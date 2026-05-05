@@ -1,53 +1,38 @@
 import Link from "next/link";
 import type { INotificationWaveCreated } from "@/types/feed.types";
-import WaveHeaderFollow, {
-  WaveFollowBtnSize,
-} from "@/components/waves/header/WaveHeaderFollow";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
+import NotificationWaveFollowBtn from "./NotificationWaveFollowBtn";
 
 export default function NotificationWaveCreated({
   notification,
 }: {
   readonly notification: INotificationWaveCreated;
 }) {
-  const { data: wave } = useQuery<ApiWave>({
-    queryKey: [
-      QueryKey.WAVE,
-      { wave_id: notification.additional_context.wave_id },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
-        endpoint: `waves/${notification.additional_context.wave_id}`,
-      }),
-  });
-
   const { isApp } = useDeviceInfo();
+  const wave = notification.related_wave;
+  const waveId = wave?.id ?? notification.additional_context.wave_id;
   const invitationHref = getWaveRoute({
-    waveId: notification.additional_context.wave_id,
-    isDirectMessage: wave?.chat.scope.group?.is_direct_message ?? false,
+    waveId,
+    isDirectMessage: wave?.is_dm_wave ?? false,
     isApp,
   });
+  const waveName = wave?.name ?? waveId;
 
   return (
     <div className="tw-w-full">
       <NotificationHeader
         author={notification.related_identity}
         actions={
-          <div className="tw-flex tw-gap-x-2 tw-items-center">
+          <div className="tw-flex tw-items-center tw-gap-x-2">
             {wave && (
-              <WaveHeaderFollow
+              <NotificationWaveFollowBtn
                 wave={wave}
-                subscribeToAllDrops={true}
-                size={WaveFollowBtnSize.SMALL}
+                size={UserFollowBtnSize.SMALL}
               />
             )}
             <NotificationsFollowBtn
@@ -57,14 +42,14 @@ export default function NotificationWaveCreated({
           </div>
         }
       >
-        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           invited you to a wave:
         </span>
         <Link
           href={invitationHref}
-          className="tw-text-sm tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300"
+          className="tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline hover:tw-text-primary-300"
         >
-          {wave?.name}
+          {waveName}
         </Link>
         <NotificationTimestamp createdAt={notification.created_at} />
       </NotificationHeader>

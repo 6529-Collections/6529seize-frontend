@@ -1,7 +1,7 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
 import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
@@ -14,7 +14,7 @@ export interface MinimalWave {
   type: ApiWaveType;
   newDropsCount: MinimalWaveNewDropsCount;
   picture: string | null;
-  contributors: { pfp: string; identity: string }[];
+  contributors: readonly SidebarWaveContributor[];
   isPinned: boolean;
   isMuted: boolean;
   unreadDropsCount: number;
@@ -22,13 +22,10 @@ export interface MinimalWave {
   firstUnreadDropSerialNo: number | null;
 }
 
-// Wave type that includes the computed isPinned field from useWavesList
-interface EnhancedApiWave extends ApiWave {
-  isPinned?: boolean;
-}
+type EnhancedSidebarWave = SidebarWave & { readonly isPinned?: boolean };
 
 interface WavesDataSource {
-  waves: EnhancedApiWave[];
+  waves: EnhancedSidebarWave[];
   isFetching: boolean;
   isFetchingNextPage: boolean;
   hasNextPage: boolean;
@@ -117,20 +114,20 @@ function useEnhancedWavesListCore(
   }, [activeWaveId, resetWaveUnreadCount]);
 
   const mapWave = useCallback(
-    (wave: EnhancedApiWave): MinimalWave => {
+    (wave: EnhancedSidebarWave): MinimalWave => {
       const wsData = newDropsCounts[wave.id];
       const hasNewWsDrops = (wsData?.count ?? 0) > 0;
       const newDrops = {
         count: wsData?.count ?? 0,
         latestDropTimestamp: getNewestTimestamp(
           wsData?.latestDropTimestamp,
-          wave.metrics.latest_drop_timestamp ?? null
+          wave.latestDropTimestamp ?? null
         ),
         firstUnreadSerialNo: wsData?.firstUnreadSerialNo ?? null,
       };
       const isCleared = clearedUnreadWaveIds.has(wave.id) && !hasNewWsDrops;
       const forcedCount = forcedUnreadCounts[wave.id];
-      const apiFirstUnread = wave.metrics.first_unread_drop_serial_no ?? null;
+      const apiFirstUnread = wave.firstUnreadDropSerialNo ?? null;
       const wsFirstUnread = wsData?.firstUnreadSerialNo ?? null;
       const wasCleared = clearedUnreadWaveIds.has(wave.id);
       let firstUnreadDropSerialNo: number | null = null;
@@ -152,28 +149,24 @@ function useEnhancedWavesListCore(
       } else if (wasCleared && hasNewWsDrops) {
         unreadDropsCount = wsData?.count ?? 0;
       } else if (hasNewWsDrops) {
-        unreadDropsCount =
-          wave.metrics.your_unread_drops_count + (wsData?.count ?? 0);
+        unreadDropsCount = wave.unreadDropsCount + (wsData?.count ?? 0);
       } else {
-        unreadDropsCount = wave.metrics.your_unread_drops_count;
+        unreadDropsCount = wave.unreadDropsCount;
       }
 
       return {
         id: wave.id,
         name: wave.name,
-        type: wave.wave.type,
+        type: wave.type,
         picture: wave.picture,
-        contributors: wave.contributors_overview.map((c) => ({
-          pfp: c.contributor_pfp,
-          identity: c.contributor_identity,
-        })),
+        contributors: wave.contributors,
         newDropsCount: newDrops,
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)
           : false,
-        isMuted: wave.metrics.muted,
+        isMuted: wave.muted,
         unreadDropsCount,
-        latestReadTimestamp: wave.metrics.your_latest_read_timestamp,
+        latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,
       };
     },

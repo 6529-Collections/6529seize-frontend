@@ -3,8 +3,8 @@ import type { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType
 import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/ApiWaveParticipationSubmissionStrategy";
 import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
-import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
@@ -153,13 +153,38 @@ export enum CreateWaveStepStatus {
   PENDING = "PENDING",
 }
 
-export interface WavesOverviewParams {
-  limit: number;
-  offset: number;
-  type: ApiWavesOverviewType;
-  only_waves_followed_by_authenticated_user?: boolean | undefined;
-  /**
-   * Filter waves by direct message flag. true -> only DMs, false -> exclude DMs.
-   */
-  direct_message?: boolean | undefined;
+export interface SidebarWaveContributor {
+  readonly pfp: string;
+  readonly identity: string | null;
+}
+
+export interface SidebarWaveDescriptionDrop {
+  readonly contents: string | null;
+  readonly media: readonly ApiDropMedia[];
+}
+
+export interface SidebarWave {
+  readonly id: string;
+  readonly name: string;
+  readonly type: ApiWaveType;
+  readonly picture: string | null;
+  readonly contributors: readonly SidebarWaveContributor[];
+  readonly isDirectMessage: boolean;
+  readonly hasCompetition: boolean;
+  readonly descriptionDrop: SidebarWaveDescriptionDrop;
+  readonly totalDropsCount: number;
+  readonly isPrivate: boolean;
+  readonly latestDropTimestamp: number | null;
+  readonly firstUnreadDropSerialNo: number | null;
+  readonly unreadDropsCount: number;
+  readonly latestReadTimestamp: number;
+  readonly pinned: boolean;
+  readonly muted: boolean;
+  readonly subscribed: boolean;
+}
+
+export interface SidebarWavesPage {
+  readonly waves: SidebarWave[];
+  readonly page: number;
+  readonly next: boolean;
 }

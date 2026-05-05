@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import type { ProcessedContent } from "./media-utils";
@@ -27,6 +27,11 @@ export const useDropContent = (
   dropPartId: number,
   maybeDrop: ApiDrop | null
 ): UseDropContentResult => {
+  const previewPart = maybeDrop?.parts.find((p) => p.part_id === dropPartId);
+  const shouldFetchDrop =
+    !maybeDrop ||
+    (!previewPart?.content?.trim() && (previewPart?.media.length ?? 0) === 0);
+
   // Fetch drop data
   const {
     data: drop,
@@ -35,9 +40,9 @@ export const useDropContent = (
   } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(dropId),
     queryFn: () => fetchDropByIdBatched(dropId),
-    placeholderData: keepPreviousData,
-    initialData: maybeDrop ?? undefined,
-    enabled: !maybeDrop,
+    placeholderData: (previousDrop) => previousDrop ?? maybeDrop ?? undefined,
+    initialData: shouldFetchDrop ? undefined : maybeDrop,
+    enabled: shouldFetchDrop,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
@@ -76,7 +81,7 @@ export const useDropContent = (
   return {
     drop: drop ?? null,
     content,
-    isLoading: isFetching && !maybeDrop,
+    isLoading: isFetching && !drop,
     error,
   };
 };

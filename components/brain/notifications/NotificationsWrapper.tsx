@@ -12,6 +12,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 
 type WaveWithChatScope = ExtendedDrop["wave"] & {
+  is_direct_message?: boolean | undefined;
   chat?:
     | {
         scope?:
@@ -28,7 +29,7 @@ type WaveWithChatScope = ExtendedDrop["wave"] & {
 };
 
 const hasChatScope = (wave: ExtendedDrop["wave"]): wave is WaveWithChatScope =>
-  typeof wave === "object" && wave !== null && "chat" in wave;
+  "chat" in wave || "is_direct_message" in wave;
 
 interface NotificationsWrapperProps {
   readonly items: NotificationDisplayItem[];
@@ -55,7 +56,9 @@ export default function NotificationsWrapper({
       }
 
       const isDirectMessage = hasChatScope(drop.wave)
-        ? (drop.wave.chat?.scope?.group?.is_direct_message ?? false)
+        ? (drop.wave.chat?.scope?.group?.is_direct_message ??
+          drop.wave.is_direct_message ??
+          false)
         : false;
 
       const href = getWaveRoute({

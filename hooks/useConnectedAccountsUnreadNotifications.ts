@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
-import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
+import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
 import type { ConnectedWalletAccount } from "@/services/auth/auth.utils";
 import { commonApiFetch } from "@/services/api/common-api";
 import useCapacitor from "./useCapacitor";
@@ -28,8 +28,8 @@ const fetchUnreadCountForAccount = async (
     return 0;
   }
 
-  const notifications = await commonApiFetch<ApiNotificationsResponse>({
-    endpoint: "notifications",
+  const notifications = await commonApiFetch<ApiNotificationsResponseV2>({
+    endpoint: "v2/notifications",
     params: { limit: "1" },
     headers: {
       Authorization: `Bearer ${account.jwt}`,
@@ -46,6 +46,7 @@ export function useConnectedAccountsUnreadNotifications(
   const queryKey = [
     QueryKey.IDENTITY_NOTIFICATIONS,
     "connected-account-unread-counts",
+    "v2",
     accounts.map((account) => toAddressKey(account.address)),
   ] as const;
 

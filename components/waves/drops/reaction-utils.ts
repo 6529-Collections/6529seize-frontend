@@ -9,6 +9,28 @@ type ReactionEntry = {
   [key: string]: unknown;
 };
 
+export const getReactionCount = (
+  reaction: Pick<ApiDropReaction, "profiles"> & { readonly count?: unknown }
+): number => {
+  if (
+    typeof reaction.count === "number" &&
+    Number.isFinite(reaction.count) &&
+    reaction.count >= 0
+  ) {
+    return reaction.count;
+  }
+
+  return reaction.profiles.length;
+};
+
+const withReactionCount = (
+  entry: ReactionEntry,
+  count: number
+): ReactionEntry => ({
+  ...entry,
+  count: Math.max(0, count),
+});
+
 export const cloneReactionEntries = (
   reactions: readonly ApiDropReaction[] | null | undefined
 ): ReactionEntry[] => {
@@ -64,7 +86,7 @@ export const removeUserFromReactions = (
   return sanitizedEntries;
 };
 
-export const findReactionIndex = (
+const findReactionIndex = (
   entries: ReactionEntry[],
   reactionCode: string
 ): number => {
@@ -75,6 +97,80 @@ export const findReactionIndex = (
   }
 
   return -1;
+};
+
+export const applyProfileReactionToEntries = ({
+  entries,
+  nextReaction,
+  previousReaction,
+  profileMin,
+}: {
+  readonly entries: ReactionEntry[];
+  readonly nextReaction: string | null;
+  readonly previousReaction: string | null;
+  readonly profileMin: ApiProfileMin;
+}): ReactionEntry[] => {
+  const normalizedPreviousReaction =
+    previousReaction === nextReaction ? null : previousReaction;
+  const userId = profileMin.id;
+  const nextEntries: ReactionEntry[] = [];
+
+  for (const entry of entries) {
+    const filteredProfiles = duplicateProfilesWithoutUser(
+      entry.profiles,
+      userId
+    );
+    const shouldDecrement =
+      normalizedPreviousReaction !== null &&
+      entry.reaction === normalizedPreviousReaction;
+    const nextCount = getReactionCount(entry) - (shouldDecrement ? 1 : 0);
+
+    if (nextCount > 0) {
+      nextEntries.push(
+        withReactionCount(
+          {
+            ...entry,
+            profiles: filteredProfiles,
+          },
+          nextCount
+        )
+      );
+    }
+  }
+
+  if (nextReaction === null) {
+    return nextEntries;
+  }
+
+  const existingIndex = findReactionIndex(nextEntries, nextReaction);
+  if (existingIndex >= 0) {
+    const target = nextEntries[existingIndex]!;
+    const hasProfile = target.profiles.some(
+      (profile) => profile.id === profileMin.id
+    );
+    nextEntries[existingIndex] = withReactionCount(
+      {
+        ...target,
+        profiles: hasProfile
+          ? target.profiles
+          : [...target.profiles, profileMin],
+      },
+      getReactionCount(target) + 1
+    );
+    return nextEntries;
+  }
+
+  nextEntries.push(
+    withReactionCount(
+      {
+        reaction: nextReaction,
+        profiles: [profileMin],
+      },
+      1
+    )
+  );
+
+  return nextEntries;
 };
 
 export const toProfileMin = (

@@ -4,6 +4,7 @@ import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCau
 import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 
 type IFeedItemWaveCreated = {
   readonly serial_no: number;
@@ -118,6 +119,7 @@ export type INotificationDropReplied = NotificationBase &
 
 export type INotificationWaveCreated = NotificationBase & {
   readonly cause: ApiNotificationCause.WaveCreated;
+  readonly related_wave?: ApiWaveOverview;
   readonly additional_context: {
     readonly wave_id: string;
   };

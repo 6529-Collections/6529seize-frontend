@@ -41,6 +41,16 @@ interface MemesLeaderboardDropProps {
   readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
+const getNonEmptyText = (value: string | null | undefined): string | null => {
+  const text = value?.trim();
+  return text && text.length > 0 ? text : null;
+};
+
+const getMetadataValue = (drop: ExtendedDrop, dataKey: string): string | null =>
+  getNonEmptyText(
+    drop.metadata.find((metadata) => metadata.data_key === dataKey)?.data_value
+  );
+
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   drop,
   onDropClick,
@@ -96,16 +106,18 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     setIsResubmitModalOpen(true);
   }, [clearDeferredResubmitOpen]);
 
-  // Extract metadata
+  const firstPart = drop.parts.at(0);
   const title =
-    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
+    getNonEmptyText(drop.title) ??
+    getMetadataValue(drop, "title") ??
     "Artwork Title";
   const description =
-    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
+    getNonEmptyText(firstPart?.content) ??
+    getMetadataValue(drop, "description") ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media.at(0);
+  const artworkMedia = firstPart?.media.at(0);
 
   // Get top voters for votes display
   const firstThreeVoters = drop.top_raters.slice(0, 3);

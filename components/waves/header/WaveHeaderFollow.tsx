@@ -8,14 +8,14 @@ import {
   commonApiDeleteWithBody,
   commonApiPost,
 } from "@/services/api/common-api";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 
-export enum WaveFollowBtnSize {
+enum WaveFollowBtnSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
 }
@@ -48,7 +48,7 @@ export default function WaveHeaderFollow({
   size = WaveFollowBtnSize.MEDIUM,
   fullWidth = false,
 }: WaveHeaderFollowProps) {
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const { setToast, requestAuth } = useAuth();
   const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
   const following = !!wave.subscribed_actions.length;
   const label = following ? "Joined" : "Join";

@@ -1,41 +1,38 @@
 "use client";
 
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import {
   buildProcessedContent,
   type ProcessedContent,
 } from "@/components/waves/drops/media-utils";
+import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import type { SidebarWave } from "@/types/waves.types";
 import Image from "next/image";
 import Link from "next/link";
 
 interface ExploreWaveCardProps {
-  readonly wave: ApiWave;
+  readonly wave: SidebarWave;
 }
 
 export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
     waveId: wave.id,
-    isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
+    isDirectMessage: wave.isDirectMessage,
     isApp: false,
   });
 
-  const author = wave.author;
-  const banner1 =
-    author.banner1_color ?? getRandomColorWithSeed(author.handle ?? "");
-  const banner2 =
-    author.banner2_color ?? getRandomColorWithSeed(author.handle ?? "");
+  const banner1 = getRandomColorWithSeed(wave.id);
+  const banner2 = getRandomColorWithSeed(wave.name);
   const imageAreaStyle = !wave.picture
     ? {
         background: `linear-gradient(135deg, ${banner1} 0%, ${banner2} 100%)`,
       }
     : undefined;
 
-  const lastMessageTime = wave.last_drop_time;
-  const hasDrops = wave.metrics.drops_count > 0;
+  const lastMessageTime = wave.latestDropTimestamp;
+  const hasDrops = lastMessageTime !== null;
   const descriptionPreview = getWavePreviewContent(wave);
 
   return (
@@ -78,7 +75,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
             </span>
             <span className="tw-text-iron-300">
               {getTimeAgoShort(lastMessageTime)} ·{" "}
-              {wave.metrics.drops_count.toLocaleString()}
+              {wave.totalDropsCount.toLocaleString()}
             </span>{" "}
             drops
           </div>
@@ -114,13 +111,9 @@ function MessagePreviewContent({
   );
 }
 
-function getWavePreviewContent(wave: ApiWave): ProcessedContent | null {
-  const descriptionParts = wave.description_drop.parts;
-  const combinedText = descriptionParts
-    .map((part) => part.content?.trim())
-    .filter((content): content is string => Boolean(content))
-    .join("\n\n");
-  const media = descriptionParts.flatMap((part) => part.media);
+function getWavePreviewContent(wave: SidebarWave): ProcessedContent | null {
+  const combinedText = wave.descriptionDrop.contents?.trim() ?? "";
+  const media = [...wave.descriptionDrop.media];
 
   if (!combinedText && media.length === 0) {
     return null;

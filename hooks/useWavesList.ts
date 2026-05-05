@@ -1,32 +1,29 @@
 "use client";
 
-import { useContext, useMemo, useCallback } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useMemo, useCallback } from "react";
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
-import { useWavesOverview } from "./useWavesOverview";
+import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
 import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { SidebarWave } from "@/types/waves.types";
 
 // Enhanced wave interface with isPinned field and newDropsCount
-interface EnhancedWave extends ApiWave {
-  isPinned: boolean;
-}
+type EnhancedWave = SidebarWave & { readonly isPinned: boolean };
 
 /**
  * Hook for managing and fetching waves list including pinned waves
  * @returns Wave list data and loading states
  */
 const useWavesList = () => {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
   const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
   const {
@@ -69,10 +66,11 @@ const useWavesList = () => {
     fetchNextPage,
     status: mainWavesStatus,
     refetch: mainWavesRefetch,
-  } = useWavesOverview({
-    type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
-    limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+  } = useWavesV2({
+    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
+    directMessage: false,
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
@@ -101,17 +99,25 @@ const useWavesList = () => {
   const announcementQueryError = shouldFetchAnnouncementWave
     ? rawAnnouncementQueryError
     : null;
+  const fetchedAnnouncementSidebarWave = useMemo(
+    () =>
+      fetchedAnnouncementWave
+        ? mapApiWaveToSidebarWave(fetchedAnnouncementWave)
+        : null,
+    [fetchedAnnouncementWave]
+  );
   const announcementWave = useMemo(() => {
-    const resolvedWave = trackedAnnouncementWave ?? fetchedAnnouncementWave;
-    if (!resolvedWave || waveIsDm(resolvedWave)) {
+    const resolvedWave =
+      trackedAnnouncementWave ?? fetchedAnnouncementSidebarWave;
+    if (!resolvedWave || resolvedWave.isDirectMessage) {
       return null;
     }
     return resolvedWave;
-  }, [trackedAnnouncementWave, fetchedAnnouncementWave]);
+  }, [trackedAnnouncementWave, fetchedAnnouncementSidebarWave]);
 
   // Create a map of mainWaves by ID for easy lookup
   const mainWavesMap = useMemo(() => {
-    const map = new Map<string, ApiWave>();
+    const map = new Map<string, SidebarWave>();
     mainWaves.forEach((wave) => {
       if (!isAnnouncementsWave(wave.id)) {
         map.set(wave.id, wave);
@@ -157,7 +163,7 @@ const useWavesList = () => {
 
     // Add all server-provided pinned waves, filtering out DMs
     serverPinnedWaves.forEach((wave) => {
-      if (!waveIsDm(wave) && !isAnnouncementsWave(wave.id)) {
+      if (!wave.isDirectMessage && !isAnnouncementsWave(wave.id)) {
         result.push({ ...wave, isPinned: true });
       }
     });
@@ -175,7 +181,7 @@ const useWavesList = () => {
     const allWavesArray: EnhancedWave[] = [];
 
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
-      if (waveIsDm(wave) || isAnnouncementsWave(wave.id)) {
+      if (wave.isDirectMessage || isAnnouncementsWave(wave.id)) {
         return;
       }
 
@@ -186,8 +192,7 @@ const useWavesList = () => {
     });
 
     const sortedNonAnnouncementWaves = [...allWavesMap.values()].sort(
-      (a, b) =>
-        b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp
+      (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
     );
 
     if (announcementWave) {
@@ -281,9 +286,5 @@ const useWavesList = () => {
     ]
   );
 };
-
-const waveIsDm = (w: ApiWave) =>
-  w.wave.type === ApiWaveType.Chat &&
-  (w.chat as any)?.scope?.group?.is_direct_message === true;
 
 export default useWavesList;

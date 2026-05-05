@@ -3,14 +3,30 @@
 import { useCallback, useMemo } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { useDrop } from "@/hooks/useDrop";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWaveData } from "@/hooks/useWaveData";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { DROP_DETAIL_STALE_TIME_MS } from "@/services/api/drop-api";
+import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
 
 export const useSingleWaveDropData = (
   initialDrop: ExtendedDrop,
   onClose: () => void
 ) => {
-  const { drop } = useDrop({ dropId: initialDrop.id });
+  const { data: drop } = useQuery<ApiDrop | undefined>({
+    queryKey: [
+      QueryKey.DROP,
+      {
+        drop_id: initialDrop.id,
+        view: "single-wave-drop",
+      },
+    ],
+    queryFn: ({ signal }) =>
+      fetchDropV2ById(initialDrop.id, signal, { includeTopRaters: false }),
+    placeholderData: keepPreviousData,
+    staleTime: DROP_DETAIL_STALE_TIME_MS,
+  });
 
   const onWaveNotFound = useCallback(() => {
     onClose();

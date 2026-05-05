@@ -1,18 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import NotificationWaveCreated from "@/components/brain/notifications/wave-created/NotificationWaveCreated";
 
-const queryMock = jest.fn();
-jest.mock("@tanstack/react-query", () => ({
-  useQuery: (...args: any[]) => queryMock(...args),
-}));
 jest.mock("next/link", () => ({
   __esModule: true,
   default: (p: any) => <a {...p}>{p.children}</a>,
 }));
-jest.mock("@/components/waves/header/WaveHeaderFollow", () => ({
+jest.mock(
+  "@/components/brain/notifications/wave-created/NotificationWaveFollowBtn",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="wave-follow" />,
+  })
+);
+jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => <div data-testid="wave-follow" />,
-  WaveFollowBtnSize: {},
+  default: () => ({ isApp: false }),
 }));
 jest.mock("@/components/brain/notifications/NotificationsFollowBtn", () => ({
   __esModule: true,
@@ -20,6 +22,7 @@ jest.mock("@/components/brain/notifications/NotificationsFollowBtn", () => ({
 }));
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: () => "/scaled.jpg",
+  getScaledResolvedImageUri: () => "/scaled.jpg",
   ImageScale: {},
 }));
 jest.mock("@/helpers/Helpers", () => ({
@@ -30,23 +33,15 @@ jest.mock("@/helpers/Helpers", () => ({
 const notification = {
   related_identity: { handle: "alice", pfp: "pfp.png" },
   additional_context: { wave_id: "1" },
+  related_wave: {
+    id: "1",
+    name: "Wave 1",
+    is_dm_wave: false,
+  },
   created_at: "2024-01-01T00:00:00Z",
 } as any;
 
 it("renders wave data and links", () => {
-  queryMock.mockReturnValue({
-    data: {
-      id: "1",
-      name: "Wave 1",
-      chat: {
-        scope: {
-          group: {
-            is_direct_message: false,
-          },
-        },
-      },
-    },
-  });
   render(<NotificationWaveCreated notification={notification} />);
   expect(screen.getByRole("link", { name: "alice" })).toHaveAttribute(
     "href",

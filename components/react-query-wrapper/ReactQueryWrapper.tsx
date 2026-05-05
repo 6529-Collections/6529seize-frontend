@@ -91,6 +91,7 @@ export enum QueryKey {
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
   WAVES_OVERVIEW = "WAVES_OVERVIEW",
   WAVES_OVERVIEW_PUBLIC = "WAVES_OVERVIEW_PUBLIC",
+  WAVES_V2 = "WAVES_V2",
   WAVES = "WAVES",
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVES_SEARCH = "WAVES_SEARCH",
@@ -910,6 +911,9 @@ const createReactQueryContextValue = (
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_V2],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES],

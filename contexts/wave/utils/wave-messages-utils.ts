@@ -1,14 +1,11 @@
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
-import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import { DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
-import {
-  commonApiFetch,
-  commonApiFetchWithRetry,
-} from "@/services/api/common-api";
+import { commonApiFetchWithRetry } from "@/services/api/common-api";
+import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import type { WaveMessagesUpdate } from "../hooks/types";
 
 /**
@@ -25,17 +22,13 @@ export async function fetchWaveMessages(
   signal?: AbortSignal,
   updateEligibility?: (waveId: string, eligibility: any) => void
 ): Promise<ApiDrop[] | null> {
-  const params: Record<string, string> = {
-    limit: WAVE_DROPS_PARAMS.limit.toString(),
-  };
-  if (serialNo) {
-    params["serial_no_less_than"] = `${serialNo}`;
-  }
-
   try {
-    const data = await commonApiFetch<ApiWaveDropsFeed>({
-      endpoint: `waves/${waveId}/drops`,
-      params,
+    const data = await fetchWaveDropsFeedV2({
+      waveId,
+      limit: WAVE_DROPS_PARAMS.limit,
+      serialNoLimit: serialNo,
+      searchStrategy:
+        serialNo !== null ? ApiDropSearchStrategy.Older : undefined,
       signal,
     });
 
@@ -52,10 +45,7 @@ export async function fetchWaveMessages(
       });
     }
 
-    return data.drops.map((drop) => ({
-      ...drop,
-      wave: data.wave,
-    }));
+    return data.drops as ApiDrop[];
   } catch (error) {
     // Check if this is an abort error
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -75,30 +65,17 @@ export async function fetchAroundSerialNoWaveMessages(
   serialNo: number,
   signal?: AbortSignal
 ): Promise<ApiDrop[] | null> {
-  const params: Record<string, string> = {
-    limit: WAVE_DROPS_PARAMS.limit.toString(),
-  };
-
-  params["search_strategy"] = ApiDropSearchStrategy.Both;
-  params["serial_no_limit"] = `${serialNo}`;
-
   try {
-    const data = await commonApiFetchWithRetry<ApiWaveDropsFeed>({
-      endpoint: `waves/${waveId}/drops`,
-      params,
+    const data = await fetchWaveDropsFeedV2({
+      waveId,
+      limit: WAVE_DROPS_PARAMS.limit,
+      serialNoLimit: serialNo,
+      searchStrategy: ApiDropSearchStrategy.Both,
       signal,
-      retryOptions: {
-        maxRetries: 2,
-        initialDelayMs: 300,
-        backoffFactor: 1.5,
-        jitter: 0.1,
-      },
+      withRetry: true,
     });
 
-    return data.drops.map((drop) => ({
-      ...drop,
-      wave: data.wave,
-    }));
+    return data.drops as ApiDrop[];
   } catch (error) {
     // Check if this is an abort error
     if (error instanceof DOMException && error.name === "AbortError") {
@@ -333,26 +310,15 @@ export async function fetchNewestWaveMessages(
   signal?: AbortSignal,
   updateEligibility?: (waveId: string, eligibility: any) => void
 ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> {
-  const params: Record<string, string> = {
-    limit: limit.toString(),
-  };
-  if (sinceSerialNo !== null) {
-    // Assuming API uses these parameters for fetching newer messages
-    params["serial_no_limit"] = `${sinceSerialNo}`;
-    params["search_strategy"] = ApiDropSearchStrategy.Newer;
-  }
-
   try {
-    const data = await commonApiFetchWithRetry<ApiWaveDropsFeed>({
-      endpoint: `waves/${waveId}/drops`,
-      params,
+    const data = await fetchWaveDropsFeedV2({
+      waveId,
+      limit,
+      serialNoLimit: sinceSerialNo,
+      searchStrategy:
+        sinceSerialNo !== null ? ApiDropSearchStrategy.Newer : undefined,
       signal,
-      retryOptions: {
-        maxRetries: 2,
-        initialDelayMs: 300,
-        backoffFactor: 1.5,
-        jitter: 0.1,
-      },
+      withRetry: true,
     });
 
     // Update centralized eligibility if callback provided
@@ -368,10 +334,7 @@ export async function fetchNewestWaveMessages(
       });
     }
 
-    const fetchedDrops = data.drops.map((drop) => ({
-      ...drop,
-      wave: data.wave,
-    }));
+    const fetchedDrops = data.drops as ApiDrop[];
 
     const highestSerialNo = getHighestSerialNo(fetchedDrops);
 

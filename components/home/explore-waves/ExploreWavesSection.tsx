@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
+import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
+import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -15,7 +15,6 @@ interface ExploreWavesSectionProps {
   readonly title?: string | undefined;
   readonly subtitle?: string | null | undefined;
   readonly limit?: number | undefined;
-  readonly endpoint?: string | undefined;
   readonly viewAllHref?: string | null | undefined;
   readonly excludeFollowed?: boolean | undefined;
 }
@@ -24,7 +23,6 @@ export function ExploreWavesSection({
   title = "Tired of bot replies? Join the most interesting chats in crypto",
   subtitle = "Most active waves",
   limit = DEFAULT_WAVES_LIMIT,
-  endpoint = "waves-overview/hot",
   viewAllHref = "/waves",
   excludeFollowed = false,
 }: ExploreWavesSectionProps) {
@@ -39,20 +37,22 @@ export function ExploreWavesSection({
     data: waves,
     isLoading,
     isError,
-  } = useQuery<ApiWave[]>({
+  } = useQuery({
     queryKey: [
       "explore-waves",
-      endpoint,
+      ApiWavesV2ListType.Hot,
       limit,
       excludeFollowed,
       excludeFollowed ? userScope : null,
     ],
     queryFn: async () => {
-      const data = await commonApiFetch<ApiWave[]>({
-        endpoint,
-        params: excludeFollowed ? { exclude_followed: "true" } : undefined,
+      const page = await fetchWavesV2Page({
+        view: ApiWavesV2ListType.Hot,
+        page: 1,
+        pageSize: limit,
+        excludeFollowed,
       });
-      return data.slice(0, limit);
+      return page.waves;
     },
     staleTime: excludeFollowed ? 0 : 5 * 60 * 1000,
     ...(excludeFollowed ? { gcTime: 0 } : {}),

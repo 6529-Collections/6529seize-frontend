@@ -51,6 +51,22 @@ const isClickFromCardDom = (
   return event.currentTarget.contains(event.target as Node);
 };
 
+const getNonEmptyText = (
+  value: string | null | undefined
+): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+};
+
+const getMetadataValue = (
+  winner: ApiWaveDecisionWinner,
+  dataKey: string
+): string | undefined =>
+  getNonEmptyText(
+    winner.drop.metadata.find((metadata) => metadata.data_key === dataKey)
+      ?.data_value
+  );
+
 export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   winner,
   wave,
@@ -108,11 +124,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   }, [handleMobileMenuOpenChange]);
 
   const title =
-    winner.drop.metadata.find((m) => m.data_key === "title")?.data_value ??
+    getNonEmptyText(winner.drop.title) ??
+    getMetadataValue(winner, "title") ??
     "Artwork Title";
   const description =
-    winner.drop.metadata.find((m) => m.data_key === "description")
-      ?.data_value ?? "This is an artwork submission for The Memes collection.";
+    getNonEmptyText(winner.drop.parts.at(0)?.content) ??
+    getMetadataValue(winner, "description") ??
+    "This is an artwork submission for The Memes collection.";
 
   const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
 
@@ -266,47 +284,49 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               </div>
 
               <div className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-leading-5">
-                <div className="tw-flex tw-items-center -tw-space-x-2">
-                  {topVoters.map((voter) => (
-                    <React.Fragment key={voter.profile.handle}>
-                      <Link
-                        href={`/${voter.profile.handle ?? voter.profile.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        scroll={false}
-                        className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
-                        data-tooltip-id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
-                      >
-                        {voter.profile.pfp ? (
-                          <Image
-                            className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                            src={getScaledImageUri(
-                              voter.profile.pfp,
-                              ImageScale.W_AUTO_H_50
-                            )}
-                            alt={`${
-                              voter.profile.handle ?? voter.profile.id
-                            }'s profile picture`}
-                            width={24}
-                            height={24}
-                          />
-                        ) : (
-                          <div className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                        )}
-                      </Link>
-                      <Tooltip
-                        id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
-                        place="top"
-                        offset={8}
-                        opacity={1}
-                        positionStrategy="fixed"
-                        style={TOOLTIP_STYLES}
-                      >
-                        {voter.profile.handle} -{" "}
-                        {formatNumberWithCommas(voter.rating)}
-                      </Tooltip>
-                    </React.Fragment>
-                  ))}
-                </div>
+                {topVoters.length > 0 && (
+                  <div className="tw-flex tw-items-center -tw-space-x-2">
+                    {topVoters.map((voter) => (
+                      <React.Fragment key={voter.profile.handle}>
+                        <Link
+                          href={`/${voter.profile.handle ?? voter.profile.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          scroll={false}
+                          className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
+                          data-tooltip-id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
+                        >
+                          {voter.profile.pfp ? (
+                            <Image
+                              className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                              src={getScaledImageUri(
+                                voter.profile.pfp,
+                                ImageScale.W_AUTO_H_50
+                              )}
+                              alt={`${
+                                voter.profile.handle ?? voter.profile.id
+                              }'s profile picture`}
+                              width={24}
+                              height={24}
+                            />
+                          ) : (
+                            <div className="tw-h-6 tw-w-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                          )}
+                        </Link>
+                        <Tooltip
+                          id={`voter-${voter.profile.handle ?? voter.profile.primary_address}-${voter.rating}`}
+                          place="top"
+                          offset={8}
+                          opacity={1}
+                          positionStrategy="fixed"
+                          style={TOOLTIP_STYLES}
+                        >
+                          {voter.profile.handle} -{" "}
+                          {formatNumberWithCommas(voter.rating)}
+                        </Tooltip>
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )}
                 <span className="tw-font-medium tw-text-iron-50">
                   {formatNumberWithCommas(ratersCount)}{" "}
                   <span className="tw-font-normal tw-text-iron-400">

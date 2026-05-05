@@ -2076,6 +2076,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropV2Page"
+  /v2/drops:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drops.
+      operationId: getDropsV2
+      parameters:
+        - name: parent_drop_id
+          in: query
+          description: Return replies under this parent drop.
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
   /v2/drops/{id}:
     get:
       tags:
@@ -11740,6 +11777,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropV2"
+        related_wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
         additional_context:
           $ref: "#/components/schemas/ApiNotificationAdditionalContextV2"
     ApiOutgoingIdentitySubscriptionsPage:
@@ -13824,6 +13863,9 @@ components:
         - subscribers_count
         - has_competition
         - is_dm_wave
+        - description_drop
+        - total_drops_count
+        - is_private
       properties:
         id:
           type: string
@@ -13844,6 +13886,17 @@ components:
           type: boolean
         is_dm_wave:
           type: boolean
+        description_drop:
+          $ref: "#/components/schemas/ApiWaveOverviewDescriptionDrop"
+        total_drops_count:
+          type: integer
+          format: int64
+        is_private:
+          type: boolean
+        contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverviewContributor"
         context_profile_context:
           $ref: "#/components/schemas/ApiWaveOverviewContextProfileContext"
     ApiWaveOverviewContextProfileContext:
@@ -13864,8 +13917,32 @@ components:
         unread_drops:
           type: integer
           format: int64
+        first_unread_drop_serial_no:
+          type: integer
+          format: int64
         muted:
           type: boolean
+    ApiWaveOverviewContributor:
+      type: object
+      required:
+        - handle
+        - pfp
+      properties:
+        handle:
+          type: string
+          nullable: true
+        pfp:
+          type: string
+          nullable: true
+    ApiWaveOverviewDescriptionDrop:
+      type: object
+      properties:
+        contents:
+          type: string
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMedia"
     ApiWaveOverviewPage:
       type: object
       required:

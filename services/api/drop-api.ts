@@ -1,9 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-
-const DROP_BATCH_SIZE = 20;
+import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
 
 export const DROP_DETAIL_STALE_TIME_MS = 60 * 1000;
 export const DROP_BATCH_STALE_TIME_MS = 5 * 60 * 1000;
@@ -32,14 +30,6 @@ const getUniqueDropIds = (dropIds: readonly string[]): string[] => {
   return uniqueDropIds;
 };
 
-const chunkDropIds = (dropIds: readonly string[]): string[][] => {
-  const chunks: string[][] = [];
-  for (let index = 0; index < dropIds.length; index += DROP_BATCH_SIZE) {
-    chunks.push(dropIds.slice(index, index + DROP_BATCH_SIZE));
-  }
-  return chunks;
-};
-
 export const orderDropsByIds = (
   dropIds: readonly string[],
   drops: readonly ApiDrop[]
@@ -58,21 +48,11 @@ export const fetchDropsByIds = async (
     return [];
   }
 
-  const dropChunks = chunkDropIds(uniqueDropIds);
-  const dropPages = await Promise.all(
-    dropChunks.map((chunk) =>
-      commonApiFetch<ApiDrop[]>({
-        endpoint: "drops",
-        params: {
-          ids: chunk.join(","),
-          limit: `${chunk.length}`,
-          include_replies: "true",
-        },
-      })
-    )
+  const drops = await Promise.all(
+    uniqueDropIds.map((dropId) => fetchDropV2ById(dropId))
   );
 
-  return orderDropsByIds(uniqueDropIds, dropPages.flat());
+  return orderDropsByIds(uniqueDropIds, drops);
 };
 
 export const seedDropCache = (

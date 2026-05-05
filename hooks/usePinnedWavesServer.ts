@@ -1,27 +1,27 @@
 "use client";
 
+import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
 import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  type RefObject,
-} from "react";
-import {
+  type InfiniteData,
   useMutation,
   useQuery,
   useQueryClient,
   type QueryClient,
   type QueryObserverResult,
 } from "@tanstack/react-query";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  fetchWavesV2Page,
+  getWavesV2OverviewQueryKeyParams,
+  type WavesV2OverviewQueryKeyParams,
+} from "@/services/api/waves-v2-api";
+import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
 
 export const MAX_PINNED_WAVES = 20;
 
@@ -29,34 +29,26 @@ export const MAX_PINNED_WAVES = 20;
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PINNED_WAVES_GC_TIME = 10 * 60 * 1000; // 10 minutes
 const PINNED_WAVES_REFETCH_INTERVAL = 2 * 60 * 1000; // 2 minutes
-
-// Type definitions for React Query data structures
-interface InfiniteQueryData<T> {
-  pages: T[][];
-  pageParams: unknown[];
-}
+const PINNED_WAVES_PAGE_SIZE = MAX_PINNED_WAVES;
 
 type PinnedWavesQueryKey = readonly [
-  QueryKey.WAVES_OVERVIEW,
-  {
-    readonly pinned: ApiWavesPinFilter.Pinned;
-    readonly viewer_identity?: string;
-  },
+  QueryKey.WAVES_V2,
+  WavesV2OverviewQueryKeyParams,
 ];
 
 interface MutationContext {
-  previousPinnedWaves: ApiWave[] | undefined;
+  previousPinnedWaves: SidebarWave[] | undefined;
 }
 
 interface UsePinnedWavesServerReturn {
-  pinnedWaves: ApiWave[];
+  pinnedWaves: SidebarWave[];
   pinnedIds: string[];
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
   pinWave: (waveId: string) => Promise<void>;
   unpinWave: (waveId: string) => Promise<void>;
-  refetch: () => Promise<QueryObserverResult<ApiWave[], Error>>;
+  refetch: () => Promise<QueryObserverResult<SidebarWave[], Error>>;
   isOperationInProgress: (waveId: string) => boolean;
   canPinWave: (waveId: string) => boolean;
 }
@@ -65,11 +57,13 @@ function createPinnedWavesQueryKey(
   viewerIdentityKey: string | null
 ): PinnedWavesQueryKey {
   return [
-    QueryKey.WAVES_OVERVIEW,
-    {
+    QueryKey.WAVES_V2,
+    getWavesV2OverviewQueryKeyParams({
+      overviewType: ApiWavesOverviewType.MostSubscribed,
+      pageSize: PINNED_WAVES_PAGE_SIZE,
       pinned: ApiWavesPinFilter.Pinned,
-      ...(viewerIdentityKey ? { viewer_identity: viewerIdentityKey } : {}),
-    },
+      viewerIdentityKey,
+    }),
   ] as const;
 }
 
@@ -87,9 +81,18 @@ function usePinnedWavesQuery(
   queryKey: PinnedWavesQueryKey,
   isAuthenticated: boolean
 ) {
-  const query = useQuery({
+  const query = useQuery<SidebarWave[], Error>({
     queryKey,
-    queryFn: pinnedWavesApi.fetchPinnedWaves,
+    queryFn: async () => {
+      const page = await fetchWavesV2Page({
+        page: 1,
+        pageSize: PINNED_WAVES_PAGE_SIZE,
+        overviewType: ApiWavesOverviewType.MostSubscribed,
+        pinned: ApiWavesPinFilter.Pinned,
+      });
+
+      return page.waves;
+    },
     enabled: isAuthenticated,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
@@ -107,7 +110,7 @@ function usePinnedWavesQuery(
 }
 
 function usePinnedWavesBudget(
-  pinnedWaves: ApiWave[],
+  pinnedWaves: SidebarWave[],
   ongoingOperations: RefObject<Set<string>>
 ) {
   const seizeSettings = useSeizeSettingsOptional();
@@ -161,7 +164,7 @@ function isMainWavesQueryForViewer(
 ): boolean {
   const [key, params] = queryKey;
   if (
-    key !== QueryKey.WAVES_OVERVIEW ||
+    key !== QueryKey.WAVES_V2 ||
     typeof params !== "object" ||
     params === null
   ) {
@@ -193,27 +196,32 @@ function useInvalidateWavesQueries(
       queryKey: pinnedWavesQueryKey,
     });
     void queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVES_OVERVIEW],
+      queryKey: [QueryKey.WAVES_V2],
       predicate: (query) =>
         isMainWavesQueryForViewer(query.queryKey, viewerIdentityKey),
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVES_OVERVIEW],
     });
   }, [queryClient, pinnedWavesQueryKey, viewerIdentityKey]);
 }
 
 function findWaveInQueryData(
-  data: ApiWave[] | InfiniteQueryData<ApiWave> | undefined,
+  data: SidebarWave[] | InfiniteData<SidebarWavesPage> | undefined,
   waveId: string
-): ApiWave | undefined {
+): SidebarWave | undefined {
   if (!data) {
     return undefined;
   }
 
   if (Array.isArray(data)) {
-    return data.find((wave): wave is ApiWave => wave.id === waveId);
+    return data.find((wave): wave is SidebarWave => wave.id === waveId);
   }
 
   for (const page of data.pages) {
-    const wave = page.find((item): item is ApiWave => item.id === waveId);
+    const wave = page.waves.find(
+      (item): item is SidebarWave => item.id === waveId
+    );
     if (wave) {
       return wave;
     }
@@ -225,11 +233,11 @@ function findWaveInQueryData(
 function findWaveForOptimisticPin(
   queryClient: QueryClient,
   waveId: string
-): ApiWave | undefined {
+): SidebarWave | undefined {
   const wavesQueries = queryClient.getQueriesData<
-    ApiWave[] | InfiniteQueryData<ApiWave>
+    SidebarWave[] | InfiniteData<SidebarWavesPage>
   >({
-    queryKey: [QueryKey.WAVES_OVERVIEW],
+    queryKey: [QueryKey.WAVES_V2],
   });
 
   for (const [, data] of wavesQueries) {
@@ -243,10 +251,10 @@ function findWaveForOptimisticPin(
 }
 
 function createOptimisticPinnedWaves(
-  previousPinnedWaves: ApiWave[] | undefined,
-  waveToPin: ApiWave | undefined,
+  previousPinnedWaves: SidebarWave[] | undefined,
+  waveToPin: SidebarWave | undefined,
   waveId: string
-): ApiWave[] | undefined {
+): SidebarWave[] | undefined {
   if (!waveToPin || !previousPinnedWaves) {
     return undefined;
   }
@@ -268,7 +276,7 @@ async function optimisticallyPinWave(
 ): Promise<MutationContext> {
   await queryClient.cancelQueries({ queryKey });
 
-  const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(queryKey);
+  const previousPinnedWaves = queryClient.getQueryData<SidebarWave[]>(queryKey);
   const waveToPin = findWaveForOptimisticPin(queryClient, waveId);
   const optimisticPinnedWaves = createOptimisticPinnedWaves(
     previousPinnedWaves,
@@ -290,7 +298,7 @@ async function optimisticallyUnpinWave(
 ): Promise<MutationContext> {
   await queryClient.cancelQueries({ queryKey });
 
-  const previousPinnedWaves = queryClient.getQueryData<ApiWave[]>(queryKey);
+  const previousPinnedWaves = queryClient.getQueryData<SidebarWave[]>(queryKey);
 
   if (previousPinnedWaves) {
     queryClient.setQueryData(
@@ -349,12 +357,24 @@ function usePinnedWaveMutations(
 }
 
 export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
   const queryClient = useQueryClient();
   const ongoingOperations = useRef<Set<string>>(new Set());
   const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
-  const viewerIdentityKey = address?.toLowerCase() ?? null;
+  const activeProfileProxyId = activeProfileProxy?.id ?? null;
+  const viewerIdentityKey = useMemo(() => {
+    if (!address) {
+      return null;
+    }
+
+    const normalizedAddress = address.toLowerCase();
+    if (activeProfileProxyId !== null) {
+      return `${normalizedAddress}:proxy:${activeProfileProxyId}`;
+    }
+
+    return `${normalizedAddress}:primary`;
+  }, [address, activeProfileProxyId]);
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
   const { data, isLoading, isError, error, refetch } = usePinnedWavesQuery(
     queryClient,
