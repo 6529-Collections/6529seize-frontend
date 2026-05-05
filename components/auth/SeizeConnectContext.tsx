@@ -1191,8 +1191,11 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       const activeAccountAddress = normalizeAddress(
         activeStoredAccount.address
       );
-      unreadNotificationsByAddress[activeAccountAddress] =
-        activeUnreadNotifications?.unread_count ?? 0;
+      const activeUnreadCount = activeUnreadNotifications?.unread_count;
+
+      if (typeof activeUnreadCount === "number") {
+        unreadNotificationsByAddress[activeAccountAddress] = activeUnreadCount;
+      }
     } else if (activeStoredAccount) {
       const activeAccountAddress = normalizeAddress(
         activeStoredAccount.address
