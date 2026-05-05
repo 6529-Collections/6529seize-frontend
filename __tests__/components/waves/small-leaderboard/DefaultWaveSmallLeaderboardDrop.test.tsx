@@ -69,6 +69,16 @@ describe("DefaultWaveSmallLeaderboardDrop", () => {
     expect(screen.queryByTestId("default-drop")).not.toBeInTheDocument();
   });
 
+  it("renders default component for approve wave rank 1", () => {
+    const drop = { id: "drop-approve-1", rank: 1 } as ExtendedDrop;
+
+    renderComponent(drop, { isApproveWave: true });
+
+    expect(screen.getByTestId("default-drop")).toBeInTheDocument();
+    expect(screen.getByText("Default Drop - Rank 1")).toBeInTheDocument();
+    expect(screen.queryByTestId("top-three-drop")).not.toBeInTheDocument();
+  });
+
   it("renders top three component for rank 2", () => {
     const drop = { id: "drop-2", rank: 2 } as ExtendedDrop;
 

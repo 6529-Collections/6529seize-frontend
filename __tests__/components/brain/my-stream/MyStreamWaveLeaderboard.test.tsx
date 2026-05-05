@@ -581,8 +581,8 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(useWaveDecisions).toHaveBeenCalledWith({
       waveId: "1",
       enabled: false,
-      loadAllPages: false,
-      pageSize: undefined,
+      loadAllPages: true,
+      pageSize: 2000,
     });
     expect(dropsProps.isVotingClosed).toBe(true);
     expect(dropsProps.isVotingControlsLocked).toBe(true);

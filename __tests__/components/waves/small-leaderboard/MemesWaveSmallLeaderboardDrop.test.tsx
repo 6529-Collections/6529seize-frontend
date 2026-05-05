@@ -112,6 +112,24 @@ describe("MemesWaveSmallLeaderboardDrop", () => {
     expect(screen.queryByTestId("top-three-drop")).not.toBeInTheDocument();
   });
 
+  it("renders default drop for approve wave rank 1", () => {
+    const drop = createMockDrop(1);
+    render(
+      <MemesWaveSmallLeaderboardDrop
+        drop={drop}
+        wave={mockWave}
+        isApproveWave={true}
+        onDropClick={mockOnDropClick}
+      />
+    );
+
+    expect(screen.getByTestId("default-drop")).toBeInTheDocument();
+    expect(screen.queryByTestId("top-three-drop")).not.toBeInTheDocument();
+    expect(mockDefaultDrop.mock.calls[0]?.[0]).toEqual(
+      expect.objectContaining({ isApproveWave: true })
+    );
+  });
+
   it("passes closed voting state to default drop", () => {
     const drop = createMockDrop(4);
     render(
