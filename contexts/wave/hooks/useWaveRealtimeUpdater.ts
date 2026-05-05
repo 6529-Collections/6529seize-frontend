@@ -13,7 +13,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
@@ -109,10 +109,21 @@ export function useWaveRealtimeUpdater({
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
+  const activeWaveIdRef = useRef(activeWaveId);
+  useLayoutEffect(() => {
+    activeWaveIdRef.current = activeWaveId;
+  }, [activeWaveId]);
   const { refreshEligibility } = useWaveEligibility();
   const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const queryClient = useQueryClient();
   const tabJustBecameVisibleRef = useRef<boolean>(false);
+
+  const canSendReadForWave = useCallback((waveId: string): boolean => {
+    return (
+      activeWaveIdRef.current === waveId &&
+      document.visibilityState === "visible"
+    );
+  }, []);
 
   // Function to cleanup abort controllers
   const cleanupController = useCallback((waveId: string) => {
@@ -314,7 +325,9 @@ export function useWaveRealtimeUpdater({
         })();
         void (async () => {
           try {
-            await markWaveNotificationsRead(waveId);
+            await markWaveNotificationsRead(waveId, {
+              shouldSend: () => canSendReadForWave(waveId),
+            });
           } catch (error) {
             console.error("Failed to mark wave as read:", error);
           }
@@ -329,6 +342,7 @@ export function useWaveRealtimeUpdater({
       initiateFetchNewestCycle,
       removeWaveDeliveredNotifications,
       markWaveNotificationsRead,
+      canSendReadForWave,
       refreshEligibility,
       isWaveMuted,
       queryClient,

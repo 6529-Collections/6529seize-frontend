@@ -99,7 +99,8 @@ describe("useWaveChatLeaveCleanup", () => {
         latestCallbacks.removeWaveDeliveredNotifications
       ).toHaveBeenCalledWith("wave-1");
       expect(latestCallbacks.markWaveNotificationsRead).toHaveBeenCalledWith(
-        "wave-1"
+        "wave-1",
+        { queueIfBlocked: false }
       );
     });
     expect(firstCallbacks.setUnreadDividerSerialNo).not.toHaveBeenCalled();
@@ -131,7 +132,28 @@ describe("useWaveChatLeaveCleanup", () => {
         "wave-1"
       );
       expect(callbacks.markWaveNotificationsRead).toHaveBeenCalledWith(
-        "wave-1"
+        "wave-1",
+        { queueIfBlocked: false }
+      );
+    });
+  });
+
+  it("marks leave cleanup reads without saving a delayed replay", async () => {
+    const callbacks = createCallbacks();
+    const { unmount } = renderLeaveCleanupHook({
+      enabled: true,
+      waveId: "wave-1",
+      ...callbacks,
+    });
+
+    await act(async () => {
+      unmount();
+    });
+
+    await waitFor(() => {
+      expect(callbacks.markWaveNotificationsRead).toHaveBeenCalledWith(
+        "wave-1",
+        { queueIfBlocked: false }
       );
     });
   });

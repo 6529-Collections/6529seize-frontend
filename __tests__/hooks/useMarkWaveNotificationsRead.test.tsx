@@ -931,6 +931,128 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("drops a queued missing-JWT read when its guard becomes false before replay", async () => {
+    const invalidateNotifications = jest.fn();
+    let shouldSend = true;
+
+    setActiveIdentity({ address: "0xAAA", jwt: null });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const queuedPromise = result.current("wave-guard-missing-jwt", {
+      shouldSend: () => shouldSend,
+    });
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    shouldSend = false;
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBeUndefined();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("sends one merged queued read when at least one guard still allows it", async () => {
+    const invalidateNotifications = jest.fn();
+    let firstShouldSend = true;
+    let secondShouldSend = true;
+
+    setActiveIdentity({ address: "0xAAA", jwt: null });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const firstPromise = result.current("wave-guard-merged", {
+      shouldSend: () => firstShouldSend,
+    });
+    const secondPromise = result.current("wave-guard-merged", {
+      shouldSend: () => secondShouldSend,
+    });
+
+    expect(secondPromise).toBe(firstPromise);
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    firstShouldSend = false;
+    secondShouldSend = true;
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    await expect(firstPromise).resolves.toBeUndefined();
+    await expect(secondPromise).resolves.toBeUndefined();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-guard-merged/read",
+      headers: { Authorization: "Bearer jwt-a" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("drops a trailing same-wave replay when its guard becomes false", async () => {
+    const firstRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+    let shouldSendReplay = true;
+
+    apiPostMock.mockReturnValueOnce(firstRequest.promise);
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    const firstPromise = result.current("wave-guard-trailing");
+    const trailingPromise = result.current("wave-guard-trailing", {
+      shouldSend: () => shouldSendReplay,
+    });
+
+    expect(trailingPromise).toBe(firstPromise);
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
+    shouldSendReplay = false;
+    firstRequest.resolve();
+
+    await expect(firstPromise).resolves.toBeUndefined();
+    await expect(trailingPromise).resolves.toBeUndefined();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not queue a blocked read when queueIfBlocked is false", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({ address: "0xAAA", jwt: null });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const blockedPromise = result.current("wave-no-queue", {
+      queueIfBlocked: false,
+    });
+
+    await expect(blockedPromise).resolves.toBeUndefined();
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
   it("queues a proxy read by JWT role until the matching proxy loads", async () => {
     const invalidateNotifications = jest.fn();
 
@@ -976,6 +1098,43 @@ describe("useMarkWaveNotificationsRead", () => {
       headers: { Authorization: "Bearer jwt-proxy-loading" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("drops a queued proxy-role read when its guard becomes stale before the proxy loads", async () => {
+    const invalidateNotifications = jest.fn();
+    let shouldSend = true;
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading",
+      jwtRole: "creator-1",
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const queuedPromise = result.current("wave-proxy-guard-stale", {
+      shouldSend: () => shouldSend,
+    });
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    shouldSend = false;
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+    });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBeUndefined();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
   it("keeps a queued proxy-role read tied to the JWT role that created its callback", async () => {

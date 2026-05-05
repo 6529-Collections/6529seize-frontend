@@ -22,7 +22,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
-  getAuthJwt: () => "test-jwt",
+  getAuthJwt: jest.fn(() => "test-jwt"),
 }));
 
 jest.mock("jwt-decode", () => ({
@@ -49,6 +49,8 @@ const {
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
+const { getAuthJwt } = require("@/services/auth/auth.utils");
+const getAuthJwtMock = getAuthJwt as jest.Mock;
 
 const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -65,6 +67,7 @@ const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
 describe("useWaveRealtimeUpdater", () => {
   beforeEach(() => {
     setDocumentVisibilityState("visible");
+    getAuthJwtMock.mockReturnValue("test-jwt");
   });
 
   afterEach(() => {
@@ -303,6 +306,82 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
 
     expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+
+  it("drops a delayed active-wave read after the active wave changes", async () => {
+    getAuthJwtMock.mockReturnValue(null);
+
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-delayed-active",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    props.activeWaveId = "wave2";
+    getAuthJwtMock.mockReturnValue("test-jwt");
+    rerender();
+    await flushPromises();
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+
+  it("drops a delayed active-wave read after the tab becomes hidden", async () => {
+    getAuthJwtMock.mockReturnValue(null);
+
+    const store = {
+      wave1: { drops: [], latestFetchedSerialNo: 10 },
+    };
+    const props = baseProps(store);
+    props.activeWaveId = "wave1";
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-delayed-hidden",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+      "wave1"
+    );
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    setDocumentVisibilityState("hidden");
+    getAuthJwtMock.mockReturnValue("test-jwt");
+    rerender();
+    await flushPromises();
+
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
   });
 

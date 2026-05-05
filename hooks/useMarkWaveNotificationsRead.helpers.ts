@@ -17,9 +17,10 @@ import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 
 interface WaveReadRequestState {
   promise: Promise<void>;
-  pending: boolean;
   readonly requestKey: string;
   authHeaders: AuthHeaders;
+  shouldSends: WaveReadShouldSend[];
+  pendingShouldSends: WaveReadShouldSend[];
 }
 
 interface PendingWaveReadRequestState {
@@ -32,6 +33,7 @@ interface PendingWaveReadRequestState {
   readonly promise: Promise<void>;
   readonly resolve: () => void;
   readonly reject: (error: unknown) => void;
+  readonly shouldSends: WaveReadShouldSend[];
 }
 
 interface WaveReadCacheRefs {
@@ -54,10 +56,20 @@ interface WaveNotificationsReadMarkerConfig extends WaveReadIdentityConfig {
 }
 
 export interface WaveNotificationsReadMarkerState {
-  readonly markWaveNotificationsRead: (waveId: string) => Promise<void>;
+  readonly markWaveNotificationsRead: (
+    waveId: string,
+    options?: MarkWaveNotificationsReadOptions
+  ) => Promise<void>;
   readonly identityKey: string;
   readonly proxyRoleIdentityKey: string | null;
 }
+
+export interface MarkWaveNotificationsReadOptions {
+  readonly shouldSend?: () => boolean;
+  readonly queueIfBlocked?: boolean;
+}
+
+type WaveReadShouldSend = (() => boolean) | undefined;
 
 const inFlightWaveReadRequests = new Map<string, WaveReadRequestState>();
 const pendingWaveReadRequests = new Map<string, PendingWaveReadRequestState>();
@@ -89,11 +101,23 @@ const hasConsistentPendingWaveReadIdentity = (
   );
 };
 
+const shouldSendWaveRead = (shouldSend: WaveReadShouldSend): boolean =>
+  shouldSend?.() ?? true;
+
+const hasSendableWaveRead = (
+  shouldSends: readonly WaveReadShouldSend[]
+): boolean => shouldSends.some(shouldSendWaveRead);
+
 const sendWaveReadRequest = async (
   waveId: string,
   authHeaders: AuthHeaders,
-  invalidateNotificationsRef: Readonly<{ current: () => void }>
+  invalidateNotificationsRef: Readonly<{ current: () => void }>,
+  shouldSends: readonly WaveReadShouldSend[]
 ): Promise<void> => {
+  if (!hasSendableWaveRead(shouldSends)) {
+    return;
+  }
+
   await commonApiPostWithoutBodyAndResponse({
     endpoint: `notifications/wave/${waveId}/read`,
     headers: authHeaders,
@@ -113,7 +137,8 @@ const startWaveReadRequest = async (
     await sendWaveReadRequest(
       waveId,
       state.authHeaders,
-      invalidateNotificationsRef
+      invalidateNotificationsRef,
+      state.shouldSends
     );
   } catch (error) {
     requestError = error;
@@ -121,8 +146,9 @@ const startWaveReadRequest = async (
   }
 
   try {
-    if (state.pending) {
-      state.pending = false;
+    if (state.pendingShouldSends.length > 0) {
+      state.shouldSends = state.pendingShouldSends;
+      state.pendingShouldSends = [];
       state.promise = startWaveReadRequest(
         waveId,
         state,
@@ -147,24 +173,27 @@ const markWaveReadWithAuthHeaders = ({
   requestKey,
   authHeaders,
   invalidateNotificationsRef,
+  shouldSend,
 }: {
   readonly waveId: string;
   readonly requestKey: string;
   readonly authHeaders: AuthHeaders;
   readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
+  readonly shouldSend: WaveReadShouldSend;
 }): Promise<void> => {
   const existingState = inFlightWaveReadRequests.get(requestKey);
   if (existingState) {
-    existingState.pending = true;
     existingState.authHeaders = authHeaders;
+    existingState.pendingShouldSends.push(shouldSend);
     return existingState.promise;
   }
 
   const state: WaveReadRequestState = {
     promise: Promise.resolve(),
-    pending: false,
     requestKey,
     authHeaders,
+    shouldSends: [shouldSend],
+    pendingShouldSends: [],
   };
   inFlightWaveReadRequests.set(requestKey, state);
   state.promise = startWaveReadRequest(
@@ -205,6 +234,8 @@ const enqueuePendingWaveReadRequest = ({
   identityKey,
   requestKey,
   waveId,
+  shouldSend,
+  queueIfBlocked,
 }: {
   readonly addressKey: string;
   readonly activeProfileProxyId: string | null;
@@ -212,9 +243,16 @@ const enqueuePendingWaveReadRequest = ({
   readonly identityKey: string;
   readonly requestKey: string;
   readonly waveId: string;
+  readonly shouldSend: WaveReadShouldSend;
+  readonly queueIfBlocked: boolean;
 }): Promise<void> => {
+  if (!queueIfBlocked) {
+    return Promise.resolve();
+  }
+
   const existingState = pendingWaveReadRequests.get(requestKey);
   if (existingState) {
+    existingState.shouldSends.push(shouldSend);
     return existingState.promise;
   }
 
@@ -235,11 +273,16 @@ const enqueuePendingWaveReadRequest = ({
     promise,
     resolve: resolveQueuedRequest,
     reject: rejectQueuedRequest,
+    shouldSends: [shouldSend],
   };
   pendingWaveReadRequests.set(requestKey, state);
 
   return promise;
 };
+
+const hasSendableQueuedWaveRead = (
+  queuedRequest: PendingWaveReadRequestState
+): boolean => hasSendableWaveRead(queuedRequest.shouldSends);
 
 const flushQueuedWaveReadRequests = ({
   queuedRequests,
@@ -286,6 +329,7 @@ const flushQueuedWaveReadRequests = ({
           requestKey,
           authHeaders,
           invalidateNotificationsRef,
+          shouldSend: () => groupedRequests.some(hasSendableQueuedWaveRead),
         });
         for (const queuedRequest of groupedRequests) {
           queuedRequest.resolve();
@@ -544,11 +588,13 @@ const markTemporaryProxyRoleWaveRead = ({
   addressKey,
   temporaryProxyRoleIdentity,
   cacheRefs,
+  options,
 }: {
   readonly waveId: string;
   readonly addressKey: string;
   readonly temporaryProxyRoleIdentity: WaveReadTemporaryProxyRoleIdentity;
   readonly cacheRefs: WaveReadCacheRefs;
+  readonly options: MarkWaveNotificationsReadOptions | undefined;
 }): Promise<void> => {
   const latestVerifiedProxyRoleIdentity =
     cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.get(
@@ -565,6 +611,7 @@ const markTemporaryProxyRoleWaveRead = ({
       }),
       authHeaders: latestVerifiedProxyRoleIdentity.authHeaders,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
+      shouldSend: options?.shouldSend,
     });
   }
 
@@ -579,6 +626,8 @@ const markTemporaryProxyRoleWaveRead = ({
       waveId,
     }),
     waveId,
+    shouldSend: options?.shouldSend,
+    queueIfBlocked: options?.queueIfBlocked ?? true,
   });
 };
 
@@ -588,12 +637,14 @@ const markWaveReadFromCache = ({
   activeProfileProxyId,
   identityKey,
   cacheRefs,
+  options,
 }: {
   readonly waveId: string;
   readonly addressKey: string | null;
   readonly activeProfileProxyId: string | null;
   readonly identityKey: string;
   readonly cacheRefs: WaveReadCacheRefs;
+  readonly options: MarkWaveNotificationsReadOptions | undefined;
 }): Promise<void> => {
   if (addressKey === null) {
     return Promise.resolve();
@@ -612,6 +663,7 @@ const markWaveReadFromCache = ({
       requestKey,
       authHeaders: verifiedCachedIdentity.authHeaders,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
+      shouldSend: options?.shouldSend,
     });
   }
 
@@ -626,6 +678,7 @@ const markWaveReadFromCache = ({
       requestKey,
       authHeaders: latestVerifiedIdentity.authHeaders,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
+      shouldSend: options?.shouldSend,
     });
   }
 
@@ -637,6 +690,7 @@ const markWaveReadFromCache = ({
       addressKey,
       temporaryProxyRoleIdentity,
       cacheRefs,
+      options,
     });
   }
 
@@ -647,6 +701,8 @@ const markWaveReadFromCache = ({
     identityKey,
     requestKey,
     waveId,
+    shouldSend: options?.shouldSend,
+    queueIfBlocked: options?.queueIfBlocked ?? true,
   });
 };
 
@@ -682,13 +738,17 @@ export const useWaveNotificationsReadMarkerState = ({
   } = identityState;
 
   const markWaveNotificationsRead = useCallback(
-    (waveId: string): Promise<void> =>
+    (
+      waveId: string,
+      options?: MarkWaveNotificationsReadOptions
+    ): Promise<void> =>
       markWaveReadFromCache({
         waveId,
         addressKey,
         activeProfileProxyId: currentProfileProxyId,
         identityKey,
         cacheRefs,
+        options,
       }),
     [addressKey, cacheRefs, currentProfileProxyId, identityKey]
   );

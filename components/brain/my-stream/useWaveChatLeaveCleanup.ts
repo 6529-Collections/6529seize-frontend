@@ -6,6 +6,11 @@ type SetUnreadDividerSerialNo = (
   serialNo: number | null | ((current: number | null) => number | null)
 ) => void;
 
+interface MarkWaveNotificationsReadOptions {
+  readonly shouldSend?: () => boolean;
+  readonly queueIfBlocked?: boolean;
+}
+
 interface UseWaveChatLeaveCleanupParams {
   readonly enabled: boolean;
   readonly waveId: string;
@@ -14,7 +19,8 @@ interface UseWaveChatLeaveCleanupParams {
     waveId: string
   ) => Promise<unknown> | void;
   readonly markWaveNotificationsRead: (
-    waveId: string
+    waveId: string,
+    options?: MarkWaveNotificationsReadOptions
   ) => Promise<unknown> | void;
 }
 
@@ -39,7 +45,9 @@ export function useWaveChatLeaveCleanup({
       }
 
       try {
-        await markWaveNotificationsRead(leftWaveId);
+        await markWaveNotificationsRead(leftWaveId, {
+          queueIfBlocked: false,
+        });
       } catch (error: unknown) {
         console.error("Failed to mark feed as read:", error);
       }

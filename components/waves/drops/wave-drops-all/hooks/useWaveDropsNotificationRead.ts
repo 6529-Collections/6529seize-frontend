@@ -1,5 +1,11 @@
 import { useWaveNotificationsReadMarkerState } from "@/hooks/useMarkWaveNotificationsRead";
-import { useEffect, useEffectEvent, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+} from "react";
 
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
@@ -21,6 +27,12 @@ interface ReadSyncAttempt {
   readonly state: ReadSyncState;
   readonly promise: Promise<ReadSyncStatus>;
   status: ReadSyncStatus;
+}
+
+interface ReadGuardState {
+  readonly enabled: boolean;
+  readonly hookInstanceId: symbol;
+  readonly waveId: string;
 }
 
 const usedTemporaryProxyRole = (state: ReadSyncState): boolean =>
@@ -46,9 +58,45 @@ export const useWaveDropsNotificationRead = ({
   enabled = true,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
+  const readSyncAttemptRef = useRef<ReadSyncAttempt | null>(null);
+  const hookInstanceIdRef = useRef(Symbol("useWaveDropsNotificationRead"));
+  const isHookMountedRef = useRef(false);
+  const latestReadGuardStateRef = useRef<ReadGuardState>({
+    enabled,
+    hookInstanceId: hookInstanceIdRef.current,
+    waveId,
+  });
+
+  useLayoutEffect(() => {
+    latestReadGuardStateRef.current = {
+      enabled,
+      hookInstanceId: hookInstanceIdRef.current,
+      waveId,
+    };
+  }, [enabled, waveId]);
+
+  useLayoutEffect(() => {
+    isHookMountedRef.current = true;
+
+    return () => {
+      isHookMountedRef.current = false;
+    };
+  }, []);
+
   const { markWaveNotificationsRead, identityKey, proxyRoleIdentityKey } =
     useWaveNotificationsReadMarkerState();
-  const readSyncAttemptRef = useRef<ReadSyncAttempt | null>(null);
+
+  const canSendReadForWave = useCallback((expectedWaveId: string): boolean => {
+    const latestState = latestReadGuardStateRef.current;
+
+    return (
+      isHookMountedRef.current &&
+      latestState.hookInstanceId === hookInstanceIdRef.current &&
+      latestState.waveId === expectedWaveId &&
+      latestState.enabled === true &&
+      document.visibilityState === "visible"
+    );
+  }, []);
 
   const syncReadState = useEffectEvent((state: ReadSyncState) => {
     const runReadSyncAttempt = async (
@@ -63,7 +111,9 @@ export const useWaveDropsNotificationRead = ({
       }
 
       try {
-        await markWaveNotificationsRead(currentState.waveId);
+        await markWaveNotificationsRead(currentState.waveId, {
+          shouldSend: () => canSendReadForWave(currentState.waveId),
+        });
         return "success";
       } catch (error) {
         console.error("Failed to mark feed as read:", error);

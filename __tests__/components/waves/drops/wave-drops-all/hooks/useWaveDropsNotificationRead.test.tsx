@@ -19,7 +19,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
-  getAuthJwt: () => "test-jwt",
+  getAuthJwt: jest.fn(() => "test-jwt"),
 }));
 
 jest.mock("jwt-decode", () => ({
@@ -47,6 +47,10 @@ const createDeferred = (): Deferred => {
 const apiPostMock = commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
   typeof commonApiPostWithoutBodyAndResponse
 >;
+const { getAuthJwt } = jest.requireMock("@/services/auth/auth.utils") as {
+  readonly getAuthJwt: jest.Mock;
+};
+const getAuthJwtMock = getAuthJwt;
 const useAuthMock = useAuth as jest.MockedFunction<typeof useAuth>;
 const jwtDecodeMock = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
 type AuthValue = ReturnType<typeof useAuth>;
@@ -133,6 +137,8 @@ describe("useWaveDropsNotificationRead", () => {
     removeWaveDeliveredNotifications.mockClear();
     apiPostMock.mockReset();
     apiPostMock.mockResolvedValue(undefined);
+    getAuthJwtMock.mockReset();
+    getAuthJwtMock.mockReturnValue("test-jwt");
     useAuthMock.mockReset();
     useAuthMock.mockReturnValue(createAuthValue(null));
     jwtDecodeMock.mockReset();
@@ -236,6 +242,143 @@ describe("useWaveDropsNotificationRead", () => {
       });
       expect(invalidateNotifications).toHaveBeenCalled();
     });
+  });
+
+  it("drops a delayed read after unmount", async () => {
+    getAuthJwtMock.mockReturnValue(null);
+
+    const { unmount } = render(
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-delayed-unmount"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-delayed-unmount"
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    unmount();
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    getAuthJwtMock.mockReturnValue("test-jwt");
+
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-delayed-flush"
+          enabled={false}
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("drops a delayed read after the visible wave changes", async () => {
+    getAuthJwtMock.mockReturnValue(null);
+
+    const renderTestComponent = (waveId: string) => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId={waveId}
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(renderTestComponent("wave-delayed-old"));
+
+    await waitFor(() => {
+      expect(removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-delayed-old"
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    getAuthJwtMock.mockReturnValue("test-jwt");
+    rerender(renderTestComponent("wave-delayed-new"));
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-delayed-new/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-delayed-old/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  it("drops a delayed read after the tab becomes hidden", async () => {
+    getAuthJwtMock.mockReturnValue(null);
+
+    const renderTestComponent = () => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-delayed-hidden"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(renderTestComponent());
+
+    await waitFor(() => {
+      expect(removeWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-delayed-hidden"
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    setDocumentVisibilityState("hidden");
+    getAuthJwtMock.mockReturnValue("test-jwt");
+    rerender(renderTestComponent());
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
   it("queues a follow-up read when the same visible wave syncs while pending", async () => {
