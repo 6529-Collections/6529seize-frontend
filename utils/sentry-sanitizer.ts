@@ -3,6 +3,12 @@ import type { Breadcrumb, Event } from "@sentry/nextjs";
 const REDACTED = "[Filtered]";
 const URL_IS_FIRST_PARTY_KEY = "url.is_first_party";
 const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
+const UNUSABLE_URL_TOKENS = new Set([
+  "[filtered]",
+  "[redacted]",
+  "filtered",
+  "unknown",
+]);
 
 const JWT_PATTERN = /eyJ[A-Za-z0-9-_]+\.eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+/g;
 const STRIPE_KEY_PATTERN = /\b(sk|pk)_[a-zA-Z0-9]{16,}\b/g;
@@ -27,6 +33,36 @@ function isFirstPartyHost(hostname: string): boolean {
 
 function isAbsoluteUrlLike(value: string): boolean {
   return /^[a-z][a-z\d+\-.]*:/i.test(value) || value.startsWith("//");
+}
+
+function isUnusableUrlToken(value: unknown): boolean {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed || isAbsoluteUrlLike(trimmed)) {
+    return false;
+  }
+
+  const noHash = trimmed.split("#", 1)[0] ?? trimmed;
+  const noQuery = noHash.split("?", 1)[0] ?? noHash;
+  const withoutPathPrefix =
+    noQuery.startsWith("/") && !noQuery.startsWith("//")
+      ? noQuery.slice(1)
+      : noQuery;
+  let decoded = withoutPathPrefix;
+  try {
+    decoded = decodeURIComponent(withoutPathPrefix);
+  } catch {
+    decoded = withoutPathPrefix;
+  }
+  const token =
+    decoded.startsWith("/") && !decoded.startsWith("//")
+      ? decoded.slice(1).toLowerCase()
+      : decoded.toLowerCase();
+
+  return UNUSABLE_URL_TOKENS.has(token);
 }
 
 function isRelativeUrlPathLike(value: string): boolean {
@@ -68,6 +104,9 @@ function getBreadcrumbUrlIsFirstParty(value: unknown): boolean | undefined {
   if (!trimmed) {
     return undefined;
   }
+  if (isUnusableUrlToken(trimmed)) {
+    return undefined;
+  }
 
   if (!isAbsoluteUrlLike(trimmed)) {
     return isRelativeUrlPathLike(trimmed) ? true : undefined;
@@ -85,6 +124,10 @@ function getBreadcrumbUrlIsFirstPartyApi(
   value: unknown,
   urlIsFirstParty: unknown
 ): boolean | undefined {
+  if (isUnusableUrlToken(value)) {
+    return undefined;
+  }
+
   if (urlIsFirstParty === false) {
     return false;
   }
@@ -128,13 +171,21 @@ function sanitizeString(value: string): string {
 export function sanitizeUrlString(value: unknown): unknown {
   if (typeof value !== "string") return value;
 
+  const trimmed = value.trim();
   // Fast-path: drop query / hash without needing URL parsing.
-  const noHash = value.split("#", 1)[0] ?? value;
+  const noHash = trimmed.split("#", 1)[0] ?? trimmed;
   const noQuery = noHash.split("?", 1)[0] ?? noHash;
+  if (isUnusableUrlToken(noQuery)) {
+    return noQuery;
+  }
+
+  if (!isAbsoluteUrlLike(trimmed) && !isRelativeUrlPathLike(noQuery)) {
+    return noQuery;
+  }
 
   // If it looks like a URL, keep only the pathname.
   try {
-    const parsed = new URL(value, "http://localhost");
+    const parsed = new URL(trimmed, "http://localhost");
     return parsed.pathname || "/";
   } catch {
     return noQuery;

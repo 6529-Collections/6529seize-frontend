@@ -1,4 +1,7 @@
-import { sanitizeSentryBreadcrumb } from "@/utils/sentry-sanitizer";
+import {
+  sanitizeSentryBreadcrumb,
+  sanitizeSentryEvent,
+} from "@/utils/sentry-sanitizer";
 
 describe("sentry-sanitizer", () => {
   it("redacts secrets from breadcrumb text fields", () => {
@@ -99,6 +102,11 @@ describe("sentry-sanitizer", () => {
 
     expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party");
     expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party_api");
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "[Filtered]",
+      })
+    );
   });
 
   it("does not mark unknown breadcrumb URL placeholders as first-party", () => {
@@ -112,7 +120,75 @@ describe("sentry-sanitizer", () => {
 
     expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party");
     expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party_api");
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "unknown",
+      })
+    );
   });
+
+  it.each(["/[Filtered]", "/%5BFiltered%5D", "/unknown"])(
+    "does not mark already-sanitized breadcrumb URL placeholder %s as first-party",
+    (url) => {
+      const breadcrumb = sanitizeSentryBreadcrumb({
+        type: "http",
+        category: "fetch",
+        data: {
+          url,
+        },
+      });
+
+      expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party");
+      expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party_api");
+    }
+  );
+
+  it.each(["[Filtered]", "unknown"])(
+    "does not add first-party metadata to %s after breadcrumb and event sanitize passes",
+    (url) => {
+      const breadcrumb = sanitizeSentryBreadcrumb({
+        type: "http",
+        category: "fetch",
+        data: {
+          url,
+        },
+      });
+
+      const event = sanitizeSentryEvent({
+        breadcrumbs: [breadcrumb!],
+      });
+      const data = event.breadcrumbs?.[0]?.data;
+
+      expect(data).toEqual(
+        expect.objectContaining({
+          url,
+        })
+      );
+      expect(data).not.toHaveProperty("url.is_first_party");
+      expect(data).not.toHaveProperty("url.is_first_party_api");
+    }
+  );
+
+  it.each(["[Redacted]", "filtered"])(
+    "does not mark unusable breadcrumb URL token %s as first-party",
+    (url) => {
+      const breadcrumb = sanitizeSentryBreadcrumb({
+        type: "http",
+        category: "fetch",
+        data: {
+          url,
+        },
+      });
+
+      expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party");
+      expect(breadcrumb?.data).not.toHaveProperty("url.is_first_party_api");
+      expect(breadcrumb?.data).toEqual(
+        expect.objectContaining({
+          url,
+        })
+      );
+    }
+  );
 
   it("marks bare API paths as first-party API breadcrumb URLs", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
