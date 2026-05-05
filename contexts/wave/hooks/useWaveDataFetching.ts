@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useCallback } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -121,7 +121,12 @@ export function useWaveDataFetching({
       const controller = createController(waveId);
 
       // Create a new promise with the abort signal
-      const fetchPromise = fetchWaveMessages(waveId, null, controller.signal, updateEligibility)
+      const fetchPromise = fetchWaveMessages(
+        waveId,
+        null,
+        controller.signal,
+        updateEligibility
+      )
         .then((drops) => handleFetchSuccess(waveId, drops))
         .catch((error) => {
           handleFetchError(waveId, error);
@@ -156,7 +161,8 @@ export function useWaveDataFetching({
     async (
       waveId: string,
       initialSinceSerialNo: number,
-      signal: AbortSignal
+      signal: AbortSignal,
+      reconcileDrops?: (drops: ApiDrop[]) => ApiDrop[]
     ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> => {
       let allFetchedDrops: ApiDrop[] = [];
       let currentSinceSerialNo = initialSinceSerialNo;
@@ -227,15 +233,18 @@ export function useWaveDataFetching({
       if (signal.aborted) {
         throw new DOMException("Aborted", "AbortError");
       }
-      const update = formatWaveMessages(waveId, allFetchedDrops);
+      const displayDrops = reconcileDrops
+        ? reconcileDrops(allFetchedDrops)
+        : allFetchedDrops;
+      const update = formatWaveMessages(waveId, displayDrops);
       updateData(update);
       // Return all accumulated drops and the overall highest serial number found
       return {
-        drops: allFetchedDrops,
+        drops: displayDrops,
         highestSerialNo: overallHighestSerialNo,
       };
     },
-    [] // No dependencies needed, it uses the imported utility
+    [updateData, updateEligibility]
   );
 
   /**

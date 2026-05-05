@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import * as Sentry from "@sentry/nextjs";
 
@@ -34,6 +35,7 @@ interface ReactionMutationContext {
   readonly intendedReaction: string | null;
   readonly optimisticReaction: string | null;
   readonly profileId: string | null;
+  readonly profile: ApiProfileMin | null;
   readonly startedAt: number;
   readonly pathname: string | null;
   readonly visibilityState: string | null;
@@ -53,6 +55,7 @@ export interface ProtectedReactionIntent {
   readonly dropMutationSeq: number;
   readonly reaction: string | null;
   readonly profileId: string | null;
+  readonly profile: ApiProfileMin | null;
   readonly startedAt: number;
   readonly apiSucceededAt: number | null;
 }
@@ -434,6 +437,7 @@ export function beginReactionMutation(params: {
   intendedReaction: string | null | undefined;
   optimisticReaction: string | null | undefined;
   profileId: string | null | undefined;
+  profile?: ApiProfileMin | null | undefined;
   websocketStatus?: WebSocketStatus | string | null;
 }): ReactionMutationContext {
   const now = Date.now();
@@ -441,6 +445,8 @@ export function beginReactionMutation(params: {
 
   const nextSeq = (dropMutationSeqByDrop.get(params.dropId) ?? 0) + 1;
   dropMutationSeqByDrop.set(params.dropId, nextSeq);
+  const profile = params.profile ?? null;
+  const profileId = params.profileId ?? profile?.id ?? null;
 
   const context: ReactionMutationContext = {
     mutationId: createMutationId(),
@@ -452,7 +458,8 @@ export function beginReactionMutation(params: {
     previousReaction: toNullableReaction(params.previousReaction),
     intendedReaction: toNullableReaction(params.intendedReaction),
     optimisticReaction: toNullableReaction(params.optimisticReaction),
-    profileId: params.profileId ?? null,
+    profileId,
+    profile: profile?.id === profileId ? profile : null,
     startedAt: now,
     pathname: getCurrentPathname(),
     visibilityState: getVisibilityState(),
@@ -611,6 +618,7 @@ export function getProtectedReactionIntent(
     dropMutationSeq: context.dropMutationSeq,
     reaction: context.intendedReaction,
     profileId: context.profileId,
+    profile: context.profile,
     startedAt: context.startedAt,
     apiSucceededAt: context.apiSucceededAt,
   };

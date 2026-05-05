@@ -3,6 +3,7 @@
 import {
   type CachedDropReactionState,
   findDropInCachedDrops,
+  reconcileServerDropsForDisplay,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
   updateServerDropInCachedDrops,
@@ -33,7 +34,8 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly syncNewestMessages: (
     waveId: string,
     sinceSerialNo: number,
-    signal: AbortSignal
+    signal: AbortSignal,
+    reconcileDrops?: (drops: ApiDrop[]) => ApiDrop[]
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
   readonly removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
   readonly isWaveMuted: (waveId: string) => boolean;
@@ -112,6 +114,12 @@ function getFullDrop(drop: Drop | undefined): ExtendedDrop | null {
   }
 
   return drop;
+}
+
+function getFullDrops(drops: readonly Drop[]): ExtendedDrop[] {
+  return drops.filter(
+    (drop): drop is ExtendedDrop => drop.type === DropSize.FULL
+  );
 }
 
 function getWaveDropUpdateKey(waveId: string, dropId: string): string {
@@ -356,12 +364,15 @@ function useWaveVisibilityRefresh(): {
 
 function useNewestMessagesSync({
   getData,
+  queryClient,
   syncNewestMessages,
   updateData,
 }: Pick<
   UseWaveRealtimeUpdaterProps,
   "getData" | "syncNewestMessages" | "updateData"
->): {
+> & {
+  readonly queryClient: QueryClient;
+}): {
   readonly initiateFetchNewestCycle: InitiateFetchNewestCycleFn;
 } {
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
@@ -387,12 +398,33 @@ function useNewestMessagesSync({
 
       try {
         const { drops: fetchedDrops, highestSerialNo: fetchedHighestSerial } =
-          await syncNewestMessages(waveId, sinceSerialNo, controller.signal);
+          await syncNewestMessages(
+            waveId,
+            sinceSerialNo,
+            controller.signal,
+            (serverDrops) => {
+              const latestData = getData(waveId);
+              return reconcileServerDropsForDisplay({
+                queryClient,
+                serverDrops,
+                ...(latestData !== undefined
+                  ? { latestWaveDrops: getFullDrops(latestData.drops) }
+                  : {}),
+                websocketStatus: WebSocketStatus.CONNECTED,
+              });
+            }
+          );
 
         if (fetchedDrops) {
           const currentData = getData(waveId);
           if (currentData) {
-            const newDrops: ExtendedDrop[] = fetchedDrops.map((drop) => ({
+            const displayDrops = reconcileServerDropsForDisplay({
+              queryClient,
+              serverDrops: fetchedDrops,
+              latestWaveDrops: getFullDrops(currentData.drops),
+              websocketStatus: WebSocketStatus.CONNECTED,
+            });
+            const newDrops: ExtendedDrop[] = displayDrops.map((drop) => ({
               ...drop,
               type: DropSize.FULL,
               stableKey: drop.id,
@@ -429,7 +461,7 @@ function useNewestMessagesSync({
         }
       }
     },
-    [cleanupController, getData, syncNewestMessages, updateData]
+    [cleanupController, getData, queryClient, syncNewestMessages, updateData]
   );
 
   useEffect(() => {
@@ -778,6 +810,7 @@ export function useWaveRealtimeUpdater({
     useWaveVisibilityRefresh();
   const { initiateFetchNewestCycle } = useNewestMessagesSync({
     getData,
+    queryClient,
     syncNewestMessages,
     updateData,
   });

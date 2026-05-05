@@ -356,6 +356,45 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("uses the protected intent profile when a protected add has no local or server profile", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "intent-current-user");
+
+    beginReactionMutation({
+      dropId: "drop-protected-intent-profile",
+      waveId: "wave-1",
+      source: "picker",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: currentUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop: serverDrop({
+        id: "drop-protected-intent-profile",
+        context_profile_context: contextProfileContext(null),
+        reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+      }),
+      latestWaveDrop: {
+        context_profile_context: contextProfileContext(":joy:"),
+        reactions: [],
+      },
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":joy:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("removes only the protected user from stale server reactions", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();

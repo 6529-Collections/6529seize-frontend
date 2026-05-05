@@ -344,6 +344,7 @@ function WaveDropReaction({
 
     const previousReaction = drop.context_profile_context?.reaction ?? null;
     const intendedReaction = selected ? null : reaction.reaction;
+    const rollbackProfile = toProfileMin(connectedProfile);
     const mutation = beginReactionMutation({
       dropId: drop.id,
       waveId,
@@ -352,10 +353,10 @@ function WaveDropReaction({
       previousReaction,
       intendedReaction,
       optimisticReaction: intendedReaction,
-      profileId: connectedProfile?.id ?? null,
+      profileId: connectedProfile?.id ?? rollbackProfile?.id ?? null,
+      profile: rollbackProfile,
       websocketStatus,
     });
-    const rollbackProfile = toProfileMin(connectedProfile);
 
     setSelected((s) => !s);
     setTotal((n) => Math.max(0, n + (selected ? -1 : 1)));

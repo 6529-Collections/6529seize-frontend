@@ -32,6 +32,9 @@ type UpdateServerDropInCachedDropsParams = Omit<
 type DropWithoutWaveReactionState = CachedDropReactionState &
   Pick<ApiDrop, "id">;
 
+type IdentifiedDropReactionState = CachedDropReactionState &
+  Pick<ApiDrop, "id">;
+
 type DropContextProfileContext = NonNullable<
   ApiDrop["context_profile_context"]
 >;
@@ -427,6 +430,13 @@ function hasProfileForReaction(
   );
 }
 
+function isProtectedIntentProfile(
+  profile: ApiProfileMin | null | undefined,
+  profileId: string
+): profile is ApiProfileMin {
+  return profile?.id === profileId;
+}
+
 function matchesProtectedReactionIntent(
   localDrop: CachedDropReactionState,
   protectedIntent: ProtectedReactionIntent
@@ -569,7 +579,11 @@ function mergeProtectedReactionProfiles(
   }
 
   const protectedProfile =
-    findReactionProfile(localReactions, profileId) ?? removedServerProfile;
+    findReactionProfile(localReactions, profileId) ??
+    removedServerProfile ??
+    (isProtectedIntentProfile(protectedIntent.profile, profileId)
+      ? protectedIntent.profile
+      : null);
   if (!protectedProfile) {
     return mergedReactions;
   }
@@ -737,10 +751,12 @@ export function updateServerDropInCachedDrops(
 }
 
 export function reconcileServerDropsForDisplay({
+  latestWaveDrops,
   queryClient,
   serverDrops,
   websocketStatus,
 }: {
+  readonly latestWaveDrops?: readonly IdentifiedDropReactionState[];
   readonly queryClient: QueryClient;
   readonly serverDrops: readonly ApiDrop[];
   readonly websocketStatus?: WebSocketStatus | string | null;
@@ -749,6 +765,8 @@ export function reconcileServerDropsForDisplay({
     reconcileServerDropForDisplay({
       queryClient,
       serverDrop,
+      latestWaveDrop:
+        latestWaveDrops?.find((drop) => drop.id === serverDrop.id) ?? null,
       ...(websocketStatus !== undefined ? { websocketStatus } : {}),
     })
   );

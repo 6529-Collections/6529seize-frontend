@@ -410,6 +410,7 @@ export function useDropReaction(
       const previousReaction = contextProfileContext?.reaction ?? null;
       const isRemoving = reactionCode === previousReaction;
       const intendedReaction = isRemoving ? null : reactionCode;
+      const rollbackProfile = toProfileMin(connectedProfile);
       const mutation = beginReactionMutation({
         dropId,
         waveId,
@@ -418,10 +419,10 @@ export function useDropReaction(
         previousReaction,
         intendedReaction,
         optimisticReaction: intendedReaction,
-        profileId: connectedProfile?.id ?? null,
+        profileId: connectedProfile?.id ?? rollbackProfile?.id ?? null,
+        profile: rollbackProfile,
         websocketStatus,
       });
-      const rollbackProfile = toProfileMin(connectedProfile);
 
       rollbackRef.current?.();
       rollbackRef.current = combineRollbacks([
