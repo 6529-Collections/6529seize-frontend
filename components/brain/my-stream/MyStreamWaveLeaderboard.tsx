@@ -82,6 +82,93 @@ const isWaveLeaderboardSortPreference = (
   value === WaveDropsLeaderboardSort.CREATED_AT ||
   (isCurationWave && value === WaveDropsLeaderboardSort.PRICE);
 
+const stickyLeaderboardControlsClassName =
+  "tw-sticky tw-top-0 tw-z-30 tw-bg-black tw-py-4";
+const staticLeaderboardControlsClassName = "tw-bg-black tw-py-4";
+
+interface LeaderboardControlsFrameProps {
+  readonly isSticky: boolean;
+  readonly children: React.ReactNode;
+}
+
+const LeaderboardControlsFrame: React.FC<LeaderboardControlsFrameProps> = ({
+  isSticky,
+  children,
+}) => (
+  <div
+    className={
+      isSticky
+        ? stickyLeaderboardControlsClassName
+        : staticLeaderboardControlsClassName
+    }
+  >
+    {children}
+  </div>
+);
+
+interface ApproveListStickyLeaderboardControlsProps {
+  readonly rootRef: React.RefObject<HTMLDivElement | null>;
+  readonly children: React.ReactNode;
+}
+
+const ApproveListStickyLeaderboardControls: React.FC<
+  ApproveListStickyLeaderboardControlsProps
+> = ({ rootRef, children }) => {
+  const [isSticky, setIsSticky] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = rootRef.current;
+    const sentinel = sentinelRef.current;
+
+    if (!container || !sentinel) {
+      return;
+    }
+
+    if (typeof globalThis.IntersectionObserver === "undefined") {
+      return;
+    }
+
+    const observer = new globalThis.IntersectionObserver(
+      ([entry]) => {
+        if (!entry) {
+          return;
+        }
+
+        const rootTop =
+          entry.rootBounds?.top ?? container.getBoundingClientRect().top;
+        const hasScrolledPastSentinel =
+          !entry.isIntersecting && entry.boundingClientRect.bottom <= rootTop;
+
+        setIsSticky((current) =>
+          current === hasScrolledPastSentinel
+            ? current
+            : hasScrolledPastSentinel
+        );
+      },
+      { root: container, threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [rootRef]);
+
+  return (
+    <>
+      <div
+        ref={sentinelRef}
+        aria-hidden="true"
+        data-testid="approval-controls-sticky-sentinel"
+        className="tw-h-px tw-w-full tw-flex-none"
+      />
+      <LeaderboardControlsFrame isSticky={isSticky}>
+        {children}
+      </LeaderboardControlsFrame>
+    </>
+  );
+};
+
 const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
   wave,
   viewMode,
@@ -152,6 +239,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const leaderboardContainerRef = useRef<HTMLDivElement | null>(null);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const {
     isApproveWave,
@@ -434,9 +522,33 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     return viewMode;
   }, [isMemesWave, viewMode]);
   const createDropAction = canOpenCreateDrop ? onCreateDrop : undefined;
+  const shouldDelayApprovalControlsSticky =
+    isApproveWave && effectiveViewMode === "list";
+  const leaderboardControls = (
+    <WaveLeaderboardHeader
+      wave={wave}
+      viewMode={effectiveViewMode}
+      sort={effectiveSort}
+      onViewModeChange={(mode) => setViewMode(mode)}
+      onCreateDrop={createDropAction}
+      onSortChange={handleSortChange}
+      curationGroups={curationGroups}
+      curatedByGroupId={curatedByGroupId ?? null}
+      onCurationGroupChange={
+        curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
+      }
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+      onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
+    />
+  );
 
   return (
-    <div className={containerClassName} style={leaderboardViewStyle}>
+    <div
+      ref={leaderboardContainerRef}
+      className={containerClassName}
+      style={leaderboardViewStyle}
+    >
       {isApproveWave ? (
         <WaveApprovalStatusBar
           approvedCount={approvedCount}
@@ -450,24 +562,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       )}
 
       {/* Sticky tabs/filters section */}
-      <div className="tw-sticky tw-top-0 tw-z-30 tw-bg-black tw-py-4">
-        <WaveLeaderboardHeader
-          wave={wave}
-          viewMode={effectiveViewMode}
-          sort={effectiveSort}
-          onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={createDropAction}
-          onSortChange={handleSortChange}
-          curationGroups={curationGroups}
-          curatedByGroupId={curatedByGroupId ?? null}
-          onCurationGroupChange={
-            curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
-          }
-          minPrice={minPrice}
-          maxPrice={maxPrice}
-          onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
-        />
-      </div>
+      {shouldDelayApprovalControlsSticky ? (
+        <ApproveListStickyLeaderboardControls
+          key={`${wave.id}:list`}
+          rootRef={leaderboardContainerRef}
+        >
+          {leaderboardControls}
+        </ApproveListStickyLeaderboardControls>
+      ) : (
+        <LeaderboardControlsFrame isSticky>
+          {leaderboardControls}
+        </LeaderboardControlsFrame>
+      )}
 
       {/* Content section */}
       <div className="tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">

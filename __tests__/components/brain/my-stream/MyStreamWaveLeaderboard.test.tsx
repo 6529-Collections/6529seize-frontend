@@ -20,6 +20,36 @@ let gridProps: any;
 let createDropProps: any[] = [];
 let curationModalProps: any;
 let approvalStatusProps: any;
+let intersectionObserverInstances: Array<{
+  readonly callback: IntersectionObserverCallback;
+  readonly options: IntersectionObserverInit;
+  readonly observe: jest.Mock;
+  readonly disconnect: jest.Mock;
+}> = [];
+const originalIntersectionObserver = (global as any).IntersectionObserver;
+
+const installMockIntersectionObserver = () => {
+  (global as any).IntersectionObserver = class {
+    public readonly observe = jest.fn();
+    public readonly disconnect = jest.fn();
+
+    constructor(
+      public readonly callback: IntersectionObserverCallback,
+      public readonly options: IntersectionObserverInit
+    ) {
+      intersectionObserverInstances.push(this);
+    }
+  };
+};
+
+const resetIntersectionObserver = () => {
+  if (originalIntersectionObserver) {
+    (global as any).IntersectionObserver = originalIntersectionObserver;
+    return;
+  }
+
+  delete (global as any).IntersectionObserver;
+};
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -135,6 +165,18 @@ const wave = {
   wave: { type: ApiWaveType.Rank },
 } as ApiWave;
 
+const makeOpenApproveWave = (): ApiWave =>
+  ({
+    ...wave,
+    voting: { period: { max: Date.now() + 60_000 } },
+    wave: {
+      type: ApiWaveType.Approve,
+      winning_threshold: 10,
+      max_winners: 1,
+      no_of_decisions_done: 0,
+    },
+  }) as ApiWave;
+
 const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   render(
     <AuthContext.Provider
@@ -150,8 +192,14 @@ const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   );
 
 describe("MyStreamWaveLeaderboard", () => {
+  afterAll(() => {
+    resetIntersectionObserver();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    intersectionObserverInstances = [];
+    resetIntersectionObserver();
     searchParamsString = "";
     dropsProps = null;
     galleryProps = null;
@@ -212,6 +260,121 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(
       createDropProps[createDropProps.length - 1]?.isCurationLeaderboard
     ).toBeUndefined();
+  });
+
+  it("keeps approve list controls non-sticky before the status sentinel leaves", () => {
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(makeOpenApproveWave());
+
+    expect(
+      screen.getByTestId("approval-controls-sticky-sentinel")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("header").parentElement).not.toHaveClass(
+      "tw-sticky"
+    );
+  });
+
+  it("toggles approve list controls sticky state when the status sentinel moves", () => {
+    installMockIntersectionObserver();
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(makeOpenApproveWave());
+
+    const sentinel = screen.getByTestId("approval-controls-sticky-sentinel");
+    const controls = screen.getByTestId("header").parentElement;
+    const observer = intersectionObserverInstances[0];
+
+    expect(observer?.options.root).toBe(sentinel.parentElement);
+    expect(observer?.observe).toHaveBeenCalledWith(sentinel);
+    expect(controls).not.toHaveClass("tw-sticky");
+
+    act(() => {
+      observer?.callback(
+        [
+          {
+            isIntersecting: false,
+            boundingClientRect: { top: -2, bottom: -1 } as DOMRectReadOnly,
+            rootBounds: { top: 0 } as DOMRectReadOnly,
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver
+      );
+    });
+
+    expect(controls).toHaveClass("tw-sticky");
+    expect(controls).toHaveClass("tw-z-30");
+
+    act(() => {
+      observer?.callback(
+        [
+          {
+            isIntersecting: true,
+            boundingClientRect: { top: 0, bottom: 1 } as DOMRectReadOnly,
+            rootBounds: { top: 0 } as DOMRectReadOnly,
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver
+      );
+    });
+
+    expect(controls).not.toHaveClass("tw-sticky");
+  });
+
+  it("keeps approve grid controls sticky", () => {
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["grid", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(makeOpenApproveWave());
+
+    expect(
+      screen.queryByTestId("approval-controls-sticky-sentinel")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("header").parentElement).toHaveClass("tw-sticky");
   });
 
   it("uses rank for saved projected vote sort when the wave has no time lock", () => {
