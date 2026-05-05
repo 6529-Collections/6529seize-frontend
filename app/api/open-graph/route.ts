@@ -28,6 +28,8 @@ const CACHE_MAX_ITEMS = 500;
 const FETCH_TIMEOUT_MS = 8000;
 const USER_AGENT = LINK_PREVIEW_USER_AGENT;
 const MAX_REDIRECTS = 5;
+const BATCH_CONCURRENCY = 5;
+const MAX_BATCH_URLS = BATCH_CONCURRENCY;
 
 const HTML_FETCH_HEADERS = {
   accept: HTML_ACCEPT_HEADER,
@@ -149,6 +151,9 @@ const isUrlGuardError = (error: unknown): error is UrlGuardError =>
   (typeof error === "object" &&
     error !== null &&
     (error as { name?: string | undefined }).name === "UrlGuardError");
+
+const isEnsPreviewError = (error: unknown): error is EnsPreviewError =>
+  typeof EnsPreviewError === "function" && error instanceof EnsPreviewError;
 type FetchInput = Parameters<typeof fetch>[0];
 
 const isRequestLike = (value: unknown): value is { url: string } => {
@@ -305,6 +310,30 @@ function handleGuardError(error: unknown, fallbackStatus = 400) {
   return NextResponse.json({ error: message }, { status: fallbackStatus });
 }
 
+function getErrorMessage(
+  error: unknown,
+  fallbackMessage = "Invalid or forbidden URL"
+): string {
+  return error instanceof Error ? error.message : fallbackMessage;
+}
+
+function handlePreviewError(error: unknown) {
+  if (isEnsPreviewError(error)) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.status }
+    );
+  }
+
+  if (isUrlGuardError(error)) {
+    return handleGuardError(error, 502);
+  }
+
+  const message =
+    error instanceof Error ? error.message : "Unable to fetch URL";
+  return NextResponse.json({ error: message }, { status: 502 });
+}
+
 function createGenericPlan(url: URL): PreviewPlan {
   return {
     cacheKey: `generic:${url.toString()}`,
@@ -325,40 +354,16 @@ function createGenericPlan(url: URL): PreviewPlan {
   };
 }
 
-export async function GET(request: NextRequest) {
-  const rawUrl = request.nextUrl.searchParams.get("url");
-
+async function resolveLinkPreview(
+  rawUrl: string | null
+): Promise<LinkPreviewResponse> {
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
-    try {
-      const preview = await fetchEnsPreview(ensTarget);
-      return NextResponse.json(preview);
-    } catch (error) {
-      if (error instanceof EnsPreviewError) {
-        return NextResponse.json(
-          { error: error.message },
-          { status: error.status }
-        );
-      }
-      const message =
-        error instanceof Error ? error.message : "Failed to fetch ENS preview";
-      return NextResponse.json({ error: message }, { status: 502 });
-    }
+    return fetchEnsPreview(ensTarget) as Promise<LinkPreviewResponse>;
   }
 
-  let targetUrl: URL;
-
-  try {
-    targetUrl = parsePublicUrl(rawUrl);
-  } catch (error) {
-    return handleGuardError(error);
-  }
-
-  try {
-    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
-  } catch (error) {
-    return handleGuardError(error);
-  }
+  const targetUrl = parsePublicUrl(rawUrl);
+  await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
 
   const manifoldPlan = createManifoldPlan(targetUrl, {
     fetchHtml,
@@ -387,26 +392,126 @@ export async function GET(request: NextRequest) {
   const cached = cache.get(plan.cacheKey);
 
   if (cached) {
-    return NextResponse.json(cached);
+    return cached;
   }
+
+  const { data, ttl } = await plan.execute();
+  cache.set(plan.cacheKey, data, ttl);
+
+  return data;
+}
+
+export async function GET(request: NextRequest) {
+  const rawUrl = request.nextUrl.searchParams.get("url");
 
   try {
-    const { data, ttl } = await plan.execute();
-    cache.set(plan.cacheKey, data, ttl);
-
-    return NextResponse.json(data);
+    const preview = await resolveLinkPreview(rawUrl);
+    return NextResponse.json(preview);
   } catch (error) {
-    if (isUrlGuardError(error)) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode }
-      );
-    }
-
-    const message =
-      error instanceof Error ? error.message : "Unable to fetch URL";
-    return NextResponse.json({ error: message }, { status: 502 });
+    return handlePreviewError(error);
   }
+}
+
+type BatchResult = {
+  readonly url: string;
+  readonly data?: LinkPreviewResponse | undefined;
+  readonly error?: string | undefined;
+};
+
+function isOpenGraphBatchBody(value: unknown): value is {
+  readonly urls: readonly string[];
+} {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const { urls } = value as { urls?: unknown };
+  return Array.isArray(urls) && urls.every((url) => typeof url === "string");
+}
+
+function normalizeBatchUrls(urls: readonly string[]): readonly string[] {
+  return Array.from(new Set(urls.map((url) => url.trim())));
+}
+
+async function mapWithConcurrency<T, R>(
+  items: readonly T[],
+  concurrency: number,
+  mapper: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+
+  const worker = async (): Promise<void> => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex]!);
+    }
+  };
+
+  const workerCount = Math.min(concurrency, items.length);
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      await worker();
+    })
+  );
+
+  return results;
+}
+
+async function resolveBatchUrl(url: string): Promise<BatchResult> {
+  try {
+    const data = await resolveLinkPreview(url);
+    return { url, data };
+  } catch (error) {
+    return { url, error: getErrorMessage(error) };
+  }
+}
+
+export async function POST(request: NextRequest) {
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid open graph batch request body." },
+      { status: 400 }
+    );
+  }
+
+  if (!isOpenGraphBatchBody(body)) {
+    return NextResponse.json(
+      { error: "A urls array is required." },
+      { status: 400 }
+    );
+  }
+
+  const urls = normalizeBatchUrls(body.urls);
+  if (urls.length > MAX_BATCH_URLS) {
+    return NextResponse.json(
+      { error: `A maximum of ${MAX_BATCH_URLS} urls can be requested.` },
+      { status: 400 }
+    );
+  }
+
+  const batchResults = await mapWithConcurrency(
+    urls,
+    BATCH_CONCURRENCY,
+    resolveBatchUrl
+  );
+  const results: Record<string, LinkPreviewResponse> = {};
+  const errors: Record<string, string> = {};
+
+  for (const result of batchResults) {
+    if (result.data) {
+      results[result.url] = result.data;
+    } else {
+      errors[result.url] = result.error ?? "Invalid or forbidden URL";
+    }
+  }
+
+  return NextResponse.json({ results, errors });
 }
 
 export const dynamic = "force-dynamic";

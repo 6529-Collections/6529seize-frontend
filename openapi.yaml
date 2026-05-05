@@ -1431,7 +1431,7 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            maximum: 200
+            maximum: 2000
         - name: sort_direction
           in: query
           description: Default is DESC (newest bookmarks first)
@@ -1996,6 +1996,300 @@ paths:
                 $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
         "400":
           description: Invalid request
+  /v2/boosted-drops:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 boosted drops.
+      operationId: getBoostedDropsV2
+      parameters:
+        - name: author
+          in: query
+          description: Drops by author
+          required: false
+          schema:
+            type: string
+        - name: booster
+          in: query
+          description: Drops boosted by given identity
+          required: false
+          schema:
+            type: string
+        - name: wave_id
+          in: query
+          description: Drops by wave
+          required: false
+          schema:
+            type: string
+        - name: min_boosts
+          in: query
+          description: Must be boosted at least so many times
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          description: Default is last_boosted_at
+          required: false
+          schema:
+            type: string
+            enum:
+              - last_boosted_at
+              - first_boosted_at
+              - drop_created_at
+              - boosts
+        - name: count_only_boosts_after
+          in: query
+          description: Timestamp in millis
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2Page"
+  /v2/drops/{id}:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop by ID.
+      operationId: getDropV2ById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropAndWave"
+        "404":
+          description: Drop not found
+  /v2/drops/{id}/metadata:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop metadata by drop ID.
+      operationId: getDropV2MetadataById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDropMetadataV2"
+        "404":
+          description: Drop not found
+  /v2/drops/{id}/parts/{part_no}:
+    get:
+      tags:
+        - DropsV2
+      summary: Get a single V2 drop part by drop ID and part number.
+      operationId: getDropV2PartById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: part_no
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropPartV2"
+        "400":
+          description: Invalid request
+        "404":
+          description: Drop or drop part not found
+  /v2/drops/{id}/boosts:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop boosts by drop ID.
+      operationId: getDropV2BoostsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDropBoostV2"
+        "404":
+          description: Drop not found
+  /v2/drops/{id}/reactions:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop reactions by drop ID.
+      operationId: getDropV2ReactionsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDropReactionV2"
+        "404":
+          description: Drop not found
+  /v2/drops/{id}/votes:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop voters by drop ID.
+      operationId: getDropV2VotersById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+            default: DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropVotersPage"
+        "400":
+          description: Invalid request
+        "404":
+          description: Drop not found
+  /v2/drops/{id}/votes/logs:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop vote edit logs by drop ID.
+      operationId: getDropV2VoteEditLogsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+            default: DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDropVoteEditLog"
+        "400":
+          description: Invalid request
+        "404":
+          description: Drop not found
   /feed:
     get:
       tags:
@@ -3201,6 +3495,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveNotificationPreferences"
+  /v2/notifications:
+    get:
+      tags:
+        - NotificationsV2
+      summary: Get V2 notifications for authenticated user.
+      operationId: getNotificationsV2
+      parameters:
+        - name: limit
+          in: query
+          description: Default is 10
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: id_less_than
+          in: query
+          description: Used to find older notifications
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: cause
+          in: query
+          description: Comma-separated list of notification causes to include
+          required: false
+          schema:
+            type: string
+        - name: cause_exclude
+          in: query
+          description: Comma-separated list of notification causes to exclude
+          required: false
+          schema:
+            type: string
+        - name: unread_only
+          in: query
+          description: Only return unread notifications
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiNotificationsResponseV2"
   /blocks:
     get:
       tags:
@@ -5897,7 +6239,6 @@ paths:
         - name: serial_no_less_than
           in: query
           required: false
-          deprecated: true
           schema:
             type: integer
             format: int64
@@ -6476,6 +6817,412 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveSubscriptionActions"
+        "404":
+          description: Wave not found
+  /v2/waves:
+    get:
+      tags:
+        - WavesV2
+      summary: Get V2 waves
+      description: >-
+        Returns a paginated list of wave overviews. Use view=SEARCH for the
+        regular waves search, view=OVERVIEW for overview rankings, view=HOT for
+        hot waves, and view=FAVOURITES for waves where an identity has written
+        the most messages.
+      operationId: getWavesV2
+      parameters:
+        - name: view
+          in: query
+          description: Defaults to SEARCH
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiWavesV2ListType"
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: >-
+            Number of waves to return. Per-view defaults and maximums match the
+            legacy endpoints.
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: name
+          in: query
+          description: SEARCH view only. Search by name or part of name.
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: SEARCH view only. Search by author identity.
+          required: false
+          schema:
+            type: string
+        - name: serial_no_less_than
+          in: query
+          description: SEARCH view only. Restricts search to older waves.
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: group_id
+          in: query
+          description: SEARCH view only. Waves by authors that fall into supplied group.
+          required: false
+          schema:
+            type: string
+        - name: direct_message
+          in: query
+          description: >-
+            SEARCH and OVERVIEW views only. Use true for DM waves, false for
+            non-DM waves, omit for all.
+          required: false
+          schema:
+            type: boolean
+        - name: overview_type
+          in: query
+          description: OVERVIEW view only. Type of overview.
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiWavesOverviewType"
+        - name: only_waves_followed_by_authenticated_user
+          in: query
+          description: >-
+            OVERVIEW view only. If true then result only includes waves that the
+            authenticated user follows.
+          required: false
+          schema:
+            type: boolean
+        - name: pinned
+          in: query
+          description: OVERVIEW view only. Filter only PINNED or NOT_PINNED waves.
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiWavesPinFilter"
+        - name: exclude_followed
+          in: query
+          description: >-
+            HOT view only. If true then result excludes waves the authenticated
+            user already follows.
+          required: false
+          schema:
+            type: boolean
+        - name: identity
+          in: query
+          description: FAVOURITES view only. Profile id, wallet, ENS, or handle to resolve.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveOverviewPage"
+        "400":
+          description: Invalid request
+  /v2/waves/{id}/drops:
+    get:
+      tags:
+        - WavesV2
+      summary: Get V2 drops related to wave
+      operationId: getWaveDropsV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 200
+            default: 20
+        - name: serial_no_limit
+          in: query
+          required: false
+          description: Serial number anchor for paginating drops.
+          schema:
+            type: integer
+            format: int64
+        - name: search_strategy
+          in: query
+          required: false
+          description: >-
+            Use in combination with serial_no_limit. If this is not set then
+            FIND_OLDER is used.
+          schema:
+            $ref: "#/components/schemas/ApiDropSearchStrategy"
+        - name: drop_type
+          in: query
+          description: Filter by drop type
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiDropType"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveDropsFeedV2"
+  /v2/waves/{id}/curations/{curation_id}/drops:
+    get:
+      tags:
+        - WavesV2
+      summary: List V2 drops in a curation for wave
+      operationId: listWaveCurationDropsV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: curation_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+        "404":
+          description: Wave or curation not found
+  /v2/waves/{id}/decisions:
+    get:
+      tags:
+        - WavesV2
+      summary: Get already decided V2 wave decision outcomes
+      operationId: getWaveDecisionsV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - decision_time
+            default: decision_time
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveDecisionsPageV2"
+        "404":
+          description: Wave not found
+  /v2/waves/{id}/leaderboard:
+    get:
+      tags:
+        - WavesV2
+      summary: Get V2 waves leaderboard
+      operationId: getWaveLeaderboardV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+        - name: sort_direction
+          in: query
+          description: Default is ASC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          description: Default is rank
+          required: false
+          schema:
+            type: string
+            enum:
+              - RANK
+              - REALTIME_VOTE
+              - MY_REALTIME_VOTE
+              - CREATED_AT
+              - PRICE
+              - RATING_PREDICTION
+              - TREND
+        - name: price_currency
+          in: query
+          description: >-
+            Optional currency used for min_price/max_price filtering and PRICE
+            sorting
+          required: false
+          schema:
+            type: string
+        - name: min_price
+          in: query
+          description: Optional minimum price filter applied to leaderboard results
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: max_price
+          in: query
+          description: Optional maximum price filter applied to leaderboard results
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: curation_id
+          in: query
+          description: >-
+            Only include drops with persisted membership in the curation
+            identified by ApiWaveCuration.id (UUID string)
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: unvoted_by_me
+          in: query
+          description: >-
+            When true, only returns drops the authenticated user has not voted
+            on or currently has a 0 vote on
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropsLeaderboardPageV2"
+  /v2/waves/{waveId}/search:
+    get:
+      tags:
+        - WavesV2
+      summary: Search for V2 drops in wave by content
+      operationId: searchDropsInWaveV2
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: term
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            maximum: 100
+            minimum: 1
+            default: 20
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
         "404":
           description: Wave not found
   /xtdh/stats:
@@ -8856,6 +9603,16 @@ components:
           $ref: "#/components/schemas/ApiDrop"
         vote:
           $ref: "#/components/schemas/ApiDropVote"
+    ApiDropAndWave:
+      type: object
+      required:
+        - drop
+        - wave
+      properties:
+        drop:
+          $ref: "#/components/schemas/ApiDropV2"
+        wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
     ApiDropAttachmentReference:
       type: object
       additionalProperties: false
@@ -8887,6 +9644,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropBoost"
+    ApiDropBoostV2:
+      type: object
+      required:
+        - booster
+        - boosted_at
+      properties:
+        booster:
+          $ref: "#/components/schemas/ApiIdentityOverview"
+        boosted_at:
+          type: integer
+          format: int64
     ApiDropContextProfileContext:
       type: object
       required:
@@ -8963,6 +9731,11 @@ components:
         serial_no:
           type: integer
           format: int64
+    ApiDropMainType:
+      type: string
+      enum:
+        - CHAT
+        - SUBMISSION
     ApiDropMedia:
       type: object
       required:
@@ -9019,6 +9792,20 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiDropResolvedIdentityProfile"
+    ApiDropMetadataV2:
+      type: object
+      required:
+        - data_key
+        - data_value
+      properties:
+        data_key:
+          type: string
+          maxLength: 500
+        data_value:
+          type: string
+          maxLength: 5000
+        resolved_profile:
+          $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
     ApiDropNftLink:
       type: object
       required:
@@ -9061,6 +9848,39 @@ components:
           anyOf:
             - $ref: "#/components/schemas/ApiQuotedDropResponse"
             - type: "null"
+    ApiDropPartQuoteV2:
+      type: object
+      required:
+        - drop_id
+        - drop_part_id
+      properties:
+        drop_id:
+          type: string
+        drop_part_id:
+          type: integer
+          format: int64
+    ApiDropPartV2:
+      type: object
+      required:
+        - part_no
+      properties:
+        part_no:
+          type: integer
+          format: int64
+          minimum: 1
+        content:
+          type: string
+          maxLength: 25000
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMedia"
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAttachment"
+        quoted_drop:
+          $ref: "#/components/schemas/ApiDropPartQuoteV2"
     ApiDropRater:
       type: object
       required:
@@ -9096,6 +9916,29 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiProfileMin"
+    ApiDropReactionCounter:
+      type: object
+      required:
+        - reaction
+        - count
+      properties:
+        reaction:
+          type: string
+        count:
+          type: integer
+          format: int64
+    ApiDropReactionV2:
+      type: object
+      required:
+        - reaction
+        - reactors
+      properties:
+        reaction:
+          type: string
+        reactors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiIdentityOverview"
     ApiDropReferencedNFT:
       type: object
       required:
@@ -9127,6 +9970,17 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ApiProfileRepCategorySummary"
+    ApiDropResolvedIdentityProfileV2:
+      allOf:
+        - $ref: "#/components/schemas/ApiIdentityOverview"
+        - type: object
+          properties:
+            bio:
+              type: string
+            top_rep_categories:
+              type: array
+              items:
+                $ref: "#/components/schemas/ApiProfileRepCategorySummary"
     ApiDropSearchStrategy:
       type: string
       enum:
@@ -9145,6 +9999,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropWithoutWave"
+        wave:
+          $ref: "#/components/schemas/ApiWaveMin"
+    ApiDropsLeaderboardPageV2:
+      type: object
+      required:
+        - drops
+        - wave
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropV2"
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
     ApiDropsPage:
@@ -9188,6 +10056,123 @@ components:
         - CHAT
         - PARTICIPATORY
         - WINNER
+    ApiDropV2:
+      type: object
+      required:
+        - id
+        - serial_no
+        - is_signed
+        - parts_count
+        - author
+        - created_at
+        - boosts
+        - drop_type
+        - hide_link_preview
+      properties:
+        id:
+          type: string
+        serial_no:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+        updated_at:
+          type: integer
+          format: int64
+        is_signed:
+          type: boolean
+        hide_link_preview:
+          type: boolean
+        title:
+          type: string
+        content:
+          type: string
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMedia"
+        attachments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAttachment"
+        parts_count:
+          type: integer
+          format: int64
+        author:
+          $ref: "#/components/schemas/ApiIdentityOverview"
+        drop_type:
+          $ref: "#/components/schemas/ApiDropMainType"
+        referenced_nfts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropReferencedNFT"
+        mentioned_users:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMentionedUser"
+        mentioned_groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropGroupMention"
+        mentioned_waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMentionedWaveV2"
+        nft_links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropNftLink"
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropReactionCounter"
+        boosts:
+          type: integer
+          format: int64
+        reply_to_drop:
+          $ref: "#/components/schemas/ApiReplyToDropV2"
+        submission_context:
+          $ref: "#/components/schemas/ApiSubmissionDropContext"
+        context_profile_context:
+          $ref: "#/components/schemas/ApiDropV2ContextProfileContext"
+    ApiDropV2ContextProfileContext:
+      type: object
+      required:
+        - boosted
+        - bookmarked
+        - subscribed
+      properties:
+        reaction:
+          type: string
+        boosted:
+          type: boolean
+        bookmarked:
+          type: boolean
+        subscribed:
+          type: boolean
+    ApiDropV2Page:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropV2"
+    ApiDropV2PageWithoutCount:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropV2"
     ApiDropVote:
       type: object
       required:
@@ -9203,6 +10188,50 @@ components:
         time:
           type: number
           format: int64
+    ApiDropVoteEditLog:
+      type: object
+      required:
+        - id
+        - old_vote
+        - new_vote
+        - created_at
+        - voter
+      properties:
+        id:
+          type: string
+        old_vote:
+          type: number
+          format: int64
+        new_vote:
+          type: number
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+        voter:
+          $ref: "#/components/schemas/ApiIdentityOverview"
+    ApiDropVoter:
+      type: object
+      required:
+        - voter
+        - vote
+      properties:
+        voter:
+          $ref: "#/components/schemas/ApiIdentityOverview"
+        vote:
+          type: number
+          format: int64
+    ApiDropVotersPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropVoter"
     ApiDropWinningContext:
       type: object
       required:
@@ -9740,6 +10769,53 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+    ApiIdentityOverview:
+      type: object
+      required:
+        - id
+        - primary_address
+        - level
+        - classification
+        - badges
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        primary_address:
+          type: string
+        pfp:
+          type: string
+        level:
+          type: integer
+          format: int64
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        context_profile_context:
+          $ref: "#/components/schemas/ApiIdentityOverviewContextProfileContext"
+        badges:
+          $ref: "#/components/schemas/ApiIdentityOverviewBadges"
+    ApiIdentityOverviewBadges:
+      type: object
+      required:
+        - artist_of_main_stage_submissions
+        - artist_of_memes
+      properties:
+        artist_of_main_stage_submissions:
+          type: integer
+          format: int64
+        artist_of_memes:
+          type: integer
+          format: int64
+        profile_wave_id:
+          type: string
+    ApiIdentityOverviewContextProfileContext:
+      type: object
+      required:
+        - subscribed
+      properties:
+        subscribed:
+          type: boolean
     ApiIdentitySubscriptionActions:
       type: object
       required:
@@ -10036,6 +11112,20 @@ components:
           type: string
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
+    ApiMentionedWaveV2:
+      type: object
+      required:
+        - id
+        - in_content
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        pfp:
+          type: string
+        in_content:
+          type: string
     ApiMintingClaimAction:
       type: object
       required:
@@ -10530,6 +11620,49 @@ components:
             $ref: "#/components/schemas/ApiDrop"
         additional_context:
           type: object
+    ApiNotificationAdditionalContextV2:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+        total:
+          type: number
+          format: double
+        category:
+          type: string
+        vote:
+          type: number
+          format: double
+        reaction:
+          type: string
+        reactors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiNotificationDropReactedReactor"
+        quote_drop_id:
+          type: string
+        quote_drop_part:
+          type: number
+          format: int64
+        quoted_drop_id:
+          type: string
+        quoted_drop_part:
+          type: number
+          format: int64
+        reply_drop_id:
+          type: string
+        replied_drop_id:
+          type: string
+        replied_drop_part:
+          type: number
+          format: int64
+        wave_id:
+          type: string
+      description: >-
+        Notification-specific additional context. For DROP_REACTED notifications
+        this includes reaction and reactors, where each reactor only has handle
+        and pfp.
     ApiNotificationCause:
       type: string
       enum:
@@ -10545,6 +11678,13 @@ components:
         - WAVE_CREATED
         - ALL_DROPS
         - PRIORITY_ALERT
+    ApiNotificationDropReactedReactor:
+      type: object
+      properties:
+        handle:
+          type: string
+        pfp:
+          type: string
     ApiNotificationsResponse:
       type: object
       required:
@@ -10558,6 +11698,50 @@ components:
         unread_count:
           type: number
           format: int64
+    ApiNotificationsResponseV2:
+      type: object
+      required:
+        - notifications
+        - unread_count
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiNotificationV2"
+        unread_count:
+          type: number
+          format: int64
+    ApiNotificationV2:
+      type: object
+      required:
+        - id
+        - cause
+        - created_at
+        - read_at
+        - related_identity
+        - related_drops
+        - additional_context
+      properties:
+        id:
+          type: number
+          format: int64
+        cause:
+          $ref: "#/components/schemas/ApiNotificationCause"
+        created_at:
+          type: number
+          format: int64
+        read_at:
+          type: number
+          format: int64
+          nullable: true
+        related_identity:
+          $ref: "#/components/schemas/ApiIdentityOverview"
+        related_drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropV2"
+        additional_context:
+          $ref: "#/components/schemas/ApiNotificationAdditionalContextV2"
     ApiOutgoingIdentitySubscriptionsPage:
       type: object
       required:
@@ -11321,6 +12505,16 @@ components:
         drop_part_id:
           type: number
           format: int64
+    ApiReplyToDropAuthor:
+      type: object
+      required:
+        - handle
+        - pfp
+      properties:
+        handle:
+          type: string
+        pfp:
+          type: string
     ApiReplyToDropResponse:
       type: object
       required:
@@ -11337,6 +12531,20 @@ components:
           type: boolean
         drop:
           $ref: "#/components/schemas/ApiDropWithoutWave"
+    ApiReplyToDropV2:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        serial_no:
+          type: integer
+          format: int64
+        content:
+          type: string
+        author:
+          $ref: "#/components/schemas/ApiReplyToDropAuthor"
     ApiRepOverview:
       type: object
       required:
@@ -11433,6 +12641,72 @@ components:
           type: string
         key:
           type: string
+    ApiSubmissionDropContext:
+      type: object
+      required:
+        - status
+        - voting
+        - has_metadata
+      properties:
+        status:
+          $ref: "#/components/schemas/ApiSubmissionDropStatus"
+        voting:
+          $ref: "#/components/schemas/ApiSubmissionDropVoting"
+        has_metadata:
+          type: boolean
+    ApiSubmissionDropStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - WINNER
+    ApiSubmissionDropVoting:
+      type: object
+      required:
+        - is_open
+        - total_votes_given
+        - current_calculated_vote
+        - predicted_final_vote
+        - voters_count
+        - place
+      properties:
+        is_open:
+          type: boolean
+        context_profile_context:
+          $ref: "#/components/schemas/ApiSubmissionDropVotingContextProfileContext"
+        total_votes_given:
+          type: integer
+          format: int64
+        current_calculated_vote:
+          type: integer
+          format: int64
+        predicted_final_vote:
+          type: integer
+          format: int64
+        voters_count:
+          type: integer
+          format: int64
+        place:
+          type: integer
+          format: int64
+    ApiSubmissionDropVotingContextProfileContext:
+      type: object
+      required:
+        - can_vote
+        - min
+        - max
+        - current
+      properties:
+        can_vote:
+          type: boolean
+        min:
+          type: integer
+          format: int64
+        max:
+          type: integer
+          format: int64
+        current:
+          type: integer
+          format: int64
     ApiTargetAndSubscriptionActions:
       type: object
       required:
@@ -12162,6 +13436,17 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveDecision"
+    ApiWaveDecisionsPageV2:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionV2"
     ApiWaveDecisionsStrategy:
       type: object
       required:
@@ -12195,6 +13480,19 @@ components:
             decisions (see description of subsequent_decisions). Also if true
             then there needs to be at least one element in subsequent_decisions
             array.
+    ApiWaveDecisionV2:
+      type: object
+      required:
+        - decision_time
+        - winners
+      properties:
+        decision_time:
+          type: integer
+          format: int62
+        winners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionWinnerV2"
     ApiWaveDecisionWinner:
       type: object
       required:
@@ -12211,6 +13509,22 @@ components:
             $ref: "#/components/schemas/ApiWaveDecisionAward"
         drop:
           $ref: "#/components/schemas/ApiDrop"
+    ApiWaveDecisionWinnerV2:
+      type: object
+      required:
+        - place
+        - awards
+        - drop
+      properties:
+        place:
+          type: integer
+          format: int64
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionAward"
+        drop:
+          $ref: "#/components/schemas/ApiDropV2"
     ApiWaveDropsFeed:
       type: object
       required:
@@ -12225,6 +13539,24 @@ components:
             $ref: "#/components/schemas/ApiDropWithoutWave"
         root_drop:
           $ref: "#/components/schemas/ApiDropWithoutWave"
+        trace:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropTraceItem"
+    ApiWaveDropsFeedV2:
+      type: object
+      required:
+        - wave
+        - drops
+      properties:
+        wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
+        drops:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropV2"
+        root_drop:
+          $ref: "#/components/schemas/ApiDropV2"
         trace:
           type: array
           items:
@@ -12482,6 +13814,69 @@ components:
       enum:
         - AUTOMATIC
         - MANUAL
+    ApiWaveOverview:
+      type: object
+      required:
+        - id
+        - name
+        - last_drop_time
+        - created_at
+        - subscribers_count
+        - has_competition
+        - is_dm_wave
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        pfp:
+          type: string
+        last_drop_time:
+          type: integer
+          format: int64
+        created_at:
+          type: integer
+          format: int64
+        subscribers_count:
+          type: integer
+          format: int64
+        has_competition:
+          type: boolean
+        is_dm_wave:
+          type: boolean
+        context_profile_context:
+          $ref: "#/components/schemas/ApiWaveOverviewContextProfileContext"
+    ApiWaveOverviewContextProfileContext:
+      type: object
+      required:
+        - subscribed
+        - pinned
+        - can_chat
+        - unread_drops
+        - muted
+      properties:
+        subscribed:
+          type: boolean
+        pinned:
+          type: boolean
+        can_chat:
+          type: boolean
+        unread_drops:
+          type: integer
+          format: int64
+        muted:
+          type: boolean
+    ApiWaveOverviewPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverview"
     ApiWaveParticipationConfig:
       type: object
       required:
@@ -12618,6 +14013,13 @@ components:
       type: string
       enum:
         - DROP_CREATED
+    ApiWavesV2ListType:
+      type: string
+      enum:
+        - SEARCH
+        - OVERVIEW
+        - HOT
+        - FAVOURITES
     ApiWaveType:
       type: string
       enum:
