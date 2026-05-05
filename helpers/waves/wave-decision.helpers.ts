@@ -43,7 +43,7 @@ export const getRenderableWaveDecisionWinners = (
 export const getApprovedWaveDecisionWinners = (
   decisionPoints: readonly ApiWaveDecision[]
 ): ApiWaveDecisionWinner[] =>
-  decisionPoints.flatMap((point) => point.winners).reverse();
+  [...decisionPoints].reverse().flatMap((point) => point.winners);
 
 export const prepareWaveDecisionPoint = (
   decisionPoint: ApiWaveDecision,
