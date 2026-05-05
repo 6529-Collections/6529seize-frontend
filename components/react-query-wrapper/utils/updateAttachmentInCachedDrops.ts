@@ -74,13 +74,16 @@ function isMatchingAttachment(
 function replaceAttachment(value: unknown, attachment: ApiAttachment): unknown {
   if (Array.isArray(value)) {
     let changed = false;
-    const next = value.map((item) => {
+    const next: unknown[] = [];
+
+    for (const item of value) {
       const updated = replaceAttachment(item, attachment);
       if (updated !== item) {
         changed = true;
       }
-      return updated;
-    });
+      next.push(updated);
+    }
+
     return changed ? next : value;
   }
 
@@ -112,38 +115,32 @@ function isMatchingDrop(
   return value["id"] === dropId;
 }
 
-function replaceDrop(value: unknown, drop: ApiDrop): unknown {
-  if (Array.isArray(value)) {
-    let changed = false;
-    const next = value.map((item) => {
-      const updated = replaceDrop(item, drop);
-      if (updated !== item) {
-        changed = true;
-      }
-      return updated;
-    });
-    return changed ? next : value;
+const CACHED_DROP_DISPLAY_FIELDS = ["type", "stableKey", "stableHash"] as const;
+
+type CachedDropDisplayField = (typeof CACHED_DROP_DISPLAY_FIELDS)[number];
+
+function replaceDropInArray(value: unknown[], drop: ApiDrop): unknown[] {
+  let changed = false;
+  const next: unknown[] = [];
+
+  for (const item of value) {
+    const updated = replaceDrop(item, drop);
+    if (updated !== item) {
+      changed = true;
+    }
+    next.push(updated);
   }
 
-  if (!isRecord(value)) {
-    return value;
-  }
+  return changed ? next : value;
+}
 
-  if (isMatchingDrop(value, drop.id)) {
-    return {
-      ...drop,
-      ...(value["type"] !== undefined && { type: value["type"] }),
-      ...(value["stableKey"] !== undefined && {
-        stableKey: value["stableKey"],
-      }),
-      ...(value["stableHash"] !== undefined && {
-        stableHash: value["stableHash"],
-      }),
-    };
-  }
-
+function replaceDropInObjectChildren(
+  value: Record<string, unknown>,
+  drop: ApiDrop
+): Record<string, unknown> {
   let changed = false;
   const next: Record<string, unknown> = {};
+
   for (const [key, item] of Object.entries(value)) {
     const updated = replaceDrop(item, drop);
     next[key] = updated;
@@ -155,12 +152,45 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
   return changed ? next : value;
 }
 
-function removeProfileFromFailedReaction(
+function buildCachedDropReplacement(
+  cachedDrop: Record<string, unknown>,
+  drop: ApiDrop
+): ApiDrop & Partial<Record<CachedDropDisplayField, unknown>> {
+  const replacement: ApiDrop &
+    Partial<Record<CachedDropDisplayField, unknown>> = { ...drop };
+
+  for (const field of CACHED_DROP_DISPLAY_FIELDS) {
+    const cachedValue = cachedDrop[field];
+    if (cachedValue !== undefined) {
+      replacement[field] = cachedValue;
+    }
+  }
+
+  return replacement;
+}
+
+function replaceDrop(value: unknown, drop: ApiDrop): unknown {
+  if (Array.isArray(value)) {
+    return replaceDropInArray(value, drop);
+  }
+
+  if (!isRecord(value)) {
+    return value;
+  }
+
+  if (isMatchingDrop(value, drop.id)) {
+    return buildCachedDropReplacement(value, drop);
+  }
+
+  return replaceDropInObjectChildren(value, drop);
+}
+
+function removeProfileFromAllReactions(
   reactions: ApiDropReaction[],
   params: RollbackRejectedReactionParams
 ): ApiDropReaction[] {
   const profileId = params.profile?.id ?? null;
-  if (!profileId || params.failedReaction === null) {
+  if (!profileId) {
     return reactions;
   }
 
@@ -168,11 +198,6 @@ function removeProfileFromFailedReaction(
   const nextReactions: ApiDropReaction[] = [];
 
   for (const reaction of reactions) {
-    if (reaction.reaction !== params.failedReaction) {
-      nextReactions.push(reaction);
-      continue;
-    }
-
     const profiles = reaction.profiles.filter(
       (profile) => profile.id !== profileId
     );
@@ -234,7 +259,7 @@ function rollbackRejectedReactionEntries(
   params: RollbackRejectedReactionParams
 ): ApiDropReaction[] {
   return addProfileToPreviousReaction(
-    removeProfileFromFailedReaction(reactions, params),
+    removeProfileFromAllReactions(reactions, params),
     params
   );
 }

@@ -752,6 +752,7 @@ describe("cached drop websocket updates", () => {
     const queryClient = createQueryClient();
     const currentUser = profile("profile-1", "current-user");
     const otherUser = profile("profile-2", "other-user");
+    const staleWaveUser = profile("profile-3", "stale-wave-user");
     const queryKey = [QueryKey.DROPS, { waveId: "wave-1" }];
     const feedQueryKey = [QueryKey.FEED_ITEMS, { page: 1 }];
     const dropQueryKey = [QueryKey.DROP, { drop_id: "drop-rejected-add" }];
@@ -765,7 +766,11 @@ describe("cached drop websocket updates", () => {
         ...contextProfileContext(":joy:"),
         rating: 7,
       },
-      reactions: [reactionEntry(":joy:", [currentUser, otherUser])],
+      reactions: [
+        reactionEntry(":joy:", [currentUser, otherUser]),
+        reactionEntry(":wave:", [currentUser, staleWaveUser]),
+        reactionEntry(":fire:", [currentUser]),
+      ],
       parts: [{ content: "fresh content" }],
     };
     queryClient.setQueryData(queryKey, { pages: [[optimisticDrop]] });
@@ -795,12 +800,17 @@ describe("cached drop websocket updates", () => {
     });
     expect(updatedDrop.reactions).toEqual([
       reactionEntry(":joy:", [otherUser]),
+      reactionEntry(":wave:", [staleWaveUser]),
     ]);
     expect(
       queryClient.getQueryData<any>(feedQueryKey).pages[0][0].item.reactions
-    ).toEqual([reactionEntry(":joy:", [otherUser])]);
+    ).toEqual([
+      reactionEntry(":joy:", [otherUser]),
+      reactionEntry(":wave:", [staleWaveUser]),
+    ]);
     expect(queryClient.getQueryData<any>(dropQueryKey).reactions).toEqual([
       reactionEntry(":joy:", [otherUser]),
+      reactionEntry(":wave:", [staleWaveUser]),
     ]);
   });
 
@@ -808,6 +818,7 @@ describe("cached drop websocket updates", () => {
     const queryClient = createQueryClient();
     const currentUser = profile("profile-1", "current-user");
     const otherUser = profile("profile-2", "other-user");
+    const staleFireUser = profile("profile-3", "stale-fire-user");
     const queryKey = [QueryKey.DROP, { drop_id: "drop-rejected-remove" }];
 
     queryClient.setQueryData(queryKey, {
@@ -816,7 +827,10 @@ describe("cached drop websocket updates", () => {
         ...contextProfileContext(null),
         rating: 11,
       },
-      reactions: [reactionEntry(":joy:", [otherUser])],
+      reactions: [
+        reactionEntry(":joy:", [otherUser]),
+        reactionEntry(":fire:", [currentUser, staleFireUser]),
+      ],
     });
 
     rollbackRejectedReactionInCachedDrops(queryClient, {
@@ -833,6 +847,7 @@ describe("cached drop websocket updates", () => {
     });
     expect(updatedDrop.reactions).toEqual([
       reactionEntry(":joy:", [otherUser, currentUser]),
+      reactionEntry(":fire:", [staleFireUser]),
     ]);
   });
 
@@ -841,6 +856,7 @@ describe("cached drop websocket updates", () => {
     const currentUser = profile("profile-1", "current-user");
     const waveUser = profile("profile-2", "wave-user");
     const joyUser = profile("profile-3", "joy-user");
+    const fireUser = profile("profile-4", "fire-user");
     const queryKey = [QueryKey.FEED_ITEMS, { page: 1 }];
 
     queryClient.setQueryData(queryKey, {
@@ -853,6 +869,7 @@ describe("cached drop websocket updates", () => {
               reactions: [
                 reactionEntry(":wave:", [waveUser]),
                 reactionEntry(":joy:", [currentUser, joyUser]),
+                reactionEntry(":fire:", [currentUser, fireUser]),
               ],
             },
           },
@@ -873,6 +890,7 @@ describe("cached drop websocket updates", () => {
     expect(updatedDrop.reactions).toEqual([
       reactionEntry(":wave:", [waveUser, currentUser]),
       reactionEntry(":joy:", [joyUser]),
+      reactionEntry(":fire:", [fireUser]),
     ]);
   });
 
