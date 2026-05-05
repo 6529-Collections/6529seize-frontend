@@ -326,6 +326,24 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("drops sampled-out WebKit network connection lost errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value: "The network connection was lost.",
+            },
+          ],
+        },
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
   it("drops sampled-out first-party status 0 network errors when a later request succeeds", () => {
     const event = createLowValueNetworkEvent({
       breadcrumbs: [

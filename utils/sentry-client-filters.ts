@@ -129,6 +129,7 @@ function isNetworkErrorMessage(value: string): boolean {
     normalized.includes("load failed") ||
     normalized.includes("networkerror") ||
     normalized.includes("network error") ||
+    normalized.includes("network connection was lost") ||
     normalized.includes("network request failed")
   );
 }

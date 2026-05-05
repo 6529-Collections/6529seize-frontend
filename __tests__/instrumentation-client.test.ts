@@ -99,6 +99,41 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("drops sampled-out first-party WebKit network connection lost errors", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "The network connection was lost.",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("The network connection was lost."),
+    });
+
+    expect(result).toBeNull();
+    expect(event.exception.values[0]?.value).toBe(
+      "Network error: The network connection was lost. (/api/waves-overview)"
+    );
+  });
+
   it("rewrites raw browser network errors with the first-party failed target before dropping", () => {
     const beforeSend = loadBeforeSend();
     const event = {
