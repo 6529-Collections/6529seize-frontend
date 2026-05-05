@@ -21,7 +21,7 @@ interface ReadSyncState {
   readonly proxyRoleIdentityKey: string | null;
 }
 
-type ReadSyncStatus = "pending" | "success" | "failed";
+type ReadSyncStatus = "pending" | "success" | "failed" | "skipped";
 
 interface ReadSyncAttempt {
   readonly state: ReadSyncState;
@@ -111,10 +111,13 @@ export const useWaveDropsNotificationRead = ({
       }
 
       try {
-        await markWaveNotificationsRead(currentState.waveId, {
-          shouldSend: () => canSendReadForWave(currentState.waveId),
-        });
-        return "success";
+        const readResult = await markWaveNotificationsRead(
+          currentState.waveId,
+          {
+            shouldSend: () => canSendReadForWave(currentState.waveId),
+          }
+        );
+        return readResult === "sent" ? "success" : "skipped";
       } catch (error) {
         console.error("Failed to mark feed as read:", error);
         return "failed";

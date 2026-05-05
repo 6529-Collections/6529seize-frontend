@@ -5,6 +5,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   useWaveNotificationsReadMarkerState as useWaveNotificationsReadMarkerStateFromConfig,
+  type MarkWaveNotificationsReadResult,
   type MarkWaveNotificationsReadOptions,
   type WaveNotificationsReadMarkerState,
 } from "@/hooks/useMarkWaveNotificationsRead.helpers";
@@ -32,6 +33,6 @@ export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMark
 export function useMarkWaveNotificationsRead(): (
   waveId: string,
   options?: MarkWaveNotificationsReadOptions
-) => Promise<void> {
+) => Promise<MarkWaveNotificationsReadResult> {
   return useWaveNotificationsReadMarkerState().markWaveNotificationsRead;
 }

@@ -502,6 +502,70 @@ describe("useWaveDropsNotificationRead", () => {
     expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("retries with the loaded proxy after a hidden temporary-proxy replay is skipped", async () => {
+    mockJwtRole("creator-1");
+
+    const renderTestComponent = () => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(renderTestComponent());
+
+    await waitFor(() => {
+      expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    setDocumentVisibilityState("hidden");
+    useAuthMock.mockReturnValue(
+      createAuthValue(
+        createActiveProfileProxy({
+          id: "proxy-1",
+          creatorId: "creator-1",
+        })
+      )
+    );
+
+    rerender(renderTestComponent());
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    await act(async () => {
+      setDocumentVisibilityState("visible");
+      dispatchVisibilityChange();
+    });
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    });
+
+    expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(2);
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer test-jwt" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
   it("retries with the loaded proxy when the temporary read request fails", async () => {
     const firstReadRequest = createDeferred();
     const consoleErrorSpy = jest

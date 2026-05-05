@@ -16,7 +16,7 @@ import type { RefObject } from "react";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 
 interface WaveReadRequestState {
-  promise: Promise<void>;
+  promise: Promise<MarkWaveNotificationsReadResult>;
   readonly requestKey: string;
   authHeaders: AuthHeaders;
   shouldSends: WaveReadShouldSend[];
@@ -30,8 +30,8 @@ interface PendingWaveReadRequestState {
   readonly identityKey: string;
   readonly requestKey: string;
   readonly waveId: string;
-  readonly promise: Promise<void>;
-  readonly resolve: () => void;
+  readonly promise: Promise<MarkWaveNotificationsReadResult>;
+  readonly resolve: (result: MarkWaveNotificationsReadResult) => void;
   readonly reject: (error: unknown) => void;
   readonly shouldSends: WaveReadShouldSend[];
 }
@@ -59,10 +59,12 @@ export interface WaveNotificationsReadMarkerState {
   readonly markWaveNotificationsRead: (
     waveId: string,
     options?: MarkWaveNotificationsReadOptions
-  ) => Promise<void>;
+  ) => Promise<MarkWaveNotificationsReadResult>;
   readonly identityKey: string;
   readonly proxyRoleIdentityKey: string | null;
 }
+
+export type MarkWaveNotificationsReadResult = "sent" | "skipped";
 
 export interface MarkWaveNotificationsReadOptions {
   readonly shouldSend?: () => boolean;
@@ -108,14 +110,20 @@ const hasSendableWaveRead = (
   shouldSends: readonly WaveReadShouldSend[]
 ): boolean => shouldSends.some(shouldSendWaveRead);
 
+const mergeWaveReadResults = (
+  first: MarkWaveNotificationsReadResult,
+  second: MarkWaveNotificationsReadResult
+): MarkWaveNotificationsReadResult =>
+  first === "sent" || second === "sent" ? "sent" : "skipped";
+
 const sendWaveReadRequest = async (
   waveId: string,
   authHeaders: AuthHeaders,
   invalidateNotificationsRef: Readonly<{ current: () => void }>,
   shouldSends: readonly WaveReadShouldSend[]
-): Promise<void> => {
+): Promise<MarkWaveNotificationsReadResult> => {
   if (!hasSendableWaveRead(shouldSends)) {
-    return;
+    return "skipped";
   }
 
   await commonApiPostWithoutBodyAndResponse({
@@ -123,18 +131,20 @@ const sendWaveReadRequest = async (
     headers: authHeaders,
   });
   invalidateNotificationsRef.current();
+  return "sent";
 };
 
 const startWaveReadRequest = async (
   waveId: string,
   state: WaveReadRequestState,
   invalidateNotificationsRef: Readonly<{ current: () => void }>
-): Promise<void> => {
+): Promise<MarkWaveNotificationsReadResult> => {
   let requestError: unknown;
   let hasRequestError = false;
+  let requestResult: MarkWaveNotificationsReadResult = "skipped";
 
   try {
-    await sendWaveReadRequest(
+    requestResult = await sendWaveReadRequest(
       waveId,
       state.authHeaders,
       invalidateNotificationsRef,
@@ -154,13 +164,15 @@ const startWaveReadRequest = async (
         state,
         invalidateNotificationsRef
       );
-      await state.promise;
-      return;
+      const trailingResult = await state.promise;
+      return mergeWaveReadResults(requestResult, trailingResult);
     }
 
     if (hasRequestError) {
       throw requestError;
     }
+
+    return requestResult;
   } finally {
     if (inFlightWaveReadRequests.get(state.requestKey) === state) {
       inFlightWaveReadRequests.delete(state.requestKey);
@@ -180,7 +192,7 @@ const markWaveReadWithAuthHeaders = ({
   readonly authHeaders: AuthHeaders;
   readonly invalidateNotificationsRef: Readonly<{ current: () => void }>;
   readonly shouldSend: WaveReadShouldSend;
-}): Promise<void> => {
+}): Promise<MarkWaveNotificationsReadResult> => {
   const existingState = inFlightWaveReadRequests.get(requestKey);
   if (existingState) {
     existingState.authHeaders = authHeaders;
@@ -189,7 +201,7 @@ const markWaveReadWithAuthHeaders = ({
   }
 
   const state: WaveReadRequestState = {
-    promise: Promise.resolve(),
+    promise: Promise.resolve("skipped"),
     requestKey,
     authHeaders,
     shouldSends: [shouldSend],
@@ -245,9 +257,9 @@ const enqueuePendingWaveReadRequest = ({
   readonly waveId: string;
   readonly shouldSend: WaveReadShouldSend;
   readonly queueIfBlocked: boolean;
-}): Promise<void> => {
+}): Promise<MarkWaveNotificationsReadResult> => {
   if (!queueIfBlocked) {
-    return Promise.resolve();
+    return Promise.resolve("skipped");
   }
 
   const existingState = pendingWaveReadRequests.get(requestKey);
@@ -256,12 +268,16 @@ const enqueuePendingWaveReadRequest = ({
     return existingState.promise;
   }
 
-  let resolveQueuedRequest: () => void = () => {};
+  let resolveQueuedRequest: (
+    result: MarkWaveNotificationsReadResult
+  ) => void = () => {};
   let rejectQueuedRequest: (error: unknown) => void = () => {};
-  const promise = new Promise<void>((resolve, reject) => {
-    resolveQueuedRequest = resolve;
-    rejectQueuedRequest = reject;
-  });
+  const promise = new Promise<MarkWaveNotificationsReadResult>(
+    (resolve, reject) => {
+      resolveQueuedRequest = resolve;
+      rejectQueuedRequest = reject;
+    }
+  );
 
   const state: PendingWaveReadRequestState = {
     addressKey,
@@ -324,7 +340,7 @@ const flushQueuedWaveReadRequests = ({
 
     void (async () => {
       try {
-        await markWaveReadWithAuthHeaders({
+        const result = await markWaveReadWithAuthHeaders({
           waveId: firstQueuedRequest.waveId,
           requestKey,
           authHeaders,
@@ -332,7 +348,7 @@ const flushQueuedWaveReadRequests = ({
           shouldSend: () => groupedRequests.some(hasSendableQueuedWaveRead),
         });
         for (const queuedRequest of groupedRequests) {
-          queuedRequest.resolve();
+          queuedRequest.resolve(result);
         }
       } catch (error) {
         for (const queuedRequest of groupedRequests) {
@@ -595,7 +611,7 @@ const markTemporaryProxyRoleWaveRead = ({
   readonly temporaryProxyRoleIdentity: WaveReadTemporaryProxyRoleIdentity;
   readonly cacheRefs: WaveReadCacheRefs;
   readonly options: MarkWaveNotificationsReadOptions | undefined;
-}): Promise<void> => {
+}): Promise<MarkWaveNotificationsReadResult> => {
   const latestVerifiedProxyRoleIdentity =
     cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.get(
       temporaryProxyRoleIdentity.identityKey
@@ -645,9 +661,9 @@ const markWaveReadFromCache = ({
   readonly identityKey: string;
   readonly cacheRefs: WaveReadCacheRefs;
   readonly options: MarkWaveNotificationsReadOptions | undefined;
-}): Promise<void> => {
+}): Promise<MarkWaveNotificationsReadResult> => {
   if (addressKey === null) {
-    return Promise.resolve();
+    return Promise.resolve("skipped");
   }
 
   const requestKey = getWaveReadRequestKey({
@@ -741,7 +757,7 @@ export const useWaveNotificationsReadMarkerState = ({
     (
       waveId: string,
       options?: MarkWaveNotificationsReadOptions
-    ): Promise<void> =>
+    ): Promise<MarkWaveNotificationsReadResult> =>
       markWaveReadFromCache({
         waveId,
         addressKey,

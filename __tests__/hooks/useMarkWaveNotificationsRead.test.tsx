@@ -132,7 +132,7 @@ describe("useMarkWaveNotificationsRead", () => {
       wrapper: createWrapper(invalidateNotifications),
     });
 
-    await expect(result.current("wave-1")).resolves.toBeUndefined();
+    await expect(result.current("wave-1")).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -154,7 +154,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     const noAddressPromise = result.current("wave-1");
 
-    await expect(noAddressPromise).resolves.toBeUndefined();
+    await expect(noAddressPromise).resolves.toBe("skipped");
     expect(apiPostMock).not.toHaveBeenCalled();
 
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
@@ -162,7 +162,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(apiPostMock).not.toHaveBeenCalled();
 
-    await expect(result.current("wave-1")).resolves.toBeUndefined();
+    await expect(result.current("wave-1")).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -208,8 +208,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
@@ -244,7 +244,12 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await Promise.all(promises);
+    await expect(Promise.all(promises)).resolves.toEqual([
+      "sent",
+      "sent",
+      "sent",
+      "sent",
+    ]);
 
     expect(apiPostMock).toHaveBeenCalledTimes(2);
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
@@ -277,7 +282,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).toBe(firstCallback);
 
-    await result.current("wave-1");
+    await expect(result.current("wave-1")).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -343,8 +348,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
@@ -431,9 +436,9 @@ describe("useMarkWaveNotificationsRead", () => {
     secondAccountRequest.resolve();
     firstAccountReplay.resolve();
 
-    await expect(firstAccountPromise).resolves.toBeUndefined();
-    await expect(firstAccountQueuedPromise).resolves.toBeUndefined();
-    await expect(secondAccountPromise).resolves.toBeUndefined();
+    await expect(firstAccountPromise).resolves.toBe("sent");
+    await expect(firstAccountQueuedPromise).resolves.toBe("sent");
+    await expect(secondAccountPromise).resolves.toBe("sent");
   });
 
   it("keeps same-wave read requests separate across active proxy switches", async () => {
@@ -484,8 +489,8 @@ describe("useMarkWaveNotificationsRead", () => {
     firstProxyRequest.resolve();
     secondProxyRequest.resolve();
 
-    await expect(firstProxyPromise).resolves.toBeUndefined();
-    await expect(secondProxyPromise).resolves.toBeUndefined();
+    await expect(firstProxyPromise).resolves.toBe("sent");
+    await expect(secondProxyPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
@@ -545,8 +550,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstProxyPromise).resolves.toBeUndefined();
-    await expect(queuedProxyPromise).resolves.toBeUndefined();
+    await expect(firstProxyPromise).resolves.toBe("sent");
+    await expect(queuedProxyPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
@@ -590,7 +595,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -646,7 +651,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -703,7 +708,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -769,7 +774,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(firstAccountPromise).resolves.toBeUndefined();
+    await expect(firstAccountPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -846,8 +851,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstProxyPromise).resolves.toBeUndefined();
-    await expect(queuedProxyPromise).resolves.toBeUndefined();
+    await expect(firstProxyPromise).resolves.toBe("sent");
+    await expect(queuedProxyPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
@@ -890,7 +895,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -921,7 +926,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).toBe(firstCallback);
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -953,7 +958,7 @@ describe("useMarkWaveNotificationsRead", () => {
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
     expect(invalidateNotifications).not.toHaveBeenCalled();
@@ -987,8 +992,8 @@ describe("useMarkWaveNotificationsRead", () => {
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
     rerender();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1021,8 +1026,8 @@ describe("useMarkWaveNotificationsRead", () => {
     shouldSendReplay = false;
     firstRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(trailingPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(trailingPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
@@ -1043,7 +1048,7 @@ describe("useMarkWaveNotificationsRead", () => {
       queueIfBlocked: false,
     });
 
-    await expect(blockedPromise).resolves.toBeUndefined();
+    await expect(blockedPromise).resolves.toBe("skipped");
     expect(apiPostMock).not.toHaveBeenCalled();
 
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
@@ -1090,7 +1095,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1131,7 +1136,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("skipped");
 
     expect(apiPostMock).not.toHaveBeenCalled();
     expect(invalidateNotifications).not.toHaveBeenCalled();
@@ -1184,7 +1189,7 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1233,8 +1238,8 @@ describe("useMarkWaveNotificationsRead", () => {
     });
     rerender();
 
-    await expect(roleQueuedPromise).resolves.toBeUndefined();
-    await expect(proxyQueuedPromise).resolves.toBeUndefined();
+    await expect(roleQueuedPromise).resolves.toBe("sent");
+    await expect(proxyQueuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1266,9 +1271,9 @@ describe("useMarkWaveNotificationsRead", () => {
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
     rerender();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
-    await expect(thirdPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
+    await expect(thirdPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1318,8 +1323,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
   });
 
   it("queues a read when the JWT belongs to another account and sends it after the matching JWT appears", async () => {
@@ -1347,7 +1352,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).toBe(firstCallback);
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1379,7 +1384,7 @@ describe("useMarkWaveNotificationsRead", () => {
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
     rerender();
 
-    await expect(firstAccountPromise).resolves.toBeUndefined();
+    await expect(firstAccountPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1436,8 +1441,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
   });
 
   it("queues a read when the JWT belongs to another proxy and sends it after the matching JWT appears", async () => {
@@ -1472,7 +1477,7 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).toBe(firstCallback);
 
-    await expect(queuedPromise).resolves.toBeUndefined();
+    await expect(queuedPromise).resolves.toBe("sent");
 
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(apiPostMock).toHaveBeenCalledWith({
@@ -1516,8 +1521,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
   });
 
   it("resolves queued same-wave calls when a failed first read is replayed successfully", async () => {
@@ -1546,8 +1551,8 @@ describe("useMarkWaveNotificationsRead", () => {
 
     trailingRequest.resolve();
 
-    await expect(firstPromise).resolves.toBeUndefined();
-    await expect(secondPromise).resolves.toBeUndefined();
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(secondPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
@@ -1600,12 +1605,12 @@ describe("useMarkWaveNotificationsRead", () => {
 
     waveTwoRequest.resolve();
 
-    await expect(waveTwoPromise).resolves.toBeUndefined();
+    await expect(waveTwoPromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
 
     waveOneRequest.resolve();
 
-    await expect(waveOnePromise).resolves.toBeUndefined();
+    await expect(waveOnePromise).resolves.toBe("sent");
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 });
