@@ -106,8 +106,8 @@ describe("ParticipationDropHeader", () => {
       />
     );
 
-    expect(screen.getByTestId("approval-badge").textContent).toContain(
-      '"order":1'
+    expect(screen.getByTestId("approval-badge").textContent).not.toContain(
+      "order"
     );
     expect(screen.queryByTestId("badge")).toBeNull();
   });
