@@ -250,6 +250,7 @@ describe("MyStreamWaveLeaderboard", () => {
     const stickyHeader = screen.getByTestId("header").parentElement;
     expect(stickyHeader).toHaveClass("tw-sticky");
     expect(stickyHeader).toHaveClass("tw-z-30");
+    expect(stickyHeader).toHaveClass("tw-flex-none");
     expect(headerProps.viewMode).toBe("list");
     expect(headerProps.onPriceRangeChange).toBeUndefined();
     expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
@@ -285,9 +286,9 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(
       screen.getByTestId("approval-controls-sticky-sentinel")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("header").parentElement).not.toHaveClass(
-      "tw-sticky"
-    );
+    const controls = screen.getByTestId("header").parentElement;
+    expect(controls).not.toHaveClass("tw-sticky");
+    expect(controls).toHaveClass("tw-flex-none");
   });
 
   it("toggles approve list controls sticky state when the status sentinel moves", () => {
@@ -334,6 +335,7 @@ describe("MyStreamWaveLeaderboard", () => {
 
     expect(controls).toHaveClass("tw-sticky");
     expect(controls).toHaveClass("tw-z-30");
+    expect(controls).toHaveClass("tw-flex-none");
 
     act(() => {
       observer?.callback(

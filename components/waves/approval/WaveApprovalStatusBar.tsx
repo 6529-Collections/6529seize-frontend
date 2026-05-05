@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type FC, useEffect, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
@@ -35,6 +35,25 @@ const getCurrentMillisForStatusRender = (
   _endTime: number | null,
   _closeStatus: ApprovalWaveCloseStatus
 ): number => Time.currentMillis();
+
+interface ApprovalStatusItemProps {
+  readonly label: string;
+  readonly value: string;
+  readonly valueClassName?: string | undefined;
+}
+
+const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
+  label,
+  value,
+  valueClassName = "tw-text-iron-100",
+}) => (
+  <div className="tw-inline-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap tw-leading-5">
+    <span className="tw-text-xs tw-font-medium tw-text-iron-500">{label}</span>
+    <span className={`tw-text-sm tw-font-semibold ${valueClassName}`}>
+      {value}
+    </span>
+  </div>
+);
 
 export default function WaveApprovalStatusBar({
   approvedCount,
@@ -109,34 +128,15 @@ export default function WaveApprovalStatusBar({
   }
 
   return (
-    <div className="tw-mt-2 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-3 md:tw-mt-4">
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3">
-        <div>
-          <p className="tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-500">
-            Threshold
-          </p>
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-            {thresholdLabel}
-          </p>
-        </div>
-        <div>
-          <p className="tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-500">
-            Approved
-          </p>
-          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
-            {approvedLabel}
-          </p>
-        </div>
-        <div>
-          <p className="tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-500">
-            Status
-          </p>
-          <p
-            className={`tw-mb-0 tw-text-sm tw-font-semibold ${statusTextClassName}`}
-          >
-            {statusLabel}
-          </p>
-        </div>
+    <div className="tw-mt-2 tw-flex-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 md:tw-mt-3">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-8 tw-gap-y-1">
+        <ApprovalStatusItem label="Threshold" value={thresholdLabel} />
+        <ApprovalStatusItem label="Approved" value={approvedLabel} />
+        <ApprovalStatusItem
+          label="Status"
+          value={statusLabel}
+          valueClassName={statusTextClassName}
+        />
       </div>
       {isApprovalStatusError && (
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">

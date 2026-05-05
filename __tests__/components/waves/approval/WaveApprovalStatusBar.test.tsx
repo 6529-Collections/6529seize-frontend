@@ -15,7 +15,7 @@ const wave = {
 
 describe("WaveApprovalStatusBar", () => {
   it("shows checking when the approved count is unknown", () => {
-    render(
+    const { container } = render(
       <WaveApprovalStatusBar
         approvedCount={null}
         closeStatus={null}
@@ -24,6 +24,11 @@ describe("WaveApprovalStatusBar", () => {
     );
 
     expect(screen.getAllByText("Checking")).toHaveLength(2);
+    expect(container.firstElementChild).toHaveClass("tw-flex-none");
+    expect(container.firstElementChild).not.toHaveClass("tw-overflow-hidden");
+    expect(container.firstElementChild?.firstElementChild).toHaveClass(
+      "tw-flex-wrap"
+    );
   });
 
   it("shows an approval status error and retry action", () => {

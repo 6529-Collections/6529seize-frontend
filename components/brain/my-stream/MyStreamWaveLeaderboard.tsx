@@ -83,8 +83,8 @@ const isWaveLeaderboardSortPreference = (
   (isCurationWave && value === WaveDropsLeaderboardSort.PRICE);
 
 const stickyLeaderboardControlsClassName =
-  "tw-sticky tw-top-0 tw-z-30 tw-bg-black tw-py-4";
-const staticLeaderboardControlsClassName = "tw-bg-black tw-py-4";
+  "tw-sticky tw-top-0 tw-z-30 tw-flex-none tw-bg-black tw-py-4";
+const staticLeaderboardControlsClassName = "tw-flex-none tw-bg-black tw-py-4";
 
 interface LeaderboardControlsFrameProps {
   readonly isSticky: boolean;
