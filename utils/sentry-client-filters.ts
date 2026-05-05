@@ -481,7 +481,7 @@ function getLatestFailedTransportBreadcrumb(
       messageTargetCandidates.length === 0 &&
       !isFirstPartyApiTarget(failedTransportTarget)
     ) {
-      continue;
+      return null;
     }
 
     if (

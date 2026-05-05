@@ -178,6 +178,57 @@ describe("instrumentation-client", () => {
     );
   });
 
+  it("keeps raw browser network errors for newer first-party page failures", () => {
+    const beforeSend = loadBeforeSend();
+    const event = {
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/notifications",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError("Load failed"),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.exception?.values?.[0]?.value).toBe(
+      "Network request failed. Please check your connection and try again. (/notifications)"
+    );
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "network",
+        handled: true,
+      })
+    );
+    expect(result?.tags?.["network_noise_sampled"]).toBeUndefined();
+  });
+
   it("drops sampled-out raw browser transport network errors when a later unrelated request fails", () => {
     const beforeSend = loadBeforeSend();
     const event = {

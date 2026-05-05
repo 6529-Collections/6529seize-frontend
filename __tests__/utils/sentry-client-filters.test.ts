@@ -1344,6 +1344,43 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("not_applicable");
   });
 
+  it("keeps newer first-party page failures ahead of older API transport failures", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/notifications",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/notifications");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
   it("filters Twitter CONFIG reference errors with app URI frames", () => {
     // Arrange
     const event = createTwitterConfigEvent();
