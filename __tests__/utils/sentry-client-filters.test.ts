@@ -977,6 +977,28 @@ describe("sentry-client-filters", () => {
     }
   });
 
+  it("uses message targets when failed breadcrumb URLs are unknown placeholders", () => {
+    for (const url of ["unknown", "/unknown"]) {
+      const event = createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url,
+            },
+          },
+        ],
+      });
+
+      expect(getLowValueNetworkErrorTargetUrl(event)).toBe(
+        "/api/waves-overview"
+      );
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    }
+  });
+
   it("drops sampled-out relative API network errors when the breadcrumb URL is missing", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({

@@ -99,7 +99,12 @@ const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 const FNV_OFFSET_BASIS = 2166136261;
 const FNV_PRIME = 16777619;
 const UINT_32_SIZE = 4294967296;
-const FILTERED_URL_TOKENS = new Set(["[filtered]", "[redacted]", "filtered"]);
+const FILTERED_URL_TOKENS = new Set([
+  "[filtered]",
+  "[redacted]",
+  "filtered",
+  "unknown",
+]);
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
