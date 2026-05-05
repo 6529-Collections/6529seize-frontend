@@ -8,6 +8,7 @@ import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import DropCurationButton from "@/components/waves/drops/DropCurationButton";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
@@ -221,12 +222,15 @@ export const WaveLeaderboardGridItem: React.FC<
     useState<HTMLDivElement | null>(null);
   const [compactTextInnerEl, setCompactTextInnerEl] =
     useState<HTMLDivElement | null>(null);
-  const hasContentOnlyActions =
+  const canCopyLink = !drop.id.startsWith("temp-");
+  const hasDesktopContentOnlyActions =
     canOpenDrop || isCuratable || canShowVotingAction;
+  const hasMobileContentOnlyActions =
+    hasDesktopContentOnlyActions || canCopyLink;
   const showDesktopContentOnlyActions =
-    isContentOnlyMode && !hasTouchScreen && hasContentOnlyActions;
+    isContentOnlyMode && !hasTouchScreen && hasDesktopContentOnlyActions;
   const showMobileContentOnlyActions =
-    isContentOnlyMode && hasTouchScreen && hasContentOnlyActions;
+    isContentOnlyMode && hasTouchScreen && hasMobileContentOnlyActions;
 
   const previewImageUrl = useMemo(
     () => getDropPreviewImageUrl(drop.metadata),
@@ -556,6 +560,10 @@ export const WaveLeaderboardGridItem: React.FC<
                   onOpenChange={() => setIsActive(false)}
                 />
               )}
+              <WaveDropMobileMenuCopyLink
+                drop={drop}
+                onCopy={() => setIsActive(false)}
+              />
 
               {isCuratable && (
                 <button

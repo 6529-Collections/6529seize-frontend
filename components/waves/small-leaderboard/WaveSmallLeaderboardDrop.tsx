@@ -2,6 +2,7 @@ import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveLeaderboardRendererSet } from "../leaderboard/leaderboardRendererRegistry";
+import { isApproveWave } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -25,6 +26,7 @@ export const WaveSmallLeaderboardDrop: React.FC<
   return (
     <SmallLeaderboardDrop
       drop={drop}
+      isApproveWave={isApproveWave(wave)}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       onDropClick={onDropClick}

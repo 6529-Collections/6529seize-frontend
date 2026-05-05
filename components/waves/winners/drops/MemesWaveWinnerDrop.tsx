@@ -9,6 +9,7 @@ import UserCICAndLevel, {
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
@@ -349,6 +350,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   <WaveDropMobileMenuOpen
                     drop={extendedDrop}
                     onOpenChange={handleMobileMenuClose}
+                  />
+                  <WaveDropMobileMenuCopyLink
+                    drop={extendedDrop}
+                    onCopy={() => setIsActive(false)}
                   />
                 </div>
               </CommonDropdownItemsMobileWrapper>,
