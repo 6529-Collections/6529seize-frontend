@@ -14,12 +14,14 @@ export interface WaveReadVerifiedIdentity {
   readonly activeProfileProxyId: string | null;
   readonly activeProfileProxyCreatorId: string | null;
   readonly identityKey: string;
+  readonly jwtExpiresAt: number;
   readonly authHeaders: AuthHeaders;
 }
 
 interface WaveReadJwtIdentity {
   readonly addressKey: string;
   readonly proxyCreatorId: string | null;
+  readonly jwtExpiresAt: number;
 }
 
 export interface WaveReadTemporaryProxyRoleIdentity {
@@ -90,6 +92,9 @@ const getAuthHeaders = (walletAuth: string): AuthHeaders => ({
   Authorization: `Bearer ${walletAuth}`,
 });
 
+export const isWaveReadJwtExpired = (jwtExpiresAt: number): boolean =>
+  jwtExpiresAt <= Math.floor(Date.now() / 1000);
+
 const decodeWaveReadJwtIdentity = (
   walletAuth: string | null
 ): WaveReadJwtIdentity | undefined => {
@@ -100,11 +105,10 @@ const decodeWaveReadJwtIdentity = (
   try {
     const decodedJwt = jwtDecode<WaveReadJwtPayload>(walletAuth);
     const expiresAt = decodedJwt.exp;
-    const now = Math.floor(Date.now() / 1000);
     if (
       typeof expiresAt !== "number" ||
       !Number.isFinite(expiresAt) ||
-      expiresAt <= now
+      isWaveReadJwtExpired(expiresAt)
     ) {
       return undefined;
     }
@@ -120,6 +124,7 @@ const decodeWaveReadJwtIdentity = (
         typeof decodedJwt.role === "string" && decodedJwt.role.length > 0
           ? decodedJwt.role
           : null,
+      jwtExpiresAt: expiresAt,
     };
   } catch {
     return undefined;
@@ -187,15 +192,17 @@ const getVerifiedIdentity = ({
   activeProfileProxyId,
   activeProfileProxyCreatorId,
   identityKey,
+  jwtIdentity,
   verifiedAuthHeaders,
 }: {
   readonly addressKey: string | null;
   readonly activeProfileProxyId: string | null;
   readonly activeProfileProxyCreatorId: string | null;
   readonly identityKey: string;
+  readonly jwtIdentity: WaveReadJwtIdentity | undefined;
   readonly verifiedAuthHeaders: AuthHeaders | undefined;
 }): WaveReadVerifiedIdentity | undefined => {
-  if (!verifiedAuthHeaders || addressKey === null) {
+  if (!verifiedAuthHeaders || addressKey === null || !jwtIdentity) {
     return undefined;
   }
 
@@ -204,6 +211,7 @@ const getVerifiedIdentity = ({
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     identityKey,
+    jwtExpiresAt: jwtIdentity.jwtExpiresAt,
     authHeaders: verifiedAuthHeaders,
   };
 };
@@ -285,6 +293,7 @@ export const useWaveReadIdentityState = ({
         activeProfileProxyId,
         activeProfileProxyCreatorId,
         identityKey,
+        jwtIdentity,
         verifiedAuthHeaders,
       }),
     [
@@ -292,6 +301,7 @@ export const useWaveReadIdentityState = ({
       activeProfileProxyId,
       addressKey,
       identityKey,
+      jwtIdentity,
       verifiedAuthHeaders,
     ]
   );

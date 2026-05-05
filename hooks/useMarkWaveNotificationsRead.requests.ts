@@ -2,6 +2,7 @@ import {
   getWaveReadIdentityKey,
   getWaveReadProxyRoleIdentityKey,
   getWaveReadRequestKey,
+  isWaveReadJwtExpired,
 } from "@/hooks/useMarkWaveNotificationsRead.identity";
 import type {
   AuthHeaders,
@@ -118,10 +119,15 @@ const mergeWaveReadResults = (
 const sendWaveReadRequest = async (
   waveId: string,
   authHeaders: AuthHeaders,
+  jwtExpiresAt: number,
   invalidateNotificationsRef: InvalidateNotificationsRef,
   shouldSends: readonly WaveReadShouldSend[]
 ): Promise<MarkWaveNotificationsReadResult> => {
   if (!hasSendableWaveRead(shouldSends)) {
+    return "skipped";
+  }
+
+  if (isWaveReadJwtExpired(jwtExpiresAt)) {
     return "skipped";
   }
 
@@ -146,6 +152,7 @@ const startWaveReadRequest = async (
     requestResult = await sendWaveReadRequest(
       waveId,
       state.authHeaders,
+      state.jwtExpiresAt,
       invalidateNotificationsRef,
       state.shouldSends
     );
@@ -187,6 +194,7 @@ export const markWaveReadWithAuthHeaders = ({
   addressKey,
   requestKey,
   authHeaders,
+  jwtExpiresAt,
   invalidateNotificationsRef,
   shouldSend,
 }: {
@@ -194,12 +202,14 @@ export const markWaveReadWithAuthHeaders = ({
   readonly addressKey: string;
   readonly requestKey: string;
   readonly authHeaders: AuthHeaders;
+  readonly jwtExpiresAt: number;
   readonly invalidateNotificationsRef: InvalidateNotificationsRef;
   readonly shouldSend: WaveReadShouldSend;
 }): Promise<MarkWaveNotificationsReadResult> => {
   const existingState = inFlightWaveReadRequests.get(requestKey);
   if (existingState) {
     existingState.authHeaders = authHeaders;
+    existingState.jwtExpiresAt = jwtExpiresAt;
     existingState.pendingShouldSends.push(shouldSend);
     return existingState.promise;
   }
@@ -209,6 +219,7 @@ export const markWaveReadWithAuthHeaders = ({
     addressKey,
     requestKey,
     authHeaders,
+    jwtExpiresAt,
     shouldSends: [shouldSend],
     pendingShouldSends: [],
   };
@@ -319,6 +330,7 @@ const flushQueuedWaveReadRequests = ({
   queuedRequests,
   getRequestKey,
   authHeaders,
+  jwtExpiresAt,
   invalidateNotificationsRef,
 }: {
   readonly queuedRequests: readonly PendingWaveReadRequestState[];
@@ -326,6 +338,7 @@ const flushQueuedWaveReadRequests = ({
     queuedRequest: PendingWaveReadRequestState
   ) => string;
   readonly authHeaders: AuthHeaders;
+  readonly jwtExpiresAt: number;
   readonly invalidateNotificationsRef: InvalidateNotificationsRef;
 }): void => {
   const queuedRequestsByRequestKey = new Map<
@@ -360,6 +373,7 @@ const flushQueuedWaveReadRequests = ({
           addressKey: firstQueuedRequest.addressKey,
           requestKey,
           authHeaders,
+          jwtExpiresAt,
           invalidateNotificationsRef,
           shouldSend: () => groupedRequests.some(hasSendableQueuedWaveRead),
         });
@@ -406,6 +420,7 @@ export const flushPendingWaveReadRequests = ({
       });
     },
     authHeaders: verifiedIdentity.authHeaders,
+    jwtExpiresAt: verifiedIdentity.jwtExpiresAt,
     invalidateNotificationsRef,
   });
 };
@@ -435,6 +450,7 @@ export const flushPendingClearedWaveReadRequests = ({
     queuedRequests,
     getRequestKey: (queuedRequest) => queuedRequest.requestKey,
     authHeaders: verifiedIdentity.authHeaders,
+    jwtExpiresAt: verifiedIdentity.jwtExpiresAt,
     invalidateNotificationsRef,
   });
 
@@ -459,4 +475,15 @@ export const deleteLatestVerifiedWaveReadIdentityByAddress = (
   addressKey: string
 ): void => {
   latestVerifiedWaveReadIdentityByAddress.delete(addressKey);
+};
+
+export const deleteLatestVerifiedWaveReadIdentityIfCurrent = (
+  identity: WaveReadVerifiedIdentity
+): void => {
+  if (
+    latestVerifiedWaveReadIdentityByAddress.get(identity.addressKey) ===
+    identity
+  ) {
+    latestVerifiedWaveReadIdentityByAddress.delete(identity.addressKey);
+  }
 };

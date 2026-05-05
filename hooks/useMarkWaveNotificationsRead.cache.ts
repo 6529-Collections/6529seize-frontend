@@ -1,6 +1,7 @@
 import {
   getWaveReadProxyRoleRequestKey,
   getWaveReadRequestKey,
+  isWaveReadJwtExpired,
 } from "@/hooks/useMarkWaveNotificationsRead.identity";
 import type {
   WaveReadTemporaryProxyRoleIdentity,
@@ -10,6 +11,7 @@ import {
   clearAllWaveReadState,
   clearPendingWaveReadsForAddress,
   deleteLatestVerifiedWaveReadIdentityByAddress,
+  deleteLatestVerifiedWaveReadIdentityIfCurrent,
   enqueuePendingWaveReadRequest,
   flushPendingClearedWaveReadRequests,
   flushPendingWaveReadRequests,
@@ -187,7 +189,64 @@ export const useSyncWaveReadVerifiedIdentityCaches = ({
   ]);
 };
 
-const getLatestClearedWaveReadIdentity = ({
+const evictExpiredWaveReadIdentity = ({
+  identity,
+  cacheRefs,
+}: {
+  readonly identity: WaveReadVerifiedIdentity;
+  readonly cacheRefs: WaveReadCacheRefs;
+}): void => {
+  if (
+    cacheRefs.authByIdentityRef.current.get(identity.identityKey) === identity
+  ) {
+    cacheRefs.authByIdentityRef.current.delete(identity.identityKey);
+  }
+
+  if (
+    cacheRefs.latestVerifiedIdentityByAddressRef.current.get(
+      identity.addressKey
+    ) === identity
+  ) {
+    cacheRefs.latestVerifiedIdentityByAddressRef.current.delete(
+      identity.addressKey
+    );
+  }
+
+  const proxyRoleIdentityKey = getVerifiedProxyRoleIdentityKey(identity);
+  if (
+    proxyRoleIdentityKey !== null &&
+    cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.get(
+      proxyRoleIdentityKey
+    ) === identity
+  ) {
+    cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.delete(
+      proxyRoleIdentityKey
+    );
+  }
+
+  deleteLatestVerifiedWaveReadIdentityIfCurrent(identity);
+};
+
+const getUsableCachedWaveReadIdentity = ({
+  identity,
+  cacheRefs,
+}: {
+  readonly identity: WaveReadVerifiedIdentity | undefined;
+  readonly cacheRefs: WaveReadCacheRefs;
+}): WaveReadVerifiedIdentity | undefined => {
+  if (!identity) {
+    return undefined;
+  }
+
+  if (!isWaveReadJwtExpired(identity.jwtExpiresAt)) {
+    return identity;
+  }
+
+  evictExpiredWaveReadIdentity({ identity, cacheRefs });
+  return undefined;
+};
+
+const getUsableLatestClearedWaveReadIdentity = ({
   addressKey,
   identityKey,
   cacheRefs,
@@ -200,10 +259,19 @@ const getLatestClearedWaveReadIdentity = ({
     return undefined;
   }
 
-  return (
-    cacheRefs.latestVerifiedIdentityByAddressRef.current.get(addressKey) ??
-    getLatestVerifiedWaveReadIdentityByAddress(addressKey)
-  );
+  const localLatestIdentity = getUsableCachedWaveReadIdentity({
+    identity:
+      cacheRefs.latestVerifiedIdentityByAddressRef.current.get(addressKey),
+    cacheRefs,
+  });
+  if (localLatestIdentity) {
+    return localLatestIdentity;
+  }
+
+  return getUsableCachedWaveReadIdentity({
+    identity: getLatestVerifiedWaveReadIdentityByAddress(addressKey),
+    cacheRefs,
+  });
 };
 
 export const useClearWaveReadStateOnAddressChange = (
@@ -251,10 +319,12 @@ const markTemporaryProxyRoleWaveRead = ({
   readonly cacheRefs: WaveReadCacheRefs;
   readonly options: MarkWaveNotificationsReadOptions | undefined;
 }): Promise<MarkWaveNotificationsReadResult> => {
-  const latestVerifiedProxyRoleIdentity =
-    cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.get(
+  const latestVerifiedProxyRoleIdentity = getUsableCachedWaveReadIdentity({
+    identity: cacheRefs.latestVerifiedIdentityByProxyRoleRef.current.get(
       temporaryProxyRoleIdentity.identityKey
-    );
+    ),
+    cacheRefs,
+  });
   if (latestVerifiedProxyRoleIdentity) {
     return markWaveReadWithAuthHeaders({
       waveId,
@@ -266,6 +336,7 @@ const markTemporaryProxyRoleWaveRead = ({
         waveId,
       }),
       authHeaders: latestVerifiedProxyRoleIdentity.authHeaders,
+      jwtExpiresAt: latestVerifiedProxyRoleIdentity.jwtExpiresAt,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
       shouldSend: options?.shouldSend,
     });
@@ -315,20 +386,23 @@ export const markWaveReadFromCache = ({
     activeProfileProxyId,
     waveId,
   });
-  const verifiedCachedIdentity =
-    cacheRefs.authByIdentityRef.current.get(identityKey);
+  const verifiedCachedIdentity = getUsableCachedWaveReadIdentity({
+    identity: cacheRefs.authByIdentityRef.current.get(identityKey),
+    cacheRefs,
+  });
   if (verifiedCachedIdentity) {
     return markWaveReadWithAuthHeaders({
       waveId,
       addressKey: verifiedCachedIdentity.addressKey,
       requestKey,
       authHeaders: verifiedCachedIdentity.authHeaders,
+      jwtExpiresAt: verifiedCachedIdentity.jwtExpiresAt,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
       shouldSend: options?.shouldSend,
     });
   }
 
-  const latestVerifiedIdentity = getLatestClearedWaveReadIdentity({
+  const latestVerifiedIdentity = getUsableLatestClearedWaveReadIdentity({
     addressKey,
     identityKey,
     cacheRefs,
@@ -339,6 +413,7 @@ export const markWaveReadFromCache = ({
       addressKey: latestVerifiedIdentity.addressKey,
       requestKey,
       authHeaders: latestVerifiedIdentity.authHeaders,
+      jwtExpiresAt: latestVerifiedIdentity.jwtExpiresAt,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
       shouldSend: options?.shouldSend,
     });

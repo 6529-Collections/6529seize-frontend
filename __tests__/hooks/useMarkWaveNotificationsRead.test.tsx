@@ -47,6 +47,9 @@ const getCurrentJwtSecond = (): number => Math.floor(Date.now() / 1000);
 
 const getFutureJwtExp = (): number => getCurrentJwtSecond() + 60;
 
+const mockCurrentJwtSecond = (currentSecond: number) =>
+  jest.spyOn(Date, "now").mockReturnValue(currentSecond * 1000);
+
 const createDeferred = (): Deferred => {
   let resolve: () => void = () => {};
   let reject: (error: unknown) => void = () => {};
@@ -134,6 +137,10 @@ describe("useMarkWaveNotificationsRead", () => {
       return payload as any;
     });
     setActiveIdentity({});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("treats a missing active profile proxy as no proxy", async () => {
@@ -1012,6 +1019,137 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(apiPostMock).toHaveBeenCalledWith({
       endpoint: "notifications/wave/wave-expired-replaced/read",
       headers: { Authorization: "Bearer jwt-fresh" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("skips an account read when cached JWT expires and queueing is disabled", async () => {
+    const invalidateNotifications = jest.fn();
+    const currentSecond = 1_700_000_000;
+    const jwtExpiresAt = currentSecond + 10;
+    const dateNowSpy = mockCurrentJwtSecond(currentSecond);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-cached",
+      jwtExp: jwtExpiresAt,
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    dateNowSpy.mockReturnValue(jwtExpiresAt * 1000);
+
+    await expect(
+      result.current("wave-cached-expired", { queueIfBlocked: false })
+    ).resolves.toBe("skipped");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-fresh",
+      jwtExp: jwtExpiresAt + 60,
+    });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("queues an account read after cached JWT expiry and flushes it with a fresh JWT", async () => {
+    const invalidateNotifications = jest.fn();
+    const currentSecond = 1_700_000_100;
+    const jwtExpiresAt = currentSecond + 10;
+    const dateNowSpy = mockCurrentJwtSecond(currentSecond);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-old",
+      jwtExp: jwtExpiresAt,
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    dateNowSpy.mockReturnValue(jwtExpiresAt * 1000);
+
+    const queuedPromise = result.current("wave-cached-refresh");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-fresh",
+      jwtExp: jwtExpiresAt + 60,
+    });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBe("sent");
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-cached-refresh/read",
+      headers: { Authorization: "Bearer jwt-fresh" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("queues a proxy-role read after cached proxy JWT expiry and flushes it with a fresh proxy JWT", async () => {
+    const invalidateNotifications = jest.fn();
+    const currentSecond = 1_700_000_200;
+    const jwtExpiresAt = currentSecond + 10;
+    const dateNowSpy = mockCurrentJwtSecond(currentSecond);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-old",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+      jwtExp: jwtExpiresAt,
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    dateNowSpy.mockReturnValue(jwtExpiresAt * 1000);
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-role-fresh",
+      jwtRole: "creator-1",
+      jwtExp: jwtExpiresAt + 60,
+    });
+    rerender();
+
+    const queuedPromise = result.current("wave-proxy-cached-expired");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-fresh",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+      jwtExp: jwtExpiresAt + 60,
+    });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBe("sent");
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-proxy-cached-expired/read",
+      headers: { Authorization: "Bearer jwt-proxy-fresh" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });

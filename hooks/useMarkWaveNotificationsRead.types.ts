@@ -39,6 +39,7 @@ export interface WaveReadRequestState {
   readonly addressKey: string;
   readonly requestKey: string;
   authHeaders: AuthHeaders;
+  jwtExpiresAt: number;
   shouldSends: WaveReadShouldSend[];
   pendingShouldSends: WaveReadShouldSend[];
 }
