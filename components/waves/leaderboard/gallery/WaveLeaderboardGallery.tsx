@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WaveLeaderboardGalleryItem } from "./WaveLeaderboardGalleryItem";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
@@ -10,6 +11,8 @@ import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
@@ -20,12 +23,16 @@ interface WaveLeaderboardGalleryProps {
 export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   wave,
   sort,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
   onDropClick,
   curatedByGroupId,
   minPrice,
   maxPrice,
   priceCurrency,
 }) => {
+  const winningThreshold =
+    wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
@@ -80,6 +87,9 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
             onDropClick={onDropClick}
             activeSort={sort}
             animationKey={animationKey}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+            winningThreshold={winningThreshold}
           />
         ))}
 

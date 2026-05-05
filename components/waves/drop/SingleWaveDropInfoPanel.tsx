@@ -2,10 +2,10 @@
 
 import WaveDropDeleteButton from "@/components/utils/button/WaveDropDeleteButton";
 import VotingModal from "@/components/voting/VotingModal";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import { useState } from "react";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { SingleWaveDropInfoContainer } from "./SingleWaveDropInfoContainer";
 import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
@@ -14,15 +14,26 @@ import { WaveDropVoteSummary } from "./WaveDropVoteSummary";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const SingleWaveDropInfoPanel = ({
   drop,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: SingleWaveDropInfoPanelProps) => {
-  const [isVotingOpen, setIsVotingOpen] = useState(false);
   const { canDelete, canShowVote, isVotingEnded, isWinner } =
     useDropInteractionRules(drop);
   const isChatWave = drop.drop_type === ApiDropType.Chat;
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const {
+    isOpen: isVotingOpen,
+    open: openVoting,
+    close: closeVoting,
+  } = useVotingModalState(isVotingActionLocked);
+  const canShowVotingAction = canShowVote && !isVotingActionLocked;
+  const shouldShowVotingEndedSummary = isVotingEnded || isVotingClosed;
 
   return (
     <>
@@ -38,9 +49,9 @@ export const SingleWaveDropInfoPanel = ({
                 <WaveDropVoteSummary
                   drop={drop}
                   isWinner={isWinner}
-                  isVotingEnded={isVotingEnded}
-                  canShowVote={canShowVote}
-                  onVoteClick={() => setIsVotingOpen(true)}
+                  isVotingEnded={shouldShowVotingEndedSummary}
+                  canShowVote={canShowVotingAction}
+                  onVoteClick={openVoting}
                 />
               </div>
             )}
@@ -62,11 +73,7 @@ export const SingleWaveDropInfoPanel = ({
       </SingleWaveDropInfoContainer>
 
       {!isChatWave && (
-        <VotingModal
-          drop={drop}
-          isOpen={isVotingOpen}
-          onClose={() => setIsVotingOpen(false)}
-        />
+        <VotingModal drop={drop} isOpen={isVotingOpen} onClose={closeVoting} />
       )}
     </>
   );

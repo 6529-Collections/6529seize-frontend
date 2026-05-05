@@ -4,17 +4,22 @@ import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import MyStreamWaveLeaderboard from "@/components/brain/my-stream/MyStreamWaveLeaderboard";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const useWave = jest.fn();
 const useLayout = jest.fn();
 const useLocalPreference = jest.fn();
 const useWaveCurations = jest.fn();
+const useWaveDecisions = jest.fn();
 const replace = jest.fn();
 let searchParamsString = "";
 let dropsProps: any;
+let galleryProps: any;
+let gridProps: any;
 let createDropProps: any[] = [];
 let curationModalProps: any;
+let approvalStatusProps: any;
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -36,6 +41,10 @@ jest.mock(
 jest.mock("@/hooks/waves/useWaveCurations", () => ({
   useWaveCurations: (...args: any[]) => useWaveCurations(...args),
 }));
+jest.mock("@/hooks/waves/useWaveDecisions", () => ({
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE: 2000,
+  useWaveDecisions: (...args: any[]) => useWaveDecisions(...args),
+}));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
   usePathname: () => "/waves",
@@ -47,6 +56,18 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/waves/leaderboard/WaveLeaderboardTime", () => ({
   WaveLeaderboardTime: () => <div data-testid="time" />,
+}));
+jest.mock("@/components/waves/approval/WaveApprovalStatusBar", () => ({
+  __esModule: true,
+  default: (props: any) => {
+    approvalStatusProps = props;
+    return (
+      <div
+        data-testid="approval-status"
+        data-close-status={props.closeStatus ?? ""}
+      />
+    );
+  },
 }));
 let headerProps: any;
 jest.mock(
@@ -79,12 +100,18 @@ jest.mock("@/components/waves/leaderboard/drops/WaveLeaderboardDrops", () => ({
 }));
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery",
-  () => ({ WaveLeaderboardGallery: () => <div data-testid="gallery" /> })
+  () => ({
+    WaveLeaderboardGallery: (props: any) => {
+      galleryProps = props;
+      return <div data-testid="gallery" />;
+    },
+  })
 );
 jest.mock("@/components/waves/leaderboard/grid/WaveLeaderboardGrid", () => ({
-  WaveLeaderboardGrid: (props: any) => (
-    <div data-testid="grid" data-mode={props.mode} />
-  ),
+  WaveLeaderboardGrid: (props: any) => {
+    gridProps = props;
+    return <div data-testid="grid" data-mode={props.mode} />;
+  },
 }));
 jest.mock(
   "@/components/waves/memes/MemesArtSubmissionModal",
@@ -105,10 +132,10 @@ jest.mock(
 const wave = {
   id: "1",
   participation: {},
-  wave: { type: "RANK" },
+  wave: { type: ApiWaveType.Rank },
 } as ApiWave;
 
-const renderLeaderboard = () =>
+const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   render(
     <AuthContext.Provider
       value={
@@ -118,7 +145,7 @@ const renderLeaderboard = () =>
         } as any
       }
     >
-      <MyStreamWaveLeaderboard wave={wave} onDropClick={jest.fn()} />
+      <MyStreamWaveLeaderboard wave={leaderboardWave} onDropClick={jest.fn()} />
     </AuthContext.Provider>
   );
 
@@ -127,13 +154,26 @@ describe("MyStreamWaveLeaderboard", () => {
     jest.clearAllMocks();
     searchParamsString = "";
     dropsProps = null;
+    galleryProps = null;
+    gridProps = null;
     createDropProps = [];
     curationModalProps = undefined;
+    approvalStatusProps = undefined;
     useLayout.mockReturnValue({ leaderboardViewStyle: {} });
     useWaveCurations.mockReturnValue({
       data: [],
       isLoading: false,
       isError: false,
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
     });
     useLocalPreference.mockImplementation((_: any, def: any) => [
       def,
@@ -193,6 +233,8 @@ describe("MyStreamWaveLeaderboard", () => {
     renderLeaderboard();
 
     expect(headerProps.viewMode).toBe("grid");
+    expect(galleryProps.isVotingClosed).toBe(false);
+    expect(galleryProps.isVotingControlsLocked).toBe(false);
     await user.click(screen.getByTestId("header"));
     expect(screen.getByTestId("memes")).toBeInTheDocument();
   });
@@ -297,6 +339,8 @@ describe("MyStreamWaveLeaderboard", () => {
       "data-mode",
       "content_only"
     );
+    expect(gridProps.isVotingClosed).toBe(false);
+    expect(gridProps.isVotingControlsLocked).toBe(false);
   });
 
   it("reads curation group from URL and keeps price filters local", () => {
@@ -494,5 +538,233 @@ describe("MyStreamWaveLeaderboard", () => {
       expect(dropsProps.maxPrice).toBeUndefined();
       expect(dropsProps.priceCurrency).toBeUndefined();
     });
+  });
+
+  it("shows approve status without loading decisions when counters close the wave", async () => {
+    const user = userEvent.setup();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 1,
+        no_of_decisions_done: 1,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(screen.getByTestId("approval-status")).toHaveAttribute(
+      "data-close-status",
+      "max_reached"
+    );
+    expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(
+      useWaveDecisions.mock.calls.some(([args]) => args.enabled === true)
+    ).toBe(false);
+    expect(useWaveDecisions).toHaveBeenCalledWith({
+      waveId: "1",
+      enabled: false,
+      loadAllPages: false,
+      pageSize: undefined,
+    });
+    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("blocks create drop while capped approval status is loading", async () => {
+    const user = userEvent.setup();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(
+      useWaveDecisions.mock.calls.some(
+        ([args]) =>
+          args.enabled === true &&
+          args.loadAllPages === true &&
+          args.pageSize === 2000
+      )
+    ).toBe(true);
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("blocks create drop and passes retry when approval status loading fails", async () => {
+    const user = userEvent.setup();
+    const retryApprovalDecisions = jest.fn();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch: retryApprovalDecisions,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(approvalStatusProps.isApprovalStatusError).toBe(true);
+    expect(approvalStatusProps.retryApprovalStatus).toEqual(
+      expect.any(Function)
+    );
+    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    approvalStatusProps.retryApprovalStatus();
+
+    expect(retryApprovalDecisions).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("removes open create drop UI when an approve wave closes", async () => {
+    const user = userEvent.setup();
+    const openApproveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 1,
+        no_of_decisions_done: 0,
+      },
+    } as ApiWave;
+    const closedApproveWave = {
+      ...openApproveWave,
+      wave: {
+        ...openApproveWave.wave,
+        no_of_decisions_done: 1,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    const { rerender } = renderLeaderboard(openApproveWave);
+
+    await user.click(screen.getByTestId("header"));
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+
+    rerender(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <MyStreamWaveLeaderboard
+          wave={closedApproveWave}
+          onDropClick={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+    });
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
   });
 });

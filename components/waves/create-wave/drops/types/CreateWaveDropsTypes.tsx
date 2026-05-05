@@ -1,13 +1,8 @@
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import CreateWaveDropsType from "./CreateWaveDropsType";
+import { ExtendedWaveParticipationRequirement } from "./CreateWaveDropsTypes.constants";
 
-export enum ExtendedWaveParticipationRequirement {
-  NONE = "NONE",
-  IMAGE = "IMAGE",
-  AUDIO = "AUDIO",
-  VIDEO = "VIDEO",
-}
 export default function CreateWaveDropsTypes({
   requiredTypes,
   onRequiredTypeChange,
@@ -56,7 +51,7 @@ export default function CreateWaveDropsTypes({
   const onChange = (type: ExtendedWaveParticipationRequirement) => {
     const waveParticipationRequirement =
       extendedTypeToWaveParticipationRequirement(type);
-    if (waveParticipationRequirement) {
+    if (waveParticipationRequirement !== null) {
       onRequiredTypeChange([waveParticipationRequirement]);
     } else {
       onRequiredTypeChange([]);
@@ -65,10 +60,10 @@ export default function CreateWaveDropsTypes({
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
         Required Types
       </p>
-      <div className="tw-mt-3 tw-flex tw-flex-wrap sm:tw-flex-row tw-gap-x-4 tw-gap-y-4">
+      <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
         {Object.values(ExtendedWaveParticipationRequirement).map((type) => (
           <CreateWaveDropsType
             key={type}

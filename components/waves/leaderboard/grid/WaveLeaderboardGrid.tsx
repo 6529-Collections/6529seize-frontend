@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
@@ -13,6 +14,8 @@ interface WaveLeaderboardGridProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
   readonly mode: WaveLeaderboardGridMode;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly curatedByGroupId?: string | undefined;
   readonly minPrice?: number | undefined;
@@ -24,12 +27,16 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   wave,
   sort,
   mode,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
   onDropClick,
   curatedByGroupId,
   minPrice,
   maxPrice,
   priceCurrency,
 }) => {
+  const winningThreshold =
+    wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
@@ -42,7 +49,12 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
 
   if (isFetching && drops.length === 0) {
     return (
-      <div className="tw-@container">
+      <div
+        className="tw-@container"
+        role="status"
+        aria-label="Loading drops"
+        aria-busy="true"
+      >
         <div className="tw-grid tw-gap-4 @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
@@ -77,6 +89,9 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
             key={drop.id}
             drop={drop}
             mode={mode}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+            winningThreshold={winningThreshold}
             onDropClick={onDropClick}
           />
         ))}

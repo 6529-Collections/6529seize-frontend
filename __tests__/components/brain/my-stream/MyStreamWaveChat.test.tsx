@@ -1,4 +1,5 @@
 import MyStreamWaveChat from "@/components/brain/my-stream/MyStreamWaveChat";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { editSlice } from "@/store/editSlice";
@@ -18,6 +19,7 @@ const mockRemoveAllDeliveredNotifications = jest
   .mockResolvedValue(undefined);
 const invalidateNotificationsMock = jest.fn();
 const mockUseAuth = jest.fn();
+const mockApprovalStatus = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
@@ -34,11 +36,17 @@ jest.mock("@/hooks/useWave", () => ({
   }),
 }));
 
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
+}));
+
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ waveViewStyle: { height: "1px" } }),
 }));
 
 const capturedPropsHolder = { current: {} as any };
+const capturedCreatorPropsHolder = { current: {} as any };
+const capturedMemesButtonPropsHolder = { current: {} as any };
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -57,15 +65,26 @@ jest.mock("@/components/waves/CreateDropWaveWrapper", () => ({
 
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
-  default: () => <div data-testid="creator" />,
-  DropMode: { BOTH: "BOTH" },
+  default: (props: any) => {
+    capturedCreatorPropsHolder.current = props;
+    return <div data-testid="creator" data-mode={props.fixedDropMode} />;
+  },
+  DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
 }));
 
 jest.mock(
   "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="memes-btn" />,
+    default: (props: any) => {
+      capturedMemesButtonPropsHolder.current = props;
+      return (
+        <div
+          data-testid="memes-btn"
+          data-locked={String(props.isSubmissionLocked)}
+        />
+      );
+    },
   })
 );
 
@@ -100,7 +119,12 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
 }));
 
-const wave = { id: "10", participation: {}, metrics: { muted: false } } as any;
+const wave = {
+  id: "10",
+  participation: {},
+  metrics: { muted: false, your_unread_drops_count: 0 },
+  wave: { type: ApiWaveType.Rank, winning_threshold: null },
+} as any;
 const mockOnDropClick = jest.fn();
 const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
   Object.defineProperty(document, "visibilityState", {
@@ -115,6 +139,8 @@ describe("MyStreamWaveChat", () => {
   beforeEach(() => {
     setDocumentVisibility("visible");
     capturedPropsHolder.current = {};
+    capturedCreatorPropsHolder.current = {};
+    capturedMemesButtonPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
     searchParamsMock.toString.mockReset();
@@ -126,6 +152,12 @@ describe("MyStreamWaveChat", () => {
     mockRemoveWaveDeliveredNotifications.mockClear();
     mockRemoveAllDeliveredNotifications.mockClear();
     invalidateNotificationsMock.mockClear();
+    mockApprovalStatus.mockReset();
+    mockApprovalStatus.mockReturnValue({
+      winningThreshold: null,
+      isVotingClosed: false,
+      isVotingControlsLocked: false,
+    });
     mockUseAuth.mockReturnValue({
       connectedProfile: { handle: "tester" },
     });
@@ -183,7 +215,48 @@ describe("MyStreamWaveChat", () => {
     });
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("BOTH");
     expect(screen.queryByTestId("memes-btn")).toBeNull();
+  });
+
+  it("locks approve submissions while keeping drop status open during status locks", async () => {
+    const approveWave = {
+      ...wave,
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 12,
+        max_winners: 1,
+        no_of_decisions_done: 1,
+      },
+    };
+
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+    mockIsMemesWave = true;
+    mockApprovalStatus.mockReturnValue({
+      winningThreshold: 12,
+      isVotingClosed: false,
+      isVotingControlsLocked: true,
+    });
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={approveWave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+    });
+
+    expect(capturedPropsHolder.current.winningThreshold).toBe(12);
+    expect(capturedPropsHolder.current.isVotingClosed).toBe(false);
+    expect(capturedPropsHolder.current.isVotingControlsLocked).toBe(true);
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
+    expect(capturedMemesButtonPropsHolder.current.isSubmissionLocked).toBe(
+      true
+    );
   });
 
   it("keeps serialNo until chat view renders", async () => {

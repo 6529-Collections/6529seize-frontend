@@ -60,10 +60,10 @@ export default function GroupCreateXtdhGrant({
   return (
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
-        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-lg">
+        <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
           xTDH Grant Beneficiary
         </p>
-        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-500">
           Optionally require identities to be beneficiaries of a selected xTDH
           grant.
         </p>
@@ -79,7 +79,7 @@ export default function GroupCreateXtdhGrant({
             value={normalizedGrantId}
             onChange={(event) => onInputChange(event.target.value)}
             placeholder="Paste grant id"
-            className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400"
+            className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-primary-400 sm:tw-text-sm"
           />
         </label>
         <button

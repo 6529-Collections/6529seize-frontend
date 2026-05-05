@@ -34,7 +34,7 @@ export const convertWaveToUpdateWave = (
     credit_category: wave.voting.credit_category,
     creditor_id: wave.voting.creditor?.id ?? null,
     signature_required: !!wave.voting.signature_required,
-    ...(wave.voting.period != null && { period: wave.voting.period }),
+    ...(wave.voting.period !== null && { period: wave.voting.period }),
     forbid_negative_votes: wave.voting.forbid_negative_votes,
   },
   visibility: {
@@ -65,6 +65,7 @@ export const convertWaveToUpdateWave = (
     type: wave.wave.type,
     winning_threshold: wave.wave.winning_threshold,
     max_winners: wave.wave.max_winners,
+    max_votes_per_identity_to_drop: wave.wave.max_votes_per_identity_to_drop,
     time_lock_ms: wave.wave.time_lock_ms,
     admin_group: {
       group_id: wave.wave.admin_group.group?.id ?? null,

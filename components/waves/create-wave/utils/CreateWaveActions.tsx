@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
 } from "@/helpers/waves/create-wave.helpers";
-import type {
-  CreateWaveConfig,
-  CreateWaveStep,
-} from "@/types/waves.types";
+import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
 import CreateWaveBackStep from "./CreateWaveBackStep";
 import CreateWaveNextStep from "./CreateWaveNextStep";
 
@@ -28,34 +24,27 @@ export default function CreateWaveActions({
   ) => void;
   readonly onComplete: () => Promise<void>;
 }) {
-  const onNextStep = async (): Promise<void> => {
+  const onNextStep = (): void => {
     const nextStep = getCreateWaveNextStep({
       step,
       waveType: config.overview.type,
     });
-    if (nextStep) {
+    if (nextStep !== null) {
       setStep(nextStep, "forward");
       return;
     }
-    await onComplete();
+    void onComplete();
   };
 
-  const [previousStep, setPreviousStep] = useState<CreateWaveStep | null>(
-    getCreateWavePreviousStep({ step, waveType: config.overview.type })
-  );
-
-  useEffect(
-    () =>
-      setPreviousStep(
-        getCreateWavePreviousStep({ step, waveType: config.overview.type })
-      ),
-    [step, config.overview.type]
-  );
+  const previousStep = getCreateWavePreviousStep({
+    step,
+    waveType: config.overview.type,
+  });
 
   return (
-    <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
       <div className="-tw-ml-6">
-        {previousStep && (
+        {previousStep !== null && (
           <CreateWaveBackStep
             onPreviousStep={() => setStep(previousStep, "backward")}
           />

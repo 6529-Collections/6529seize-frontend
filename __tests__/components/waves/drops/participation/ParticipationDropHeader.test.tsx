@@ -29,6 +29,13 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => {
   MockWaveDropTime.displayName = "MockWaveDropTime";
   return MockWaveDropTime;
 });
+jest.mock("@/components/waves/approval/ApprovalStatusBadge", () => {
+  const MockApprovalStatusBadge = (props: any) => (
+    <div data-testid="approval-badge">{JSON.stringify(props)}</div>
+  );
+  MockApprovalStatusBadge.displayName = "MockApprovalStatusBadge";
+  return MockApprovalStatusBadge;
+});
 jest.mock("@/helpers/Helpers", () => ({ cicToType: jest.fn(() => "TYPE") }));
 
 describe("ParticipationDropHeader", () => {
@@ -82,5 +89,44 @@ describe("ParticipationDropHeader", () => {
     expect(screen.queryByTestId("badge")).toBeNull();
     expect(screen.getByText("alice")).toBeInTheDocument();
     expect(screen.getByTestId("time")).toBeInTheDocument();
+  });
+
+  it("uses approval badge for approved approve drops", () => {
+    const drop = {
+      ...baseDrop,
+      rank: 1,
+      winning_context: { decision_time: 999, place: 1 },
+    };
+
+    render(
+      <ParticipationDropHeader
+        drop={drop}
+        showWaveInfo={false}
+        winningThreshold={10}
+      />
+    );
+
+    expect(screen.getByTestId("approval-badge").textContent).toContain(
+      '"order":1'
+    );
+    expect(screen.queryByTestId("badge")).toBeNull();
+  });
+
+  it("does not show approval badge for rank-only approve drops", () => {
+    const drop = {
+      ...baseDrop,
+      rank: 1,
+    };
+
+    render(
+      <ParticipationDropHeader
+        drop={drop}
+        showWaveInfo={false}
+        winningThreshold={10}
+      />
+    );
+
+    expect(screen.queryByTestId("approval-badge")).toBeNull();
+    expect(screen.queryByTestId("badge")).toBeNull();
   });
 });

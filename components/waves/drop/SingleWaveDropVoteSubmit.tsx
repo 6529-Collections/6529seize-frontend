@@ -11,12 +11,13 @@ import {
 } from "react";
 import mojs from "@mojs/core";
 import styles from "./VoteButton.module.scss";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "@/components/auth/Auth";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 type ThemeColors = {
   primary: string;
@@ -74,6 +75,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
   ) => {
     const position = drop.rank;
     const { requestAuth, setToast } = useContext(AuthContext);
+    const queryClient = useQueryClient();
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [isSpinnerExiting, setIsSpinnerExiting] = useState(false);
@@ -98,6 +100,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
             category: DEFAULT_DROP_RATE_CATEGORY,
           },
         }),
+      onSuccess: () => {
+        invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
+      },
       onError: (error) => {
         setToast({
           message: error as unknown as string,

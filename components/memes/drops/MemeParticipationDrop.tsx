@@ -3,6 +3,7 @@
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
+import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
@@ -16,7 +17,7 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
@@ -32,6 +33,8 @@ interface MemeParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly footer?: ReactNode;
   readonly showInteractions?: boolean | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 // Border styling based on rank
@@ -69,9 +72,16 @@ export default function MemeParticipationDrop({
   onReply,
   footer,
   showInteractions = true,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: MemeParticipationDropProps) {
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote } = useDropInteractionRules(drop);
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const {
+    isOpen: isVotingModalOpen,
+    open: openVotingModal,
+    close: closeVotingModal,
+  } = useVotingModalState(isVotingActionLocked);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
@@ -161,13 +171,10 @@ export default function MemeParticipationDrop({
               />
             </div>
 
-            {canShowVote && showInteractions && (
+            {canShowVote && showInteractions && !isVotingActionLocked && (
               <div className="tw-flex tw-w-full tw-justify-center tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-6 tw-pt-4 @[700px]:tw-w-auto @[700px]:tw-border-none @[700px]:tw-px-0 @[700px]:tw-pt-0">
                 <div onClick={(e) => e.stopPropagation()}>
-                  <VotingModalButton
-                    drop={drop}
-                    onClick={() => setIsVotingModalOpen(true)}
-                  />
+                  <VotingModalButton drop={drop} onClick={openVotingModal} />
                 </div>
               </div>
             )}
@@ -199,13 +206,13 @@ export default function MemeParticipationDrop({
             <MobileVotingModal
               drop={drop}
               isOpen={isVotingModalOpen}
-              onClose={() => setIsVotingModalOpen(false)}
+              onClose={closeVotingModal}
             />
           ) : (
             <VotingModal
               drop={drop}
               isOpen={isVotingModalOpen}
-              onClose={() => setIsVotingModalOpen(false)}
+              onClose={closeVotingModal}
             />
           ))}
       </div>

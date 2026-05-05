@@ -22,13 +22,13 @@ export default function GroupCreateCIC({
     ? IDENTITY_LABEL[cic.direction]
     : "Identity";
   return (
-    <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div className="tw-flex tw-flex-col">
         <div className="tw-mb-4">
-          <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+          <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
             NIC
           </p>
-          <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-300">
+          <p className="tw-mb-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
             Specify the NIC and optionally set the identity who gave it.
           </p>
         </div>
@@ -41,9 +41,9 @@ export default function GroupCreateCIC({
             />
           </div>
         )}
-        <div className="tw-flex tw-flex-col tw-gap-y-4 lg:tw-gap-y-5 tw-gap-x-3">
+        <div className="tw-flex tw-flex-col tw-gap-x-3 tw-gap-y-4 lg:tw-gap-y-5">
           <IdentitySearch
-            size={IdentitySearchSize.MD}
+            size={IdentitySearchSize.SM}
             identity={cic.user_identity}
             label={identityLabel}
             setIdentity={(identity) =>

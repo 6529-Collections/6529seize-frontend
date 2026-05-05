@@ -1,9 +1,6 @@
 import { getCreateWaveStepStatus } from "@/helpers/waves/waves.helpers";
-import type {
-  CreateWaveStep} from "@/types/waves.types";
-import {
-  CreateWaveStepStatus,
-} from "@/types/waves.types";
+import type { CreateWaveStep } from "@/types/waves.types";
+import { CreateWaveStepStatus } from "@/types/waves.types";
 import CreateWavesMainStepIcon from "./CreateWavesMainStepIcon";
 import CreateWavesMainStepConnectionLine from "./CreateWavesMainStepConnectionLine";
 
@@ -37,22 +34,22 @@ export default function CreateWavesMainStep({
   };
 
   return (
-    <div className="tw-relative tw-mb-11">
+    <div className="tw-relative tw-mb-10">
       {!isLast && <CreateWavesMainStepConnectionLine done={isDone} />}
       <button
         type="button"
         disabled={!isDone}
         onClick={() => onStep(step)}
-        className="tw-bg-transparent tw-p-0 tw-border-none focus:tw-outline-none tw-group tw-relative tw-flex tw-items-center"
+        className="tw-group tw-relative tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
       >
-        <span className="tw-mr-6 tw-flex tw-min-w-0 tw-flex-col">
+        <span className="tw-mr-5 tw-flex tw-min-w-0 tw-flex-col">
           <span
-            className={`${LABEL_CLASSES[stepStatus]} tw-text-base tw-transform tw-transition tw-ease-out tw-duration-300`}
+            className={`${LABEL_CLASSES[stepStatus]} tw-transform tw-text-base tw-transition tw-duration-300 tw-ease-out`}
           >
             {label}
           </span>
         </span>
-        <span className="tw-flex tw-h-9 tw-items-center">
+        <span className="tw-flex tw-h-8 tw-items-center">
           <CreateWavesMainStepIcon stepStatus={stepStatus} />
         </span>
       </button>

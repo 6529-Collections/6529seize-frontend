@@ -1,5 +1,6 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import {
   act,
@@ -42,6 +43,27 @@ jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => ({
   ],
   WAVE_LEADERBOARD_CURATION_SORT_ITEMS: [
     { key: "RANK", label: "Current Vote", value: "RANK" },
+    {
+      key: "RATING_PREDICTION",
+      label: "Projected Vote",
+      value: "RATING_PREDICTION",
+    },
+    { key: "TREND", label: "Hot", value: "TREND" },
+    { key: "CREATED_AT", label: "Newest", value: "CREATED_AT" },
+    { key: "PRICE", label: "Price", value: "PRICE" },
+  ],
+  WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: [
+    { key: "RANK", label: "Closest to approval", value: "RANK" },
+    {
+      key: "RATING_PREDICTION",
+      label: "Projected Vote",
+      value: "RATING_PREDICTION",
+    },
+    { key: "TREND", label: "Hot", value: "TREND" },
+    { key: "CREATED_AT", label: "Newest", value: "CREATED_AT" },
+  ],
+  WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS: [
+    { key: "RANK", label: "Closest to approval", value: "RANK" },
     {
       key: "RATING_PREDICTION",
       label: "Projected Vote",
@@ -106,7 +128,7 @@ jest.mock("react-use", () => {
   };
 });
 
-const wave = { id: "w" } as any;
+const wave = { id: "w", wave: { type: ApiWaveType.Rank } } as any;
 
 beforeEach(() => {
   sortComponentMock.mockClear();
@@ -210,6 +232,47 @@ it("renders three view toggles and sort for non-meme waves", async () => {
   expect(onSortChange).toHaveBeenCalledWith("SORT");
   await user.click(screen.getByRole("tab", { name: "Content only" }));
   expect(onViewModeChange).toHaveBeenCalledWith("grid_content_only");
+});
+
+it("uses approval sort labels for approve waves", async () => {
+  useWave.mockReturnValue({
+    isMemesWave: false,
+    isCurationWave: false,
+    participation: { isEligible: true },
+  });
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "tester" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveLeaderboardHeader
+        wave={{ ...wave, wave: { type: ApiWaveType.Approve } }}
+        onCreateDrop={jest.fn()}
+        viewMode="list"
+        onViewModeChange={jest.fn()}
+        sort={WaveDropsLeaderboardSort.RANK}
+        onSortChange={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  await waitFor(() =>
+    expect(sortComponentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            label: "Closest to approval",
+            value: WaveDropsLeaderboardSort.RANK,
+          }),
+        ]),
+      })
+    )
+  );
 });
 
 it("renders curation selector and handles curation filter changes", async () => {

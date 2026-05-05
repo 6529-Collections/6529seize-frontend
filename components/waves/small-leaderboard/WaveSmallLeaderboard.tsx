@@ -6,6 +6,7 @@ import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 import { WaveSmallLeaderboardDrop } from "./WaveSmallLeaderboardDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
 interface WaveSmallLeaderboardProps {
   readonly wave: ApiWave;
@@ -20,12 +21,15 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
     });
+  const { isVotingClosed, isVotingControlsLocked } = useApprovalWaveStatus({
+    wave,
+  });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   });
 
@@ -43,6 +47,8 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
                 drop={drop}
                 wave={wave}
                 key={drop.id}
+                isVotingClosed={isVotingClosed}
+                isVotingControlsLocked={isVotingControlsLocked}
                 onDropClick={() => onDropClick(drop)}
               />
             ))}

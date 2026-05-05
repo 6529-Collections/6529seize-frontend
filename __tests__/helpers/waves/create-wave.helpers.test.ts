@@ -57,7 +57,7 @@ const createBaseConfig = (waveType: ApiWaveType) =>
       },
     },
     outcomes: [],
-    approval: { threshold: null, thresholdTimeMs: null },
+    approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
   }) as any;
 
 const createDrop = () =>
@@ -88,7 +88,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.VOTING,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.APPROVAL);
+      ).toBe(CreateWaveStep.OUTCOMES);
       expect(
         getCreateWaveNextStep({
           step: CreateWaveStep.DESCRIPTION,
@@ -111,7 +111,7 @@ describe("create-wave.helpers", () => {
           step: CreateWaveStep.OUTCOMES,
           waveType: ApiWaveType.Approve,
         })
-      ).toBe(CreateWaveStep.APPROVAL);
+      ).toBe(CreateWaveStep.VOTING);
     });
   });
 
@@ -167,6 +167,7 @@ describe("create-wave.helpers", () => {
           type: null,
           category: null,
           profileId: null,
+          winningThreshold: null,
           timeWeighted: {
             enabled: false,
             averagingInterval: 5,
@@ -174,7 +175,6 @@ describe("create-wave.helpers", () => {
           },
         },
         outcomes: [],
-        approval: { threshold: null, thresholdTimeMs: null },
       } as any;
       const drop = {
         parts: [],
@@ -190,6 +190,7 @@ describe("create-wave.helpers", () => {
       ]);
       expect(res.voting.period.max).toBe(2 + 3 + 5);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
+      expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
     });
 
     it("includes identity submission strategy when configured", () => {
@@ -232,6 +233,7 @@ describe("create-wave.helpers", () => {
           type: null,
           category: null,
           profileId: null,
+          winningThreshold: null,
           timeWeighted: {
             enabled: false,
             averagingInterval: 5,
@@ -239,7 +241,6 @@ describe("create-wave.helpers", () => {
           },
         },
         outcomes: [],
-        approval: { threshold: null, thresholdTimeMs: null },
       } as any;
       const drop = {
         parts: [],
@@ -253,6 +254,87 @@ describe("create-wave.helpers", () => {
       );
     });
 
+    it("uses the explicit end date for approve waves", () => {
+      const config = {
+        overview: { type: ApiWaveType.Approve, name: "W", image: null },
+        groups: {
+          canView: "1",
+          canDrop: "2",
+          canVote: "3",
+          canChat: "4",
+          admin: "5",
+        },
+        dates: {
+          submissionStartDate: 100,
+          votingStartDate: 100,
+          endDate: 999,
+          firstDecisionTime: 2,
+          subsequentDecisions: [3, 5],
+          isRolling: false,
+        },
+        drops: {
+          noOfApplicationsAllowedPerParticipant: 1,
+          requiredTypes: [],
+          requiredMetadata: [],
+          submissionStrategy: null,
+          terms: null,
+          signatureRequired: false,
+          adminCanDeleteDrops: true,
+        },
+        chat: { enabled: true },
+        voting: {
+          type: null,
+          category: null,
+          profileId: null,
+          timeWeighted: {
+            enabled: false,
+            averagingInterval: 5,
+            averagingIntervalUnit: "minutes",
+          },
+        },
+        outcomes: [],
+        approval: { threshold: 1, thresholdTimeMs: null, maxWinners: null },
+      } as any;
+      const drop = {
+        parts: [],
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      } as any;
+      const res = getCreateNewWaveBody({ drop, picture: "pic", config });
+      expect(res.participation.period.max).toBe(999);
+      expect(res.voting.period.max).toBe(999);
+      expect(res.wave.decisions_strategy).toBeNull();
+    });
+
+    it("sends null periods and max winners for approve waves without limits", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.dates.endDate = null;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.participation.period.max).toBeNull();
+      expect(res.voting.period.max).toBeNull();
+      expect(res.wave.max_winners).toBeNull();
+    });
+
+    it("does not send fractional approve max winners", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.maxWinners = 1.5;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.max_winners).toBeNull();
+    });
+
     it("keeps manual approve outcomes without max winners and filters invalid credit amounts", () => {
       const config = createBaseConfig(ApiWaveType.Approve);
       config.outcomes = [
@@ -261,7 +343,6 @@ describe("create-wave.helpers", () => {
           title: "Manual action",
           credit: null,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -269,7 +350,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 0,
           category: "gold",
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -277,7 +357,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: Number.NaN,
           category: "gold",
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -285,7 +364,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 15,
           category: "gold",
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -293,7 +371,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -301,7 +378,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 0,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
         {
@@ -309,7 +385,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: 25,
           category: null,
-          maxWinners: null,
           winnersConfig: null,
         },
       ] as any;
@@ -341,17 +416,40 @@ describe("create-wave.helpers", () => {
           amount: 25,
         },
       ]);
+      expect(res.wave.max_winners).toBeNull();
+    });
+
+    it("maps approve max winners to the wave config", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.maxWinners = 3;
+      config.outcomes = [
+        {
+          type: CreateWaveOutcomeType.MANUAL,
+          title: "Manual action",
+          credit: null,
+          category: null,
+          winnersConfig: null,
+        },
+      ] as any;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.max_winners).toBe(3);
     });
 
     it("filters rank outcomes with missing or non-positive total amounts", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
+      config.approval.maxWinners = 4;
       config.outcomes = [
         {
           type: CreateWaveOutcomeType.REP,
           title: null,
           credit: null,
           category: "gold",
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -364,7 +462,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: "gold",
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -377,7 +474,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: "gold",
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -390,7 +486,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: null,
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -403,7 +498,6 @@ describe("create-wave.helpers", () => {
           title: null,
           credit: null,
           category: null,
-          maxWinners: 1,
           winnersConfig: {
             creditValueType:
               CreateWaveOutcomeConfigWinnersCreditValueType.ABSOLUTE_VALUE,
@@ -438,6 +532,7 @@ describe("create-wave.helpers", () => {
           distribution: [{ amount: 20, description: null }],
         },
       ]);
+      expect(res.wave.max_winners).toBeNull();
     });
   });
 });

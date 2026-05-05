@@ -10,7 +10,14 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
-  () => (props: any) => <div data-testid="votes" data-variant={props.variant} />
+  () => (props: any) => (
+    <div
+      data-testid="votes"
+      data-variant={props.variant}
+      data-winning-threshold={props.winningThreshold ?? ""}
+      data-is-voting-closed={String(props.isVotingClosed)}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
@@ -75,6 +82,100 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
     await userEvent.click(screen.getByTestId("vote-btn"));
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
+  });
+
+  it("closes voting modal when voting closes", async () => {
+    const { rerender } = render(
+      <WaveLeaderboardGalleryItem drop={drop} onDropClick={jest.fn()} />
+    );
+
+    await userEvent.click(screen.getByTestId("vote-btn"));
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
+
+    rerender(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
+    expect(screen.queryByTestId("vote-btn")).toBeNull();
+  });
+
+  it("hides vote action while controls are locked without passing closed state to votes", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        winningThreshold={10}
+        isVotingClosed={false}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-btn")).toBeNull();
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "10"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "false"
+    );
+  });
+
+  it("closes voting modal when controls become locked", async () => {
+    const { rerender } = render(
+      <WaveLeaderboardGalleryItem drop={drop} onDropClick={jest.fn()} />
+    );
+
+    await userEvent.click(screen.getByTestId("vote-btn"));
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
+
+    rerender(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
+    expect(screen.queryByTestId("vote-btn")).toBeNull();
+  });
+
+  it("hides voting button when voting is closed", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-btn")).toBeNull();
+  });
+
+  it("passes approve status props to the vote display", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={drop}
+        onDropClick={jest.fn()}
+        winningThreshold={10}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "10"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 
   it("applies artFocused styles", () => {

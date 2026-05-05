@@ -20,10 +20,16 @@ interface WaveLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onSourceDropDeleted?: (() => void) | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 interface WaveSmallLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
@@ -42,21 +48,54 @@ const WAVE_LEADERBOARD_VARIANT_OVERRIDES: Readonly<
 
 const DefaultLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
-> = ({ drop, onDropClick }) => {
-  return <DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />;
+> = ({
+  drop,
+  onDropClick,
+  isVotingClosed,
+  isVotingControlsLocked,
+  winningThreshold,
+}) => {
+  return (
+    <DefaultWaveLeaderboardDrop
+      drop={drop}
+      onDropClick={onDropClick}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+      winningThreshold={winningThreshold}
+    />
+  );
 };
 
 const QuorumLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
-> = ({ drop, onDropClick }) => {
-  return <QuorumWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />;
+> = ({
+  drop,
+  onDropClick,
+  isVotingClosed,
+  isVotingControlsLocked,
+  winningThreshold,
+}) => {
+  return (
+    <QuorumWaveLeaderboardDrop
+      drop={drop}
+      onDropClick={onDropClick}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+      winningThreshold={winningThreshold}
+    />
+  );
 };
 
 const MemesLeaderboardDropRenderer: React.FC<
   WaveLeaderboardDropRendererProps
-> = ({ drop, wave, onDropClick }) => {
+> = ({ drop, wave, onDropClick, onSourceDropDeleted }) => {
   return (
-    <MemesLeaderboardDrop drop={drop} wave={wave} onDropClick={onDropClick} />
+    <MemesLeaderboardDrop
+      drop={drop}
+      wave={wave}
+      onDropClick={onDropClick}
+      onSourceDropDeleted={onSourceDropDeleted}
+    />
   );
 };
 

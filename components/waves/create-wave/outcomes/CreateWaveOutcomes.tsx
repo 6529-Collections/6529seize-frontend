@@ -5,13 +5,14 @@ import CreateWaveOutcomesCIC from "./cic/CreateWaveOutcomesCIC";
 import CreateWaveOutcomesRows from "./winners/rows/CreateWaveOutcomesRows";
 import type {
   CreateWaveDatesConfig,
-  CreateWaveOutcomeConfig} from "@/types/waves.types";
-import {
-  CreateWaveOutcomeType,
+  CreateWaveOutcomeConfig,
 } from "@/types/waves.types";
+import { CreateWaveOutcomeType } from "@/types/waves.types";
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
-import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import CreateWaveApprovalMaxWinners from "./CreateWaveApprovalMaxWinners";
+import CreateWaveOutcomeWarning from "./CreateWaveOutcomeWarning";
 
 import type { JSX } from "react";
 
@@ -21,17 +22,23 @@ export default function WavesOutcome({
   waveType,
   errors,
   dates,
+  maxWinners,
   setOutcomeType,
   setOutcomes,
+  setMaxWinners,
 }: {
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly outcomeType: CreateWaveOutcomeType | null;
   readonly waveType: ApiWaveType;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly dates: CreateWaveDatesConfig;
+  readonly maxWinners: number | null;
   readonly setOutcomeType: (outcomeType: CreateWaveOutcomeType | null) => void;
   readonly setOutcomes: (outcomes: CreateWaveOutcomeConfig[]) => void;
+  readonly setMaxWinners: (maxWinners: number | null) => void;
 }) {
+  const isApproveWave = waveType === ApiWaveType.Approve;
+
   const onOutcome = (outcome: CreateWaveOutcomeConfig) => {
     setOutcomes([...outcomes, outcome]);
     setOutcomeType(null);
@@ -46,7 +53,6 @@ export default function WavesOutcome({
       <CreateWaveOutcomesManual
         onOutcome={onOutcome}
         onCancel={onCancel}
-        dates={dates}
         waveType={waveType}
       />
     ),
@@ -54,7 +60,6 @@ export default function WavesOutcome({
       <CreateWaveOutcomesRep
         onOutcome={onOutcome}
         onCancel={onCancel}
-        dates={dates}
         waveType={waveType}
       />
     ),
@@ -62,7 +67,6 @@ export default function WavesOutcome({
       <CreateWaveOutcomesCIC
         onOutcome={onOutcome}
         onCancel={onCancel}
-        dates={dates}
         waveType={waveType}
       />
     ),
@@ -74,6 +78,19 @@ export default function WavesOutcome({
         Choose outcome type
       </p>
       <div className="tw-mt-3 tw-space-y-6">
+        {isApproveWave && (
+          <div className="tw-space-y-4">
+            <CreateWaveApprovalMaxWinners
+              maxWinners={maxWinners}
+              setMaxWinners={setMaxWinners}
+            />
+            <CreateWaveOutcomeWarning
+              waveType={waveType}
+              dates={dates}
+              maxWinners={maxWinners}
+            />
+          </div>
+        )}
         <CreateWaveOutcomeTypes
           outcomeType={outcomeType}
           setOutcomeType={setOutcomeType}
