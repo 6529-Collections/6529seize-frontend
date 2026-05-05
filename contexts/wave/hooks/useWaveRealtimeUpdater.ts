@@ -366,11 +366,7 @@ function useNewestMessagesSync({
   getData,
   queryClient,
   syncNewestMessages,
-  updateData,
-}: Pick<
-  UseWaveRealtimeUpdaterProps,
-  "getData" | "syncNewestMessages" | "updateData"
-> & {
+}: Pick<UseWaveRealtimeUpdaterProps, "getData" | "syncNewestMessages"> & {
   readonly queryClient: QueryClient;
 }): {
   readonly initiateFetchNewestCycle: InitiateFetchNewestCycleFn;
@@ -397,47 +393,22 @@ function useNewestMessagesSync({
       abortControllersRef.current[waveId] = controller;
 
       try {
-        const { drops: fetchedDrops, highestSerialNo: fetchedHighestSerial } =
-          await syncNewestMessages(
-            waveId,
-            sinceSerialNo,
-            controller.signal,
-            (serverDrops) => {
-              const latestData = getData(waveId);
-              return reconcileServerDropsForDisplay({
-                queryClient,
-                serverDrops,
-                ...(latestData !== undefined
-                  ? { latestWaveDrops: getFullDrops(latestData.drops) }
-                  : {}),
-                websocketStatus: WebSocketStatus.CONNECTED,
-              });
-            }
-          );
-
-        if (fetchedDrops) {
-          const currentData = getData(waveId);
-          if (currentData) {
-            const displayDrops = reconcileServerDropsForDisplay({
+        await syncNewestMessages(
+          waveId,
+          sinceSerialNo,
+          controller.signal,
+          (serverDrops) => {
+            const latestData = getData(waveId);
+            return reconcileServerDropsForDisplay({
               queryClient,
-              serverDrops: fetchedDrops,
-              latestWaveDrops: getFullDrops(currentData.drops),
+              serverDrops,
+              ...(latestData !== undefined
+                ? { latestWaveDrops: getFullDrops(latestData.drops) }
+                : {}),
               websocketStatus: WebSocketStatus.CONNECTED,
             });
-            const newDrops: ExtendedDrop[] = displayDrops.map((drop) => ({
-              ...drop,
-              type: DropSize.FULL,
-              stableKey: drop.id,
-              stableHash: drop.id,
-            }));
-
-            updateData({
-              key: waveId,
-              drops: newDrops,
-              latestFetchedSerialNo: fetchedHighestSerial ?? null,
-            });
           }
-        }
+        );
       } catch (error) {
         if (!(error instanceof DOMException && error.name === "AbortError")) {
           console.error("Error fetching newest messages:", error);
@@ -461,7 +432,7 @@ function useNewestMessagesSync({
         }
       }
     },
-    [cleanupController, getData, queryClient, syncNewestMessages, updateData]
+    [cleanupController, getData, queryClient, syncNewestMessages]
   );
 
   useEffect(() => {
@@ -812,7 +783,6 @@ export function useWaveRealtimeUpdater({
     getData,
     queryClient,
     syncNewestMessages,
-    updateData,
   });
   const { processIncomingDrop } = useIncomingDropProcessor({
     activeWaveId,

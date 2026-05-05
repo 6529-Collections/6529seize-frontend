@@ -8,6 +8,7 @@ import * as Sentry from "@sentry/nextjs";
 import {
   __resetDropReactionMonitoringForTests,
   beginReactionMutation,
+  recordReactionRequestFailed,
   recordReactionRequestSucceeded,
 } from "@/utils/monitoring/dropReactionMonitoring";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
@@ -130,6 +131,31 @@ describe("useWaveRealtimeUpdater", () => {
     isWaveMuted: jest.fn().mockReturnValue(false),
   });
 
+  const toStoredDrop = (drop: any) => ({
+    ...drop,
+    type: DropSize.FULL,
+    stableKey: drop.id,
+    stableHash: drop.id,
+  });
+
+  const applyWaveStoreUpdate = (store: any, update: any) => {
+    const currentDrops = store[update.key]?.drops ?? [];
+    const updateDrops = update.drops ?? currentDrops;
+    store[update.key] = {
+      ...store[update.key],
+      ...update,
+      drops: [
+        ...currentDrops.filter(
+          (currentDrop: any) =>
+            !updateDrops.some(
+              (updatedDrop: any) => updatedDrop.id === currentDrop.id
+            )
+        ),
+        ...updateDrops,
+      ],
+    };
+  };
+
   const expectCachedDropUpdate = (
     cachedDrop: any,
     verifyUpdatedDrop: (updatedDrop: any) => void
@@ -200,41 +226,44 @@ describe("useWaveRealtimeUpdater", () => {
       },
     };
     const props = baseProps(store);
-    props.updateData = jest.fn((update: any) => {
-      const currentDrops = store[update.key]?.drops ?? [];
-      const updateDrops = update.drops ?? currentDrops;
-      store[update.key] = {
-        ...store[update.key],
-        ...update,
-        drops: [
-          ...currentDrops.filter(
-            (currentDrop: any) =>
-              !updateDrops.some(
-                (updatedDrop: any) => updatedDrop.id === currentDrop.id
-              )
-          ),
-          ...updateDrops,
+    props.updateData = jest.fn((update: any) =>
+      applyWaveStoreUpdate(store, update)
+    );
+    const serverDrops = [
+      {
+        id: "d-newest-protected",
+        serial_no: 21,
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-current-user"),
+            profile("profile-2", "fresh-wave"),
+          ]),
         ],
-      };
-    });
-    props.syncNewestMessages = jest.fn().mockResolvedValue({
-      drops: [
-        {
-          id: "d-newest-protected",
-          serial_no: 21,
-          author: {},
-          wave: { id: "wave1" },
-          context_profile_context: contextProfileContext(":wave:"),
-          reactions: [
-            reactionEntry(":wave:", [
-              profile("profile-1", "server-current-user"),
-              profile("profile-2", "fresh-wave"),
-            ]),
-          ],
-        },
-      ],
-      highestSerialNo: 21,
-    });
+      },
+    ];
+    props.syncNewestMessages = jest.fn(
+      async (
+        waveId: string,
+        _sinceSerialNo: number,
+        _signal: AbortSignal,
+        reconcileDrops?: (drops: any[]) => any[]
+      ) => {
+        const displayDrops = reconcileDrops?.(serverDrops) ?? serverDrops;
+        props.updateData({
+          key: waveId,
+          drops: displayDrops.map(toStoredDrop),
+          latestFetchedSerialNo: 21,
+        });
+
+        return {
+          drops: displayDrops,
+          highestSerialNo: 21,
+        };
+      }
+    );
 
     dateNowSpy.mockReturnValue(2_000);
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
@@ -280,6 +309,130 @@ describe("useWaveRealtimeUpdater", () => {
     expect(syncedDrop.reactions).toEqual([
       reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
       reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
+  it("does not replay reconciled newest-sync drops after a reaction rollback", async () => {
+    const dropId = "d-newest-rollback-race";
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentUser = profile("profile-1", "current-user");
+    const mutation = beginReactionMutation({
+      dropId,
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: currentUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: dropId,
+            type: DropSize.FULL,
+            stableKey: "rollback-race-stable-key",
+            stableHash: "rollback-race-stable-hash",
+            serial_no: 20,
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.updateData = jest.fn((update: any) =>
+      applyWaveStoreUpdate(store, update)
+    );
+    const serverDrop = {
+      id: dropId,
+      serial_no: 21,
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+      ],
+    };
+    props.syncNewestMessages = jest.fn(
+      async (
+        waveId: string,
+        _sinceSerialNo: number,
+        _signal: AbortSignal,
+        reconcileDrops?: (drops: any[]) => any[]
+      ) => {
+        const displayDrops = reconcileDrops?.([serverDrop]) ?? [serverDrop];
+
+        props.updateData({
+          key: waveId,
+          drops: displayDrops.map(toStoredDrop),
+          latestFetchedSerialNo: 21,
+        });
+        expect(
+          store.wave1.drops.find((drop: any) => drop.id === dropId)
+            ?.context_profile_context.reaction
+        ).toBe(":joy:");
+
+        dateNowSpy.mockReturnValue(2_500);
+        recordReactionRequestFailed(mutation, new Error("network failed"));
+        props.updateData({
+          key: waveId,
+          drops: [
+            {
+              ...toStoredDrop(serverDrop),
+              stableKey: "rollback-race-stable-key",
+              stableHash: "rollback-race-stable-hash",
+              context_profile_context: contextProfileContext(":wave:"),
+              reactions: [reactionEntry(":wave:", [currentUser])],
+            },
+          ],
+          latestFetchedSerialNo: 21,
+        });
+
+        return {
+          drops: displayDrops,
+          highestSerialNo: 21,
+        };
+      }
+    );
+
+    dateNowSpy.mockReturnValue(2_000);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-newest-rollback-trigger",
+      serial_no: 22,
+      wave: { id: "wave1" },
+      author: {},
+      context_profile_context: null,
+      reactions: [],
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+
+    await waitFor(() => expect(props.syncNewestMessages).toHaveBeenCalled());
+    await flushPromises();
+
+    const finalDrop = store.wave1.drops.find(
+      (updatedDrop: any) => updatedDrop.id === dropId
+    );
+    expect(finalDrop.context_profile_context.reaction).toBe(":wave:");
+    expect(finalDrop.reactions).toEqual([
+      reactionEntry(":wave:", [currentUser]),
     ]);
   });
 
