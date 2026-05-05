@@ -104,7 +104,14 @@ describe("WaveWinnersSmall", () => {
   it("renders approved drops without selector for approve waves", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [
-        { decision_time: 1, winners: [{ drop: { id: "d" }, place: 1 }] },
+        {
+          decision_time: 1,
+          winners: [{ drop: { id: "older" }, place: 1 }],
+        },
+        {
+          decision_time: 2,
+          winners: [{ drop: { id: "newer" }, place: 2 }],
+        },
       ],
       isFetching: false,
       isLoadingAllPages: false,
@@ -112,9 +119,14 @@ describe("WaveWinnersSmall", () => {
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: true },
       isApproveWave: true,
+      isQuorumWave: false,
     });
     render(<WaveWinnersSmall wave={mockWave} onDropClick={jest.fn()} />);
     expect(ItemMock).toHaveBeenCalled();
+    expect(ItemMock.mock.calls.map(([props]) => props.drop.id)).toEqual([
+      "newer",
+      "older",
+    ]);
     expect(SelectorMock).not.toHaveBeenCalled();
     expect(useWaveDecisions).toHaveBeenCalledWith({
       waveId: "w",
@@ -122,6 +134,32 @@ describe("WaveWinnersSmall", () => {
       loadAllPages: true,
       pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
     });
+  });
+
+  it("uses quorum compact content for quorum approve waves", () => {
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        {
+          decision_time: 1,
+          winners: [{ drop: { id: "d" }, place: 1 }],
+        },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+      isApproveWave: true,
+      isQuorumWave: true,
+    });
+
+    render(<WaveWinnersSmall wave={mockWave} onDropClick={jest.fn()} />);
+
+    expect(ItemMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
   });
 
   it("shows approval empty state for approve waves", () => {

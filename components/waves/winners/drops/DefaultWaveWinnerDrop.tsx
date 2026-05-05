@@ -21,11 +21,13 @@ import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 import { WaveWinnerIdentity } from "../identity/WaveWinnerIdentity";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly isApprovalWave?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 const getRankHoverClass = (place: number | null): string => {
@@ -42,6 +44,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   winner,
   onDropClick,
   isApprovalWave = false,
+  contentPresentation = "default",
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
@@ -139,6 +142,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               <WaveWinnersDropContent
                 winner={winner}
                 isCompetitionDrop={true}
+                contentPresentation={contentPresentation}
               />
             </div>
           </div>

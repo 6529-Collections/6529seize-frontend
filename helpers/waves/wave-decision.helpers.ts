@@ -40,6 +40,11 @@ export const getRenderableWaveDecisionWinners = (
 ): RenderableWaveDecisionWinner[] =>
   winners.filter(hasRenderableWaveDecisionWinner);
 
+export const getApprovedWaveDecisionWinners = (
+  decisionPoints: readonly ApiWaveDecision[]
+): ApiWaveDecisionWinner[] =>
+  decisionPoints.flatMap((point) => point.winners).reverse();
+
 export const prepareWaveDecisionPoint = (
   decisionPoint: ApiWaveDecision,
   waveId: string

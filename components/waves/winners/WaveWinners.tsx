@@ -12,6 +12,7 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useWave } from "@/hooks/useWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveWinnersApprovalError } from "./WaveWinnersApprovalError";
+import { getApprovedWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
@@ -24,6 +25,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
 }) => {
   const {
     decisions: { multiDecision },
+    isQuorumWave,
   } = useWave(wave);
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
 
@@ -48,7 +50,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
       : undefined,
   });
   const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
-  const approvedWinners = decisionPoints.flatMap((point) => point.winners);
+  const approvedWinners = getApprovedWaveDecisionWinners(decisionPoints);
   const handleApprovalWinnersRetry = () => {
     if (hasNextPage) {
       void fetchNextPage();
@@ -76,6 +78,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           isLoading={isDecisionsLoading}
           isApprovalWave={true}
           emptyMessage="No drops approved yet"
+          contentPresentation={isQuorumWave ? "quorumCompact" : undefined}
         />
       </div>
     );

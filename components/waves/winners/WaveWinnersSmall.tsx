@@ -9,7 +9,10 @@ import {
   useWaveDecisions,
 } from "@/hooks/waves/useWaveDecisions";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
-import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
+import {
+  getApprovedWaveDecisionWinners,
+  getRenderableWaveDecisionWinners,
+} from "@/helpers/waves/wave-decision.helpers";
 
 // Import extracted components
 import { WaveWinnerItemSmall } from "./WaveWinnerItemSmall";
@@ -35,6 +38,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     const {
       decisions: { multiDecision },
       isApproveWave,
+      isQuorumWave,
     } = useWave(wave);
     const [selectedDecisionPoint, setSelectedDecisionPoint] = useState<
       string | null
@@ -100,7 +104,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
 
     if (isApproveWave) {
       const approvedWinners = getRenderableWaveDecisionWinners(
-        decisionPoints.flatMap((point) => point.winners)
+        getApprovedWaveDecisionWinners(decisionPoints)
       );
 
       if (approvedWinners.length === 0) {
@@ -130,6 +134,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
                 onDropClick={() =>
                   onDropClick(convertApiDropToExtendedDrop(winner.drop))
                 }
+                contentPresentation={isQuorumWave ? "quorumCompact" : undefined}
               />
             ))}
           </div>

@@ -32,6 +32,7 @@ import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { normalizeWaveLeaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import {
   FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
   useWaveDecisions,
@@ -54,6 +55,95 @@ interface CreateDropUiState {
   readonly submissionExperience: WaveSubmissionExperience | null;
   readonly isApprovalVotingControlsLocked: boolean;
 }
+
+interface LeaderboardContentProps {
+  readonly wave: ApiWave;
+  readonly viewMode: LeaderboardViewMode;
+  readonly sort: WaveDropsLeaderboardSort;
+  readonly isMemesWave: boolean;
+  readonly isVotingClosed: boolean;
+  readonly isVotingControlsLocked: boolean;
+  readonly curatedByGroupId: string | undefined;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly minPrice: number | undefined;
+  readonly maxPrice: number | undefined;
+  readonly priceCurrency: string | undefined;
+  readonly onCreateDrop: (() => void) | undefined;
+}
+
+const isWaveLeaderboardSortPreference = (
+  value: unknown,
+  isCurationWave: boolean
+): value is WaveDropsLeaderboardSort =>
+  value === WaveDropsLeaderboardSort.RANK ||
+  value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
+  value === WaveDropsLeaderboardSort.TREND ||
+  value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
+  value === WaveDropsLeaderboardSort.CREATED_AT ||
+  (isCurationWave && value === WaveDropsLeaderboardSort.PRICE);
+
+const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
+  wave,
+  viewMode,
+  sort,
+  isMemesWave,
+  isVotingClosed,
+  isVotingControlsLocked,
+  curatedByGroupId,
+  onDropClick,
+  minPrice,
+  maxPrice,
+  priceCurrency,
+  onCreateDrop,
+}) => {
+  if (viewMode === "list") {
+    return (
+      <WaveLeaderboardDrops
+        wave={wave}
+        sort={sort}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
+        curatedByGroupId={curatedByGroupId}
+        onDropClick={onDropClick}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
+        onCreateDrop={onCreateDrop}
+      />
+    );
+  }
+
+  if (!isMemesWave) {
+    return (
+      <WaveLeaderboardGrid
+        wave={wave}
+        sort={sort}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
+        curatedByGroupId={curatedByGroupId}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
+        mode={viewMode === "grid" ? "compact" : "content_only"}
+        onDropClick={onDropClick}
+      />
+    );
+  }
+
+  return (
+    <WaveLeaderboardGallery
+      wave={wave}
+      sort={sort}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+      curatedByGroupId={curatedByGroupId}
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+      priceCurrency={priceCurrency}
+      onDropClick={onDropClick}
+    />
+  );
+};
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
@@ -124,12 +214,26 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     sortPreferenceKey,
     WaveDropsLeaderboardSort.RANK,
     (value): value is WaveDropsLeaderboardSort =>
-      value === WaveDropsLeaderboardSort.RANK ||
-      value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
-      value === WaveDropsLeaderboardSort.TREND ||
-      value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
-      value === WaveDropsLeaderboardSort.CREATED_AT ||
-      (isCurationWave && value === WaveDropsLeaderboardSort.PRICE)
+      isWaveLeaderboardSortPreference(value, isCurationWave)
+  );
+  const effectiveSort = useMemo(
+    () =>
+      normalizeWaveLeaderboardSort({
+        sort,
+        timeLockMs: wave.wave.time_lock_ms,
+      }),
+    [sort, wave.wave.time_lock_ms]
+  );
+  const handleSortChange = useCallback(
+    (nextSort: WaveDropsLeaderboardSort) => {
+      setSort(
+        normalizeWaveLeaderboardSort({
+          sort: nextSort,
+          timeLockMs: wave.wave.time_lock_ms,
+        })
+      );
+    },
+    [setSort, wave.wave.time_lock_ms]
   );
 
   const {
@@ -281,12 +385,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       typeof minPrice === "number" || typeof maxPrice === "number";
     if (
       isCurationWave &&
-      (hasPriceFilter || sort === WaveDropsLeaderboardSort.PRICE)
+      (hasPriceFilter || effectiveSort === WaveDropsLeaderboardSort.PRICE)
     ) {
       return "ETH";
     }
     return undefined;
-  }, [isCurationWave, maxPrice, minPrice, sort]);
+  }, [effectiveSort, isCurationWave, maxPrice, minPrice]);
 
   const updateCurationGroupInUrl = useCallback(
     (groupId: string | null) => {
@@ -329,53 +433,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     }
     return viewMode;
   }, [isMemesWave, viewMode]);
-
-  let leaderboardContent: React.ReactNode;
-  if (effectiveViewMode === "list") {
-    leaderboardContent = (
-      <WaveLeaderboardDrops
-        wave={wave}
-        sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
-        isVotingControlsLocked={isApprovalVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
-        onDropClick={onDropClick}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        priceCurrency={priceCurrency}
-        onCreateDrop={canOpenCreateDrop ? onCreateDrop : undefined}
-      />
-    );
-  } else if (!isMemesWave) {
-    leaderboardContent = (
-      <WaveLeaderboardGrid
-        wave={wave}
-        sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
-        isVotingControlsLocked={isApprovalVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        priceCurrency={priceCurrency}
-        mode={effectiveViewMode === "grid" ? "compact" : "content_only"}
-        onDropClick={onDropClick}
-      />
-    );
-  } else {
-    leaderboardContent = (
-      <WaveLeaderboardGallery
-        wave={wave}
-        sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
-        isVotingControlsLocked={isApprovalVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        priceCurrency={priceCurrency}
-        onDropClick={onDropClick}
-      />
-    );
-  }
+  const createDropAction = canOpenCreateDrop ? onCreateDrop : undefined;
 
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
@@ -396,10 +454,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         <WaveLeaderboardHeader
           wave={wave}
           viewMode={effectiveViewMode}
-          sort={sort}
+          sort={effectiveSort}
           onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={canOpenCreateDrop ? onCreateDrop : undefined}
-          onSortChange={(s) => setSort(s)}
+          onCreateDrop={createDropAction}
+          onSortChange={handleSortChange}
           curationGroups={curationGroups}
           curatedByGroupId={curatedByGroupId ?? null}
           onCurationGroupChange={
@@ -455,7 +513,20 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           />
         )}
 
-        {leaderboardContent}
+        <LeaderboardContent
+          wave={wave}
+          viewMode={effectiveViewMode}
+          sort={effectiveSort}
+          isMemesWave={isMemesWave}
+          isVotingClosed={isApprovalVotingClosed}
+          isVotingControlsLocked={isApprovalVotingControlsLocked}
+          curatedByGroupId={curatedByGroupId}
+          onDropClick={onDropClick}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          priceCurrency={priceCurrency}
+          onCreateDrop={createDropAction}
+        />
       </div>
     </div>
   );

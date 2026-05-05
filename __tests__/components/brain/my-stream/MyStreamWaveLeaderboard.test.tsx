@@ -214,6 +214,39 @@ describe("MyStreamWaveLeaderboard", () => {
     ).toBeUndefined();
   });
 
+  it("uses rank for saved projected vote sort when the wave has no time lock", () => {
+    const setSort = jest.fn();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RATING_PREDICTION,
+      setSort,
+    ]);
+
+    renderLeaderboard({
+      ...wave,
+      wave: { type: ApiWaveType.Rank, time_lock_ms: null },
+    } as ApiWave);
+
+    expect(headerProps.sort).toBe(WaveDropsLeaderboardSort.RANK);
+    expect(dropsProps.sort).toBe(WaveDropsLeaderboardSort.RANK);
+    expect(setSort).not.toHaveBeenCalled();
+
+    act(() => {
+      headerProps.onSortChange(WaveDropsLeaderboardSort.RATING_PREDICTION);
+    });
+
+    expect(setSort).toHaveBeenCalledWith(WaveDropsLeaderboardSort.RANK);
+  });
+
   it("uses grid view for memes wave and opens meme modal", async () => {
     const user = userEvent.setup();
     useWave.mockReturnValue({

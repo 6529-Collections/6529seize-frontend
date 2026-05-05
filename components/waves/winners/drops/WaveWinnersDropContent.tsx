@@ -7,23 +7,38 @@ import { useRouter } from "next/navigation";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
   winner,
   isCompetitionDrop = false,
+  contentPresentation = "default",
 }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState(0);
 
   const onDropContentClick = (drop: ExtendedDrop) => {
-    const waveMeta = (drop.wave as unknown as {
-      chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
-    })?.chat;
+    const waveMeta = (
+      drop.wave as unknown as {
+        chat?:
+          | {
+              scope?:
+                | {
+                    group?:
+                      | { is_direct_message?: boolean | undefined }
+                      | undefined;
+                  }
+                | undefined;
+            }
+          | undefined;
+      }
+    ).chat;
     const href = getWaveRoute({
       waveId: drop.wave.id,
       serialNo: drop.serial_no,
@@ -48,6 +63,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
       onQuoteClick={() => {}}
       setLongPressTriggered={() => {}}
       isCompetitionDrop={isCompetitionDrop}
+      contentPresentation={contentPresentation}
     />
   );
 };

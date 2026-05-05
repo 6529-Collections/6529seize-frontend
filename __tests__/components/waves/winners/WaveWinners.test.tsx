@@ -66,9 +66,19 @@ describe("WaveWinners", () => {
   it("renders approved drops for approve waves", () => {
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: true },
+      isQuorumWave: false,
     });
     (useWaveDecisions as jest.Mock).mockReturnValue({
-      decisionPoints: [{ winners: [{ drop: { id: "d1" } }] }],
+      decisionPoints: [
+        {
+          decision_time: 1,
+          winners: [{ drop: { id: "older" }, place: 1 }],
+        },
+        {
+          decision_time: 2,
+          winners: [{ drop: { id: "newer" }, place: 2 }],
+        },
+      ],
       isFetching: false,
       isLoadingAllPages: false,
     });
@@ -85,7 +95,10 @@ describe("WaveWinners", () => {
       expect.objectContaining({
         isApprovalWave: true,
         emptyMessage: "No drops approved yet",
-        winners: [{ drop: { id: "d1" } }],
+        winners: [
+          { drop: { id: "newer" }, place: 2 },
+          { drop: { id: "older" }, place: 1 },
+        ],
       })
     );
     expect(useWaveDecisions).toHaveBeenCalledWith({
@@ -94,6 +107,37 @@ describe("WaveWinners", () => {
       loadAllPages: true,
       pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
     });
+  });
+
+  it("uses quorum compact content for quorum approve waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+      isQuorumWave: true,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        {
+          decision_time: 1,
+          winners: [{ drop: { id: "d1" }, place: 1 }],
+        },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(
+      <WaveWinners
+        wave={{ ...wave, wave: { type: ApiWaveType.Approve } }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(Drops).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+        isApprovalWave: true,
+      })
+    );
   });
 
   it("shows approve-wave full-load error instead of partial drops", () => {

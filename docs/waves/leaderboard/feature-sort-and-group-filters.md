@@ -32,7 +32,8 @@ Use leaderboard header filters to:
 - `Sort` is always visible in the leaderboard header.
 - On wider layouts, `Sort` uses compact pill tabs instead of a dropdown.
 - `Sort` options are:
-  - all waves: `Current Vote`, `Projected Vote`, `Hot`, `Newest`
+  - all waves: `Current Vote`, `Hot`, `Newest`
+  - waves with `time_lock_ms`: `Projected Vote`
   - curation waves only: `Price`
 - In tab layout, the active sort stays filled and brighter than the inactive
   options so the current mode remains easy to scan.
@@ -77,6 +78,8 @@ Use leaderboard header filters to:
 - URL `min_price` and `max_price` values are not used by leaderboard header UI.
 - If both price bounds are set in reverse order (`min > max`), request bounds
   are normalized before fetch.
+- If a saved sort is `Projected Vote` but the wave has no `time_lock_ms`, the
+  leaderboard resets that wave's saved sort to `Current Vote`.
 
 ## Failure and Recovery
 
