@@ -73,6 +73,45 @@ describe("sentry-sanitizer", () => {
     );
   });
 
+  it.each(["staging", "test"])(
+    "marks api.%s.6529.io breadcrumb URLs as first-party API before stripping the host",
+    (environment) => {
+      const breadcrumb = sanitizeSentryBreadcrumb({
+        type: "http",
+        category: "fetch",
+        data: {
+          url: `https://api.${environment}.6529.io/alchemy-proxy?chainId=1#hash`,
+        },
+      });
+
+      expect(breadcrumb?.data).toEqual(
+        expect.objectContaining({
+          url: "/alchemy-proxy",
+          "url.is_first_party": true,
+          "url.is_first_party_api": true,
+        })
+      );
+    }
+  );
+
+  it("does not mark allowlist-api environment subdomains as first-party API hosts", () => {
+    const breadcrumb = sanitizeSentryBreadcrumb({
+      type: "http",
+      category: "fetch",
+      data: {
+        url: "https://allowlist-api.staging.6529.io/alchemy-proxy?chainId=1#hash",
+      },
+    });
+
+    expect(breadcrumb?.data).toEqual(
+      expect.objectContaining({
+        url: "/alchemy-proxy",
+        "url.is_first_party": true,
+        "url.is_first_party_api": false,
+      })
+    );
+  });
+
   it("marks relative breadcrumb URLs as first-party", () => {
     const breadcrumb = sanitizeSentryBreadcrumb({
       type: "http",

@@ -251,7 +251,7 @@ function getRequestPathname(value: string | undefined): string | null {
 
 function isFirstPartyApiUrl(url: URL): boolean {
   const hostname = url.hostname.toLowerCase();
-  if (hostname === "api.6529.io") {
+  if (isFirstPartyApiHost(hostname)) {
     return true;
   }
 
@@ -933,6 +933,21 @@ function getContextString(
 function isFirstPartyHost(hostname: string): boolean {
   const normalized = hostname.toLowerCase();
   return normalized === "6529.io" || normalized.endsWith(".6529.io");
+}
+
+function isFirstPartyApiHost(hostname: string): boolean {
+  const labels = hostname.toLowerCase().split(".");
+  if (labels.length === 3) {
+    return labels[0] === "api" && labels[1] === "6529" && labels[2] === "io";
+  }
+
+  return (
+    labels.length === 4 &&
+    labels[0] === "api" &&
+    labels[1] !== "" &&
+    labels[2] === "6529" &&
+    labels[3] === "io"
+  );
 }
 
 function getSpanUrlString(span: SentryTransactionSpan): string | undefined {

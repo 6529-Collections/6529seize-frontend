@@ -326,6 +326,63 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("drops sampled-out status 0 network errors from API environment subdomains", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://api.staging.6529.io/alchemy-proxy",
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe(
+      "https://api.staging.6529.io/alchemy-proxy"
+    );
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("drops sampled-out sanitized API subdomain network errors using preserved metadata", () => {
+    const targetUrl = "https://api.staging.6529.io/alchemy-proxy";
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: `Network request failed. Please check your connection and try again. (${targetUrl})`,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/alchemy-proxy",
+            "url.is_first_party": true,
+            "url.is_first_party_api": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe(targetUrl);
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
   it("drops sampled-out WebKit network connection lost errors", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({

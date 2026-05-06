@@ -31,6 +31,21 @@ function isFirstPartyHost(hostname: string): boolean {
   return normalized === "6529.io" || normalized.endsWith(".6529.io");
 }
 
+function isFirstPartyApiHost(hostname: string): boolean {
+  const labels = hostname.toLowerCase().split(".");
+  if (labels.length === 3) {
+    return labels[0] === "api" && labels[1] === "6529" && labels[2] === "io";
+  }
+
+  return (
+    labels.length === 4 &&
+    labels[0] === "api" &&
+    labels[1] !== "" &&
+    labels[2] === "6529" &&
+    labels[3] === "io"
+  );
+}
+
 function isAbsoluteUrlLike(value: string): boolean {
   return /^[a-z][a-z\d+\-.]*:/i.test(value) || value.startsWith("//");
 }
@@ -148,7 +163,7 @@ function getBreadcrumbUrlIsFirstPartyApi(
   try {
     const parsed = new URL(trimmed, "https://6529.io");
     const hostname = parsed.hostname.toLowerCase();
-    if (hostname === "api.6529.io") {
+    if (isFirstPartyApiHost(hostname)) {
       return true;
     }
 
