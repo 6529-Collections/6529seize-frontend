@@ -2184,6 +2184,36 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("rejects a failed read when its queued replay is skipped", async () => {
+    const firstRequest = createDeferred();
+    const readError = new Error("first read failed");
+    const invalidateNotifications = jest.fn();
+    let shouldSend = true;
+
+    apiPostMock.mockReturnValueOnce(firstRequest.promise);
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    const firstPromise = result.current("wave-1");
+    const secondPromise = result.current("wave-1", {
+      shouldSend: () => shouldSend,
+    });
+    const rejection = expect(firstPromise).rejects.toBe(readError);
+
+    expect(secondPromise).toBe(firstPromise);
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
+    shouldSend = false;
+    firstRequest.reject(readError);
+
+    await rejection;
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
   it("rejects a failed read when no replay is queued", async () => {
     const readError = new Error("read failed");
     const invalidateNotifications = jest.fn();

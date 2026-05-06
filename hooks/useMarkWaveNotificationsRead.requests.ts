@@ -263,7 +263,22 @@ const startWaveReadRequest = async (
         state,
         invalidateNotificationsRef
       );
-      const trailingResult = await state.promise;
+
+      let trailingResult: MarkWaveNotificationsReadResult;
+      try {
+        trailingResult = await state.promise;
+      } catch (trailingError) {
+        if (hasRequestError) {
+          throw requestError;
+        }
+
+        throw trailingError;
+      }
+
+      if (hasRequestError && trailingResult !== "sent") {
+        throw requestError;
+      }
+
       return mergeWaveReadResults(requestResult, trailingResult);
     }
 
