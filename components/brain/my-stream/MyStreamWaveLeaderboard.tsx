@@ -33,17 +33,12 @@ import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmission
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { normalizeWaveLeaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
-import {
-  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
-  useWaveDecisions,
-} from "@/hooks/waves/useWaveDecisions";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import { hasApprovalDecisionCounts } from "@/helpers/waves/approve-wave.helpers";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -332,35 +327,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
-  const shouldLoadApprovalDecisionPoints =
-    isApproveWave && !hasApprovalDecisionCounts(wave);
-  const {
-    decisionPoints: approvalDecisionPoints = [],
-    hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
-    isLoadingAllPagesError: isApprovalDecisionPointsLoadError,
-    refetch: retryApprovalDecisionPointsLoad,
-    fetchNextPage: retryApprovalDecisionPointsNextPage,
-    hasNextPage: hasApprovalDecisionPointsNextPage,
-  } = useWaveDecisions({
-    waveId: wave.id,
-    enabled: shouldLoadApprovalDecisionPoints,
-    loadAllPages: shouldLoadApprovalDecisionPoints,
-    pageSize: shouldLoadApprovalDecisionPoints
-      ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
-      : undefined,
-  });
-  const retryApprovalDecisionPoints = useCallback(() => {
-    if (hasApprovalDecisionPointsNextPage) {
-      void retryApprovalDecisionPointsNextPage();
-      return;
-    }
-
-    void retryApprovalDecisionPointsLoad();
-  }, [
-    hasApprovalDecisionPointsNextPage,
-    retryApprovalDecisionPointsLoad,
-    retryApprovalDecisionPointsNextPage,
-  ]);
   const {
     approvedCount,
     closeStatus: approvalCloseStatus,
@@ -370,14 +336,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     retryApprovalStatus,
   } = useApprovalWaveStatus({
     wave,
-    ...(shouldLoadApprovalDecisionPoints
-      ? {
-          decisionPoints: approvalDecisionPoints,
-          areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
-          isDecisionPointsLoadError: isApprovalDecisionPointsLoadError,
-          onRetryDecisionPointsLoad: retryApprovalDecisionPoints,
-        }
-      : {}),
   });
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingControlsLocked;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(

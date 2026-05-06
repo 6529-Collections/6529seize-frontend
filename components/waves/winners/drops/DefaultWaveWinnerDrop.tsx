@@ -1,6 +1,7 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
+import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -215,6 +216,10 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
               <WaveDropMobileMenuOpen
                 drop={extendedDrop}
                 onOpenChange={handleMobileMenuClose}
+              />
+              <WaveDropMobileMenuCopyLink
+                drop={extendedDrop}
+                onCopy={() => setIsActive(false)}
               />
             </div>
           </CommonDropdownItemsMobileWrapper>,

@@ -28,6 +28,7 @@ interface WaveLeaderboardDropRendererProps {
 
 interface WaveSmallLeaderboardDropRendererProps {
   readonly drop: ExtendedDrop;
+  readonly isApproveWave?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: () => void;

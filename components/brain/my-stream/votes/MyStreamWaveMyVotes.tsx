@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -13,14 +13,6 @@ import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import {
-  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
-  useWaveDecisions,
-} from "@/hooks/waves/useWaveDecisions";
-import {
-  hasApprovalDecisionCounts,
-  isApproveWave,
-} from "@/helpers/waves/approve-wave.helpers";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -38,46 +30,8 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       enabled: !isResettingVotes,
     });
-  const isApprovalWave = isApproveWave(wave);
-  const shouldLoadApprovalDecisionPoints =
-    isApprovalWave && !hasApprovalDecisionCounts(wave);
-  const {
-    decisionPoints: approvalDecisionPoints,
-    hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
-    isLoadingAllPagesError: isApprovalDecisionPointsLoadError,
-    refetch: retryApprovalDecisionPointsLoad,
-    fetchNextPage: retryApprovalDecisionPointsNextPage,
-    hasNextPage: hasApprovalDecisionPointsNextPage,
-  } = useWaveDecisions({
-    waveId: wave.id,
-    enabled: shouldLoadApprovalDecisionPoints,
-    loadAllPages: shouldLoadApprovalDecisionPoints,
-    pageSize: shouldLoadApprovalDecisionPoints
-      ? FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE
-      : undefined,
-  });
-  const retryApprovalDecisionPoints = useCallback(() => {
-    if (hasApprovalDecisionPointsNextPage) {
-      void retryApprovalDecisionPointsNextPage();
-      return;
-    }
-
-    void retryApprovalDecisionPointsLoad();
-  }, [
-    hasApprovalDecisionPointsNextPage,
-    retryApprovalDecisionPointsLoad,
-    retryApprovalDecisionPointsNextPage,
-  ]);
   const { isVotingControlsLocked } = useApprovalWaveStatus({
     wave,
-    ...(shouldLoadApprovalDecisionPoints
-      ? {
-          decisionPoints: approvalDecisionPoints,
-          areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
-          isDecisionPointsLoadError: isApprovalDecisionPointsLoadError,
-          onRetryDecisionPointsLoad: retryApprovalDecisionPoints,
-        }
-      : {}),
   });
 
   const { myVotesViewStyle } = useLayout();
