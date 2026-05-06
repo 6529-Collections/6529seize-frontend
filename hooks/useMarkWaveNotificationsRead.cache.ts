@@ -33,6 +33,9 @@ import type {
 import { useLayoutEffect, useMemo, useRef } from "react";
 
 let mountedWaveNotificationsReadMarkerHookCount = 0;
+let clearWaveNotificationsReadStateTimeout: ReturnType<
+  typeof globalThis.setTimeout
+> | null = null;
 
 export const useWaveReadCacheRefs = ({
   addressEpoch,
@@ -294,15 +297,28 @@ export const useClearWaveReadStateOnAddressChange = (
 
 export const useClearWaveReadStateOnLastUnmount = (): void => {
   useLayoutEffect(() => {
+    if (clearWaveNotificationsReadStateTimeout !== null) {
+      globalThis.clearTimeout(clearWaveNotificationsReadStateTimeout);
+      clearWaveNotificationsReadStateTimeout = null;
+    }
+
     mountedWaveNotificationsReadMarkerHookCount += 1;
 
     return () => {
       mountedWaveNotificationsReadMarkerHookCount -= 1;
 
-      if (mountedWaveNotificationsReadMarkerHookCount <= 0) {
-        mountedWaveNotificationsReadMarkerHookCount = 0;
-        clearAllWaveReadState();
+      if (mountedWaveNotificationsReadMarkerHookCount > 0) {
+        return;
       }
+
+      mountedWaveNotificationsReadMarkerHookCount = 0;
+      clearWaveNotificationsReadStateTimeout = globalThis.setTimeout(() => {
+        clearWaveNotificationsReadStateTimeout = null;
+
+        if (mountedWaveNotificationsReadMarkerHookCount === 0) {
+          clearAllWaveReadState();
+        }
+      }, 0);
     };
   }, []);
 };

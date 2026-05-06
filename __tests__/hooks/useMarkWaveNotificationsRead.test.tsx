@@ -7,7 +7,7 @@ import {
 } from "@/hooks/useMarkWaveNotificationsRead";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { jwtDecode } from "jwt-decode";
 import type { ReactNode } from "react";
 
@@ -1262,27 +1262,40 @@ describe("useMarkWaveNotificationsRead", () => {
   });
 
   it("clears queued reads when the last marker hook unmounts", async () => {
+    jest.useFakeTimers();
     const invalidateNotifications = jest.fn();
 
-    setActiveIdentity({ address: "0xAAA", jwt: null });
-    const { result, unmount } = renderHook(
-      () => useMarkWaveNotificationsRead(),
-      {
-        wrapper: createWrapper(invalidateNotifications),
-      }
-    );
+    try {
+      setActiveIdentity({ address: "0xAAA", jwt: null });
+      const { result, unmount } = renderHook(
+        () => useMarkWaveNotificationsRead(),
+        {
+          wrapper: createWrapper(invalidateNotifications),
+        }
+      );
 
-    const queuedPromise = result.current("wave-last-unmount");
-    const rejection = expect(queuedPromise).rejects.toThrow(
-      "no marker hooks are mounted"
-    );
+      const queuedPromise = result.current("wave-last-unmount");
+      const queuedSettlement = trackPromiseSettlement(queuedPromise);
+      const rejection = expect(queuedPromise).rejects.toThrow(
+        "no marker hooks are mounted"
+      );
 
-    unmount();
+      unmount();
+      await flushMicrotasks();
 
-    await rejection;
+      expect(queuedSettlement.isSettled()).toBe(false);
 
-    expect(apiPostMock).not.toHaveBeenCalled();
-    expect(invalidateNotifications).not.toHaveBeenCalled();
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+
+      await rejection;
+
+      expect(apiPostMock).not.toHaveBeenCalled();
+      expect(invalidateNotifications).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("keeps queued reads when one marker hook unmounts and another remains mounted", async () => {
@@ -1312,6 +1325,55 @@ describe("useMarkWaveNotificationsRead", () => {
       headers: { Authorization: "Bearer jwt-a" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps queued reads when a marker hook remounts before deferred cleanup runs", async () => {
+    jest.useFakeTimers();
+    const invalidateNotifications = jest.fn();
+
+    try {
+      setActiveIdentity({ address: "0xAAA", jwt: null });
+      const firstHook = renderHook(() => useMarkWaveNotificationsRead(), {
+        wrapper: createWrapper(invalidateNotifications),
+      });
+
+      const queuedPromise = firstHook.result.current("wave-remount");
+      const queuedSettlement = trackPromiseSettlement(queuedPromise);
+      const resolved = expect(queuedPromise).resolves.toBe("sent");
+
+      firstHook.unmount();
+
+      const secondHook = renderHook(() => useMarkWaveNotificationsRead(), {
+        wrapper: createWrapper(invalidateNotifications),
+      });
+
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      await flushMicrotasks();
+
+      expect(queuedSettlement.isSettled()).toBe(false);
+      expect(apiPostMock).not.toHaveBeenCalled();
+
+      setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+      secondHook.rerender();
+
+      await resolved;
+
+      expect(apiPostMock).toHaveBeenCalledTimes(1);
+      expect(apiPostMock).toHaveBeenCalledWith({
+        endpoint: "notifications/wave/wave-remount/read",
+        headers: { Authorization: "Bearer jwt-a" },
+      });
+      expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+
+      secondHook.unmount();
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("drops a queued missing-JWT read when its guard becomes false before replay", async () => {
