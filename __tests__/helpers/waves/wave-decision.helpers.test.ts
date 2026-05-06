@@ -18,6 +18,15 @@ const makeDecision = (
     winners,
   }) as ApiWaveDecision;
 
+const makeDecisionWithRuntimeWinners = (
+  decisionTime: number,
+  winners: unknown
+): ApiWaveDecision =>
+  ({
+    decision_time: decisionTime,
+    winners,
+  }) as ApiWaveDecision;
+
 describe("wave-decision.helpers", () => {
   describe("getApprovedWaveDecisionWinners", () => {
     it("shows newer decisions first while keeping winner place order", () => {
@@ -36,6 +45,49 @@ describe("wave-decision.helpers", () => {
         "decision-1-place-2",
       ]);
       expect(decisionPoints).toEqual([firstDecision, secondDecision]);
+    });
+
+    it("skips decision points without a winners array", () => {
+      const validDecision = makeDecision(4, [makeWinner(4, 1)]);
+      const decisionPoints = [
+        makeDecisionWithRuntimeWinners(1, null),
+        { decision_time: 2 } as ApiWaveDecision,
+        makeDecisionWithRuntimeWinners(3, { winner: makeWinner(3, 1) }),
+        validDecision,
+      ];
+
+      const winners = getApprovedWaveDecisionWinners(decisionPoints);
+
+      expect(winners.map((winner) => winner.drop.id)).toEqual([
+        "decision-4-place-1",
+      ]);
+    });
+
+    it("filters malformed winners inside valid arrays", () => {
+      const validWinner = makeWinner(1, 1);
+      const decisionPoints = [
+        makeDecisionWithRuntimeWinners(1, [
+          null,
+          undefined,
+          false,
+          {},
+          { place: Number.NaN, awards: [], drop: { id: "nan-place" } },
+          {
+            place: Number.POSITIVE_INFINITY,
+            awards: [],
+            drop: { id: "inf-place" },
+          },
+          { place: 2, awards: {}, drop: { id: "bad-awards" } },
+          { place: 3, awards: [], drop: null },
+          { place: 4, awards: [], drop: {} },
+          { place: 5, awards: [], drop: { id: "" } },
+          validWinner,
+        ]),
+      ];
+
+      const winners = getApprovedWaveDecisionWinners(decisionPoints);
+
+      expect(winners).toEqual([validWinner]);
     });
   });
 });
