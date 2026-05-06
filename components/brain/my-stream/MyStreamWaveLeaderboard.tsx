@@ -39,7 +39,7 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import { hasApprovalDecisionCounts } from "@/helpers/waves/approve-wave.helpers";
+import { getApprovedDropsCount } from "@/helpers/waves/approve-wave.helpers";
 import {
   FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
   useWaveDecisions,
@@ -332,8 +332,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
-  const shouldLoadApprovalDecisionPoints =
-    isApproveWave && !hasApprovalDecisionCounts(wave);
+  const cannotDeriveApprovedCount =
+    isApproveWave && getApprovedDropsCount({ wave }) === null;
+  const shouldLoadApprovalDecisionPoints = cannotDeriveApprovedCount;
   const {
     decisionPoints: approvalDecisionPoints,
     hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
@@ -377,6 +378,15 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         }
       : {}),
   });
+  const isApprovalCountError = Boolean(
+    shouldLoadApprovalDecisionPoints &&
+    isApprovalDecisionPointsLoadError &&
+    approvedCount === null &&
+    !isApprovalStatusError
+  );
+  const retryApprovalCount = isApprovalCountError
+    ? retryApprovalDecisionPointsLoad
+    : null;
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingControlsLocked;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(
     () => ({
@@ -551,7 +561,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         <WaveApprovalStatusBar
           approvedCount={approvedCount}
           closeStatus={approvalCloseStatus}
+          isApprovalCountError={isApprovalCountError}
           isApprovalStatusError={isApprovalStatusError}
+          retryApprovalCount={retryApprovalCount}
           retryApprovalStatus={retryApprovalStatus}
           wave={wave}
         />

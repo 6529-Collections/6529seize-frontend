@@ -959,6 +959,130 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(approvalStatusProps.closeStatus).toBe("ended");
   });
 
+  it("shows count retry without locking uncapped approve waves when count loading fails", async () => {
+    const user = userEvent.setup();
+    const retryApprovalDecisions = jest.fn();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: null,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch: retryApprovalDecisions,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(approvalStatusProps.isApprovalStatusError).toBe(false);
+    expect(approvalStatusProps.retryApprovalStatus).toBeNull();
+    expect(approvalStatusProps.isApprovalCountError).toBe(true);
+    expect(approvalStatusProps.retryApprovalCount).toEqual(
+      expect.any(Function)
+    );
+    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingControlsLocked).toBe(false);
+    expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
+    expect(dropsProps.onCreateDrop).toEqual(expect.any(Function));
+
+    approvalStatusProps.retryApprovalCount();
+
+    expect(retryApprovalDecisions).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+  });
+
+  it("shows count retry while keeping ended approve waves closed when count loading fails", () => {
+    const retryApprovalDecisions = jest.fn();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() - 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch: retryApprovalDecisions,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(approvalStatusProps.closeStatus).toBe("ended");
+    expect(approvalStatusProps.isApprovalStatusError).toBe(false);
+    expect(approvalStatusProps.retryApprovalStatus).toBeNull();
+    expect(approvalStatusProps.isApprovalCountError).toBe(true);
+    expect(approvalStatusProps.retryApprovalCount).toEqual(
+      expect.any(Function)
+    );
+    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    approvalStatusProps.retryApprovalCount();
+
+    expect(retryApprovalDecisions).toHaveBeenCalledTimes(1);
+  });
+
   it("blocks create drop and passes retry when approval status loading fails", async () => {
     const user = userEvent.setup();
     const retryApprovalDecisions = jest.fn();
@@ -1006,6 +1130,8 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(approvalStatusProps.retryApprovalStatus).toEqual(
       expect.any(Function)
     );
+    expect(approvalStatusProps.isApprovalCountError).toBe(false);
+    expect(approvalStatusProps.retryApprovalCount).toBeNull();
     expect(dropsProps.isVotingClosed).toBe(false);
     expect(dropsProps.isVotingControlsLocked).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();

@@ -54,4 +54,32 @@ describe("WaveApprovalStatusBar", () => {
 
     expect(retryApprovalStatus).toHaveBeenCalledTimes(1);
   });
+
+  it("shows an approved count error without the paused-controls message", () => {
+    const retryApprovalCount = jest.fn();
+
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={null}
+        closeStatus={null}
+        isApprovalCountError={true}
+        retryApprovalCount={retryApprovalCount}
+        wave={wave}
+      />
+    );
+
+    expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.getByText("Unavailable")).toBeInTheDocument();
+    expect(
+      screen.getByText("Unable to load approved count.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Open")).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Voting and create controls are paused/)
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(retryApprovalCount).toHaveBeenCalledTimes(1);
+  });
 });
