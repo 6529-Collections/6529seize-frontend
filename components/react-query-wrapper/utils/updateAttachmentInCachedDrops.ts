@@ -275,6 +275,34 @@ function rollbackRejectedReactionEntries(
   );
 }
 
+function hasProfileInReaction(
+  reactions: ApiDropReaction[],
+  params: RollbackRejectedReactionParams
+): boolean {
+  const profileId = params.profile?.id ?? null;
+  if (!profileId || params.failedReaction === null) {
+    return false;
+  }
+
+  return reactions.some(
+    (reaction) =>
+      reaction.reaction === params.failedReaction &&
+      reaction.profiles.some((profile) => profile.id === profileId)
+  );
+}
+
+function canRollbackRejectedReactionDrop(
+  contextProfileContext: unknown,
+  reactions: ApiDropReaction[],
+  params: RollbackRejectedReactionParams
+): boolean {
+  if (isRecord(contextProfileContext)) {
+    return contextProfileContext["reaction"] === params.failedReaction;
+  }
+
+  return hasProfileInReaction(reactions, params);
+}
+
 function rollbackContextProfileContext(
   contextProfileContext: unknown,
   previousReaction: string | null
@@ -305,15 +333,22 @@ function rollbackRejectedReactionDrop(
   params: RollbackRejectedReactionParams
 ): Record<string, unknown> {
   const contextProfileContext = value["context_profile_context"];
+  const reactions = Array.isArray(value["reactions"])
+    ? (value["reactions"] as ApiDropReaction[])
+    : [];
+
+  if (
+    !canRollbackRejectedReactionDrop(contextProfileContext, reactions, params)
+  ) {
+    return value;
+  }
+
   const nextContextProfileContext = rollbackContextProfileContext(
     contextProfileContext,
     params.previousReaction
   );
   const contextChanged = nextContextProfileContext !== contextProfileContext;
 
-  const reactions = Array.isArray(value["reactions"])
-    ? (value["reactions"] as ApiDropReaction[])
-    : [];
   const nextReactions = rollbackRejectedReactionEntries(reactions, params);
   const reactionsChanged = nextReactions !== reactions;
 

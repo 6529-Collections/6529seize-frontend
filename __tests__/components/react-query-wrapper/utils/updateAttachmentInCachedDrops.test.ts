@@ -1123,6 +1123,66 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("does not roll back when cache has moved past the failed optimistic reaction", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const waveUser = profile("profile-2", "wave-user");
+    const fireUser = profile("profile-3", "fire-user");
+    const queryKey = [QueryKey.DROP, { drop_id: "drop-rejected-race" }];
+    const cachedDrop = {
+      id: "drop-rejected-race",
+      context_profile_context: {
+        ...contextProfileContext(":fire:"),
+        rating: 17,
+      },
+      reactions: [
+        reactionEntry(":wave:", [waveUser]),
+        reactionEntry(":fire:", [currentUser, fireUser]),
+      ],
+    };
+    queryClient.setQueryData(queryKey, cachedDrop);
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-race",
+      failedReaction: ":joy:",
+      previousReaction: ":wave:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey);
+    expect(updatedDrop).toBe(cachedDrop);
+    expect(updatedDrop.context_profile_context.reaction).toBe(":fire:");
+    expect(updatedDrop.reactions).toEqual(cachedDrop.reactions);
+  });
+
+  it("does not roll back when cache never received the failed optimistic reaction", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const waveUser = profile("profile-2", "wave-user");
+    const queryKey = [QueryKey.DROP, { drop_id: "drop-rejected-unchanged" }];
+    const cachedDrop = {
+      id: "drop-rejected-unchanged",
+      context_profile_context: {
+        ...contextProfileContext(":wave:"),
+        rating: 19,
+      },
+      reactions: [reactionEntry(":wave:", [currentUser, waveUser])],
+    };
+    queryClient.setQueryData(queryKey, cachedDrop);
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-unchanged",
+      failedReaction: ":joy:",
+      previousReaction: ":wave:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey);
+    expect(updatedDrop).toBe(cachedDrop);
+    expect(updatedDrop.context_profile_context.reaction).toBe(":wave:");
+    expect(updatedDrop.reactions).toEqual(cachedDrop.reactions);
+  });
+
   it("returns a protected refetched reaction to the previous reaction after failure", () => {
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();
