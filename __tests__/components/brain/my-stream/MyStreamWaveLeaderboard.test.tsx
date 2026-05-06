@@ -906,6 +906,56 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(approvalStatusProps.closeStatus).toBeNull();
   });
 
+  it("counts uncapped approve decision winners without drop data", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: null,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [
+        ...approvalDecisionPoints,
+        {
+          decision_time: 1300,
+          winners: [{ place: 1, awards: [] }],
+        },
+      ] as any,
+      isFetching: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(screen.getByTestId("approval-status")).toBeInTheDocument();
+    expect(approvalStatusProps.approvedCount).toBe(3);
+  });
+
   it("loads full decisions for ended approve waves with missing server counts", () => {
     const approveWave = {
       ...wave,
