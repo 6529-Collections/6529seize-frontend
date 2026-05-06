@@ -56,6 +56,11 @@ type SentryTransactionEvent = Sentry.Event & {
   tags?: Record<string, unknown> | undefined;
   extra?: Record<string, unknown> | undefined;
 };
+type NetworkErrorSamplingMessageSnapshot = {
+  exceptionValue?: string | undefined;
+  eventMessage?: string | undefined;
+  errorMessage: string;
+};
 
 function getFallbackMessage(hint?: Sentry.EventHint): string {
   if (typeof hint?.originalException === "string") {
@@ -283,6 +288,51 @@ function handleNetworkError(
   }
 }
 
+function getNetworkErrorSamplingMessageSnapshot(
+  event: Sentry.Event,
+  error: Error,
+  value: Sentry.Exception | undefined
+): NetworkErrorSamplingMessageSnapshot {
+  return {
+    exceptionValue: typeof value?.value === "string" ? value.value : undefined,
+    eventMessage: typeof event.message === "string" ? event.message : undefined,
+    errorMessage: error.message,
+  };
+}
+
+function getNetworkErrorSamplingEvent(
+  event: Sentry.Event,
+  snapshot: NetworkErrorSamplingMessageSnapshot
+): Sentry.Event {
+  const originalExceptionValue =
+    snapshot.exceptionValue ?? snapshot.errorMessage;
+  const values = event.exception?.values;
+
+  return {
+    ...event,
+    message: snapshot.eventMessage ?? snapshot.errorMessage,
+    ...(event.exception
+      ? {
+          exception: {
+            ...event.exception,
+            ...(values
+              ? {
+                  values: values.map((exceptionValue, index) =>
+                    index === 0
+                      ? {
+                          ...exceptionValue,
+                          value: originalExceptionValue,
+                        }
+                      : exceptionValue
+                  ),
+                }
+              : {}),
+          },
+        }
+      : {}),
+  };
+}
+
 Sentry.init({
   ...(dsn && { dsn }),
   enabled: sentryEnabled,
@@ -328,11 +378,20 @@ Sentry.init({
       handleIndexedDBError(event);
     }
 
+    const networkErrorSamplingMessageSnapshot =
+      error instanceof Error
+        ? getNetworkErrorSamplingMessageSnapshot(event, error, value)
+        : undefined;
     if (error instanceof Error) {
       handleNetworkError(event, error, value);
     }
 
-    const networkNoiseDecision = getLowValueNetworkErrorDecision(event);
+    const networkErrorSamplingEvent = networkErrorSamplingMessageSnapshot
+      ? getNetworkErrorSamplingEvent(event, networkErrorSamplingMessageSnapshot)
+      : event;
+    const networkNoiseDecision = getLowValueNetworkErrorDecision(
+      networkErrorSamplingEvent
+    );
     if (networkNoiseDecision === "drop") {
       return null;
     }

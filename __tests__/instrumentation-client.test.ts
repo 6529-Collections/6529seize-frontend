@@ -715,6 +715,94 @@ describe("instrumentation-client", () => {
     expect(result?.message).not.toContain("#hash");
   });
 
+  it("drops sampled-out app-wrapped absolute API network errors using the original target", () => {
+    const beforeSend = loadBeforeSend();
+    const message =
+      "Network request failed. Please check your connection and try again. (https://api.6529.io/api/waves-overview?token=secret#hash)";
+    const expectedMessage =
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+    const event = {
+      event_id: "network-drop-event",
+      message,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: message,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error(message),
+    });
+
+    expect(result).toBeNull();
+    expect(event.exception.values[0]?.value).toBe(expectedMessage);
+    expect(event.message).toBe(expectedMessage);
+    expect(event.exception.values[0]?.value).not.toContain("token=");
+    expect(event.message).not.toContain("#hash");
+  });
+
+  it("keeps and tags sampled-in app-wrapped absolute API network errors using the original target", () => {
+    const beforeSend = loadBeforeSend();
+    const message =
+      "Network request failed. Please check your connection and try again. (https://api.6529.io/api/waves-overview?token=secret#hash)";
+    const expectedMessage =
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+    const event = {
+      event_id: "event-200",
+      message,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: message,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error(message),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.tags).toEqual(
+      expect.objectContaining({
+        errorType: "network",
+        handled: true,
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+    expect(result?.exception?.values?.[0]?.value).toBe(expectedMessage);
+    expect(result?.message).toBe(expectedMessage);
+    expect(result?.exception?.values?.[0]?.value).not.toContain("token=");
+    expect(result?.message).not.toContain("#hash");
+  });
+
   it("keeps and tags sampled-in app-wrapped first-party browser transport network errors without rewriting the message", () => {
     const beforeSend = loadBeforeSend();
     const event = {
