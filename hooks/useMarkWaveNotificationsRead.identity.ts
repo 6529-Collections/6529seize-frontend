@@ -206,6 +206,10 @@ const getVerifiedIdentity = ({
     return undefined;
   }
 
+  if (isWaveReadJwtExpired(jwtIdentity.jwtExpiresAt)) {
+    return undefined;
+  }
+
   return {
     addressKey,
     activeProfileProxyId,

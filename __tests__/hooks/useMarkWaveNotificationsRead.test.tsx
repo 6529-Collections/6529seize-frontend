@@ -62,6 +62,30 @@ const createDeferred = (): Deferred => {
   return { promise, resolve, reject };
 };
 
+const flushMicrotasks = async (): Promise<void> => {
+  for (let i = 0; i < 5; i += 1) {
+    await Promise.resolve();
+  }
+};
+
+const trackPromiseSettlement = (
+  promise: Promise<unknown>
+): { readonly isSettled: () => boolean } => {
+  let settled = false;
+  void promise.then(
+    () => {
+      settled = true;
+    },
+    () => {
+      settled = true;
+    }
+  );
+
+  return {
+    isSettled: () => settled,
+  };
+};
+
 const apiPostMock = commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
   typeof commonApiPostWithoutBodyAndResponse
 >;
@@ -1424,6 +1448,143 @@ describe("useMarkWaveNotificationsRead", () => {
       headers: { Authorization: "Bearer jwt-proxy-loading" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for fresh auth when proxy data loads after the role JWT expires", async () => {
+    const invalidateNotifications = jest.fn();
+    const currentSecond = 1_700_000_300;
+    const jwtExpiresAt = currentSecond + 10;
+    const dateNowSpy = mockCurrentJwtSecond(currentSecond);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading-old",
+      jwtRole: "creator-1",
+      jwtExp: jwtExpiresAt,
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const queuedPromise = result.current("wave-proxy-load-after-expiry");
+    const queuedSettlement = trackPromiseSettlement(queuedPromise);
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+
+    dateNowSpy.mockReturnValue(jwtExpiresAt * 1000);
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading-old",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+      jwtExp: jwtExpiresAt,
+    });
+    rerender();
+    await flushMicrotasks();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(queuedSettlement.isSettled()).toBe(false);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-proxy-loading-fresh",
+      activeProfileProxyId: "proxy-1",
+      activeProfileProxyCreatorId: "creator-1",
+      jwtExp: jwtExpiresAt + 60,
+    });
+    rerender();
+
+    await expect(queuedPromise).resolves.toBe("sent");
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-proxy-load-after-expiry/read",
+      headers: { Authorization: "Bearer jwt-proxy-loading-fresh" },
+    });
+    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("requeues a trailing same-wave read when fresh auth expires before the trailing send", async () => {
+    const firstRequest = createDeferred();
+    const trailingRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+    const currentSecond = 1_700_000_400;
+    const oldJwtExpiresAt = currentSecond + 10;
+    const temporaryJwtExpiresAt = oldJwtExpiresAt + 10;
+    const dateNowSpy = mockCurrentJwtSecond(currentSecond);
+
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockReturnValueOnce(trailingRequest.promise);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-trailing-old",
+      jwtExp: oldJwtExpiresAt,
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const firstPromise = result.current("wave-trailing-expiry");
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenNthCalledWith(1, {
+      endpoint: "notifications/wave/wave-trailing-expiry/read",
+      headers: { Authorization: "Bearer jwt-trailing-old" },
+    });
+
+    dateNowSpy.mockReturnValue(oldJwtExpiresAt * 1000);
+    const queuedPromise = result.current("wave-trailing-expiry");
+    const firstSettlement = trackPromiseSettlement(firstPromise);
+    const queuedSettlement = trackPromiseSettlement(queuedPromise);
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-trailing-temporary",
+      jwtExp: temporaryJwtExpiresAt,
+    });
+    rerender();
+    await flushMicrotasks();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
+    dateNowSpy.mockReturnValue(temporaryJwtExpiresAt * 1000);
+    firstRequest.resolve();
+    await flushMicrotasks();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(firstSettlement.isSettled()).toBe(false);
+    expect(queuedSettlement.isSettled()).toBe(false);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-trailing-newest",
+      jwtExp: temporaryJwtExpiresAt + 60,
+    });
+    rerender();
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledTimes(2);
+    });
+    expect(apiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-trailing-expiry/read",
+      headers: { Authorization: "Bearer jwt-trailing-newest" },
+    });
+
+    trailingRequest.resolve();
+
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(queuedPromise).resolves.toBe("sent");
+    expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
   it("does not create a proxy-role identity from an expired JWT role", async () => {

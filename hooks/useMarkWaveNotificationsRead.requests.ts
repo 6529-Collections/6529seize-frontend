@@ -14,6 +14,8 @@ import type {
   PendingWaveReadRequestState,
   WaveReadAddressEpoch,
   WaveReadRequestState,
+  WaveReadSendIntent,
+  WaveReadSendRetryContext,
   WaveReadShouldSend,
 } from "@/hooks/useMarkWaveNotificationsRead.types";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
@@ -31,7 +33,7 @@ const createClearedWaveReadStateError = (reason: string): Error =>
   new Error(`Pending wave notification read cleared: ${reason}.`);
 
 const clearInFlightWaveReadState = (state: WaveReadRequestState): void => {
-  state.pendingShouldSends = [];
+  state.pendingSendIntents = [];
 };
 
 const isCurrentInFlightWaveReadRequest = (
@@ -103,12 +105,12 @@ const hasConsistentPendingWaveReadIdentity = (
   );
 };
 
-const shouldSendWaveRead = (shouldSend: WaveReadShouldSend): boolean =>
-  shouldSend?.() ?? true;
+const shouldSendWaveRead = (sendIntent: WaveReadSendIntent): boolean =>
+  sendIntent.shouldSend?.() ?? true;
 
 const hasSendableWaveRead = (
-  shouldSends: readonly WaveReadShouldSend[]
-): boolean => shouldSends.some(shouldSendWaveRead);
+  sendIntents: readonly WaveReadSendIntent[]
+): boolean => sendIntents.some(shouldSendWaveRead);
 
 const mergeWaveReadResults = (
   first: MarkWaveNotificationsReadResult,
@@ -116,19 +118,64 @@ const mergeWaveReadResults = (
 ): MarkWaveNotificationsReadResult =>
   first === "sent" || second === "sent" ? "sent" : "skipped";
 
+type WaveReadSendRequestResult =
+  | MarkWaveNotificationsReadResult
+  | "auth-expired";
+
+const createWaveReadSendIntent = ({
+  shouldSend,
+  retryContext,
+}: {
+  readonly shouldSend: WaveReadShouldSend;
+  readonly retryContext: WaveReadSendRetryContext | undefined;
+}): WaveReadSendIntent => ({
+  shouldSend,
+  retryContext,
+});
+
+const requeueExpiredWaveReadIntents = (
+  sendIntents: readonly WaveReadSendIntent[]
+): Promise<MarkWaveNotificationsReadResult> => {
+  const retryPromises = sendIntents
+    .filter(shouldSendWaveRead)
+    .map((sendIntent) => {
+      const retryContext = sendIntent.retryContext;
+      if (!retryContext) {
+        return Promise.resolve<MarkWaveNotificationsReadResult>("skipped");
+      }
+
+      return enqueuePendingWaveReadRequest({
+        ...retryContext,
+        shouldSend: sendIntent.shouldSend,
+        queueIfBlocked: true,
+      });
+    });
+
+  if (retryPromises.length === 0) {
+    return Promise.resolve("skipped");
+  }
+
+  return Promise.all(retryPromises).then((results) =>
+    results.reduce<MarkWaveNotificationsReadResult>(
+      mergeWaveReadResults,
+      "skipped"
+    )
+  );
+};
+
 const sendWaveReadRequest = async (
   waveId: string,
   authHeaders: AuthHeaders,
   jwtExpiresAt: number,
   invalidateNotificationsRef: InvalidateNotificationsRef,
-  shouldSends: readonly WaveReadShouldSend[]
-): Promise<MarkWaveNotificationsReadResult> => {
-  if (!hasSendableWaveRead(shouldSends)) {
+  sendIntents: readonly WaveReadSendIntent[]
+): Promise<WaveReadSendRequestResult> => {
+  if (!hasSendableWaveRead(sendIntents)) {
     return "skipped";
   }
 
   if (isWaveReadJwtExpired(jwtExpiresAt)) {
-    return "skipped";
+    return "auth-expired";
   }
 
   await commonApiPostWithoutBodyAndResponse({
@@ -149,13 +196,29 @@ const startWaveReadRequest = async (
   let requestResult: MarkWaveNotificationsReadResult = "skipped";
 
   try {
-    requestResult = await sendWaveReadRequest(
+    const sendResult = await sendWaveReadRequest(
       waveId,
       state.authHeaders,
       state.jwtExpiresAt,
       invalidateNotificationsRef,
-      state.shouldSends
+      state.sendIntents
     );
+
+    if (sendResult === "auth-expired") {
+      if (!isCurrentInFlightWaveReadRequest(state)) {
+        requestResult = "skipped";
+      } else {
+        const expiredSendIntents = [
+          ...state.sendIntents,
+          ...state.pendingSendIntents,
+        ];
+        state.pendingSendIntents = [];
+        inFlightWaveReadRequests.delete(state.requestKey);
+        requestResult = await requeueExpiredWaveReadIntents(expiredSendIntents);
+      }
+    } else {
+      requestResult = sendResult;
+    }
   } catch (error) {
     requestError = error;
     hasRequestError = true;
@@ -163,11 +226,11 @@ const startWaveReadRequest = async (
 
   try {
     if (
-      state.pendingShouldSends.length > 0 &&
+      state.pendingSendIntents.length > 0 &&
       isCurrentInFlightWaveReadRequest(state)
     ) {
-      state.shouldSends = state.pendingShouldSends;
-      state.pendingShouldSends = [];
+      state.sendIntents = state.pendingSendIntents;
+      state.pendingSendIntents = [];
       state.promise = startWaveReadRequest(
         waveId,
         state,
@@ -196,7 +259,7 @@ export const markWaveReadWithAuthHeaders = ({
   authHeaders,
   jwtExpiresAt,
   invalidateNotificationsRef,
-  shouldSend,
+  sendIntents,
 }: {
   readonly waveId: string;
   readonly addressKey: string;
@@ -204,13 +267,13 @@ export const markWaveReadWithAuthHeaders = ({
   readonly authHeaders: AuthHeaders;
   readonly jwtExpiresAt: number;
   readonly invalidateNotificationsRef: InvalidateNotificationsRef;
-  readonly shouldSend: WaveReadShouldSend;
+  readonly sendIntents: readonly WaveReadSendIntent[];
 }): Promise<MarkWaveNotificationsReadResult> => {
   const existingState = inFlightWaveReadRequests.get(requestKey);
   if (existingState) {
     existingState.authHeaders = authHeaders;
     existingState.jwtExpiresAt = jwtExpiresAt;
-    existingState.pendingShouldSends.push(shouldSend);
+    existingState.pendingSendIntents.push(...sendIntents);
     return existingState.promise;
   }
 
@@ -220,8 +283,8 @@ export const markWaveReadWithAuthHeaders = ({
     requestKey,
     authHeaders,
     jwtExpiresAt,
-    shouldSends: [shouldSend],
-    pendingShouldSends: [],
+    sendIntents: [...sendIntents],
+    pendingSendIntents: [],
   };
   inFlightWaveReadRequests.set(requestKey, state);
   state.promise = startWaveReadRequest(
@@ -255,7 +318,7 @@ export const getVerifiedProxyRoleIdentityKey = (
       })
     : null;
 
-export const enqueuePendingWaveReadRequest = ({
+export function enqueuePendingWaveReadRequest({
   addressKey,
   activeProfileProxyId,
   proxyCreatorId,
@@ -277,7 +340,7 @@ export const enqueuePendingWaveReadRequest = ({
   readonly latestAddressEpochRef: RefObject<WaveReadAddressEpoch>;
   readonly shouldSend: WaveReadShouldSend;
   readonly queueIfBlocked: boolean;
-}): Promise<MarkWaveNotificationsReadResult> => {
+}): Promise<MarkWaveNotificationsReadResult> {
   if (!queueIfBlocked) {
     return Promise.resolve("skipped");
   }
@@ -288,9 +351,24 @@ export const enqueuePendingWaveReadRequest = ({
     );
   }
 
+  const retryContext: WaveReadSendRetryContext = {
+    addressKey,
+    activeProfileProxyId,
+    proxyCreatorId,
+    identityKey,
+    requestKey,
+    waveId,
+    addressEpoch,
+    latestAddressEpochRef,
+  };
+  const sendIntent = createWaveReadSendIntent({
+    shouldSend,
+    retryContext,
+  });
+
   const existingState = pendingWaveReadRequests.get(requestKey);
   if (existingState) {
-    existingState.shouldSends.push(shouldSend);
+    existingState.sendIntents.push(sendIntent);
     return existingState.promise;
   }
 
@@ -312,23 +390,22 @@ export const enqueuePendingWaveReadRequest = ({
     identityKey,
     requestKey,
     waveId,
+    addressEpoch,
+    latestAddressEpochRef,
     promise,
     resolve: resolveQueuedRequest,
     reject: rejectQueuedRequest,
-    shouldSends: [shouldSend],
+    sendIntents: [sendIntent],
   };
   pendingWaveReadRequests.set(requestKey, state);
 
   return promise;
-};
-
-const hasSendableQueuedWaveRead = (
-  queuedRequest: PendingWaveReadRequestState
-): boolean => hasSendableWaveRead(queuedRequest.shouldSends);
+}
 
 const flushQueuedWaveReadRequests = ({
   queuedRequests,
   getRequestKey,
+  getRetryContext,
   authHeaders,
   jwtExpiresAt,
   invalidateNotificationsRef,
@@ -337,6 +414,10 @@ const flushQueuedWaveReadRequests = ({
   readonly getRequestKey: (
     queuedRequest: PendingWaveReadRequestState
   ) => string;
+  readonly getRetryContext: (
+    queuedRequest: PendingWaveReadRequestState,
+    requestKey: string
+  ) => WaveReadSendRetryContext;
   readonly authHeaders: AuthHeaders;
   readonly jwtExpiresAt: number;
   readonly invalidateNotificationsRef: InvalidateNotificationsRef;
@@ -366,6 +447,15 @@ const flushQueuedWaveReadRequests = ({
       continue;
     }
 
+    const sendIntents = groupedRequests.flatMap((queuedRequest) =>
+      queuedRequest.sendIntents.map((sendIntent) =>
+        createWaveReadSendIntent({
+          shouldSend: sendIntent.shouldSend,
+          retryContext: getRetryContext(queuedRequest, requestKey),
+        })
+      )
+    );
+
     void (async () => {
       try {
         const result = await markWaveReadWithAuthHeaders({
@@ -375,7 +465,7 @@ const flushQueuedWaveReadRequests = ({
           authHeaders,
           jwtExpiresAt,
           invalidateNotificationsRef,
-          shouldSend: () => groupedRequests.some(hasSendableQueuedWaveRead),
+          sendIntents,
         });
         for (const queuedRequest of groupedRequests) {
           queuedRequest.resolve(result);
@@ -419,6 +509,16 @@ export const flushPendingWaveReadRequests = ({
         waveId: queuedRequest.waveId,
       });
     },
+    getRetryContext: (queuedRequest, requestKey) => ({
+      addressKey: verifiedIdentity.addressKey,
+      activeProfileProxyId: verifiedIdentity.activeProfileProxyId,
+      proxyCreatorId: null,
+      identityKey: verifiedIdentity.identityKey,
+      requestKey,
+      waveId: queuedRequest.waveId,
+      addressEpoch: queuedRequest.addressEpoch,
+      latestAddressEpochRef: queuedRequest.latestAddressEpochRef,
+    }),
     authHeaders: verifiedIdentity.authHeaders,
     jwtExpiresAt: verifiedIdentity.jwtExpiresAt,
     invalidateNotificationsRef,
@@ -449,6 +549,16 @@ export const flushPendingClearedWaveReadRequests = ({
   flushQueuedWaveReadRequests({
     queuedRequests,
     getRequestKey: (queuedRequest) => queuedRequest.requestKey,
+    getRetryContext: (queuedRequest, requestKey) => ({
+      addressKey: verifiedIdentity.addressKey,
+      activeProfileProxyId: verifiedIdentity.activeProfileProxyId,
+      proxyCreatorId: null,
+      identityKey: verifiedIdentity.identityKey,
+      requestKey,
+      waveId: queuedRequest.waveId,
+      addressEpoch: queuedRequest.addressEpoch,
+      latestAddressEpochRef: queuedRequest.latestAddressEpochRef,
+    }),
     authHeaders: verifiedIdentity.authHeaders,
     jwtExpiresAt: verifiedIdentity.jwtExpiresAt,
     invalidateNotificationsRef,

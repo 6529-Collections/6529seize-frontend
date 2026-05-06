@@ -26,6 +26,8 @@ import type {
   MarkWaveNotificationsReadResult,
   WaveReadAddressEpoch,
   WaveReadCacheRefs,
+  WaveReadSendIntent,
+  WaveReadSendRetryContext,
 } from "@/hooks/useMarkWaveNotificationsRead.types";
 import { useLayoutEffect, useMemo, useRef } from "react";
 
@@ -304,6 +306,54 @@ export const useClearWaveReadStateOnLastUnmount = (): void => {
   }, []);
 };
 
+const createWaveReadSendIntent = ({
+  shouldSend,
+  retryContext,
+}: {
+  readonly shouldSend: MarkWaveNotificationsReadOptions["shouldSend"];
+  readonly retryContext: WaveReadSendRetryContext | undefined;
+}): WaveReadSendIntent => ({
+  shouldSend,
+  retryContext,
+});
+
+const getWaveReadSendRetryContext = ({
+  addressKey,
+  activeProfileProxyId,
+  proxyCreatorId,
+  identityKey,
+  requestKey,
+  waveId,
+  addressEpoch,
+  cacheRefs,
+  queueIfBlocked,
+}: {
+  readonly addressKey: string;
+  readonly activeProfileProxyId: string | null;
+  readonly proxyCreatorId: string | null;
+  readonly identityKey: string;
+  readonly requestKey: string;
+  readonly waveId: string;
+  readonly addressEpoch: WaveReadAddressEpoch;
+  readonly cacheRefs: WaveReadCacheRefs;
+  readonly queueIfBlocked: boolean;
+}): WaveReadSendRetryContext | undefined => {
+  if (!queueIfBlocked) {
+    return undefined;
+  }
+
+  return {
+    addressKey,
+    activeProfileProxyId,
+    proxyCreatorId,
+    identityKey,
+    requestKey,
+    waveId,
+    addressEpoch,
+    latestAddressEpochRef: cacheRefs.latestAddressEpochRef,
+  };
+};
+
 const markTemporaryProxyRoleWaveRead = ({
   waveId,
   addressKey,
@@ -326,32 +376,52 @@ const markTemporaryProxyRoleWaveRead = ({
     cacheRefs,
   });
   if (latestVerifiedProxyRoleIdentity) {
+    const loadedProxyRequestKey = getWaveReadRequestKey({
+      addressKey: latestVerifiedProxyRoleIdentity.addressKey,
+      activeProfileProxyId:
+        latestVerifiedProxyRoleIdentity.activeProfileProxyId,
+      waveId,
+    });
+
     return markWaveReadWithAuthHeaders({
       waveId,
       addressKey: latestVerifiedProxyRoleIdentity.addressKey,
-      requestKey: getWaveReadRequestKey({
-        addressKey: latestVerifiedProxyRoleIdentity.addressKey,
-        activeProfileProxyId:
-          latestVerifiedProxyRoleIdentity.activeProfileProxyId,
-        waveId,
-      }),
+      requestKey: loadedProxyRequestKey,
       authHeaders: latestVerifiedProxyRoleIdentity.authHeaders,
       jwtExpiresAt: latestVerifiedProxyRoleIdentity.jwtExpiresAt,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
-      shouldSend: options?.shouldSend,
+      sendIntents: [
+        createWaveReadSendIntent({
+          shouldSend: options?.shouldSend,
+          retryContext: getWaveReadSendRetryContext({
+            addressKey: latestVerifiedProxyRoleIdentity.addressKey,
+            activeProfileProxyId:
+              latestVerifiedProxyRoleIdentity.activeProfileProxyId,
+            proxyCreatorId: null,
+            identityKey: latestVerifiedProxyRoleIdentity.identityKey,
+            requestKey: loadedProxyRequestKey,
+            waveId,
+            addressEpoch,
+            cacheRefs,
+            queueIfBlocked: options?.queueIfBlocked ?? true,
+          }),
+        }),
+      ],
     });
   }
+
+  const proxyRoleRequestKey = getWaveReadProxyRoleRequestKey({
+    addressKey,
+    proxyCreatorId: temporaryProxyRoleIdentity.proxyCreatorId,
+    waveId,
+  });
 
   return enqueuePendingWaveReadRequest({
     addressKey,
     activeProfileProxyId: null,
     proxyCreatorId: temporaryProxyRoleIdentity.proxyCreatorId,
     identityKey: temporaryProxyRoleIdentity.identityKey,
-    requestKey: getWaveReadProxyRoleRequestKey({
-      addressKey,
-      proxyCreatorId: temporaryProxyRoleIdentity.proxyCreatorId,
-      waveId,
-    }),
+    requestKey: proxyRoleRequestKey,
     waveId,
     addressEpoch,
     latestAddressEpochRef: cacheRefs.latestAddressEpochRef,
@@ -398,7 +468,22 @@ export const markWaveReadFromCache = ({
       authHeaders: verifiedCachedIdentity.authHeaders,
       jwtExpiresAt: verifiedCachedIdentity.jwtExpiresAt,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
-      shouldSend: options?.shouldSend,
+      sendIntents: [
+        createWaveReadSendIntent({
+          shouldSend: options?.shouldSend,
+          retryContext: getWaveReadSendRetryContext({
+            addressKey: verifiedCachedIdentity.addressKey,
+            activeProfileProxyId,
+            proxyCreatorId: null,
+            identityKey: verifiedCachedIdentity.identityKey,
+            requestKey,
+            waveId,
+            addressEpoch,
+            cacheRefs,
+            queueIfBlocked: options?.queueIfBlocked ?? true,
+          }),
+        }),
+      ],
     });
   }
 
@@ -415,7 +500,22 @@ export const markWaveReadFromCache = ({
       authHeaders: latestVerifiedIdentity.authHeaders,
       jwtExpiresAt: latestVerifiedIdentity.jwtExpiresAt,
       invalidateNotificationsRef: cacheRefs.invalidateNotificationsRef,
-      shouldSend: options?.shouldSend,
+      sendIntents: [
+        createWaveReadSendIntent({
+          shouldSend: options?.shouldSend,
+          retryContext: getWaveReadSendRetryContext({
+            addressKey: latestVerifiedIdentity.addressKey,
+            activeProfileProxyId,
+            proxyCreatorId: null,
+            identityKey: latestVerifiedIdentity.identityKey,
+            requestKey,
+            waveId,
+            addressEpoch,
+            cacheRefs,
+            queueIfBlocked: options?.queueIfBlocked ?? true,
+          }),
+        }),
+      ],
     });
   }
 
