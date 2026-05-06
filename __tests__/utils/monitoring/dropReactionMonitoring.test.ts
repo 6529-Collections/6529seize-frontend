@@ -224,6 +224,7 @@ describe("dropReactionMonitoring", () => {
           reaction: ":wave:",
         } as any,
       },
+      activeProfileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
@@ -240,6 +241,45 @@ describe("dropReactionMonitoring", () => {
         message: "Reaction optimistic state disagreed with canonical state",
       })
     );
+  });
+
+  it("does not record reconciliation logs for a different active profile", () => {
+    const mutation = beginReactionMutation({
+      dropId: "drop-profile-mismatch",
+      waveId: "wave-1",
+      source: "chip",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":smile:",
+      optimisticReaction: ":smile:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    recordReactionRequestSent(mutation, {
+      endpoint: "drops/drop-profile-mismatch/reaction",
+      method: "POST",
+    });
+
+    dateNowSpy.mockReturnValue(1_100);
+    recordReactionRequestSucceeded(mutation);
+    jest.clearAllMocks();
+
+    dateNowSpy.mockReturnValue(6_101);
+    recordReactionRealtimeReconciliation({
+      drop: {
+        id: "drop-profile-mismatch",
+        wave: { id: "wave-1" },
+        context_profile_context: {
+          reaction: ":wave:",
+        } as any,
+      },
+      activeProfileId: "profile-2",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(addBreadcrumbMock).not.toHaveBeenCalled();
+    expect(captureExceptionMock).not.toHaveBeenCalled();
   });
 
   it("ignores reconciliation mismatch after the reconciliation window", () => {
@@ -272,6 +312,7 @@ describe("dropReactionMonitoring", () => {
           reaction: ":wave:",
         } as any,
       },
+      activeProfileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
@@ -317,6 +358,7 @@ describe("dropReactionMonitoring", () => {
           reaction: ":smile:",
         } as any,
       },
+      activeProfileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
@@ -358,6 +400,7 @@ describe("dropReactionMonitoring", () => {
           reaction: ":smile:",
         } as any,
       },
+      activeProfileId: "profile-1",
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
@@ -384,7 +427,7 @@ describe("dropReactionMonitoring", () => {
 
     dateNowSpy.mockReturnValue(2_000);
 
-    expect(getProtectedReactionIntent("drop-protected-1")).toEqual(
+    expect(getProtectedReactionIntent("drop-protected-1", "profile-1")).toEqual(
       expect.objectContaining({
         mutationId: mutation.mutationId,
         dropMutationSeq: 1,
@@ -413,7 +456,7 @@ describe("dropReactionMonitoring", () => {
 
     dateNowSpy.mockReturnValue(6_100);
 
-    expect(getProtectedReactionIntent("drop-protected-2")).toEqual(
+    expect(getProtectedReactionIntent("drop-protected-2", "profile-1")).toEqual(
       expect.objectContaining({
         mutationId: mutation.mutationId,
         reaction: ":joy:",
@@ -441,7 +484,9 @@ describe("dropReactionMonitoring", () => {
 
     dateNowSpy.mockReturnValue(6_101);
 
-    expect(getProtectedReactionIntent("drop-protected-3")).toBeNull();
+    expect(
+      getProtectedReactionIntent("drop-protected-3", "profile-1")
+    ).toBeNull();
   });
 
   it("returns null for a failed mutation", () => {
@@ -462,7 +507,52 @@ describe("dropReactionMonitoring", () => {
 
     dateNowSpy.mockReturnValue(1_200);
 
-    expect(getProtectedReactionIntent("drop-protected-4")).toBeNull();
+    expect(
+      getProtectedReactionIntent("drop-protected-4", "profile-1")
+    ).toBeNull();
+  });
+
+  it("returns null for a different active profile", () => {
+    beginReactionMutation({
+      dropId: "drop-protected-different-profile",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+
+    expect(
+      getProtectedReactionIntent(
+        "drop-protected-different-profile",
+        "profile-2"
+      )
+    ).toBeNull();
+  });
+
+  it("returns null for anonymous active profile state", () => {
+    beginReactionMutation({
+      dropId: "drop-protected-anonymous",
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "add",
+      previousReaction: null,
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+
+    expect(
+      getProtectedReactionIntent("drop-protected-anonymous", null)
+    ).toBeNull();
   });
 
   it("uses the newest mutation as the protected intent for a drop", () => {
@@ -493,7 +583,7 @@ describe("dropReactionMonitoring", () => {
 
     dateNowSpy.mockReturnValue(1_100);
 
-    expect(getProtectedReactionIntent("drop-protected-5")).toEqual(
+    expect(getProtectedReactionIntent("drop-protected-5", "profile-1")).toEqual(
       expect.objectContaining({
         mutationId: newerMutation.mutationId,
         dropMutationSeq: 2,

@@ -194,7 +194,7 @@ function addReactionBreadcrumb(
       previous_reaction: context.previousReaction,
       intended_reaction: context.intendedReaction,
       optimistic_reaction: context.optimisticReaction,
-      profile_id: context.profileId ?? undefined,
+      profile_id: context.profileId,
       pathname: context.pathname ?? undefined,
       visibility_state: context.visibilityState ?? undefined,
       online: context.online ?? undefined,
@@ -603,13 +603,20 @@ export function recordReactionRollbackApplied(
 }
 
 export function getProtectedReactionIntent(
-  dropId: string
+  dropId: string,
+  activeProfileId: string | null
 ): ProtectedReactionIntent | null {
   const now = Date.now();
   pruneState(now);
 
   const context = getLatestMutationContext(dropId);
-  if (!context || !isProtectedReactionContext(context, now)) {
+  if (
+    !context ||
+    activeProfileId === null ||
+    context.profileId === null ||
+    context.profileId !== activeProfileId ||
+    !isProtectedReactionContext(context, now)
+  ) {
     return null;
   }
 
@@ -629,6 +636,7 @@ export function recordReactionRealtimeReconciliation(params: {
     readonly wave: Pick<ApiDrop["wave"], "id">;
     readonly context_profile_context: ApiDrop["context_profile_context"];
   };
+  readonly activeProfileId: string | null;
   websocketStatus?: WebSocketStatus | string | null;
   protectedIntent?: ProtectedReactionIntent | null;
 }): void {
@@ -637,6 +645,14 @@ export function recordReactionRealtimeReconciliation(params: {
 
   const context = getLatestMutationContext(params.drop.id);
   if (!context) {
+    return;
+  }
+
+  if (
+    params.activeProfileId === null ||
+    context.profileId === null ||
+    context.profileId !== params.activeProfileId
+  ) {
     return;
   }
 
@@ -732,7 +748,7 @@ export function recordReactionRealtimeReconciliation(params: {
       intended_reaction: context.intendedReaction,
       optimistic_reaction: context.optimisticReaction,
       server_reaction: serverReaction ?? undefined,
-      profile_id: context.profileId ?? undefined,
+      profile_id: context.profileId,
       pathname: context.pathname ?? undefined,
       visibility_state: context.visibilityState ?? undefined,
       online: context.online ?? undefined,

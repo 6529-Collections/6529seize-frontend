@@ -118,6 +118,7 @@ describe("useWaveRealtimeUpdater", () => {
 
   const baseProps = (store: any) => ({
     activeWaveId: null as string | null,
+    activeProfileId: "profile-1" as string | null,
     getData: (key: any) => store[key],
     updateData: jest.fn((update: any) => {
       store[update.key] = { ...store[update.key], ...update };

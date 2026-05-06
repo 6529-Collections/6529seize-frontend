@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
@@ -128,6 +129,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const prevIsActiveRef = useRef(isActive);
   const lastBrowserResumeSyncAtRef = useRef(0);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
+  const { connectedProfile } = useContext(AuthContext);
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
@@ -167,6 +169,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // Instantiate the real-time updater hook
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     activeWaveId,
+    activeProfileId: connectedProfile?.id ?? null,
     getData: waveMessagesStore.getData,
     updateData: waveMessagesStore.updateData,
     registerWave,

@@ -1,12 +1,12 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   findDropInCachedDrops,
-  reconcileDropsWithoutWaveForDisplay,
-  reconcileServerDropForDisplay,
+  reconcileDropsWithoutWaveForDisplay as reconcileDropsWithoutWaveForDisplayBase,
+  reconcileServerDropForDisplay as reconcileServerDropForDisplayBase,
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
   rollbackRejectedReactionInCachedDrops,
-  updateServerDropInCachedDrops,
+  updateServerDropInCachedDrops as updateServerDropInCachedDropsBase,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import {
   __resetDropReactionMonitoringForTests,
@@ -38,6 +38,42 @@ const createQueryClient = () =>
       queries: { retry: false },
       mutations: { retry: false },
     },
+  });
+
+const ACTIVE_PROFILE_ID = "profile-1";
+
+const reconcileServerDropForDisplay = (
+  params: Omit<
+    Parameters<typeof reconcileServerDropForDisplayBase>[0],
+    "activeProfileId"
+  > & { readonly activeProfileId?: string | null }
+) =>
+  reconcileServerDropForDisplayBase({
+    activeProfileId: ACTIVE_PROFILE_ID,
+    ...params,
+  });
+
+const updateServerDropInCachedDrops = (
+  queryClient: Parameters<typeof updateServerDropInCachedDropsBase>[0],
+  params: Omit<
+    Parameters<typeof updateServerDropInCachedDropsBase>[1],
+    "activeProfileId"
+  > & { readonly activeProfileId?: string | null }
+) =>
+  updateServerDropInCachedDropsBase(queryClient, {
+    activeProfileId: ACTIVE_PROFILE_ID,
+    ...params,
+  });
+
+const reconcileDropsWithoutWaveForDisplay = (
+  params: Omit<
+    Parameters<typeof reconcileDropsWithoutWaveForDisplayBase>[0],
+    "activeProfileId"
+  > & { readonly activeProfileId?: string | null }
+) =>
+  reconcileDropsWithoutWaveForDisplayBase({
+    activeProfileId: ACTIVE_PROFILE_ID,
+    ...params,
   });
 
 describe("cached drop websocket updates", () => {
@@ -455,6 +491,86 @@ describe("cached drop websocket updates", () => {
     });
     expect(reconciledDrop.reactions).toEqual([
       reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
+  it("does not apply another profile's protected intent", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+
+    beginReactionMutation({
+      dropId: "drop-other-profile-protected",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const rawDrop = serverDrop({
+      id: "drop-other-profile-protected",
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-2", "active-user"),
+          profile("profile-3", "fresh-wave"),
+        ]),
+      ],
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      activeProfileId: "profile-2",
+      queryClient,
+      serverDrop: rawDrop,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop).toBe(rawDrop);
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":wave:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-2", "active-user"),
+        profile("profile-3", "fresh-wave"),
+      ]),
+    ]);
+  });
+
+  it("does not apply protected intents for anonymous reconciliation", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+
+    beginReactionMutation({
+      dropId: "drop-anonymous-protected",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const rawDrop = serverDrop({
+      id: "drop-anonymous-protected",
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [reactionEntry(":wave:", [profile("profile-2")])],
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      activeProfileId: null,
+      queryClient,
+      serverDrop: rawDrop,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop).toBe(rawDrop);
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":wave:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2")]),
     ]);
   });
 

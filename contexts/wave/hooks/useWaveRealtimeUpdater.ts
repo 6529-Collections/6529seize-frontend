@@ -24,12 +24,19 @@ import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater, WaveMessages } from "./types";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly activeWaveId: string | null;
+  readonly activeProfileId: string | null;
   readonly registerWave: (waveId: string) => void;
   readonly syncNewestMessages: (
     waveId: string,
@@ -70,6 +77,10 @@ type ProcessIncomingDropFn = (
   dropData: IncomingDrop,
   type: ProcessIncomingDropType
 ) => void;
+
+type ActiveProfileIdRef = {
+  readonly current: string | null;
+};
 
 function getDocument(): Document | null {
   return typeof globalThis.document === "undefined"
@@ -377,10 +388,12 @@ function useWaveVisibilityRefresh(): {
 }
 
 function useNewestMessagesSync({
+  activeProfileIdRef,
   getData,
   queryClient,
   syncNewestMessages,
 }: Pick<UseWaveRealtimeUpdaterProps, "getData" | "syncNewestMessages"> & {
+  readonly activeProfileIdRef: ActiveProfileIdRef;
   readonly queryClient: QueryClient;
 }): {
   readonly initiateFetchNewestCycle: InitiateFetchNewestCycleFn;
@@ -414,6 +427,7 @@ function useNewestMessagesSync({
           (serverDrops) => {
             const latestData = getData(waveId);
             return reconcileServerDropsForDisplay({
+              activeProfileId: activeProfileIdRef.current,
               queryClient,
               serverDrops,
               ...(latestData !== undefined
@@ -446,7 +460,13 @@ function useNewestMessagesSync({
         }
       }
     },
-    [cleanupController, getData, queryClient, syncNewestMessages]
+    [
+      activeProfileIdRef,
+      cleanupController,
+      getData,
+      queryClient,
+      syncNewestMessages,
+    ]
   );
 
   useEffect(() => {
@@ -467,6 +487,7 @@ type IncomingDropProcessorProps = Pick<
   UseWaveRealtimeUpdaterProps,
   "activeWaveId" | "getData" | "isWaveMuted" | "registerWave" | "updateData"
 > & {
+  readonly activeProfileIdRef: ActiveProfileIdRef;
   readonly clearActiveWaveNotifications: WaveIdCallback;
   readonly initiateFetchNewestCycle: InitiateFetchNewestCycleFn;
   readonly queryClient: QueryClient;
@@ -474,6 +495,7 @@ type IncomingDropProcessorProps = Pick<
 };
 
 function useIncomingDropProcessor({
+  activeProfileIdRef,
   activeWaveId,
   clearActiveWaveNotifications,
   getData,
@@ -513,6 +535,7 @@ function useIncomingDropProcessor({
 
       if (latestFullDrop !== null) {
         const nextDrop = updateServerDropInCachedDrops(queryClient, {
+          activeProfileId: activeProfileIdRef.current,
           serverDrop: pendingUpdate.serverDrop,
           latestWaveDrop: latestFullDrop,
           websocketStatus: WebSocketStatus.CONNECTED,
@@ -529,7 +552,7 @@ function useIncomingDropProcessor({
         pendingFetchedDropUpdatesRef.current.delete(key);
       }
     }
-  }, [getData, queryClient, updateData]);
+  }, [activeProfileIdRef, getData, queryClient, updateData]);
 
   useEffect(() => {
     flushPendingFetchedDropUpdates();
@@ -572,6 +595,7 @@ function useIncomingDropProcessor({
       );
       const latestExistingDrop = getFullDrop(latestDrop);
       const nextDrop = updateServerDropInCachedDrops(queryClient, {
+        activeProfileId: activeProfileIdRef.current,
         serverDrop,
         latestWaveDrop: latestExistingDrop,
         ...(cachedDropSnapshot !== undefined ? { cachedDropSnapshot } : {}),
@@ -607,7 +631,7 @@ function useIncomingDropProcessor({
 
       pendingFetchedDropUpdatesRef.current.delete(updateKey);
     },
-    [getData, queryClient, updateData]
+    [activeProfileIdRef, getData, queryClient, updateData]
   );
 
   const processIncomingDropAsync = useCallback(
@@ -629,6 +653,7 @@ function useIncomingDropProcessor({
       const serverDisplayDrop = isFetchedDropUpdate(type)
         ? null
         : updateServerDropInCachedDrops(queryClient, {
+            activeProfileId: activeProfileIdRef.current,
             serverDrop: incomingServerDrop,
             latestWaveDrop: latestFullDrop,
             websocketStatus: WebSocketStatus.CONNECTED,
@@ -718,6 +743,7 @@ function useIncomingDropProcessor({
       }
     },
     [
+      activeProfileIdRef,
       activeWaveId,
       clearActiveWaveNotifications,
       getData,
@@ -786,6 +812,7 @@ function useAttachmentStatusProcessor({
 }
 
 export function useWaveRealtimeUpdater({
+  activeProfileId,
   activeWaveId,
   getData,
   updateData,
@@ -796,17 +823,23 @@ export function useWaveRealtimeUpdater({
   isWaveMuted,
 }: UseWaveRealtimeUpdaterProps): WaveRealtimeUpdaterResult {
   const queryClient = useQueryClient();
+  const activeProfileIdRef = useRef<string | null>(activeProfileId);
+  useLayoutEffect(() => {
+    activeProfileIdRef.current = activeProfileId;
+  }, [activeProfileId]);
   const { clearActiveWaveNotifications } = useWaveNotificationActions({
     removeWaveDeliveredNotifications,
   });
   const { refreshEligibilityAfterVisibilityChange } =
     useWaveVisibilityRefresh();
   const { initiateFetchNewestCycle } = useNewestMessagesSync({
+    activeProfileIdRef,
     getData,
     queryClient,
     syncNewestMessages,
   });
   const { processIncomingDrop } = useIncomingDropProcessor({
+    activeProfileIdRef,
     activeWaveId,
     clearActiveWaveNotifications,
     getData,

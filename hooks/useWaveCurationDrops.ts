@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   reconcileDropsWithoutWaveForDisplay,
@@ -26,7 +27,7 @@ import {
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 
 const DEFAULT_WAVE_CURATION_DROPS_PAGE_SIZE = 20;
@@ -44,7 +45,13 @@ export function useWaveCurationDrops({
 }) {
   const normalizedCurationId = curationId?.trim() ?? "";
   const waveId = wave?.id ?? null;
+  const { connectedProfile } = useAuth();
   const queryClient = useQueryClient();
+  const activeProfileId = connectedProfile?.id ?? null;
+  const activeProfileIdRef = useRef<string | null>(activeProfileId);
+  useLayoutEffect(() => {
+    activeProfileIdRef.current = activeProfileId;
+  }, [activeProfileId]);
   const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
   const queryKey = useMemo(
     () =>
@@ -94,6 +101,7 @@ export function useWaveCurationDrops({
           waveMin === null
             ? page.data
             : reconcileDropsWithoutWaveForDisplay({
+                activeProfileId: activeProfileIdRef.current,
                 queryClient,
                 serverDrops: page.data,
                 wave: waveMin,
@@ -147,6 +155,7 @@ export function useWaveCurationDrops({
         }
 
         updateServerDropInCachedDrops(queryClient, {
+          activeProfileId: activeProfileIdRef.current,
           serverDrop: message,
           websocketStatus: WebSocketStatus.CONNECTED,
         });

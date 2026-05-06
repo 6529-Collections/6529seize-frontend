@@ -13,6 +13,11 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/services/api/common-api");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: { id: "profile-1" },
+  }),
+}));
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: jest.fn(),
 }));

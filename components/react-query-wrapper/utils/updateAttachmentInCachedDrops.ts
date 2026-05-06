@@ -23,6 +23,7 @@ type ServerDropForDisplay = Omit<ApiDrop, "reactions"> & {
 type ReconcileServerDropForDisplayParams = {
   readonly queryClient: QueryClient;
   readonly serverDrop: ServerDropForDisplay;
+  readonly activeProfileId: string | null;
   readonly latestWaveDrop?: CachedDropReactionState | null;
   readonly cachedDropSnapshot?: CachedDropReactionState | null;
   readonly websocketStatus?: WebSocketStatus | string | null;
@@ -772,13 +773,17 @@ export function rollbackRejectedReactionInCachedDrops(
 }
 
 export function reconcileServerDropForDisplay({
+  activeProfileId,
   cachedDropSnapshot,
   latestWaveDrop,
   queryClient,
   serverDrop,
   websocketStatus,
 }: ReconcileServerDropForDisplayParams): ApiDrop {
-  const protectedIntent = getProtectedReactionIntent(serverDrop.id);
+  const protectedIntent = getProtectedReactionIntent(
+    serverDrop.id,
+    activeProfileId
+  );
 
   recordReactionRealtimeReconciliation({
     drop: {
@@ -786,6 +791,7 @@ export function reconcileServerDropForDisplay({
       wave: { id: serverDrop.wave.id },
       context_profile_context: serverDrop.context_profile_context,
     },
+    activeProfileId,
     ...(websocketStatus !== undefined ? { websocketStatus } : {}),
     protectedIntent,
   });
@@ -851,11 +857,13 @@ export function updateServerDropInCachedDrops(
 }
 
 export function reconcileServerDropsForDisplay({
+  activeProfileId,
   latestWaveDrops,
   queryClient,
   serverDrops,
   websocketStatus,
 }: {
+  readonly activeProfileId: string | null;
   readonly latestWaveDrops?: readonly IdentifiedDropReactionState[];
   readonly queryClient: QueryClient;
   readonly serverDrops: readonly ServerDropForDisplay[];
@@ -863,6 +871,7 @@ export function reconcileServerDropsForDisplay({
 }): ApiDrop[] {
   return serverDrops.map((serverDrop) =>
     reconcileServerDropForDisplay({
+      activeProfileId,
       queryClient,
       serverDrop,
       latestWaveDrop:
@@ -875,11 +884,13 @@ export function reconcileServerDropsForDisplay({
 export function reconcileDropsWithoutWaveForDisplay<
   TDrop extends DropWithoutWaveReactionState,
 >({
+  activeProfileId,
   queryClient,
   serverDrops,
   wave,
   websocketStatus,
 }: {
+  readonly activeProfileId: string | null;
   readonly queryClient: QueryClient;
   readonly serverDrops: readonly TDrop[];
   readonly wave: ApiDrop["wave"];
@@ -888,6 +899,7 @@ export function reconcileDropsWithoutWaveForDisplay<
   return serverDrops.map((drop) => {
     const serverDrop = { ...drop, wave } as ServerDropForDisplay & TDrop;
     const displayDrop = reconcileServerDropForDisplay({
+      activeProfileId,
       queryClient,
       serverDrop,
       ...(websocketStatus !== undefined ? { websocketStatus } : {}),

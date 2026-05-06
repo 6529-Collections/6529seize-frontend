@@ -1,12 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   keepPreviousData,
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { useAuth } from "@/components/auth/Auth";
 import useCapacitor from "./useCapacitor";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -33,8 +40,14 @@ import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
 
 export function useDropMessages(waveId: string, dropId: string | null) {
+  const { connectedProfile } = useAuth();
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
+  const activeProfileId = connectedProfile?.id ?? null;
+  const activeProfileIdRef = useRef<string | null>(activeProfileId);
+  useLayoutEffect(() => {
+    activeProfileIdRef.current = activeProfileId;
+  }, [activeProfileId]);
   const [init, setInit] = useState(false);
 
   const queryKey = [
@@ -81,6 +94,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
       return {
         ...results,
         drops: reconcileDropsWithoutWaveForDisplay({
+          activeProfileId: activeProfileIdRef.current,
           queryClient,
           serverDrops: results.drops,
           wave: results.wave,
@@ -154,6 +168,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
         }
 
         updateServerDropInCachedDrops(queryClient, {
+          activeProfileId: activeProfileIdRef.current,
           serverDrop: message,
           websocketStatus: WebSocketStatus.CONNECTED,
         });
