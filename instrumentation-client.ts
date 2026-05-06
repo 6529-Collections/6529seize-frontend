@@ -238,10 +238,7 @@ function getRawBrowserNetworkErrorMessage(
   error: Error
 ): string {
   const url = extractUrlFromError(error, event);
-  const normalized = error.message.toLowerCase();
-  return normalized.includes("network")
-    ? `Network error: ${error.message} (${url})`
-    : `Network request failed. Please check your connection and try again. (${url})`;
+  return `Network request failed. Please check your connection and try again. (${url})`;
 }
 
 function getAppWrappedNetworkErrorMessage(

@@ -130,7 +130,7 @@ describe("instrumentation-client", () => {
 
     expect(result).toBeNull();
     expect(event.exception.values[0]?.value).toBe(
-      "Network error: The network connection was lost. (/api/waves-overview)"
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
     );
   });
 
@@ -251,6 +251,44 @@ describe("instrumentation-client", () => {
     expect(result?.exception?.values?.[0]?.value).toBe(
       "Network request failed. Please check your connection and try again. (/api/message-target)"
     );
+  });
+
+  it("does not send raw browser network messages with absolute URLs", () => {
+    const beforeSend = loadBeforeSend();
+    const message =
+      "Failed to fetch (https://api.6529.io/api/waves-overview?token=secret#hash)";
+    const event = {
+      event_id: "event-200",
+      message,
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: message,
+          },
+        ],
+      },
+    };
+
+    const result = beforeSend(event, {
+      originalException: new TypeError(message),
+    });
+    const value = result?.exception?.values?.[0]?.value;
+    const eventMessage = result?.message;
+
+    expect(result).not.toBeNull();
+    expect(value).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
+    expect(eventMessage).toBe(
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)"
+    );
+    for (const output of [value, eventMessage]) {
+      expect(output).not.toContain("Failed to fetch");
+      expect(output).not.toContain("https://");
+      expect(output).not.toContain("token=");
+      expect(output).not.toContain("#hash");
+    }
   });
 
   it("keeps raw browser network errors for newer first-party page failures", () => {
