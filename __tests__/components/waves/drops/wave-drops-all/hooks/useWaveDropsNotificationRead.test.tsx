@@ -53,6 +53,7 @@ const { getAuthJwt } = jest.requireMock("@/services/auth/auth.utils") as {
 const getAuthJwtMock = getAuthJwt;
 const useAuthMock = useAuth as jest.MockedFunction<typeof useAuth>;
 const jwtDecodeMock = jwtDecode as jest.MockedFunction<typeof jwtDecode>;
+const mockJwtExp = 4102444800;
 type AuthValue = ReturnType<typeof useAuth>;
 
 const createAuthValue = (
@@ -80,7 +81,7 @@ const mockJwtRole = (role: string | null) => {
       throw new Error(`Unexpected JWT decode for ${token}`);
     }
 
-    return { sub: "0xAAA", role } as T;
+    return { sub: "0xAAA", role, exp: mockJwtExp } as T;
   });
 };
 

@@ -143,7 +143,7 @@ jest.mock("jwt-decode", () => ({
       throw new Error(`Unexpected JWT decode for ${token}`);
     }
 
-    return { sub: "0xAAA", role: null };
+    return { sub: "0xAAA", role: null, exp: 4102444800 };
   },
 }));
 

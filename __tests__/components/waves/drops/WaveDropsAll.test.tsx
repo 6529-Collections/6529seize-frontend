@@ -141,6 +141,7 @@ const mockRemoveNotifications = jest.fn();
 const mockCommonApiPost = jest.fn();
 const mockAddress = "0xAAA";
 const mockJwt = "test-jwt";
+const mockJwtExp = 4102444800;
 
 const useVirtualizedWaveDropsMock =
   useVirtualizedWaveDrops as jest.MockedFunction<
@@ -305,7 +306,7 @@ function setupMocks(options: MockSetupOptions = {}) {
       throw new Error(`Unexpected JWT decode for ${token}`);
     }
 
-    return { sub: mockAddress, role: null };
+    return { sub: mockAddress, role: null, exp: mockJwtExp };
   });
 
   // Setup typing mock
