@@ -271,6 +271,8 @@ describe("cached drop websocket updates", () => {
         context_profile_context: {
           ...contextProfileContext(":wave:"),
           rating: 9,
+          boosted: true,
+          bookmarked: true,
         },
         reactions: [
           reactionEntry(":wave:", [
@@ -285,6 +287,8 @@ describe("cached drop websocket updates", () => {
 
     expect(reconciledDrop.context_profile_context).toMatchObject({
       rating: 9,
+      boosted: true,
+      bookmarked: true,
       reaction: ":joy:",
     });
     expect(reconciledDrop.reactions).toEqual([
@@ -574,7 +578,11 @@ describe("cached drop websocket updates", () => {
         [
           {
             id: dropId,
-            context_profile_context: contextProfileContext(":fire:"),
+            context_profile_context: {
+              ...contextProfileContext(":fire:"),
+              rating: 22,
+              boosted: true,
+            },
             reactions: [reactionEntry(":fire:", [currentProfileUser])],
           },
         ],
@@ -588,7 +596,11 @@ describe("cached drop websocket updates", () => {
       queryClient,
       serverDrop: serverDrop({
         id: dropId,
-        context_profile_context: contextProfileContext(":wave:"),
+        context_profile_context: {
+          ...contextProfileContext(":wave:"),
+          rating: 7,
+          bookmarked: true,
+        },
         reactions: [
           reactionEntry(":wave:", [
             profile("profile-1", "server-request-user"),
@@ -599,13 +611,116 @@ describe("cached drop websocket updates", () => {
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
-    expect(reconciledDrop.context_profile_context?.reaction).toBe(":fire:");
+    expect(reconciledDrop.context_profile_context).toMatchObject({
+      rating: 22,
+      boosted: true,
+      bookmarked: false,
+      reaction: ":fire:",
+    });
     expect(reconciledDrop.reactions).toEqual([
       reactionEntry(":wave:", [
         profile("profile-1", "server-request-user"),
         profile("profile-3", "server-wave"),
       ]),
       reactionEntry(":fire:", [currentProfileUser]),
+    ]);
+  });
+
+  it("uses empty context for cross-profile protected reaction without safe local context", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentProfileUser = profile("profile-2", "current-profile-user");
+    const dropId = "drop-cross-profile-empty-context";
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-2",
+      profile: currentProfileUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: serverDrop({
+        id: dropId,
+        context_profile_context: {
+          ...contextProfileContext(":wave:"),
+          rating: 7,
+          boosted: true,
+          bookmarked: true,
+        },
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-request-user"),
+            profile("profile-3", "server-wave"),
+          ]),
+        ],
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context).toEqual(
+      contextProfileContext(":fire:")
+    );
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-request-user"),
+        profile("profile-3", "server-wave"),
+      ]),
+      reactionEntry(":fire:", [currentProfileUser]),
+    ]);
+  });
+
+  it("uses null context for cross-profile protected remove without safe local context", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const dropId = "drop-cross-profile-null-context";
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "quick-react",
+      action: "remove",
+      previousReaction: ":joy:",
+      intendedReaction: null,
+      optimisticReaction: null,
+      profileId: "profile-2",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: serverDrop({
+        id: dropId,
+        context_profile_context: {
+          ...contextProfileContext(":joy:"),
+          rating: 7,
+          boosted: true,
+          bookmarked: true,
+        },
+        reactions: [
+          reactionEntry(":joy:", [
+            profile("profile-1", "server-request-user"),
+            profile("profile-2", "current-profile-user"),
+          ]),
+        ],
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context).toBeNull();
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":joy:", [profile("profile-1", "server-request-user")]),
     ]);
   });
 

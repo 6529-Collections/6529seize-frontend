@@ -62,6 +62,16 @@ type SelectedProtectedReactionIntent = {
   readonly profileId: string | null;
 };
 
+type SelectedProtectedLocalDrop = {
+  readonly drop: CachedDropReactionState | null;
+  readonly matchesProtectedIntent: boolean;
+};
+
+type PreserveProtectedReactionFieldsOptions = {
+  readonly allowServerContextProfileContext: boolean;
+  readonly allowLocalContextProfileContext: boolean;
+};
+
 const EMPTY_CONTEXT_PROFILE_CONTEXT: DropContextProfileContext = {
   rating: 0,
   min_rating: 0,
@@ -652,7 +662,7 @@ function selectProtectedLocalDrop({
   readonly latestCachedDrops: readonly CachedDropReactionState[];
   readonly latestWaveDrop: CachedDropReactionState | null | undefined;
   readonly protectedIntent: ProtectedReactionIntent;
-}): CachedDropReactionState | null {
+}): SelectedProtectedLocalDrop {
   const protectedLatestWaveDrop =
     latestWaveDrop !== null &&
     latestWaveDrop !== undefined &&
@@ -661,7 +671,10 @@ function selectProtectedLocalDrop({
       : undefined;
 
   if (protectedLatestWaveDrop !== undefined) {
-    return protectedLatestWaveDrop;
+    return {
+      drop: protectedLatestWaveDrop,
+      matchesProtectedIntent: true,
+    };
   }
 
   const protectedCachedDrop = latestCachedDrops.find((source) =>
@@ -669,7 +682,10 @@ function selectProtectedLocalDrop({
   );
 
   if (protectedCachedDrop !== undefined) {
-    return protectedCachedDrop;
+    return {
+      drop: protectedCachedDrop,
+      matchesProtectedIntent: true,
+    };
   }
 
   const protectedSnapshot =
@@ -680,10 +696,16 @@ function selectProtectedLocalDrop({
       : undefined;
 
   if (protectedSnapshot !== undefined) {
-    return protectedSnapshot;
+    return {
+      drop: protectedSnapshot,
+      matchesProtectedIntent: true,
+    };
   }
 
-  return latestWaveDrop ?? latestCachedDrops[0] ?? cachedDropSnapshot ?? null;
+  return {
+    drop: latestWaveDrop ?? latestCachedDrops[0] ?? cachedDropSnapshot ?? null,
+    matchesProtectedIntent: false,
+  };
 }
 
 function mergeProtectedReactionProfiles(
@@ -760,27 +782,21 @@ function mergeProtectedReactionProfiles(
 function preserveProtectedReactionFields(
   serverDrop: ServerDropForDisplay,
   localDrop: CachedDropReactionState | null,
-  protectedIntent: ProtectedReactionIntent
+  protectedIntent: ProtectedReactionIntent,
+  options: PreserveProtectedReactionFieldsOptions
 ): ApiDrop {
   const serverReactions = getServerDropReactions(serverDrop);
   const baseReactions = serverReactions ?? localDrop?.reactions ?? [];
-  const serverContext = serverDrop.context_profile_context;
-  const localContext = localDrop?.context_profile_context ?? null;
+  const serverContext = options.allowServerContextProfileContext
+    ? serverDrop.context_profile_context
+    : null;
+  const localContext = options.allowLocalContextProfileContext
+    ? (localDrop?.context_profile_context ?? null)
+    : null;
   const contextSource =
     serverContext ??
     localContext ??
-    (protectedIntent.reaction !== null
-      ? {
-          rating: 0,
-          min_rating: 0,
-          max_rating: 0,
-          reaction: null,
-          boosted: false,
-          bookmarked: false,
-          curatable: false,
-          curated: false,
-        }
-      : null);
+    (protectedIntent.reaction !== null ? EMPTY_CONTEXT_PROFILE_CONTEXT : null);
 
   return {
     ...serverDrop,
@@ -877,6 +893,7 @@ export function reconcileServerDropForDisplay({
 
   const serverReactions = getServerDropReactions(serverDrop);
   const serverReaction = serverDrop.context_profile_context?.reaction ?? null;
+  const isSameProfileResponse = requestProfileId === currentProfileId;
   if (protectedIntent === null) {
     if (serverReactions !== undefined) {
       return serverDrop as ApiDrop;
@@ -899,6 +916,7 @@ export function reconcileServerDropForDisplay({
   }
 
   if (
+    isSameProfileResponse &&
     serverReaction === protectedIntent.reaction &&
     serverReactions !== undefined &&
     serverReactionsMatchProtectedIntent(serverReactions, protectedIntent)
@@ -907,7 +925,7 @@ export function reconcileServerDropForDisplay({
   }
 
   const latestCachedDrops = findDropsInCachedDrops(queryClient, serverDrop.id);
-  const localDrop = selectProtectedLocalDrop({
+  const selectedLocalDrop = selectProtectedLocalDrop({
     cachedDropSnapshot,
     latestCachedDrops,
     latestWaveDrop,
@@ -916,8 +934,13 @@ export function reconcileServerDropForDisplay({
 
   return preserveProtectedReactionFields(
     serverDrop,
-    localDrop,
-    protectedIntent
+    selectedLocalDrop.drop,
+    protectedIntent,
+    {
+      allowServerContextProfileContext: isSameProfileResponse,
+      allowLocalContextProfileContext:
+        isSameProfileResponse || selectedLocalDrop.matchesProtectedIntent,
+    }
   );
 }
 
