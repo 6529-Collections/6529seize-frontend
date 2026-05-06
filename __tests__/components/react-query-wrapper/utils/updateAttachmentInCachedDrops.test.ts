@@ -1080,6 +1080,101 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("rolls back a rejected remove reaction when context is null", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const otherUser = profile("profile-2", "other-user");
+    const staleFireUser = profile("profile-3", "stale-fire-user");
+    const queryKey = [QueryKey.DROP, { drop_id: "drop-rejected-remove-null" }];
+
+    queryClient.setQueryData(queryKey, {
+      id: "drop-rejected-remove-null",
+      context_profile_context: null,
+      reactions: [
+        reactionEntry(":joy:", [otherUser]),
+        reactionEntry(":fire:", [staleFireUser]),
+      ],
+    });
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-remove-null",
+      failedReaction: null,
+      previousReaction: ":joy:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey);
+    expect(updatedDrop.context_profile_context).toMatchObject({
+      reaction: ":joy:",
+    });
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":joy:", [otherUser, currentUser]),
+      reactionEntry(":fire:", [staleFireUser]),
+    ]);
+  });
+
+  it("rolls back a rejected remove reaction when context is missing", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const otherUser = profile("profile-2", "other-user");
+    const staleFireUser = profile("profile-3", "stale-fire-user");
+    const queryKey = [
+      QueryKey.DROP,
+      { drop_id: "drop-rejected-remove-missing-context" },
+    ];
+
+    queryClient.setQueryData(queryKey, {
+      id: "drop-rejected-remove-missing-context",
+      reactions: [
+        reactionEntry(":joy:", [otherUser]),
+        reactionEntry(":fire:", [staleFireUser]),
+      ],
+    });
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-remove-missing-context",
+      failedReaction: null,
+      previousReaction: ":joy:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey);
+    expect(updatedDrop.context_profile_context).toMatchObject({
+      reaction: ":joy:",
+    });
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":joy:", [otherUser, currentUser]),
+      reactionEntry(":fire:", [staleFireUser]),
+    ]);
+  });
+
+  it("does not roll back a stale rejected remove reaction when context is missing", () => {
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    const fireUser = profile("profile-2", "fire-user");
+    const queryKey = [
+      QueryKey.DROP,
+      { drop_id: "drop-rejected-remove-missing-context-stale" },
+    ];
+    const cachedDrop = {
+      id: "drop-rejected-remove-missing-context-stale",
+      reactions: [reactionEntry(":fire:", [currentUser, fireUser])],
+    };
+    queryClient.setQueryData(queryKey, cachedDrop);
+
+    rollbackRejectedReactionInCachedDrops(queryClient, {
+      dropId: "drop-rejected-remove-missing-context-stale",
+      failedReaction: null,
+      previousReaction: ":joy:",
+      profile: currentUser as any,
+    });
+
+    const updatedDrop = queryClient.getQueryData<any>(queryKey);
+    expect(updatedDrop).toBe(cachedDrop);
+    expect(updatedDrop).not.toHaveProperty("context_profile_context");
+    expect(updatedDrop.reactions).toEqual(cachedDrop.reactions);
+  });
+
   it("rolls back a rejected replace reaction without touching other users", () => {
     const queryClient = createQueryClient();
     const currentUser = profile("profile-1", "current-user");

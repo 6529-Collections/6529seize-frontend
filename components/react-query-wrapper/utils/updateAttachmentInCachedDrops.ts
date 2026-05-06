@@ -291,6 +291,15 @@ function hasProfileInReaction(
   );
 }
 
+function hasProfileInAnyReaction(
+  reactions: ApiDropReaction[],
+  profileId: string
+): boolean {
+  return reactions.some((reaction) =>
+    reaction.profiles.some((profile) => profile.id === profileId)
+  );
+}
+
 function canRollbackRejectedReactionDrop(
   contextProfileContext: unknown,
   reactions: ApiDropReaction[],
@@ -298,6 +307,15 @@ function canRollbackRejectedReactionDrop(
 ): boolean {
   if (isRecord(contextProfileContext)) {
     return contextProfileContext["reaction"] === params.failedReaction;
+  }
+
+  const profileId = params.profile?.id ?? null;
+  if (params.failedReaction === null) {
+    return (
+      params.previousReaction !== null &&
+      profileId !== null &&
+      !hasProfileInAnyReaction(reactions, profileId)
+    );
   }
 
   return hasProfileInReaction(reactions, params);
