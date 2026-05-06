@@ -307,6 +307,102 @@ describe("useWaveDrops", () => {
     ]);
   });
 
+  it("keeps current profile reactions when an old-profile query resolves late", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentProfileUser = profile("profile-2", "current-profile-user");
+    const dropId = "drop-current-profile-late-query";
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const response = deferred<any[]>();
+    commonApiFetchMock.mockReturnValue(response.promise);
+
+    const { rerender } = renderHook(() =>
+      useWaveDrops({
+        waveId: "wave-1",
+      })
+    );
+
+    const options = useInfiniteQueryMock.mock.calls[0][0];
+    const dropsPromise = options.queryFn({ pageParam: null });
+
+    mockConnectedProfileId = "profile-2";
+    rerender();
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-2",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    queryClient.getQueriesData.mockImplementation(
+      ({ queryKey }: { queryKey: readonly unknown[] }) =>
+        queryKey[0] === QueryKey.DROPS
+          ? [
+              [
+                [QueryKey.DROPS, { waveId: "wave-1" }],
+                {
+                  pages: [
+                    [
+                      {
+                        id: dropId,
+                        context_profile_context:
+                          contextProfileContext(":fire:"),
+                        reactions: [
+                          reactionEntry(":fire:", [currentProfileUser]),
+                        ],
+                      },
+                    ],
+                  ],
+                },
+              ],
+            ]
+          : []
+    );
+
+    dateNowSpy.mockReturnValue(2_000);
+    response.resolve([
+      {
+        id: dropId,
+        wave: { id: "wave-1" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-request-user"),
+            profile("profile-3", "server-wave"),
+          ]),
+        ],
+      },
+    ]);
+
+    const drops = await dropsPromise;
+
+    expect(drops[0].context_profile_context.reaction).toBe(":fire:");
+    expect(drops[0].reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-request-user"),
+        profile("profile-3", "server-wave"),
+      ]),
+      reactionEntry(":fire:", [currentProfileUser]),
+    ]);
+  });
+
   it("debounces refetch for same-wave websocket updates and ignores others", () => {
     jest.useFakeTimers();
     const refetch = jest.fn().mockResolvedValue(undefined);

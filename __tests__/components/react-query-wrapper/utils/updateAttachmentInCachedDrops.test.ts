@@ -538,6 +538,77 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("prefers current profile protected intent over request-start profile", () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentProfileUser = profile("profile-2", "current-profile-user");
+    const dropId = "drop-current-profile-wins";
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-2",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: dropId,
+            context_profile_context: contextProfileContext(":fire:"),
+            reactions: [reactionEntry(":fire:", [currentProfileUser])],
+          },
+        ],
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: serverDrop({
+        id: dropId,
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-request-user"),
+            profile("profile-3", "server-wave"),
+          ]),
+        ],
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":fire:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-request-user"),
+        profile("profile-3", "server-wave"),
+      ]),
+      reactionEntry(":fire:", [currentProfileUser]),
+    ]);
+  });
+
   it("does not apply protected intents for anonymous reconciliation", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();

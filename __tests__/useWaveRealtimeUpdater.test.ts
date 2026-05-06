@@ -795,6 +795,120 @@ describe("useWaveRealtimeUpdater", () => {
     ]);
   });
 
+  it("keeps current profile reactions when an old-profile fetched drop resolves late", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentProfileUser = profile("profile-2", "current-profile-user");
+    const dropId = "d-fetch-current-profile-wins";
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: dropId,
+            type: DropSize.FULL,
+            stableKey: "fetch-current-profile-stable-key",
+            stableHash: "fetch-current-profile-stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:")],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    const response = deferred<any>();
+    fetchDropByIdBatched.mockReturnValue(response.promise);
+
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: dropId,
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    act(() => {
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+    });
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith(dropId);
+
+    props.activeProfileId = "profile-2";
+    rerender();
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId,
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-2",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    store.wave1 = {
+      ...store.wave1,
+      drops: [
+        {
+          ...store.wave1.drops[0],
+          context_profile_context: contextProfileContext(":fire:"),
+          reactions: [reactionEntry(":fire:", [currentProfileUser])],
+        },
+      ],
+    };
+
+    dateNowSpy.mockReturnValue(2_000);
+    await act(async () => {
+      response.resolve({
+        id: dropId,
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-request-user"),
+            profile("profile-3", "server-wave"),
+          ]),
+        ],
+      });
+      await flushPromises();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalled());
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.context_profile_context.reaction).toBe(":fire:");
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-request-user"),
+        profile("profile-3", "server-wave"),
+      ]),
+      reactionEntry(":fire:", [currentProfileUser]),
+    ]);
+  });
+
   it("does not update wave store when the latest fetched drop is missing", async () => {
     const store: any = {
       wave1: {

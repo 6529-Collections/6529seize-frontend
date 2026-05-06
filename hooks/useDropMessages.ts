@@ -95,7 +95,8 @@ export function useDropMessages(waveId: string, dropId: string | null) {
       return {
         ...results,
         drops: reconcileDropsWithoutWaveForDisplay({
-          activeProfileId: requestActiveProfileId,
+          requestProfileId: requestActiveProfileId,
+          currentProfileId: activeProfileIdRef.current,
           queryClient,
           serverDrops: results.drops,
           wave: results.wave,
@@ -169,7 +170,8 @@ export function useDropMessages(waveId: string, dropId: string | null) {
         }
 
         updateServerDropInCachedDrops(queryClient, {
-          activeProfileId: activeProfileIdRef.current,
+          requestProfileId: activeProfileIdRef.current,
+          currentProfileId: activeProfileIdRef.current,
           serverDrop: message,
           websocketStatus: WebSocketStatus.CONNECTED,
         });

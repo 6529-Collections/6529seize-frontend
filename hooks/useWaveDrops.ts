@@ -134,7 +134,8 @@ export function useWaveDrops({
       });
 
       return reconcileServerDropsForDisplay({
-        activeProfileId: requestActiveProfileId,
+        requestProfileId: requestActiveProfileId,
+        currentProfileId: activeProfileIdRef.current,
         queryClient,
         serverDrops,
         websocketStatus: WebSocketStatus.CONNECTED,
@@ -172,7 +173,8 @@ export function useWaveDrops({
         }
 
         updateServerDropInCachedDrops(queryClient, {
-          activeProfileId: activeProfileIdRef.current,
+          requestProfileId: activeProfileIdRef.current,
+          currentProfileId: activeProfileIdRef.current,
           serverDrop: message,
           websocketStatus: WebSocketStatus.CONNECTED,
         });

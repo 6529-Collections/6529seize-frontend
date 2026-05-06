@@ -227,6 +227,91 @@ describe("useDropMessages", () => {
     ]);
   });
 
+  it("keeps current profile reactions when an old-profile query resolves late", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentProfileUser = profile("profile-2", "current-profile-user");
+    const queryClient = createQueryClient();
+    const dropId = "drop-current-profile-late-query";
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    const response = deferred<any>();
+    commonApiFetchMock.mockReturnValue(response.promise);
+
+    const { rerender } = renderHook(() => useDropMessages("wave-1", "drop-1"), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    const options = useInfiniteQueryMock.mock.calls[0][0];
+    const resultPromise = options.queryFn({ pageParam: null });
+
+    mockConnectedProfileId = "profile-2";
+    rerender();
+
+    dateNowSpy.mockReturnValue(1_500);
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":fire:",
+      optimisticReaction: ":fire:",
+      profileId: "profile-2",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        {
+          drops: [
+            {
+              id: dropId,
+              context_profile_context: contextProfileContext(":fire:"),
+              reactions: [reactionEntry(":fire:", [currentProfileUser])],
+            },
+          ],
+        },
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(2_000);
+    response.resolve({
+      wave: { id: "wave-1" },
+      drops: [
+        {
+          id: dropId,
+          context_profile_context: contextProfileContext(":wave:"),
+          reactions: [
+            reactionEntry(":wave:", [
+              profile("profile-1", "server-request-user"),
+              profile("profile-3", "server-wave"),
+            ]),
+          ],
+        },
+      ],
+    });
+
+    const result = await resultPromise;
+
+    expect(result.drops[0].context_profile_context.reaction).toBe(":fire:");
+    expect(result.drops[0].reactions).toEqual([
+      reactionEntry(":wave:", [
+        profile("profile-1", "server-request-user"),
+        profile("profile-3", "server-wave"),
+      ]),
+      reactionEntry(":fire:", [currentProfileUser]),
+    ]);
+  });
+
   it("websocket callback debounces refetch", () => {
     jest.useFakeTimers();
     const refetch = jest.fn().mockResolvedValue(undefined);

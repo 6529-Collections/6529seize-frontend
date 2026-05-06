@@ -23,7 +23,9 @@ type ServerDropForDisplay = Omit<ApiDrop, "reactions"> & {
 type ReconcileServerDropForDisplayParams = {
   readonly queryClient: QueryClient;
   readonly serverDrop: ServerDropForDisplay;
-  readonly activeProfileId: string | null;
+  readonly requestProfileId?: string | null;
+  readonly currentProfileId?: string | null;
+  readonly activeProfileId?: string | null;
   readonly latestWaveDrop?: CachedDropReactionState | null;
   readonly cachedDropSnapshot?: CachedDropReactionState | null;
   readonly websocketStatus?: WebSocketStatus | string | null;
@@ -53,6 +55,11 @@ type RollbackRejectedReactionParams = {
   readonly failedReaction: string | null;
   readonly previousReaction: string | null;
   readonly profile: ApiProfileMin | null;
+};
+
+type SelectedProtectedReactionIntent = {
+  readonly protectedIntent: ProtectedReactionIntent | null;
+  readonly profileId: string | null;
 };
 
 const EMPTY_CONTEXT_PROFILE_CONTEXT: DropContextProfileContext = {
@@ -563,6 +570,66 @@ function getServerDropReactions(
   return Array.isArray(serverDrop.reactions) ? serverDrop.reactions : undefined;
 }
 
+function normalizeRequestProfileId({
+  activeProfileId,
+  requestProfileId,
+}: {
+  readonly activeProfileId: string | null | undefined;
+  readonly requestProfileId: string | null | undefined;
+}): string | null {
+  return requestProfileId !== undefined
+    ? requestProfileId
+    : (activeProfileId ?? null);
+}
+
+function normalizeCurrentProfileId(
+  {
+    currentProfileId,
+  }: { readonly currentProfileId: string | null | undefined },
+  requestProfileId: string | null
+): string | null {
+  return currentProfileId !== undefined ? currentProfileId : requestProfileId;
+}
+
+function selectProtectedReactionIntent({
+  currentProfileId,
+  dropId,
+  requestProfileId,
+}: {
+  readonly currentProfileId: string | null;
+  readonly dropId: string;
+  readonly requestProfileId: string | null;
+}): SelectedProtectedReactionIntent {
+  const currentProfileIntent = getProtectedReactionIntent(
+    dropId,
+    currentProfileId
+  );
+  if (currentProfileIntent !== null) {
+    return {
+      protectedIntent: currentProfileIntent,
+      profileId: currentProfileId,
+    };
+  }
+
+  if (requestProfileId !== currentProfileId) {
+    const requestProfileIntent = getProtectedReactionIntent(
+      dropId,
+      requestProfileId
+    );
+    if (requestProfileIntent !== null) {
+      return {
+        protectedIntent: requestProfileIntent,
+        profileId: requestProfileId,
+      };
+    }
+  }
+
+  return {
+    protectedIntent: null,
+    profileId: requestProfileId,
+  };
+}
+
 function selectLocalDrop({
   cachedDropSnapshot,
   latestCachedDrops,
@@ -775,15 +842,27 @@ export function rollbackRejectedReactionInCachedDrops(
 export function reconcileServerDropForDisplay({
   activeProfileId,
   cachedDropSnapshot,
+  currentProfileId: currentProfileIdInput,
   latestWaveDrop,
   queryClient,
+  requestProfileId: requestProfileIdInput,
   serverDrop,
   websocketStatus,
 }: ReconcileServerDropForDisplayParams): ApiDrop {
-  const protectedIntent = getProtectedReactionIntent(
-    serverDrop.id,
-    activeProfileId
+  const requestProfileId = normalizeRequestProfileId({
+    activeProfileId,
+    requestProfileId: requestProfileIdInput,
+  });
+  const currentProfileId = normalizeCurrentProfileId(
+    { currentProfileId: currentProfileIdInput },
+    requestProfileId
   );
+  const { profileId: reconciliationProfileId, protectedIntent } =
+    selectProtectedReactionIntent({
+      currentProfileId,
+      dropId: serverDrop.id,
+      requestProfileId,
+    });
 
   recordReactionRealtimeReconciliation({
     drop: {
@@ -791,7 +870,7 @@ export function reconcileServerDropForDisplay({
       wave: { id: serverDrop.wave.id },
       context_profile_context: serverDrop.context_profile_context,
     },
-    activeProfileId,
+    activeProfileId: reconciliationProfileId,
     ...(websocketStatus !== undefined ? { websocketStatus } : {}),
     protectedIntent,
   });
@@ -858,20 +937,30 @@ export function updateServerDropInCachedDrops(
 
 export function reconcileServerDropsForDisplay({
   activeProfileId,
+  currentProfileId,
   latestWaveDrops,
   queryClient,
+  requestProfileId,
   serverDrops,
   websocketStatus,
 }: {
-  readonly activeProfileId: string | null;
+  readonly activeProfileId?: string | null;
+  readonly requestProfileId?: string | null;
+  readonly currentProfileId?: string | null;
   readonly latestWaveDrops?: readonly IdentifiedDropReactionState[];
   readonly queryClient: QueryClient;
   readonly serverDrops: readonly ServerDropForDisplay[];
   readonly websocketStatus?: WebSocketStatus | string | null;
 }): ApiDrop[] {
+  const profileParams = {
+    ...(activeProfileId !== undefined ? { activeProfileId } : {}),
+    ...(requestProfileId !== undefined ? { requestProfileId } : {}),
+    ...(currentProfileId !== undefined ? { currentProfileId } : {}),
+  };
+
   return serverDrops.map((serverDrop) =>
     reconcileServerDropForDisplay({
-      activeProfileId,
+      ...profileParams,
       queryClient,
       serverDrop,
       latestWaveDrop:
@@ -885,21 +974,31 @@ export function reconcileDropsWithoutWaveForDisplay<
   TDrop extends DropWithoutWaveReactionState,
 >({
   activeProfileId,
+  currentProfileId,
   queryClient,
+  requestProfileId,
   serverDrops,
   wave,
   websocketStatus,
 }: {
-  readonly activeProfileId: string | null;
+  readonly activeProfileId?: string | null;
+  readonly requestProfileId?: string | null;
+  readonly currentProfileId?: string | null;
   readonly queryClient: QueryClient;
   readonly serverDrops: readonly TDrop[];
   readonly wave: ApiDrop["wave"];
   readonly websocketStatus?: WebSocketStatus | string | null;
 }): TDrop[] {
+  const profileParams = {
+    ...(activeProfileId !== undefined ? { activeProfileId } : {}),
+    ...(requestProfileId !== undefined ? { requestProfileId } : {}),
+    ...(currentProfileId !== undefined ? { currentProfileId } : {}),
+  };
+
   return serverDrops.map((drop) => {
     const serverDrop = { ...drop, wave } as ServerDropForDisplay & TDrop;
     const displayDrop = reconcileServerDropForDisplay({
-      activeProfileId,
+      ...profileParams,
       queryClient,
       serverDrop,
       ...(websocketStatus !== undefined ? { websocketStatus } : {}),

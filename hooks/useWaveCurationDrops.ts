@@ -102,7 +102,8 @@ export function useWaveCurationDrops({
           waveMin === null
             ? page.data
             : reconcileDropsWithoutWaveForDisplay({
-                activeProfileId: requestActiveProfileId,
+                requestProfileId: requestActiveProfileId,
+                currentProfileId: activeProfileIdRef.current,
                 queryClient,
                 serverDrops: page.data,
                 wave: waveMin,
@@ -156,7 +157,8 @@ export function useWaveCurationDrops({
         }
 
         updateServerDropInCachedDrops(queryClient, {
-          activeProfileId: activeProfileIdRef.current,
+          requestProfileId: activeProfileIdRef.current,
+          currentProfileId: activeProfileIdRef.current,
           serverDrop: message,
           websocketStatus: WebSocketStatus.CONNECTED,
         });

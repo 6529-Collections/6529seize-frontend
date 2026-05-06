@@ -429,7 +429,8 @@ function useNewestMessagesSync({
           (serverDrops) => {
             const latestData = getData(waveId);
             return reconcileServerDropsForDisplay({
-              activeProfileId: requestActiveProfileId,
+              requestProfileId: requestActiveProfileId,
+              currentProfileId: activeProfileIdRef.current,
               queryClient,
               serverDrops,
               ...(latestData !== undefined
@@ -537,7 +538,8 @@ function useIncomingDropProcessor({
 
       if (latestFullDrop !== null) {
         const nextDrop = updateServerDropInCachedDrops(queryClient, {
-          activeProfileId: pendingUpdate.requestActiveProfileId,
+          requestProfileId: pendingUpdate.requestActiveProfileId,
+          currentProfileId: activeProfileIdRef.current,
           serverDrop: pendingUpdate.serverDrop,
           latestWaveDrop: latestFullDrop,
           websocketStatus: WebSocketStatus.CONNECTED,
@@ -598,7 +600,8 @@ function useIncomingDropProcessor({
       );
       const latestExistingDrop = getFullDrop(latestDrop);
       const nextDrop = updateServerDropInCachedDrops(queryClient, {
-        activeProfileId: requestActiveProfileId,
+        requestProfileId: requestActiveProfileId,
+        currentProfileId: activeProfileIdRef.current,
         serverDrop,
         latestWaveDrop: latestExistingDrop,
         ...(cachedDropSnapshot !== undefined ? { cachedDropSnapshot } : {}),
@@ -657,7 +660,8 @@ function useIncomingDropProcessor({
       const serverDisplayDrop = isFetchedDropUpdate(type)
         ? null
         : updateServerDropInCachedDrops(queryClient, {
-            activeProfileId: activeProfileIdRef.current,
+            requestProfileId: activeProfileIdRef.current,
+            currentProfileId: activeProfileIdRef.current,
             serverDrop: incomingServerDrop,
             latestWaveDrop: latestFullDrop,
             websocketStatus: WebSocketStatus.CONNECTED,
