@@ -372,6 +372,33 @@ describe("sentry-client-filters", () => {
     expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
   });
 
+  it("ignores plain parenthesized context when matching low-value network errors", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Failed to fetch (while loading wave overview)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
   it("uses a real failed HTTP breadcrumb before a later successful breadcrumb for message targets", () => {
     const event = createLowValueNetworkEvent({
       exception: {

@@ -152,11 +152,16 @@ function getUrlCandidatesFromText(value: string): string[] {
   const urls: string[] = [];
   for (const match of value.matchAll(URL_IN_PARENS_PATTERN)) {
     const candidate = match[1]?.trim();
-    if (candidate) {
+    if (candidate && isParenthesizedNetworkTargetUrl(candidate)) {
       urls.push(candidate);
     }
   }
   return urls;
+}
+
+function isParenthesizedNetworkTargetUrl(value: string): boolean {
+  const candidate = value.trim();
+  return candidate.startsWith("/") || /^https?:\/\//i.test(candidate);
 }
 
 function isFilteredUrl(value: string | undefined): boolean {
