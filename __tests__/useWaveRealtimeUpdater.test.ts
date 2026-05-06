@@ -216,6 +216,35 @@ describe("useWaveRealtimeUpdater", () => {
     expect(updatedDrop.author.subscribed_actions).toEqual([]);
   });
 
+  it("defaults missing wave booleans to false for new drops", async () => {
+    const store = { wave1: { drops: [], latestFetchedSerialNo: null } };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-wave-boolean-fallbacks",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    const update = props.updateData.mock.calls[0]?.[0];
+    const updatedDrop = update.drops[0];
+    expect(update.key).toBe("wave1");
+    expect(updatedDrop.wave.authenticated_user_eligible_to_participate).toBe(
+      false
+    );
+    expect(updatedDrop.wave.authenticated_user_eligible_to_vote).toBe(false);
+    expect(updatedDrop.wave.authenticated_user_eligible_to_chat).toBe(false);
+    expect(updatedDrop.wave.authenticated_user_admin).toBe(false);
+  });
+
   it("reconciles newest-message sync drops before writing the wave store", async () => {
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
     const currentUser = profile("profile-1", "current-user");
@@ -2152,6 +2181,103 @@ describe("useWaveRealtimeUpdater", () => {
       );
       expect(updatedCacheDrop.reactions).toEqual(reactionEntries(":server:"));
     }
+  });
+
+  it("replays unopened fetched updates when registration populates the store later", async () => {
+    const dropId = "d-unopened-delayed-registration";
+    const freshReaction = reactionEntries(":fresh:");
+    const staleReaction = reactionEntries(":stale:");
+    const serverContext = {
+      ...contextProfileContext(":fresh:"),
+      rating: 9,
+    };
+    const staleContext = {
+      ...contextProfileContext(":stale:"),
+      rating: 1,
+    };
+    const cachedContext = {
+      ...contextProfileContext(":old-cache:"),
+      rating: 2,
+    };
+    const store: any = {};
+    const props = baseProps(store);
+
+    mockGetQueriesData.mockReturnValue([
+      [
+        ["DROPS"],
+        {
+          pages: [
+            [
+              {
+                id: dropId,
+                context_profile_context: cachedContext,
+                reactions: reactionEntries(":old-cache:"),
+              },
+            ],
+          ],
+        },
+      ],
+    ]);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: dropId,
+      author: {},
+      wave: { id: "wave2" },
+      context_profile_context: serverContext,
+      reactions: freshReaction,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: dropId,
+      wave: { id: "wave2" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.registerWave).toHaveBeenCalledWith("wave2");
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith(dropId);
+    expect(props.updateData).not.toHaveBeenCalled();
+
+    store.wave2 = {
+      drops: [
+        {
+          id: dropId,
+          type: DropSize.FULL,
+          stableKey: "initial-stable-key",
+          stableHash: "initial-stable-hash",
+          author: {},
+          wave: { id: "wave2" },
+          context_profile_context: staleContext,
+          reactions: staleReaction,
+        },
+      ],
+      isLoading: false,
+      latestFetchedSerialNo: 20,
+    };
+
+    act(() => {
+      rerender();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalledTimes(1));
+
+    const replayedUpdate = props.updateData.mock.calls[0]?.[0];
+    const replayedDrop = replayedUpdate.drops[0];
+    expect(replayedUpdate.key).toBe("wave2");
+    expect(replayedDrop.stableKey).toBe("initial-stable-key");
+    expect(replayedDrop.stableHash).toBe("initial-stable-hash");
+    expect(replayedDrop.context_profile_context.reaction).toBe(":fresh:");
+    expect(replayedDrop.context_profile_context.rating).toBe(9);
+    expect(replayedDrop.reactions).toBe(freshReaction);
   });
 
   it("registers unopened waves but skips reaction refetches without a local or cached drop", async () => {

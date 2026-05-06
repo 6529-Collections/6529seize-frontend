@@ -47,12 +47,19 @@ export enum ProcessIncomingDropType {
   DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
 }
 
+type IncomingDropWaveBooleanFields = Pick<
+  ApiDrop["wave"],
+  | "authenticated_user_eligible_to_participate"
+  | "authenticated_user_eligible_to_vote"
+  | "authenticated_user_eligible_to_chat"
+  | "authenticated_user_admin"
+>;
+
 type IncomingDropWave = Omit<
   ApiDrop["wave"],
-  "authenticated_user_eligible_to_chat"
-> & {
-  readonly authenticated_user_eligible_to_chat?: ApiDrop["wave"]["authenticated_user_eligible_to_chat"];
-};
+  keyof IncomingDropWaveBooleanFields
+> &
+  Partial<IncomingDropWaveBooleanFields>;
 
 type IncomingDrop = Omit<ApiDrop, "wave" | "context_profile_context"> & {
   readonly wave?: IncomingDropWave;
@@ -173,17 +180,20 @@ function buildOptimisticDrop(
       ...wave,
       authenticated_user_eligible_to_participate:
         existingDrop?.wave.authenticated_user_eligible_to_participate ??
-        wave.authenticated_user_eligible_to_participate,
+        wave.authenticated_user_eligible_to_participate ??
+        false,
       authenticated_user_eligible_to_vote:
         existingDrop?.wave.authenticated_user_eligible_to_vote ??
-        wave.authenticated_user_eligible_to_vote,
+        wave.authenticated_user_eligible_to_vote ??
+        false,
       authenticated_user_eligible_to_chat:
         existingDrop?.wave.authenticated_user_eligible_to_chat ??
         wave.authenticated_user_eligible_to_chat ??
         false,
       authenticated_user_admin:
         existingDrop?.wave.authenticated_user_admin ??
-        wave.authenticated_user_admin,
+        wave.authenticated_user_admin ??
+        false,
     },
     stableKey: drop.id,
     stableHash: drop.id,
@@ -271,6 +281,7 @@ type PendingFetchedDropUpdate = {
 
 type FetchedDropUpdateOptions = {
   readonly updateWaveStore?: boolean;
+  readonly keepPendingWhenWaveMissing?: boolean;
 };
 
 function useWaveNotificationActions({
@@ -539,7 +550,10 @@ function useIncomingDropProcessor({
       drop: IncomingDrop,
       waveId: string,
       cachedDropSnapshot?: CachedDropReactionState | null,
-      { updateWaveStore = true }: FetchedDropUpdateOptions = {}
+      {
+        keepPendingWhenWaveMissing = false,
+        updateWaveStore = true,
+      }: FetchedDropUpdateOptions = {}
     ): Promise<void> => {
       const updateKey = getWaveDropUpdateKey(waveId, drop.id);
       const sequence =
@@ -578,7 +592,10 @@ function useIncomingDropProcessor({
         return;
       }
 
-      if (latestData?.isLoading === true && latestDrop === undefined) {
+      if (
+        (latestData?.isLoading === true && latestDrop === undefined) ||
+        (keepPendingWhenWaveMissing && latestData === undefined)
+      ) {
         pendingFetchedDropUpdatesRef.current.set(updateKey, {
           waveId,
           dropId: drop.id,
@@ -652,7 +669,9 @@ function useIncomingDropProcessor({
             drop.id
           );
           if (cachedDropSnapshot !== null) {
-            await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot);
+            await handleFetchedDropUpdate(drop, waveId, cachedDropSnapshot, {
+              keepPendingWhenWaveMissing: true,
+            });
           }
         } else {
           registerWave(waveId);
