@@ -398,10 +398,8 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(2);
   });
 
-  it("uses the old account JWT when an old account callback runs after switching accounts", async () => {
+  it("rejects an old cached account callback after switching accounts", async () => {
     const invalidateNotifications = jest.fn();
-
-    apiPostMock.mockResolvedValueOnce(undefined);
 
     setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
     const { result, rerender } = renderHook(
@@ -417,14 +415,49 @@ describe("useMarkWaveNotificationsRead", () => {
 
     expect(result.current).not.toBe(accountCallback);
 
-    await accountCallback("wave-1");
+    await expect(accountCallback("wave-1")).rejects.toThrow(
+      "wallet address changed or disconnected"
+    );
 
-    expect(apiPostMock).toHaveBeenCalledTimes(1);
-    expect(apiPostMock).toHaveBeenCalledWith({
-      endpoint: "notifications/wave/wave-1/read",
-      headers: { Authorization: "Bearer jwt-a" },
-    });
-    expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("skips an old cached account callback after switching accounts when queueing is disabled", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+    const accountCallback = result.current;
+
+    setActiveIdentity({ address: "0xBBB", jwt: "jwt-b" });
+    rerender();
+
+    expect(result.current).not.toBe(accountCallback);
+
+    await expect(
+      accountCallback("wave-1", { queueIfBlocked: false })
+    ).resolves.toBe("skipped");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
+
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    rerender();
+
+    expect(apiPostMock).not.toHaveBeenCalled();
+    expect(invalidateNotifications).not.toHaveBeenCalled();
   });
 
   it("keeps same-wave read requests separate across active account switches", async () => {

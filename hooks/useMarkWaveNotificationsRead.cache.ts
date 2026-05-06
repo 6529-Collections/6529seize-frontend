@@ -16,6 +16,7 @@ import {
   flushPendingClearedWaveReadRequests,
   flushPendingWaveReadRequests,
   getLatestVerifiedWaveReadIdentityByAddress,
+  getStaleAddressEpochWaveReadResult,
   getVerifiedProxyRoleIdentityKey,
   markWaveReadIdentityCleared,
   markWaveReadWithAuthHeaders,
@@ -451,6 +452,16 @@ export const markWaveReadFromCache = ({
     return Promise.resolve("skipped");
   }
 
+  const queueIfBlocked = options?.queueIfBlocked ?? true;
+  const staleAddressEpochResult = getStaleAddressEpochWaveReadResult({
+    addressEpoch,
+    latestAddressEpochRef: cacheRefs.latestAddressEpochRef,
+    queueIfBlocked,
+  });
+  if (staleAddressEpochResult) {
+    return staleAddressEpochResult;
+  }
+
   const requestKey = getWaveReadRequestKey({
     addressKey,
     activeProfileProxyId,
@@ -480,7 +491,7 @@ export const markWaveReadFromCache = ({
             waveId,
             addressEpoch,
             cacheRefs,
-            queueIfBlocked: options?.queueIfBlocked ?? true,
+            queueIfBlocked,
           }),
         }),
       ],
@@ -512,7 +523,7 @@ export const markWaveReadFromCache = ({
             waveId,
             addressEpoch,
             cacheRefs,
-            queueIfBlocked: options?.queueIfBlocked ?? true,
+            queueIfBlocked,
           }),
         }),
       ],
@@ -542,6 +553,6 @@ export const markWaveReadFromCache = ({
     addressEpoch,
     latestAddressEpochRef: cacheRefs.latestAddressEpochRef,
     shouldSend: options?.shouldSend,
-    queueIfBlocked: options?.queueIfBlocked ?? true,
+    queueIfBlocked,
   });
 };

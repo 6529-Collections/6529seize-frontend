@@ -32,6 +32,28 @@ const latestVerifiedWaveReadIdentityByAddress = new Map<
 const createClearedWaveReadStateError = (reason: string): Error =>
   new Error(`Pending wave notification read cleared: ${reason}.`);
 
+export const getStaleAddressEpochWaveReadResult = ({
+  addressEpoch,
+  latestAddressEpochRef,
+  queueIfBlocked,
+}: {
+  readonly addressEpoch: WaveReadAddressEpoch;
+  readonly latestAddressEpochRef: RefObject<WaveReadAddressEpoch>;
+  readonly queueIfBlocked: boolean;
+}): Promise<MarkWaveNotificationsReadResult> | undefined => {
+  if (addressEpoch === latestAddressEpochRef.current) {
+    return undefined;
+  }
+
+  if (!queueIfBlocked) {
+    return Promise.resolve("skipped");
+  }
+
+  return Promise.reject(
+    createClearedWaveReadStateError("wallet address changed or disconnected")
+  );
+};
+
 const clearInFlightWaveReadState = (state: WaveReadRequestState): void => {
   state.pendingSendIntents = [];
 };
@@ -383,14 +405,17 @@ export function enqueuePendingWaveReadRequest({
   readonly shouldSend: WaveReadShouldSend;
   readonly queueIfBlocked: boolean;
 }): Promise<MarkWaveNotificationsReadResult> {
-  if (!queueIfBlocked) {
-    return Promise.resolve("skipped");
+  const staleAddressEpochResult = getStaleAddressEpochWaveReadResult({
+    addressEpoch,
+    latestAddressEpochRef,
+    queueIfBlocked,
+  });
+  if (staleAddressEpochResult) {
+    return staleAddressEpochResult;
   }
 
-  if (addressEpoch !== latestAddressEpochRef.current) {
-    return Promise.reject(
-      createClearedWaveReadStateError("wallet address changed or disconnected")
-    );
+  if (!queueIfBlocked) {
+    return Promise.resolve("skipped");
   }
 
   const retryContext: WaveReadSendRetryContext = {
