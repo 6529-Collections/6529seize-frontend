@@ -314,6 +314,56 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("merges protected reactions when a websocket drop omits reactions", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const currentUser = profile("profile-1", "current-user");
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: "drop-missing-reactions",
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId: "drop-missing-reactions",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      queryClient,
+      serverDrop: serverDrop({
+        id: "drop-missing-reactions",
+        context_profile_context: {
+          ...contextProfileContext(":joy:"),
+          rating: 9,
+        },
+        reactions: undefined,
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context).toMatchObject({
+      rating: 9,
+      reaction: ":joy:",
+    });
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("falls back to the removed server profile when protected local data has no profile", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();

@@ -495,6 +495,12 @@ function serverReactionsMatchProtectedIntent(
   return protectedIntent.reaction === null ? true : matchingProfiles === 1;
 }
 
+function getServerDropReactions(
+  serverDrop: Partial<Pick<ApiDrop, "reactions">>
+): ApiDropReaction[] {
+  return serverDrop.reactions ?? [];
+}
+
 function selectProtectedLocalDrop({
   cachedDropSnapshot,
   latestCachedDrops,
@@ -642,7 +648,7 @@ function preserveProtectedReactionFields(
         }
       : null,
     reactions: mergeProtectedReactionProfiles(
-      serverDrop.reactions,
+      getServerDropReactions(serverDrop),
       localDrop?.reactions ?? [],
       protectedIntent
     ),
@@ -716,7 +722,10 @@ export function reconcileServerDropForDisplay({
 
   if (
     serverReaction === protectedIntent.reaction &&
-    serverReactionsMatchProtectedIntent(serverDrop.reactions, protectedIntent)
+    serverReactionsMatchProtectedIntent(
+      getServerDropReactions(serverDrop),
+      protectedIntent
+    )
   ) {
     return serverDrop;
   }
