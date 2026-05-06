@@ -33,9 +33,10 @@ import type {
 import { useLayoutEffect, useMemo, useRef } from "react";
 
 let mountedWaveNotificationsReadMarkerHookCount = 0;
-let clearWaveNotificationsReadStateTimeout: ReturnType<
-  typeof globalThis.setTimeout
-> | null = null;
+let clearWaveNotificationsReadStateTimeout: {
+  readonly timeout: ReturnType<typeof globalThis.setTimeout>;
+  readonly addressKey: string | null;
+} | null = null;
 
 export const useWaveReadCacheRefs = ({
   addressEpoch,
@@ -295,11 +296,27 @@ export const useClearWaveReadStateOnAddressChange = (
   }, [addressKey]);
 };
 
-export const useClearWaveReadStateOnLastUnmount = (): void => {
+export const useClearWaveReadStateOnLastUnmount = (
+  addressKey: string | null
+): void => {
+  const latestAddressKeyRef = useRef(addressKey);
+
+  useLayoutEffect(() => {
+    latestAddressKeyRef.current = addressKey;
+  }, [addressKey]);
+
   useLayoutEffect(() => {
     if (clearWaveNotificationsReadStateTimeout !== null) {
-      globalThis.clearTimeout(clearWaveNotificationsReadStateTimeout);
+      const deferredCleanup = clearWaveNotificationsReadStateTimeout;
+      globalThis.clearTimeout(deferredCleanup.timeout);
       clearWaveNotificationsReadStateTimeout = null;
+
+      if (
+        deferredCleanup.addressKey !== null &&
+        deferredCleanup.addressKey !== latestAddressKeyRef.current
+      ) {
+        clearPendingWaveReadsForAddress(deferredCleanup.addressKey);
+      }
     }
 
     mountedWaveNotificationsReadMarkerHookCount += 1;
@@ -312,13 +329,20 @@ export const useClearWaveReadStateOnLastUnmount = (): void => {
       }
 
       mountedWaveNotificationsReadMarkerHookCount = 0;
-      clearWaveNotificationsReadStateTimeout = globalThis.setTimeout(() => {
-        clearWaveNotificationsReadStateTimeout = null;
+      const cleanupAddressKey = latestAddressKeyRef.current;
+      const timeout = globalThis.setTimeout(() => {
+        if (clearWaveNotificationsReadStateTimeout?.timeout === timeout) {
+          clearWaveNotificationsReadStateTimeout = null;
+        }
 
         if (mountedWaveNotificationsReadMarkerHookCount === 0) {
           clearAllWaveReadState();
         }
       }, 0);
+      clearWaveNotificationsReadStateTimeout = {
+        timeout,
+        addressKey: cleanupAddressKey,
+      };
     };
   }, []);
 };

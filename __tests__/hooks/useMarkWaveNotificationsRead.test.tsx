@@ -1376,6 +1376,55 @@ describe("useMarkWaveNotificationsRead", () => {
     }
   });
 
+  it("rejects queued reads when a different wallet remounts before deferred cleanup runs", async () => {
+    jest.useFakeTimers();
+    const invalidateNotifications = jest.fn();
+
+    try {
+      setActiveIdentity({ address: "0xAAA", jwt: null });
+      const firstHook = renderHook(() => useMarkWaveNotificationsRead(), {
+        wrapper: createWrapper(invalidateNotifications),
+      });
+
+      const queuedPromise = firstHook.result.current(
+        "wave-remount-address-switch"
+      );
+      const rejection = expect(queuedPromise).rejects.toThrow(
+        "wallet address changed or disconnected"
+      );
+
+      firstHook.unmount();
+
+      setActiveIdentity({ address: "0xBBB", jwt: null });
+      const secondHook = renderHook(() => useMarkWaveNotificationsRead(), {
+        wrapper: createWrapper(invalidateNotifications),
+      });
+
+      await rejection;
+
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+      await flushMicrotasks();
+
+      expect(apiPostMock).not.toHaveBeenCalled();
+
+      setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+      secondHook.rerender();
+      await flushMicrotasks();
+
+      expect(apiPostMock).not.toHaveBeenCalled();
+      expect(invalidateNotifications).not.toHaveBeenCalled();
+
+      secondHook.unmount();
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("drops a queued missing-JWT read when its guard becomes false before replay", async () => {
     const invalidateNotifications = jest.fn();
     let shouldSend = true;

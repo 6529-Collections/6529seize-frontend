@@ -59,7 +59,7 @@ export const useWaveNotificationsReadMarkerState = ({
     cacheRefs,
   });
   useClearWaveReadStateOnAddressChange(addressKey);
-  useClearWaveReadStateOnLastUnmount();
+  useClearWaveReadStateOnLastUnmount(addressKey);
 
   const markWaveNotificationsRead = useCallback(
     (
