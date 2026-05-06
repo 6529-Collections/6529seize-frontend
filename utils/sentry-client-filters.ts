@@ -23,6 +23,7 @@ type NetworkTargetCandidate = {
   url: string;
   isFirstParty?: boolean | undefined;
   isFirstPartyApi?: boolean | undefined;
+  isPlaceholder?: boolean | undefined;
 };
 
 type NetworkBreadcrumbFailureKind = "transport" | "http";
@@ -99,12 +100,7 @@ const URL_IS_FIRST_PARTY_API_KEY = "url.is_first_party_api";
 const FNV_OFFSET_BASIS = 2166136261;
 const FNV_PRIME = 16777619;
 const UINT_32_SIZE = 4294967296;
-const FILTERED_URL_TOKENS = new Set([
-  "[filtered]",
-  "[redacted]",
-  "filtered",
-  "unknown",
-]);
+const FILTERED_URL_TOKENS = new Set(["[filtered]", "[redacted]", "filtered"]);
 
 function getStringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -183,6 +179,25 @@ function isFilteredUrl(value: string | undefined): boolean {
 
   try {
     return FILTERED_URL_TOKENS.has(decodeURIComponent(sanitizedPathToken));
+  } catch {
+    return false;
+  }
+}
+
+function isUnknownPlaceholderToken(value: string): boolean {
+  return value === "unknown" || value === "/unknown";
+}
+
+function isUnknownPlaceholderUrl(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (isUnknownPlaceholderToken(normalized)) {
+    return true;
+  }
+
+  try {
+    return isUnknownPlaceholderToken(
+      decodeURIComponent(normalized).trim().toLowerCase()
+    );
   } catch {
     return false;
   }
@@ -387,11 +402,30 @@ function getBreadcrumbUrlIsFirstPartyApi(
   return getBooleanValue(breadcrumb.data?.[URL_IS_FIRST_PARTY_API_KEY]);
 }
 
+function isUnknownBreadcrumbUrlPlaceholder(
+  breadcrumb: SentryBreadcrumb
+): boolean {
+  const url = getBreadcrumbUrl(breadcrumb);
+  if (!url) {
+    return false;
+  }
+
+  return (
+    getBreadcrumbUrlIsFirstParty(breadcrumb) === undefined &&
+    getBreadcrumbUrlIsFirstPartyApi(breadcrumb) === undefined &&
+    isUnknownPlaceholderUrl(url)
+  );
+}
+
 function getBreadcrumbTargetCandidate(
   breadcrumb: SentryBreadcrumb
 ): NetworkTargetCandidate | null {
   const url = getBreadcrumbUrl(breadcrumb);
-  if (!url || isFilteredUrl(url)) {
+  if (
+    !url ||
+    isFilteredUrl(url) ||
+    isUnknownBreadcrumbUrlPlaceholder(breadcrumb)
+  ) {
     return null;
   }
 
@@ -409,14 +443,21 @@ function getFailedTransportBreadcrumbTarget(
     url: getBreadcrumbUrl(breadcrumb) ?? "",
     isFirstParty: getBreadcrumbUrlIsFirstParty(breadcrumb),
     isFirstPartyApi: getBreadcrumbUrlIsFirstPartyApi(breadcrumb),
+    isPlaceholder: isUnknownBreadcrumbUrlPlaceholder(breadcrumb),
   };
+}
+
+function isPlaceholderOrFilteredTarget(
+  candidate: NetworkTargetCandidate
+): boolean {
+  return candidate.isPlaceholder === true || isFilteredUrl(candidate.url);
 }
 
 function canUseFailedTransportForMessageTarget(
   failedTransportTarget: NetworkTargetCandidate,
   messageTargetCandidates: NetworkTargetCandidate[]
 ): boolean {
-  if (isFilteredUrl(failedTransportTarget.url)) {
+  if (isPlaceholderOrFilteredTarget(failedTransportTarget)) {
     if (failedTransportTarget.isFirstParty === false) {
       return false;
     }
@@ -571,7 +612,7 @@ export function getLowValueNetworkErrorTargetUrl(
   }
 
   const messageTargetCandidates = getMessageTargetCandidates(event);
-  if (isFilteredUrl(latestBreadcrumb.url)) {
+  if (isPlaceholderOrFilteredTarget(latestBreadcrumb)) {
     return (
       messageTargetCandidates.find(isFilteredBreadcrumbFallbackApiTarget)
         ?.url ?? null
@@ -595,7 +636,11 @@ function getUsableBreadcrumbMessageUrl(
   breadcrumb: SentryBreadcrumb
 ): string | null {
   const url = getBreadcrumbUrl(breadcrumb)?.trim();
-  if (!url || isFilteredUrl(url)) {
+  if (
+    !url ||
+    isFilteredUrl(url) ||
+    isUnknownBreadcrumbUrlPlaceholder(breadcrumb)
+  ) {
     return null;
   }
 

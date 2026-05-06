@@ -977,7 +977,7 @@ describe("sentry-client-filters", () => {
     }
   });
 
-  it("uses message targets when failed breadcrumb URLs are unknown placeholders", () => {
+  it("uses message targets when metadata-free failed breadcrumb URLs are unknown placeholders", () => {
     for (const url of ["unknown", "/unknown"]) {
       const event = createLowValueNetworkEvent({
         breadcrumbs: [
@@ -997,6 +997,34 @@ describe("sentry-client-filters", () => {
       );
       expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
     }
+  });
+
+  it("uses older API transport failures when later /unknown HTTP failures have first-party metadata", () => {
+    const event = createLowValueNetworkEvent({
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/unknown",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
   });
 
   it("drops sampled-out relative API network errors when the breadcrumb URL is missing", () => {
@@ -1369,6 +1397,64 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe("not_applicable");
+  });
+
+  it("drops /unknown when sanitized API metadata marks it as first-party API", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/unknown)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/unknown",
+            "url.is_first_party": true,
+            "url.is_first_party_api": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/unknown");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("keeps /unknown page failures when sanitized API metadata is missing", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/unknown)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/unknown",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/unknown");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
   it("keeps first-party page navigation failures", () => {
