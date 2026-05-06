@@ -49,6 +49,26 @@ describe("WaveWinners", () => {
     expect(Timeline).toHaveBeenCalled();
   });
 
+  it("uses quorum compact content for quorum multi-decision rank waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: true },
+      isQuorumWave: true,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
+
+    expect(Timeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
+  });
+
   it("renders podium and drops for single decision", () => {
     (useWave as jest.Mock).mockReturnValue({
       decisions: { multiDecision: false },

@@ -90,6 +90,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
         decisionPoints={decisionPoints}
         wave={wave}
         isLoading={isDecisionsLoading}
+        contentPresentation={contentPresentation}
       />
     );
   } else {
