@@ -86,6 +86,29 @@ describe("WaveWinnersSmall", () => {
     expect(ItemMock).toHaveBeenCalled();
   });
 
+  it("uses quorum compact content for single-decision quorum rank waves", () => {
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        { decision_time: 1, winners: [{ drop: { id: "d" }, place: 1 }] },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: false },
+      isApproveWave: false,
+      isQuorumWave: true,
+    });
+
+    render(<WaveWinnersSmall wave={mockWave} onDropClick={jest.fn()} />);
+
+    expect(ItemMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
+  });
+
   it("renders selector for multi decision", () => {
     (useWaveDecisions as jest.Mock).mockReturnValue({
       decisionPoints: [

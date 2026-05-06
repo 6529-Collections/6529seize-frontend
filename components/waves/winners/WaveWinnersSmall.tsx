@@ -62,6 +62,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
         : undefined,
     });
     const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
+    const contentPresentation = isQuorumWave ? "quorumCompact" : undefined;
     const handleApprovalWinnersRetry = () => {
       if (hasNextPage) {
         void fetchNextPage();
@@ -134,7 +135,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
                 onDropClick={() =>
                   onDropClick(convertApiDropToExtendedDrop(winner.drop))
                 }
-                contentPresentation={isQuorumWave ? "quorumCompact" : undefined}
+                contentPresentation={contentPresentation}
               />
             ))}
           </div>
@@ -171,6 +172,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
                 onDropClick={() =>
                   onDropClick(convertApiDropToExtendedDrop(winner.drop))
                 }
+                contentPresentation={contentPresentation}
               />
             ))}
           </div>
