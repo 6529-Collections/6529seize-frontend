@@ -51,6 +51,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   });
   const isDecisionsLoading = isApproveWave ? isLoadingAllPages : isFetching;
   const approvedWinners = getApprovedWaveDecisionWinners(decisionPoints);
+  const contentPresentation = isQuorumWave ? "quorumCompact" : undefined;
   const handleApprovalWinnersRetry = () => {
     if (hasNextPage) {
       void fetchNextPage();
@@ -78,7 +79,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           isLoading={isDecisionsLoading}
           isApprovalWave={true}
           emptyMessage="No drops approved yet"
-          contentPresentation={isQuorumWave ? "quorumCompact" : undefined}
+          contentPresentation={contentPresentation}
         />
       </div>
     );
@@ -104,6 +105,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           onDropClick={onDropClick}
           winners={decisionPoints[0]?.winners ?? []}
           isLoading={isDecisionsLoading}
+          contentPresentation={contentPresentation}
         />
       </div>
     );

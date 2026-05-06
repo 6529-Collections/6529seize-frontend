@@ -140,6 +140,30 @@ describe("WaveWinners", () => {
     );
   });
 
+  it("uses quorum compact content for quorum single-decision rank waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: false },
+      isQuorumWave: true,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        {
+          winners: [{ drop: { id: "d1" }, place: 1 }],
+        },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
+
+    expect(Drops).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
+  });
+
   it("shows approve-wave full-load error instead of partial drops", () => {
     const fetchNextPage = jest.fn();
     const refetch = jest.fn();
