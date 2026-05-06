@@ -217,6 +217,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
                 onDropClick={() =>
                   onDropClick(convertApiDropToExtendedDrop(winner.drop))
                 }
+                contentPresentation={contentPresentation}
               />
             ))}
         </div>
