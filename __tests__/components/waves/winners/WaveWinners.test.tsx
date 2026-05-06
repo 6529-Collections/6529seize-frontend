@@ -92,11 +92,11 @@ describe("WaveWinners", () => {
       decisionPoints: [
         {
           decision_time: 1,
-          winners: [{ drop: { id: "older" }, place: 1 }],
+          winners: [{ drop: { id: "older" }, place: 1, awards: [] }],
         },
         {
           decision_time: 2,
-          winners: [{ drop: { id: "newer" }, place: 2 }],
+          winners: [{ drop: { id: "newer" }, place: 2, awards: [] }],
         },
       ],
       isFetching: false,
@@ -116,8 +116,8 @@ describe("WaveWinners", () => {
         isApprovalWave: true,
         emptyMessage: "No drops approved yet",
         winners: [
-          { drop: { id: "newer" }, place: 2 },
-          { drop: { id: "older" }, place: 1 },
+          { drop: { id: "newer" }, place: 2, awards: [] },
+          { drop: { id: "older" }, place: 1, awards: [] },
         ],
       })
     );
@@ -138,7 +138,7 @@ describe("WaveWinners", () => {
       decisionPoints: [
         {
           decision_time: 1,
-          winners: [{ drop: { id: "d1" }, place: 1 }],
+          winners: [{ drop: { id: "d1" }, place: 1, awards: [] }],
         },
       ],
       isFetching: false,

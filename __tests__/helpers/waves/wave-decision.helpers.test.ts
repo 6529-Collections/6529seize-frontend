@@ -77,6 +77,7 @@ describe("wave-decision.helpers", () => {
             awards: [],
             drop: { id: "inf-place" },
           },
+          { place: 2, drop: { id: "missing-awards" } },
           { place: 2, awards: {}, drop: { id: "bad-awards" } },
           { place: 3, awards: [], drop: null },
           { place: 4, awards: [], drop: {} },

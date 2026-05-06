@@ -152,11 +152,11 @@ describe("WaveWinnersSmall", () => {
       decisionPoints: [
         {
           decision_time: 1,
-          winners: [{ drop: { id: "older" }, place: 1 }],
+          winners: [{ drop: { id: "older" }, place: 1, awards: [] }],
         },
         {
           decision_time: 2,
-          winners: [{ drop: { id: "newer" }, place: 2 }],
+          winners: [{ drop: { id: "newer" }, place: 2, awards: [] }],
         },
       ],
       isFetching: false,
@@ -187,7 +187,7 @@ describe("WaveWinnersSmall", () => {
       decisionPoints: [
         {
           decision_time: 1,
-          winners: [{ drop: { id: "d" }, place: 1 }],
+          winners: [{ drop: { id: "d" }, place: 1, awards: [] }],
         },
       ],
       isFetching: false,
