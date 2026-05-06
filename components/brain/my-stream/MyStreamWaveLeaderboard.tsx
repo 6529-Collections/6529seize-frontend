@@ -39,6 +39,11 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { hasApprovalDecisionCounts } from "@/helpers/waves/approve-wave.helpers";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -327,6 +332,33 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
+  const shouldLoadApprovalDecisionPoints =
+    isApproveWave && !hasApprovalDecisionCounts(wave);
+  const {
+    decisionPoints: approvalDecisionPoints,
+    hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
+    isLoadingAllPagesError: isApprovalDecisionPointsLoadError,
+    refetch: refetchApprovalDecisionPoints,
+    fetchNextPage: fetchNextApprovalDecisionPointsPage,
+    hasNextPage: hasNextApprovalDecisionPointsPage,
+  } = useWaveDecisions({
+    waveId: wave.id,
+    enabled: shouldLoadApprovalDecisionPoints,
+    loadAllPages: true,
+    pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  });
+  const retryApprovalDecisionPointsLoad = useCallback(() => {
+    if (hasNextApprovalDecisionPointsPage) {
+      void fetchNextApprovalDecisionPointsPage();
+      return;
+    }
+
+    void refetchApprovalDecisionPoints();
+  }, [
+    fetchNextApprovalDecisionPointsPage,
+    hasNextApprovalDecisionPointsPage,
+    refetchApprovalDecisionPoints,
+  ]);
   const {
     approvedCount,
     closeStatus: approvalCloseStatus,
@@ -336,6 +368,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     retryApprovalStatus,
   } = useApprovalWaveStatus({
     wave,
+    ...(shouldLoadApprovalDecisionPoints
+      ? {
+          decisionPoints: approvalDecisionPoints,
+          areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
+          isDecisionPointsLoadError: isApprovalDecisionPointsLoadError,
+          onRetryDecisionPointsLoad: retryApprovalDecisionPointsLoad,
+        }
+      : {}),
   });
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingControlsLocked;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(

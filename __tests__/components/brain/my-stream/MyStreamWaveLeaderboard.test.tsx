@@ -177,6 +177,17 @@ const makeOpenApproveWave = (): ApiWave =>
     },
   }) as ApiWave;
 
+const approvalDecisionPoints = [
+  {
+    decision_time: 1100,
+    winners: [{ place: 1, awards: [], drop: { id: "drop-1" } }],
+  },
+  {
+    decision_time: 1200,
+    winners: [{ place: 1, awards: [], drop: { id: "drop-2" } }],
+  },
+];
+
 const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   render(
     <AuthContext.Provider
@@ -840,6 +851,112 @@ describe("MyStreamWaveLeaderboard", () => {
     await user.click(screen.getByTestId("header"));
 
     expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
+  });
+
+  it("loads full decisions for uncapped approve waves with missing server counts", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: null,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: approvalDecisionPoints,
+      isFetching: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(
+      useWaveDecisions.mock.calls.filter(([args]) => args.enabled === true)
+    ).toHaveLength(1);
+    expect(useWaveDecisions.mock.calls[0][0]).toEqual({
+      waveId: "1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: 2000,
+    });
+    expect(approvalStatusProps.approvedCount).toBe(2);
+    expect(approvalStatusProps.closeStatus).toBeNull();
+  });
+
+  it("loads full decisions for ended approve waves with missing server counts", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() - 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: approvalDecisionPoints.slice(0, 1),
+      isFetching: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(
+      useWaveDecisions.mock.calls.filter(([args]) => args.enabled === true)
+    ).toHaveLength(1);
+    expect(useWaveDecisions.mock.calls[0][0]).toEqual({
+      waveId: "1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: 2000,
+    });
+    expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(approvalStatusProps.closeStatus).toBe("ended");
   });
 
   it("blocks create drop and passes retry when approval status loading fails", async () => {
