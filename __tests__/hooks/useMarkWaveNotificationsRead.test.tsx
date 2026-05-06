@@ -5,6 +5,21 @@ import {
   useMarkWaveNotificationsRead,
   useWaveNotificationsReadMarkerState,
 } from "@/hooks/useMarkWaveNotificationsRead";
+import {
+  getWaveReadIdentityKey,
+  getWaveReadProxyRoleIdentityKey,
+  getWaveReadProxyRoleRequestKey,
+  getWaveReadRequestKey,
+} from "@/hooks/useMarkWaveNotificationsRead.identity";
+import type { WaveReadVerifiedIdentity } from "@/hooks/useMarkWaveNotificationsRead.identity";
+import {
+  clearAllWaveReadState,
+  enqueuePendingWaveReadRequest,
+  flushPendingClearedWaveReadRequests,
+  flushPendingWaveReadRequests,
+  markWaveReadIdentityCleared,
+} from "@/hooks/useMarkWaveNotificationsRead.requests";
+import type { WaveReadAddressEpoch } from "@/hooks/useMarkWaveNotificationsRead.types";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { act, renderHook, waitFor } from "@testing-library/react";
@@ -147,6 +162,38 @@ const setActiveIdentity = ({
   } as any);
   getAuthJwtMock.mockReturnValue(jwt ?? null);
 };
+
+const createAddressEpochState = (): {
+  readonly addressEpoch: WaveReadAddressEpoch;
+  readonly latestAddressEpochRef: { current: WaveReadAddressEpoch };
+} => {
+  const addressEpoch = {};
+  return {
+    addressEpoch,
+    latestAddressEpochRef: { current: addressEpoch },
+  };
+};
+
+const createVerifiedIdentity = ({
+  addressKey = "0xaaa",
+  activeProfileProxyId = null,
+  activeProfileProxyCreatorId = null,
+  identityKey = getWaveReadIdentityKey({ addressKey, activeProfileProxyId }),
+  jwt = "jwt-a",
+}: {
+  readonly addressKey?: string | undefined;
+  readonly activeProfileProxyId?: string | null | undefined;
+  readonly activeProfileProxyCreatorId?: string | null | undefined;
+  readonly identityKey?: string | undefined;
+  readonly jwt?: string | undefined;
+} = {}): WaveReadVerifiedIdentity => ({
+  addressKey,
+  activeProfileProxyId,
+  activeProfileProxyCreatorId,
+  identityKey,
+  jwtExpiresAt: getFutureJwtExp(),
+  authHeaders: { Authorization: `Bearer ${jwt}` },
+});
 
 describe("useMarkWaveNotificationsRead", () => {
   beforeEach(() => {
@@ -2372,6 +2419,173 @@ describe("useMarkWaveNotificationsRead", () => {
     await expect(result.current("wave-1")).rejects.toBe(readError);
     expect(apiPostMock).toHaveBeenCalledTimes(1);
     expect(invalidateNotifications).not.toHaveBeenCalled();
+  });
+
+  it("rejects a queued missing-JWT read that becomes stale before JWT verification", async () => {
+    const invalidateNotifications = jest.fn();
+    const addressKey = "0xaaa";
+    const waveId = "wave-stale-missing-jwt";
+    const identityKey = getWaveReadIdentityKey({
+      addressKey,
+      activeProfileProxyId: null,
+    });
+    const requestKey = getWaveReadRequestKey({
+      addressKey,
+      activeProfileProxyId: null,
+      waveId,
+    });
+    const { addressEpoch, latestAddressEpochRef } = createAddressEpochState();
+
+    try {
+      const queuedPromise = enqueuePendingWaveReadRequest({
+        addressKey,
+        activeProfileProxyId: null,
+        proxyCreatorId: null,
+        identityKey,
+        requestKey,
+        waveId,
+        addressEpoch,
+        latestAddressEpochRef,
+        shouldSend: undefined,
+        queueIfBlocked: true,
+      });
+      const rejection = expect(queuedPromise).rejects.toThrow(
+        "wallet address changed or disconnected"
+      );
+
+      latestAddressEpochRef.current = {};
+      flushPendingWaveReadRequests({
+        verifiedIdentity: createVerifiedIdentity({ addressKey, identityKey }),
+        invalidateNotificationsRef: { current: invalidateNotifications },
+      });
+
+      await rejection;
+      expect(apiPostMock).not.toHaveBeenCalled();
+      expect(invalidateNotifications).not.toHaveBeenCalled();
+    } finally {
+      clearAllWaveReadState();
+    }
+  });
+
+  it("sends a fresh queued read when a stale same-wave proxy-role read is dropped", async () => {
+    const invalidateNotifications = jest.fn();
+    const addressKey = "0xaaa";
+    const waveId = "wave-mixed-stale-fresh";
+    const proxyCreatorId = "creator-1";
+    const activeProfileProxyId = "proxy-1";
+    const proxyRoleIdentityKey = getWaveReadProxyRoleIdentityKey({
+      addressKey,
+      proxyCreatorId,
+    });
+    const proxyRoleRequestKey = getWaveReadProxyRoleRequestKey({
+      addressKey,
+      proxyCreatorId,
+      waveId,
+    });
+    const verifiedIdentity = createVerifiedIdentity({
+      addressKey,
+      activeProfileProxyId,
+      activeProfileProxyCreatorId: proxyCreatorId,
+      jwt: "jwt-proxy-1",
+    });
+    const loadedProxyRequestKey = getWaveReadRequestKey({
+      addressKey,
+      activeProfileProxyId,
+      waveId,
+    });
+    const staleEpochState = createAddressEpochState();
+    const freshEpochState = createAddressEpochState();
+
+    try {
+      const stalePromise = enqueuePendingWaveReadRequest({
+        addressKey,
+        activeProfileProxyId: null,
+        proxyCreatorId,
+        identityKey: proxyRoleIdentityKey,
+        requestKey: proxyRoleRequestKey,
+        waveId,
+        addressEpoch: staleEpochState.addressEpoch,
+        latestAddressEpochRef: staleEpochState.latestAddressEpochRef,
+        shouldSend: undefined,
+        queueIfBlocked: true,
+      });
+      const freshPromise = enqueuePendingWaveReadRequest({
+        addressKey,
+        activeProfileProxyId,
+        proxyCreatorId: null,
+        identityKey: verifiedIdentity.identityKey,
+        requestKey: loadedProxyRequestKey,
+        waveId,
+        addressEpoch: freshEpochState.addressEpoch,
+        latestAddressEpochRef: freshEpochState.latestAddressEpochRef,
+        shouldSend: undefined,
+        queueIfBlocked: true,
+      });
+      const staleRejection = expect(stalePromise).rejects.toThrow(
+        "wallet address changed or disconnected"
+      );
+
+      staleEpochState.latestAddressEpochRef.current = {};
+      flushPendingWaveReadRequests({
+        verifiedIdentity,
+        invalidateNotificationsRef: { current: invalidateNotifications },
+      });
+
+      await staleRejection;
+      await expect(freshPromise).resolves.toBe("sent");
+      expect(apiPostMock).toHaveBeenCalledTimes(1);
+      expect(apiPostMock).toHaveBeenCalledWith({
+        endpoint: "notifications/wave/wave-mixed-stale-fresh/read",
+        headers: { Authorization: "Bearer jwt-proxy-1" },
+      });
+      expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+    } finally {
+      clearAllWaveReadState();
+    }
+  });
+
+  it("rejects a stale queued read on the cleared-auth flush path", async () => {
+    const invalidateNotifications = jest.fn();
+    const addressKey = "0xaaa";
+    const waveId = "wave-stale-cleared-auth";
+    const verifiedIdentity = createVerifiedIdentity({ addressKey });
+    const requestKey = getWaveReadRequestKey({
+      addressKey,
+      activeProfileProxyId: null,
+      waveId,
+    });
+    const { addressEpoch, latestAddressEpochRef } = createAddressEpochState();
+
+    try {
+      markWaveReadIdentityCleared(verifiedIdentity);
+      const queuedPromise = enqueuePendingWaveReadRequest({
+        addressKey,
+        activeProfileProxyId: null,
+        proxyCreatorId: null,
+        identityKey: verifiedIdentity.identityKey,
+        requestKey,
+        waveId,
+        addressEpoch,
+        latestAddressEpochRef,
+        shouldSend: undefined,
+        queueIfBlocked: true,
+      });
+      const rejection = expect(queuedPromise).rejects.toThrow(
+        "wallet address changed or disconnected"
+      );
+
+      latestAddressEpochRef.current = {};
+      flushPendingClearedWaveReadRequests({
+        verifiedIdentity,
+        invalidateNotificationsRef: { current: invalidateNotifications },
+      });
+
+      await rejection;
+      expect(apiPostMock).not.toHaveBeenCalled();
+      expect(invalidateNotifications).not.toHaveBeenCalled();
+    } finally {
+      clearAllWaveReadState();
+    }
   });
 
   it("reads different waves independently", async () => {

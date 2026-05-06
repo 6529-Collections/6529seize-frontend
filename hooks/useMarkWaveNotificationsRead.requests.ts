@@ -501,6 +501,18 @@ const flushQueuedWaveReadRequests = ({
       continue;
     }
 
+    if (
+      queuedRequest.addressEpoch !== queuedRequest.latestAddressEpochRef.current
+    ) {
+      pendingWaveReadRequests.delete(queuedRequest.requestKey);
+      queuedRequest.reject(
+        createClearedWaveReadStateError(
+          "wallet address changed or disconnected"
+        )
+      );
+      continue;
+    }
+
     const requestKey = getRequestKey(queuedRequest);
     pendingWaveReadRequests.delete(queuedRequest.requestKey);
     const groupedRequests = queuedRequestsByRequestKey.get(requestKey) ?? [];
