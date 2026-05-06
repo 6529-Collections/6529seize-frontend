@@ -191,6 +191,31 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.syncNewestMessages).toHaveBeenCalled();
   });
 
+  it("defaults missing subscribed author actions to an empty array for new drops", async () => {
+    const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d-subscribed-actions-fallback",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      )
+    );
+    await flushPromises();
+
+    const update = props.updateData.mock.calls[0]?.[0];
+    const updatedDrop = update.drops[0];
+    expect(update.key).toBe("wave1");
+    expect(updatedDrop.id).toBe("d-subscribed-actions-fallback");
+    expect(updatedDrop.author.subscribed_actions).toEqual([]);
+  });
+
   it("reconciles newest-message sync drops before writing the wave store", async () => {
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
     const currentUser = profile("profile-1", "current-user");

@@ -150,9 +150,12 @@ function buildOptimisticDrop(
   wave: IncomingDropWave,
   existingDrop: ExtendedDrop | null
 ): ExtendedDrop {
+  const incomingAuthorSubscribedActions = (
+    drop.author as Partial<Pick<IncomingDrop["author"], "subscribed_actions">>
+  ).subscribed_actions;
   const authorSubscribedActions =
     existingDrop === null
-      ? drop.author.subscribed_actions
+      ? (incomingAuthorSubscribedActions ?? [])
       : existingDrop.author.subscribed_actions;
   const contextProfileContext =
     existingDrop !== null && drop.context_profile_context === undefined
