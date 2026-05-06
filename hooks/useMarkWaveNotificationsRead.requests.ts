@@ -134,14 +134,22 @@ const createWaveReadSendIntent = ({
 });
 
 const requeueExpiredWaveReadIntents = (
-  sendIntents: readonly WaveReadSendIntent[]
+  sendIntents: readonly WaveReadSendIntent[],
+  invalidateNotificationsRef: InvalidateNotificationsRef
 ): Promise<MarkWaveNotificationsReadResult> => {
+  const requeuedAddressKeys = new Set<string>();
   const retryPromises = sendIntents
     .filter(shouldSendWaveRead)
     .map((sendIntent) => {
       const retryContext = sendIntent.retryContext;
       if (!retryContext) {
         return Promise.resolve<MarkWaveNotificationsReadResult>("skipped");
+      }
+
+      if (
+        retryContext.addressEpoch === retryContext.latestAddressEpochRef.current
+      ) {
+        requeuedAddressKeys.add(retryContext.addressKey);
       }
 
       return enqueuePendingWaveReadRequest({
@@ -153,6 +161,22 @@ const requeueExpiredWaveReadIntents = (
 
   if (retryPromises.length === 0) {
     return Promise.resolve("skipped");
+  }
+
+  for (const addressKey of requeuedAddressKeys) {
+    const verifiedIdentity =
+      latestVerifiedWaveReadIdentityByAddress.get(addressKey);
+    if (
+      !verifiedIdentity ||
+      isWaveReadJwtExpired(verifiedIdentity.jwtExpiresAt)
+    ) {
+      continue;
+    }
+
+    flushPendingWaveReadRequests({
+      verifiedIdentity,
+      invalidateNotificationsRef,
+    });
   }
 
   return Promise.all(retryPromises).then((results) =>
@@ -214,7 +238,10 @@ const startWaveReadRequest = async (
         ];
         state.pendingSendIntents = [];
         inFlightWaveReadRequests.delete(state.requestKey);
-        requestResult = await requeueExpiredWaveReadIntents(expiredSendIntents);
+        requestResult = await requeueExpiredWaveReadIntents(
+          expiredSendIntents,
+          invalidateNotificationsRef
+        );
       }
     } else {
       requestResult = sendResult;
@@ -479,13 +506,13 @@ const flushQueuedWaveReadRequests = ({
   }
 };
 
-export const flushPendingWaveReadRequests = ({
+export function flushPendingWaveReadRequests({
   verifiedIdentity,
   invalidateNotificationsRef,
 }: {
   readonly verifiedIdentity: WaveReadVerifiedIdentity;
   readonly invalidateNotificationsRef: InvalidateNotificationsRef;
-}): void => {
+}): void {
   const proxyRoleIdentityKey =
     getVerifiedProxyRoleIdentityKey(verifiedIdentity);
   const queuedRequests = Array.from(pendingWaveReadRequests.values()).filter(
@@ -523,7 +550,7 @@ export const flushPendingWaveReadRequests = ({
     jwtExpiresAt: verifiedIdentity.jwtExpiresAt,
     invalidateNotificationsRef,
   });
-};
+}
 
 export const flushPendingClearedWaveReadRequests = ({
   verifiedIdentity,

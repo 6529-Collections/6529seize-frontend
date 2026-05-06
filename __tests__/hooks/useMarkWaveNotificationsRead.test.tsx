@@ -1507,6 +1507,70 @@ describe("useMarkWaveNotificationsRead", () => {
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("flushes a requeued trailing same-wave read when fresh auth is already cached", async () => {
+    const firstRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+    const currentSecond = 1_700_000_350;
+    const oldJwtExpiresAt = currentSecond + 10;
+    const freshJwtExpiresAt = oldJwtExpiresAt + 60;
+    const dateNowSpy = mockCurrentJwtSecond(currentSecond);
+
+    apiPostMock.mockReturnValueOnce(firstRequest.promise);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-requeued-old",
+      jwtExp: oldJwtExpiresAt,
+    });
+    const { result, rerender } = renderHook(
+      () => useMarkWaveNotificationsRead(),
+      {
+        wrapper: createWrapper(invalidateNotifications),
+      }
+    );
+
+    const firstPromise = result.current("wave-requeued-cached-auth");
+    const firstSettlement = trackPromiseSettlement(firstPromise);
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenNthCalledWith(1, {
+      endpoint: "notifications/wave/wave-requeued-cached-auth/read",
+      headers: { Authorization: "Bearer jwt-requeued-old" },
+    });
+
+    const queuedPromise = result.current("wave-requeued-cached-auth");
+    const queuedSettlement = trackPromiseSettlement(queuedPromise);
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-requeued-fresh",
+      jwtExp: freshJwtExpiresAt,
+    });
+    rerender();
+    await flushMicrotasks();
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(firstSettlement.isSettled()).toBe(false);
+    expect(queuedSettlement.isSettled()).toBe(false);
+
+    dateNowSpy.mockReturnValue(oldJwtExpiresAt * 1000);
+    firstRequest.resolve();
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledTimes(2);
+    });
+    expect(apiPostMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-requeued-cached-auth/read",
+      headers: { Authorization: "Bearer jwt-requeued-fresh" },
+    });
+
+    await expect(firstPromise).resolves.toBe("sent");
+    await expect(queuedPromise).resolves.toBe("sent");
+    expect(invalidateNotifications).toHaveBeenCalledTimes(2);
+  });
+
   it("requeues a trailing same-wave read when fresh auth expires before the trailing send", async () => {
     const firstRequest = createDeferred();
     const trailingRequest = createDeferred();
