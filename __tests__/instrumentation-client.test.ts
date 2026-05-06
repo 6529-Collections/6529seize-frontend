@@ -674,6 +674,47 @@ describe("instrumentation-client", () => {
     expect(result).toBeNull();
   });
 
+  it("sanitizes app-wrapped absolute network URLs before sending", () => {
+    const beforeSend = loadBeforeSend();
+    const message =
+      "Network request failed. Please check your connection and try again. (https://api.6529.io/api/waves-overview?token=secret#hash)";
+    const expectedMessage =
+      "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+    const event = {
+      event_id: "event-200",
+      message,
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: message,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    };
+
+    const result = beforeSend(event, {
+      originalException: new Error(message),
+    });
+
+    expect(result).not.toBeNull();
+    expect(result?.exception?.values?.[0]?.value).toBe(expectedMessage);
+    expect(result?.message).toBe(expectedMessage);
+    expect(result?.exception?.values?.[0]?.value).not.toContain("token=");
+    expect(result?.message).not.toContain("#hash");
+  });
+
   it("keeps and tags sampled-in app-wrapped first-party browser transport network errors without rewriting the message", () => {
     const beforeSend = loadBeforeSend();
     const event = {

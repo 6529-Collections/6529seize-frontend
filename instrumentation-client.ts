@@ -239,6 +239,16 @@ function getRawBrowserNetworkErrorMessage(
     : `Network request failed. Please check your connection and try again. (${url})`;
 }
 
+function getAppWrappedNetworkErrorMessage(
+  event: Sentry.Event,
+  error: Error
+): string {
+  const urlMatch = URL_REGEX.exec(error.message.slice(0, 2048));
+  const prefix = error.message.slice(0, urlMatch?.index ?? 0).trimEnd();
+  const url = extractUrlFromError(error, event);
+  return `${prefix} (${url})`;
+}
+
 function handleNetworkError(
   event: Sentry.Event,
   error: Error,
@@ -252,7 +262,7 @@ function handleNetworkError(
   }
 
   const transformedMessage = isAppWrappedError
-    ? error.message
+    ? getAppWrappedNetworkErrorMessage(event, error)
     : getRawBrowserNetworkErrorMessage(event, error);
 
   if (value) {
