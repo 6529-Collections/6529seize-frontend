@@ -279,7 +279,11 @@ function isFirstPartyApiTarget(candidate: NetworkTargetCandidate): boolean {
 function canUseAsSanitizedRelativePath(
   candidate: NetworkTargetCandidate
 ): boolean {
-  return isRelativePath(candidate.url) && candidate.isFirstParty !== false;
+  return (
+    isRelativePath(candidate.url) &&
+    candidate.isFirstParty !== false &&
+    candidate.isFirstPartyApi !== false
+  );
 }
 
 function hasExplicitThirdPartyRelativeOrigin(

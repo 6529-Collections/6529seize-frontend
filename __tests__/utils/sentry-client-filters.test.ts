@@ -1422,6 +1422,35 @@ describe("sentry-client-filters", () => {
     expect(result).toBe("drop");
   });
 
+  it("does not match api.6529.io errors to sanitized breadcrumbs explicitly marked non-API", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (https://api.6529.io/alchemy-proxy)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/alchemy-proxy",
+            "url.is_first_party": true,
+            "url.is_first_party_api": false,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
   it("drops api.6529.io paths after sanitization when the breadcrumb keeps API metadata", () => {
     const result = getLowValueNetworkErrorDecision(
       createLowValueNetworkEvent({
