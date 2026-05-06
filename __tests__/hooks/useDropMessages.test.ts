@@ -1,7 +1,13 @@
 import { renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseInfiniteQueryResult } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WsMessageType } from "@/helpers/Types";
+import {
+  __resetDropReactionMonitoringForTests,
+  beginReactionMutation,
+} from "@/utils/monitoring/dropReactionMonitoring";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
 // Setup mock for useInfiniteQuery so tests can control its behaviour
 const useInfiniteQueryMock = jest.fn();
@@ -13,9 +19,11 @@ jest.mock("@tanstack/react-query", () => {
   };
 });
 
+let mockConnectedProfileId: string | null = "profile-1";
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { id: "profile-1" },
+    connectedProfile:
+      mockConnectedProfileId === null ? null : { id: mockConnectedProfileId },
   }),
 }));
 
@@ -36,8 +44,11 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn().mockResolvedValue({ drops: [], wave: null }),
 }));
 
-const createWrapper = () => {
-  const queryClient = new QueryClient({
+const { commonApiFetch } = require("@/services/api/common-api");
+const commonApiFetchMock = commonApiFetch as jest.Mock;
+
+const createQueryClient = () =>
+  new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
@@ -45,12 +56,26 @@ const createWrapper = () => {
       },
     },
   });
+
+const createWrapper = (queryClient = createQueryClient()) => {
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
 
+const deferred = <T>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
+  mockConnectedProfileId = "profile-1";
+  __resetDropReactionMonitoringForTests();
+  commonApiFetchMock.mockResolvedValue({ drops: [], wave: null });
   useInfiniteQueryMock.mockReset();
   useInfiniteQueryMock.mockReturnValue({
     data: { pages: [] },
@@ -62,7 +87,33 @@ beforeEach(() => {
   } as Partial<UseInfiniteQueryResult>);
 });
 
+afterEach(() => {
+  jest.restoreAllMocks();
+  __resetDropReactionMonitoringForTests();
+});
+
 describe("useDropMessages", () => {
+  const contextProfileContext = (reaction: string | null) => ({
+    rating: 0,
+    min_rating: 0,
+    max_rating: 0,
+    reaction,
+    boosted: false,
+    bookmarked: false,
+    curatable: false,
+    curated: false,
+  });
+
+  const profile = (id: string, handle = id) => ({ id, handle });
+
+  const reactionEntry = (
+    reaction: string,
+    profiles = [profile("profile-1")]
+  ) => ({
+    reaction,
+    profiles,
+  });
+
   it("should return expected hook properties", () => {
     const { result } = renderHook(
       () => useDropMessages("wave-123", "drop-456"),
@@ -108,6 +159,72 @@ describe("useDropMessages", () => {
 
     await result.current.manualFetch();
     expect(fetchNextPage).toHaveBeenCalled();
+  });
+
+  it("reconciles in-flight query responses with the profile that started the request", async () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentUser = profile("profile-1", "current-user");
+    const queryClient = createQueryClient();
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        {
+          drops: [
+            {
+              id: "drop-profile-switch",
+              context_profile_context: contextProfileContext(":joy:"),
+              reactions: [reactionEntry(":joy:", [currentUser])],
+            },
+          ],
+        },
+      ],
+    });
+
+    beginReactionMutation({
+      dropId: "drop-profile-switch",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    const response = deferred<any>();
+    commonApiFetchMock.mockReturnValue(response.promise);
+
+    const { rerender } = renderHook(() => useDropMessages("wave-1", "drop-1"), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    const options = useInfiniteQueryMock.mock.calls[0][0];
+    const resultPromise = options.queryFn({ pageParam: null });
+
+    mockConnectedProfileId = "profile-2";
+    rerender();
+    response.resolve({
+      wave: { id: "wave-1" },
+      drops: [
+        {
+          id: "drop-profile-switch",
+          context_profile_context: contextProfileContext(":wave:"),
+          reactions: [
+            reactionEntry(":wave:", [
+              profile("profile-1", "server-current-user"),
+              profile("profile-2", "server-wave"),
+            ]),
+          ],
+        },
+      ],
+    });
+
+    const result = await resultPromise;
+
+    expect(result.drops[0].context_profile_context.reaction).toBe(":joy:");
+    expect(result.drops[0].reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "server-wave")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
   });
 
   it("websocket callback debounces refetch", () => {

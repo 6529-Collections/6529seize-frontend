@@ -87,6 +87,7 @@ export function useWaveCurationDrops({
         );
       }
 
+      const requestActiveProfileId = activeProfileIdRef.current;
       const page = await commonApiFetch<ApiCurationDropsPage>({
         endpoint: `waves/${waveId}/curations/${normalizedCurationId}/drops`,
         params: {
@@ -101,7 +102,7 @@ export function useWaveCurationDrops({
           waveMin === null
             ? page.data
             : reconcileDropsWithoutWaveForDisplay({
-                activeProfileId: activeProfileIdRef.current,
+                activeProfileId: requestActiveProfileId,
                 queryClient,
                 serverDrops: page.data,
                 wave: waveMin,

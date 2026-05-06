@@ -127,13 +127,14 @@ export function useWaveDrops({
         params["serial_no_less_than"] = `${pageParam}`;
       }
 
+      const requestActiveProfileId = activeProfileIdRef.current;
       const serverDrops = await commonApiFetch<ApiDrop[]>({
         endpoint: "drops",
         params,
       });
 
       return reconcileServerDropsForDisplay({
-        activeProfileId: activeProfileIdRef.current,
+        activeProfileId: requestActiveProfileId,
         queryClient,
         serverDrops,
         websocketStatus: WebSocketStatus.CONNECTED,

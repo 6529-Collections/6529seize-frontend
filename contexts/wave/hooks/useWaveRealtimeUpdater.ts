@@ -288,6 +288,7 @@ type PendingFetchedDropUpdate = {
   readonly dropId: string;
   readonly sequence: number;
   readonly serverDrop: ApiDrop;
+  readonly requestActiveProfileId: string | null;
 };
 
 type FetchedDropUpdateOptions = {
@@ -420,6 +421,7 @@ function useNewestMessagesSync({
       abortControllersRef.current[waveId] = controller;
 
       try {
+        const requestActiveProfileId = activeProfileIdRef.current;
         await syncNewestMessages(
           waveId,
           sinceSerialNo,
@@ -427,7 +429,7 @@ function useNewestMessagesSync({
           (serverDrops) => {
             const latestData = getData(waveId);
             return reconcileServerDropsForDisplay({
-              activeProfileId: activeProfileIdRef.current,
+              activeProfileId: requestActiveProfileId,
               queryClient,
               serverDrops,
               ...(latestData !== undefined
@@ -535,7 +537,7 @@ function useIncomingDropProcessor({
 
       if (latestFullDrop !== null) {
         const nextDrop = updateServerDropInCachedDrops(queryClient, {
-          activeProfileId: activeProfileIdRef.current,
+          activeProfileId: pendingUpdate.requestActiveProfileId,
           serverDrop: pendingUpdate.serverDrop,
           latestWaveDrop: latestFullDrop,
           websocketStatus: WebSocketStatus.CONNECTED,
@@ -584,6 +586,7 @@ function useIncomingDropProcessor({
       fetchedDropRequestSequencesRef.current.set(updateKey, sequence);
       pendingFetchedDropUpdatesRef.current.delete(updateKey);
 
+      const requestActiveProfileId = activeProfileIdRef.current;
       const serverDrop = await fetchDropByIdBatched(drop.id);
       if (fetchedDropRequestSequencesRef.current.get(updateKey) !== sequence) {
         return;
@@ -595,7 +598,7 @@ function useIncomingDropProcessor({
       );
       const latestExistingDrop = getFullDrop(latestDrop);
       const nextDrop = updateServerDropInCachedDrops(queryClient, {
-        activeProfileId: activeProfileIdRef.current,
+        activeProfileId: requestActiveProfileId,
         serverDrop,
         latestWaveDrop: latestExistingDrop,
         ...(cachedDropSnapshot !== undefined ? { cachedDropSnapshot } : {}),
@@ -625,6 +628,7 @@ function useIncomingDropProcessor({
           dropId: drop.id,
           sequence,
           serverDrop,
+          requestActiveProfileId,
         });
         return;
       }

@@ -86,6 +86,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
         params["search_strategy"] = `${pageParam.strategy}`;
       }
 
+      const requestActiveProfileId = activeProfileIdRef.current;
       const results = await commonApiFetch<ApiWaveDropsFeed>({
         endpoint: `waves/${waveId}/drops`,
         params,
@@ -94,7 +95,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
       return {
         ...results,
         drops: reconcileDropsWithoutWaveForDisplay({
-          activeProfileId: activeProfileIdRef.current,
+          activeProfileId: requestActiveProfileId,
           queryClient,
           serverDrops: results.drops,
           wave: results.wave,

@@ -367,6 +367,141 @@ describe("useWaveRealtimeUpdater", () => {
     ]);
   });
 
+  it("reconciles newest-message sync responses with the profile that started the request", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentUser = profile("profile-1", "current-user");
+    beginReactionMutation({
+      dropId: "d-newest-profile-switch",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: currentUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: "d-newest-profile-switch",
+            type: DropSize.FULL,
+            stableKey: "profile-switch-stable-key",
+            stableHash: "profile-switch-stable-hash",
+            serial_no: 20,
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    props.updateData = jest.fn((update: any) =>
+      applyWaveStoreUpdate(store, update)
+    );
+    const releaseSync = deferred<void>();
+    const serverDrops = [
+      {
+        id: "d-newest-profile-switch",
+        serial_no: 21,
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-current-user"),
+            profile("profile-2", "fresh-wave"),
+          ]),
+        ],
+      },
+    ];
+    props.syncNewestMessages = jest.fn(
+      async (
+        waveId: string,
+        _sinceSerialNo: number,
+        _signal: AbortSignal,
+        reconcileDrops?: (drops: any[]) => any[]
+      ) => {
+        await releaseSync.promise;
+        const displayDrops = reconcileDrops?.(serverDrops) ?? serverDrops;
+        props.updateData({
+          key: waveId,
+          drops: displayDrops.map(toStoredDrop),
+          latestFetchedSerialNo: 21,
+        });
+
+        return {
+          drops: displayDrops,
+          highestSerialNo: 21,
+        };
+      }
+    );
+
+    dateNowSpy.mockReturnValue(1_500);
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-newest-profile-switch-trigger",
+      serial_no: 22,
+      wave: { id: "wave1" },
+      author: {},
+      context_profile_context: null,
+      reactions: [],
+    };
+
+    act(() => {
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_INSERT
+      );
+    });
+
+    await waitFor(() => expect(props.syncNewestMessages).toHaveBeenCalled());
+
+    props.activeProfileId = "profile-2";
+    rerender();
+
+    dateNowSpy.mockReturnValue(2_000);
+    await act(async () => {
+      releaseSync.resolve(undefined);
+      await flushPromises();
+    });
+
+    await waitFor(() =>
+      expect(
+        props.updateData.mock.calls.some((call) =>
+          call[0].drops?.some(
+            (updatedDrop: any) => updatedDrop.id === "d-newest-profile-switch"
+          )
+        )
+      ).toBe(true)
+    );
+
+    const syncUpdate = props.updateData.mock.calls
+      .map((call) => call[0])
+      .filter((update) =>
+        update.drops?.some(
+          (updatedDrop: any) => updatedDrop.id === "d-newest-profile-switch"
+        )
+      )
+      .at(-1);
+    const syncedDrop = syncUpdate?.drops.find(
+      (updatedDrop: any) => updatedDrop.id === "d-newest-profile-switch"
+    );
+    expect(syncedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(syncedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("does not replay reconciled newest-sync drops after a reaction rollback", async () => {
     const dropId = "d-newest-rollback-race";
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
@@ -571,6 +706,93 @@ describe("useWaveRealtimeUpdater", () => {
     await flushPromises();
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4");
     expect(props.updateData).toHaveBeenCalled();
+  });
+
+  it("reconciles fetched drop responses with the profile that started the request", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentUser = profile("profile-1", "current-user");
+    beginReactionMutation({
+      dropId: "d-fetch-profile-switch",
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: currentUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const store: any = {
+      wave1: {
+        drops: [
+          {
+            id: "d-fetch-profile-switch",
+            type: DropSize.FULL,
+            stableKey: "fetch-profile-switch-stable-key",
+            stableHash: "fetch-profile-switch-stable-hash",
+            author: {},
+            wave: { id: "wave1" },
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [reactionEntry(":joy:", [currentUser])],
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    const response = deferred<any>();
+    fetchDropByIdBatched.mockReturnValue(response.promise);
+
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: "d-fetch-profile-switch",
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    act(() => {
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+    });
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d-fetch-profile-switch");
+
+    props.activeProfileId = "profile-2";
+    rerender();
+
+    dateNowSpy.mockReturnValue(2_000);
+    await act(async () => {
+      response.resolve({
+        id: "d-fetch-profile-switch",
+        author: {},
+        wave: { id: "wave1" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [
+            profile("profile-1", "server-current-user"),
+            profile("profile-2", "fresh-wave"),
+          ]),
+        ],
+      });
+      await flushPromises();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalled());
+
+    const lastUpdate =
+      props.updateData.mock.calls[props.updateData.mock.calls.length - 1]?.[0];
+    const updatedDrop = lastUpdate.drops[0];
+    expect(updatedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(updatedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
   });
 
   it("does not update wave store when the latest fetched drop is missing", async () => {
@@ -911,6 +1133,103 @@ describe("useWaveRealtimeUpdater", () => {
     expect(replayedDrop.context_profile_context.reaction).toBe(":fresh:");
     expect(replayedDrop.context_profile_context.rating).toBe(9);
     expect(replayedDrop.reactions).toBe(freshReaction);
+  });
+
+  it("replays pending fetched drop updates with the profile that started the request", async () => {
+    const dropId = "d-loading-replay-profile-switch";
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const currentUser = profile("profile-1", "current-user");
+    beginReactionMutation({
+      dropId,
+      waveId: "wave1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: currentUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const store: any = {
+      wave1: {
+        drops: [],
+        isLoading: true,
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: dropId,
+      title: "server-title",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: contextProfileContext(":wave:"),
+      reactions: [
+        reactionEntry(":wave:", [
+          profile("profile-1", "server-current-user"),
+          profile("profile-2", "fresh-wave"),
+        ]),
+      ],
+    });
+
+    dateNowSpy.mockReturnValue(1_500);
+    const { result, rerender } = renderHook(() =>
+      useWaveRealtimeUpdater(props)
+    );
+    const drop: any = {
+      id: dropId,
+      wave: { id: "wave1" },
+      author: {},
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+
+    props.activeProfileId = "profile-2";
+    store.wave1 = {
+      ...store.wave1,
+      drops: [
+        {
+          id: dropId,
+          type: DropSize.FULL,
+          stableKey: "loaded-stable-key",
+          stableHash: "loaded-stable-hash",
+          title: "loaded-title",
+          author: {},
+          wave: { id: "wave1" },
+          context_profile_context: contextProfileContext(":joy:"),
+          reactions: [reactionEntry(":joy:", [currentUser])],
+        },
+      ],
+      isLoading: false,
+    };
+
+    dateNowSpy.mockReturnValue(2_000);
+    act(() => {
+      rerender();
+    });
+
+    await waitFor(() => expect(props.updateData).toHaveBeenCalledTimes(1));
+
+    const replayedUpdate = props.updateData.mock.calls[0]?.[0];
+    const replayedDrop = replayedUpdate.drops[0];
+    expect(replayedDrop.stableKey).toBe("loaded-stable-key");
+    expect(replayedDrop.stableHash).toBe("loaded-stable-hash");
+    expect(replayedDrop.title).toBe("server-title");
+    expect(replayedDrop.context_profile_context.reaction).toBe(":joy:");
+    expect(replayedDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "fresh-wave")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
   });
 
   it("reconciles pending fetched reaction replays with the latest protected cache reaction", async () => {
