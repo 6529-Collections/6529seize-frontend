@@ -16,9 +16,13 @@ export type CachedDropReactionState = Pick<
   "context_profile_context" | "reactions"
 >;
 
+type ServerDropForDisplay = Omit<ApiDrop, "reactions"> & {
+  readonly reactions?: ApiDrop["reactions"];
+};
+
 type ReconcileServerDropForDisplayParams = {
   readonly queryClient: QueryClient;
-  readonly serverDrop: ApiDrop;
+  readonly serverDrop: ServerDropForDisplay;
   readonly latestWaveDrop?: CachedDropReactionState | null;
   readonly cachedDropSnapshot?: CachedDropReactionState | null;
   readonly websocketStatus?: WebSocketStatus | string | null;
@@ -29,8 +33,12 @@ type UpdateServerDropInCachedDropsParams = Omit<
   "queryClient"
 >;
 
-type DropWithoutWaveReactionState = CachedDropReactionState &
-  Pick<ApiDrop, "id">;
+type DropWithoutWaveReactionState = Pick<
+  ApiDrop,
+  "context_profile_context" | "id"
+> & {
+  readonly reactions?: ApiDrop["reactions"];
+};
 
 type IdentifiedDropReactionState = CachedDropReactionState &
   Pick<ApiDrop, "id">;
@@ -496,9 +504,21 @@ function serverReactionsMatchProtectedIntent(
 }
 
 function getServerDropReactions(
-  serverDrop: Partial<Pick<ApiDrop, "reactions">>
-): ApiDropReaction[] {
-  return serverDrop.reactions ?? [];
+  serverDrop: Pick<ServerDropForDisplay, "reactions">
+): ApiDropReaction[] | undefined {
+  return Array.isArray(serverDrop.reactions) ? serverDrop.reactions : undefined;
+}
+
+function selectLocalDrop({
+  cachedDropSnapshot,
+  latestCachedDrops,
+  latestWaveDrop,
+}: {
+  readonly cachedDropSnapshot: CachedDropReactionState | null | undefined;
+  readonly latestCachedDrops: readonly CachedDropReactionState[];
+  readonly latestWaveDrop: CachedDropReactionState | null | undefined;
+}): CachedDropReactionState | null {
+  return latestWaveDrop ?? latestCachedDrops[0] ?? cachedDropSnapshot ?? null;
 }
 
 function selectProtectedLocalDrop({
@@ -617,10 +637,12 @@ function mergeProtectedReactionProfiles(
 }
 
 function preserveProtectedReactionFields(
-  serverDrop: ApiDrop,
+  serverDrop: ServerDropForDisplay,
   localDrop: CachedDropReactionState | null,
   protectedIntent: ProtectedReactionIntent
 ): ApiDrop {
+  const serverReactions = getServerDropReactions(serverDrop);
+  const baseReactions = serverReactions ?? localDrop?.reactions ?? [];
   const serverContext = serverDrop.context_profile_context;
   const localContext = localDrop?.context_profile_context ?? null;
   const contextSource =
@@ -648,7 +670,7 @@ function preserveProtectedReactionFields(
         }
       : null,
     reactions: mergeProtectedReactionProfiles(
-      getServerDropReactions(serverDrop),
+      baseReactions,
       localDrop?.reactions ?? [],
       protectedIntent
     ),
@@ -715,19 +737,35 @@ export function reconcileServerDropForDisplay({
     protectedIntent,
   });
 
+  const serverReactions = getServerDropReactions(serverDrop);
   const serverReaction = serverDrop.context_profile_context?.reaction ?? null;
   if (protectedIntent === null) {
-    return serverDrop;
+    if (serverReactions !== undefined) {
+      return serverDrop as ApiDrop;
+    }
+
+    const latestCachedDrops = findDropsInCachedDrops(
+      queryClient,
+      serverDrop.id
+    );
+    const localDrop = selectLocalDrop({
+      cachedDropSnapshot,
+      latestCachedDrops,
+      latestWaveDrop,
+    });
+
+    return {
+      ...serverDrop,
+      reactions: localDrop?.reactions ?? [],
+    };
   }
 
   if (
     serverReaction === protectedIntent.reaction &&
-    serverReactionsMatchProtectedIntent(
-      getServerDropReactions(serverDrop),
-      protectedIntent
-    )
+    serverReactions !== undefined &&
+    serverReactionsMatchProtectedIntent(serverReactions, protectedIntent)
   ) {
-    return serverDrop;
+    return serverDrop as ApiDrop;
   }
 
   const latestCachedDrops = findDropsInCachedDrops(queryClient, serverDrop.id);
@@ -767,7 +805,7 @@ export function reconcileServerDropsForDisplay({
 }: {
   readonly latestWaveDrops?: readonly IdentifiedDropReactionState[];
   readonly queryClient: QueryClient;
-  readonly serverDrops: readonly ApiDrop[];
+  readonly serverDrops: readonly ServerDropForDisplay[];
   readonly websocketStatus?: WebSocketStatus | string | null;
 }): ApiDrop[] {
   return serverDrops.map((serverDrop) =>
@@ -795,7 +833,7 @@ export function reconcileDropsWithoutWaveForDisplay<
   readonly websocketStatus?: WebSocketStatus | string | null;
 }): TDrop[] {
   return serverDrops.map((drop) => {
-    const serverDrop = { ...drop, wave } as ApiDrop & TDrop;
+    const serverDrop = { ...drop, wave } as ServerDropForDisplay & TDrop;
     const displayDrop = reconcileServerDropForDisplay({
       queryClient,
       serverDrop,
