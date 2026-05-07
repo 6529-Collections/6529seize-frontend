@@ -626,6 +626,73 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("ignores request-start protected intent after current profile switch", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const dropId = "drop-stale-request-profile-intent";
+    const requestProfileUser = profile("profile-1", "request-profile-user");
+    const serverWaveProfiles = [
+      profile("profile-2", "current-profile-user"),
+      profile("profile-3", "server-wave"),
+    ];
+
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: dropId,
+            context_profile_context: {
+              ...contextProfileContext(":joy:"),
+              rating: 99,
+              bookmarked: true,
+            },
+            reactions: [reactionEntry(":joy:", [requestProfileUser])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const rawDrop = serverDrop({
+      id: dropId,
+      context_profile_context: {
+        ...contextProfileContext(":wave:"),
+        rating: 7,
+        bookmarked: false,
+      },
+      reactions: [reactionEntry(":wave:", serverWaveProfiles)],
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: rawDrop,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop).toBe(rawDrop);
+    expect(reconciledDrop.context_profile_context).toMatchObject({
+      rating: 7,
+      bookmarked: false,
+      reaction: ":wave:",
+    });
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", serverWaveProfiles),
+    ]);
+  });
+
   it("uses empty context for cross-profile protected reaction without safe local context", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();

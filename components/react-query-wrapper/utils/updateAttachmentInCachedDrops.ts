@@ -604,11 +604,9 @@ function normalizeCurrentProfileId(
 function selectProtectedReactionIntent({
   currentProfileId,
   dropId,
-  requestProfileId,
 }: {
   readonly currentProfileId: string | null;
   readonly dropId: string;
-  readonly requestProfileId: string | null;
 }): SelectedProtectedReactionIntent {
   const currentProfileIntent = getProtectedReactionIntent(
     dropId,
@@ -621,22 +619,9 @@ function selectProtectedReactionIntent({
     };
   }
 
-  if (requestProfileId !== currentProfileId) {
-    const requestProfileIntent = getProtectedReactionIntent(
-      dropId,
-      requestProfileId
-    );
-    if (requestProfileIntent !== null) {
-      return {
-        protectedIntent: requestProfileIntent,
-        profileId: requestProfileId,
-      };
-    }
-  }
-
   return {
     protectedIntent: null,
-    profileId: requestProfileId,
+    profileId: currentProfileId,
   };
 }
 
@@ -877,7 +862,6 @@ export function reconcileServerDropForDisplay({
     selectProtectedReactionIntent({
       currentProfileId,
       dropId: serverDrop.id,
-      requestProfileId,
     });
 
   recordReactionRealtimeReconciliation({
