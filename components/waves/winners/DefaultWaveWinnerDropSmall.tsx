@@ -12,15 +12,17 @@ import { Time } from "@/helpers/time";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { WaveWinnerIdentity } from "./identity/WaveWinnerIdentity";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
   readonly rank?: number | undefined; // For explicitly setting rank from decision winners
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
-  ({ drop, onDropClick, rank }) => {
+  ({ drop, onDropClick, rank, contentPresentation = "default" }) => {
     // Use provided rank or fall back to drop.rank
     const effectiveRank = rank ?? drop.rank;
 
@@ -159,7 +161,11 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
           />
 
           <div className="tw-ml-10">
-            <DropContentSmall drop={drop} onDropClick={onDropClick} />
+            <DropContentSmall
+              drop={drop}
+              onDropClick={onDropClick}
+              contentPresentation={contentPresentation}
+            />
             <div className="tw-relative tw-mt-2">
               <WaveWinnersSmallOutcome drop={drop} />
             </div>

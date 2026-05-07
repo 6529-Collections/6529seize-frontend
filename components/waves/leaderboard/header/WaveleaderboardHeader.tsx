@@ -28,10 +28,7 @@ import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
 import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
 import {
-  WAVE_LEADERBOARD_CURATION_SORT_ITEMS,
-  WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS,
-  WAVE_LEADERBOARD_APPROVE_SORT_ITEMS,
-  WAVE_LEADERBOARD_SORT_ITEMS,
+  getWaveLeaderboardSortItems,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
 import { resolveWaveLeaderboardHeaderLayout } from "./waveLeaderboardHeaderLayout";
@@ -336,18 +333,12 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const showPriceControls = Boolean(isCurationWave && onPriceRangeChange);
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const sortItems = useMemo(() => {
-    if (isCurationWave) {
-      return isApproveWave
-        ? WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS
-        : WAVE_LEADERBOARD_CURATION_SORT_ITEMS;
-    }
-
-    if (isApproveWave) {
-      return WAVE_LEADERBOARD_APPROVE_SORT_ITEMS;
-    }
-
-    return WAVE_LEADERBOARD_SORT_ITEMS;
-  }, [isApproveWave, isCurationWave]);
+    return getWaveLeaderboardSortItems({
+      isApproveWave,
+      isCurationWave,
+      timeLockMs: wave.wave.time_lock_ms,
+    });
+  }, [isApproveWave, isCurationWave, wave.wave.time_lock_ms]);
   const viewModes: LeaderboardViewMode[] = isMemesWave
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];
@@ -364,7 +355,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     () => new Map(sortItems.map((item) => [item.value, item.label])),
     [sortItems]
   );
-  const activeSortLabel = sortLabelByValue.get(sort) ?? "Current Vote";
+  const activeSortLabel =
+    sortLabelByValue.get(sort) ?? sortItems[0]?.label ?? "Current Vote";
 
   const activeCurationLabel = useMemo(() => {
     if (!showCurationGroupSelect || !curatedByGroupId) {

@@ -20,6 +20,36 @@ let gridProps: any;
 let createDropProps: any[] = [];
 let curationModalProps: any;
 let approvalStatusProps: any;
+let intersectionObserverInstances: Array<{
+  readonly callback: IntersectionObserverCallback;
+  readonly options: IntersectionObserverInit;
+  readonly observe: jest.Mock;
+  readonly disconnect: jest.Mock;
+}> = [];
+const originalIntersectionObserver = (global as any).IntersectionObserver;
+
+const installMockIntersectionObserver = () => {
+  (global as any).IntersectionObserver = class {
+    public readonly observe = jest.fn();
+    public readonly disconnect = jest.fn();
+
+    constructor(
+      public readonly callback: IntersectionObserverCallback,
+      public readonly options: IntersectionObserverInit
+    ) {
+      intersectionObserverInstances.push(this);
+    }
+  };
+};
+
+const resetIntersectionObserver = () => {
+  if (originalIntersectionObserver) {
+    (global as any).IntersectionObserver = originalIntersectionObserver;
+    return;
+  }
+
+  delete (global as any).IntersectionObserver;
+};
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: (...args: any[]) => useWave(...args),
@@ -135,6 +165,29 @@ const wave = {
   wave: { type: ApiWaveType.Rank },
 } as ApiWave;
 
+const makeOpenApproveWave = (): ApiWave =>
+  ({
+    ...wave,
+    voting: { period: { max: Date.now() + 60_000 } },
+    wave: {
+      type: ApiWaveType.Approve,
+      winning_threshold: 10,
+      max_winners: 1,
+      no_of_decisions_done: 0,
+    },
+  }) as ApiWave;
+
+const approvalDecisionPoints = [
+  {
+    decision_time: 1100,
+    winners: [{ place: 1, awards: [], drop: { id: "drop-1" } }],
+  },
+  {
+    decision_time: 1200,
+    winners: [{ place: 1, awards: [], drop: { id: "drop-2" } }],
+  },
+];
+
 const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   render(
     <AuthContext.Provider
@@ -150,8 +203,14 @@ const renderLeaderboard = (leaderboardWave: ApiWave = wave) =>
   );
 
 describe("MyStreamWaveLeaderboard", () => {
+  afterAll(() => {
+    resetIntersectionObserver();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    intersectionObserverInstances = [];
+    resetIntersectionObserver();
     searchParamsString = "";
     dropsProps = null;
     galleryProps = null;
@@ -202,6 +261,7 @@ describe("MyStreamWaveLeaderboard", () => {
     const stickyHeader = screen.getByTestId("header").parentElement;
     expect(stickyHeader).toHaveClass("tw-sticky");
     expect(stickyHeader).toHaveClass("tw-z-30");
+    expect(stickyHeader).toHaveClass("tw-flex-none");
     expect(headerProps.viewMode).toBe("list");
     expect(headerProps.onPriceRangeChange).toBeUndefined();
     expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
@@ -212,6 +272,155 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(
       createDropProps[createDropProps.length - 1]?.isCurationLeaderboard
     ).toBeUndefined();
+  });
+
+  it("keeps approve list controls non-sticky before the status sentinel leaves", () => {
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(makeOpenApproveWave());
+
+    expect(
+      screen.getByTestId("approval-controls-sticky-sentinel")
+    ).toBeInTheDocument();
+    const controls = screen.getByTestId("header").parentElement;
+    expect(controls).not.toHaveClass("tw-sticky");
+    expect(controls).toHaveClass("tw-flex-none");
+  });
+
+  it("toggles approve list controls sticky state when the status sentinel moves", () => {
+    installMockIntersectionObserver();
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(makeOpenApproveWave());
+
+    const sentinel = screen.getByTestId("approval-controls-sticky-sentinel");
+    const controls = screen.getByTestId("header").parentElement;
+    const observer = intersectionObserverInstances[0];
+
+    expect(observer?.options.root).toBe(sentinel.parentElement);
+    expect(observer?.observe).toHaveBeenCalledWith(sentinel);
+    expect(controls).not.toHaveClass("tw-sticky");
+
+    act(() => {
+      observer?.callback(
+        [
+          {
+            isIntersecting: false,
+            boundingClientRect: { top: -2, bottom: -1 } as DOMRectReadOnly,
+            rootBounds: { top: 0 } as DOMRectReadOnly,
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver
+      );
+    });
+
+    expect(controls).toHaveClass("tw-sticky");
+    expect(controls).toHaveClass("tw-z-30");
+    expect(controls).toHaveClass("tw-flex-none");
+
+    act(() => {
+      observer?.callback(
+        [
+          {
+            isIntersecting: true,
+            boundingClientRect: { top: 0, bottom: 1 } as DOMRectReadOnly,
+            rootBounds: { top: 0 } as DOMRectReadOnly,
+          } as IntersectionObserverEntry,
+        ],
+        {} as IntersectionObserver
+      );
+    });
+
+    expect(controls).not.toHaveClass("tw-sticky");
+  });
+
+  it("keeps approve grid controls sticky", () => {
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["grid", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(makeOpenApproveWave());
+
+    expect(
+      screen.queryByTestId("approval-controls-sticky-sentinel")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("header").parentElement).toHaveClass("tw-sticky");
+  });
+
+  it("uses rank for saved projected vote sort when the wave has no time lock", () => {
+    const setSort = jest.fn();
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RATING_PREDICTION,
+      setSort,
+    ]);
+
+    renderLeaderboard({
+      ...wave,
+      wave: { type: ApiWaveType.Rank, time_lock_ms: null },
+    } as ApiWave);
+
+    expect(headerProps.sort).toBe(WaveDropsLeaderboardSort.RANK);
+    expect(dropsProps.sort).toBe(WaveDropsLeaderboardSort.RANK);
+    expect(setSort).not.toHaveBeenCalled();
+
+    act(() => {
+      headerProps.onSortChange(WaveDropsLeaderboardSort.RATING_PREDICTION);
+    });
+
+    expect(setSort).toHaveBeenCalledWith(WaveDropsLeaderboardSort.RANK);
   });
 
   it("uses grid view for memes wave and opens meme modal", async () => {
@@ -644,6 +853,286 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(screen.queryByTestId("create-drop")).not.toBeInTheDocument();
   });
 
+  it("loads full decisions for uncapped approve waves with missing server counts", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: null,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: approvalDecisionPoints,
+      isFetching: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(
+      useWaveDecisions.mock.calls.filter(([args]) => args.enabled === true)
+    ).toHaveLength(1);
+    expect(useWaveDecisions.mock.calls[0][0]).toEqual({
+      waveId: "1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: 2000,
+    });
+    expect(approvalStatusProps.approvedCount).toBe(2);
+    expect(approvalStatusProps.closeStatus).toBeNull();
+  });
+
+  it("counts uncapped approve decision winners without drop data", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: null,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [
+        ...approvalDecisionPoints,
+        {
+          decision_time: 1300,
+          winners: [{ place: 1, awards: [] }],
+        },
+      ] as any,
+      isFetching: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(screen.getByTestId("approval-status")).toBeInTheDocument();
+    expect(approvalStatusProps.approvedCount).toBe(3);
+  });
+
+  it("loads full decisions for ended approve waves with missing server counts", () => {
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() - 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: approvalDecisionPoints.slice(0, 1),
+      isFetching: false,
+      hasLoadedAllPages: true,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: false,
+      refetch: jest.fn(),
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(
+      useWaveDecisions.mock.calls.filter(([args]) => args.enabled === true)
+    ).toHaveLength(1);
+    expect(useWaveDecisions.mock.calls[0][0]).toEqual({
+      waveId: "1",
+      enabled: true,
+      loadAllPages: true,
+      pageSize: 2000,
+    });
+    expect(approvalStatusProps.approvedCount).toBe(1);
+    expect(approvalStatusProps.closeStatus).toBe("ended");
+  });
+
+  it("shows count retry without locking uncapped approve waves when count loading fails", async () => {
+    const user = userEvent.setup();
+    const retryApprovalDecisions = jest.fn();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() + 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: null,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch: retryApprovalDecisions,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(approvalStatusProps.isApprovalStatusError).toBe(false);
+    expect(approvalStatusProps.retryApprovalStatus).toBeNull();
+    expect(approvalStatusProps.isApprovalCountError).toBe(true);
+    expect(approvalStatusProps.retryApprovalCount).toEqual(
+      expect.any(Function)
+    );
+    expect(dropsProps.isVotingClosed).toBe(false);
+    expect(dropsProps.isVotingControlsLocked).toBe(false);
+    expect(headerProps.onCreateDrop).toEqual(expect.any(Function));
+    expect(dropsProps.onCreateDrop).toEqual(expect.any(Function));
+
+    approvalStatusProps.retryApprovalCount();
+
+    expect(retryApprovalDecisions).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByTestId("header"));
+
+    expect(screen.getByTestId("create-drop")).toBeInTheDocument();
+  });
+
+  it("shows count retry while keeping ended approve waves closed when count loading fails", () => {
+    const retryApprovalDecisions = jest.fn();
+    const approveWave = {
+      ...wave,
+      voting: { period: { max: Date.now() - 60_000 } },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 10,
+        max_winners: 2,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as ApiWave;
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isQuorumWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useWaveDecisions.mockReturnValue({
+      decisionPoints: [],
+      isFetching: false,
+      hasLoadedAllPages: false,
+      isLoadingAllPages: false,
+      isLoadingAllPagesError: true,
+      refetch: retryApprovalDecisions,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RANK,
+      jest.fn(),
+    ]);
+
+    renderLeaderboard(approveWave);
+
+    expect(approvalStatusProps.approvedCount).toBeNull();
+    expect(approvalStatusProps.closeStatus).toBe("ended");
+    expect(approvalStatusProps.isApprovalStatusError).toBe(false);
+    expect(approvalStatusProps.retryApprovalStatus).toBeNull();
+    expect(approvalStatusProps.isApprovalCountError).toBe(true);
+    expect(approvalStatusProps.retryApprovalCount).toEqual(
+      expect.any(Function)
+    );
+    expect(dropsProps.isVotingClosed).toBe(true);
+    expect(dropsProps.isVotingControlsLocked).toBe(true);
+    expect(headerProps.onCreateDrop).toBeUndefined();
+    expect(dropsProps.onCreateDrop).toBeUndefined();
+
+    approvalStatusProps.retryApprovalCount();
+
+    expect(retryApprovalDecisions).toHaveBeenCalledTimes(1);
+  });
+
   it("blocks create drop and passes retry when approval status loading fails", async () => {
     const user = userEvent.setup();
     const retryApprovalDecisions = jest.fn();
@@ -691,6 +1180,8 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(approvalStatusProps.retryApprovalStatus).toEqual(
       expect.any(Function)
     );
+    expect(approvalStatusProps.isApprovalCountError).toBe(false);
+    expect(approvalStatusProps.retryApprovalCount).toBeNull();
     expect(dropsProps.isVotingClosed).toBe(false);
     expect(dropsProps.isVotingControlsLocked).toBe(true);
     expect(headerProps.onCreateDrop).toBeUndefined();

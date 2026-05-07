@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { DefaultWaveWinnersDrop } from "@/components/waves/winners/drops/DefaultWaveWinnerDrop";
 
 const mockMobileMenuOpenClick = jest.fn();
+const mockWaveWinnersDropContent = jest.fn(() => <div data-testid="content" />);
 
 jest.mock("@/helpers/waves/drop.helpers", () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: "ext-drop" })),
@@ -32,7 +33,7 @@ jest.mock(
   () => () => <div data-testid="outcome" />
 );
 jest.mock("@/components/waves/winners/drops/WaveWinnersDropContent", () => ({
-  WaveWinnersDropContent: () => <div data-testid="content" />,
+  WaveWinnersDropContent: (props: any) => mockWaveWinnersDropContent(props),
 }));
 jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
@@ -89,6 +90,7 @@ describe("DefaultWaveWinnerDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockMobileMenuOpenClick.mockClear();
+    mockWaveWinnersDropContent.mockClear();
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
       isActive: false,
@@ -101,6 +103,22 @@ describe("DefaultWaveWinnerDrop", () => {
     render(<DefaultWaveWinnersDrop winner={winner} onDropClick={jest.fn()} />);
 
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+  });
+
+  it("forwards content presentation to drop content", () => {
+    render(
+      <DefaultWaveWinnersDrop
+        winner={winner}
+        onDropClick={jest.fn()}
+        contentPresentation="quorumCompact"
+      />
+    );
+
+    expect(mockWaveWinnersDropContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
   });
 
   it("keeps native tap behavior for touch long-press handlers", () => {

@@ -21,6 +21,18 @@ export type ApprovalWaveCloseStatus = "max_reached" | "ended" | null;
 const isValidCount = (value: number | null | undefined): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0;
 
+const getWinnerDropId = (
+  winner: ApiWaveDecision["winners"][number]
+): string | null => {
+  const drop = (winner as { readonly drop?: unknown }).drop;
+  if (typeof drop !== "object" || drop === null) {
+    return null;
+  }
+
+  const id = (drop as { readonly id?: unknown }).id;
+  return typeof id === "string" && id.length > 0 ? id : null;
+};
+
 export const isApproveWave = (wave: ApiWave | null | undefined): boolean =>
   wave?.wave.type === ApiWaveType.Approve;
 
@@ -121,7 +133,7 @@ export const getApprovedDropsCount = ({
 
   (decisionPoints ?? []).forEach((decisionPoint) => {
     decisionPoint.winners.forEach((winner) => {
-      const dropId = winner.drop.id;
+      const dropId = getWinnerDropId(winner);
       if (dropId) {
         approvedDropIds.add(dropId);
       } else {

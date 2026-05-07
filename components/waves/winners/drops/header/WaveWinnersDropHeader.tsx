@@ -33,7 +33,6 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
         {isApprovalWave ? (
           <ApprovalStatusBadge
             approvedAt={winner.drop.winning_context?.decision_time ?? null}
-            order={winner.place}
           />
         ) : (
           <WinnerDropBadge

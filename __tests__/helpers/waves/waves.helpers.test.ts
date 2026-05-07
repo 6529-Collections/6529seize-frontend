@@ -38,8 +38,26 @@ describe("waves.helpers", () => {
   });
 
   describe("convertWaveToUpdateWave", () => {
-    it("maps fields correctly", () => {
-      const wave: any = {
+    const makeWave = (
+      options: {
+        readonly votingPeriod?: unknown;
+        readonly participationPeriod?: unknown;
+      } = {}
+    ): any => {
+      const resolvedVotingPeriod = Object.prototype.hasOwnProperty.call(
+        options,
+        "votingPeriod"
+      )
+        ? options.votingPeriod
+        : { min: 1, max: 10 };
+      const resolvedParticipationPeriod = Object.prototype.hasOwnProperty.call(
+        options,
+        "participationPeriod"
+      )
+        ? options.participationPeriod
+        : { min: 2, max: 20 };
+
+      return {
         name: "wave1",
         picture: "pic.png",
         voting: {
@@ -48,7 +66,7 @@ describe("waves.helpers", () => {
           credit_category: "cat",
           creditor: { id: "cred1" },
           signature_required: false,
-          period: 10,
+          period: resolvedVotingPeriod,
           forbid_negative_votes: true,
         },
         visibility: { scope: { group: { id: "vis" } } },
@@ -59,7 +77,7 @@ describe("waves.helpers", () => {
           required_media: null,
           required_metadata: [],
           signature_required: true,
-          period: 5,
+          period: resolvedParticipationPeriod,
           terms: "terms",
         },
         wave: {
@@ -73,6 +91,10 @@ describe("waves.helpers", () => {
           decisions_strategy: "strategy",
         },
       };
+    };
+
+    it("maps fields correctly", () => {
+      const wave = makeWave();
 
       const result = convertWaveToUpdateWave(wave);
       expect(result).toEqual({
@@ -84,7 +106,7 @@ describe("waves.helpers", () => {
           credit_category: "cat",
           creditor_id: "cred1",
           signature_required: false,
-          period: 10,
+          period: { min: 1, max: 10 },
           forbid_negative_votes: true,
         },
         visibility: { scope: { group_id: "vis" } },
@@ -95,7 +117,7 @@ describe("waves.helpers", () => {
           required_media: null,
           required_metadata: [],
           signature_required: true,
-          period: 5,
+          period: { min: 2, max: 20 },
           terms: "terms",
         },
         wave: {
@@ -109,6 +131,32 @@ describe("waves.helpers", () => {
           decisions_strategy: "strategy",
         },
       });
+    });
+
+    it.each([
+      ["voting", null],
+      ["voting", undefined],
+      ["participation", null],
+      ["participation", undefined],
+    ])("omits %s period when it is %s", (periodType, periodValue) => {
+      const wave =
+        periodType === "voting"
+          ? makeWave({ votingPeriod: periodValue })
+          : makeWave({ participationPeriod: periodValue });
+
+      const result = convertWaveToUpdateWave(wave);
+
+      if (periodType === "voting") {
+        expect(result.voting).not.toHaveProperty("period");
+        expect(result.participation).toHaveProperty("period", {
+          min: 2,
+          max: 20,
+        });
+        return;
+      }
+
+      expect(result.voting).toHaveProperty("period", { min: 1, max: 10 });
+      expect(result.participation).not.toHaveProperty("period");
     });
   });
 
