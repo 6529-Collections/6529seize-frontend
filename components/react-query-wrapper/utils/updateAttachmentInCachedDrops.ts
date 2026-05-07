@@ -883,6 +883,13 @@ export function reconcileServerDropForDisplay({
       return serverDrop as ApiDrop;
     }
 
+    if (!isSameProfileResponse) {
+      return {
+        ...serverDrop,
+        reactions: [],
+      };
+    }
+
     const latestCachedDrops = findDropsInCachedDrops(
       queryClient,
       serverDrop.id
