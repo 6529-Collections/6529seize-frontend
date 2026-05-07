@@ -693,6 +693,174 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
+  it("uses fresh request-profile server context after current profile switch", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const dropId = "drop-fresh-request-profile-context";
+    const requestProfileUser = profile("profile-1", "request-profile-user");
+
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: dropId,
+            context_profile_context: {
+              ...contextProfileContext(":joy:"),
+              rating: 99,
+              min_rating: 1,
+              max_rating: 100,
+              boosted: false,
+              bookmarked: true,
+              curatable: false,
+              curated: false,
+            },
+            reactions: [reactionEntry(":joy:", [requestProfileUser])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: requestProfileUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const rawDrop = serverDrop({
+      id: dropId,
+      context_profile_context: {
+        ...contextProfileContext(":joy:"),
+        rating: 7,
+        min_rating: 2,
+        max_rating: 10,
+        boosted: true,
+        bookmarked: false,
+        curatable: true,
+        curated: true,
+      },
+      reactions: [
+        reactionEntry(":joy:", [
+          requestProfileUser,
+          profile("profile-3", "server-joy"),
+        ]),
+        reactionEntry(":wave:", [profile("profile-4", "server-wave")]),
+      ],
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: rawDrop,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop).toBe(rawDrop);
+    expect(reconciledDrop.context_profile_context).toMatchObject({
+      rating: 7,
+      min_rating: 2,
+      max_rating: 10,
+      boosted: true,
+      bookmarked: false,
+      curatable: true,
+      curated: true,
+      reaction: ":joy:",
+    });
+  });
+
+  it("keeps fresh request-profile server context while repairing stale server reactions", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const dropId = "drop-fresh-request-context-stale-reactions";
+    const requestProfileUser = profile("profile-1", "request-profile-user");
+
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: dropId,
+            context_profile_context: {
+              ...contextProfileContext(":joy:"),
+              rating: 99,
+              min_rating: 1,
+              max_rating: 100,
+              boosted: false,
+              bookmarked: true,
+              curatable: false,
+              curated: false,
+            },
+            reactions: [reactionEntry(":joy:", [requestProfileUser])],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: requestProfileUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: serverDrop({
+        id: dropId,
+        context_profile_context: {
+          ...contextProfileContext(":joy:"),
+          rating: 7,
+          min_rating: 2,
+          max_rating: 10,
+          boosted: true,
+          bookmarked: false,
+          curatable: true,
+          curated: true,
+        },
+        reactions: [
+          reactionEntry(":wave:", [
+            requestProfileUser,
+            profile("profile-3", "server-wave"),
+          ]),
+          reactionEntry(":joy:", [profile("profile-4", "server-joy")]),
+        ],
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context).toMatchObject({
+      rating: 7,
+      min_rating: 2,
+      max_rating: 10,
+      boosted: true,
+      bookmarked: false,
+      curatable: true,
+      curated: true,
+      reaction: ":joy:",
+    });
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-3", "server-wave")]),
+      reactionEntry(":joy:", [
+        profile("profile-4", "server-joy"),
+        requestProfileUser,
+      ]),
+    ]);
+  });
+
   it("uses empty context for cross-profile protected reaction without safe local context", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();

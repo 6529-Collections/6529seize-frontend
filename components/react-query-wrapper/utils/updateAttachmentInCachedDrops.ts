@@ -60,6 +60,7 @@ type RollbackRejectedReactionParams = {
 type SelectedProtectedReactionIntent = {
   readonly protectedIntent: ProtectedReactionIntent | null;
   readonly profileId: string | null;
+  readonly source: "current" | "request" | "none";
 };
 
 type SelectedProtectedLocalDrop = {
@@ -626,6 +627,7 @@ function selectProtectedReactionIntent({
     return {
       protectedIntent: currentProfileIntent,
       profileId: currentProfileId,
+      source: "current",
     };
   }
 
@@ -639,6 +641,7 @@ function selectProtectedReactionIntent({
       return {
         protectedIntent: requestProfileIntent,
         profileId: requestProfileId,
+        source: "request",
       };
     }
   }
@@ -646,6 +649,7 @@ function selectProtectedReactionIntent({
   return {
     protectedIntent: null,
     profileId: currentProfileId,
+    source: "none",
   };
 }
 
@@ -920,13 +924,16 @@ export function reconcileServerDropForDisplay({
     requestProfileId
   );
   const serverReactions = getServerDropReactions(serverDrop);
-  const { profileId: reconciliationProfileId, protectedIntent } =
-    selectProtectedReactionIntent({
-      allowRequestProfileFallback: serverReactions !== undefined,
-      currentProfileId,
-      dropId: serverDrop.id,
-      requestProfileId,
-    });
+  const {
+    profileId: reconciliationProfileId,
+    protectedIntent,
+    source: protectedIntentSource,
+  } = selectProtectedReactionIntent({
+    allowRequestProfileFallback: serverReactions !== undefined,
+    currentProfileId,
+    dropId: serverDrop.id,
+    requestProfileId,
+  });
 
   recordReactionRealtimeReconciliation({
     drop: {
@@ -970,9 +977,16 @@ export function reconcileServerDropForDisplay({
     };
   }
 
+  const serverContextMatchesProtectedIntent =
+    serverReaction === protectedIntent.reaction;
+  const allowServerContextProfileContext =
+    isSameProfileResponse ||
+    (protectedIntentSource === "request" &&
+      serverContextMatchesProtectedIntent);
+
   if (
-    isSameProfileResponse &&
-    serverReaction === protectedIntent.reaction &&
+    allowServerContextProfileContext &&
+    serverContextMatchesProtectedIntent &&
     serverReactions !== undefined &&
     serverReactionsMatchProtectedIntent(serverReactions, protectedIntent)
   ) {
@@ -992,7 +1006,7 @@ export function reconcileServerDropForDisplay({
     selectedLocalDrop.drop,
     protectedIntent,
     {
-      allowServerContextProfileContext: isSameProfileResponse,
+      allowServerContextProfileContext,
       allowLocalContextProfileContext:
         isSameProfileResponse || selectedLocalDrop.matchesProtectedIntent,
     }
