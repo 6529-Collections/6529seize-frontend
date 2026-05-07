@@ -21,6 +21,16 @@ const invalidateNotificationsMock = jest.fn();
 const mockUseAuth = jest.fn();
 const mockApprovalStatus = jest.fn();
 
+let documentVisibilityState: DocumentVisibilityState = "visible";
+
+const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
+  documentVisibilityState = state;
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => documentVisibilityState,
+  });
+};
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
   useSearchParams: () => searchParamsMock,
@@ -115,8 +125,26 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ address: "0xAAA" }),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: () => "test-jwt",
+}));
+
+jest.mock("jwt-decode", () => ({
+  jwtDecode: (token: string) => {
+    if (token !== "test-jwt") {
+      throw new Error(`Unexpected JWT decode for ${token}`);
+    }
+
+    return { sub: "0xAAA", role: null, exp: 4102444800 };
+  },
 }));
 
 const wave = {
@@ -126,18 +154,12 @@ const wave = {
   wave: { type: ApiWaveType.Rank, winning_threshold: null },
 } as any;
 const mockOnDropClick = jest.fn();
-const setDocumentVisibility = (visibilityState: DocumentVisibilityState) => {
-  Object.defineProperty(document, "visibilityState", {
-    configurable: true,
-    value: visibilityState,
-  });
-};
 
 describe("MyStreamWaveChat", () => {
   let store: any;
 
   beforeEach(() => {
-    setDocumentVisibility("visible");
+    setDocumentVisibilityState("visible");
     capturedPropsHolder.current = {};
     capturedCreatorPropsHolder.current = {};
     capturedMemesButtonPropsHolder.current = {};
@@ -160,6 +182,7 @@ describe("MyStreamWaveChat", () => {
     });
     mockUseAuth.mockReturnValue({
       connectedProfile: { handle: "tester" },
+      activeProfileProxy: null,
     });
     (
       commonApiPostWithoutBodyAndResponse as jest.MockedFunction<
@@ -319,13 +342,16 @@ describe("MyStreamWaveChat", () => {
       expect(mockRemoveWaveDeliveredNotifications).toHaveBeenCalledWith("10");
       expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledWith({
         endpoint: "notifications/wave/10/read",
+        headers: { Authorization: "Bearer test-jwt" },
       });
       expect(invalidateNotificationsMock).toHaveBeenCalled();
     });
   });
 
-  it("does not call the read endpoint on unmount when the tab is hidden", async () => {
-    setDocumentVisibility("hidden");
+  it("does not mark notifications read on hidden unmount", async () => {
+    setDocumentVisibilityState("hidden");
+    searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("serialNo=5");
 
     const { unmount } = renderWithProvider(
       <MyStreamWaveChat
@@ -338,16 +364,19 @@ describe("MyStreamWaveChat", () => {
 
     await act(async () => {
       unmount();
+      await Promise.resolve();
     });
 
+    expect(mockSetUnreadDividerSerialNo).toHaveBeenCalledWith(null);
+    expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
     expect(invalidateNotificationsMock).not.toHaveBeenCalled();
-    expect(mockRemoveWaveDeliveredNotifications).not.toHaveBeenCalled();
   });
 
   it("skips notification cleanup on unmount for anonymous viewers", async () => {
     mockUseAuth.mockReturnValue({
       connectedProfile: null,
+      activeProfileProxy: null,
     });
 
     const { unmount } = renderWithProvider(

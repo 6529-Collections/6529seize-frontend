@@ -35,6 +35,13 @@ jest.mock("@/hooks/useConnectedAccountsUnreadNotifications", () => ({
   useConnectedAccountsUnreadNotifications: jest.fn(() => ({})),
 }));
 
+jest.mock("@/hooks/useUnreadNotifications", () => ({
+  useUnreadNotifications: jest.fn(() => ({
+    notifications: { unread_count: 0 },
+    haveUnreadNotifications: false,
+  })),
+}));
+
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
   getConnectedWalletAccounts: jest.fn(() => []),
@@ -54,20 +61,40 @@ const AddressProbe: React.FC = () => {
   return <div data-testid="active-address">{address ?? "undefined"}</div>;
 };
 
+const UnreadProbe: React.FC = () => {
+  const { connectedAccountUnreadNotifications } = useSeizeConnectContext();
+  return (
+    <div data-testid="unread-map">
+      {JSON.stringify(connectedAccountUnreadNotifications)}
+    </div>
+  );
+};
+
 const buildStoredAccount = (
-  address: string
+  address: string,
+  profileHandle: string | null = null,
+  jwt: string | null = null
 ): authUtils.ConnectedWalletAccount => ({
   address,
   refreshToken: "dummy-refresh-token",
   role: null,
-  jwt: null,
+  jwt,
   profileId: null,
-  profileHandle: null,
+  profileHandle,
 });
 
 describe("SeizeConnectContext switch sync guard", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    require("@/hooks/useConnectedAccountsUnreadNotifications").useConnectedAccountsUnreadNotifications.mockReturnValue(
+      {}
+    );
+    require("@/hooks/useUnreadNotifications").useUnreadNotifications.mockReturnValue(
+      {
+        notifications: { unread_count: 0 },
+        haveUnreadNotifications: false,
+      }
+    );
   });
 
   it("prefers stored active account while provider still reports previous known account", async () => {
@@ -183,6 +210,128 @@ describe("SeizeConnectContext switch sync guard", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("active-address")).toHaveTextContent(addressA);
+    });
+  });
+
+  it("polls inactive accounts only and merges the active unread count", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    const mockGetWalletAddress =
+      authUtils.getWalletAddress as jest.MockedFunction<
+        typeof authUtils.getWalletAddress
+      >;
+    const mockGetConnectedWalletAccounts =
+      authUtils.getConnectedWalletAccounts as jest.MockedFunction<
+        typeof authUtils.getConnectedWalletAccounts
+      >;
+    const mockUseConnectedAccountsUnreadNotifications =
+      require("@/hooks/useConnectedAccountsUnreadNotifications")
+        .useConnectedAccountsUnreadNotifications as jest.Mock;
+    const mockUseUnreadNotifications = require("@/hooks/useUnreadNotifications")
+      .useUnreadNotifications as jest.Mock;
+
+    const activeAccount = buildStoredAccount(addressA, "alice");
+    const inactiveAccount = buildStoredAccount(addressB, "bob");
+
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: addressA,
+      isConnected: true,
+      status: "connected",
+    });
+    mockGetWalletAddress.mockReturnValue(addressA);
+    mockGetConnectedWalletAccounts.mockReturnValue([
+      activeAccount,
+      inactiveAccount,
+    ]);
+    mockUseConnectedAccountsUnreadNotifications.mockReturnValue({
+      [addressB]: 4,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      notifications: { unread_count: 7 },
+      haveUnreadNotifications: true,
+    });
+
+    render(
+      <SeizeConnectProvider>
+        <UnreadProbe />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockUseConnectedAccountsUnreadNotifications).toHaveBeenCalledWith([
+        inactiveAccount,
+      ]);
+      expect(mockUseUnreadNotifications).toHaveBeenCalledWith("alice");
+    });
+
+    const unreadMap = JSON.parse(
+      screen.getByTestId("unread-map").textContent ?? "{}"
+    );
+
+    expect(unreadMap).toEqual({
+      [addressA]: 7,
+      [addressB]: 4,
+    });
+  });
+
+  it("keeps the active JWT unread count when the active account has no profile handle", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    const mockGetWalletAddress =
+      authUtils.getWalletAddress as jest.MockedFunction<
+        typeof authUtils.getWalletAddress
+      >;
+    const mockGetConnectedWalletAccounts =
+      authUtils.getConnectedWalletAccounts as jest.MockedFunction<
+        typeof authUtils.getConnectedWalletAccounts
+      >;
+    const mockUseConnectedAccountsUnreadNotifications =
+      require("@/hooks/useConnectedAccountsUnreadNotifications")
+        .useConnectedAccountsUnreadNotifications as jest.Mock;
+    const mockUseUnreadNotifications = require("@/hooks/useUnreadNotifications")
+      .useUnreadNotifications as jest.Mock;
+
+    const activeAccount = buildStoredAccount(addressA, null, "active-jwt");
+    const inactiveAccount = buildStoredAccount(addressB, "bob", "inactive-jwt");
+
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: addressA,
+      isConnected: true,
+      status: "connected",
+    });
+    mockGetWalletAddress.mockReturnValue(addressA);
+    mockGetConnectedWalletAccounts.mockReturnValue([
+      activeAccount,
+      inactiveAccount,
+    ]);
+    mockUseConnectedAccountsUnreadNotifications.mockReturnValue({
+      [addressA]: 9,
+      [addressB]: 4,
+    });
+    mockUseUnreadNotifications.mockReturnValue({
+      notifications: { unread_count: 0 },
+      haveUnreadNotifications: false,
+    });
+
+    render(
+      <SeizeConnectProvider>
+        <UnreadProbe />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockUseConnectedAccountsUnreadNotifications).toHaveBeenCalledWith([
+        activeAccount,
+        inactiveAccount,
+      ]);
+      expect(mockUseUnreadNotifications).toHaveBeenCalledWith(null);
+    });
+
+    const unreadMap = JSON.parse(
+      screen.getByTestId("unread-map").textContent ?? "{}"
+    );
+
+    expect(unreadMap).toEqual({
+      [addressA]: 9,
+      [addressB]: 4,
     });
   });
 });

@@ -60,6 +60,7 @@ export enum QueryKey {
   IDENTITY_FOLLOWING_ACTIONS = "IDENTITY_FOLLOWING_ACTIONS",
   IDENTITY_FOLLOWERS = "IDENTITY_FOLLOWERS",
   IDENTITY_NOTIFICATIONS = "IDENTITY_NOTIFICATIONS",
+  CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS = "CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS",
   IDENTITY_SEARCH = "IDENTITY_SEARCH",
   IDENTITY_FAVOURITE_WAVES = "IDENTITY_FAVOURITE_WAVES",
   WALLET_TDH_HISTORY = "WALLET_TDH_HISTORY",
@@ -980,8 +981,11 @@ const createReactQueryContextValue = (
   };
 
   const invalidateNotifications = () => {
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
     });
   };
 
