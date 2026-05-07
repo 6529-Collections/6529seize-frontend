@@ -113,6 +113,33 @@ describe("approve-wave.helpers", () => {
         })
       ).toBe(0);
     });
+
+    it("counts complete decisions with duplicate ids and missing drop data", () => {
+      expect(
+        getApprovedDropsCount({
+          areDecisionPointsComplete: true,
+          decisionPoints: [
+            {
+              decision_time: 1000,
+              winners: [
+                { place: 1, awards: [], drop: { id: "drop-1" } },
+                { place: 2, awards: [], drop: { id: "drop-1" } },
+                { place: 3, awards: [] },
+              ],
+            },
+            {
+              decision_time: 2000,
+              winners: [
+                { place: 1, awards: [], drop: { id: "drop-2" } },
+                { place: 2, awards: [], drop: { id: "" } },
+                { place: 3, awards: [], drop: {} },
+              ],
+            },
+          ] as any,
+          wave,
+        })
+      ).toBe(5);
+    });
   });
 
   describe("getApprovalDropStatus", () => {

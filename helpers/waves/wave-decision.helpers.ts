@@ -35,10 +35,47 @@ const getWinnerPlace = (winner: unknown): number => {
   return typeof place === "number" ? place : Number.POSITIVE_INFINITY;
 };
 
+const isValidApiWaveDecisionWinner = (
+  winner: unknown
+): winner is ApiWaveDecisionWinner => {
+  if (!isRecord(winner) || Array.isArray(winner)) {
+    return false;
+  }
+
+  const place = winner["place"];
+  if (typeof place !== "number" || !Number.isFinite(place)) {
+    return false;
+  }
+
+  const awards = winner["awards"];
+  if (!Array.isArray(awards)) {
+    return false;
+  }
+
+  const drop = winner["drop"];
+  if (!isRecord(drop) || Array.isArray(drop)) {
+    return false;
+  }
+
+  const id = drop["id"];
+  return typeof id === "string" && id.length > 0;
+};
+
 export const getRenderableWaveDecisionWinners = (
   winners: readonly ApiWaveDecisionWinner[]
 ): RenderableWaveDecisionWinner[] =>
   winners.filter(hasRenderableWaveDecisionWinner);
+
+export const getApprovedWaveDecisionWinners = (
+  decisionPoints: readonly ApiWaveDecision[]
+): ApiWaveDecisionWinner[] =>
+  [...decisionPoints].reverse().flatMap((point) => {
+    if (!Array.isArray(point.winners)) {
+      return [];
+    }
+
+    return point.winners.filter(isValidApiWaveDecisionWinner);
+  });
 
 export const prepareWaveDecisionPoint = (
   decisionPoint: ApiWaveDecision,

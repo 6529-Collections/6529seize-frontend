@@ -70,7 +70,6 @@ function LeaderboardResultBadge({
     return isOfficiallyApprovedDrop(drop) ? (
       <ApprovalStatusBadge
         approvedAt={drop.winning_context?.decision_time ?? null}
-        order={drop.winning_context?.place ?? drop.rank}
       />
     ) : null;
   }

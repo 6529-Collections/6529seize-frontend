@@ -6,12 +6,14 @@ import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
 import { format } from "date-fns";
 import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 interface WaveWinnersTimelineProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly decisionPoints: ApiWaveDecision[];
   readonly wave: ApiWave;
   readonly isLoading: boolean;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
@@ -19,6 +21,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   decisionPoints,
   wave,
   isLoading,
+  contentPresentation,
 }) => {
   if (isLoading) {
     return <WaveWinnersTimelineLoading />;
@@ -81,6 +84,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                       onDropClick={onDropClick}
                       wave={wave}
                       isLoading={false}
+                      contentPresentation={contentPresentation}
                     />
                   </div>
                 </div>
