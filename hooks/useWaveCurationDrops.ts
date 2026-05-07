@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getReactionProfileId } from "@/components/waves/drops/reaction-utils";
 import {
   reconcileDropsWithoutWaveForDisplay,
   updateAttachmentInCachedDrops,
@@ -47,7 +48,7 @@ export function useWaveCurationDrops({
   const waveId = wave?.id ?? null;
   const { connectedProfile } = useAuth();
   const queryClient = useQueryClient();
-  const activeProfileId = connectedProfile?.id ?? null;
+  const activeProfileId = getReactionProfileId(connectedProfile);
   const activeProfileIdRef = useRef<string | null>(activeProfileId);
   useLayoutEffect(() => {
     activeProfileIdRef.current = activeProfileId;

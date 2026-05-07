@@ -14,6 +14,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import { getReactionProfileId } from "@/components/waves/drops/reaction-utils";
 import useCapacitor from "./useCapacitor";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -43,7 +44,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
   const { connectedProfile } = useAuth();
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
-  const activeProfileId = connectedProfile?.id ?? null;
+  const activeProfileId = getReactionProfileId(connectedProfile);
   const activeProfileIdRef = useRef<string | null>(activeProfileId);
   useLayoutEffect(() => {
     activeProfileIdRef.current = activeProfileId;
