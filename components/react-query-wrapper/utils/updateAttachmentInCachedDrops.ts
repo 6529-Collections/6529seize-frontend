@@ -821,12 +821,19 @@ function removeStaleRequestProfileFromCachedReactions({
     requestProfileId
   );
 
-  if (
-    requestProfileIntent === null ||
-    (requestProfileIntent.reaction !== null &&
-      requestProfileIntent.reaction === serverContextReaction)
-  ) {
+  if (requestProfileIntent === null) {
     return reactions;
+  }
+
+  if (
+    requestProfileIntent.reaction !== null &&
+    requestProfileIntent.reaction === serverContextReaction
+  ) {
+    return mergeProtectedReactionProfiles(
+      reactions,
+      reactions,
+      requestProfileIntent
+    );
   }
 
   return removeProfileIdFromAllReactions(

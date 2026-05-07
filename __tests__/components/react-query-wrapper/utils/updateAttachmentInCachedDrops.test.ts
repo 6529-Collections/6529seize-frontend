@@ -962,8 +962,66 @@ describe("cached drop websocket updates", () => {
 
     expect(reconciledDrop.context_profile_context?.reaction).toBe(":joy:");
     expect(reconciledDrop.reactions).toEqual([
-      reactionEntry(":joy:", [requestProfileUser, otherJoyUser]),
+      reactionEntry(":joy:", [otherJoyUser, requestProfileUser]),
       reactionEntry(":wave:", [waveUser]),
+    ]);
+  });
+
+  it("moves confirmed request-profile reactions for cross-profile drops that omit reactions", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const dropId = "drop-cross-profile-missing-reactions-confirmed-move";
+    const requestProfileUser = profile("profile-1", "request-profile-user");
+    const otherJoyUser = profile("profile-3", "other-joy-user");
+    const waveUser = profile("profile-4", "wave-user");
+    const fireUser = profile("profile-5", "fire-user");
+
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: dropId,
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [
+              reactionEntry(":wave:", [requestProfileUser, waveUser]),
+              reactionEntry(":joy:", [otherJoyUser]),
+              reactionEntry(":fire:", [fireUser]),
+            ],
+          },
+        ],
+      ],
+    });
+
+    beginReactionMutation({
+      dropId,
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "profile-1",
+      profile: requestProfileUser as any,
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: serverDrop({
+        id: dropId,
+        context_profile_context: contextProfileContext(":joy:"),
+        reactions: undefined,
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":joy:");
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":wave:", [waveUser]),
+      reactionEntry(":joy:", [otherJoyUser, requestProfileUser]),
+      reactionEntry(":fire:", [fireUser]),
     ]);
   });
 
