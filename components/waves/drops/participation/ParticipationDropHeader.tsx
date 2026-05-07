@@ -38,7 +38,6 @@ export default function ParticipationDropHeader({
     statusBadge = (
       <ApprovalStatusBadge
         approvedAt={drop.winning_context?.decision_time ?? null}
-        order={drop.winning_context?.place ?? rank}
       />
     );
   } else if (!isApproveDrop && hasWinnerRank) {

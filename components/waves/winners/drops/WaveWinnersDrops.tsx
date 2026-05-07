@@ -6,6 +6,7 @@ import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWi
 import { publicEnv } from "@/config/env";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 
 interface WaveWinnersDropsProps {
   readonly wave: ApiWave;
@@ -14,6 +15,7 @@ interface WaveWinnersDropsProps {
   readonly isLoading?: boolean | undefined;
   readonly isApprovalWave?: boolean | undefined;
   readonly emptyMessage?: string | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
@@ -23,6 +25,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   isLoading = false,
   isApprovalWave = false,
   emptyMessage,
+  contentPresentation = "default",
 }) => {
   const renderableWinners = getRenderableWaveDecisionWinners(winners);
   const invalidWinnerCount = winners.length - renderableWinners.length;
@@ -81,6 +84,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
           wave={wave}
           onDropClick={onDropClick}
           isApprovalWave={isApprovalWave}
+          contentPresentation={contentPresentation}
         />
       ))}
     </div>
