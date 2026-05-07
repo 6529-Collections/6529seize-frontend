@@ -214,11 +214,10 @@ function replaceDrop(value: unknown, drop: ApiDrop): unknown {
   return replaceDropInObjectChildren(value, drop);
 }
 
-function removeProfileFromAllReactions(
+function removeProfileIdFromAllReactions(
   reactions: ApiDropReaction[],
-  params: RollbackRejectedReactionParams
+  profileId: string | null
 ): ApiDropReaction[] {
-  const profileId = params.profile?.id ?? null;
   if (!profileId) {
     return reactions;
   }
@@ -245,6 +244,13 @@ function removeProfileFromAllReactions(
   }
 
   return changed ? nextReactions : reactions;
+}
+
+function removeProfileFromAllReactions(
+  reactions: ApiDropReaction[],
+  params: RollbackRejectedReactionParams
+): ApiDropReaction[] {
+  return removeProfileIdFromAllReactions(reactions, params.profile?.id ?? null);
 }
 
 function addProfileToPreviousReaction(
@@ -799,6 +805,26 @@ function preserveProtectedReactionFields(
   };
 }
 
+function removeStaleRequestProfileFromCachedReactions({
+  dropId,
+  reactions,
+  requestProfileId,
+}: {
+  readonly dropId: string;
+  readonly reactions: ApiDropReaction[];
+  readonly requestProfileId: string | null;
+}): ApiDropReaction[] {
+  const requestProfileIntent = getProtectedReactionIntent(
+    dropId,
+    requestProfileId
+  );
+
+  return removeProfileIdFromAllReactions(
+    reactions,
+    requestProfileIntent?.profileId ?? null
+  );
+}
+
 const CACHED_DROP_QUERY_KEYS = [
   QueryKey.DROPS,
   QueryKey.DROPS_LEADERBOARD,
@@ -883,13 +909,6 @@ export function reconcileServerDropForDisplay({
       return serverDrop as ApiDrop;
     }
 
-    if (!isSameProfileResponse) {
-      return {
-        ...serverDrop,
-        reactions: [],
-      };
-    }
-
     const latestCachedDrops = findDropsInCachedDrops(
       queryClient,
       serverDrop.id
@@ -899,10 +918,17 @@ export function reconcileServerDropForDisplay({
       latestCachedDrops,
       latestWaveDrop,
     });
+    const fallbackReactions = localDrop?.reactions ?? [];
 
     return {
       ...serverDrop,
-      reactions: localDrop?.reactions ?? [],
+      reactions: isSameProfileResponse
+        ? fallbackReactions
+        : removeStaleRequestProfileFromCachedReactions({
+            dropId: serverDrop.id,
+            reactions: fallbackReactions,
+            requestProfileId,
+          }),
     };
   }
 

@@ -873,11 +873,16 @@ describe("cached drop websocket updates", () => {
     expect(uncachedDisplayDrop.reactions).toEqual([]);
   });
 
-  it("drops cached reactions for stale cross-profile drops that omit reactions", () => {
-    jest.spyOn(Date, "now").mockReturnValue(1_000);
+  it("preserves cached reactions for cross-profile drops that omit reactions without stale intent", () => {
     const queryClient = createQueryClient();
-    const dropId = "drop-cross-profile-missing-reactions";
-    const staleProfileUser = profile("profile-1", "stale-profile-user");
+    const dropId = "drop-cross-profile-missing-reactions-no-intent";
+    const cachedReactions = [
+      reactionEntry(":joy:", [
+        profile("profile-1", "request-profile-user"),
+        profile("profile-3", "cached-joy"),
+      ]),
+      reactionEntry(":fire:", [profile("profile-4", "cached-fire")]),
+    ];
 
     queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
       pages: [
@@ -885,7 +890,46 @@ describe("cached drop websocket updates", () => {
           {
             id: dropId,
             context_profile_context: contextProfileContext(":joy:"),
-            reactions: [reactionEntry(":joy:", [staleProfileUser])],
+            reactions: cachedReactions,
+          },
+        ],
+      ],
+    });
+
+    const reconciledDrop = reconcileServerDropForDisplay({
+      requestProfileId: "profile-1",
+      currentProfileId: "profile-2",
+      queryClient,
+      serverDrop: serverDrop({
+        id: dropId,
+        context_profile_context: contextProfileContext(":server:"),
+        reactions: undefined,
+      }),
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+
+    expect(reconciledDrop.context_profile_context?.reaction).toBe(":server:");
+    expect(reconciledDrop.reactions).toEqual(cachedReactions);
+  });
+
+  it("removes only stale request-profile reactions for cross-profile drops that omit reactions", () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    const queryClient = createQueryClient();
+    const dropId = "drop-cross-profile-missing-reactions";
+    const staleProfileUser = profile("profile-1", "stale-profile-user");
+    const otherJoyUser = profile("profile-3", "other-joy-user");
+    const waveUser = profile("profile-4", "wave-user");
+
+    queryClient.setQueryData([QueryKey.DROPS, { waveId: "wave-1" }], {
+      pages: [
+        [
+          {
+            id: dropId,
+            context_profile_context: contextProfileContext(":joy:"),
+            reactions: [
+              reactionEntry(":joy:", [staleProfileUser, otherJoyUser]),
+              reactionEntry(":wave:", [waveUser]),
+            ],
           },
         ],
       ],
@@ -917,7 +961,10 @@ describe("cached drop websocket updates", () => {
     });
 
     expect(reconciledDrop.context_profile_context?.reaction).toBe(":server:");
-    expect(reconciledDrop.reactions).toEqual([]);
+    expect(reconciledDrop.reactions).toEqual([
+      reactionEntry(":joy:", [otherJoyUser]),
+      reactionEntry(":wave:", [waveUser]),
+    ]);
   });
 
   it("falls back to the removed server profile when protected local data has no profile", () => {
