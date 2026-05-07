@@ -21,6 +21,7 @@ import {
   cloneReactionEntries,
   findReactionIndex,
   getReactionErrorMessage,
+  getReactionProfileId,
   removeUserFromReactions,
   toProfileMin,
 } from "@/components/waves/drops/reaction-utils";
@@ -411,6 +412,7 @@ export function useDropReaction(
       const isRemoving = reactionCode === previousReaction;
       const intendedReaction = isRemoving ? null : reactionCode;
       const rollbackProfile = toProfileMin(connectedProfile);
+      const profileId = getReactionProfileId(connectedProfile);
       const mutation = beginReactionMutation({
         dropId,
         waveId,
@@ -419,7 +421,7 @@ export function useDropReaction(
         previousReaction,
         intendedReaction,
         optimisticReaction: intendedReaction,
-        profileId: connectedProfile?.id ?? rollbackProfile?.id ?? null,
+        profileId,
         profile: rollbackProfile,
         websocketStatus,
       });

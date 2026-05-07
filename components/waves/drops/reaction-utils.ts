@@ -9,6 +9,18 @@ type ReactionEntry = {
   [key: string]: unknown;
 };
 
+type ReactionProfileIdentity =
+  | {
+      readonly id?: string | null | undefined;
+      readonly primary_wallet?: string | null | undefined;
+    }
+  | null
+  | undefined;
+
+export const getReactionProfileId = (
+  profile: ReactionProfileIdentity
+): string | null => profile?.id ?? profile?.primary_wallet ?? null;
+
 export const cloneReactionEntries = (
   reactions: readonly ApiDropReaction[] | null | undefined
 ): ReactionEntry[] => {
@@ -84,8 +96,13 @@ export const toProfileMin = (
     return null;
   }
 
+  const profileId = getReactionProfileId(profile);
+  if (profileId === null) {
+    return null;
+  }
+
   return {
-    id: profile.id ?? profile.primary_wallet,
+    id: profileId,
     handle: profile.handle ?? null,
     pfp: profile.pfp ?? null,
     banner1_color: getBannerColorValue(profile.banner1),
@@ -243,8 +260,13 @@ const getEmptyStructuredReactionStatusText = (
 };
 
 const getEmptyStructuredReactionFallbackMessage = (
-  error: StructuredReactionError
+  error: StructuredReactionError,
+  status: number | null
 ): string | null => {
+  if (status === null && error.response === undefined) {
+    return null;
+  }
+
   const message = error.message;
   if (typeof message !== "string") {
     return null;
@@ -278,9 +300,8 @@ export const getReactionErrorMessage = (
       }
     }
 
-    const statusMessage = getEmptyStructuredReactionStatusMessage(
-      getStructuredReactionStatus(structuredError)
-    );
+    const status = getStructuredReactionStatus(structuredError);
+    const statusMessage = getEmptyStructuredReactionStatusMessage(status);
     if (statusMessage) {
       return statusMessage;
     }
@@ -290,8 +311,10 @@ export const getReactionErrorMessage = (
       return statusText;
     }
 
-    const fallbackMessage =
-      getEmptyStructuredReactionFallbackMessage(structuredError);
+    const fallbackMessage = getEmptyStructuredReactionFallbackMessage(
+      structuredError,
+      status
+    );
     if (fallbackMessage) {
       return fallbackMessage;
     }

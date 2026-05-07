@@ -1,4 +1,5 @@
 import { act, render } from "@testing-library/react";
+import { AuthContext } from "@/components/auth/Auth";
 import { MyStreamProvider, useMyStream } from "@/contexts/wave/MyStreamContext";
 
 const mockSetActiveWave = jest.fn();
@@ -86,6 +87,10 @@ jest.mock("@/contexts/wave/hooks/useEnhancedWavesListCore", () => ({
 const useWavesListMock = require("@/hooks/useWavesList").default as jest.Mock;
 const useDmWavesListMock = require("@/hooks/useDmWavesList")
   .default as jest.Mock;
+const { useWaveRealtimeUpdater: useWaveRealtimeUpdaterMock } =
+  require("@/contexts/wave/hooks/useWaveRealtimeUpdater") as {
+    useWaveRealtimeUpdater: jest.Mock;
+  };
 
 const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   Object.defineProperty(document, "visibilityState", {
@@ -186,5 +191,27 @@ describe("MyStreamProvider resume sync", () => {
 
     expect(mainRefetch).not.toHaveBeenCalled();
     expect(dmRefetch).not.toHaveBeenCalled();
+  });
+
+  it("passes wallet fallback as the active profile id to realtime updates", () => {
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: null, primary_wallet: "wallet-1" },
+          } as any
+        }
+      >
+        <MyStreamProvider>
+          <div />
+        </MyStreamProvider>
+      </AuthContext.Provider>
+    );
+
+    expect(useWaveRealtimeUpdaterMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeProfileId: "wallet-1",
+      })
+    );
   });
 });

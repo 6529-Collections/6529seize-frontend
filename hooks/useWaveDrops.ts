@@ -8,6 +8,7 @@ import {
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getReactionProfileId } from "@/components/waves/drops/reaction-utils";
 import {
   reconcileServerDropsForDisplay,
   updateAttachmentInCachedDrops,
@@ -70,7 +71,7 @@ export function useWaveDrops({
   enabled = true,
 }: UseWaveDropsProps) {
   const { connectedProfile } = useAuth();
-  const activeProfileId = connectedProfile?.id ?? null;
+  const activeProfileId = getReactionProfileId(connectedProfile);
   const activeProfileIdRef = useRef<string | null>(activeProfileId);
   useLayoutEffect(() => {
     activeProfileIdRef.current = activeProfileId;

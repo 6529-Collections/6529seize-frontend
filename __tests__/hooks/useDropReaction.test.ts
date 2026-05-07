@@ -197,6 +197,50 @@ describe("useDropReaction", () => {
     );
   });
 
+  it("uses the primary wallet as the mutation profile id when identity id is missing", async () => {
+    mockUseAuth.mockReturnValue({
+      setToast: setToastMock,
+      connectedProfile: {
+        id: null,
+        handle: "user",
+        pfp: null,
+        banner1: null,
+        banner2: null,
+        cic: 0,
+        rep: 0,
+        tdh: 0,
+        tdh_rate: 0,
+        xtdh: 0,
+        xtdh_rate: 0,
+        level: 0,
+        primary_wallet: "0xuser",
+        active_main_stage_submission_ids: [],
+        winner_main_stage_drop_ids: [],
+        is_wave_creator: false,
+        artist_of_prevote_cards: [],
+        profile_wave_id: null,
+      },
+    });
+    (commonApi.commonApiPost as jest.Mock).mockResolvedValueOnce({});
+
+    const { result } = renderHook(() =>
+      useDropReaction(mockDrop, { source: "quick-react" })
+    );
+
+    await act(async () => {
+      await result.current.react(":smile:");
+    });
+
+    expect(dropReactionMonitoring.beginReactionMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        profileId: "0xuser",
+        profile: expect.objectContaining({
+          id: "0xuser",
+        }),
+      })
+    );
+  });
+
   it("does not roll back cached drop queries for superseded quick react failures", async () => {
     (
       dropReactionMonitoring.isLatestReactionMutation as jest.Mock

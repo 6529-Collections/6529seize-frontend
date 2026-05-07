@@ -1,4 +1,8 @@
-import { getReactionErrorMessage } from "@/components/waves/drops/reaction-utils";
+import {
+  getReactionErrorMessage,
+  getReactionProfileId,
+  toProfileMin,
+} from "@/components/waves/drops/reaction-utils";
 
 const createStructuredReactionError = ({
   body,
@@ -22,6 +26,36 @@ const createStructuredReactionError = ({
       ...(statusText !== undefined ? { statusText } : {}),
     },
   });
+
+describe("reaction profile identity helpers", () => {
+  it("falls back to the primary wallet when the profile id is missing", () => {
+    const profile = {
+      id: null,
+      handle: "alice",
+      pfp: null,
+      banner1: null,
+      banner2: null,
+      cic: 0,
+      rep: 0,
+      tdh: 0,
+      tdh_rate: 0,
+      xtdh: 0,
+      xtdh_rate: 0,
+      level: 0,
+      primary_wallet: "wallet-1",
+      active_main_stage_submission_ids: [],
+      winner_main_stage_drop_ids: [],
+      is_wave_creator: false,
+      artist_of_prevote_cards: [],
+      profile_wave_id: null,
+      classification: "Pseudonym",
+      sub_classification: null,
+    } as any;
+
+    expect(getReactionProfileId(profile)).toBe("wallet-1");
+    expect(toProfileMin(profile)?.id).toBe("wallet-1");
+  });
+});
 
 describe("getReactionErrorMessage", () => {
   it("surfaces the error field from structured API errors", () => {

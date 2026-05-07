@@ -31,6 +31,7 @@ import {
   cloneReactionEntries,
   findReactionIndex,
   getReactionErrorMessage,
+  getReactionProfileId,
   removeUserFromReactions,
   toProfileMin,
 } from "./reaction-utils";
@@ -278,7 +279,7 @@ function WaveDropReaction({
             }
 
             const reactions = cloneReactionEntries(draft.reactions);
-            const userId = connectedProfile?.id ?? null;
+            const userId = getReactionProfileId(connectedProfile);
             const reactionsWithoutUser = removeUserFromReactions(
               reactions,
               userId
@@ -345,6 +346,7 @@ function WaveDropReaction({
     const previousReaction = drop.context_profile_context?.reaction ?? null;
     const intendedReaction = selected ? null : reaction.reaction;
     const rollbackProfile = toProfileMin(connectedProfile);
+    const profileId = getReactionProfileId(connectedProfile);
     const mutation = beginReactionMutation({
       dropId: drop.id,
       waveId,
@@ -353,7 +355,7 @@ function WaveDropReaction({
       previousReaction,
       intendedReaction,
       optimisticReaction: intendedReaction,
-      profileId: connectedProfile?.id ?? rollbackProfile?.id ?? null,
+      profileId,
       profile: rollbackProfile,
       websocketStatus,
     });

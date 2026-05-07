@@ -1,5 +1,38 @@
 import { renderHook, act } from "@testing-library/react";
 import { useWaveDataFetching } from "@/contexts/wave/hooks/useWaveDataFetching";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+
+const mockQueryClient = {
+  getQueriesData: jest.fn(),
+  setQueriesData: jest.fn(),
+};
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => mockQueryClient,
+}));
+
+let mockConnectedProfile: {
+  id?: string | null;
+  primary_wallet?: string;
+} | null = { id: "profile-1" };
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    connectedProfile: mockConnectedProfile,
+  }),
+}));
+
+const mockReconcileServerDropsForDisplay = jest.fn(
+  ({ serverDrops }: { serverDrops: any[] }) => serverDrops
+);
+
+jest.mock(
+  "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops",
+  () => ({
+    reconcileServerDropsForDisplay: (params: any) =>
+      mockReconcileServerDropsForDisplay(params),
+  })
+);
 
 const getLoadingState = jest.fn(() => ({
   state: { isLoading: false, promise: null },
@@ -43,6 +76,13 @@ jest.mock("@/contexts/wave/utils/wave-messages-utils", () => ({
 }));
 
 describe("useWaveDataFetching", () => {
+  beforeEach(() => {
+    mockConnectedProfile = { id: "profile-1" };
+    mockReconcileServerDropsForDisplay.mockImplementation(
+      ({ serverDrops }: { serverDrops: any[] }) => serverDrops
+    );
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -82,6 +122,54 @@ describe("useWaveDataFetching", () => {
     expect(updateData).toHaveBeenLastCalledWith({
       key: "wave1",
       drops: [{ id: "d1" }],
+    });
+  });
+
+  it("reconciles initial fetches before formatting wave messages", async () => {
+    mockConnectedProfile = { id: null, primary_wallet: "wallet-1" };
+    const serverDrop = {
+      id: "d1",
+      serial_no: 1,
+      context_profile_context: { reaction: ":wave:" },
+      reactions: [],
+    };
+    const displayDrop = {
+      ...serverDrop,
+      context_profile_context: { reaction: ":joy:" },
+    };
+    fetchWaveMessages.mockResolvedValue([serverDrop]);
+    mockReconcileServerDropsForDisplay.mockReturnValueOnce([displayDrop]);
+    formatWaveMessages.mockImplementation((waveId: string, drops: any[]) => ({
+      key: waveId,
+      drops,
+    }));
+    createEmptyWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const { result, updateData } = setup({ wave1: { drops: [] } });
+
+    await act(async () => {
+      result.current.registerWave("wave1");
+      await Promise.resolve();
+    });
+
+    expect(mockReconcileServerDropsForDisplay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestProfileId: "wallet-1",
+        currentProfileId: "wallet-1",
+        queryClient: mockQueryClient,
+        serverDrops: [serverDrop],
+        websocketStatus: WebSocketStatus.CONNECTED,
+      })
+    );
+    expect(formatWaveMessages).toHaveBeenLastCalledWith(
+      "wave1",
+      [displayDrop],
+      {
+        isLoading: false,
+      }
+    );
+    expect(updateData).toHaveBeenLastCalledWith({
+      key: "wave1",
+      drops: [displayDrop],
     });
   });
 
@@ -134,6 +222,64 @@ describe("useWaveDataFetching", () => {
     });
   });
 
+  it("syncNewestMessages reconciles before updating when no callback is passed", async () => {
+    mockConnectedProfile = { id: null, primary_wallet: "wallet-1" };
+    const latestWaveDrop = {
+      id: "d",
+      serial_no: 10,
+      type: "FULL",
+      stableKey: "d",
+      stableHash: "d",
+      context_profile_context: { reaction: ":joy:" },
+      reactions: [{ reaction: ":joy:", profiles: [{ id: "wallet-1" }] }],
+    };
+    const serverDrop = {
+      id: "d",
+      serial_no: 11,
+      context_profile_context: { reaction: ":wave:" },
+      reactions: [],
+    };
+    const displayDrop = {
+      ...serverDrop,
+      context_profile_context: { reaction: ":joy:" },
+    };
+    fetchNewestWaveMessages.mockResolvedValue({
+      drops: [serverDrop],
+      highestSerialNo: 11,
+    });
+    mockReconcileServerDropsForDisplay.mockReturnValueOnce([displayDrop]);
+    formatWaveMessages.mockImplementation((waveId: string, drops: any[]) => ({
+      key: waveId,
+      drops,
+    }));
+    const { result, updateData } = setup({
+      wave1: { drops: [latestWaveDrop] },
+    });
+
+    const res = await result.current.syncNewestMessages(
+      "wave1",
+      10,
+      new AbortController().signal
+    );
+
+    expect(mockReconcileServerDropsForDisplay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestProfileId: "wallet-1",
+        currentProfileId: "wallet-1",
+        queryClient: mockQueryClient,
+        serverDrops: [serverDrop],
+        latestWaveDrops: [latestWaveDrop],
+        websocketStatus: WebSocketStatus.CONNECTED,
+      })
+    );
+    expect(formatWaveMessages).toHaveBeenCalledWith("wave1", [displayDrop]);
+    expect(updateData).toHaveBeenCalledWith({
+      key: "wave1",
+      drops: [displayDrop],
+    });
+    expect(res).toEqual({ drops: [displayDrop], highestSerialNo: 11 });
+  });
+
   it("syncNewestMessages reconciles drops before updating data", async () => {
     const serverDrop = {
       id: "d",
@@ -164,6 +310,7 @@ describe("useWaveDataFetching", () => {
     );
 
     expect(reconcileDrops).toHaveBeenCalledWith([serverDrop]);
+    expect(mockReconcileServerDropsForDisplay).not.toHaveBeenCalled();
     expect(formatWaveMessages).toHaveBeenCalledWith("wave1", [displayDrop]);
     expect(updateData).toHaveBeenCalledWith({
       key: "wave1",

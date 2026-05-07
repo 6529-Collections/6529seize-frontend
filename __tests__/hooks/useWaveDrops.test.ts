@@ -13,11 +13,13 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/services/api/common-api");
-let mockConnectedProfileId: string | null = "profile-1";
+let mockConnectedProfile: {
+  id?: string | null;
+  primary_wallet?: string;
+} | null = { id: "profile-1" };
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile:
-      mockConnectedProfileId === null ? null : { id: mockConnectedProfileId },
+    connectedProfile: mockConnectedProfile,
   }),
 }));
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
@@ -78,7 +80,7 @@ describe("useWaveDrops", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockConnectedProfileId = "profile-1";
+    mockConnectedProfile = { id: "profile-1" };
     __resetDropReactionMonitoringForTests();
     queryClient.getQueriesData.mockReturnValue([]);
     commonApiFetchMock.mockResolvedValue([]);
@@ -234,6 +236,70 @@ describe("useWaveDrops", () => {
     ]);
   });
 
+  it("keeps protected reactions when the profile uses wallet fallback identity", async () => {
+    jest.spyOn(Date, "now").mockReturnValue(1_000);
+    mockConnectedProfile = { id: null, primary_wallet: "wallet-1" };
+    const currentUser = profile("wallet-1", "current-user");
+    queryClient.getQueriesData.mockImplementation(
+      ({ queryKey }: { queryKey: readonly unknown[] }) =>
+        queryKey[0] === QueryKey.DROPS
+          ? [
+              [
+                [QueryKey.DROPS, { waveId: "wave-1" }],
+                {
+                  pages: [
+                    [
+                      {
+                        id: "drop-wallet-fallback",
+                        context_profile_context: contextProfileContext(":joy:"),
+                        reactions: [reactionEntry(":joy:", [currentUser])],
+                      },
+                    ],
+                  ],
+                },
+              ],
+            ]
+          : []
+    );
+
+    beginReactionMutation({
+      dropId: "drop-wallet-fallback",
+      waveId: "wave-1",
+      source: "picker",
+      action: "replace",
+      previousReaction: ":wave:",
+      intendedReaction: ":joy:",
+      optimisticReaction: ":joy:",
+      profileId: "wallet-1",
+      websocketStatus: WebSocketStatus.CONNECTED,
+    });
+    commonApiFetchMock.mockResolvedValue([
+      {
+        id: "drop-wallet-fallback",
+        wave: { id: "wave-1" },
+        context_profile_context: contextProfileContext(":wave:"),
+        reactions: [
+          reactionEntry(":wave:", [profile("profile-2", "server-wave")]),
+        ],
+      },
+    ]);
+
+    renderHook(() =>
+      useWaveDrops({
+        waveId: "wave-1",
+      })
+    );
+
+    const options = useInfiniteQueryMock.mock.calls[0][0];
+    const drops = await options.queryFn({ pageParam: null });
+
+    expect(drops[0].context_profile_context.reaction).toBe(":joy:");
+    expect(drops[0].reactions).toEqual([
+      reactionEntry(":wave:", [profile("profile-2", "server-wave")]),
+      reactionEntry(":joy:", [currentUser]),
+    ]);
+  });
+
   it("reconciles in-flight query responses with the profile that started the request", async () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const currentUser = profile("profile-1", "current-user");
@@ -282,7 +348,7 @@ describe("useWaveDrops", () => {
     const options = useInfiniteQueryMock.mock.calls[0][0];
     const dropsPromise = options.queryFn({ pageParam: null });
 
-    mockConnectedProfileId = "profile-2";
+    mockConnectedProfile = { id: "profile-2" };
     rerender();
     response.resolve([
       {
@@ -336,7 +402,7 @@ describe("useWaveDrops", () => {
     const options = useInfiniteQueryMock.mock.calls[0][0];
     const dropsPromise = options.queryFn({ pageParam: null });
 
-    mockConnectedProfileId = "profile-2";
+    mockConnectedProfile = { id: "profile-2" };
     rerender();
 
     dateNowSpy.mockReturnValue(1_500);
