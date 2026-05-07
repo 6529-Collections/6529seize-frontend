@@ -808,10 +808,12 @@ function preserveProtectedReactionFields(
 function removeStaleRequestProfileFromCachedReactions({
   dropId,
   reactions,
+  serverContextReaction,
   requestProfileId,
 }: {
   readonly dropId: string;
   readonly reactions: ApiDropReaction[];
+  readonly serverContextReaction: string | null;
   readonly requestProfileId: string | null;
 }): ApiDropReaction[] {
   const requestProfileIntent = getProtectedReactionIntent(
@@ -819,9 +821,17 @@ function removeStaleRequestProfileFromCachedReactions({
     requestProfileId
   );
 
+  if (
+    requestProfileIntent === null ||
+    (requestProfileIntent.reaction !== null &&
+      requestProfileIntent.reaction === serverContextReaction)
+  ) {
+    return reactions;
+  }
+
   return removeProfileIdFromAllReactions(
     reactions,
-    requestProfileIntent?.profileId ?? null
+    requestProfileIntent.profileId
   );
 }
 
@@ -927,6 +937,7 @@ export function reconcileServerDropForDisplay({
         : removeStaleRequestProfileFromCachedReactions({
             dropId: serverDrop.id,
             reactions: fallbackReactions,
+            serverContextReaction: serverReaction,
             requestProfileId,
           }),
     };
