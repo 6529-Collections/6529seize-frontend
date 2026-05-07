@@ -608,11 +608,15 @@ function normalizeCurrentProfileId(
 }
 
 function selectProtectedReactionIntent({
+  allowRequestProfileFallback,
   currentProfileId,
   dropId,
+  requestProfileId,
 }: {
+  readonly allowRequestProfileFallback: boolean;
   readonly currentProfileId: string | null;
   readonly dropId: string;
+  readonly requestProfileId: string | null;
 }): SelectedProtectedReactionIntent {
   const currentProfileIntent = getProtectedReactionIntent(
     dropId,
@@ -623,6 +627,20 @@ function selectProtectedReactionIntent({
       protectedIntent: currentProfileIntent,
       profileId: currentProfileId,
     };
+  }
+
+  if (allowRequestProfileFallback && requestProfileId !== currentProfileId) {
+    const requestProfileIntent = getProtectedReactionIntent(
+      dropId,
+      requestProfileId
+    );
+
+    if (requestProfileIntent !== null) {
+      return {
+        protectedIntent: requestProfileIntent,
+        profileId: requestProfileId,
+      };
+    }
   }
 
   return {
@@ -901,10 +919,13 @@ export function reconcileServerDropForDisplay({
     { currentProfileId: currentProfileIdInput },
     requestProfileId
   );
+  const serverReactions = getServerDropReactions(serverDrop);
   const { profileId: reconciliationProfileId, protectedIntent } =
     selectProtectedReactionIntent({
+      allowRequestProfileFallback: serverReactions !== undefined,
       currentProfileId,
       dropId: serverDrop.id,
+      requestProfileId,
     });
 
   recordReactionRealtimeReconciliation({
@@ -918,7 +939,6 @@ export function reconcileServerDropForDisplay({
     protectedIntent,
   });
 
-  const serverReactions = getServerDropReactions(serverDrop);
   const serverReaction = serverDrop.context_profile_context?.reaction ?? null;
   const isSameProfileResponse = requestProfileId === currentProfileId;
   if (protectedIntent === null) {

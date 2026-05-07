@@ -626,7 +626,7 @@ describe("cached drop websocket updates", () => {
     ]);
   });
 
-  it("ignores request-start protected intent after current profile switch", () => {
+  it("falls back to request-start protected intent after current profile switch", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000);
     const queryClient = createQueryClient();
     const dropId = "drop-stale-request-profile-intent";
@@ -682,14 +682,14 @@ describe("cached drop websocket updates", () => {
       websocketStatus: WebSocketStatus.CONNECTED,
     });
 
-    expect(reconciledDrop).toBe(rawDrop);
     expect(reconciledDrop.context_profile_context).toMatchObject({
-      rating: 7,
-      bookmarked: false,
-      reaction: ":wave:",
+      rating: 99,
+      bookmarked: true,
+      reaction: ":joy:",
     });
     expect(reconciledDrop.reactions).toEqual([
       reactionEntry(":wave:", serverWaveProfiles),
+      reactionEntry(":joy:", [requestProfileUser]),
     ]);
   });
 
