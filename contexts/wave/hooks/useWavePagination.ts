@@ -8,6 +8,7 @@ import {
   fetchLightWaveMessages,
   fetchWaveMessages,
   fetchAroundSerialNoWaveMessages,
+  type OnSerialJumpFailure,
 } from "../utils/wave-messages-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
@@ -30,6 +31,7 @@ interface NextPageLightProps {
   readonly waveId: string;
   readonly type: DropSize.LIGHT;
   readonly targetSerialNo: number;
+  readonly onSerialScrollFailure?: OnSerialJumpFailure | undefined;
 }
 
 // Tracks the state for fetching messages around a specific serial number
@@ -271,15 +273,29 @@ export function useWavePagination({
       const controller = createController(props.waveId);
 
       // Create promise for the request
-      const rawPromise =
-        props.type === DropSize.FULL
-          ? fetchWaveMessages(props.waveId, oldestSerialNo, controller.signal)
-          : fetchLightWaveMessages(
-              props.waveId,
-              oldestSerialNo,
-              props.targetSerialNo,
-              controller.signal
-            );
+      let rawPromise: Promise<(ApiDrop | ApiDropId)[] | null>;
+      if (props.type === DropSize.FULL) {
+        rawPromise = fetchWaveMessages(
+          props.waveId,
+          oldestSerialNo,
+          controller.signal
+        );
+      } else if (props.onSerialScrollFailure) {
+        rawPromise = fetchLightWaveMessages(
+          props.waveId,
+          oldestSerialNo,
+          props.targetSerialNo,
+          controller.signal,
+          props.onSerialScrollFailure
+        );
+      } else {
+        rawPromise = fetchLightWaveMessages(
+          props.waveId,
+          oldestSerialNo,
+          props.targetSerialNo,
+          controller.signal
+        );
+      }
 
       const handledPromise = rawPromise
         .then((drops) => updateWithPaginatedData(props.waveId, drops))

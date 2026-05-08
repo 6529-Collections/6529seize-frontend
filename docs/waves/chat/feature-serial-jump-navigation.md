@@ -61,8 +61,9 @@ as one-time setup values and removes them from the URL.
 - `serialNo` values that cannot be parsed as integers are ignored.
 - Very old targets can require additional history fetches.
 - If a jump stalls, the loading overlay timeout clears and the thread stays
-  usable.
-- If a target cannot be resolved, chat stays at the current position.
+  usable and shows a short error toast.
+- If a target cannot be resolved, chat stays at the current position and shows
+  a short error toast.
 - `drop` overlay navigation and `serialNo` jump navigation are separate
   mechanisms; when both are present, `drop` handling takes precedence.
 
@@ -71,6 +72,9 @@ as one-time setup values and removes them from the URL.
 - Retry the same jump action (search result, sidebar item, or link click).
 - If history loading is slow, wait for loading to settle, then retry.
 - If URL/query state looks stale, reload the thread and retry.
+- Failed jumps log a structured debug reason such as `target_not_found`,
+  `history_window_exhausted`, `fetch_failed`, `fetch_unavailable`,
+  `reveal_timeout`, `dom_timeout`, or `operation_timeout`.
 
 ## Limitations / Notes
 

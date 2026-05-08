@@ -11,6 +11,62 @@ import {
 } from "@/services/api/common-api";
 import type { WaveMessagesUpdate } from "../hooks/types";
 
+export type SerialJumpFailureReason =
+  | "target_not_found"
+  | "history_window_exhausted"
+  | "fetch_failed"
+  | "fetch_unavailable"
+  | "reveal_timeout"
+  | "dom_timeout"
+  | "operation_timeout";
+
+export interface SerialJumpFailure {
+  readonly reason: SerialJumpFailureReason;
+  readonly waveId: string;
+  readonly targetSerialNo: number;
+  readonly details?: Record<string, unknown> | undefined;
+}
+
+export type OnSerialJumpFailure = (failure: SerialJumpFailure) => void;
+
+type DropIdsLookupFailureReason =
+  | "target_not_found"
+  | "history_window_exhausted"
+  | "fetch_failed";
+
+class DropIdsSerialLookupError extends Error {
+  readonly reason: DropIdsLookupFailureReason;
+  readonly details: Record<string, unknown>;
+
+  constructor(
+    reason: DropIdsLookupFailureReason,
+    message: string,
+    details: Record<string, unknown>
+  ) {
+    super(message);
+    this.name = "DropIdsSerialLookupError";
+    this.reason = reason;
+    this.details = details;
+  }
+}
+
+const isAbortError = (error: unknown): boolean =>
+  (error instanceof DOMException && error.name === "AbortError") ||
+  (error instanceof Error && error.name === "AbortError");
+
+const getErrorDetails = (error: unknown): Record<string, unknown> => {
+  if (error instanceof Error) {
+    return {
+      errorName: error.name,
+      errorMessage: error.message,
+    };
+  }
+
+  return {
+    errorMessage: String(error),
+  };
+};
+
 /**
  * Fetches wave messages (drops) for a specific wave
  * @param waveId The ID of the wave to fetch messages for
@@ -119,13 +175,15 @@ export async function fetchAroundSerialNoWaveMessages(
  * @param oldestSerialNo Unused with drop-ids paging (kept for interface compatibility)
  * @param targetSerialNo The serial number to scroll to
  * @param signal Optional AbortSignal for cancellation
+ * @param onFailure Optional callback for serial-jump lookup failure detail
  * @returns Array of drop ids and full drops around the target, or null if the request fails
  */
 export async function fetchLightWaveMessages(
   waveId: string,
   oldestSerialNo: number,
   targetSerialNo: number,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onFailure?: OnSerialJumpFailure
 ): Promise<(ApiDropId | ApiDrop)[] | null> {
   void oldestSerialNo;
   const params: DropIdsApiParams = {
@@ -161,8 +219,24 @@ export async function fetchLightWaveMessages(
     return combined;
   } catch (error) {
     // Check if this is an abort error
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (isAbortError(error)) {
       throw error; // Re-throw abort errors to be handled by the caller
+    }
+
+    if (error instanceof DropIdsSerialLookupError) {
+      onFailure?.({
+        reason: error.reason,
+        waveId,
+        targetSerialNo,
+        details: error.details,
+      });
+    } else {
+      onFailure?.({
+        reason: "fetch_failed",
+        waveId,
+        targetSerialNo,
+        details: getErrorDetails(error),
+      });
     }
 
     console.error(
@@ -459,20 +533,39 @@ async function findDropIdsBySerialNoWithPagination(
         currentMaxSerialForNextCall.toString();
     }
 
-    const currentBatch = await commonApiFetchWithRetry<ApiDropId[]>({
-      endpoint: `drop-ids`,
-      params: paramsForCurrentRequest,
-      signal,
-      retryOptions: {
-        maxRetries: 3,
-        initialDelayMs: 1000,
-        backoffFactor: 2,
-        jitter: 0.1,
-      },
-    });
+    let currentBatch: ApiDropId[];
+    try {
+      currentBatch = await commonApiFetchWithRetry<ApiDropId[]>({
+        endpoint: `drop-ids`,
+        params: paramsForCurrentRequest,
+        signal,
+        retryOptions: {
+          maxRetries: 3,
+          initialDelayMs: 1000,
+          backoffFactor: 2,
+          jitter: 0.1,
+        },
+      });
+    } catch (error) {
+      if (isAbortError(error)) {
+        throw error;
+      }
+
+      throw new DropIdsSerialLookupError(
+        "fetch_failed",
+        `Failed to fetch drop ids for target serial number ${targetSerialNo}.`,
+        {
+          requestsMade,
+          maxRequests: MAX_REQUESTS,
+          itemsPerRequest,
+          maxSerialNo: currentMaxSerialForNextCall,
+          ...getErrorDetails(error),
+        }
+      );
+    }
 
     if (signal?.aborted) {
-      throw new Error("Request aborted by signal.");
+      throw new DOMException("Request aborted by signal.", "AbortError");
     }
 
     if (!currentBatch || currentBatch.length === 0) {
@@ -480,7 +573,13 @@ async function findDropIdsBySerialNoWithPagination(
         // Only throw if target hasn't been found in a previous batch that was processed before an empty one
         const maxSerialLabel = currentMaxSerialForNextCall ?? "newest";
         const message = `Target serial number ${targetSerialNo} not found. No (more) items match criteria with wave_id=${apiParams.wave_id} and max_serial_no=${maxSerialLabel}.`;
-        throw new Error(message);
+        throw new DropIdsSerialLookupError("target_not_found", message, {
+          requestsMade,
+          maxRequests: MAX_REQUESTS,
+          itemsChecked: allFetchedDropsMap.size,
+          itemsPerRequest,
+          maxSerialNo: currentMaxSerialForNextCall,
+        });
       }
       break; // Target was found, and now we got an empty batch, so we are done.
     }
@@ -538,12 +637,21 @@ async function findDropIdsBySerialNoWithPagination(
   }
 
   if (!targetFound) {
-    throw new Error(
+    const hitRequestLimit = requestsMade >= MAX_REQUESTS;
+    throw new DropIdsSerialLookupError(
+      hitRequestLimit ? "history_window_exhausted" : "target_not_found",
       `Target serial number ${targetSerialNo} not found for wave_id=${
         apiParams.wave_id
       } after ${requestsMade} requests (checked up to ${
         requestsMade * itemsPerRequest
-      } items).`
+      } items).`,
+      {
+        requestsMade,
+        maxRequests: MAX_REQUESTS,
+        itemsChecked: requestsMade * itemsPerRequest,
+        itemsPerRequest,
+        maxSerialNo: currentMaxSerialForNextCall,
+      }
     );
   }
 

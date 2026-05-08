@@ -25,6 +25,10 @@ import {
   TweetPreviewModeProvider,
   type TweetPreviewMode,
 } from "@/components/tweets/TweetPreviewModeContext";
+import type {
+  SerialJumpFailure,
+  SerialJumpFailureReason,
+} from "@/contexts/wave/utils/wave-messages-utils";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
@@ -32,6 +36,23 @@ import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
 
 const EMPTY_DROPS: Drop[] = [];
+const SERIAL_SCROLL_FIND_FAILURE_REASONS: ReadonlySet<SerialJumpFailureReason> =
+  new Set<SerialJumpFailureReason>([
+    "target_not_found",
+    "history_window_exhausted",
+    "reveal_timeout",
+  ]);
+const SERIAL_SCROLL_FIND_FAILURE_MESSAGE =
+  "Could not find that drop in history.";
+const SERIAL_SCROLL_JUMP_FAILURE_MESSAGE =
+  "Could not jump to that drop. Please try again.";
+
+const getSerialScrollFailureToastMessage = (
+  reason: SerialJumpFailureReason
+): string =>
+  SERIAL_SCROLL_FIND_FAILURE_REASONS.has(reason)
+    ? SERIAL_SCROLL_FIND_FAILURE_MESSAGE
+    : SERIAL_SCROLL_JUMP_FAILURE_MESSAGE;
 
 interface WaveDropsAllProps {
   readonly waveId: string;
@@ -72,7 +93,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 }) => {
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, setToast } = useAuth();
   const { isAppleMobile } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -117,6 +138,16 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     drops: dropsForClipboard,
   });
 
+  const handleSerialScrollFailure = useCallback(
+    (failure: SerialJumpFailure) => {
+      setToast({
+        message: getSerialScrollFailureToastMessage(failure.reason),
+        type: "error",
+      });
+    },
+    [setToast]
+  );
+
   const initializedWaveRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -156,6 +187,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     scrollContainerRef,
     shouldPinToBottom,
     scrollToVisualBottom,
+    onSerialScrollFailure: handleSerialScrollFailure,
   });
 
   const autoCollapseSerials = useMemo(() => {

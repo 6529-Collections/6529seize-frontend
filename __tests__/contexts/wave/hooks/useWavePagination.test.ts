@@ -1,14 +1,14 @@
-import { renderHook, act } from '@testing-library/react';
-import { useWavePagination } from '@/contexts/wave/hooks/useWavePagination';
-import { DropSize } from '@/helpers/waves/drop.helpers';
-import { WAVE_DROPS_PARAMS } from '@/components/react-query-wrapper/utils/query-utils';
+import { renderHook, act } from "@testing-library/react";
+import { useWavePagination } from "@/contexts/wave/hooks/useWavePagination";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 
 // Mock abort controller utilities
 const cancelFetch = jest.fn();
-const createController = jest.fn(() => ({ signal: {} } as AbortController));
+const createController = jest.fn(() => ({ signal: {} }) as AbortController);
 const cleanupController = jest.fn();
 
-jest.mock('@/contexts/wave/hooks/useWaveAbortController', () => ({
+jest.mock("@/contexts/wave/hooks/useWaveAbortController", () => ({
   useWaveAbortController: () => ({
     cancelFetch,
     createController,
@@ -21,9 +21,10 @@ export const fetchWaveMessages = jest.fn();
 export const fetchLightWaveMessages = jest.fn();
 export const fetchAroundSerialNoWaveMessages = jest.fn();
 
-jest.mock('@/contexts/wave/utils/wave-messages-utils', () => ({
+jest.mock("@/contexts/wave/utils/wave-messages-utils", () => ({
   fetchWaveMessages: (...args: unknown[]) => fetchWaveMessages(...args),
-  fetchLightWaveMessages: (...args: unknown[]) => fetchLightWaveMessages(...args),
+  fetchLightWaveMessages: (...args: unknown[]) =>
+    fetchLightWaveMessages(...args),
   fetchAroundSerialNoWaveMessages: (...args: unknown[]) =>
     fetchAroundSerialNoWaveMessages(...args),
 }));
@@ -37,7 +38,7 @@ interface WaveState {
   latestFetchedSerialNo: number | null;
 }
 
-describe('useWavePagination', () => {
+describe("useWavePagination", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -61,36 +62,41 @@ describe('useWavePagination', () => {
     return { result, updateData, getData, store };
   }
 
-  it('fetchNextPage appends drops and updates loading flags', async () => {
+  it("fetchNextPage appends drops and updates loading flags", async () => {
     const initial: Record<string, WaveState> = {
       wave1: {
-        id: 'wave1',
+        id: "wave1",
         isLoading: false,
         isLoadingNextPage: false,
         hasNextPage: true,
-        drops: [
-          { id: 'a', serial_no: 3, type: DropSize.FULL },
-        ],
+        drops: [{ id: "a", serial_no: 3, type: DropSize.FULL }],
         latestFetchedSerialNo: null,
       },
     };
 
     fetchWaveMessages.mockResolvedValue([
-      { id: 'b', serial_no: 2 },
-      { id: 'c', serial_no: 1 },
+      { id: "b", serial_no: 2 },
+      { id: "c", serial_no: 1 },
     ]);
 
     const { result, updateData } = setup(initial);
 
     await act(async () => {
-      await result.current.fetchNextPage({ waveId: 'wave1', type: DropSize.FULL });
+      await result.current.fetchNextPage({
+        waveId: "wave1",
+        type: DropSize.FULL,
+      });
     });
 
-    expect(fetchWaveMessages).toHaveBeenCalledWith('wave1', 3, expect.any(Object));
+    expect(fetchWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      3,
+      expect.any(Object)
+    );
 
     // First call sets loading state
     expect(updateData).toHaveBeenCalledWith({
-      key: 'wave1',
+      key: "wave1",
       isLoadingNextPage: true,
     });
     // Last call appends new drops and clears loading
@@ -100,41 +106,78 @@ describe('useWavePagination', () => {
     expect(lastCall.drops).toHaveLength(2);
   });
 
-  it('handles abort errors when fetching next page', async () => {
+  it("handles abort errors when fetching next page", async () => {
     const initial: Record<string, WaveState> = {
       wave1: {
-        id: 'wave1',
+        id: "wave1",
         isLoading: false,
         isLoadingNextPage: false,
         hasNextPage: true,
-        drops: [
-          { id: 'a', serial_no: 3, type: DropSize.FULL },
-        ],
+        drops: [{ id: "a", serial_no: 3, type: DropSize.FULL }],
         latestFetchedSerialNo: null,
       },
     };
 
-    const abortError = new DOMException('aborted', 'AbortError');
+    const abortError = new DOMException("aborted", "AbortError");
     fetchWaveMessages.mockRejectedValue(abortError);
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const { result, updateData } = setup(initial);
     await act(async () => {
-      await result.current.fetchNextPage({ waveId: 'wave1', type: DropSize.FULL });
+      await result.current.fetchNextPage({
+        waveId: "wave1",
+        type: DropSize.FULL,
+      });
     });
 
     expect(consoleSpy).not.toHaveBeenCalled();
     expect(updateData).toHaveBeenLastCalledWith({
-      key: 'wave1',
+      key: "wave1",
       isLoadingNextPage: false,
     });
     consoleSpy.mockRestore();
   });
 
-  it('processes only the latest around-serial request', async () => {
+  it("passes serial scroll failure callback to light fetches", async () => {
     const initial: Record<string, WaveState> = {
       wave1: {
-        id: 'wave1',
+        id: "wave1",
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: true,
+        drops: [{ id: "a", serial_no: 3, type: DropSize.FULL }],
+        latestFetchedSerialNo: null,
+      },
+    };
+
+    const onSerialScrollFailure = jest.fn();
+    fetchLightWaveMessages.mockResolvedValue([]);
+
+    const { result } = setup(initial);
+    await act(async () => {
+      await result.current.fetchNextPage({
+        waveId: "wave1",
+        type: DropSize.LIGHT,
+        targetSerialNo: 2,
+        onSerialScrollFailure,
+      });
+    });
+
+    expect(fetchLightWaveMessages).toHaveBeenCalledWith(
+      "wave1",
+      3,
+      2,
+      expect.any(Object),
+      onSerialScrollFailure
+    );
+  });
+
+  it("processes only the latest around-serial request", async () => {
+    const initial: Record<string, WaveState> = {
+      wave1: {
+        id: "wave1",
         isLoading: false,
         isLoadingNextPage: false,
         hasNextPage: true,
@@ -144,14 +187,14 @@ describe('useWavePagination', () => {
     };
 
     fetchAroundSerialNoWaveMessages.mockResolvedValue([
-      { id: 'd', serial_no: 110 },
+      { id: "d", serial_no: 110 },
     ]);
 
     const { result } = setup(initial);
 
     act(() => {
-      result.current.fetchAroundSerialNo('wave1', 100);
-      result.current.fetchAroundSerialNo('wave1', 110);
+      result.current.fetchAroundSerialNo("wave1", 100);
+      result.current.fetchAroundSerialNo("wave1", 110);
     });
 
     // allow queue to resolve
@@ -162,13 +205,13 @@ describe('useWavePagination', () => {
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenNthCalledWith(
       1,
-      'wave1',
+      "wave1",
       100,
       expect.any(Object)
     );
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenNthCalledWith(
       2,
-      'wave1',
+      "wave1",
       110 + (WAVE_DROPS_PARAMS.limit - 1),
       expect.any(Object)
     );

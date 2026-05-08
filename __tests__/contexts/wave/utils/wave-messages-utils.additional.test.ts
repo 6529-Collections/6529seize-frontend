@@ -79,7 +79,15 @@ describe("wave-messages-utils additional", () => {
       throw new Error(`Unexpected endpoint: ${options.endpoint}`);
     });
 
-    const result = await fetchLightWaveMessages("w", 4005, 5);
+    const onFailure = jest.fn();
+
+    const result = await fetchLightWaveMessages(
+      "w",
+      4005,
+      5,
+      undefined,
+      onFailure
+    );
 
     expect(lightCallCount).toBe(2);
     expect(mockFetchRetry).toHaveBeenCalledTimes(3);
@@ -93,9 +101,10 @@ describe("wave-messages-utils additional", () => {
     expect(result!.find((d) => d.serial_no === 5)).toMatchObject({
       id: "full-5",
     });
+    expect(onFailure).not.toHaveBeenCalled();
   });
 
-  it("fetchLightWaveMessages returns null when target serial is not found", async () => {
+  it("fetchLightWaveMessages reports target_not_found and returns null when target serial is not found", async () => {
     mockFetchRetry.mockImplementation(async (options) => {
       if (options.endpoint === "drop-ids") {
         return [];
@@ -108,8 +117,60 @@ describe("wave-messages-utils additional", () => {
       throw new Error(`Unexpected endpoint: ${options.endpoint}`);
     });
 
-    const result = await fetchLightWaveMessages("w", 10, 5);
+    const onFailure = jest.fn();
+    const result = await fetchLightWaveMessages(
+      "w",
+      10,
+      5,
+      undefined,
+      onFailure
+    );
 
     expect(result).toBeNull();
+    expect(onFailure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reason: "target_not_found",
+        waveId: "w",
+        targetSerialNo: 5,
+        details: expect.objectContaining({
+          requestsMade: 1,
+        }),
+      })
+    );
+  });
+
+  it("fetchLightWaveMessages reports fetch_failed and returns null when drop-id fetch fails", async () => {
+    mockFetchRetry.mockImplementation(async (options) => {
+      if (options.endpoint === "drop-ids") {
+        throw new Error("drop ids unavailable");
+      }
+
+      if (options.endpoint === "waves/w/drops") {
+        return { drops: [], wave: { id: "w" } };
+      }
+
+      throw new Error(`Unexpected endpoint: ${options.endpoint}`);
+    });
+
+    const onFailure = jest.fn();
+    const result = await fetchLightWaveMessages(
+      "w",
+      10,
+      5,
+      undefined,
+      onFailure
+    );
+
+    expect(result).toBeNull();
+    expect(onFailure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reason: "fetch_failed",
+        waveId: "w",
+        targetSerialNo: 5,
+        details: expect.objectContaining({
+          errorMessage: "drop ids unavailable",
+        }),
+      })
+    );
   });
 });

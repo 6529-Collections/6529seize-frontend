@@ -139,9 +139,13 @@ const mockFetchNextPage = jest.fn();
 const mockWaitAndRevealDrop = jest.fn();
 const mockRemoveNotifications = jest.fn();
 const mockCommonApiPost = jest.fn();
+const mockSetToast = jest.fn();
 const mockAddress = "0xAAA";
 const mockJwt = "test-jwt";
 const mockJwtExp = 4102444800;
+const SERIAL_FIND_FAILURE_TOAST = "Could not find that drop in history.";
+const SERIAL_JUMP_FAILURE_TOAST =
+  "Could not jump to that drop. Please try again.";
 
 const useVirtualizedWaveDropsMock =
   useVirtualizedWaveDrops as jest.MockedFunction<
@@ -292,6 +296,7 @@ function setupMocks(options: MockSetupOptions = {}) {
   require("@/components/auth/Auth").useAuth.mockReturnValue({
     connectedProfile: options.auth?.connectedProfile ?? null,
     activeProfileProxy: null,
+    setToast: mockSetToast,
   });
 
   require("@/components/auth/SeizeConnectContext").useSeizeConnectContext.mockReturnValue(
@@ -369,6 +374,12 @@ function renderComponent(options: RenderOptions = {}) {
     ...render(<WaveDropsAll {...defaultProps} />),
     props: defaultProps,
   };
+}
+
+async function advanceTimersByTime(ms: number) {
+  await act(async () => {
+    await jest.advanceTimersByTimeAsync(ms);
+  });
 }
 
 describe("WaveDropsAll", () => {
@@ -917,11 +928,57 @@ describe("WaveDropsAll", () => {
 
       await waitFor(() => {
         expect(mockFetchNextPage).toHaveBeenCalledWith(
-          {
+          expect.objectContaining({
             waveId: "test-wave-1",
             type: "LIGHT",
             targetSerialNo: 10,
-          },
+            onSerialScrollFailure: expect.any(Function),
+          }),
+          null
+        );
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+      await waitFor(() => {
+        expect(mockSetToast).toHaveBeenCalledWith({
+          message: SERIAL_JUMP_FAILURE_TOAST,
+          type: "error",
+        });
+      });
+      expect(mockWaitAndRevealDrop).not.toHaveBeenCalled();
+      consoleWarn.mockRestore();
+    });
+
+    it("releases light drop hydration and shows toast when target fetching returns null", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockResolvedValueOnce(null);
+
+      renderComponent({ initialDrop: 10 });
+
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+      await waitFor(() => {
+        expect(mockFetchNextPage).toHaveBeenCalledWith(
+          expect.objectContaining({
+            waveId: "test-wave-1",
+            type: "LIGHT",
+            targetSerialNo: 10,
+            onSerialScrollFailure: expect.any(Function),
+          }),
           null
         );
       });
@@ -930,10 +987,18 @@ describe("WaveDropsAll", () => {
         expect(dropsProps.suspendLightDropHydration).toBe(false);
       });
       expect(mockWaitAndRevealDrop).not.toHaveBeenCalled();
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: SERIAL_JUMP_FAILURE_TOAST,
+        type: "error",
+      });
       consoleWarn.mockRestore();
     });
 
-    it("releases light drop hydration when target reveal fails", async () => {
+    it("releases light drop hydration and shows find toast when target reveal fails", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
       setupMocks({
         waveMessages: {
           drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
@@ -957,9 +1022,55 @@ describe("WaveDropsAll", () => {
       await waitFor(() => {
         expect(dropsProps.suspendLightDropHydration).toBe(false);
       });
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: SERIAL_FIND_FAILURE_TOAST,
+        type: "error",
+      });
+      consoleWarn.mockRestore();
+    });
+
+    it("shows jump toast when revealed target never reaches the DOM", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockResolvedValueOnce([]);
+      mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+
+      renderComponent({ initialDrop: 10 });
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+
+      await advanceTimersByTime(3000);
+
+      await waitFor(() => {
+        expect(mockSetToast).toHaveBeenCalledWith({
+          message: SERIAL_JUMP_FAILURE_TOAST,
+          type: "error",
+        });
+      });
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+      consoleWarn.mockRestore();
     });
 
     it("keeps light drop hydration suspended until successful target scroll settles", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
       setupMocks({
         waveMessages: {
           drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
@@ -999,6 +1110,50 @@ describe("WaveDropsAll", () => {
       await waitFor(() => {
         expect(dropsProps.suspendLightDropHydration).toBe(false);
       });
+      expect(mockSetToast).not.toHaveBeenCalled();
+      consoleWarn.mockRestore();
+    });
+
+    it("clears overlay and shows jump toast when scroll operation watchdog expires", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      const neverSettles = new Promise<never>(() => {
+        // Keep the operation active until the watchdog timeout fires.
+      });
+      mockFetchNextPage.mockReturnValueOnce(neverSettles);
+
+      renderComponent({ initialDrop: 10 });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("scrolling-overlay").style.display).toBe(
+          "block"
+        );
+      });
+
+      await advanceTimersByTime(10000);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("scrolling-overlay").style.display).toBe(
+          "none"
+        );
+      });
+      expect(mockSetToast).toHaveBeenCalledWith({
+        message: SERIAL_JUMP_FAILURE_TOAST,
+        type: "error",
+      });
+      expect(dropsProps.suspendLightDropHydration).toBe(false);
+      consoleWarn.mockRestore();
     });
   });
 
