@@ -23,6 +23,7 @@ export type {
 
 export const useWaveNotificationsReadMarkerState = ({
   address,
+  connectedProfileId,
   activeProfileProxyId,
   activeProfileProxyCreatorId,
   walletAuth,
@@ -30,6 +31,7 @@ export const useWaveNotificationsReadMarkerState = ({
 }: WaveNotificationsReadMarkerConfig): WaveNotificationsReadMarkerState => {
   const identityState = useWaveReadIdentityState({
     address,
+    connectedProfileId,
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     walletAuth,
