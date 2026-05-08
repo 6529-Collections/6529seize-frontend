@@ -13,17 +13,31 @@ import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly isApproveWave?: boolean | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const WaveSmallLeaderboardDefaultDrop: React.FC<
   WaveSmallLeaderboardDefaultDropProps
-> = ({ drop, onDropClick, contentPresentation = "default" }) => {
+> = ({
+  drop,
+  onDropClick,
+  contentPresentation = "default",
+  isApproveWave = false,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
+}) => {
   const authorLabel = drop.author.handle ?? drop.author.primary_address;
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const isApprovedDrop = isApproveWave && isOfficiallyApprovedDrop(drop);
 
   const getCICColor = (cic: number): string => {
     const cicType = cicToType(cic);
@@ -44,37 +58,45 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
     }
   };
 
+  let statusBadge: React.ReactNode = (
+    <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)] tw-ring-1 tw-ring-iron-600/50">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="2.5"
+        stroke="currentColor"
+        aria-hidden="true"
+        className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+      </svg>
+    </div>
+  );
+
+  if (isApprovedDrop) {
+    statusBadge = (
+      <ApprovalStatusBadge
+        approvedAt={drop.winning_context?.decision_time ?? null}
+      />
+    );
+  } else if (!isApproveWave && typeof drop.rank === "number") {
+    statusBadge = (
+      <WinnerDropBadge
+        rank={drop.rank}
+        decisionTime={drop.winning_context?.decision_time ?? null}
+      />
+    );
+  }
+
   return (
     <div>
       <div className="tw-relative tw-flex tw-flex-col tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800">
         <div className="tw-group tw-rounded-xl tw-p-4 tw-transition tw-duration-300 tw-ease-out tw-@container desktop-hover:hover:tw-bg-iron-800/80">
           <div>
             <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
-              {typeof drop.rank === "number" ? (
-                <WinnerDropBadge
-                  rank={drop.rank}
-                  decisionTime={drop.winning_context?.decision_time ?? null}
-                />
-              ) : (
-                <div className="tw-flex tw-h-6 tw-min-w-6 tw-items-center tw-justify-center tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-400 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)] tw-ring-1 tw-ring-iron-600/50">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2.5"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                    className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 12h14"
-                    />
-                  </svg>
-                </div>
-              )}
-              <WaveDropActionsRate drop={drop} />
+              {statusBadge}
+              {!isVotingActionLocked && <WaveDropActionsRate drop={drop} />}
             </div>
 
             <div className="tw-flex-1">

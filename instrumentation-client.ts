@@ -13,11 +13,14 @@ import {
   sanitizeUrlString,
 } from "@/utils/sentry-sanitizer";
 import {
+  getLowValueNetworkErrorDecision,
+  getNetworkErrorMessageTargetUrl,
   getThirdPartyTelemetrySpanTargetKey,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  tagSampledLowValueNetworkError,
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
@@ -37,10 +40,26 @@ const noisyPatterns = [
 const referenceErrors = ["__firefox__"];
 
 const URL_REGEX = /\(([^)]+?)\)/;
+const APP_WRAPPED_NETWORK_ERROR_PREFIXES = [
+  "Network request failed.",
+  "Network error:",
+];
+const RAW_BROWSER_NETWORK_ERROR_PATTERNS = [
+  /\bfailed to fetch\b/i,
+  /\bload failed\b/i,
+  /\bnetwork\s*error\b/i,
+  /\bnetwork connection was lost\b/i,
+  /\bnetwork request failed\b/i,
+];
 type SentryTransactionEvent = Sentry.Event & {
   spans?: SentryTransactionSpan[] | undefined;
   tags?: Record<string, unknown> | undefined;
   extra?: Record<string, unknown> | undefined;
+};
+type NetworkErrorSamplingMessageSnapshot = {
+  exceptionValue?: string | undefined;
+  eventMessage?: string | undefined;
+  errorMessage: string;
 };
 
 function getFallbackMessage(hint?: Sentry.EventHint): string {
@@ -162,18 +181,26 @@ function handleIndexedDBError(event: Sentry.Event): void {
   event.fingerprint = ["indexeddb-connection-lost"];
 }
 
-function extractUrlFromError(error: TypeError, event: Sentry.Event): string {
+function isParenthesizedUrlLike(value: string | undefined): boolean {
+  const candidate = value?.trim();
+  return (
+    !!candidate &&
+    (candidate.startsWith("/") || /^https?:\/\//i.test(candidate))
+  );
+}
+
+function extractUrlFromError(error: Error, event: Sentry.Event): string {
   const urlMatch = URL_REGEX.exec(error.message.slice(0, 2048));
-  if (urlMatch?.[1]) {
-    return String(sanitizeUrlString(urlMatch[1]));
+  const parenthesizedValue = urlMatch?.[1];
+  if (isParenthesizedUrlLike(parenthesizedValue)) {
+    return String(sanitizeUrlString(parenthesizedValue));
   }
 
-  const fetchBreadcrumb = event.breadcrumbs?.find(
-    (crumb) => crumb.category === "fetch" || crumb.type === "http"
-  );
-  if (fetchBreadcrumb?.data?.["url"]) {
-    return String(sanitizeUrlString(fetchBreadcrumb.data["url"]));
+  const networkMessageTargetUrl = getNetworkErrorMessageTargetUrl(event);
+  if (networkMessageTargetUrl) {
+    return String(sanitizeUrlString(networkMessageTargetUrl));
   }
+
   if (event.request?.url) {
     return String(sanitizeUrlString(event.request.url));
   }
@@ -181,31 +208,64 @@ function extractUrlFromError(error: TypeError, event: Sentry.Event): string {
 }
 
 function isNetworkError(errorMessage: string): boolean {
-  const normalized = errorMessage.toLowerCase();
-  return (
-    normalized.includes("failed to fetch") ||
-    normalized.includes("load failed") ||
-    normalized.includes("networkerror") ||
-    normalized.includes("network error") ||
-    normalized.includes("network request failed") ||
-    /\bnetwork\b/.test(normalized)
+  return RAW_BROWSER_NETWORK_ERROR_PATTERNS.some((pattern) =>
+    pattern.test(errorMessage)
   );
+}
+
+function isRawBrowserNetworkError(error: Error): boolean {
+  return (
+    error.name === "NetworkError" ||
+    (error instanceof TypeError && isNetworkError(error.message))
+  );
+}
+
+function hasUrlInParentheses(message: string): boolean {
+  const urlMatch = URL_REGEX.exec(message.slice(0, 2048));
+  return isParenthesizedUrlLike(urlMatch?.[1]);
+}
+
+function isAppWrappedApiNetworkError(errorMessage: string): boolean {
+  return (
+    APP_WRAPPED_NETWORK_ERROR_PREFIXES.some((prefix) =>
+      errorMessage.startsWith(prefix)
+    ) && hasUrlInParentheses(errorMessage)
+  );
+}
+
+function getRawBrowserNetworkErrorMessage(
+  event: Sentry.Event,
+  error: Error
+): string {
+  const url = extractUrlFromError(error, event);
+  return `Network request failed. Please check your connection and try again. (${url})`;
+}
+
+function getAppWrappedNetworkErrorMessage(
+  event: Sentry.Event,
+  error: Error
+): string {
+  const urlMatch = URL_REGEX.exec(error.message.slice(0, 2048));
+  const prefix = error.message.slice(0, urlMatch?.index ?? 0).trimEnd();
+  const url = extractUrlFromError(error, event);
+  return `${prefix} (${url})`;
 }
 
 function handleNetworkError(
   event: Sentry.Event,
-  error: TypeError,
+  error: Error,
   value: Sentry.Exception | undefined
 ): void {
-  if (!isNetworkError(error.message)) {
+  const isAppWrappedError = isAppWrappedApiNetworkError(error.message);
+  const isRawBrowserError = isRawBrowserNetworkError(error);
+
+  if (!isAppWrappedError && !isRawBrowserError) {
     return;
   }
 
-  const url = extractUrlFromError(error, event);
-  const normalized = error.message.toLowerCase();
-  const transformedMessage = normalized.includes("network")
-    ? `Network error: ${error.message} (${url})`
-    : `Network request failed. Please check your connection and try again. (${url})`;
+  const transformedMessage = isAppWrappedError
+    ? getAppWrappedNetworkErrorMessage(event, error)
+    : getRawBrowserNetworkErrorMessage(event, error);
 
   if (value) {
     value.value = transformedMessage;
@@ -220,7 +280,54 @@ function handleNetworkError(
     errorType: "network",
     handled: true,
   };
-  event.fingerprint = ["network-error"];
+  if (!event.fingerprint || event.fingerprint.length === 0) {
+    event.fingerprint = ["network-error"];
+  }
+}
+
+function getNetworkErrorSamplingMessageSnapshot(
+  event: Sentry.Event,
+  error: Error,
+  value: Sentry.Exception | undefined
+): NetworkErrorSamplingMessageSnapshot {
+  return {
+    exceptionValue: typeof value?.value === "string" ? value.value : undefined,
+    eventMessage: typeof event.message === "string" ? event.message : undefined,
+    errorMessage: error.message,
+  };
+}
+
+function getNetworkErrorSamplingEvent(
+  event: Sentry.Event,
+  snapshot: NetworkErrorSamplingMessageSnapshot
+): Sentry.Event {
+  const originalExceptionValue =
+    snapshot.exceptionValue ?? snapshot.errorMessage;
+  const values = event.exception?.values;
+
+  return {
+    ...event,
+    message: snapshot.eventMessage ?? snapshot.errorMessage,
+    ...(event.exception
+      ? {
+          exception: {
+            ...event.exception,
+            ...(values
+              ? {
+                  values: values.map((exceptionValue, index) =>
+                    index === 0
+                      ? {
+                          ...exceptionValue,
+                          value: originalExceptionValue,
+                        }
+                      : exceptionValue
+                  ),
+                }
+              : {}),
+          },
+        }
+      : {}),
+  };
 }
 
 Sentry.init({
@@ -268,8 +375,25 @@ Sentry.init({
       handleIndexedDBError(event);
     }
 
-    if (error instanceof TypeError) {
+    const networkErrorSamplingMessageSnapshot =
+      error instanceof Error
+        ? getNetworkErrorSamplingMessageSnapshot(event, error, value)
+        : undefined;
+    if (error instanceof Error) {
       handleNetworkError(event, error, value);
+    }
+
+    const networkErrorSamplingEvent = networkErrorSamplingMessageSnapshot
+      ? getNetworkErrorSamplingEvent(event, networkErrorSamplingMessageSnapshot)
+      : event;
+    const networkNoiseDecision = getLowValueNetworkErrorDecision(
+      networkErrorSamplingEvent
+    );
+    if (networkNoiseDecision === "drop") {
+      return null;
+    }
+    if (networkNoiseDecision === "keep_sampled") {
+      tagSampledLowValueNetworkError(event);
     }
 
     return sanitizeSentryEvent(event);

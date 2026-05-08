@@ -99,7 +99,7 @@ describe("useWaveDropsLeaderboard extra", () => {
         curatedByGroupId: "curation-group-1",
         minPrice: 0.5,
         maxPrice: 2.75,
-        priceCurrency: "ETH",
+        priceCurrency: " ETH ",
         sort: WaveDropsLeaderboardSort.PRICE,
       })
     );

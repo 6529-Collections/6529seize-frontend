@@ -10,13 +10,12 @@ import type {
 import { WsMessageType } from "@/helpers/Types";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useWaveEligibility } from "../WaveEligibilityContext";
 import type { WaveDataStoreUpdater } from "./types";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { useQueryClient } from "@tanstack/react-query";
@@ -110,10 +109,21 @@ export function useWaveRealtimeUpdater({
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
+  const activeWaveIdRef = useRef(activeWaveId);
+  useLayoutEffect(() => {
+    activeWaveIdRef.current = activeWaveId;
+  }, [activeWaveId]);
   const { refreshEligibility } = useWaveEligibility();
-  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
   const queryClient = useQueryClient();
   const tabJustBecameVisibleRef = useRef<boolean>(false);
+
+  const canSendReadForWave = useCallback((waveId: string): boolean => {
+    return (
+      activeWaveIdRef.current === waveId &&
+      document.visibilityState === "visible"
+    );
+  }, []);
 
   // Function to cleanup abort controllers
   const cleanupController = useCallback((waveId: string) => {
@@ -187,17 +197,6 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
-      const markWaveAsRead = async (waveId: string) => {
-        if (document.visibilityState !== "visible") {
-          return;
-        }
-
-        await commonApiPostWithoutBodyAndResponse({
-          endpoint: `notifications/wave/${waveId}/read`,
-        });
-        invalidateNotifications();
-      };
-
       if (!drop?.wave?.id) {
         return;
       }
@@ -314,12 +313,25 @@ export function useWaveRealtimeUpdater({
       }
 
       if (activeWaveId === waveId && document.visibilityState === "visible") {
-        removeWaveDeliveredNotifications(waveId).catch((error) =>
-          console.error("Failed to remove wave delivered notifications:", error)
-        );
-        markWaveAsRead(waveId).catch((error) =>
-          console.error("Failed to mark wave as read:", error)
-        );
+        void (async () => {
+          try {
+            await removeWaveDeliveredNotifications(waveId);
+          } catch (error) {
+            console.error(
+              "Failed to remove wave delivered notifications:",
+              error
+            );
+          }
+        })();
+        void (async () => {
+          try {
+            await markWaveNotificationsRead(waveId, {
+              shouldSend: () => canSendReadForWave(waveId),
+            });
+          } catch (error) {
+            console.error("Failed to mark wave as read:", error);
+          }
+        })();
       }
     },
     [
@@ -329,9 +341,10 @@ export function useWaveRealtimeUpdater({
       registerWave,
       initiateFetchNewestCycle,
       removeWaveDeliveredNotifications,
+      markWaveNotificationsRead,
+      canSendReadForWave,
       refreshEligibility,
       isWaveMuted,
-      invalidateNotifications,
       queryClient,
     ]
   );

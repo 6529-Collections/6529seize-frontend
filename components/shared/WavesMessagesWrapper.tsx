@@ -114,6 +114,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // Clear logic for when to show each part
   const hasWave = waveId !== undefined;
   const canShowMainContent = !isMobile || hasWave;
+  const showProfileFeedShortcut = !isMobile;
   const shouldShowLeftSidebar =
     showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
   const shouldShowMainContent = canShowMainContent;
@@ -143,7 +144,10 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
               style={contentContainerStyle}
             >
               {shouldShowLeftSidebar && (
-                <WebBrainLeftSidebar isCollapsed={rightVariant === "inline"} />
+                <WebBrainLeftSidebar
+                  isCollapsed={rightVariant === "inline"}
+                  showProfileFeedShortcut={showProfileFeedShortcut}
+                />
               )}
               {shouldShowMainContent && (
                 <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-grow tw-flex-col tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">

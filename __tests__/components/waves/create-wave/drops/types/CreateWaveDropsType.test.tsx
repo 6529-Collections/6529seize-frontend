@@ -1,9 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import CreateWaveDropsType from '@/components/waves/create-wave/drops/types/CreateWaveDropsType';
-import { ExtendedWaveParticipationRequirement } from '@/components/waves/create-wave/drops/types/CreateWaveDropsTypes';
+import { render, screen, fireEvent } from "@testing-library/react";
+import CreateWaveDropsType from "@/components/waves/create-wave/drops/types/CreateWaveDropsType";
+import { ExtendedWaveParticipationRequirement } from "@/components/waves/create-wave/drops/types/CreateWaveDropsTypes.constants";
 
-describe('CreateWaveDropsType', () => {
-  it('calls change handler when clicked', () => {
+describe("CreateWaveDropsType", () => {
+  it("calls change handler when clicked", () => {
     const onChange = jest.fn();
     render(
       <CreateWaveDropsType
@@ -12,11 +12,13 @@ describe('CreateWaveDropsType', () => {
         onRequiredTypeChange={onChange}
       />
     );
-    fireEvent.click(screen.getByRole('checkbox'));
-    expect(onChange).toHaveBeenCalledWith(ExtendedWaveParticipationRequirement.IMAGE);
+    fireEvent.click(screen.getByRole("radio"));
+    expect(onChange).toHaveBeenCalledWith(
+      ExtendedWaveParticipationRequirement.IMAGE
+    );
   });
 
-  it('displays label and checked state', () => {
+  it("displays label and checked state", () => {
     const { container } = render(
       <CreateWaveDropsType
         isChecked={true}
@@ -24,8 +26,8 @@ describe('CreateWaveDropsType', () => {
         onRequiredTypeChange={() => {}}
       />
     );
-    const checkbox = container.querySelector('input[type="checkbox"]');
-    expect(checkbox).toBeChecked();
-    expect(screen.getByText('Audio')).toBeInTheDocument();
+    const radio = container.querySelector('input[type="radio"]');
+    expect(radio).toBeChecked();
+    expect(screen.getByText("Audio")).toBeInTheDocument();
   });
 });

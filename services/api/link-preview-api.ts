@@ -1,4 +1,5 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
+import type { EnsPreview } from "@/components/waves/ens/types";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 interface LinkPreviewMedia {
@@ -84,13 +85,22 @@ interface GenericLinkPreviewResponse extends LinkPreviewBase {
   readonly type?: string | null | undefined;
 }
 
+type EnsLinkPreviewResponse = EnsPreview & LinkPreviewBase;
+
 export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
+  | EnsLinkPreviewResponse
   | ManifoldListingLinkPreview
   | GoogleWorkspaceLinkPreview;
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;
 const LINK_PREVIEW_CACHE_MAX_ITEMS = 200;
+const LINK_PREVIEW_BATCH_MAX_URLS = 5;
+const LINK_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS = 2;
+const LINK_PREVIEW_FETCH_TIMEOUT_MS = 10_000;
+const LINK_PREVIEW_METADATA_ERROR_MESSAGE =
+  "Failed to fetch link preview metadata.";
+const LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE = `${LINK_PREVIEW_METADATA_ERROR_MESSAGE} Request timed out.`;
 const OPENSEA_CACHE_KEY_SUFFIX = "|opensea-v3-token-uri-fallback";
 
 const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
@@ -117,6 +127,30 @@ interface OpenGraphErrorBody {
   readonly error: string;
 }
 
+interface OpenGraphBatchResponse {
+  readonly results?: Record<string, LinkPreviewResponse | undefined>;
+  readonly errors?: Record<string, string | undefined>;
+}
+
+const hasOwnRecordKey = <T>(
+  record: Record<string, T | undefined> | undefined,
+  key: string
+): record is Record<string, T | undefined> =>
+  record !== undefined && Object.hasOwn(record, key);
+
+type PendingLinkPreviewRequest = {
+  readonly url: string;
+  readonly cacheKey: string;
+  readonly promise: Promise<LinkPreviewResponse>;
+  readonly resolve: (value: LinkPreviewResponse) => void;
+  readonly reject: (reason: Error) => void;
+};
+
+const pendingLinkPreviewBatch = new Map<string, PendingLinkPreviewRequest>();
+const queuedLinkPreviewBatchChunks: PendingLinkPreviewRequest[][] = [];
+let batchFlushTimer: ReturnType<typeof setTimeout> | undefined;
+let activeLinkPreviewBatchChunks = 0;
+
 const hasErrorMessage = (value: unknown): value is OpenGraphErrorBody => {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -127,14 +161,308 @@ const hasErrorMessage = (value: unknown): value is OpenGraphErrorBody => {
   return typeof maybeError === "string" && maybeError.length > 0;
 };
 
-export const fetchLinkPreview = async (
-  url: string
+const isAbortError = (error: unknown): boolean => {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  return (error as { readonly name?: unknown }).name === "AbortError";
+};
+
+const readOpenGraphError = async (
+  response: Response,
+  fallbackMessage: string
+): Promise<Error> => {
+  let errorMessage = fallbackMessage;
+  try {
+    const body: unknown = await response.json();
+    if (hasErrorMessage(body)) {
+      errorMessage = body.error;
+    }
+  } catch (error: unknown) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+
+    // ignore parse errors and use default message
+  }
+
+  return new Error(errorMessage);
+};
+
+const fetchLinkPreviewMetadata = async <T>(
+  input: RequestInfo | URL,
+  init: RequestInit
+): Promise<T> => {
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      reject(new Error(LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE));
+    }, LINK_PREVIEW_FETCH_TIMEOUT_MS);
+  });
+
+  const fetchAndReadJson = async (): Promise<T> => {
+    const response = await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw await readOpenGraphError(
+        response,
+        LINK_PREVIEW_METADATA_ERROR_MESSAGE
+      );
+    }
+
+    return (await response.json()) as T;
+  };
+
+  try {
+    return await Promise.race([fetchAndReadJson(), timeoutPromise]);
+  } catch (error: unknown) {
+    if (isAbortError(error)) {
+      throw new Error(LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE);
+    }
+
+    throw error;
+  } finally {
+    if (timeout !== undefined) {
+      clearTimeout(timeout);
+    }
+  }
+};
+
+const fetchSingleLinkPreview = async (
+  normalizedUrl: string
 ): Promise<LinkPreviewResponse> => {
+  const params = new URLSearchParams({ url: normalizedUrl });
+
+  return fetchLinkPreviewMetadata<LinkPreviewResponse>(
+    `/api/open-graph?${params.toString()}`,
+    {
+      headers: { Accept: "application/json" },
+    }
+  );
+};
+
+const fetchLinkPreviewBatch = async (
+  urls: readonly string[]
+): Promise<OpenGraphBatchResponse> => {
+  return fetchLinkPreviewMetadata<OpenGraphBatchResponse>("/api/open-graph", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ urls }),
+  });
+};
+
+const chunkRequests = (
+  requests: readonly PendingLinkPreviewRequest[]
+): readonly PendingLinkPreviewRequest[][] => {
+  const chunks: PendingLinkPreviewRequest[][] = [];
+
+  for (
+    let index = 0;
+    index < requests.length;
+    index += LINK_PREVIEW_BATCH_MAX_URLS
+  ) {
+    chunks.push(requests.slice(index, index + LINK_PREVIEW_BATCH_MAX_URLS));
+  }
+
+  return chunks;
+};
+
+const rejectPendingRequest = (
+  request: PendingLinkPreviewRequest,
+  error: Error
+): void => {
+  linkPreviewCache.delete(request.cacheKey);
+  request.reject(error);
+};
+
+const resolveWithSingleRequestFallback = async (
+  request: PendingLinkPreviewRequest
+): Promise<void> => {
+  try {
+    const data = await fetchSingleLinkPreview(request.url);
+    request.resolve(data);
+  } catch (error) {
+    rejectPendingRequest(
+      request,
+      error instanceof Error
+        ? error
+        : new Error(LINK_PREVIEW_METADATA_ERROR_MESSAGE)
+    );
+  }
+};
+
+const rejectBatchChunk = (
+  requests: readonly PendingLinkPreviewRequest[],
+  error: unknown
+): void => {
+  const rejection =
+    error instanceof Error
+      ? error
+      : new Error(LINK_PREVIEW_METADATA_ERROR_MESSAGE);
+
+  for (const request of requests) {
+    rejectPendingRequest(request, rejection);
+  }
+};
+
+const resolveBatchChunk = async (
+  requests: readonly PendingLinkPreviewRequest[]
+): Promise<void> => {
+  let batchResponse: OpenGraphBatchResponse;
+
+  try {
+    batchResponse = await fetchLinkPreviewBatch(
+      requests.map((request) => request.url)
+    );
+  } catch {
+    await Promise.all(
+      requests.map(async (request) => {
+        await resolveWithSingleRequestFallback(request);
+      })
+    );
+    return;
+  }
+
+  for (const request of requests) {
+    const result = hasOwnRecordKey(batchResponse.results, request.url)
+      ? batchResponse.results[request.url]
+      : undefined;
+    if (result !== undefined) {
+      request.resolve(result);
+      continue;
+    }
+
+    const errorMessage = hasOwnRecordKey(batchResponse.errors, request.url)
+      ? batchResponse.errors[request.url]
+      : undefined;
+    rejectPendingRequest(
+      request,
+      new Error(
+        errorMessage && errorMessage.length > 0
+          ? errorMessage
+          : LINK_PREVIEW_METADATA_ERROR_MESSAGE
+      )
+    );
+  }
+};
+
+const resolveBatchChunkSafely = async (
+  requests: readonly PendingLinkPreviewRequest[]
+): Promise<void> => {
+  try {
+    await resolveBatchChunk(requests);
+  } catch (error: unknown) {
+    rejectBatchChunk(requests, error);
+  }
+};
+
+const processQueuedBatchChunks = (): void => {
+  while (
+    activeLinkPreviewBatchChunks < LINK_PREVIEW_BATCH_MAX_ACTIVE_CHUNKS &&
+    queuedLinkPreviewBatchChunks.length > 0
+  ) {
+    const chunk = queuedLinkPreviewBatchChunks.shift();
+    if (chunk === undefined) {
+      return;
+    }
+
+    activeLinkPreviewBatchChunks += 1;
+
+    const handleChunkCompletion = (): void => {
+      activeLinkPreviewBatchChunks -= 1;
+      processQueuedBatchChunks();
+    };
+
+    void resolveBatchChunkSafely(chunk).then(
+      handleChunkCompletion,
+      handleChunkCompletion
+    );
+  }
+};
+
+const enqueueBatchChunk = (
+  requests: readonly PendingLinkPreviewRequest[]
+): void => {
+  queuedLinkPreviewBatchChunks.push([...requests]);
+  processQueuedBatchChunks();
+};
+
+const flushPendingLinkPreviewBatch = (): void => {
+  batchFlushTimer = undefined;
+  const requests = Array.from(pendingLinkPreviewBatch.values());
+  pendingLinkPreviewBatch.clear();
+
+  for (const chunk of chunkRequests(requests)) {
+    enqueueBatchChunk(chunk);
+  }
+};
+
+const scheduleBatchFlush = (): void => {
+  if (batchFlushTimer !== undefined) {
+    return;
+  }
+
+  batchFlushTimer = setTimeout(flushPendingLinkPreviewBatch, 0);
+};
+
+const clearLinkPreviewCacheOnError = async (
+  rawPromise: Promise<LinkPreviewResponse>,
+  cacheKey: string
+): Promise<LinkPreviewResponse> => {
+  try {
+    return await rawPromise;
+  } catch (error: unknown) {
+    linkPreviewCache.delete(cacheKey);
+    throw error;
+  }
+};
+
+const queueLinkPreviewRequest = (
+  normalizedUrl: string,
+  cacheKey: string
+): Promise<LinkPreviewResponse> => {
+  const pendingRequest = pendingLinkPreviewBatch.get(cacheKey);
+  if (pendingRequest) {
+    return pendingRequest.promise;
+  }
+
+  let resolveRequest!: (value: LinkPreviewResponse) => void;
+  let rejectRequest!: (reason: Error) => void;
+  const rawPromise = new Promise<LinkPreviewResponse>((resolve, reject) => {
+    resolveRequest = resolve;
+    rejectRequest = reject;
+  });
+  const promise = clearLinkPreviewCacheOnError(rawPromise, cacheKey);
+
+  pendingLinkPreviewBatch.set(cacheKey, {
+    url: normalizedUrl,
+    cacheKey,
+    promise,
+    resolve: resolveRequest,
+    reject: rejectRequest,
+  });
+  scheduleBatchFlush();
+
+  return promise;
+};
+
+export const fetchLinkPreview = (url: string): Promise<LinkPreviewResponse> => {
   const normalizedUrl = normalizeUrl(url);
   const cacheKey = buildCacheKey(normalizedUrl);
 
   if (!normalizedUrl) {
-    throw new Error("A valid URL is required to fetch link preview metadata.");
+    return Promise.reject(
+      new Error("A valid URL is required to fetch link preview metadata.")
+    );
   }
 
   const cachedResponse = linkPreviewCache.get(cacheKey);
@@ -142,30 +470,7 @@ export const fetchLinkPreview = async (
     return cachedResponse;
   }
 
-  const params = new URLSearchParams({ url: normalizedUrl });
-
-  const requestPromise = fetch(`/api/open-graph?${params.toString()}`, {
-    headers: { Accept: "application/json" },
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        let errorMessage = "Failed to fetch link preview metadata.";
-        try {
-          const body: unknown = await response.json();
-          if (hasErrorMessage(body)) {
-            errorMessage = body.error;
-          }
-        } catch {
-          // ignore parse errors and use default message
-        }
-        throw new Error(errorMessage);
-      }
-      return response.json() as Promise<LinkPreviewResponse>;
-    })
-    .catch((error) => {
-      linkPreviewCache.delete(cacheKey);
-      throw error;
-    });
+  const requestPromise = queueLinkPreviewRequest(normalizedUrl, cacheKey);
 
   linkPreviewCache.set(cacheKey, requestPromise);
 

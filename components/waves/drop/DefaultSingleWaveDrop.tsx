@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
 import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
 import { useSingleWaveDropData } from "./useSingleWaveDropData";
@@ -19,14 +20,29 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
     initialDrop,
     onClose
   );
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({
+      wave,
+    });
 
   if (!extendedDrop || !wave || !drop) {
     return null;
   }
 
   return (
-    <SingleWaveDropWrapper drop={drop} wave={wave} onClose={onClose}>
-      <SingleWaveDropInfoPanel drop={extendedDrop} />
+    <SingleWaveDropWrapper
+      drop={drop}
+      wave={wave}
+      onClose={onClose}
+      winningThreshold={winningThreshold}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+    >
+      <SingleWaveDropInfoPanel
+        drop={extendedDrop}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
+      />
     </SingleWaveDropWrapper>
   );
 };

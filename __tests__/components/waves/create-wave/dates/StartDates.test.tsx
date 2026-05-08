@@ -13,7 +13,10 @@ jest.mock("@/components/utils/calendar/CommonCalendar", () => {
 jest.mock("@/components/common/DateAccordion", () => {
   const MockDateAccordion = (props: any) => (
     <div>
-      <div onClick={props.onToggle}>{props.title}</div>
+      <div onClick={props.onToggle}>
+        {props.title}
+        {props.titleActions}
+      </div>
       {props.isExpanded ? props.children : props.collapsedContent}
     </div>
   );

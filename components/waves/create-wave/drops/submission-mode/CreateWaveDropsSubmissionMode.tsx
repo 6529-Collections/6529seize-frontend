@@ -1,5 +1,4 @@
 import CommonAnimationHeight from "@/components/utils/animation/CommonAnimationHeight";
-import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/ApiWaveParticipationSubmissionStrategy";
@@ -27,25 +26,28 @@ const createDefaultIdentitySubmissionStrategy =
   });
 
 type SubmissionOptionSection = "who-can-be-submitted" | "duplicate-submissions";
+type SubmissionModeOptionSection = "submission-mode";
 
 type SubmissionOptionRowProps<T extends string> = {
   readonly type: T;
   readonly selected: T;
   readonly label: string;
-  readonly description: string;
+  readonly description?: string;
   readonly titleId: string;
-  readonly descriptionId: string;
+  readonly descriptionId?: string;
   readonly groupName: string;
   readonly onChange: (type: T) => void;
 };
 
 const getOptionDescriptionId = (
-  section: SubmissionOptionSection,
+  section: SubmissionOptionSection | SubmissionModeOptionSection,
   option: string
 ) => `${section}-${option.toLowerCase()}-description`;
 
-const getOptionTitleId = (section: SubmissionOptionSection, option: string) =>
-  `${section}-${option.toLowerCase()}-title`;
+const getOptionTitleId = (
+  section: SubmissionOptionSection | SubmissionModeOptionSection,
+  option: string
+) => `${section}-${option.toLowerCase()}-title`;
 
 function SubmissionOptionRow<T extends string>({
   type,
@@ -59,21 +61,21 @@ function SubmissionOptionRow<T extends string>({
 }: SubmissionOptionRowProps<T>) {
   const isSelected = selected === type;
   const wrapperClasses = isSelected
-    ? "tw-ring-primary-400 tw-bg-[#202B45] tw-shadow-xl"
-    : "tw-ring-iron-700 tw-bg-iron-800 tw-shadow hover:tw-ring-iron-650";
-  const inputClasses = isSelected
-    ? "tw-text-primary-500 focus:tw-ring-primary-500"
-    : "tw-text-primary-400 focus:tw-ring-primary-400";
+    ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
+    : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10";
   const labelClasses = isSelected
-    ? "tw-text-primary-400"
-    : "tw-text-iron-300 group-hover:tw-text-iron-200";
+    ? "tw-text-white"
+    : "tw-text-iron-300 group-hover:tw-text-white";
   const descriptionClasses = isSelected
-    ? "tw-text-iron-200"
-    : "tw-text-iron-400";
+    ? "tw-text-iron-300"
+    : "tw-text-iron-500";
+  const hasDescription = description !== undefined;
 
   return (
     <label
-      className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-4 tw-rounded-lg tw-px-4 tw-py-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+      className={`${wrapperClasses} tw-group tw-flex tw-w-full tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-px-3 tw-py-3 tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+        hasDescription ? "tw-items-start" : "tw-items-center"
+      }`}
     >
       <input
         type="radio"
@@ -82,21 +84,37 @@ function SubmissionOptionRow<T extends string>({
         onChange={() => onChange(type)}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className={`${inputClasses} tw-form-radio tw-mt-1 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 sm:tw-h-5 sm:tw-w-5`}
+        className="tw-peer tw-sr-only"
       />
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-2">
+      <span
+        aria-hidden="true"
+        className={`tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-500 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 ${
+          isSelected
+            ? "tw-border-primary-400 tw-bg-primary-500/10"
+            : "tw-border-iron-600 tw-bg-transparent group-hover:tw-border-iron-500"
+        } ${hasDescription ? "tw-mt-1" : ""}`}
+      >
+        <span
+          className={`tw-h-2 tw-w-2 tw-rounded-full tw-bg-primary-400 tw-transition tw-duration-200 ${
+            isSelected ? "tw-scale-100" : "tw-scale-0"
+          }`}
+        />
+      </span>
+      <div className="tw-flex tw-min-w-0 tw-flex-col">
         <span
           id={titleId}
-          className={`${labelClasses} tw-text-base tw-font-semibold`}
+          className={`${labelClasses} tw-min-h-4 tw-text-sm tw-font-semibold`}
         >
           {label}
         </span>
-        <span
-          id={descriptionId}
-          className={`${descriptionClasses} tw-text-sm tw-font-medium tw-leading-6`}
-        >
-          {description}
-        </span>
+        {description && (
+          <span
+            id={descriptionId}
+            className={`${descriptionClasses} tw-mt-1 tw-text-xs tw-font-medium tw-leading-4`}
+          >
+            {description}
+          </span>
+        )}
       </div>
     </label>
   );
@@ -163,6 +181,20 @@ export default function CreateWaveDropsSubmissionMode({
     });
   };
 
+  const submissionModeOptions: {
+    readonly type: CreateWaveSubmissionMode;
+    readonly label: string;
+  }[] = [
+    {
+      type: CreateWaveSubmissionMode.STANDARD,
+      label: "Standard drops",
+    },
+    {
+      type: CreateWaveSubmissionMode.IDENTITY,
+      label: "Identity nominations",
+    },
+  ];
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       <div>
@@ -174,19 +206,18 @@ export default function CreateWaveDropsSubmissionMode({
         </p>
       </div>
 
-      <div className="tw-grid tw-gap-4 md:tw-grid-cols-2">
-        <CommonBorderedRadioButton
-          type={CreateWaveSubmissionMode.STANDARD}
-          selected={selectedMode}
-          label="Standard drops"
-          onChange={onSubmissionModeChange}
-        />
-        <CommonBorderedRadioButton
-          type={CreateWaveSubmissionMode.IDENTITY}
-          selected={selectedMode}
-          label="Identity nominations"
-          onChange={onSubmissionModeChange}
-        />
+      <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+        {submissionModeOptions.map((option) => (
+          <SubmissionOptionRow
+            key={option.type}
+            type={option.type}
+            selected={selectedMode}
+            label={option.label}
+            titleId={getOptionTitleId("submission-mode", option.type)}
+            groupName="submission-mode"
+            onChange={onSubmissionModeChange}
+          />
+        ))}
       </div>
 
       <CommonAnimationHeight>
@@ -196,7 +227,7 @@ export default function CreateWaveDropsSubmissionMode({
               <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
                 Which identities can a participant submit?
               </p>
-              <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-4">
+              <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
                 {(
                   Object.values(
                     ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted
@@ -237,7 +268,7 @@ export default function CreateWaveDropsSubmissionMode({
               <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
                 When can the same identity be submitted again?
               </p>
-              <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-4">
+              <div className="tw-mt-3 tw-grid tw-grid-cols-1 tw-gap-3">
                 {(
                   Object.values(
                     ApiWaveParticipationIdentitySubmissionAllowDuplicates

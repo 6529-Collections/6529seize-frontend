@@ -21,6 +21,16 @@ export const getCreateWaveStepStatus = ({
   return CreateWaveStepStatus.PENDING;
 };
 
+const getPeriodUpdate = <T>(
+  period: T | null | undefined
+): Partial<{ readonly period: T }> => {
+  if (period === null || period === undefined) {
+    return {};
+  }
+
+  return { period };
+};
+
 export const convertWaveToUpdateWave = (
   wave: ApiWave
 ): ApiUpdateWaveRequest => ({
@@ -34,7 +44,7 @@ export const convertWaveToUpdateWave = (
     credit_category: wave.voting.credit_category,
     creditor_id: wave.voting.creditor?.id ?? null,
     signature_required: !!wave.voting.signature_required,
-    ...(wave.voting.period != null && { period: wave.voting.period }),
+    ...getPeriodUpdate(wave.voting.period),
     forbid_negative_votes: wave.voting.forbid_negative_votes,
   },
   visibility: {
@@ -57,7 +67,7 @@ export const convertWaveToUpdateWave = (
     required_media: wave.participation.required_media,
     required_metadata: wave.participation.required_metadata,
     signature_required: !!wave.participation.signature_required,
-    ...(wave.participation.period && { period: wave.participation.period }),
+    ...getPeriodUpdate(wave.participation.period),
     terms: wave.participation.terms,
   },
   wave: {
@@ -65,6 +75,7 @@ export const convertWaveToUpdateWave = (
     type: wave.wave.type,
     winning_threshold: wave.wave.winning_threshold,
     max_winners: wave.wave.max_winners,
+    max_votes_per_identity_to_drop: wave.wave.max_votes_per_identity_to_drop,
     time_lock_ms: wave.wave.time_lock_ms,
     admin_group: {
       group_id: wave.wave.admin_group.group?.id ?? null,

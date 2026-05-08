@@ -9,6 +9,7 @@ import { DropLocation } from "@/components/waves/drops/Drop";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
+import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileMenuCopyLink";
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
@@ -266,6 +267,10 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <WaveDropMobileMenuOpen
                   drop={drop}
                   onOpenChange={() => setIsActive(false)}
+                />
+                <WaveDropMobileMenuCopyLink
+                  drop={drop}
+                  onCopy={() => setIsActive(false)}
                 />
 
                 <MemesArtResubmitAction

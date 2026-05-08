@@ -1,22 +1,41 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { WaveLeaderboardGallery } from '@/components/waves/leaderboard/gallery/WaveLeaderboardGallery';
-import { AuthContext } from '@/components/auth/Auth';
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { WaveLeaderboardGallery } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGallery";
+import { AuthContext } from "@/components/auth/Auth";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-jest.mock('@/hooks/useWaveDropsLeaderboard', () => ({
+jest.mock("@/hooks/useWaveDropsLeaderboard", () => ({
   useWaveDropsLeaderboard: jest.fn(),
-  WaveDropsLeaderboardSort: { RANK: 'RANK' },
+  WaveDropsLeaderboardSort: { RANK: "RANK" },
 }));
-jest.mock('@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem', () => ({
-  WaveLeaderboardGalleryItem: ({ drop, onDropClick }: any) => (
-    <div data-testid="item" onClick={() => onDropClick(drop)}>{drop.id}</div>
-  ),
-}));
+jest.mock(
+  "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem",
+  () => ({
+    WaveLeaderboardGalleryItem: ({
+      drop,
+      isVotingClosed,
+      isVotingControlsLocked,
+      onDropClick,
+    }: any) => (
+      <div
+        data-testid="item"
+        data-is-voting-closed={String(isVotingClosed)}
+        data-is-voting-controls-locked={String(isVotingControlsLocked)}
+        onClick={() => onDropClick(drop)}
+      >
+        {drop.id}
+      </div>
+    ),
+  })
+);
 
-const { useWaveDropsLeaderboard } = require('@/hooks/useWaveDropsLeaderboard');
+const { useWaveDropsLeaderboard } = require("@/hooks/useWaveDropsLeaderboard");
 
-const wave = { id: '1' } as any;
-const authValue = { connectedProfile: { handle: 'user' } } as any;
+const wave = {
+  id: "1",
+  wave: { type: ApiWaveType.Rank, winning_threshold: null },
+} as any;
+const authValue = { connectedProfile: { handle: "user" } } as any;
 
 function renderGallery(overrides: any) {
   (useWaveDropsLeaderboard as jest.Mock).mockReturnValue({
@@ -28,32 +47,55 @@ function renderGallery(overrides: any) {
   });
   return render(
     <AuthContext.Provider value={authValue}>
-      <WaveLeaderboardGallery wave={wave} sort="RANK" onDropClick={overrides.onDropClick || jest.fn()} />
+      <WaveLeaderboardGallery
+        wave={wave}
+        sort="RANK"
+        isVotingClosed={overrides.isVotingClosed}
+        isVotingControlsLocked={overrides.isVotingControlsLocked}
+        onDropClick={overrides.onDropClick || jest.fn()}
+      />
     </AuthContext.Provider>
   );
 }
 
-it('shows loading when fetching and no drops', () => {
+it("shows loading when fetching and no drops", () => {
   renderGallery({ isFetching: true });
-  expect(screen.getByText('Loading drops...', { selector: 'div' })).toBeInTheDocument();
+  expect(
+    screen.getByText("Loading drops...", { selector: "div" })
+  ).toBeInTheDocument();
 });
 
-it('shows empty message when no drops', () => {
+it("shows empty message when no drops", () => {
   renderGallery({});
-  expect(screen.getByText('No drops to show')).toBeInTheDocument();
+  expect(screen.getByText("No drops to show")).toBeInTheDocument();
 });
 
-it('renders drops with load more button', () => {
+it("renders drops with load more button", () => {
   const fetchNextPage = jest.fn();
   const onDropClick = jest.fn();
   const drops = [
-    { id: 'd1', parts: [{ media: [{ url: 'a', mime_type: 'image/jpeg' }] }] },
+    { id: "d1", parts: [{ media: [{ url: "a", mime_type: "image/jpeg" }] }] },
   ];
-  renderGallery({ drops, hasNextPage: true, fetchNextPage, onDropClick });
-  expect(screen.getByTestId('item')).toHaveTextContent('d1');
-  const button = screen.getByRole('button', { name: 'Load more drops' });
+  renderGallery({
+    drops,
+    hasNextPage: true,
+    fetchNextPage,
+    isVotingClosed: true,
+    isVotingControlsLocked: true,
+    onDropClick,
+  });
+  expect(screen.getByTestId("item")).toHaveTextContent("d1");
+  expect(screen.getByTestId("item")).toHaveAttribute(
+    "data-is-voting-closed",
+    "true"
+  );
+  expect(screen.getByTestId("item")).toHaveAttribute(
+    "data-is-voting-controls-locked",
+    "true"
+  );
+  const button = screen.getByRole("button", { name: "Load more drops" });
   fireEvent.click(button);
   expect(fetchNextPage).toHaveBeenCalled();
-  fireEvent.click(screen.getByTestId('item'));
+  fireEvent.click(screen.getByTestId("item"));
   expect(onDropClick).toHaveBeenCalledWith(drops[0]);
 });

@@ -23,7 +23,7 @@ jest.mock("@/components/common/TabToggleWithOverflow", () => ({
   __esModule: true,
   TabToggleWithOverflow: ({ options, activeKey }: any) => (
     <div data-testid="tabs">
-      {activeKey}-{options.length}
+      {activeKey}-{options.map((option: any) => option.label).join(",")}
     </div>
   ),
 }));
@@ -103,5 +103,26 @@ describe("WaveContent", () => {
       />
     );
     expect(setActiveTab).toHaveBeenCalledWith(SidebarTab.ABOUT);
+  });
+
+  it("keeps approve wave approval tabs available after voting completes", () => {
+    const setActiveTab = jest.fn();
+    useWaveTimers.mockReturnValue({
+      voting: { isCompleted: true },
+      decisions: { firstDecisionDone: false },
+    });
+    render(
+      <WaveContent
+        wave={{ wave: { type: ApiWaveType.Approve }, name: "Wave" } as any}
+        mode={Mode.CONTENT}
+        setMode={jest.fn()}
+        activeTab={SidebarTab.LEADERBOARD}
+        setActiveTab={setActiveTab}
+      />
+    );
+
+    expect(setActiveTab).not.toHaveBeenCalled();
+    expect(screen.getByTestId("tabs")).toHaveTextContent("Approvals");
+    expect(screen.getByTestId("tabs")).toHaveTextContent("Approved");
   });
 });

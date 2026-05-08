@@ -8,14 +8,24 @@ interface DefaultWaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: () => void;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly isApproveWave?: boolean | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export const DefaultWaveSmallLeaderboardDrop: React.FC<
   DefaultWaveSmallLeaderboardDropProps
-> = ({ drop, onDropClick, contentPresentation = "default" }) => {
+> = ({
+  drop,
+  onDropClick,
+  contentPresentation = "default",
+  isApproveWave = false,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
+}) => {
   return (
     <div className="tw-cursor-pointer" onClick={onDropClick}>
-      {typeof drop.rank === "number" && drop.rank <= 3 ? (
+      {!isApproveWave && typeof drop.rank === "number" && drop.rank <= 3 ? (
         <WaveSmallLeaderboardTopThreeDrop
           drop={drop}
           onDropClick={onDropClick}
@@ -26,6 +36,9 @@ export const DefaultWaveSmallLeaderboardDrop: React.FC<
           drop={drop}
           onDropClick={onDropClick}
           contentPresentation={contentPresentation}
+          isApproveWave={isApproveWave}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       )}
     </div>

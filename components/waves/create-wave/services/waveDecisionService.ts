@@ -19,6 +19,34 @@ export const calculateDecisionTimes = (
   return decisions;
 };
 
+export const getMinimumRollingEndDate = (
+  firstDecisionTime: number,
+  subsequentDecisions: number[]
+): number => {
+  if (subsequentDecisions.length === 0) {
+    return firstDecisionTime;
+  }
+
+  const decisions = calculateDecisionTimes(
+    firstDecisionTime,
+    subsequentDecisions
+  );
+  return decisions[decisions.length - 1]!;
+};
+
+export const clampRollingEndDate = (
+  dates: CreateWaveDatesConfig
+): number | null => {
+  if (dates.endDate === null || !Number.isFinite(dates.endDate)) {
+    return dates.endDate;
+  }
+
+  return Math.max(
+    dates.endDate,
+    getMinimumRollingEndDate(dates.firstDecisionTime, dates.subsequentDecisions)
+  );
+};
+
 /**
  * Calculates the end date based on decisions and rolling status
  */
@@ -26,20 +54,19 @@ export const calculateEndDate = (
   dates: CreateWaveDatesConfig
 ): number | null => {
   if (dates.isRolling) {
-    // If rolling, end date is explicitly set by user
-    return dates.endDate;
-  } else {
-    // If not rolling, end date is the last decision
-    if (dates.subsequentDecisions.length === 0) {
-      return dates.firstDecisionTime;
-    }
-
-    const decisions = calculateDecisionTimes(
-      dates.firstDecisionTime,
-      dates.subsequentDecisions
-    );
-    return decisions[decisions.length - 1]!;
+    return clampRollingEndDate(dates);
   }
+
+  // If not rolling, end date is the last decision
+  if (dates.subsequentDecisions.length === 0) {
+    return dates.firstDecisionTime;
+  }
+
+  const decisions = calculateDecisionTimes(
+    dates.firstDecisionTime,
+    dates.subsequentDecisions
+  );
+  return decisions[decisions.length - 1]!;
 };
 
 /**
@@ -65,7 +92,12 @@ export const validateDateSequence = (
     );
   }
 
-  if (dates.isRolling && !dates.endDate) {
+  if (
+    dates.isRolling &&
+    (dates.endDate === null ||
+      !Number.isFinite(dates.endDate) ||
+      dates.endDate <= 0)
+  ) {
     errors.push("Rolling mode requires an end date");
   }
 
@@ -87,8 +119,8 @@ export const adjustDatesAfterSubmissionChange = (
     newDates.votingStartDate = newSubmissionStartDate;
 
     // Ensure first decision is after voting
-    if (dates.firstDecisionTime < newSubmissionStartDate) {
-      newDates.firstDecisionTime = newSubmissionStartDate;
+    if (dates.firstDecisionTime < newDates.votingStartDate) {
+      newDates.firstDecisionTime = newDates.votingStartDate;
     }
   }
 
@@ -147,7 +179,7 @@ export const countTotalDecisions = (
   let totalDecisions = 1 + completeCycles * subsequentDecisions.length; // 1 is for first decision
 
   // Check if there are partial cycles
-  let timeInPartialCycle = remainingTime % cycleLength;
+  const timeInPartialCycle = remainingTime % cycleLength;
   let cumulativeTime = 0;
 
   // Count decisions in the partial cycle

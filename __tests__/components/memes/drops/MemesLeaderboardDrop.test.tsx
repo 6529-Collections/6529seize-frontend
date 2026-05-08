@@ -93,6 +93,9 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenuDelete", () => () => (
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
   <div data-testid="mobile-open" />
 ));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuCopyLink", () => () => (
+  <div data-testid="mobile-copy" />
+));
 jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({
   MemesArtResubmitAction: (p: any) => (
     <button data-testid="resubmit-action" onClick={p.onOpenModal}>
@@ -212,6 +215,26 @@ test("opens mobile resubmit modal after the touch menu leaves", async () => {
     expect.objectContaining({ isOpen: true })
   );
   expect(screen.getByTestId("resubmit-modal")).toBeInTheDocument();
+});
+
+test("shows copy link in the touch action sheet", () => {
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+  useIsMobileScreen.mockReturnValue(false);
+  useLongPressInteraction.mockReturnValueOnce({
+    isActive: true,
+    setIsActive: jest.fn(),
+    touchHandlers: {},
+  });
+
+  render(
+    <MemesLeaderboardDrop
+      drop={drop}
+      wave={{ id: "w1" } as any}
+      onDropClick={jest.fn()}
+    />
+  );
+
+  expect(screen.getByTestId("mobile-copy")).toBeInTheDocument();
 });
 
 test("notifies when mobile resubmit deletes the source drop", async () => {

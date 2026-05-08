@@ -93,8 +93,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Get wave type info to determine if gallery toggle should be shown
   // Show for CHAT type waves (normal waves), hide for RANK, MEMES, and DMs
-  const { isRankWave, isMemesWave, isDm } = useWave(wave);
-  const showGalleryToggle = !isRankWave && !isMemesWave && !isDm;
+  const { isRankWave, isApproveWave, isMemesWave, isDm } = useWave(wave);
+  const showGalleryToggle =
+    !isRankWave && !isApproveWave && !isMemesWave && !isDm;
   const hasSerialTarget = searchParams.get("serialNo") !== null;
 
   useEffect(() => {

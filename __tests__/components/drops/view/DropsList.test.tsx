@@ -104,6 +104,38 @@ describe("DropsList", () => {
     expect(lightProps).toHaveLength(1);
   });
 
+  it("passes approve wave state to full drops", () => {
+    const drops: any = [
+      { stableKey: "a", serial_no: 1, type: DropSize.FULL, wave: { id: "w" } },
+    ];
+
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={drops}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        parentContainerRef={undefined}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        dropViewDropId={null}
+        winningThreshold={42}
+        isVotingClosed={true}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(dropProps).toHaveLength(1);
+    expect(dropProps[0].winningThreshold).toBe(42);
+    expect(dropProps[0].isVotingClosed).toBe(true);
+    expect(dropProps[0].isVotingControlsLocked).toBe(true);
+  });
+
   it("renders unread divider when unreadDividerSerialNo matches a drop", () => {
     const drops: any = [
       { stableKey: "a", serial_no: 1, type: DropSize.FULL, wave: { id: "w" } },

@@ -1,7 +1,9 @@
 "use client";
 
+import { CameraIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, DragEvent } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 
 const ACCEPTED_FORMATS = [
@@ -45,11 +47,12 @@ export default function CreateWaveImageInput({
     }
   };
 
-  const handleDrop = (e: any) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e?.dataTransfer?.files?.length) {
-      onFileChange(e.dataTransfer.files[0]);
+    const file = e.dataTransfer.files.item(0);
+    if (file !== null) {
+      onFileChange(file);
     }
   };
 
@@ -68,7 +71,7 @@ export default function CreateWaveImageInput({
     };
   }, [previewUrl]);
 
-  const handleDrag = (e: any) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -81,8 +84,8 @@ export default function CreateWaveImageInput({
   };
 
   return (
-    <div className="tw-flex tw-gap-x-5">
-      <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
+    <div className="tw-flex tw-items-center tw-gap-x-5">
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-1.5">
         <div className="tw-flex-shrink-0">
           {imageToShow ? (
             <Image
@@ -92,10 +95,15 @@ export default function CreateWaveImageInput({
               height={80}
               unoptimized
               loader={({ src }) => src}
-              className="w-flex-shrink-0 tw-h-14 tw-w-14 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-2 tw-ring-iron-800 sm:tw-h-20 sm:tw-w-20"
+              className="tw-h-14 tw-w-14 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-object-cover sm:tw-h-20 sm:tw-w-20"
             />
           ) : (
-            <div className="w-flex-shrink-0 tw-h-14 tw-w-14 tw-rounded-full tw-bg-iron-700 tw-object-cover tw-ring-2 tw-ring-iron-900 sm:tw-h-20 sm:tw-w-20" />
+            <div className="tw-flex tw-h-14 tw-w-14 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-object-cover tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-text-iron-300 sm:tw-h-20 sm:tw-w-20">
+              <CameraIcon
+                aria-hidden="true"
+                className="tw-h-5 tw-w-5 sm:tw-h-6 sm:tw-w-6"
+              />
+            </div>
           )}
         </div>
         {imageToShow && allowRemove && (
@@ -119,15 +127,15 @@ export default function CreateWaveImageInput({
         <label
           className={` ${
             dragging
-              ? "tw-border-iron-600 tw-bg-iron-800"
-              : "tw-border-iron-700 tw-bg-iron-900"
-          } tw-flex tw-h-40 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-iron-600 hover:tw-bg-iron-800`}
+              ? "tw-border-white/20 tw-bg-iron-900"
+              : "tw-border-white/10 tw-bg-iron-900/60"
+          } tw-flex tw-h-40 tw-w-full tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-dashed tw-transition tw-duration-300 tw-ease-out hover:tw-border-white/20 hover:tw-bg-iron-900`}
         >
-          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pb-6 tw-pt-5">
-            <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out group-hover:tw-bg-iron-800">
-              <div className="tw-flex tw-h-5 tw-w-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-px-4 tw-py-5">
+            <div className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out group-hover:tw-border-white/20">
+              <div className="tw-flex tw-h-4 tw-w-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-50">
                 <svg
-                  className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-50"
+                  className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-white"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"
@@ -143,13 +151,13 @@ export default function CreateWaveImageInput({
                 </svg>
               </div>
             </div>
-            <p className="tw-mb-2 tw-mt-4 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
+            <p className="tw-mb-1 tw-mt-3 tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-text-sm">
               <span className="tw-font-medium tw-text-white">
                 Click to upload
               </span>{" "}
               or drag and drop
             </p>
-            <p className="tw-mb-0 tw-text-xs tw-font-normal tw-text-iron-400">
+            <p className="tw-mb-0 tw-text-xs tw-font-normal tw-text-iron-500">
               JPEG, JPG, PNG, GIF, WEBP
             </p>
           </div>
@@ -159,10 +167,13 @@ export default function CreateWaveImageInput({
             type="file"
             className="tw-hidden"
             accept={ACCEPTED_FORMATS_DISPLAY}
-            onChange={(e: any) => {
-              if (e.target.files) {
-                const f = e.target.files[0];
-                onFileChange(f);
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const files = e.target.files;
+              if (files !== null) {
+                const file = files.item(0);
+                if (file !== null) {
+                  onFileChange(file);
+                }
               }
             }}
           />

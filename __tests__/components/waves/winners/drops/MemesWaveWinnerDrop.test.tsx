@@ -5,6 +5,8 @@ import { MemesWaveWinnersDrop } from "@/components/waves/winners/drops/MemesWave
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 
+const mockMobileMenuOpenClick = jest.fn();
+
 jest.mock("@/helpers/waves/drop.helpers", () => ({
   convertApiDropToExtendedDrop: jest.fn(() => ({ id: "ext" })),
 }));
@@ -48,26 +50,35 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ hasTouchScreen: false }),
+  default: jest.fn(),
 }));
 jest.mock("@/hooks/useLongPressInteraction", () => ({
   __esModule: true,
-  default: () => ({
-    isActive: false,
-    setIsActive: jest.fn(),
-    touchHandlers: {},
-  }),
+  default: jest.fn(),
 }));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="actions" />
 ));
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper",
-  () => (p: any) => <div>{p.children}</div>
+  () => (p: any) =>
+    p.isOpen ? <div data-testid="mobile-wrapper">{p.children}</div> : null
 );
-jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => () => (
-  <div data-testid="mobile" />
-));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
+  __esModule: true,
+  default: (props: { onOpenChange: () => void }) => (
+    <button
+      type="button"
+      data-testid="mobile"
+      onClick={() => {
+        mockMobileMenuOpenClick();
+        props.onOpenChange();
+      }}
+    >
+      Open drop
+    </button>
+  ),
+}));
 jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
   <span data-testid="time" />
 ));
@@ -98,7 +109,22 @@ const winner: ApiWaveDecisionWinner = {
 } as any;
 const wave: ApiWave = { voting: { credit_type: "votes" } } as any;
 
+const useDeviceInfo = require("@/hooks/useDeviceInfo").default as jest.Mock;
+const useLongPressInteraction = require("@/hooks/useLongPressInteraction")
+  .default as jest.Mock;
+
 describe("MemesWaveWinnersDrop", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockMobileMenuOpenClick.mockClear();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+    useLongPressInteraction.mockReturnValue({
+      isActive: false,
+      setIsActive: jest.fn(),
+      touchHandlers: {},
+    });
+  });
+
   it("calls convert helper and onDropClick", async () => {
     const user = userEvent.setup();
     const onClick = jest.fn();
@@ -114,5 +140,77 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByTestId("author-badges")).toBeInTheDocument();
     expect(screen.getByTestId("identity")).toBeInTheDocument();
     expect(screen.getByAltText("alice's profile picture")).toBeInTheDocument();
+  });
+
+  it("keeps native tap behavior for touch long-press handlers", () => {
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(useLongPressInteraction).toHaveBeenCalledWith({
+      hasTouchScreen: true,
+      onInteractionStart: expect.any(Function),
+      preventDefault: false,
+    });
+  });
+
+  it("suppresses the click that follows a long press", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+
+    const { container } = render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    const longPressOptions = useLongPressInteraction.mock.calls[0][0];
+    longPressOptions.onInteractionStart();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).not.toHaveBeenCalled();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets the first portal menu tap run after a long press", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+    const setIsActive = jest.fn();
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+    useLongPressInteraction.mockReturnValue({
+      isActive: true,
+      setIsActive,
+      touchHandlers: {},
+    });
+
+    const { container } = render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    const longPressOptions = useLongPressInteraction.mock.calls[0][0];
+    longPressOptions.onInteractionStart();
+
+    await user.click(screen.getByTestId("mobile"));
+    expect(mockMobileMenuOpenClick).toHaveBeenCalledTimes(1);
+    expect(setIsActive).toHaveBeenCalledWith(false);
+    expect(onDropClick).not.toHaveBeenCalled();
+
+    await user.click(container.firstElementChild as HTMLElement);
+    expect(onDropClick).toHaveBeenCalledTimes(1);
   });
 });

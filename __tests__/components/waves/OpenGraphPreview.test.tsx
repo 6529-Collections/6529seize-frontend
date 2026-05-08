@@ -112,15 +112,31 @@ describe("OpenGraphPreview", () => {
     const card = screen.getByTestId("og-preview-card");
     expect(card).toBeInTheDocument();
     expect(card).toHaveClass("tw-h-full");
+    expect(card.firstElementChild).toHaveClass(
+      "tw-flex-row",
+      "tw-h-full",
+      "tw-min-h-0"
+    );
     expect(screen.getByText("Example.com")).toBeInTheDocument();
     const titleLinks = screen.getAllByRole("link", { name: "Example Title" });
     expect(titleLinks).toHaveLength(2);
+    expect(titleLinks[0]).toHaveClass(
+      "tw-h-full",
+      "tw-w-28",
+      "sm:tw-w-32",
+      "md:tw-w-44"
+    );
     const titleLink = titleLinks[1];
     expect(titleLink).toHaveAttribute("href", "/article");
     expect(titleLink).not.toHaveAttribute("target");
     const image = screen.getByAltText("Example Title");
     expect(image).toHaveAttribute("src", "https://cdn.example.com/preview.png");
-    expect(image.parentElement).toHaveClass("tw-aspect-[16/9]");
+    expect(image).toHaveAttribute(
+      "sizes",
+      "(max-width: 640px) 7rem, (max-width: 768px) 8rem, 176px"
+    );
+    expect(image.parentElement).toHaveClass("tw-h-full", "tw-w-full");
+    expect(image.parentElement).not.toHaveClass("tw-aspect-[16/9]");
     expect(screen.getByText("An example description")).toBeInTheDocument();
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
   });

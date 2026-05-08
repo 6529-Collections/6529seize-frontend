@@ -38,4 +38,19 @@ describe("WaveWinnersDropContent", () => {
     await user.click(screen.getByTestId("content"));
     expect(push).toHaveBeenCalledWith("/waves/w1?serialNo=2");
   });
+
+  it("forwards content presentation to WaveDropContent", () => {
+    render(
+      <WaveWinnersDropContent
+        winner={winner}
+        contentPresentation="quorumCompact"
+      />
+    );
+
+    expect(WaveDropContentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
+  });
 });

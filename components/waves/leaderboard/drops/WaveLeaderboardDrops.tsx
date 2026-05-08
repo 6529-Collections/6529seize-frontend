@@ -14,6 +14,8 @@ import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onCreateDrop?: (() => void) | undefined;
   readonly curatedByGroupId?: string | undefined;
@@ -25,6 +27,8 @@ interface WaveLeaderboardDropsProps {
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
   sort,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
   onDropClick,
   onCreateDrop,
   curatedByGroupId,
@@ -32,15 +36,25 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   maxPrice,
   priceCurrency,
 }) => {
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDropsLeaderboard({
-      waveId: wave.id,
-      sort,
-      curatedByGroupId,
-      minPrice,
-      maxPrice,
-      priceCurrency,
-    });
+  const {
+    drops,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    refetch,
+  } = useWaveDropsLeaderboard({
+    waveId: wave.id,
+    sort,
+    curatedByGroupId,
+    minPrice,
+    maxPrice,
+    priceCurrency,
+  });
+
+  const handleSourceDropDeleted = React.useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
   const intersectionElementRef = useIntersectionObserver(async () => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -66,6 +80,9 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           drop={drop}
           wave={wave}
           onDropClick={onDropClick}
+          onSourceDropDeleted={handleSourceDropDeleted}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       ))}
       {isFetchingNextPage && <WaveLeaderboardLoadingBar />}
