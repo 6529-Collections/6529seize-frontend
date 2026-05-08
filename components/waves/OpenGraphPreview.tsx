@@ -493,15 +493,22 @@ export default function OpenGraphPreview({
           className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
           data-testid="og-preview-card"
         >
-          <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-gap-3 md:tw-flex-row">
+          <div
+            className={
+              imageUrl
+                ? "tw-flex tw-h-full tw-min-h-0 tw-flex-row tw-gap-3"
+                : "tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-gap-3 md:tw-flex-row"
+            }
+          >
             {imageUrl && (
               <Link
                 href={effectiveHref}
                 target={linkTarget}
                 rel={linkRel}
-                className="tw-block tw-w-full tw-flex-shrink-0 md:tw-h-full md:tw-w-44"
+                className="tw-block tw-h-full tw-w-28 tw-flex-shrink-0 sm:tw-w-32 md:tw-w-44"
               >
-                <div className="tw-aspect-[16/9] tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60 md:tw-aspect-auto">
+                <div className="tw-h-full tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/60">
+                  {/* OG image hosts are arbitrary, so many are not in Next remotePatterns. */}
                   <Image
                     src={imageUrl}
                     alt={title ?? domain ?? "Link preview"}
@@ -509,7 +516,7 @@ export default function OpenGraphPreview({
                     height={630}
                     className="tw-h-full tw-w-full tw-object-cover"
                     loading="lazy"
-                    sizes="(max-width: 768px) 100vw, 240px"
+                    sizes="(max-width: 640px) 7rem, (max-width: 768px) 8rem, 176px"
                     unoptimized
                   />
                 </div>
