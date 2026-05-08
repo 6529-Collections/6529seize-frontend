@@ -6,7 +6,9 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
 
-const RESPONSIVE_IMAGE_GRID_SIZES = "(max-width: 767px) 100vw, 33vw";
+const TWO_COLUMN_RESPONSIVE_IMAGE_GRID_SIZES = "(max-width: 767px) 100vw, 50vw";
+const THREE_COLUMN_RESPONSIVE_IMAGE_GRID_SIZES =
+  "(max-width: 767px) 100vw, 33vw";
 
 function isImageMedia(mimeType: string): boolean {
   return mimeType.includes("image");
@@ -63,8 +65,13 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     activePart.media.every((media) => isImageMedia(media.mime_type)) &&
     !fullWidthMedia &&
     !disableMediaInteraction;
-  const desktopGridColumnClassName =
-    activePart.media.length === 2 ? "md:tw-grid-cols-2" : "md:tw-grid-cols-3";
+  const usesTwoColumnResponsiveGrid = activePart.media.length === 2;
+  const desktopGridColumnClassName = usesTwoColumnResponsiveGrid
+    ? "md:tw-grid-cols-2"
+    : "md:tw-grid-cols-3";
+  const responsiveImageGridSizes = usesTwoColumnResponsiveGrid
+    ? TWO_COLUMN_RESPONSIVE_IMAGE_GRID_SIZES
+    : THREE_COLUMN_RESPONSIVE_IMAGE_GRID_SIZES;
   const mediaStackClassName = useResponsiveImageGrid
     ? clsx(
         topSpacingClassName,
@@ -129,7 +136,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               isCompetitionDrop={isCompetitionDrop}
               imageScale={imageScale}
               imageSizes={
-                useResponsiveImageGrid ? RESPONSIVE_IMAGE_GRID_SIZES : undefined
+                useResponsiveImageGrid ? responsiveImageGridSizes : undefined
               }
               useResponsiveImageSrcSet={useResponsiveImageGrid}
             />

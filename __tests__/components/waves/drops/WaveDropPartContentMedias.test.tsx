@@ -28,7 +28,8 @@ jest.mock("@/components/waves/drops/WaveDropPartContentFullWidthImage", () => ({
   default: () => <div data-testid="full-width-image" />,
 }));
 
-const responsiveGridImageSizes = "(max-width: 767px) 100vw, 33vw";
+const twoColumnResponsiveGridImageSizes = "(max-width: 767px) 100vw, 50vw";
+const threeColumnResponsiveGridImageSizes = "(max-width: 767px) 100vw, 33vw";
 
 const createImageMedia = (count: number) =>
   Array.from({ length: count }, (_, index) => ({
@@ -99,7 +100,7 @@ describe("WaveDropPartContentMedias", () => {
     expect(layout).toHaveClass("tw-grid", "tw-grid-cols-1", "tw-gap-3");
     expect(firstMedia).toHaveAttribute(
       "data-image-sizes",
-      responsiveGridImageSizes
+      twoColumnResponsiveGridImageSizes
     );
     expect(firstMedia).toHaveAttribute("data-responsive-srcset", "true");
     expect(firstMediaContainer).toHaveClass(
@@ -108,7 +109,7 @@ describe("WaveDropPartContentMedias", () => {
     );
   });
 
-  it("uses two desktop columns for two image media items", () => {
+  it("uses two desktop columns and 50vw sizes for two images", () => {
     const { container } = render(
       <WaveDropPartContentMedias
         activePart={createPart(createImageMedia(2))}
@@ -117,11 +118,16 @@ describe("WaveDropPartContentMedias", () => {
     );
 
     const layout = getLayout(container);
+    const firstMedia = screen.getAllByTestId("drop-media")[0]!;
     expect(layout).toHaveClass("md:tw-grid-cols-2");
     expect(layout).not.toHaveClass("md:tw-grid-cols-3");
+    expect(firstMedia).toHaveAttribute(
+      "data-image-sizes",
+      twoColumnResponsiveGridImageSizes
+    );
   });
 
-  it("uses three desktop columns for three or more image media items", () => {
+  it("uses three desktop columns and 33vw sizes for 3+ images", () => {
     const { container } = render(
       <WaveDropPartContentMedias
         activePart={createPart(createImageMedia(4))}
@@ -130,8 +136,13 @@ describe("WaveDropPartContentMedias", () => {
     );
 
     const layout = getLayout(container);
+    const firstMedia = screen.getAllByTestId("drop-media")[0]!;
     expect(layout).toHaveClass("md:tw-grid-cols-3");
     expect(layout).not.toHaveClass("md:tw-grid-cols-2");
+    expect(firstMedia).toHaveAttribute(
+      "data-image-sizes",
+      threeColumnResponsiveGridImageSizes
+    );
   });
 
   it("keeps mixed image and video media stacked", () => {
