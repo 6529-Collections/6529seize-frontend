@@ -41,6 +41,11 @@ jest.mock(
         data-has-end-before-voting-error={String(
           props.errors.includes("END_DATE_MUST_BE_AFTER_VOTING_START_DATE")
         )}
+        data-has-first-before-voting-error={String(
+          props.errors.includes(
+            "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE"
+          )
+        )}
         onClick={() => {
           props.onInteraction();
         }}
@@ -77,6 +82,11 @@ jest.mock(
       )}
       data-has-end-before-voting-error={String(
         props.errors.includes("END_DATE_MUST_BE_AFTER_VOTING_START_DATE")
+      )}
+      data-has-first-before-voting-error={String(
+        props.errors.includes(
+          "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE"
+        )
       )}
     />
   )
@@ -279,6 +289,35 @@ describe("CreateWaveDatesRank", () => {
     expect(screen.getByTestId("rolling")).toHaveAttribute(
       "data-has-end-before-voting-error",
       "true"
+    );
+  });
+
+  it("routes first-decision-before-voting errors to decisions for rolling waves", () => {
+    const dates = {
+      ...baseDates,
+      endDate: null,
+      subsequentDecisions: [100],
+      isRolling: true,
+    };
+
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={dates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-first-before-voting-error",
+      "true"
+    );
+    expect(screen.getByTestId("rolling")).toHaveAttribute(
+      "data-has-first-before-voting-error",
+      "false"
     );
   });
 

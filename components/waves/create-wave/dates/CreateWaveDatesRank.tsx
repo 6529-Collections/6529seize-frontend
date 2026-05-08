@@ -39,9 +39,14 @@ export default function CreateWaveDatesRank({
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE;
   const endDateBeforeVotingStartError =
     CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE;
+  const firstDecisionBeforeVotingStartError =
+    CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE;
   const hasRankFutureDateError = errors.includes(rankFutureDateError);
   const hasEndDateBeforeVotingStartError = errors.includes(
     endDateBeforeVotingStartError
+  );
+  const hasFirstDecisionBeforeVotingStartError = errors.includes(
+    firstDecisionBeforeVotingStartError
   );
   const now = hasRankFutureDateError ? Time.currentMillis() : null;
   const isFirstDecisionTimeInPast =
@@ -53,10 +58,15 @@ export default function CreateWaveDatesRank({
     (!Number.isFinite(dates.endDate) || dates.endDate <= now);
   const unroutedErrors = errors.filter(
     (error) =>
-      error !== rankFutureDateError && error !== endDateBeforeVotingStartError
+      error !== rankFutureDateError &&
+      error !== endDateBeforeVotingStartError &&
+      error !== firstDecisionBeforeVotingStartError
   );
   const decisionErrors = [
     ...unroutedErrors,
+    ...(hasFirstDecisionBeforeVotingStartError
+      ? [firstDecisionBeforeVotingStartError]
+      : []),
     ...(hasEndDateBeforeVotingStartError && !dates.isRolling
       ? [endDateBeforeVotingStartError]
       : []),

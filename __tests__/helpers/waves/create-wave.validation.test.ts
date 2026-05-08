@@ -248,6 +248,94 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("rejects rolling rank dates when the first decision is before voting starts", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now + HOUR_IN_MS * 2,
+        firstDecisionTime: now + HOUR_IN_MS,
+        endDate: null,
+        subsequentDecisions: [HOUR_IN_MS],
+        isRolling: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("uses the first-decision error when a fixed final announcement is after voting starts", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now + HOUR_IN_MS * 3,
+        firstDecisionTime: now + HOUR_IN_MS * 2,
+        endDate: null,
+        subsequentDecisions: [HOUR_IN_MS * 2],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("allows first rank decision at the voting start time", () => {
+    const now = 1_000;
+    const votingStartDate = now + HOUR_IN_MS;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate,
+        firstDecisionTime: votingStartDate,
+        endDate: null,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+  });
+
   it("chat waves cannot have voting", () => {
     const chatConfig = {
       ...baseConfig,

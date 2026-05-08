@@ -136,4 +136,28 @@ describe("Decisions", () => {
       "Last winners announcement cannot be before voting begins. Move voting start earlier or move winner announcements later."
     );
   });
+
+  it("opens and shows an alert when the first announcement is before voting starts", () => {
+    render(
+      <Decisions
+        dates={baseDates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE,
+        ]}
+        setDates={jest.fn()}
+        onRollingEnabled={jest.fn()}
+        isExpanded={false}
+        setIsExpanded={jest.fn()}
+        onInteraction={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("accordion")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "First winners announcement cannot be before voting begins. Move voting start earlier or move first winners announcement later."
+    );
+  });
 });
