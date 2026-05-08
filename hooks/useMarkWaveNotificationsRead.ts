@@ -15,14 +15,16 @@ import { useContext } from "react";
 export function useWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
   const { address } = useSeizeConnectContext();
-  const { activeProfileProxy } = useAuth();
+  const { activeProfileProxy, connectedProfile } = useAuth();
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
   const activeProfileProxyCreatorId = activeProfileProxy
     ? activeProfileProxy.created_by.id
     : null;
+  const connectedProfileId = connectedProfile?.id ?? null;
 
   return useWaveNotificationsReadMarkerStateFromConfig({
     address,
+    connectedProfileId,
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     walletAuth: getAuthJwt(),

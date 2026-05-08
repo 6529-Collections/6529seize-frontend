@@ -124,6 +124,7 @@ const createWrapper =
 const setActiveIdentity = ({
   address,
   jwt,
+  connectedProfileId,
   activeProfileProxyId,
   activeProfileProxyCreatorId,
   jwtAddress,
@@ -133,6 +134,7 @@ const setActiveIdentity = ({
 }: {
   readonly address?: string | undefined;
   readonly jwt?: string | null | undefined;
+  readonly connectedProfileId?: string | null | undefined;
   readonly activeProfileProxyId?: string | null | undefined;
   readonly activeProfileProxyCreatorId?: string | null | undefined;
   readonly jwtAddress?: string | undefined;
@@ -156,6 +158,7 @@ const setActiveIdentity = ({
 
   useSeizeConnectContextMock.mockReturnValue({ address } as any);
   useAuthMock.mockReturnValue({
+    connectedProfile: connectedProfileId ? { id: connectedProfileId } : null,
     activeProfileProxy: activeProfileProxyId
       ? { id: activeProfileProxyId, created_by: { id: proxyCreatorId } }
       : null,
@@ -231,6 +234,63 @@ describe("useMarkWaveNotificationsRead", () => {
       endpoint: "notifications/wave/wave-1/read",
       headers: { Authorization: "Bearer jwt-a" },
     });
+  });
+
+  it("treats the connected profile's own JWT role as primary auth when no proxy is active", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-own-role",
+      connectedProfileId: "profile-1",
+      jwtRole: "profile-1",
+    });
+
+    const { result } = renderHook(() => useWaveNotificationsReadMarkerState(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    expect(result.current.proxyRoleIdentityKey).toBeNull();
+
+    await expect(
+      result.current.markWaveNotificationsRead("wave-own-role")
+    ).resolves.toBe("sent");
+
+    expect(apiPostMock).toHaveBeenCalledTimes(1);
+    expect(apiPostMock).toHaveBeenCalledWith({
+      endpoint: "notifications/wave/wave-own-role/read",
+      headers: { Authorization: "Bearer jwt-own-role" },
+    });
+  });
+
+  it("does not treat a different JWT role as primary auth when no proxy is active", async () => {
+    const invalidateNotifications = jest.fn();
+
+    setActiveIdentity({
+      address: "0xAAA",
+      jwt: "jwt-other-role",
+      connectedProfileId: "profile-1",
+      jwtRole: "creator-1",
+    });
+
+    const { result } = renderHook(() => useWaveNotificationsReadMarkerState(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    expect(result.current.proxyRoleIdentityKey).toBe(
+      getWaveReadProxyRoleIdentityKey({
+        addressKey: "0xaaa",
+        proxyCreatorId: "creator-1",
+      })
+    );
+
+    await expect(
+      result.current.markWaveNotificationsRead("wave-other-role", {
+        queueIfBlocked: false,
+      })
+    ).resolves.toBe("skipped");
+
+    expect(apiPostMock).not.toHaveBeenCalled();
   });
 
   it("does not queue a read before the wallet address is known", async () => {
