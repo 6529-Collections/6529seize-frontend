@@ -32,6 +32,7 @@ interface WaveDropPartDropProps {
   isCompetitionDrop?: boolean | undefined;
   mediaImageScale?: ImageScale | undefined;
   fullWidthMedia?: boolean | undefined;
+  responsiveImageGrid?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
@@ -58,6 +59,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
   fullWidthMedia = false,
+  responsiveImageGrid = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
   embedPath,
@@ -93,6 +95,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             isCompetitionDrop={isCompetitionDrop}
             mediaImageScale={mediaImageScale}
             fullWidthMedia={fullWidthMedia}
+            responsiveImageGrid={responsiveImageGrid}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
             contentPresentation={contentPresentation}
             embedPath={embedPath}

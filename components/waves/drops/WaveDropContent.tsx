@@ -31,6 +31,7 @@ interface WaveDropContentProps {
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
+  readonly responsiveImageGrid?: boolean | undefined;
   readonly hasTouch?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -57,6 +58,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
   fullWidthMedia = false,
+  responsiveImageGrid = false,
   hasTouch,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
@@ -84,6 +86,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       isCompetitionDrop={isCompetitionDrop}
       mediaImageScale={mediaImageScale}
       fullWidthMedia={fullWidthMedia}
+      responsiveImageGrid={responsiveImageGrid}
       hasTouch={effectiveHasTouch}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
       contentPresentation={contentPresentation}

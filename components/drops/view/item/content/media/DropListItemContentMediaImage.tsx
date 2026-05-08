@@ -37,6 +37,7 @@ function DropListItemContentMediaImage({
   disableModal = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx450,
+  imageSizes = "(max-width: 768px) 100vw, 768px",
   loadStrategy = "in-view",
 }: {
   readonly src: string;
@@ -46,6 +47,7 @@ function DropListItemContentMediaImage({
   readonly disableModal?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly imageSizes?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
@@ -315,7 +317,7 @@ function DropListItemContentMediaImage({
             optimize={false}
             fill
             loading={loadStrategy === "eager" ? "eager" : undefined}
-            sizes="(max-width: 768px) 100vw, 768px"
+            sizes={imageSizes}
             className={`tw-max-h-full tw-max-w-full ${
               !loaded ? "tw-opacity-0" : "tw-opacity-100"
             } ${disableModal ? "" : "tw-cursor-pointer"}`}

@@ -317,6 +317,7 @@ const getContentBlock = ({
   handleOnReply,
   handleOnEdit,
   hasActiveLinkCardActions,
+  responsiveImageGrid,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -352,6 +353,7 @@ const getContentBlock = ({
   readonly handleOnReply: () => void;
   readonly handleOnEdit: () => void;
   readonly hasActiveLinkCardActions: boolean;
+  readonly responsiveImageGrid: boolean;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -392,6 +394,7 @@ const getContentBlock = ({
             onCancel={handleEditCancel}
             hasTouch={allowLongPress}
             onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+            responsiveImageGrid={responsiveImageGrid}
           />
         </div>
       </div>
@@ -619,7 +622,7 @@ const WaveDrop = ({
       );
       const updatedParts: ApiCreateDropPart[] = drop.parts.map(
         (part, index) => {
-          const attachments = (part.attachments ?? []).map((attachment) => ({
+          const attachments = part.attachments.map((attachment) => ({
             attachment_id: attachment.attachment_id,
           }));
           const requestPart: ApiCreateDropPart = {
@@ -745,6 +748,7 @@ const WaveDrop = ({
     handleOnReply,
     handleOnEdit,
     hasActiveLinkCardActions,
+    responsiveImageGrid: location === DropLocation.WAVE,
   });
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (

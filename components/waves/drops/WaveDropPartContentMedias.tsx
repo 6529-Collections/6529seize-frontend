@@ -6,9 +6,15 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
 
+const RESPONSIVE_IMAGE_GRID_SIZES = "(max-width: 767px) 100vw, 33vw";
+
+function isImageMedia(mimeType: string): boolean {
+  return mimeType.includes("image");
+}
+
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
-    mimeType.includes("image") ||
+    isImageMedia(mimeType) ||
     mimeType.includes("video") ||
     mimeType.includes("audio") ||
     mimeType === "model/gltf-binary" ||
@@ -25,6 +31,7 @@ interface WaveDropPartContentMediasProps {
   readonly isCompetitionDrop?: boolean | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
+  readonly responsiveImageGrid?: boolean | undefined;
 }
 
 const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
@@ -33,6 +40,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   isCompetitionDrop = false,
   imageScale = ImageScale.AUTOx450,
   fullWidthMedia = false,
+  responsiveImageGrid = false,
 }) => {
   if (!activePart.media.length) {
     return null;
@@ -49,13 +57,29 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     topSpacingClassName = "tw-mt-0";
   }
 
-  const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
+  const useResponsiveImageGrid =
+    responsiveImageGrid &&
+    activePart.media.length > 1 &&
+    activePart.media.every((media) => isImageMedia(media.mime_type)) &&
+    !fullWidthMedia &&
+    !disableMediaInteraction;
+  const desktopGridColumnClassName =
+    activePart.media.length === 2 ? "md:tw-grid-cols-2" : "md:tw-grid-cols-3";
+  const mediaStackClassName = useResponsiveImageGrid
+    ? clsx(
+        topSpacingClassName,
+        "tw-grid tw-grid-cols-1 tw-gap-3",
+        desktopGridColumnClassName
+      )
+    : clsx(topSpacingClassName, "tw-space-y-3");
   const getMediaContainerClassName = ({
     useNaturalHeightImage,
     useCompactLink,
+    useResponsiveGridItem,
   }: {
     readonly useNaturalHeightImage: boolean;
     readonly useCompactLink: boolean;
+    readonly useResponsiveGridItem: boolean;
   }) => {
     if (useNaturalHeightImage || useCompactLink) {
       return "tw-w-full";
@@ -63,6 +87,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
     return clsx(
       "tw-flex tw-h-64 tw-items-center tw-justify-center",
+      useResponsiveGridItem && "md:tw-aspect-square md:tw-h-auto",
       fullWidthMedia && "tw-w-full"
     );
   };
@@ -76,6 +101,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         const mediaContainerClassName = getMediaContainerClassName({
           useNaturalHeightImage,
           useCompactLink,
+          useResponsiveGridItem: useResponsiveImageGrid,
         });
         let mediaContent;
 
@@ -102,6 +128,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               media_url={media.url}
               isCompetitionDrop={isCompetitionDrop}
               imageScale={imageScale}
+              imageSizes={
+                useResponsiveImageGrid ? RESPONSIVE_IMAGE_GRID_SIZES : undefined
+              }
             />
           );
         }

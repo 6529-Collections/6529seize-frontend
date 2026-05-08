@@ -42,6 +42,7 @@ interface WaveDropPartContentProps {
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
+  readonly responsiveImageGrid?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
@@ -52,9 +53,11 @@ interface WaveDropPartContentProps {
   readonly maxEmbedDepth?: number | undefined;
 }
 
+const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
+
 const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   mentionedUsers,
-  mentionedGroups = [],
+  mentionedGroups = EMPTY_MENTIONED_GROUPS,
   mentionedWaves,
   referencedNfts,
   wave,
@@ -73,6 +76,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
   fullWidthMedia = false,
+  responsiveImageGrid = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
   embedPath,
@@ -187,10 +191,11 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               isCompetitionDrop={isCompetitionDrop}
               imageScale={mediaImageScale}
               fullWidthMedia={fullWidthMedia}
+              responsiveImageGrid={responsiveImageGrid}
             />
           )}
           <WaveDropPartContentAttachments
-            attachments={activePart.attachments ?? []}
+            attachments={activePart.attachments}
           />
         </div>
 

@@ -4,7 +4,12 @@ import DropListItemContentMedia from "@/components/drops/view/item/content/media
 
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaImage",
-  () => ({ __esModule: true, default: () => <div data-testid="image" /> })
+  () => ({
+    __esModule: true,
+    default: (props: any) => (
+      <div data-testid="image" data-image-sizes={props.imageSizes ?? ""} />
+    ),
+  })
 );
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMediaVideo",
@@ -43,6 +48,20 @@ describe("DropListItemContentMedia", () => {
       <DropListItemContentMedia media_mime_type="image/png" media_url="img" />
     );
     expect(screen.getByTestId("image")).toBeInTheDocument();
+  });
+
+  it("forwards image sizes to the image component", () => {
+    render(
+      <DropListItemContentMedia
+        media_mime_type="image/png"
+        media_url="img"
+        imageSizes="(max-width: 767px) 100vw, 33vw"
+      />
+    );
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-image-sizes",
+      "(max-width: 767px) 100vw, 33vw"
+    );
   });
 
   it("renders video component", () => {

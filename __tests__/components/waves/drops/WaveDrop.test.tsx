@@ -6,8 +6,10 @@ import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { editSlice } from "@/store/editSlice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
 const mockWaveDropActions = jest.fn();
+const mockWaveDropContent = jest.fn();
 const mockMutate = jest.fn();
 let mockEditMentionedGroups: ApiDropGroupMention[] = [];
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
@@ -17,22 +19,31 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
 jest.mock("@/components/waves/drops/WaveDropReply", () => () => (
   <div data-testid="reply" />
 ));
-jest.mock("@/components/waves/drops/WaveDropContent", () => (props: any) => (
-  <div>
-    <button
-      type="button"
-      data-testid="content"
-      onClick={() =>
-        props.onLinkCardActionsActiveChange?.("https://example.com", true)
-      }
-    />
-    <button
-      type="button"
-      data-testid="save-edit"
-      onClick={() => props.onSave?.("edited", [], mockEditMentionedGroups, [])}
-    />
-  </div>
-));
+jest.mock("@/components/waves/drops/WaveDropContent", () => {
+  const MockWaveDropContent = (props: any) => {
+    mockWaveDropContent(props);
+    return (
+      <div>
+        <button
+          type="button"
+          data-testid="content"
+          onClick={() =>
+            props.onLinkCardActionsActiveChange?.("https://example.com", true)
+          }
+        />
+        <button
+          type="button"
+          data-testid="save-edit"
+          onClick={() =>
+            props.onSave?.("edited", [], mockEditMentionedGroups, [])
+          }
+        />
+      </div>
+    );
+  };
+
+  return MockWaveDropContent;
+});
 jest.mock("@/components/waves/drops/WaveDropHeader", () => () => (
   <div data-testid="header" />
 ));
@@ -125,6 +136,7 @@ const drop: any = {
 describe("WaveDrop", () => {
   beforeEach(() => {
     mockWaveDropActions.mockClear();
+    mockWaveDropContent.mockClear();
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
   });
@@ -195,6 +207,54 @@ describe("WaveDrop", () => {
     expect(mockWaveDropActions).toHaveBeenLastCalledWith(
       expect.objectContaining({ suppressed: true }),
       undefined
+    );
+  });
+
+  it("enables responsive image grid for wave view content", () => {
+    isMobileMock.mockReturnValue(false);
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockWaveDropContent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ responsiveImageGrid: true })
+    );
+  });
+
+  it("keeps responsive image grid disabled outside wave view content", () => {
+    isMobileMock.mockReturnValue(false);
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.MY_STREAM}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mockWaveDropContent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ responsiveImageGrid: false })
     );
   });
 
