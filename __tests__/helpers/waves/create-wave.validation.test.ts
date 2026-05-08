@@ -223,6 +223,31 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("rejects fixed rank dates when the effective end is before voting starts", () => {
+    jest.spyOn(Time, "currentMillis").mockReturnValue(0);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 10,
+        votingStartDate: 30,
+        firstDecisionTime: 20,
+        endDate: null,
+        subsequentDecisions: [5],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
   it("chat waves cannot have voting", () => {
     const chatConfig = {
       ...baseConfig,

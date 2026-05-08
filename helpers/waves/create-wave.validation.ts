@@ -109,16 +109,11 @@ const getDatesValidationErrors = ({
       );
     }
 
-    const rollingEndDate =
-      dates.isRolling &&
-      dates.endDate !== null &&
-      Number.isFinite(dates.endDate)
-        ? dates.endDate
-        : null;
+    const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
     if (
-      rollingEndDate !== null &&
+      rankEffectiveEndDate !== null &&
       dates.votingStartDate &&
-      rollingEndDate < dates.votingStartDate
+      rankEffectiveEndDate < dates.votingStartDate
     ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
@@ -126,7 +121,6 @@ const getDatesValidationErrors = ({
     }
 
     const now = Time.currentMillis();
-    const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
     const isExplicitRollingEndDateInPast =
       dates.isRolling &&
       dates.endDate !== null &&
