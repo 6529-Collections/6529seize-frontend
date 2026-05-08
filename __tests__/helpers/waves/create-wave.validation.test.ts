@@ -69,16 +69,26 @@ describe("create-wave.validation", () => {
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   });
 
-  it("requires end date for rank waves", () => {
+  it("allows recurring rank waves without an end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
     const config = {
       ...baseConfig,
-      dates: { ...baseConfig.dates, endDate: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: null,
+        subsequentDecisions: [100],
+        isRolling: true,
+      },
     };
     const errors = getCreateWaveValidationErrors({
       step: CreateWaveStep.DATES,
       config,
     });
-    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+    expect(errors).toEqual([]);
   });
 
   it("rejects rank dates when first decision and end date are not in the future", () => {
@@ -133,6 +143,35 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("allows fixed rank dates without a user-selected end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: null,
+        subsequentDecisions: [100],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
   it("checks the configured end date for rolling rank dates", () => {
     const now = 1_000;
     jest.spyOn(Time, "currentMillis").mockReturnValue(now);
@@ -159,7 +198,7 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("keeps rank end-before-voting validation", () => {
+  it("keeps explicit rolling rank end-before-voting validation", () => {
     jest.spyOn(Time, "currentMillis").mockReturnValue(0);
     const config = {
       ...baseConfig,
@@ -169,7 +208,32 @@ describe("create-wave.validation", () => {
         votingStartDate: 10,
         firstDecisionTime: 20,
         endDate: 9,
-        subsequentDecisions: [],
+        subsequentDecisions: [5],
+        isRolling: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("rejects fixed rank dates when the effective end is before voting starts", () => {
+    jest.spyOn(Time, "currentMillis").mockReturnValue(0);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 10,
+        votingStartDate: 30,
+        firstDecisionTime: 20,
+        endDate: null,
+        subsequentDecisions: [5],
         isRolling: false,
       },
     };
@@ -181,6 +245,94 @@ describe("create-wave.validation", () => {
 
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("rejects rolling rank dates when the first decision is before voting starts", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now + HOUR_IN_MS * 2,
+        firstDecisionTime: now + HOUR_IN_MS,
+        endDate: null,
+        subsequentDecisions: [HOUR_IN_MS],
+        isRolling: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("uses the first-decision error when a fixed final announcement is after voting starts", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now + HOUR_IN_MS * 3,
+        firstDecisionTime: now + HOUR_IN_MS * 2,
+        endDate: null,
+        subsequentDecisions: [HOUR_IN_MS * 2],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("allows first rank decision at the voting start time", () => {
+    const now = 1_000;
+    const votingStartDate = now + HOUR_IN_MS;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate,
+        firstDecisionTime: votingStartDate,
+        endDate: null,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
     );
   });
 
