@@ -38,6 +38,9 @@ jest.mock(
         data-has-rank-error={String(
           props.errors.includes("RANK_DECISION_TIME_MUST_BE_IN_FUTURE")
         )}
+        data-has-end-before-voting-error={String(
+          props.errors.includes("END_DATE_MUST_BE_AFTER_VOTING_START_DATE")
+        )}
         onClick={() => {
           props.onInteraction();
         }}
@@ -71,6 +74,9 @@ jest.mock(
       data-error-count={String(props.errors.length)}
       data-has-rank-error={String(
         props.errors.includes("RANK_DECISION_TIME_MUST_BE_IN_FUTURE")
+      )}
+      data-has-end-before-voting-error={String(
+        props.errors.includes("END_DATE_MUST_BE_AFTER_VOTING_START_DATE")
       )}
     />
   )
@@ -224,6 +230,54 @@ describe("CreateWaveDatesRank", () => {
     );
     expect(screen.getByTestId("rolling")).toHaveAttribute(
       "data-has-rank-error",
+      "true"
+    );
+  });
+
+  it("routes fixed rank end-before-voting errors to the decisions section", () => {
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={baseDates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-end-before-voting-error",
+      "true"
+    );
+    expect(screen.queryByTestId("rolling")).toBeNull();
+  });
+
+  it("routes rolling end-before-voting errors to the rolling section", () => {
+    const dates = {
+      ...baseDates,
+      endDate: 10,
+      subsequentDecisions: [100],
+      isRolling: true,
+    };
+
+    render(
+      <CreateWaveDatesRank
+        waveType={ApiWaveType.Rank}
+        dates={dates}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE,
+        ]}
+        setDates={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("decisions")).toHaveAttribute(
+      "data-has-end-before-voting-error",
+      "false"
+    );
+    expect(screen.getByTestId("rolling")).toHaveAttribute(
+      "data-has-end-before-voting-error",
       "true"
     );
   });

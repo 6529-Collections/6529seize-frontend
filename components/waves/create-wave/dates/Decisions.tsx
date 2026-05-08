@@ -69,7 +69,11 @@ export default function Decisions({
   const hasRankFutureDateError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
   );
-  const shouldShowExpandedContent = isExpanded || hasRankFutureDateError;
+  const hasEndDateBeforeVotingStartError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+  );
+  const shouldShowExpandedContent =
+    isExpanded || hasRankFutureDateError || hasEndDateBeforeVotingStartError;
 
   // Calculate total decision points for summary
   const totalDecisionPoints = 1 + dates.subsequentDecisions.length;
@@ -154,6 +158,22 @@ export default function Decisions({
             />
             <span>
               First winners announcement and wave end must be in the future.
+            </span>
+          </div>
+        )}
+        {hasEndDateBeforeVotingStartError && (
+          <div
+            role="alert"
+            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+          >
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span>
+              Last winners announcement cannot be before voting begins. Move
+              voting start earlier or move winner announcements later.
             </span>
           </div>
         )}

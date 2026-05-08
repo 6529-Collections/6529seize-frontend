@@ -37,7 +37,12 @@ export default function CreateWaveDatesRank({
   const [hasAutoCollapsedStart, setHasAutoCollapsedStart] = useState(false);
   const rankFutureDateError =
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE;
+  const endDateBeforeVotingStartError =
+    CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE;
   const hasRankFutureDateError = errors.includes(rankFutureDateError);
+  const hasEndDateBeforeVotingStartError = errors.includes(
+    endDateBeforeVotingStartError
+  );
   const now = hasRankFutureDateError ? Time.currentMillis() : null;
   const isFirstDecisionTimeInPast =
     now !== null && dates.firstDecisionTime <= now;
@@ -46,17 +51,28 @@ export default function CreateWaveDatesRank({
     dates.isRolling &&
     dates.endDate !== null &&
     (!Number.isFinite(dates.endDate) || dates.endDate <= now);
-  const errorsWithoutRankFutureDate = errors.filter(
-    (error) => error !== rankFutureDateError
+  const unroutedErrors = errors.filter(
+    (error) =>
+      error !== rankFutureDateError && error !== endDateBeforeVotingStartError
   );
-  const decisionErrors =
-    hasRankFutureDateError && (!dates.isRolling || isFirstDecisionTimeInPast)
-      ? [...errorsWithoutRankFutureDate, rankFutureDateError]
-      : errorsWithoutRankFutureDate;
-  const rollingEndDateErrors =
-    hasRankFutureDateError && isRollingEndDateInPast
+  const decisionErrors = [
+    ...unroutedErrors,
+    ...(hasEndDateBeforeVotingStartError && !dates.isRolling
+      ? [endDateBeforeVotingStartError]
+      : []),
+    ...(hasRankFutureDateError &&
+    (!dates.isRolling || isFirstDecisionTimeInPast)
       ? [rankFutureDateError]
-      : [];
+      : []),
+  ];
+  const rollingEndDateErrors = [
+    ...(hasEndDateBeforeVotingStartError && dates.isRolling
+      ? [endDateBeforeVotingStartError]
+      : []),
+    ...(hasRankFutureDateError && isRollingEndDateInPast
+      ? [rankFutureDateError]
+      : []),
+  ];
 
   const toggleSection = (sectionName: "start" | "decisions" | "rolling") => {
     setExpandedSections((prev) => ({

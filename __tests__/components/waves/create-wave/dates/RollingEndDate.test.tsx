@@ -272,4 +272,26 @@ describe("RollingEndDate", () => {
       "Wave end date must be in the future."
     );
   });
+
+  it("expands and shows an alert when the end date is before voting starts", () => {
+    render(
+      <RollingEndDate
+        dates={baseConfig}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE,
+        ]}
+        setDates={jest.fn()}
+        isExpanded={false}
+        setIsExpanded={() => {}}
+      />
+    );
+
+    expect(screen.getByTestId("accordion")).toHaveAttribute(
+      "data-expanded",
+      "true"
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Wave end date cannot be before voting begins."
+    );
+  });
 });
