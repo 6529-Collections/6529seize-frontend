@@ -5,7 +5,8 @@
 The `Dates` step sets when a `Rank` wave accepts submissions, when voting
 starts, and when winners are announced.
 
-If recurring announcements are enabled, this step also sets `Wave End Date`.
+If recurring announcements are enabled, this step can also set an optional
+`Wave End Date`.
 
 ## Location in the Site
 
@@ -32,7 +33,7 @@ If recurring announcements are enabled, this step also sets `Wave End Date`.
    `Weeks`).
 5. Optional: enable `Repeating Announcement Cycles` after at least one
    additional interval exists.
-6. If recurring is enabled, set `Wave End Date`.
+6. If recurring is enabled, optionally set `Wave End Date`.
 7. Continue to `Drops`.
 
 ## Common Scenarios
@@ -40,8 +41,8 @@ If recurring announcements are enabled, this step also sets `Wave End Date`.
 - One-time winners: set only `First Winners Announcement`.
 - Fixed schedule: add intervals and leave recurring off.
   - End date follows the last scheduled announcement.
-- Recurring schedule: add intervals, enable recurring, then set an end date and
-  time.
+- Recurring schedule: add intervals, enable recurring, then leave no end date or
+  set an optional end date and time.
 - Mid-flow adjustment: return from later steps and revise dates before final
   submit.
 
@@ -55,9 +56,8 @@ If recurring announcements are enabled, this step also sets `Wave End Date`.
   it stays at or after voting start.
 - `Wave End Date` appears only when recurring is on and at least one additional
   interval exists.
-- When recurring is turned on, end date is prefilled to a future default
-  covering about two full announcement cycles unless a later valid end date
-  already exists.
+- When recurring is turned on, the end date starts blank. Users can add or clear
+  it later.
 - End-date calendar selection blocks days before one full configured cycle is
   complete.
 
@@ -66,7 +66,7 @@ If recurring announcements are enabled, this step also sets `Wave End Date`.
 - If `Next` does not advance, verify:
   - submission start <= voting start
   - first announcement is not before voting start
-  - end date is set and valid
+  - explicit recurring end date, if set, is valid
 - If recurring controls are missing, add at least one additional announcement
   interval first.
 - If first announcement shifts after a voting-date change, set it again in

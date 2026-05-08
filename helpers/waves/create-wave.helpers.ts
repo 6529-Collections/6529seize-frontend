@@ -352,10 +352,9 @@ export const calculateLastDecisionTime = (
 /**
  * Calculates the end date based on the given dates configuration
  * @param dates The CreateWaveDatesConfig object
- * @returns The calculated end date in milliseconds
- * @throws Error if isRolling is true and no end date is provided
+ * @returns The calculated end date in milliseconds, or null for open-ended rolling waves
  */
-const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
+const calculateEndDate = (dates: CreateWaveDatesConfig): number | null => {
   // If subsequentDecisions is empty, end date is firstDecisionTime
   if (dates.subsequentDecisions.length === 0) {
     return dates.firstDecisionTime;
@@ -369,9 +368,9 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
     );
   }
 
-  // If we reach this point, isRolling is true and we need to calculate the last decision time
-  if (typeof dates.endDate !== "number") {
-    throw new Error("End date must be explicitly set when isRolling is true");
+  // Open-ended rolling waves keep both periods open.
+  if (dates.endDate === null || !Number.isFinite(dates.endDate)) {
+    return null;
   }
 
   // Calculate the last decision time that will occur before the user-specified end date
