@@ -272,12 +272,22 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             showBalance={true}
           />
         </div>
-        <MemePageLiveRightMenu
-          show={true}
-          nft={nft}
-          nftMeta={nftMeta}
-          nftBalance={nftBalance}
-        />
+        <div>
+          {isLastCard && (
+            <NowMintingCountdown
+              nftId={nft.id}
+              contract={MEMES_CONTRACT}
+              chainId={mainnet.id}
+              fullWidth
+            />
+          )}
+          <MemePageLiveRightMenu
+            show={true}
+            nft={nft}
+            nftMeta={nftMeta}
+            nftBalance={nftBalance}
+          />
+        </div>
       </div>
     );
   }
@@ -373,7 +383,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         <Col>
           <Container className="pt-4 pb-4">
             <Row>
-              <Col sm={12} md={isLastCard ? 6 : 12}>
+              <Col sm={12}>
                 <Container className="no-padding">
                   <Row>
                     <Col>
@@ -383,47 +393,35 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                   {nftMeta && nft && (
                     <>
                       <Row className="pt-3 pb-3">
-                        <Col className="d-flex">
-                          <NftNavigation
-                            nftId={nft.id}
-                            path="/the-memes"
-                            startIndex={1}
-                            endIndex={nftMeta.collection_size}
-                            params={searchParams}
-                          />
-                        </Col>
-                      </Row>
-                      <Row className="pt-2">
-                        <Col>
-                          <h2 className="float-left">
-                            <Link
-                              href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
-                            >
-                              SZN{nftMeta.season}
-                            </Link>
-                          </h2>
-                          <h2 className="float-left">
-                            &nbsp;| Card {nft.id} -&nbsp;
-                          </h2>
-                          <h2 className="float-left">{nft.name}</h2>
+                        <Col className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+                          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
+                            <h2 className="tw-mb-0">
+                              <Link
+                                href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                              >
+                                SZN{nftMeta.season}
+                              </Link>
+                            </h2>
+                            <h2 className="tw-mb-0">
+                              &nbsp;| Card {nft.id} -&nbsp;
+                            </h2>
+                            <h2 className="tw-mb-0">{nft.name}</h2>
+                          </div>
+                          <div className="tw-flex tw-shrink-0 tw-justify-end sm:tw-ml-6">
+                            <NftNavigation
+                              nftId={nft.id}
+                              path="/the-memes"
+                              startIndex={1}
+                              endIndex={nftMeta.collection_size}
+                              params={searchParams}
+                            />
+                          </div>
                         </Col>
                       </Row>
                     </>
                   )}
                 </Container>
               </Col>
-              {isLastCard && (
-                <Col sm={12} md={6} className="d-flex align-items-center">
-                  {nft && (
-                    <NowMintingCountdown
-                      nftId={nft.id}
-                      contract={MEMES_CONTRACT}
-                      chainId={mainnet.id}
-                      fullWidth
-                    />
-                  )}
-                </Col>
-              )}
             </Row>
             {nftMeta && nft && (
               <>
