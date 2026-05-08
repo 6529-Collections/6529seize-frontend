@@ -258,6 +258,59 @@ describe("WaveDrop", () => {
     );
   });
 
+  it("saves edited drops when parts are missing attachments", () => {
+    isMobileMock.mockReturnValue(false);
+    const legacyDrop = {
+      ...drop,
+      parts: [
+        {
+          part_id: 1,
+          content: "first",
+          media: [],
+          quoted_drop: null,
+          replies_count: 0,
+          quotes_count: 0,
+        },
+        {
+          part_id: 2,
+          content: "second",
+          media: [],
+          quoted_drop: null,
+          replies_count: 0,
+          quotes_count: 0,
+        },
+      ],
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={legacyDrop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("save-edit"));
+
+    expect(mockMutate).toHaveBeenCalledTimes(1);
+    const request = mockMutate.mock.calls[0][0].request;
+    expect(request.parts).toEqual([
+      { content: "edited", quoted_drop: null, media: [] },
+      { content: "second", quoted_drop: null, media: [] },
+    ]);
+    expect(request.parts[0]).not.toHaveProperty("attachments");
+    expect(request.parts[1]).not.toHaveProperty("attachments");
+  });
+
   it("omits group mention metadata from edit update requests", () => {
     isMobileMock.mockReturnValue(false);
     mockEditMentionedGroups = [ApiDropGroupMention.All];

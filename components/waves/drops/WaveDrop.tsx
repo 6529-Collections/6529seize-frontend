@@ -622,7 +622,7 @@ const WaveDrop = ({
       );
       const updatedParts: ApiCreateDropPart[] = drop.parts.map(
         (part, index) => {
-          const attachments = part.attachments.map((attachment) => ({
+          const attachments = (part.attachments ?? []).map((attachment) => ({
             attachment_id: attachment.attachment_id,
           }));
           const requestPart: ApiCreateDropPart = {

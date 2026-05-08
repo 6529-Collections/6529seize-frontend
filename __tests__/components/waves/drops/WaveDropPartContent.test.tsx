@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import WaveDropPartContent from "@/components/waves/drops/WaveDropPartContent";
 
 const mockMarkdownProps: any[] = [];
+const mockAttachmentsProps: any[] = [];
 
 jest.mock(
   "@/components/waves/drops/WaveDropPartContentMarkdown",
@@ -16,6 +17,13 @@ jest.mock(
   () => (props: any) => (
     <div data-testid="medias">{props.activePart.media.length}</div>
   )
+);
+jest.mock(
+  "@/components/waves/drops/WaveDropPartContentAttachments",
+  () => (props: any) => {
+    mockAttachmentsProps.push(props);
+    return <div data-testid="attachments">{props.attachments.length}</div>;
+  }
 );
 
 const baseProps = {
@@ -34,6 +42,7 @@ const baseProps = {
 
 beforeEach(() => {
   mockMarkdownProps.length = 0;
+  mockAttachmentsProps.length = 0;
   jest.clearAllMocks();
 });
 
@@ -54,6 +63,20 @@ it("reuses the default mentionedGroups reference across rerenders", () => {
 
   expect(firstMentionedGroups).toBe(secondMentionedGroups);
   expect(firstMentionedGroups).toEqual([]);
+});
+
+it("treats missing attachments as an empty attachment list", () => {
+  render(
+    <WaveDropPartContent
+      {...baseProps}
+      activePart={{ content: "test", media: [] } as any}
+    />
+  );
+
+  expect(screen.getByTestId("attachments")).toHaveTextContent("0");
+  expect(
+    mockAttachmentsProps[mockAttachmentsProps.length - 1].attachments
+  ).toEqual([]);
 });
 
 it("renders medias and navigation", async () => {
