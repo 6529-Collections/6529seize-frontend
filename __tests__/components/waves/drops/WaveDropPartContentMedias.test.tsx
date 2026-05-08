@@ -12,7 +12,13 @@ jest.mock(
   () => ({
     __esModule: true,
     default: (props: any) => (
-      <div data-testid="drop-media" data-image-sizes={props.imageSizes ?? ""} />
+      <div
+        data-testid="drop-media"
+        data-image-sizes={props.imageSizes ?? ""}
+        data-responsive-srcset={
+          props.useResponsiveImageSrcSet ? "true" : "false"
+        }
+      />
     ),
   })
 );
@@ -95,6 +101,7 @@ describe("WaveDropPartContentMedias", () => {
       "data-image-sizes",
       responsiveGridImageSizes
     );
+    expect(firstMedia).toHaveAttribute("data-responsive-srcset", "true");
     expect(firstMediaContainer).toHaveClass(
       "md:tw-aspect-square",
       "md:tw-h-auto"
@@ -137,6 +144,7 @@ describe("WaveDropPartContentMedias", () => {
     expect(layout).toHaveClass("tw-space-y-3");
     expect(layout).not.toHaveClass("tw-grid");
     expect(firstMedia).toHaveAttribute("data-image-sizes", "");
+    expect(firstMedia).toHaveAttribute("data-responsive-srcset", "false");
   });
 
   it("keeps disabled media interaction stacked", () => {

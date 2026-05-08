@@ -131,6 +131,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               imageSizes={
                 useResponsiveImageGrid ? RESPONSIVE_IMAGE_GRID_SIZES : undefined
               }
+              useResponsiveImageSrcSet={useResponsiveImageGrid}
             />
           );
         }

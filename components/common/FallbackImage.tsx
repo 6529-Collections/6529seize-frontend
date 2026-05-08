@@ -16,77 +16,81 @@ type FallbackImageProps = Omit<ImageProps, "src" | "alt"> & {
 export const FallbackImage = React.forwardRef<
   HTMLImageElement,
   FallbackImageProps
->(
-  (
-    {
-      primarySrc,
-      fallbackSrc,
-      alt = "",
-      onError,
-      onPrimaryError,
-      optimize,
-      ...imageProps
-    },
-    ref
-  ) => {
-    const [src, setSrc] = React.useState(primarySrc);
-    const [usedFallback, setUsedFallback] = React.useState(false);
-
-    // Reset state when primarySrc changes (for retries)
-    React.useEffect(() => {
-      setSrc(primarySrc);
-      setUsedFallback(false);
-    }, [primarySrc]);
-
-    const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-      if (!usedFallback) {
-        onPrimaryError?.(e);
-        setSrc(fallbackSrc);
-        setUsedFallback(true);
-      } else {
-        // If fallback also fails, call the external onError handler
-        onError?.(e);
-      }
-    };
-
-    const skipOptimization = useMemo(() => {
-      if (optimize === false) {
-        return true;
-      }
-
-      const targetSrc = src ?? primarySrc;
-
-      const isAnimatedGif =
-        /\.gif(?:$|\?)/i.test(primarySrc) || /\.gif(?:$|\?)/i.test(fallbackSrc);
-      if (isAnimatedGif) {
-        return true;
-      }
-
-      if (optimize === true) {
-        return false;
-      }
-
-      try {
-        const parsed = new URL(targetSrc);
-        const hostname = parsed.hostname.toLowerCase();
-        const isCloudfrontHost = hostname.endsWith(".cloudfront.net");
-        return !isCloudfrontHost;
-      } catch {
-        return true;
-      }
-    }, [fallbackSrc, optimize, primarySrc, src]);
-
-    return (
-      <Image
-        ref={ref}
-        src={src}
-        alt={alt}
-        onError={handleError}
-        unoptimized={skipOptimization}
-        {...imageProps}
-      />
-    );
-  }
-);
+>((props, ref) => (
+  <FallbackImageInner key={props.primarySrc} {...props} forwardedRef={ref} />
+));
 
 FallbackImage.displayName = "FallbackImage";
+
+type FallbackImageInnerProps = FallbackImageProps & {
+  readonly forwardedRef: React.ForwardedRef<HTMLImageElement>;
+};
+
+function FallbackImageInner({
+  primarySrc,
+  fallbackSrc,
+  alt = "",
+  onError,
+  onPrimaryError,
+  optimize,
+  loader,
+  forwardedRef,
+  ...imageProps
+}: FallbackImageInnerProps) {
+  const [usedFallback, setUsedFallback] = React.useState(false);
+  const src = usedFallback ? fallbackSrc : primarySrc;
+
+  const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    if (!usedFallback) {
+      onPrimaryError?.(e);
+      setUsedFallback(true);
+    } else {
+      // If fallback also fails, call the external onError handler
+      onError?.(e);
+    }
+  };
+
+  const skipOptimization = useMemo(() => {
+    if (usedFallback) {
+      return true;
+    }
+
+    if (optimize === false) {
+      return true;
+    }
+
+    const isAnimatedGif =
+      /\.gif(?:$|\?)/i.test(primarySrc) || /\.gif(?:$|\?)/i.test(fallbackSrc);
+    if (isAnimatedGif) {
+      return true;
+    }
+
+    if (optimize === true) {
+      return false;
+    }
+
+    try {
+      const parsed = new URL(src);
+      const hostname = parsed.hostname.toLowerCase();
+      const isCloudfrontHost = hostname.endsWith(".cloudfront.net");
+      return !isCloudfrontHost;
+    } catch {
+      return true;
+    }
+  }, [fallbackSrc, optimize, primarySrc, src, usedFallback]);
+
+  const loaderProps: Pick<ImageProps, "loader"> =
+    !usedFallback && loader ? { loader } : {};
+
+  return (
+    <Image
+      ref={forwardedRef}
+      src={src}
+      alt={alt}
+      onError={handleError}
+      {...loaderProps}
+      {...imageProps}
+      unoptimized={skipOptimization}
+    />
+  );
+}

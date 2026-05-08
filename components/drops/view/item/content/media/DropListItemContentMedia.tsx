@@ -37,6 +37,7 @@ export default function DropListItemContentMedia({
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
   imageSizes,
+  useResponsiveImageSrcSet = false,
   htmlIframeContainerClassName,
   htmlPreviewImageUrl,
   loadStrategy = "in-view",
@@ -50,6 +51,7 @@ export default function DropListItemContentMedia({
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly imageSizes?: string | undefined;
+  readonly useResponsiveImageSrcSet?: boolean | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
@@ -91,6 +93,7 @@ export default function DropListItemContentMedia({
           imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
           imageSizes={imageSizes}
+          useResponsiveImageSrcSet={useResponsiveImageSrcSet}
           loadStrategy={loadStrategy}
         />
       );

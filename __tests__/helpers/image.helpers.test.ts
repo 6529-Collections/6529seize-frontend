@@ -1,4 +1,6 @@
 import {
+  getResponsiveDropImageScale,
+  responsiveDropImageLoader,
   getScaledImageUri,
   getScaledResolvedImageUri,
   ImageScale,
@@ -26,6 +28,14 @@ describe("getScaledImageUri", () => {
     );
   });
 
+  it("replaces an existing backend scale instead of nesting scales", () => {
+    const url =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/drop-id/AUTOx450/art.png?x=1";
+    expect(getScaledImageUri(url, ImageScale.AUTOx1080)).toBe(
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/drop-id/AUTOx1080/art.png?x=1"
+    );
+  });
+
   it("returns original url for unsupported extension", () => {
     const url = "https://d3lqz0a4bldqgf.cloudfront.net/pfp/user/file.svg";
     expect(getScaledImageUri(url, ImageScale.AUTOx450)).toBe(url);
@@ -43,5 +53,29 @@ describe("getScaledResolvedImageUri", () => {
   it("does not re-resolve already concrete urls", () => {
     const url = "https://ipfs.io/ipfs/QmConcrete";
     expect(getScaledResolvedImageUri(url, ImageScale.W_AUTO_H_50)).toBe(url);
+  });
+});
+
+describe("responsive drop image helpers", () => {
+  it.each([
+    [320, ImageScale.AUTOx450],
+    [450, ImageScale.AUTOx450],
+    [451, ImageScale.AUTOx600],
+    [600, ImageScale.AUTOx600],
+    [601, ImageScale.AUTOx800],
+    [800, ImageScale.AUTOx800],
+    [801, ImageScale.AUTOx1080],
+    [1440, ImageScale.AUTOx1080],
+  ])("maps width %i to %s", (width, scale) => {
+    expect(getResponsiveDropImageScale(width)).toBe(scale);
+  });
+
+  it("builds scaled CloudFront urls for the Next image loader", () => {
+    const src =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/drop-id/AUTOx450/art.png";
+
+    expect(responsiveDropImageLoader({ src, width: 750 })).toBe(
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/drop-id/AUTOx800/art.png"
+    );
   });
 });

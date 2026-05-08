@@ -2,7 +2,11 @@
 
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { fullScreenSupported } from "@/helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+  responsiveDropImageLoader,
+} from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
@@ -38,6 +42,7 @@ function DropListItemContentMediaImage({
   imageObjectPosition,
   imageScale = ImageScale.AUTOx450,
   imageSizes = "(max-width: 768px) 100vw, 768px",
+  useResponsiveImageSrcSet = false,
   loadStrategy = "in-view",
 }: {
   readonly src: string;
@@ -48,6 +53,7 @@ function DropListItemContentMediaImage({
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly imageSizes?: string | undefined;
+  readonly useResponsiveImageSrcSet?: boolean | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
@@ -289,6 +295,12 @@ function DropListItemContentMediaImage({
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
+  const fallbackImageOptimizationProps: Pick<
+    React.ComponentProps<typeof FallbackImage>,
+    "loader" | "optimize"
+  > = useResponsiveImageSrcSet
+    ? { optimize: true, loader: responsiveDropImageLoader }
+    : { optimize: false };
 
   return (
     <>
@@ -314,7 +326,7 @@ function DropListItemContentMediaImage({
             primarySrc={getScaledImageUri(src, imageScale)}
             fallbackSrc={src}
             alt="Drop media"
-            optimize={false}
+            {...fallbackImageOptimizationProps}
             fill
             loading={loadStrategy === "eager" ? "eager" : undefined}
             sizes={imageSizes}

@@ -7,7 +7,13 @@ jest.mock(
   () => ({
     __esModule: true,
     default: (props: any) => (
-      <div data-testid="image" data-image-sizes={props.imageSizes ?? ""} />
+      <div
+        data-testid="image"
+        data-image-sizes={props.imageSizes ?? ""}
+        data-responsive-srcset={
+          props.useResponsiveImageSrcSet ? "true" : "false"
+        }
+      />
     ),
   })
 );
@@ -61,6 +67,21 @@ describe("DropListItemContentMedia", () => {
     expect(screen.getByTestId("image")).toHaveAttribute(
       "data-image-sizes",
       "(max-width: 767px) 100vw, 33vw"
+    );
+  });
+
+  it("forwards responsive srcset mode to the image component", () => {
+    render(
+      <DropListItemContentMedia
+        media_mime_type="image/png"
+        media_url="img"
+        useResponsiveImageSrcSet
+      />
+    );
+
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-responsive-srcset",
+      "true"
     );
   });
 
