@@ -92,15 +92,6 @@ export const validateDateSequence = (
     );
   }
 
-  if (
-    dates.isRolling &&
-    (dates.endDate === null ||
-      !Number.isFinite(dates.endDate) ||
-      dates.endDate <= 0)
-  ) {
-    errors.push("Rolling mode requires an end date");
-  }
-
   return errors;
 };
 

@@ -45,6 +45,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION = "TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION",
   MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
   RANK_DECISION_TIME_MUST_BE_IN_FUTURE = "RANK_DECISION_TIME_MUST_BE_IN_FUTURE",
+  RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE = "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -108,20 +109,39 @@ const getDatesValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
       );
     }
-    if (dates.endDate === null || dates.endDate <= 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
-    } else if (dates.votingStartDate && dates.endDate < dates.votingStartDate) {
+
+    if (
+      dates.votingStartDate &&
+      dates.firstDecisionTime < dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+      );
+    }
+
+    const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
+    if (
+      rankEffectiveEndDate !== null &&
+      dates.votingStartDate &&
+      rankEffectiveEndDate < dates.votingStartDate
+    ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
       );
     }
 
     const now = Time.currentMillis();
-    const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
+    const isExplicitRollingEndDateInPast =
+      dates.isRolling &&
+      dates.endDate !== null &&
+      (!Number.isFinite(dates.endDate) || dates.endDate <= now);
+    const isFixedRankEffectiveEndDateInPast =
+      !dates.isRolling &&
+      (rankEffectiveEndDate === null || rankEffectiveEndDate <= now);
     if (
       dates.firstDecisionTime <= now ||
-      rankEffectiveEndDate === null ||
-      rankEffectiveEndDate <= now
+      isExplicitRollingEndDateInPast ||
+      isFixedRankEffectiveEndDateInPast
     ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE

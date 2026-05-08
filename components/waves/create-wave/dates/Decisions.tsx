@@ -8,11 +8,7 @@ import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import DateAccordion from "@/components/common/DateAccordion";
 import DecisionsFirst from "./DecisionsFirst";
 import SubsequentDecisions from "./SubsequentDecisions";
-import {
-  calculateDecisionTimes,
-  calculateEndDateForCycles,
-  getMinimumRollingEndDate,
-} from "../services/waveDecisionService";
+import { calculateDecisionTimes } from "../services/waveDecisionService";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
@@ -73,7 +69,17 @@ export default function Decisions({
   const hasRankFutureDateError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
   );
-  const shouldShowExpandedContent = isExpanded || hasRankFutureDateError;
+  const hasEndDateBeforeVotingStartError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+  );
+  const hasFirstDecisionBeforeVotingStartError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+  );
+  const shouldShowExpandedContent =
+    isExpanded ||
+    hasRankFutureDateError ||
+    hasEndDateBeforeVotingStartError ||
+    hasFirstDecisionBeforeVotingStartError;
 
   // Calculate total decision points for summary
   const totalDecisionPoints = 1 + dates.subsequentDecisions.length;
@@ -94,28 +100,11 @@ export default function Decisions({
 
       // When turning on rolling mode:
       // 1. Set isRolling flag
-      // 2. Calculate end date for 2 complete decision cycles
-      const twoCompleteRoundsEndDate = calculateEndDateForCycles(
-        dates.firstDecisionTime,
-        dates.subsequentDecisions,
-        2 // Two complete rounds
-      );
-
-      // Use the calculated date or keep existing if already set and valid
-      const minEndDate = getMinimumRollingEndDate(
-        dates.firstDecisionTime,
-        dates.subsequentDecisions
-      );
-
-      const newEndDate =
-        dates.endDate !== null && dates.endDate > minEndDate
-          ? dates.endDate
-          : twoCompleteRoundsEndDate;
-
+      // 2. Leave the optional end date blank by default
       setDates({
         ...dates,
         isRolling: true,
-        endDate: newEndDate,
+        endDate: null,
       });
     } else {
       // When turning off rolling mode:
@@ -148,7 +137,7 @@ export default function Decisions({
       titleActions={
         <TooltipIconButton
           icon={faInfoCircle}
-          tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until your end date."
+          tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until an optional end date."
           tooltipPosition="bottom"
           tooltipWidth="tw-w-80"
         />
@@ -175,6 +164,38 @@ export default function Decisions({
             />
             <span>
               First winners announcement and wave end must be in the future.
+            </span>
+          </div>
+        )}
+        {hasEndDateBeforeVotingStartError && (
+          <div
+            role="alert"
+            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+          >
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span>
+              Last winners announcement cannot be before voting begins. Move
+              voting start earlier or move winner announcements later.
+            </span>
+          </div>
+        )}
+        {hasFirstDecisionBeforeVotingStartError && (
+          <div
+            role="alert"
+            className="tw-mb-3 tw-flex tw-items-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-error/40 tw-bg-error/10 tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-error"
+          >
+            <FontAwesomeIcon
+              icon={faTriangleExclamation}
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+            <span>
+              First winners announcement cannot be before voting begins. Move
+              voting start earlier or move first winners announcement later.
             </span>
           </div>
         )}
@@ -227,7 +248,7 @@ export default function Decisions({
                     Repeating Announcement Cycles
                   </h3>
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                    Repeat this pattern until your wave ends
+                    Repeat this pattern until an optional end date
                   </p>
                 </div>
                 <div>
@@ -243,7 +264,8 @@ export default function Decisions({
                 <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/20 tw-p-3 tw-shadow-inner">
                   <p className="tw-text-primary-100 tw-mb-0 tw-text-xs">
                     <strong>Recurring cycles enabled.</strong> Announcements
-                    will repeat until your wave&apos;s end date.
+                    will repeat until an optional end date, or keep going with
+                    no end date.
                   </p>
                 </div>
               )}
