@@ -26,6 +26,7 @@ import {
   MemePageCollectorsSubMenu,
 } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
+import { MemePageReferencesSubMenu } from "./MemePageReferences";
 import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
@@ -39,10 +40,6 @@ import {
 import styles from "./TheMemes.module.scss";
 import UpcomingMemePage from "./UpcomingMemePage";
 
-const MemePageArt = dynamic(() =>
-  import("./MemePageArt").then((mod) => mod.MemePageArt)
-);
-
 const MemePageActivity = dynamic(() =>
   import("./MemePageActivity").then((mod) => mod.MemePageActivity)
 );
@@ -52,6 +49,9 @@ const MemePageTimeline = dynamic(() =>
 );
 
 const ACTIVITY_PAGE_SIZE = 25;
+const VISIBLE_MEME_TABS = MEME_TABS.filter(
+  (tab) => tab.focus !== MEME_FOCUS.THE_ART
+);
 
 export default function MemePage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
@@ -66,9 +66,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     if (!focusParam) {
       return undefined;
     }
-    return (Object.values(MEME_FOCUS) as MEME_FOCUS[]).find(
+    const matchedFocus = (Object.values(MEME_FOCUS) as MEME_FOCUS[]).find(
       (sd) => sd === focusParam
     );
+    return matchedFocus === MEME_FOCUS.THE_ART
+      ? MEME_FOCUS.LIVE
+      : matchedFocus;
   }, [focusParam]);
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>(
@@ -80,7 +83,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
       [MEME_FOCUS.LIVE]: true,
       [MEME_FOCUS.YOUR_CARDS]: true,
       [MEME_FOCUS.COLLECTORS]: true,
-      [MEME_FOCUS.THE_ART]: resolvedRouterFocus === MEME_FOCUS.THE_ART,
+      [MEME_FOCUS.THE_ART]: false,
+      [MEME_FOCUS.REFERENCES]: true,
       [MEME_FOCUS.ACTIVITY]: resolvedRouterFocus === MEME_FOCUS.ACTIVITY,
       [MEME_FOCUS.TIMELINE]: resolvedRouterFocus === MEME_FOCUS.TIMELINE,
     })
@@ -253,58 +257,86 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
   }, [nftId, connectedWallets, connectedProfile?.consolidation_key]);
 
+  function printStaticCardHeader() {
+    if (!nft) {
+      return null;
+    }
+
+    return (
+      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-6">
+        <div className={`${styles["nftImageWrapper"] ?? ""} tw-pb-12 tw-pt-2`}>
+          <NFTImage
+            nft={nft}
+            animation={true}
+            height={650}
+            showBalance={true}
+          />
+        </div>
+        <MemePageLiveRightMenu
+          show={true}
+          nft={nft}
+          nftMeta={nftMeta}
+          nftBalance={nftBalance}
+        />
+      </div>
+    );
+  }
+
+  function printTabs() {
+    if (!nft) {
+      return null;
+    }
+
+    return (
+      <Row className="py-3">
+        <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+          {VISIBLE_MEME_TABS.map((tab) => (
+            <TabButton
+              key={`${nft.id}-${tab.focus}-tab`}
+              tab={tab}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          ))}
+        </Col>
+      </Row>
+    );
+  }
+
   function printContent() {
     return (
       <>
         <Container className="p-0">
-          <Row>
-            {[
-              MEME_FOCUS.LIVE,
-              MEME_FOCUS.YOUR_CARDS,
-              MEME_FOCUS.COLLECTORS,
-            ].includes(activeTab) &&
-              nft && (
-                <>
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 6 }}
-                    lg={{ span: 6 }}
-                    className={`${styles["nftImageWrapper"]} pt-2 pb-5`}
-                  >
-                    <NFTImage
-                      nft={nft}
-                      animation={true}
-                      height={650}
-                      showBalance={true}
-                    />
-                  </Col>
-                  <MemePageLiveRightMenu
-                    show={activeTab === MEME_FOCUS.LIVE}
-                    nft={nft}
-                    nftMeta={nftMeta}
-                    nftBalance={nftBalance}
-                  />
-                  {userLoaded && (
-                    <MemePageYourCardsRightMenu
-                      show={activeTab === MEME_FOCUS.YOUR_CARDS}
-                      transactions={transactions}
-                      wallets={connectedWallets}
-                      nft={nft}
-                      nftBalance={nftBalance}
-                      myOwner={myOwner}
-                      myTDH={myTDH}
-                      myRank={myRank}
-                    />
-                  )}
-                  <MemePageCollectorsRightMenu
-                    show={activeTab === MEME_FOCUS.COLLECTORS}
-                    nft={nft}
-                  />
-                </>
-              )}
-          </Row>
-          <MemePageLiveSubMenu show={activeTab === MEME_FOCUS.LIVE} nft={nft} />
+          {userLoaded && activeTab === MEME_FOCUS.YOUR_CARDS && (
+            <Row className="pt-3">
+              <MemePageYourCardsRightMenu
+                show={true}
+                transactions={transactions}
+                wallets={connectedWallets}
+                nft={nft}
+                nftBalance={nftBalance}
+                myOwner={myOwner}
+                myTDH={myTDH}
+                myRank={myRank}
+              />
+            </Row>
+          )}
+          {activeTab === MEME_FOCUS.COLLECTORS && (
+            <Row className="pt-3">
+              <MemePageCollectorsRightMenu show={true} nft={nft} />
+            </Row>
+          )}
+          <MemePageLiveSubMenu
+            show={activeTab === MEME_FOCUS.LIVE}
+            nft={nft}
+            nftMeta={nftMeta}
+            nftBalance={nftBalance}
+            defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
+          />
+          <MemePageReferencesSubMenu
+            show={activeTab === MEME_FOCUS.REFERENCES}
+            nft={nft}
+          />
           {userLoaded && (
             <MemePageYourCardsSubMenu
               show={activeTab === MEME_FOCUS.YOUR_CARDS}
@@ -316,13 +348,6 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             nft={nft}
           />
         </Container>
-        {loadedTabs[MEME_FOCUS.THE_ART] && (
-          <MemePageArt
-            show={activeTab === MEME_FOCUS.THE_ART}
-            nft={nft}
-            nftMeta={nftMeta}
-          />
-        )}
         {loadedTabs[MEME_FOCUS.ACTIVITY] && (
           <MemePageActivity
             show={activeTab === MEME_FOCUS.ACTIVITY}
@@ -402,18 +427,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             </Row>
             {nftMeta && nft && (
               <>
-                <Row className="pt-3 pb-3">
-                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    {MEME_TABS.map((tab) => (
-                      <TabButton
-                        key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                        tab={tab}
-                        activeTab={activeTab}
-                        setActiveTab={setActiveTab}
-                      />
-                    ))}
-                  </Col>
-                </Row>
+                {printStaticCardHeader()}
+                {printTabs()}
                 {printContent()}
               </>
             )}

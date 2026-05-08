@@ -57,6 +57,7 @@ export function MemePageArt(props: {
   show: boolean;
   nft: NFT | undefined;
   nftMeta: MemesExtendedData | undefined;
+  showArtwork?: boolean;
 }) {
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
 
@@ -286,99 +287,102 @@ export function MemePageArt(props: {
   }
 
   const currentFormat = fileType ?? "";
+  const showArtwork = props.showArtwork ?? true;
 
   if (props.show && props.nft && props.nftMeta) {
     return (
       <>
-        <Container className="p-0">
-          <Row className="position-relative">
-            {hasAnimation ? (
-              <>
-                <Col xs={12} className={styles["artHeader"]}>
-                  <div className={styles["artHeaderContent"]}>
-                    <div className={styles["artFormatLabel"]}>
-                      {currentFormat}
+        {showArtwork && (
+          <Container className="p-0">
+            <Row className="position-relative">
+              {hasAnimation ? (
+                <>
+                  <Col xs={12} className={styles["artHeader"]}>
+                    <div className={styles["artHeaderContent"]}>
+                      <div className={styles["artFormatLabel"]}>
+                        {currentFormat}
+                      </div>
+                      {isFullScreenSupported && (
+                        <FontAwesomeIcon
+                          icon={faExpandAlt}
+                          className={styles["fullScreen"]}
+                          onClick={() =>
+                            fullscreenElementId &&
+                            enterArtFullScreen(fullscreenElementId)
+                          }
+                        />
+                      )}
                     </div>
-                    {isFullScreenSupported && (
-                      <FontAwesomeIcon
-                        icon={faExpandAlt}
-                        className={styles["fullScreen"]}
-                        onClick={() =>
-                          fullscreenElementId &&
-                          enterArtFullScreen(fullscreenElementId)
-                        }
+                  </Col>
+                  <Carousel
+                    className={styles["memesCarousel"]}
+                    interval={null}
+                    indicators={false}
+                    wrap={false}
+                    onSlide={carouselHandlerSlide}
+                  >
+                    <Carousel.Item className="text-center">
+                      <NFTImage
+                        nft={props.nft}
+                        animation={true}
+                        height={650}
+                        transparentBG={true}
+                        showOriginal={true}
+                        showBalance={false}
+                        id="the-art-fullscreen-animation"
                       />
+                    </Carousel.Item>
+                    {hasImage && (
+                      <Carousel.Item className="text-center">
+                        <NFTImage
+                          nft={props.nft}
+                          animation={false}
+                          height={650}
+                          showBalance={false}
+                          transparentBG={true}
+                          showOriginal={true}
+                          id="the-art-fullscreen-img"
+                        />
+                      </Carousel.Item>
                     )}
-                  </div>
-                </Col>
-                <Carousel
-                  className={styles["memesCarousel"]}
-                  interval={null}
-                  indicators={false}
-                  wrap={false}
-                  onSlide={carouselHandlerSlide}
-                >
-                  <Carousel.Item className="text-center">
+                  </Carousel>
+                </>
+              ) : (
+                <>
+                  <Col xs={12} className={styles["artHeader"]}>
+                    <div className={styles["artHeaderContent"]}>
+                      <div className={styles["artFormatLabel"]}>
+                        {currentFormat}
+                      </div>
+                      {isFullScreenSupported && (
+                        <FontAwesomeIcon
+                          icon={faExpandAlt}
+                          className={styles["fullScreen"]}
+                          onClick={() =>
+                            fullscreenElementId &&
+                            enterArtFullScreen(fullscreenElementId)
+                          }
+                        />
+                      )}
+                    </div>
+                  </Col>
+                  {hasImage && (
                     <NFTImage
                       nft={props.nft}
-                      animation={true}
+                      animation={false}
                       height={650}
                       transparentBG={true}
                       showOriginal={true}
                       showBalance={false}
-                      id="the-art-fullscreen-animation"
+                      id="the-art-fullscreen-img"
                     />
-                  </Carousel.Item>
-                  {hasImage && (
-                    <Carousel.Item className="text-center">
-                      <NFTImage
-                        nft={props.nft}
-                        animation={false}
-                        height={650}
-                        showBalance={false}
-                        transparentBG={true}
-                        showOriginal={true}
-                        id="the-art-fullscreen-img"
-                      />
-                    </Carousel.Item>
                   )}
-                </Carousel>
-              </>
-            ) : (
-              <>
-                <Col xs={12} className={styles["artHeader"]}>
-                  <div className={styles["artHeaderContent"]}>
-                    <div className={styles["artFormatLabel"]}>
-                      {currentFormat}
-                    </div>
-                    {isFullScreenSupported && (
-                      <FontAwesomeIcon
-                        icon={faExpandAlt}
-                        className={styles["fullScreen"]}
-                        onClick={() =>
-                          fullscreenElementId &&
-                          enterArtFullScreen(fullscreenElementId)
-                        }
-                      />
-                    )}
-                  </div>
-                </Col>
-                {hasImage && (
-                  <NFTImage
-                    nft={props.nft}
-                    animation={false}
-                    height={650}
-                    transparentBG={true}
-                    showOriginal={true}
-                    showBalance={false}
-                    id="the-art-fullscreen-img"
-                  />
-                )}
-              </>
-            )}
-          </Row>
-        </Container>
-        <Container className="pt-5 pb-3">
+                </>
+              )}
+            </Row>
+          </Container>
+        )}
+        <Container className={`${showArtwork ? "pt-5" : "pt-3"} pb-3`}>
           <Row>
             <Col>
               <Container>
