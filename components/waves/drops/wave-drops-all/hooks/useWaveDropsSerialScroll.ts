@@ -352,6 +352,9 @@ export const useWaveDropsSerialScroll = ({
     const signal = scrollOperationAbortController.current.signal;
 
     let didSucceed = false;
+    const deferredFetchFailure: { value: SerialJumpFailure | null } = {
+      value: null,
+    };
     try {
       if (signal.aborted) {
         finalizeScrollBaseline();
@@ -365,7 +368,11 @@ export const useWaveDropsSerialScroll = ({
           waveId,
           type: DropSize.LIGHT,
           targetSerialNo: activeSerialTarget,
-          onSerialScrollFailure: reportSerialScrollFailure,
+          onSerialScrollFailure: (failure) => {
+            if (failure.targetSerialNo === activeSerialTarget) {
+              deferredFetchFailure.value = failure;
+            }
+          },
         },
         dropId
       );
@@ -374,11 +381,6 @@ export const useWaveDropsSerialScroll = ({
         finalizeScrollBaseline();
         scrollOperationLockRef.current = false;
         setIsScrolling(false);
-        return;
-      }
-
-      if (fetchedDrops === null) {
-        reportActiveScrollFailure("fetch_unavailable", activeSerialTarget);
         return;
       }
 
@@ -392,7 +394,13 @@ export const useWaveDropsSerialScroll = ({
       }
 
       if (!didReveal) {
-        reportActiveScrollFailure("reveal_timeout", activeSerialTarget);
+        if (deferredFetchFailure.value !== null) {
+          reportSerialScrollFailure(deferredFetchFailure.value);
+        } else if (fetchedDrops === null) {
+          reportActiveScrollFailure("fetch_unavailable", activeSerialTarget);
+        } else {
+          reportActiveScrollFailure("reveal_timeout", activeSerialTarget);
+        }
         return;
       }
 

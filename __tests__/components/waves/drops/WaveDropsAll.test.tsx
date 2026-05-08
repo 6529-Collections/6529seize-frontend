@@ -951,7 +951,7 @@ describe("WaveDropsAll", () => {
       consoleWarn.mockRestore();
     });
 
-    it("releases light drop hydration and shows toast when target fetching returns null", async () => {
+    it("reveals locally and does not toast when target fetching returns null", async () => {
       const consoleWarn = jest
         .spyOn(console, "warn")
         .mockImplementation(() => {});
@@ -966,8 +966,16 @@ describe("WaveDropsAll", () => {
       });
 
       mockFetchNextPage.mockResolvedValueOnce(null);
+      mockWaitAndRevealDrop.mockResolvedValueOnce(true);
 
       renderComponent({ initialDrop: 10 });
+
+      const targetElement = document.createElement("div");
+      targetElement.scrollIntoView = jest.fn();
+      Object.defineProperty(targetElement, "getBoundingClientRect", {
+        value: () => ({ top: 0, bottom: 1 }),
+      });
+      dropsProps.targetDropRef.current = targetElement;
 
       expect(dropsProps.suspendLightDropHydration).toBe(true);
 
@@ -984,13 +992,109 @@ describe("WaveDropsAll", () => {
       });
 
       await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+      await waitFor(() => {
+        expect(targetElement.scrollIntoView).toHaveBeenCalled();
+      });
+      act(() => {
+        jest.advanceTimersByTime(600);
+      });
+      await waitFor(() => {
         expect(dropsProps.suspendLightDropHydration).toBe(false);
       });
-      expect(mockWaitAndRevealDrop).not.toHaveBeenCalled();
+      expect(screen.getByTestId("scrolling-overlay").style.display).toBe(
+        "none"
+      );
+      expect(mockSetToast).not.toHaveBeenCalled();
+      consoleWarn.mockRestore();
+    });
+
+    it("shows jump toast when target fetching returns null and local reveal fails", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockResolvedValueOnce(null);
+      mockWaitAndRevealDrop.mockResolvedValueOnce(false);
+
+      renderComponent({ initialDrop: 10 });
+
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
       expect(mockSetToast).toHaveBeenCalledWith({
         message: SERIAL_JUMP_FAILURE_TOAST,
         type: "error",
       });
+      consoleWarn.mockRestore();
+    });
+
+    it("does not toast when fetch reports target missing but local reveal succeeds", async () => {
+      const consoleWarn = jest
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      setupMocks({
+        waveMessages: {
+          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+          hasNextPage: true,
+          isLoading: false,
+          isLoadingNextPage: false,
+        },
+      });
+
+      mockFetchNextPage.mockImplementationOnce((params) => {
+        params.onSerialScrollFailure({
+          reason: "target_not_found",
+          waveId: "test-wave-1",
+          targetSerialNo: 10,
+          details: { requestsMade: 1 },
+        });
+        return Promise.resolve(null);
+      });
+      mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+
+      renderComponent({ initialDrop: 10 });
+
+      const targetElement = document.createElement("div");
+      targetElement.scrollIntoView = jest.fn();
+      Object.defineProperty(targetElement, "getBoundingClientRect", {
+        value: () => ({ top: 0, bottom: 1 }),
+      });
+      dropsProps.targetDropRef.current = targetElement;
+
+      await waitFor(() => {
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+      });
+      await waitFor(() => {
+        expect(targetElement.scrollIntoView).toHaveBeenCalled();
+      });
+      act(() => {
+        jest.advanceTimersByTime(600);
+      });
+      await waitFor(() => {
+        expect(dropsProps.suspendLightDropHydration).toBe(false);
+      });
+      expect(screen.getByTestId("scrolling-overlay").style.display).toBe(
+        "none"
+      );
+      expect(mockSetToast).not.toHaveBeenCalled();
       consoleWarn.mockRestore();
     });
 
