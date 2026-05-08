@@ -85,7 +85,7 @@ describe("Decisions", () => {
     await user.click(screen.getByRole("switch"));
     expect(onRollingEnabled).toHaveBeenCalled();
     expect(setDates).toHaveBeenCalledWith(
-      expect.objectContaining({ isRolling: true })
+      expect.objectContaining({ isRolling: true, endDate: null })
     );
   });
 

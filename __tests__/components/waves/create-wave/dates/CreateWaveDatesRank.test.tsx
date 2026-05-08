@@ -51,7 +51,7 @@ jest.mock(
           props.setDates({
             ...props.dates,
             isRolling: true,
-            endDate: 500,
+            endDate: null,
             subsequentDecisions: [1],
           });
         }}

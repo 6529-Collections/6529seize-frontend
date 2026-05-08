@@ -57,7 +57,7 @@ describe("create-wave.helpers extra", () => {
     expect(body.wave.time_lock_ms).toBe(300000); // clamped to min 5 minutes
   });
 
-  it("throws when rolling without end date", () => {
+  it("sends null periods when rolling rank has no end date", () => {
     const config: any = {
       overview: { type: ApiWaveType.Rank, name: "W" },
       groups: {
@@ -104,9 +104,63 @@ describe("create-wave.helpers extra", () => {
       mentioned_users: [],
       metadata: [],
     };
-    expect(() => getCreateNewWaveBody({ drop, picture: null, config })).toThrow(
-      "End date must be explicitly set when isRolling is true"
-    );
+    const body = getCreateNewWaveBody({ drop, picture: null, config });
+    expect(body.participation.period.max).toBeNull();
+    expect(body.voting.period.max).toBeNull();
+  });
+
+  it("uses the last fixed rank decision as the period max", () => {
+    const config: any = {
+      overview: { type: ApiWaveType.Rank, name: "W" },
+      groups: {
+        canView: "1",
+        canDrop: "2",
+        canVote: "3",
+        canChat: "4",
+        admin: "5",
+      },
+      dates: {
+        submissionStartDate: 1,
+        votingStartDate: 10,
+        endDate: null,
+        firstDecisionTime: 10,
+        subsequentDecisions: [5, 7],
+        isRolling: false,
+      },
+      drops: {
+        noOfApplicationsAllowedPerParticipant: 1,
+        requiredTypes: [],
+        requiredMetadata: [],
+        submissionStrategy: null,
+        terms: null,
+        signatureRequired: false,
+        adminCanDeleteDrops: false,
+      },
+      chat: { enabled: false },
+      voting: {
+        type: null,
+        category: null,
+        profileId: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+      outcomes: [],
+    };
+    const drop: any = {
+      parts: [],
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    };
+
+    const body = getCreateNewWaveBody({ drop, picture: null, config });
+
+    expect(body.participation.period.max).toBe(22);
+    expect(body.voting.period.max).toBe(22);
   });
 });
 it("calculates rolling end date correctly", () => {
@@ -157,6 +211,7 @@ it("calculates rolling end date correctly", () => {
     metadata: [],
   };
   const body = getCreateNewWaveBody({ drop, picture: null, config });
+  expect(body.participation.period.max).toBe(60);
   expect(body.voting.period.max).toBe(60); // last decision before 65
 });
 

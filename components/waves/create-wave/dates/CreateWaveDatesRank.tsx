@@ -44,9 +44,8 @@ export default function CreateWaveDatesRank({
   const isRollingEndDateInPast =
     now !== null &&
     dates.isRolling &&
-    (dates.endDate === null ||
-      !Number.isFinite(dates.endDate) ||
-      dates.endDate <= now);
+    dates.endDate !== null &&
+    (!Number.isFinite(dates.endDate) || dates.endDate <= now);
   const errorsWithoutRankFutureDate = errors.filter(
     (error) => error !== rankFutureDateError
   );

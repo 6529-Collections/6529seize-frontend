@@ -8,11 +8,7 @@ import type { CreateWaveDatesConfig } from "@/types/waves.types";
 import DateAccordion from "@/components/common/DateAccordion";
 import DecisionsFirst from "./DecisionsFirst";
 import SubsequentDecisions from "./SubsequentDecisions";
-import {
-  calculateDecisionTimes,
-  calculateEndDateForCycles,
-  getMinimumRollingEndDate,
-} from "../services/waveDecisionService";
+import { calculateDecisionTimes } from "../services/waveDecisionService";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CommonSwitch from "@/components/utils/switch/CommonSwitch";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
@@ -94,28 +90,11 @@ export default function Decisions({
 
       // When turning on rolling mode:
       // 1. Set isRolling flag
-      // 2. Calculate end date for 2 complete decision cycles
-      const twoCompleteRoundsEndDate = calculateEndDateForCycles(
-        dates.firstDecisionTime,
-        dates.subsequentDecisions,
-        2 // Two complete rounds
-      );
-
-      // Use the calculated date or keep existing if already set and valid
-      const minEndDate = getMinimumRollingEndDate(
-        dates.firstDecisionTime,
-        dates.subsequentDecisions
-      );
-
-      const newEndDate =
-        dates.endDate !== null && dates.endDate > minEndDate
-          ? dates.endDate
-          : twoCompleteRoundsEndDate;
-
+      // 2. Leave the optional end date blank by default
       setDates({
         ...dates,
         isRolling: true,
-        endDate: newEndDate,
+        endDate: null,
       });
     } else {
       // When turning off rolling mode:
@@ -148,7 +127,7 @@ export default function Decisions({
       titleActions={
         <TooltipIconButton
           icon={faInfoCircle}
-          tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until your end date."
+          tooltipText="Schedule when winners will be announced during your wave. With recurring cycles, announcements repeat until an optional end date."
           tooltipPosition="bottom"
           tooltipWidth="tw-w-80"
         />
@@ -227,7 +206,7 @@ export default function Decisions({
                     Repeating Announcement Cycles
                   </h3>
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                    Repeat this pattern until your wave ends
+                    Repeat this pattern until an optional end date
                   </p>
                 </div>
                 <div>
@@ -243,7 +222,8 @@ export default function Decisions({
                 <div className="tw-mt-3 tw-rounded-lg tw-border tw-border-primary-500/30 tw-bg-primary-500/20 tw-p-3 tw-shadow-inner">
                   <p className="tw-text-primary-100 tw-mb-0 tw-text-xs">
                     <strong>Recurring cycles enabled.</strong> Announcements
-                    will repeat until your wave&apos;s end date.
+                    will repeat until an optional end date, or keep going with
+                    no end date.
                   </p>
                 </div>
               )}

@@ -108,9 +108,18 @@ const getDatesValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
       );
     }
-    if (dates.endDate === null || dates.endDate <= 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
-    } else if (dates.votingStartDate && dates.endDate < dates.votingStartDate) {
+
+    const rollingEndDate =
+      dates.isRolling &&
+      dates.endDate !== null &&
+      Number.isFinite(dates.endDate)
+        ? dates.endDate
+        : null;
+    if (
+      rollingEndDate !== null &&
+      dates.votingStartDate &&
+      rollingEndDate < dates.votingStartDate
+    ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
       );
@@ -118,10 +127,17 @@ const getDatesValidationErrors = ({
 
     const now = Time.currentMillis();
     const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
+    const isExplicitRollingEndDateInPast =
+      dates.isRolling &&
+      dates.endDate !== null &&
+      (!Number.isFinite(dates.endDate) || dates.endDate <= now);
+    const isFixedRankEffectiveEndDateInPast =
+      !dates.isRolling &&
+      (rankEffectiveEndDate === null || rankEffectiveEndDate <= now);
     if (
       dates.firstDecisionTime <= now ||
-      rankEffectiveEndDate === null ||
-      rankEffectiveEndDate <= now
+      isExplicitRollingEndDateInPast ||
+      isFixedRankEffectiveEndDateInPast
     ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE

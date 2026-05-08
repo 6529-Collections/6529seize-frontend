@@ -69,16 +69,26 @@ describe("create-wave.validation", () => {
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   });
 
-  it("requires end date for rank waves", () => {
+  it("allows recurring rank waves without an end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
     const config = {
       ...baseConfig,
-      dates: { ...baseConfig.dates, endDate: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: null,
+        subsequentDecisions: [100],
+        isRolling: true,
+      },
     };
     const errors = getCreateWaveValidationErrors({
       step: CreateWaveStep.DATES,
       config,
     });
-    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+    expect(errors).toEqual([]);
   });
 
   it("rejects rank dates when first decision and end date are not in the future", () => {
@@ -133,6 +143,35 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("allows fixed rank dates without a user-selected end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: null,
+        subsequentDecisions: [100],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
   it("checks the configured end date for rolling rank dates", () => {
     const now = 1_000;
     jest.spyOn(Time, "currentMillis").mockReturnValue(now);
@@ -159,7 +198,7 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("keeps rank end-before-voting validation", () => {
+  it("keeps explicit rolling rank end-before-voting validation", () => {
     jest.spyOn(Time, "currentMillis").mockReturnValue(0);
     const config = {
       ...baseConfig,
@@ -169,8 +208,8 @@ describe("create-wave.validation", () => {
         votingStartDate: 10,
         firstDecisionTime: 20,
         endDate: 9,
-        subsequentDecisions: [],
-        isRolling: false,
+        subsequentDecisions: [5],
+        isRolling: true,
       },
     };
 
