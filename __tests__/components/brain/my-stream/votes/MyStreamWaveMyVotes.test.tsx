@@ -1,11 +1,17 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotes from "@/components/brain/my-stream/votes/MyStreamWaveMyVotes";
 import { AuthContext } from "@/components/auth/Auth";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 
 let intersectionCb: () => void = () => {};
 let resetProps: any = null;
+const mockApprovalStatus = jest.fn(() => ({
+  isApprovalStatusLoading: false,
+  isVotingClosed: false,
+  isVotingControlsLocked: false,
+}));
 
 jest.mock("@/hooks/useWaveDropsLeaderboard");
 jest.mock("@/hooks/useIntersectionObserver", () => ({
@@ -14,12 +20,25 @@ jest.mock("@/hooks/useIntersectionObserver", () => ({
     return { current: null };
   },
 }));
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: (...args: any) => mockApprovalStatus(...args),
+}));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ myVotesViewStyle: {} }),
 }));
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVote",
-  () => (p: any) => <div data-testid="vote">{p.drop.id}</div>
+  () => (p: any) => (
+    <button
+      type="button"
+      data-testid="vote"
+      data-is-checked={String(p.isChecked)}
+      data-is-voting-closed={String(p.isVotingClosed)}
+      onClick={() => p.onToggleCheck(p.drop.id)}
+    >
+      {p.drop.id}
+    </button>
+  )
 );
 jest.mock(
   "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset",
@@ -36,12 +55,25 @@ jest.mock(
 const useWaveDropsLeaderboardMock = useWaveDropsLeaderboard as jest.Mock;
 
 describe("MyStreamWaveMyVotes", () => {
-  const wave = { id: "1" } as any;
+  const wave = {
+    id: "1",
+    wave: {
+      type: ApiWaveType.Rank,
+      no_of_decisions_done: 0,
+      no_of_decisions_left: null,
+    },
+  } as any;
   const onDropClick = jest.fn();
   const auth = { connectedProfile: { handle: "me" } } as any;
 
   beforeEach(() => {
     useWaveDropsLeaderboardMock.mockReset();
+    mockApprovalStatus.mockReset();
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: false,
+      isVotingClosed: false,
+      isVotingControlsLocked: false,
+    });
     resetProps = null;
   });
 
@@ -84,6 +116,7 @@ describe("MyStreamWaveMyVotes", () => {
       </AuthContext.Provider>
     );
     expect(screen.getByTestId("vote")).toHaveTextContent("a");
+    expect(resetProps?.waveId).toBe("1");
     expect(resetProps?.availableVotes).toBe(8);
     intersectionCb();
     expect(fetchNextPage).toHaveBeenCalled();
@@ -109,5 +142,178 @@ describe("MyStreamWaveMyVotes", () => {
     );
     expect(screen.getByTestId("loading")).toBeInTheDocument();
     expect(resetProps?.availableVotes).toBe(4);
+  });
+
+  it("delegates approve-wave decision loading to approval status hook", () => {
+    const approveWave = {
+      id: "approve-1",
+      wave: {
+        type: ApiWaveType.Approve,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as any;
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={approveWave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: approveWave });
+  });
+
+  it("does not pass decision points when approve decision counts exist", () => {
+    const approveWave = {
+      id: "approve-1",
+      wave: {
+        type: ApiWaveType.Approve,
+        no_of_decisions_done: 1,
+        no_of_decisions_left: null,
+      },
+    } as any;
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={approveWave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: approveWave });
+  });
+
+  it("locks voting controls while approve decision points are loading", () => {
+    const approveWave = {
+      id: "approve-1",
+      wave: {
+        type: ApiWaveType.Approve,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as any;
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: true,
+      isVotingClosed: false,
+      isVotingControlsLocked: true,
+    });
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={approveWave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    const vote = screen.getByTestId("vote");
+    expect(screen.queryByTestId("reset")).not.toBeInTheDocument();
+    expect(vote).toHaveAttribute("data-is-voting-closed", "true");
+
+    fireEvent.click(vote);
+
+    expect(vote).toHaveAttribute("data-is-checked", "false");
+  });
+
+  it("keeps voting controls unlocked when approval status hook says unlocked", () => {
+    const approveWave = {
+      id: "approve-1",
+      wave: {
+        type: ApiWaveType.Approve,
+        no_of_decisions_done: null,
+        no_of_decisions_left: null,
+      },
+    } as any;
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={approveWave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    const vote = screen.getByTestId("vote");
+    expect(screen.getByTestId("reset")).toBeInTheDocument();
+    expect(vote).toHaveAttribute("data-is-voting-closed", "false");
+
+    fireEvent.click(vote);
+
+    expect(vote).toHaveAttribute("data-is-checked", "true");
+  });
+
+  it("renders closed approval votes as read-only", () => {
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: false,
+      isVotingClosed: true,
+      isVotingControlsLocked: true,
+    });
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 1, max_rating: 5 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.queryByTestId("reset")).not.toBeInTheDocument();
+    expect(resetProps).toBeNull();
+    expect(screen.getByTestId("vote")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 });

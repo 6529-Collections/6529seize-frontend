@@ -15,6 +15,7 @@ import type {
   WaveOverviewConfig,
 } from "@/types/waves.types";
 import { CreateWaveStep } from "@/types/waves.types";
+import { Time } from "@/helpers/time";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",
@@ -27,8 +28,6 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
   DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY = "DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY",
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
-  APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
-  APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION",
   OUTCOMES_REQUIRED = "OUTCOMES_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT = "CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
@@ -41,12 +40,17 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   TDH_VOTING_CANNOT_HAVE_PROFILE_ID = "TDH_VOTING_CANNOT_HAVE_PROFILE_ID",
   VOTING_CATEGORY_CANNOT_BE_EMPTY = "VOTING_CATEGORY_CANNOT_BE_EMPTY",
   VOTING_PROFILE_ID_CANNOT_BE_EMPTY = "VOTING_PROFILE_ID_CANNOT_BE_EMPTY",
-  APPROVAL_THRESHOLD_MUST_BE_NULL = "APPROVAL_THRESHOLD_MUST_BE_NULL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL",
   TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
+  TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION = "TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION",
+  MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID = "MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID",
+  RANK_DECISION_TIME_MUST_BE_IN_FUTURE = "RANK_DECISION_TIME_MUST_BE_IN_FUTURE",
+  RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE = "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE",
 }
 
 const MAX_NAME_LENGTH = 250;
+const MINUTE_IN_MS = 60 * 1000;
+const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 
 const getOverviewValidationErrors = ({
   overview,
@@ -60,6 +64,19 @@ const getOverviewValidationErrors = ({
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
   }
   return errors;
+};
+
+const getRankEffectiveEndDate = (
+  dates: CreateWaveDatesConfig
+): number | null => {
+  if (dates.isRolling) {
+    return dates.endDate;
+  }
+
+  return (
+    dates.firstDecisionTime +
+    dates.subsequentDecisions.reduce((sum, interval) => sum + interval, 0)
+  );
 };
 
 const getDatesValidationErrors = ({
@@ -92,21 +109,64 @@ const getDatesValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
       );
     }
-    if (dates.endDate === null || dates.endDate <= 0) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
-    } else if (dates.votingStartDate && dates.endDate < dates.votingStartDate) {
+
+    if (
+      dates.votingStartDate &&
+      dates.firstDecisionTime < dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+      );
+    }
+
+    const rankEffectiveEndDate = getRankEffectiveEndDate(dates);
+    if (
+      rankEffectiveEndDate !== null &&
+      dates.votingStartDate &&
+      rankEffectiveEndDate < dates.votingStartDate
+    ) {
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
       );
     }
-  } else if (
-    dates.submissionStartDate &&
-    dates.votingStartDate &&
-    dates.submissionStartDate !== dates.votingStartDate
-  ) {
-    errors.push(
-      CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
-    );
+
+    const now = Time.currentMillis();
+    const isExplicitRollingEndDateInPast =
+      dates.isRolling &&
+      dates.endDate !== null &&
+      (!Number.isFinite(dates.endDate) || dates.endDate <= now);
+    const isFixedRankEffectiveEndDateInPast =
+      !dates.isRolling &&
+      (rankEffectiveEndDate === null || rankEffectiveEndDate <= now);
+    if (
+      dates.firstDecisionTime <= now ||
+      isExplicitRollingEndDateInPast ||
+      isFixedRankEffectiveEndDateInPast
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+      );
+    }
+  } else {
+    if (
+      dates.submissionStartDate &&
+      dates.votingStartDate &&
+      dates.submissionStartDate !== dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE
+      );
+    }
+
+    if (
+      dates.endDate !== null &&
+      dates.votingStartDate &&
+      dates.endDate <= dates.votingStartDate
+    ) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+      );
+    }
   }
 
   return errors;
@@ -198,23 +258,40 @@ const getDropsValidationErrors = ({
 
 const getVotingValidationErrors = ({
   waveType,
+  dates,
   voting,
+  approval,
 }: {
   readonly waveType: ApiWaveType;
+  readonly dates: CreateWaveDatesConfig;
   readonly voting: CreateWaveVotingConfig;
+  readonly approval: CreateWaveApprovalConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
+  const maxVotesPerIdentityPerDrop: number | null | undefined =
+    voting.maxVotesPerIdentityPerDrop;
 
   if (waveType === ApiWaveType.Chat) {
     // Chat waves must have null type and null category/profileId
     if (
       voting.type !== null ||
       voting.category !== null ||
-      voting.profileId !== null
+      voting.profileId !== null ||
+      maxVotesPerIdentityPerDrop !== null ||
+      voting.winningThreshold !== null
     ) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING);
     }
     return errors;
+  }
+
+  if (
+    waveType === ApiWaveType.Approve &&
+    (approval.threshold === null ||
+      !Number.isInteger(approval.threshold) ||
+      approval.threshold <= 0)
+  ) {
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
   }
 
   // For Rank and Approve waves
@@ -247,8 +324,18 @@ const getVotingValidationErrors = ({
     }
   }
 
-  // Validate time-weighted voting settings for Rank waves
-  if (waveType === ApiWaveType.Rank && voting.timeWeighted.enabled) {
+  if (
+    maxVotesPerIdentityPerDrop !== null &&
+    (!Number.isInteger(maxVotesPerIdentityPerDrop) ||
+      maxVotesPerIdentityPerDrop < 1)
+  ) {
+    errors.push(
+      CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID
+    );
+  }
+
+  // Validate time-weighted voting settings for Rank and Approve waves
+  if (voting.timeWeighted.enabled) {
     // Constants for validation
     const MIN_MINUTES = 5;
     const MAX_HOURS = 24;
@@ -273,6 +360,20 @@ const getVotingValidationErrors = ({
         CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE
       );
     }
+
+    if (waveType === ApiWaveType.Approve && dates.endDate !== null) {
+      const intervalInMs =
+        voting.timeWeighted.averagingIntervalUnit === "minutes"
+          ? voting.timeWeighted.averagingInterval * MINUTE_IN_MS
+          : voting.timeWeighted.averagingInterval * HOUR_IN_MS;
+      const waveDurationMs = dates.endDate - dates.submissionStartDate;
+
+      if (waveDurationMs >= 0 && intervalInMs > waveDurationMs) {
+        errors.push(
+          CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+        );
+      }
+    }
   }
 
   return errors;
@@ -281,43 +382,22 @@ const getVotingValidationErrors = ({
 const getApprovalValidationErrors = ({
   waveType,
   approval,
-  dates,
 }: {
   readonly waveType: ApiWaveType;
   readonly approval: CreateWaveApprovalConfig;
-  readonly dates: CreateWaveDatesConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
 
-  if (waveType === ApiWaveType.Chat || waveType === ApiWaveType.Rank) {
-    // Chat and Rank waves cannot have approval settings
-    if (approval.threshold !== null || approval.thresholdTimeMs !== null) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_MUST_BE_NULL);
-    }
+  if (waveType !== ApiWaveType.Approve) {
     return errors;
   }
 
-  // For Approve waves
-  if (approval.threshold === null || approval.threshold <= 0) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
-  }
-
-  if (approval.thresholdTimeMs === null || approval.thresholdTimeMs <= 0) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED);
-  }
-
   if (
-    typeof approval.thresholdTimeMs === "number" &&
-    approval.thresholdTimeMs > 0 &&
-    typeof dates.endDate === "number" &&
-    dates.endDate > 0
+    approval.threshold === null ||
+    !Number.isInteger(approval.threshold) ||
+    approval.threshold <= 0
   ) {
-    const waveDuration = dates.endDate - dates.submissionStartDate;
-    if (approval.thresholdTimeMs >= waveDuration) {
-      errors.push(
-        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
-      );
-    }
+    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
   }
 
   return errors;
@@ -404,7 +484,9 @@ export const getCreateWaveValidationErrors = ({
       errors.push(
         ...getVotingValidationErrors({
           waveType: config.overview.type,
+          dates: config.dates,
           voting: config.voting,
+          approval: config.approval,
         })
       );
       break;
@@ -413,7 +495,6 @@ export const getCreateWaveValidationErrors = ({
         ...getApprovalValidationErrors({
           waveType: config.overview.type,
           approval: config.approval,
-          dates: config.dates,
         })
       );
       break;

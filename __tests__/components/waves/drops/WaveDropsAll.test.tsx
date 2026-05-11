@@ -34,7 +34,16 @@ jest.mock("@/hooks/useWaveIsTyping");
 jest.mock("@/hooks/useWaveBoostedDrops");
 jest.mock("@/components/notifications/NotificationsContext");
 jest.mock("@/components/auth/Auth");
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
+}));
 jest.mock("@/services/api/common-api");
+jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: jest.fn(),
+}));
+jest.mock("jwt-decode", () => ({
+  jwtDecode: jest.fn(),
+}));
 jest.mock("next/navigation");
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -130,6 +139,9 @@ const mockFetchNextPage = jest.fn();
 const mockWaitAndRevealDrop = jest.fn();
 const mockRemoveNotifications = jest.fn();
 const mockCommonApiPost = jest.fn();
+const mockAddress = "0xAAA";
+const mockJwt = "test-jwt";
+const mockJwtExp = 4102444800;
 
 const useVirtualizedWaveDropsMock =
   useVirtualizedWaveDrops as jest.MockedFunction<
@@ -208,6 +220,8 @@ function setupMocks(options: MockSetupOptions = {}) {
   containerProps = undefined;
   dropsProps = undefined;
   scrollButtonProps = undefined;
+  mockFetchNextPage.mockReset();
+  mockFetchNextPage.mockResolvedValue(undefined);
 
   // Setup useVirtualizedWaveDrops mock
   const defaultWaveMessages: WaveMessagesMock = {
@@ -277,6 +291,22 @@ function setupMocks(options: MockSetupOptions = {}) {
   // Setup auth mock
   require("@/components/auth/Auth").useAuth.mockReturnValue({
     connectedProfile: options.auth?.connectedProfile ?? null,
+    activeProfileProxy: null,
+  });
+
+  require("@/components/auth/SeizeConnectContext").useSeizeConnectContext.mockReturnValue(
+    {
+      address: mockAddress,
+    }
+  );
+
+  require("@/services/auth/auth.utils").getAuthJwt.mockReturnValue(mockJwt);
+  require("jwt-decode").jwtDecode.mockImplementation((token: string) => {
+    if (token !== mockJwt) {
+      throw new Error(`Unexpected JWT decode for ${token}`);
+    }
+
+    return { sub: mockAddress, role: null, exp: mockJwtExp };
   });
 
   // Setup typing mock
@@ -315,7 +345,11 @@ interface RenderOptions {
   onQuote?: jest.Mock | undefined;
   activeDrop?: ActiveDropState | null | undefined;
   initialDrop?: number | null | undefined;
+  unreadCount?: number | undefined;
   onDropContentClick?: jest.Mock | undefined;
+  winningThreshold?: number | null | undefined;
+  isVotingClosed?: boolean | undefined;
+  isVotingControlsLocked?: boolean | undefined;
 }
 
 function renderComponent(options: RenderOptions = {}) {
@@ -326,6 +360,7 @@ function renderComponent(options: RenderOptions = {}) {
     onQuote: jest.fn(),
     activeDrop: null,
     initialDrop: null,
+    unreadCount: 1,
     onDropContentClick: jest.fn(),
     ...options,
   };
@@ -442,6 +477,9 @@ describe("WaveDropsAll", () => {
         dropId: "target-drop",
         activeDrop: mockActiveDrop,
         initialDrop: 5,
+        winningThreshold: 11,
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
       });
 
       expect(dropsProps).toMatchObject({
@@ -452,6 +490,9 @@ describe("WaveDropsAll", () => {
         dropViewDropId: "target-drop",
         onReply: props.onReply,
         onQuoteClick: expect.any(Function),
+        winningThreshold: 11,
+        isVotingClosed: true,
+        isVotingControlsLocked: true,
       });
     });
   });
@@ -981,14 +1022,10 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      // Trigger the error scenario
-      try {
-        await act(async () => {
-          await containerProps.onTopIntersection();
-        });
-      } catch (error) {
-        // Expected to throw, but component should still render
-      }
+      await act(async () => {
+        containerProps.onTopIntersection();
+        await Promise.resolve();
+      });
 
       // Component should not crash on fetch failure
       expect(screen.getByTestId("drops-list")).toBeInTheDocument();
@@ -1048,13 +1085,10 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       // Trigger error scenario and ensure component stays stable
-      try {
-        await act(async () => {
-          await containerProps.onTopIntersection();
-        });
-      } catch (error) {
-        // Expected to handle errors gracefully
-      }
+      await act(async () => {
+        containerProps.onTopIntersection();
+        await Promise.resolve();
+      });
 
       expect(screen.getByTestId("drops-list")).toBeInTheDocument();
       consoleError.mockRestore();
@@ -1066,13 +1100,16 @@ describe("WaveDropsAll", () => {
         .mockImplementation(() => {});
       mockCommonApiPost.mockRejectedValueOnce(new Error("API error"));
 
-      setupMocks();
+      setupMocks({
+        auth: { connectedProfile: { handle: "testuser" } },
+      });
 
       renderComponent({ waveId: "test-wave" });
 
       await waitFor(() => {
         expect(mockCommonApiPost).toHaveBeenCalledWith({
           endpoint: "notifications/wave/test-wave/read",
+          headers: { Authorization: `Bearer ${mockJwt}` },
         });
       });
 
@@ -1125,16 +1162,23 @@ describe("WaveDropsAll", () => {
   });
 
   describe("Component Lifecycle", () => {
-    it("removes notifications and marks wave as read on mount", async () => {
-      setupMocks();
+    it("removes notifications and marks wave as read on mount with no unread drops", async () => {
+      setupMocks({
+        auth: { connectedProfile: { handle: "testuser" } },
+      });
 
       // Don't pass initialDrop to avoid triggering AbortController code path
-      renderComponent({ waveId: "test-wave", initialDrop: null });
+      renderComponent({
+        waveId: "test-wave",
+        initialDrop: null,
+        unreadCount: 0,
+      });
 
       expect(mockRemoveNotifications).toHaveBeenCalledWith("test-wave");
       await waitFor(() => {
         expect(mockCommonApiPost).toHaveBeenCalledWith({
           endpoint: "notifications/wave/test-wave/read",
+          headers: { Authorization: `Bearer ${mockJwt}` },
         });
       });
     });

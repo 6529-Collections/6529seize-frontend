@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
@@ -27,8 +28,7 @@ import type { LeaderboardViewMode } from "../types";
 import { WaveLeaderboardCurationGroupSelect } from "./WaveLeaderboardCurationGroupSelect";
 import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
 import {
-  WAVE_LEADERBOARD_CURATION_SORT_ITEMS,
-  WAVE_LEADERBOARD_SORT_ITEMS,
+  getWaveLeaderboardSortItems,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
 import { resolveWaveLeaderboardHeaderLayout } from "./waveLeaderboardHeaderLayout";
@@ -331,13 +331,14 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     onCurationGroupChange && curationGroups.length > 0
   );
   const showPriceControls = Boolean(isCurationWave && onPriceRangeChange);
-  const sortItems = useMemo(
-    () =>
-      isCurationWave
-        ? WAVE_LEADERBOARD_CURATION_SORT_ITEMS
-        : WAVE_LEADERBOARD_SORT_ITEMS,
-    [isCurationWave]
-  );
+  const isApproveWave = wave.wave.type === ApiWaveType.Approve;
+  const sortItems = useMemo(() => {
+    return getWaveLeaderboardSortItems({
+      isApproveWave,
+      isCurationWave,
+      timeLockMs: wave.wave.time_lock_ms,
+    });
+  }, [isApproveWave, isCurationWave, wave.wave.time_lock_ms]);
   const viewModes: LeaderboardViewMode[] = isMemesWave
     ? ["list", "grid"]
     : ["list", "grid", "grid_content_only"];
@@ -354,7 +355,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     () => new Map(sortItems.map((item) => [item.value, item.label])),
     [sortItems]
   );
-  const activeSortLabel = sortLabelByValue.get(sort) ?? "Current Vote";
+  const activeSortLabel =
+    sortLabelByValue.get(sort) ?? sortItems[0]?.label ?? "Current Vote";
 
   const activeCurationLabel = useMemo(() => {
     if (!showCurationGroupSelect || !curatedByGroupId) {

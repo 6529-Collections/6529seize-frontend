@@ -1,79 +1,36 @@
-import {
-  CREATE_WAVE_INLINE_GROUP_RULE_LABELS,
-  type CreateWaveInlineGroupRuleType,
-} from "./createWaveInlineGroupBuilder";
-import { DraftChipButton } from "./CreateWaveInlineGroupButtons";
-
 export default function CreateWaveInlineGroupHeader({
-  currentStateLabel,
-  showModeChips,
-  identityChipLabel,
-  disabled,
-  isIdentityPanel,
-  isRulePanel,
-  isSearchPanel,
-  configuredRules,
-  onIdentityToggle,
-  onRuleOpen,
-  onRulesToggle,
-  onSearchToggle,
+  currentGroupLabel,
+  unsavedGroupDescription,
+  unsavedGroupSummary,
 }: {
-  readonly currentStateLabel: string;
-  readonly showModeChips: boolean;
-  readonly identityChipLabel: string;
-  readonly disabled: boolean;
-  readonly isIdentityPanel: boolean;
-  readonly isRulePanel: boolean;
-  readonly isSearchPanel: boolean;
-  readonly configuredRules: readonly CreateWaveInlineGroupRuleType[];
-  readonly onIdentityToggle: () => void;
-  readonly onRuleOpen: (rule: CreateWaveInlineGroupRuleType) => void;
-  readonly onRulesToggle: () => void;
-  readonly onSearchToggle: () => void;
+  readonly currentGroupLabel: string;
+  readonly unsavedGroupDescription: string | null;
+  readonly unsavedGroupSummary: string | null;
 }) {
   return (
-    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/70 tw-p-3">
-      <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-        Current state
-      </p>
-      <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-        {currentStateLabel}
-      </p>
-      {showModeChips && (
-        <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-          <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
-            Draft
-          </span>
-          <DraftChipButton
-            label={identityChipLabel}
-            disabled={disabled}
-            active={isIdentityPanel}
-            isToggle={true}
-            onClick={onIdentityToggle}
-          />
-          {!isRulePanel &&
-            configuredRules.map((rule) => (
-              <DraftChipButton
-                key={rule}
-                label={CREATE_WAVE_INLINE_GROUP_RULE_LABELS[rule]}
-                disabled={disabled}
-                onClick={() => onRuleOpen(rule)}
-              />
-            ))}
-          <DraftChipButton
-            label="Add rule"
-            disabled={disabled}
-            active={isRulePanel}
-            isToggle={true}
-            onClick={onRulesToggle}
-          />
-          <DraftChipButton
-            label="Use existing group"
-            disabled={disabled}
-            active={isSearchPanel}
-            isToggle={true}
-            onClick={onSearchToggle}
-          />
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 md:tw-pr-[31rem]">
+      <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-p-3">
+        <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          Current group
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          {currentGroupLabel}
+        </p>
+      </div>
+
+      {unsavedGroupSummary && (
+        <div className="tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/40 tw-p-3">
+          <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+            Unsaved group
+          </p>
+          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+            {unsavedGroupSummary}
+          </p>
+          {unsavedGroupDescription && (
+            <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-font-medium tw-text-iron-400">
+              {unsavedGroupDescription}
+            </p>
+          )}
         </div>
       )}
     </div>

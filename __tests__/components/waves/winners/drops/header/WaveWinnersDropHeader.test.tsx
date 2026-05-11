@@ -17,6 +17,9 @@ jest.mock(
 jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
   <div data-testid="badge" />
 ));
+jest.mock("@/components/waves/approval/ApprovalStatusBadge", () => () => (
+  <div data-testid="approval-badge" />
+));
 jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
   <div data-testid="time" />
 ));
@@ -56,5 +59,14 @@ describe("WaveWinnersDropHeader", () => {
     expect(getByTestId("author-badges")).toBeInTheDocument();
     expect(queryByTestId("votes")).toBeNull();
     expect(queryByTestId("voters")).toBeNull();
+  });
+
+  it("uses approval badge for approval waves", () => {
+    const { getByTestId, queryByTestId } = render(
+      <WaveWinnersDropHeader winner={winner} isApprovalWave={true} />
+    );
+
+    expect(getByTestId("approval-badge")).toBeInTheDocument();
+    expect(queryByTestId("badge")).toBeNull();
   });
 });

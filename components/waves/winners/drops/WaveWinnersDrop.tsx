@@ -5,16 +5,22 @@ import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWi
 import { useWave } from "@/hooks/useWave";
 import { DefaultWaveWinnersDrop } from "./DefaultWaveWinnerDrop";
 import { MemesWaveWinnersDrop } from "./MemesWaveWinnerDrop";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+
 interface WaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly isApprovalWave?: boolean | undefined;
+  readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
   winner,
   wave,
   onDropClick,
+  isApprovalWave = false,
+  contentPresentation = "default",
 }) => {
   const { isMemesWave } = useWave(wave);
 
@@ -32,6 +38,8 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
     <DefaultWaveWinnersDrop
       winner={winner}
       onDropClick={onDropClick}
+      isApprovalWave={isApprovalWave}
+      contentPresentation={contentPresentation}
     />
   );
 };

@@ -15,6 +15,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
@@ -34,6 +35,9 @@ function MyStreamWaveCurationDropItem({
   curationId,
   canManageActiveCuration,
   onDropClick,
+  winningThreshold,
+  isVotingClosed,
+  isVotingControlsLocked,
 }: {
   readonly drop: ExtendedDrop;
   readonly previousDrop: ExtendedDrop | null;
@@ -41,6 +45,9 @@ function MyStreamWaveCurationDropItem({
   readonly curationId: string;
   readonly canManageActiveCuration: boolean;
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }) {
   const { hasTouchScreen, isApp } = useDeviceInfo();
   const isTouchDevice = useIsTouchDevice();
@@ -95,6 +102,9 @@ function MyStreamWaveCurationDropItem({
         onReplyClick={() => {}}
         onQuoteClick={() => {}}
         onDropContentClick={onDropClick}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
       />
 
       {canManageActiveCuration && !shouldUseDetachedRemoveButton && (
@@ -148,6 +158,8 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({ wave });
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -173,9 +185,20 @@ export default function MyStreamWaveCurationContent({
           curationId={curationId}
           canManageActiveCuration={canManageActiveCuration}
           onDropClick={onDropClick}
+          winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
         />
       )),
-    [canManageActiveCuration, curationId, drops, onDropClick]
+    [
+      canManageActiveCuration,
+      curationId,
+      drops,
+      isVotingClosed,
+      isVotingControlsLocked,
+      onDropClick,
+      winningThreshold,
+    ]
   );
 
   let content: ReactNode;

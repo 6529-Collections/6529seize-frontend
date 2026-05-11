@@ -61,10 +61,19 @@ describe("useWaveConfig", () => {
       );
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(
+        result.current.config.voting.maxVotesPerIdentityPerDrop
+      ).toBeNull();
+      expect(result.current.config.voting.winningThreshold).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: false,
         averagingInterval: 24,
         averagingIntervalUnit: "hours",
+      });
+      expect(result.current.config.approval).toEqual({
+        threshold: null,
+        thresholdTimeMs: null,
+        maxWinners: null,
       });
     });
 
@@ -96,12 +105,6 @@ describe("useWaveConfig", () => {
 
       // Outcomes
       expect(result.current.config.outcomes).toEqual([]);
-
-      // Approval
-      expect(result.current.config.approval).toEqual({
-        threshold: null,
-        thresholdTimeMs: null,
-      });
     });
 
     it("should initialize endDateConfig with null values", () => {
@@ -124,9 +127,16 @@ describe("useWaveConfig", () => {
           ...result.current.config.dates,
           endDate: 2000000,
         });
+        result.current.onApprovalMaxWinnersChange(4);
+        result.current.setEndDateConfig({
+          time: 3600,
+          period: null,
+        });
       });
 
       expect(result.current.config.dates.endDate).toBe(2000000);
+      expect(result.current.config.approval.maxWinners).toBe(4);
+      expect(result.current.endDateConfig.time).toBe(3600);
 
       // Change overview type - should reset everything
       act(() => {
@@ -142,8 +152,13 @@ describe("useWaveConfig", () => {
       expect(result.current.config.overview.image).toEqual(
         new File([""], "test-image.jpg", { type: "image/jpeg" })
       );
-      expect(result.current.config.dates.endDate).toBeNull(); // Reset to initial
+      expect(result.current.config.dates.endDate).toBe(1000000); // Reset to initial rank default
+      expect(result.current.endDateConfig).toEqual({
+        time: null,
+        period: null,
+      });
       expect(result.current.config.drops.adminCanDeleteDrops).toBe(true);
+      expect(result.current.config.approval.maxWinners).toBeNull();
     });
   });
 
@@ -208,7 +223,6 @@ describe("useWaveConfig", () => {
           title: "Outcome 1",
           credit: 100,
           category: null,
-          maxWinners: 5,
           winnersConfig: null,
         },
         {
@@ -217,7 +231,6 @@ describe("useWaveConfig", () => {
           title: "Outcome 2",
           credit: 200,
           category: null,
-          maxWinners: 3,
           winnersConfig: null,
         },
       ];
@@ -342,10 +355,12 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.onCategoryChange("test-category");
         result.current.onProfileIdChange("test-profile");
+        result.current.onMaxVotesPerIdentityPerDropChange(1);
       });
 
       expect(result.current.config.voting.category).toBe("test-category");
       expect(result.current.config.voting.profileId).toBe("test-profile");
+      expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
 
       // Change voting type - should reset dependent fields
       act(() => {
@@ -355,6 +370,8 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.type).toBe(ApiWaveCreditType.Rep);
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
+      expect(result.current.config.voting.winningThreshold).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: false,
         averagingInterval: 24,
@@ -382,6 +399,24 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.profileId).toBe("profile-456");
     });
 
+    it("should update max votes per identity per drop", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onMaxVotesPerIdentityPerDropChange(1);
+      });
+
+      expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
+
+      act(() => {
+        result.current.onMaxVotesPerIdentityPerDropChange(null);
+      });
+
+      expect(
+        result.current.config.voting.maxVotesPerIdentityPerDrop
+      ).toBeNull();
+    });
+
     it("should update time weighted voting settings", () => {
       const { result } = renderHook(() => useWaveConfig());
 
@@ -401,7 +436,7 @@ describe("useWaveConfig", () => {
     });
   });
 
-  describe("Approval Configuration", () => {
+  describe("Approve Threshold Configuration", () => {
     it("should update approval threshold", () => {
       const { result } = renderHook(() => useWaveConfig());
 
@@ -412,14 +447,30 @@ describe("useWaveConfig", () => {
       expect(result.current.config.approval.threshold).toBe(75);
     });
 
-    it("should update threshold time", () => {
+    it("should update approval threshold time", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
-        result.current.onThresholdTimeChange(86400000); // 24 hours in ms
+        result.current.onThresholdTimeChange(60000);
       });
 
-      expect(result.current.config.approval.thresholdTimeMs).toBe(86400000);
+      expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
+    });
+
+    it("should update approval max winners", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onApprovalMaxWinnersChange(5);
+      });
+
+      expect(result.current.config.approval.maxWinners).toBe(5);
+
+      act(() => {
+        result.current.onApprovalMaxWinnersChange(null);
+      });
+
+      expect(result.current.config.approval.maxWinners).toBeNull();
     });
   });
 

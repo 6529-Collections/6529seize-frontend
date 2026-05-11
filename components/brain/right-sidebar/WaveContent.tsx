@@ -55,6 +55,8 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   );
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
+  const isApproveWave = wave.wave.type === ApiWaveType.Approve;
+  const isCompetitionWave = isRankWave || isApproveWave;
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
@@ -63,27 +65,33 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   // Handle tab validity when wave state changes
   useEffect(() => {
     const isLeaderboardAndVotingEnded =
-      activeTab === SidebarTab.LEADERBOARD && isCompleted;
+      activeTab === SidebarTab.LEADERBOARD && isCompleted && !isApproveWave;
     const isWinnersAndFirstDecisionNotPassed =
-      activeTab === SidebarTab.WINNERS && !firstDecisionDone;
+      activeTab === SidebarTab.WINNERS && !firstDecisionDone && !isApproveWave;
     // If on Leaderboard tab and voting has ended, switch to About
     if (isLeaderboardAndVotingEnded || isWinnersAndFirstDecisionNotPassed) {
       setActiveTab(SidebarTab.ABOUT);
     }
-  }, [isCompleted, firstDecisionDone, activeTab, setActiveTab]);
+  }, [isApproveWave, isCompleted, firstDecisionDone, activeTab, setActiveTab]);
 
   // Generate tab options based on wave state
   const options = useMemo(() => {
     const tabs: TabOption[] = [{ key: SidebarTab.ABOUT, label: "About" }];
 
     // Show Leaderboard tab always except when voting has ended
-    if (!isCompleted) {
-      tabs.push({ key: SidebarTab.LEADERBOARD, label: "Leaderboard" });
+    if (!isCompleted || isApproveWave) {
+      tabs.push({
+        key: SidebarTab.LEADERBOARD,
+        label: isApproveWave ? "Approvals" : "Leaderboard",
+      });
     }
 
     // Show Winners tab if first decision has passed
-    if (firstDecisionDone) {
-      tabs.push({ key: SidebarTab.WINNERS, label: "Winners" });
+    if (firstDecisionDone || isApproveWave) {
+      tabs.push({
+        key: SidebarTab.WINNERS,
+        label: isApproveWave ? "Approved" : "Winners",
+      });
     }
 
     tabs.push(
@@ -92,7 +100,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     );
 
     return tabs;
-  }, [isCompleted, firstDecisionDone]);
+  }, [isApproveWave, isCompleted, firstDecisionDone]);
 
   const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
@@ -136,7 +144,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
   };
 
-  if (!isRankWave) {
+  if (!isCompetitionWave) {
     return (
       <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader

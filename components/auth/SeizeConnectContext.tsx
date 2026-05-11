@@ -30,6 +30,7 @@ import {
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
+import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { WalletInitializationError } from "@/src/errors/wallet";
 import { SecurityEventType } from "@/src/types/security";
 import {
@@ -1140,8 +1141,74 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [activeAddress, liveConnectedAddress, storedConnectedAccounts]);
 
-  const connectedAccountUnreadNotifications =
-    useConnectedAccountsUnreadNotifications(storedConnectedAccounts);
+  const activeStoredAccount = useMemo(() => {
+    if (!activeAddress) {
+      return null;
+    }
+
+    return (
+      storedConnectedAccounts.find(
+        (storedAccount) =>
+          normalizeAddress(storedAccount.address) ===
+          normalizeAddress(activeAddress)
+      ) ?? null
+    );
+  }, [activeAddress, storedConnectedAccounts]);
+
+  const jwtPollingStoredConnectedAccounts = useMemo(() => {
+    if (!activeAddress) {
+      return storedConnectedAccounts;
+    }
+
+    if (!activeStoredAccount?.profileHandle) {
+      return storedConnectedAccounts;
+    }
+
+    return storedConnectedAccounts.filter(
+      (storedAccount) =>
+        normalizeAddress(storedAccount.address) !==
+        normalizeAddress(activeAddress)
+    );
+  }, [
+    activeAddress,
+    activeStoredAccount?.profileHandle,
+    storedConnectedAccounts,
+  ]);
+
+  const jwtConnectedAccountUnreadNotifications =
+    useConnectedAccountsUnreadNotifications(jwtPollingStoredConnectedAccounts);
+
+  const { notifications: activeUnreadNotifications } = useUnreadNotifications(
+    activeStoredAccount?.profileHandle ?? null
+  );
+
+  const connectedAccountUnreadNotifications = useMemo(() => {
+    const unreadNotificationsByAddress = {
+      ...jwtConnectedAccountUnreadNotifications,
+    };
+
+    if (activeStoredAccount?.profileHandle) {
+      const activeAccountAddress = normalizeAddress(
+        activeStoredAccount.address
+      );
+      const activeUnreadCount = activeUnreadNotifications?.unread_count;
+
+      if (typeof activeUnreadCount === "number") {
+        unreadNotificationsByAddress[activeAccountAddress] = activeUnreadCount;
+      }
+    } else if (activeStoredAccount) {
+      const activeAccountAddress = normalizeAddress(
+        activeStoredAccount.address
+      );
+      unreadNotificationsByAddress[activeAccountAddress] ??= 0;
+    }
+
+    return unreadNotificationsByAddress;
+  }, [
+    activeStoredAccount,
+    activeUnreadNotifications?.unread_count,
+    jwtConnectedAccountUnreadNotifications,
+  ]);
 
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({

@@ -1,6 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGridItem } from "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 
 const startDropOpen = jest.fn();
@@ -32,7 +33,13 @@ jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => () => (
 
 jest.mock(
   "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes",
-  () => () => <div data-testid="votes" />
+  () => (props: any) => (
+    <div
+      data-testid="votes"
+      data-winning-threshold={props.winningThreshold ?? ""}
+      data-is-voting-closed={String(props.isVotingClosed)}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
@@ -93,6 +100,10 @@ jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
   __esModule: true,
   default: () => <button data-testid="mobile-open-action">Open drop</button>,
+}));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuCopyLink", () => ({
+  __esModule: true,
+  default: () => <button data-testid="mobile-copy-action">Copy link</button>,
 }));
 
 jest.mock(
@@ -186,6 +197,115 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-bg-iron-950");
     expect(viewport).toHaveClass("tw-bg-iron-950");
     expect(content).toHaveClass("tw-space-y-3");
+  });
+
+  it("hides vote actions when voting is closed", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+  });
+
+  it("closes voting modal when voting closes", () => {
+    const { rerender } = render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("vote-button"));
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+
+    rerender(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.queryByTestId("modal")).toBeNull();
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+  });
+
+  it("hides vote action while controls are locked without passing closed state to votes", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        winningThreshold={12}
+        isVotingClosed={false}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+    expect(screen.getByTestId("curate-action")).toBeInTheDocument();
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "12"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "false"
+    );
+  });
+
+  it("closes voting modal when controls become locked", () => {
+    const { rerender } = render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("vote-button"));
+    expect(screen.getByTestId("modal")).toBeInTheDocument();
+
+    rerender(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        isVotingControlsLocked={true}
+      />
+    );
+
+    expect(screen.queryByTestId("modal")).toBeNull();
+    expect(screen.queryByTestId("vote-button")).toBeNull();
+  });
+
+  it("passes approve status props to the compact vote display", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={jest.fn()}
+        winningThreshold={12}
+        isVotingClosed={true}
+      />
+    );
+
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold",
+      "12"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-is-voting-closed",
+      "true"
+    );
   });
 
   it("hides compact footer in content-only mode", () => {
@@ -364,6 +484,7 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.getByTestId("mobile-wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("mobile-open-action")).toBeInTheDocument();
+    expect(screen.getByTestId("mobile-copy-action")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Curate drop" })
     ).toBeInTheDocument();
@@ -380,5 +501,61 @@ describe("WaveLeaderboardGridItem", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Vote" }));
     expect(screen.getByTestId("modal")).toBeInTheDocument();
+  });
+
+  it("shows copy action on touch devices when it is the only content-only action", () => {
+    useDeviceInfo.mockReturnValue({ hasTouchScreen: true });
+    useLongPressInteraction.mockReturnValue({
+      isActive: true,
+      setIsActive: jest.fn(),
+      touchHandlers: {},
+    });
+    useDropInteractionRules.mockReturnValue({ canShowVote: false });
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          drop_type: ApiDropType.Chat,
+          context_profile_context: { curatable: false, curated: false },
+        }}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("mobile-wrapper")).toBeInTheDocument();
+    expect(screen.getByTestId("mobile-copy-action")).toBeInTheDocument();
+    expect(screen.queryByTestId("mobile-open-action")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Curate drop" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Vote" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not show desktop content-only actions for copy-only drops", () => {
+    useDropInteractionRules.mockReturnValue({ canShowVote: false });
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          drop_type: ApiDropType.Chat,
+          context_profile_context: { curatable: false, curated: false },
+        }}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByTestId("wave-leaderboard-grid-item-content-only-actions-d1")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("open-action")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("curate-action")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("vote-button")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("mobile-copy-action")).not.toBeInTheDocument();
   });
 });

@@ -11,24 +11,36 @@ interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
   readonly voteAction?: ReactNode;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export default function ParticipationDropFooter({
   drop,
   voteAction,
   showInteractions = true,
+  winningThreshold,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
 }: ParticipationDropFooterProps) {
   const { canShowVote } = useDropInteractionRules(drop);
+  const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
+  const canShowVoting = canShowVote && !isVotingActionLocked;
   const canShowCuration = drop.context_profile_context?.curatable ?? false;
   const hasRatings = drop.raters_count > 0;
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" && winningThreshold > 0;
+  const shouldShowRatings = hasRatings || hasWinningThreshold;
   const hasReactions = drop.reactions.length > 0;
   const normalizedVoteAction = Children.toArray(voteAction);
   const hasVoteAction = normalizedVoteAction.length > 0;
   const hasPrimaryActions = canShowCuration || hasVoteAction;
-  const shouldShowVoteFooter = canShowVote && (hasRatings || hasPrimaryActions);
-  const shouldShowRatingsOnlyFooter = !canShowVote && hasRatings;
+  const shouldShowVoteFooter =
+    canShowVoting && (shouldShowRatings || hasPrimaryActions);
+  const shouldShowRatingsOnlyFooter = !canShowVoting && shouldShowRatings;
   const shouldShowReactionsFooter =
-    hasReactions || (!canShowVote && canShowCuration);
+    hasReactions || (!canShowVoting && canShowCuration);
 
   if (!showInteractions) {
     return <div className="tw-pb-4" />;
@@ -42,9 +54,14 @@ export default function ParticipationDropFooter({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-justify-between">
-            {hasRatings && (
+            {shouldShowRatings && (
               <div className="tw-px-4">
-                <ParticipationDropRatings drop={drop} rank={drop.rank} />
+                <ParticipationDropRatings
+                  drop={drop}
+                  rank={drop.rank}
+                  winningThreshold={winningThreshold}
+                  isVotingClosed={isVotingClosed}
+                />
               </div>
             )}
 
@@ -66,13 +83,18 @@ export default function ParticipationDropFooter({
       {/* Show ratings if no vote button */}
       {shouldShowRatingsOnlyFooter && (
         <div className="tw-ml-[3.25rem] tw-mt-4 tw-px-4">
-          <ParticipationDropRatings drop={drop} rank={drop.rank} />
+          <ParticipationDropRatings
+            drop={drop}
+            rank={drop.rank}
+            winningThreshold={winningThreshold}
+            isVotingClosed={isVotingClosed}
+          />
         </div>
       )}
 
       {shouldShowReactionsFooter && (
         <div className="tw-ml-[3.25rem] tw-mt-4 tw-flex tw-w-[calc(100%-3.25rem)] tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-4 tw-pb-4">
-          {!canShowVote && (
+          {!canShowVoting && (
             <DropCurationButton
               dropId={drop.id}
               waveId={drop.wave.id}

@@ -5,7 +5,10 @@ import type { SingleWaveDropVoteSubmitHandles } from "@/components/waves/drop/Si
 import SingleWaveDropVoteSubmit from "@/components/waves/drop/SingleWaveDropVoteSubmit";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import * as commonApi from "@/services/api/common-api";
 
 // Mock dependencies
@@ -229,6 +232,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     mockCommonApiPost.mockResolvedValue(updatedDrop);
 
     renderComponent({ newRating: 150, onVoteApplied });
+    const invalidateQueriesSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     const button = screen.getByRole("button");
     fireEvent.click(button);
@@ -238,6 +242,12 @@ describe("SingleWaveDropVoteSubmit", () => {
     await waitFor(() => {
       expect(onVoteApplied).toHaveBeenCalledWith(updatedDrop);
     });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE, { wave_id: mockDrop.wave.id }],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_DECISIONS, { waveId: mockDrop.wave.id }],
+    });
   });
 
   it("handles authentication failure", async () => {
@@ -245,6 +255,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     const onVoteApplied = jest.fn();
 
     renderComponent({ onVoteApplied });
+    const invalidateQueriesSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     const button = screen.getByRole("button");
     fireEvent.click(button);
@@ -259,6 +270,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     // Should not make API call if auth fails
     expect(commonApi.commonApiPost).not.toHaveBeenCalled();
     expect(onVoteApplied).not.toHaveBeenCalled();
+    expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
 
   it("handles API error correctly", async () => {
@@ -268,6 +280,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     mockCommonApiPost.mockRejectedValue(mockError);
 
     renderComponent({ onVoteApplied });
+    const invalidateQueriesSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     const button = screen.getByRole("button");
     fireEvent.click(button);
@@ -281,6 +294,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     // Button should show initial text
     expect(screen.getByText("Vote")).toBeInTheDocument();
     expect(onVoteApplied).not.toHaveBeenCalled();
+    expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
 
   it("accepts onVoteSuccess callback prop", () => {

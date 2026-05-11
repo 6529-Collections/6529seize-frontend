@@ -58,6 +58,22 @@ jest.mock("@/hooks/waves/useDecisionPoints", () => ({
   }),
 }));
 
+jest.mock("@/hooks/waves/useWaveCurations", () => ({
+  useWaveCurations: () => ({ data: [] }),
+}));
+
+jest.mock("@/hooks/waves/useWaveCurationReorderMutation", () => ({
+  useWaveCurationReorderMutation: () => ({
+    reorderCuration: jest.fn(),
+    isPending: false,
+  }),
+}));
+
+jest.mock("@/hooks/useProfileWave", () => ({
+  getProfileWaveIdentity: () => "",
+  useProfileWave: () => ({ data: null }),
+}));
+
 jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
   __esModule: true,
   CompactTimeCountdown: ({ timeLeft }: any) => (
@@ -74,6 +90,7 @@ import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDe
 let mockAvailableTabs: MyStreamWaveTab[] = [];
 let mockWaveInfo: any = {
   isChatWave: false,
+  isApproveWave: false,
   isMemesWave: false,
   isCurationWave: false,
   isRankWave: false,
@@ -86,8 +103,19 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
   return render(
     <MyStreamWaveDesktopTabs
       activeTab={activeTab}
-      wave={{ wave: { type: ApiWaveType.Approve } } as any}
+      wave={
+        {
+          id: "wave-1",
+          author: { id: "author-1" },
+          wave: {
+            type: ApiWaveType.Approve,
+            authenticated_user_eligible_for_admin: false,
+          },
+        } as any
+      }
       setActiveTab={setActiveTab}
+      activeCurationId={null}
+      onSelectCuration={jest.fn()}
     />
   );
 }
@@ -98,6 +126,7 @@ beforeEach(() => {
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
   mockWaveInfo = {
     isChatWave: false,
+    isApproveWave: false,
     isMemesWave: false,
     isCurationWave: false,
     isRankWave: false,
@@ -113,6 +142,7 @@ describe("MyStreamWaveDesktopTabs", () => {
   it("returns null for chat waves", () => {
     mockWaveInfo = {
       isChatWave: true,
+      isApproveWave: false,
       isMemesWave: false,
       isCurationWave: false,
       isRankWave: false,
@@ -137,6 +167,7 @@ describe("MyStreamWaveDesktopTabs", () => {
   it("shows My Votes for curation waves", () => {
     mockWaveInfo = {
       isChatWave: false,
+      isApproveWave: false,
       isMemesWave: false,
       isCurationWave: true,
       isRankWave: false,
@@ -163,6 +194,7 @@ describe("MyStreamWaveDesktopTabs", () => {
   it("hides My Votes for guests on memes waves", () => {
     mockWaveInfo = {
       isChatWave: false,
+      isApproveWave: false,
       isMemesWave: true,
       isCurationWave: false,
       isRankWave: false,
@@ -189,6 +221,7 @@ describe("MyStreamWaveDesktopTabs", () => {
   it("keeps Sales hidden outside curation waves", () => {
     mockWaveInfo = {
       isChatWave: false,
+      isApproveWave: false,
       isMemesWave: false,
       isCurationWave: false,
       isRankWave: false,
@@ -203,6 +236,7 @@ describe("MyStreamWaveDesktopTabs", () => {
   it("keeps FAQ hidden outside memes waves", () => {
     mockWaveInfo = {
       isChatWave: false,
+      isApproveWave: false,
       isMemesWave: false,
       isCurationWave: true,
       isRankWave: false,
@@ -218,6 +252,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     const spy = jest.spyOn(Time, "currentMillis").mockReturnValue(0);
     mockWaveInfo = {
       isChatWave: false,
+      isApproveWave: false,
       isMemesWave: true,
       isCurationWave: false,
       isRankWave: false,
@@ -232,6 +267,7 @@ describe("MyStreamWaveDesktopTabs", () => {
   it("passes curation flag into tab availability update", () => {
     mockWaveInfo = {
       isChatWave: false,
+      isApproveWave: false,
       isMemesWave: false,
       isCurationWave: true,
       isRankWave: false,
@@ -245,8 +281,32 @@ describe("MyStreamWaveDesktopTabs", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: true,
+        isApproveWave: false,
       })
     );
+  });
+
+  it("renames approve wave tabs", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+    ];
+
+    renderComponent(MyStreamWaveTab.LEADERBOARD);
+
+    expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.getByText("Approvals")).toBeInTheDocument();
+    expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.queryByText("Leaderboard")).toBeNull();
+    expect(screen.queryByText("Winners")).toBeNull();
   });
 
   it("forces a transient switch to Chat when serialNo is present", () => {

@@ -4,15 +4,27 @@ import { DefaultWaveSmallLeaderboardDrop } from "./DefaultWaveSmallLeaderboardDr
 
 interface QuorumWaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
+  readonly isApproveWave?: boolean | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
 export const QuorumWaveSmallLeaderboardDrop: React.FC<
   QuorumWaveSmallLeaderboardDropProps
-> = ({ drop, onDropClick }) => {
+> = ({
+  drop,
+  isApproveWave = false,
+  isVotingClosed = false,
+  isVotingControlsLocked = false,
+  onDropClick,
+}) => {
   return (
     <DefaultWaveSmallLeaderboardDrop
       drop={drop}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+      isApproveWave={isApproveWave}
       onDropClick={onDropClick}
       contentPresentation="quorumCompact"
     />

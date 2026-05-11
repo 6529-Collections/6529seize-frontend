@@ -5,8 +5,11 @@ import {
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CreateWaveStep } from "@/types/waves.types";
+import { Time } from "@/helpers/time";
 
 describe("create-wave.validation", () => {
+  const HOUR_IN_MS = 60 * 60 * 1000;
+
   const baseConfig: any = {
     overview: { type: ApiWaveType.Rank, name: "name", image: null },
     groups: {
@@ -38,6 +41,8 @@ describe("create-wave.validation", () => {
       type: ApiWaveCreditType.Rep,
       category: "cat",
       profileId: "id",
+      maxVotesPerIdentityPerDrop: null,
+      winningThreshold: null,
       timeWeighted: {
         enabled: false,
         averagingInterval: 10,
@@ -45,8 +50,12 @@ describe("create-wave.validation", () => {
       },
     },
     outcomes: [{ id: 1 }],
-    approval: { threshold: 1, thresholdTimeMs: 1 },
+    approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
   };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   it("validates overview name required", () => {
     const config = {
@@ -60,16 +69,271 @@ describe("create-wave.validation", () => {
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   });
 
-  it("requires end date for rank waves", () => {
+  it("allows recurring rank waves without an end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
     const config = {
       ...baseConfig,
-      dates: { ...baseConfig.dates, endDate: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: null,
+        subsequentDecisions: [100],
+        isRolling: true,
+      },
     };
     const errors = getCreateWaveValidationErrors({
       step: CreateWaveStep.DATES,
       config,
     });
-    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
+    expect(errors).toEqual([]);
+  });
+
+  it("rejects rank dates when first decision and end date are not in the future", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now,
+        endDate: now,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("allows rank dates with future first decision and future fixed effective end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: now,
+        subsequentDecisions: [100],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("allows fixed rank dates without a user-selected end date", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: null,
+        subsequentDecisions: [100],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("checks the configured end date for rolling rank dates", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now,
+        firstDecisionTime: now + 1,
+        endDate: now,
+        subsequentDecisions: [100],
+        isRolling: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("keeps explicit rolling rank end-before-voting validation", () => {
+    jest.spyOn(Time, "currentMillis").mockReturnValue(0);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 10,
+        votingStartDate: 10,
+        firstDecisionTime: 20,
+        endDate: 9,
+        subsequentDecisions: [5],
+        isRolling: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("rejects fixed rank dates when the effective end is before voting starts", () => {
+    jest.spyOn(Time, "currentMillis").mockReturnValue(0);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 10,
+        votingStartDate: 30,
+        firstDecisionTime: 20,
+        endDate: null,
+        subsequentDecisions: [5],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("rejects rolling rank dates when the first decision is before voting starts", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now + HOUR_IN_MS * 2,
+        firstDecisionTime: now + HOUR_IN_MS,
+        endDate: null,
+        subsequentDecisions: [HOUR_IN_MS],
+        isRolling: true,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_DECISION_TIME_MUST_BE_IN_FUTURE
+    );
+  });
+
+  it("uses the first-decision error when a fixed final announcement is after voting starts", () => {
+    const now = 1_000;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate: now + HOUR_IN_MS * 3,
+        firstDecisionTime: now + HOUR_IN_MS * 2,
+        endDate: null,
+        subsequentDecisions: [HOUR_IN_MS * 2],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("allows first rank decision at the voting start time", () => {
+    const now = 1_000;
+    const votingStartDate = now + HOUR_IN_MS;
+    jest.spyOn(Time, "currentMillis").mockReturnValue(now);
+    const config = {
+      ...baseConfig,
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: now,
+        votingStartDate,
+        firstDecisionTime: votingStartDate,
+        endDate: null,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE
+    );
   });
 
   it("chat waves cannot have voting", () => {
@@ -96,14 +360,39 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("approval threshold required for approve waves", () => {
+  it("chat waves cannot have a vote cap", () => {
+    const chatConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Chat, name: "n", image: null },
+      voting: {
+        type: null,
+        category: null,
+        profileId: null,
+        maxVotesPerIdentityPerDrop: 1,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: chatConfig,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING
+    );
+  });
+
+  it("approval threshold required for approve waves on voting step", () => {
     const approveConfig = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
-      approval: { threshold: null, thresholdTimeMs: null },
+      approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
     };
     const errors = getCreateWaveValidationErrors({
-      step: CreateWaveStep.APPROVAL,
+      step: CreateWaveStep.VOTING,
       config: approveConfig,
     });
     expect(errors).toContain(
@@ -195,26 +484,201 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("approval threshold time must be smaller than duration", () => {
+  it("validates time weighted interval for approve waves", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
-      approval: { threshold: 1, thresholdTimeMs: 10 },
+      approval: { ...baseConfig.approval, threshold: 1 },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL
+    );
+  });
+
+  it("rejects approve time weighted intervals longer than the wave duration", () => {
+    const startDate = 1_000;
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
       dates: {
-        submissionStartDate: 0,
-        votingStartDate: 0,
-        endDate: 5,
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows approve time weighted intervals equal to the wave duration", () => {
+    const startDate = 1_000;
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("does not apply approve duration validation to rank waves", () => {
+    const startDate = 1_000;
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Rank },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      voting: {
+        ...baseConfig.voting,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows approve time weighted voting without an end date", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      approval: { ...baseConfig.approval, threshold: 1 },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 1_000,
+        votingStartDate: 1_000,
+        endDate: null,
+      },
+      voting: {
+        ...baseConfig.voting,
+        winningThreshold: 1,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toEqual([]);
+  });
+
+  it("allows approve waves without an end date", () => {
+    const config = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        submissionStartDate: 1,
+        votingStartDate: 1,
+        endDate: null,
         firstDecisionTime: 0,
         subsequentDecisions: [],
         isRolling: false,
       },
     };
     const errors = getCreateWaveValidationErrors({
-      step: CreateWaveStep.APPROVAL,
+      step: CreateWaveStep.DATES,
+      config,
+    });
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
+    );
+  });
+
+  it("approve waves require end date after start", () => {
+    const config = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        submissionStartDate: 1,
+        votingStartDate: 1,
+        endDate: 1,
+        firstDecisionTime: 0,
+        subsequentDecisions: [],
+        isRolling: false,
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.DATES,
       config,
     });
     expect(errors).toContain(
-      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
+      CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
     );
   });
 
@@ -239,6 +703,42 @@ describe("create-wave.validation", () => {
     expect(errors).toContain(
       CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL
     );
+  });
+
+  it("allows blank max votes per identity per drop", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        ...baseConfig.voting,
+        maxVotesPerIdentityPerDrop: null,
+      },
+    };
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID
+    );
+  });
+
+  it("rejects invalid max votes per identity per drop", () => {
+    for (const maxVotesPerIdentityPerDrop of [0, -1, 1.5]) {
+      const config = {
+        ...baseConfig,
+        voting: {
+          ...baseConfig.voting,
+          maxVotesPerIdentityPerDrop,
+        },
+      };
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.VOTING,
+        config,
+      });
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.MAX_VOTES_PER_IDENTITY_PER_DROP_INVALID
+      );
+    }
   });
 
   it("tdh voting cannot have category or profile id", () => {

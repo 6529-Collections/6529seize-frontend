@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
@@ -12,6 +12,7 @@ import { useLayout } from "../layout/LayoutContext";
 import { WaveLeaderboardLoadingBar } from "@/components/waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -29,11 +30,15 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       enabled: !isResettingVotes,
     });
+  const { isVotingControlsLocked } = useApprovalWaveStatus({
+    wave,
+  });
 
   const { myVotesViewStyle } = useLayout();
 
-  // State to track checked drops
-  const [checkedDrops, setCheckedDrops] = useState<Set<string>>(new Set());
+  const [checkedDrops, setCheckedDrops] = useState<Set<string>>(
+    new Set<string>()
+  );
 
   const sharedAvailableVotes = useMemo(() => {
     const dropWithContext = drops.find((drop) => drop.context_profile_context);
@@ -54,40 +59,52 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
 
   // Check if all items are selected
   const allItemsSelected = useMemo(() => {
+    if (isVotingControlsLocked) {
+      return false;
+    }
+
     return !!drops.length && drops.every((drop) => checkedDrops.has(drop.id));
-  }, [drops, checkedDrops]);
+  }, [drops, checkedDrops, isVotingControlsLocked]);
 
   const handleToggleCheck = (dropId: string) => {
+    if (isVotingControlsLocked) {
+      return;
+    }
+
     setCheckedDrops((prev) => {
-      if (prev.has(dropId)) {
-        prev.delete(dropId);
+      const next = new Set(prev);
+      if (next.has(dropId)) {
+        next.delete(dropId);
       } else {
-        prev.add(dropId);
+        next.add(dropId);
       }
-      return new Set(prev);
+      return next;
     });
   };
 
   const handleToggleSelectAll = () => {
+    if (isVotingControlsLocked) {
+      return;
+    }
+
     if (allItemsSelected) {
-      // If all items are selected, deselect all
-      setCheckedDrops(new Set());
+      setCheckedDrops(new Set<string>());
     } else {
-      // Otherwise, select all
       setCheckedDrops(new Set(drops.map((drop) => drop.id)));
     }
   };
 
   const removeSelected = (dropId: string) => {
     setCheckedDrops((prev) => {
-      prev.delete(dropId);
-      return new Set(prev);
+      const next = new Set(prev);
+      next.delete(dropId);
+      return next;
     });
   };
 
-  const intersectionElementRef = useIntersectionObserver(async () => {
+  const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
-      await fetchNextPage();
+      void fetchNextPage();
     }
   });
 
@@ -104,24 +121,29 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         </div>
       ) : (
         <div className="tw-mt-4 tw-space-y-4">
-          <MyStreamWaveMyVotesReset
-            haveDrops={!!drops.length}
-            availableVotes={sharedAvailableVotes}
-            selected={checkedDrops}
-            onToggleSelectAll={handleToggleSelectAll}
-            allItemsSelected={allItemsSelected}
-            removeSelected={removeSelected}
-            onResettingChange={setIsResettingVotes}
-          />
+          {!isVotingControlsLocked && (
+            <MyStreamWaveMyVotesReset
+              waveId={wave.id}
+              haveDrops={!!drops.length}
+              availableVotes={sharedAvailableVotes}
+              selected={checkedDrops}
+              allItemsSelected={allItemsSelected}
+              isVotingClosed={isVotingControlsLocked}
+              onToggleSelectAll={handleToggleSelectAll}
+              removeSelected={removeSelected}
+              onResettingChange={setIsResettingVotes}
+            />
+          )}
           <div className="tw-space-y-2">
             {drops.map((drop) => (
               <MyStreamWaveMyVote
                 key={drop.id}
                 drop={drop}
                 onDropClick={onDropClick}
-                isChecked={checkedDrops.has(drop.id)}
-                onToggleCheck={handleToggleCheck}
+                isChecked={!isVotingControlsLocked && checkedDrops.has(drop.id)}
                 isResetting={isResettingVotes}
+                isVotingClosed={isVotingControlsLocked}
+                onToggleCheck={handleToggleCheck}
               />
             ))}
             {isFetchingNextPage && <WaveLeaderboardLoadingBar />}

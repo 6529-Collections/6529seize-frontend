@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -6,22 +7,47 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
 import WaveDropTime from "../time/WaveDropTime";
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 import type { DropTimestampLayout } from "../drop.types";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
   readonly showWaveInfo: boolean;
+  readonly winningThreshold?: number | null | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
 }
 
 export default function ParticipationDropHeader({
   drop,
   showWaveInfo,
+  winningThreshold,
   timestampLayout = "inline",
 }: ParticipationDropHeaderProps) {
   const isStackedTimestamp = timestampLayout === "stacked";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
-  const hasRank = drop.rank !== null;
+  const isApproveDrop =
+    typeof winningThreshold === "number" && winningThreshold > 0;
+  const isApprovedDrop = isApproveDrop && isOfficiallyApprovedDrop(drop);
+  const rank = drop.rank;
+  const hasWinnerRank =
+    typeof rank === "number" && rank !== 0 && !Number.isNaN(rank);
+  let statusBadge: ReactNode = null;
+
+  if (isApprovedDrop) {
+    statusBadge = (
+      <ApprovalStatusBadge
+        approvedAt={drop.winning_context?.decision_time ?? null}
+      />
+    );
+  } else if (!isApproveDrop && hasWinnerRank) {
+    statusBadge = (
+      <WinnerDropBadge
+        rank={rank}
+        decisionTime={drop.winning_context?.decision_time ?? null}
+      />
+    );
+  }
 
   return (
     <>
@@ -46,12 +72,7 @@ export default function ParticipationDropHeader({
             level={drop.author.level}
             size={UserCICAndLevelSize.SMALL}
           />
-          {hasRank && (
-            <WinnerDropBadge
-              rank={drop.rank}
-              decisionTime={drop.winning_context?.decision_time ?? null}
-            />
-          )}
+          {statusBadge}
           {!isStackedTimestamp && (
             <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
           )}

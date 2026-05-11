@@ -26,16 +26,27 @@ interface DefaultParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
+  readonly isVotingClosed?: boolean | undefined;
+  readonly isVotingControlsLocked?: boolean | undefined;
 }
 
 export default function ParticipationDrop(
   props: DefaultParticipationDropProps
 ) {
-  const { drop } = props;
+  const { drop, winningThreshold } = props;
   const { isVotingEnded } = useDropInteractionRules(drop);
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0;
 
   // Render either the ongoing or ended drop component based on the voting state
   if (isVotingEnded) {
+    if (hasWinningThreshold) {
+      return <OngoingParticipationDrop {...props} isVotingClosed={true} />;
+    }
+
     return <EndedParticipationDrop {...props} />;
   }
 

@@ -98,6 +98,27 @@ describe("MyStreamWaveMyVote", () => {
     expect(onToggleCheck).toHaveBeenCalledWith("d1");
   });
 
+  it("hides vote controls when voting is closed", () => {
+    const { container } = render(
+      <MyStreamWaveMyVote
+        drop={drop}
+        onDropClick={jest.fn()}
+        isChecked={true}
+        isVotingClosed={true}
+        onToggleCheck={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("votes")).toBeInTheDocument();
+    expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+    expect(
+      container.querySelector(".tw-mr-1.tw-flex-shrink-0.tw-self-start")
+    ).not.toBeInTheDocument();
+    expect(container.firstElementChild).not.toHaveClass(
+      "tw-border-primary-400"
+    );
+  });
+
   it("uses curation nft preview media when drop has no attached media", () => {
     mockIsCurationWave.mockReturnValue(true);
     const curationDrop = {

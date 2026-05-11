@@ -6,6 +6,7 @@ import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
@@ -43,10 +44,49 @@ const getTimeWeightedLockMs = (
   return Math.max(MIN_MS, Math.min(MAX_MS, ms));
 };
 
+const getCreateWaveTimeLockMs = ({
+  config,
+  endDate,
+}: {
+  readonly config: CreateWaveConfig;
+  readonly endDate: number | null;
+}): number | null => {
+  if (
+    config.overview.type === ApiWaveType.Chat ||
+    !config.voting.timeWeighted.enabled
+  ) {
+    return null;
+  }
+
+  const timeLockMs = getTimeWeightedLockMs(config.voting.timeWeighted);
+
+  if (config.overview.type !== ApiWaveType.Approve || endDate === null) {
+    return timeLockMs;
+  }
+
+  const waveDurationMs = Math.max(
+    0,
+    endDate - config.dates.submissionStartDate
+  );
+
+  if (timeLockMs > waveDurationMs) {
+    throw new Error(
+      CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION
+    );
+  }
+
+  return timeLockMs;
+};
+
 const isPositiveFiniteNumber = (
   value: number | null | undefined
 ): value is number =>
   typeof value === "number" && Number.isFinite(value) && value > 0;
+
+const isPositiveWholeNumber = (
+  value: number | null | undefined
+): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value > 0;
 
 export const getCreateWaveNextStep = ({
   step,
@@ -68,9 +108,6 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.DROPS:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.VOTING:
-      if (waveType === ApiWaveType.Approve) {
-        return CreateWaveStep.APPROVAL;
-      }
       if (waveType === ApiWaveType.Chat) {
         return CreateWaveStep.DESCRIPTION;
       }
@@ -111,9 +148,6 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.APPROVAL:
       return CreateWaveStep.VOTING;
     case CreateWaveStep.OUTCOMES:
-      if (waveType === ApiWaveType.Approve) {
-        return CreateWaveStep.APPROVAL;
-      }
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
@@ -247,6 +281,20 @@ const getOutcomes = ({
   }
 };
 
+const getApproveMaxWinners = ({
+  config,
+}: {
+  readonly config: CreateWaveConfig;
+}): number | null => {
+  if (config.overview.type !== ApiWaveType.Approve) {
+    return null;
+  }
+
+  return isPositiveWholeNumber(config.approval.maxWinners)
+    ? config.approval.maxWinners
+    : null;
+};
+
 /**
  * Calculates the last decision time that will occur in a rolling wave before the given end date
  * @param firstDecisionTime The timestamp of the first decision
@@ -304,10 +352,9 @@ export const calculateLastDecisionTime = (
 /**
  * Calculates the end date based on the given dates configuration
  * @param dates The CreateWaveDatesConfig object
- * @returns The calculated end date in milliseconds
- * @throws Error if isRolling is true and no end date is provided
+ * @returns The calculated end date in milliseconds, or null for open-ended rolling waves
  */
-const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
+const calculateEndDate = (dates: CreateWaveDatesConfig): number | null => {
   // If subsequentDecisions is empty, end date is firstDecisionTime
   if (dates.subsequentDecisions.length === 0) {
     return dates.firstDecisionTime;
@@ -321,9 +368,9 @@ const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
     );
   }
 
-  // If we reach this point, isRolling is true and we need to calculate the last decision time
-  if (typeof dates.endDate !== "number") {
-    throw new Error("End date must be explicitly set when isRolling is true");
+  // Open-ended rolling waves keep both periods open.
+  if (dates.endDate === null || !Number.isFinite(dates.endDate)) {
+    return null;
   }
 
   // Calculate the last decision time that will occur before the user-specified end date
@@ -343,7 +390,10 @@ export const getCreateNewWaveBody = ({
   readonly picture: string | null;
   readonly config: CreateWaveConfig;
 }): ApiCreateNewWave => {
-  const endDate = calculateEndDate(config.dates);
+  const endDate =
+    config.overview.type === ApiWaveType.Approve
+      ? config.dates.endDate
+      : calculateEndDate(config.dates);
 
   return {
     name: config.overview.name,
@@ -408,12 +458,12 @@ export const getCreateNewWaveBody = ({
           ? config.approval.threshold
           : null,
       // TODO - should be in outcomes
-      max_winners: null,
-      time_lock_ms:
-        config.overview.type === ApiWaveType.Rank &&
-        config.voting.timeWeighted.enabled
-          ? getTimeWeightedLockMs(config.voting.timeWeighted)
-          : null,
+      max_winners: getApproveMaxWinners({ config }),
+      max_votes_per_identity_to_drop:
+        config.overview.type === ApiWaveType.Chat
+          ? null
+          : (config.voting.maxVotesPerIdentityPerDrop ?? null),
+      time_lock_ms: getCreateWaveTimeLockMs({ config, endDate }),
       admin_group: {
         group_id: config.groups.admin,
       },
