@@ -32,6 +32,7 @@ export interface WaveReadTemporaryProxyRoleIdentity {
 
 export interface WaveReadIdentityConfig {
   readonly address: string | undefined;
+  readonly connectedProfileId: string | null;
   readonly activeProfileProxyId: string | null;
   readonly activeProfileProxyCreatorId: string | null;
   readonly walletAuth: string | null;
@@ -95,8 +96,30 @@ const getAuthHeaders = (walletAuth: string): AuthHeaders => ({
 export const isWaveReadJwtExpired = (jwtExpiresAt: number): boolean =>
   jwtExpiresAt <= Math.floor(Date.now() / 1000);
 
+const normalizeWaveReadJwtRole = ({
+  role,
+  connectedProfileId,
+  activeProfileProxyId,
+}: {
+  readonly role: string | null | undefined;
+  readonly connectedProfileId: string | null;
+  readonly activeProfileProxyId: string | null;
+}): string | null => {
+  if (typeof role !== "string" || role.length === 0) {
+    return null;
+  }
+
+  if (activeProfileProxyId === null && role === connectedProfileId) {
+    return null;
+  }
+
+  return role;
+};
+
 const decodeWaveReadJwtIdentity = (
-  walletAuth: string | null
+  walletAuth: string | null,
+  connectedProfileId: string | null,
+  activeProfileProxyId: string | null
 ): WaveReadJwtIdentity | undefined => {
   if (!walletAuth) {
     return undefined;
@@ -120,10 +143,11 @@ const decodeWaveReadJwtIdentity = (
 
     return {
       addressKey,
-      proxyCreatorId:
-        typeof decodedJwt.role === "string" && decodedJwt.role.length > 0
-          ? decodedJwt.role
-          : null,
+      proxyCreatorId: normalizeWaveReadJwtRole({
+        role: decodedJwt.role,
+        connectedProfileId,
+        activeProfileProxyId,
+      }),
       jwtExpiresAt: expiresAt,
     };
   } catch {
@@ -247,14 +271,20 @@ const getProxyRoleIdentityKey = ({
 
 export const useWaveReadIdentityState = ({
   address,
+  connectedProfileId,
   activeProfileProxyId,
   activeProfileProxyCreatorId,
   walletAuth,
 }: WaveReadIdentityConfig): WaveReadIdentityState => {
   const addressKey = getAddressKey(address);
   const jwtIdentity = useMemo(
-    () => decodeWaveReadJwtIdentity(walletAuth),
-    [walletAuth]
+    () =>
+      decodeWaveReadJwtIdentity(
+        walletAuth,
+        connectedProfileId,
+        activeProfileProxyId
+      ),
+    [activeProfileProxyId, connectedProfileId, walletAuth]
   );
   const verifiedAuthHeaders = useMemo(
     () =>
