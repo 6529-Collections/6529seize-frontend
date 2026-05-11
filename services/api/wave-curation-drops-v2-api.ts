@@ -4,8 +4,8 @@ import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropCon
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { normalizeWaveMin } from "@/services/api/drop-v2-mappers";
 import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 
 interface FetchWaveCurationDropsV2Props {
@@ -15,9 +15,6 @@ interface FetchWaveCurationDropsV2Props {
   readonly pageSize: number;
   readonly signal?: AbortSignal | undefined;
 }
-
-const normalizeWaveMin = (wave: ApiWave | ApiWaveMin): ApiWaveMin =>
-  "description_drop" in wave ? toApiWaveMin(wave) : wave;
 
 const FALLBACK_CONTEXT_PROFILE_CONTEXT: ApiDropContextProfileContext = {
   rating: 0,

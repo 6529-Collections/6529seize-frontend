@@ -2,10 +2,8 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
-  mapApiWaveOverviewToApiWaveMin,
-  mapLeaderboardDropV2,
-} from "@/services/api/wave-drops-v2-api";
+import { mapApiWaveOverviewToApiWaveMin } from "@/services/api/drop-v2-mappers";
+import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 
 interface FetchQuorumParticipationDropPreviewBySerialNoV2Props {
   readonly waveId: string;

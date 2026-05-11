@@ -13,8 +13,8 @@ import { commonApiFetch } from "@/services/api/common-api";
 import {
   mapApiWaveOverviewToApiWaveMin,
   mapIdentityOverviewToProfileMin,
-  mapLeaderboardDropV2,
-} from "@/services/api/wave-drops-v2-api";
+} from "@/services/api/drop-v2-mappers";
+import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 import type {
   INotificationDropReacted,
   TypedNotification,

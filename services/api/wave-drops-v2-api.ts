@@ -1,6 +1,5 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
-import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ApiDropsLeaderboardPage } from "@/generated/models/ApiDropsLeaderboardPage";
 import type { ApiDropsLeaderboardPageV2 } from "@/generated/models/ApiDropsLeaderboardPageV2";
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
@@ -17,25 +16,27 @@ import type { ApiDropV2Page } from "@/generated/models/ApiDropV2Page";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import type { ApiDropVotersPage } from "@/generated/models/ApiDropVotersPage";
 import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
-import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
-import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
-import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
-import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
-import type { ApiReplyToDropV2 } from "@/generated/models/ApiReplyToDropV2";
 import { ApiSubmissionDropStatus } from "@/generated/models/ApiSubmissionDropStatus";
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
-import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
 } from "@/services/api/common-api";
+import {
+  createBasePart,
+  getContextProfileContext,
+  mapApiWaveOverviewToApiWaveMin,
+  mapDropPartV2ToApiDropPart,
+  mapDropReactionCountersV2,
+  mapIdentityOverviewToProfileMin,
+  mapMentionedWaves,
+  mapReplyToDrop,
+  normalizeWaveMin,
+} from "@/services/api/drop-v2-mappers";
 
 const DEFAULT_RETRY_OPTIONS = {
   maxRetries: 2,
@@ -95,86 +96,6 @@ export type ApiWaveDropsV2PageFeed = ApiWaveDropsFeed & {
 const getDropEndpointId = (dropId: string): string =>
   encodeURIComponent(dropId);
 
-export const mapIdentityOverviewToProfileMin = (
-  identity: ApiIdentityOverview
-): ApiProfileMin => ({
-  id: identity.id,
-  handle: identity.handle ?? null,
-  pfp: identity.pfp ?? null,
-  banner1_color: null,
-  banner2_color: null,
-  cic: 0,
-  rep: 0,
-  tdh: 0,
-  tdh_rate: 0,
-  xtdh: 0,
-  xtdh_rate: 0,
-  level: identity.level,
-  classification: identity.classification,
-  sub_classification: null,
-  primary_address: identity.primary_address,
-  subscribed_actions: [],
-  archived: false,
-  active_main_stage_submission_ids: [],
-  winner_main_stage_drop_ids: [],
-  artist_of_prevote_cards: [],
-  profile_wave_id: null,
-  is_wave_creator: false,
-});
-
-export const mapApiWaveOverviewToApiWaveMin = (
-  wave: ApiWaveOverview
-): ApiWaveMin => ({
-  id: wave.id,
-  name: wave.name,
-  picture: wave.pfp ?? null,
-  description_drop_id: "",
-  last_drop_time: wave.last_drop_time,
-  submission_type: null,
-  authenticated_user_eligible_to_vote: true,
-  authenticated_user_eligible_to_participate: true,
-  authenticated_user_eligible_to_chat:
-    wave.context_profile_context?.can_chat ?? true,
-  authenticated_user_admin: false,
-  visibility_group_id: wave.is_private ? "private" : null,
-  participation_group_id: null,
-  chat_group_id: null,
-  voting_group_id: null,
-  admin_group_id: null,
-  voting_period_start: null,
-  voting_period_end: null,
-  voting_credit_type: ApiWaveCreditType.Tdh,
-  voting_credit_nfts: null,
-  admin_drop_deletion_enabled: false,
-  forbid_negative_votes: false,
-  pinned: wave.context_profile_context?.pinned ?? false,
-  identity_wave: false,
-});
-
-const normalizeWaveMin = (wave: ApiWave | ApiWaveMin): ApiWaveMin =>
-  "description_drop" in wave ? toApiWaveMin(wave) : wave;
-
-const mapDropPartV2ToApiDropPart = (part: ApiDropPartV2): ApiDropPart => ({
-  part_id: part.part_no,
-  content: part.content ?? null,
-  media: part.media ?? [],
-  attachments: part.attachments ?? [],
-  quoted_drop: part.quoted_drop
-    ? {
-        drop_id: part.quoted_drop.drop_id,
-        drop_part_id: part.quoted_drop.drop_part_id,
-      }
-    : null,
-});
-
-const createBasePart = (drop: ApiDropV2): ApiDropPart => ({
-  part_id: 1,
-  content: drop.content ?? null,
-  media: drop.media ?? [],
-  attachments: drop.attachments ?? [],
-  quoted_drop: null,
-});
-
 const fetchDropPartV2 = async ({
   dropId,
   partNo,
@@ -218,15 +139,6 @@ const hydrateDropParts = async (
 
   return [basePart, ...extraParts];
 };
-
-const mapDropReactionCountersV2 = (drop: ApiDropV2): ApiDropReaction[] =>
-  drop.reactions
-    ?.filter((reaction) => reaction.count > 0)
-    .map((reaction) => ({
-      reaction: reaction.reaction,
-      profiles: [],
-      count: reaction.count,
-    })) ?? [];
 
 export const fetchDropReactionDetailsV2 = async (
   dropId: string,
@@ -299,99 +211,6 @@ const fetchTopRatersV2 = async (
   }
 };
 
-const mapMentionedWaves = (
-  drop: ApiDropV2,
-  fallbackWave: ApiWaveMin
-): ApiMentionedWave[] =>
-  drop.mentioned_waves?.map((wave) => ({
-    wave_name_in_content: wave.in_content,
-    wave_id: wave.id,
-    wave: {
-      ...fallbackWave,
-      id: wave.id,
-      name: wave.name ?? wave.in_content,
-      picture: wave.pfp ?? null,
-    },
-  })) ?? [];
-
-const mapReplyToDrop = (
-  drop: ApiDropV2
-): ApiReplyToDropResponse | undefined => {
-  if (!drop.reply_to_drop) {
-    return undefined;
-  }
-
-  return {
-    drop_id: drop.reply_to_drop.id,
-    drop_part_id: 1,
-    is_deleted: false,
-    drop: mapReplyToDropPreview(drop.reply_to_drop),
-  };
-};
-
-const mapReplyToDropPreview = (
-  replyToDrop: ApiReplyToDropV2
-): ApiDropWithoutWave => ({
-  id: replyToDrop.id,
-  serial_no: replyToDrop.serial_no ?? 0,
-  drop_type: ApiDropType.Chat,
-  rank: null,
-  author: {
-    id: replyToDrop.author?.handle ?? "",
-    handle: replyToDrop.author?.handle ?? null,
-    pfp: replyToDrop.author?.pfp ?? null,
-    banner1_color: null,
-    banner2_color: null,
-    cic: 0,
-    rep: 0,
-    tdh: 0,
-    tdh_rate: 0,
-    xtdh: 0,
-    xtdh_rate: 0,
-    level: 0,
-    classification: ApiProfileClassification.Pseudonym,
-    sub_classification: null,
-    primary_address: "",
-    subscribed_actions: [],
-    archived: false,
-    active_main_stage_submission_ids: [],
-    winner_main_stage_drop_ids: [],
-    artist_of_prevote_cards: [],
-    profile_wave_id: null,
-    is_wave_creator: false,
-  },
-  created_at: 0,
-  updated_at: null,
-  title: null,
-  parts: [
-    {
-      part_id: 1,
-      content: replyToDrop.content ?? null,
-      media: [],
-      attachments: [],
-      quoted_drop: null,
-    },
-  ],
-  parts_count: 1,
-  referenced_nfts: [],
-  mentioned_users: [],
-  mentioned_groups: [],
-  mentioned_waves: [],
-  metadata: [],
-  rating: 0,
-  realtime_rating: 0,
-  rating_prediction: 0,
-  top_raters: [],
-  raters_count: 0,
-  context_profile_context: null,
-  subscribed_actions: [],
-  is_signed: false,
-  reactions: [],
-  boosts: 0,
-  hide_link_preview: false,
-  nft_links: [],
-});
-
 const getDropType = (drop: ApiDropV2): ApiDropType => {
   if (drop.drop_type === ApiDropMainType.Chat) {
     return ApiDropType.Chat;
@@ -402,24 +221,6 @@ const getDropType = (drop: ApiDropV2): ApiDropType => {
   }
 
   return ApiDropType.Participatory;
-};
-
-const getContextProfileContext = (
-  drop: ApiDropV2
-): ApiDropContextProfileContext => {
-  const votingContext = drop.submission_context?.voting.context_profile_context;
-  const dropContext = drop.context_profile_context;
-
-  return {
-    rating: votingContext?.current ?? 0,
-    min_rating: votingContext?.min ?? 0,
-    max_rating: votingContext?.max ?? 0,
-    reaction: dropContext?.reaction ?? null,
-    boosted: dropContext?.boosted ?? false,
-    bookmarked: dropContext?.bookmarked ?? false,
-    curatable: false,
-    curated: false,
-  };
 };
 
 const getWinningContext = (drop: ApiDropV2) => {
