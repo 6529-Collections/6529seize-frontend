@@ -109,8 +109,10 @@ function DropListItemContentMediaVideo({
     <div
       ref={wrapperRef}
       className={clsx(
-        "tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-center",
-        fillContainer ? "tw-h-full tw-max-h-full" : "tw-max-h-64"
+        "tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-bg-black",
+        fillContainer
+          ? "tw-h-full tw-max-h-full"
+          : "tw-min-h-[200px] tw-max-h-64"
       )}
     >
       <video

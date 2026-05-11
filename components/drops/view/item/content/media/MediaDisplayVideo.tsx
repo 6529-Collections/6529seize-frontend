@@ -115,7 +115,10 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
   };
 
   return (
-    <div ref={wrapperRef} className="tw-relative tw-max-h-64 tw-w-full">
+    <div
+      ref={wrapperRef}
+      className="tw-relative tw-min-h-[200px] tw-max-h-64 tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black"
+    >
       <video
         ref={videoRef}
         onClick={() => {
