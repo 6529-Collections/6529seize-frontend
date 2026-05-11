@@ -71,6 +71,11 @@ export function InlineMediaActions({
 
   return (
     <div className="tw-absolute tw-right-[5px] tw-top-[5px] tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur">
+      {canFullscreen && (
+        <ToolbarButton label="Full screen" onClick={stopAndRun(onFullscreen!)}>
+          <ArrowsPointingOutIcon className="tw-size-4" aria-hidden="true" />
+        </ToolbarButton>
+      )}
       {onOpen && openLabel && (
         <ToolbarButton label={openLabel} onClick={stopAndRun(onOpen)}>
           <ArrowTopRightOnSquareIcon className="tw-size-4" aria-hidden="true" />
@@ -83,11 +88,6 @@ export function InlineMediaActions({
       >
         <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
       </ToolbarButton>
-      {canFullscreen && (
-        <ToolbarButton label="Full screen" onClick={stopAndRun(onFullscreen!)}>
-          <ArrowsPointingOutIcon className="tw-size-4" aria-hidden="true" />
-        </ToolbarButton>
-      )}
     </div>
   );
 }
@@ -117,6 +117,14 @@ export function ExpandedMediaToolbar({
   return (
     <div className="tw-fixed tw-right-4 tw-top-3 tw-z-[1102] tw-flex tw-items-center tw-gap-x-3 tw-pt-[env(safe-area-inset-top,0px)]">
       <div className="tw-flex tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/95 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur">
+        {canFullscreen && (
+          <ToolbarButton
+            label="Full screen"
+            onClick={stopAndRun(onFullscreen!)}
+          >
+            <ArrowsPointingOutIcon className="tw-size-5" aria-hidden="true" />
+          </ToolbarButton>
+        )}
         <ToolbarButton label={openLabel} onClick={stopAndRun(onOpen)}>
           <ArrowTopRightOnSquareIcon className="tw-size-5" aria-hidden="true" />
         </ToolbarButton>
@@ -127,14 +135,6 @@ export function ExpandedMediaToolbar({
         >
           <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
         </ToolbarButton>
-        {canFullscreen && (
-          <ToolbarButton
-            label="Full screen"
-            onClick={stopAndRun(onFullscreen!)}
-          >
-            <ArrowsPointingOutIcon className="tw-size-5" aria-hidden="true" />
-          </ToolbarButton>
-        )}
       </div>
       <button
         type="button"
