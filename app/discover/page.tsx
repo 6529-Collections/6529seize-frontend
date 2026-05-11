@@ -9,7 +9,6 @@ export default function DiscoverPage() {
         title="Active discussions you are not yet following"
         subtitle={null}
         limit={20}
-        endpoint="waves-overview/hot"
         viewAllHref={null}
         excludeFollowed={true}
       />

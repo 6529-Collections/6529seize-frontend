@@ -17,6 +17,31 @@ function createWave(id: string) {
   } as any;
 }
 
+function createSidebarWave(id: string) {
+  return {
+    id,
+    name: id,
+    type: "CHAT",
+    picture: null,
+    contributors: [],
+    isDirectMessage: false,
+    hasCompetition: false,
+    descriptionDrop: {
+      contents: null,
+      media: [],
+    },
+    totalDropsCount: 0,
+    isPrivate: false,
+    latestDropTimestamp: 0,
+    firstUnreadDropSerialNo: null,
+    unreadDropsCount: 0,
+    latestReadTimestamp: 0,
+    pinned: false,
+    muted: false,
+    subscribed: false,
+  } as any;
+}
+
 describe("increaseWavesOverviewDropsCount", () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -96,6 +121,48 @@ describe("increaseWavesOverviewDropsCount", () => {
     expect(result.pages[1][0].id).toBe("w2");
     expect(result.pages[1][0].metrics.drops_count).toBe(1);
     expect(result.pageParams).toEqual([undefined, 1]);
+  });
+
+  it("updates v2 overview and pinned caches", async () => {
+    jest.spyOn(Date, "now").mockReturnValue(4321);
+    const client = new QueryClient();
+    const waveOne = createSidebarWave("w1");
+    const waveTwo = createSidebarWave("w2");
+    const overviewKey = [
+      QueryKey.WAVES_V2,
+      {
+        view: "OVERVIEW",
+        page_size: 20,
+        overview_type: ApiWavesOverviewType.RecentlyDroppedTo,
+        only_waves_followed_by_authenticated_user: true,
+        direct_message: false,
+      },
+    ];
+    const pinnedKey = [
+      QueryKey.WAVES_V2,
+      { pinned: ApiWavesPinFilter.Pinned, viewer_identity: "0xabc:primary" },
+    ];
+
+    client.setQueryData(overviewKey, {
+      pages: [
+        { waves: [waveOne], page: 1, next: true },
+        { waves: [waveTwo], page: 2, next: false },
+      ],
+      pageParams: [1, 2],
+    });
+    client.setQueryData(pinnedKey, [waveOne]);
+
+    await increaseWavesOverviewDropsCount(client, "w1");
+
+    const overviewResult: any = client.getQueryData(overviewKey);
+    const pinnedResult: any = client.getQueryData(pinnedKey);
+
+    expect(overviewResult.pages[0].waves[0].totalDropsCount).toBe(1);
+    expect(overviewResult.pages[0].waves[0].latestDropTimestamp).toBe(4321);
+    expect(overviewResult.pages[1].waves[0]).toEqual(waveTwo);
+    expect(overviewResult.pageParams).toEqual([1, 2]);
+    expect(pinnedResult[0].totalDropsCount).toBe(1);
+    expect(pinnedResult[0].latestDropTimestamp).toBe(4321);
   });
 
   it("leaves unrelated overview caches untouched", async () => {

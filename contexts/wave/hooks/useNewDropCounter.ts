@@ -1,11 +1,11 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
-import type { ApiWave } from "@/generated/models/ApiWave";
+import { useAuth } from "@/components/auth/Auth";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import type { SidebarWave } from "@/types/waves.types";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Interface for tracking new drops count for a wave
@@ -53,11 +53,11 @@ export function getNewestTimestamp(
  */
 function useNewDropCounter(
   activeWaveId: string | null,
-  waves: ApiWave[],
+  waves: SidebarWave[],
   refetchWaves: () => void,
   options: UseNewDropCounterOptions = {}
 ) {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = useAuth();
   const {
     otherListWaveIds = DEFAULT_OTHER_LIST_WAVE_IDS,
     unknownWaveRefetchCooldownMs = DEFAULT_UNKNOWN_WAVE_REFETCH_COOLDOWN_MS,
@@ -78,8 +78,8 @@ function useNewDropCounter(
           count: 0,
           latestDropTimestamp: getNewestTimestamp(
             prev[waveId]?.latestDropTimestamp,
-            waves.find((wave) => wave.id === waveId)?.metrics
-              .latest_drop_timestamp ?? null
+            waves.find((wave) => wave.id === waveId)?.latestDropTimestamp ??
+              null
           ),
           firstUnreadSerialNo: null,
         },
@@ -96,7 +96,7 @@ function useNewDropCounter(
           count: 0,
           latestDropTimestamp: getNewestTimestamp(
             prev[wave.id]?.latestDropTimestamp,
-            wave.metrics.latest_drop_timestamp ?? null
+            wave.latestDropTimestamp ?? null
           ),
           firstUnreadSerialNo: null,
         };
@@ -158,7 +158,7 @@ function useNewDropCounter(
           return;
         }
 
-        if (wave.metrics.muted) return;
+        if (wave.muted) return;
 
         if (
           connectedProfile?.handle?.toLowerCase() ===

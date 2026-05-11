@@ -1,43 +1,79 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-import { fetchDropsByIds } from "@/services/api/drop-api";
+import { fetchDropByIdBatched, fetchDropsByIds } from "@/services/api/drop-api";
+import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
 
-jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: jest.fn(),
+jest.mock("@/services/api/wave-drops-v2-api", () => ({
+  fetchDropV2ById: jest.fn(),
 }));
 
-const commonApiFetchMock = commonApiFetch as jest.Mock;
+const fetchDropV2ByIdMock = fetchDropV2ById as jest.Mock;
 
 beforeEach(() => {
+  jest.useRealTimers();
   jest.clearAllMocks();
 });
 
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 describe("fetchDropsByIds", () => {
-  it("includes reply drops in batched ID lookups", async () => {
+  it("fetches drops with the v2 drop detail endpoint", async () => {
     const replyDrop = { id: "reply-1" } as ApiDrop;
-    commonApiFetchMock.mockResolvedValue([replyDrop]);
+    fetchDropV2ByIdMock.mockResolvedValue(replyDrop);
 
     const result = await fetchDropsByIds(["reply-1"]);
 
-    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
-    expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "drops",
-      params: {
-        ids: "reply-1",
-        limit: "1",
-        include_replies: "true",
-      },
-    });
+    expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(1);
+    expect(fetchDropV2ByIdMock).toHaveBeenCalledWith("reply-1");
     expect(result).toEqual([replyDrop]);
   });
 
   it("returns fetched drops in requested ID order", async () => {
     const firstDrop = { id: "drop-1" } as ApiDrop;
     const secondDrop = { id: "reply-1" } as ApiDrop;
-    commonApiFetchMock.mockResolvedValue([secondDrop, firstDrop]);
+    fetchDropV2ByIdMock
+      .mockResolvedValueOnce(firstDrop)
+      .mockResolvedValueOnce(secondDrop);
 
     const result = await fetchDropsByIds(["drop-1", "reply-1"]);
 
     expect(result).toEqual([firstDrop, secondDrop]);
+  });
+
+  it("keeps fulfilled drops when another drop request fails", async () => {
+    const validDrop = { id: "valid-drop" } as ApiDrop;
+    fetchDropV2ByIdMock
+      .mockResolvedValueOnce(validDrop)
+      .mockRejectedValueOnce(new Error("Drop deleted"));
+
+    const result = await fetchDropsByIds(["valid-drop", "deleted-drop"]);
+
+    expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(2);
+    expect(result).toEqual([validDrop]);
+  });
+
+  it("resolves valid batched requests when another batched id fails", async () => {
+    jest.useFakeTimers();
+    const validDrop = { id: "valid-drop" } as ApiDrop;
+    const deletedDropError = new Error("Drop deleted");
+    fetchDropV2ByIdMock.mockImplementation(async (dropId: string) => {
+      if (dropId === "valid-drop") {
+        return validDrop;
+      }
+      throw deletedDropError;
+    });
+
+    const validPromise = fetchDropByIdBatched("valid-drop");
+    const deletedPromise = fetchDropByIdBatched("deleted-drop");
+    const assertions = Promise.all([
+      expect(validPromise).resolves.toBe(validDrop),
+      expect(deletedPromise).rejects.toBe(deletedDropError),
+    ]);
+
+    jest.runOnlyPendingTimers();
+
+    await assertions;
+    expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(2);
   });
 });

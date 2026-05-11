@@ -12,6 +12,8 @@
  */
 
 import { ApiWaveOverviewContextProfileContext } from '../models/ApiWaveOverviewContextProfileContext';
+import { ApiWaveOverviewContributor } from '../models/ApiWaveOverviewContributor';
+import { ApiWaveOverviewDescriptionDrop } from '../models/ApiWaveOverviewDescriptionDrop';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveOverview {
@@ -23,6 +25,10 @@ export class ApiWaveOverview {
     'subscribers_count': number;
     'has_competition': boolean;
     'is_dm_wave': boolean;
+    'description_drop': ApiWaveOverviewDescriptionDrop;
+    'total_drops_count': number;
+    'is_private': boolean;
+    'contributors'?: Array<ApiWaveOverviewContributor>;
     'context_profile_context'?: ApiWaveOverviewContextProfileContext;
 
     static readonly discriminator: string | undefined = undefined;
@@ -76,6 +82,30 @@ export class ApiWaveOverview {
             "name": "is_dm_wave",
             "baseName": "is_dm_wave",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "description_drop",
+            "baseName": "description_drop",
+            "type": "ApiWaveOverviewDescriptionDrop",
+            "format": ""
+        },
+        {
+            "name": "total_drops_count",
+            "baseName": "total_drops_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "is_private",
+            "baseName": "is_private",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "contributors",
+            "baseName": "contributors",
+            "type": "Array<ApiWaveOverviewContributor>",
             "format": ""
         },
         {

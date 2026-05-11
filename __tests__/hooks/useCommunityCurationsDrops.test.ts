@@ -1,15 +1,24 @@
 import { renderHook } from "@testing-library/react";
-import type { ApiCuratedProfileWaveDropsPage } from "@/generated/models/ApiCuratedProfileWaveDropsPage";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
+import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { commonApiFetch } from "@/services/api/common-api";
+
+type CommunityCurationsDropsPage = {
+  readonly data: ApiDrop[];
+  readonly page: number;
+  readonly next: boolean;
+};
 
 type InfiniteQueryOptions = {
   readonly queryFn: (context: {
     readonly pageParam: number;
   }) => Promise<unknown>;
   readonly getNextPageParam: (
-    lastPage: ApiCuratedProfileWaveDropsPage
+    lastPage: CommunityCurationsDropsPage
   ) => number | undefined;
   readonly enabled?: boolean;
   readonly initialPageParam?: number;
@@ -32,7 +41,7 @@ const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
 >;
 
 const getDefaultQueryResult = (
-  pages: ApiCuratedProfileWaveDropsPage[] | undefined = undefined
+  pages: CommunityCurationsDropsPage[] | undefined = undefined
 ) => ({
   data: pages ? { pages } : undefined,
   fetchNextPage: jest.fn(),
@@ -49,6 +58,47 @@ const buildDrop = ({ id }: { readonly id: string }): ApiDrop =>
     nft_links: [],
     parts: [],
   }) as unknown as ApiDrop;
+
+const buildDropV2 = ({ id }: { readonly id: string }): ApiDropV2 =>
+  ({
+    id,
+    serial_no: 1,
+    created_at: 1000,
+    updated_at: null,
+    is_signed: false,
+    hide_link_preview: false,
+    title: "Curated drop",
+    content: "Part 1",
+    media: [],
+    attachments: [],
+    parts_count: 1,
+    author: {
+      id: "author-id",
+      handle: "artist",
+      primary_address: "0xauthor",
+      pfp: "author.png",
+      level: 1,
+      classification: ApiProfileClassification.Pseudonym,
+      badges: {
+        artist_of_main_stage_submissions: 0,
+        artist_of_memes: 0,
+        profile_wave_id: "profile-wave-1",
+      },
+    },
+    drop_type: ApiDropMainType.Chat,
+    referenced_nfts: [],
+    mentioned_users: [],
+    mentioned_groups: [],
+    mentioned_waves: [],
+    nft_links: [],
+    reactions: [{ reaction: "👍", count: 2 }],
+    boosts: 0,
+    context_profile_context: {
+      reaction: null,
+      boosted: false,
+      bookmarked: false,
+    },
+  }) as unknown as ApiDropV2;
 
 describe("useCommunityCurationsDrops", () => {
   beforeEach(() => {
@@ -68,14 +118,45 @@ describe("useCommunityCurationsDrops", () => {
     expect(queryOptions).not.toBeNull();
     expect(queryOptions?.initialPageParam).toBe(1);
 
-    await queryOptions?.queryFn({ pageParam: 2 });
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [buildDropV2({ id: "curated-drop-1" })],
+      page: 2,
+      next: true,
+    } as ApiDropV2PageWithoutCount);
+
+    const response = await queryOptions?.queryFn({ pageParam: 2 });
 
     expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "curated-profile-wave-drops",
+      endpoint: "v2/curated-profile-wave-drops",
       params: {
         page: "2",
         page_size: "12",
       },
+    });
+    expect(response).toEqual({
+      data: [
+        expect.objectContaining({
+          id: "curated-drop-1",
+          parts: [
+            expect.objectContaining({
+              content: "Part 1",
+              part_id: 1,
+            }),
+          ],
+          reactions: [
+            expect.objectContaining({
+              count: 2,
+              profiles: [],
+              reaction: "👍",
+            }),
+          ],
+          wave: expect.objectContaining({
+            id: "profile-wave-1",
+          }),
+        }),
+      ],
+      page: 2,
+      next: true,
     });
     expect(
       queryOptions?.getNextPageParam({

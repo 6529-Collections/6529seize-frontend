@@ -28,8 +28,9 @@ import React, {
 import { Tooltip } from "react-tooltip";
 import {
   cloneReactionEntries,
-  findReactionIndex,
+  applyProfileReactionToEntries,
   getReactionErrorMessage,
+  getReactionCount,
   removeUserFromReactions,
   toProfileMin,
 } from "./reaction-utils";
@@ -44,18 +45,196 @@ import {
 } from "@/utils/monitoring/dropReactionMonitoring";
 import styles from "./WaveDropReactions.module.scss";
 import WaveDropReactionsDetailDialog from "./WaveDropReactionsDetailDialog";
+import { fetchDropReactionDetailsV2 } from "@/services/api/wave-drops-v2-api";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
 }
 
+interface DetailedReactionsState {
+  readonly dropId: string;
+  readonly reactions: ApiDropReaction[];
+}
+
+const getReactionClassNames = ({
+  animate,
+  canReact,
+  selected,
+}: {
+  readonly animate: boolean;
+  readonly canReact: boolean;
+  readonly selected: boolean;
+}) => {
+  let hoverStyle = "";
+  if (canReact) {
+    hoverStyle = selected
+      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
+      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  }
+
+  let animationStyle = "";
+  if (animate) {
+    animationStyle = selected
+      ? styles["reactionSlideUp"]!
+      : styles["reactionSlideDown"]!;
+  }
+
+  return {
+    borderStyle: selected ? "tw-border-primary-500" : "tw-border-iron-700",
+    bgStyle: selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40",
+    hoverStyle,
+    animationStyle,
+  };
+};
+
+function ReactionTooltipContent({
+  displayProfiles,
+  isDetailsLoading,
+  moreCount,
+  onMoreClick,
+  total,
+}: {
+  readonly displayProfiles: ApiDropReaction["profiles"];
+  readonly isDetailsLoading: boolean;
+  readonly moreCount: number;
+  readonly onMoreClick: (e: React.MouseEvent) => void;
+  readonly total: number;
+}) {
+  if (isDetailsLoading && displayProfiles.length === 0) {
+    return <span className="tw-whitespace-nowrap">Loading reactions...</span>;
+  }
+
+  if (displayProfiles.length === 0) {
+    return (
+      <span className="tw-whitespace-nowrap">
+        {formatLargeNumber(total)} {total === 1 ? "reaction" : "reactions"}
+      </span>
+    );
+  }
+
+  return (
+    <span className="tw-whitespace-nowrap">
+      by{" "}
+      {displayProfiles.map((profile, index) => {
+        const displayName = profile.handle ?? profile.id;
+        const isLast = index === displayProfiles.length - 1;
+
+        return (
+          <span key={profile.id}>
+            {profile.handle ? (
+              <Link
+                href={`/${profile.handle}`}
+                className="tw-text-primary-400 tw-no-underline hover:tw-text-primary-300 hover:tw-underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {displayName}
+              </Link>
+            ) : (
+              <span>{displayName}</span>
+            )}
+            {isLast ? null : ", "}
+          </span>
+        );
+      })}
+      {moreCount > 0 && (
+        <>
+          {" "}
+          <button
+            type="button"
+            onClick={onMoreClick}
+            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-400 tw-underline hover:tw-text-primary-300"
+          >
+            and {moreCount} {moreCount === 1 ? "other" : "others"}
+          </button>
+        </>
+      )}
+    </span>
+  );
+}
+
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
+  const [detailedReactionsState, setDetailedReactionsState] =
+    useState<DetailedReactionsState | null>(null);
+  const [detailsLoadingDropId, setDetailsLoadingDropId] = useState<
+    string | null
+  >(null);
+  const detailsRequestRef = useRef<{
+    readonly dropId: string;
+    readonly promise: Promise<void>;
+  } | null>(null);
   const isTouchDevice = useIsTouchDevice();
+  const detailedReactions =
+    detailedReactionsState?.dropId === drop.id
+      ? detailedReactionsState.reactions
+      : null;
+  const detailsLoading = detailsLoadingDropId === drop.id;
 
-  const handleOpenDialog = useCallback((reactionKey: string) => {
-    setDialogReaction(reactionKey);
-  }, []);
+  const reactionsWithDetails = useMemo(() => {
+    if (!detailedReactions) {
+      return drop.reactions;
+    }
+
+    const detailsByReaction = new Map(
+      detailedReactions.map((reaction) => [reaction.reaction, reaction])
+    );
+
+    return drop.reactions.map((reaction) => {
+      const detailedReaction = detailsByReaction.get(reaction.reaction);
+      if (!detailedReaction) {
+        return reaction;
+      }
+      const profilesById = new Map(
+        detailedReaction.profiles.map((profile) => [profile.id, profile])
+      );
+      for (const profile of reaction.profiles) {
+        profilesById.set(profile.id, profile);
+      }
+
+      return {
+        ...reaction,
+        profiles: [...profilesById.values()],
+        count: getReactionCount(reaction),
+      };
+    });
+  }, [detailedReactions, drop.reactions]);
+
+  const loadReactionDetails = useCallback(() => {
+    if (detailedReactions) {
+      return null;
+    }
+
+    if (detailsRequestRef.current?.dropId === drop.id) {
+      return detailsRequestRef.current.promise;
+    }
+
+    const requestDropId = drop.id;
+    const request = (async () => {
+      setDetailsLoadingDropId(requestDropId);
+      try {
+        const reactions = await fetchDropReactionDetailsV2(requestDropId);
+        setDetailedReactionsState({ dropId: requestDropId, reactions });
+      } catch {
+        setDetailedReactionsState({ dropId: requestDropId, reactions: [] });
+      } finally {
+        setDetailsLoadingDropId((current) =>
+          current === requestDropId ? null : current
+        );
+        detailsRequestRef.current = null;
+      }
+    })();
+
+    detailsRequestRef.current = { dropId: requestDropId, promise: request };
+    return request;
+  }, [detailedReactions, drop.id]);
+
+  const handleOpenDialog = useCallback(
+    (reactionKey: string) => {
+      setDialogReaction(reactionKey);
+      loadReactionDetails()?.catch(() => undefined);
+    },
+    [loadReactionDetails]
+  );
 
   const handleCloseDialog = useCallback(() => {
     setDialogReaction(null);
@@ -63,20 +242,23 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
 
   return (
     <>
-      {drop.reactions.map((reaction) => (
+      {reactionsWithDetails.map((reaction) => (
         <WaveDropReaction
-          key={`${reaction.reaction}-${reaction.profiles.length}`}
+          key={`${reaction.reaction}-${getReactionCount(reaction)}`}
           drop={drop}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
+          onLoadDetails={loadReactionDetails}
+          isDetailsLoading={detailsLoading}
           isTouchDevice={isTouchDevice}
         />
       ))}
       <WaveDropReactionsDetailDialog
         isOpen={dialogReaction !== null}
         onClose={handleCloseDialog}
-        reactions={drop.reactions}
+        reactions={reactionsWithDetails}
         initialReaction={dialogReaction ?? undefined}
+        isLoading={detailsLoading}
       />
     </>
   );
@@ -86,11 +268,15 @@ function WaveDropReaction({
   drop,
   reaction,
   onOpenDetailDialog,
+  onLoadDetails,
+  isDetailsLoading,
   isTouchDevice,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
+  readonly onLoadDetails: () => Promise<void> | null;
+  readonly isDetailsLoading: boolean;
   readonly isTouchDevice: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
@@ -134,7 +320,7 @@ function WaveDropReaction({
     [touchHandlers]
   );
 
-  const [total, setTotal] = useState(reaction.profiles.length);
+  const [total, setTotal] = useState(getReactionCount(reaction));
   const [selected, setSelected] = useState(
     reaction.reaction === drop.context_profile_context?.reaction
   );
@@ -163,18 +349,20 @@ function WaveDropReaction({
   }, [drop.context_profile_context?.reaction, reaction.reaction]);
 
   useEffect(() => {
+    const nextTotal = getReactionCount(reaction);
     if (reaction.profiles === prevProfilesRef.current) {
-      return;
+      const timeoutId = setTimeout(() => {
+        setTotal((current) => (current === nextTotal ? current : nextTotal));
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
     prevProfilesRef.current = reaction.profiles;
-
-    const nextTotal = reaction.profiles.length;
 
     const timeoutId = setTimeout(() => {
       setTotal((current) => (current === nextTotal ? current : nextTotal));
     }, 0);
     return () => clearTimeout(timeoutId);
-  }, [reaction.profiles]);
+  }, [reaction]);
 
   // Trigger animation when total changes
   useEffect(() => {
@@ -275,32 +463,15 @@ function WaveDropReaction({
 
             const reactions = cloneReactionEntries(draft.reactions);
             const userId = connectedProfile?.id ?? null;
-            const reactionsWithoutUser = removeUserFromReactions(
-              reactions,
-              userId
-            );
-
-            if (willSelect && userProfileMin) {
-              const existingIndex = findReactionIndex(
-                reactionsWithoutUser,
-                reaction.reaction
-              );
-
-              if (existingIndex >= 0) {
-                const target = reactionsWithoutUser[existingIndex]!;
-                reactionsWithoutUser[existingIndex] = {
-                  ...target,
-                  profiles: [...target.profiles, userProfileMin],
-                };
-              } else {
-                reactionsWithoutUser.push({
-                  reaction: reaction.reaction,
-                  profiles: [userProfileMin],
-                });
-              }
-            }
-
-            draft.reactions = reactionsWithoutUser;
+            draft.reactions = userProfileMin
+              ? applyProfileReactionToEntries({
+                  entries: reactions,
+                  nextReaction: willSelect ? reaction.reaction : null,
+                  previousReaction:
+                    drop.context_profile_context?.reaction ?? null,
+                  profileMin: userProfileMin,
+                })
+              : removeUserFromReactions(reactions, userId);
             const existingContext: ApiDropContextProfileContext =
               draft.context_profile_context ??
                 drop.context_profile_context ?? {
@@ -423,6 +594,12 @@ function WaveDropReaction({
     return { displayProfiles, moreCount };
   }, [reaction.profiles, total]);
 
+  const handlePointerEnter = useCallback(() => {
+    if (!isTouchDevice) {
+      onLoadDetails()?.catch(() => undefined);
+    }
+  }, [isTouchDevice, onLoadDetails]);
+
   const handleMoreClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -431,23 +608,17 @@ function WaveDropReaction({
     [onOpenDetailDialog, reaction.reaction]
   );
 
-  // styles
-  const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
-  const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
-  let hoverStyle = "";
-  if (canReact) {
-    hoverStyle = selected
-      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
-      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
-  }
-  let animationStyle = "";
-  if (animate) {
-    if (selected) {
-      animationStyle = styles["reactionSlideUp"]!;
-    } else {
-      animationStyle = styles["reactionSlideDown"]!;
-    }
-  }
+  const { animationStyle, bgStyle, borderStyle, hoverStyle } =
+    getReactionClassNames({ animate, canReact, selected });
+  const tooltipContent = (
+    <ReactionTooltipContent
+      displayProfiles={tooltipProfiles.displayProfiles}
+      isDetailsLoading={isDetailsLoading}
+      moreCount={tooltipProfiles.moreCount}
+      onMoreClick={handleMoreClick}
+      total={total}
+    />
+  );
 
   if (!emojiNode || total === 0) return null;
   return (
@@ -457,6 +628,8 @@ function WaveDropReaction({
         onClick={handleClick}
         disabled={!canReact}
         aria-disabled={!canReact}
+        onMouseEnter={handlePointerEnter}
+        onFocus={handlePointerEnter}
         {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
@@ -493,45 +666,7 @@ function WaveDropReaction({
         >
           <div className="tw-flex tw-items-center tw-gap-2">
             {emojiNodeTooltip}
-            <span className="tw-whitespace-nowrap">
-              by{" "}
-              {tooltipProfiles.displayProfiles.map((profile, index) => {
-                const displayName = profile.handle ?? profile.id;
-                const isLast =
-                  index === tooltipProfiles.displayProfiles.length - 1;
-                const showComma = !isLast;
-
-                return (
-                  <span key={profile.id}>
-                    {profile.handle ? (
-                      <Link
-                        href={`/${profile.handle}`}
-                        className="tw-text-primary-400 tw-no-underline hover:tw-text-primary-300 hover:tw-underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {displayName}
-                      </Link>
-                    ) : (
-                      <span>{displayName}</span>
-                    )}
-                    {showComma && ", "}
-                  </span>
-                );
-              })}
-              {tooltipProfiles.moreCount > 0 && (
-                <>
-                  {" "}
-                  <button
-                    type="button"
-                    onClick={handleMoreClick}
-                    className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-400 tw-underline hover:tw-text-primary-300"
-                  >
-                    and {tooltipProfiles.moreCount}{" "}
-                    {tooltipProfiles.moreCount === 1 ? "other" : "others"}
-                  </button>
-                </>
-              )}
-            </span>
+            {tooltipContent}
           </div>
         </Tooltip>
       )}

@@ -413,6 +413,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         <WaveDropsAllWithoutProvider
           key={wave.id}
           waveId={wave.id}
+          wave={wave}
           onReply={handleReply}
           activeDrop={activeDrop}
           initialDrop={scrollTarget}

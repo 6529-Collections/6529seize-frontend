@@ -8,10 +8,8 @@ import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
-import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import {
   convertApiDropToExtendedDrop,
   type ExtendedDrop,
@@ -21,7 +19,7 @@ import {
   fetchDropByIdBatched,
   getDropQueryKey,
 } from "@/services/api/drop-api";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchQuorumParticipationDropPreviewBySerialNoV2 } from "@/services/api/quorum-participation-drop-preview-v2-api";
 import QuorumParticipationDrop from "./QuorumParticipationDrop";
 
 interface QuorumParticipationDropLinkPreviewProps {
@@ -50,32 +48,6 @@ const toSerialNumber = (
 
   const parsed = Number.parseInt(serialNo, 10);
   return Number.isFinite(parsed) ? parsed : null;
-};
-
-const fetchDropBySerialNo = async ({
-  waveId,
-  serialNo,
-}: {
-  readonly waveId: string;
-  readonly serialNo: number;
-}): Promise<ApiDrop | null> => {
-  const results = await commonApiFetch<ApiWaveDropsFeed>({
-    endpoint: `waves/${waveId}/drops`,
-    params: {
-      limit: "1",
-      serial_no_limit: `${serialNo}`,
-      search_strategy: WaveDropsSearchStrategy.Both,
-    },
-  });
-
-  const drop = results.drops.find(
-    (candidate) => candidate.serial_no === serialNo
-  );
-  if (!drop) {
-    return null;
-  }
-
-  return { ...drop, wave: results.wave } as ApiDrop;
 };
 
 export default function QuorumParticipationDropLinkPreview({
@@ -112,7 +84,7 @@ export default function QuorumParticipationDropLinkPreview({
       }
 
       if (parsedSerialNo !== null) {
-        return await fetchDropBySerialNo({
+        return await fetchQuorumParticipationDropPreviewBySerialNoV2({
           waveId,
           serialNo: parsedSerialNo,
         });

@@ -114,7 +114,7 @@ describe("useWaveDropsLeaderboard extra", () => {
 
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: "waves/2/leaderboard",
+        endpoint: "v2/waves/2/leaderboard",
         params: expect.objectContaining({
           sort: WaveDropsLeaderboardSort.PRICE,
           curation_id: "curation-group-1",
@@ -145,7 +145,7 @@ describe("useWaveDropsLeaderboard extra", () => {
 
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: "waves/2/leaderboard",
+        endpoint: "v2/waves/2/leaderboard",
         params: expect.objectContaining({
           sort: WaveDropsLeaderboardSort.PRICE,
           min_price: "0.5",
@@ -174,7 +174,7 @@ describe("useWaveDropsLeaderboard extra", () => {
 
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: "waves/2/leaderboard",
+        endpoint: "v2/waves/2/leaderboard",
         params: expect.not.objectContaining({
           price_currency: expect.any(String),
         }),

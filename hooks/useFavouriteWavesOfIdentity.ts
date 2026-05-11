@@ -3,8 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { commonApiFetch } from "@/services/api/common-api";
+import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
+import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
+import type { SidebarWave } from "@/types/waves.types";
 
 interface UseFavouriteWavesOfIdentityProps {
   readonly identityKey: string | null;
@@ -20,21 +21,21 @@ export function useFavouriteWavesOfIdentity({
   const normalizedIdentityKey = identityKey?.trim() ?? null;
   const activeIdentityKey = normalizedIdentityKey ?? "";
 
-  const query = useQuery<ApiWave[], Error>({
+  const query = useQuery<SidebarWave[], Error>({
     queryKey: [
       QueryKey.IDENTITY_FAVOURITE_WAVES,
       { identity_key: normalizedIdentityKey, limit },
     ],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave[]>({
-        endpoint: `waves-overview/favourites-of-identity/${encodeURIComponent(
-          activeIdentityKey
-        )}`,
-        params: {
-          limit: `${limit}`,
-          offset: "0",
-        },
-      }),
+    queryFn: async () => {
+      const page = await fetchWavesV2Page({
+        view: ApiWavesV2ListType.Favourites,
+        page: 1,
+        pageSize: limit,
+        identity: activeIdentityKey,
+      });
+
+      return page.waves;
+    },
     enabled: enabled && activeIdentityKey.length > 0,
     ...getDefaultQueryRetry(),
   });

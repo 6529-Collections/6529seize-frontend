@@ -17,10 +17,9 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import {
+  applyProfileReactionToEntries,
   cloneReactionEntries,
-  findReactionIndex,
   getReactionErrorMessage,
-  removeUserFromReactions,
   toProfileMin,
 } from "@/components/waves/drops/reaction-utils";
 import {
@@ -153,31 +152,18 @@ const applyReactionToCacheDrop = ({
     return drop;
   }
 
-  const reactionsWithoutUser = removeUserFromReactions(
-    cloneReactionEntries(drop.reactions),
-    profileMin.id
-  );
-
-  if (reactionCode !== null) {
-    const targetIndex = findReactionIndex(reactionsWithoutUser, reactionCode);
-
-    if (targetIndex >= 0) {
-      const target = reactionsWithoutUser[targetIndex]!;
-      reactionsWithoutUser[targetIndex] = {
-        ...target,
-        profiles: [...target.profiles, profileMin],
-      };
-    } else {
-      reactionsWithoutUser.push({
-        reaction: reactionCode,
-        profiles: [profileMin],
-      });
-    }
-  }
+  const previousReaction =
+    drop.context_profile_context?.reaction ?? baseContext?.reaction ?? null;
+  const reactions = applyProfileReactionToEntries({
+    entries: cloneReactionEntries(drop.reactions),
+    nextReaction: reactionCode,
+    previousReaction,
+    profileMin,
+  });
 
   return {
     ...drop,
-    reactions: reactionsWithoutUser,
+    reactions,
     context_profile_context: {
       ...(drop.context_profile_context ??
         baseContext ??
