@@ -37,7 +37,7 @@ const getGridContentSpacingClassName = (isCompactMode: boolean): string =>
   isCompactMode ? "tw-space-y-3" : "tw-space-y-1";
 
 const getGridMediaWrapperClassName = (isCompactMode: boolean): string =>
-  `tw-relative tw-aspect-[16/9] tw-min-h-[14rem] tw-overflow-hidden md:tw-min-h-[15rem] ${
+  `tw-relative tw-flex tw-aspect-square tw-min-h-[14rem] tw-items-center tw-justify-center tw-overflow-hidden md:tw-min-h-[15rem] ${
     isCompactMode ? "tw-rounded-lg tw-bg-iron-900" : "tw-bg-iron-950"
   }`;
 

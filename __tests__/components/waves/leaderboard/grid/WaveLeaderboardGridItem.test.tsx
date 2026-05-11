@@ -200,7 +200,11 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("media")).toBeInTheDocument();
     const mediaWrapper = screen.getByTestId("media")
       .parentElement as HTMLElement;
-    expect(mediaWrapper).toHaveClass("tw-aspect-[16/9]");
+    expect(mediaWrapper).toHaveClass("tw-aspect-square");
+    expect(mediaWrapper).not.toHaveClass("tw-aspect-[16/9]");
+    expect(mediaWrapper).toHaveClass("tw-flex");
+    expect(mediaWrapper).toHaveClass("tw-items-center");
+    expect(mediaWrapper).toHaveClass("tw-justify-center");
     expect(mediaWrapper).toHaveClass("tw-min-h-[14rem]");
     expect(mediaWrapper).toHaveClass("md:tw-min-h-[15rem]");
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
@@ -372,7 +376,11 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("media")).toBeInTheDocument();
     const mediaWrapper = screen.getByTestId("media")
       .parentElement as HTMLElement;
-    expect(mediaWrapper).toHaveClass("tw-aspect-[16/9]");
+    expect(mediaWrapper).toHaveClass("tw-aspect-square");
+    expect(mediaWrapper).not.toHaveClass("tw-aspect-[16/9]");
+    expect(mediaWrapper).toHaveClass("tw-flex");
+    expect(mediaWrapper).toHaveClass("tw-items-center");
+    expect(mediaWrapper).toHaveClass("tw-justify-center");
     expect(mediaWrapper).toHaveClass("tw-min-h-[14rem]");
     expect(mediaWrapper).toHaveClass("md:tw-min-h-[15rem]");
 
