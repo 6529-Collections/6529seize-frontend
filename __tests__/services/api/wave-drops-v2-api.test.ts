@@ -105,6 +105,43 @@ describe("fetchWaveDropsFeedV2", () => {
     ]);
   });
 
+  it("preserves V2 author badges without fabricating legacy artwork ids", async () => {
+    const badges = {
+      artist_of_main_stage_submissions: 1,
+      artist_of_memes: 1,
+      profile_wave_id: "profile-wave-1",
+    };
+
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        {
+          ...createDrop(1),
+          author: {
+            ...identity,
+            badges,
+          },
+        },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]?.author).toEqual(
+      expect.objectContaining({
+        active_main_stage_submission_ids: [],
+        artist_of_prevote_cards: [],
+        badges,
+        is_wave_creator: true,
+        profile_wave_id: "profile-wave-1",
+        winner_main_stage_drop_ids: [],
+      })
+    );
+  });
+
   it("fetches only additional parts for multi-part drops", async () => {
     commonApiFetchMock
       .mockResolvedValueOnce({

@@ -56,3 +56,19 @@ it("renders wave data and links", () => {
   const img = screen.getByRole("img");
   expect(img.getAttribute("src")).toContain("scaled.jpg");
 });
+
+it("renders fallback wave text without a link when wave id is missing", () => {
+  render(
+    <NotificationWaveCreated
+      notification={{
+        ...notification,
+        additional_context: {},
+        related_wave: undefined,
+      }}
+    />
+  );
+
+  expect(screen.getByText("Unknown wave")).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Unknown wave" })).toBeNull();
+  expect(screen.queryByTestId("wave-follow")).toBeNull();
+});

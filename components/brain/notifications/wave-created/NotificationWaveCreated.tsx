@@ -15,13 +15,16 @@ export default function NotificationWaveCreated({
 }) {
   const { isApp } = useDeviceInfo();
   const wave = notification.related_wave;
-  const waveId = wave?.id ?? notification.additional_context.wave_id;
-  const invitationHref = getWaveRoute({
-    waveId,
-    isDirectMessage: wave?.is_direct_message ?? wave?.is_dm_wave ?? false,
-    isApp,
-  });
-  const waveName = wave?.name ?? waveId;
+  const contextWaveId = notification.additional_context.wave_id || undefined;
+  const waveId = wave?.id ?? contextWaveId;
+  const invitationHref = waveId
+    ? getWaveRoute({
+        waveId,
+        isDirectMessage: wave?.is_direct_message ?? wave?.is_dm_wave ?? false,
+        isApp,
+      })
+    : null;
+  const waveName = wave?.name ?? waveId ?? "Unknown wave";
 
   return (
     <div className="tw-w-full">
@@ -45,12 +48,18 @@ export default function NotificationWaveCreated({
         <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           invited you to a wave:
         </span>
-        <Link
-          href={invitationHref}
-          className="tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline hover:tw-text-primary-300"
-        >
-          {waveName}
-        </Link>
+        {invitationHref ? (
+          <Link
+            href={invitationHref}
+            className="tw-text-sm tw-font-medium tw-text-primary-400 tw-no-underline hover:tw-text-primary-300"
+          >
+            {waveName}
+          </Link>
+        ) : (
+          <span className="tw-text-sm tw-font-medium tw-text-iron-300">
+            {waveName}
+          </span>
+        )}
         <NotificationTimestamp createdAt={notification.created_at} />
       </NotificationHeader>
     </div>

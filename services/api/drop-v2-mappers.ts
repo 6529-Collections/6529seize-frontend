@@ -6,6 +6,7 @@ import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
+import type { ApiIdentityOverviewBadges } from "@/generated/models/ApiIdentityOverviewBadges";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -17,32 +18,41 @@ import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 
+type ApiProfileMinWithBadges = ApiProfileMin & {
+  readonly badges?: ApiIdentityOverviewBadges;
+};
+
 export const mapIdentityOverviewToProfileMin = (
   identity: ApiIdentityOverview
-): ApiProfileMin => ({
-  id: identity.id,
-  handle: identity.handle ?? null,
-  pfp: identity.pfp ?? null,
-  banner1_color: null,
-  banner2_color: null,
-  cic: 0,
-  rep: 0,
-  tdh: 0,
-  tdh_rate: 0,
-  xtdh: 0,
-  xtdh_rate: 0,
-  level: identity.level,
-  classification: identity.classification,
-  sub_classification: null,
-  primary_address: identity.primary_address,
-  subscribed_actions: [],
-  archived: false,
-  active_main_stage_submission_ids: [],
-  winner_main_stage_drop_ids: [],
-  artist_of_prevote_cards: [],
-  profile_wave_id: null,
-  is_wave_creator: false,
-});
+): ApiProfileMinWithBadges => {
+  const profileWaveId = identity.badges.profile_wave_id ?? null;
+
+  return {
+    id: identity.id,
+    handle: identity.handle ?? null,
+    pfp: identity.pfp ?? null,
+    banner1_color: null,
+    banner2_color: null,
+    cic: 0,
+    rep: 0,
+    tdh: 0,
+    tdh_rate: 0,
+    xtdh: 0,
+    xtdh_rate: 0,
+    level: identity.level,
+    classification: identity.classification,
+    sub_classification: null,
+    primary_address: identity.primary_address,
+    subscribed_actions: [],
+    archived: false,
+    active_main_stage_submission_ids: [],
+    winner_main_stage_drop_ids: [],
+    artist_of_prevote_cards: [],
+    profile_wave_id: profileWaveId,
+    is_wave_creator: profileWaveId !== null,
+    badges: identity.badges,
+  };
+};
 
 export const mapApiWaveOverviewToApiWaveMin = (
   wave: ApiWaveOverview

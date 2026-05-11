@@ -45,6 +45,10 @@ const createDeferred = <T,>() => {
 };
 
 describe("useSingleWaveDropData", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it("fetches single-drop detail without eager top raters", async () => {
     fetchDropV2ByIdMock.mockResolvedValue({
       id: "drop-1",
