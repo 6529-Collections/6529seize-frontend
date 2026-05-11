@@ -57,6 +57,13 @@ jest.mock("@/hooks/useConnectedAccountsUnreadNotifications", () => ({
   useConnectedAccountsUnreadNotifications: () => ({}),
 }));
 
+jest.mock("@/hooks/useUnreadNotifications", () => ({
+  useUnreadNotifications: () => ({
+    notifications: { unread_count: 0 },
+    haveUnreadNotifications: false,
+  }),
+}));
+
 jest.mock("@/services/auth/auth.utils", () => ({
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
   canStoreAnotherWalletAccount: jest.fn(() => true),

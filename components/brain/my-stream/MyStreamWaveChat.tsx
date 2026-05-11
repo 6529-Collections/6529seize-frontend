@@ -9,7 +9,6 @@ import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -23,13 +22,13 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { useWave } from "@/hooks/useWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
 import {
   ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
@@ -37,7 +36,6 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -45,6 +43,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
+import { useWaveChatLeaveCleanup } from "./useWaveChatLeaveCleanup";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -72,46 +71,15 @@ const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
 }) => {
   const { setUnreadDividerSerialNo } = useUnreadDivider();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
-  const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
+  const markWaveNotificationsRead = useMarkWaveNotificationsRead();
 
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    return () => {
-      setUnreadDividerSerialNo(null);
-      void (async () => {
-        if (document.visibilityState !== "visible") {
-          return;
-        }
-
-        try {
-          await Promise.resolve(removeWaveDeliveredNotifications(waveId));
-        } catch (error: unknown) {
-          console.error(
-            "Failed to remove wave delivered notifications:",
-            error
-          );
-        }
-
-        try {
-          await commonApiPostWithoutBodyAndResponse({
-            endpoint: `notifications/wave/${waveId}/read`,
-          });
-          invalidateNotifications();
-        } catch (error: unknown) {
-          console.error("Failed to mark feed as read:", error);
-        }
-      })();
-    };
-  }, [
+  useWaveChatLeaveCleanup({
     enabled,
     waveId,
     setUnreadDividerSerialNo,
     removeWaveDeliveredNotifications,
-    invalidateNotifications,
-  ]);
+    markWaveNotificationsRead,
+  });
 
   return null;
 };
@@ -123,6 +91,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   onDropClick,
 }) => {
   const router = useRouter();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const galleryContainerRef = useRef<HTMLDivElement>(null);

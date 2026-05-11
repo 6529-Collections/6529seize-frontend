@@ -32,12 +32,18 @@ import useLocalPreference from "@/hooks/useLocalPreference";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
+import { normalizeWaveLeaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
 import {
   resolveWaveSubmissionExperience,
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { getApprovedDropsCount } from "@/helpers/waves/approve-wave.helpers";
+import {
+  FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  useWaveDecisions,
+} from "@/hooks/waves/useWaveDecisions";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -50,6 +56,182 @@ interface CreateDropUiState {
   readonly isApprovalVotingControlsLocked: boolean;
 }
 
+interface LeaderboardContentProps {
+  readonly wave: ApiWave;
+  readonly viewMode: LeaderboardViewMode;
+  readonly sort: WaveDropsLeaderboardSort;
+  readonly isMemesWave: boolean;
+  readonly isVotingClosed: boolean;
+  readonly isVotingControlsLocked: boolean;
+  readonly curatedByGroupId: string | undefined;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly minPrice: number | undefined;
+  readonly maxPrice: number | undefined;
+  readonly priceCurrency: string | undefined;
+  readonly onCreateDrop: (() => void) | undefined;
+}
+
+const isWaveLeaderboardSortPreference = (
+  value: unknown,
+  isCurationWave: boolean
+): value is WaveDropsLeaderboardSort =>
+  value === WaveDropsLeaderboardSort.RANK ||
+  value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
+  value === WaveDropsLeaderboardSort.TREND ||
+  value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
+  value === WaveDropsLeaderboardSort.CREATED_AT ||
+  (isCurationWave && value === WaveDropsLeaderboardSort.PRICE);
+
+const stickyLeaderboardControlsClassName =
+  "tw-sticky tw-top-0 tw-z-30 tw-flex-none tw-bg-black tw-py-4";
+const staticLeaderboardControlsClassName = "tw-flex-none tw-bg-black tw-py-4";
+
+interface LeaderboardControlsFrameProps {
+  readonly isSticky: boolean;
+  readonly children: React.ReactNode;
+}
+
+const LeaderboardControlsFrame: React.FC<LeaderboardControlsFrameProps> = ({
+  isSticky,
+  children,
+}) => (
+  <div
+    className={
+      isSticky
+        ? stickyLeaderboardControlsClassName
+        : staticLeaderboardControlsClassName
+    }
+  >
+    {children}
+  </div>
+);
+
+interface ApproveListStickyLeaderboardControlsProps {
+  readonly rootRef: React.RefObject<HTMLDivElement | null>;
+  readonly children: React.ReactNode;
+}
+
+const ApproveListStickyLeaderboardControls: React.FC<
+  ApproveListStickyLeaderboardControlsProps
+> = ({ rootRef, children }) => {
+  const [isSticky, setIsSticky] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const container = rootRef.current;
+    const sentinel = sentinelRef.current;
+
+    if (!container || !sentinel) {
+      return;
+    }
+
+    if (typeof globalThis.IntersectionObserver === "undefined") {
+      return;
+    }
+
+    const observer = new globalThis.IntersectionObserver(
+      ([entry]) => {
+        if (!entry) {
+          return;
+        }
+
+        const rootTop =
+          entry.rootBounds?.top ?? container.getBoundingClientRect().top;
+        const hasScrolledPastSentinel =
+          !entry.isIntersecting && entry.boundingClientRect.bottom <= rootTop;
+
+        setIsSticky((current) =>
+          current === hasScrolledPastSentinel
+            ? current
+            : hasScrolledPastSentinel
+        );
+      },
+      { root: container, threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [rootRef]);
+
+  return (
+    <>
+      <div
+        ref={sentinelRef}
+        aria-hidden="true"
+        data-testid="approval-controls-sticky-sentinel"
+        className="tw-h-px tw-w-full tw-flex-none"
+      />
+      <LeaderboardControlsFrame isSticky={isSticky}>
+        {children}
+      </LeaderboardControlsFrame>
+    </>
+  );
+};
+
+const LeaderboardContent: React.FC<LeaderboardContentProps> = ({
+  wave,
+  viewMode,
+  sort,
+  isMemesWave,
+  isVotingClosed,
+  isVotingControlsLocked,
+  curatedByGroupId,
+  onDropClick,
+  minPrice,
+  maxPrice,
+  priceCurrency,
+  onCreateDrop,
+}) => {
+  if (viewMode === "list") {
+    return (
+      <WaveLeaderboardDrops
+        wave={wave}
+        sort={sort}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
+        curatedByGroupId={curatedByGroupId}
+        onDropClick={onDropClick}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
+        onCreateDrop={onCreateDrop}
+      />
+    );
+  }
+
+  if (!isMemesWave) {
+    return (
+      <WaveLeaderboardGrid
+        wave={wave}
+        sort={sort}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
+        curatedByGroupId={curatedByGroupId}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        priceCurrency={priceCurrency}
+        mode={viewMode === "grid" ? "compact" : "content_only"}
+        onDropClick={onDropClick}
+      />
+    );
+  }
+
+  return (
+    <WaveLeaderboardGallery
+      wave={wave}
+      sort={sort}
+      isVotingClosed={isVotingClosed}
+      isVotingControlsLocked={isVotingControlsLocked}
+      curatedByGroupId={curatedByGroupId}
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+      priceCurrency={priceCurrency}
+      onDropClick={onDropClick}
+    />
+  );
+};
+
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
@@ -57,6 +239,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const leaderboardContainerRef = useRef<HTMLDivElement | null>(null);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const {
     isApproveWave,
@@ -119,12 +302,26 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     sortPreferenceKey,
     WaveDropsLeaderboardSort.RANK,
     (value): value is WaveDropsLeaderboardSort =>
-      value === WaveDropsLeaderboardSort.RANK ||
-      value === WaveDropsLeaderboardSort.RATING_PREDICTION ||
-      value === WaveDropsLeaderboardSort.TREND ||
-      value === WaveDropsLeaderboardSort.MY_REALTIME_VOTE ||
-      value === WaveDropsLeaderboardSort.CREATED_AT ||
-      (isCurationWave && value === WaveDropsLeaderboardSort.PRICE)
+      isWaveLeaderboardSortPreference(value, isCurationWave)
+  );
+  const effectiveSort = useMemo(
+    () =>
+      normalizeWaveLeaderboardSort({
+        sort,
+        timeLockMs: wave.wave.time_lock_ms,
+      }),
+    [sort, wave.wave.time_lock_ms]
+  );
+  const handleSortChange = useCallback(
+    (nextSort: WaveDropsLeaderboardSort) => {
+      setSort(
+        normalizeWaveLeaderboardSort({
+          sort: nextSort,
+          timeLockMs: wave.wave.time_lock_ms,
+        })
+      );
+    },
+    [setSort, wave.wave.time_lock_ms]
   );
 
   const {
@@ -135,6 +332,34 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     waveId: wave.id,
     enabled: wave.wave.type !== ApiWaveType.Chat,
   });
+  const cannotDeriveApprovedCount =
+    isApproveWave && getApprovedDropsCount({ wave }) === null;
+  const shouldLoadApprovalDecisionPoints = cannotDeriveApprovedCount;
+  const {
+    decisionPoints: approvalDecisionPoints,
+    hasLoadedAllPages: hasLoadedApprovalDecisionPoints,
+    isLoadingAllPagesError: isApprovalDecisionPointsLoadError,
+    refetch: refetchApprovalDecisionPoints,
+    fetchNextPage: fetchNextApprovalDecisionPointsPage,
+    hasNextPage: hasNextApprovalDecisionPointsPage,
+  } = useWaveDecisions({
+    waveId: wave.id,
+    enabled: shouldLoadApprovalDecisionPoints,
+    loadAllPages: true,
+    pageSize: FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
+  });
+  const retryApprovalDecisionPointsLoad = useCallback(() => {
+    if (hasNextApprovalDecisionPointsPage) {
+      void fetchNextApprovalDecisionPointsPage();
+      return;
+    }
+
+    void refetchApprovalDecisionPoints();
+  }, [
+    fetchNextApprovalDecisionPointsPage,
+    hasNextApprovalDecisionPointsPage,
+    refetchApprovalDecisionPoints,
+  ]);
   const {
     approvedCount,
     closeStatus: approvalCloseStatus,
@@ -144,7 +369,24 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     retryApprovalStatus,
   } = useApprovalWaveStatus({
     wave,
+    ...(shouldLoadApprovalDecisionPoints
+      ? {
+          decisionPoints: approvalDecisionPoints,
+          areDecisionPointsComplete: hasLoadedApprovalDecisionPoints,
+          isDecisionPointsLoadError: isApprovalDecisionPointsLoadError,
+          onRetryDecisionPointsLoad: retryApprovalDecisionPointsLoad,
+        }
+      : {}),
   });
+  const isApprovalCountError = Boolean(
+    shouldLoadApprovalDecisionPoints &&
+    isApprovalDecisionPointsLoadError &&
+    approvedCount === null &&
+    !isApprovalStatusError
+  );
+  const retryApprovalCount = isApprovalCountError
+    ? retryApprovalDecisionPointsLoad
+    : null;
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingControlsLocked;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(
     () => ({
@@ -239,12 +481,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       typeof minPrice === "number" || typeof maxPrice === "number";
     if (
       isCurationWave &&
-      (hasPriceFilter || sort === WaveDropsLeaderboardSort.PRICE)
+      (hasPriceFilter || effectiveSort === WaveDropsLeaderboardSort.PRICE)
     ) {
       return "ETH";
     }
     return undefined;
-  }, [isCurationWave, maxPrice, minPrice, sort]);
+  }, [effectiveSort, isCurationWave, maxPrice, minPrice]);
 
   const updateCurationGroupInUrl = useCallback(
     (groupId: string | null) => {
@@ -287,61 +529,41 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     }
     return viewMode;
   }, [isMemesWave, viewMode]);
-
-  let leaderboardContent: React.ReactNode;
-  if (effectiveViewMode === "list") {
-    leaderboardContent = (
-      <WaveLeaderboardDrops
-        wave={wave}
-        sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
-        isVotingControlsLocked={isApprovalVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
-        onDropClick={onDropClick}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        priceCurrency={priceCurrency}
-        onCreateDrop={canOpenCreateDrop ? onCreateDrop : undefined}
-      />
-    );
-  } else if (!isMemesWave) {
-    leaderboardContent = (
-      <WaveLeaderboardGrid
-        wave={wave}
-        sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
-        isVotingControlsLocked={isApprovalVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        priceCurrency={priceCurrency}
-        mode={effectiveViewMode === "grid" ? "compact" : "content_only"}
-        onDropClick={onDropClick}
-      />
-    );
-  } else {
-    leaderboardContent = (
-      <WaveLeaderboardGallery
-        wave={wave}
-        sort={sort}
-        isVotingClosed={isApprovalVotingClosed}
-        isVotingControlsLocked={isApprovalVotingControlsLocked}
-        curatedByGroupId={curatedByGroupId}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        priceCurrency={priceCurrency}
-        onDropClick={onDropClick}
-      />
-    );
-  }
+  const createDropAction = canOpenCreateDrop ? onCreateDrop : undefined;
+  const shouldDelayApprovalControlsSticky =
+    isApproveWave && effectiveViewMode === "list";
+  const leaderboardControls = (
+    <WaveLeaderboardHeader
+      wave={wave}
+      viewMode={effectiveViewMode}
+      sort={effectiveSort}
+      onViewModeChange={(mode) => setViewMode(mode)}
+      onCreateDrop={createDropAction}
+      onSortChange={handleSortChange}
+      curationGroups={curationGroups}
+      curatedByGroupId={curatedByGroupId ?? null}
+      onCurationGroupChange={
+        curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
+      }
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+      onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
+    />
+  );
 
   return (
-    <div className={containerClassName} style={leaderboardViewStyle}>
+    <div
+      ref={leaderboardContainerRef}
+      className={containerClassName}
+      style={leaderboardViewStyle}
+    >
       {isApproveWave ? (
         <WaveApprovalStatusBar
           approvedCount={approvedCount}
           closeStatus={approvalCloseStatus}
+          isApprovalCountError={isApprovalCountError}
           isApprovalStatusError={isApprovalStatusError}
+          retryApprovalCount={retryApprovalCount}
           retryApprovalStatus={retryApprovalStatus}
           wave={wave}
         />
@@ -350,24 +572,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       )}
 
       {/* Sticky tabs/filters section */}
-      <div className="tw-sticky tw-top-0 tw-z-30 tw-bg-black tw-py-4">
-        <WaveLeaderboardHeader
-          wave={wave}
-          viewMode={effectiveViewMode}
-          sort={sort}
-          onViewModeChange={(mode) => setViewMode(mode)}
-          onCreateDrop={canOpenCreateDrop ? onCreateDrop : undefined}
-          onSortChange={(s) => setSort(s)}
-          curationGroups={curationGroups}
-          curatedByGroupId={curatedByGroupId ?? null}
-          onCurationGroupChange={
-            curationGroups.length > 0 ? updateCurationGroupInUrl : undefined
-          }
-          minPrice={minPrice}
-          maxPrice={maxPrice}
-          onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
-        />
-      </div>
+      {shouldDelayApprovalControlsSticky ? (
+        <ApproveListStickyLeaderboardControls
+          key={`${wave.id}:list`}
+          rootRef={leaderboardContainerRef}
+        >
+          {leaderboardControls}
+        </ApproveListStickyLeaderboardControls>
+      ) : (
+        <LeaderboardControlsFrame isSticky>
+          {leaderboardControls}
+        </LeaderboardControlsFrame>
+      )}
 
       {/* Content section */}
       <div className="tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)]">
@@ -413,7 +629,20 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           />
         )}
 
-        {leaderboardContent}
+        <LeaderboardContent
+          wave={wave}
+          viewMode={effectiveViewMode}
+          sort={effectiveSort}
+          isMemesWave={isMemesWave}
+          isVotingClosed={isApprovalVotingClosed}
+          isVotingControlsLocked={isApprovalVotingControlsLocked}
+          curatedByGroupId={curatedByGroupId}
+          onDropClick={onDropClick}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          priceCurrency={priceCurrency}
+          onCreateDrop={createDropAction}
+        />
       </div>
     </div>
   );

@@ -3,8 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { DefaultWaveWinnerDropSmall } from "@/components/waves/winners/DefaultWaveWinnerDropSmall";
 import { screen } from "@testing-library/react";
 
+const mockDropContentSmall = jest.fn(() => <div data-testid="content" />);
+
 jest.mock("@/components/waves/winners/drops/DropContentSmall", () => ({
-  DropContentSmall: () => <div data-testid="content" />,
+  DropContentSmall: (props: any) => mockDropContentSmall(props),
 }));
 jest.mock("@/components/waves/winners/WaveWinnersSmallOutcome", () => ({
   WaveWinnersSmallOutcome: () => <div data-testid="outcome" />,
@@ -29,21 +31,36 @@ const baseDrop = {
   referenced_nfts: [],
   created_at: 0,
 } as any;
-const wave = {} as any;
 
 describe("DefaultWaveWinnerDropSmall", () => {
+  beforeEach(() => {
+    mockDropContentSmall.mockClear();
+  });
+
   it("handles click and shows user vote", async () => {
     const onDropClick = jest.fn();
     const user = userEvent.setup();
     const { container } = render(
-      <DefaultWaveWinnerDropSmall
-        drop={baseDrop}
-        wave={wave}
-        onDropClick={onDropClick}
-      />
+      <DefaultWaveWinnerDropSmall drop={baseDrop} onDropClick={onDropClick} />
     );
     await user.click(container.firstElementChild as HTMLElement);
     expect(onDropClick).toHaveBeenCalled();
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+  });
+
+  it("forwards content presentation to small content", () => {
+    render(
+      <DefaultWaveWinnerDropSmall
+        drop={baseDrop}
+        onDropClick={jest.fn()}
+        contentPresentation="quorumCompact"
+      />
+    );
+
+    expect(mockDropContentSmall).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contentPresentation: "quorumCompact",
+      })
+    );
   });
 });

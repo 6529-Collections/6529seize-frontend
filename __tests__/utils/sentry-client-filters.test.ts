@@ -1,12 +1,19 @@
 import {
   __testing,
+  getLowValueNetworkErrorDecision,
+  getLowValueNetworkErrorTargetUrl,
+  getNetworkErrorMessageTargetUrl,
   shouldFilterByFilenameExceptions,
   shouldFilterInjectedWalletCollision,
   shouldFilterThirdPartyTelemetrySpan,
   shouldFilterTwitterConfigReferenceError,
+  tagSampledLowValueNetworkError,
 } from "@/utils/sentry-client-filters";
 
 describe("sentry-client-filters", () => {
+  const wrappedNetworkMessage =
+    "Network request failed. Please check your connection and try again. (/api/waves-overview)";
+
   const buildSpan = (overrides: Record<string, unknown> = {}) =>
     ({
       op: "http.client",
@@ -82,6 +89,37 @@ describe("sentry-client-filters", () => {
           },
         ],
       },
+      ...overrides,
+    }) as any;
+
+  const createLowValueNetworkEvent = (
+    overrides: Record<string, unknown> = {}
+  ) =>
+    ({
+      event_id: "network-drop-event",
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: wrappedNetworkMessage,
+          },
+        ],
+      },
+      tags: {
+        errorType: "network",
+        handled: true,
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
       ...overrides,
     }) as any;
 
@@ -277,6 +315,1326 @@ describe("sentry-client-filters", () => {
     );
 
     expect(result).toBe(false);
+  });
+
+  it("drops sampled-out first-party status 0 network errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent(),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out status 0 network errors from API environment subdomains", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://api.staging.6529.io/alchemy-proxy",
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe(
+      "https://api.staging.6529.io/alchemy-proxy"
+    );
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("drops sampled-out sanitized API subdomain network errors using preserved metadata", () => {
+    const targetUrl = "https://api.staging.6529.io/alchemy-proxy";
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: `Network request failed. Please check your connection and try again. (${targetUrl})`,
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/alchemy-proxy",
+            "url.is_first_party": true,
+            "url.is_first_party_api": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe(targetUrl);
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("drops sampled-out WebKit network connection lost errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value: "The network connection was lost.",
+            },
+          ],
+        },
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out first-party status 0 network errors when a later request succeeds", () => {
+    const event = createLowValueNetworkEvent({
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("ignores plain parenthesized context when matching low-value network errors", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Failed to fetch (while loading wave overview)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("uses a real failed HTTP breadcrumb before a later successful breadcrumb for message targets", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("uses a first-party status 0 page breadcrumb before a later HTTP failure for raw message targets", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/waves",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/waves");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("uses a third-party status 0 breadcrumb before a later HTTP failure for raw message targets", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://example.com/collect",
+            "url.is_first_party": false,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe(
+      "https://example.com/collect"
+    );
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("does not use successful breadcrumbs for network error message targets", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getNetworkErrorMessageTargetUrl(event)).toBeNull();
+  });
+
+  it("drops sampled-out message-target status 0 errors when a later status 0 targets a different first-party API", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/a)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/a",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/b",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out message-target status 0 errors when a later status 0 targets a third-party URL", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/a)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/a",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "https://example.com/collect",
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops raw first-party status 0 network errors when a later third-party status 0 fails", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://example.com/collect",
+            "url.is_first_party": false,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("keeps raw network errors when only a third-party status 0 fails", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "https://example.com/collect",
+            "url.is_first_party": false,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("keeps message-target network errors when only a different API has status 0", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/a)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/b",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops sampled-out first-party status 0 network errors when a later unrelated first-party request fails", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "/api/identity",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out first-party status 0 network errors when later unrelated third-party requests fail", () => {
+    for (const statusCode of [404, 500]) {
+      const result = getLowValueNetworkErrorDecision(
+        createLowValueNetworkEvent({
+          breadcrumbs: [
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: 0,
+                url: "/api/waves-overview",
+                "url.is_first_party": true,
+              },
+            },
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: statusCode,
+                url: "https://example.com/collect",
+                "url.is_first_party": false,
+              },
+            },
+          ],
+        }),
+        0
+      );
+
+      expect(result).toBe("drop");
+    }
+  });
+
+  it("keeps first-party network errors when a later request has a real HTTP failure", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps first-party network errors when a later real HTTP failure has no URL", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps first-party network errors when a later real HTTP failure has a filtered URL", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "[Filtered]",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops sampled-out first-party status 0 network errors when later unknown HTTP failures are marked third-party", () => {
+    for (const laterFailureData of [
+      {
+        status_code: 500,
+        "url.is_first_party": false,
+      },
+      {
+        status_code: 500,
+        url: "[Filtered]",
+        "url.is_first_party": false,
+      },
+    ]) {
+      const result = getLowValueNetworkErrorDecision(
+        createLowValueNetworkEvent({
+          breadcrumbs: [
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: 0,
+                url: "/api/waves-overview",
+                "url.is_first_party": true,
+              },
+            },
+            {
+              type: "http",
+              category: "fetch",
+              data: laterFailureData,
+            },
+          ],
+        }),
+        0
+      );
+
+      expect(result).toBe("drop");
+    }
+  });
+
+  it("keeps raw first-party network errors when a later same-target request has a real HTTP failure", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("keeps third-party API paths after URL sanitization", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/third-party)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/third-party",
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops sampled-out relative API network errors when the breadcrumb URL is filtered", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "[Filtered]",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("drops sampled-out relative API network errors when the filtered breadcrumb URL was sanitized", () => {
+    for (const url of ["/[Filtered]", "/%5BFiltered%5D"]) {
+      const result = getLowValueNetworkErrorDecision(
+        createLowValueNetworkEvent({
+          breadcrumbs: [
+            {
+              type: "http",
+              category: "fetch",
+              data: {
+                status_code: 0,
+                url,
+              },
+            },
+          ],
+        }),
+        0
+      );
+
+      expect(result).toBe("drop");
+    }
+  });
+
+  it("uses message targets when metadata-free failed breadcrumb URLs are unknown placeholders", () => {
+    for (const url of ["unknown", "/unknown"]) {
+      const event = createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url,
+            },
+          },
+        ],
+      });
+
+      expect(getLowValueNetworkErrorTargetUrl(event)).toBe(
+        "/api/waves-overview"
+      );
+      expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    }
+  });
+
+  it("uses older API transport failures when later /unknown HTTP failures have first-party metadata", () => {
+    const event = createLowValueNetworkEvent({
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 500,
+            url: "/unknown",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("drops sampled-out relative API network errors when the breadcrumb URL is missing", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps events with filtered breadcrumb URLs marked third-party", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "[Filtered]",
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps events with missing breadcrumb URLs marked third-party", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              "url.is_first_party": false,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops first-party relative API paths when sampled out", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/api/first-party)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/api/first-party",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps sampled-in first-party status 0 network errors", () => {
+    const event = createLowValueNetworkEvent();
+    const result = getLowValueNetworkErrorDecision(event, 1);
+
+    expect(result).toBe("keep_sampled");
+
+    tagSampledLowValueNetworkError(event);
+
+    expect(event.tags).toEqual(
+      expect.objectContaining({
+        network_failure_kind: "browser_transport",
+        network_noise_sampled: "true",
+      })
+    );
+  });
+
+  it("keeps network errors when the browser received a real HTTP status", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 500,
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps TypeErrors that are not tagged as network errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        tags: {},
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("samples tagged plain Error network events the same way as tagged TypeError events", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "Error",
+            value: wrappedNetworkMessage,
+          },
+        ],
+      },
+    });
+
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+    expect(getLowValueNetworkErrorDecision(event, 1)).toBe("keep_sampled");
+  });
+
+  it("keeps network errors when no failed status is known", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            level: "info",
+            data: {
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops Sentry fetch error breadcrumbs without a status", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: [
+          {
+            category: "fetch",
+            level: "error",
+            data: {
+              url: "/api/waves-overview",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("uses an HTTP error breadcrumb without a status before a later success", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          level: "error",
+          data: {
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 200,
+            url: "/api/identity",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/api/waves-overview");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("handles Sentry breadcrumb values form for first-party status 0 errors", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        breadcrumbs: {
+          values: [
+            {
+              type: "http",
+              category: "xhr",
+              data: {
+                status_code: 0,
+                url: "/api/waves-overview",
+                "url.is_first_party": true,
+              },
+            },
+          ],
+        },
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("treats api.6529.io as a first-party API target", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (https://api.6529.io/waves-overview)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "https://api.6529.io/waves-overview",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("matches api.6529.io errors to sanitized breadcrumb paths", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (https://api.6529.io/waves-overview)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/waves-overview",
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("does not match api.6529.io errors to sanitized breadcrumbs explicitly marked non-API", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (https://api.6529.io/alchemy-proxy)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/alchemy-proxy",
+            "url.is_first_party": true,
+            "url.is_first_party_api": false,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("drops api.6529.io paths after sanitization when the breadcrumb keeps API metadata", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/oracle/prenodes)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/oracle/prenodes",
+              "url.is_first_party": true,
+              "url.is_first_party_api": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("drop");
+  });
+
+  it("keeps same-looking page paths when sanitized API metadata is missing", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/oracle/prenodes)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/oracle/prenodes",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("drops /unknown when sanitized API metadata marks it as first-party API", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/unknown)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/unknown",
+            "url.is_first_party": true,
+            "url.is_first_party_api": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBe("/unknown");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("drop");
+  });
+
+  it("keeps /unknown page failures when sanitized API metadata is missing", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value:
+              "Network request failed. Please check your connection and try again. (/unknown)",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/unknown",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/unknown");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
+  });
+
+  it("keeps first-party page navigation failures", () => {
+    const result = getLowValueNetworkErrorDecision(
+      createLowValueNetworkEvent({
+        exception: {
+          values: [
+            {
+              type: "TypeError",
+              value:
+                "Network request failed. Please check your connection and try again. (/notifications)",
+            },
+          ],
+        },
+        breadcrumbs: [
+          {
+            type: "http",
+            category: "fetch",
+            data: {
+              status_code: 0,
+              url: "/notifications",
+              "url.is_first_party": true,
+            },
+          },
+        ],
+      }),
+      0
+    );
+
+    expect(result).toBe("not_applicable");
+  });
+
+  it("keeps newer first-party page failures ahead of older API transport failures", () => {
+    const event = createLowValueNetworkEvent({
+      exception: {
+        values: [
+          {
+            type: "TypeError",
+            value: "Load failed",
+          },
+        ],
+      },
+      breadcrumbs: [
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/api/waves-overview",
+            "url.is_first_party": true,
+          },
+        },
+        {
+          type: "http",
+          category: "fetch",
+          data: {
+            status_code: 0,
+            url: "/notifications",
+            "url.is_first_party": true,
+          },
+        },
+      ],
+    });
+
+    expect(getLowValueNetworkErrorTargetUrl(event)).toBeNull();
+    expect(getNetworkErrorMessageTargetUrl(event)).toBe("/notifications");
+    expect(getLowValueNetworkErrorDecision(event, 0)).toBe("not_applicable");
   });
 
   it("filters Twitter CONFIG reference errors with app URI frames", () => {

@@ -16,7 +16,7 @@ interface WaveleaderboardSortProps {
 
 type WaveleaderboardSortMode = "tabs" | "dropdown";
 
-export const WAVE_LEADERBOARD_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+const WAVE_LEADERBOARD_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
   [
     {
       key: WaveDropsLeaderboardSort.RANK,
@@ -40,7 +40,7 @@ export const WAVE_LEADERBOARD_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLea
     },
   ];
 
-export const WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+const WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
   [
     {
       key: WaveDropsLeaderboardSort.RANK,
@@ -64,7 +64,7 @@ export const WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: readonly CommonSelectItem<Wave
     },
   ];
 
-export const WAVE_LEADERBOARD_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+const WAVE_LEADERBOARD_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
   [
     ...WAVE_LEADERBOARD_SORT_ITEMS,
     {
@@ -74,7 +74,7 @@ export const WAVE_LEADERBOARD_CURATION_SORT_ITEMS: readonly CommonSelectItem<Wav
     },
   ];
 
-export const WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
+const WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =
   [
     ...WAVE_LEADERBOARD_APPROVE_SORT_ITEMS,
     {
@@ -83,6 +83,63 @@ export const WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS: readonly CommonSelect
       value: WaveDropsLeaderboardSort.PRICE,
     },
   ];
+
+const hasWaveLeaderboardTimeLock = (
+  timeLockMs: unknown
+): timeLockMs is number =>
+  typeof timeLockMs === "number" && Number.isFinite(timeLockMs);
+
+const removeRatingPredictionSort = (
+  items: readonly CommonSelectItem<WaveDropsLeaderboardSort>[]
+): readonly CommonSelectItem<WaveDropsLeaderboardSort>[] =>
+  items.filter(
+    (item) => item.value !== WaveDropsLeaderboardSort.RATING_PREDICTION
+  );
+
+export const getWaveLeaderboardSortItems = ({
+  isApproveWave,
+  isCurationWave,
+  timeLockMs,
+}: {
+  readonly isApproveWave: boolean;
+  readonly isCurationWave: boolean;
+  readonly timeLockMs: unknown;
+}): readonly CommonSelectItem<WaveDropsLeaderboardSort>[] => {
+  let items: readonly CommonSelectItem<WaveDropsLeaderboardSort>[];
+
+  if (isCurationWave) {
+    items = isApproveWave
+      ? WAVE_LEADERBOARD_APPROVE_CURATION_SORT_ITEMS
+      : WAVE_LEADERBOARD_CURATION_SORT_ITEMS;
+  } else if (isApproveWave) {
+    items = WAVE_LEADERBOARD_APPROVE_SORT_ITEMS;
+  } else {
+    items = WAVE_LEADERBOARD_SORT_ITEMS;
+  }
+
+  if (hasWaveLeaderboardTimeLock(timeLockMs)) {
+    return items;
+  }
+
+  return removeRatingPredictionSort(items);
+};
+
+export const normalizeWaveLeaderboardSort = ({
+  sort,
+  timeLockMs,
+}: {
+  readonly sort: WaveDropsLeaderboardSort;
+  readonly timeLockMs: unknown;
+}): WaveDropsLeaderboardSort => {
+  if (
+    sort === WaveDropsLeaderboardSort.RATING_PREDICTION &&
+    !hasWaveLeaderboardTimeLock(timeLockMs)
+  ) {
+    return WaveDropsLeaderboardSort.RANK;
+  }
+
+  return sort;
+};
 
 export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   sort,
