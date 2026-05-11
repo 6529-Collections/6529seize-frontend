@@ -14,10 +14,13 @@ import Link from "next/link";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 
 const statsTableClassName =
-  "tw-w-full tw-border-collapse [&_td]:tw-px-0.5 [&_td]:tw-py-0.5";
+  "tw-w-full tw-border-collapse tw-text-base tw-text-white [&_td]:tw-border-0 [&_td]:tw-px-0.5 [&_td]:tw-py-0.5";
 
 const nftTableClassName =
-  "tw-mb-4 tw-w-full tw-border-collapse [&_td]:tw-p-2";
+  "tw-mb-4 tw-w-full tw-border-collapse tw-text-base tw-text-white [&_td]:tw-border-0 [&_td]:tw-p-2";
+
+const sectionHeadingClassName =
+  "tw-mb-2 tw-text-lg tw-font-bold tw-leading-6 tw-text-white";
 
 export function MemeCollectorsStats({
   nftMeta,
@@ -26,7 +29,7 @@ export function MemeCollectorsStats({
 }) {
   return (
     <section className="tw-pt-2">
-      <h3>Meme Collectors</h3>
+      <h3 className={sectionHeadingClassName}>Meme Collectors</h3>
       <table className={statsTableClassName}>
         <tbody>
           <tr>
@@ -117,9 +120,7 @@ export function MemeCollectorsStats({
             </tr>
           )}
           <tr>
-            <td>
-              % Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529 Museum
-            </td>
+            <td>% Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529 Museum</td>
             <td className="tw-text-right tw-font-medium">
               {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) / 10}%
             </td>
@@ -152,7 +153,7 @@ export function MemeNftLivePanel({
 
   return (
     <section className="tw-pt-4">
-      <h3>NFT</h3>
+      <h3 className={sectionHeadingClassName}>NFT</h3>
       <table className={nftTableClassName}>
         <tbody>
           <tr>
@@ -197,13 +198,14 @@ export function MemeNftLivePanel({
             href={distributionPlanLink}
             target={nft.has_distribution ? "_self" : "_blank"}
             rel={nft.has_distribution ? undefined : "noopener noreferrer"}
+            className="tw-text-white tw-underline hover:tw-text-iron-300"
           >
             Distribution Plan
           </Link>
         </div>
       )}
       {nftBalance > 0 && (
-        <h3 className="font-color tw-pt-4">
+        <h3 className={`${sectionHeadingClassName} tw-pt-4`}>
           You Own {nftBalance} edition{nftBalance > 1 && "s"}
         </h3>
       )}

@@ -15,6 +15,8 @@ export enum MEME_FOCUS {
   THE_ART = "the-art",
   REFERENCES = "references",
   COLLECTORS = "collectors",
+  HISTORY = "history",
+  YOUR_TRANSACTIONS = "your-transactions",
   ACTIVITY = "activity",
   TIMELINE = "timeline",
 }
@@ -25,6 +27,7 @@ export const MEME_TABS: MemeTab[] = [
   { focus: MEME_FOCUS.THE_ART, title: "The Art" },
   { focus: MEME_FOCUS.REFERENCES, title: "References" },
   { focus: MEME_FOCUS.COLLECTORS, title: "Collectors" },
+  { focus: MEME_FOCUS.HISTORY, title: "History" },
   { focus: MEME_FOCUS.ACTIVITY, title: "Activity" },
   { focus: MEME_FOCUS.TIMELINE, title: "Timeline" },
 ];

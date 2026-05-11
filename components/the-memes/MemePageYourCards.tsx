@@ -89,13 +89,8 @@ export function MemePageYourCardsRightMenu(props: {
     });
 
     return (
-      <Col
-        xs={{ span: 12 }}
-        sm={{ span: 12 }}
-        md={{ span: 6 }}
-        lg={{ span: 6 }}
-      >
-        <Container className="p-0">
+      <div className="tw-pt-3">
+        <Container className="p-0" fluid>
           <Row>
             {props.wallets.length === 0 && (
               <Row className="pt-2">
@@ -248,7 +243,7 @@ export function MemePageYourCardsRightMenu(props: {
             )}
           </Row>
         </Container>
-      </Col>
+      </div>
     );
   } else {
     return <></>;
