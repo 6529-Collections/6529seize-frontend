@@ -391,7 +391,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).not.toHaveClass("tw-p-2");
     expect(card).toHaveClass("tw-border");
     expect(card).toHaveClass("tw-bg-iron-950");
-    expect(viewport).toHaveClass("tw-max-h-[20rem]");
+    expect(viewport).not.toHaveClass("tw-max-h-[20rem]");
     expect(viewport).toHaveClass("tw-bg-iron-950");
     expect(viewport).not.toHaveClass("tw-h-[20rem]");
     expect(viewport).not.toHaveClass("tw-p-2");
@@ -440,6 +440,9 @@ describe("WaveLeaderboardGridItem", () => {
 
     expect(screen.queryByTestId("media")).not.toBeInTheDocument();
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
+    const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
+    const viewport = card.firstElementChild as HTMLElement;
+    expect(viewport).toHaveClass("tw-max-h-[20rem]");
   });
 
   it("does not render preview-only metadata as media", () => {

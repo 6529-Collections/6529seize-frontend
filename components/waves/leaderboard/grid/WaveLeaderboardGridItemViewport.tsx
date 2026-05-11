@@ -28,8 +28,14 @@ interface WaveLeaderboardGridItemViewportProps {
   readonly onVoteButtonClick: () => void;
 }
 
-const getGridViewportClassName = (isCompactMode: boolean): string =>
-  isCompactMode
+const getGridViewportClassName = ({
+  hasMedia,
+  isCompactMode,
+}: {
+  readonly hasMedia: boolean;
+  readonly isCompactMode: boolean;
+}): string =>
+  isCompactMode || hasMedia
     ? "tw-relative tw-overflow-hidden tw-bg-iron-950"
     : "tw-relative tw-max-h-[20rem] tw-overflow-hidden tw-bg-iron-950";
 
@@ -165,7 +171,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   return (
     <div
       ref={setViewportEl}
-      className={getGridViewportClassName(isCompactMode)}
+      className={getGridViewportClassName({ hasMedia, isCompactMode })}
     >
       <div
         ref={setInnerEl}
