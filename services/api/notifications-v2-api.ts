@@ -112,11 +112,22 @@ const emptyProfile = ({
 
 const mapReactorToProfileMin = (
   reactor: ApiNotificationDropReactedReactor,
-  fallbackIndex: number
+  fallbackIndex: number,
+  fallbackProfile: ApiProfileMin
 ): ApiProfileMin => {
   const trimmedHandle = reactor.handle?.trim();
   const handle =
     trimmedHandle === undefined || trimmedHandle === "" ? null : trimmedHandle;
+
+  if (
+    fallbackProfile.handle?.toLowerCase() === handle?.toLowerCase() &&
+    handle !== null
+  ) {
+    return {
+      ...fallbackProfile,
+      pfp: reactor.pfp ?? fallbackProfile.pfp,
+    };
+  }
 
   return emptyProfile({
     id: handle ?? `reactor-${fallbackIndex}`,
@@ -156,7 +167,11 @@ const mapDropReactedNotification = (
 
   return reactors.map((reactor, index) => ({
     ...base,
-    related_identity: mapReactorToProfileMin(reactor, index),
+    related_identity: mapReactorToProfileMin(
+      reactor,
+      index,
+      base.related_identity
+    ),
   }));
 };
 

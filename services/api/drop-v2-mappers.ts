@@ -7,6 +7,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
 import type { ApiIdentityOverviewBadges } from "@/generated/models/ApiIdentityOverviewBadges";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -21,6 +22,13 @@ import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
 };
+
+const getIdentitySubscribedActions = (
+  identity: ApiIdentityOverview
+): ApiIdentitySubscriptionTargetAction[] =>
+  identity.context_profile_context?.subscribed
+    ? [ApiIdentitySubscriptionTargetAction.WaveCreated]
+    : [];
 
 export const mapIdentityOverviewToProfileMin = (
   identity: ApiIdentityOverview
@@ -43,7 +51,7 @@ export const mapIdentityOverviewToProfileMin = (
     classification: identity.classification,
     sub_classification: null,
     primary_address: identity.primary_address,
-    subscribed_actions: [],
+    subscribed_actions: getIdentitySubscribedActions(identity),
     archived: false,
     active_main_stage_submission_ids: [],
     winner_main_stage_drop_ids: [],

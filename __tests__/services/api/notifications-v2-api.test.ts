@@ -8,7 +8,10 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
-const identity = (handle: string) => ({
+const identity = (
+  handle: string,
+  { subscribed = false }: { readonly subscribed?: boolean } = {}
+) => ({
   id: `${handle}-id`,
   handle,
   primary_address: `0x${handle}`,
@@ -16,6 +19,9 @@ const identity = (handle: string) => ({
   level: 1,
   classification: ApiProfileClassification.Pseudonym,
   badges: {},
+  context_profile_context: {
+    subscribed,
+  },
 });
 
 const wave = {
@@ -134,6 +140,41 @@ describe("fetchNotificationsV2", () => {
     }
 
     throw new Error("Expected drop reacted notification");
+  });
+
+  it("preserves followed state for grouped reaction reactor matching related identity", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 10,
+          cause: ApiNotificationCause.DropReacted,
+          created_at: 2000,
+          read_at: null,
+          related_identity: identity("alice", { subscribed: true }),
+          related_wave: wave,
+          related_drops: [drop],
+          additional_context: {
+            reaction: ":green_circle:",
+            reactors: [{ handle: "alice", pfp: "alice-new.png" }],
+          },
+        },
+      ],
+    });
+
+    const response = await fetchNotificationsV2({
+      limit: "30",
+      cause: [ApiNotificationCause.DropReacted],
+    });
+
+    expect(response.notifications).toHaveLength(1);
+    expect(response.notifications[0]?.related_identity).toEqual(
+      expect.objectContaining({
+        handle: "alice",
+        pfp: "alice-new.png",
+        subscribed_actions: expect.arrayContaining([expect.any(String)]),
+      })
+    );
   });
 
   it("normalizes related wave on wave-created notifications", async () => {
