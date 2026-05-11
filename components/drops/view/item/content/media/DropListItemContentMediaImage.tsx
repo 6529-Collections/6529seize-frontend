@@ -2,6 +2,7 @@
 
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
 import React, { useCallback, useRef, useState } from "react";
@@ -35,6 +36,7 @@ function DropListItemContentMediaImage({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
+  const { isCapacitor } = useCapacitor();
   const { hasTouchScreen } = useDeviceInfo();
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -65,15 +67,23 @@ function DropListItemContentMediaImage({
     setRetryTick((t) => t + 1);
   };
 
+  const openModal = useCallback(() => {
+    if (disableModal) {
+      return;
+    }
+
+    setIsModalOpen(true);
+  }, [disableModal]);
+
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLImageElement>) => {
       if (disableModal) {
         return;
       }
       event.stopPropagation();
-      setIsModalOpen(true);
+      openModal();
     },
-    [disableModal]
+    [disableModal, openModal]
   );
 
   const handleCloseModal = useCallback(
@@ -94,7 +104,7 @@ function DropListItemContentMediaImage({
     if (fullscreenTarget) {
       requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, [requestCenteredImageFullscreen]);
+  }, []);
 
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
@@ -127,7 +137,7 @@ function DropListItemContentMediaImage({
             onDownload={downloadMedia}
             isDownloading={isDownloading}
             onFullscreen={handleFullScreen}
-            fullscreenTargetAvailable
+            fullscreenTargetAvailable={!isCapacitor}
           />
         )}
         {!loaded && errorCount <= maxRetries && (
@@ -186,6 +196,7 @@ function DropListItemContentMediaImage({
           onDownload={downloadMedia}
           isDownloading={isDownloading}
           onFullscreen={handleFullScreen}
+          fullscreenTargetAvailable={!isCapacitor}
         />
       )}
     </>

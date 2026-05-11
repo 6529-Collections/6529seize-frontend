@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
+import useCapacitor from "@/hooks/useCapacitor";
 
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: (_src: string) => _src,
@@ -13,7 +14,7 @@ jest.mock("@/helpers/Helpers", () => ({
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isCapacitor: false }),
+  default: jest.fn(() => ({ isCapacitor: false })),
 }));
 
 jest.mock("@/hooks/useInView", () => ({
@@ -21,6 +22,8 @@ jest.mock("@/hooks/useInView", () => ({
 }));
 
 beforeEach(() => {
+  (useCapacitor as jest.Mock).mockReturnValue({ isCapacitor: false });
+
   (globalThis as any).ResizeObserver = class {
     observe() {
       return undefined;
@@ -53,6 +56,23 @@ describe("DropListItemContentMediaImage", () => {
     expect(
       screen.queryByAltText("Full size drop media")
     ).not.toBeInTheDocument();
+  });
+
+  it("hides native fullscreen in Capacitor", () => {
+    (useCapacitor as jest.Mock).mockReturnValue({ isCapacitor: true });
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLImageElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: requestFullscreen,
+    });
+
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+
+    expect(
+      screen.queryByRole("button", { name: /full screen/i })
+    ).not.toBeInTheDocument();
+
+    expect(requestFullscreen).not.toHaveBeenCalled();
   });
 });
 

@@ -38,6 +38,7 @@ export function ImageMediaModal({
   onDownload,
   isDownloading,
   onFullscreen,
+  fullscreenTargetAvailable = true,
 }: {
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
@@ -47,6 +48,7 @@ export function ImageMediaModal({
   readonly onDownload: () => void;
   readonly isDownloading: boolean;
   readonly onFullscreen: () => void;
+  readonly fullscreenTargetAvailable?: boolean | undefined;
 }) {
   const [isZoomed, setIsZoomed] = useState(false);
 
@@ -98,7 +100,7 @@ export function ImageMediaModal({
         onDownload={onDownload}
         isDownloading={isDownloading}
         onFullscreen={onFullscreen}
-        fullscreenTargetAvailable
+        fullscreenTargetAvailable={fullscreenTargetAvailable}
         onClose={onClose}
       />
     </div>,

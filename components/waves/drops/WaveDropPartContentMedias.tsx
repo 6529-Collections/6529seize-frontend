@@ -4,7 +4,7 @@ import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { ImageScale } from "@/helpers/image.helpers";
-import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
+import WaveDropPartContentMediaImage from "./WaveDropPartContentMediaImage";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -100,7 +100,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           );
         } else if (useNaturalHeightImage || useImageIntrinsicHeight) {
           mediaContent = (
-            <WaveDropPartContentFullWidthImage
+            <WaveDropPartContentMediaImage
               src={media.url}
               imageScale={imageScale}
               imageObjectPosition={

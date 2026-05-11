@@ -7,6 +7,7 @@ import {
 import { InlineMediaActions } from "@/components/drops/view/item/content/media/MediaActionToolbar";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import React, { useCallback, useRef, useState } from "react";
 
 function NaturalHeightImage({
@@ -54,7 +55,7 @@ function NaturalHeightImage({
   );
 }
 
-export default function WaveDropPartContentFullWidthImage({
+export default function WaveDropPartContentMediaImage({
   src,
   imageScale = ImageScale.AUTOx450,
   imageObjectPosition = "center",
@@ -67,6 +68,7 @@ export default function WaveDropPartContentFullWidthImage({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
+  const { isCapacitor } = useCapacitor();
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -136,7 +138,7 @@ export default function WaveDropPartContentFullWidthImage({
           onDownload={downloadMedia}
           isDownloading={isDownloading}
           onFullscreen={handleFullScreen}
-          fullscreenTargetAvailable
+          fullscreenTargetAvailable={!isCapacitor}
         />
         <button
           type="button"
@@ -173,6 +175,7 @@ export default function WaveDropPartContentFullWidthImage({
           onDownload={downloadMedia}
           isDownloading={isDownloading}
           onFullscreen={handleFullScreen}
+          fullscreenTargetAvailable={!isCapacitor}
         />
       )}
     </>
