@@ -21,6 +21,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   buttonRef,
   dynamicPosition = true,
   closeOnFocusOutside = true,
+  portalClassName = "tw-z-[999]",
   children,
 }: {
   readonly isOpen: boolean;
@@ -28,6 +29,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
   readonly dynamicPosition?: boolean | undefined;
   readonly closeOnFocusOutside?: boolean | undefined;
+  readonly portalClassName?: string | undefined;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -144,7 +146,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
   return createPortal(
     <div
-      className="tw-absolute tw-z-[100]"
+      className={`tw-absolute ${portalClassName}`}
       ref={dropdownRef}
       style={{ left: 0, top: 0 }}
     >

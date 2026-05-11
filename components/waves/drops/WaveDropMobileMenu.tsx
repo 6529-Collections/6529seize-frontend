@@ -250,7 +250,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     }),
     [drop]
   );
-
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
