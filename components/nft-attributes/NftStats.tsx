@@ -7,6 +7,7 @@ import { MetadataLink } from "./MetadataLink";
 export function NftPageStats(props: {
   readonly nft: NFT | LabNFT;
   readonly hide_mint_price?: boolean | undefined;
+  readonly hide_metadata?: boolean | undefined;
   readonly hide_hodl_rate?: boolean | undefined;
   readonly afterMetadata?: ReactNode;
 }) {
@@ -21,7 +22,7 @@ export function NftPageStats(props: {
           unit="ETH"
         />
       )}
-      <MetadataLink url={props.nft.uri} />
+      {!props.hide_metadata && <MetadataLink url={props.nft.uri} />}
       {props.afterMetadata}
       {hasHodlRate && (
         <NftStatTableRow

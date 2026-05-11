@@ -1,7 +1,8 @@
 import NFTLeaderboard from "@/components/leaderboard/NFTLeaderboard";
-import type { NFT } from "@/entities/INFT";
+import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { Col, Container, Row, Table } from "react-bootstrap";
+import { MemeCollectorsStats } from "./MemePageLiveStats";
 import styles from "./TheMemes.module.scss";
 
 export function MemePageCollectorsRightMenu(props: {
@@ -15,7 +16,8 @@ export function MemePageCollectorsRightMenu(props: {
         sm={{ span: 12 }}
         md={{ span: 6 }}
         lg={{ span: 6 }}
-        className="pt-2">
+        className="pt-2"
+      >
         <Container className="p-0">
           <Row>
             <Col>
@@ -55,24 +57,37 @@ export function MemePageCollectorsRightMenu(props: {
         </Container>
       </Col>
     );
-  } else {
-    return <></>;
   }
+
+  return <></>;
 }
 
 export function MemePageCollectorsSubMenu(props: {
   show: boolean;
   nft: NFT | undefined;
+  nftMeta: MemesExtendedData | undefined;
 }) {
   if (props.show && props.nft) {
     return (
-      <Row className="pt-3">
-        <Col>
-          <NFTLeaderboard contract={props.nft.contract} nftId={props.nft.id} />
-        </Col>
-      </Row>
+      <>
+        {props.nftMeta && (
+          <Row className="pt-3">
+            <Col>
+              <MemeCollectorsStats nftMeta={props.nftMeta} />
+            </Col>
+          </Row>
+        )}
+        <Row className="pt-3">
+          <Col>
+            <NFTLeaderboard
+              contract={props.nft.contract}
+              nftId={props.nft.id}
+            />
+          </Col>
+        </Row>
+      </>
     );
-  } else {
-    return <></>;
   }
+
+  return <></>;
 }

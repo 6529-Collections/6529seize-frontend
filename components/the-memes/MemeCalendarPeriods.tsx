@@ -21,17 +21,25 @@ export default function MemeCalendarPeriods({ id }: { readonly id: number }) {
 
   const printPeriod = (label: string, number: number) => {
     return (
-      <>
+      <span className="tw-whitespace-nowrap">
         <span>{label}</span> <span className="tw-font-semibold">{number}</span>
-      </>
+      </span>
     );
   };
 
   return (
-    <div className="tw-text-xs sm:tw-text-sm tw-text-iron-300">
-      {printPeriod("SZN", szn)} / {printPeriod("YEAR", year)} /{" "}
-      {printPeriod("EPOCH", epoch)} / {printPeriod("PERIOD", period)} /{" "}
-      {printPeriod("ERA", era)} / {printPeriod("EON", eon)}
-    </div>
+    <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+      {printPeriod("SZN", szn)}
+      <span className="tw-text-iron-600">/</span>
+      {printPeriod("YEAR", year)}
+      <span className="tw-text-iron-600">/</span>
+      {printPeriod("EPOCH", epoch)}
+      <span className="tw-text-iron-600">/</span>
+      {printPeriod("PERIOD", period)}
+      <span className="tw-text-iron-600">/</span>
+      {printPeriod("ERA", era)}
+      <span className="tw-text-iron-600">/</span>
+      {printPeriod("EON", eon)}
+    </span>
   );
 }

@@ -84,7 +84,7 @@ export function MemePageReferencesSubMenu(props: {
   );
 
   useEffect(() => {
-    if (props.nft) {
+    if (props.show && props.nft) {
       void fetchUrl(
         `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
       )
@@ -97,14 +97,14 @@ export function MemePageReferencesSubMenu(props: {
           setMemeLabNftsLoaded(true);
         });
     }
-  }, [props.nft]);
+  }, [props.show, props.nft]);
 
   useEffect(() => {
-    if (props.nft) {
+    if (props.show && props.nft) {
       // eslint-disable-next-line react-you-might-not-need-an-effect/no-derived-state
       fetchRememes(props.nft.id);
     }
-  }, [props.nft, fetchRememes]);
+  }, [props.show, props.nft, fetchRememes]);
 
   if (!props.show) {
     return <></>;
@@ -147,7 +147,8 @@ export function MemePageReferencesSubMenu(props: {
             <span className="d-flex align-items-center gap-2 pt-2">
               <Dropdown
                 className={styles["rememesSortDropdown"]}
-                drop={"down-centered"}>
+                drop={"down-centered"}
+              >
                 <Dropdown.Toggle>Sort: {selectedRememeSorting}</Dropdown.Toggle>
                 <Dropdown.Menu>
                   {rememeSorting.map((s) => (
@@ -157,7 +158,8 @@ export function MemePageReferencesSubMenu(props: {
                         setRememesPage(1);
                         setRememesTotalResults(0);
                         setSelectedRememeSorting(s);
-                      }}>
+                      }}
+                    >
                       {s}
                     </Dropdown.Item>
                   ))}
@@ -183,7 +185,8 @@ export function MemePageReferencesSubMenu(props: {
                       backgroundColor: "#f8f9fa",
                       color: "#212529",
                       padding: "4px 8px",
-                    }}>
+                    }}
+                  >
                     Refresh results
                   </Tooltip>
                 </>
@@ -215,10 +218,12 @@ export function MemePageReferencesSubMenu(props: {
                   xs={{ span: 6 }}
                   sm={{ span: 4 }}
                   md={{ span: 3 }}
-                  lg={{ span: 3 }}>
+                  lg={{ span: 3 }}
+                >
                   <Link
                     href={`/rememes/${rememe.contract}/${rememe.id}`}
-                    className="decoration-none scale-hover">
+                    className="decoration-none scale-hover"
+                  >
                     <Container fluid className="no-padding">
                       <Row>
                         <Col>
@@ -238,7 +243,12 @@ export function MemePageReferencesSubMenu(props: {
                                   rememe.contract,
                                   OPENSEA_STORE_FRONT_CONTRACT
                                 ) ? (
-                                  <>{rememe.contract_opensea_data.collectionName}</>
+                                  <>
+                                    {
+                                      rememe.contract_opensea_data
+                                        .collectionName
+                                    }
+                                  </>
                                 ) : (
                                   <>
                                     {rememe.contract_opensea_data.collectionName

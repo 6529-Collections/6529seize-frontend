@@ -2,11 +2,17 @@
 
 import dynamic from "next/dynamic";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
+import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
-import MemeCalendarPeriods from "./MemeCalendarPeriods";
-import { MemeCollectorsStats, MemeNftLivePanel } from "./MemePageLiveStats";
+import {
+  MemeArtworkDetails,
+  MemeCardFileType,
+  MemeDistributionPlanLink,
+  MemeMarketplaceLinks,
+  MemeNftLivePanel,
+} from "./MemePageLiveStats";
 
 const MemePageArt = dynamic(() =>
   import("./MemePageArt").then((mod) => mod.MemePageArt)
@@ -15,19 +21,20 @@ const MemePageArt = dynamic(() =>
 export function MemePageLiveRightMenu(props: {
   show: boolean;
   nft: NFT | undefined;
-  nftMeta: MemesExtendedData | undefined;
   nftBalance: number;
 }) {
-  if (props.show && props.nft && props.nftMeta) {
+  if (props.show && props.nft) {
     return (
       <div className="tw-w-full tw-pt-2">
-        <MemeCalendarPeriods id={props.nft.id} />
-        <MemeCollectorsStats nftMeta={props.nftMeta} />
+        <MemeDistributionPlanLink nft={props.nft} />
+        <MemeArtworkDetails nft={props.nft} />
+        <MemeNftLivePanel nft={props.nft} nftBalance={props.nftBalance} />
+        <MemeMarketplaceLinks nft={props.nft} />
       </div>
     );
-  } else {
-    return <></>;
   }
+
+  return <></>;
 }
 
 export function MemePageLiveSubMenu(props: {
@@ -41,7 +48,10 @@ export function MemePageLiveSubMenu(props: {
     return (
       <>
         {props.nft && (
-          <MemeNftLivePanel nft={props.nft} nftBalance={props.nftBalance ?? 0} />
+          <>
+            <MemePageCardDescription nft={props.nft} />
+            <MemeCardFileType nft={props.nft} />
+          </>
         )}
         {props.nft && props.nftMeta && (
           <MemePageAdditionalDetailsAccordion
@@ -52,9 +62,25 @@ export function MemePageLiveSubMenu(props: {
         )}
       </>
     );
-  } else {
-    return <></>;
   }
+
+  return <></>;
+}
+
+function MemePageCardDescription({ nft }: { readonly nft: NFT }) {
+  return (
+    <section className="tw-pb-3 tw-pt-4">
+      <h3 className="tw-mb-2 tw-text-lg tw-font-bold tw-leading-6 tw-text-white">
+        Card Description
+      </h3>
+      <div
+        className="tw-text-base tw-leading-relaxed tw-text-white"
+        dangerouslySetInnerHTML={{
+          __html: parseNftDescriptionToHtml(nft.description),
+        }}
+      />
+    </section>
+  );
 }
 
 function MemePageAdditionalDetailsAccordion({
@@ -86,12 +112,7 @@ function MemePageAdditionalDetailsAccordion({
       </button>
       {isOpen && (
         <div className="tw-pt-3">
-          <MemePageArt
-            show={true}
-            nft={nft}
-            nftMeta={nftMeta}
-            showArtwork={false}
-          />
+          <MemePageArt show={true} nft={nft} nftMeta={nftMeta} />
         </div>
       )}
     </section>

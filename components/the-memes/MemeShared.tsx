@@ -22,7 +22,7 @@ export enum MEME_FOCUS {
 }
 
 export const MEME_TABS: MemeTab[] = [
-  { focus: MEME_FOCUS.LIVE, title: "Live" },
+  { focus: MEME_FOCUS.LIVE, title: "Overview" },
   { focus: MEME_FOCUS.YOUR_CARDS, title: "Your Cards" },
   { focus: MEME_FOCUS.THE_ART, title: "The Art" },
   { focus: MEME_FOCUS.REFERENCES, title: "References" },
