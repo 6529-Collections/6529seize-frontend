@@ -193,7 +193,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
             />
           )}
           <WaveDropPartContentAttachments
-            attachments={activePart.attachments}
+            attachments={activePart.attachments ?? []}
           />
         </div>
 
