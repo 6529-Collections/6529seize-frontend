@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
@@ -33,7 +33,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   size = UserFollowBtnSize.MEDIUM,
 }) => {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const { setToast, requestAuth } = useAuth();
   const [mutating, setMutating] = useState<boolean>(false);
 
   const following = profile.subscribed_actions.length > 0;
