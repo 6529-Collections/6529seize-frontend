@@ -83,7 +83,7 @@ export const mapApiWaveOverviewToApiWaveMin = (
   identity_wave: false,
 });
 
-const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
+export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
   id: waveId,
   name: waveId,
   picture: null,
