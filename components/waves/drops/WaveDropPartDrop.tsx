@@ -31,6 +31,7 @@ interface WaveDropPartDropProps {
   readonly onCancel?: (() => void) | undefined;
   isCompetitionDrop?: boolean | undefined;
   mediaImageScale?: ImageScale | undefined;
+  mediaContainerHeightClassName?: string | undefined;
   fullWidthMedia?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -57,6 +58,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   onCancel,
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
+  mediaContainerHeightClassName,
   fullWidthMedia = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
@@ -92,6 +94,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             drop={drop}
             isCompetitionDrop={isCompetitionDrop}
             mediaImageScale={mediaImageScale}
+            mediaContainerHeightClassName={mediaContainerHeightClassName}
             fullWidthMedia={fullWidthMedia}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
             contentPresentation={contentPresentation}

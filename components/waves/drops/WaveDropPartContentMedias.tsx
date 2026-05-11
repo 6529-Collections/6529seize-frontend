@@ -24,6 +24,7 @@ interface WaveDropPartContentMediasProps {
   readonly disableMediaInteraction?: boolean | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly imageScale?: ImageScale | undefined;
+  readonly mediaContainerHeightClassName?: string | undefined;
   readonly fullWidthMedia?: boolean | undefined;
 }
 
@@ -32,6 +33,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   disableMediaInteraction = false,
   isCompetitionDrop = false,
   imageScale = ImageScale.AUTOx450,
+  mediaContainerHeightClassName = "tw-h-64",
   fullWidthMedia = false,
 }) => {
   if (!activePart.media.length) {
@@ -62,7 +64,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     }
 
     return clsx(
-      "tw-flex tw-h-64 tw-items-center tw-justify-center",
+      "tw-flex tw-items-center tw-justify-center",
+      mediaContainerHeightClassName,
       fullWidthMedia && "tw-w-full"
     );
   };
