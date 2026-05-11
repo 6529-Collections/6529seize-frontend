@@ -1,0 +1,107 @@
+"use client";
+
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { ExpandedMediaToolbar } from "./MediaActionToolbar";
+
+export function requestCenteredImageFullscreen(
+  fullscreenTarget: HTMLImageElement
+) {
+  const previousObjectPosition = fullscreenTarget.style.objectPosition;
+
+  fullscreenTarget.style.objectPosition = "center";
+
+  const restoreInlinePosition = () => {
+    if (document.fullscreenElement === fullscreenTarget) {
+      return;
+    }
+
+    fullscreenTarget.style.objectPosition = previousObjectPosition;
+    document.removeEventListener("fullscreenchange", restoreInlinePosition);
+  };
+
+  document.addEventListener("fullscreenchange", restoreInlinePosition);
+  fullscreenTarget.requestFullscreen().catch(() => {
+    document.removeEventListener("fullscreenchange", restoreInlinePosition);
+    fullscreenTarget.style.objectPosition = previousObjectPosition;
+  });
+}
+
+export function ImageMediaModal({
+  src,
+  imageRef,
+  onClose,
+  onOpen,
+  openLabel,
+  onDownload,
+  isDownloading,
+  onFullscreen,
+}: {
+  readonly src: string;
+  readonly imageRef: React.RefObject<HTMLImageElement | null>;
+  readonly onClose: () => void;
+  readonly onOpen: () => void;
+  readonly openLabel: string;
+  readonly onDownload: () => void;
+  readonly isDownloading: boolean;
+  readonly onFullscreen: () => void;
+}) {
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  useKeyPressEvent("Escape", onClose);
+
+  return createPortal(
+    <div
+      className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
+      onTouchStart={(event) => event.stopPropagation()}
+      onTouchEnd={(event) => event.stopPropagation()}
+      onTouchMove={(event) => event.stopPropagation()}
+    >
+      <button
+        type="button"
+        aria-label="Close modal"
+        onClick={onClose}
+        className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
+      />
+      <TransformWrapper
+        panning={{ disabled: true }}
+        limitToBounds={!isZoomed}
+        smooth
+        onZoom={(event) => setIsZoomed(event.state.scale > 1)}
+      >
+        {() => (
+          <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
+            <div className="tw-pointer-events-auto tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col">
+              <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
+                <TransformComponent
+                  wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                >
+                  <img
+                    ref={imageRef}
+                    src={src}
+                    alt="Full size drop media"
+                    style={{ pointerEvents: "auto" }}
+                    className="tw-max-h-[75vh] tw-max-w-full tw-object-contain lg:tw-max-h-[90vh]"
+                  />
+                </TransformComponent>
+              </div>
+            </div>
+          </div>
+        )}
+      </TransformWrapper>
+      <ExpandedMediaToolbar
+        onOpen={onOpen}
+        openLabel={openLabel}
+        onDownload={onDownload}
+        isDownloading={isDownloading}
+        onFullscreen={onFullscreen}
+        fullscreenTargetAvailable
+        onClose={onClose}
+      />
+    </div>,
+    document.body
+  );
+}

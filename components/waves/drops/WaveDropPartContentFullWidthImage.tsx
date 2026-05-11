@@ -1,15 +1,13 @@
 "use client";
 
 import {
-  ExpandedMediaToolbar,
-  InlineMediaActions,
-} from "@/components/drops/view/item/content/media/MediaActionToolbar";
+  ImageMediaModal,
+  requestCenteredImageFullscreen,
+} from "@/components/drops/view/item/content/media/ImageMediaModal";
+import { InlineMediaActions } from "@/components/drops/view/item/content/media/MediaActionToolbar";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import React, { useCallback, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
-import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 function NaturalHeightImage({
   imgRef,
@@ -69,7 +67,6 @@ export default function WaveDropPartContentFullWidthImage({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -102,91 +99,15 @@ export default function WaveDropPartContentFullWidthImage({
   );
 
   const handleCloseModal = useCallback(() => {
-    setIsZoomed(false);
     setIsModalOpen(false);
   }, []);
-
-  const requestCenteredImageFullscreen = useCallback(
-    (fullscreenTarget: HTMLImageElement) => {
-      const previousObjectPosition = fullscreenTarget.style.objectPosition;
-
-      fullscreenTarget.style.objectPosition = "center";
-
-      const restoreInlinePosition = () => {
-        if (document.fullscreenElement === fullscreenTarget) {
-          return;
-        }
-
-        fullscreenTarget.style.objectPosition = previousObjectPosition;
-        document.removeEventListener("fullscreenchange", restoreInlinePosition);
-      };
-
-      document.addEventListener("fullscreenchange", restoreInlinePosition);
-      fullscreenTarget.requestFullscreen().catch(() => {
-        document.removeEventListener("fullscreenchange", restoreInlinePosition);
-        fullscreenTarget.style.objectPosition = previousObjectPosition;
-      });
-    },
-    []
-  );
 
   const handleFullScreen = useCallback(() => {
     const fullscreenTarget = modalImageRef.current ?? imgRef.current;
     if (fullscreenTarget) {
       requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, [requestCenteredImageFullscreen]);
-
-  useKeyPressEvent("Escape", () => {
-    handleCloseModal();
-  });
-
-  const modalContent = (
-    <div className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default">
-      <button
-        type="button"
-        aria-label="Close modal"
-        onClick={handleCloseModal}
-        className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
-      />
-      <TransformWrapper
-        panning={{ disabled: true }}
-        limitToBounds={!isZoomed}
-        smooth
-        onZoom={(event) => setIsZoomed(event.state.scale > 1)}
-      >
-        {() => (
-          <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-            <div className="tw-pointer-events-auto tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col">
-              <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
-                <TransformComponent
-                  wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                >
-                  <img
-                    ref={modalImageRef}
-                    src={src}
-                    alt="Full size drop media"
-                    style={{ pointerEvents: "auto" }}
-                    className="tw-max-h-[75vh] tw-max-w-full tw-object-contain lg:tw-max-h-[90vh]"
-                  />
-                </TransformComponent>
-              </div>
-            </div>
-          </div>
-        )}
-      </TransformWrapper>
-      <ExpandedMediaToolbar
-        onOpen={openMedia}
-        openLabel={openLabel}
-        onDownload={downloadMedia}
-        isDownloading={isDownloading}
-        onFullscreen={handleFullScreen}
-        fullscreenTargetAvailable
-        onClose={handleCloseModal}
-      />
-    </div>
-  );
+  }, []);
 
   if (errorCount > 0) {
     return (
@@ -242,7 +163,18 @@ export default function WaveDropPartContentFullWidthImage({
         </div>
       )}
 
-      {isModalOpen && createPortal(modalContent, document.body)}
+      {isModalOpen && (
+        <ImageMediaModal
+          src={src}
+          imageRef={modalImageRef}
+          onClose={handleCloseModal}
+          onOpen={openMedia}
+          openLabel={openLabel}
+          onDownload={downloadMedia}
+          isDownloading={isDownloading}
+          onFullscreen={handleFullScreen}
+        />
+      )}
     </>
   );
 }
