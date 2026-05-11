@@ -98,6 +98,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     useWave(wave);
   const isCompetitionWave = isRankWave || isApproveWave;
   const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const canShowMyVotesTab = isCurationWave || hasAuthenticatedProfile;
 
   // Get unread indicator for messages
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
@@ -309,7 +310,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               onViewChange={handleWaveViewChange}
               renderAfterLeaderboard={salesTabButton}
             />
-            {(isCurationWave || (isMemesWave && hasAuthenticatedProfile)) && (
+            {canShowMyVotesTab && (
               <>
                 <button
                   ref={getActiveButtonRef(activeView === BrainView.MY_VOTES)}

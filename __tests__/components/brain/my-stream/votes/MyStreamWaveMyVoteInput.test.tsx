@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVoteInput from "@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput";
 import { AuthContext } from "@/components/auth/Auth";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   QueryKey,
   ReactQueryWrapperContext,
@@ -33,7 +34,7 @@ const wrapper = ({ children }: any) => (
 
 const drop: any = {
   id: "d1",
-  wave: { id: "wave-1" },
+  wave: { id: "wave-1", voting_credit_type: ApiWaveCreditType.Tdh },
   context_profile_context: { rating: 0, min_rating: 0, max_rating: 10 },
 };
 
@@ -77,6 +78,21 @@ describe("MyStreamWaveMyVoteInput", () => {
     render(<MyStreamWaveMyVoteInput drop={dropWithRating} />, { wrapper });
     expectMaxVotes("10");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
+  });
+
+  it("uses the wave voting credit label in the input", () => {
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={{
+          ...drop,
+          wave: { id: "wave-1", voting_credit_type: ApiWaveCreditType.Rep },
+        }}
+      />,
+      { wrapper }
+    );
+
+    expect(screen.getByText("Rep")).toBeInTheDocument();
+    expect(screen.queryByText("TDH")).not.toBeInTheDocument();
   });
 
   it("keeps max visible with negative current rating", () => {
