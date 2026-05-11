@@ -108,6 +108,8 @@ function normalizeActiveView({
   const hasLoadedWave = wave !== null && wave !== undefined;
   const isCompetitionWave = isRankWave || isApproveWave;
   const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const canUseMyVotesView =
+    isCompetitionWave && (isCurationWave || hasAuthenticatedProfile);
   const waveDefaultView =
     hasLoadedWave && isRankWave && !isApproveWave && isCompleted
       ? BrainView.SUBMISSIONS
@@ -146,9 +148,7 @@ function normalizeActiveView({
     (activeView === BrainView.WINNERS &&
       (!isCompetitionWave || (!isApproveWave && !firstDecisionDone))) ||
     (activeView === BrainView.OUTCOME && !supportsOutcomeView) ||
-    (activeView === BrainView.MY_VOTES &&
-      ((isMemesWave && !hasAuthenticatedProfile) ||
-        (!isMemesWave && !isCurationWave))) ||
+    (activeView === BrainView.MY_VOTES && !canUseMyVotesView) ||
     (activeView === BrainView.FAQ && !isMemesWave);
 
   return shouldResetToDefault ? waveDefaultView : activeView;
