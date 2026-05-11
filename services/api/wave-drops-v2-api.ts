@@ -198,23 +198,25 @@ const hydrateDropParts = async (
   drop: ApiDropV2,
   signal?: AbortSignal
 ): Promise<ApiDropPart[]> => {
+  const basePart = createBasePart(drop);
   const partsCount = Math.max(1, drop.parts_count || 1);
+
+  if (partsCount <= 1) {
+    return [basePart];
+  }
+
   const fetchedParts = await Promise.all(
-    Array.from({ length: partsCount }, (_, index) => {
-      const partNo = index + 1;
+    Array.from({ length: partsCount - 1 }, (_, index) => {
+      const partNo = index + 2;
       return fetchDropPartV2({ dropId: drop.id, partNo, signal });
     })
   );
 
-  const parts = fetchedParts
+  const extraParts = fetchedParts
     .map((part) => (part ? mapDropPartV2ToApiDropPart(part) : null))
     .filter((part): part is ApiDropPart => !!part);
 
-  if (parts.length > 0) {
-    return parts;
-  }
-
-  return [createBasePart(drop)];
+  return [basePart, ...extraParts];
 };
 
 const mapDropReactionCountersV2 = (drop: ApiDropV2): ApiDropReaction[] =>
