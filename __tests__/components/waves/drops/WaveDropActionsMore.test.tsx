@@ -10,6 +10,9 @@ jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
 jest.mock("@/components/waves/drops/useDropLinkPreviewToggleControl", () => ({
   useDropLinkPreviewToggleControl: jest.fn(),
 }));
+jest.mock("@/hooks/drops/useCanShowDropCurationsAction", () => ({
+  useCanShowDropCurationsAction: jest.fn(() => false),
+}));
 
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper",
@@ -25,9 +28,6 @@ jest.mock("@/components/waves/drops/WaveDropActionsCopyLink", () => () => (
 ));
 jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => () => (
   <div data-testid="open" />
-));
-jest.mock("@/components/waves/drops/WaveDropActionsDownload", () => () => (
-  <div data-testid="download" />
 ));
 jest.mock("@/components/waves/drops/WaveDropActionsOptions", () => () => (
   <div data-testid="delete" />
@@ -58,6 +58,7 @@ const mockedUseDropLinkPreviewToggleControl = jest.mocked(
 
 const drop = {
   id: "drop-1",
+  wave: { authenticated_user_admin: false },
   parts: [],
 } as any;
 
@@ -139,5 +140,41 @@ describe("WaveDropActionsMore", () => {
     );
 
     expect(onToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not show a desktop download action for media", async () => {
+    const dropWithMedia = {
+      ...drop,
+      parts: [
+        {
+          media: [
+            {
+              url: "https://example.com/first.png",
+              mime_type: "image/png",
+            },
+          ],
+          attachments: [
+            {
+              url: "https://example.com/attachment.pdf",
+            },
+          ],
+        },
+        {
+          media: [
+            {
+              url: "https://example.com/second.mp4",
+              mime_type: "video/mp4",
+            },
+          ],
+          attachments: [],
+        },
+      ],
+    };
+
+    render(<WaveDropActionsMore drop={dropWithMedia} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "More actions" }));
+
+    expect(screen.queryByText("Download media")).toBeNull();
   });
 });

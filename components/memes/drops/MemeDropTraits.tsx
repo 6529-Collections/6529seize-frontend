@@ -29,6 +29,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
       const bIndex = MEME_TRAITS_SORT_ORDER.indexOf(b.data_key);
       return aIndex - bIndex;
     });
+  const hasHiddenTraits = traits.length > 2;
 
   const handleShowLess = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,9 +41,39 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
     setShowAllTraits(true);
   };
 
+  if (!traits.length) {
+    return null;
+  }
+
+  const traitToggle = (() => {
+    if (showAllTraits) {
+      return (
+        <button
+          onClick={handleShowLess}
+          className="tw-cursor-pointer tw-self-end tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-pb-1.5 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
+        >
+          Show less
+        </button>
+      );
+    }
+
+    if (!hasHiddenTraits) {
+      return null;
+    }
+
+    return (
+      <button
+        onClick={handleShowAll}
+        className="tw-cursor-pointer tw-self-end tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-pb-1.5 tw-text-left tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:hover:tw-text-iron-300"
+      >
+        Show all
+      </button>
+    );
+  })();
+
   return (
-    <div className="lg:tw-flex tw-flex-col tw-gap-2 tw-hidden">
-      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
+    <div className="tw-hidden tw-flex-col tw-gap-2 lg:tw-flex">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-4">
         {traits.slice(0, 2).map((trait) => (
           <MemeDropTrait
             key={trait.data_key}
@@ -70,20 +101,10 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
                 dropId={drop.id}
               />
             ))}
-            <button
-              onClick={handleShowLess}
-              className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer"
-            >
-              Show less
-            </button>
+            {traitToggle}
           </>
         ) : (
-          <button
-            onClick={handleShowAll}
-            className="tw-text-iron-400 tw-text-xs tw-text-left tw-font-medium desktop-hover:hover:tw-text-iron-300 tw-transition-colors tw-whitespace-nowrap tw-self-end tw-pb-1.5 tw-bg-transparent tw-border-0 tw-cursor-pointer"
-          >
-            Show all
-          </button>
+          traitToggle
         )}
       </div>
     </div>

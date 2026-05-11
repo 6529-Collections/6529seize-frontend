@@ -23,16 +23,12 @@ interface WaveDropReplyProps {
  */
 export default function WaveDropReply({
   dropId,
-  dropPartId,
+  dropPartId: _dropPartId,
   maybeDrop,
   onReplyClick,
 }: WaveDropReplyProps) {
   const fixedReplyHeightClasses = "tw-h-[24px] tw-min-h-[24px] tw-max-h-[24px]";
-  const { drop, content, isLoading } = useDropContent(
-    dropId,
-    dropPartId,
-    maybeDrop
-  );
+  const { drop, content, isLoading } = useDropContent(dropId, 1, maybeDrop);
   const replyPreviewContent = useMemo(() => {
     if (content.apiMedia.length > 0 || content.segments.length !== 1) {
       return content;
@@ -88,7 +84,11 @@ export default function WaveDropReply({
             </Link>
             <ContentDisplay
               content={replyPreviewContent}
-              onClick={() => onReplyClick(drop.serial_no)}
+              onClick={() => {
+                if (drop.serial_no > 0) {
+                  onReplyClick(drop.serial_no);
+                }
+              }}
               className="tw-min-w-0 tw-flex-1 tw-overflow-hidden"
               textClassName="tw-min-w-0 tw-overflow-hidden"
               linkify={false}

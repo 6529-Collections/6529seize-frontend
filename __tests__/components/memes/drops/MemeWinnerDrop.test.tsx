@@ -70,3 +70,33 @@ test("hides actions when mobile", () => {
   );
   expect(queryByTestId("reply")).toBeNull();
 });
+
+test("uses v2 title and part one content before metadata fallbacks", () => {
+  render(
+    <MemeWinnerDrop
+      drop={{
+        ...drop,
+        title: "Part title",
+        parts: [
+          {
+            part_id: 1,
+            content: "Part description",
+            media: [{ url: "u", mime_type: "image/png" }],
+          },
+        ],
+        metadata: [
+          { data_key: "title", data_value: "Metadata title" },
+          { data_key: "description", data_value: "Metadata description" },
+        ],
+      }}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    />
+  );
+
+  expect(screen.getByText("Part title")).toBeInTheDocument();
+  expect(screen.getByText("Part description")).toBeInTheDocument();
+  expect(screen.queryByText("Metadata title")).not.toBeInTheDocument();
+  expect(screen.queryByText("Metadata description")).not.toBeInTheDocument();
+});

@@ -3,17 +3,23 @@
 import type { QueryStatus } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
+import type { SidebarWave } from "@/types/waves.types";
 import { ChatBubbleLeftRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Image from "next/image";
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import {
+  getSidebarWaveHref,
+  getSidebarWaveImageSrc,
+  getSidebarWaveIsDirectMessage,
+  type UserPageBrainSidebarWave,
+} from "./userPageBrainSidebarWave.helpers";
 
 interface UserPageBrainSidebarMobileStripProps {
   readonly createdWaves: ApiWave[];
   readonly createdStatus: QueryStatus;
-  readonly mostActiveWaves: ApiWave[];
+  readonly mostActiveWaves: SidebarWave[];
   readonly mostActiveStatus: QueryStatus;
   readonly onOpenCreatedWaves: () => void;
 }
@@ -21,17 +27,11 @@ interface UserPageBrainSidebarMobileStripProps {
 function UserPageBrainSidebarMobileWavePill({
   wave,
 }: {
-  readonly wave: ApiWave;
+  readonly wave: UserPageBrainSidebarWave;
 }) {
-  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
-  const href = getWaveRoute({
-    waveId: wave.id,
-    isDirectMessage,
-    isApp: false,
-  });
-  const imageSrc = wave.picture
-    ? getScaledImageUri(wave.picture, ImageScale.W_200_H_200)
-    : null;
+  const isDirectMessage = getSidebarWaveIsDirectMessage(wave);
+  const href = getSidebarWaveHref(wave);
+  const imageSrc = getSidebarWaveImageSrc(wave, ImageScale.W_200_H_200);
   const FallbackIcon = isDirectMessage ? ChatBubbleLeftRightIcon : WavesIcon;
 
   return (

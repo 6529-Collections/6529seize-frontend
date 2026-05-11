@@ -6,6 +6,7 @@ import { useMyStreamWaveMessages } from "@/contexts/wave/MyStreamContext";
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import type { WaveMessages } from "@/contexts/wave/hooks/types";
 import { useDropMessages } from "./useDropMessages";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly drops: Drop[];
@@ -142,10 +143,11 @@ const getNextVirtualLimitAfterAppend = ({
 export function useVirtualizedWaveMessages(
   waveId: string,
   dropId: string | null,
-  pageSize: number = 50
+  pageSize: number = 50,
+  wave?: ApiWave
 ): VirtualizedWaveMessages | undefined {
   const fullWaveMessages = useMyStreamWaveMessages(waveId);
-  const fullWaveMessagesForDrop = useDropMessages(waveId, dropId);
+  const fullWaveMessagesForDrop = useDropMessages(waveId, dropId, wave);
   const fetchNextPageForDrop = fullWaveMessagesForDrop.fetchNextPage;
 
   const scopeKey = getScopeKey({ waveId, dropId, pageSize });

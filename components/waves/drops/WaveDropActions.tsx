@@ -56,7 +56,7 @@ export default function WaveDropActions({
   return (
     <div
       className={`tw-absolute tw-right-2 tw-z-20 ${
-        compact ? "-tw-top-4" : "tw-top-0"
+        compact ? "-tw-top-4" : "-tw-top-9"
       } tw-transition-opacity tw-duration-200 tw-ease-in-out ${visibilityClasses}`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">

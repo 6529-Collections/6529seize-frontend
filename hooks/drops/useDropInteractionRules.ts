@@ -1,7 +1,6 @@
 "use client";
 
-import { useContext } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropVoteState } from "./types";
@@ -25,7 +24,7 @@ interface DropInteractionRules {
  * @returns Object containing boolean flags for different interaction possibilities
  */
 export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy } = useAuth();
 
   // Check if this is a winner drop
   const isWinner = drop.drop_type === ApiDropType.Winner;

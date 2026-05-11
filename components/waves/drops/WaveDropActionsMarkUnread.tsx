@@ -60,6 +60,11 @@ export default function WaveDropActionsMarkUnread({
       queryClient.invalidateQueries({
         queryKey: [QueryKey.WAVES_OVERVIEW],
       });
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVES_V2],
+        })
+        .catch(() => undefined);
 
       queryClient.invalidateQueries({
         queryKey: [QueryKey.WAVE, { wave_id: drop.wave.id }],

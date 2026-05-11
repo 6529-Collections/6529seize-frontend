@@ -55,6 +55,7 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
       hasNextPage,
     } = useWaveDecisions({
       waveId: wave.id,
+      wave,
       enabled: true, // Always enabled now that we use it for both types
       loadAllPages: isApproveWave,
       pageSize: isApproveWave

@@ -9,10 +9,14 @@ import {
 } from "@/contexts/wave/UnreadDividerContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
+import {
+  isWaveDirectMessage,
+  toApiWaveMin,
+} from "@/helpers/waves/wave.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useScrollBehavior } from "@/hooks/useScrollBehavior";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
@@ -35,6 +39,7 @@ const EMPTY_DROPS: Drop[] = [];
 
 interface WaveDropsAllProps {
   readonly waveId: string;
+  readonly wave?: ApiWave | undefined;
   readonly dropId: string | null;
   readonly onReply: ({
     drop,
@@ -57,6 +62,7 @@ interface WaveDropsAllProps {
 
 const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   waveId,
+  wave,
   dropId,
   onReply,
   activeDrop,
@@ -77,7 +83,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const { waveMessages, fetchNextPage, waitAndRevealDrop } =
-    useVirtualizedWaveDrops(waveId, dropId);
+    useVirtualizedWaveDrops(waveId, dropId, wave);
 
   const { setUnreadDividerSerialNo } = useUnreadDivider();
 
@@ -87,7 +93,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     isMuted
   );
 
-  const { data: boostedDrops } = useWaveBoostedDrops({ waveId });
+  const { data: boostedDrops } = useWaveBoostedDrops({ waveId, wave });
 
   const scrollBehavior = useScrollBehavior();
   const {
@@ -137,6 +143,23 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     waveMessages,
     shouldPinToBottom,
   });
+
+  const renderedWaveMessagesWithFullWave = useMemo(() => {
+    if (!renderedWaveMessages || !wave) {
+      return renderedWaveMessages;
+    }
+
+    const waveMin = toApiWaveMin(wave);
+    return {
+      ...renderedWaveMessages,
+      drops: renderedWaveMessages.drops.map(
+        (drop: Drop): Drop =>
+          drop.type === DropSize.FULL && drop.wave.id === wave.id
+            ? { ...drop, wave: waveMin }
+            : drop
+      ),
+    };
+  }, [renderedWaveMessages, wave]);
 
   const {
     serialTarget,
@@ -265,7 +288,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     >
       <TweetPreviewModeProvider mode={tweetPreviewMode}>
         <WaveDropsContent
-          waveMessages={renderedWaveMessages}
+          waveMessages={renderedWaveMessagesWithFullWave}
           dropId={dropId}
           scrollContainerRef={scrollContainerRef}
           scrollContainerCallbackRef={scrollContainerCallbackRef}
@@ -306,6 +329,7 @@ export const WaveDropsAllWithoutProvider: React.FC<WaveDropsAllProps> =
 
 const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   waveId,
+  wave,
   dropId,
   onReply,
   activeDrop,
@@ -327,6 +351,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
       <WaveDropsAllInner
         key={waveId}
         waveId={waveId}
+        wave={wave}
         dropId={dropId}
         onReply={onReply}
         activeDrop={activeDrop}

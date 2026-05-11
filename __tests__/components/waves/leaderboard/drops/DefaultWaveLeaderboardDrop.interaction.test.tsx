@@ -34,6 +34,10 @@ jest.mock("@/components/waves/drops/WaveDropActionsOpen", () => ({
   __esModule: true,
   default: () => <div />,
 }));
+jest.mock("@/components/waves/drops/DropCurationButton", () => ({
+  __esModule: true,
+  default: () => <div data-testid="curate" />,
+}));
 jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => (p: any) => (
   <button
     type="button"
@@ -82,10 +86,6 @@ jest.mock(
 jest.mock(
   "@/components/waves/leaderboard/content/WaveLeaderboardDropContent",
   () => ({ WaveLeaderboardDropContent: () => <div data-testid="content" /> })
-);
-jest.mock(
-  "@/components/waves/leaderboard/drops/footer/WaveLeaderboardDropFooter",
-  () => ({ WaveLeaderboardDropFooter: () => <div data-testid="footer" /> })
 );
 jest.mock(
   "@/components/waves/leaderboard/drops/header/WaveleaderboardDropRaters",
