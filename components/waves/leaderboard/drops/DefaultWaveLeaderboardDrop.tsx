@@ -30,6 +30,7 @@ interface DefaultWaveLeaderboardDropProps {
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation;
 }
 
@@ -47,6 +48,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   winningThreshold,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  mediaContainerHeightClassName,
   contentPresentation = "default",
 }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
@@ -159,6 +161,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
             <WaveLeaderboardDropContent
               drop={drop}
               isCompetitionDrop={true}
+              mediaContainerHeightClassName={mediaContainerHeightClassName}
               contentPresentation={contentPresentation}
             />
             <div className="tw-mt-3 tw-flex tw-w-full tw-flex-col tw-justify-between tw-gap-x-2 tw-space-y-3 @[700px]:tw-flex-row @[700px]:tw-items-center @[700px]:tw-space-y-0">

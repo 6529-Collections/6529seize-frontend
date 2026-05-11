@@ -47,7 +47,7 @@ describe("WaveLeaderboardGrid", () => {
       isFetchingNextPage: false,
     });
 
-    render(
+    const { container } = render(
       <WaveLeaderboardGrid
         wave={wave}
         sort="RANK"
@@ -59,6 +59,12 @@ describe("WaveLeaderboardGrid", () => {
     expect(
       screen.getByRole("status", { name: "Loading drops" })
     ).toBeInTheDocument();
+    const loadingMedia = container.querySelector(".tw-aspect-square");
+    expect(loadingMedia).toBeInTheDocument();
+    expect(loadingMedia).not.toHaveClass("tw-aspect-[16/9]");
+    expect(loadingMedia).toHaveClass("tw-min-h-[14rem]");
+    expect(loadingMedia).toHaveClass("md:tw-min-h-[15rem]");
+    expect(loadingMedia).toHaveClass("tw-animate-pulse");
   });
 
   it("renders drops and load more action", () => {

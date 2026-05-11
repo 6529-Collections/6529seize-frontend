@@ -11,12 +11,18 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveLeaderboardDropContent: React.FC<
   WaveLeaderboardDropContentProps
-> = ({ drop, isCompetitionDrop = false, contentPresentation = "default" }) => {
+> = ({
+  drop,
+  isCompetitionDrop = false,
+  mediaContainerHeightClassName,
+  contentPresentation = "default",
+}) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
@@ -41,6 +47,7 @@ export const WaveLeaderboardDropContent: React.FC<
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
         isCompetitionDrop={isCompetitionDrop}
+        mediaContainerHeightClassName={mediaContainerHeightClassName}
         contentPresentation={contentPresentation}
       />
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">

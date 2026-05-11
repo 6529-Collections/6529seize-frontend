@@ -63,6 +63,7 @@ const DefaultLeaderboardDropRenderer: React.FC<
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
+      mediaContainerHeightClassName="tw-h-96"
     />
   );
 };
