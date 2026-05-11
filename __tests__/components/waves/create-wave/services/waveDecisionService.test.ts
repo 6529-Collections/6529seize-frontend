@@ -78,28 +78,17 @@ describe("waveDecisionService", () => {
     expect(errs).toHaveLength(0);
   });
 
-  it("requires a valid rolling end date", () => {
-    expect(
-      validateDateSequence({
-        submissionStartDate: 1,
-        votingStartDate: 2,
-        firstDecisionTime: 3,
-        subsequentDecisions: [5],
-        isRolling: true,
-        endDate: null,
-      } as any)
-    ).toContain("Rolling mode requires an end date");
+  it("allows rolling mode without an end date", () => {
+    const errors = validateDateSequence({
+      submissionStartDate: 1,
+      votingStartDate: 2,
+      firstDecisionTime: 3,
+      subsequentDecisions: [5],
+      isRolling: true,
+      endDate: null,
+    } as any);
 
-    expect(
-      validateDateSequence({
-        submissionStartDate: 1,
-        votingStartDate: 2,
-        firstDecisionTime: 3,
-        subsequentDecisions: [5],
-        isRolling: true,
-        endDate: 0,
-      } as any)
-    ).toContain("Rolling mode requires an end date");
+    expect(errors).toHaveLength(0);
   });
 
   it("calculates end date for rolling waves", () => {
