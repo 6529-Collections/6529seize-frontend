@@ -15,9 +15,6 @@ import ArtistProfileHandle from "./ArtistProfileHandle";
 const statsTableClassName =
   "tw-w-full tw-border-collapse tw-text-base tw-text-white [&_td]:tw-border-0 [&_td]:tw-px-0.5 [&_td]:tw-py-0.5";
 
-const overviewTableClassName =
-  "tw-w-full tw-border-collapse tw-text-base tw-text-white [&_td]:tw-border-0 [&_td]:tw-px-0.5 [&_td]:tw-py-1";
-
 const sectionHeadingClassName =
   "tw-mb-2 tw-text-lg tw-font-bold tw-leading-6 tw-text-white";
 
@@ -134,30 +131,75 @@ export function MemeCollectorsStats({
 }
 
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
+  const mintDate = getMintDateParts(printMintDate(nft.mint_date));
+
   return (
-    <section className="tw-py-3">
-      <table className={overviewTableClassName}>
-        <tbody>
-          <tr>
-            <td>Artist Name</td>
-            <td className="tw-text-right tw-font-medium">{nft.artist}</td>
-          </tr>
-          <tr>
-            <td>Artist Profile</td>
-            <td className="tw-text-right tw-font-medium">
-              <ArtistProfileHandle nft={nft} />
-            </td>
-          </tr>
-          <tr>
-            <td>Mint Date</td>
-            <td className="tw-text-right tw-font-medium">
-              {printMintDate(nft.mint_date)}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <section className="tw-py-4">
+      <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
+        <div>
+          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+            Created by
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-2.5">
+            <span className="tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-[10px] tw-font-semibold tw-text-iron-400">
+              {getInitials(nft.artist_seize_handle)}
+            </span>
+            <div>
+              {/* <div className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
+                {nft.artist}
+              </div> */}
+              <div className="tw-text-lg tw-font-semibold tw-leading-none tw-text-white [&_a]:tw-text-white [&_a]:tw-no-underline hover:[&_a]:tw-text-iron-300">
+                <ArtistProfileHandle nft={nft} />
+              </div>
+              {/* <div className="tw-mt-1.5 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500 [&_a]:tw-text-iron-400 [&_a]:tw-no-underline hover:[&_a]:tw-text-white">
+                <ArtistProfileHandle nft={nft} />
+              </div> */}
+            </div>
+          </div>
+        </div>
+        <div className="sm:tw-text-right">
+          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+            Mint date
+          </div>
+          <div className="tw-flex tw-flex-wrap tw-items-baseline sm:tw-justify-end">
+            <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-white">
+              {mintDate.date}
+            </span>
+            {mintDate.relative && (
+              <span className="tw-ml-1.5 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-600">
+                {mintDate.relative}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
     </section>
   );
+}
+
+function getMintDateParts(value: string) {
+  const normalizedValue = value.replace(/\s+/g, " ").trim();
+  const match = normalizedValue.match(/^(.*?)\s*(\(.+\))$/);
+
+  if (!match) {
+    return { date: normalizedValue };
+  }
+
+  return { date: match[1], relative: match[2] };
+}
+
+function getInitials(value: string | undefined) {
+  if (!value) {
+    return "?";
+  }
+
+  return value
+    .split(/[,\s]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 }
 
 export function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
@@ -217,9 +259,9 @@ export function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   }
 
   return (
-    <section className="tw-pt-4">
+    <div className="tw-flex tw-items-end">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
-    </section>
+    </div>
   );
 }
 
@@ -260,6 +302,7 @@ export function MemeNftLivePanel({
           value={nft.highest_offer}
           unit="ETH"
         />
+        <MemeMarketplaceLinks nft={nft} />
       </div>
       {nftBalance > 0 && (
         <h3 className={`${sectionHeadingClassName} tw-pt-4`}>

@@ -10,7 +10,6 @@ import {
   MemeArtworkDetails,
   MemeCardFileType,
   MemeDistributionPlanLink,
-  MemeMarketplaceLinks,
   MemeNftLivePanel,
 } from "./MemePageLiveStats";
 
@@ -29,7 +28,6 @@ export function MemePageLiveRightMenu(props: {
         <MemeDistributionPlanLink nft={props.nft} />
         <MemeArtworkDetails nft={props.nft} />
         <MemeNftLivePanel nft={props.nft} nftBalance={props.nftBalance} />
-        <MemeMarketplaceLinks nft={props.nft} />
       </div>
     );
   }
