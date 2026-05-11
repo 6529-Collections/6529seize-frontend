@@ -322,8 +322,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isApproveWave,
     isMemesWave,
     isCurationWave,
+    isRankWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
+  const isCompetitionWave = isRankWave || isApproveWave;
   const {
     voting: { isUpcoming, isCompleted },
     decisions: { firstDecisionDone },
@@ -455,7 +457,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       availableTabs
         .filter((tab) => {
           if (tab === MyStreamWaveTab.MY_VOTES) {
-            return isCurationWave || (isMemesWave && hasAuthenticatedProfile);
+            return (
+              isCurationWave ||
+              (hasAuthenticatedProfile && (isMemesWave || isCompetitionWave))
+            );
           }
           if (tab === MyStreamWaveTab.SALES) {
             return isCurationWave;
@@ -474,6 +479,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       availableTabs,
       hasAuthenticatedProfile,
       isApproveWave,
+      isCompetitionWave,
       isMemesWave,
       isCurationWave,
     ]
