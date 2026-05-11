@@ -41,6 +41,7 @@ interface WaveDropPartContentProps {
   readonly drop?: ApiDrop | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
+  readonly mediaContainerHeightClassName?: string | undefined;
   readonly fullWidthMedia?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -72,6 +73,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   drop,
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
+  mediaContainerHeightClassName,
   fullWidthMedia = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
@@ -186,11 +188,12 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               activePart={activePart}
               isCompetitionDrop={isCompetitionDrop}
               imageScale={mediaImageScale}
+              mediaContainerHeightClassName={mediaContainerHeightClassName}
               fullWidthMedia={fullWidthMedia}
             />
           )}
           <WaveDropPartContentAttachments
-            attachments={activePart.attachments ?? []}
+            attachments={activePart.attachments}
           />
         </div>
 

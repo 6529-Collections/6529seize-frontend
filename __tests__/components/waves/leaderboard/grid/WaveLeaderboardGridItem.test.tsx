@@ -3,14 +3,26 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGridItem } from "@/components/waves/leaderboard/grid/WaveLeaderboardGridItem";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 
 const startDropOpen = jest.fn();
 let markdownProps: any;
 const toggleCuration = jest.fn();
 
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) => url,
+}));
+
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplay",
-  () => () => <div data-testid="media" />
+  () => (props: any) => (
+    <div
+      data-testid="media"
+      data-media-url={props.media_url}
+      data-media-mime-type={props.media_mime_type}
+      data-preview-image-url={props.previewImageUrl ?? ""}
+    />
+  )
 );
 
 jest.mock(
@@ -151,6 +163,14 @@ describe("WaveLeaderboardGridItem", () => {
     referenced_nfts: [],
     winning_context: { decision_time: null },
   };
+  const previewMetadata = [
+    {
+      data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+      data_value: JSON.stringify({
+        preview_image: "https://example.com/preview.jpg",
+      }),
+    },
+  ];
 
   beforeEach(() => {
     markdownProps = undefined;
@@ -168,7 +188,7 @@ describe("WaveLeaderboardGridItem", () => {
     });
   });
 
-  it("renders compact footer with rank and votes", () => {
+  it("renders compact media cards with scrollable text and footer actions", () => {
     render(
       <WaveLeaderboardGridItem
         drop={baseDrop}
@@ -178,7 +198,26 @@ describe("WaveLeaderboardGridItem", () => {
     );
 
     expect(screen.getByTestId("media")).toBeInTheDocument();
+    const mediaWrapper = screen.getByTestId("media")
+      .parentElement as HTMLElement;
+    expect(mediaWrapper).toHaveClass("tw-aspect-[16/9]");
+    expect(mediaWrapper).toHaveClass("tw-min-h-[14rem]");
+    expect(mediaWrapper).toHaveClass("md:tw-min-h-[15rem]");
     expect(screen.getByTestId("markdown")).toBeInTheDocument();
+    const markdownInner = screen.getByTestId("markdown")
+      .parentElement as HTMLElement;
+    const markdownViewport = markdownInner.parentElement as HTMLElement;
+    const textWrapper = markdownViewport.parentElement as HTMLElement;
+    expect(textWrapper).toHaveClass("tw-px-3");
+    expect(textWrapper).toHaveClass("tw-pt-2");
+    expect(textWrapper).toHaveClass("tw-pb-4");
+    expect(markdownViewport).toHaveClass("tw-max-h-28");
+    expect(markdownViewport).toHaveClass("tw-overflow-y-auto");
+    expect(markdownViewport).toHaveClass("tw-scrollbar-thin");
+    expect(markdownViewport).toHaveClass("tw-scrollbar-track-iron-800");
+    expect(markdownViewport).toHaveClass("tw-scrollbar-thumb-iron-500");
+    expect(markdownViewport).not.toHaveClass("tw-overflow-hidden");
+    expect(markdownViewport.querySelector(".tw-bg-gradient-to-t")).toBeNull();
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
     expect(screen.getByTestId("curate-action")).toBeInTheDocument();
@@ -186,7 +225,7 @@ describe("WaveLeaderboardGridItem", () => {
     const footer = screen.getByTestId("wave-leaderboard-grid-item-footer-d1");
     expect(footer).toBeInTheDocument();
     expect(footer).toHaveClass("tw-px-3");
-    expect(footer).toHaveClass("tw-pt-2");
+    expect(footer).toHaveClass("tw-pt-3");
     expect(footer).toHaveClass("tw-pb-3");
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
@@ -330,6 +369,12 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByTestId("open-action")).toBeInTheDocument();
     expect(screen.getByTestId("curate-action")).toBeInTheDocument();
     expect(screen.getByTestId("vote-button")).toBeInTheDocument();
+    expect(screen.getByTestId("media")).toBeInTheDocument();
+    const mediaWrapper = screen.getByTestId("media")
+      .parentElement as HTMLElement;
+    expect(mediaWrapper).toHaveClass("tw-aspect-[16/9]");
+    expect(mediaWrapper).toHaveClass("tw-min-h-[14rem]");
+    expect(mediaWrapper).toHaveClass("md:tw-min-h-[15rem]");
 
     const card = screen.getByTestId("wave-leaderboard-grid-item-d1");
     const viewport = card.firstElementChild as HTMLElement;
@@ -347,9 +392,95 @@ describe("WaveLeaderboardGridItem", () => {
     expect(viewport).not.toHaveClass("tw-bg-iron-900/50");
     expect(content).toHaveClass("tw-space-y-1");
     expect(content).not.toHaveClass("tw-space-y-3");
-    const markdownContainer = screen.getByTestId("markdown")
-      .parentElement as HTMLElement;
-    expect(markdownContainer).toHaveClass("tw-p-2");
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(markdownProps).toBeUndefined();
+  });
+
+  it("renders compact text-only drops without a media block", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          parts: [{ media: [], content: "hello" }],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
+    expect(screen.getByTestId("markdown")).toBeInTheDocument();
+    const markdownViewport = screen.getByTestId("markdown").parentElement
+      ?.parentElement as HTMLElement;
+    expect(markdownViewport).toHaveClass("tw-max-h-56");
+    expect(markdownViewport).toHaveClass("tw-overflow-hidden");
+    expect(markdownViewport).not.toHaveClass("tw-overflow-y-auto");
+    expect(markdownViewport).not.toHaveClass("tw-scrollbar-thin");
+  });
+
+  it("renders markdown for content-only text-only drops", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          parts: [{ media: [], content: "hello" }],
+        }}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
+    expect(screen.getByTestId("markdown")).toBeInTheDocument();
+  });
+
+  it("does not render preview-only metadata as media", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          metadata: previewMetadata,
+          parts: [{ media: [], content: "hello" }],
+        }}
+        mode="content_only"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("media")).not.toBeInTheDocument();
+    expect(screen.getByTestId("markdown")).toBeInTheDocument();
+  });
+
+  it("passes preview image metadata to non-image media", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          metadata: previewMetadata,
+          parts: [
+            {
+              media: [{ url: "video.mp4", mime_type: "video/mp4" }],
+              content: "hello",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-media-url",
+      "video.mp4"
+    );
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-media-mime-type",
+      "video/mp4"
+    );
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-preview-image-url",
+      "https://example.com/preview.jpg"
+    );
   });
 
   it("keeps marketplace-only card border while removing inner padding", () => {
@@ -451,7 +582,10 @@ describe("WaveLeaderboardGridItem", () => {
 
     render(
       <WaveLeaderboardGridItem
-        drop={baseDrop}
+        drop={{
+          ...baseDrop,
+          parts: [{ media: [], content: "hello" }],
+        }}
         mode="content_only"
         onDropClick={onDropClick}
       />

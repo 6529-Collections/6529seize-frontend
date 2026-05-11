@@ -18,12 +18,18 @@ import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
   readonly isCompetitionDrop?: boolean | undefined;
+  readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
 }
 
 export const WaveLeaderboardDropContent: React.FC<
   WaveLeaderboardDropContentProps
-> = ({ drop, isCompetitionDrop = false, contentPresentation = "default" }) => {
+> = ({
+  drop,
+  isCompetitionDrop = false,
+  mediaContainerHeightClassName,
+  contentPresentation = "default",
+}) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const visibleMetadata = getDropVisibleMetadata({
@@ -62,6 +68,7 @@ export const WaveLeaderboardDropContent: React.FC<
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
         isCompetitionDrop={isCompetitionDrop}
+        mediaContainerHeightClassName={mediaContainerHeightClassName}
         contentPresentation={contentPresentation}
       />
       <WaveLeaderboardIdentity
