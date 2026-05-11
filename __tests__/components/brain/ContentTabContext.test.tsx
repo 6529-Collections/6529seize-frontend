@@ -118,6 +118,49 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
+  it("adds My Votes for authenticated normal rank waves", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "rank-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
+    ]);
+  });
+
+  it("omits My Votes for guests on normal rank waves", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "rank-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: false,
+        isMemesWave: false,
+        isCurationWave: false,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.OUTCOME,
+    ]);
+  });
+
   it("forces CHAT for chat waves", () => {
     const { result } = setup();
     act(() =>
@@ -195,7 +238,7 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
   });
 
-  it("keeps approve waves on approvals and always shows approved tab", () => {
+  it("adds My Votes for authenticated normal approve waves", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -215,8 +258,32 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+  });
+
+  it("omits My Votes for guests on normal approve waves", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "approve-wave",
+        isChatWave: false,
+        hasAuthenticatedProfile: false,
+        isMemesWave: false,
+        isCurationWave: false,
+        isApproveWave: true,
+        votingState: WaveVotingState.ENDED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+    ]);
   });
 
   it("normalizes stored LEADERBOARD to SUBMISSIONS once voting ends", () => {

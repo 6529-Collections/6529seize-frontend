@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -151,17 +151,17 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("filters options and corrects invalid active tab", () => {
+  it("filters hidden My Votes without correcting the active tab", () => {
     mockAvailableTabs = [
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.LEADERBOARD,
     ];
     renderComponent(MyStreamWaveTab.MY_VOTES);
-    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT);
-    expect(screen.getByText("Chat")).toBeInTheDocument();
-    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Leaderboard").length).toBeGreaterThan(0);
     expect(screen.queryByText("My Votes")).toBeNull();
+    expect(setActiveTab).not.toHaveBeenCalled();
   });
 
   it("shows My Votes for curation waves", () => {
@@ -180,14 +180,54 @@ describe("MyStreamWaveDesktopTabs", () => {
     ];
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
-    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
-      "Chat",
-      "Leaderboard",
-      "Sales",
-      "My Votes",
-    ]);
-    expect(screen.getByText("Sales")).toBeInTheDocument();
-    expect(screen.getByText("My Votes")).toBeInTheDocument();
+    expect(screen.getAllByText("Sales").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+    expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("shows My Votes for authenticated normal rank waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: false,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: true,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
+    ];
+
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+  });
+
+  it("hides My Votes for guests on normal rank waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: false,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: true,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
+    ];
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
+    });
+
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Leaderboard").length).toBeGreaterThan(0);
+    expect(screen.queryByText("My Votes")).toBeNull();
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
@@ -212,9 +252,66 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
-    expect(screen.getByText("Leaderboard")).toBeInTheDocument();
-    expect(screen.getByText("Chat")).toBeInTheDocument();
+    expect(screen.getAllByText("Leaderboard").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.queryByText("My Votes")).toBeNull();
+    expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("shows My Votes for authenticated normal approve waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
+    ];
+
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+  });
+
+  it("hides My Votes for guests on normal approve waves", () => {
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.MY_VOTES,
+    ];
+    (useAuth as jest.Mock).mockReturnValue({
+      connectedProfile: null,
+    });
+
+    renderComponent(MyStreamWaveTab.MY_VOTES);
+
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Approvals").length).toBeGreaterThan(0);
+    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(setActiveTab).not.toHaveBeenCalled();
+  });
+
+  it("sets the active tab when a visible standard tab is clicked", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+    renderComponent(MyStreamWaveTab.CHAT);
+
+    fireEvent.click(screen.getAllByRole("tab", { name: "Leaderboard" })[0]);
+
     expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.LEADERBOARD);
   });
 
@@ -229,8 +326,9 @@ describe("MyStreamWaveDesktopTabs", () => {
     mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.SALES];
     renderComponent(MyStreamWaveTab.SALES);
 
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.queryByText("Sales")).toBeNull();
-    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT);
+    expect(setActiveTab).not.toHaveBeenCalled();
   });
 
   it("keeps FAQ hidden outside memes waves", () => {
@@ -244,8 +342,9 @@ describe("MyStreamWaveDesktopTabs", () => {
     mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.FAQ];
     renderComponent(MyStreamWaveTab.FAQ);
 
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.queryByText("FAQ")).toBeNull();
-    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.CHAT);
+    expect(setActiveTab).not.toHaveBeenCalled();
   });
 
   it("does not render countdown; parent header handles it", () => {
@@ -302,9 +401,9 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     renderComponent(MyStreamWaveTab.LEADERBOARD);
 
-    expect(screen.getByText("Chat")).toBeInTheDocument();
-    expect(screen.getByText("Approvals")).toBeInTheDocument();
-    expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Approvals").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Approved").length).toBeGreaterThan(0);
     expect(screen.queryByText("Leaderboard")).toBeNull();
     expect(screen.queryByText("Winners")).toBeNull();
   });

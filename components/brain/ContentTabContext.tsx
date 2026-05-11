@@ -89,7 +89,8 @@ const buildMemesTabs = (
 const buildDefaultTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
-  isCurationWave: boolean
+  isCurationWave: boolean,
+  hasAuthenticatedProfile: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
@@ -106,13 +107,16 @@ const buildDefaultTabs = (
   if (!isCurationWave) {
     tabs.push(MyStreamWaveTab.OUTCOME);
   }
-  if (isCurationWave) {
+  if (isCurationWave || hasAuthenticatedProfile) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
   }
   return tabs;
 };
 
-const buildApproveTabs = (isCurationWave: boolean) => {
+const buildApproveTabs = (
+  isCurationWave: boolean,
+  hasAuthenticatedProfile: boolean
+) => {
   const tabs: MyStreamWaveTab[] = [
     MyStreamWaveTab.CHAT,
     MyStreamWaveTab.LEADERBOARD,
@@ -127,6 +131,10 @@ const buildApproveTabs = (isCurationWave: boolean) => {
   if (!isCurationWave) {
     tabs.push(MyStreamWaveTab.OUTCOME);
   } else {
+    tabs.push(MyStreamWaveTab.MY_VOTES);
+  }
+
+  if (!isCurationWave && hasAuthenticatedProfile) {
     tabs.push(MyStreamWaveTab.MY_VOTES);
   }
 
@@ -196,7 +204,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       if (isChatWave) {
         tabs = [MyStreamWaveTab.CHAT];
       } else if (isApproveWave) {
-        tabs = buildApproveTabs(isCurationWave);
+        tabs = buildApproveTabs(isCurationWave, hasAuthenticatedProfile);
       } else if (isMemesWave) {
         tabs = buildMemesTabs(
           hasAuthenticatedProfile,
@@ -207,7 +215,8 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         tabs = buildDefaultTabs(
           votingState,
           hasFirstDecisionPassed,
-          isCurationWave
+          isCurationWave,
+          hasAuthenticatedProfile
         );
       }
 
