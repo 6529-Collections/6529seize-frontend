@@ -5,6 +5,8 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import React, { useEffect } from "react";
+import { InlineMediaActions } from "./MediaActionToolbar";
+import { useMediaActions } from "./useMediaActions";
 
 interface Props {
   readonly src: string;
@@ -16,7 +18,13 @@ function DropListItemContentMediaVideo({
   disableAutoPlay = false,
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { isApp } = useDeviceInfo();
+  const { hasTouchScreen, isApp } = useDeviceInfo();
+  const { downloadMedia, isDownloading, openLabel, openMedia } =
+    useMediaActions({
+      url: src,
+      fallbackFileName: "video",
+      dialogTitle: "Save video",
+    });
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
@@ -66,8 +74,15 @@ function DropListItemContentMediaVideo({
     >
       <video
         ref={videoRef}
+        onClick={(event) => {
+          if (!hasTouchScreen) {
+            return;
+          }
+          event.currentTarget.requestFullscreen().catch(() => undefined);
+        }}
         playsInline
         controls
+        controlsList="noplaybackrate"
         autoPlay={false}
         muted
         loop
@@ -75,6 +90,13 @@ function DropListItemContentMediaVideo({
       >
         Your browser does not support the video tag.
       </video>
+      <InlineMediaActions
+        variant="video"
+        onDownload={() => void downloadMedia()}
+        onOpen={openMedia}
+        openLabel={openLabel}
+        isDownloading={isDownloading}
+      />
     </div>
   );
 }

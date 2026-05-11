@@ -4,6 +4,9 @@ import React, { useEffect } from "react";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { InlineMediaActions } from "./MediaActionToolbar";
+import { useMediaActions } from "./useMediaActions";
 
 interface Props {
   readonly src: string;
@@ -13,6 +16,13 @@ interface Props {
 const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const { hasTouchScreen } = useDeviceInfo();
+  const { downloadMedia, isDownloading, openLabel, openMedia } =
+    useMediaActions({
+      url: src,
+      fallbackFileName: "video",
+      dialogTitle: "Save video",
+    });
 
   // Poll for HLS → MP4 → fallback original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
@@ -51,17 +61,52 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
     }
   }, [inView, isLoading, videoRef]);
 
+  const handleVideoClick = () => {
+    if (showControls) {
+      return;
+    }
+
+    const vid = videoRef.current;
+    if (!vid) {
+      return;
+    }
+
+    if (vid.paused) {
+      vid.play().catch(() => {});
+      return;
+    }
+
+    vid.pause();
+  };
+
   return (
     <div ref={wrapperRef} className="tw-relative tw-max-h-64 tw-w-full">
       <video
         ref={videoRef}
+        onClick={(event) => {
+          if (showControls && hasTouchScreen) {
+            event.currentTarget.requestFullscreen().catch(() => undefined);
+            return;
+          }
+          handleVideoClick();
+        }}
         className="tw-h-auto tw-max-h-64 tw-w-full tw-rounded-xl tw-object-contain"
         muted
         loop
         controls={showControls}
+        controlsList="noplaybackrate"
         playsInline
         preload="auto"
       />
+      {showControls && (
+        <InlineMediaActions
+          variant="video"
+          onDownload={() => void downloadMedia()}
+          onOpen={openMedia}
+          openLabel={openLabel}
+          isDownloading={isDownloading}
+        />
+      )}
     </div>
   );
 };

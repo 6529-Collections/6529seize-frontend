@@ -1,28 +1,16 @@
 "use client";
 
 import { FallbackImage } from "@/components/common/FallbackImage";
-import { fullScreenSupported } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
-import { faExpand } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Tooltip } from "react-tooltip";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { ExpandedMediaToolbar, InlineMediaActions } from "./MediaActionToolbar";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
-
-const tooltipProps = {
-  delayShow: 250,
-  place: "top" as const,
-  style: { backgroundColor: "#37373E", color: "white", zIndex: 1002 },
-};
-
-const modalButtonClasses =
-  "tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out";
+import { useMediaActions } from "./useMediaActions";
 
 function DropListItemContentMediaImage({
   src,
@@ -52,7 +40,12 @@ function DropListItemContentMediaImage({
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
-  const { isCapacitor } = useCapacitor();
+  const { downloadMedia, isDownloading, openLabel, openMedia } =
+    useMediaActions({
+      url: src,
+      fallbackFileName: "image",
+      dialogTitle: "Save image",
+    });
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
@@ -97,16 +90,12 @@ function DropListItemContentMediaImage({
     []
   );
 
-  const handleFullScreen = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.stopPropagation();
-      const fullscreenTarget = modalImageRef.current ?? imgRef.current;
-      if (fullscreenTarget) {
-        fullscreenTarget.requestFullscreen().catch(() => undefined);
-      }
-    },
-    []
-  );
+  const handleFullScreen = useCallback(() => {
+    const fullscreenTarget = modalImageRef.current ?? imgRef.current;
+    if (fullscreenTarget) {
+      fullscreenTarget.requestFullscreen().catch(() => undefined);
+    }
+  }, []);
 
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
@@ -147,7 +136,7 @@ function DropListItemContentMediaImage({
       >
         {() => (
           <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-            <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col lg:tw-flex-row">
+            <div className="tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col">
               <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
@@ -162,59 +151,19 @@ function DropListItemContentMediaImage({
                   />
                 </TransformComponent>
               </div>
-
-              <div className="tw-fixed tw-right-4 tw-top-2 tw-z-[1001] tw-flex tw-flex-row tw-gap-x-4 tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-right-auto lg:tw-top-0 lg:tw-ml-4 lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-self-start lg:tw-pt-0">
-                {fullScreenSupported() && !isCapacitor && (
-                  <button
-                    onClick={handleFullScreen}
-                    data-tooltip-id="full-screen"
-                    className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700"
-                    aria-label="Full screen"
-                  >
-                    <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
-                  </button>
-                )}
-
-                <button
-                  onClick={handleCloseModal}
-                  data-tooltip-id="close-modal"
-                  className={modalButtonClasses}
-                  aria-label="Close modal"
-                >
-                  <svg
-                    className="tw-h-5 tw-w-5 tw-flex-shrink-0"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
         )}
       </TransformWrapper>
-
-      {/* Tooltips inside modal */}
-      {!isCapacitor && (
-        <>
-          <Tooltip id="full-screen" {...tooltipProps}>
-            <span className="tw-text-xs">Full screen</span>
-          </Tooltip>
-
-          <Tooltip id="close-modal" {...tooltipProps}>
-            <span className="tw-text-xs">Close</span>
-          </Tooltip>
-        </>
-      )}
+      <ExpandedMediaToolbar
+        onOpen={openMedia}
+        openLabel={openLabel}
+        onDownload={() => void downloadMedia()}
+        isDownloading={isDownloading}
+        onFullscreen={handleFullScreen}
+        fullscreenTargetAvailable
+        onClose={handleCloseModal}
+      />
     </div>
   );
 
@@ -229,6 +178,13 @@ function DropListItemContentMediaImage({
           isCompetitionDrop ? "tw-justify-center" : ""
         }`}
       >
+        {!disableModal && (
+          <InlineMediaActions
+            variant="image"
+            onDownload={() => void downloadMedia()}
+            isDownloading={isDownloading}
+          />
+        )}
         {!loaded && errorCount <= maxRetries && (
           <div
             className={`tw-rounded-xl tw-bg-iron-800 ${

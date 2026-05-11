@@ -91,8 +91,7 @@ describe("DropListItemContentMediaVideo", () => {
     expect(playSpy).not.toHaveBeenCalled();
   });
 
-  it("shows the custom download button on activity and hides it after idle", () => {
-    jest.useFakeTimers();
+  it("always shows the inline video media actions", () => {
     const ref = {
       current: document.createElement("div"),
     } as React.RefObject<HTMLDivElement>;
@@ -105,16 +104,14 @@ describe("DropListItemContentMediaVideo", () => {
     const { container } = render(
       <DropListItemContentMediaVideo src="foo.mp4" />
     );
-    const wrapper = container.firstElementChild as HTMLElement;
 
-    fireEvent.mouseMove(wrapper);
-    const button = screen.getByRole("button", { name: /download video/i });
-    expect(button).toHaveClass("tw-opacity-100");
-
-    act(() => {
-      jest.advanceTimersByTime(2500);
-    });
-    expect(button).toHaveClass("tw-opacity-0");
+    expect(container.querySelector("video")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Open in new tab" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
   });
 
   it("downloads the original video source from the custom button", async () => {
@@ -131,8 +128,7 @@ describe("DropListItemContentMediaVideo", () => {
       <DropListItemContentMediaVideo src="https://example.com/path/foo.mp4" />
     );
 
-    fireEvent.mouseMove(container.firstElementChild as HTMLElement);
-    fireEvent.click(screen.getByRole("button", { name: /download video/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Download media" }));
 
     await act(async () => {
       await Promise.resolve();

@@ -3,7 +3,6 @@ import clsx from "clsx";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
-import DropMediaActionRow from "@/components/drops/view/item/content/media/DropMediaActionRow";
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
 
@@ -63,11 +62,11 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     }
 
     if (useIntrinsicHeightMedia) {
-      return "tw-flex tw-w-full tw-max-h-64 tw-items-center tw-justify-center";
+      return "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-max-h-64 tw-items-center tw-justify-center";
     }
 
     return clsx(
-      "tw-flex tw-h-64 tw-items-center tw-justify-center",
+      "tw-flex tw-h-64 tw-min-w-[min(200px,100%)] tw-items-center tw-justify-center",
       fullWidthMedia && "tw-w-full"
     );
   };
@@ -81,10 +80,6 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           !fullWidthMedia && media.mime_type.includes("image");
         const useVideoIntrinsicHeight = media.mime_type.includes("video");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
-        const showMediaActionRow =
-          !disableMediaInteraction &&
-          (media.mime_type.includes("image") ||
-            media.mime_type.includes("video"));
         const mediaContainerClassName = getMediaContainerClassName({
           useIntrinsicHeightMedia:
             useNaturalHeightImage ||
@@ -127,9 +122,6 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         return (
           <div key={`part-${i}-media-${media.url}`}>
             <div className={mediaContainerClassName}>{mediaContent}</div>
-            {showMediaActionRow && (
-              <DropMediaActionRow mimeType={media.mime_type} url={media.url} />
-            )}
           </div>
         );
       })}
