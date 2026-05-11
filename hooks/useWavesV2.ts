@@ -77,11 +77,11 @@ export const useWavesV2 = ({
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
     placeholderData: (previousData, previousQuery) => {
       const previousParams =
-        previousQuery !== undefined
-          ? (previousQuery.queryKey[1] as
+        previousQuery === undefined
+          ? undefined
+          : (previousQuery.queryKey[1] as
               | { viewer_identity?: string | null }
-              | undefined)
-          : undefined;
+              | undefined);
       const previousViewerIdentity =
         typeof previousParams?.viewer_identity === "string"
           ? previousParams.viewer_identity
@@ -110,11 +110,11 @@ export const useWavesV2 = ({
       Date.now() - lastErrorTimestamp < 30000
     ) {
       setTimeout(() => {
-        void query.fetchNextPage();
+        query.fetchNextPage().catch(() => undefined);
       }, 30000);
       return;
     }
-    void query.fetchNextPage();
+    query.fetchNextPage().catch(() => undefined);
   }, [lastErrorTimestamp, query]);
 
   const refetch = useCallback(() => {
@@ -123,11 +123,11 @@ export const useWavesV2 = ({
       Date.now() - lastErrorTimestamp < 30000
     ) {
       setTimeout(() => {
-        void query.refetch();
+        query.refetch().catch(() => undefined);
       }, 30000);
       return;
     }
-    void query.refetch();
+    query.refetch().catch(() => undefined);
   }, [lastErrorTimestamp, query]);
 
   return useMemo(

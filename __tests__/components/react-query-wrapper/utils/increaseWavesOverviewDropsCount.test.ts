@@ -157,9 +157,11 @@ describe("increaseWavesOverviewDropsCount", () => {
     const overviewResult: any = client.getQueryData(overviewKey);
     const pinnedResult: any = client.getQueryData(pinnedKey);
 
+    expect(overviewResult.pages[0].waves[0].totalDropsCount).toBe(1);
     expect(overviewResult.pages[0].waves[0].latestDropTimestamp).toBe(4321);
     expect(overviewResult.pages[1].waves[0]).toEqual(waveTwo);
     expect(overviewResult.pageParams).toEqual([1, 2]);
+    expect(pinnedResult[0].totalDropsCount).toBe(1);
     expect(pinnedResult[0].latestDropTimestamp).toBe(4321);
   });
 

@@ -25,6 +25,10 @@ type NotificationWaveMin = ApiWaveMin & {
   readonly is_direct_message?: boolean;
 };
 
+const knownNotificationCauses = new Set<string>(
+  Object.values(ApiNotificationCause)
+);
+
 type FetchNotificationsV2Params = {
   readonly limit: string;
   readonly cause?: ApiNotificationCause[] | null | undefined;
@@ -41,6 +45,13 @@ const mapWaveOverviewToNotificationWaveMin = (
 ): NotificationWaveMin => ({
   ...mapApiWaveOverviewToApiWaveMin(wave),
   is_direct_message: wave.is_dm_wave,
+});
+
+const mapWaveOverviewToNotificationRelatedWave = (
+  wave: ApiWaveOverview
+): ApiWaveOverview & NotificationWaveMin => ({
+  ...wave,
+  ...mapWaveOverviewToNotificationWaveMin(wave),
 });
 
 const mapDropV2ToApiDrop = ({
@@ -149,6 +160,17 @@ const mapDropReactedNotification = (
   }));
 };
 
+const handleUnknownNotificationCause = (
+  notification: ApiNotificationV2
+): TypedNotification[] => {
+  const cause = String(notification.cause);
+  const knownCauses = [...knownNotificationCauses].join(", ");
+  console.error(
+    `Unsupported notification cause "${cause}". Known ApiNotificationCause values: ${knownCauses}`
+  );
+  return [];
+};
+
 const mapNotificationV2 = (
   notification: ApiNotificationV2
 ): TypedNotification[] => {
@@ -251,7 +273,11 @@ const mapNotificationV2 = (
           ...base,
           cause: ApiNotificationCause.WaveCreated,
           ...(notification.related_wave
-            ? { related_wave: notification.related_wave }
+            ? {
+                related_wave: mapWaveOverviewToNotificationRelatedWave(
+                  notification.related_wave
+                ),
+              }
             : {}),
           additional_context: {
             wave_id:
@@ -281,6 +307,8 @@ const mapNotificationV2 = (
           additional_context: { ...context },
         },
       ];
+    default:
+      return handleUnknownNotificationCause(notification);
   }
 };
 

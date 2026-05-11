@@ -34,9 +34,11 @@ export default function WaveMute({
       queryClient.invalidateQueries({
         queryKey: [QueryKey.WAVES_OVERVIEW],
       });
-      void queryClient.invalidateQueries({
-        queryKey: [QueryKey.WAVES_V2],
-      });
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVES_V2],
+        })
+        .catch(() => undefined);
       onSuccess?.();
     } catch (error) {
       const defaultMessage = isMuted

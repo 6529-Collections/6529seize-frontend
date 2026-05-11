@@ -27,6 +27,23 @@ const createWrapper = () => {
   );
 };
 
+const createInitialDrop = (id: string) =>
+  ({
+    id,
+    wave: { id: "wave-1" },
+    stableHash: `${id}-hash`,
+    stableKey: `${id}-key`,
+  }) as any;
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+
+  return { promise, resolve };
+};
+
 describe("useSingleWaveDropData", () => {
   it("fetches single-drop detail without eager top raters", async () => {
     fetchDropV2ByIdMock.mockResolvedValue({
@@ -54,6 +71,42 @@ describe("useSingleWaveDropData", () => {
         expect.objectContaining({ aborted: false }),
         { includeTopRaters: false }
       );
+    });
+  });
+
+  it("does not expose the previous drop while a new drop id is loading", async () => {
+    const secondDrop = createDeferred<any>();
+    fetchDropV2ByIdMock
+      .mockResolvedValueOnce({
+        id: "drop-1",
+        wave: { id: "wave-1" },
+      } as any)
+      .mockReturnValueOnce(secondDrop.promise);
+
+    const { result, rerender } = renderHook(
+      ({ initialDrop }) => useSingleWaveDropData(initialDrop, jest.fn()),
+      {
+        initialProps: { initialDrop: createInitialDrop("drop-1") },
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.drop?.id).toBe("drop-1");
+    });
+
+    rerender({ initialDrop: createInitialDrop("drop-2") });
+
+    expect(result.current.drop).toBeUndefined();
+    expect(result.current.extendedDrop).toBeNull();
+
+    secondDrop.resolve({
+      id: "drop-2",
+      wave: { id: "wave-1" },
+    });
+
+    await waitFor(() => {
+      expect(result.current.drop?.id).toBe("drop-2");
     });
   });
 });

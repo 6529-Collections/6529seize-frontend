@@ -37,5 +37,5 @@ export async function fetchQuorumParticipationDropPreviewBySerialNoV2({
   return {
     ...mapLeaderboardDropV2({ drop, wave }),
     wave,
-  } as ApiDrop;
+  };
 }

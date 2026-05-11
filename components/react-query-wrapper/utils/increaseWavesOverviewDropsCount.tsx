@@ -109,6 +109,7 @@ const updateSidebarWaveDropMetrics = (
   timestamp: number
 ): SidebarWave => ({
   ...wave,
+  totalDropsCount: wave.totalDropsCount + 1,
   latestDropTimestamp: Math.max(timestamp, wave.latestDropTimestamp ?? 0),
 });
 

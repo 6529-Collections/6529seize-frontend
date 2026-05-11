@@ -140,4 +140,21 @@ describe("fetchWaveDropsFeedV2", () => {
       "Part 2",
     ]);
   });
+
+  it("rethrows abort errors from additional part fetches", async () => {
+    const abortError = new DOMException("Aborted", "AbortError");
+    commonApiFetchMock
+      .mockResolvedValueOnce({
+        wave,
+        drops: [createDrop(2)],
+      })
+      .mockRejectedValueOnce(abortError);
+
+    await expect(
+      fetchWaveDropsFeedV2({
+        waveId: "wave-1",
+        limit: 20,
+      })
+    ).rejects.toBe(abortError);
+  });
 });

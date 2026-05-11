@@ -96,6 +96,32 @@ export type ApiWaveDropsV2PageFeed = ApiWaveDropsFeed & {
 const getDropEndpointId = (dropId: string): string =>
   encodeURIComponent(dropId);
 
+const isAbortFetchError = (error: unknown): boolean => {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return true;
+  }
+
+  if (error instanceof Error && error.name === "AbortError") {
+    return true;
+  }
+
+  const maybeAbortError = error as
+    | { readonly code?: unknown; readonly name?: unknown }
+    | null
+    | undefined;
+
+  return (
+    maybeAbortError?.name === "AbortError" ||
+    maybeAbortError?.code === "ERR_CANCELED"
+  );
+};
+
+const rethrowAbortFetchError = (error: unknown) => {
+  if (isAbortFetchError(error)) {
+    throw error;
+  }
+};
+
 const fetchDropPartV2 = async ({
   dropId,
   partNo,
@@ -110,7 +136,8 @@ const fetchDropPartV2 = async ({
       endpoint: `v2/drops/${getDropEndpointId(dropId)}/parts/${partNo}`,
       signal,
     });
-  } catch {
+  } catch (error) {
+    rethrowAbortFetchError(error);
     return null;
   }
 };
@@ -159,7 +186,8 @@ export const fetchDropReactionDetailsV2 = async (
       reaction: reaction.reaction,
       profiles: reaction.reactors.map(mapIdentityOverviewToProfileMin),
     }));
-  } catch {
+  } catch (error) {
+    rethrowAbortFetchError(error);
     return [];
   }
 };
@@ -177,7 +205,8 @@ const fetchDropMetadataV2 = async (
       endpoint: `v2/drops/${getDropEndpointId(drop.id)}/metadata`,
       signal,
     });
-  } catch {
+  } catch (error) {
+    rethrowAbortFetchError(error);
     return [];
   }
 };
@@ -206,7 +235,8 @@ const fetchTopRatersV2 = async (
       profile: mapIdentityOverviewToProfileMin(voter.voter),
       rating: voter.vote,
     }));
-  } catch {
+  } catch (error) {
+    rethrowAbortFetchError(error);
     return [];
   }
 };
@@ -417,7 +447,7 @@ export async function fetchWaveDropsFeedV2({
   return {
     wave,
     drops,
-  } as unknown as ApiWaveDropsFeed;
+  };
 }
 
 export async function fetchWaveLeaderboardV2({
@@ -519,7 +549,7 @@ export async function fetchDropRepliesV2({
     count: response.count,
     page: response.page,
     next: response.next,
-  } as unknown as ApiWaveDropsV2PageFeed;
+  };
 }
 
 export async function fetchBoostedDropsV2({

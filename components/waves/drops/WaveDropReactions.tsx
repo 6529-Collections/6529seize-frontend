@@ -56,6 +56,102 @@ interface DetailedReactionsState {
   readonly reactions: ApiDropReaction[];
 }
 
+const getReactionClassNames = ({
+  animate,
+  canReact,
+  selected,
+}: {
+  readonly animate: boolean;
+  readonly canReact: boolean;
+  readonly selected: boolean;
+}) => {
+  let hoverStyle = "";
+  if (canReact) {
+    hoverStyle = selected
+      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
+      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  }
+
+  let animationStyle = "";
+  if (animate) {
+    animationStyle = selected
+      ? styles["reactionSlideUp"]!
+      : styles["reactionSlideDown"]!;
+  }
+
+  return {
+    borderStyle: selected ? "tw-border-primary-500" : "tw-border-iron-700",
+    bgStyle: selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40",
+    hoverStyle,
+    animationStyle,
+  };
+};
+
+function ReactionTooltipContent({
+  displayProfiles,
+  isDetailsLoading,
+  moreCount,
+  onMoreClick,
+  total,
+}: {
+  readonly displayProfiles: ApiDropReaction["profiles"];
+  readonly isDetailsLoading: boolean;
+  readonly moreCount: number;
+  readonly onMoreClick: (e: React.MouseEvent) => void;
+  readonly total: number;
+}) {
+  if (isDetailsLoading && displayProfiles.length === 0) {
+    return <span className="tw-whitespace-nowrap">Loading reactions...</span>;
+  }
+
+  if (displayProfiles.length === 0) {
+    return (
+      <span className="tw-whitespace-nowrap">
+        {formatLargeNumber(total)} {total === 1 ? "reaction" : "reactions"}
+      </span>
+    );
+  }
+
+  return (
+    <span className="tw-whitespace-nowrap">
+      by{" "}
+      {displayProfiles.map((profile, index) => {
+        const displayName = profile.handle ?? profile.id;
+        const isLast = index === displayProfiles.length - 1;
+
+        return (
+          <span key={profile.id}>
+            {profile.handle ? (
+              <Link
+                href={`/${profile.handle}`}
+                className="tw-text-primary-400 tw-no-underline hover:tw-text-primary-300 hover:tw-underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {displayName}
+              </Link>
+            ) : (
+              <span>{displayName}</span>
+            )}
+            {isLast ? null : ", "}
+          </span>
+        );
+      })}
+      {moreCount > 0 && (
+        <>
+          {" "}
+          <button
+            type="button"
+            onClick={onMoreClick}
+            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-400 tw-underline hover:tw-text-primary-300"
+          >
+            and {moreCount} {moreCount === 1 ? "other" : "others"}
+          </button>
+        </>
+      )}
+    </span>
+  );
+}
+
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const [detailedReactionsState, setDetailedReactionsState] =
@@ -135,7 +231,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const handleOpenDialog = useCallback(
     (reactionKey: string) => {
       setDialogReaction(reactionKey);
-      void loadReactionDetails();
+      loadReactionDetails()?.catch(() => undefined);
     },
     [loadReactionDetails]
   );
@@ -500,7 +596,7 @@ function WaveDropReaction({
 
   const handlePointerEnter = useCallback(() => {
     if (!isTouchDevice) {
-      void onLoadDetails();
+      onLoadDetails()?.catch(() => undefined);
     }
   }, [isTouchDevice, onLoadDetails]);
 
@@ -512,77 +608,17 @@ function WaveDropReaction({
     [onOpenDetailDialog, reaction.reaction]
   );
 
-  // styles
-  const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
-  const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
-  let hoverStyle = "";
-  if (canReact) {
-    hoverStyle = selected
-      ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
-      : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
-  }
-  let animationStyle = "";
-  if (animate) {
-    if (selected) {
-      animationStyle = styles["reactionSlideUp"]!;
-    } else {
-      animationStyle = styles["reactionSlideDown"]!;
-    }
-  }
-
-  let tooltipContent: React.ReactNode;
-  if (isDetailsLoading && tooltipProfiles.displayProfiles.length === 0) {
-    tooltipContent = (
-      <span className="tw-whitespace-nowrap">Loading reactions...</span>
-    );
-  } else if (tooltipProfiles.displayProfiles.length > 0) {
-    tooltipContent = (
-      <span className="tw-whitespace-nowrap">
-        by{" "}
-        {tooltipProfiles.displayProfiles.map((profile, index) => {
-          const displayName = profile.handle ?? profile.id;
-          const isLast = index === tooltipProfiles.displayProfiles.length - 1;
-          const showComma = !isLast;
-
-          return (
-            <span key={profile.id}>
-              {profile.handle ? (
-                <Link
-                  href={`/${profile.handle}`}
-                  className="tw-text-primary-400 tw-no-underline hover:tw-text-primary-300 hover:tw-underline"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {displayName}
-                </Link>
-              ) : (
-                <span>{displayName}</span>
-              )}
-              {showComma && ", "}
-            </span>
-          );
-        })}
-        {tooltipProfiles.moreCount > 0 && (
-          <>
-            {" "}
-            <button
-              type="button"
-              onClick={handleMoreClick}
-              className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-primary-400 tw-underline hover:tw-text-primary-300"
-            >
-              and {tooltipProfiles.moreCount}{" "}
-              {tooltipProfiles.moreCount === 1 ? "other" : "others"}
-            </button>
-          </>
-        )}
-      </span>
-    );
-  } else {
-    tooltipContent = (
-      <span className="tw-whitespace-nowrap">
-        {formatLargeNumber(total)} {total === 1 ? "reaction" : "reactions"}
-      </span>
-    );
-  }
+  const { animationStyle, bgStyle, borderStyle, hoverStyle } =
+    getReactionClassNames({ animate, canReact, selected });
+  const tooltipContent = (
+    <ReactionTooltipContent
+      displayProfiles={tooltipProfiles.displayProfiles}
+      isDetailsLoading={isDetailsLoading}
+      moreCount={tooltipProfiles.moreCount}
+      onMoreClick={handleMoreClick}
+      total={total}
+    />
+  );
 
   if (!emojiNode || total === 0) return null;
   return (

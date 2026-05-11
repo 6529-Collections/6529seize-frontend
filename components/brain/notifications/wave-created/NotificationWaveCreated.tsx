@@ -18,7 +18,7 @@ export default function NotificationWaveCreated({
   const waveId = wave?.id ?? notification.additional_context.wave_id;
   const invitationHref = getWaveRoute({
     waveId,
-    isDirectMessage: wave?.is_dm_wave ?? false,
+    isDirectMessage: wave?.is_direct_message ?? wave?.is_dm_wave ?? false,
     isApp,
   });
   const waveName = wave?.name ?? waveId;

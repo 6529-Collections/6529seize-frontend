@@ -913,9 +913,11 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
     });
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVES_V2],
-    });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVES_V2],
+      })
+      .catch(() => undefined);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES],
     });
@@ -985,12 +987,16 @@ const createReactQueryContextValue = (
   };
 
   const invalidateNotifications = () => {
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-    });
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
-    });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+      })
+      .catch(() => undefined);
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      })
+      .catch(() => undefined);
   };
 
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {

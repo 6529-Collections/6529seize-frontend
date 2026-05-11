@@ -28,7 +28,7 @@ export async function fetchWaveMessages(
       limit: WAVE_DROPS_PARAMS.limit,
       serialNoLimit: serialNo,
       searchStrategy:
-        serialNo !== null ? ApiDropSearchStrategy.Older : undefined,
+        serialNo === null ? undefined : ApiDropSearchStrategy.Older,
       signal,
     });
 
@@ -316,7 +316,7 @@ export async function fetchNewestWaveMessages(
       limit,
       serialNoLimit: sinceSerialNo,
       searchStrategy:
-        sinceSerialNo !== null ? ApiDropSearchStrategy.Newer : undefined,
+        sinceSerialNo === null ? undefined : ApiDropSearchStrategy.Newer,
       signal,
       withRetry: true,
     });

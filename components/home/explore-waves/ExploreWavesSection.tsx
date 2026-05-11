@@ -43,7 +43,7 @@ export function ExploreWavesSection({
       ApiWavesV2ListType.Hot,
       limit,
       excludeFollowed,
-      excludeFollowed ? userScope : null,
+      userScope,
     ],
     queryFn: async () => {
       const page = await fetchWavesV2Page({

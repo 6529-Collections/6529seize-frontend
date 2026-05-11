@@ -121,9 +121,84 @@ describe("fetchNotificationsV2", () => {
     expect(
       response.notifications.map((n) => n.related_identity.handle)
     ).toEqual(["alice", "bob"]);
-    const mappedDrop = (response.notifications[0] as any).related_drops[0]!;
-    expect(mappedDrop.wave.id).toBe("wave-1");
-    expect((mappedDrop.wave as any).is_direct_message).toBe(true);
-    expect(mappedDrop.parts[0]?.content).toBe("hello");
+    const [firstNotification] = response.notifications;
+    if (
+      firstNotification?.cause === ApiNotificationCause.DropReacted &&
+      "related_drops" in firstNotification
+    ) {
+      const mappedDrop = firstNotification.related_drops[0]!;
+      expect(mappedDrop.wave.id).toBe("wave-1");
+      expect(mappedDrop.wave).toMatchObject({ is_direct_message: true });
+      expect(mappedDrop.parts[0]?.content).toBe("hello");
+      return;
+    }
+
+    throw new Error("Expected drop reacted notification");
+  });
+
+  it("normalizes related wave on wave-created notifications", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 0,
+      notifications: [
+        {
+          id: 8,
+          cause: ApiNotificationCause.WaveCreated,
+          created_at: 3000,
+          read_at: null,
+          related_identity: identity("creator"),
+          related_wave: wave,
+          related_drops: [],
+          additional_context: {
+            wave_id: "wave-1",
+          },
+        },
+      ],
+    });
+
+    const response = await fetchNotificationsV2({ limit: "30" });
+    const [notification] = response.notifications;
+
+    expect(notification).toMatchObject({
+      cause: ApiNotificationCause.WaveCreated,
+      related_wave: {
+        id: "wave-1",
+        is_direct_message: true,
+      },
+      additional_context: {
+        wave_id: "wave-1",
+      },
+    });
+  });
+
+  it("drops unknown notification causes safely", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    try {
+      (commonApiFetch as jest.Mock).mockResolvedValue({
+        unread_count: 0,
+        notifications: [
+          {
+            id: 9,
+            cause: "NEW_CAUSE" as ApiNotificationCause,
+            created_at: 4000,
+            read_at: null,
+            related_identity: identity("unknown"),
+            related_drops: [],
+            additional_context: {},
+          },
+        ],
+      });
+
+      const response = await fetchNotificationsV2({ limit: "30" });
+
+      expect(response.notifications).toEqual([]);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Unsupported notification cause "NEW_CAUSE"')
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 });

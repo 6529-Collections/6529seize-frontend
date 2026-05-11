@@ -55,8 +55,8 @@ export function getWavesV2OverviewQueryKeyParams({
     page_size: pageSize,
     overview_type: overviewType,
     only_waves_followed_by_authenticated_user: following,
-    ...(directMessage !== undefined ? { direct_message: directMessage } : {}),
-    ...(pinned !== undefined ? { pinned } : {}),
+    ...(directMessage === undefined ? {} : { direct_message: directMessage }),
+    ...(pinned === undefined ? {} : { pinned }),
     ...(normalizedViewerIdentityKey
       ? { viewer_identity: normalizedViewerIdentityKey }
       : {}),

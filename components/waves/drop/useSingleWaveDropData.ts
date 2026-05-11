@@ -5,7 +5,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWaveData } from "@/hooks/useWaveData";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DROP_DETAIL_STALE_TIME_MS } from "@/services/api/drop-api";
 import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
@@ -24,7 +24,6 @@ export const useSingleWaveDropData = (
     ],
     queryFn: ({ signal }) =>
       fetchDropV2ById(initialDrop.id, signal, { includeTopRaters: false }),
-    placeholderData: keepPreviousData,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
 
