@@ -49,19 +49,29 @@ const stopAndRun =
 export function InlineMediaActions({
   onDownload,
   onOpen,
+  onFullscreen,
   openLabel,
   isDownloading,
+  fullscreenTargetAvailable,
   variant,
 }: {
   readonly onDownload: () => void;
   readonly onOpen?: (() => void) | undefined;
+  readonly onFullscreen?: (() => void) | undefined;
   readonly openLabel?: string | undefined;
   readonly isDownloading: boolean;
+  readonly fullscreenTargetAvailable?: boolean | undefined;
   readonly variant: "image" | "video";
 }) {
+  const canFullscreen =
+    variant === "image" &&
+    Boolean(onFullscreen) &&
+    Boolean(fullscreenTargetAvailable) &&
+    fullScreenSupported();
+
   return (
-    <div className="tw-absolute tw-right-[2px] tw-top-[2px] tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur">
-      {variant === "video" && onOpen && openLabel && (
+    <div className="tw-absolute tw-right-[5px] tw-top-[5px] tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur">
+      {onOpen && openLabel && (
         <ToolbarButton label={openLabel} onClick={stopAndRun(onOpen)}>
           <ArrowTopRightOnSquareIcon className="tw-size-4" aria-hidden="true" />
         </ToolbarButton>
@@ -73,6 +83,11 @@ export function InlineMediaActions({
       >
         <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
       </ToolbarButton>
+      {canFullscreen && (
+        <ToolbarButton label="Full screen" onClick={stopAndRun(onFullscreen!)}>
+          <ArrowsPointingOutIcon className="tw-size-4" aria-hidden="true" />
+        </ToolbarButton>
+      )}
     </div>
   );
 }

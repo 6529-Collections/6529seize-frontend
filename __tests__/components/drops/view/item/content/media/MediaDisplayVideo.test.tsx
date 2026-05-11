@@ -15,6 +15,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
 }));
+jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: false }));
 jest.mock("@/hooks/useOptimizedVideo", () => ({
   useOptimizedVideo: jest.fn(() => ({
     playableUrl: "video.mp4",

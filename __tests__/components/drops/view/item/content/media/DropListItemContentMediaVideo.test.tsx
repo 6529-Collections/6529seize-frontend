@@ -124,7 +124,7 @@ describe("DropListItemContentMediaVideo", () => {
       isHls: false,
     });
 
-    const { container } = render(
+    render(
       <DropListItemContentMediaVideo src="https://example.com/path/foo.mp4" />
     );
 

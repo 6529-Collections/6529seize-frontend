@@ -23,7 +23,6 @@ function DropListItemContentMediaImage({
 }: {
   readonly src: string;
   readonly maxRetries?: number | undefined;
-  readonly onContainerClick?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly disableModal?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
@@ -90,12 +89,36 @@ function DropListItemContentMediaImage({
     []
   );
 
+  const requestCenteredImageFullscreen = useCallback(
+    (fullscreenTarget: HTMLImageElement) => {
+      const previousObjectPosition = fullscreenTarget.style.objectPosition;
+
+      fullscreenTarget.style.objectPosition = "center";
+
+      const restoreInlinePosition = () => {
+        if (document.fullscreenElement === fullscreenTarget) {
+          return;
+        }
+
+        fullscreenTarget.style.objectPosition = previousObjectPosition;
+        document.removeEventListener("fullscreenchange", restoreInlinePosition);
+      };
+
+      document.addEventListener("fullscreenchange", restoreInlinePosition);
+      fullscreenTarget.requestFullscreen().catch(() => {
+        document.removeEventListener("fullscreenchange", restoreInlinePosition);
+        fullscreenTarget.style.objectPosition = previousObjectPosition;
+      });
+    },
+    []
+  );
+
   const handleFullScreen = useCallback(() => {
     const fullscreenTarget = modalImageRef.current ?? imgRef.current;
     if (fullscreenTarget) {
-      fullscreenTarget.requestFullscreen().catch(() => undefined);
+      requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, []);
+  }, [requestCenteredImageFullscreen]);
 
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
@@ -158,7 +181,7 @@ function DropListItemContentMediaImage({
       <ExpandedMediaToolbar
         onOpen={openMedia}
         openLabel={openLabel}
-        onDownload={() => void downloadMedia()}
+        onDownload={downloadMedia}
         isDownloading={isDownloading}
         onFullscreen={handleFullScreen}
         fullscreenTargetAvailable
@@ -181,8 +204,12 @@ function DropListItemContentMediaImage({
         {!disableModal && (
           <InlineMediaActions
             variant="image"
-            onDownload={() => void downloadMedia()}
+            onOpen={openMedia}
+            openLabel={openLabel}
+            onDownload={downloadMedia}
             isDownloading={isDownloading}
+            onFullscreen={handleFullScreen}
+            fullscreenTargetAvailable
           />
         )}
         {!loaded && errorCount <= maxRetries && (

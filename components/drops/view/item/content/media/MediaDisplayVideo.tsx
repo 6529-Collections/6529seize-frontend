@@ -5,6 +5,7 @@ import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { PlayIcon } from "@heroicons/react/24/solid";
 import { InlineMediaActions } from "./MediaActionToolbar";
 import { useMediaActions } from "./useMediaActions";
 
@@ -16,7 +17,7 @@ interface Props {
 const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { hasTouchScreen } = useDeviceInfo();
+  const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -37,8 +38,9 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
     src: playableUrl,
     isHls,
     fallbackSrc: src, // if HLS fails, revert to original
-    autoPlay: inView, // only autoplay if in view
+    autoPlay: inView && !isApp, // only autoplay if in view and not in app
   });
+  const showNativeControls = showControls && !isApp;
 
   // Inline attributes for iOS / legacy WebKit
   useEffect(() => {
@@ -53,13 +55,36 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
     const vid = videoRef.current;
     if (!vid || isLoading) return;
 
-    if (!inView) {
+    if (!inView || isApp) {
       vid.pause();
     } else {
       // Attempt to play if we're in view
       vid.play().catch(() => {});
     }
-  }, [inView, isLoading, videoRef]);
+  }, [inView, isApp, isLoading, videoRef]);
+
+  useEffect(() => {
+    if (!isApp) {
+      return;
+    }
+
+    const pauseWhenFullscreenCloses = () => {
+      const vid = videoRef.current;
+      if (!vid || document.fullscreenElement === vid) {
+        return;
+      }
+
+      vid.pause();
+    };
+
+    document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
+    return () => {
+      document.removeEventListener(
+        "fullscreenchange",
+        pauseWhenFullscreenCloses
+      );
+    };
+  }, [isApp, videoRef]);
 
   const handleVideoClick = () => {
     if (showControls) {
@@ -79,13 +104,23 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
     vid.pause();
   };
 
+  const enterFullscreenAndPlay = () => {
+    const vid = videoRef.current;
+    if (!vid) {
+      return;
+    }
+
+    vid.play().catch(() => undefined);
+    vid.requestFullscreen().catch(() => undefined);
+  };
+
   return (
     <div ref={wrapperRef} className="tw-relative tw-max-h-64 tw-w-full">
       <video
         ref={videoRef}
-        onClick={(event) => {
-          if (showControls && hasTouchScreen) {
-            event.currentTarget.requestFullscreen().catch(() => undefined);
+        onClick={() => {
+          if (showControls && isApp) {
+            enterFullscreenAndPlay();
             return;
           }
           handleVideoClick();
@@ -93,15 +128,29 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
         className="tw-h-auto tw-max-h-64 tw-w-full tw-rounded-xl tw-object-contain"
         muted
         loop
-        controls={showControls}
+        controls={showNativeControls}
         controlsList="noplaybackrate"
         playsInline
         preload="auto"
       />
+      {showControls && isApp && (
+        <button
+          type="button"
+          aria-label="Play video"
+          title="Play video"
+          onClick={(event) => {
+            event.stopPropagation();
+            enterFullscreenAndPlay();
+          }}
+          className="tw-absolute tw-left-1/2 tw-top-1/2 tw-z-20 tw-flex tw-size-16 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/75 tw-text-white tw-shadow-lg tw-shadow-black/30 tw-backdrop-blur-sm"
+        >
+          <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
+        </button>
+      )}
       {showControls && (
         <InlineMediaActions
           variant="video"
-          onDownload={() => void downloadMedia()}
+          onDownload={downloadMedia}
           onOpen={openMedia}
           openLabel={openLabel}
           isDownloading={isDownloading}

@@ -106,12 +106,36 @@ export default function WaveDropPartContentFullWidthImage({
     setIsModalOpen(false);
   }, []);
 
+  const requestCenteredImageFullscreen = useCallback(
+    (fullscreenTarget: HTMLImageElement) => {
+      const previousObjectPosition = fullscreenTarget.style.objectPosition;
+
+      fullscreenTarget.style.objectPosition = "center";
+
+      const restoreInlinePosition = () => {
+        if (document.fullscreenElement === fullscreenTarget) {
+          return;
+        }
+
+        fullscreenTarget.style.objectPosition = previousObjectPosition;
+        document.removeEventListener("fullscreenchange", restoreInlinePosition);
+      };
+
+      document.addEventListener("fullscreenchange", restoreInlinePosition);
+      fullscreenTarget.requestFullscreen().catch(() => {
+        document.removeEventListener("fullscreenchange", restoreInlinePosition);
+        fullscreenTarget.style.objectPosition = previousObjectPosition;
+      });
+    },
+    []
+  );
+
   const handleFullScreen = useCallback(() => {
     const fullscreenTarget = modalImageRef.current ?? imgRef.current;
     if (fullscreenTarget) {
-      fullscreenTarget.requestFullscreen().catch(() => undefined);
+      requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, []);
+  }, [requestCenteredImageFullscreen]);
 
   useKeyPressEvent("Escape", () => {
     handleCloseModal();
@@ -155,7 +179,7 @@ export default function WaveDropPartContentFullWidthImage({
       <ExpandedMediaToolbar
         onOpen={openMedia}
         openLabel={openLabel}
-        onDownload={() => void downloadMedia()}
+        onDownload={downloadMedia}
         isDownloading={isDownloading}
         onFullscreen={handleFullScreen}
         fullscreenTargetAvailable
@@ -186,8 +210,12 @@ export default function WaveDropPartContentFullWidthImage({
       <div className="tw-relative tw-w-full">
         <InlineMediaActions
           variant="image"
-          onDownload={() => void downloadMedia()}
+          onOpen={openMedia}
+          openLabel={openLabel}
+          onDownload={downloadMedia}
           isDownloading={isDownloading}
+          onFullscreen={handleFullScreen}
+          fullscreenTargetAvailable
         />
         <button
           type="button"

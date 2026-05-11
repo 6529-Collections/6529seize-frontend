@@ -30,6 +30,7 @@ export function MemesDropArtworkHero({
                 isCompetitionDrop={true}
                 imageScale={ImageScale.AUTOx1080}
                 disableModal={true}
+                fillVideoContainer={true}
               />
               {canOpenFullscreen && (
                 <button
