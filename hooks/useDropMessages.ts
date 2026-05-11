@@ -17,20 +17,27 @@ import {
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   generateUniqueKeys,
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
 
-import { commonApiFetch } from "@/services/api/common-api";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
+import {
+  fetchDropRepliesV2,
+  type ApiWaveDropsV2PageFeed,
+} from "@/services/api/wave-drops-v2-api";
 
-export function useDropMessages(waveId: string, dropId: string | null) {
+export function useDropMessages(
+  waveId: string,
+  dropId: string | null,
+  wave?: ApiWave
+) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
   const [init, setInit] = useState(false);
@@ -57,36 +64,19 @@ export function useDropMessages(waveId: string, dropId: string | null) {
       pageParam,
     }: {
       pageParam: {
-        serialNo: number | null;
-        strategy: WaveDropsSearchStrategy;
+        page: number;
       } | null;
-    }) => {
-      const params: Record<string, string> = {
-        limit: WAVE_DROPS_PARAMS.limit.toString(),
-        drop_id: dropId ?? "",
-      };
-
-      if (pageParam?.serialNo) {
-        params["serial_no_limit"] = `${pageParam.serialNo}`;
-        params["search_strategy"] = `${pageParam.strategy}`;
-      }
-
-      const results = await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${waveId}/drops`,
-        params,
-      });
-
-      return results;
-    },
+    }) =>
+      fetchDropRepliesV2({
+        parentDropId: dropId ?? "",
+        page: pageParam?.page ?? 1,
+        pageSize: WAVE_DROPS_PARAMS.limit,
+        wave,
+      }),
     enabled: !!dropId,
     initialPageParam: null,
     getNextPageParam: (lastPage) =>
-      lastPage.drops.at(-1)?.serial_no
-        ? {
-            serialNo: lastPage.drops.at(-1)?.serial_no ?? null,
-            strategy: WaveDropsSearchStrategy.Older,
-          }
-        : null,
+      lastPage.next ? { page: lastPage.page + 1 } : null,
     placeholderData: keepPreviousData,
     staleTime: 60000,
     refetchOnWindowFocus: true,
@@ -102,7 +92,7 @@ export function useDropMessages(waveId: string, dropId: string | null) {
   }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
 
   const processDrops = (
-    pages: ApiWaveDropsFeed[] | undefined,
+    pages: (ApiWaveDropsFeed | ApiWaveDropsV2PageFeed)[] | undefined,
     previousDrops: ExtendedDrop[],
     isReverse: boolean
   ) => {

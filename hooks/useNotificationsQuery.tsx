@@ -3,7 +3,7 @@
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 import type {
   NotificationDisplayItem,
   TypedNotificationsResponse,
@@ -60,6 +60,7 @@ const getIdentityNotificationsQueryKey = (
       cause: cause?.length
         ? [...cause].sort((a, b) => a.localeCompare(b)).join(",")
         : null,
+      version: "v2",
     },
   ] as const;
 
@@ -69,19 +70,10 @@ const fetchNotifications = async ({
   pageParam,
   signal,
 }: NotificationsQueryParams) => {
-  const params: Record<string, string> = { limit };
-
-  if (pageParam != null) {
-    params["id_less_than"] = String(pageParam);
-  }
-
-  if (cause?.length) {
-    params["cause"] = cause.join(",");
-  }
-
-  return await commonApiFetch<TypedNotificationsResponse>({
-    endpoint: "notifications",
-    params,
+  return await fetchNotificationsV2({
+    limit,
+    cause,
+    pageParam,
     signal,
   });
 };

@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { ExploreWaveCard } from "@/components/home/explore-waves/ExploreWaveCard";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import type { ImgHTMLAttributes, ReactNode } from "react";
+import type { SidebarWave } from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -49,24 +50,15 @@ describe("ExploreWaveCard", () => {
     mockContentDisplay.mockClear();
   });
 
-  it("uses ApiWave last_drop_time and description_drop preview content", () => {
+  it("uses sidebar wave latest drop time, total drops, and description preview", () => {
     render(
       <ExploreWaveCard
         wave={createWave({
-          last_drop_time: 2_000,
-          metrics: {
-            drops_count: 7,
-            latest_drop_timestamp: 1_000,
-          },
-          description_drop: {
-            parts: [
-              {
-                part_id: 1,
-                content: "Description preview",
-                media: [],
-                quoted_drop: null,
-              },
-            ],
+          latestDropTimestamp: 2_000,
+          totalDropsCount: 7,
+          descriptionDrop: {
+            contents: "Description preview",
+            media: [],
           },
         })}
       />
@@ -93,114 +85,41 @@ describe("ExploreWaveCard", () => {
     });
   });
 
-  it("does not render the preview container when description_drop is empty", () => {
+  it("shows empty state when latest drop is missing", () => {
     render(
       <ExploreWaveCard
         wave={createWave({
-          description_drop: {
-            parts: [
-              {
-                part_id: 1,
-                content: "   ",
-                media: [],
-                quoted_drop: null,
-              },
-            ],
-          },
+          latestDropTimestamp: null,
         })}
       />
     );
 
-    expect(screen.queryByTestId("content-display")).not.toBeInTheDocument();
+    expect(screen.getByText("No drops yet")).toBeInTheDocument();
   });
 });
 
-function createWave(overrides: Partial<ApiWave> = {}): ApiWave {
-  const baseWave = {
-    id: "wave-1",
-    serial_no: 1,
-    author: {
-      handle: "alice",
-      banner1_color: null,
-      banner2_color: null,
-    },
-    name: "Wave One",
-    picture: null,
-    created_at: 1,
-    last_drop_time: 1_000,
-    description_drop: {
-      id: "drop-1",
-      serial_no: 1,
-      drop_type: "CHAT",
-      rank: null,
-      wave: {
-        id: "wave-1",
-      },
-      author: {
-        handle: "alice",
-      },
-      created_at: 1,
-      updated_at: null,
-      title: null,
-      parts: [
-        {
-          part_id: 1,
-          content: "Description preview",
-          media: [],
-          quoted_drop: null,
-        },
-      ],
-      parts_count: 1,
-      referenced_nfts: [],
-      mentioned_users: [],
-      mentioned_waves: [],
-      metadata: [],
-      rating: 0,
-      realtime_rating: 0,
-      rating_prediction: 0,
-      top_raters: [],
-      raters_count: 0,
-      context_profile_context: null,
-      subscribed_actions: [],
-      is_signed: false,
-      reactions: [],
-      boosts: 0,
-      hide_link_preview: false,
-    },
-    voting: {},
-    visibility: {},
-    participation: {},
-    chat: {
-      scope: {
-        group: {
-          is_direct_message: false,
-        },
-      },
-      enabled: true,
-    },
-    wave: {
-      type: "CHAT",
-    },
-    contributors_overview: [],
-    subscribed_actions: [],
-    metrics: {
-      drops_count: 3,
-      latest_drop_timestamp: 1_000,
-    },
-    pauses: [],
-    pinned: false,
-  } as any;
-
+function createWave(overrides: Partial<SidebarWave> = {}): SidebarWave {
   return {
-    ...baseWave,
+    id: "wave-1",
+    name: "Wave One",
+    type: ApiWaveType.Chat,
+    picture: null,
+    contributors: [],
+    isDirectMessage: false,
+    hasCompetition: false,
+    descriptionDrop: {
+      contents: "Description preview",
+      media: [],
+    },
+    totalDropsCount: 3,
+    isPrivate: false,
+    latestDropTimestamp: 1_000,
+    firstUnreadDropSerialNo: null,
+    unreadDropsCount: 0,
+    latestReadTimestamp: 0,
+    pinned: false,
+    muted: false,
+    subscribed: false,
     ...overrides,
-    metrics: {
-      ...baseWave.metrics,
-      ...(overrides.metrics as object | undefined),
-    },
-    description_drop: {
-      ...baseWave.description_drop,
-      ...(overrides.description_drop as object | undefined),
-    },
-  } as ApiWave;
+  };
 }

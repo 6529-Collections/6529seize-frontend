@@ -39,9 +39,18 @@ interface DropAuthorBadgesProfile {
   readonly artist_of_prevote_cards?: readonly number[] | null;
   readonly profile_wave_id?: string | null;
   readonly is_wave_creator?: boolean | null;
+  readonly badges?: {
+    readonly artist_of_main_stage_submissions?: number | null;
+    readonly artist_of_memes?: number | null;
+    readonly profile_wave_id?: string | null;
+  } | null;
   readonly classification: ApiProfileClassification;
   readonly sub_classification: string | null;
 }
+
+type ApiProfileMinWithAuthorBadges = ApiProfileMin & {
+  readonly badges?: DropAuthorBadgesProfile["badges"];
+};
 
 interface DropAuthorBadgesProps {
   readonly profile: DropAuthorBadgesProfile;
@@ -61,10 +70,16 @@ interface DropAuthorBadgesProps {
 
 const DEFAULT_CONTAINER_CLASS = "tw-inline-flex tw-items-center tw-gap-x-1.5";
 
-const toApiProfileMin = (profile: DropAuthorBadgesProfile): ApiProfileMin => {
+const getProfileWaveId = (profile: DropAuthorBadgesProfile): string | null =>
+  profile.profile_wave_id ?? profile.badges?.profile_wave_id ?? null;
+
+const toApiProfileMin = (
+  profile: DropAuthorBadgesProfile
+): ApiProfileMinWithAuthorBadges => {
   const primaryAddress =
     profile.primary_address ?? profile.primary_wallet ?? "";
   const fallbackId = primaryAddress;
+  const profileWaveId = getProfileWaveId(profile);
 
   return {
     id: profile.id ?? fallbackId,
@@ -97,10 +112,11 @@ const toApiProfileMin = (profile: DropAuthorBadgesProfile): ApiProfileMin => {
       profile.artist_of_prevote_cards !== undefined
         ? [...profile.artist_of_prevote_cards]
         : [],
-    profile_wave_id: profile.profile_wave_id ?? null,
-    is_wave_creator: profile.is_wave_creator === true,
+    profile_wave_id: profileWaveId,
+    is_wave_creator: profile.is_wave_creator === true || profileWaveId !== null,
     classification: profile.classification,
     sub_classification: profile.sub_classification,
+    badges: profile.badges,
   };
 };
 
@@ -115,7 +131,8 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   const submissionCount = getSubmissionCount(profile);
   const trophyCount = getTrophyArtworkCount(profile);
   const hasActivityBadge = submissionCount > 0 || trophyCount > 0;
-  const isWaveCreator = profile.is_wave_creator === true;
+  const isWaveCreator =
+    profile.is_wave_creator === true || getProfileWaveId(profile) !== null;
 
   const modalUser = React.useMemo(() => toApiProfileMin(profile), [profile]);
 

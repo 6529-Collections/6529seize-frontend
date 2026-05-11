@@ -13,11 +13,12 @@ import {
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 
@@ -32,12 +33,20 @@ interface UseWaveDropsProps {
   readonly enabled?: boolean | undefined;
 }
 
-const processDrops = (pages: ApiDrop[][] | undefined): ExtendedDrop[] => {
+interface WaveDropsPage {
+  readonly drops: ApiDrop[];
+  readonly nextSerialNo?: number | undefined;
+}
+
+const hasMedia = (drop: ApiDrop): boolean =>
+  drop.parts.some((part) => part.media.length > 0);
+
+const processDrops = (pages: WaveDropsPage[] | undefined): ExtendedDrop[] => {
   if (!pages) {
     return [];
   }
 
-  const allDrops = pages.flat();
+  const allDrops = pages.flatMap((page) => page.drops);
   const extendedDrops: ExtendedDrop[] = allDrops.map((drop) => ({
     ...drop,
     type: DropSize.FULL,
@@ -97,35 +106,50 @@ export function useWaveDrops({
   } = useInfiniteQuery({
     queryKey,
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        wave_id: waveId,
-        limit: limit.toString(),
-      };
+      const collectedDrops: ApiDrop[] = [];
+      let nextSerialNo: number | undefined;
+      let serialNoLimit = pageParam;
 
-      if (containsMedia) {
-        params["contains_media"] = "true";
+      for (let shouldFetch = true; shouldFetch; ) {
+        const feed = await fetchWaveDropsFeedV2({
+          waveId,
+          limit,
+          serialNoLimit,
+          searchStrategy:
+            typeof serialNoLimit === "number"
+              ? ApiDropSearchStrategy.Older
+              : undefined,
+          dropType,
+        });
+        const pageDrops = feed.drops as ApiDrop[];
+
+        if (pageDrops.length === 0) {
+          return { drops: collectedDrops };
+        }
+
+        nextSerialNo = pageDrops.at(-1)?.serial_no;
+        collectedDrops.push(
+          ...(containsMedia ? pageDrops.filter(hasMedia) : pageDrops)
+        );
+
+        if (
+          !containsMedia ||
+          collectedDrops.length > 0 ||
+          nextSerialNo === undefined ||
+          nextSerialNo === serialNoLimit
+        ) {
+          shouldFetch = false;
+          continue;
+        }
+
+        serialNoLimit = nextSerialNo;
       }
 
-      if (dropType !== undefined) {
-        params["drop_type"] = dropType;
-      }
-
-      if (curationId) {
-        params["curation_id"] = curationId;
-      }
-
-      if (typeof pageParam === "number") {
-        params["serial_no_less_than"] = `${pageParam}`;
-      }
-
-      return await commonApiFetch<ApiDrop[]>({
-        endpoint: "drops",
-        params,
-      });
+      return { drops: collectedDrops, nextSerialNo };
     },
     enabled: enabled && !!waveId,
     initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? undefined,
+    getNextPageParam: (lastPage) => lastPage.nextSerialNo,
     placeholderData: keepPreviousData,
     staleTime: 60000,
     refetchOnWindowFocus: true,

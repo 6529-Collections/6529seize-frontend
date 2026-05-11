@@ -20,7 +20,6 @@ import { startDropOpen } from "@/utils/monitoring/dropOpenTiming";
 import React from "react";
 import { createPortal } from "react-dom";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
-import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
 import { WaveLeaderboardDropAuthorAvatar } from "./header/WaveLeaderboardDropAuthor";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
@@ -172,7 +171,6 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                   winningThreshold={winningThreshold}
                   isVotingClosed={isVotingClosed}
                 />
-                <WaveLeaderboardDropFooter drop={drop} />
               </div>
               <div
                 className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4 @[700px]:tw-ml-auto @[700px]:tw-w-auto @[700px]:tw-border-t-0 @[700px]:tw-pt-0"

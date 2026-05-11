@@ -8,9 +8,14 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { jwtDecode } from "jwt-decode";
 import { getUserProfile } from "./server.helpers";
-import type { TypedFeedItem, TypedNotificationsResponse } from "@/types/feed.types";
-import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import type { TypedFeedItem } from "@/types/feed.types";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  fetchWavesV2Page,
+  getWavesV2OverviewQueryKeyParams,
+} from "@/services/api/waves-v2-api";
+import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
+import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 
 const getWalletFromJwt = (headers: Record<string, string>): string | null => {
   const jwt = headers["Authorization"]?.split(" ")[1] ?? null;
@@ -43,36 +48,29 @@ const prefetchAuthenticatedWavesOverview = async ({
   queryClient: QueryClient;
   headers: Record<string, string>;
 }) => {
+  const queryKeyParams = getWavesV2OverviewQueryKeyParams({
+    pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    following:
+      WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+    directMessage: false,
+  });
+
   await queryClient.prefetchInfiniteQuery({
-    queryKey: [
-      QueryKey.WAVES_OVERVIEW,
-      {
-        limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
-        type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
-        only_waves_followed_by_authenticated_user:
+    queryKey: [QueryKey.WAVES_V2, queryKeyParams],
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      return await fetchWavesV2Page({
+        page: pageParam,
+        pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+        overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+        following:
           WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
-      },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const queryParams: Record<string, string> = {
-        limit: `${WAVE_FOLLOWING_WAVES_PARAMS.limit}`,
-        offset: `${pageParam}`,
-        type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
-        only_waves_followed_by_authenticated_user: `${WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user}`,
-      };
-
-
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: `waves-overview`,
-        params: queryParams,
+        directMessage: false,
         headers,
       });
     },
-    initialPageParam: 0,
-    getNextPageParam: (_, allPages) =>
-      allPages.at(-1)?.length === WAVE_FOLLOWING_WAVES_PARAMS.limit
-        ? allPages.flat().length
-        : null,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
     pages: 1,
     staleTime: 60000,
   });
@@ -136,16 +134,10 @@ const prefetchAuthenticatedWaveFeedItems = async ({
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        limit: WAVE_DROPS_PARAMS.limit.toString(),
-      };
-
-      if (pageParam) {
-        params["serial_no_less_than"] = `${pageParam}`;
-      }
-      return await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${waveId}/drops`,
-        params,
+      return await fetchWaveDropsFeedV2({
+        waveId: waveId!,
+        limit: WAVE_DROPS_PARAMS.limit,
+        serialNoLimit: pageParam,
         headers,
       });
     },
@@ -296,18 +288,12 @@ const prefetchAuthenticatedNotificationsItems = async ({
   await queryClient.prefetchInfiniteQuery({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
-      { identity: handle, limit: "10" },
+      { identity: handle, limit: "10", cause: null, version: "v2" },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
+      return await fetchNotificationsV2({
         limit: "10",
-      };
-      if (pageParam) {
-        params["id_less_than"] = `${pageParam}`;
-      }
-      return await commonApiFetch<TypedNotificationsResponse>({
-        endpoint: `notifications`,
-        params,
+        pageParam,
         headers,
       });
     },

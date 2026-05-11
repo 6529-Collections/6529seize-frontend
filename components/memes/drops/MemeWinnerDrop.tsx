@@ -34,6 +34,21 @@ const getRankHoverClass = (rank: number | null): string => {
   return getRankHoverBorderClass(rank);
 };
 
+const getNonEmptyText = (
+  value: string | null | undefined
+): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : undefined;
+};
+
+const getMetadataValue = (
+  drop: ExtendedDrop,
+  dataKey: string
+): string | undefined =>
+  getNonEmptyText(
+    drop.metadata.find((metadata) => metadata.data_key === dataKey)?.data_value
+  );
+
 export default function MemeWinnerDrop({
   drop,
   showReplyAndQuote,
@@ -46,10 +61,12 @@ export default function MemeWinnerDrop({
 
   // Extract metadata
   const title =
-    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
+    getNonEmptyText(drop.title) ??
+    getMetadataValue(drop, "title") ??
     "Artwork Title";
   const description =
-    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
+    getNonEmptyText(drop.parts.at(0)?.content) ??
+    getMetadataValue(drop, "description") ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available

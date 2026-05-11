@@ -92,6 +92,7 @@ export enum QueryKey {
   EMMA_ALLOWLIST_RESULT = "EMMA_ALLOWLIST_RESULT",
   WAVES_OVERVIEW = "WAVES_OVERVIEW",
   WAVES_OVERVIEW_PUBLIC = "WAVES_OVERVIEW_PUBLIC",
+  WAVES_V2 = "WAVES_V2",
   WAVES = "WAVES",
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVES_SEARCH = "WAVES_SEARCH",
@@ -912,6 +913,11 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC],
     });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVES_V2],
+      })
+      .catch(() => undefined);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES],
     });
@@ -981,12 +987,16 @@ const createReactQueryContextValue = (
   };
 
   const invalidateNotifications = () => {
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
-    });
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
-    });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+      })
+      .catch(() => undefined);
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+      })
+      .catch(() => undefined);
   };
 
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {

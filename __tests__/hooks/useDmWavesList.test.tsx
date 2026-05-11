@@ -11,26 +11,25 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-jest.mock("@/hooks/useWavesOverview", () => ({
-  useWavesOverview: jest.fn(),
+jest.mock("@/hooks/useWavesV2", () => ({
+  useWavesV2: jest.fn(),
 }));
 
 const useAuthMock = require("@/components/auth/Auth").useAuth as jest.Mock;
 const useSeizeConnectContextMock =
   require("@/components/auth/SeizeConnectContext")
     .useSeizeConnectContext as jest.Mock;
-const useWavesOverviewMock = require("@/hooks/useWavesOverview")
-  .useWavesOverview as jest.Mock;
+const useWavesV2Mock = require("@/hooks/useWavesV2").useWavesV2 as jest.Mock;
 
 describe("useDmWavesList", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAuthMock.mockReturnValue({ activeProfileProxy: null });
     useSeizeConnectContextMock.mockReturnValue({ address: "0xABC" });
-    useWavesOverviewMock.mockReturnValue({
+    useWavesV2Mock.mockReturnValue({
       waves: [
-        { id: "older", metrics: { latest_drop_timestamp: 100 } },
-        { id: "newer", metrics: { latest_drop_timestamp: 200 } },
+        { id: "older", latestDropTimestamp: 100 },
+        { id: "newer", latestDropTimestamp: 200 },
       ],
       isFetching: false,
       isFetchingNextPage: false,
@@ -48,9 +47,10 @@ describe("useDmWavesList", () => {
       "newer",
       "older",
     ]);
-    expect(useWavesOverviewMock).toHaveBeenCalledWith(
+    expect(useWavesV2Mock).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: ApiWavesOverviewType.RecentlyDroppedTo,
+        overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+        pageSize: 20,
         directMessage: true,
         viewerIdentityKey: "0xabc:primary",
         refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,

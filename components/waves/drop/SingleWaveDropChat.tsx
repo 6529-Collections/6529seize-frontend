@@ -15,6 +15,7 @@ import PrivilegedDropCreator from "../PrivilegedDropCreator";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import { DropMode } from "../dropComposer.types";
 import { WaveDropLayerProvider } from "../drops/WaveDropLayerContext";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -33,6 +34,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
 }) => {
   const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useAndroidKeyboard();
+  const { updateEligibility } = useWaveEligibility();
 
   // Apply Android keyboard adjustments to the fixed input area
   const inputContainerStyle = useMemo(() => {
@@ -71,6 +73,18 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     });
   };
 
+  React.useEffect(() => {
+    updateEligibility(wave.id, {
+      authenticated_user_eligible_to_chat:
+        wave.chat.authenticated_user_eligible,
+      authenticated_user_eligible_to_vote:
+        wave.voting.authenticated_user_eligible,
+      authenticated_user_eligible_to_participate:
+        wave.participation.authenticated_user_eligible,
+      authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
+    });
+  }, [updateEligibility, wave]);
+
   return (
     <WaveDropLayerProvider
       value={{
@@ -86,6 +100,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                 <div className="tw-min-h-0 tw-flex-1">
                   <WaveDropsAll
                     waveId={wave.id}
+                    wave={wave}
                     onReply={({
                       drop: repliedDrop,
                       partId,

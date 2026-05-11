@@ -274,7 +274,7 @@ export default function NotificationDropReactedGroup({
     useWaveNavigation();
   const { drop, notifications, createdAt } = group;
   const isDirectMessage = getIsDirectMessage(drop.wave);
-  const ids = notifications.map((n) => n.id);
+  const ids = [...new Set(notifications.map((n) => n.id))];
   const idsKey = ids.join(",");
   const latestPerUser = notificationsLatestPerUser(notifications);
   const fullReactors = latestPerUser.map((n) => n.related_identity);

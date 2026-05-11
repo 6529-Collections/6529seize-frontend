@@ -1,7 +1,6 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ApiDropWithoutWavesPageWithoutCount } from "@/generated/models/ApiDropWithoutWavesPageWithoutCount";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
@@ -9,7 +8,7 @@ import {
   generateUniqueKeys,
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchWaveDropsSearchV2 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -39,14 +38,16 @@ export function useWaveDropsSearch({
     ],
     enabled: enabled && wave !== null && trimmedTerm.length > 0,
     initialPageParam: 1,
-    queryFn: async ({ pageParam }) => {
-      return await commonApiFetch<ApiDropWithoutWavesPageWithoutCount>({
-        endpoint: `waves/${wave!.id}/search`,
-        params: {
-          term: trimmedTerm,
-          page: String(pageParam),
-          size: String(size),
-        },
+    queryFn: async ({ pageParam }: { pageParam: number }) => {
+      if (!wave) {
+        throw new Error("Wave is required to search drops");
+      }
+
+      return await fetchWaveDropsSearchV2({
+        wave,
+        term: trimmedTerm,
+        page: pageParam,
+        size,
       });
     },
     getNextPageParam: (lastPage) =>

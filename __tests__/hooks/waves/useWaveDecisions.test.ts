@@ -207,7 +207,7 @@ describe("useWaveDecisions", () => {
     await options.queryFn({ pageParam: 3 });
 
     expect(fetchMock).toHaveBeenCalledWith({
-      endpoint: "waves/w1/decisions",
+      endpoint: "v2/waves/w1/decisions",
       params: {
         sort_direction: "DESC",
         sort: "decision_time",

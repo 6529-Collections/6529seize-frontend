@@ -1,9 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { commonApiFetch } from "@/services/api/common-api";
-
-const DROP_BATCH_SIZE = 20;
+import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
 
 export const DROP_DETAIL_STALE_TIME_MS = 60 * 1000;
 export const DROP_BATCH_STALE_TIME_MS = 5 * 60 * 1000;
@@ -32,14 +30,6 @@ const getUniqueDropIds = (dropIds: readonly string[]): string[] => {
   return uniqueDropIds;
 };
 
-const chunkDropIds = (dropIds: readonly string[]): string[][] => {
-  const chunks: string[][] = [];
-  for (let index = 0; index < dropIds.length; index += DROP_BATCH_SIZE) {
-    chunks.push(dropIds.slice(index, index + DROP_BATCH_SIZE));
-  }
-  return chunks;
-};
-
 export const orderDropsByIds = (
   dropIds: readonly string[],
   drops: readonly ApiDrop[]
@@ -50,29 +40,65 @@ export const orderDropsByIds = (
     .filter((drop): drop is ApiDrop => !!drop);
 };
 
-export const fetchDropsByIds = async (
+type DropFetchResult =
+  | {
+      readonly dropId: string;
+      readonly status: "fulfilled";
+      readonly drop: ApiDrop;
+    }
+  | {
+      readonly dropId: string;
+      readonly status: "rejected";
+      readonly error: unknown;
+    };
+
+type FulfilledDropFetchResult = Extract<
+  DropFetchResult,
+  { readonly status: "fulfilled" }
+>;
+
+const fetchDropResultsByIds = async (
   dropIds: readonly string[]
-): Promise<ApiDrop[]> => {
+): Promise<DropFetchResult[]> => {
   const uniqueDropIds = getUniqueDropIds(dropIds);
   if (uniqueDropIds.length === 0) {
     return [];
   }
 
-  const dropChunks = chunkDropIds(uniqueDropIds);
-  const dropPages = await Promise.all(
-    dropChunks.map((chunk) =>
-      commonApiFetch<ApiDrop[]>({
-        endpoint: "drops",
-        params: {
-          ids: chunk.join(","),
-          limit: `${chunk.length}`,
-          include_replies: "true",
-        },
-      })
-    )
+  const results = await Promise.allSettled(
+    uniqueDropIds.map((dropId) => fetchDropV2ById(dropId))
   );
 
-  return orderDropsByIds(uniqueDropIds, dropPages.flat());
+  return results.map((result, index) => {
+    const dropId = uniqueDropIds[index]!;
+    if (result.status === "fulfilled") {
+      return {
+        dropId,
+        status: "fulfilled",
+        drop: result.value,
+      };
+    }
+
+    return {
+      dropId,
+      status: "rejected",
+      error: result.reason as unknown,
+    };
+  });
+};
+
+export const fetchDropsByIds = async (
+  dropIds: readonly string[]
+): Promise<ApiDrop[]> => {
+  const results = await fetchDropResultsByIds(dropIds);
+  const drops = results
+    .filter(
+      (result): result is FulfilledDropFetchResult =>
+        result.status === "fulfilled"
+    )
+    .map((result) => result.drop);
+
+  return orderDropsByIds(dropIds, drops);
 };
 
 export const seedDropCache = (
@@ -100,18 +126,15 @@ const flushPendingDropRequests = async () => {
   const dropIds = [...currentRequests.keys()];
 
   try {
-    const drops = await fetchDropsByIds(dropIds);
-    const dropsById = new Map(drops.map((drop) => [drop.id, drop]));
+    const results = await fetchDropResultsByIds(dropIds);
 
-    for (const dropId of dropIds) {
-      const drop = dropsById.get(dropId);
-      const requests = currentRequests.get(dropId) ?? [];
-      if (!drop) {
-        const error = new Error(`Drop ${dropId} not found`);
-        requests.forEach((request) => request.reject(error));
+    for (const result of results) {
+      const requests = currentRequests.get(result.dropId) ?? [];
+      if (result.status === "rejected") {
+        requests.forEach((request) => request.reject(result.error));
         continue;
       }
-      requests.forEach((request) => request.resolve(drop));
+      requests.forEach((request) => request.resolve(result.drop));
     }
   } catch (error) {
     currentRequests.forEach((requests) => {

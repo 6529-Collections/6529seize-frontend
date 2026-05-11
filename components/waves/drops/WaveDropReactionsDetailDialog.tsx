@@ -8,12 +8,14 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { getReactionCount } from "./reaction-utils";
 
 interface WaveDropReactionsDetailDialogProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly reactions: ApiDropReaction[];
   readonly initialReaction?: string | undefined;
+  readonly isLoading?: boolean | undefined;
 }
 
 export default function WaveDropReactionsDetailDialog({
@@ -21,6 +23,7 @@ export default function WaveDropReactionsDetailDialog({
   onClose,
   reactions,
   initialReaction,
+  isLoading = false,
 }: WaveDropReactionsDetailDialogProps) {
   const [selectedReaction, setSelectedReaction] = useState<string>(
     initialReaction ?? reactions[0]?.reaction ?? ""
@@ -45,7 +48,10 @@ export default function WaveDropReactionsDetailDialog({
           selectedReaction={selectedReaction}
           onSelectReaction={setSelectedReaction}
         />
-        <ProfilesList profiles={selectedReactionData?.profiles ?? []} />
+        <ProfilesList
+          profiles={selectedReactionData?.profiles ?? []}
+          isLoading={isLoading}
+        />
       </div>
     </MobileWrapperDialog>
   );
@@ -135,7 +141,7 @@ function ReactionButton({
         {emojiNode}
       </div>
       <span className="tw-text-sm tw-font-medium">
-        {reaction.profiles.length}
+        {getReactionCount(reaction)}
       </span>
     </button>
   );
@@ -143,9 +149,19 @@ function ReactionButton({
 
 function ProfilesList({
   profiles,
+  isLoading,
 }: {
   readonly profiles: ApiDropReaction["profiles"];
+  readonly isLoading: boolean;
 }) {
+  if (isLoading && profiles.length === 0) {
+    return (
+      <div className="tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+        Loading reactions...
+      </div>
+    );
+  }
+
   return (
     <div className="tw-flex-1 tw-overflow-y-auto tw-px-4 tw-py-2">
       <div className="tw-flex tw-flex-col tw-gap-y-2">

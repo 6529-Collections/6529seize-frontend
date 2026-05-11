@@ -63,10 +63,6 @@ jest.mock(
   () => ({ WaveLeaderboardDropContent: () => <div data-testid="content" /> })
 );
 jest.mock(
-  "@/components/waves/leaderboard/drops/footer/WaveLeaderboardDropFooter",
-  () => ({ WaveLeaderboardDropFooter: () => <div data-testid="footer" /> })
-);
-jest.mock(
   "@/components/waves/leaderboard/drops/header/WaveleaderboardDropRaters",
   () => ({
     WaveLeaderboardDropRaters: (props: any) => (
@@ -92,6 +88,11 @@ describe("DefaultWaveLeaderboardDrop", () => {
     id: "1",
     rank: 1,
     wave: { id: "w1" },
+    author: {
+      handle: "alice",
+      primary_address: "0xalice",
+      pfp: null,
+    },
     context_profile_context: { curatable: true, curated: false },
   };
 

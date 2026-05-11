@@ -22,6 +22,7 @@ export const WaveLeaderboardRightSidebarBoostedDrops =
 
     const { data: boostedDrops, isLoading } = useWaveBoostedDrops({
       waveId: wave.id,
+      wave,
       limit: MAX_BOOSTED_DROPS,
       timeWindow,
     });

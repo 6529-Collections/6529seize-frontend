@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from "react";
 
 import WaveDropQuote from "./WaveDropQuote";
-import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { WaveDropsSearchStrategy } from "@/contexts/wave/hooks/types";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 interface WaveDropQuoteWithSerialNoProps {
   readonly serialNo: number;
   readonly waveId: string;
@@ -43,20 +43,13 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
         strategy: WaveDropsSearchStrategy.Both,
       },
     ],
-    queryFn: async () => {
-      const params: Record<string, string> = {
-        limit: "1",
-        serial_no_limit: `${serialNo}`,
-        search_strategy: WaveDropsSearchStrategy.Both,
-      };
-
-      const results = await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${waveId}/drops`,
-        params,
-      });
-
-      return results;
-    },
+    queryFn: async () =>
+      fetchWaveDropsFeedV2({
+        waveId,
+        limit: 1,
+        serialNoLimit: serialNo,
+        searchStrategy: WaveDropsSearchStrategy.Both,
+      }),
   });
   const [drop, setDrop] = useState<ApiDrop | null>(null);
   useEffect(() => {

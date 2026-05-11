@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -20,6 +20,7 @@ interface UseWaveTopVotersProps {
   readonly sortDirection?: "ASC" | "DESC" | undefined;
   readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE" | undefined;
   readonly refetchInterval?: number | undefined;
+  readonly enabled?: boolean | undefined;
 }
 
 export function useWaveTopVoters({
@@ -30,21 +31,30 @@ export function useWaveTopVoters({
   sortDirection = "ASC",
   sort = "ABSOLUTE",
   refetchInterval = Infinity,
+  enabled = true,
 }: UseWaveTopVotersProps) {
   const queryClient = useQueryClient();
   const [voters, setVoters] = useState<ApiWaveVoter[]>([]);
+  const canFetch = enabled && !!connectedProfileHandle;
 
-  const queryKey = [
-    QueryKey.WAVE_VOTERS,
-    {
-      waveId,
-      dropId,
-      sortDirection,
-      sort,
-    },
-  ];
+  const queryKey = useMemo(
+    () => [
+      QueryKey.WAVE_VOTERS,
+      {
+        waveId,
+        dropId,
+        sortDirection,
+        sort,
+      },
+    ],
+    [waveId, dropId, sortDirection, sort]
+  );
 
   useEffect(() => {
+    if (!canFetch) {
+      return;
+    }
+
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -79,7 +89,7 @@ export function useWaveTopVoters({
       staleTime: 60000,
       ...getDefaultQueryRetry(),
     });
-  }, [waveId, dropId, sortDirection, sort]);
+  }, [canFetch, queryKey, queryClient, waveId, dropId, sortDirection, sort]);
 
   const {
     data,
@@ -118,7 +128,7 @@ export function useWaveTopVoters({
       return currentPage + 1;
     },
     placeholderData: keepPreviousData,
-    enabled: !!connectedProfileHandle,
+    enabled: canFetch,
     staleTime: 60000,
     refetchInterval,
     ...getDefaultQueryRetry(),

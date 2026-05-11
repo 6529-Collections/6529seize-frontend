@@ -79,6 +79,10 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenuOpen", () => ({
     </button>
   ),
 }));
+jest.mock("@/components/waves/drops/WaveDropMobileMenuCopyLink", () => ({
+  __esModule: true,
+  default: () => <button type="button" data-testid="mobile-copy" />,
+}));
 jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
   <span data-testid="time" />
 ));
@@ -158,6 +162,30 @@ describe("MemesWaveWinnersDrop", () => {
       onInteractionStart: expect.any(Function),
       preventDefault: false,
     });
+  });
+
+  it("uses v2 title and part one content before metadata fallbacks", () => {
+    render(
+      <MemesWaveWinnersDrop
+        winner={
+          {
+            ...winner,
+            drop: {
+              ...winner.drop,
+              title: "Part title",
+              parts: [{ part_id: 1, content: "Part description", media: [] }],
+            },
+          } as ApiWaveDecisionWinner
+        }
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("Part title")).toBeInTheDocument();
+    expect(screen.getByText("Part description")).toBeInTheDocument();
+    expect(screen.queryByText("T")).not.toBeInTheDocument();
+    expect(screen.queryByText("D")).not.toBeInTheDocument();
   });
 
   it("suppresses the click that follows a long press", async () => {
