@@ -114,6 +114,48 @@ describe("DropListItemContentMediaVideo", () => {
     ).toBeInTheDocument();
   });
 
+  it("hides open action for QuickTime video that browsers download directly", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mov",
+      isHls: false,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mov" />);
+
+    expect(
+      screen.queryByRole("button", { name: "Open in new tab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+  });
+
+  it("hides open action for video/quicktime even without a mov extension", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo",
+      isHls: false,
+    });
+
+    render(
+      <DropListItemContentMediaVideo src="foo" mimeType="video/quicktime" />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Open in new tab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+  });
+
   it("downloads the original video source from the custom button", async () => {
     const ref = {
       current: document.createElement("div"),

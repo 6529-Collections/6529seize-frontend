@@ -11,10 +11,15 @@ import { useMediaActions } from "./useMediaActions";
 
 interface Props {
   readonly src: string;
+  readonly mimeType?: string | undefined;
   readonly showControls?: boolean | undefined;
 }
 
-const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
+const MediaDisplayVideo: React.FC<Props> = ({
+  src,
+  mimeType,
+  showControls = false,
+}) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const { isApp } = useDeviceInfo();
@@ -23,6 +28,7 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
       url: src,
       fallbackFileName: "video",
       dialogTitle: "Save video",
+      mimeType,
     });
 
   // Poll for HLS → MP4 → fallback original
@@ -132,7 +138,7 @@ const MediaDisplayVideo: React.FC<Props> = ({ src, showControls = false }) => {
         muted
         loop
         controls={showNativeControls}
-        controlsList="noplaybackrate"
+        controlsList="nodownload noplaybackrate"
         playsInline
         preload="auto"
       />

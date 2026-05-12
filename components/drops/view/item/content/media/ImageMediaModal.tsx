@@ -43,8 +43,8 @@ export function ImageMediaModal({
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
   readonly onClose: () => void;
-  readonly onOpen: () => void;
-  readonly openLabel: string;
+  readonly onOpen?: (() => void) | undefined;
+  readonly openLabel?: string | undefined;
   readonly onDownload: () => void;
   readonly isDownloading: boolean;
   readonly onFullscreen: () => void;
@@ -64,6 +64,7 @@ export function ImageMediaModal({
       <button
         type="button"
         aria-label="Close modal"
+        data-testid="modal-backdrop"
         onClick={onClose}
         className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
       />
@@ -75,10 +76,9 @@ export function ImageMediaModal({
       >
         {() => (
           <div
-            className="tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden"
-            onClick={onClose}
+            className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden"
           >
-            <div className="tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
+            <div className="tw-pointer-events-auto tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
               <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
@@ -90,7 +90,6 @@ export function ImageMediaModal({
                     ref={imageRef}
                     src={src}
                     alt="Full size drop media"
-                    onClick={(event) => event.stopPropagation()}
                     style={{
                       height: "90dvh",
                       maxHeight: "90dvh",

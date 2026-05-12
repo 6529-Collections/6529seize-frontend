@@ -67,15 +67,16 @@ jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => (props: any) => {
-    const isImage = props.media_mime_type.includes("image");
-    const isVideo = props.media_mime_type.includes("video");
+    const mediaMimeType = props.media_mime_type ?? "";
+    const isImage = mediaMimeType.includes("image");
+    const isVideo = mediaMimeType.includes("video");
     const showsToolbar = !props.disableModal && (isImage || isVideo);
 
     return (
       <div
         data-testid="media"
         data-disable-modal={String(Boolean(props.disableModal))}
-        data-media-mime-type={props.media_mime_type}
+        data-media-mime-type={mediaMimeType}
         data-media-url={props.media_url}
       >
         {showsToolbar && (

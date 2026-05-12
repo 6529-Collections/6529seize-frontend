@@ -76,6 +76,7 @@ export default function WaveDropPartContentMediaImage({
       url: src,
       fallbackFileName: "image",
       dialogTitle: "Save image",
+      mimeType: "image",
     });
 
   const handleImageLoad = useCallback(() => {

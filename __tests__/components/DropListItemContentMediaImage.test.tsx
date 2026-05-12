@@ -53,9 +53,8 @@ describe("DropListItemContentMediaImage", () => {
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
     fireEvent.click(img);
-    const modalImage = screen.getByAltText("Full size drop media");
 
-    fireEvent.click(modalImage.parentElement?.parentElement as HTMLElement);
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
 
     expect(
       screen.queryByAltText("Full size drop media")

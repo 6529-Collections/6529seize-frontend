@@ -142,7 +142,9 @@ describe("useDownloader", () => {
     const { result, unmount } = renderHook(() => useDownloader());
 
     act(() => {
-      void result.current.download("/slow.csv", "slow.csv", 5000);
+      result.current
+        .download("/slow.csv", "slow.csv", 5000)
+        .catch(() => undefined);
     });
     act(() => {
       unmount();
