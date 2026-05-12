@@ -55,7 +55,9 @@ describe("SandboxedExternalIframe", () => {
     act(() => {
       observerCallback?.(
         [{ isIntersecting: true } as IntersectionObserverEntry],
-        new MockIntersectionObserver(jest.fn()) as unknown as IntersectionObserver
+        new MockIntersectionObserver(
+          jest.fn()
+        ) as unknown as IntersectionObserver
       );
     });
 
