@@ -131,7 +131,7 @@ describe("SingleWaveDropTraits", () => {
       render(<SingleWaveDropTraits drop={drop} />);
 
       const traitButton = screen.getByRole("button", {
-        name: "View full Artist trait",
+        name: `View full Artist trait: ${value}`,
       });
       const valueElement = within(traitButton).getByText(value);
 
@@ -156,7 +156,9 @@ describe("SingleWaveDropTraits", () => {
 
       fireEvent.click(screen.getByText("Show all"));
       fireEvent.click(
-        screen.getByRole("button", { name: "View full Parent trait" })
+        screen.getByRole("button", {
+          name: `View full Parent trait: ${value}`,
+        })
       );
 
       const dialog = screen.getByRole("dialog", { name: "Parent" });

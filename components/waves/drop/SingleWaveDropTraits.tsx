@@ -70,7 +70,7 @@ const MetadataItem: React.FC<{
     return (
       <button
         type="button"
-        aria-label={`View full ${label} trait`}
+        aria-label={`View full ${label} trait: ${displayValue}`}
         className={`${cardClassName} tw-cursor-pointer tw-appearance-none tw-text-left`}
         onClick={(e) => {
           e.stopPropagation();
