@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import {
@@ -67,12 +67,9 @@ export function MemePageLiveSubMenu(props: {
 
 function MemePageCardDescription({ nft }: { readonly nft: NFT }) {
   return (
-    <section className="tw-pb-3 tw-pt-4">
-      <h3 className="tw-mb-2 tw-text-lg tw-font-bold tw-leading-6 tw-text-white">
-        Card Description
-      </h3>
+    <section className="tw-max-w-4xl tw-text-pretty tw-pb-3 tw-pt-6">
       <div
-        className="tw-text-base tw-leading-relaxed tw-text-white"
+        className="tw-text-base tw-font-normal tw-text-iron-400"
         dangerouslySetInnerHTML={{
           __html: parseNftDescriptionToHtml(nft.description),
         }}
@@ -98,18 +95,31 @@ function MemePageAdditionalDetailsAccordion({
         type="button"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
-        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-0 tw-py-4 tw-text-left tw-text-white tw-transition-colors hover:tw-text-white"
+        className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-4 tw-text-left tw-text-iron-100 tw-transition-colors hover:tw-text-white"
       >
-        <span className="tw-text-lg tw-font-semibold">Additional Details</span>
+        <span className="tw-flex tw-items-center tw-gap-4">
+          <span
+            className={`tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-transition-colors ${
+              isOpen
+                ? "tw-bg-primary-500 tw-text-white"
+                : "tw-bg-iron-900 tw-text-iron-400"
+            }`}
+          >
+            <FontAwesomeIcon icon={faInfoCircle} className="tw-h-5 tw-w-5" />
+          </span>
+          <span className="tw-text-lg tw-font-semibold">
+            Additional details
+          </span>
+        </span>
         <FontAwesomeIcon
           icon={faChevronDown}
-          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 ${
+          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400 tw-transition-transform tw-duration-200 ${
             isOpen ? "tw-rotate-180" : ""
           }`}
         />
       </button>
       {isOpen && (
-        <div className="tw-pt-3">
+        <div>
           <MemePageArt show={true} nft={nft} nftMeta={nftMeta} />
         </div>
       )}

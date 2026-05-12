@@ -3,7 +3,6 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import styles from "./Leaderboard.module.scss";
 
 export function LeaderboardCollector(
   props: Readonly<{
@@ -35,24 +34,22 @@ export function LeaderboardCollector(
   );
 
   return (
-    <div className="d-flex align-items-center gap-3">
+    <div className="tw-flex tw-items-center tw-gap-3">
       <a
         href={`/${link}`}
-        className="no-wrap d-flex gap-2 decoration-none align-items-center"
+        className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-iron-100 tw-no-underline hover:tw-text-white hover:tw-no-underline"
       >
         {pfpImg}
         {hasLevel ? (
-          <div
-            className={`d-flex gap-2 align-items-center ${styles["collectorLevel"]}`}
-          >
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <span>{display}</span>
             <UserCICAndLevel
               level={props.level}
-              size={UserCICAndLevelSize.LARGE}
+              size={UserCICAndLevelSize.SMALL}
             />
-            <div>{display}</div>
           </div>
         ) : (
-          <div>{display}</div>
+          <span>{display}</span>
         )}
       </a>
     </div>

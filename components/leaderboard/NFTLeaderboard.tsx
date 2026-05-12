@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./Leaderboard.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import Pagination from "../pagination/Pagination";
@@ -18,6 +16,12 @@ import {
   faSquareCaretUp,
   faSquareCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
+
+const tableHeaderClassName =
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400";
+
+const tableCellClassName =
+  "tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100";
 
 interface Props {
   contract: string;
@@ -132,7 +136,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       return { ...lead, rank };
     });
     setLeaderboard(data);
-    setScrollPosition();
     setFetchingLeaderboard(false);
   }
 
@@ -148,320 +151,177 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     fetchResults();
   }, [page]);
 
-  return (
-    <Container className={`no-padding pt-3`} id="nft-leaderboard">
-      <Row className="pt-2 pb-2">
-        <Col className="d-flex justify-content-end align-items-center">
-          <SearchWalletsDisplay
-            searchWallets={searchWallets}
-            setSearchWallets={setSearchWallets}
-            setShowSearchModal={setShowSearchModal}
+  function getCaretClassName(sortOption: Sort, sortDirection: SortDirection) {
+    const active =
+      sort.sort === sortOption && sort.sort_direction === sortDirection;
+    return `tw-h-3 tw-w-3 tw-transition-colors ${
+      active ? "tw-text-white" : "tw-text-iron-500 hover:tw-text-white"
+    }`;
+  }
+
+  function printSortControls(sortOption: Sort, label: string) {
+    return (
+      <span className="tw-flex tw-flex-col tw-items-center">
+        <button
+          type="button"
+          onClick={() =>
+            setSort({
+              sort: sortOption,
+              sort_direction: SortDirection.ASC,
+            })
+          }
+          className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+          aria-label={`Sort ${label} ascending`}
+        >
+          <FontAwesomeIcon
+            icon={faSquareCaretUp}
+            className={getCaretClassName(sortOption, SortDirection.ASC)}
           />
-        </Col>
-      </Row>
-      <Row className={styles["scrollContainer"]}>
-        <Col>
-          <Table bordered={false} className={styles["leaderboardTable"]}>
-            <thead>
-              <tr>
-                <th className={styles["rank"]}></th>
-                <th className={styles["hodlerContainer"]}></th>
-                <th className={styles["gap"]}></th>
-                <th
-                  colSpan={3}
-                  className={`${styles["tdh"]} ${styles["borderBottom"]}`}>
-                  <b>This Card</b>
-                </th>
-                <th className={styles["gap"]}></th>
-                <th
-                  colSpan={3}
-                  className={`${styles["tdh"]} ${styles["borderBottom"]}`}>
-                  <b>Total</b>
-                </th>
-              </tr>
-              <tr className={styles["gap"]}></tr>
-              <tr>
-                <th className={styles["rank"]}>Rank</th>
-                <th className={styles["hodlerContainer"]}>
-                  Collector{" "}
-                  {totalResults > 0 && `x${totalResults.toLocaleString()}`}
-                </th>
-                <th className={styles["gap"]}></th>
-                <th className={styles["tdhSub"]}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Balance&nbsp;
-                    <span className="d-flex flex-column">
-                      <FontAwesomeIcon
-                        icon={faSquareCaretUp}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.balance,
-                            sort_direction: SortDirection.ASC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.ASC ||
-                          sort.sort != Sort.balance
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                      <FontAwesomeIcon
-                        icon={faSquareCaretDown}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.balance,
-                            sort_direction: SortDirection.DESC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.DESC ||
-                          sort.sort != Sort.balance
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                    </span>
-                  </span>
-                </th>
-                <th className={styles["tdhSub"]}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    TDH&nbsp;
-                    <span className="d-flex flex-column">
-                      <FontAwesomeIcon
-                        icon={faSquareCaretUp}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.boosted_tdh,
-                            sort_direction: SortDirection.ASC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.ASC ||
-                          sort.sort != Sort.boosted_tdh
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                      <FontAwesomeIcon
-                        icon={faSquareCaretDown}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.boosted_tdh,
-                            sort_direction: SortDirection.DESC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.DESC ||
-                          sort.sort != Sort.boosted_tdh
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                    </span>
-                  </span>
-                </th>
-                <th className={styles["tdhSub"]}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Unweighted TDH&nbsp;
-                    <span className="d-flex flex-column">
-                      <FontAwesomeIcon
-                        icon={faSquareCaretUp}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.tdh__raw,
-                            sort_direction: SortDirection.ASC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.ASC ||
-                          sort.sort != Sort.tdh__raw
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                      <FontAwesomeIcon
-                        icon={faSquareCaretDown}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.tdh__raw,
-                            sort_direction: SortDirection.DESC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.DESC ||
-                          sort.sort != Sort.tdh__raw
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                    </span>
-                  </span>
-                </th>
-                <th className={styles["gap"]}></th>
-                <th className={styles["tdhSub"]}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Balance&nbsp;
-                    <span className="d-flex flex-column">
-                      <FontAwesomeIcon
-                        icon={faSquareCaretUp}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.total_balance,
-                            sort_direction: SortDirection.ASC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.ASC ||
-                          sort.sort != Sort.total_balance
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                      <FontAwesomeIcon
-                        icon={faSquareCaretDown}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.total_balance,
-                            sort_direction: SortDirection.DESC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.DESC ||
-                          sort.sort != Sort.total_balance
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                    </span>
-                  </span>
-                </th>
-                <th className={styles["tdhSub"]}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    TDH&nbsp;
-                    <span className="d-flex flex-column">
-                      <FontAwesomeIcon
-                        icon={faSquareCaretUp}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.total_boosted_tdh,
-                            sort_direction: SortDirection.ASC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.ASC ||
-                          sort.sort != Sort.total_boosted_tdh
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                      <FontAwesomeIcon
-                        icon={faSquareCaretDown}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.total_boosted_tdh,
-                            sort_direction: SortDirection.DESC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.DESC ||
-                          sort.sort != Sort.total_boosted_tdh
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                    </span>
-                  </span>
-                </th>
-                <th className={styles["tdhSub"]}>
-                  <span className="d-flex align-items-center justify-content-center">
-                    Unweighted TDH&nbsp;
-                    <span className="d-flex flex-column">
-                      <FontAwesomeIcon
-                        icon={faSquareCaretUp}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.total_tdh__raw,
-                            sort_direction: SortDirection.ASC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.ASC ||
-                          sort.sort != Sort.total_tdh__raw
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                      <FontAwesomeIcon
-                        icon={faSquareCaretDown}
-                        onClick={() =>
-                          setSort({
-                            sort: Sort.total_tdh__raw,
-                            sort_direction: SortDirection.DESC,
-                          })
-                        }
-                        className={`${styles["caret"]} ${
-                          sort.sort_direction != SortDirection.DESC ||
-                          sort.sort != Sort.total_tdh__raw
-                            ? styles["disabled"]
-                            : ""
-                        }`}
-                      />
-                    </span>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((lead) => {
-                return (
-                  <tr key={lead.consolidation_key}>
-                    <td className={styles["rank"]}>
-                      {numberWithCommas(lead.rank)}
-                    </td>
-                    <td className={styles["hodlerContainer"]}>
-                      <LeaderboardCollector
-                        handle={lead.handle}
-                        consolidationKey={lead.consolidation_key}
-                        consolidationDisplay={lead.consolidation_display}
-                        pfp={lead.pfp_url}
-                        level={lead.level}
-                      />
-                    </td>
-                    <td className={styles["gap"]}></td>
-                    <td className={styles["tdhSub"]}>
-                      {numberWithCommas(lead.balance)}
-                    </td>
-                    <td className={styles["tdhSub"]}>
-                      {numberWithCommas(Math.round(lead.boosted_tdh))}
-                    </td>
-                    <td className={styles["tdhSub"]}>
-                      {numberWithCommas(Math.round(lead.tdh__raw))}
-                    </td>
-                    <td className={styles["gap"]}></td>
-                    <td className={styles["tdhSub"]}>
-                      {numberWithCommas(lead.total_balance)}
-                    </td>
-                    <td className={styles["tdhSub"]}>
-                      {numberWithCommas(Math.round(lead.total_boosted_tdh))}
-                    </td>
-                    <td className={styles["tdhSub"]}>
-                      {numberWithCommas(Math.round(lead.total_tdh__raw))}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </Col>
-      </Row>
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            setSort({
+              sort: sortOption,
+              sort_direction: SortDirection.DESC,
+            })
+          }
+          className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
+          aria-label={`Sort ${label} descending`}
+        >
+          <FontAwesomeIcon
+            icon={faSquareCaretDown}
+            className={getCaretClassName(sortOption, SortDirection.DESC)}
+          />
+        </button>
+      </span>
+    );
+  }
+
+  function printSortableHeader(
+    label: string,
+    sortOption: Sort,
+    className = ""
+  ) {
+    return (
+      <th scope="col" className={`${tableHeaderClassName} ${className}`}>
+        <span className="tw-flex tw-items-center tw-justify-center tw-gap-1.5">
+          {label}
+          {printSortControls(sortOption, label)}
+        </span>
+      </th>
+    );
+  }
+
+  return (
+    <section className="tw-pt-8" id="nft-leaderboard">
+      <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+        <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
+          Collectors leaderboard
+        </h3>
+        <SearchWalletsDisplay
+          searchWallets={searchWallets}
+          setSearchWallets={setSearchWallets}
+          setShowSearchModal={setShowSearchModal}
+        />
+      </div>
+      <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+        <table className="tw-w-full tw-min-w-[1040px] tw-border-collapse">
+          <thead className="tw-bg-iron-900/60">
+            <tr>
+              <th
+                rowSpan={2}
+                scope="col"
+                className="tw-w-20 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
+              >
+                Rank
+              </th>
+              <th
+                rowSpan={2}
+                scope="col"
+                className="tw-min-w-[18rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
+              >
+                Collector{" "}
+                {totalResults > 0 && `x${totalResults.toLocaleString()}`}
+              </th>
+              <th
+                colSpan={3}
+                scope="colgroup"
+                className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-300"
+              >
+                This Card
+              </th>
+              <th
+                colSpan={3}
+                scope="colgroup"
+                className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-300"
+              >
+                Total
+              </th>
+            </tr>
+            <tr>
+              {printSortableHeader("Balance", Sort.balance)}
+              {printSortableHeader("TDH", Sort.boosted_tdh)}
+              {printSortableHeader("Unweighted TDH", Sort.tdh__raw)}
+              {printSortableHeader(
+                "Balance",
+                Sort.total_balance,
+                "tw-border-l"
+              )}
+              {printSortableHeader("TDH", Sort.total_boosted_tdh)}
+              {printSortableHeader("Unweighted TDH", Sort.total_tdh__raw)}
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((lead) => {
+              return (
+                <tr
+                  key={lead.consolidation_key}
+                  className="odd:tw-bg-black even:tw-bg-iron-950/70"
+                >
+                  <td className="tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+                    {numberWithCommas(lead.rank)}
+                  </td>
+                  <td className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3">
+                    <LeaderboardCollector
+                      handle={lead.handle}
+                      consolidationKey={lead.consolidation_key}
+                      consolidationDisplay={lead.consolidation_display}
+                      pfp={lead.pfp_url}
+                      level={lead.level}
+                    />
+                  </td>
+                  <td className={tableCellClassName}>
+                    {numberWithCommas(lead.balance)}
+                  </td>
+                  <td className={tableCellClassName}>
+                    {numberWithCommas(Math.round(lead.boosted_tdh))}
+                  </td>
+                  <td className={tableCellClassName}>
+                    {numberWithCommas(Math.round(lead.tdh__raw))}
+                  </td>
+                  <td className={`${tableCellClassName} tw-border-l`}>
+                    {numberWithCommas(lead.total_balance)}
+                  </td>
+                  <td className={tableCellClassName}>
+                    {numberWithCommas(Math.round(lead.total_boosted_tdh))}
+                  </td>
+                  <td className={tableCellClassName}>
+                    {numberWithCommas(Math.round(lead.total_tdh__raw))}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
       {leaderboard.length === 0 && !fetchingLeaderboard && (
-        <Row>
-          <Col>No Results found</Col>
-        </Row>
+        <div className="tw-py-5 tw-text-sm tw-font-medium tw-text-iron-400">
+          No Results found
+        </div>
       )}
       {totalResults > 0 && (
-        <Row className="text-center pt-2 pb-3">
+        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -470,7 +330,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               setPage(newPage);
             }}
           />
-        </Row>
+        </div>
       )}
       <SearchModalDisplay
         show={showSearchModal}
@@ -478,6 +338,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         searchWallets={searchWallets}
         setSearchWallets={setSearchWallets}
       />
-    </Container>
+    </section>
   );
 }

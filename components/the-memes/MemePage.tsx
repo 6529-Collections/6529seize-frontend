@@ -7,6 +7,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Container, Row } from "react-bootstrap";
 import { mainnet } from "viem/chains";
 import { AuthContext } from "@/components/auth/Auth";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
 
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
@@ -33,12 +34,7 @@ import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
-import {
-  getMemeTabTitle,
-  MEME_FOCUS,
-  MEME_TABS,
-  TabButton,
-} from "./MemeShared";
+import { getMemeTabTitle, MEME_FOCUS, MEME_TABS } from "./MemeShared";
 import styles from "./TheMemes.module.scss";
 import UpcomingMemePage from "./UpcomingMemePage";
 
@@ -69,12 +65,42 @@ const MEME_HISTORY_TABS: {
   readonly focus: MEME_HISTORY_TAB;
   readonly title: string;
 }[] = [
-  { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS, title: "Your Transactions" },
-  { focus: MEME_HISTORY_TAB.ACTIVITY, title: "Card Activity" },
   { focus: MEME_HISTORY_TAB.TIMELINE, title: "Timeline" },
+  { focus: MEME_HISTORY_TAB.ACTIVITY, title: "Card Activity" },
+  { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS, title: "Your Transactions" },
 ];
 
 const MEME_FOCUS_VALUES: readonly string[] = Object.values(MEME_FOCUS);
+const MEME_TAB_BUTTON_BASE_CLASS_NAME =
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out";
+
+function getMemePageTabButtonClassName(isActive: boolean) {
+  return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
+    isActive
+      ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
+      : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
+  }`;
+}
+
+function MemePageTabButton({
+  title,
+  isActive,
+  onClick,
+}: {
+  readonly title: string;
+  readonly isActive: boolean;
+  readonly onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={getMemePageTabButtonClassName(isActive)}
+      onClick={onClick}
+    >
+      {title}
+    </button>
+  );
+}
 
 function parseMemeFocus(focus: string | null): MEME_FOCUS | undefined {
   if (focus === null || !MEME_FOCUS_VALUES.includes(focus)) {
@@ -146,12 +172,10 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }, [focusParam]);
 
   const activeTab = resolvedRouterFocus ?? MEME_FOCUS.LIVE;
-  const activeHistoryTab =
+  const requestedHistoryTab =
     activeTab === MEME_FOCUS.HISTORY
       ? getHistoryTabForFocus(focusParam)
       : MEME_HISTORY_TAB.ACTIVITY;
-
-  const routeFocus = getRouteFocus(activeTab, activeHistoryTab);
 
   useEffect(() => {
     setConnectedWallets(connectedProfile?.wallets?.map((w) => w.wallet) ?? []);
@@ -173,6 +197,36 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const [myRank, setMyRank] = useState<NftRank>();
 
   const [userLoaded, setUserLoaded] = useState(false);
+
+  const hasUserTransactions =
+    userLoaded && connectedWallets.length > 0 && transactions.length > 0;
+
+  const activeHistoryTab =
+    requestedHistoryTab === MEME_HISTORY_TAB.YOUR_TRANSACTIONS &&
+    !hasUserTransactions
+      ? MEME_HISTORY_TAB.ACTIVITY
+      : requestedHistoryTab;
+
+  const visibleHistoryTabs = useMemo(
+    () =>
+      MEME_HISTORY_TABS.filter(
+        (tab) =>
+          tab.focus !== MEME_HISTORY_TAB.YOUR_TRANSACTIONS ||
+          hasUserTransactions
+      ),
+    [hasUserTransactions]
+  );
+  const visibleHistoryTabItems = useMemo(
+    () =>
+      visibleHistoryTabs.map((tab) => ({
+        key: tab.focus,
+        label: tab.title,
+        value: tab.focus,
+      })),
+    [visibleHistoryTabs]
+  );
+
+  const routeFocus = getRouteFocus(activeTab, activeHistoryTab);
 
   useEffect(() => {
     setTitle(getMemeTabTitle(`The Memes`, nftId, nft, routeFocus));
@@ -324,7 +378,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           </div>
           {userLoaded && (
             <MemePageYourCardsRightMenu
-              show={true}
+              show={hasUserTransactions}
               transactions={transactions}
               wallets={connectedWallets}
               nft={nft}
@@ -362,17 +416,19 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <nav
         aria-label="Meme page sections"
-        className="tw-py-3 [&_button]:tw-text-base"
+        className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-pb-6"
       >
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-          {VISIBLE_MEME_TABS.map((tab) => (
-            <TabButton
-              key={`${nft.id}-${tab.focus}-tab`}
-              tab={tab}
-              activeTab={activeTab}
-              setActiveTab={setActiveMemeTab}
-            />
-          ))}
+        <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
+          <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
+            {VISIBLE_MEME_TABS.map((tab) => (
+              <MemePageTabButton
+                key={`${nft.id}-${tab.focus}-tab`}
+                title={tab.title}
+                isActive={activeTab === tab.focus}
+                onClick={() => setActiveMemeTab(tab.focus)}
+              />
+            ))}
+          </div>
         </div>
       </nav>
     );
@@ -384,29 +440,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
 
     return (
-      <nav
-        aria-label="Meme history sections"
-        className="tw-pb-3 [&_button]:tw-text-base"
-      >
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-          {MEME_HISTORY_TABS.map((tab) => {
-            const isActive = activeHistoryTab === tab.focus;
-
-            return (
-              <button
-                key={`${nft.id}-${tab.focus}-history-tab`}
-                type="button"
-                className={`tw-m-0 tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-no-underline tw-transition-colors tw-duration-200 ${
-                  isActive
-                    ? "tw-font-semibold tw-text-white"
-                    : "tw-text-gray-400 hover:tw-text-white"
-                }`}
-                onClick={() => setActiveHistoryMemeTab(tab.focus)}
-              >
-                {tab.title}
-              </button>
-            );
-          })}
+      <nav aria-label="Meme history sections" className="tw-pb-5">
+        <div className="tw-w-fit tw-max-w-full">
+          <CommonTabs<MEME_HISTORY_TAB>
+            items={visibleHistoryTabItems}
+            activeItem={activeHistoryTab}
+            filterLabel="Meme history sections"
+            setSelected={setActiveHistoryMemeTab}
+            fill={false}
+          />
         </div>
       </nav>
     );

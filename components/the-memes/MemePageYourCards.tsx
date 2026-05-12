@@ -92,24 +92,6 @@ export function MemePageYourCardsRightMenu(props: {
       <div className="tw-pt-3">
         <Container className="p-0" fluid>
           <Row>
-            {props.wallets.length === 0 && (
-              <Row className="pt-2">
-                <Col>
-                  <h4>Connect your wallet to view your cards.</h4>
-                </Col>
-              </Row>
-            )}
-            {props.nftBalance === 0 &&
-              props.wallets.length > 0 &&
-              props.nft && (
-                <Row className="pt-2">
-                  <Col>
-                    <h3>
-                      You don&apos;t own any editions of Card {props.nft.id}
-                    </h3>
-                  </Col>
-                </Row>
-              )}
             {props.transactions.length > 0 && props.wallets.length > 0 && (
               <>
                 {props.nftBalance > 0 && props.myOwner && (

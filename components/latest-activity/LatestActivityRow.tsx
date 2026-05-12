@@ -90,14 +90,15 @@ export function printRoyalties(value: number, royalties: number, from: string) {
 export function printGas(
   gas: number,
   gas_gwei: number,
-  gas_price_gwei: number
+  gas_price_gwei: number,
+  iconClassName = styles["gasIcon"]
 ) {
   const id = getRandomObjectId();
   return (
     <>
       <FontAwesomeIcon
         data-tooltip-id={id}
-        className={styles["gasIcon"]}
+        className={iconClassName}
         icon={faGasPump}
       ></FontAwesomeIcon>
       <Tooltip
@@ -133,9 +134,17 @@ interface Props {
   nextgen_collection?: NextGenCollection | undefined;
   tr: Transaction;
   hideNextgenTokenId?: boolean | undefined;
+  variant?: "default" | "tailwind" | undefined;
 }
 
 export default function LatestActivityRow(props: Readonly<Props>) {
+  const isTailwind = props.variant === "tailwind";
+  const nftImageClassName = isTailwind
+    ? "tw-mx-1 tw-inline-block tw-rounded-sm"
+    : styles["nftImage"];
+  const activityIconClassName =
+    "tw-h-5 tw-w-5 tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-white";
+
   function getNftImageSrc(nft?: NFTLite, src?: string) {
     if (!nft) {
       return "";
@@ -182,7 +191,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
             onError={({ currentTarget }) => {
               currentTarget.src = getNftImageSrc(props.nft, currentTarget.src);
             }}
-            className={styles["nftImage"]}
+            className={nftImageClassName}
           />
         </a>
       );
@@ -201,7 +210,11 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function printDescription() {
     return (
-      <span className="d-flex">
+      <span
+        className={
+          isTailwind ? "tw-flex tw-items-center tw-whitespace-nowrap" : "d-flex"
+        }
+      >
         {(areEqualAddresses(MANIFOLD, props.tr.from_address) ||
           isNullAddress(props.tr.from_address)) && (
           <>
@@ -294,7 +307,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           }}
           src={getNextGenIconUrl(props.tr.token_id)}
           alt={`#${props.tr.token_id.toString()}`}
-          className={styles["nftImage"]}
+          className={nftImageClassName}
           onError={({ currentTarget }) => {
             if (currentTarget.src === getNextGenIconUrl(props.tr.token_id)) {
               currentTarget.src = getNextGenImageUrl(props.tr.token_id);
@@ -364,7 +377,11 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function printDescriptionNextgen() {
     return (
-      <span className="d-flex">
+      <span
+        className={
+          isTailwind ? "tw-flex tw-items-center tw-whitespace-nowrap" : "d-flex"
+        }
+      >
         {getDescription()}
         {props.tr.value > 0 &&
           ` for ${Math.round(props.tr.value * 100000) / 100000} ETH`}
@@ -374,13 +391,24 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function printInfo() {
     return (
-      <span className="d-flex align-items-center gap-3">
+      <span
+        className={
+          isTailwind
+            ? "tw-flex tw-items-center tw-gap-3 tw-pl-4"
+            : "d-flex align-items-center gap-3"
+        }
+      >
         {printRoyalties(
           props.tr.value,
           props.tr.royalties,
           props.tr.from_address
         )}
-        {printGas(props.tr.gas, props.tr.gas_gwei, props.tr.gas_price_gwei)}
+        {printGas(
+          props.tr.gas,
+          props.tr.gas_gwei,
+          props.tr.gas_price_gwei,
+          isTailwind ? activityIconClassName : undefined
+        )}
         <Link
           href={`https://etherscan.io/tx/${props.tr.transaction}`}
           target="_blank"
@@ -388,7 +416,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           className="tw-flex"
         >
           <FontAwesomeIcon
-            className={styles["gasIcon"]}
+            className={isTailwind ? activityIconClassName : styles["gasIcon"]}
             icon={faExternalLinkSquare}
           ></FontAwesomeIcon>
         </Link>
@@ -412,6 +440,20 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   }
 
   function getIconClass() {
+    if (isTailwind) {
+      const baseClassName = "tw-h-5 tw-w-5";
+      if (isBurn()) {
+        return `${baseClassName} tw-text-red`;
+      }
+      if (isMint() || isAirdrop()) {
+        return `${baseClassName} tw-text-iron-100`;
+      }
+      if (props.tr.value > 0) {
+        return `${baseClassName} tw-text-primary-300`;
+      }
+      return `${baseClassName} tw-text-success`;
+    }
+
     if (isBurn()) {
       return styles["iconRed"];
     }
@@ -447,15 +489,37 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
-      className={styles["latestActivityRow"]}
+      className={
+        isTailwind
+          ? "odd:tw-bg-black even:tw-bg-iron-950/70"
+          : styles["latestActivityRow"]
+      }
     >
-      <td className="align-middle text-center">
+      <td
+        className={
+          isTailwind
+            ? "tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+            : "align-middle text-center"
+        }
+      >
         {getDateDisplay(new Date(props.tr.transaction_date))}
       </td>
-      <td className="align-middle text-center">
+      <td
+        className={
+          isTailwind
+            ? "tw-w-14 tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-text-center tw-align-middle"
+            : "align-middle text-center"
+        }
+      >
         <FontAwesomeIcon className={getIconClass()} icon={getIcon()} />
       </td>
-      <td className="d-flex align-items-center justify-content-between gap-2">
+      <td
+        className={
+          isTailwind
+            ? "tw-flex tw-items-center tw-justify-between tw-gap-2 tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
+            : "d-flex align-items-center justify-content-between gap-2"
+        }
+      >
         {areEqualAddresses(props.tr.contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID])
           ? printDescriptionNextgen()
           : printDescription()}

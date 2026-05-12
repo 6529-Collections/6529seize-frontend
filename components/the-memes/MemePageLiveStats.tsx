@@ -7,13 +7,11 @@ import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import { faFire } from "@fortawesome/free-solid-svg-icons";
+import { faFire, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import ArtistProfileHandle from "./ArtistProfileHandle";
-
-const statsTableClassName =
-  "tw-w-full tw-border-collapse tw-text-base tw-text-white [&_td]:tw-border-0 [&_td]:tw-px-0.5 [&_td]:tw-py-0.5";
 
 const sectionHeadingClassName =
   "tw-mb-2 tw-text-lg tw-font-bold tw-leading-6 tw-text-white";
@@ -23,111 +21,175 @@ export function MemeCollectorsStats({
 }: {
   readonly nftMeta: MemesExtendedData;
 }) {
+  const editionSizeExMuseumLabel =
+    nftMeta.burnt > 0 ? "ex. burnt and 6529 museum" : "ex. 6529 museum";
+  const percentUniqueExMuseumLabel =
+    nftMeta.burnt > 0
+      ? "% Unique ex. burnt and 6529 museum"
+      : "% Unique ex. 6529 museum";
+
   return (
-    <section className="tw-pt-2">
-      <h3 className={sectionHeadingClassName}>Meme Collectors</h3>
-      <table className={statsTableClassName}>
-        <tbody>
-          <tr>
-            <td>Edition Size</td>
-            <td className="tw-text-right tw-font-medium">
-              {numberWithCommas(nftMeta.edition_size)}
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {nftMeta.edition_size_rank}/{nftMeta.collection_size}
-            </td>
-          </tr>
-          {nftMeta.burnt > 0 && (
-            <>
-              <tr>
-                <td>
-                  <span className="tw-flex tw-items-center tw-gap-2">
-                    <span>Burnt</span>
-                    <FontAwesomeIcon
-                      icon={faFire}
-                      className="tw-h-[22px] tw-text-[#c51d34]"
-                    />
-                  </span>
-                </td>
-                <td className="tw-text-right tw-font-medium">
-                  {numberWithCommas(nftMeta.burnt)}
-                </td>
-              </tr>
-              <tr>
-                <td>Edition Size ex. Burnt</td>
-                <td className="tw-text-right tw-font-medium">
-                  {numberWithCommas(nftMeta.edition_size_not_burnt)}
-                </td>
-                <td className="tw-text-right tw-font-medium">
-                  {nftMeta.edition_size_not_burnt_rank}/
-                  {nftMeta.collection_size}
-                </td>
-              </tr>
-            </>
-          )}
-          <tr>
-            <td>6529 Museum</td>
-            <td className="tw-text-right tw-font-medium">
-              {numberWithCommas(nftMeta.museum_holdings)}
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {nftMeta.museum_holdings_rank}/{nftMeta.collection_size}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Edition Size ex.{nftMeta.burnt > 0 && " Burnt and"} 6529 Museum
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {numberWithCommas(nftMeta.edition_size_cleaned)}
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {nftMeta.edition_size_cleaned_rank}/{nftMeta.collection_size}
-            </td>
-          </tr>
-          <tr>
-            <td>Collectors</td>
-            <td className="tw-text-right tw-font-medium">
-              {numberWithCommas(nftMeta.hodlers)}
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {nftMeta.hodlers_rank}/{nftMeta.collection_size}
-            </td>
-          </tr>
-          <tr>
-            <td>% Unique</td>
-            <td className="tw-text-right tw-font-medium">
-              {Math.round(nftMeta.percent_unique * 100 * 10) / 10}%
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {nftMeta.percent_unique_rank}/{nftMeta.collection_size}
-            </td>
-          </tr>
-          {nftMeta.burnt > 0 && (
-            <tr>
-              <td>% Unique ex. Burnt</td>
-              <td className="tw-text-right tw-font-medium">
-                {Math.round(nftMeta.percent_unique_not_burnt * 100 * 10) / 10}%
-              </td>
-              <td className="tw-text-right tw-font-medium">
-                {nftMeta.percent_unique_not_burnt_rank}/
-                {nftMeta.collection_size}
-              </td>
-            </tr>
-          )}
-          <tr>
-            <td>% Unique ex.{nftMeta.burnt > 0 && " Burnt and"} 6529 Museum</td>
-            <td className="tw-text-right tw-font-medium">
-              {Math.round(nftMeta.percent_unique_cleaned * 100 * 10) / 10}%
-            </td>
-            <td className="tw-text-right tw-font-medium">
-              {nftMeta.percent_unique_cleaned_rank}/{nftMeta.collection_size}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <section className="tw-flex tw-flex-wrap tw-gap-x-14 tw-gap-y-10 tw-pt-10">
+      <CollectorStatGroup
+        title="Edition size"
+        value={numberWithCommas(nftMeta.edition_size)}
+        rank={nftMeta.edition_size_rank}
+        total={nftMeta.collection_size}
+      >
+        {nftMeta.burnt > 0 && (
+          <>
+            <CollectorDetailStat
+              label="burnt"
+              value={numberWithCommas(nftMeta.burnt)}
+              icon={
+                <FontAwesomeIcon
+                  icon={faFire}
+                  className="tw-h-4 tw-w-4 tw-text-[#c51d34]"
+                />
+              }
+            />
+            <CollectorDetailStat
+              label="ex. burnt"
+              value={numberWithCommas(nftMeta.edition_size_not_burnt)}
+              rank={nftMeta.edition_size_not_burnt_rank}
+              total={nftMeta.collection_size}
+            />
+          </>
+        )}
+        <CollectorDetailStat
+          label={editionSizeExMuseumLabel}
+          value={numberWithCommas(nftMeta.edition_size_cleaned)}
+          rank={nftMeta.edition_size_cleaned_rank}
+          total={nftMeta.collection_size}
+        />
+      </CollectorStatGroup>
+
+      <CollectorStatGroup
+        title="Collectors"
+        value={numberWithCommas(nftMeta.hodlers)}
+        rank={nftMeta.hodlers_rank}
+        total={nftMeta.collection_size}
+      >
+        <CollectorDetailStat
+          label="6529 museum"
+          value={numberWithCommas(nftMeta.museum_holdings)}
+          rank={nftMeta.museum_holdings_rank}
+          total={nftMeta.collection_size}
+        />
+        <CollectorDetailStat
+          label="% Unique"
+          value={formatPercent(nftMeta.percent_unique)}
+          rank={nftMeta.percent_unique_rank}
+          total={nftMeta.collection_size}
+          infoTitle="Percentage of cards held by unique collectors."
+        />
+        {nftMeta.burnt > 0 && (
+          <CollectorDetailStat
+            label="% Unique ex. burnt"
+            value={formatPercent(nftMeta.percent_unique_not_burnt)}
+            rank={nftMeta.percent_unique_not_burnt_rank}
+            total={nftMeta.collection_size}
+          />
+        )}
+        <CollectorDetailStat
+          label={percentUniqueExMuseumLabel}
+          value={formatPercent(nftMeta.percent_unique_cleaned)}
+          rank={nftMeta.percent_unique_cleaned_rank}
+          total={nftMeta.collection_size}
+        />
+      </CollectorStatGroup>
     </section>
   );
+}
+
+function CollectorStatGroup({
+  title,
+  value,
+  rank,
+  total,
+  className = "",
+  children,
+}: {
+  readonly title: string;
+  readonly value: string;
+  readonly rank: number;
+  readonly total: number;
+  readonly className?: string | undefined;
+  readonly children: ReactNode;
+}) {
+  return (
+    <div className={`tw-min-w-[17rem] tw-flex-1 ${className}`}>
+      <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100">
+        {title}
+      </h3>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+        <span className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
+          {value}
+        </span>
+        <CollectorRankBadge rank={rank} total={total} />
+      </div>
+      <div className="tw-ml-1.5 tw-mt-6 tw-space-y-3 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-800 tw-pl-5">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function CollectorDetailStat({
+  label,
+  value,
+  rank,
+  total,
+  icon,
+  infoTitle,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly rank?: number | undefined;
+  readonly total?: number | undefined;
+  readonly icon?: ReactNode;
+  readonly infoTitle?: string | undefined;
+}) {
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1.5">
+      <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+        {label}
+      </span>
+      {icon}
+      <span className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
+        {value}
+      </span>
+      {rank !== undefined && total !== undefined && (
+        <CollectorRankBadge rank={rank} total={total} />
+      )}
+      {infoTitle && (
+        <span title={infoTitle} aria-label={infoTitle} role="img">
+          <FontAwesomeIcon
+            icon={faInfoCircle}
+            className="tw-h-3.5 tw-w-3.5 tw-text-iron-400"
+          />
+        </span>
+      )}
+    </div>
+  );
+}
+
+function CollectorRankBadge({
+  rank,
+  total,
+}: {
+  readonly rank: number;
+  readonly total: number;
+}) {
+  return (
+    <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-400">
+      Rank {numberWithCommas(rank)}/{numberWithCommas(total)}
+    </span>
+  );
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100 * 10) / 10}%`;
 }
 
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
@@ -137,7 +199,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
     <section className="tw-py-4">
       <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
         <div>
-          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Created by
           </div>
           <div className="tw-flex tw-items-center tw-gap-2.5">
@@ -158,7 +220,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
           </div>
         </div>
         <div className="sm:tw-text-right">
-          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Mint date
           </div>
           <div className="tw-flex tw-flex-wrap tw-items-baseline sm:tw-justify-end">
@@ -234,8 +296,7 @@ export function MemeCardFileType({ nft }: { readonly nft: NFT }) {
 
   return (
     <section className="tw-pb-4">
-      <div className="tw-flex tw-items-center tw-gap-3 tw-text-base tw-text-white">
-        <span>File Type</span>
+      <div className="tw-flex tw-items-center tw-gap-3 tw-text-sm tw-text-iron-300">
         <MediaTypeBadge
           mimeType={fileMimeType}
           size="sm"
