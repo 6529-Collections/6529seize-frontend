@@ -39,9 +39,7 @@ function canOpenMediaInBrowser({
   }
 
   const extension = getUrlExtension(url);
-  return !(
-    extension && DIRECT_OPEN_UNSUPPORTED_EXTENSIONS.has(extension)
-  );
+  return !(extension && DIRECT_OPEN_UNSUPPORTED_EXTENSIONS.has(extension));
 }
 
 export function useMediaActions({

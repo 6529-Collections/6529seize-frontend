@@ -12,6 +12,11 @@ jest.mock('@/components/drops/view/item/content/media/DropListItemContentMedia',
   default: () => <div data-testid="drop-media" />,
 }));
 
+jest.mock('@/components/waves/drops/WaveDropPartContentMediaImage', () => ({
+  __esModule: true,
+  default: () => <div data-testid="wave-image-media" />,
+}));
+
 const basePart: any = {
   content: '',
   media: [
@@ -28,9 +33,10 @@ describe('WaveDropPartContentMedias', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders DropListItemContentMedia by default', () => {
+  it('renders standard media actions for image and video media by default', () => {
     render(<WaveDropPartContentMedias activePart={basePart} />);
-    expect(screen.getAllByTestId('drop-media')).toHaveLength(2);
+    expect(screen.getByTestId('wave-image-media')).toBeInTheDocument();
+    expect(screen.getByTestId('drop-media')).toBeInTheDocument();
   });
 
   it('uses MediaDisplay when disabled', () => {
