@@ -6,6 +6,7 @@ import { UserRejectedRequestError } from "viem";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { DropHasher } from "@/utils/drop-hasher";
 import { AuthContext } from "@/components/auth/Auth";
+import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 
 /**
  * Hook for hashing drop data and requesting user signature
@@ -51,7 +52,7 @@ export const useDropSignature = () => {
 
       if (!clientSignature.signature) {
         setToast({
-          message: "Error requesting authentication, please try again",
+          message: AUTH_SIGNATURE_FAILED_MESSAGE,
           type: "error",
         });
         return { success: false };
