@@ -7,7 +7,7 @@ import { useAuth } from "@/components/auth/Auth";
 let intersectionCb: any;
 const downloadMock = jest.fn();
 const setToastMock = jest.fn();
-const useDownloaderMock = jest.fn();
+const downloaderMock = jest.fn();
 
 jest.mock("@/hooks/useWaveTopVoters");
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
@@ -17,7 +17,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
-  default: (...args: any[]) => useDownloaderMock(...args),
+  default: (...args: any[]) => downloaderMock(...args),
 }));
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: (cb: any) => {
@@ -44,8 +44,8 @@ describe("SingleWaveDropVoters", () => {
     useVoters.mockReset();
     downloadMock.mockReset();
     setToastMock.mockReset();
-    useDownloaderMock.mockReset();
-    useDownloaderMock.mockReturnValue({
+    downloaderMock.mockReset();
+    downloaderMock.mockReturnValue({
       download: downloadMock,
       error: null,
       isInProgress: false,
@@ -139,7 +139,7 @@ describe("SingleWaveDropVoters", () => {
       <SingleWaveDropVoters
         drop={{
           ...baseDrop,
-          id: 'drop/with\\bad:chars*?"<>|',
+          id: String.raw`drop/with\bad:chars*?"<>|`,
         }}
       />
     );
@@ -158,7 +158,7 @@ describe("SingleWaveDropVoters", () => {
   });
 
   it("shows downloading state while the csv download is in progress", () => {
-    useDownloaderMock.mockReturnValue({
+    downloaderMock.mockReturnValue({
       download: downloadMock,
       error: null,
       isInProgress: true,
@@ -181,7 +181,7 @@ describe("SingleWaveDropVoters", () => {
   });
 
   it("shows a toast when csv download fails", () => {
-    useDownloaderMock.mockReturnValue({
+    downloaderMock.mockReturnValue({
       download: downloadMock,
       error: { errorMessage: "backend unavailable" },
       isInProgress: false,

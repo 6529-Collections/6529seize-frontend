@@ -53,17 +53,28 @@ const normalizeDownloadError = (error: ErrorMessage): ErrorMessage => {
   return error;
 };
 
+const isResponseError = (error: unknown): error is Response =>
+  typeof error === "object" &&
+  error !== null &&
+  "status" in error &&
+  "statusText" in error &&
+  "headers" in error &&
+  "clone" in error;
+
+const getResponseBodyMessage = (body: unknown): unknown => {
+  if (typeof body !== "object" || body === null) {
+    return body;
+  }
+
+  return (
+    (body as { error?: unknown; reason?: unknown }).error ??
+    (body as { error?: unknown; reason?: unknown }).reason
+  );
+};
+
 const getDownloadErrorMessage = async (error: unknown): Promise<string> => {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "status" in error &&
-    "statusText" in error &&
-    "headers" in error &&
-    "clone" in error
-  ) {
-    const responseError = error as Response;
-    const response = responseError.clone();
+  if (isResponseError(error)) {
+    const response = error.clone();
     let body: unknown = null;
     try {
       const contentType = response.headers.get("Content-Type") ?? "";
@@ -74,19 +85,14 @@ const getDownloadErrorMessage = async (error: unknown): Promise<string> => {
       body = null;
     }
 
-    const bodyMessage =
-      typeof body === "object" && body !== null
-        ? ((body as { error?: unknown; reason?: unknown }).error ??
-          (body as { error?: unknown; reason?: unknown }).reason)
-        : body;
-
-    const statusMessage = getHttpDownloadErrorMessage(responseError.status);
+    const bodyMessage = getResponseBodyMessage(body);
+    const statusMessage = getHttpDownloadErrorMessage(error.status);
     if (statusMessage) {
       return statusMessage;
     }
 
     return [
-      `${responseError.status} - ${responseError.statusText}`,
+      `${error.status} - ${error.statusText}`,
       typeof bodyMessage === "string" ? bodyMessage : null,
     ]
       .filter(Boolean)

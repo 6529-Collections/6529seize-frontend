@@ -62,7 +62,7 @@ describe("useDownloader", () => {
 
   it("fetches and shares downloaded files in Capacitor", async () => {
     Capacitor.isNativePlatform.mockReturnValue(true);
-    global.fetch = jest.fn().mockResolvedValue({
+    globalThis.fetch = jest.fn().mockResolvedValue({
       ok: true,
       blob: () => Promise.resolve(new Blob(["csv"], { type: "text/csv" })),
     });
@@ -77,7 +77,7 @@ describe("useDownloader", () => {
       });
     });
 
-    expect(global.fetch).toHaveBeenCalledWith("/file.csv", {
+    expect(globalThis.fetch).toHaveBeenCalledWith("/file.csv", {
       method: "GET",
       headers: { Accept: "text/csv" },
       signal: expect.objectContaining({ aborted: false }),
@@ -100,7 +100,7 @@ describe("useDownloader", () => {
       json: () => Promise.resolve({ error: "No rows" }),
       text: () => Promise.resolve(JSON.stringify({ error: "No rows" })),
     };
-    global.fetch = jest.fn().mockResolvedValue(response);
+    globalThis.fetch = jest.fn().mockResolvedValue(response);
 
     const { result } = renderHook(() => useDownloader());
 
