@@ -16,9 +16,9 @@ const mockDropItemChat = jest.fn(
 const mockRenderSeizeQuote = jest.fn(() => (
   <div data-testid="seize-quote-content" />
 ));
-const mockQuorumParticipationDropLinkPreview = jest.fn((props: any) => (
+const mockWaveDropLinkPreview = jest.fn((props: any) => (
   <div
-    data-testid="quorum-participation-preview"
+    data-testid="wave-drop-link-preview"
     data-drop-id={props.dropId}
     data-serial-no={props.serialNo}
   />
@@ -36,13 +36,10 @@ jest.mock("@/components/waves/drops/DropItemChat", () => ({
   default: (props: any) => mockDropItemChat(props),
 }));
 
-jest.mock(
-  "@/components/waves/quorum/QuorumParticipationDropLinkPreview",
-  () => ({
-    __esModule: true,
-    default: (props: any) => mockQuorumParticipationDropLinkPreview(props),
-  })
-);
+jest.mock("@/components/waves/drops/WaveDropLinkPreview", () => ({
+  __esModule: true,
+  default: (props: any) => mockWaveDropLinkPreview(props),
+}));
 
 jest.mock("@/components/drops/view/part/dropPartMarkdown/renderers", () => ({
   renderSeizeQuote: (...args: any[]) => mockRenderSeizeQuote(...args),
@@ -64,14 +61,16 @@ const getHandlers = (options?: {
   readonly isQuorumWaveById?:
     | ((waveId: string | undefined | null) => boolean)
     | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }) =>
   createSeizeHandlers({
     onQuoteClick: options?.onQuoteClick ?? jest.fn(),
     currentDropId: options?.currentDropId,
     embedPath: [],
     quotePath: [],
-    embedDepth: 0,
-    maxEmbedDepth: 4,
+    embedDepth: options?.embedDepth ?? 0,
+    maxEmbedDepth: options?.maxEmbedDepth ?? 4,
     isMemesWaveById: options?.isMemesWaveById,
     isQuorumWaveById: options?.isQuorumWaveById,
   });
@@ -110,7 +109,7 @@ describe("createSeizeHandlers drop handler", () => {
     expect(mockRenderSeizeQuote).not.toHaveBeenCalled();
   });
 
-  it("renders quorum participation preview for quorum drop links", () => {
+  it("routes quorum drop links through the generic drop preview", () => {
     const onQuoteClick = jest.fn();
     mockedParseSeizeDropLink.mockReturnValue({
       waveId: "quorum-wave-id",
@@ -126,11 +125,11 @@ describe("createSeizeHandlers drop handler", () => {
     const element = handler.render(href);
     render(<>{element}</>);
 
-    expect(screen.getByTestId("quorum-participation-preview")).toHaveAttribute(
+    expect(screen.getByTestId("wave-drop-link-preview")).toHaveAttribute(
       "data-drop-id",
       "drop-1"
     );
-    expect(mockQuorumParticipationDropLinkPreview).toHaveBeenCalledWith(
+    expect(mockWaveDropLinkPreview).toHaveBeenCalledWith(
       expect.objectContaining({
         href,
         waveId: "quorum-wave-id",
@@ -146,7 +145,7 @@ describe("createSeizeHandlers drop handler", () => {
     expect(mockDropItemChat).not.toHaveBeenCalled();
   });
 
-  it("renders quote-style preview for non-memes waves", () => {
+  it("renders generic drop preview for non-memes drop links", () => {
     const onQuoteClick = jest.fn();
     mockedParseSeizeDropLink.mockReturnValue({
       waveId: "normal-wave-id",
@@ -161,21 +160,23 @@ describe("createSeizeHandlers drop handler", () => {
     const element = handler.render(href);
     render(<>{element}</>);
 
-    expect(screen.getByTestId("seize-quote-content")).toBeInTheDocument();
-    expect(mockRenderSeizeQuote).toHaveBeenCalledWith(
-      {
+    expect(screen.getByTestId("wave-drop-link-preview")).toHaveAttribute(
+      "data-drop-id",
+      "drop-2"
+    );
+    expect(mockWaveDropLinkPreview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href,
         waveId: "normal-wave-id",
         dropId: "drop-2",
-      },
-      onQuoteClick,
-      href,
-      {
+        onQuoteClick,
         embedPath: [],
         quotePath: [],
         embedDepth: 1,
         maxEmbedDepth: 4,
-      }
+      })
     );
+    expect(mockRenderSeizeQuote).not.toHaveBeenCalled();
     expect(mockDropItemChat).not.toHaveBeenCalled();
   });
 
@@ -213,33 +214,49 @@ describe("createSeizeHandlers drop handler", () => {
     ).toThrow("Seize drop link matches current drop");
   });
 
-  it("renders quorum participation preview for quorum serial links", () => {
+  it("keeps embed-depth guard for drop links", () => {
+    mockedParseSeizeDropLink.mockReturnValue({
+      waveId: "normal-wave-id",
+      dropId: "drop-5",
+    });
+    const handler = getDropHandler({
+      embedDepth: 4,
+      maxEmbedDepth: 4,
+      isMemesWaveById: () => false,
+    });
+
+    expect(() =>
+      handler.render("https://site.com/waves/normal-wave-id?drop=drop-5")
+    ).toThrow("Seize drop link exceeded max embed depth");
+  });
+
+  it("renders generic drop preview for non-quorum serial links", () => {
     const onQuoteClick = jest.fn();
     mockedParseSeizeQuoteLink.mockReturnValue({
-      waveId: "quorum-wave-id",
+      waveId: "normal-wave-id",
       serialNo: "7",
     });
     const handler = getQuoteHandler({
       onQuoteClick,
-      isQuorumWaveById: (waveId) => waveId === "quorum-wave-id",
+      isQuorumWaveById: () => false,
     });
 
-    const href = "https://site.com/waves/quorum-wave-id?serialNo=7";
+    const href = "https://site.com/waves/normal-wave-id?serialNo=7";
     const element = handler.render(href);
     render(<>{element}</>);
 
-    expect(screen.getByTestId("quorum-participation-preview")).toHaveAttribute(
+    expect(screen.getByTestId("wave-drop-link-preview")).toHaveAttribute(
       "data-serial-no",
       "7"
     );
-    expect(mockQuorumParticipationDropLinkPreview).toHaveBeenCalledWith(
+    expect(mockWaveDropLinkPreview).toHaveBeenCalledWith(
       expect.objectContaining({
         href,
-        waveId: "quorum-wave-id",
+        waveId: "normal-wave-id",
         serialNo: "7",
         onQuoteClick,
         embedPath: [],
-        quotePath: ["quorum-wave-id:7"],
+        quotePath: ["normal-wave-id:7"],
         embedDepth: 1,
         maxEmbedDepth: 4,
         hideLink: true,
