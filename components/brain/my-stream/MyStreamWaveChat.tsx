@@ -5,6 +5,7 @@ import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper"
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import { WaveGallery } from "@/components/waves/gallery";
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
+import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import PrivilegedDropCreator, {
@@ -75,6 +76,7 @@ interface WaveChatLeaveHandlerProps {
 }
 
 const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
+const noop = () => {};
 
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   enabled,
@@ -253,13 +255,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     activeChatSubmitDropExperience !== null &&
     activeChatSubmitDropExperience !==
       WaveSubmissionExperience.CURATION_LEGACY &&
-    activeChatSubmitDropExperience !== WaveSubmissionExperience.MEMES_LEGACY;
+    activeChatSubmitDropExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
+    activeChatSubmitDropExperience !== WaveSubmissionExperience.QUORUM_PROPOSAL;
+  const showQuorumProposalSubmit =
+    activeChatSubmitDropExperience === WaveSubmissionExperience.QUORUM_PROPOSAL;
   const showCurationSubmitModal =
     activeChatSubmitDropExperience === WaveSubmissionExperience.CURATION_LEGACY;
-  const submitPanelTitle =
-    activeChatSubmitDropExperience === WaveSubmissionExperience.QUORUM_PROPOSAL
-      ? "Create proposal"
-      : "Submit drop";
+  const closeChatSubmitDrop = onCloseChatSubmitDrop ?? noop;
   const appChatSubmitDropTitle =
     chatSubmitDropAction?.restrictionMessage ?? chatSubmitDropAction?.label;
   const chatCurationUrlSubmitHandler =
@@ -511,13 +513,18 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <WaveChatSubmitDropModal
             isOpen
             wave={wave}
-            title={submitPanelTitle}
+            title="Submit drop"
             initialCurationUrl={chatSubmitDrop?.initialCurationUrl ?? null}
-            closeOnComposerExit={
-              activeChatSubmitDropExperience ===
-              WaveSubmissionExperience.QUORUM_PROPOSAL
-            }
-            onClose={onCloseChatSubmitDrop ?? (() => {})}
+            onClose={closeChatSubmitDrop}
+          />
+        )}
+        {showQuorumProposalSubmit && (
+          <WaveDropCreate
+            wave={wave}
+            onCancel={closeChatSubmitDrop}
+            onSuccess={closeChatSubmitDrop}
+            onExitFixedDropMode={closeChatSubmitDrop}
+            isModalContent
           />
         )}
         {showCurationSubmitModal && (
@@ -525,7 +532,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             isOpen
             wave={wave}
             initialUrl={chatSubmitDrop?.initialCurationUrl ?? null}
-            onClose={onCloseChatSubmitDrop ?? (() => {})}
+            onClose={closeChatSubmitDrop}
           />
         )}
         {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (

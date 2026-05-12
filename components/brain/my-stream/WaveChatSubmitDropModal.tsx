@@ -14,7 +14,6 @@ interface WaveChatSubmitDropModalProps {
   readonly title: string;
   readonly onClose: () => void;
   readonly initialCurationUrl?: string | null | undefined;
-  readonly closeOnComposerExit?: boolean | undefined;
 }
 
 export function WaveChatSubmitDropModal({
@@ -23,7 +22,6 @@ export function WaveChatSubmitDropModal({
   title,
   onClose,
   initialCurationUrl = null,
-  closeOnComposerExit = false,
 }: WaveChatSubmitDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
   const titleId = useId();
@@ -145,7 +143,6 @@ export function WaveChatSubmitDropModal({
                 wave={wave}
                 onSuccess={onClose}
                 initialCurationUrl={initialCurationUrl}
-                onExitFixedDropMode={closeOnComposerExit ? onClose : undefined}
                 isModalContent
               />
             </div>

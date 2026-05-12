@@ -46,10 +46,12 @@ jest.mock("next/navigation", () => ({
 
 let mockIsMemesWave = false;
 let mockIsCurationWave = false;
+let mockIsQuorumWave = false;
 jest.mock("@/hooks/useWave", () => ({
   useWave: () => ({
     isMemesWave: mockIsMemesWave,
     isCurationWave: mockIsCurationWave,
+    isQuorumWave: mockIsQuorumWave,
   }),
 }));
 
@@ -211,6 +213,7 @@ describe("MyStreamWaveChat", () => {
     searchParamsMock.toString.mockReturnValue("");
     mockIsMemesWave = false;
     mockIsCurationWave = false;
+    mockIsQuorumWave = false;
     mockIsApp = false;
     mockOnDropClick.mockClear();
     mockSetUnreadDividerSerialNo.mockClear();
@@ -389,10 +392,11 @@ describe("MyStreamWaveChat", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("uses proposal title and close wiring for quorum submit modal", async () => {
+  it("opens quorum proposal submit directly without the chat submit modal", async () => {
     const onClose = jest.fn();
     searchParamsMock.get.mockReturnValue(null);
     searchParamsMock.toString.mockReturnValue("");
+    mockIsQuorumWave = true;
 
     renderWithProvider(
       <MyStreamWaveChat
@@ -409,11 +413,24 @@ describe("MyStreamWaveChat", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "Create proposal" })
-    ).toBeInTheDocument();
-    expect(capturedCreatorPropsHolder.current.onExitFixedDropMode).toBe(
-      onClose
+      screen.queryByTestId("chat-submit-drop-modal")
+    ).not.toBeInTheDocument();
+    expect(
+      capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
+    ).toEqual(expect.arrayContaining(["CHAT", "PARTICIPATION"]));
+
+    const quorumSubmitCreator = capturedCreatorPropsHolder.all.find(
+      (props) => props.fixedDropMode === "PARTICIPATION"
     );
+
+    expect(quorumSubmitCreator.onAllDropsAdded).toBe(onClose);
+    expect(quorumSubmitCreator.onExitFixedDropMode).toBe(onClose);
+
+    fireEvent.click(screen.getByTestId("creator-success-PARTICIPATION"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    quorumSubmitCreator.onExitFixedDropMode();
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 
   it("shows compact app submit CTA above the composer", async () => {

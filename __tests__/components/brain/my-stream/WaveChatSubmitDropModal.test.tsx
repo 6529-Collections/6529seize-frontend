@@ -43,7 +43,7 @@ describe("WaveChatSubmitDropModal", () => {
       <WaveChatSubmitDropModal
         isOpen={true}
         wave={wave}
-        title="Create proposal"
+        title="Submit drop"
         initialCurationUrl="https://example.com/art"
         onClose={jest.fn()}
       />
@@ -53,7 +53,7 @@ describe("WaveChatSubmitDropModal", () => {
       await screen.findByTestId("chat-submit-drop-modal")
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Create proposal" })
+      screen.getByRole("heading", { name: "Submit drop" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("modal-create-drop")).toBeInTheDocument();
     expect(waveDropCreateProps.isModalContent).toBe(true);
@@ -61,24 +61,6 @@ describe("WaveChatSubmitDropModal", () => {
       "https://example.com/art"
     );
     expect(waveDropCreateProps.onExitFixedDropMode).toBeUndefined();
-  });
-
-  it("can close when the nested composer exits fixed drop mode", async () => {
-    const onClose = jest.fn();
-
-    render(
-      <WaveChatSubmitDropModal
-        isOpen={true}
-        wave={wave}
-        title="Create proposal"
-        onClose={onClose}
-        closeOnComposerExit
-      />
-    );
-
-    await screen.findByTestId("chat-submit-drop-modal");
-
-    expect(waveDropCreateProps.onExitFixedDropMode).toBe(onClose);
   });
 
   it("closes from backdrop, close button, and escape key", async () => {
