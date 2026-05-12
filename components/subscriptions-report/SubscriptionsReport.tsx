@@ -29,7 +29,7 @@ import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
 import Image from "next/image";
 import Link from "next/link";
-import useDownloader from "react-use-downloader";
+import useDownloader from "@/hooks/useDownloader";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
 
