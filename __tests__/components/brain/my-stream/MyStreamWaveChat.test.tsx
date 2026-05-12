@@ -101,7 +101,7 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
             success
           </button>
         )}
-        {props.onSubmitCurationUrl && (
+        {props.onSubmitCurationUrl && props.canSubmitCurationUrl !== false && (
           <button
             type="button"
             data-testid="submit-curation-url"
@@ -110,6 +110,12 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
             Submit it as a drop
           </button>
         )}
+        {props.canSubmitCurationUrl === false &&
+          props.curationUrlSubmitRestrictionMessage && (
+            <p data-testid="curation-submit-restriction">
+              {props.curationUrlSubmitRestrictionMessage}
+            </p>
+          )}
       </div>
     );
   },
@@ -550,6 +556,43 @@ describe("MyStreamWaveChat", () => {
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe(
       "PARTICIPATION"
     );
+  });
+
+  it("shows the submit restriction instead of curation URL handoff when blocked", async () => {
+    const onOpenWithCurationUrl = jest.fn();
+    const restrictionMessage = "Submissions are locked.";
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+          chatSubmitDropAction={{
+            isVisible: true,
+            canOpen: false,
+            label: "Submit drop",
+            compactLabel: "Drop",
+            restrictionMessage,
+            onOpen: jest.fn(),
+            onOpenWithCurationUrl,
+          }}
+        />
+      );
+    });
+
+    expect(screen.queryByTestId("submit-curation-url")).not.toBeInTheDocument();
+    expect(screen.getByTestId("curation-submit-restriction")).toHaveTextContent(
+      restrictionMessage
+    );
+    expect(capturedCreatorPropsHolder.current.canSubmitCurationUrl).toBe(false);
+    expect(
+      capturedCreatorPropsHolder.current.curationUrlSubmitRestrictionMessage
+    ).toBe(restrictionMessage);
+    expect(onOpenWithCurationUrl).not.toHaveBeenCalled();
   });
 
   it("locks approve submissions while keeping drop status open during status locks", async () => {

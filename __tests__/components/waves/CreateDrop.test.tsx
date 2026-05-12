@@ -282,6 +282,40 @@ describe("CreateDrop", () => {
     expect(screen.queryByText("submit curation")).not.toBeInTheDocument();
   });
 
+  it("does not open external curation submit flow from chat mode when blocked", async () => {
+    const onSubmitCurationUrl = jest.fn();
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{} as any}
+            onSubmitCurationUrl={onSubmitCurationUrl}
+            canSubmitCurationUrl={false}
+            curationUrlSubmitRestrictionMessage="Submissions are locked."
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("switch to drop"));
+
+    expect(onSubmitCurationUrl).not.toHaveBeenCalled();
+    expect(screen.queryByText("submit curation")).not.toBeInTheDocument();
+  });
+
   it("resets to default mode when wave scope changes", async () => {
     useWaveMock.mockReturnValue({
       isMemesWave: false,

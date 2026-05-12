@@ -43,6 +43,8 @@ interface CreateDropProps {
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
   readonly initialCurationUrl?: string | null | undefined;
   readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
+  readonly canSubmitCurationUrl?: boolean | undefined;
+  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -75,6 +77,8 @@ export default function CreateDrop({
   curationComposerVariant = "default",
   initialCurationUrl: initialCurationUrlProp = null,
   onSubmitCurationUrl,
+  canSubmitCurationUrl,
+  curationUrlSubmitRestrictionMessage = null,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
 }: CreateDropProps) {
@@ -142,6 +146,16 @@ export default function CreateDrop({
     dismissedQuorumProposalScope !== quorumProposalScopeKey;
   const canMentionAll =
     wave.wave.authenticated_user_eligible_for_admin === true;
+  const canUseCurationUrlSubmit =
+    fixedDropMode === DropMode.CHAT
+      ? onSubmitCurationUrl !== undefined && canSubmitCurationUrl !== false
+      : true;
+  const curationUrlRestrictionMessage =
+    fixedDropMode === DropMode.CHAT &&
+    onSubmitCurationUrl !== undefined &&
+    canSubmitCurationUrl === false
+      ? curationUrlSubmitRestrictionMessage
+      : null;
 
   const canSwitchDropMode = useCallback(
     (newIsDropMode: boolean) => {
@@ -195,8 +209,10 @@ export default function CreateDrop({
 
   const onSwitchToDropModeWithUrl = useCallback(
     (url: string) => {
-      if (fixedDropMode === DropMode.CHAT && onSubmitCurationUrl) {
-        onSubmitCurationUrl(url);
+      if (fixedDropMode === DropMode.CHAT) {
+        if (onSubmitCurationUrl && canSubmitCurationUrl !== false) {
+          onSubmitCurationUrl(url);
+        }
         return;
       }
 
@@ -207,7 +223,13 @@ export default function CreateDrop({
       setDismissedQuorumProposalScope(null);
       setDropModeOverride({ scopeKey: modeScopeToken, value: true });
     },
-    [canSwitchDropMode, fixedDropMode, modeScopeToken, onSubmitCurationUrl]
+    [
+      canSubmitCurationUrl,
+      canSwitchDropMode,
+      fixedDropMode,
+      modeScopeToken,
+      onSubmitCurationUrl,
+    ]
   );
 
   const onCloseQuorumProposal = useCallback(() => {
@@ -388,6 +410,8 @@ export default function CreateDrop({
         (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
       externalAttachmentDrop,
       onExternalAttachmentDropConsumed,
+      canSubmitCurationUrl: canUseCurationUrlSubmit,
+      curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
     };
   }, [
     activeDrop,
@@ -406,6 +430,8 @@ export default function CreateDrop({
     onExitFixedDropMode,
     externalAttachmentDrop,
     onExternalAttachmentDropConsumed,
+    canUseCurationUrlSubmit,
+    curationUrlRestrictionMessage,
   ]);
 
   let dropComposerContent: ReactNode;

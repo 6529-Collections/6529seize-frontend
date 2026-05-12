@@ -152,6 +152,8 @@ interface CreateDropContentProps {
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
+  readonly canSubmitCurationUrl?: boolean | undefined;
+  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -453,6 +455,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   dropModeToggleExitLabel,
   canExitDropMode,
   submissionExperience,
+  canSubmitCurationUrl = true,
+  curationUrlSubmitRestrictionMessage = null,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
 }) => {
@@ -703,7 +707,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const showCurationDropModeWarning =
     !isDropMode &&
     !!normalizedCurationDropUrl &&
-    isCurationSubmissionExperience;
+    isCurationSubmissionExperience &&
+    (canSubmitCurationUrl || !!curationUrlSubmitRestrictionMessage);
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
   const lastExternalAttachmentDropTokenRef = useRef<number | null>(null);
@@ -1186,25 +1191,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   };
 
-  const getMissingRequirementsResult = useMemo(() => {
-    return () =>
+  const missingRequirements = useMemo<MissingRequirements>(
+    () =>
       getMissingRequirements(
         isDropMode,
         metadata,
         files,
         wave.participation.required_media
-      );
-  }, [metadata, files, wave.participation.required_media, isDropMode]);
-
-  const [missingRequirements, setMissingRequirements] =
-    useState<MissingRequirements>({
-      metadata: [],
-      media: [],
-    });
-
-  useEffect(() => {
-    setMissingRequirements(getMissingRequirementsResult());
-  }, [metadata, files, getMissingRequirementsResult]);
+      ),
+    [files, isDropMode, metadata, wave.participation.required_media]
+  );
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
@@ -1787,13 +1783,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             {showCurationDropModeWarning && (
               <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
                 This looks like a curation URL.{" "}
-                <button
-                  type="button"
-                  className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
-                  onClick={onSwitchToDropMode}
-                >
-                  Submit it as a drop
-                </button>
+                {canSubmitCurationUrl ? (
+                  <button
+                    type="button"
+                    className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
+                    onClick={onSwitchToDropMode}
+                  >
+                    Submit it as a drop
+                  </button>
+                ) : (
+                  <span>{curationUrlSubmitRestrictionMessage}</span>
+                )}
               </div>
             )}
           </div>

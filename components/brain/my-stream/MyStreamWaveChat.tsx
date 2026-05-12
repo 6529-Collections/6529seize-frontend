@@ -262,6 +262,16 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       : "Submit drop";
   const appChatSubmitDropTitle =
     chatSubmitDropAction?.restrictionMessage ?? chatSubmitDropAction?.label;
+  const chatCurationUrlSubmitHandler =
+    chatSubmitDropAction?.isVisible === true
+      ? chatSubmitDropAction.onOpenWithCurationUrl
+      : undefined;
+  const canSubmitChatCurationUrl =
+    chatSubmitDropAction?.isVisible === true && chatSubmitDropAction.canOpen;
+  const chatCurationUrlSubmitRestrictionMessage =
+    chatSubmitDropAction?.isVisible === true
+      ? chatSubmitDropAction.restrictionMessage
+      : null;
 
   const shouldHandleContainerFileDrop = (
     event: React.DragEvent<HTMLElement>
@@ -488,8 +498,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 onExternalAttachmentDropConsumed={() =>
                   setExternalAttachmentDrop(null)
                 }
-                onSubmitCurationUrl={
-                  chatSubmitDropAction?.onOpenWithCurationUrl
+                onSubmitCurationUrl={chatCurationUrlSubmitHandler}
+                canSubmitCurationUrl={canSubmitChatCurationUrl}
+                curationUrlSubmitRestrictionMessage={
+                  chatCurationUrlSubmitRestrictionMessage
                 }
               />
             </CreateDropWaveWrapper>
