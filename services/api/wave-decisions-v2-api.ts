@@ -19,6 +19,7 @@ import {
   mapDropReactionCountersV2,
   mapIdentityOverviewToProfileMin,
   mapMentionedWaves,
+  mapPriorityMetadataV2ToDropMetadata,
   mapReplyToDrop,
 } from "@/services/api/drop-v2-mappers";
 
@@ -84,7 +85,7 @@ const mapDecisionDropV2 = ({
     mentioned_users: drop.mentioned_users ?? [],
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
-    metadata: [],
+    metadata: mapPriorityMetadataV2ToDropMetadata(drop),
     rating: voting?.current_calculated_vote ?? 0,
     realtime_rating: voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,

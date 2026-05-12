@@ -12,7 +12,6 @@ import { useUserWinningArtworks } from "@/hooks/useUserWinningArtworks";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { faEye, faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
@@ -38,6 +37,7 @@ const WinnerTrophyCard: React.FC<{
 }> = ({ drop, onDropClick }) => {
   const extendedDrop = convertApiDropToExtendedDrop(drop);
   const decisionTime = drop.winning_context?.decision_time;
+  const hasDecisionTime = typeof decisionTime === "number" && decisionTime > 0;
 
   return (
     <div
@@ -150,27 +150,17 @@ const WinnerTrophyCard: React.FC<{
             </span>
           </div>
 
-          <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
-            {typeof decisionTime === "number" ? (
-              <>
-                <FontAwesomeIcon
-                  icon={faTrophy}
-                  className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-[#D4AF37]"
-                />
-                <span>
-                  Won on{" "}
-                  {Time.millis(decisionTime).toDate().toLocaleDateString()}
-                </span>
-              </>
-            ) : (
-              <>
-                <CalendarDaysIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>
-                  {Time.millis(drop.created_at).toDate().toLocaleDateString()}
-                </span>
-              </>
-            )}
-          </div>
+          {hasDecisionTime && (
+            <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+              <FontAwesomeIcon
+                icon={faTrophy}
+                className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-[#D4AF37]"
+              />
+              <span>
+                Won on {Time.millis(decisionTime).toDate().toLocaleDateString()}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
