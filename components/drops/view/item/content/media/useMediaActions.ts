@@ -57,11 +57,11 @@ export function useMediaActions({
   const [isDownloading, setIsDownloading] = useState(false);
   const fileName = getDownloadFilenameFromUrl(url, fallbackFileName);
   const canOpen = canOpenMediaInBrowser({ mimeType, url });
-  const openLabel = canOpen
-    ? isCapacitor
-      ? "Open in browser"
-      : "Open in new tab"
-    : undefined;
+  let openLabel: string | undefined;
+
+  if (canOpen) {
+    openLabel = isCapacitor ? "Open in browser" : "Open in new tab";
+  }
 
   const openMedia = useCallback(() => {
     globalThis.window.open(url, "_blank", "noopener,noreferrer");

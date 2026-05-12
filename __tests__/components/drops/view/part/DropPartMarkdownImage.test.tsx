@@ -17,7 +17,7 @@ jest.mock(
 
 describe("DropPartMarkdownImage", () => {
   it("renders markdown images through the standard image media component", () => {
-    render(<DropPartMarkdownImage src="/img.png" alt="alt" />);
+    render(<DropPartMarkdownImage src="/img.png" />);
 
     expect(screen.getByTestId("standard-image-media")).toHaveAttribute(
       "data-src",

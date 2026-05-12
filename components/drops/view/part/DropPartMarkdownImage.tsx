@@ -4,7 +4,6 @@ import DropListItemContentMediaImage from "@/components/drops/view/item/content/
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
-  readonly alt?: string | undefined;
 }
 
 export default function DropPartMarkdownImage({

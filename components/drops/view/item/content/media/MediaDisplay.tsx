@@ -3,7 +3,7 @@
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import InteractiveMediaLoadGate from "@/components/drops/media/InteractiveMediaLoadGate";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import {
@@ -12,7 +12,6 @@ import {
 } from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useCallback, useRef } from "react";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
