@@ -77,16 +77,82 @@ describe("useDownloader", () => {
       });
     });
 
-    expect(globalThis.fetch).toHaveBeenCalledWith("/file.csv", {
-      method: "GET",
-      headers: { Accept: "text/csv" },
-      signal: expect.objectContaining({ aborted: false }),
-    });
+    const fetchOptions = (globalThis.fetch as jest.Mock).mock
+      .calls[0][1] as RequestInit;
+    expect(fetchOptions.method).toBe("GET");
+    expect(new Headers(fetchOptions.headers).get("authorization")).toBe(
+      "Bearer jwt"
+    );
+    expect(new Headers(fetchOptions.headers).get("accept")).toBe("text/csv");
+    expect(fetchOptions.signal).toEqual(
+      expect.objectContaining({ aborted: false })
+    );
     expect(shareFetchedBlobInNativeAppMock).toHaveBeenCalledWith(
       expect.any(Blob),
       "file.csv"
     );
     await waitFor(() => expect(result.current.percentage).toBe(100));
+  });
+
+  it("merges Headers instances for Capacitor downloads", async () => {
+    Capacitor.isNativePlatform.mockReturnValue(true);
+    globalThis.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      blob: () => Promise.resolve(new Blob(["csv"], { type: "text/csv" })),
+    });
+
+    const { result } = renderHook(() =>
+      useDownloader({
+        headers: new Headers({
+          Authorization: "Bearer jwt",
+          Accept: "application/json",
+        }),
+      })
+    );
+
+    await act(async () => {
+      await result.current.download("/file.csv", "file.csv", undefined, {
+        headers: new Headers({ Accept: "text/csv" }),
+      });
+    });
+
+    const fetchOptions = (globalThis.fetch as jest.Mock).mock
+      .calls[0][1] as RequestInit;
+    const headers = new Headers(fetchOptions.headers);
+    expect(headers.get("authorization")).toBe("Bearer jwt");
+    expect(headers.get("accept")).toBe("text/csv");
+  });
+
+  it("aborts and clears native download work on unmount", async () => {
+    Capacitor.isNativePlatform.mockReturnValue(true);
+    const clearIntervalSpy = jest.spyOn(globalThis.window, "clearInterval");
+    const clearTimeoutSpy = jest.spyOn(globalThis.window, "clearTimeout");
+    let signal: AbortSignal | undefined;
+    globalThis.fetch = jest.fn((_, init?: RequestInit) => {
+      signal = init?.signal ?? undefined;
+      return new Promise<Response>((_, reject) => {
+        signal?.addEventListener("abort", () => {
+          const abortError = new Error("Aborted");
+          abortError.name = "AbortError";
+          reject(abortError);
+        });
+      });
+    });
+
+    const { result, unmount } = renderHook(() => useDownloader());
+
+    act(() => {
+      void result.current.download("/slow.csv", "slow.csv", 5000);
+    });
+    act(() => {
+      unmount();
+    });
+
+    await waitFor(() => expect(signal?.aborted).toBe(true));
+    expect(clearIntervalSpy).toHaveBeenCalled();
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+    clearIntervalSpy.mockRestore();
+    clearTimeoutSpy.mockRestore();
   });
 
   it("exposes download errors in Capacitor", async () => {

@@ -74,19 +74,31 @@ export function ImageMediaModal({
         onZoom={(event) => setIsZoomed(event.state.scale > 1)}
       >
         {() => (
-          <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-            <div className="tw-pointer-events-auto tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col">
+          <div
+            className="tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden"
+            onClick={onClose}
+          >
+            <div className="tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
               <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                  wrapperStyle={{ width: "95vw", height: "90dvh" }}
+                  contentStyle={{ width: "95vw", height: "90dvh" }}
                 >
                   <img
                     ref={imageRef}
                     src={src}
                     alt="Full size drop media"
-                    style={{ pointerEvents: "auto" }}
-                    className="tw-max-h-[75vh] tw-max-w-full tw-object-contain lg:tw-max-h-[90vh]"
+                    onClick={(event) => event.stopPropagation()}
+                    style={{
+                      height: "90dvh",
+                      maxHeight: "90dvh",
+                      maxWidth: "95vw",
+                      pointerEvents: "auto",
+                      width: "95vw",
+                    }}
+                    className="tw-h-full tw-w-full tw-object-contain"
                   />
                 </TransformComponent>
               </div>

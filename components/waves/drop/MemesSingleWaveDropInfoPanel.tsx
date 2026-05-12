@@ -12,10 +12,9 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
 import { MemesDropDetailsSection } from "./MemesDropDetailsSection";
-import { MemesDropFullscreenOverlay } from "./MemesDropFullscreenOverlay";
 import { MemesDropSummarySection } from "./MemesDropSummarySection";
 
 interface MemesSingleWaveDropInfoPanelProps {
@@ -33,7 +32,6 @@ export const MemesSingleWaveDropInfoPanel = ({
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }: MemesSingleWaveDropInfoPanelProps) => {
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobileScreen = useIsMobileScreen();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
     useDropInteractionRules(drop);
@@ -108,12 +106,6 @@ export const MemesSingleWaveDropInfoPanel = ({
     return name;
   }, [title, wave?.name, drop.author?.handle]);
 
-  const handleCloseFullscreen = useCallback(() => {
-    setIsFullscreen(false);
-  }, []);
-  const handleOpenFullscreen = useCallback(() => {
-    setIsFullscreen(true);
-  }, []);
   const handleOpenVoting = useCallback(() => {
     openVoting();
   }, [openVoting]);
@@ -121,10 +113,7 @@ export const MemesSingleWaveDropInfoPanel = ({
   return (
     <>
       <div className="tw-w-full">
-        <MemesDropArtworkHero
-          artworkMedia={artworkMedia}
-          onOpenFullscreen={handleOpenFullscreen}
-        />
+        <MemesDropArtworkHero artworkMedia={artworkMedia} />
         <MemesDropSummarySection
           drop={drop}
           title={title}
@@ -153,15 +142,6 @@ export const MemesSingleWaveDropInfoPanel = ({
           onClose={onClose}
         />
       </div>
-
-      <MemesDropFullscreenOverlay
-        isOpen={isFullscreen}
-        artworkMedia={artworkMedia}
-        drop={drop}
-        title={title}
-        description={description}
-        onClose={handleCloseFullscreen}
-      />
 
       {isMobileScreen ? (
         <MobileVotingModal

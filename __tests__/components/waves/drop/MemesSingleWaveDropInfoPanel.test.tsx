@@ -66,14 +66,28 @@ jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({
 }));
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
-  () => (props: any) => (
-    <div
-      data-testid="media"
-      data-disable-modal={String(props.disableModal)}
-      data-media-mime-type={props.media_mime_type}
-      data-media-url={props.media_url}
-    />
-  )
+  () => (props: any) => {
+    const isImage = props.media_mime_type.includes("image");
+    const isVideo = props.media_mime_type.includes("video");
+    const showsToolbar = !props.disableModal && (isImage || isVideo);
+
+    return (
+      <div
+        data-testid="media"
+        data-disable-modal={String(Boolean(props.disableModal))}
+        data-media-mime-type={props.media_mime_type}
+        data-media-url={props.media_url}
+      >
+        {showsToolbar && (
+          <>
+            {isImage && <button type="button">Full screen</button>}
+            <button type="button">Open in new tab</button>
+            <button type="button">Download media</button>
+          </>
+        )}
+      </div>
+    );
+  }
 );
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: (drop: any) => mockUseDropInteractionRules(drop),
@@ -115,6 +129,10 @@ const dropWithMedia = (mime_type: string, url = "media") => ({
 
 describe("MemesSingleWaveDropInfoPanel", () => {
   beforeEach(() => {
+    Object.defineProperty(document.body, "requestFullscreen", {
+      configurable: true,
+      value: jest.fn(),
+    });
     mockIsMobileScreen = false;
     mockUseDropInteractionRules.mockReset();
     mockUseDropInteractionRules.mockReturnValue({
@@ -134,7 +152,7 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     );
     expect(screen.getByTestId("media")).toHaveAttribute(
       "data-disable-modal",
-      "true"
+      "false"
     );
     expect(screen.getByTestId("traits")).toBeInTheDocument();
     expect(screen.getByTestId("process")).toBeInTheDocument();
@@ -159,24 +177,46 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     expect(heroWrapper).not.toHaveClass("tw-min-h-screen");
   });
 
-  it("opens fullscreen when the hero fullscreen button is clicked", async () => {
+  it("uses the standard image media toolbar and modal path", () => {
     render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
 
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-disable-modal",
+      "false"
+    );
+    expect(screen.getByRole("button", { name: "Full screen" })).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Exit fullscreen view" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: "Open in new tab" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeVisible();
+  });
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Open fullscreen view" })
+  it("uses the standard video media toolbar without fullscreen", () => {
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={dropWithMedia("video/mp4", "video.mp4")}
+        wave={null}
+      />
     );
 
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-media-url",
+      "video.mp4"
+    );
     expect(
-      screen.getByRole("button", { name: "Exit fullscreen view" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open in new tab" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeVisible();
   });
 
   it.each([
-    ["video/mp4", "video.mp4"],
     ["text/html", "interactive.html"],
     ["model/gltf-binary", "model.glb"],
   ])("hides fullscreen while rendering %s hero media", (mime_type, url) => {
@@ -193,21 +233,8 @@ describe("MemesSingleWaveDropInfoPanel", () => {
       mime_type
     );
     expect(
-      screen.queryByRole("button", { name: "Open fullscreen view" })
+      screen.queryByRole("button", { name: "Full screen" })
     ).not.toBeInTheDocument();
-  });
-
-  it("closes fullscreen when button clicked", async () => {
-    const setState = jest.fn();
-    const spy = jest
-      .spyOn(React, "useState")
-      .mockImplementationOnce(() => [true, setState]);
-    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
-    await userEvent.click(
-      screen.getByRole("button", { name: "Exit fullscreen view" })
-    );
-    expect(setState).toHaveBeenCalledWith(false);
-    spy.mockRestore();
   });
 
   it("passes single-drop close callback to resubmit source deletion", async () => {

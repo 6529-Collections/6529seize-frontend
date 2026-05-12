@@ -3,7 +3,7 @@
 import { Capacitor } from "@capacitor/core";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import reactUseDownloader from "react-use-downloader";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type UseDownloader = ReturnType<typeof reactUseDownloader>;
 type UseDownloaderOptions = Parameters<typeof reactUseDownloader>[0];
@@ -106,6 +106,17 @@ const getDownloadErrorMessage = async (error: unknown): Promise<string> => {
   return "An unknown error occurred.";
 };
 
+const mergeDownloadHeaders = (
+  optionsHeaders: HeadersInit | undefined,
+  overrideHeaders: HeadersInit | undefined
+): Headers => {
+  const headers = new Headers(optionsHeaders);
+  new Headers(overrideHeaders).forEach((value, key) => {
+    headers.set(key, value);
+  });
+  return headers;
+};
+
 export default function useDownloader(
   options: UseDownloaderOptions = {}
 ): UseDownloader {
@@ -117,19 +128,47 @@ export default function useDownloader(
   const [error, setError] = useState<ErrorMessage>(null);
   const [isInProgress, setIsInProgress] = useState(false);
   const controllerRef = useRef<AbortController | null>(null);
+  const elapsedIntervalRef = useRef<number | null>(null);
+  const timeoutIdRef = useRef<number | null>(null);
+  const isMountedRef = useRef(false);
+
+  const clearNativeRequest = useCallback((abort = false) => {
+    if (abort) {
+      controllerRef.current?.abort();
+    }
+    if (elapsedIntervalRef.current !== null) {
+      globalThis.window.clearInterval(elapsedIntervalRef.current);
+      elapsedIntervalRef.current = null;
+    }
+    if (timeoutIdRef.current !== null) {
+      globalThis.window.clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = null;
+    }
+    controllerRef.current = null;
+    if (isMountedRef.current) {
+      setIsInProgress(false);
+    }
+  }, []);
 
   const resetNativeState = useCallback(() => {
     setElapsed(0);
     setPercentage(0);
     setSize(0);
     setError(null);
-    setIsInProgress(false);
-    controllerRef.current = null;
-  }, []);
+    clearNativeRequest();
+  }, [clearNativeRequest]);
 
   const cancel = useCallback(() => {
     controllerRef.current?.abort();
   }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      clearNativeRequest(true);
+      isMountedRef.current = false;
+    };
+  }, [clearNativeRequest]);
 
   const download = useCallback<UseDownloader["download"]>(
     async (downloadUrl, filename, timeout = 0, overrideOptions = {}) => {
@@ -150,19 +189,23 @@ export default function useDownloader(
       setIsInProgress(true);
       const controller = new AbortController();
       controllerRef.current = controller;
-      const elapsedInterval = globalThis.window.setInterval(() => {
+      elapsedIntervalRef.current = globalThis.window.setInterval(() => {
         setElapsed((current) => current + 1);
       }, 1000);
-      const timeoutId =
+      timeoutIdRef.current =
         timeout > 0
           ? globalThis.window.setTimeout(() => controller.abort(), timeout)
           : null;
 
       try {
+        const { headers: optionsHeaders, ...restOptions } = options;
+        const { headers: overrideHeaders, ...restOverrideOptions } =
+          overrideOptions;
         const response = await fetch(downloadUrl, {
           method: "GET",
-          ...options,
-          ...overrideOptions,
+          ...restOptions,
+          ...restOverrideOptions,
+          headers: mergeDownloadHeaders(optionsHeaders, overrideHeaders),
           signal: controller.signal,
         });
 
@@ -177,19 +220,23 @@ export default function useDownloader(
         await shareFetchedBlobInNativeApp(blob, filename);
       } catch (downloadError) {
         const errorMessage = await getDownloadErrorMessage(downloadError);
-        setError({ errorMessage });
-      } finally {
-        globalThis.window.clearInterval(elapsedInterval);
-        if (timeoutId !== null) {
-          globalThis.window.clearTimeout(timeoutId);
+        if (isMountedRef.current) {
+          setError({ errorMessage });
         }
-        setIsInProgress(false);
-        controllerRef.current = null;
+      } finally {
+        clearNativeRequest();
       }
 
       return undefined;
     },
-    [isNative, isInProgress, options, resetNativeState, webDownloader]
+    [
+      clearNativeRequest,
+      isNative,
+      isInProgress,
+      options,
+      resetNativeState,
+      webDownloader,
+    ]
   );
 
   return useMemo(() => {
