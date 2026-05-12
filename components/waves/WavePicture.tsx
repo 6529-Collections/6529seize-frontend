@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { useAuth } from "@/components/auth/Auth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWater } from "@fortawesome/free-solid-svg-icons";
 
 interface WavePictureProps {
   readonly name: string;
@@ -177,10 +179,15 @@ export default function WavePicture({
     })
     .map((contributor) => contributor.pfp);
 
-  // 3) If no PFPS, show fallback background
+  // 3) If no PFPS, show the default wave icon fallback
   if (pfps.length === 0) {
     return (
-      <div className="tw-h-full tw-w-full tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700" />
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700">
+        <FontAwesomeIcon
+          icon={faWater}
+          className="tw-size-[54%] tw-text-white/60"
+        />
+      </div>
     );
   }
 
