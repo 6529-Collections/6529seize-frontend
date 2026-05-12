@@ -1,4 +1,5 @@
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
@@ -61,6 +62,14 @@ export const mapIdentityOverviewToProfileMin = (
     badges: identity.badges,
   };
 };
+
+export const mapPriorityMetadataV2ToDropMetadata = (
+  drop: ApiDropV2
+): ApiDropMetadataResponse[] =>
+  (drop.priority_metadata ?? []).map((metadata) => ({
+    data_key: metadata.data_key,
+    data_value: metadata.data_value,
+  }));
 
 export const mapApiWaveOverviewToApiWaveMin = (
   wave: ApiWaveOverview
