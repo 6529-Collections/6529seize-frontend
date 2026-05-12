@@ -156,6 +156,31 @@ describe("DropListItemContentMediaVideo", () => {
     ).toBeInTheDocument();
   });
 
+  it("hides open action for video/quicktime with MIME parameters", () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo",
+      isHls: false,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo"
+        mimeType="video/quicktime; codecs=avc1"
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Open in new tab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+  });
+
   it("downloads the original video source from the custom button", async () => {
     const ref = {
       current: document.createElement("div"),

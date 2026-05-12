@@ -31,11 +31,13 @@ function canOpenMediaInBrowser({
   readonly mimeType?: string | undefined;
   readonly url: string;
 }): boolean {
-  if (
-    mimeType &&
-    DIRECT_OPEN_UNSUPPORTED_MIME_TYPES.has(mimeType.toLowerCase())
-  ) {
-    return false;
+  if (mimeType) {
+    const normalizedMimeType = (mimeType.split(";")[0] ?? "")
+      .trim()
+      .toLowerCase();
+    if (DIRECT_OPEN_UNSUPPORTED_MIME_TYPES.has(normalizedMimeType)) {
+      return false;
+    }
   }
 
   const extension = getUrlExtension(url);

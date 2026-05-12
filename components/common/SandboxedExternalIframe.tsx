@@ -97,7 +97,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     return () => {
       observer.disconnect();
     };
-  }, [canonicalSrc, isVisible]);
+  }, [canonicalSrc, isVisible, onVisible]);
 
   const parsedCanonicalUrl = useMemo(() => {
     if (!canonicalSrc) {
