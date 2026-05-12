@@ -2,18 +2,26 @@ import { renderHook, act } from "@testing-library/react";
 import React from "react";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { useSignMessage } from "wagmi";
+import { UserRejectedRequestError } from "viem";
 
 jest.mock("wagmi", () => ({ useSignMessage: jest.fn() }));
 
 const mockHash = "hash";
 jest.mock("@/utils/drop-hasher", () => ({
-  DropHasher: class { hash() { return mockHash; } },
+  DropHasher: class {
+    hash() {
+      return mockHash;
+    }
+  },
 }));
 
 const mockSetToast = jest.fn();
+const dropSignatureFailedMessage =
+  "Signature failed. Make sure your wallet is connected and unlocked, and that you are using the wallet linked to your 6529 account. If it still fails, log out of 6529 and log back in, then try again.";
 
 describe("useDropSignature", () => {
   beforeEach(() => {
+    mockSetToast.mockClear();
     jest.spyOn(React, "useContext").mockReturnValue({ setToast: mockSetToast });
   });
 
@@ -34,7 +42,7 @@ describe("useDropSignature", () => {
     expect(res).toEqual({ success: true, signature: "sig" });
   });
 
-  it("handles rejection", async () => {
+  it("shows drop-specific copy when signing fails", async () => {
     (useSignMessage as jest.Mock).mockReturnValue({
       signMessageAsync: jest.fn().mockRejectedValue(new Error("err")),
     });
@@ -45,6 +53,28 @@ describe("useDropSignature", () => {
       res = await result.current.signDrop({ drop, termsOfService: null });
     });
     expect(res).toEqual({ success: false });
-    expect(mockSetToast).toHaveBeenCalled();
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: dropSignatureFailedMessage,
+      type: "error",
+    });
+  });
+
+  it("shows signature rejected when the user rejects signing", async () => {
+    (useSignMessage as jest.Mock).mockReturnValue({
+      signMessageAsync: jest
+        .fn()
+        .mockRejectedValue(new UserRejectedRequestError(new Error("rejected"))),
+    });
+    const { result } = renderHook(() => useDropSignature());
+    const drop = { parts: [], drop_type: 0 } as any;
+    let res: any;
+    await act(async () => {
+      res = await result.current.signDrop({ drop, termsOfService: null });
+    });
+    expect(res).toEqual({ success: false });
+    expect(mockSetToast).toHaveBeenCalledWith({
+      message: "Signature rejected",
+      type: "error",
+    });
   });
 });

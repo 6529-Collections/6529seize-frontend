@@ -6,7 +6,9 @@ import { UserRejectedRequestError } from "viem";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { DropHasher } from "@/utils/drop-hasher";
 import { AuthContext } from "@/components/auth/Auth";
-import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
+
+const DROP_SIGNATURE_FAILED_MESSAGE =
+  "Signature failed. Make sure your wallet is connected and unlocked, and that you are using the wallet linked to your 6529 account. If it still fails, log out of 6529 and log back in, then try again.";
 
 /**
  * Hook for hashing drop data and requesting user signature
@@ -44,7 +46,7 @@ export const useDropSignature = () => {
 
       if (clientSignature.userRejected) {
         setToast({
-          message: "Authentication rejected",
+          message: "Signature rejected",
           type: "error",
         });
         return { success: false };
@@ -52,7 +54,7 @@ export const useDropSignature = () => {
 
       if (!clientSignature.signature) {
         setToast({
-          message: AUTH_SIGNATURE_FAILED_MESSAGE,
+          message: DROP_SIGNATURE_FAILED_MESSAGE,
           type: "error",
         });
         return { success: false };
