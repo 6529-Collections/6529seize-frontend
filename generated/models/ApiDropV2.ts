@@ -16,6 +16,7 @@ import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
+import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropReactionCounter } from '../models/ApiDropReactionCounter';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
@@ -45,6 +46,7 @@ export class ApiDropV2 {
     'mentioned_groups'?: Array<ApiDropGroupMention>;
     'mentioned_waves'?: Array<ApiMentionedWaveV2>;
     'nft_links'?: Array<ApiDropNftLink>;
+    'priority_metadata'?: Array<ApiDropMetadataV2>;
     'reactions'?: Array<ApiDropReactionCounter>;
     'boosts': number;
     'reply_to_drop'?: ApiReplyToDropV2;
@@ -162,6 +164,12 @@ export class ApiDropV2 {
             "name": "nft_links",
             "baseName": "nft_links",
             "type": "Array<ApiDropNftLink>",
+            "format": ""
+        },
+        {
+            "name": "priority_metadata",
+            "baseName": "priority_metadata",
+            "type": "Array<ApiDropMetadataV2>",
             "format": ""
         },
         {
