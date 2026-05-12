@@ -6,6 +6,8 @@ import { useAuth } from "@/components/auth/Auth";
 
 let intersectionCb: any;
 const downloadMock = jest.fn();
+const setToastMock = jest.fn();
+const useDownloaderMock = jest.fn();
 
 jest.mock("@/hooks/useWaveTopVoters");
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
@@ -15,11 +17,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
-  default: () => ({
-    download: downloadMock,
-    error: null,
-    isInProgress: false,
-  }),
+  default: (...args: any[]) => useDownloaderMock(...args),
 }));
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: (cb: any) => {
@@ -45,9 +43,16 @@ describe("SingleWaveDropVoters", () => {
   beforeEach(() => {
     useVoters.mockReset();
     downloadMock.mockReset();
+    setToastMock.mockReset();
+    useDownloaderMock.mockReset();
+    useDownloaderMock.mockReturnValue({
+      download: downloadMock,
+      error: null,
+      isInProgress: false,
+    });
     useAuthMock.mockReturnValue({
       connectedProfile: null,
-      setToast: jest.fn(),
+      setToast: setToastMock,
     });
   });
 
@@ -118,5 +123,82 @@ describe("SingleWaveDropVoters", () => {
     expect(useVoters).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false })
     );
+  });
+
+  it("sanitizes the drop id in the csv filename", async () => {
+    const user = userEvent.setup();
+    useVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+    });
+
+    render(
+      <SingleWaveDropVoters
+        drop={{
+          ...baseDrop,
+          id: 'drop/with\\bad:chars*?"<>|',
+        }}
+      />
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Download all top voters as CSV" })
+    );
+
+    expect(downloadMock).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "/api/v2/drops/drop%2Fwith%5Cbad%3Achars*%3F%22%3C%3E%7C/votes/download"
+      ),
+      "drop-votes-drop_with_bad_chars______.csv",
+      undefined,
+      expect.any(Object)
+    );
+  });
+
+  it("shows downloading state while the csv download is in progress", () => {
+    useDownloaderMock.mockReturnValue({
+      download: downloadMock,
+      error: null,
+      isInProgress: true,
+    });
+    useVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+    });
+
+    render(<SingleWaveDropVoters drop={baseDrop} />);
+
+    const downloadButton = screen.getByRole("button", {
+      name: "Download all top voters as CSV",
+    });
+    expect(downloadButton).toBeDisabled();
+    expect(downloadButton).toHaveTextContent("Downloading");
+  });
+
+  it("shows a toast when csv download fails", () => {
+    useDownloaderMock.mockReturnValue({
+      download: downloadMock,
+      error: { errorMessage: "backend unavailable" },
+      isInProgress: false,
+    });
+    useVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+    });
+
+    render(<SingleWaveDropVoters drop={baseDrop} />);
+
+    expect(setToastMock).toHaveBeenCalledWith({
+      type: "error",
+      message: "Download failed: backend unavailable",
+    });
   });
 });

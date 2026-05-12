@@ -145,6 +145,20 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     expect(screen.getByText("Desc")).toBeInTheDocument();
   });
 
+  it("uses compact responsive media sizing before the desktop breakpoint", () => {
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
+
+    const mediaFrame = screen.getByTestId("media").parentElement;
+    const heroWrapper = mediaFrame?.parentElement?.parentElement?.parentElement;
+
+    expect(mediaFrame).toHaveClass(
+      "tw-h-[clamp(18rem,75vw,calc(100dvh-8rem))]"
+    );
+    expect(mediaFrame).toHaveClass("lg:tw-h-[95vh]");
+    expect(heroWrapper).toHaveClass("lg:tw-min-h-screen");
+    expect(heroWrapper).not.toHaveClass("tw-min-h-screen");
+  });
+
   it("opens fullscreen when the hero fullscreen button is clicked", async () => {
     render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
 

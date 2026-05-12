@@ -11,12 +11,24 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import useDownloader from "react-use-downloader";
+import useDownloader from "@/hooks/useDownloader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
 
 interface SingleWaveDropVotersProps {
   readonly drop: ApiDrop;
 }
+
+const getSafeCsvFilenameId = (dropId: string): string => {
+  const safeId = dropId
+    .replaceAll(/[/\\:*?"<>|]/g, "_")
+    .replaceAll(/\s+/g, "_")
+    .slice(0, 180);
+
+  return safeId || "drop";
+};
 
 export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
   drop,
@@ -68,7 +80,9 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
 
     setToast({
       type: "error",
-      message: sanitizeErrorForUser(downloadError.errorMessage),
+      message: `Download failed: ${sanitizeErrorForUser(
+        downloadError.errorMessage
+      )}`,
     });
   }, [downloadError, setToast]);
 
@@ -77,7 +91,8 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
       return;
     }
 
-    await download(downloadUrl, `drop-votes-${drop.id}.csv`, undefined, {
+    const safeId = getSafeCsvFilenameId(drop.id);
+    await download(downloadUrl, `drop-votes-${safeId}.csv`, undefined, {
       headers: buildDownloadHeaders(),
     });
   }, [buildDownloadHeaders, download, downloadUrl, drop.id, isInProgress]);
@@ -113,11 +128,19 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
             type="button"
             onClick={onDownloadAllVotes}
             disabled={isInProgress}
-            className="tw-flex tw-h-8 tw-items-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+            className="tw-flex tw-h-8 tw-w-[9.25rem] tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
             aria-label="Download all top voters as CSV"
           >
-            <span>{isInProgress ? "Downloading" : "Download All"}</span>
-            <ArrowDownTrayIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+            <span className="tw-w-[5.5rem] tw-whitespace-nowrap tw-text-left">
+              {isInProgress ? "Downloading" : "Download All"}
+            </span>
+            <span className="tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center">
+              {isInProgress ? (
+                <CircleLoader size={CircleLoaderSize.SMALL} />
+              ) : (
+                <ArrowDownTrayIcon className="tw-size-4" />
+              )}
+            </span>
           </button>
           <button
             type="button"
