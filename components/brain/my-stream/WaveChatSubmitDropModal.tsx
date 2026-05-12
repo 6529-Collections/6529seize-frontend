@@ -1,27 +1,32 @@
 "use client";
 
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
+import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
-import { WaveDropCreate } from "./WaveDropCreate";
 
-interface WaveLeaderboardCurationDropModalProps {
+interface WaveChatSubmitDropModalProps {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
+  readonly title: string;
   readonly onClose: () => void;
-  readonly initialUrl?: string | null | undefined;
+  readonly initialCurationUrl?: string | null | undefined;
+  readonly closeOnComposerExit?: boolean | undefined;
 }
 
-export function WaveLeaderboardCurationDropModal({
+export function WaveChatSubmitDropModal({
   isOpen,
   wave,
+  title,
   onClose,
-  initialUrl = null,
-}: WaveLeaderboardCurationDropModalProps) {
+  initialCurationUrl = null,
+  closeOnComposerExit = false,
+}: WaveChatSubmitDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
+  const titleId = useId();
   const panelRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
@@ -87,19 +92,21 @@ export function WaveLeaderboardCurationDropModal({
     return null;
   }
 
+  const closeBackdropLabel = `Close ${title.toLowerCase()} modal`;
+
   return createPortal(
     <dialog
       open
       aria-modal="true"
-      aria-labelledby="leaderboard-drop-art-title"
+      aria-labelledby={titleId}
       className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-m-0 tw-h-full tw-w-full tw-max-w-none tw-border-0 tw-bg-gray-600/50 tw-p-0 tw-outline-none tw-backdrop-blur-[1px]"
-      data-testid="curation-drop-modal"
+      data-testid="chat-submit-drop-modal"
     >
       <button
         type="button"
         onClick={onClose}
         className="tw-fixed tw-inset-0 tw-cursor-default tw-border-0 tw-bg-transparent tw-p-0"
-        aria-label="Close drop artwork modal"
+        aria-label={closeBackdropLabel}
         tabIndex={-1}
       />
       <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-items-start tw-justify-center tw-px-4 tw-pb-4 tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] lg:tw-items-center">
@@ -109,17 +116,17 @@ export function WaveLeaderboardCurationDropModal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="tw-max-h-[90vh] tw-w-full tw-max-w-3xl tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl"
-          data-testid="curation-drop-modal-panel"
+          data-testid="chat-submit-drop-modal-panel"
           tabIndex={-1}
         >
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-b tw-border-solid tw-border-iron-800 tw-p-6">
             <h2
-              id="leaderboard-drop-art-title"
+              id={titleId}
               ref={titleRef}
               className="tw-mb-0 tw-text-2xl tw-font-bold tw-text-white"
               tabIndex={-1}
             >
-              Drop Artwork
+              {title}
             </h2>
             <button
               ref={closeButtonRef}
@@ -134,15 +141,12 @@ export function WaveLeaderboardCurationDropModal({
 
           <div className="tw-max-h-[calc(90vh-88px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">
             <div className="tw-px-6 tw-pb-6 tw-pt-5">
-              <p className="tw-mb-5 tw-max-w-lg tw-text-base tw-text-iron-400">
-                Enter a supported curation URL to submit a new piece to the
-                leaderboard.
-              </p>
               <WaveDropCreate
                 wave={wave}
                 onSuccess={onClose}
-                isCurationLeaderboard
-                initialCurationUrl={initialUrl}
+                initialCurationUrl={initialCurationUrl}
+                onExitFixedDropMode={closeOnComposerExit ? onClose : undefined}
+                isModalContent
               />
             </div>
           </div>

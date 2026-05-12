@@ -10,8 +10,8 @@ Before a thread loads, routing can stop at:
 - Set up profile
 - `This content is not available`
 
-If the thread loads, the footer then checks chat and submission availability for
-the current account.
+If the thread loads, the footer checks chat availability. Submission
+availability is exposed through the Chat tab `Submit drop` action.
 
 ## Location in the Site
 
@@ -21,23 +21,22 @@ the current account.
 
 ## Footer States
 
-- Composer visible: at least one mode is allowed.
-- Logged-out blocked panel: if both modes are blocked because the viewer is not
+- Composer visible: chat is allowed.
+- Logged-out blocked panel: if chat is blocked because the viewer is not
   authenticated, footer shows
   `Connect your wallet to participate in this wave`.
-- Generic blocked panel: if both modes are blocked for any other reason, footer
+- Generic blocked panel: if chat is blocked for any other reason, footer
   shows `You cannot participate in this wave at the moment`.
 - Closed-chat panel: if composer rendering reaches a chat-type wave with chat
   disabled, footer shows `Wave is closed`.
 
 ## Mode Rules
 
-- For `DropMode.BOTH`, footer picks an allowed mode automatically.
-- If one mode is blocked and the other is allowed, composer stays available in
-  the allowed mode.
-- Mode toggle appears only on participatory waves in main thread view.
-- Mode toggle is hidden in single-drop context and memes waves.
-- When one mode is blocked, toggle cannot switch into the blocked mode.
+- Main chat composers use `DropMode.CHAT`.
+- Dedicated submission panels use `DropMode.PARTICIPATION`.
+- Chat composers do not render a chat/drop mode toggle.
+- If submission is available, users enter it from `Submit drop` in the Chat tab
+  header or app composer area.
 
 ## Edge Cases
 

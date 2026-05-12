@@ -19,7 +19,6 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
@@ -47,7 +46,6 @@ import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapp
 import CreateDropActions from "./CreateDropActions";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import type { CreateDropInputHandles } from "./CreateDropInput";
 import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
@@ -151,8 +149,6 @@ interface CreateDropContentProps {
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
-  readonly privileges: DropPrivileges;
-  readonly showDropModeToggle: boolean;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
@@ -171,20 +167,6 @@ const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
 
 const getFileIdentity = (file: File): string =>
   [file.name, file.size, file.type, file.lastModified].join(":");
-
-const getInactiveDropActionLabel = (
-  submissionExperience: WaveSubmissionExperience
-): "drop" | "nominate" | "proposal" => {
-  if (submissionExperience === WaveSubmissionExperience.IDENTITY) {
-    return "nominate";
-  }
-
-  if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
-    return "proposal";
-  }
-
-  return "drop";
-};
 
 const normalizeIdentityValue = (identity: string | null | undefined) =>
   identity?.trim().toLowerCase() ?? null;
@@ -468,8 +450,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   onDropModeChange,
   onSwitchToDropModeWithUrl,
   submitDrop,
-  privileges,
-  showDropModeToggle,
   dropModeToggleExitLabel,
   canExitDropMode,
   submissionExperience,
@@ -554,13 +534,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     prevIsDropModeRef.current = isDropMode;
   }, [isDropMode]);
 
-  const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
   const isIdentitySubmissionExperience =
     submissionExperience === WaveSubmissionExperience.IDENTITY;
   const isCurationSubmissionExperience =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY;
-  const inactiveDropActionLabel =
-    getInactiveDropActionLabel(submissionExperience);
   const identitySubmissionMode = isIdentitySubmissionExperience
     ? (wave.participation.submission_strategy?.config.who_can_be_submitted ??
       null)
@@ -1815,7 +1792,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
                   onClick={onSwitchToDropMode}
                 >
-                  Switch to Drop mode
+                  Submit it as a drop
                 </button>
               </div>
             )}
@@ -1823,19 +1800,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {showDropModeToggle &&
-              isParticipatory &&
-              !dropId &&
-              submissionExperience !==
-                WaveSubmissionExperience.MEMES_LEGACY && (
-                <CreateDropDropModeToggle
-                  isDropMode={isDropMode}
-                  onDropModeChange={handleDropModeChange}
-                  privileges={privileges}
-                  exitLabel={dropModeToggleExitLabel}
-                  inactiveActionLabel={inactiveDropActionLabel}
-                />
-              )}
             <CreateDropSubmit
               submitting={submitting}
               canSubmit={canSubmit}

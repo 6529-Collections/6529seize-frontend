@@ -41,6 +41,8 @@ interface CreateDropProps {
   readonly fixedDropMode: DropMode;
   readonly privileges: DropPrivileges;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly initialCurationUrl?: string | null | undefined;
+  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -71,6 +73,8 @@ export default function CreateDrop({
   fixedDropMode,
   privileges,
   curationComposerVariant = "default",
+  initialCurationUrl: initialCurationUrlProp = null,
+  onSubmitCurationUrl,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
 }: CreateDropProps) {
@@ -125,7 +129,7 @@ export default function CreateDrop({
   const initialCurationUrl =
     curationPrefillSeed?.scopeKey === modeScopeToken
       ? curationPrefillSeed.url
-      : null;
+      : initialCurationUrlProp;
   const isCurationDropMode =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
     isDropMode;
@@ -191,6 +195,11 @@ export default function CreateDrop({
 
   const onSwitchToDropModeWithUrl = useCallback(
     (url: string) => {
+      if (fixedDropMode === DropMode.CHAT && onSubmitCurationUrl) {
+        onSubmitCurationUrl(url);
+        return;
+      }
+
       if (!canSwitchDropMode(true)) {
         return;
       }
@@ -198,7 +207,7 @@ export default function CreateDrop({
       setDismissedQuorumProposalScope(null);
       setDropModeOverride({ scopeKey: modeScopeToken, value: true });
     },
-    [canSwitchDropMode, modeScopeToken]
+    [canSwitchDropMode, fixedDropMode, modeScopeToken, onSubmitCurationUrl]
   );
 
   const onCloseQuorumProposal = useCallback(() => {
@@ -369,10 +378,6 @@ export default function CreateDrop({
       onDropModeChange,
       onSwitchToDropModeWithUrl,
       submitDrop,
-      privileges,
-      showDropModeToggle:
-        fixedDropMode === DropMode.BOTH ||
-        (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
       dropModeToggleExitLabel:
         fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode
           ? "Close create drop"

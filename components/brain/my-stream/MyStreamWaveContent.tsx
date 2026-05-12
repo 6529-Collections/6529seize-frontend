@@ -1,7 +1,14 @@
 "use client";
 
-import React, { type JSX, useEffect, useMemo } from "react";
+import React, {
+  type JSX,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/components/auth/Auth";
 import { useSetWaveData } from "@/contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -26,6 +33,14 @@ import { useWave } from "@/hooks/useWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { getDropQueryKey } from "@/services/api/drop-api";
+import { getWaveDropEligibility } from "@/components/waves/leaderboard/dropEligibility";
+import {
+  resolveWaveSubmissionExperience,
+  WaveSubmissionExperience,
+} from "@/helpers/waves/wave-submission-experience.helpers";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import type { ChatSubmitDropState } from "./chatSubmitDrop.types";
+import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -36,12 +51,31 @@ const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
+const getChatSubmitDropRestrictionMessage = ({
+  dropEligibility,
+  isApprovalVotingControlsLocked,
+}: {
+  readonly dropEligibility: ReturnType<typeof getWaveDropEligibility>;
+  readonly isApprovalVotingControlsLocked: boolean;
+}): string | null => {
+  if (!dropEligibility.canCreateDrop) {
+    return dropEligibility.restrictionMessage;
+  }
+
+  if (isApprovalVotingControlsLocked) {
+    return "Approval controls are locked";
+  }
+
+  return null;
+};
+
 const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const queryClient = useQueryClient();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { waves, directMessages, registerWave } = useMyStream();
   const { data: wave } = useWaveData({
     waveId,
@@ -93,10 +127,64 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   // Get wave type info to determine if gallery toggle should be shown
   // Show for CHAT type waves (normal waves), hide for RANK, MEMES, and DMs
-  const { isRankWave, isApproveWave, isMemesWave, isDm } = useWave(wave);
+  const {
+    isRankWave,
+    isApproveWave,
+    isMemesWave,
+    isCurationWave,
+    isQuorumWave,
+    isDm,
+    isChatWave,
+    participation,
+  } = useWave(wave);
+  const { isVotingControlsLocked: isApprovalVotingControlsLocked } =
+    useApprovalWaveStatus({ wave });
   const showGalleryToggle =
     !isRankWave && !isApproveWave && !isMemesWave && !isDm;
   const hasSerialTarget = searchParams.get("serialNo") !== null;
+  const submissionExperience = useMemo(
+    () =>
+      resolveWaveSubmissionExperience({
+        isMemesWave,
+        isCurationWave,
+        isQuorumWave,
+        submissionStrategy: wave?.participation.submission_strategy ?? null,
+      }),
+    [
+      isCurationWave,
+      isMemesWave,
+      isQuorumWave,
+      wave?.participation.submission_strategy,
+    ]
+  );
+  const isLoggedIn = Boolean(connectedProfile?.handle);
+  const dropEligibility = useMemo(
+    () =>
+      getWaveDropEligibility({
+        isLoggedIn,
+        isProxy: Boolean(activeProfileProxy),
+        isCurationWave,
+        participation,
+      }),
+    [activeProfileProxy, isCurationWave, isLoggedIn, participation]
+  );
+  const chatSubmitDropRestrictionMessage = getChatSubmitDropRestrictionMessage({
+    dropEligibility,
+    isApprovalVotingControlsLocked,
+  });
+  const canOpenChatSubmitDrop =
+    dropEligibility.canCreateDrop && !isApprovalVotingControlsLocked;
+  const showChatSubmitDropAction =
+    !isChatWave &&
+    !isMemesWave &&
+    submissionExperience !== WaveSubmissionExperience.MEMES_LEGACY;
+  const chatSubmitDropLabels = getChatSubmitDropLabels(submissionExperience);
+  const [chatSubmitDropState, setChatSubmitDropState] = useState<{
+    readonly waveId: string;
+    readonly submissionExperience: WaveSubmissionExperience;
+    readonly initialCurationUrl: string | null;
+    readonly isApprovalVotingControlsLocked: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (
@@ -124,6 +212,32 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
+  const openChatSubmitDrop = useCallback(
+    (initialCurationUrl: string | null = null) => {
+      if (!wave || !showChatSubmitDropAction || !canOpenChatSubmitDrop) {
+        return;
+      }
+
+      setChatSubmitDropState({
+        waveId: wave.id,
+        submissionExperience,
+        initialCurationUrl,
+        isApprovalVotingControlsLocked,
+      });
+    },
+    [
+      canOpenChatSubmitDrop,
+      isApprovalVotingControlsLocked,
+      showChatSubmitDropAction,
+      submissionExperience,
+      wave,
+    ]
+  );
+
+  const closeChatSubmitDrop = useCallback(() => {
+    setChatSubmitDropState(null);
+  }, []);
+
   const onSelectCuration = (curationId: string | null) => {
     const params = new URLSearchParams(searchParams.toString() || "");
 
@@ -149,6 +263,26 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     return null;
   }
 
+  const activeChatSubmitDropState: ChatSubmitDropState | null =
+    chatSubmitDropState?.waveId === wave.id &&
+    chatSubmitDropState.submissionExperience === submissionExperience &&
+    chatSubmitDropState.isApprovalVotingControlsLocked ===
+      isApprovalVotingControlsLocked
+      ? {
+          submissionExperience: chatSubmitDropState.submissionExperience,
+          initialCurationUrl: chatSubmitDropState.initialCurationUrl,
+        }
+      : null;
+  const chatSubmitDropAction = {
+    isVisible: showChatSubmitDropAction,
+    canOpen: canOpenChatSubmitDrop,
+    label: chatSubmitDropLabels.label,
+    compactLabel: chatSubmitDropLabels.compactLabel,
+    restrictionMessage: chatSubmitDropRestrictionMessage,
+    onOpen: () => openChatSubmitDrop(null),
+    onOpenWithCurationUrl: openChatSubmitDrop,
+  };
+
   // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: (
@@ -157,6 +291,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
         viewMode={showGalleryToggle ? viewMode : "chat"}
         onDropClick={onDropClick}
+        chatSubmitDrop={activeChatSubmitDropState}
+        chatSubmitDropAction={chatSubmitDropAction}
+        onCloseChatSubmitDrop={closeChatSubmitDrop}
       />
     ),
     [MyStreamWaveTab.LEADERBOARD]: (
@@ -193,6 +330,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         showGalleryToggle={showGalleryToggle}
         activeCurationId={activeCurationId}
         onSelectCuration={onSelectCuration}
+        chatSubmitDropAction={chatSubmitDropAction}
       />
 
       <div

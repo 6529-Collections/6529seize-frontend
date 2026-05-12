@@ -2,9 +2,16 @@ import MyStreamWaveChat from "@/components/brain/my-stream/MyStreamWaveChat";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "@/services/api/common-api";
+import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { editSlice } from "@/store/editSlice";
 import { configureStore } from "@reduxjs/toolkit";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 
@@ -55,8 +62,13 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 }));
 
 const capturedPropsHolder = { current: {} as any };
-const capturedCreatorPropsHolder = { current: {} as any };
+const capturedCreatorPropsHolder = {
+  current: {} as any,
+  all: [] as any[],
+};
 const capturedMemesButtonPropsHolder = { current: {} as any };
+const PREFILL_URL =
+  "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/123";
 jest.mock("@/components/waves/drops/wave-drops-all", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -77,9 +89,31 @@ jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
   __esModule: true,
   default: (props: any) => {
     capturedCreatorPropsHolder.current = props;
-    return <div data-testid="creator" data-mode={props.fixedDropMode} />;
+    capturedCreatorPropsHolder.all.push(props);
+    return (
+      <div data-testid="creator" data-mode={props.fixedDropMode}>
+        {props.onAllDropsAdded && (
+          <button
+            type="button"
+            data-testid={`creator-success-${props.fixedDropMode}`}
+            onClick={props.onAllDropsAdded}
+          >
+            success
+          </button>
+        )}
+        {props.onSubmitCurationUrl && (
+          <button
+            type="button"
+            data-testid="submit-curation-url"
+            onClick={() => props.onSubmitCurationUrl(PREFILL_URL)}
+          >
+            Submit it as a drop
+          </button>
+        )}
+      </div>
+    );
   },
-  DropMode: { BOTH: "BOTH", CHAT: "CHAT" },
+  DropMode: { BOTH: "BOTH", CHAT: "CHAT", PARTICIPATION: "PARTICIPATION" },
 }));
 
 jest.mock(
@@ -98,9 +132,10 @@ jest.mock(
   })
 );
 
+let mockIsApp = false;
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ isApp: false }),
+  default: () => ({ isApp: mockIsApp }),
 }));
 
 jest.mock("@/contexts/wave/UnreadDividerContext", () => ({
@@ -162,6 +197,7 @@ describe("MyStreamWaveChat", () => {
     setDocumentVisibilityState("visible");
     capturedPropsHolder.current = {};
     capturedCreatorPropsHolder.current = {};
+    capturedCreatorPropsHolder.all = [];
     capturedMemesButtonPropsHolder.current = {};
     replaceMock.mockClear();
     searchParamsMock.get.mockReset();
@@ -169,6 +205,7 @@ describe("MyStreamWaveChat", () => {
     searchParamsMock.toString.mockReturnValue("");
     mockIsMemesWave = false;
     mockIsCurationWave = false;
+    mockIsApp = false;
     mockOnDropClick.mockClear();
     mockSetUnreadDividerSerialNo.mockClear();
     mockRemoveWaveDeliveredNotifications.mockClear();
@@ -195,7 +232,11 @@ describe("MyStreamWaveChat", () => {
   });
 
   const renderWithProvider = (component: React.ReactElement) => {
-    return render(
+    return render(wrapWithProvider(component));
+  };
+
+  const wrapWithProvider = (component: React.ReactElement) => {
+    return (
       <ReactQueryWrapperContext.Provider
         value={{ invalidateNotifications: invalidateNotificationsMock } as any}
       >
@@ -238,8 +279,277 @@ describe("MyStreamWaveChat", () => {
     });
     expect(replaceMock).not.toHaveBeenCalled();
     expect(capturedPropsHolder.current.initialDrop).toBeNull();
-    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("BOTH");
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
     expect(screen.queryByTestId("memes-btn")).toBeNull();
+  });
+
+  it("opens participation submit flow in a modal while keeping chat composer mounted", async () => {
+    const onClose = jest.fn();
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+          chatSubmitDrop={{
+            submissionExperience: WaveSubmissionExperience.DEFAULT,
+            initialCurationUrl: null,
+          }}
+          onCloseChatSubmitDrop={onClose}
+        />
+      );
+    });
+
+    expect(screen.getByTestId("chat-submit-drop-modal")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Submit drop" })
+    ).toBeInTheDocument();
+    expect(
+      capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
+    ).toEqual(expect.arrayContaining(["CHAT", "PARTICIPATION"]));
+  });
+
+  it("closing the submit modal restores the normal chat composer", async () => {
+    const onClose = jest.fn();
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    const { rerender } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+        chatSubmitDrop={{
+          submissionExperience: WaveSubmissionExperience.DEFAULT,
+          initialCurationUrl: null,
+        }}
+        onCloseChatSubmitDrop={onClose}
+      />
+    );
+
+    expect(screen.getByTestId("chat-submit-drop-modal")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Close modal"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    capturedCreatorPropsHolder.all = [];
+    rerender(
+      wrapWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+          chatSubmitDrop={null}
+          onCloseChatSubmitDrop={onClose}
+        />
+      )
+    );
+
+    expect(
+      screen.queryByTestId("chat-submit-drop-modal")
+    ).not.toBeInTheDocument();
+    expect(
+      capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
+    ).toEqual(["CHAT"]);
+  });
+
+  it("successful submit closes the submit modal", async () => {
+    const onClose = jest.fn();
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+        chatSubmitDrop={{
+          submissionExperience: WaveSubmissionExperience.DEFAULT,
+          initialCurationUrl: null,
+        }}
+        onCloseChatSubmitDrop={onClose}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("creator-success-PARTICIPATION"));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses proposal title and close wiring for quorum submit modal", async () => {
+    const onClose = jest.fn();
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+        chatSubmitDrop={{
+          submissionExperience: WaveSubmissionExperience.QUORUM_PROPOSAL,
+          initialCurationUrl: null,
+        }}
+        onCloseChatSubmitDrop={onClose}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Create proposal" })
+    ).toBeInTheDocument();
+    expect(capturedCreatorPropsHolder.current.onExitFixedDropMode).toBe(
+      onClose
+    );
+  });
+
+  it("shows compact app submit CTA above the composer", async () => {
+    const onOpen = jest.fn();
+    mockIsApp = true;
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+          chatSubmitDropAction={{
+            isVisible: true,
+            canOpen: true,
+            label: "Submit drop",
+            compactLabel: "Drop",
+            restrictionMessage: null,
+            onOpen,
+            onOpenWithCurationUrl: jest.fn(),
+          }}
+        />
+      );
+    });
+
+    const button = screen.getByRole("button", { name: "Submit drop" });
+
+    expect(button).toHaveTextContent("Drop");
+    expect(screen.queryByText("Submit drop")).not.toBeInTheDocument();
+    expect(button).not.toHaveClass("tw-w-full");
+
+    fireEvent.click(button);
+
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
+  });
+
+  it("keeps compact app submit CTA when the modal is open", async () => {
+    const onOpen = jest.fn();
+    mockIsApp = true;
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    await act(async () => {
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+          chatSubmitDrop={{
+            submissionExperience: WaveSubmissionExperience.DEFAULT,
+            initialCurationUrl: null,
+          }}
+          chatSubmitDropAction={{
+            isVisible: true,
+            canOpen: true,
+            label: "Submit drop",
+            compactLabel: "Drop",
+            restrictionMessage: null,
+            onOpen,
+            onOpenWithCurationUrl: jest.fn(),
+          }}
+          onCloseChatSubmitDrop={jest.fn()}
+        />
+      );
+    });
+
+    const button = screen.getByRole("button", { name: "Submit drop" });
+
+    expect(button).toHaveTextContent("Drop");
+    expect(button).not.toHaveClass("tw-w-full");
+    expect(screen.getByTestId("chat-submit-drop-modal")).toBeInTheDocument();
+    expect(
+      capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
+    ).toEqual(expect.arrayContaining(["CHAT", "PARTICIPATION"]));
+  });
+
+  it("opens curation submit modal with a URL seed from chat composer", async () => {
+    const onOpenWithCurationUrl = jest.fn();
+    const onClose = jest.fn();
+    searchParamsMock.get.mockReturnValue(null);
+    searchParamsMock.toString.mockReturnValue("");
+
+    const { rerender } = renderWithProvider(
+      <MyStreamWaveChat
+        wave={wave}
+        firstUnreadSerialNo={null}
+        viewMode="chat"
+        onDropClick={mockOnDropClick}
+        chatSubmitDropAction={{
+          isVisible: true,
+          canOpen: true,
+          label: "Submit drop",
+          compactLabel: "Drop",
+          restrictionMessage: null,
+          onOpen: jest.fn(),
+          onOpenWithCurationUrl,
+        }}
+        onCloseChatSubmitDrop={onClose}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("submit-curation-url"));
+    expect(onOpenWithCurationUrl).toHaveBeenCalledWith(PREFILL_URL);
+
+    capturedCreatorPropsHolder.all = [];
+    rerender(
+      wrapWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+          chatSubmitDrop={{
+            submissionExperience: WaveSubmissionExperience.CURATION_LEGACY,
+            initialCurationUrl: PREFILL_URL,
+          }}
+          chatSubmitDropAction={{
+            isVisible: true,
+            canOpen: true,
+            label: "Submit drop",
+            compactLabel: "Drop",
+            restrictionMessage: null,
+            onOpen: jest.fn(),
+            onOpenWithCurationUrl,
+          }}
+          onCloseChatSubmitDrop={onClose}
+        />
+      )
+    );
+
+    expect(screen.getByTestId("curation-drop-modal")).toBeInTheDocument();
+    expect(capturedCreatorPropsHolder.current.initialCurationUrl).toBe(
+      PREFILL_URL
+    );
+    expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe(
+      "PARTICIPATION"
+    );
   });
 
   it("locks approve submissions while keeping drop status open during status locks", async () => {

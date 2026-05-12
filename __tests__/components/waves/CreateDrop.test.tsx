@@ -103,6 +103,7 @@ const commonApiPostMock = commonApiPost as jest.Mock;
 
 const wave = {
   id: "1",
+  wave: { authenticated_user_eligible_for_admin: false },
   chat: { authenticated_user_eligible: true },
   participation: { authenticated_user_eligible: true },
 } as any;
@@ -247,6 +248,38 @@ describe("CreateDrop", () => {
     await waitFor(() =>
       expect(screen.getByTestId("initial-url")).toHaveTextContent(PREFILL_URL)
     );
+  });
+
+  it("opens external curation submit flow from chat mode with the url seed", async () => {
+    const onSubmitCurationUrl = jest.fn();
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{} as any}
+            onSubmitCurationUrl={onSubmitCurationUrl}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("switch to drop"));
+
+    expect(onSubmitCurationUrl).toHaveBeenCalledWith(PREFILL_URL);
+    expect(screen.queryByText("submit curation")).not.toBeInTheDocument();
   });
 
   it("resets to default mode when wave scope changes", async () => {

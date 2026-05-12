@@ -18,6 +18,8 @@ interface PrivilegedDropCreatorProps {
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly initialCurationUrl?: string | null | undefined;
+  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -38,6 +40,8 @@ export default function PrivilegedDropCreator({
   onExitFixedDropMode,
   onDropAddedToQueue,
   curationComposerVariant = "default",
+  initialCurationUrl = null,
+  onSubmitCurationUrl,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
 }: PrivilegedDropCreatorProps) {
@@ -96,6 +100,8 @@ export default function PrivilegedDropCreator({
       }}
       onDropAddedToQueue={onDropAddedToQueue}
       curationComposerVariant={curationComposerVariant}
+      initialCurationUrl={initialCurationUrl}
+      onSubmitCurationUrl={onSubmitCurationUrl}
       externalAttachmentDrop={externalAttachmentDrop}
       onExternalAttachmentDropConsumed={onExternalAttachmentDropConsumed}
     />

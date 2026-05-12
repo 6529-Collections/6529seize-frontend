@@ -1,6 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CreateCurationDropContent from "@/components/waves/CreateCurationDropContent";
+import type { ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 import { render, screen } from "@testing-library/react";
 
@@ -53,35 +54,45 @@ const wave = {
   metrics: {},
 } as any;
 
+const URL_A =
+  "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/123";
+const URL_B =
+  "https://opensea.io/item/ethereum/0x1234567890abcdef1234567890abcdef12345678/456";
+
+const createContent = (
+  overrides: Partial<ComponentProps<typeof CreateCurationDropContent>> = {}
+) => (
+  <AuthContext.Provider
+    value={
+      {
+        requestAuth: async () => ({ success: true }),
+        setToast: jest.fn(),
+        connectedProfile: null,
+      } as any
+    }
+  >
+    <ReactQueryWrapperContext.Provider
+      value={{ addOptimisticDrop: jest.fn(async () => {}) } as any}
+    >
+      <CreateCurationDropContent
+        activeDrop={null}
+        onCancelReplyQuote={jest.fn()}
+        wave={wave}
+        dropId={null}
+        isDropMode={true}
+        initialUrl={null}
+        submitDrop={jest.fn()}
+        {...overrides}
+      />
+    </ReactQueryWrapperContext.Provider>
+  </AuthContext.Provider>
+);
+
 describe("CreateCurationDropContent supported URLs", () => {
   it("toggles supported URLs inline in leaderboard variant without opening a new modal", async () => {
     const user = userEvent.setup();
 
-    render(
-      <AuthContext.Provider
-        value={
-          {
-            requestAuth: async () => ({ success: true }),
-            setToast: jest.fn(),
-            connectedProfile: null,
-          } as any
-        }
-      >
-        <ReactQueryWrapperContext.Provider
-          value={{ addOptimisticDrop: jest.fn(async () => {}) } as any}
-        >
-          <CreateCurationDropContent
-            activeDrop={null}
-            onCancelReplyQuote={jest.fn()}
-            wave={wave}
-            dropId={null}
-            isDropMode={true}
-            submitDrop={jest.fn()}
-            curationComposerVariant="leaderboard"
-          />
-        </ReactQueryWrapperContext.Provider>
-      </AuthContext.Provider>
-    );
+    render(createContent({ curationComposerVariant: "leaderboard" }));
 
     const toggleButton = screen.getByRole("button", {
       name: "View Supported URLs",
@@ -120,5 +131,34 @@ describe("CreateCurationDropContent supported URLs", () => {
         "Submit one URL only. It must match one of these formats:"
       )
     ).not.toBeInTheDocument();
+  });
+
+  it("seeds the input from a non-null initial URL", () => {
+    render(createContent({ initialUrl: URL_A }));
+
+    expect(screen.getByLabelText("Curation URL")).toHaveValue(URL_A);
+  });
+
+  it("updates the input when initialUrl changes from one URL to another", () => {
+    const { rerender } = render(createContent({ initialUrl: URL_A }));
+
+    expect(screen.getByLabelText("Curation URL")).toHaveValue(URL_A);
+
+    rerender(createContent({ initialUrl: URL_B }));
+
+    expect(screen.getByLabelText("Curation URL")).toHaveValue(URL_B);
+  });
+
+  it("keeps the current input when initialUrl changes to null", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(createContent({ initialUrl: URL_A }));
+    const input = screen.getByLabelText("Curation URL");
+
+    await user.clear(input);
+    await user.type(input, URL_B);
+
+    rerender(createContent({ initialUrl: null }));
+
+    expect(screen.getByLabelText("Curation URL")).toHaveValue(URL_B);
   });
 });

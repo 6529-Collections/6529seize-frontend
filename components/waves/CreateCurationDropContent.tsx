@@ -75,13 +75,32 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
 
-  const [urlValue, setUrlValue] = useState(() => initialUrl ?? "");
+  const [urlInput, setUrlInput] = useState(() => ({
+    initialUrl,
+    value: initialUrl ?? "",
+  }));
   const [submitting, setSubmitting] = useState(false);
   const [showLiveValidation, setShowLiveValidation] = useState(false);
   const [isSupportedUrlsExpanded, setIsSupportedUrlsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isInitialMountRef = useRef(true);
   const isLeaderboardVariant = curationComposerVariant === "leaderboard";
+
+  let urlValue = urlInput.value;
+  if (urlInput.initialUrl !== initialUrl) {
+    urlValue = initialUrl ?? urlInput.value;
+    setUrlInput({
+      initialUrl,
+      value: urlValue,
+    });
+  }
+
+  const setUrlValue = useCallback((value: string) => {
+    setUrlInput((current) => ({
+      ...current,
+      value,
+    }));
+  }, []);
 
   const curationValidation = useMemo(() => {
     return validateCurationDropInput(urlValue);
@@ -285,6 +304,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
     isApp,
     submitDrop,
     setToast,
+    setUrlValue,
   ]);
 
   const onDrop = useCallback(() => {

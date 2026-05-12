@@ -11,6 +11,10 @@ interface WaveDropCreateProps {
   readonly onCancel?: (() => void) | undefined;
   readonly onSuccess: () => void;
   readonly isCurationLeaderboard?: boolean | undefined;
+  readonly initialCurationUrl?: string | null | undefined;
+  readonly title?: string | undefined;
+  readonly isModalContent?: boolean | undefined;
+  readonly onExitFixedDropMode?: (() => void) | undefined;
 }
 
 export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
@@ -18,23 +22,33 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   onCancel,
   onSuccess,
   isCurationLeaderboard = false,
+  initialCurationUrl = null,
+  title = "Create a New Drop",
+  isModalContent = false,
+  onExitFixedDropMode = onCancel,
 }) => {
   const curationComposerVariant: CurationComposerVariant = isCurationLeaderboard
     ? "leaderboard"
     : "default";
+  const showHeader = !isCurationLeaderboard && !isModalContent;
+  const containerClassName = (() => {
+    if (isModalContent) {
+      return "tw-mb-0";
+    }
+
+    if (isCurationLeaderboard) {
+      return "tw-mb-4";
+    }
+
+    return "tw-mb-4 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  })();
 
   return (
-    <div
-      className={
-        isCurationLeaderboard
-          ? "tw-mb-4"
-          : "tw-mb-4 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800"
-      }
-    >
-      {!isCurationLeaderboard && (
+    <div className={containerClassName}>
+      {showHeader && (
         <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between">
           <span className="tw-text-base tw-font-semibold tw-text-iron-200">
-            Create a New Drop
+            {title}
           </span>
           {onCancel && (
             <button
@@ -64,11 +78,12 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
         onCancelReplyQuote={() => {}}
         onDropAddedToQueue={() => {}}
         onAllDropsAdded={onSuccess}
-        onExitFixedDropMode={onCancel}
+        onExitFixedDropMode={onExitFixedDropMode}
         dropId={null}
         activeDrop={null}
         fixedDropMode={DropMode.PARTICIPATION}
         curationComposerVariant={curationComposerVariant}
+        initialCurationUrl={initialCurationUrl}
       />
     </div>
   );
