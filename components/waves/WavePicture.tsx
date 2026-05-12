@@ -186,6 +186,9 @@ export default function WavePicture({
         <FontAwesomeIcon
           icon={faWater}
           className="tw-size-[54%] tw-text-white/60"
+          aria-hidden="true"
+          focusable={false}
+          data-testid="wave-fallback-icon"
         />
       </div>
     );

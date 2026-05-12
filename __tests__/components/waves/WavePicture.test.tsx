@@ -11,12 +11,12 @@ describe("WavePicture", () => {
     expect(img).toHaveAttribute("alt", "wave");
   });
 
-  it("renders faded wave icon fallback when no picture and no contributors", () => {
+  it("renders default wave icon fallback when no picture and no contributors", () => {
     const { container } = render(
       <WavePicture name="wave" picture={null} contributors={[]} />
     );
     expect(container.firstChild).toBeInTheDocument();
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
   });
 
   it("renders contributor images sliced", () => {
