@@ -16,7 +16,10 @@ describe("WavePicture", () => {
       <WavePicture name="wave" picture={null} contributors={[]} />
     );
     expect(container.firstChild).toBeInTheDocument();
-    expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
+    const icon = screen.getByTestId("wave-fallback-icon");
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass("tw-text-white/60");
+    expect(icon.parentElement).toHaveClass("tw-bg-white/10");
   });
 
   it("renders contributor images sliced", () => {

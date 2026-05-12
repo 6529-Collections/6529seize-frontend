@@ -182,7 +182,7 @@ export default function WavePicture({
   // 3) If no PFPS, show the default wave icon fallback
   if (pfps.length === 0) {
     return (
-      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700">
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-white/10">
         <FontAwesomeIcon
           icon={faWater}
           className="tw-size-[54%] tw-text-white/60"
