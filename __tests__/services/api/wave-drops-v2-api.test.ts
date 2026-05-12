@@ -1,7 +1,12 @@
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { commonApiFetch } from "@/services/api/common-api";
-import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
+import {
+  fetchWaveDropsFeedV2,
+  mapLeaderboardDropV2,
+} from "@/services/api/wave-drops-v2-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -140,6 +145,60 @@ describe("fetchWaveDropsFeedV2", () => {
         winner_main_stage_drop_ids: [],
       })
     );
+  });
+
+  it("maps V2 priority metadata into hydrated legacy drops", async () => {
+    const priorityMetadata = [
+      {
+        data_key: "additional_media",
+        data_value: JSON.stringify({
+          preview_image: "ipfs://preview-image",
+        }),
+      },
+    ];
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        {
+          ...createDrop(1),
+          priority_metadata: priorityMetadata,
+        },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(result.drops[0]?.metadata).toEqual(priorityMetadata);
+  });
+
+  it("maps V2 priority metadata into leaderboard legacy drops", () => {
+    const priorityMetadata = [
+      {
+        data_key: "additional_media",
+        data_value: JSON.stringify({
+          preview_image: "ipfs://leaderboard-preview-image",
+        }),
+      },
+    ];
+
+    const drop = mapLeaderboardDropV2({
+      drop: {
+        ...createDrop(1),
+        priority_metadata: priorityMetadata,
+      } as unknown as ApiDropV2,
+      wave: {
+        id: "wave-1",
+        name: "Wave 1",
+        picture: null,
+        voting_credit_type: "TDH",
+      } as unknown as ApiWaveMin,
+    });
+
+    expect(drop.metadata).toEqual(priorityMetadata);
   });
 
   it("fetches only additional parts for multi-part drops", async () => {

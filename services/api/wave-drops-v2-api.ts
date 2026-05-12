@@ -34,6 +34,7 @@ import {
   mapDropReactionCountersV2,
   mapIdentityOverviewToProfileMin,
   mapMentionedWaves,
+  mapPriorityMetadataV2ToDropMetadata,
   mapReplyToDrop,
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
@@ -192,22 +193,39 @@ export const fetchDropReactionDetailsV2 = async (
   }
 };
 
+const mergeMetadata = (
+  priorityMetadata: ApiDropMetadataResponse[],
+  metadata: ApiDropMetadataResponse[]
+): ApiDropMetadataResponse[] => {
+  const priorityKeys = new Set(
+    priorityMetadata.map((item) => item.data_key.trim()).filter(Boolean)
+  );
+
+  return [
+    ...priorityMetadata,
+    ...metadata.filter((item) => !priorityKeys.has(item.data_key.trim())),
+  ];
+};
+
 const fetchDropMetadataV2 = async (
   drop: ApiDropV2,
   signal?: AbortSignal
 ): Promise<ApiDropMetadataResponse[]> => {
+  const priorityMetadata = mapPriorityMetadataV2ToDropMetadata(drop);
+
   if (!drop.submission_context?.has_metadata) {
-    return [];
+    return priorityMetadata;
   }
 
   try {
-    return await commonApiFetch<ApiDropMetadataResponse[]>({
+    const metadata = await commonApiFetch<ApiDropMetadataResponse[]>({
       endpoint: `v2/drops/${getDropEndpointId(drop.id)}/metadata`,
       signal,
     });
+    return mergeMetadata(priorityMetadata, metadata);
   } catch (error) {
     rethrowAbortFetchError(error);
-    return [];
+    return priorityMetadata;
   }
 };
 
@@ -353,7 +371,7 @@ export const mapLeaderboardDropV2 = ({
     mentioned_users: drop.mentioned_users ?? [],
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
-    metadata: [],
+    metadata: mapPriorityMetadataV2ToDropMetadata(drop),
     rating: voting?.current_calculated_vote ?? 0,
     realtime_rating: voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
