@@ -1,12 +1,17 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { publicEnv } from "@/config/env";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
+import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
+import { sanitizeErrorForUser } from "@/utils/error-sanitizer";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import useDownloader from "react-use-downloader";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
 
 interface SingleWaveDropVotersProps {
@@ -16,8 +21,9 @@ interface SingleWaveDropVotersProps {
 export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
   drop,
 }) => {
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, setToast } = useAuth();
   const [isVotersOpen, setIsVotersOpen] = useState(false);
+  const { download, error: downloadError, isInProgress } = useDownloader();
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: drop.wave.id,
@@ -29,6 +35,55 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
       enabled: isVotersOpen,
     });
 
+  const downloadUrl = useMemo(
+    () =>
+      `${publicEnv.API_ENDPOINT}/api/v2/drops/${encodeURIComponent(
+        drop.id
+      )}/votes/download`,
+    [drop.id]
+  );
+
+  const buildDownloadHeaders = useCallback((): Record<string, string> => {
+    const headers: Record<string, string> = {
+      Accept: "text/csv",
+    };
+    const apiAuth = getStagingAuth();
+    const walletAuth = getAuthJwt();
+
+    if (apiAuth) {
+      headers["x-6529-auth"] = apiAuth;
+    }
+
+    if (walletAuth) {
+      headers["Authorization"] = `Bearer ${walletAuth}`;
+    }
+
+    return headers;
+  }, []);
+
+  useEffect(() => {
+    if (!downloadError?.errorMessage) {
+      return;
+    }
+
+    setToast({
+      type: "error",
+      message: sanitizeErrorForUser(downloadError.errorMessage),
+    });
+  }, [downloadError, setToast]);
+
+  const onDownloadAllVotes = useCallback(async () => {
+    if (isInProgress) {
+      return;
+    }
+
+    await download(downloadUrl, `drop-votes-${drop.id}.csv`, undefined, {
+      headers: buildDownloadHeaders(),
+    });
+  }, [buildDownloadHeaders, download, downloadUrl, drop.id, isInProgress]);
+
+  const toggleVoters = () => setIsVotersOpen((current) => !current);
+
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isLoading && !isFetchingNextPage) {
       fetchNextPage();
@@ -37,26 +92,50 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
 
   return (
     <div>
-      <button
-        onClick={() => setIsVotersOpen(!isVotersOpen)}
+      <div
         className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-border-0 tw-px-4 tw-py-4 tw-text-left tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-900 ${
           isVotersOpen ? "tw-bg-iron-800" : "tw-bg-iron-950"
         }`}
       >
-        <span
-          className={`tw-text-sm tw-font-medium ${isVotersOpen ? "tw-text-iron-300" : "tw-text-iron-400"}`}
+        <button
+          type="button"
+          onClick={toggleVoters}
+          className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
         >
-          Top voters
-        </span>
-        <motion.div
-          animate={{ rotate: isVotersOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <ChevronDownIcon
-            className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${isVotersOpen ? "tw-text-iron-400" : "tw-text-iron-600"}`}
-          />
-        </motion.div>
-      </button>
+          <span
+            className={`tw-text-sm tw-font-medium ${isVotersOpen ? "tw-text-iron-300" : "tw-text-iron-400"}`}
+          >
+            Top voters
+          </span>
+        </button>
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-3">
+          <button
+            type="button"
+            onClick={onDownloadAllVotes}
+            disabled={isInProgress}
+            className="tw-flex tw-h-8 tw-items-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+            aria-label="Download all top voters as CSV"
+          >
+            <span>{isInProgress ? "Downloading" : "Download All"}</span>
+            <ArrowDownTrayIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          </button>
+          <button
+            type="button"
+            onClick={toggleVoters}
+            className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0"
+            aria-label={`${isVotersOpen ? "Collapse" : "Expand"} top voters`}
+          >
+            <motion.div
+              animate={{ rotate: isVotersOpen ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ChevronDownIcon
+                className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${isVotersOpen ? "tw-text-iron-400" : "tw-text-iron-600"}`}
+              />
+            </motion.div>
+          </button>
+        </div>
+      </div>
 
       <AnimatePresence>
         {isVotersOpen && (

@@ -5,9 +5,22 @@ import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
 import { useAuth } from "@/components/auth/Auth";
 
 let intersectionCb: any;
+const downloadMock = jest.fn();
 
 jest.mock("@/hooks/useWaveTopVoters");
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
+jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: jest.fn(() => "jwt"),
+  getStagingAuth: jest.fn(() => "staging"),
+}));
+jest.mock("react-use-downloader", () => ({
+  __esModule: true,
+  default: () => ({
+    download: downloadMock,
+    error: null,
+    isInProgress: false,
+  }),
+}));
 jest.mock("@/hooks/useIntersectionObserver", () => ({
   useIntersectionObserver: (cb: any) => {
     intersectionCb = cb;
@@ -31,7 +44,11 @@ const baseDrop = {
 describe("SingleWaveDropVoters", () => {
   beforeEach(() => {
     useVoters.mockReset();
-    useAuthMock.mockReturnValue({ connectedProfile: null });
+    downloadMock.mockReset();
+    useAuthMock.mockReturnValue({
+      connectedProfile: null,
+      setToast: jest.fn(),
+    });
   });
 
   it("shows placeholder when no voters", async () => {
@@ -47,7 +64,7 @@ describe("SingleWaveDropVoters", () => {
     expect(useVoters).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false })
     );
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Top voters" }));
     expect(useVoters).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true })
     );
@@ -65,9 +82,41 @@ describe("SingleWaveDropVoters", () => {
       isLoading: false,
     });
     render(<SingleWaveDropVoters drop={baseDrop} />);
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Top voters" }));
     expect(screen.getByTestId("voter")).toHaveTextContent("v1");
     intersectionCb();
     expect(fetchNextPage).toHaveBeenCalled();
+  });
+
+  it("downloads all votes as csv for the drop", async () => {
+    const user = userEvent.setup();
+    useVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+    });
+
+    render(<SingleWaveDropVoters drop={baseDrop} />);
+    await user.click(
+      screen.getByRole("button", { name: "Download all top voters as CSV" })
+    );
+
+    expect(downloadMock).toHaveBeenCalledWith(
+      expect.stringContaining("/api/v2/drops/d/votes/download"),
+      "drop-votes-d.csv",
+      undefined,
+      {
+        headers: {
+          Accept: "text/csv",
+          Authorization: "Bearer jwt",
+          "x-6529-auth": "staging",
+        },
+      }
+    );
+    expect(useVoters).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 });
