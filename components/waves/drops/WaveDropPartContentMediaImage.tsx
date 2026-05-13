@@ -1,5 +1,6 @@
 "use client";
 
+import { FallbackImage } from "@/components/common/FallbackImage";
 import {
   ImageMediaModal,
   requestCenteredImageFullscreen,
@@ -27,31 +28,42 @@ function NaturalHeightImage({
   readonly onFinalError: () => void;
   readonly imageObjectPosition: string;
 }) {
-  const [currentSrc, setCurrentSrc] = useState(primarySrc);
-  const [usedFallback, setUsedFallback] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<string | undefined>();
 
-  const handleError = useCallback(() => {
-    if (!usedFallback) {
-      setCurrentSrc(fallbackSrc);
-      setUsedFallback(true);
-      return;
-    }
+  const handleLoad = useCallback(
+    (event: React.SyntheticEvent<HTMLImageElement, Event>) => {
+      const { naturalHeight, naturalWidth } = event.currentTarget;
 
-    onFinalError();
-  }, [fallbackSrc, onFinalError, usedFallback]);
+      if (naturalHeight > 0 && naturalWidth > 0) {
+        setAspectRatio(`${naturalWidth} / ${naturalHeight}`);
+      }
+
+      onLoad();
+    },
+    [onLoad]
+  );
 
   return (
-    <img
-      key={retryTick}
-      ref={imgRef}
-      src={currentSrc}
-      alt="Drop media"
-      loading="lazy"
-      className="tw-block tw-h-auto tw-max-h-64 tw-w-full tw-max-w-full tw-object-contain"
-      style={{ objectPosition: imageObjectPosition }}
-      onLoad={onLoad}
-      onError={handleError}
-    />
+    <span
+      className="tw-relative tw-block tw-min-h-px tw-w-full tw-max-w-full tw-overflow-hidden"
+      style={{ aspectRatio, maxHeight: "16rem" }}
+    >
+      {/* Drop media can come from hosts outside next.config.ts image remotePatterns. */}
+      <FallbackImage
+        key={retryTick}
+        ref={imgRef}
+        primarySrc={primarySrc}
+        fallbackSrc={fallbackSrc}
+        alt="Drop media"
+        fill
+        sizes="(max-width: 768px) 100vw, 768px"
+        optimize={false}
+        className="tw-object-contain"
+        style={{ objectPosition: imageObjectPosition }}
+        onLoad={handleLoad}
+        onError={onFinalError}
+      />
+    </span>
   );
 }
 

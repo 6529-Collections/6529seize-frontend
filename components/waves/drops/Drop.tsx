@@ -44,6 +44,10 @@ interface DropProps {
   readonly winningThreshold?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 export default function Drop({
@@ -68,6 +72,10 @@ export default function Drop({
   winningThreshold,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: DropProps) {
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
@@ -88,6 +96,10 @@ export default function Drop({
         winningThreshold={winningThreshold}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
+        embedPath={embedPath}
+        quotePath={quotePath}
+        embedDepth={embedDepth}
+        maxEmbedDepth={maxEmbedDepth}
       />
     ),
     [ApiDropType.Winner]: (
@@ -109,6 +121,10 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        embedPath={embedPath}
+        quotePath={quotePath}
+        embedDepth={embedDepth}
+        maxEmbedDepth={maxEmbedDepth}
       />
     ),
     [ApiDropType.Chat]: (
@@ -132,6 +148,10 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        embedPath={embedPath}
+        quotePath={quotePath}
+        embedDepth={embedDepth}
+        maxEmbedDepth={maxEmbedDepth}
       />
     ),
   };

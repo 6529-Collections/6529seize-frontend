@@ -5,8 +5,9 @@ import { useCallback, useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import LinkHandlerFrame from "@/components/waves/LinkHandlerFrame";
-import { DropLocation } from "@/components/waves/drops/drop.types";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
+import { DropLocation } from "@/components/waves/drops/drop.types";
+import Drop from "@/components/waves/drops/Drop";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -14,15 +15,16 @@ import {
   convertApiDropToExtendedDrop,
   type ExtendedDrop,
 } from "@/helpers/waves/drop.helpers";
+import { useWaveById } from "@/hooks/useWaveById";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import {
   DROP_DETAIL_STALE_TIME_MS,
   fetchDropByIdBatched,
   getDropQueryKey,
 } from "@/services/api/drop-api";
 import { fetchQuorumParticipationDropPreviewBySerialNoV2 } from "@/services/api/quorum-participation-drop-preview-v2-api";
-import QuorumParticipationDrop from "./QuorumParticipationDrop";
 
-interface QuorumParticipationDropLinkPreviewProps {
+interface WaveDropLinkPreviewProps {
   readonly href: string;
   readonly waveId: string;
   readonly dropId?: string | undefined;
@@ -50,7 +52,46 @@ const toSerialNumber = (
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-export default function QuorumParticipationDropLinkPreview({
+const getErrorStatus = (error: unknown): number | undefined => {
+  if (error === null || error === undefined || typeof error !== "object") {
+    return undefined;
+  }
+
+  const maybeError = error as {
+    readonly status?: unknown;
+    readonly response?: { readonly status?: unknown };
+  };
+  const status = maybeError.response?.status ?? maybeError.status;
+
+  return typeof status === "number" ? status : undefined;
+};
+
+const isDropNotFoundError = (
+  error: unknown,
+  normalizedDropId: string | null
+): boolean => {
+  if (error === null || error === undefined) {
+    return false;
+  }
+
+  if (getErrorStatus(error) === 404) {
+    return true;
+  }
+
+  if (!normalizedDropId) {
+    return false;
+  }
+
+  const expectedMessage = `Drop ${normalizedDropId} not found`;
+
+  if (error instanceof Error) {
+    return error.message === expectedMessage;
+  }
+
+  return error === expectedMessage;
+};
+
+export default function WaveDropLinkPreview({
   href,
   waveId,
   dropId,
@@ -61,17 +102,16 @@ export default function QuorumParticipationDropLinkPreview({
   embedDepth,
   maxEmbedDepth,
   hideLink,
-}: QuorumParticipationDropLinkPreviewProps) {
+}: WaveDropLinkPreviewProps) {
   const parsedSerialNo = toSerialNumber(serialNo);
-  const normalizedDropId =
-    dropId === undefined || dropId.length === 0 ? null : dropId;
-  const { data: drop } = useQuery<ApiDrop | null>({
+  const normalizedDropId = dropId?.trim() ? dropId.trim() : null;
+  const { data: drop, error } = useQuery<ApiDrop | null>({
     queryKey:
       normalizedDropId !== null
         ? getDropQueryKey(normalizedDropId)
         : [
             QueryKey.DROP,
-            "quorum-participation-link-preview",
+            "wave-drop-link-preview",
             {
               dropId: normalizedDropId,
               waveId,
@@ -96,6 +136,11 @@ export default function QuorumParticipationDropLinkPreview({
     placeholderData: keepPreviousData,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
+  const { wave } = useWaveById(waveId, {
+    enabled: drop?.drop_type === ApiDropType.Participatory,
+  });
+  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
+    useApprovalWaveStatus({ wave });
 
   const extendedDrop = useMemo<ExtendedDrop | null>(() => {
     if (drop?.drop_type !== ApiDropType.Participatory) {
@@ -114,19 +159,29 @@ export default function QuorumParticipationDropLinkPreview({
     [onQuoteClick]
   );
 
+  const isNotFound =
+    drop === null || isDropNotFoundError(error, normalizedDropId);
+
   return (
     <LinkHandlerFrame href={href} hideLink={hideLink}>
       {extendedDrop ? (
-        <QuorumParticipationDrop
+        <Drop
           drop={extendedDrop}
+          previousDrop={null}
+          nextDrop={null}
           showWaveInfo={true}
           activeDrop={null}
           showReplyAndQuote={false}
           location={DropLocation.MY_STREAM}
+          dropViewDropId={null}
           onReply={handleReply}
+          onReplyClick={() => undefined}
           onQuoteClick={onQuoteClick}
           onDropContentClick={handleDropContentClick}
           showInteractions={false}
+          winningThreshold={winningThreshold}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
           embedPath={embedPath}
           quotePath={quotePath}
           embedDepth={embedDepth}
@@ -134,9 +189,10 @@ export default function QuorumParticipationDropLinkPreview({
         />
       ) : (
         <WaveDropQuote
-          drop={drop ?? null}
+          drop={isNotFound ? null : (drop ?? null)}
           partId={1}
           onQuoteClick={onQuoteClick}
+          isNotFound={isNotFound}
           embedPath={embedPath}
           quotePath={quotePath}
           embedDepth={embedDepth}

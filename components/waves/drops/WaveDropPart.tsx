@@ -79,6 +79,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const haveNextPart = activePartIndex < drop.parts.length - 1;
 
     const isTemporaryDrop = drop.id.startsWith("temp-");
+    const isInteractive = !isTemporaryDrop && !!onDropContentClick;
 
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
     const touchStartX = useRef(0);
@@ -121,12 +122,32 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       setLongPressTriggered(false);
     };
 
-    const handleClick = () => {
-      if (window.getSelection()?.toString()) {
+    const handleClick = (
+      event:
+        | React.MouseEvent<HTMLDivElement>
+        | React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      const selection = globalThis.getSelection?.() ?? null;
+      if (selection?.toString()) {
         return;
       }
       if (isTemporaryDrop || !onDropContentClick) return;
+
+      event.stopPropagation();
       onDropContentClick(drop);
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!isInteractive) return;
+      const isActivationKey =
+        event.key === "Enter" || event.key === " " || event.key === "Space";
+
+      if (!isActivationKey) {
+        return;
+      }
+
+      event.preventDefault();
+      handleClick(event);
     };
 
     if (!activePart) {
@@ -141,15 +162,11 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`touch-select-none tw-no-underline ${
-          isTemporaryDrop || !onDropContentClick
-            ? "tw-cursor-default"
-            : "tw-cursor-pointer"
+          isInteractive ? "tw-cursor-pointer" : "tw-cursor-default"
         }`}
-        role={isTemporaryDrop || !onDropContentClick ? undefined : "button"}
-        tabIndex={isTemporaryDrop || !onDropContentClick ? undefined : 0}
-        onKeyDown={(e) =>
-          !isTemporaryDrop && e.key === "Enter" && handleClick()
-        }
+        role={isInteractive ? "button" : undefined}
+        tabIndex={isInteractive ? 0 : undefined}
+        onKeyDown={handleKeyDown}
       >
         <div className="tw-relative tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDropPartDrop

@@ -317,6 +317,10 @@ const getContentBlock = ({
   handleOnReply,
   handleOnEdit,
   hasActiveLinkCardActions,
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -352,6 +356,10 @@ const getContentBlock = ({
   readonly handleOnReply: () => void;
   readonly handleOnEdit: () => void;
   readonly hasActiveLinkCardActions: boolean;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -392,6 +400,10 @@ const getContentBlock = ({
             onCancel={handleEditCancel}
             hasTouch={allowLongPress}
             onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+            embedPath={embedPath}
+            quotePath={quotePath}
+            embedDepth={embedDepth}
+            maxEmbedDepth={maxEmbedDepth}
           />
         </div>
       </div>
@@ -428,6 +440,10 @@ interface WaveDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const WaveDrop = ({
@@ -448,6 +464,10 @@ const WaveDrop = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -745,6 +765,10 @@ const WaveDrop = ({
     handleOnReply,
     handleOnEdit,
     hasActiveLinkCardActions,
+    embedPath,
+    quotePath,
+    embedDepth,
+    maxEmbedDepth,
   });
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (

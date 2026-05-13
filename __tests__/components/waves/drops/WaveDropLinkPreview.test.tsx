@@ -1,18 +1,18 @@
 import { waitFor } from "@testing-library/react";
 
-import QuorumParticipationDropLinkPreview from "@/components/waves/quorum/QuorumParticipationDropLinkPreview";
+import WaveDropLinkPreview from "@/components/waves/drops/WaveDropLinkPreview";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiSubmissionDropStatus } from "@/generated/models/ApiSubmissionDropStatus";
+import { useWaveById } from "@/hooks/useWaveById";
+import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { renderWithQueryClient } from "../../../utils/reactQuery";
 
-const mockQuorumParticipationDrop = jest.fn(() => (
-  <div data-testid="quorum-drop" />
-));
-const mockWaveDropQuote = jest.fn(() => <div data-testid="wave-drop-quote" />);
+const mockDrop = jest.fn(() => <div data-testid="drop" />);
+const mockWaveDropQuote = jest.fn(() => <div data-testid="quote" />);
 const mockLinkHandlerFrame = jest.fn(({ children }: any) => (
   <div data-testid="link-frame">{children}</div>
 ));
@@ -22,22 +22,30 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/services/api/drop-api", () => {
-  const { QueryKey } = jest.requireActual(
+  const { QueryKey: ActualQueryKey } = jest.requireActual(
     "@/components/react-query-wrapper/ReactQueryWrapper"
   );
   return {
     DROP_DETAIL_STALE_TIME_MS: 60 * 1000,
     fetchDropByIdBatched: jest.fn(),
     getDropQueryKey: (dropId: string | null | undefined) => [
-      QueryKey.DROP,
+      ActualQueryKey.DROP,
       { drop_id: dropId ?? null },
     ],
   };
 });
 
-jest.mock("@/components/waves/quorum/QuorumParticipationDrop", () => ({
+jest.mock("@/hooks/useWaveById", () => ({
+  useWaveById: jest.fn(),
+}));
+
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: jest.fn(),
+}));
+
+jest.mock("@/components/waves/drops/Drop", () => ({
   __esModule: true,
-  default: (props: any) => mockQuorumParticipationDrop(props),
+  default: (props: any) => mockDrop(props),
 }));
 
 jest.mock("@/components/waves/drops/WaveDropQuote", () => ({
@@ -56,27 +64,40 @@ const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
 const fetchDropByIdBatchedMock = fetchDropByIdBatched as jest.MockedFunction<
   typeof fetchDropByIdBatched
 >;
+const useWaveByIdMock = useWaveById as jest.MockedFunction<typeof useWaveById>;
+const useApprovalWaveStatusMock = useApprovalWaveStatus as jest.MockedFunction<
+  typeof useApprovalWaveStatus
+>;
+
+const approvalWave = {
+  id: "wave-1",
+  wave: { type: "APPROVE", winning_threshold: 12 },
+} as any;
 
 const buildDrop = (overrides: Record<string, unknown> = {}) =>
   ({
     id: "drop-1",
     serial_no: 7,
     drop_type: ApiDropType.Participatory,
-    wave: { id: "quorum-wave", name: "Quorum" },
+    wave: { id: "wave-1", name: "Rank Wave" },
     reply_to: null,
     author: { handle: "alice" },
-    title: "Proposal",
-    parts: [{ part_id: 1, content: "Proposal body", media: [] }],
+    title: "Submission",
+    parts: [{ part_id: 1, content: "Body", media: [] }],
     metadata: [],
     created_at: 1000,
     rank: null,
+    mentioned_users: [],
+    mentioned_groups: [],
+    mentioned_waves: [],
+    referenced_nfts: [],
     ...overrides,
   }) as any;
 
 const buildWaveOverview = () =>
   ({
-    id: "quorum-wave",
-    name: "Quorum",
+    id: "wave-1",
+    name: "Rank Wave",
     pfp: null,
     last_drop_time: 1000,
     created_at: 1000,
@@ -102,8 +123,8 @@ const buildDropV2 = (overrides: Record<string, unknown> = {}) =>
     created_at: 1000,
     is_signed: false,
     hide_link_preview: false,
-    title: "Proposal",
-    content: "Proposal body",
+    title: "Submission",
+    content: "Body",
     media: [],
     attachments: [],
     parts_count: 1,
@@ -114,6 +135,7 @@ const buildDropV2 = (overrides: Record<string, unknown> = {}) =>
       level: 0,
       classification: ApiProfileClassification.Pseudonym,
       primary_address: "0xabc",
+      badges: {},
     },
     drop_type: ApiDropMainType.Submission,
     referenced_nfts: [],
@@ -149,26 +171,43 @@ const buildDropV2 = (overrides: Record<string, unknown> = {}) =>
     ...overrides,
   }) as any;
 
-describe("QuorumParticipationDropLinkPreview", () => {
+describe("WaveDropLinkPreview", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    useWaveByIdMock.mockReturnValue({
+      wave: approvalWave,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    } as any);
+    useApprovalWaveStatusMock.mockReturnValue({
+      winningThreshold: 12,
+      approvedCount: 3,
+      closeStatus: null,
+      isApprovalStatusLoading: false,
+      isApprovalStatusError: false,
+      isVotingClosed: true,
+      isVotingControlsLocked: true,
+      retryApprovalStatus: null,
+    });
   });
 
-  it("loads a drop id and renders the quorum participation design", async () => {
-    const drop = buildDrop();
-    fetchDropByIdBatchedMock.mockResolvedValue(drop);
+  it("fetches by drop id and renders participatory drops through Drop", async () => {
+    fetchDropByIdBatchedMock.mockResolvedValue(buildDrop());
 
     renderWithQueryClient(
-      <QuorumParticipationDropLinkPreview
-        href="https://site.com/waves/quorum-wave?drop=drop-1"
-        waveId="quorum-wave"
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
         dropId="drop-1"
         onQuoteClick={jest.fn()}
       />
     );
 
     await waitFor(() => {
-      expect(mockQuorumParticipationDrop).toHaveBeenCalledWith(
+      expect(mockDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           drop: expect.objectContaining({ id: "drop-1" }),
           showInteractions: false,
@@ -179,7 +218,7 @@ describe("QuorumParticipationDropLinkPreview", () => {
     expect(fetchDropByIdBatchedMock).toHaveBeenCalledWith("drop-1");
   });
 
-  it("loads a serial number and renders the quorum participation design", async () => {
+  it("fetches by serial number", async () => {
     const drop = buildDropV2();
     commonApiFetchMock.mockResolvedValue({
       drops: [drop],
@@ -187,24 +226,23 @@ describe("QuorumParticipationDropLinkPreview", () => {
     });
 
     renderWithQueryClient(
-      <QuorumParticipationDropLinkPreview
-        href="https://site.com/waves/quorum-wave?serialNo=7"
-        waveId="quorum-wave"
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?serialNo=7"
+        waveId="wave-1"
         serialNo="7"
         onQuoteClick={jest.fn()}
       />
     );
 
     await waitFor(() => {
-      expect(mockQuorumParticipationDrop).toHaveBeenCalledWith(
+      expect(mockDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           drop: expect.objectContaining({ id: "drop-1" }),
-          showInteractions: false,
         })
       );
     });
     expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "v2/waves/quorum-wave/drops",
+      endpoint: "v2/waves/wave-1/drops",
       params: {
         limit: "1",
         serial_no_limit: "7",
@@ -213,14 +251,52 @@ describe("QuorumParticipationDropLinkPreview", () => {
     });
   });
 
-  it("falls back to the normal quote preview for non-participatory drops", async () => {
-    const drop = buildDrop({ drop_type: ApiDropType.Chat });
-    fetchDropByIdBatchedMock.mockResolvedValue(drop);
+  it("passes approval wave status and embed guards into Drop", async () => {
+    fetchDropByIdBatchedMock.mockResolvedValue(buildDrop());
 
     renderWithQueryClient(
-      <QuorumParticipationDropLinkPreview
-        href="https://site.com/waves/quorum-wave?drop=drop-1"
-        waveId="quorum-wave"
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
+        dropId="drop-1"
+        onQuoteClick={jest.fn()}
+        embedPath={["parent-drop"]}
+        quotePath={["wave-1:1"]}
+        embedDepth={2}
+        maxEmbedDepth={4}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          winningThreshold: 12,
+          isVotingClosed: true,
+          isVotingControlsLocked: true,
+          embedPath: ["parent-drop"],
+          quotePath: ["wave-1:1"],
+          embedDepth: 2,
+          maxEmbedDepth: 4,
+        })
+      );
+    });
+    expect(useWaveByIdMock).toHaveBeenLastCalledWith("wave-1", {
+      enabled: true,
+    });
+    expect(useApprovalWaveStatusMock).toHaveBeenLastCalledWith({
+      wave: approvalWave,
+    });
+  });
+
+  it("falls back to WaveDropQuote for non-participatory drops", async () => {
+    fetchDropByIdBatchedMock.mockResolvedValue(
+      buildDrop({ drop_type: ApiDropType.Chat })
+    );
+
+    renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
         dropId="drop-1"
         onQuoteClick={jest.fn()}
       />
@@ -231,9 +307,36 @@ describe("QuorumParticipationDropLinkPreview", () => {
         expect.objectContaining({
           drop: expect.objectContaining({ drop_type: ApiDropType.Chat }),
           partId: 1,
+          isNotFound: false,
         })
       );
     });
-    expect(mockQuorumParticipationDrop).not.toHaveBeenCalled();
+    expect(mockDrop).not.toHaveBeenCalled();
+  });
+
+  it("falls back to a not-found quote when the drop is missing", async () => {
+    commonApiFetchMock.mockResolvedValue({
+      drops: [],
+      wave: { id: "wave-1", name: "Rank Wave" },
+    });
+
+    renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?serialNo=99"
+        waveId="wave-1"
+        serialNo="99"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockWaveDropQuote).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          drop: null,
+          isNotFound: true,
+        })
+      );
+    });
+    expect(mockDrop).not.toHaveBeenCalled();
   });
 });

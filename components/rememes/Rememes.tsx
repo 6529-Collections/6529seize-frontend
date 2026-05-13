@@ -57,7 +57,7 @@ export default function Rememes() {
     TokenType.ALL
   );
 
-  const queryMemeId = searchParams?.get("meme_id");
+  const queryMemeId = searchParams.get("meme_id");
   const parsedQueryMemeId = queryMemeId ? Number.parseInt(queryMemeId) : 0;
   const [selectedMeme, setSelectedMeme] = useState<number>(
     Number.isFinite(parsedQueryMemeId) ? parsedQueryMemeId : 0
@@ -132,14 +132,14 @@ export default function Rememes() {
   });
 
   useEffect(() => {
-    const nextSearchParams = new URLSearchParams(searchParams?.toString());
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
     if (selectedMeme) {
       nextSearchParams.set("meme_id", selectedMeme.toString());
     } else {
       nextSearchParams.delete("meme_id");
     }
 
-    const currentQuery = searchParams?.toString() ?? "";
+    const currentQuery = searchParams.toString();
     const nextQuery = nextSearchParams.toString();
     if (nextQuery !== currentQuery) {
       const nextPath = nextQuery ? `${pathname}?${nextQuery}` : pathname;
