@@ -262,11 +262,26 @@
   margin-left: 20px;
 }
 
-.loader {
-  --bs-spinner-width: 1rem;
-  --bs-spinner-height: 1rem;
-  --bs-spinner-border-width: 0.14em;
+.validateButton {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.5;
+}
 
+.loaderSlot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  line-height: 0;
+}
+
+.loader {
+  width: 12px !important;
+  height: 12px !important;
+  border-width: 1.5px !important;
   flex: 0 0 auto;
   vertical-align: middle;
 }
