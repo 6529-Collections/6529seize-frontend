@@ -521,6 +521,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
+  const [actionsContainerElement, setActionsContainerElement] =
+    useState<HTMLDivElement | null>(null);
   const hasUserToggledOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
@@ -562,14 +564,21 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isWideContainer ||
     (showOptionsState?.scopeKey === wave.id ? showOptionsState.value : false);
 
-  useLayoutEffect(() => {
-    const container = actionsContainerRef.current;
-    if (!container) return;
+  const setActionsContainerRef = useCallback((node: HTMLDivElement | null) => {
+    actionsContainerRef.current = node;
+    setActionsContainerElement(node);
+  }, []);
 
-    const measureWidth = () => {
-      const width = container.getBoundingClientRect().width;
+  useLayoutEffect(() => {
+    if (!actionsContainerElement) return;
+
+    const setWidthState = (width: number) => {
       const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
       setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+    };
+
+    const measureWidth = () => {
+      setWidthState(actionsContainerElement.getBoundingClientRect().width);
     };
 
     measureWidth();
@@ -577,15 +586,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const width = entry.contentRect.width;
-        const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
-        setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+        setWidthState(entry.contentRect.width);
       }
     });
 
-    observer.observe(container);
+    observer.observe(actionsContainerElement);
     return () => observer.disconnect();
-  }, []);
+  }, [actionsContainerElement]);
 
   useLayoutEffect(() => {
     if (prevIsDropModeRef.current && !isDropMode) {
@@ -1821,7 +1828,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         <>
           <div className="tw-flex tw-w-full tw-items-end">
             <div
-              ref={actionsContainerRef}
+              ref={setActionsContainerRef}
               className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
             >
               <CreateDropActions

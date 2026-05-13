@@ -31,23 +31,40 @@ jest.mock("next/dynamic", () => () => () => null);
 
 jest.mock("framer-motion", () => {
   const ReactLib = require("react");
+  const MotionDiv = ReactLib.forwardRef(function Div(
+    {
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & {
+      readonly children: React.ReactNode;
+      readonly initial?: unknown;
+      readonly animate?: unknown;
+      readonly exit?: unknown;
+      readonly transition?: unknown;
+    },
+    ref: React.Ref<HTMLDivElement>
+  ) {
+    const htmlProps = { ...props } as Record<string, unknown>;
+    delete htmlProps.initial;
+    delete htmlProps.animate;
+    delete htmlProps.exit;
+    delete htmlProps.transition;
+
+    return ReactLib.createElement("div", { ...htmlProps, ref }, children);
+  });
 
   return {
     __esModule: true,
     AnimatePresence: ({ children }: { children: React.ReactNode }) =>
       ReactLib.createElement(ReactLib.Fragment, null, children),
+    LazyMotion: ({ children }: { children: React.ReactNode }) =>
+      ReactLib.createElement(ReactLib.Fragment, null, children),
+    domAnimation: {},
+    m: {
+      div: MotionDiv,
+    },
     motion: {
-      div: ReactLib.forwardRef(function Div(
-        {
-          children,
-          ...props
-        }: React.HTMLAttributes<HTMLDivElement> & {
-          readonly children: React.ReactNode;
-        },
-        ref: React.Ref<HTMLDivElement>
-      ) {
-        return ReactLib.createElement("div", { ...props, ref }, children);
-      }),
+      div: MotionDiv,
     },
   };
 });
@@ -105,13 +122,19 @@ jest.mock("@/components/waves/CreateDropSubmit", () => ({
 jest.mock("@/components/waves/CreateDropIdentityField", () => (props: any) => (
   <div data-testid="identity-field">
     <span>
-      {props.selectedIdentity?.label ?? props.selfIdentity?.label ?? "none"}
+      {props.selectedIdentity?.label ??
+        (props.mode === "ONLY_MYSELF" ? props.selfIdentity?.label : null) ??
+        "none"}
     </span>
     <button type="button" onClick={props.onOpenPicker}>
       change identity
     </button>
   </div>
 ));
+
+jest.mock("@/components/waves/utils/getOptimisticDrop", () => ({
+  getOptimisticDrop: jest.fn(() => null),
+}));
 
 jest.mock(
   "@/components/waves/CreateDropIdentityPickerContent",
@@ -470,6 +493,40 @@ describe("CreateDropContent identity picker flow", () => {
     });
     expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
     expect(screen.getByTestId("input")).toBeInTheDocument();
+  });
+
+  it("measures the action width after the inline picker closes", async () => {
+    const rectSpy = jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 501,
+        height: 0,
+        top: 0,
+        right: 501,
+        bottom: 0,
+        left: 0,
+        toJSON: () => ({}),
+      } as DOMRect);
+
+    try {
+      renderSubject({ identityPickerPlacement: "inline" });
+
+      expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByText("select other"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("input")).toBeInTheDocument();
+      });
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
   });
 
   it("reopens the inline picker when changing identity", async () => {
