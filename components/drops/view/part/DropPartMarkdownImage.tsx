@@ -10,8 +10,12 @@ export default function DropPartMarkdownImage({
   src,
 }: DropPartMarkdownImageProps) {
   return (
-    <div className="tw-relative tw-mt-2 tw-h-64 tw-w-full">
-      <DropListItemContentMediaImage src={src} loadStrategy="eager" />
+    <div className="tw-relative tw-mt-2 tw-w-full">
+      <DropListItemContentMediaImage
+        src={src}
+        loadStrategy="eager"
+        intrinsicHeight
+      />
     </div>
   );
 }
