@@ -245,6 +245,55 @@ describe("useWaveDropsNotificationRead", () => {
     });
   });
 
+  it("uses the latest delivered-notification remover on visibility sync", async () => {
+    const firstRemoveWaveDeliveredNotifications = jest
+      .fn()
+      .mockResolvedValue(undefined);
+    const nextRemoveWaveDeliveredNotifications = jest
+      .fn()
+      .mockResolvedValue(undefined);
+
+    const renderTestComponent = (
+      currentRemoveWaveDeliveredNotifications: (
+        waveId: string
+      ) => Promise<unknown> | void
+    ) => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={
+            currentRemoveWaveDeliveredNotifications
+          }
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(
+      renderTestComponent(firstRemoveWaveDeliveredNotifications)
+    );
+
+    await waitFor(() => {
+      expect(firstRemoveWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-1"
+      );
+    });
+
+    rerender(renderTestComponent(nextRemoveWaveDeliveredNotifications));
+
+    await act(async () => {
+      dispatchVisibilityChange();
+    });
+
+    await waitFor(() => {
+      expect(nextRemoveWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-1"
+      );
+    });
+    expect(firstRemoveWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+  });
+
   it("drops a delayed read after unmount", async () => {
     getAuthJwtMock.mockReturnValue(null);
 

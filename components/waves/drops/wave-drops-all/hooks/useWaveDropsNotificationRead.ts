@@ -1,11 +1,5 @@
 import { useWaveNotificationsReadMarkerState } from "@/hooks/useMarkWaveNotificationsRead";
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
@@ -85,6 +79,17 @@ export const useWaveDropsNotificationRead = ({
 
   const { markWaveNotificationsRead, identityKey, proxyRoleIdentityKey } =
     useWaveNotificationsReadMarkerState();
+  const latestReadActionsRef = useRef({
+    removeWaveDeliveredNotifications,
+    markWaveNotificationsRead,
+  });
+
+  useLayoutEffect(() => {
+    latestReadActionsRef.current = {
+      removeWaveDeliveredNotifications,
+      markWaveNotificationsRead,
+    };
+  }, [markWaveNotificationsRead, removeWaveDeliveredNotifications]);
 
   const canSendReadForWave = useCallback((expectedWaveId: string): boolean => {
     const latestState = latestReadGuardStateRef.current;
@@ -98,110 +103,115 @@ export const useWaveDropsNotificationRead = ({
     );
   }, []);
 
-  const syncReadState = useEffectEvent((state: ReadSyncState) => {
-    const runReadSyncAttempt = async (
-      currentState: ReadSyncState
-    ): Promise<ReadSyncStatus> => {
-      try {
-        await Promise.resolve(
-          removeWaveDeliveredNotifications(currentState.waveId)
-        );
-      } catch (error) {
-        console.error("Failed to remove wave delivered notifications:", error);
-      }
-
-      try {
-        const readResult = await markWaveNotificationsRead(
-          currentState.waveId,
-          {
-            shouldSend: () => canSendReadForWave(currentState.waveId),
-          }
-        );
-        return readResult === "sent" ? "success" : "skipped";
-      } catch (error) {
-        console.error("Failed to mark feed as read:", error);
-        return "failed";
-      }
-    };
-
-    const trackReadSyncAttempt = ({
-      currentState,
-      promise,
-    }: {
-      readonly currentState: ReadSyncState;
-      readonly promise: Promise<ReadSyncStatus>;
-    }): ReadSyncAttempt => {
-      let attempt: ReadSyncAttempt | null = null;
-      const trackedPromise = promise.then((status) => {
-        if (attempt) {
-          attempt.status = status;
+  const syncReadState = useCallback(
+    (state: ReadSyncState) => {
+      const runReadSyncAttempt = async (
+        currentState: ReadSyncState
+      ): Promise<ReadSyncStatus> => {
+        try {
+          const { removeWaveDeliveredNotifications: latestRemove } =
+            latestReadActionsRef.current;
+          await Promise.resolve(latestRemove(currentState.waveId));
+        } catch (error) {
+          console.error(
+            "Failed to remove wave delivered notifications:",
+            error
+          );
         }
-        return status;
-      });
 
-      attempt = {
-        state: currentState,
-        status: "pending",
-        promise: trackedPromise,
+        try {
+          const { markWaveNotificationsRead: latestMarkRead } =
+            latestReadActionsRef.current;
+          const readResult = await latestMarkRead(currentState.waveId, {
+            shouldSend: () => canSendReadForWave(currentState.waveId),
+          });
+          return readResult === "sent" ? "success" : "skipped";
+        } catch (error) {
+          console.error("Failed to mark feed as read:", error);
+          return "failed";
+        }
       };
-      readSyncAttemptRef.current = attempt;
-      return attempt;
-    };
 
-    const markReadSyncAttemptCovered = (currentState: ReadSyncState) => {
-      readSyncAttemptRef.current = {
-        state: currentState,
-        status: "success",
-        promise: Promise.resolve("success"),
-      };
-    };
-
-    if (document.visibilityState !== "visible") {
-      return;
-    }
-
-    const previousAttempt = readSyncAttemptRef.current;
-
-    if (
-      usesLoadedProxyForSameRole({
-        previousState: previousAttempt?.state ?? null,
-        currentState: state,
-      })
-    ) {
-      if (previousAttempt?.status === "success") {
-        markReadSyncAttemptCovered(state);
-        return;
-      }
-
-      if (previousAttempt?.status === "pending") {
-        let followUpAttempt: ReadSyncAttempt | null = null;
-        const followUpPromise = previousAttempt.promise.then(
-          async (previousStatus) => {
-            if (previousStatus === "success") {
-              return "success";
-            }
-
-            if (readSyncAttemptRef.current !== followUpAttempt) {
-              return "failed";
-            }
-
-            return runReadSyncAttempt(state);
+      const trackReadSyncAttempt = ({
+        currentState,
+        promise,
+      }: {
+        readonly currentState: ReadSyncState;
+        readonly promise: Promise<ReadSyncStatus>;
+      }): ReadSyncAttempt => {
+        let attempt: ReadSyncAttempt | null = null;
+        const trackedPromise = promise.then((status) => {
+          if (attempt) {
+            attempt.status = status;
           }
-        );
-
-        followUpAttempt = trackReadSyncAttempt({
-          currentState: state,
-          promise: followUpPromise,
+          return status;
         });
+
+        attempt = {
+          state: currentState,
+          status: "pending",
+          promise: trackedPromise,
+        };
+        readSyncAttemptRef.current = attempt;
+        return attempt;
+      };
+
+      const markReadSyncAttemptCovered = (currentState: ReadSyncState) => {
+        readSyncAttemptRef.current = {
+          state: currentState,
+          status: "success",
+          promise: Promise.resolve("success"),
+        };
+      };
+
+      if (document.visibilityState !== "visible") {
         return;
       }
-    }
 
-    trackReadSyncAttempt({
-      currentState: state,
-      promise: runReadSyncAttempt(state),
-    });
-  });
+      const previousAttempt = readSyncAttemptRef.current;
+
+      if (
+        usesLoadedProxyForSameRole({
+          previousState: previousAttempt?.state ?? null,
+          currentState: state,
+        })
+      ) {
+        if (previousAttempt?.status === "success") {
+          markReadSyncAttemptCovered(state);
+          return;
+        }
+
+        if (previousAttempt?.status === "pending") {
+          let followUpAttempt: ReadSyncAttempt | null = null;
+          const followUpPromise = previousAttempt.promise.then(
+            async (previousStatus) => {
+              if (previousStatus === "success") {
+                return "success";
+              }
+
+              if (readSyncAttemptRef.current !== followUpAttempt) {
+                return "failed";
+              }
+
+              return runReadSyncAttempt(state);
+            }
+          );
+
+          followUpAttempt = trackReadSyncAttempt({
+            currentState: state,
+            promise: followUpPromise,
+          });
+          return;
+        }
+      }
+
+      trackReadSyncAttempt({
+        currentState: state,
+        promise: runReadSyncAttempt(state),
+      });
+    },
+    [canSendReadForWave]
+  );
 
   useEffect(() => {
     if (!enabled) {
@@ -229,5 +239,5 @@ export const useWaveDropsNotificationRead = ({
         "visibilitychange",
         syncReadStateWhenVisible
       );
-  }, [enabled, identityKey, proxyRoleIdentityKey, waveId]);
+  }, [enabled, identityKey, proxyRoleIdentityKey, syncReadState, waveId]);
 };
