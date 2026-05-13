@@ -17,7 +17,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { CurationComposerVariant } from "./dropComposer.types";
+import type {
+  CurationComposerVariant,
+  IdentityPickerPlacement,
+} from "./dropComposer.types";
 import { DropMode } from "./dropComposer.types";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -41,6 +44,10 @@ interface CreateDropProps {
   readonly fixedDropMode: DropMode;
   readonly privileges: DropPrivileges;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly initialCurationUrl?: string | null | undefined;
+  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
+  readonly canSubmitCurationUrl?: boolean | undefined;
+  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -49,6 +56,8 @@ interface CreateDropProps {
     | null
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
+  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
 }
 
 export interface DropMutationBody {
@@ -71,8 +80,14 @@ export default function CreateDrop({
   fixedDropMode,
   privileges,
   curationComposerVariant = "default",
+  initialCurationUrl: initialCurationUrlProp = null,
+  onSubmitCurationUrl,
+  canSubmitCurationUrl,
+  curationUrlSubmitRestrictionMessage = null,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
+  termsSignatureFlowEnabled = true,
+  identityPickerPlacement = "modal",
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -125,7 +140,7 @@ export default function CreateDrop({
   const initialCurationUrl =
     curationPrefillSeed?.scopeKey === modeScopeToken
       ? curationPrefillSeed.url
-      : null;
+      : initialCurationUrlProp;
   const isCurationDropMode =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY &&
     isDropMode;
@@ -138,6 +153,16 @@ export default function CreateDrop({
     dismissedQuorumProposalScope !== quorumProposalScopeKey;
   const canMentionAll =
     wave.wave.authenticated_user_eligible_for_admin === true;
+  const canUseCurationUrlSubmit =
+    fixedDropMode === DropMode.CHAT
+      ? onSubmitCurationUrl !== undefined && canSubmitCurationUrl !== false
+      : true;
+  const curationUrlRestrictionMessage =
+    fixedDropMode === DropMode.CHAT &&
+    onSubmitCurationUrl !== undefined &&
+    canSubmitCurationUrl === false
+      ? curationUrlSubmitRestrictionMessage
+      : null;
 
   const canSwitchDropMode = useCallback(
     (newIsDropMode: boolean) => {
@@ -191,6 +216,13 @@ export default function CreateDrop({
 
   const onSwitchToDropModeWithUrl = useCallback(
     (url: string) => {
+      if (fixedDropMode === DropMode.CHAT) {
+        if (onSubmitCurationUrl && canSubmitCurationUrl !== false) {
+          onSubmitCurationUrl(url);
+        }
+        return;
+      }
+
       if (!canSwitchDropMode(true)) {
         return;
       }
@@ -198,7 +230,13 @@ export default function CreateDrop({
       setDismissedQuorumProposalScope(null);
       setDropModeOverride({ scopeKey: modeScopeToken, value: true });
     },
-    [canSwitchDropMode, modeScopeToken]
+    [
+      canSubmitCurationUrl,
+      canSwitchDropMode,
+      fixedDropMode,
+      modeScopeToken,
+      onSubmitCurationUrl,
+    ]
   );
 
   const onCloseQuorumProposal = useCallback(() => {
@@ -369,10 +407,6 @@ export default function CreateDrop({
       onDropModeChange,
       onSwitchToDropModeWithUrl,
       submitDrop,
-      privileges,
-      showDropModeToggle:
-        fixedDropMode === DropMode.BOTH ||
-        (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
       dropModeToggleExitLabel:
         fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode
           ? "Close create drop"
@@ -383,6 +417,10 @@ export default function CreateDrop({
         (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
       externalAttachmentDrop,
       onExternalAttachmentDropConsumed,
+      canSubmitCurationUrl: canUseCurationUrlSubmit,
+      curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
+      termsSignatureFlowEnabled,
+      identityPickerPlacement,
     };
   }, [
     activeDrop,
@@ -401,6 +439,10 @@ export default function CreateDrop({
     onExitFixedDropMode,
     externalAttachmentDrop,
     onExternalAttachmentDropConsumed,
+    canUseCurationUrlSubmit,
+    curationUrlRestrictionMessage,
+    termsSignatureFlowEnabled,
+    identityPickerPlacement,
   ]);
 
   let dropComposerContent: ReactNode;
@@ -415,6 +457,7 @@ export default function CreateDrop({
           dropId={dropId}
           submitDrop={submitDrop}
           onClose={onCloseQuorumProposal}
+          termsSignatureFlowEnabled={termsSignatureFlowEnabled}
         />
         {!isQuorumProposalModalOpen && (
           <div className="tw-flex tw-w-full tw-justify-end">
@@ -440,6 +483,7 @@ export default function CreateDrop({
         initialUrl={initialCurationUrl}
         submitDrop={submitDrop}
         curationComposerVariant={curationComposerVariant}
+        termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       />
     );
   } else {

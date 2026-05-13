@@ -70,6 +70,25 @@ jest.mock("@/components/waves/header/WaveDescriptionPopover", () => ({
 
 describe("MyStreamWaveTabsDefault", () => {
   const mockToggleViewMode = jest.fn();
+  const createSubmitDropAction = (
+    overrides: Partial<{
+      isVisible: boolean;
+      canOpen: boolean;
+      label: string;
+      compactLabel: string;
+      restrictionMessage: string | null;
+      onOpen: jest.Mock;
+    }> = {}
+  ) => ({
+    isVisible: true,
+    canOpen: true,
+    label: "Submit drop",
+    compactLabel: "Drop",
+    restrictionMessage: null,
+    onOpen: jest.fn(),
+    onOpenWithCurationUrl: jest.fn(),
+    ...overrides,
+  });
   const setNavigatorClipboard = (writeTextImpl = mockWriteText) => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -534,6 +553,95 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(
       screen.getByRole("button", { name: "Show wave description" })
     ).toBeInTheDocument();
+  });
+
+  it("shows compact Drop on the Chat tab and opens the submit flow", () => {
+    const submitDropAction = createSubmitDropAction();
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+          chatSubmitDropAction={submitDropAction}
+        />
+      </SidebarProvider>
+    );
+
+    const button = screen.getByRole("button", { name: "Submit drop" });
+
+    expect(button).toHaveTextContent("Drop");
+    expect(screen.queryByText("Submit drop")).not.toBeInTheDocument();
+
+    fireEvent.click(button);
+
+    expect(submitDropAction.onOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows compact Proposal for quorum submit actions", () => {
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+          chatSubmitDropAction={createSubmitDropAction({
+            label: "Create proposal",
+            compactLabel: "Proposal",
+          })}
+        />
+      </SidebarProvider>
+    );
+
+    const button = screen.getByRole("button", { name: "Create proposal" });
+
+    expect(button).toHaveTextContent("Proposal");
+    expect(screen.queryByText("Create proposal")).not.toBeInTheDocument();
+  });
+
+  it("shows a disabled Submit drop reason", () => {
+    const restrictionMessage = "Please log in to make submissions";
+
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+
+    render(
+      <SidebarProvider>
+        <MyStreamWaveTabsDefault
+          wave={createWave(false)}
+          viewMode="chat"
+          onToggleViewMode={mockToggleViewMode}
+          showGalleryToggle={true}
+          chatSubmitDropAction={createSubmitDropAction({
+            canOpen: false,
+            restrictionMessage,
+          })}
+        />
+      </SidebarProvider>
+    );
+
+    const button = screen.getByRole("button", { name: "Submit drop" });
+
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("title", restrictionMessage);
+    expect(button.parentElement).toHaveAttribute(
+      "data-tooltip-content",
+      restrictionMessage
+    );
   });
 
   it("copies in mobile right action cluster when share is unavailable", () => {

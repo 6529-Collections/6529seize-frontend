@@ -31,23 +31,40 @@ jest.mock("next/dynamic", () => () => () => null);
 
 jest.mock("framer-motion", () => {
   const ReactLib = require("react");
+  const MotionDiv = ReactLib.forwardRef(function Div(
+    {
+      children,
+      ...props
+    }: React.HTMLAttributes<HTMLDivElement> & {
+      readonly children: React.ReactNode;
+      readonly initial?: unknown;
+      readonly animate?: unknown;
+      readonly exit?: unknown;
+      readonly transition?: unknown;
+    },
+    ref: React.Ref<HTMLDivElement>
+  ) {
+    const htmlProps = { ...props } as Record<string, unknown>;
+    delete htmlProps.initial;
+    delete htmlProps.animate;
+    delete htmlProps.exit;
+    delete htmlProps.transition;
+
+    return ReactLib.createElement("div", { ...htmlProps, ref }, children);
+  });
 
   return {
     __esModule: true,
     AnimatePresence: ({ children }: { children: React.ReactNode }) =>
       ReactLib.createElement(ReactLib.Fragment, null, children),
+    LazyMotion: ({ children }: { children: React.ReactNode }) =>
+      ReactLib.createElement(ReactLib.Fragment, null, children),
+    domAnimation: {},
+    m: {
+      div: MotionDiv,
+    },
     motion: {
-      div: ReactLib.forwardRef(function Div(
-        {
-          children,
-          ...props
-        }: React.HTMLAttributes<HTMLDivElement> & {
-          readonly children: React.ReactNode;
-        },
-        ref: React.Ref<HTMLDivElement>
-      ) {
-        return ReactLib.createElement("div", { ...props, ref }, children);
-      }),
+      div: MotionDiv,
     },
   };
 });
@@ -102,24 +119,37 @@ jest.mock("@/components/waves/CreateDropSubmit", () => ({
     </button>
   ),
 }));
-jest.mock("@/components/waves/CreateDropDropModeToggle", () => ({
-  CreateDropDropModeToggle: (props: any) => (
-    <button type="button" onClick={() => props.onDropModeChange(false)}>
-      toggle
-    </button>
-  ),
-}));
-
 jest.mock("@/components/waves/CreateDropIdentityField", () => (props: any) => (
   <div data-testid="identity-field">
     <span>
-      {props.selectedIdentity?.label ?? props.selfIdentity?.label ?? "none"}
+      {props.selectedIdentity?.label ??
+        (props.mode === "ONLY_MYSELF" ? props.selfIdentity?.label : null) ??
+        "none"}
     </span>
     <button type="button" onClick={props.onOpenPicker}>
       change identity
     </button>
   </div>
 ));
+
+jest.mock("@/components/waves/utils/getOptimisticDrop", () => ({
+  getOptimisticDrop: jest.fn(() => null),
+}));
+
+jest.mock(
+  "@/components/waves/CreateDropIdentityPickerContent",
+  () => (props: any) => (
+    <div data-testid="identity-picker-content">
+      <div>{props.errorMessage}</div>
+      <button type="button" onClick={() => props.onSelect(mockOtherSelection)}>
+        select other
+      </button>
+      <button type="button" onClick={() => props.onSelect(mockViewerSelection)}>
+        select self
+      </button>
+    </div>
+  )
+);
 
 jest.mock(
   "@/components/waves/CreateDropIdentityPickerModal",
@@ -277,11 +307,13 @@ describe("CreateDropContent identity picker flow", () => {
     wave = createWave(),
     drop = null,
     submitDrop = jest.fn(),
+    identityPickerPlacement = "modal",
   }: {
     readonly isDropMode?: boolean;
     readonly wave?: any;
     readonly drop?: any;
     readonly submitDrop?: jest.Mock;
+    readonly identityPickerPlacement?: "modal" | "inline";
   } = {}) => {
     const onDropModeChange = jest.fn();
     const utils = render(
@@ -301,8 +333,10 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={onDropModeChange}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={submitDrop}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
+          identityPickerPlacement={identityPickerPlacement}
         />
       </ReactQueryWrapperContext.Provider>
     );
@@ -406,7 +440,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -415,28 +450,107 @@ describe("CreateDropContent identity picker flow", () => {
     expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
   });
 
-  it("keeps the selected identity when leaving Drop mode is rejected by the parent", async () => {
-    const { onDropModeChange } = renderSubject();
-
-    await userEvent.click(screen.getByText("select other"));
-
-    expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
-
-    await userEvent.click(screen.getByText("toggle"));
-
-    expect(onDropModeChange).toHaveBeenCalledWith(false);
-    expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
-    expect(
-      screen.queryByTestId("identity-picker-modal")
-    ).not.toBeInTheDocument();
-  });
-
   it("keeps the picker open and shows an error when selecting the viewer identity in OnlyOthers mode", async () => {
     renderSubject();
 
     await userEvent.click(screen.getByText("select self"));
 
     expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
+    expect(
+      screen.getByText("Select someone else to nominate.")
+    ).toBeInTheDocument();
+  });
+
+  it("renders the inline picker instead of the modal when placement is inline", () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    expect(screen.getByTestId("identity-picker-inline")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("identity-picker-modal")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+  });
+
+  it("exits Drop mode when the inline picker closes without a selection", async () => {
+    const { onDropModeChange } = renderSubject({
+      identityPickerPlacement: "inline",
+    });
+
+    await userEvent.click(screen.getByLabelText("Close identity picker"));
+
+    expect(onDropModeChange).toHaveBeenCalledWith(false);
+  });
+
+  it("hides the inline picker and shows the composer after selecting an identity", async () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    await userEvent.click(screen.getByText("select other"));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("identity-picker-inline")
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
+    expect(screen.getByTestId("input")).toBeInTheDocument();
+  });
+
+  it("measures the action width after the inline picker closes", async () => {
+    const rectSpy = jest
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 501,
+        height: 0,
+        top: 0,
+        right: 501,
+        bottom: 0,
+        left: 0,
+        toJSON: () => ({}),
+      } as DOMRect);
+
+    try {
+      renderSubject({ identityPickerPlacement: "inline" });
+
+      expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByText("select other"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("input")).toBeInTheDocument();
+      });
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("reopens the inline picker when changing identity", async () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    await userEvent.click(screen.getByText("select other"));
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("identity-picker-inline")
+      ).not.toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByText("change identity"));
+
+    expect(screen.getByTestId("identity-picker-inline")).toBeInTheDocument();
+    expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+  });
+
+  it("keeps the inline picker open and shows an error when selecting self in OnlyOthers mode", async () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    await userEvent.click(screen.getByText("select self"));
+
+    expect(screen.getByTestId("identity-picker-inline")).toBeInTheDocument();
     expect(
       screen.getByText("Select someone else to nominate.")
     ).toBeInTheDocument();
@@ -465,7 +579,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -488,7 +603,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -526,7 +642,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -551,7 +668,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -586,7 +704,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -621,7 +740,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -648,7 +768,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -688,7 +809,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -726,7 +848,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -765,7 +888,8 @@ describe("CreateDropContent identity picker flow", () => {
           onDropModeChange={jest.fn()}
           onSwitchToDropModeWithUrl={jest.fn()}
           submitDrop={jest.fn()}
-          privileges={{ chatRestriction: null, submissionRestriction: null }}
+          dropModeToggleExitLabel={null}
+          canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>

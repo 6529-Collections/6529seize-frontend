@@ -42,6 +42,7 @@ export default function IdentitySearch({
   autoFocus = false,
   selectedDisplayValue,
   clearable = true,
+  disabled = false,
   dropdownListClassName,
   onSelectionChange,
   setIdentity,
@@ -54,6 +55,7 @@ export default function IdentitySearch({
   readonly autoFocus?: boolean | undefined;
   readonly selectedDisplayValue?: string | null | undefined;
   readonly clearable?: boolean | undefined;
+  readonly disabled?: boolean | undefined;
   readonly dropdownListClassName?: string | undefined;
   readonly onSelectionChange?:
     | ((selection: SelectableIdentityOption | null) => void)
@@ -83,6 +85,7 @@ export default function IdentitySearch({
   const [searchCriteriaDraft, setSearchCriteriaDraft] =
     useState<IdentitySearchDraft | null>(null);
   const shouldUseDraft =
+    !disabled &&
     searchCriteriaDraft !== null &&
     (searchCriteriaDraft.baseResolvedDisplayValue === resolvedDisplayValue ||
       searchCriteriaDraft.preservedResolvedValues.some(
@@ -94,7 +97,10 @@ export default function IdentitySearch({
   const [debouncedValue, setDebouncedValue] = useState<string | null>(
     searchCriteria
   );
-  useDebounce(() => setDebouncedValue(searchCriteria), 200, [searchCriteria]);
+  useDebounce(() => setDebouncedValue(disabled ? null : searchCriteria), 200, [
+    disabled,
+    searchCriteria,
+  ]);
   const { data } = useQuery<CommunityMemberMinimal[]>({
     queryKey: [
       QueryKey.PROFILE_SEARCH,
@@ -111,9 +117,15 @@ export default function IdentitySearch({
           only_profile_owners: "true",
         },
       }),
-    enabled: !!debouncedValue && debouncedValue.length >= MIN_SEARCH_LENGTH,
+    enabled:
+      !disabled &&
+      !!debouncedValue &&
+      debouncedValue.length >= MIN_SEARCH_LENGTH,
   });
-  const searchResults = useMemo(() => data ?? [], [data]);
+  const searchResults = useMemo(
+    () => (disabled ? [] : (data ?? [])),
+    [data, disabled]
+  );
 
   const [isOpen, setIsOpen] = useState(false);
   const [manualHighlightedIndex, setManualHighlightedIndex] = useState<
@@ -122,6 +134,17 @@ export default function IdentitySearch({
   const [highlightedOptionId, setHighlightedOptionId] = useState<
     string | undefined
   >(undefined);
+
+  if (disabled) {
+    if (isOpen) {
+      setIsOpen(false);
+    }
+    if (manualHighlightedIndex !== null) {
+      setManualHighlightedIndex(null);
+    }
+  }
+
+  const isDropdownOpen = !disabled && isOpen;
   const selectedResultIndex = useMemo(() => {
     if (searchResults.length === 0 || !identity) {
       return null;
@@ -136,7 +159,7 @@ export default function IdentitySearch({
   }, [identity, searchResults]);
 
   const effectiveHighlightedIndex = useMemo(() => {
-    if (!isOpen || searchResults.length === 0) {
+    if (!isDropdownOpen || searchResults.length === 0) {
       return null;
     }
 
@@ -146,7 +169,7 @@ export default function IdentitySearch({
 
     return selectedResultIndex;
   }, [
-    isOpen,
+    isDropdownOpen,
     manualHighlightedIndex,
     searchResults.length,
     selectedResultIndex,
@@ -164,6 +187,10 @@ export default function IdentitySearch({
       readonly selection?: SelectableIdentityOption | null;
     }
   ) => {
+    if (disabled) {
+      return;
+    }
+
     const draftValue = options?.displayValue ?? newValue ?? "";
     setIdentity(newValue);
     onSelectionChange?.(options?.selection ?? null);
@@ -176,6 +203,11 @@ export default function IdentitySearch({
   };
 
   const onFocusChange = (newV: boolean) => {
+    if (disabled) {
+      closeDropdown();
+      return;
+    }
+
     if (newV) {
       const len = searchCriteria?.length ?? 0;
       setIsOpen(len >= MIN_SEARCH_LENGTH);
@@ -185,6 +217,10 @@ export default function IdentitySearch({
   };
 
   const onSearchCriteriaChange = (newV: string | null) => {
+    if (disabled) {
+      return;
+    }
+
     setSearchCriteriaDraft({
       value: newV ?? "",
       baseResolvedDisplayValue: resolvedDisplayValue,
@@ -200,6 +236,10 @@ export default function IdentitySearch({
   };
 
   const selectProfile = (profile: CommunityMemberMinimal) => {
+    if (disabled) {
+      return false;
+    }
+
     const nextSelection = getSelectableIdentityOption(profile);
     if (!nextSelection) {
       return false;
@@ -214,7 +254,11 @@ export default function IdentitySearch({
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, closeDropdown);
-  useKeyPressEvent("Escape", closeDropdown);
+  useKeyPressEvent("Escape", () => {
+    if (!disabled) {
+      closeDropdown();
+    }
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
   const shouldAutoFocus = useRef(autoFocus);
@@ -225,6 +269,10 @@ export default function IdentitySearch({
   }, []);
 
   const handleArrowNavigation = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (disabled) {
+      return;
+    }
+
     const resultCount = searchResults.length;
     if (resultCount === 0) {
       return;
@@ -282,13 +330,17 @@ export default function IdentitySearch({
         }}
         onKeyDown={(event) => handleArrowNavigation(event)}
         id={inputId}
+        disabled={disabled}
         autoComplete="off"
         role="combobox"
         aria-autocomplete="list"
-        aria-expanded={isOpen}
+        aria-disabled={disabled}
+        aria-expanded={isDropdownOpen}
         aria-controls={listboxId}
         aria-activedescendant={
-          isOpen && highlightedOptionId ? highlightedOptionId : undefined
+          isDropdownOpen && highlightedOptionId
+            ? highlightedOptionId
+            : undefined
         }
         className={`${INPUT_CLASSES[size]} ${
           error
@@ -298,14 +350,14 @@ export default function IdentitySearch({
           searchCriteria
             ? "tw-text-primary-400 focus:tw-text-white"
             : "tw-text-white"
-        }`}
+        } disabled:tw-cursor-not-allowed disabled:tw-opacity-70`}
         placeholder=" "
       />
       <MagnifyingGlassIcon
         className={`${ICON_TOP_CLASS} ${SEARCH_ICON_SIZE_CLASSES[size]} tw-pointer-events-none tw-absolute tw-left-3 tw-text-iron-300`}
         aria-hidden="true"
       />
-      {clearable && hasIdentity && (
+      {!disabled && clearable && hasIdentity && (
         <button
           type="button"
           aria-label="Clear identity"
@@ -329,7 +381,7 @@ export default function IdentitySearch({
         {label}
       </label>
       <CommonProfileSearchItems
-        open={isOpen}
+        open={isDropdownOpen}
         selected={identity}
         searchCriteria={searchCriteria}
         profiles={searchResults}

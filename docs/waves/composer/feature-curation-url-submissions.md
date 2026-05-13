@@ -7,7 +7,7 @@ supported NFT marketplace URL.
 
 This flow appears in two places:
 
-- Curation `Drop` mode in the thread composer.
+- Chat tab `Submit drop` action in the wave header or app composer area.
 - Curation leaderboard `Drop Artwork` modal.
 
 ## Location in the Site
@@ -20,16 +20,16 @@ This flow appears in two places:
 ## Entry Points
 
 1. Open a curation wave thread.
-2. In thread composer, switch to `Drop` mode when chat/drop toggles are shown.
-3. Or, while still in `Post` mode, enter one supported curation URL and use
-   `Switch to Drop mode` when the inline prompt appears.
+2. On the Chat tab, use `Submit drop`.
+3. Or, while still in chat mode, enter one supported curation URL and use
+   `Submit it as a drop` when the inline prompt appears.
 4. In `Leaderboard`, use header `Drop Art` (or empty-state `Drop`) to open
    `Drop Artwork` modal.
 5. Paste one supported URL and submit with `Enter` or `Submit to Curation`.
 
 ## Composer Variants
 
-- Thread-composer variant uses input placeholder
+- Chat submit variant uses input placeholder
   `Enter supported curation URL`.
 - Leaderboard modal variant uses input placeholder `https://...`.
 - Default thread composer shows helper text:
@@ -40,11 +40,11 @@ This flow appears in two places:
 - Leaderboard modal variant uses submit button label `Submit to Curation`.
 - If the value can be normalized, both variants show:
   `Will submit as: {canonicalUrl}`.
-- In curation-wave thread `Post` mode, entering one supported curation URL
+- In curation-wave chat mode, entering one supported curation URL
   shows:
-  `This looks like a curation URL. Switch to Drop mode`.
-- Selecting `Switch to Drop mode` opens curation `Drop` mode and seeds the URL
-  input with the normalized URL.
+  `This looks like a curation URL. Submit it as a drop`.
+- Selecting `Submit it as a drop` opens the curation submit modal and seeds the
+  URL input with the normalized URL.
 - Prefill is scoped to the current wave/thread context. Switching context (for
   example, opening another wave thread) resets mode and does not carry the old
   prefill forward.

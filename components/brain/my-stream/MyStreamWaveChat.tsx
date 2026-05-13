@@ -4,7 +4,10 @@ import { useAuth } from "@/components/auth/Auth";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import { WaveGallery } from "@/components/waves/gallery";
+import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
+import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
@@ -33,6 +36,7 @@ import {
   ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
+import { PlusIcon } from "@heroicons/react/24/solid";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
@@ -44,6 +48,11 @@ import React, {
 import { useSelector } from "react-redux";
 import { useLayout } from "./layout/LayoutContext";
 import { useWaveChatLeaveCleanup } from "./useWaveChatLeaveCleanup";
+import { WaveChatSubmitDropModal } from "./WaveChatSubmitDropModal";
+import type {
+  ChatSubmitDropAction,
+  ChatSubmitDropState,
+} from "./chatSubmitDrop.types";
 
 interface InitialDropState {
   readonly waveId: string;
@@ -56,6 +65,9 @@ interface MyStreamWaveChatProps {
   readonly firstUnreadSerialNo: number | null;
   readonly viewMode: WaveViewMode;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly chatSubmitDrop?: ChatSubmitDropState | null | undefined;
+  readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
+  readonly onCloseChatSubmitDrop?: (() => void) | undefined;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -64,6 +76,7 @@ interface WaveChatLeaveHandlerProps {
 }
 
 const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
+const noop = () => {};
 
 const WaveChatLeaveHandler: React.FC<WaveChatLeaveHandlerProps> = ({
   enabled,
@@ -89,6 +102,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   firstUnreadSerialNo,
   viewMode,
   onDropClick,
+  chatSubmitDrop = null,
+  chatSubmitDropAction = null,
+  onCloseChatSubmitDrop,
 }) => {
   const router = useRouter();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
@@ -232,7 +248,33 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     useApprovalWaveStatus({
       wave,
     });
-  const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
+  const fixedDropMode = DropMode.CHAT;
+  const activeChatSubmitDropExperience =
+    chatSubmitDrop?.submissionExperience ?? null;
+  const showFixedParticipationSubmit =
+    activeChatSubmitDropExperience !== null &&
+    activeChatSubmitDropExperience !==
+      WaveSubmissionExperience.CURATION_LEGACY &&
+    activeChatSubmitDropExperience !== WaveSubmissionExperience.MEMES_LEGACY &&
+    activeChatSubmitDropExperience !== WaveSubmissionExperience.QUORUM_PROPOSAL;
+  const showQuorumProposalSubmit =
+    activeChatSubmitDropExperience === WaveSubmissionExperience.QUORUM_PROPOSAL;
+  const showCurationSubmitModal =
+    activeChatSubmitDropExperience === WaveSubmissionExperience.CURATION_LEGACY;
+  const closeChatSubmitDrop = onCloseChatSubmitDrop ?? noop;
+  const appChatSubmitDropTitle =
+    chatSubmitDropAction?.restrictionMessage ?? chatSubmitDropAction?.label;
+  const chatCurationUrlSubmitHandler =
+    chatSubmitDropAction?.isVisible === true
+      ? chatSubmitDropAction.onOpenWithCurationUrl
+      : undefined;
+  const canSubmitChatCurationUrl =
+    chatSubmitDropAction?.isVisible === true && chatSubmitDropAction.canOpen;
+  const chatCurationUrlSubmitRestrictionMessage =
+    chatSubmitDropAction?.isVisible === true
+      ? chatSubmitDropAction.restrictionMessage
+      : null;
+  const isChatSubmitFlowOpen = activeChatSubmitDropExperience !== null;
 
   const shouldHandleContainerFileDrop = (
     event: React.DragEvent<HTMLElement>
@@ -427,6 +469,27 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         />
         {!(isApp && editingDropId) && (
           <div className="tw-mt-auto">
+            {isApp && chatSubmitDropAction?.isVisible === true && (
+              <div className="tw-flex tw-flex-col tw-items-end tw-px-2 tw-pb-2">
+                <PrimaryButton
+                  loading={false}
+                  disabled={!chatSubmitDropAction.canOpen}
+                  onClicked={chatSubmitDropAction.onOpen}
+                  padding="tw-px-2.5 tw-py-2"
+                  title={appChatSubmitDropTitle}
+                  ariaLabel={chatSubmitDropAction.label}
+                >
+                  <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                  <span>{chatSubmitDropAction.compactLabel}</span>
+                </PrimaryButton>
+                {!chatSubmitDropAction.canOpen &&
+                  chatSubmitDropAction.restrictionMessage && (
+                    <p className="tw-mb-0 tw-mt-1.5 tw-text-right tw-text-xs tw-font-medium tw-text-iron-400">
+                      {chatSubmitDropAction.restrictionMessage}
+                    </p>
+                  )}
+              </div>
+            )}
             <CreateDropWaveWrapper>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}
@@ -439,9 +502,41 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 onExternalAttachmentDropConsumed={() =>
                   setExternalAttachmentDrop(null)
                 }
+                onSubmitCurationUrl={chatCurationUrlSubmitHandler}
+                canSubmitCurationUrl={canSubmitChatCurationUrl}
+                curationUrlSubmitRestrictionMessage={
+                  chatCurationUrlSubmitRestrictionMessage
+                }
+                termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
               />
             </CreateDropWaveWrapper>
           </div>
+        )}
+        {showFixedParticipationSubmit && (
+          <WaveChatSubmitDropModal
+            isOpen
+            wave={wave}
+            title="Submit drop"
+            initialCurationUrl={chatSubmitDrop?.initialCurationUrl ?? null}
+            onClose={closeChatSubmitDrop}
+          />
+        )}
+        {showQuorumProposalSubmit && (
+          <WaveDropCreate
+            wave={wave}
+            onCancel={closeChatSubmitDrop}
+            onSuccess={closeChatSubmitDrop}
+            onExitFixedDropMode={closeChatSubmitDrop}
+            isModalContent
+          />
+        )}
+        {showCurationSubmitModal && (
+          <WaveLeaderboardCurationDropModal
+            isOpen
+            wave={wave}
+            initialUrl={chatSubmitDrop?.initialCurationUrl ?? null}
+            onClose={closeChatSubmitDrop}
+          />
         )}
         {submissionExperience === WaveSubmissionExperience.MEMES_LEGACY && (
           <MobileMemesArtSubmissionBtn

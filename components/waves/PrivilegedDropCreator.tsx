@@ -4,7 +4,11 @@ import { useDropPrivileges } from "@/hooks/useDropPriviledges";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
-import { DropMode, type CurationComposerVariant } from "./dropComposer.types";
+import {
+  DropMode,
+  type CurationComposerVariant,
+  type IdentityPickerPlacement,
+} from "./dropComposer.types";
 
 export { DropMode } from "./dropComposer.types";
 
@@ -18,6 +22,10 @@ interface PrivilegedDropCreatorProps {
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly initialCurationUrl?: string | null | undefined;
+  readonly onSubmitCurationUrl?: ((url: string) => void) | undefined;
+  readonly canSubmitCurationUrl?: boolean | undefined;
+  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -26,6 +34,8 @@ interface PrivilegedDropCreatorProps {
     | null
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
+  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -38,8 +48,14 @@ export default function PrivilegedDropCreator({
   onExitFixedDropMode,
   onDropAddedToQueue,
   curationComposerVariant = "default",
+  initialCurationUrl = null,
+  onSubmitCurationUrl,
+  canSubmitCurationUrl,
+  curationUrlSubmitRestrictionMessage,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
+  termsSignatureFlowEnabled = true,
+  identityPickerPlacement = "modal",
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
@@ -96,8 +112,14 @@ export default function PrivilegedDropCreator({
       }}
       onDropAddedToQueue={onDropAddedToQueue}
       curationComposerVariant={curationComposerVariant}
+      initialCurationUrl={initialCurationUrl}
+      onSubmitCurationUrl={onSubmitCurationUrl}
+      canSubmitCurationUrl={canSubmitCurationUrl}
+      curationUrlSubmitRestrictionMessage={curationUrlSubmitRestrictionMessage}
       externalAttachmentDrop={externalAttachmentDrop}
       onExternalAttachmentDropConsumed={onExternalAttachmentDropConsumed}
+      termsSignatureFlowEnabled={termsSignatureFlowEnabled}
+      identityPickerPlacement={identityPickerPlacement}
     />
   );
 }

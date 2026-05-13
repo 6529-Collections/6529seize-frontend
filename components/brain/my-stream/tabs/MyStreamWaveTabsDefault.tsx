@@ -13,6 +13,7 @@ import {
   LinkIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/solid";
 import WavePicture from "../../../waves/WavePicture";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { createBreakpoint } from "react-use";
@@ -25,7 +26,9 @@ import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
+import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -33,8 +36,9 @@ interface MyStreamWaveTabsDefaultProps {
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
   readonly showGalleryToggle: boolean;
-  readonly activeCurationId: string | null;
-  readonly onSelectCuration: (curationId: string | null) => void;
+  readonly activeCurationId?: string | null | undefined;
+  readonly onSelectCuration?: ((curationId: string | null) => void) | undefined;
+  readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
 }
 
 const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
@@ -42,8 +46,9 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   viewMode,
   onToggleViewMode,
   showGalleryToggle,
-  activeCurationId,
-  onSelectCuration,
+  activeCurationId = null,
+  onSelectCuration = () => {},
+  chatSubmitDropAction = null,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
@@ -113,6 +118,17 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const rightSidebarActionLabel = isRightSidebarOpen
     ? "Hide right sidebar"
     : "Show right sidebar";
+  const showChatSubmitDropAction =
+    activeContentTab === MyStreamWaveTab.CHAT &&
+    !activeCurationId &&
+    chatSubmitDropAction?.isVisible === true;
+  const chatSubmitDropTooltip = chatSubmitDropAction
+    ? (chatSubmitDropAction.restrictionMessage ?? chatSubmitDropAction.label)
+    : null;
+  const chatSubmitDropTitle = chatSubmitDropTooltip ?? undefined;
+  const chatSubmitDropAriaLabel = chatSubmitDropAction
+    ? chatSubmitDropAction.label
+    : undefined;
   const renderWaveLinkActionIcon = () => {
     if (waveLinkActionFeedbackState !== "idle") {
       return <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
@@ -169,6 +185,26 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           )}
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">
+          {showChatSubmitDropAction && (
+            <span
+              className="tw-inline-flex"
+              title={chatSubmitDropTitle}
+              data-tooltip-id={headerActionsTooltipId}
+              data-tooltip-content={chatSubmitDropTooltip}
+            >
+              <PrimaryButton
+                loading={false}
+                disabled={!chatSubmitDropAction.canOpen}
+                onClicked={chatSubmitDropAction.onOpen}
+                padding="tw-px-2.5 tw-py-2"
+                title={chatSubmitDropTitle}
+                ariaLabel={chatSubmitDropAriaLabel}
+              >
+                <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                <span>{chatSubmitDropAction.compactLabel}</span>
+              </PrimaryButton>
+            </span>
+          )}
           {showGalleryToggle && !activeCurationId && (
             <button
               type="button"
