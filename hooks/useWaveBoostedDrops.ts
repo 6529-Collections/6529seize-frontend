@@ -4,11 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import type { Page } from "@/helpers/Types";
 import { TimeWindow, TIME_WINDOW_MS } from "@/types/boosted-drops.types";
+import { fetchBoostedDropsV2 } from "@/services/api/wave-drops-v2-api";
 
 interface UseWaveBoostedDropsProps {
   readonly waveId: string;
+  readonly wave?: ApiWave | undefined;
   readonly limit?: number;
   readonly timeWindow?: TimeWindow;
 }
@@ -19,6 +22,7 @@ const REFETCH_INTERVAL = 30000; // 30 seconds
 
 export function useWaveBoostedDrops({
   waveId,
+  wave,
   limit = DEFAULT_LIMIT,
   timeWindow = TimeWindow.DAY,
 }: UseWaveBoostedDropsProps) {
@@ -26,6 +30,15 @@ export function useWaveBoostedDrops({
     queryKey: [QueryKey.BOOSTED_DROPS, { waveId, limit, timeWindow }],
     queryFn: async () => {
       const countOnlyBoostsAfter = Date.now() - TIME_WINDOW_MS[timeWindow];
+      if (wave) {
+        return await fetchBoostedDropsV2({
+          waveId,
+          wave,
+          limit,
+          countOnlyBoostsAfter,
+        });
+      }
+
       const response = await commonApiFetch<Page<ApiDrop>>({
         endpoint: "boosted-drops",
         params: {

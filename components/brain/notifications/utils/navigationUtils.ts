@@ -8,9 +8,20 @@ export function getIsDirectMessage(
   fallback = false
 ): boolean {
   const w = wave as {
-    chat?: { scope?: { group?: { is_direct_message?: boolean | undefined } | undefined } | undefined } | undefined;
+    is_direct_message?: boolean | undefined;
+    chat?:
+      | {
+          scope?:
+            | {
+                group?: { is_direct_message?: boolean | undefined } | undefined;
+              }
+            | undefined;
+        }
+      | undefined;
   };
-  return w.chat?.scope?.group?.is_direct_message ?? fallback;
+  return (
+    w.chat?.scope?.group?.is_direct_message ?? w.is_direct_message ?? fallback
+  );
 }
 
 export function useWaveNavigation() {
@@ -32,7 +43,10 @@ export function useWaveNavigation() {
     );
   };
 
-  const createReplyClickHandler = (waveId: string, isDirectMessage: boolean) => {
+  const createReplyClickHandler = (
+    waveId: string,
+    isDirectMessage: boolean
+  ) => {
     return (serialNo: number) => {
       navigateToWave(waveId, serialNo, isDirectMessage);
     };

@@ -22,12 +22,14 @@ jest.mock("@/components/waves/drop/MemesSingleWaveDropInfoPanel", () => ({
   },
 }));
 
-jest.mock("@/hooks/useDrop", () => ({
-  useDrop: () => ({ drop: { id: "d1", wave: { id: "w1" } } }),
+jest.mock("@/components/waves/drop/useSingleWaveDropData", () => ({
+  useSingleWaveDropData: () => ({
+    drop: { id: "d1", wave: { id: "w1" } },
+    wave: { id: "w1" },
+    extendedDrop: { id: "d1", wave: { id: "w1" } },
+  }),
 }));
-jest.mock("@/hooks/useWaveData", () => ({
-  useWaveData: () => ({ data: { id: "w1" } }),
-}));
+
 jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
   useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
 }));

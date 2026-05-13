@@ -17,20 +17,23 @@ export default function WaveWinnersDropHeaderVoters({
   const hasUserVoted = userVote !== 0;
   const isNegativeVote = userVote < 0;
   const userVoteClass = isNegativeVote ? "tw-text-rose-400" : "tw-text-iron-50";
+  const hasTopRaters = winner.drop.top_raters.length > 0;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2">
       <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-sm tw-leading-5">
-        <div className="tw-flex tw-items-center -tw-space-x-2">
-          {winner.drop.top_raters.map((voter, index) => (
-            <WaveWinnersDropHeaderVoter
-              voter={voter}
-              winner={winner}
-              index={index}
-              key={voter.profile.handle}
-            />
-          ))}
-        </div>
+        {hasTopRaters && (
+          <div className="tw-flex tw-items-center -tw-space-x-2">
+            {winner.drop.top_raters.map((voter, index) => (
+              <WaveWinnersDropHeaderVoter
+                voter={voter}
+                winner={winner}
+                index={index}
+                key={voter.profile.handle}
+              />
+            ))}
+          </div>
+        )}
         <span className="tw-font-medium tw-text-iron-50">
           {formatNumberWithCommas(winner.drop.raters_count)}{" "}
           <span className="tw-font-normal tw-text-iron-400">

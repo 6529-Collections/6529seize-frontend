@@ -1,13 +1,15 @@
 import { useEffect, useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
-import type { ApiWaveDecisionsPage } from "@/generated/models/ApiWaveDecisionsPage";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { prepareWaveDecisionPoint } from "@/helpers/waves/wave-decision.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { fetchWaveDecisionsV2 } from "@/services/api/wave-decisions-v2-api";
 
 interface UseWaveDecisionsProps {
   readonly waveId: string;
+  readonly wave?: ApiWave | ApiWaveMin | undefined;
   readonly enabled?: boolean | undefined;
   readonly loadAllPages?: boolean | undefined;
   readonly pageSize?: number | undefined;
@@ -35,6 +37,7 @@ const getValidPageSize = (pageSize: number | undefined): number => {
 
 export function useWaveDecisions({
   waveId,
+  wave,
   enabled = true,
   loadAllPages = false,
   pageSize,
@@ -53,17 +56,25 @@ export function useWaveDecisions({
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: [QueryKey.WAVE_DECISIONS, { waveId, pageSize: resolvedPageSize }],
-    queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
+    queryFn: async ({
+      pageParam,
+      signal,
+    }: {
+      pageParam?: number | undefined;
+      signal?: AbortSignal | undefined;
+    }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
 
-      return await commonApiFetch<ApiWaveDecisionsPage>({
-        endpoint: `waves/${waveId}/decisions`,
+      return await fetchWaveDecisionsV2({
+        waveId,
+        wave,
         params: {
           sort_direction: "DESC",
           sort: "decision_time",
           page: currentPage.toString(),
           page_size: resolvedPageSize.toString(),
         },
+        signal,
       });
     },
     initialPageParam: DEFAULT_PAGE,

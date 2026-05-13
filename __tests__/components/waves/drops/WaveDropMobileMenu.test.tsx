@@ -376,6 +376,49 @@ test("shows full menu when a profile handle is present", () => {
   expect(screen.getByTestId("delete")).toBeInTheDocument();
 });
 
+test("does not show mobile download actions for media", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+    parts: [
+      {
+        media: [{ url: "https://example.com/first.png" }],
+        attachments: [{ url: "https://example.com/attachment.pdf" }],
+      },
+      {
+        media: [{ url: "https://example.com/second.mp4" }],
+        attachments: [],
+      },
+    ],
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { handle: "alice" },
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(screen.queryByText("Download media")).toBeNull();
+});
+
 test("shows clap by default for non-author profiles", () => {
   const drop = {
     id: "1",

@@ -6,7 +6,6 @@ import {
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
-import type { ApiCurationDropsPage } from "@/generated/models/ApiCurationDropsPage";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
@@ -17,7 +16,7 @@ import {
   generateUniqueKeys,
   mapToExtendedDrops,
 } from "@/helpers/waves/wave-drops.helpers";
-import { commonApiFetch } from "@/services/api/common-api";
+import { fetchWaveCurationDropsV2 } from "@/services/api/wave-curation-drops-v2-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   keepPreviousData,
@@ -72,18 +71,17 @@ export function useWaveCurationDrops({
   } = useInfiniteQuery({
     queryKey,
     queryFn: async ({ pageParam }: { pageParam: number }) => {
-      if (!waveId || !normalizedCurationId) {
+      if (!wave || !normalizedCurationId) {
         throw new Error(
           "Wave and curation are required to load curation drops"
         );
       }
 
-      return await commonApiFetch<ApiCurationDropsPage>({
-        endpoint: `waves/${waveId}/curations/${normalizedCurationId}/drops`,
-        params: {
-          page: String(pageParam),
-          page_size: String(pageSize),
-        },
+      return await fetchWaveCurationDropsV2({
+        wave,
+        curationId: normalizedCurationId,
+        page: pageParam,
+        pageSize,
       });
     },
     enabled: enabled && !!waveId && normalizedCurationId.length > 0,

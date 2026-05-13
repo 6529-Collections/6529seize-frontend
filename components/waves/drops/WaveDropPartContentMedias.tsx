@@ -4,7 +4,7 @@ import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { ImageScale } from "@/helpers/image.helpers";
-import WaveDropPartContentFullWidthImage from "./WaveDropPartContentFullWidthImage";
+import WaveDropPartContentMediaImage from "./WaveDropPartContentMediaImage";
 
 function isRenderableMedia(mimeType: string, url: string): boolean {
   return (
@@ -53,18 +53,22 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
   const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
   const getMediaContainerClassName = ({
-    useNaturalHeightImage,
+    useIntrinsicHeightMedia,
     useCompactLink,
   }: {
-    readonly useNaturalHeightImage: boolean;
+    readonly useIntrinsicHeightMedia: boolean;
     readonly useCompactLink: boolean;
   }) => {
-    if (useNaturalHeightImage || useCompactLink) {
+    if (useCompactLink) {
       return "tw-w-full";
     }
 
+    if (useIntrinsicHeightMedia) {
+      return "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-max-h-64 tw-items-center tw-justify-center";
+    }
+
     return clsx(
-      "tw-flex tw-items-center tw-justify-center",
+      "tw-flex tw-min-w-[min(200px,100%)] tw-items-center tw-justify-center",
       mediaContainerHeightClassName,
       fullWidthMedia && "tw-w-full"
     );
@@ -75,9 +79,15 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       {activePart.media.map((media, i) => {
         const useNaturalHeightImage =
           fullWidthMedia && media.mime_type.includes("image");
+        const useImageIntrinsicHeight =
+          !fullWidthMedia && media.mime_type.includes("image");
+        const useVideoIntrinsicHeight = media.mime_type.includes("video");
         const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
         const mediaContainerClassName = getMediaContainerClassName({
-          useNaturalHeightImage,
+          useIntrinsicHeightMedia:
+            useNaturalHeightImage ||
+            useImageIntrinsicHeight ||
+            useVideoIntrinsicHeight,
           useCompactLink,
         });
         let mediaContent;
@@ -91,11 +101,14 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
               imageScale={imageScale}
             />
           );
-        } else if (useNaturalHeightImage) {
+        } else if (useNaturalHeightImage || useImageIntrinsicHeight) {
           mediaContent = (
-            <WaveDropPartContentFullWidthImage
+            <WaveDropPartContentMediaImage
               src={media.url}
               imageScale={imageScale}
+              imageObjectPosition={
+                useImageIntrinsicHeight ? "left top" : "center"
+              }
             />
           );
         } else {
@@ -110,11 +123,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
         }
 
         return (
-          <div
-            key={`part-${i}-media-${media.url}`}
-            className={mediaContainerClassName}
-          >
-            {mediaContent}
+          <div key={`part-${i}-media-${media.url}`}>
+            <div className={mediaContainerClassName}>{mediaContent}</div>
           </div>
         );
       })}

@@ -185,6 +185,30 @@ test("uses mobile modal on small screens", async () => {
   expect(screen.getByTestId("mobile-modal")).toHaveTextContent("open");
 });
 
+test("uses v2 part one title and content before metadata fallbacks", () => {
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  render(
+    <MemesLeaderboardDrop
+      drop={{
+        ...drop,
+        title: "Part title",
+        parts: [
+          {
+            content: "Part description",
+            media: [{ mime_type: "image", url: "img" }],
+          },
+        ],
+      }}
+      onDropClick={jest.fn()}
+    />
+  );
+
+  expect(screen.getByTestId("header")).toHaveTextContent("Part title");
+  expect(screen.getByTestId("desc")).toHaveTextContent("Part description");
+});
+
 test("opens mobile resubmit modal after the touch menu leaves", async () => {
   const setIsActive = jest.fn();
   useDeviceInfo.mockReturnValue({ hasTouchScreen: true });

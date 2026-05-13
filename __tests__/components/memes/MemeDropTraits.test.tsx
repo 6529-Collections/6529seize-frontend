@@ -2,16 +2,13 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MemeDropTraits from "@/components/memes/drops/MemeDropTraits";
 
-jest.mock(
-  "@/components/memes/drops/MemeDropTrait",
-  () => (props: any) =>
-    (
-      <div
-        data-testid="trait"
-        data-label={props.label}
-        data-value={props.value}></div>
-    )
-);
+jest.mock("@/components/memes/drops/MemeDropTrait", () => (props: any) => (
+  <div
+    data-testid="trait"
+    data-label={props.label}
+    data-value={props.value}
+  ></div>
+));
 
 describe("MemeDropTraits", () => {
   const drop = {
@@ -32,5 +29,32 @@ describe("MemeDropTraits", () => {
     expect(screen.getByText("Show less")).toBeInTheDocument();
     await user.click(screen.getByText("Show less"));
     expect(screen.getAllByTestId("trait")).toHaveLength(2);
+  });
+
+  it("does not render the show all control when there are no traits", () => {
+    const { container } = render(
+      <MemeDropTraits drop={{ metadata: [] } as any} />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByText("Show all")).not.toBeInTheDocument();
+  });
+
+  it("does not render the show all control when all traits are visible", () => {
+    render(
+      <MemeDropTraits
+        drop={
+          {
+            metadata: [
+              { data_key: "artist", data_value: "bob" },
+              { data_key: "memeName", data_value: "cool" },
+            ],
+          } as any
+        }
+      />
+    );
+
+    expect(screen.getAllByTestId("trait")).toHaveLength(2);
+    expect(screen.queryByText("Show all")).not.toBeInTheDocument();
   });
 });

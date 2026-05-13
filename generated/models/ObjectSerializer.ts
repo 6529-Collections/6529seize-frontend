@@ -284,6 +284,8 @@ export * from '../models/ApiWaveOutcomeType';
 export * from '../models/ApiWaveOutcomesPage';
 export * from '../models/ApiWaveOverview';
 export * from '../models/ApiWaveOverviewContextProfileContext';
+export * from '../models/ApiWaveOverviewContributor';
+export * from '../models/ApiWaveOverviewDescriptionDrop';
 export * from '../models/ApiWaveOverviewPage';
 export * from '../models/ApiWaveParticipationConfig';
 export * from '../models/ApiWaveParticipationIdentitySubmissionAllowDuplicates';
@@ -483,7 +485,7 @@ import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
-import { ApiDropV2                        } from '../models/ApiDropV2';
+import { ApiDropV2                         } from '../models/ApiDropV2';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
 import { ApiDropV2Page } from '../models/ApiDropV2Page';
 import { ApiDropV2PageWithoutCount } from '../models/ApiDropV2PageWithoutCount';
@@ -551,7 +553,7 @@ import { ApiNotification        } from '../models/ApiNotification';
 import { ApiNotificationAdditionalContextV2 } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
-import { ApiNotificationV2        } from '../models/ApiNotificationV2';
+import { ApiNotificationV2         } from '../models/ApiNotificationV2';
 import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
 import { ApiOutgoingIdentitySubscriptionsPage } from '../models/ApiOutgoingIdentitySubscriptionsPage';
@@ -655,6 +657,8 @@ import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { ApiWaveOutcomesPage } from '../models/ApiWaveOutcomesPage';
 import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { ApiWaveOverviewContextProfileContext } from '../models/ApiWaveOverviewContextProfileContext';
+import { ApiWaveOverviewContributor } from '../models/ApiWaveOverviewContributor';
+import { ApiWaveOverviewDescriptionDrop } from '../models/ApiWaveOverviewDescriptionDrop';
 import { ApiWaveOverviewPage } from '../models/ApiWaveOverviewPage';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
 import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from '../models/ApiWaveParticipationIdentitySubmissionAllowDuplicates';
@@ -1061,6 +1065,8 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveOutcomesPage": ApiWaveOutcomesPage,
     "ApiWaveOverview": ApiWaveOverview,
     "ApiWaveOverviewContextProfileContext": ApiWaveOverviewContextProfileContext,
+    "ApiWaveOverviewContributor": ApiWaveOverviewContributor,
+    "ApiWaveOverviewDescriptionDrop": ApiWaveOverviewDescriptionDrop,
     "ApiWaveOverviewPage": ApiWaveOverviewPage,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveParticipationSubmissionStrategy": ApiWaveParticipationSubmissionStrategy,

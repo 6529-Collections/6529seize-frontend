@@ -3,17 +3,10 @@
 import React, { useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import WaveDropContent from "@/components/waves/drops/WaveDropContent";
-import WaveDropMetadata from "@/components/waves/drops/WaveDropMetadata";
 import { useRouter } from "next/navigation";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
-import {
-  getDropIdentityProfile,
-  getDropVisibleMetadata,
-} from "@/components/waves/drops/identityDisplay.helpers";
-import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
-import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -32,20 +25,6 @@ export const WaveLeaderboardDropContent: React.FC<
 }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
-  const visibleMetadata = getDropVisibleMetadata({
-    wave: drop.wave,
-    metadata: drop.metadata,
-  });
-  const identityProfile = getDropIdentityProfile({
-    wave: drop.wave,
-    metadata: drop.metadata,
-  });
-  const isSelfNominee = identityProfile
-    ? areSameProfileIdentity({
-        left: drop.author,
-        right: identityProfile,
-      })
-    : false;
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
     const href = getWaveRoute({
@@ -71,16 +50,6 @@ export const WaveLeaderboardDropContent: React.FC<
         mediaContainerHeightClassName={mediaContainerHeightClassName}
         contentPresentation={contentPresentation}
       />
-      <WaveLeaderboardIdentity
-        drop={drop}
-        variant="responsive"
-        cardVariant="chat"
-        className="tw-mt-2 lg:tw-mt-0"
-        showIdentityHeader={!isSelfNominee}
-      />
-      {!!visibleMetadata.length && (
-        <WaveDropMetadata metadata={visibleMetadata} />
-      )}
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
         <WaveDropReactions drop={drop} />
       </div>

@@ -11,11 +11,15 @@ describe("WavePicture", () => {
     expect(img).toHaveAttribute("alt", "wave");
   });
 
-  it("renders gradient when no picture and no contributors", () => {
+  it("renders default wave icon fallback when no picture and no contributors", () => {
     const { container } = render(
       <WavePicture name="wave" picture={null} contributors={[]} />
     );
     expect(container.firstChild).toBeInTheDocument();
+    const icon = screen.getByTestId("wave-fallback-icon");
+    expect(icon).toBeInTheDocument();
+    expect(icon).toHaveClass("tw-text-white/60");
+    expect(icon.parentElement).toHaveClass("tw-bg-white/10");
   });
 
   it("renders contributor images sliced", () => {

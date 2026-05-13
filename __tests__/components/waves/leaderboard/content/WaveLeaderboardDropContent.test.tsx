@@ -15,22 +15,10 @@ jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
   default: (props: any) => waveDropContentMock(props),
 }));
-jest.mock("@/components/waves/drops/WaveDropMetadata", () => ({
-  __esModule: true,
-  default: ({ metadata }: any) => (
-    <div data-testid="meta">{metadata.length}</div>
-  ),
-}));
 jest.mock("@/components/waves/drops/WaveDropReactions", () => ({
   __esModule: true,
   default: () => <div data-testid="reactions" />,
 }));
-jest.mock(
-  "@/components/waves/leaderboard/identity/WaveLeaderboardIdentity",
-  () => ({
-    WaveLeaderboardIdentity: () => <div data-testid="identity" />,
-  })
-);
 
 const routerMock = useRouter as jest.Mock;
 
@@ -39,7 +27,7 @@ describe("WaveLeaderboardDropContent", () => {
     waveDropContentMock.mockClear();
   });
 
-  it("navigates on drop click, renders identity, and filters reserved metadata", () => {
+  it("navigates on drop click and renders reactions", () => {
     const push = jest.fn();
     routerMock.mockReturnValue({ push });
     const drop = {
@@ -56,8 +44,7 @@ describe("WaveLeaderboardDropContent", () => {
     render(<WaveLeaderboardDropContent drop={drop} />);
     fireEvent.click(screen.getByTestId("content"));
     expect(push).toHaveBeenCalledWith("/waves/w?serialNo=5");
-    expect(screen.getByTestId("identity")).toBeInTheDocument();
-    expect(screen.getByTestId("meta")).toHaveTextContent("1");
+    expect(screen.getByTestId("reactions")).toBeInTheDocument();
   });
 
   it("forwards custom content presentation to the shared drop content", () => {

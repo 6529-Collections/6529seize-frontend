@@ -30,10 +30,10 @@ const DropListItemContentMediaGLB = dynamic(
 export default function DropListItemContentMedia({
   media_mime_type,
   media_url,
-  onContainerClick,
   isCompetitionDrop = false,
   disableModal = false,
   disableAutoPlay = false,
+  fillVideoContainer = false,
   imageObjectPosition,
   imageScale = ImageScale.AUTOx800,
   htmlIframeContainerClassName,
@@ -42,10 +42,10 @@ export default function DropListItemContentMedia({
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
-  readonly onContainerClick?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly disableModal?: boolean | undefined;
   readonly disableAutoPlay?: boolean | undefined;
+  readonly fillVideoContainer?: boolean | undefined;
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly htmlIframeContainerClassName?: string | undefined;
@@ -83,7 +83,6 @@ export default function DropListItemContentMedia({
       return (
         <DropListItemContentMediaImage
           src={media_url}
-          onContainerClick={onContainerClick}
           isCompetitionDrop={isCompetitionDrop}
           disableModal={disableModal}
           imageObjectPosition={imageObjectPosition}
@@ -96,6 +95,7 @@ export default function DropListItemContentMedia({
         <DropListItemContentMediaVideo
           src={media_url}
           disableAutoPlay={disableAutoPlay}
+          fillContainer={fillVideoContainer}
         />
       );
     case MediaType.AUDIO:
