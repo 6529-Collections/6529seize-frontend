@@ -15,6 +15,7 @@ interface WaveDropCreateProps {
   readonly title?: string | undefined;
   readonly isModalContent?: boolean | undefined;
   readonly onExitFixedDropMode?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
 }
 
 export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
@@ -26,6 +27,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   title = "Create a New Drop",
   isModalContent = false,
   onExitFixedDropMode = onCancel,
+  termsSignatureFlowEnabled = true,
 }) => {
   const curationComposerVariant: CurationComposerVariant = isCurationLeaderboard
     ? "leaderboard"
@@ -84,6 +86,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
         fixedDropMode={DropMode.PARTICIPATION}
         curationComposerVariant={curationComposerVariant}
         initialCurationUrl={initialCurationUrl}
+        termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       />
     </div>
   );

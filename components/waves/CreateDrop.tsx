@@ -53,6 +53,7 @@ interface CreateDropProps {
     | null
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
 }
 
 export interface DropMutationBody {
@@ -81,6 +82,7 @@ export default function CreateDrop({
   curationUrlSubmitRestrictionMessage = null,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
+  termsSignatureFlowEnabled = true,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -412,6 +414,7 @@ export default function CreateDrop({
       onExternalAttachmentDropConsumed,
       canSubmitCurationUrl: canUseCurationUrlSubmit,
       curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
+      termsSignatureFlowEnabled,
     };
   }, [
     activeDrop,
@@ -432,6 +435,7 @@ export default function CreateDrop({
     onExternalAttachmentDropConsumed,
     canUseCurationUrlSubmit,
     curationUrlRestrictionMessage,
+    termsSignatureFlowEnabled,
   ]);
 
   let dropComposerContent: ReactNode;
@@ -446,6 +450,7 @@ export default function CreateDrop({
           dropId={dropId}
           submitDrop={submitDrop}
           onClose={onCloseQuorumProposal}
+          termsSignatureFlowEnabled={termsSignatureFlowEnabled}
         />
         {!isQuorumProposalModalOpen && (
           <div className="tw-flex tw-w-full tw-justify-end">
@@ -471,6 +476,7 @@ export default function CreateDrop({
         initialUrl={initialCurationUrl}
         submitDrop={submitDrop}
         curationComposerVariant={curationComposerVariant}
+        termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       />
     );
   } else {

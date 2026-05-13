@@ -162,6 +162,7 @@ interface CreateDropContentProps {
     | null
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
 }
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
@@ -459,6 +460,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   curationUrlSubmitRestrictionMessage = null,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
+  termsSignatureFlowEnabled = true,
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
@@ -1849,7 +1851,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         removeFile={removeFile}
         disabled={submitting}
       />
-      <TermsSignatureFlow />
+      <TermsSignatureFlow enabled={termsSignatureFlowEnabled} />
     </div>
   );
 };

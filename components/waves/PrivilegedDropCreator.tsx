@@ -30,6 +30,7 @@ interface PrivilegedDropCreatorProps {
     | null
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -48,6 +49,7 @@ export default function PrivilegedDropCreator({
   curationUrlSubmitRestrictionMessage,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
+  termsSignatureFlowEnabled = true,
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
@@ -110,6 +112,7 @@ export default function PrivilegedDropCreator({
       curationUrlSubmitRestrictionMessage={curationUrlSubmitRestrictionMessage}
       externalAttachmentDrop={externalAttachmentDrop}
       onExternalAttachmentDropConsumed={onExternalAttachmentDropConsumed}
+      termsSignatureFlowEnabled={termsSignatureFlowEnabled}
     />
   );
 }

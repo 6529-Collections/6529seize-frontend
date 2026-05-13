@@ -1,10 +1,14 @@
 "use client";
 
-import type { FC} from "react";
+import type { FC } from "react";
 import { useEffect, useState } from "react";
 import TermsOfServiceModal from "./TermsOfServiceModal";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+
+interface TermsSignatureFlowProps {
+  readonly enabled?: boolean | undefined;
+}
 
 interface SigningCompleteResult {
   success: boolean;
@@ -15,7 +19,7 @@ interface SigningCompleteResult {
  * Component that handles the terms signature flow
  * This is a wrapper component that listens for global events to show terms
  */
-const TermsSignatureFlow: FC = () => {
+const TermsSignatureFlowInner: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [termsContent, setTermsContent] = useState<string | null>(null);
   const [pendingDrop, setPendingDrop] = useState<ApiCreateDropRequest | null>(
@@ -103,6 +107,16 @@ const TermsSignatureFlow: FC = () => {
       isLoading={isLoading}
     />
   );
+};
+
+const TermsSignatureFlow: FC<TermsSignatureFlowProps> = ({
+  enabled = true,
+}) => {
+  if (!enabled) {
+    return null;
+  }
+
+  return <TermsSignatureFlowInner />;
 };
 
 export default TermsSignatureFlow;

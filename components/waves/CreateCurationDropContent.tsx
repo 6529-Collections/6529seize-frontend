@@ -52,6 +52,7 @@ interface CreateCurationDropContentProps {
   readonly initialUrl: string | null;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly curationComposerVariant?: CurationComposerVariant | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
 }
 
 const DEFAULT_HELPER_TEXT =
@@ -66,6 +67,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
   initialUrl,
   submitDrop,
   curationComposerVariant = "default",
+  termsSignatureFlowEnabled = true,
 }) => {
   const { isApp } = useDeviceInfo();
   const editingDropId = useSelector(selectEditingDropId);
@@ -445,7 +447,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
           </div>
         </div>
       )}
-      <TermsSignatureFlow />
+      <TermsSignatureFlow enabled={termsSignatureFlowEnabled} />
     </div>
   );
 };

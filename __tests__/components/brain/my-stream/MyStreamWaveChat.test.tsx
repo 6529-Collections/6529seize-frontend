@@ -254,6 +254,14 @@ describe("MyStreamWaveChat", () => {
     );
   };
 
+  const getCreatorPropsByMode = (mode: string) => {
+    const props = capturedCreatorPropsHolder.all.find(
+      (creatorProps) => creatorProps.fixedDropMode === mode
+    );
+    expect(props).toBeDefined();
+    return props as any;
+  };
+
   it("handles serialNo param and shows memes button", async () => {
     searchParamsMock.get.mockReturnValueOnce("5").mockReturnValue(null);
     searchParamsMock.toString.mockReturnValue("serialNo=5");
@@ -320,6 +328,10 @@ describe("MyStreamWaveChat", () => {
     expect(
       capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
     ).toEqual(expect.arrayContaining(["CHAT", "PARTICIPATION"]));
+    expect(getCreatorPropsByMode("CHAT").termsSignatureFlowEnabled).toBe(false);
+    expect(
+      getCreatorPropsByMode("PARTICIPATION").termsSignatureFlowEnabled
+    ).toBe(true);
   });
 
   it("closing the submit modal restores the normal chat composer", async () => {
@@ -366,6 +378,9 @@ describe("MyStreamWaveChat", () => {
     expect(
       capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
     ).toEqual(["CHAT"]);
+    expect(capturedCreatorPropsHolder.current.termsSignatureFlowEnabled).toBe(
+      true
+    );
   });
 
   it("successful submit closes the submit modal", async () => {
@@ -418,6 +433,10 @@ describe("MyStreamWaveChat", () => {
     expect(
       capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
     ).toEqual(expect.arrayContaining(["CHAT", "PARTICIPATION"]));
+    expect(getCreatorPropsByMode("CHAT").termsSignatureFlowEnabled).toBe(false);
+    expect(
+      getCreatorPropsByMode("PARTICIPATION").termsSignatureFlowEnabled
+    ).toBe(true);
 
     const quorumSubmitCreator = capturedCreatorPropsHolder.all.find(
       (props) => props.fixedDropMode === "PARTICIPATION"
@@ -510,6 +529,10 @@ describe("MyStreamWaveChat", () => {
     expect(
       capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)
     ).toEqual(expect.arrayContaining(["CHAT", "PARTICIPATION"]));
+    expect(getCreatorPropsByMode("CHAT").termsSignatureFlowEnabled).toBe(false);
+    expect(
+      getCreatorPropsByMode("PARTICIPATION").termsSignatureFlowEnabled
+    ).toBe(true);
   });
 
   it("opens curation submit modal with a URL seed from chat composer", async () => {
@@ -573,6 +596,10 @@ describe("MyStreamWaveChat", () => {
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe(
       "PARTICIPATION"
     );
+    expect(getCreatorPropsByMode("CHAT").termsSignatureFlowEnabled).toBe(false);
+    expect(
+      getCreatorPropsByMode("PARTICIPATION").termsSignatureFlowEnabled
+    ).toBe(true);
   });
 
   it("shows the submit restriction instead of curation URL handoff when blocked", async () => {

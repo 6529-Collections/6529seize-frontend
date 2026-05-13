@@ -274,6 +274,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     chatSubmitDropAction?.isVisible === true
       ? chatSubmitDropAction.restrictionMessage
       : null;
+  const isChatSubmitFlowOpen = activeChatSubmitDropExperience !== null;
 
   const shouldHandleContainerFileDrop = (
     event: React.DragEvent<HTMLElement>
@@ -505,6 +506,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 curationUrlSubmitRestrictionMessage={
                   chatCurationUrlSubmitRestrictionMessage
                 }
+                termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
               />
             </CreateDropWaveWrapper>
           </div>
