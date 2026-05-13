@@ -1,8 +1,9 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { SingleWaveDropTraits } from "@/components/waves/drop/SingleWaveDropTraits";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
+import useIsMobileDevice from "@/hooks/isMobileDevice";
+import type { ReactNode } from "react";
 
 // Mock dependencies
 jest.mock("@/hooks/isMobileDevice", () => ({
@@ -10,6 +11,53 @@ jest.mock("@/hooks/isMobileDevice", () => ({
   default: jest.fn(() => false),
 }));
 
+jest.mock("react-tooltip", () => {
+  const ReactActual = jest.requireActual<typeof import("react")>("react");
+
+  return {
+    Tooltip: ({ id }: { id: string }) =>
+      ReactActual.createElement("div", {
+        "data-testid": "react-tooltip",
+        "data-tooltip-id": id,
+      }),
+  };
+});
+
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => {
+  const ReactActual = jest.requireActual<typeof import("react")>("react");
+
+  return {
+    __esModule: true,
+    default: ({
+      title,
+      isOpen,
+      onClose,
+      children,
+    }: {
+      title?: string;
+      isOpen: boolean;
+      onClose: () => void;
+      children: ReactNode;
+    }) =>
+      isOpen
+        ? ReactActual.createElement(
+            "div",
+            { role: "dialog", "aria-label": title },
+            ReactActual.createElement("h2", null, title),
+            ReactActual.createElement(
+              "button",
+              { type: "button", onClick: onClose },
+              "Close panel"
+            ),
+            children
+          )
+        : null,
+  };
+});
+
+const mockedUseIsMobileDevice = useIsMobileDevice as jest.MockedFunction<
+  typeof useIsMobileDevice
+>;
 
 describe("SingleWaveDropTraits", () => {
   const createMockDrop = (
@@ -36,11 +84,97 @@ describe("SingleWaveDropTraits", () => {
       context_profile_context: null,
       referenced_nfts: [],
       mentioned_users: [],
-    } as ExtendedDrop);
+    }) as ExtendedDrop;
 
   const createMetadata = (key: string, value: string): ApiDropMetadata => ({
     data_key: key,
     data_value: value,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedUseIsMobileDevice.mockReturnValue(false);
+  });
+
+  describe("trait card interaction", () => {
+    it("renders desktop tooltip trigger and does not open mobile dialog on click", () => {
+      const value = "A long artist value that should stay truncated on desktop";
+      const drop = createMockDrop([createMetadata("artist", value)], "");
+      drop.parts = [];
+
+      render(<SingleWaveDropTraits drop={drop} />);
+
+      const valueElement = screen.getByText(value);
+      const tooltipId = `trait-Artist-${value}`;
+
+      expect(valueElement).toHaveClass("tw-truncate");
+      expect(valueElement).toHaveAttribute("data-tooltip-id", tooltipId);
+      expect(
+        screen
+          .getAllByTestId("react-tooltip")
+          .some(
+            (tooltip) => tooltip.getAttribute("data-tooltip-id") === tooltipId
+          )
+      ).toBe(true);
+
+      fireEvent.click(valueElement);
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("renders mobile trait cards as tappable buttons", () => {
+      mockedUseIsMobileDevice.mockReturnValue(true);
+      const value = "Readable mobile artist value";
+      const drop = createMockDrop([createMetadata("artist", value)], "");
+      drop.parts = [];
+
+      render(<SingleWaveDropTraits drop={drop} />);
+
+      const traitButton = screen.getByRole("button", {
+        name: `View full Artist trait: ${value}`,
+      });
+      const valueElement = within(traitButton).getByText(value);
+
+      expect(traitButton).toHaveAttribute("type", "button");
+      expect(valueElement).toHaveClass(
+        "tw-line-clamp-2",
+        "tw-whitespace-normal",
+        "tw-break-words"
+      );
+      expect(valueElement).not.toHaveClass("tw-truncate");
+      expect(screen.queryByTestId("react-tooltip")).not.toBeInTheDocument();
+    });
+
+    it("opens and closes a full-value mobile dialog", () => {
+      mockedUseIsMobileDevice.mockReturnValue(true);
+      const value =
+        "Parent value with enough detail to need the full mobile bottom sheet";
+      const drop = createMockDrop([createMetadata("parent", value)], "");
+      drop.parts = [];
+
+      render(<SingleWaveDropTraits drop={drop} />);
+
+      fireEvent.click(screen.getByText("Show all"));
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: `View full Parent trait: ${value}`,
+        })
+      );
+
+      const dialog = screen.getByRole("dialog", { name: "Parent" });
+      expect(within(dialog).getByText(value)).toHaveClass(
+        "tw-whitespace-pre-wrap",
+        "tw-break-words"
+      );
+
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Close panel" })
+      );
+
+      expect(
+        screen.queryByRole("dialog", { name: "Parent" })
+      ).not.toBeInTheDocument();
+    });
   });
 
   describe("rendering with no traits", () => {
@@ -503,30 +637,30 @@ describe("SingleWaveDropTraits", () => {
       const { container } = render(<SingleWaveDropTraits drop={drop} />);
 
       const gridContainer = container.querySelector(".tw-grid");
+      if (!gridContainer) {
+        throw new Error("Missing traits grid");
+      }
       expect(gridContainer).toHaveClass(
         "tw-grid-cols-2",
         "sm:tw-grid-cols-3",
-        "md:tw-grid-cols-3",
-        "tw-gap-2"
+        "lg:tw-grid-cols-4",
+        "tw-gap-3"
       );
     });
 
     it("should render metadata items with correct styling", () => {
       const drop = createMockDrop([createMetadata("artist", "Test Artist")]);
 
-      render(<SingleWaveDropTraits drop={drop} />);
-
-      // Find the metadata item container by looking for the specific class pattern
       const { container } = render(<SingleWaveDropTraits drop={drop} />);
       const metadataItems = container.querySelectorAll(
-        String.raw`.tw-px-3.tw-py-1\.5.tw-rounded-md.tw-bg-iron-900`
+        ".tw-px-3.tw-py-2.tw-rounded-lg.tw-bg-iron-900"
       );
       expect(metadataItems.length).toBeGreaterThan(0);
 
-      const firstMetadataItem = metadataItems[0];
+      const firstMetadataItem = metadataItems.item(0);
       expect(firstMetadataItem).toHaveClass("tw-flex");
       expect(firstMetadataItem).toHaveClass("tw-flex-col");
-      expect(firstMetadataItem).toHaveClass("tw-gap-y-1.5");
+      expect(firstMetadataItem).toHaveClass("tw-min-w-[100px]");
     });
   });
 

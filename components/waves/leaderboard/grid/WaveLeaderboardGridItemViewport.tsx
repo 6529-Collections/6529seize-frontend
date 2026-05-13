@@ -25,6 +25,7 @@ interface WaveLeaderboardGridItemViewportProps {
   readonly isCuratable: boolean;
   readonly isCurated: boolean;
   readonly canShowVotingAction: boolean;
+  readonly onOpenDrop: () => void;
   readonly onVoteButtonClick: () => void;
 }
 
@@ -70,7 +71,7 @@ const getCompactTextViewportClassName = ({
   }
 
   if (hasMedia) {
-    return "tw-max-h-28 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 [&_p]:tw-whitespace-normal";
+    return "tw-max-h-28 tw-overflow-hidden [&_p]:tw-whitespace-normal";
   }
 
   return "tw-relative tw-max-h-56 tw-overflow-hidden [&_p]:tw-whitespace-normal";
@@ -135,6 +136,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
   isCuratable,
   isCurated,
   canShowVotingAction,
+  onOpenDrop,
   onVoteButtonClick,
 }) => {
   const activePart = drop.parts[0];
@@ -157,8 +159,11 @@ export const WaveLeaderboardGridItemViewport: React.FC<
     ? null
     : previewImageUrl;
   const hasMedia = mediaUrl !== null && mediaUrl.length > 0;
+  const hasTextContent = (activePart?.content ?? "").trim().length > 0;
   const shouldRenderMarkdown = !(isContentOnlyMode && hasMedia);
   const shouldMeasureCompactTextOverflow = isCompactMode && !hasMedia;
+  const showCompactMediaReadAction =
+    isCompactMode && hasMedia && hasTextContent && shouldRenderMarkdown;
   const showGradient = useOverflowGradient({
     viewportEl,
     innerEl,
@@ -167,6 +172,15 @@ export const WaveLeaderboardGridItemViewport: React.FC<
     viewportEl: compactTextViewportEl,
     innerEl: compactTextInnerEl,
   });
+  const onReadFullTextClick = useCallback<
+    React.MouseEventHandler<HTMLButtonElement>
+  >(
+    (event) => {
+      event.stopPropagation();
+      onOpenDrop();
+    },
+    [onOpenDrop]
+  );
 
   return (
     <div
@@ -230,6 +244,15 @@ export const WaveLeaderboardGridItemViewport: React.FC<
                 <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-14 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/70 tw-to-transparent" />
               )}
             </div>
+            {showCompactMediaReadAction && (
+              <button
+                type="button"
+                onClick={onReadFullTextClick}
+                className="desktop-hover:hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline"
+              >
+                Read full text
+              </button>
+            )}
           </div>
         )}
       </div>

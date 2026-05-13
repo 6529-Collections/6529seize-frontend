@@ -309,7 +309,7 @@ const mapNotificationV2 = (
           cause: ApiNotificationCause.AllDrops,
           related_drops: relatedDrops,
           additional_context: {
-            vote: context.vote ?? 0,
+            ...(typeof context.vote === "number" ? { vote: context.vote } : {}),
           },
         },
       ];

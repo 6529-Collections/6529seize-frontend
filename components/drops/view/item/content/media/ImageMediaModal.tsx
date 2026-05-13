@@ -1,5 +1,6 @@
 "use client";
 
+import { FallbackImage } from "@/components/common/FallbackImage";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
@@ -43,8 +44,8 @@ export function ImageMediaModal({
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
   readonly onClose: () => void;
-  readonly onOpen: () => void;
-  readonly openLabel: string;
+  readonly onOpen?: (() => void) | undefined;
+  readonly openLabel?: string | undefined;
   readonly onDownload: () => void;
   readonly isDownloading: boolean;
   readonly onFullscreen: () => void;
@@ -64,6 +65,7 @@ export function ImageMediaModal({
       <button
         type="button"
         aria-label="Close modal"
+        data-testid="modal-backdrop"
         onClick={onClose}
         className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
       />
@@ -75,19 +77,31 @@ export function ImageMediaModal({
       >
         {() => (
           <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-            <div className="tw-pointer-events-auto tw-relative tw-flex tw-max-h-[90vh] tw-max-w-[95vw] tw-flex-col">
+            <div className="tw-pointer-events-auto tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
               <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+                  wrapperStyle={{ width: "95vw", height: "90dvh" }}
+                  contentStyle={{ width: "95vw", height: "90dvh" }}
                 >
-                  <img
-                    ref={imageRef}
-                    src={src}
-                    alt="Full size drop media"
-                    style={{ pointerEvents: "auto" }}
-                    className="tw-max-h-[75vh] tw-max-w-full tw-object-contain lg:tw-max-h-[90vh]"
-                  />
+                  <div className="tw-relative tw-h-full tw-w-full">
+                    {/* Drop media can come from arbitrary hosts outside Next image config. */}
+                    <FallbackImage
+                      ref={imageRef}
+                      primarySrc={src}
+                      fallbackSrc={src}
+                      alt="Full size drop media"
+                      fill
+                      sizes="95vw"
+                      optimize={false}
+                      style={{
+                        objectFit: "contain",
+                        objectPosition: "center",
+                        pointerEvents: "auto",
+                      }}
+                    />
+                  </div>
                 </TransformComponent>
               </div>
             </div>

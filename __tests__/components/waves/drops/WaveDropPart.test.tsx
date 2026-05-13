@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  createEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropPart from "@/components/waves/drops/WaveDropPart";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -83,6 +89,17 @@ describe("WaveDropPart", () => {
     hasTouch: true,
   };
 
+  const getDropContainer = () => {
+    const container = screen.getByTestId("wave-drop-part-drop").parentElement
+      ?.parentElement;
+
+    if (!container) {
+      throw new Error("Drop container not found");
+    }
+
+    return container;
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
@@ -150,7 +167,7 @@ describe("WaveDropPart", () => {
     it("does not apply accessibility attributes for temporary drops", () => {
       render(<WaveDropPart {...defaultProps} drop={mockTemporaryDrop} />);
 
-      const container = screen.getByTestId("wave-drop-part-drop").parentElement;
+      const container = getDropContainer();
       expect(container).not.toHaveAttribute("role");
       expect(container).not.toHaveAttribute("tabIndex");
     });
@@ -159,23 +176,24 @@ describe("WaveDropPart", () => {
   describe("Click Handling", () => {
     it("calls onDropContentClick when clicked", async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-      render(<WaveDropPart {...defaultProps} />);
-
-      const containers = screen.getAllByRole("button");
-      const dropContainer = containers.find((el) =>
-        el.className.includes("tw-cursor-pointer")
+      const parentOnClick = jest.fn();
+      render(
+        <div onClick={parentOnClick}>
+          <WaveDropPart {...defaultProps} />
+        </div>
       );
-      await user.click(dropContainer!);
+
+      await user.click(getDropContainer());
 
       expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
+      expect(parentOnClick).not.toHaveBeenCalled();
     });
 
     it("does not call onDropContentClick for temporary drops", async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       render(<WaveDropPart {...defaultProps} drop={mockTemporaryDrop} />);
 
-      const container = screen.getByTestId("wave-drop-part-drop").parentElement;
-      await user.click(container!);
+      await user.click(getDropContainer());
 
       expect(mockOnDropContentClick).not.toHaveBeenCalled();
     });
@@ -183,8 +201,8 @@ describe("WaveDropPart", () => {
     it("does not call onDropContentClick when text is selected", async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-      // Mock window.getSelection to return selected text
-      Object.defineProperty(window, "getSelection", {
+      // Mock global selection to return selected text
+      Object.defineProperty(globalThis, "getSelection", {
         writable: true,
         value: jest.fn(() => ({
           toString: () => "selected text",
@@ -193,33 +211,52 @@ describe("WaveDropPart", () => {
 
       render(<WaveDropPart {...defaultProps} />);
 
-      const containers = screen.getAllByRole("button");
-      const dropContainer = containers.find((el) =>
-        el.className.includes("tw-cursor-pointer")
-      );
-      await user.click(dropContainer!);
+      await user.click(getDropContainer());
 
       expect(mockOnDropContentClick).not.toHaveBeenCalled();
     });
 
     it("calls onDropContentClick on Enter key press", () => {
-      // Mock window.getSelection to return empty string
-      Object.defineProperty(window, "getSelection", {
+      const parentOnKeyDown = jest.fn();
+
+      // Mock global selection to return empty string
+      Object.defineProperty(globalThis, "getSelection", {
         writable: true,
         value: jest.fn(() => ({
           toString: () => "",
         })),
       });
 
-      render(<WaveDropPart {...defaultProps} />);
-
-      const containers = screen.getAllByRole("button");
-      const dropContainer = containers.find((el) =>
-        el.className.includes("tw-cursor-pointer")
+      render(
+        <div onKeyDown={parentOnKeyDown}>
+          <WaveDropPart {...defaultProps} />
+        </div>
       );
-      fireEvent.keyDown(dropContainer!, { key: "Enter" });
+
+      fireEvent.keyDown(getDropContainer(), { key: "Enter" });
 
       expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
+      expect(parentOnKeyDown).not.toHaveBeenCalled();
+    });
+
+    it("calls onDropContentClick on Space key press", () => {
+      const parentOnKeyDown = jest.fn();
+
+      render(
+        <div onKeyDown={parentOnKeyDown}>
+          <WaveDropPart {...defaultProps} />
+        </div>
+      );
+
+      const keyDown = createEvent.keyDown(getDropContainer(), {
+        cancelable: true,
+        key: " ",
+      });
+      fireEvent(getDropContainer(), keyDown);
+
+      expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
+      expect(keyDown.defaultPrevented).toBe(true);
+      expect(parentOnKeyDown).not.toHaveBeenCalled();
     });
 
     it("does not call onDropContentClick for other keys", () => {
@@ -229,7 +266,7 @@ describe("WaveDropPart", () => {
       const dropContainer = containers.find((el) =>
         el.className.includes("tw-cursor-pointer")
       );
-      fireEvent.keyDown(dropContainer!, { key: "Space" });
+      fireEvent.keyDown(dropContainer!, { key: "Escape" });
 
       expect(mockOnDropContentClick).not.toHaveBeenCalled();
     });

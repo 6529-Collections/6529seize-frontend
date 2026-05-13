@@ -94,6 +94,7 @@ export default function DropListItemContentMedia({
       return (
         <DropListItemContentMediaVideo
           src={media_url}
+          mimeType={media_mime_type}
           disableAutoPlay={disableAutoPlay}
           fillContainer={fillVideoContainer}
         />

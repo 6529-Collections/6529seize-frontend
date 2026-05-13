@@ -7,6 +7,9 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { DropHasher } from "@/utils/drop-hasher";
 import { AuthContext } from "@/components/auth/Auth";
 
+const DROP_SIGNATURE_FAILED_MESSAGE =
+  "Signature failed. Make sure your wallet is connected and unlocked, and that you are using the wallet linked to your 6529 account. If it still fails, log out of 6529 and log back in, then try again.";
+
 /**
  * Hook for hashing drop data and requesting user signature
  * @returns Object with signDrop function and loading state
@@ -43,7 +46,7 @@ export const useDropSignature = () => {
 
       if (clientSignature.userRejected) {
         setToast({
-          message: "Authentication rejected",
+          message: "Signature rejected",
           type: "error",
         });
         return { success: false };
@@ -51,7 +54,7 @@ export const useDropSignature = () => {
 
       if (!clientSignature.signature) {
         setToast({
-          message: "Error requesting authentication, please try again",
+          message: DROP_SIGNATURE_FAILED_MESSAGE,
           type: "error",
         });
         return { success: false };

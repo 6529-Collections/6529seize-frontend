@@ -2325,6 +2325,28 @@ paths:
           description: Invalid request
         "404":
           description: Drop not found
+  /v2/drops/{id}/votes/download:
+    get:
+      tags:
+        - DropsV2
+      summary: Download V2 drop voters by drop ID as CSV.
+      operationId: downloadDropV2VotersById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Drop not found
   /v2/drops/{id}/votes/logs:
     get:
       tags:
@@ -10229,6 +10251,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropNftLink"
+        priority_metadata:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMetadataV2"
         reactions:
           type: array
           items:

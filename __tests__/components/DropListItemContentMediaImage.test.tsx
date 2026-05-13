@@ -48,6 +48,19 @@ describe("DropListItemContentMediaImage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("closes the modal when the backdrop is clicked", () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+    const img = screen.getByAltText("Drop media");
+    fireEvent.load(img);
+    fireEvent.click(img);
+
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
+
+    expect(
+      screen.queryByAltText("Full size drop media")
+    ).not.toBeInTheDocument();
+  });
+
   it("does not open modal when disableModal is true", () => {
     render(<DropListItemContentMediaImage src="img" disableModal />);
     const img = screen.getByAltText("Drop media");
@@ -73,6 +86,36 @@ describe("DropListItemContentMediaImage", () => {
     ).not.toBeInTheDocument();
 
     expect(requestFullscreen).not.toHaveBeenCalled();
+  });
+
+  it("renders intrinsic-height images without the fill container height", () => {
+    const { container } = render(
+      <DropListItemContentMediaImage src="img" intrinsicHeight />
+    );
+
+    const wrapper = container.querySelector(".tw-relative.tw-flex");
+    const img = screen.getByAltText("Drop media");
+
+    expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
+    expect(wrapper).not.toHaveClass("tw-h-full");
+    expect(img).toHaveClass("tw-h-auto", "tw-w-full", "tw-max-h-64");
+    expect(img).not.toHaveAttribute("data-nimg", "fill");
+  });
+
+  it("retries intrinsic-height images instead of swapping to the same fallback source", () => {
+    jest.useFakeTimers();
+    const setTimeoutSpy = jest.spyOn(globalThis, "setTimeout");
+
+    render(
+      <DropListItemContentMediaImage src="img" intrinsicHeight maxRetries={1} />
+    );
+
+    fireEvent.error(screen.getByAltText("Drop media"));
+
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);
+
+    setTimeoutSpy.mockRestore();
+    jest.useRealTimers();
   });
 });
 

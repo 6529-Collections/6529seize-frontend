@@ -28,7 +28,7 @@ export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
   } catch {
     const rawName = url.split("?")[0]?.split("#")[0]?.split("/").pop();
     const name = rawName ? decodeFileName(rawName) : undefined;
-    return name || decodedFallback;
+    return name ?? decodedFallback;
   }
 }
 

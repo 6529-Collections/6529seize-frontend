@@ -9,9 +9,15 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/waves/drops/WaveDropAuthorPfp", () => () => <div />);
 jest.mock("@/components/waves/drops/WaveDropReply", () => () => <div />);
-jest.mock("@/components/waves/drops/WaveDropContent", () => (props: any) => (
+const mockWaveDropContent = jest.fn((props: any) => (
   <button data-testid="content" onClick={() => props.setActivePartIndex(0)} />
 ));
+jest.mock("@/components/waves/drops/WaveDropContent", () => (props: any) => {
+  mockWaveDropContent(props);
+  return (
+    <button data-testid="content" onClick={() => props.setActivePartIndex(0)} />
+  );
+});
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
   <button data-testid="reply" onClick={props.onReply} />
 ));
@@ -39,6 +45,7 @@ describe("DefaultWinnerDrop", () => {
 
   beforeEach(() => {
     WaveDropMetadataMock.mockClear();
+    mockWaveDropContent.mockClear();
   });
 
   it("calls reply handler", async () => {
@@ -98,5 +105,35 @@ describe("DefaultWinnerDrop", () => {
     expect(WaveDropMetadataMock.mock.calls.at(-1)?.[0]?.metadata).toEqual([
       { data_key: "k", data_value: "v" },
     ]);
+  });
+
+  it("passes embed guard props to content", () => {
+    const guardProps = {
+      embedPath: ["parent-drop"],
+      quotePath: ["w:1"],
+      embedDepth: 2,
+      maxEmbedDepth: 4,
+    };
+
+    render(
+      <DefaultWinnerDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        dropViewDropId={null}
+        location={0 as any}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        {...guardProps}
+      />
+    );
+
+    expect(mockWaveDropContent).toHaveBeenLastCalledWith(
+      expect.objectContaining(guardProps)
+    );
   });
 });

@@ -211,6 +211,30 @@ describe("fetchNotificationsV2", () => {
     });
   });
 
+  it("does not default all-drops vote context to reset rating", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 0,
+      notifications: [
+        {
+          id: 11,
+          cause: ApiNotificationCause.AllDrops,
+          created_at: 5000,
+          read_at: null,
+          related_identity: identity("poster"),
+          related_wave: wave,
+          related_drops: [drop],
+          additional_context: {},
+        },
+      ],
+    });
+
+    const response = await fetchNotificationsV2({ limit: "30" });
+    const [notification] = response.notifications;
+
+    expect(notification?.cause).toBe(ApiNotificationCause.AllDrops);
+    expect(notification?.additional_context).toEqual({});
+  });
+
   it("drops unknown notification causes safely", async () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")

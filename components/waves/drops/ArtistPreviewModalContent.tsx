@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ArtistActiveSubmissionContent } from "./ArtistActiveSubmissionContent";
 import { ArtistWinningArtworksContent } from "./ArtistWinningArtworksContent";
 import { ArtistPreviewModalHeader } from "./ArtistPreviewModalHeader";
@@ -15,6 +16,7 @@ import {
   getSubmissionCount,
   getTrophyArtworkCount,
 } from "@/helpers/artist-activity.helpers";
+import { useIdentity } from "@/hooks/useIdentity";
 
 interface ArtistPreviewModalContentProps {
   readonly user: ApiProfileMin;
@@ -45,15 +47,38 @@ export const ArtistPreviewModalContent: React.FC<
 
   const submissionCount = getSubmissionCount(user);
   const trophyCount = getTrophyArtworkCount(user);
-  const hasActiveSubmissions = submissionCount > 0;
+  const knownSubmissionIdsCount = user.active_main_stage_submission_ids.length;
+  const knownTrophyIdsCount =
+    user.winner_main_stage_drop_ids.length +
+    user.artist_of_prevote_cards.length;
+  const identityKey = user.handle ?? user.primary_address;
+  const shouldHydrateArtistActivity =
+    isOpen &&
+    !!identityKey &&
+    (submissionCount > knownSubmissionIdsCount ||
+      trophyCount > knownTrophyIdsCount);
+  const { profile: hydratedIdentity, isLoading: isHydratingArtistActivity } =
+    useIdentity({
+      handleOrWallet: shouldHydrateArtistActivity ? identityKey : undefined,
+      initialProfile: null,
+    });
+  const hydratedUser = React.useMemo(
+    () => mergeArtistActivity(user, hydratedIdentity),
+    [hydratedIdentity, user]
+  );
+  const hydratedSubmissionCount = getSubmissionCount(hydratedUser);
+  const hydratedTrophyCount = getTrophyArtworkCount(hydratedUser);
+  const hasActiveSubmissions = hydratedSubmissionCount > 0;
+  const hasHydratedTrophyArtworks =
+    hasTrophyArtworks || hydratedTrophyCount > 0;
 
-  const showTabs = hasActiveSubmissions && hasTrophyArtworks;
+  const showTabs = hasActiveSubmissions && hasHydratedTrophyArtworks;
 
   // Extract nested ternary for better readability
   let currentContentType: "active" | "winners";
   if (showTabs) {
     currentContentType = activeTab;
-  } else if (hasTrophyArtworks) {
+  } else if (hasHydratedTrophyArtworks) {
     currentContentType = "winners";
   } else {
     currentContentType = "active";
@@ -86,12 +111,12 @@ export const ArtistPreviewModalContent: React.FC<
 
       {/* Header */}
       <ArtistPreviewModalHeader
-        user={user}
+        user={hydratedUser}
         onClose={onClose}
         isApp={isApp}
         currentContentType={currentContentType}
-        submissionCount={submissionCount}
-        trophyCount={trophyCount}
+        submissionCount={hydratedSubmissionCount}
+        trophyCount={hydratedTrophyCount}
       />
 
       {/* Tabs + content */}
@@ -104,28 +129,32 @@ export const ArtistPreviewModalContent: React.FC<
         )}
 
         {(() => {
+          if (isHydratingArtistActivity) {
+            return <ArtistActivityLoadingState />;
+          }
+
           // Extract nested ternary logic for better readability
           if (showTabs) {
             return activeTab === "active" ? (
               <ArtistActiveSubmissionContent
-                user={user}
+                user={hydratedUser}
                 isOpen={isOpen}
                 onClose={onClose}
                 isApp={isApp}
               />
             ) : (
               <ArtistWinningArtworksContent
-                user={user}
+                user={hydratedUser}
                 isOpen={isOpen}
                 onDropClick={handleDropClick}
               />
             );
           }
 
-          if (hasTrophyArtworks) {
+          if (hasHydratedTrophyArtworks) {
             return (
               <ArtistWinningArtworksContent
-                user={user}
+                user={hydratedUser}
                 isOpen={isOpen}
                 onDropClick={handleDropClick}
               />
@@ -134,7 +163,7 @@ export const ArtistPreviewModalContent: React.FC<
 
           return (
             <ArtistActiveSubmissionContent
-              user={user}
+              user={hydratedUser}
               isOpen={isOpen}
               onClose={onClose}
               isApp={isApp}
@@ -145,3 +174,32 @@ export const ArtistPreviewModalContent: React.FC<
     </div>
   );
 };
+
+const mergeArtistActivity = (
+  user: ApiProfileMin,
+  identity: ApiIdentity | null
+): ApiProfileMin => {
+  if (!identity) {
+    return user;
+  }
+
+  return {
+    ...user,
+    active_main_stage_submission_ids: identity.active_main_stage_submission_ids,
+    winner_main_stage_drop_ids: identity.winner_main_stage_drop_ids,
+    artist_of_prevote_cards: identity.artist_of_prevote_cards,
+    profile_wave_id: identity.profile_wave_id ?? user.profile_wave_id,
+    is_wave_creator: identity.is_wave_creator || user.is_wave_creator,
+  };
+};
+
+const ArtistActivityLoadingState = () => (
+  <div className="tw-flex tw-h-96 tw-items-center tw-justify-center">
+    <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
+      <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400"></div>
+      <span className="tw-animate-fade-in-out tw-text-sm tw-text-iron-400">
+        Loading artist activity...
+      </span>
+    </div>
+  </div>
+);
