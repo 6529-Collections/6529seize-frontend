@@ -18,14 +18,17 @@ afterEach(() => {
 });
 
 describe("fetchDropsByIds", () => {
-  it("fetches drops with the v2 drop detail endpoint", async () => {
+  it("fetches drops with lean v2 drop detail hydration", async () => {
     const replyDrop = { id: "reply-1" } as ApiDrop;
     fetchDropV2ByIdMock.mockResolvedValue(replyDrop);
 
     const result = await fetchDropsByIds(["reply-1"]);
 
     expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(1);
-    expect(fetchDropV2ByIdMock).toHaveBeenCalledWith("reply-1");
+    expect(fetchDropV2ByIdMock).toHaveBeenCalledWith("reply-1", undefined, {
+      includeFullMetadata: false,
+      includeTopRaters: false,
+    });
     expect(result).toEqual([replyDrop]);
   });
 

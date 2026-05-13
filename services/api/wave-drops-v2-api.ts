@@ -194,8 +194,8 @@ export const fetchDropReactionDetailsV2 = async (
 };
 
 const mergeMetadata = (
-  priorityMetadata: ApiDropMetadataResponse[],
-  metadata: ApiDropMetadataResponse[]
+  priorityMetadata: readonly ApiDropMetadataResponse[],
+  metadata: readonly ApiDropMetadataResponse[]
 ): ApiDropMetadataResponse[] => {
   const priorityKeys = new Set(
     priorityMetadata.map((item) => item.data_key.trim()).filter(Boolean)
@@ -205,6 +205,27 @@ const mergeMetadata = (
     ...priorityMetadata,
     ...metadata.filter((item) => !priorityKeys.has(item.data_key.trim())),
   ];
+};
+
+export const fetchDropMetadataByIdV2 = async ({
+  dropId,
+  priorityMetadata = [],
+  signal,
+}: {
+  readonly dropId: string;
+  readonly priorityMetadata?: readonly ApiDropMetadataResponse[] | undefined;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiDropMetadataResponse[]> => {
+  try {
+    const metadata = await commonApiFetch<ApiDropMetadataResponse[]>({
+      endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(dropId))}/metadata`,
+      signal,
+    });
+    return mergeMetadata(priorityMetadata, metadata);
+  } catch (error) {
+    rethrowAbortFetchError(error);
+    return [...priorityMetadata];
+  }
 };
 
 const fetchDropMetadataV2 = async (
@@ -218,16 +239,11 @@ const fetchDropMetadataV2 = async (
     return priorityMetadata;
   }
 
-  try {
-    const metadata = await commonApiFetch<ApiDropMetadataResponse[]>({
-      endpoint: `v2/drops/${getDropEndpointId(drop.id)}/metadata`,
-      signal,
-    });
-    return mergeMetadata(priorityMetadata, metadata);
-  } catch (error) {
-    rethrowAbortFetchError(error);
-    return priorityMetadata;
-  }
+  return fetchDropMetadataByIdV2({
+    dropId: drop.id,
+    priorityMetadata,
+    signal,
+  });
 };
 
 const fetchTopRatersV2 = async (
@@ -548,8 +564,8 @@ export async function fetchDropV2ById(
     drop: data.drop,
     wave,
     signal,
-    includeFullMetadata: options?.includeFullMetadata,
-    includeTopRaters: options?.includeTopRaters,
+    includeFullMetadata: options?.includeFullMetadata ?? false,
+    includeTopRaters: options?.includeTopRaters ?? false,
   });
 }
 

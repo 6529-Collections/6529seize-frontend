@@ -1,91 +1,118 @@
-import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import { renderHook, waitFor } from "@testing-library/react";
+import type { ReactNode } from "react";
 
 import { useSingleWaveDropData } from "@/components/waves/drop/useSingleWaveDropData";
-import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
+import { DropSize } from "@/helpers/waves/drop.helpers";
+import {
+  fetchDropMetadataByIdV2,
+  fetchDropV2ById,
+} from "@/services/api/wave-drops-v2-api";
 
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
+  fetchDropMetadataByIdV2: jest.fn(),
   fetchDropV2ById: jest.fn(),
 }));
 
+const useWaveDataMock = jest.fn(() => ({ data: { id: "wave-1" } }));
 jest.mock("@/hooks/useWaveData", () => ({
-  useWaveData: () => ({ data: { id: "wave-1" } }),
+  useWaveData: (props: unknown) => useWaveDataMock(props),
 }));
 
 const fetchDropV2ByIdMock = fetchDropV2ById as jest.MockedFunction<
   typeof fetchDropV2ById
 >;
+const fetchDropMetadataByIdV2Mock =
+  fetchDropMetadataByIdV2 as jest.MockedFunction<
+    typeof fetchDropMetadataByIdV2
+  >;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
   });
 
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return function Wrapper({ children }: { readonly children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+  };
 };
 
 const createInitialDrop = (id: string) =>
   ({
     id,
     wave: { id: "wave-1" },
+    metadata: [{ data_key: "priority", data_value: id }],
     stableHash: `${id}-hash`,
     stableKey: `${id}-key`,
+    type: DropSize.FULL,
   }) as any;
-
-const createDeferred = <T,>() => {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((promiseResolve) => {
-    resolve = promiseResolve;
-  });
-
-  return { promise, resolve };
-};
 
 describe("useSingleWaveDropData", () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    useWaveDataMock.mockReturnValue({ data: { id: "wave-1" } });
+    fetchDropMetadataByIdV2Mock.mockResolvedValue([
+      { data_key: "priority", data_value: "drop-1" },
+      { data_key: "title", data_value: "Full Title" },
+    ]);
   });
 
-  it("fetches single-drop detail without eager top raters", async () => {
-    fetchDropV2ByIdMock.mockResolvedValue({
-      id: "drop-1",
-      wave: { id: "wave-1" },
-    } as any);
+  it("fetches detail metadata without fetching single-drop detail", async () => {
+    const initialDrop = createInitialDrop("drop-1");
 
-    renderHook(
-      () =>
-        useSingleWaveDropData(
-          {
-            id: "drop-1",
-            wave: { id: "wave-1" },
-            stableHash: "hash",
-            stableKey: "key",
-          } as any,
-          jest.fn()
-        ),
+    const { result } = renderHook(
+      () => useSingleWaveDropData(initialDrop, jest.fn()),
       { wrapper: createWrapper() }
     );
 
+    expect(fetchDropV2ByIdMock).not.toHaveBeenCalled();
+    expect(fetchDropMetadataByIdV2Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dropId: "drop-1",
+        priorityMetadata: initialDrop.metadata,
+      })
+    );
+    expect(useWaveDataMock).toHaveBeenCalledWith(
+      expect.objectContaining({ waveId: "wave-1" })
+    );
+    expect(result.current.drop).toEqual(
+      expect.objectContaining({
+        id: "drop-1",
+        metadata: initialDrop.metadata,
+      })
+    );
+
     await waitFor(() => {
-      expect(fetchDropV2ByIdMock).toHaveBeenCalledWith(
-        "drop-1",
-        expect.objectContaining({ aborted: false }),
-        { includeTopRaters: false }
-      );
+      expect(result.current.drop.metadata).toEqual([
+        { data_key: "priority", data_value: "drop-1" },
+        { data_key: "title", data_value: "Full Title" },
+      ]);
     });
+
+    expect(result.current.extendedDrop).toEqual(
+      expect.objectContaining({
+        id: "drop-1",
+        type: DropSize.FULL,
+        stableHash: "drop-1-hash",
+        stableKey: "drop-1-key",
+        metadata: [
+          { data_key: "priority", data_value: "drop-1" },
+          { data_key: "title", data_value: "Full Title" },
+        ],
+      })
+    );
   });
 
-  it("does not expose the previous drop while a new drop id is loading", async () => {
-    const secondDrop = createDeferred<any>();
-    fetchDropV2ByIdMock
-      .mockResolvedValueOnce({
-        id: "drop-1",
-        wave: { id: "wave-1" },
-      } as any)
-      .mockReturnValueOnce(secondDrop.promise);
+  it("switches directly to a new initial drop without exposing stale detail data", async () => {
+    fetchDropMetadataByIdV2Mock.mockImplementation(async ({ dropId }) => [
+      { data_key: "full", data_value: dropId },
+    ]);
 
     const { result, rerender } = renderHook(
       ({ initialDrop }) => useSingleWaveDropData(initialDrop, jest.fn()),
@@ -95,22 +122,34 @@ describe("useSingleWaveDropData", () => {
       }
     );
 
+    expect(result.current.drop.id).toBe("drop-1");
+
     await waitFor(() => {
-      expect(result.current.drop?.id).toBe("drop-1");
+      expect(result.current.drop.metadata).toEqual([
+        { data_key: "full", data_value: "drop-1" },
+      ]);
     });
 
     rerender({ initialDrop: createInitialDrop("drop-2") });
 
-    expect(result.current.drop).toBeUndefined();
-    expect(result.current.extendedDrop).toBeNull();
-
-    secondDrop.resolve({
-      id: "drop-2",
-      wave: { id: "wave-1" },
-    });
+    expect(result.current.drop.id).toBe("drop-2");
+    expect(result.current.extendedDrop.id).toBe("drop-2");
+    expect(result.current.drop.metadata).toEqual([
+      { data_key: "priority", data_value: "drop-2" },
+    ]);
 
     await waitFor(() => {
-      expect(result.current.drop?.id).toBe("drop-2");
+      expect(result.current.drop.metadata).toEqual([
+        { data_key: "full", data_value: "drop-2" },
+      ]);
     });
+
+    expect(fetchDropMetadataByIdV2Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dropId: "drop-2",
+        priorityMetadata: [{ data_key: "priority", data_value: "drop-2" }],
+      })
+    );
+    expect(fetchDropV2ByIdMock).not.toHaveBeenCalled();
   });
 });
