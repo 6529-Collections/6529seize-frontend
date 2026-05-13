@@ -24,7 +24,7 @@ export function MemePageLiveRightMenu(props: {
 }) {
   if (props.show && props.nft) {
     return (
-      <div className="tw-w-full tw-pt-2">
+      <div className="tw-w-full tw-pt-8">
         <MemeArtworkDetails nft={props.nft} />
         <MemeNftLivePanel nft={props.nft} />
       </div>
@@ -98,7 +98,7 @@ function MemePageAdditionalDetailsAccordion({
       >
         <span className="tw-flex tw-items-center tw-gap-3">
           <span
-            className={`tw-rounded-lg tw-p-2 tw-transition-colors tw-flex tw-items-center tw-justify-center tw-duration-300 tw-ease-out ${
+            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-2 tw-transition-colors tw-duration-300 tw-ease-out ${
               isOpen
                 ? "tw-bg-primary-500 tw-text-iron-100"
                 : "tw-bg-iron-900 tw-text-iron-500 group-hover:tw-text-iron-100"
@@ -106,7 +106,7 @@ function MemePageAdditionalDetailsAccordion({
           >
             <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           </span>
-          <span className="tw-whitespace-nowrap tw-text-lg md:tw-text-xl tw-font-semibold tw-leading-7 tw-text-iron-300 group-hover:tw-text-iron-50 tw-transition-colors tw-duration-300 tw-ease-out">
+          <span className="tw-whitespace-nowrap tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-300 tw-transition-colors tw-duration-300 tw-ease-out group-hover:tw-text-iron-50 md:tw-text-xl">
             Additional details
           </span>
         </span>

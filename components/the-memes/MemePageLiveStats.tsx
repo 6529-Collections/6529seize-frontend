@@ -250,7 +250,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
 
   return (
     <section>
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="tw-flex tw-flex-col tw-gap-8">
         <div>
           <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Created by
@@ -329,7 +329,7 @@ function getInitials(value: string | undefined) {
     .toUpperCase();
 }
 
-export function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
+function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
   const distributionPlanLink = getDistributionPlanLink(nft);
 
   return (
@@ -376,7 +376,7 @@ export function MemeCardFileType({ nft }: { readonly nft: NFT }) {
   );
 }
 
-export function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
+function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
   const showMarketplaceLinks = !capacitor.isIos || country === "US";
@@ -394,7 +394,7 @@ export function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
 
 export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
   return (
-    <section className="tw-pt-6">
+    <section className="tw-pt-8">
       <h3 className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
         Market Overview
       </h3>
