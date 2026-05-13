@@ -3,10 +3,6 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/styles/Home.module.scss", () => ({ shadowBox: "shadowBox" }));
 
-jest.mock("@/enums", () => ({
-  ContractType: { ERC721: "ERC721", ERC1155: "ERC1155" },
-}));
-
 jest.mock("@/entities/IProfile", () => ({
   COLLECTED_COLLECTION_TYPE_TO_CONTRACT: {
     MEMES: "0xCONTRACT_MEMES",

@@ -5,8 +5,8 @@ import type { CollectedCollectionType } from "@/entities/IProfile";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ContractType } from "@/types/enums";
 import {
-  faMinusCircle,
-  faPlusCircle,
+  faMinus,
+  faPlus,
   faRightLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -127,22 +127,25 @@ function TransferSingleImpl(props: TransferSingleProps) {
   );
 
   const quantityToggle = max > 1 && (
-    <div className="tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-full tw-bg-primary-500 tw-p-1 tw-font-medium">
+    <div className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-p-1 tw-font-medium">
       <button
         type="button"
         onClick={() => t.decQty(key)}
         disabled={selectedQty <= 1}
         aria-label="Decrease quantity"
-        className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+        className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus:tw-outline-none ${
+          selectedQty <= 1
+            ? "tw-cursor-not-allowed tw-bg-transparent tw-text-iron-600"
+            : "tw-cursor-pointer tw-bg-transparent tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-100"
+        }`}
         data-testid="transfer-single-minus"
       >
         <FontAwesomeIcon
-          icon={faMinusCircle}
-          className="tw-size-6 tw-cursor-pointer"
-          color={selectedQty <= 1 ? "#aaa" : "#fff"}
+          icon={faMinus}
+          className="tw-size-3"
         />
       </button>
-      <div className="tw-min-w-[2ch] tw-select-none tw-text-center tw-text-sm tw-tabular-nums">
+      <div className="tw-min-w-9 tw-select-none tw-text-center tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-100 tw-tabular-nums">
         {selectedQty}/{max}
       </div>
       <button
@@ -150,13 +153,16 @@ function TransferSingleImpl(props: TransferSingleProps) {
         onClick={() => t.incQty(key)}
         disabled={selectedQty >= max}
         aria-label="Increase quantity"
-        className="tw-flex tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 focus:tw-outline-none"
+        className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none ${
+          selectedQty >= max
+            ? "tw-cursor-not-allowed tw-border-primary-500/15 tw-bg-primary-500/30 tw-text-iron-100/40"
+            : "tw-cursor-pointer tw-border-primary-500 tw-bg-primary-500 tw-text-iron-100 hover:tw-border-primary-400 hover:tw-bg-primary-400"
+        }`}
         data-testid="transfer-single-plus"
       >
         <FontAwesomeIcon
-          icon={faPlusCircle}
-          className="tw-size-6 tw-cursor-pointer"
-          color={selectedQty >= max ? "#aaa" : "#fff"}
+          icon={faPlus}
+          className="tw-size-3"
         />
       </button>
     </div>
@@ -173,7 +179,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
         }
         setShowModal(true);
       }}
-      className="tw-rounded-lg tw-border-2 tw-border-solid tw-border-white tw-bg-white tw-px-6 tw-py-2 tw-text-base tw-font-semibold tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-75"
+      className="tw-min-w-40 tw-rounded-lg tw-border-2 tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-75"
       data-testid="transfer-single-submit"
     >
       {transferButtonText}
@@ -187,9 +193,11 @@ function TransferSingleImpl(props: TransferSingleProps) {
     >
       {children ? (
         <div className="tw-flex tw-items-center tw-gap-5">
-          {children}
-          {quantityToggle}
-          <div className="tw-ml-auto tw-w-48 tw-shrink-0">{transferButton}</div>
+          <div className="tw-min-w-0 tw-flex-1">{children}</div>
+          <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-4">
+            {quantityToggle}
+            {transferButton}
+          </div>
         </div>
       ) : (
         <>
@@ -198,7 +206,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
             {quantityToggle}
           </div>
 
-          <div className="tw-mt-4">{transferButton}</div>
+          <div>{transferButton}</div>
         </>
       )}
       <TransferModal open={showModal} onClose={() => setShowModal(false)} />

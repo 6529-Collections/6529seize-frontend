@@ -179,14 +179,15 @@ export function SearchWalletsDisplay(
       )}
       <button
         onClick={() => setShowSearchModal(true)}
-        className={`btn-link ${styles["searchBtn"]} ${
-          searchWallets.length > 0 ? styles["searchBtnActive"] : ""
-        } d-inline-flex align-items-center justify-content-center`}>
+        className={`tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none ${
+          searchWallets.length > 0
+            ? "tw-border-primary-500/30 tw-bg-primary-500/10 tw-text-primary-300 hover:tw-border-primary-500/50 hover:tw-bg-primary-500/20 hover:tw-text-primary-200"
+            : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-900 hover:tw-text-iron-100"
+        }`}>
         <FontAwesomeIcon
+          className="tw-size-5"
           style={{
-            width: "20px",
-            height: "20px",
-            color: "#000",
+            color: "currentColor",
           }}
           icon={faSearch}></FontAwesomeIcon>
       </button>

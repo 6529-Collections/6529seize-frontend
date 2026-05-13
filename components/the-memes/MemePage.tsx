@@ -364,7 +364,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
 
     return (
-      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-6">
+      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-6 tw-mb-6">
         <div>
           <div className={`${styles["nftImageWrapper"] ?? ""}`}>
             <MemePageArtViewer

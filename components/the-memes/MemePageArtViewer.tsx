@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
 import type { NFT } from "@/entities/INFT";
@@ -24,7 +24,6 @@ export function MemePageArtViewer({
   readonly nft: NFT;
   readonly showBalance?: boolean;
 }) {
-  const { connectedProfile } = useAuth();
   const isFullScreenSupported = useSyncExternalStore(
     () => () => undefined,
     fullScreenSupported,
@@ -51,13 +50,6 @@ export function MemePageArtViewer({
   }
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const currentFormat = fileType ?? "";
-  const shouldReserveBalanceSpace = showBalance && Boolean(connectedProfile);
-  const artControlsClassName = styles["artControls"] ?? "";
-  const artControlsWithBalanceClassName =
-    styles["artControlsWithBalance"] ?? "";
-  const controlClassName = shouldReserveBalanceSpace
-    ? `${artControlsClassName} ${artControlsWithBalanceClassName}`.trim()
-    : artControlsClassName;
 
   function carouselHandlerSlide(event: number) {
     setCurrentSlide(event);
@@ -73,8 +65,18 @@ export function MemePageArtViewer({
 
   function printArtworkControls() {
     return (
-      <Col xs={12} className={controlClassName}>
+      <Col xs={12} className={styles["artControls"]}>
         <div className={styles["artControlsContent"]}>
+          {showBalance && (
+            <div className={styles["artControlsBalance"]}>
+              <NFTImageBalance
+                contract={nft.contract}
+                tokenId={nft.id}
+                height={650}
+                inline
+              />
+            </div>
+          )}
           <div className={styles["artControlsCenter"]}>
             {hasMultipleSlides && (
               <button
@@ -150,7 +152,7 @@ export function MemePageArtViewer({
                   height={650}
                   transparentBG={true}
                   showOriginal={true}
-                  showBalance={showBalance}
+                  showBalance={false}
                   id="the-art-fullscreen-animation"
                 />
               </Carousel.Item>
@@ -160,7 +162,7 @@ export function MemePageArtViewer({
                     nft={nft}
                     animation={false}
                     height={650}
-                    showBalance={showBalance}
+                    showBalance={false}
                     transparentBG={true}
                     showOriginal={true}
                     id="the-art-fullscreen-img"
@@ -179,7 +181,7 @@ export function MemePageArtViewer({
                 height={650}
                 transparentBG={true}
                 showOriginal={true}
-                showBalance={showBalance}
+                showBalance={false}
                 id="the-art-fullscreen-img"
               />
             )}

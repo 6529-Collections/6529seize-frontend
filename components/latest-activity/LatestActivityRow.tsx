@@ -489,7 +489,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
   }
 
   const tailwindRowClassName = isStripedRow
-    ? "odd:tw-bg-iron-950/40 even:tw-bg-iron-900/30"
+    ? "odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70"
     : "";
   const tailwindCellBorderClassName = "tw-border-b tw-border-iron-800";
 

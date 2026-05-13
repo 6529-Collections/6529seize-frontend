@@ -280,7 +280,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               return (
                 <tr
                   key={lead.consolidation_key}
-                  className="odd:tw-bg-iron-950/40 even:tw-bg-iron-900/30"
+                  className="odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70"
                 >
                   <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
                     {numberWithCommas(lead.rank)}

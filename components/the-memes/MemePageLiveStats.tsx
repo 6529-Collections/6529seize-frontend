@@ -249,8 +249,8 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
   );
 
   return (
-    <section className="tw-py-4">
-      <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
+    <section>
+      <div className="tw-flex tw-flex-col tw-gap-6">
         <div>
           <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Created by
@@ -275,11 +275,11 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
             </div>
           </div>
         </div>
-        <div className="sm:tw-text-right">
+        <div>
           <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             Mint date
           </div>
-          <div className="tw-flex tw-flex-wrap tw-items-baseline sm:tw-justify-end">
+          <div className="tw-flex tw-flex-wrap tw-items-baseline">
             <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-white">
               {mintDate.date}
             </span>
@@ -394,8 +394,8 @@ export function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
 
 export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
   return (
-    <section className="tw-pt-5">
-      <h3 className="tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+    <section className="tw-pt-6">
+      <h3 className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
         Market Overview
       </h3>
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">

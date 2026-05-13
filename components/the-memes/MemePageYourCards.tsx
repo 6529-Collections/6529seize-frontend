@@ -38,6 +38,7 @@ export function MemePageYourCardsRightMenu(props: {
     (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
   );
 
+  /*
   const transferredIn =
     props.wallets.length === 0
       ? []
@@ -47,6 +48,7 @@ export function MemePageYourCardsRightMenu(props: {
             props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
             t.value === 0
         );
+  */
 
   const transferredOut =
     props.wallets.length === 0
@@ -105,28 +107,28 @@ export function MemePageYourCardsRightMenu(props: {
                 }
                 thumbUrl={transferNft.thumbnail}
               >
-                <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-6 tw-gap-y-2">
-                  <div className="tw-flex tw-items-baseline tw-gap-2">
-                    <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
+                <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-2">
+                  <div className="tw-flex tw-items-baseline tw-gap-1.5">
+                    <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
                       Cards
                     </span>
-                    <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-iron-50">{`x${props.nftBalance}`}</span>
+                    <span className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-50">{`x${props.nftBalance}`}</span>
                   </div>
                   {props.myRank !== undefined && props.myTDH !== undefined ? (
                     <>
-                      <div className="tw-flex tw-items-baseline tw-gap-2">
-                        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
+                      <div className="tw-flex tw-items-baseline tw-gap-1.5">
+                        <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
                           TDH
                         </span>
-                        <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-iron-50">
+                        <span className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-50">
                           {numberWithCommas(Math.round(props.myTDH.tdh))}
                         </span>
                       </div>
-                      <div className="tw-flex tw-items-baseline tw-gap-2">
-                        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
+                      <div className="tw-flex tw-items-baseline tw-gap-1.5">
+                        <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
                           Rank
                         </span>
-                        <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-iron-50">
+                        <span className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-50">
                           #{props.myRank.rank}
                         </span>
                       </div>
@@ -140,15 +142,17 @@ export function MemePageYourCardsRightMenu(props: {
               </TransferSingle>
             </div>
           )}
+          {/*
           {props.nftBalance > 0 && (
             <h3 className="tw-mb-0 tw-text-lg tw-font-bold tw-leading-6 tw-text-white">
               You Own {props.nftBalance} edition
               {props.nftBalance > 1 && "s"}
             </h3>
           )}
-          <section className="tw-pt-4">
+          */}
+          <section>
             <div className="tw-space-y-1">
-              <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+              <p className="tw-m-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
                 First acquired{" "}
                 {printMintDate(new Date(firstAcquired!.transaction_date))}
               </p>
@@ -164,12 +168,14 @@ export function MemePageYourCardsRightMenu(props: {
                   {getTokenCount(bought) > 1 && "s"} bought for {boughtSum} ETH
                 </p>
               )}
+              {/*
               {transferredIn.length > 0 && (
                 <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
                   {getTokenCount(transferredIn)} card
                   {getTokenCount(transferredIn) > 1 && "s"} transferred in
                 </p>
               )}
+              */}
               {sold.length > 0 && (
                 <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
                   {getTokenCount(sold)} card
@@ -209,7 +215,7 @@ export function MemePageYourCardsSubMenu(props: {
                   <LatestActivityRow
                     tr={tr}
                     variant="tailwind"
-                    rowStyle="divided"
+                    rowStyle="striped"
                     key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                   />
                 ))}
