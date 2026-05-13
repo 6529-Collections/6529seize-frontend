@@ -245,6 +245,140 @@ describe("useWaveDropsNotificationRead", () => {
     });
   });
 
+  it("uses the latest delivered-notification remover on visibility sync", async () => {
+    const firstRemoveWaveDeliveredNotifications = jest
+      .fn()
+      .mockResolvedValue(undefined);
+    const nextRemoveWaveDeliveredNotifications = jest
+      .fn()
+      .mockResolvedValue(undefined);
+
+    const renderTestComponent = (
+      currentRemoveWaveDeliveredNotifications: (
+        waveId: string
+      ) => Promise<unknown> | void
+    ) => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={
+            currentRemoveWaveDeliveredNotifications
+          }
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(
+      renderTestComponent(firstRemoveWaveDeliveredNotifications)
+    );
+
+    await waitFor(() => {
+      expect(firstRemoveWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-1"
+      );
+    });
+
+    rerender(renderTestComponent(nextRemoveWaveDeliveredNotifications));
+
+    await act(async () => {
+      dispatchVisibilityChange();
+    });
+
+    await waitFor(() => {
+      expect(nextRemoveWaveDeliveredNotifications).toHaveBeenCalledWith(
+        "wave-1"
+      );
+    });
+    expect(firstRemoveWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the initial read marker when auth changes while removal is pending", async () => {
+    const firstRemove = createDeferred();
+    const nextRemove = createDeferred();
+    const pendingRemoveWaveDeliveredNotifications = jest
+      .fn()
+      .mockReturnValueOnce(firstRemove.promise)
+      .mockReturnValueOnce(nextRemove.promise);
+
+    getAuthJwtMock.mockReturnValue("wallet-a-jwt");
+    jwtDecodeMock.mockImplementation(<T,>(token: string): T => {
+      if (token === "wallet-a-jwt") {
+        return { sub: "0xAAA", role: null, exp: mockJwtExp } as T;
+      }
+
+      if (token === "proxy-b-jwt") {
+        return { sub: "0xAAA", role: "creator-b", exp: mockJwtExp } as T;
+      }
+
+      throw new Error(`Unexpected JWT decode for ${token}`);
+    });
+
+    const renderTestComponent = () => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          removeWaveDeliveredNotifications={
+            pendingRemoveWaveDeliveredNotifications
+          }
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const { rerender } = render(renderTestComponent());
+
+    await waitFor(() => {
+      expect(pendingRemoveWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
+    });
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    getAuthJwtMock.mockReturnValue("proxy-b-jwt");
+    useAuthMock.mockReturnValue(
+      createAuthValue(
+        createActiveProfileProxy({
+          id: "proxy-b",
+          creatorId: "creator-b",
+        })
+      )
+    );
+
+    rerender(renderTestComponent());
+
+    await waitFor(() => {
+      expect(pendingRemoveWaveDeliveredNotifications).toHaveBeenCalledTimes(2);
+    });
+    expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+
+    await act(async () => {
+      firstRemove.resolve();
+      await firstRemove.promise;
+    });
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
+    });
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(1, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer wallet-a-jwt" },
+    });
+
+    await act(async () => {
+      nextRemove.resolve();
+      await nextRemove.promise;
+    });
+
+    await waitFor(() => {
+      expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(2);
+    });
+    expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(2, {
+      endpoint: "notifications/wave/wave-1/read",
+      headers: { Authorization: "Bearer proxy-b-jwt" },
+    });
+  });
+
   it("drops a delayed read after unmount", async () => {
     getAuthJwtMock.mockReturnValue(null);
 
