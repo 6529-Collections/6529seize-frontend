@@ -19,11 +19,10 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { selectEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import type { EditorState } from "lexical";
 import dynamic from "next/dynamic";
 import React, {
@@ -47,7 +46,6 @@ import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapp
 import CreateDropActions from "./CreateDropActions";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import type { CreateDropInputHandles } from "./CreateDropInput";
 import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
@@ -67,6 +65,7 @@ import { useWebSocket } from "@/services/websocket";
 import throttle from "lodash/throttle";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import CreateDropIdentityField from "./CreateDropIdentityField";
+import CreateDropIdentityPickerContent from "./CreateDropIdentityPickerContent";
 import CreateDropIdentityPickerModal from "./CreateDropIdentityPickerModal";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import {
@@ -101,6 +100,8 @@ import {
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
+import type { IdentityPickerPlacement } from "./dropComposer.types";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -151,11 +152,11 @@ interface CreateDropContentProps {
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
-  readonly privileges: DropPrivileges;
-  readonly showDropModeToggle: boolean;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
+  readonly canSubmitCurationUrl?: boolean | undefined;
+  readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
   readonly externalAttachmentDrop?:
     | {
         readonly token: number;
@@ -164,27 +165,65 @@ interface CreateDropContentProps {
     | null
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
+  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
 }
 
 const CONTAINER_WIDTH_THRESHOLD = 500;
 const SELECT_OTHER_IDENTITY_ERROR = "Select someone else to nominate.";
 
+function CreateDropInlineIdentityPickerPanel({
+  mode,
+  selectedIdentity,
+  disabled,
+  errorMessage,
+  canClose,
+  onClose,
+  onSelect,
+}: {
+  readonly mode: ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted;
+  readonly selectedIdentity: SelectableIdentityOption | null;
+  readonly disabled: boolean;
+  readonly errorMessage: string | null;
+  readonly canClose: boolean;
+  readonly onClose: () => void;
+  readonly onSelect: (selection: SelectableIdentityOption) => void;
+}) {
+  return (
+    <div
+      className="tw-mb-3 tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg"
+      data-testid="identity-picker-inline"
+    >
+      <div className="tw-mb-4 tw-flex tw-items-start tw-justify-between tw-gap-4">
+        <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-iron-50">
+          Select identity
+        </h3>
+        {canClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={disabled}
+            className="tw-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-white/5 tw-p-0 tw-text-iron-400 tw-transition-colors disabled:tw-cursor-not-allowed desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white"
+            aria-label="Close identity picker"
+            title="Close identity picker"
+          >
+            <XMarkIcon className="tw-h-4 tw-w-4" aria-hidden="true" />
+          </button>
+        )}
+      </div>
+      <CreateDropIdentityPickerContent
+        mode={mode}
+        selectedIdentity={selectedIdentity}
+        disabled={disabled}
+        errorMessage={errorMessage}
+        onSelect={onSelect}
+      />
+    </div>
+  );
+}
+
 const getFileIdentity = (file: File): string =>
   [file.name, file.size, file.type, file.lastModified].join(":");
-
-const getInactiveDropActionLabel = (
-  submissionExperience: WaveSubmissionExperience
-): "drop" | "nominate" | "proposal" => {
-  if (submissionExperience === WaveSubmissionExperience.IDENTITY) {
-    return "nominate";
-  }
-
-  if (submissionExperience === WaveSubmissionExperience.QUORUM_PROPOSAL) {
-    return "proposal";
-  }
-
-  return "drop";
-};
 
 const normalizeIdentityValue = (identity: string | null | undefined) =>
   identity?.trim().toLowerCase() ?? null;
@@ -468,18 +507,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   onDropModeChange,
   onSwitchToDropModeWithUrl,
   submitDrop,
-  privileges,
-  showDropModeToggle,
   dropModeToggleExitLabel,
   canExitDropMode,
   submissionExperience,
+  canSubmitCurationUrl = true,
+  curationUrlSubmitRestrictionMessage = null,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
+  termsSignatureFlowEnabled = true,
+  identityPickerPlacement = "modal",
 }) => {
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { send } = useWebSocket();
   const { isApp } = useDeviceInfo();
   const actionsContainerRef = useRef<HTMLDivElement>(null);
+  const [actionsContainerElement, setActionsContainerElement] =
+    useState<HTMLDivElement | null>(null);
   const hasUserToggledOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
@@ -521,14 +564,21 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     isWideContainer ||
     (showOptionsState?.scopeKey === wave.id ? showOptionsState.value : false);
 
-  useLayoutEffect(() => {
-    const container = actionsContainerRef.current;
-    if (!container) return;
+  const setActionsContainerRef = useCallback((node: HTMLDivElement | null) => {
+    actionsContainerRef.current = node;
+    setActionsContainerElement(node);
+  }, []);
 
-    const measureWidth = () => {
-      const width = container.getBoundingClientRect().width;
+  useLayoutEffect(() => {
+    if (!actionsContainerElement) return;
+
+    const setWidthState = (width: number) => {
       const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
       setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+    };
+
+    const measureWidth = () => {
+      setWidthState(actionsContainerElement.getBoundingClientRect().width);
     };
 
     measureWidth();
@@ -536,15 +586,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        const width = entry.contentRect.width;
-        const isWide = width >= CONTAINER_WIDTH_THRESHOLD;
-        setIsWideContainer((prev) => (prev === isWide ? prev : isWide));
+        setWidthState(entry.contentRect.width);
       }
     });
 
-    observer.observe(container);
+    observer.observe(actionsContainerElement);
     return () => observer.disconnect();
-  }, []);
+  }, [actionsContainerElement]);
 
   useLayoutEffect(() => {
     if (prevIsDropModeRef.current && !isDropMode) {
@@ -554,13 +602,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     prevIsDropModeRef.current = isDropMode;
   }, [isDropMode]);
 
-  const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
   const isIdentitySubmissionExperience =
     submissionExperience === WaveSubmissionExperience.IDENTITY;
   const isCurationSubmissionExperience =
     submissionExperience === WaveSubmissionExperience.CURATION_LEGACY;
-  const inactiveDropActionLabel =
-    getInactiveDropActionLabel(submissionExperience);
   const identitySubmissionMode = isIdentitySubmissionExperience
     ? (wave.participation.submission_strategy?.config.who_can_be_submitted ??
       null)
@@ -726,7 +771,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const showCurationDropModeWarning =
     !isDropMode &&
     !!normalizedCurationDropUrl &&
-    isCurationSubmissionExperience;
+    isCurationSubmissionExperience &&
+    (canSubmitCurationUrl || !!curationUrlSubmitRestrictionMessage);
 
   const [referencedNfts, setReferencedNfts] = useState<ReferencedNft[]>([]);
   const lastExternalAttachmentDropTokenRef = useRef<number | null>(null);
@@ -1209,25 +1255,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   };
 
-  const getMissingRequirementsResult = useMemo(() => {
-    return () =>
+  const missingRequirements = useMemo<MissingRequirements>(
+    () =>
       getMissingRequirements(
         isDropMode,
         metadata,
         files,
         wave.participation.required_media
-      );
-  }, [metadata, files, wave.participation.required_media, isDropMode]);
-
-  const [missingRequirements, setMissingRequirements] =
-    useState<MissingRequirements>({
-      metadata: [],
-      media: [],
-    });
-
-  useEffect(() => {
-    setMissingRequirements(getMissingRequirementsResult());
-  }, [metadata, files, getMissingRequirementsResult]);
+      ),
+    [files, isDropMode, metadata, wave.participation.required_media]
+  );
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
@@ -1722,6 +1759,23 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     );
   }
 
+  const shouldShowIdentitySubmissionControls =
+    isIdentitySubmissionExperience &&
+    isDropMode &&
+    identitySubmissionMode !== null;
+  const showInlineIdentityPicker =
+    shouldShowIdentitySubmissionControls &&
+    identityPickerPlacement === "inline" &&
+    (!selectedIdentitySelection || isIdentityPickerOpen);
+  const showIdentityField =
+    shouldShowIdentitySubmissionControls && !showInlineIdentityPicker;
+  const showModalIdentityPicker =
+    shouldShowIdentitySubmissionControls &&
+    identityPickerPlacement === "modal" &&
+    identitySubmissionMode !==
+      ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself;
+  const showComposer = !showInlineIdentityPicker;
+
   return (
     <div className="tw-flex-grow">
       <CreateDropReplyingWrapper
@@ -1730,162 +1784,166 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         onCancelReplyQuote={onCancelReplyQuote}
         dropId={dropId}
       />
-      {isIdentitySubmissionExperience &&
-        isDropMode &&
-        identitySubmissionMode !== null && (
-          <CreateDropIdentityField
-            mode={identitySubmissionMode}
-            selectedIdentity={selectedIdentitySelection}
-            selfIdentity={viewerIdentity}
-            disabled={submitting}
-            errorMessage={
-              showIdentityValidationMessage ? identityValidationMessage : null
-            }
-            onOpenPicker={openIdentityPicker}
-            onClosePanel={
-              canExitDropMode && dropModeToggleExitLabel === null
-                ? closeIdentitySelectionPanel
-                : undefined
-            }
-          />
-        )}
-      {isIdentitySubmissionExperience &&
-        isDropMode &&
-        identitySubmissionMode !== null &&
-        identitySubmissionMode !==
-          ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyMyself && (
-          <CreateDropIdentityPickerModal
-            isOpen={isIdentityPickerOpen}
-            mode={identitySubmissionMode}
-            selectedIdentity={selectedIdentitySelection}
-            disabled={submitting}
-            errorMessage={identityPickerErrorMessage}
-            canClose={canDismissIdentityPicker}
-            onClose={closeIdentityPicker}
-            onSelect={handleIdentitySelection}
-          />
-        )}
-      <div className="tw-flex tw-w-full tw-items-end">
-        <div
-          ref={actionsContainerRef}
-          className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
-        >
-          <CreateDropActions
-            isStormMode={isStormModeActive}
-            isDropMode={isDropMode}
-            canAddPart={canAddPart}
-            submitting={submitting}
-            showOptions={showOptions}
-            animateOptions={
-              !isWideContainer && hasUserToggledOptionsRef.current
-            }
-            isRequiredMetadataMissing={!!missingRequirements.metadata.length}
-            isRequiredMediaMissing={!!missingRequirements.media.length}
-            handleFileChange={handleFileChange}
-            onAddMetadataClick={openMetadata}
-            breakIntoStorm={breakIntoStorm}
-            setShowOptions={handleSetShowOptions}
-            onGifDrop={onGifDrop}
-          />
-          <div className="tw-w-full tw-flex-grow">
-            <CreateDropInput
-              waveId={wave.id}
-              key={dropEditorRefreshKey}
-              ref={createDropInputRef}
-              editorState={editorState}
-              type={activeDrop?.action ?? null}
-              submitting={submitting}
-              isStormMode={isStormModeActive}
-              isDropMode={isDropMode}
-              canMentionAll={canMentionAll}
-              canSubmit={canSubmit}
-              onEditorState={handleEditorStateChange}
-              onEditorBlur={handleEditorBlur}
-              onReferencedNft={onReferencedNft}
-              onMentionedUser={onMentionedUser}
-              onMentionedWave={onMentionedWave}
-              onAttachmentFiles={handleFileChange}
-              onDrop={onDrop}
-            />
-            {showCurationDropModeWarning && (
-              <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
-                This looks like a curation URL.{" "}
-                <button
-                  type="button"
-                  className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
-                  onClick={onSwitchToDropMode}
-                >
-                  Switch to Drop mode
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="tw-ml-2 lg:tw-ml-3">
-          <div className="tw-flex tw-items-center tw-gap-x-3">
-            {showDropModeToggle &&
-              isParticipatory &&
-              !dropId &&
-              submissionExperience !==
-                WaveSubmissionExperience.MEMES_LEGACY && (
-                <CreateDropDropModeToggle
-                  isDropMode={isDropMode}
-                  onDropModeChange={handleDropModeChange}
-                  privileges={privileges}
-                  exitLabel={dropModeToggleExitLabel}
-                  inactiveActionLabel={inactiveDropActionLabel}
-                />
-              )}
-            <CreateDropSubmit
-              submitting={submitting}
-              canSubmit={canSubmit}
-              onDrop={onDrop}
-              isDropMode={isDropMode}
-            />
-          </div>
-        </div>
-      </div>
-      {isDropMode && (
-        <CreateDropContentRequirements
-          canSubmit={canSubmit}
-          wave={wave}
-          missingMedia={missingRequirements.media}
-          missingMetadata={missingRequirements.metadata}
-          onOpenMetadata={openMetadata}
-          setFiles={handleFileChange}
+      {showIdentityField && (
+        <CreateDropIdentityField
+          mode={identitySubmissionMode}
+          selectedIdentity={selectedIdentitySelection}
+          selfIdentity={viewerIdentity}
           disabled={submitting}
+          errorMessage={
+            showIdentityValidationMessage ? identityValidationMessage : null
+          }
+          onOpenPicker={openIdentityPicker}
+          onClosePanel={
+            canExitDropMode && dropModeToggleExitLabel === null
+              ? closeIdentitySelectionPanel
+              : undefined
+          }
         />
       )}
-      <AnimatePresence>
-        {isDropMode && isMetadataOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <CreateDropMetadata
+      {showInlineIdentityPicker && (
+        <CreateDropInlineIdentityPickerPanel
+          mode={identitySubmissionMode}
+          selectedIdentity={selectedIdentitySelection}
+          disabled={submitting}
+          errorMessage={identityPickerErrorMessage}
+          canClose={canDismissIdentityPicker}
+          onClose={closeIdentityPicker}
+          onSelect={handleIdentitySelection}
+        />
+      )}
+      {showModalIdentityPicker && (
+        <CreateDropIdentityPickerModal
+          isOpen={isIdentityPickerOpen}
+          mode={identitySubmissionMode}
+          selectedIdentity={selectedIdentitySelection}
+          disabled={submitting}
+          errorMessage={identityPickerErrorMessage}
+          canClose={canDismissIdentityPicker}
+          onClose={closeIdentityPicker}
+          onSelect={handleIdentitySelection}
+        />
+      )}
+      {showComposer && (
+        <>
+          <div className="tw-flex tw-w-full tw-items-end">
+            <div
+              ref={setActionsContainerRef}
+              className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+            >
+              <CreateDropActions
+                isStormMode={isStormModeActive}
+                isDropMode={isDropMode}
+                canAddPart={canAddPart}
+                submitting={submitting}
+                showOptions={showOptions}
+                animateOptions={
+                  !isWideContainer && hasUserToggledOptionsRef.current
+                }
+                isRequiredMetadataMissing={
+                  !!missingRequirements.metadata.length
+                }
+                isRequiredMediaMissing={!!missingRequirements.media.length}
+                handleFileChange={handleFileChange}
+                onAddMetadataClick={openMetadata}
+                breakIntoStorm={breakIntoStorm}
+                setShowOptions={handleSetShowOptions}
+                onGifDrop={onGifDrop}
+              />
+              <div className="tw-w-full tw-flex-grow">
+                <CreateDropInput
+                  waveId={wave.id}
+                  key={dropEditorRefreshKey}
+                  ref={createDropInputRef}
+                  editorState={editorState}
+                  type={activeDrop?.action ?? null}
+                  submitting={submitting}
+                  isStormMode={isStormModeActive}
+                  isDropMode={isDropMode}
+                  canMentionAll={canMentionAll}
+                  canSubmit={canSubmit}
+                  onEditorState={handleEditorStateChange}
+                  onEditorBlur={handleEditorBlur}
+                  onReferencedNft={onReferencedNft}
+                  onMentionedUser={onMentionedUser}
+                  onMentionedWave={onMentionedWave}
+                  onAttachmentFiles={handleFileChange}
+                  onDrop={onDrop}
+                />
+                {showCurationDropModeWarning && (
+                  <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
+                    This looks like a curation URL.{" "}
+                    {canSubmitCurationUrl ? (
+                      <button
+                        type="button"
+                        className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-amber-300 tw-underline tw-transition desktop-hover:hover:tw-text-amber-100"
+                        onClick={onSwitchToDropMode}
+                      >
+                        Submit it as a drop
+                      </button>
+                    ) : (
+                      <span>{curationUrlSubmitRestrictionMessage}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="tw-ml-2 lg:tw-ml-3">
+              <div className="tw-flex tw-items-center tw-gap-x-3">
+                <CreateDropSubmit
+                  submitting={submitting}
+                  canSubmit={canSubmit}
+                  onDrop={onDrop}
+                  isDropMode={isDropMode}
+                />
+              </div>
+            </div>
+          </div>
+          {isDropMode && (
+            <CreateDropContentRequirements
+              canSubmit={canSubmit}
+              wave={wave}
+              missingMedia={missingRequirements.media}
+              missingMetadata={missingRequirements.metadata}
+              onOpenMetadata={openMetadata}
+              setFiles={handleFileChange}
               disabled={submitting}
-              onRemoveMetadata={onRemoveMetadata}
-              closeMetadata={closeMetadata}
-              metadata={metadata}
-              missingRequiredMetadataKeys={missingRequirements.metadata}
-              metadataErrorById={metadataErrorById}
-              onChangeKey={onChangeKey}
-              onChangeValue={onChangeValue}
-              onAddMetadata={onAddMetadata}
             />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <CreateDropContentFiles
-        parts={drop?.parts ?? []}
-        files={files}
-        uploadingFiles={uploadingFiles}
-        removeFile={removeFile}
-        disabled={submitting}
-      />
-      <TermsSignatureFlow />
+          )}
+          <LazyMotion features={domAnimation}>
+            <AnimatePresence>
+              {isDropMode && isMetadataOpen && (
+                <m.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <CreateDropMetadata
+                    disabled={submitting}
+                    onRemoveMetadata={onRemoveMetadata}
+                    closeMetadata={closeMetadata}
+                    metadata={metadata}
+                    missingRequiredMetadataKeys={missingRequirements.metadata}
+                    metadataErrorById={metadataErrorById}
+                    onChangeKey={onChangeKey}
+                    onChangeValue={onChangeValue}
+                    onAddMetadata={onAddMetadata}
+                  />
+                </m.div>
+              )}
+            </AnimatePresence>
+          </LazyMotion>
+          <CreateDropContentFiles
+            parts={drop?.parts ?? []}
+            files={files}
+            uploadingFiles={uploadingFiles}
+            removeFile={removeFile}
+            disabled={submitting}
+          />
+        </>
+      )}
+      <TermsSignatureFlow enabled={termsSignatureFlowEnabled} />
     </div>
   );
 };

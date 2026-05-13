@@ -49,6 +49,7 @@ interface QuorumProposalDropModalProps {
   readonly dropId: string | null;
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly onClose: () => void;
+  readonly termsSignatureFlowEnabled?: boolean | undefined;
 }
 
 interface QuorumProposalStep {
@@ -206,6 +207,7 @@ export default function QuorumProposalDropModal({
   dropId,
   submitDrop,
   onClose,
+  termsSignatureFlowEnabled = true,
 }: QuorumProposalDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -694,7 +696,7 @@ export default function QuorumProposalDropModal({
           </div>
         </div>
       </dialog>
-      <TermsSignatureFlow />
+      <TermsSignatureFlow enabled={termsSignatureFlowEnabled} />
     </>,
     document.body
   );

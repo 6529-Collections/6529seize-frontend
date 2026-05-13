@@ -139,6 +139,28 @@ it("shows reply placeholder", () => {
   expect(screen.getByTestId("placeholder")).toHaveTextContent("Post a reply");
 });
 
+it("shows chat message placeholder for the base chat composer", () => {
+  render(
+    <CreateDropInput
+      waveId="w"
+      editorState={null}
+      type={null}
+      canSubmit={false}
+      isStormMode={false}
+      isDropMode={false}
+      submitting={false}
+      onEditorState={jest.fn()}
+      onReferencedNft={jest.fn()}
+      onMentionedUser={jest.fn()}
+      onMentionedWave={jest.fn()}
+    />
+  );
+
+  expect(screen.getByTestId("placeholder")).toHaveTextContent(
+    "Write a chat message"
+  );
+});
+
 it("renders validation helper text when provided", () => {
   render(
     <CreateDropInput

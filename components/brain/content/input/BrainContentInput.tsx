@@ -7,7 +7,6 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
-import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 
 interface BrainContentInputProps {
   readonly activeDrop: ActiveDropState | null;
@@ -26,8 +25,6 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
   const containerClassName = capacitor.isCapacitor
     ? "tw-max-h-[calc(100vh-14.7rem)]"
     : "tw-max-h-[calc(100vh-20rem)] lg:tw-max-h-[calc(100vh-20rem)]";
-  const { isVotingControlsLocked } = useApprovalWaveStatus({ wave });
-  const fixedDropMode = isVotingControlsLocked ? DropMode.CHAT : DropMode.BOTH;
 
   if (!wave) return null;
 
@@ -43,7 +40,7 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         onDropAddedToQueue={onCancelReplyQuote}
         key={wave.id}
         dropId={null}
-        fixedDropMode={fixedDropMode}
+        fixedDropMode={DropMode.CHAT}
       />
     </div>
   );

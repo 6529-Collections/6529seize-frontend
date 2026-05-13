@@ -12,12 +12,14 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
   readonly onClose: () => void;
+  readonly initialUrl?: string | null | undefined;
 }
 
 export function WaveLeaderboardCurationDropModal({
   isOpen,
   wave,
   onClose,
+  initialUrl = null,
 }: WaveLeaderboardCurationDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -140,6 +142,7 @@ export function WaveLeaderboardCurationDropModal({
                 wave={wave}
                 onSuccess={onClose}
                 isCurationLeaderboard
+                initialCurationUrl={initialUrl}
               />
             </div>
           </div>

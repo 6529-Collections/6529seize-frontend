@@ -8,14 +8,16 @@ import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
+import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
   readonly viewMode: WaveViewMode;
   readonly onToggleViewMode: () => void;
   readonly showGalleryToggle: boolean;
-  readonly activeCurationId: string | null;
-  readonly onSelectCuration: (curationId: string | null) => void;
+  readonly activeCurationId?: string | null | undefined;
+  readonly onSelectCuration?: ((curationId: string | null) => void) | undefined;
+  readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
 }
 
 export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
@@ -23,8 +25,9 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
   viewMode,
   onToggleViewMode,
   showGalleryToggle,
-  activeCurationId,
-  onSelectCuration,
+  activeCurationId = null,
+  onSelectCuration = () => {},
+  chatSubmitDropAction = null,
 }) => {
   const { isMemesWave } = useWave(wave);
   const { registerRef } = useLayout();
@@ -73,6 +76,7 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
               showGalleryToggle={showGalleryToggle}
               activeCurationId={activeCurationId}
               onSelectCuration={onSelectCuration}
+              chatSubmitDropAction={chatSubmitDropAction}
             />
           )}
         </div>

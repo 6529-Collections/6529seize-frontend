@@ -3,7 +3,6 @@ import BrainContentInput from "@/components/brain/content/input/BrainContentInpu
 
 const useWaveDataMock = jest.fn();
 const capacitorMock = jest.fn();
-const approvalStatusMock = jest.fn();
 
 jest.mock("@/hooks/useWaveData", () => ({
   useWaveData: (args: any) => useWaveDataMock(args),
@@ -12,10 +11,6 @@ jest.mock("@/hooks/useWaveData", () => ({
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => capacitorMock(),
-}));
-
-jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
-  useApprovalWaveStatus: (args: any) => approvalStatusMock(args),
 }));
 
 jest.mock("@/components/waves/PrivilegedDropCreator", () => ({
@@ -32,8 +27,6 @@ describe("BrainContentInput", () => {
   beforeEach(() => {
     useWaveDataMock.mockReset();
     capacitorMock.mockReset();
-    approvalStatusMock.mockReset();
-    approvalStatusMock.mockReturnValue({ isVotingControlsLocked: false });
   });
 
   it("returns null when wave is missing", () => {
@@ -43,7 +36,6 @@ describe("BrainContentInput", () => {
       <BrainContentInput activeDrop={null} onCancelReplyQuote={jest.fn()} />
     );
     expect(container.firstChild).toBeNull();
-    expect(approvalStatusMock).toHaveBeenCalledWith({ wave: null });
   });
 
   it("renders creator and passes wave id", () => {
@@ -60,7 +52,7 @@ describe("BrainContentInput", () => {
       onWaveNotFound: expect.any(Function),
     });
     expect(screen.getByTestId("creator")).toHaveTextContent("w1");
-    expect(screen.getByTestId("creator")).toHaveAttribute("data-mode", "BOTH");
+    expect(screen.getByTestId("creator")).toHaveAttribute("data-mode", "CHAT");
     expect(screen.getByTestId("creator").parentElement?.className).toContain(
       "tw-max-h-[calc(100vh-20rem)]"
     );
@@ -87,20 +79,5 @@ describe("BrainContentInput", () => {
       (onWaveNotFound as any)();
     }
     expect(onCancel).toHaveBeenCalled();
-  });
-
-  it("uses chat composer mode when approval submissions are locked", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
-    approvalStatusMock.mockReturnValue({ isVotingControlsLocked: true });
-    useWaveDataMock.mockReturnValue({ data: { id: "w3" } });
-
-    render(
-      <BrainContentInput
-        activeDrop={{ drop: { wave: { id: "w3" } } } as any}
-        onCancelReplyQuote={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId("creator")).toHaveAttribute("data-mode", "CHAT");
   });
 });

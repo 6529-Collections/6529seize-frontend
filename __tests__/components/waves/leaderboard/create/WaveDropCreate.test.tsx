@@ -35,6 +35,8 @@ describe("WaveDropCreate", () => {
     await user.click(screen.getByTestId("creator"));
     expect(onSuccess).toHaveBeenCalled();
     expect(creatorProps.curationComposerVariant).toBe("default");
+    expect(creatorProps.onExitFixedDropMode).toBe(onCancel);
+    expect(creatorProps.identityPickerPlacement).toBe("modal");
   });
 
   it("renders lightweight curation leaderboard variant", () => {
@@ -47,5 +49,30 @@ describe("WaveDropCreate", () => {
       screen.queryByLabelText("Close create drop")
     ).not.toBeInTheDocument();
     expect(creatorProps.curationComposerVariant).toBe("leaderboard");
+  });
+
+  it("renders modal content without an inner header card", () => {
+    render(<WaveDropCreate wave={wave} onSuccess={jest.fn()} isModalContent />);
+
+    expect(screen.queryByText("Create a New Drop")).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Close create drop")
+    ).not.toBeInTheDocument();
+    expect(creatorProps.fixedDropMode).toBe("PARTICIPATION");
+    expect(creatorProps.curationComposerVariant).toBe("default");
+    expect(creatorProps.onExitFixedDropMode).toBeUndefined();
+    expect(creatorProps.identityPickerPlacement).toBe("modal");
+  });
+
+  it("passes explicit identity picker placement to the creator", () => {
+    render(
+      <WaveDropCreate
+        wave={wave}
+        onSuccess={jest.fn()}
+        identityPickerPlacement="inline"
+      />
+    );
+
+    expect(creatorProps.identityPickerPlacement).toBe("inline");
   });
 });

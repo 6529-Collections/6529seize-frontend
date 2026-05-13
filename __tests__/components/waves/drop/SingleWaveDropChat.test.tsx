@@ -92,7 +92,7 @@ describe("SingleWaveDropChat", () => {
 
     expect(capturedProps.waveId).toBe("w1");
     expect(capturedProps.dropId).toBe("d1");
-    expect(capturedCreatorProps.fixedDropMode).toBe("BOTH");
+    expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
 
     act(() => capturedProps.onReply({ drop, partId: 2 }));
     expect(document.querySelector('[data-part="2"]')).toBeInTheDocument();
@@ -159,13 +159,13 @@ describe("SingleWaveDropChat", () => {
     expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
   });
 
-  it("keeps both composer mode for unlocked waves", () => {
+  it("keeps chat composer mode for unlocked waves", () => {
     const wave = createWave();
     const drop: any = { id: "d1" };
 
     render(<SingleWaveDropChat wave={wave} drop={drop} />);
 
-    expect(capturedCreatorProps.fixedDropMode).toBe("BOTH");
+    expect(capturedCreatorProps.fixedDropMode).toBe("CHAT");
   });
 
   it("locks the composer when voting is closed", () => {

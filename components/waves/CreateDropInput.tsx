@@ -182,7 +182,9 @@ const CreateDropInput = forwardRef<
 
     const getPlaceHolderText = () => {
       if (isStormMode) return "Add to the storm";
-      if (type === null) return isDropMode ? "Create a drop" : "Create a post";
+      if (type === null) {
+        return isDropMode ? "Create a drop" : "Write a chat message";
+      }
       switch (type) {
         case ActiveDropAction.REPLY:
           return isDropMode ? "Drop a reply" : "Post a reply";
