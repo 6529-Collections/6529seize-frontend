@@ -174,6 +174,7 @@ describe("WaveLeaderboardGridItem", () => {
 
   beforeEach(() => {
     markdownProps = undefined;
+    startDropOpen.mockReset();
     toggleCuration.mockReset();
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
@@ -188,7 +189,7 @@ describe("WaveLeaderboardGridItem", () => {
     });
   });
 
-  it("renders compact media cards with scrollable text and footer actions", () => {
+  it("renders compact media cards with clipped text and footer actions", () => {
     render(
       <WaveLeaderboardGridItem
         drop={baseDrop}
@@ -216,12 +217,13 @@ describe("WaveLeaderboardGridItem", () => {
     expect(textWrapper).toHaveClass("tw-pt-2");
     expect(textWrapper).toHaveClass("tw-pb-4");
     expect(markdownViewport).toHaveClass("tw-max-h-28");
-    expect(markdownViewport).toHaveClass("tw-overflow-y-auto");
-    expect(markdownViewport).toHaveClass("tw-scrollbar-thin");
-    expect(markdownViewport).toHaveClass("tw-scrollbar-track-iron-800");
-    expect(markdownViewport).toHaveClass("tw-scrollbar-thumb-iron-500");
-    expect(markdownViewport).not.toHaveClass("tw-overflow-hidden");
+    expect(markdownViewport).toHaveClass("tw-overflow-hidden");
+    expect(markdownViewport).not.toHaveClass("tw-overflow-y-auto");
+    expect(markdownViewport).not.toHaveClass("tw-scrollbar-thin");
     expect(markdownViewport.querySelector(".tw-bg-gradient-to-t")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Read full text" })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("rank")).toBeInTheDocument();
     expect(screen.getByTestId("votes")).toBeInTheDocument();
     expect(screen.getByTestId("curate-action")).toBeInTheDocument();
@@ -240,6 +242,71 @@ describe("WaveLeaderboardGridItem", () => {
     expect(card).toHaveClass("tw-bg-iron-950");
     expect(viewport).toHaveClass("tw-bg-iron-950");
     expect(content).toHaveClass("tw-space-y-3");
+  });
+
+  it("opens compact media text through the read action", () => {
+    const onDropClick = jest.fn();
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={onDropClick}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Read full text" }));
+
+    expect(onDropClick).toHaveBeenCalledTimes(1);
+    expect(onDropClick).toHaveBeenCalledWith(baseDrop);
+    expect(startDropOpen).toHaveBeenCalledTimes(1);
+    expect(startDropOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dropId: "d1",
+        waveId: "w1",
+        source: "leaderboard_grid",
+      })
+    );
+  });
+
+  it("does not show the read action for compact media cards without text", () => {
+    render(
+      <WaveLeaderboardGridItem
+        drop={{
+          ...baseDrop,
+          parts: [
+            {
+              media: [{ url: "media", mime_type: "image/jpeg" }],
+              content: "",
+            },
+          ],
+        }}
+        mode="compact"
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Read full text" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not open compact drops from footer action buttons", () => {
+    const onDropClick = jest.fn();
+
+    render(
+      <WaveLeaderboardGridItem
+        drop={baseDrop}
+        mode="compact"
+        onDropClick={onDropClick}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("curate-action"));
+    fireEvent.click(screen.getByTestId("vote-button"));
+
+    expect(onDropClick).not.toHaveBeenCalled();
+    expect(startDropOpen).not.toHaveBeenCalled();
   });
 
   it("hides vote actions when voting is closed", () => {
@@ -401,6 +468,9 @@ describe("WaveLeaderboardGridItem", () => {
     expect(content).toHaveClass("tw-space-y-1");
     expect(content).not.toHaveClass("tw-space-y-3");
     expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Read full text" })
+    ).not.toBeInTheDocument();
     expect(markdownProps).toBeUndefined();
   });
 

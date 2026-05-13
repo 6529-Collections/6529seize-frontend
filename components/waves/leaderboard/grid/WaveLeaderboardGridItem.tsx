@@ -146,6 +146,7 @@ export const WaveLeaderboardGridItem: React.FC<
         isCuratable={isCuratable}
         isCurated={isCurated}
         canShowVotingAction={canShowVotingAction}
+        onOpenDrop={openDrop}
         onVoteButtonClick={handleVoteButtonClick}
       />
 
