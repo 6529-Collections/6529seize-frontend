@@ -22,6 +22,7 @@ function DropListItemContentMediaImage({
   imageObjectPosition,
   imageScale = ImageScale.AUTOx450,
   loadStrategy = "in-view",
+  intrinsicHeight = false,
 }: {
   readonly src: string;
   readonly maxRetries?: number | undefined;
@@ -30,6 +31,7 @@ function DropListItemContentMediaImage({
   readonly imageObjectPosition?: string | undefined;
   readonly imageScale?: ImageScale | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
+  readonly intrinsicHeight?: boolean | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -121,12 +123,32 @@ function DropListItemContentMediaImage({
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
+  const primarySrc = getScaledImageUri(src, imageScale);
+  const [currentSrc, setCurrentSrc] = useState(primarySrc);
+  const [usedFallback, setUsedFallback] = useState(false);
+
+  React.useEffect(() => {
+    setCurrentSrc(primarySrc);
+    setUsedFallback(false);
+  }, [primarySrc]);
+
+  const handleIntrinsicImageError = useCallback(() => {
+    if (!usedFallback) {
+      setCurrentSrc(src);
+      setUsedFallback(true);
+      return;
+    }
+
+    handleError();
+  }, [handleError, src, usedFallback]);
 
   return (
     <>
       <div
         ref={ref}
-        className={`tw-relative tw-flex tw-h-full tw-w-full tw-items-center ${
+        className={`tw-relative tw-flex tw-w-full tw-items-center ${
+          intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
+        } ${
           isCompetitionDrop ? "tw-justify-center" : ""
         }`}
       >
@@ -151,27 +173,44 @@ function DropListItemContentMediaImage({
         )}
 
         {shouldLoadImage && errorCount <= maxRetries && (
-          <FallbackImage
-            key={retryTick}
-            ref={imgRef}
-            primarySrc={getScaledImageUri(src, imageScale)}
-            fallbackSrc={src}
-            alt="Drop media"
-            optimize={false}
-            fill
-            loading={loadStrategy === "eager" ? "eager" : undefined}
-            sizes="(max-width: 768px) 100vw, 768px"
-            className={`tw-max-h-full tw-max-w-full ${
-              !loaded ? "tw-opacity-0" : "tw-opacity-100"
-            } ${disableModal ? "" : "tw-cursor-pointer"}`}
-            style={{
-              objectFit: "contain",
-              objectPosition: resolvedObjectPosition,
-            }}
-            onLoad={handleImageLoad}
-            onClick={handleImageClick}
-            onError={handleError}
-          />
+          intrinsicHeight ? (
+            <img
+              key={retryTick}
+              ref={imgRef}
+              src={currentSrc}
+              alt="Drop media"
+              loading={loadStrategy === "eager" ? "eager" : "lazy"}
+              className={`tw-block tw-h-auto tw-max-h-64 tw-w-full tw-max-w-full tw-object-contain ${
+                !loaded ? "tw-opacity-0" : "tw-opacity-100"
+              } ${disableModal ? "" : "tw-cursor-pointer"}`}
+              style={{ objectPosition: resolvedObjectPosition }}
+              onLoad={handleImageLoad}
+              onClick={handleImageClick}
+              onError={handleIntrinsicImageError}
+            />
+          ) : (
+            <FallbackImage
+              key={retryTick}
+              ref={imgRef}
+              primarySrc={primarySrc}
+              fallbackSrc={src}
+              alt="Drop media"
+              optimize={false}
+              fill
+              loading={loadStrategy === "eager" ? "eager" : undefined}
+              sizes="(max-width: 768px) 100vw, 768px"
+              className={`tw-max-h-full tw-max-w-full ${
+                !loaded ? "tw-opacity-0" : "tw-opacity-100"
+              } ${disableModal ? "" : "tw-cursor-pointer"}`}
+              style={{
+                objectFit: "contain",
+                objectPosition: resolvedObjectPosition,
+              }}
+              onLoad={handleImageLoad}
+              onClick={handleImageClick}
+              onError={handleError}
+            />
+          )
         )}
         {errorCount > maxRetries && (
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">

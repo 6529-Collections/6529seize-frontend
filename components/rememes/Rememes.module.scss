@@ -263,9 +263,12 @@
 }
 
 .loader {
-  width: 20px;
-  height: 20px;
-  margin-left: 5px;
+  --bs-spinner-width: 1rem;
+  --bs-spinner-height: 1rem;
+  --bs-spinner-border-width: 0.14em;
+
+  flex: 0 0 auto;
+  vertical-align: middle;
 }
 
 .addRememeChecklist {

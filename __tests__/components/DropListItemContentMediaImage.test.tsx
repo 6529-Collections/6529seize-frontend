@@ -87,6 +87,20 @@ describe("DropListItemContentMediaImage", () => {
 
     expect(requestFullscreen).not.toHaveBeenCalled();
   });
+
+  it("renders intrinsic-height images without the fill container height", () => {
+    const { container } = render(
+      <DropListItemContentMediaImage src="img" intrinsicHeight />
+    );
+
+    const wrapper = container.querySelector(".tw-relative.tw-flex");
+    const img = screen.getByAltText("Drop media");
+
+    expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
+    expect(wrapper).not.toHaveClass("tw-h-full");
+    expect(img).toHaveClass("tw-h-auto", "tw-w-full", "tw-max-h-64");
+    expect(img).not.toHaveAttribute("data-nimg", "fill");
+  });
 });
 
 describe("DropListItemContentMediaImage retry", () => {
