@@ -5,14 +5,18 @@ import React from "react";
 import { createPortal } from "react-dom";
 
 let waveDropCreateProps: any;
+let waveDropCreateExtra: React.ReactNode | null = null;
 
 jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
   WaveDropCreate: (props: any) => {
     waveDropCreateProps = props;
     return (
-      <button data-testid="modal-create-drop" onClick={props.onSuccess}>
-        create
-      </button>
+      <>
+        <button data-testid="modal-create-drop" onClick={props.onSuccess}>
+          create
+        </button>
+        {waveDropCreateExtra}
+      </>
     );
   },
 }));
@@ -28,9 +32,40 @@ function FakeChildPortal() {
   );
 }
 
+type EscapeBlockStrategy = "stopPropagation" | "preventDefault";
+
+function EscapeBlockingChildPortal({
+  strategy,
+}: {
+  readonly strategy: EscapeBlockStrategy;
+}) {
+  return createPortal(
+    <button
+      type="button"
+      data-testid={`fake-child-portal-${strategy}`}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape") {
+          return;
+        }
+
+        if (strategy === "stopPropagation") {
+          event.stopPropagation();
+          return;
+        }
+
+        event.preventDefault();
+      }}
+    >
+      fake child portal
+    </button>,
+    document.body
+  );
+}
+
 describe("WaveChatSubmitDropModal", () => {
   beforeEach(() => {
     waveDropCreateProps = undefined;
+    waveDropCreateExtra = null;
   });
 
   it("does not render when closed", () => {
@@ -100,7 +135,33 @@ describe("WaveChatSubmitDropModal", () => {
     expect(onClose).toHaveBeenCalledTimes(3);
   });
 
-  it("does not close when escape starts outside the modal panel", async () => {
+  it("closes on Escape when focus is on document.body", async () => {
+    const onClose = jest.fn();
+
+    render(
+      <WaveChatSubmitDropModal
+        isOpen={true}
+        wave={wave}
+        title="Submit drop"
+        onClose={onClose}
+      />
+    );
+
+    const closeButton = await screen.findByLabelText("Close modal");
+    await waitFor(() => {
+      expect(closeButton).toHaveFocus();
+    });
+
+    document.body.tabIndex = -1;
+    document.body.focus();
+    expect(document.body).toHaveFocus();
+
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    document.body.removeAttribute("tabindex");
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes on Escape when focus is in an outside portal that does not stop the event", async () => {
     const onClose = jest.fn();
 
     render(
@@ -124,8 +185,62 @@ describe("WaveChatSubmitDropModal", () => {
     expect(childPortalButton).toHaveFocus();
 
     fireEvent.keyDown(childPortalButton, { key: "Escape" });
-    expect(onClose).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it("moves Tab focus back into the modal when focus starts outside the panel", async () => {
+    render(
+      <>
+        <WaveChatSubmitDropModal
+          isOpen={true}
+          wave={wave}
+          title="Submit drop"
+          onClose={jest.fn()}
+        />
+        <FakeChildPortal />
+      </>
+    );
+
+    const panel = await screen.findByTestId("chat-submit-drop-modal-panel");
+    const closeButton = screen.getByLabelText("Close modal");
+    const childPortalButton = screen.getByTestId("fake-child-portal-button");
+
+    expect(panel).not.toContainElement(childPortalButton);
+
+    childPortalButton.focus();
+    expect(childPortalButton).toHaveFocus();
+
+    fireEvent.keyDown(childPortalButton, { key: "Tab" });
+    expect(closeButton).toHaveFocus();
+    expect(panel.contains(document.activeElement)).toBe(true);
+  });
+
+  it.each(["stopPropagation", "preventDefault"] as const)(
+    "does not close when a nested portal handles Escape with %s",
+    async (strategy) => {
+      const onClose = jest.fn();
+      waveDropCreateExtra = <EscapeBlockingChildPortal strategy={strategy} />;
+
+      render(
+        <WaveChatSubmitDropModal
+          isOpen={true}
+          wave={wave}
+          title="Submit drop"
+          onClose={onClose}
+        />
+      );
+
+      const childPortalButton = await screen.findByTestId(
+        `fake-child-portal-${strategy}`
+      );
+
+      childPortalButton.focus();
+      expect(childPortalButton).toHaveFocus();
+
+      fireEvent.keyDown(childPortalButton, { key: "Escape" });
+      expect(onClose).not.toHaveBeenCalled();
+    }
+  );
 
   it("moves initial focus into the modal", async () => {
     render(

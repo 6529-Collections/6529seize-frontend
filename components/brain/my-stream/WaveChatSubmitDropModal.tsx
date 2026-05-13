@@ -64,8 +64,7 @@ export function WaveChatSubmitDropModal({
         return;
       }
 
-      const eventTarget = event.target;
-      if (!(eventTarget instanceof Node) || !panel.contains(eventTarget)) {
+      if (event.defaultPrevented) {
         return;
       }
 
