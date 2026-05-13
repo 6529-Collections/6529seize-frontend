@@ -52,7 +52,7 @@ export function MemePageReferencesSubMenu(props: {
   const [showRememesSort, setShowRememesSort] = useState(false);
   const [rememesLoaded, setRememesLoaded] = useState(false);
 
-  const rememesTarget = useRef<HTMLImageElement>(null);
+  const rememesTarget = useRef<HTMLDivElement>(null);
 
   const rememeSorting = [RememeSort.RANDOM, RememeSort.CREATED_ASC];
   const [selectedRememeSorting, setSelectedRememeSorting] =
@@ -101,7 +101,6 @@ export function MemePageReferencesSubMenu(props: {
 
   useEffect(() => {
     if (props.show && props.nft) {
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-derived-state
       fetchRememes(props.nft.id);
     }
   }, [props.show, props.nft, fetchRememes]);
