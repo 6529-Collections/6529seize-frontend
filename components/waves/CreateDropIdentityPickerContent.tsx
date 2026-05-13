@@ -36,6 +36,14 @@ export default function CreateDropIdentityPickerContent({
   autoFocus = true,
   onSelect,
 }: CreateDropIdentityPickerContentProps) {
+  const onSelectionChange = disabled
+    ? () => {}
+    : (selection: SelectableIdentityOption | null) => {
+        if (selection) {
+          onSelect(selection);
+        }
+      };
+
   return (
     <>
       <p className="tw-mb-6 tw-text-sm tw-font-normal tw-text-iron-400">
@@ -46,11 +54,7 @@ export default function CreateDropIdentityPickerContent({
         identity={selectedIdentity?.value ?? null}
         selectedDisplayValue={selectedIdentity?.label ?? null}
         setIdentity={() => {}}
-        onSelectionChange={(selection) => {
-          if (selection) {
-            onSelect(selection);
-          }
-        }}
+        onSelectionChange={onSelectionChange}
         label="Search identity"
         size={IdentitySearchSize.MD}
         autoFocus={autoFocus}
