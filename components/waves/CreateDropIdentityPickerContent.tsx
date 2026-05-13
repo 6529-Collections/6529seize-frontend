@@ -59,6 +59,7 @@ export default function CreateDropIdentityPickerContent({
         size={IdentitySearchSize.MD}
         autoFocus={autoFocus}
         clearable={false}
+        disabled={disabled}
         dropdownListClassName="tw-max-h-[50vh] md:tw-max-h-96 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
         error={!!errorMessage}
         errorMessage={errorMessage}

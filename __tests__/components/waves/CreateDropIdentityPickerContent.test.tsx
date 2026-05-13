@@ -11,8 +11,10 @@ jest.mock("@/components/utils/input/identity/IdentitySearch", () => ({
     SM: "SM",
   },
   default: ({
+    disabled = false,
     onSelectionChange,
   }: {
+    readonly disabled?: boolean | undefined;
     readonly onSelectionChange?:
       | ((
           selection: {
@@ -27,6 +29,8 @@ jest.mock("@/components/utils/input/identity/IdentitySearch", () => ({
   }) => (
     <button
       type="button"
+      disabled={disabled}
+      aria-disabled={disabled}
       onClick={() =>
         onSelectionChange?.({
           value: "0xother",
@@ -65,8 +69,11 @@ describe("CreateDropIdentityPickerContent", () => {
 
   it("calls onSelect when IdentitySearch selects an identity while enabled", async () => {
     const { onSelect } = renderSubject({ disabled: false });
+    const searchControl = screen.getByText("Select mocked identity");
 
-    await userEvent.click(screen.getByText("Select mocked identity"));
+    expect(searchControl).toBeEnabled();
+
+    await userEvent.click(searchControl);
 
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -78,8 +85,11 @@ describe("CreateDropIdentityPickerContent", () => {
 
   it("does not call onSelect when IdentitySearch selects an identity while disabled", async () => {
     const { onSelect } = renderSubject({ disabled: true });
+    const searchControl = screen.getByText("Select mocked identity");
 
-    await userEvent.click(screen.getByText("Select mocked identity"));
+    expect(searchControl).toBeDisabled();
+
+    await userEvent.click(searchControl);
 
     expect(onSelect).not.toHaveBeenCalled();
     expect(

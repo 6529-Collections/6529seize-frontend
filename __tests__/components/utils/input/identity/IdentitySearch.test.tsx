@@ -219,6 +219,73 @@ describe("IdentitySearch", () => {
     expect(screen.queryByLabelText("Clear identity")).not.toBeInTheDocument();
   });
 
+  it("disables the input and hides the clear button when disabled", () => {
+    render(
+      <IdentitySearch
+        identity="0x1"
+        selectedDisplayValue="User"
+        disabled={true}
+        setIdentity={setIdentity}
+      />
+    );
+
+    const input = screen.getByRole("combobox", { name: "Identity" });
+
+    expect(input).toBeDisabled();
+    expect(input).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByLabelText("Clear identity")).not.toBeInTheDocument();
+    expect(receivedProps.open).toBe(false);
+  });
+
+  it("does not open or enable search while disabled", () => {
+    render(
+      <IdentitySearch
+        identity="0x1"
+        selectedDisplayValue="User"
+        disabled={true}
+        setIdentity={setIdentity}
+      />
+    );
+
+    const input = screen.getByRole("combobox", { name: "Identity" });
+
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: "abc" } });
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+
+    expect(receivedProps.open).toBe(false);
+    expect(useQuery).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+  });
+
+  it("ignores profile selection while disabled", () => {
+    const onSelectionChange = jest.fn();
+
+    render(
+      <IdentitySearch
+        identity={null}
+        disabled={true}
+        setIdentity={setIdentity}
+        onSelectionChange={onSelectionChange}
+      />
+    );
+
+    receivedProps.onProfileSelect({
+      handle: "user",
+      display: "User",
+      wallet: "0x1",
+      primary_wallet: "0x1",
+      pfp: "avatar.png",
+      profile_id: "profile-1",
+    });
+
+    expect(setIdentity).not.toHaveBeenCalled();
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
   it("replaces a stale local draft when the controlled identity display changes externally", () => {
     const { rerender } = render(
       <IdentitySearch identity={null} setIdentity={setIdentity} />
@@ -238,6 +305,32 @@ describe("IdentitySearch", () => {
     );
 
     expect(input).toHaveValue("Other User");
+  });
+
+  it("shows the selected display value when disabled after a draft edit", () => {
+    const { rerender } = render(
+      <IdentitySearch
+        identity="0x1"
+        selectedDisplayValue="User"
+        setIdentity={setIdentity}
+      />
+    );
+
+    const input = screen.getByRole("combobox", { name: "Identity" });
+
+    fireEvent.change(input, { target: { value: "draft" } });
+    expect(input).toHaveValue("draft");
+
+    rerender(
+      <IdentitySearch
+        identity="0x1"
+        selectedDisplayValue="User"
+        disabled={true}
+        setIdentity={setIdentity}
+      />
+    );
+
+    expect(input).toHaveValue("User");
   });
 
   it("clears identity when the clear button is clicked", () => {
