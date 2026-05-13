@@ -66,7 +66,12 @@ const fetchDropResultsByIds = async (
   }
 
   const results = await Promise.allSettled(
-    uniqueDropIds.map((dropId) => fetchDropV2ById(dropId))
+    uniqueDropIds.map((dropId) =>
+      fetchDropV2ById(dropId, undefined, {
+        includeFullMetadata: false,
+        includeTopRaters: false,
+      })
+    )
   );
 
   return results.map((result, index) => {

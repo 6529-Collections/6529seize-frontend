@@ -6,6 +6,7 @@ import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   fetchBoostedDropsV2,
+  fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
   fetchDropV2ById,
   fetchWaveDropsFeedV2,
@@ -385,7 +386,49 @@ describe("fetchDropV2ById", () => {
     jest.clearAllMocks();
   });
 
-  it("keeps full metadata hydration for single drop details while allowing top raters to be skipped", async () => {
+  it("fetches drop metadata by id without fetching the drop detail", async () => {
+    const fullMetadata = [{ data_key: "artist", data_value: "Alice" }];
+    commonApiFetchMock.mockResolvedValueOnce(fullMetadata);
+
+    const result = await fetchDropMetadataByIdV2({
+      dropId: "drop-1",
+      priorityMetadata,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/drops/drop-1/metadata",
+      })
+    );
+    expect(commonApiFetchMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/drops/drop-1",
+      })
+    );
+    expect(result).toEqual([...priorityMetadata, ...fullMetadata]);
+  });
+
+  it("keeps by-id drop hydration lean by default", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drop: createEnrichableDrop(),
+    });
+
+    const result = await fetchDropV2ById("drop-1");
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/drops/drop-1",
+      })
+    );
+    expectNoListEnrichmentCalls();
+    expect(result.metadata).toEqual(priorityMetadata);
+    expect(result.top_raters).toEqual([]);
+  });
+
+  it("allows explicit full metadata hydration while top raters are skipped", async () => {
     const fullMetadata = [{ data_key: "artist", data_value: "Alice" }];
     commonApiFetchMock
       .mockResolvedValueOnce({
@@ -395,6 +438,7 @@ describe("fetchDropV2ById", () => {
       .mockResolvedValueOnce(fullMetadata);
 
     const result = await fetchDropV2ById("drop-1", undefined, {
+      includeFullMetadata: true,
       includeTopRaters: false,
     });
 
