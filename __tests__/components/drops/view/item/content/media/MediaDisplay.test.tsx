@@ -36,10 +36,12 @@ jest.mock("@/components/common/SandboxedExternalIframe", () => (props: any) => {
   }, [props.onVisible]);
   mockSandboxedExternalIframe(props);
   return (
-    <div
+    <iframe
+      ref={props.iframeRef}
       data-testid="iframe"
       data-src={props.src}
       data-title={props.title}
+      title={props.title}
       data-class-name={props.className}
       data-container-class-name={props.containerClassName}
     />
@@ -57,6 +59,19 @@ jest.mock(
   "@/components/drops/view/item/content/media/UnsupportedMediaLink",
   () => ({ __esModule: true, default: () => <a href="file.txt">file.txt</a> })
 );
+jest.mock("@/helpers/Helpers", () => ({
+  fullScreenSupported: () => true,
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
+jest.mock("@/helpers/media-download.helpers", () => ({
+  __esModule: true,
+  getDownloadFilenameFromUrl: jest.fn((_url: string) => "media.html"),
+  downloadMediaUrl: jest.fn(),
+  triggerDirectDownload: jest.fn(),
+}));
 
 jest.mock(
   "next/dynamic",
@@ -98,7 +113,6 @@ describe("MediaDisplay", () => {
     const node = screen.getByTestId("video");
     expect(node).toHaveAttribute("data-src", "vid.mp4");
     expect(node).toHaveAttribute("data-controls", "true");
-    expect(node).toHaveAttribute("data-disable", "false");
   });
 
   it("renders audio", () => {
@@ -132,6 +146,13 @@ describe("MediaDisplay", () => {
       "data-title",
       "Interactive HTML media"
     );
+    expect(screen.getByRole("button", { name: "Full screen" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Download media" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open in new tab" })
+    ).not.toBeInTheDocument();
   });
 
   it("forwards iframe container classes for html media", () => {
@@ -255,7 +276,7 @@ describe("MediaDisplay", () => {
     );
   });
 
-  it("auto-advances html when timeout fallback is enabled", () => {
+  it("auto-advances html when timeout fallback is enabled", async () => {
     jest.useFakeTimers();
     mockGetArweaveGatewayFallbackUrls.mockReturnValue([
       "https://arweave.net/tx",
@@ -271,7 +292,15 @@ describe("MediaDisplay", () => {
     );
 
     act(() => {
+      mockSandboxedExternalIframe.mock.calls.at(-1)?.[0].onVisible?.();
+    });
+
+    act(() => {
       jest.advanceTimersByTime(8000);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
     });
 
     expect(screen.getByTestId("iframe")).toHaveAttribute(

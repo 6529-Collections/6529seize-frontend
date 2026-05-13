@@ -48,6 +48,19 @@ describe("DropListItemContentMediaImage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("closes the modal when the backdrop is clicked", () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+    const img = screen.getByAltText("Drop media");
+    fireEvent.load(img);
+    fireEvent.click(img);
+
+    fireEvent.click(screen.getByTestId("modal-backdrop"));
+
+    expect(
+      screen.queryByAltText("Full size drop media")
+    ).not.toBeInTheDocument();
+  });
+
   it("does not open modal when disableModal is true", () => {
     render(<DropListItemContentMediaImage src="img" disableModal />);
     const img = screen.getByAltText("Drop media");
