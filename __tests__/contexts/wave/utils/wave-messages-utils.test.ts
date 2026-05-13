@@ -23,6 +23,56 @@ const sampleDrop = {
   metadata: [],
 };
 
+const sampleIdentity = {
+  id: "author-id",
+  handle: "author",
+  primary_address: "0xauthor",
+  pfp: null,
+  level: 1,
+  classification: "PSEUDONYM",
+  badges: {},
+};
+
+const sampleWaveOverview = {
+  id: "wave-1",
+  name: "Wave 1",
+  pfp: null,
+  last_drop_time: 100,
+  is_private: false,
+  context_profile_context: {
+    can_chat: true,
+    pinned: false,
+  },
+};
+
+const sampleV2Drop = {
+  id: "drop-1",
+  serial_no: 5,
+  created_at: 1000,
+  updated_at: null,
+  is_signed: false,
+  hide_link_preview: false,
+  title: "Drop 1",
+  content: "Drop content",
+  media: [],
+  attachments: [],
+  parts_count: 1,
+  author: sampleIdentity,
+  drop_type: "CHAT",
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  nft_links: [],
+  reactions: [],
+  boosts: 0,
+  context_profile_context: {
+    reaction: null,
+    boosted: false,
+    bookmarked: false,
+  },
+};
+
 afterEach(() => {
   jest.clearAllMocks();
 });
@@ -88,15 +138,15 @@ describe("mergeDrops", () => {
 describe("fetchNewestWaveMessages", () => {
   it("fetches latest drops and annotates wave data", async () => {
     (commonApiFetchWithRetry as jest.Mock).mockResolvedValue({
-      drops: [sampleDrop],
-      wave: { id: "wave-1", authenticated_user_admin: true },
+      drops: [sampleV2Drop],
+      wave: sampleWaveOverview,
     });
 
     const result = await fetchNewestWaveMessages("wave-1", null, 10);
 
     expect(commonApiFetchWithRetry).toHaveBeenCalledWith(
       expect.objectContaining({
-        endpoint: "waves/wave-1/drops",
+        endpoint: "v2/waves/wave-1/drops",
         params: { limit: "10" },
         signal: undefined,
         retryOptions: expect.objectContaining({ maxRetries: 2 }),
@@ -104,7 +154,7 @@ describe("fetchNewestWaveMessages", () => {
     );
     expect(result.drops?.[0]).toMatchObject({
       id: "drop-1",
-      wave: { authenticated_user_admin: true },
+      wave: { id: "wave-1", authenticated_user_admin: false },
     });
     expect(result.highestSerialNo).toBe(5);
   });
