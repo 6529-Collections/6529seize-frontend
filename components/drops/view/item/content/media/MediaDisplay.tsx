@@ -3,7 +3,7 @@
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import InteractiveMediaLoadGate from "@/components/drops/media/InteractiveMediaLoadGate";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import {
@@ -11,9 +11,11 @@ import {
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
+import useCapacitor from "@/hooks/useCapacitor";
 import MediaDisplayAudio from "./MediaDisplayAudio";
 import MediaDisplayImage from "./MediaDisplayImage";
 import MediaDisplayVideo from "./MediaDisplayVideo";
+import { InlineMediaActions } from "./MediaActionToolbar";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 import UnsupportedMediaLink from "./UnsupportedMediaLink";
 
@@ -46,6 +48,8 @@ function InteractiveHtmlMediaDisplay({
   readonly requireInteractionToLoad?: boolean | undefined;
   readonly iframeContainerClassName?: string | undefined;
 }) {
+  const { isCapacitor } = useCapacitor();
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isActivated, setIsActivated] = useState(!requireInteractionToLoad);
   const urls = useMemo(
     () => getArweaveGatewayFallbackUrls(media_url),
@@ -100,6 +104,10 @@ function InteractiveHtmlMediaDisplay({
     );
   };
 
+  const handleFullScreen = useCallback(() => {
+    iframeRef.current?.requestFullscreen().catch(() => undefined);
+  }, []);
+
   if (requireInteractionToLoad && !isActivated) {
     return (
       <InteractiveMediaLoadGate onLoad={() => setIsActivated(true)}>
@@ -115,20 +123,30 @@ function InteractiveHtmlMediaDisplay({
   }
 
   return (
-    <SandboxedExternalIframe
-      key={activeUrl}
-      title={DEFAULT_HTML_MEDIA_TITLE}
-      src={activeUrl}
-      className="tw-h-full tw-w-full"
-      containerClassName={iframeContainerClassName}
-      onLoad={() => {
-        setDidLoadCurrentUrl(true);
-      }}
-      onError={advanceToNextUrl}
-      onVisible={() => {
-        setIsIframeVisible(true);
-      }}
-    />
+    <div className="tw-relative tw-h-full tw-w-full">
+      <InlineMediaActions
+        variant="html"
+        isDownloading={false}
+        onFullscreen={handleFullScreen}
+        fullscreenTargetAvailable={!isCapacitor}
+        position="bottom-right"
+      />
+      <SandboxedExternalIframe
+        key={activeUrl}
+        title={DEFAULT_HTML_MEDIA_TITLE}
+        src={activeUrl}
+        className="tw-h-full tw-w-full"
+        containerClassName={iframeContainerClassName}
+        iframeRef={iframeRef}
+        onLoad={() => {
+          setDidLoadCurrentUrl(true);
+        }}
+        onError={advanceToNextUrl}
+        onVisible={() => {
+          setIsIframeVisible(true);
+        }}
+      />
+    </div>
   );
 }
 
@@ -245,6 +263,7 @@ export default function MediaDisplay({
       return (
         <MediaDisplayVideo
           src={media_url}
+          mimeType={media_mime_type}
           showControls={!disableMediaInteraction}
         />
       );

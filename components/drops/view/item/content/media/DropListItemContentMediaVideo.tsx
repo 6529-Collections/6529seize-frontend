@@ -12,12 +12,14 @@ import { useMediaActions } from "./useMediaActions";
 
 interface Props {
   readonly src: string;
+  readonly mimeType?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
 }
 
 function DropListItemContentMediaVideo({
   src,
+  mimeType,
   disableAutoPlay = false,
   fillContainer = false,
 }: Props) {
@@ -28,6 +30,7 @@ function DropListItemContentMediaVideo({
       url: src,
       fallbackFileName: "video",
       dialogTitle: "Save video",
+      mimeType,
     });
 
   // 1) Pick up the best URL (HLS or MP4)
@@ -125,7 +128,7 @@ function DropListItemContentMediaVideo({
         }}
         playsInline
         controls={showNativeControls}
-        controlsList="noplaybackrate"
+        controlsList="nodownload noplaybackrate"
         autoPlay={false}
         muted
         loop
