@@ -5,6 +5,7 @@ import clsx from "clsx";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropReactions from "./WaveDropReactions";
+import { getReactionCount } from "./reaction-utils";
 
 interface CurationDropFooterProps {
   readonly drop: ExtendedDrop;
@@ -16,7 +17,7 @@ export default function CurationDropFooter({
   className,
 }: CurationDropFooterProps) {
   const hasVisibleReactions = drop.reactions.some(
-    (reaction) => reaction.profiles.length > 0
+    (reaction) => getReactionCount(reaction) > 0
   );
 
   return (

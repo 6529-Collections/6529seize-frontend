@@ -5,6 +5,7 @@ import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { NextPageProps } from "@/contexts/wave/hooks/useWavePagination";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 /**
  * Hook that adapts the useVirtualizedWaveMessages hook to match the
@@ -17,6 +18,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 export function useVirtualizedWaveDrops(
   waveId: string,
   dropId: string | null,
+  wave?: ApiWave,
   pageSize: number = 50
 ) {
   // Original implementation - would be imported from useMyStream
@@ -26,7 +28,8 @@ export function useVirtualizedWaveDrops(
   const virtualizedWaveMessages = useVirtualizedWaveMessages(
     waveId,
     dropId,
-    pageSize
+    pageSize,
+    wave
   );
   // Create a wrapper for fetchNextPageForWave that first tries to get data locally
   const fetchNextPageForWave = useCallback(

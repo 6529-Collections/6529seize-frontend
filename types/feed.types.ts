@@ -4,6 +4,11 @@ import type { ApiNotificationCause } from "@/generated/models/ApiNotificationCau
 import type { ApiNotificationsResponse } from "@/generated/models/ApiNotificationsResponse";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
+
+type NotificationWaveOverview = ApiWaveOverview & {
+  readonly is_direct_message?: boolean;
+};
 
 type IFeedItemWaveCreated = {
   readonly serial_no: number;
@@ -118,6 +123,7 @@ export type INotificationDropReplied = NotificationBase &
 
 export type INotificationWaveCreated = NotificationBase & {
   readonly cause: ApiNotificationCause.WaveCreated;
+  readonly related_wave?: NotificationWaveOverview;
   readonly additional_context: {
     readonly wave_id: string;
   };
@@ -127,7 +133,7 @@ export type INotificationAllDrops = NotificationBase &
   WithDrops & {
     readonly cause: ApiNotificationCause.AllDrops;
     readonly additional_context: {
-      readonly vote: number;
+      readonly vote?: number | undefined;
     };
   };
 

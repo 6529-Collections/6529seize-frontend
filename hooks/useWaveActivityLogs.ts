@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -20,6 +20,7 @@ interface UseWaveActivityLogsProps {
   readonly reverse: boolean;
   readonly dropId: string | null;
   readonly logTypes: string[];
+  readonly enabled?: boolean | undefined;
 }
 
 export function useWaveActivityLogs({
@@ -28,22 +29,32 @@ export function useWaveActivityLogs({
   reverse,
   dropId,
   logTypes,
+  enabled = true,
 }: UseWaveActivityLogsProps) {
   const queryClient = useQueryClient();
 
   const [logs, setLogs] = useState<ApiWaveLog[]>([]);
+  const canFetch = enabled && !!connectedProfileHandle;
+  const serializedLogTypes = logTypes.join(",");
 
-  const queryKey = [
-    QueryKey.WAVE_LOGS,
-    {
-      waveId,
-      limit: WAVE_LOGS_PARAMS.limit,
-      dropId,
-      logTypes,
-    },
-  ];
+  const queryKey = useMemo(
+    () => [
+      QueryKey.WAVE_LOGS,
+      {
+        waveId,
+        limit: WAVE_LOGS_PARAMS.limit,
+        dropId,
+        logTypes: serializedLogTypes,
+      },
+    ],
+    [waveId, dropId, serializedLogTypes]
+  );
 
   useEffect(() => {
+    if (!canFetch) {
+      return;
+    }
+
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -53,8 +64,8 @@ export function useWaveActivityLogs({
         if (dropId) {
           params["drop_id"] = dropId;
         }
-        if (logTypes) {
-          params["log_types"] = logTypes.join(",");
+        if (serializedLogTypes) {
+          params["log_types"] = serializedLogTypes;
         }
         if (pageParam) {
           params["offset"] = `${pageParam}`;
@@ -73,7 +84,7 @@ export function useWaveActivityLogs({
       staleTime: 60000,
       ...getDefaultQueryRetry(),
     });
-  }, [waveId]);
+  }, [canFetch, queryKey, waveId, dropId, serializedLogTypes, queryClient]);
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     useInfiniteQuery({
@@ -85,8 +96,8 @@ export function useWaveActivityLogs({
         if (dropId) {
           params["drop_id"] = dropId;
         }
-        if (logTypes) {
-          params["log_types"] = logTypes.join(",");
+        if (serializedLogTypes) {
+          params["log_types"] = serializedLogTypes;
         }
         if (pageParam !== null) {
           params["offset"] = `${pageParam}`;
@@ -105,7 +116,7 @@ export function useWaveActivityLogs({
           ? allPages.length * WAVE_LOGS_PARAMS.limit
           : null,
       placeholderData: keepPreviousData,
-      enabled: !!connectedProfileHandle,
+      enabled: canFetch,
       staleTime: 60000,
       refetchInterval: 30000,
       ...getDefaultQueryRetry(),

@@ -2,8 +2,9 @@
 
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { isNumber } from "lodash";
+import isNumber from "lodash/isNumber";
 import React, { useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import type { TraitsData } from "../memes/submission/types/TraitsData";
@@ -17,43 +18,71 @@ interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;
 }
 
+interface SelectedTrait {
+  readonly label: string;
+  readonly displayValue: string;
+}
+
 // Component to display individual metadata items in cards
 const MetadataItem: React.FC<{
-  label: string;
-  value: string | number | boolean;
-}> = ({ label, value }) => {
+  readonly label: string;
+  readonly value: string | number | boolean;
+  readonly onMobileSelect: (trait: SelectedTrait) => void;
+}> = ({ label, value, onMobileSelect }) => {
   const isMobile = useIsMobileDevice();
 
   // Format display value
   const displayValue =
     typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
-
-  return (
-    <div className="tw-flex-1 tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-px-3 tw-py-2 tw-flex tw-flex-col tw-min-w-[100px]">
-      <span className="tw-block tw-text-[9px] tw-uppercase tw-tracking-wide tw-text-iron-500 tw-mb-1 tw-font-normal">
+  const tooltipId = `trait-${label}-${displayValue}`;
+  const cardClassName =
+    "tw-flex-1 tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-px-3 tw-py-2 tw-flex tw-flex-col tw-min-w-[100px]";
+  const valueClassName = isMobile
+    ? "tw-text-xs tw-font-medium tw-leading-snug tw-text-iron-200 tw-line-clamp-2 tw-whitespace-normal tw-break-words"
+    : "tw-text-xs tw-font-medium tw-text-iron-200 tw-truncate";
+  const content = (
+    <>
+      <span className="tw-mb-1 tw-block tw-text-[9px] tw-font-normal tw-uppercase tw-tracking-wide tw-text-iron-500">
         {label}
       </span>
-      <>
-        <span
-          className="tw-text-xs tw-font-medium tw-text-iron-200 tw-truncate"
-          data-tooltip-id={`trait-${label}-${displayValue}`}
+      <span className={valueClassName} data-tooltip-id={tooltipId}>
+        {displayValue}
+      </span>
+      {!isMobile && (
+        <Tooltip
+          id={tooltipId}
+          place="top"
+          offset={8}
+          opacity={1}
+          style={{
+            ...TOOLTIP_STYLES,
+            maxWidth: "300px",
+            wordWrap: "break-word",
+          }}
         >
-          {displayValue}
-        </span>
-        {!isMobile && (
-          <Tooltip
-            id={`trait-${label}-${displayValue}`}
-            place="top"
-            offset={8}
-            opacity={1}
-            style={{ ...TOOLTIP_STYLES, maxWidth: "300px", wordWrap: "break-word" }}
-          >
-            <span className="tw-text-xs">{displayValue}</span>
-          </Tooltip>
-        )}
-      </>
-    </div>
+          <span className="tw-text-xs">{displayValue}</span>
+        </Tooltip>
+      )}
+    </>
   );
+
+  if (isMobile) {
+    return (
+      <button
+        type="button"
+        aria-label={`View full ${label} trait: ${displayValue}`}
+        className={`${cardClassName} tw-cursor-pointer tw-appearance-none tw-text-left`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onMobileSelect({ label, displayValue });
+        }}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={cardClassName}>{content}</div>;
 };
 
 // Extract trait data from drop metadata
@@ -289,6 +318,9 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
   drop,
 }) => {
   const [showAllTraits, setShowAllTraits] = useState(false);
+  const [selectedTrait, setSelectedTrait] = useState<SelectedTrait | null>(
+    null
+  );
 
   // Extract traits from drop metadata
   const traits = useMemo(() => {
@@ -486,7 +518,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
 
   return (
     <div className="tw-w-full">
-      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4 tw-gap-3">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
         {/* Always show first 3 items */}
         {traitItems.slice(0, 3).map((item) => (
           <MetadataItem
@@ -497,6 +529,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
               ] ?? item.label
             }
             value={item.value}
+            onMobileSelect={setSelectedTrait}
           />
         ))}
 
@@ -513,22 +546,38 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
                     ] ?? item.label
                   }
                   value={item.value}
+                  onMobileSelect={setSelectedTrait}
                 />
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-flex-1 tw-min-w-[100px] tw-px-3 tw-py-2 tw-bg-iron-900/30 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-text-xs tw-text-iron-300 hover:tw-text-iron-40 tw-transition-colors tw-flex tw-items-center tw-justify-center tw-cursor-pointer">
+                className="hover:tw-text-iron-40 tw-flex tw-min-w-[100px] tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-300 tw-transition-colors"
+              >
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-flex-1 tw-min-w-[100px] tw-px-3 tw-py-2 tw-bg-iron-900/30 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-text-xs tw-text-iron-300 hover:tw-text-iron-50 tw-transition-colors tw-flex tw-items-center tw-justify-center tw-cursor-pointer">
+              className="tw-flex tw-min-w-[100px] tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50"
+            >
               Show all
             </button>
           ))}
       </div>
+      {selectedTrait && (
+        <MobileWrapperDialog
+          title={selectedTrait.label}
+          isOpen={true}
+          onClose={() => setSelectedTrait(null)}
+        >
+          <div className="tw-px-4 sm:tw-px-6">
+            <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-relaxed tw-text-iron-100">
+              {selectedTrait.displayValue}
+            </p>
+          </div>
+        </MobileWrapperDialog>
+      )}
     </div>
   );
 };

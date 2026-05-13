@@ -26,6 +26,7 @@ import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
@@ -77,6 +78,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { waves, directMessages, registerWave } = useMyStream();
+  const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => {
@@ -96,6 +98,22 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   useEffect(() => {
     registerWave(waveId, true);
   }, [registerWave, waveId]);
+
+  useEffect(() => {
+    if (!wave) {
+      return;
+    }
+
+    updateEligibility(wave.id, {
+      authenticated_user_eligible_to_chat:
+        wave.chat.authenticated_user_eligible,
+      authenticated_user_eligible_to_vote:
+        wave.voting.authenticated_user_eligible,
+      authenticated_user_eligible_to_participate:
+        wave.participation.authenticated_user_eligible,
+      authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
+    });
+  }, [updateEligibility, wave]);
 
   // Get enhanced data from the waves list (has correct WS-updated values)
   const enhancedData = useMemo(() => {

@@ -1,12 +1,14 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWaveDecision } from "@/generated/models/ApiWaveDecision";
-import type { ApiWaveDecisionsPage } from "@/generated/models/ApiWaveDecisionsPage";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMemo } from "react";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { fetchWaveDecisionsV2 } from "@/services/api/wave-decisions-v2-api";
 
 interface UseWaveSalesDecisionsProps {
   readonly waveId: string;
+  readonly wave?: ApiWave | ApiWaveMin | undefined;
   readonly enabled?: boolean | undefined;
 }
 
@@ -23,6 +25,7 @@ const sortDecisionPoint = (
 
 export function useWaveSalesDecisions({
   waveId,
+  wave,
   enabled = true,
 }: UseWaveSalesDecisionsProps) {
   const {
@@ -39,8 +42,9 @@ export function useWaveSalesDecisions({
     queryFn: async ({ pageParam }: { pageParam?: number | undefined }) => {
       const currentPage = pageParam ?? DEFAULT_PAGE;
 
-      return await commonApiFetch<ApiWaveDecisionsPage>({
-        endpoint: `waves/${waveId}/decisions`,
+      return await fetchWaveDecisionsV2({
+        waveId,
+        wave,
         params: {
           sort_direction: "DESC",
           sort: "decision_time",

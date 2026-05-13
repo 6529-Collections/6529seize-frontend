@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -68,6 +69,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const hasValidVoteValue = !Number.isNaN(parsedVoteValue);
   const isEditing =
     hasValidVoteValue && parsedVoteValue !== liveCurrentVoteValue;
+  const voteLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
 
   const setVoteDraftValue = (nextValue: string) => {
     setVoteDraftState({
@@ -238,7 +240,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             className="tw-h-8 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400"
           />
           <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400">
-            TDH
+            {voteLabel}
           </div>
         </div>
 

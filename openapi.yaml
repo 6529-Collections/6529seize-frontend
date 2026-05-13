@@ -996,11 +996,13 @@ paths:
       tags:
         - Drops
       summary: Get curated profile wave drops
+      deprecated: true
       description: >-
-        Returns drops from effective profile-wave curations across all public
-        profile waves, newest drops first. If a profile wave has an explicit
-        profile curation it is used; otherwise the oldest curation in the
-        profile wave is used. Reply drops are included when curated.
+        Deprecated. Use GET /v2/curated-profile-wave-drops instead. Returns
+        drops from effective profile-wave curations across all public profile
+        waves, newest drops first. If a profile wave has an explicit profile
+        curation it is used; otherwise the oldest curation in the profile wave
+        is used. Reply drops are included when curated.
       operationId: getCuratedProfileWaveDrops
       parameters:
         - name: page
@@ -1032,6 +1034,8 @@ paths:
       tags:
         - Drops
       summary: Get latest drops.
+      deprecated: true
+      description: Deprecated. Use GET /v2/drops instead.
       operationId: getLatestDrops
       parameters:
         - name: limit
@@ -1197,6 +1201,8 @@ paths:
       tags:
         - Drops
       summary: Get boosted drops.
+      deprecated: true
+      description: Deprecated. Use GET /v2/boosted-drops instead.
       operationId: getBoostedDrops
       parameters:
         - name: author
@@ -1277,6 +1283,8 @@ paths:
       tags:
         - Drops
       summary: Get drop boosts by Drop ID.
+      deprecated: true
+      description: Deprecated. Use GET /v2/drops/{id}/boosts instead.
       operationId: getDropBoostsById
       parameters:
         - name: dropId
@@ -1450,6 +1458,8 @@ paths:
       tags:
         - Drops
       summary: Get drop by ID.
+      deprecated: true
+      description: Deprecated. Use GET /v2/drops/{id} instead.
       operationId: getDropById
       parameters:
         - name: dropId
@@ -2076,6 +2086,79 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropV2Page"
+  /v2/curated-profile-wave-drops:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 curated profile wave drops
+      description: >-
+        Returns V2 drops from effective profile-wave curations across all public
+        profile waves, newest drops first. If a profile wave has an explicit
+        profile curation it is used; otherwise the oldest curation in the
+        profile wave is used. Reply drops are included when curated.
+      operationId: getCuratedProfileWaveDropsV2
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
+  /v2/drops:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drops.
+      operationId: getDropsV2
+      parameters:
+        - name: parent_drop_id
+          in: query
+          description: Return replies under this parent drop.
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2PageWithoutCount"
   /v2/drops/{id}:
     get:
       tags:
@@ -2240,6 +2323,28 @@ paths:
                 $ref: "#/components/schemas/ApiDropVotersPage"
         "400":
           description: Invalid request
+        "404":
+          description: Drop not found
+  /v2/drops/{id}/votes/download:
+    get:
+      tags:
+        - DropsV2
+      summary: Download V2 drop voters by drop ID as CSV.
+      operationId: downloadDropV2VotersById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
         "404":
           description: Drop not found
   /v2/drops/{id}/votes/logs:
@@ -3351,6 +3456,8 @@ paths:
       tags:
         - Notifications
       summary: Get notifications for authenticated user.
+      deprecated: true
+      description: Deprecated. Use GET /v2/notifications instead.
       operationId: getNotifications
       parameters:
         - name: limit
@@ -5719,6 +5826,8 @@ paths:
       tags:
         - Waves
       summary: Get already decided wave decision outcomes
+      deprecated: true
+      description: Deprecated. Use GET /v2/waves/{id}/decisions instead.
       operationId: getWaveDecisions
       parameters:
         - name: id
@@ -5834,6 +5943,8 @@ paths:
       tags:
         - Waves
       summary: Search for drops in wave by content
+      deprecated: true
+      description: Deprecated. Use GET /v2/waves/{waveId}/search instead.
       operationId: searchDropsInWave
       parameters:
         - name: waveId
@@ -5899,6 +6010,8 @@ paths:
       tags:
         - Waves
       summary: Get overview of waves by different criteria.
+      deprecated: true
+      description: Deprecated. Use GET /v2/waves?view=OVERVIEW instead.
       operationId: getWavesOverview
       parameters:
         - name: limit
@@ -5959,10 +6072,12 @@ paths:
       tags:
         - Waves
       summary: Get waves where a profile has written the most messages.
+      deprecated: true
       description: >-
-        Returns non-DM waves ranked by how many chat messages the resolved
-        profile has written in them. Results only include waves the requester
-        can access.
+        Deprecated. Use GET /v2/waves?view=FAVOURITES&identity={identityKey}
+        instead. Returns non-DM waves ranked by how many chat messages the
+        resolved profile has written in them. Results only include waves the
+        requester can access.
       operationId: getFavouriteWavesOfIdentity
       parameters:
         - name: identityKey
@@ -6003,7 +6118,10 @@ paths:
       tags:
         - Waves
       summary: Get hot waves overview.
-      description: Returns up to 25 public waves ranked by activity in the last 24 hours.
+      deprecated: true
+      description: >-
+        Deprecated. Use GET /v2/waves?view=HOT instead. Returns up to 25 public
+        waves ranked by activity in the last 24 hours.
       operationId: getHotWavesOverview
       parameters:
         - name: exclude_followed
@@ -6028,6 +6146,8 @@ paths:
       tags:
         - Waves
       summary: Get waves.
+      deprecated: true
+      description: Deprecated. Use GET /v2/waves?view=SEARCH instead.
       operationId: getWaves
       parameters:
         - name: name
@@ -6196,6 +6316,8 @@ paths:
       tags:
         - Waves
       summary: Get drops related to wave or parent drop
+      deprecated: true
+      description: Deprecated. Use GET /v2/waves/{id}/drops instead.
       operationId: getDropsOfWave
       parameters:
         - name: id
@@ -6412,6 +6534,8 @@ paths:
       tags:
         - Waves
       summary: Get waves leaderboard
+      deprecated: true
+      description: Deprecated. Use GET /v2/waves/{id}/leaderboard instead.
       operationId: getWaveLeaderboard
       parameters:
         - name: id
@@ -6558,6 +6682,10 @@ paths:
       tags:
         - Waves
       summary: List drops in a curation for wave
+      deprecated: true
+      description: >-
+        Deprecated. Use GET /v2/waves/{id}/curations/{curation_id}/drops
+        instead.
       operationId: listWaveCurationDrops
       parameters:
         - name: id
@@ -10123,6 +10251,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropNftLink"
+        priority_metadata:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMetadataV2"
         reactions:
           type: array
           items:
@@ -11740,6 +11872,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropV2"
+        related_wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
         additional_context:
           $ref: "#/components/schemas/ApiNotificationAdditionalContextV2"
     ApiOutgoingIdentitySubscriptionsPage:
@@ -13824,6 +13958,9 @@ components:
         - subscribers_count
         - has_competition
         - is_dm_wave
+        - description_drop
+        - total_drops_count
+        - is_private
       properties:
         id:
           type: string
@@ -13844,6 +13981,17 @@ components:
           type: boolean
         is_dm_wave:
           type: boolean
+        description_drop:
+          $ref: "#/components/schemas/ApiWaveOverviewDescriptionDrop"
+        total_drops_count:
+          type: integer
+          format: int64
+        is_private:
+          type: boolean
+        contributors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverviewContributor"
         context_profile_context:
           $ref: "#/components/schemas/ApiWaveOverviewContextProfileContext"
     ApiWaveOverviewContextProfileContext:
@@ -13864,8 +14012,32 @@ components:
         unread_drops:
           type: integer
           format: int64
+        first_unread_drop_serial_no:
+          type: integer
+          format: int64
         muted:
           type: boolean
+    ApiWaveOverviewContributor:
+      type: object
+      required:
+        - handle
+        - pfp
+      properties:
+        handle:
+          type: string
+          nullable: true
+        pfp:
+          type: string
+          nullable: true
+    ApiWaveOverviewDescriptionDrop:
+      type: object
+      properties:
+        contents:
+          type: string
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMedia"
     ApiWaveOverviewPage:
       type: object
       required:

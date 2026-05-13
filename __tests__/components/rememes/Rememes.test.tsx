@@ -4,12 +4,16 @@ import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+const mockRouterReplace = jest.fn();
+
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
+    replace: mockRouterReplace,
   }),
   useSearchParams: jest.fn().mockReturnValue({
     get: jest.fn().mockReturnValue(undefined),
+    toString: jest.fn().mockReturnValue(""),
   }),
   usePathname: jest.fn().mockReturnValue("/rememes"),
 }));
@@ -67,14 +71,21 @@ describe("Rememes component", () => {
     );
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
     expect(fetchUrl).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/rememes?page_size=40&page=1"
+      "https://api.test.6529.io/api/rememes?page_size=40&page=1",
+      expect.objectContaining({ signal: expect.any(Object) })
     );
+    expect(
+      (fetchUrl as jest.Mock).mock.calls.filter(([url]: [string]) =>
+        url.includes("/api/rememes?")
+      )
+    ).toHaveLength(1);
     await screen.findByText("Sort: Random");
     await userEvent.click(screen.getByText("Sort: Random"));
     await userEvent.click(screen.getByText(RememeSort.CREATED_ASC));
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(
-        "https://api.test.6529.io/api/rememes?page_size=40&page=1&sort=created_at&sort_direction=desc"
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&sort=created_at&sort_direction=desc",
+        expect.objectContaining({ signal: expect.any(Object) })
       )
     );
   });

@@ -172,5 +172,4 @@
 - [Block Finder](feature-block-finder.md)
 - [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
-- [Wave Drop Media Download](../waves/drop-actions/feature-media-download.md)
 - [Docs Home](../README.md)

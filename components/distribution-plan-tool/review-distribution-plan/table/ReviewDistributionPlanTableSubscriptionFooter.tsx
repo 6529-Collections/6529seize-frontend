@@ -29,7 +29,7 @@ import {
   useRef,
   useState,
 } from "react";
-import useDownloader from "react-use-downloader";
+import useDownloader from "@/hooks/useDownloader";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription";
 import {
   DistributionAirdropsPhase,

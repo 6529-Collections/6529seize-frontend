@@ -48,6 +48,7 @@ export default function ParticipationDropContent({
         onQuoteClick={onQuoteClick}
         setLongPressTriggered={setLongPressTriggered}
         isCompetitionDrop={isCompetitionDrop}
+        mediaContainerHeightClassName="tw-h-96"
         hasTouch={hasTouch}
         contentPresentation={contentPresentation}
         embedPath={embedPath}

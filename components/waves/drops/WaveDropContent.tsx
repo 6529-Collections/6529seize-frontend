@@ -30,6 +30,7 @@ interface WaveDropContentProps {
   readonly onCancel?: (() => void) | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly mediaImageScale?: ImageScale | undefined;
+  readonly mediaContainerHeightClassName?: string | undefined;
   readonly fullWidthMedia?: boolean | undefined;
   readonly hasTouch?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
@@ -56,6 +57,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   onCancel,
   isCompetitionDrop = false,
   mediaImageScale = ImageScale.AUTOx450,
+  mediaContainerHeightClassName,
   fullWidthMedia = false,
   hasTouch,
   onLinkCardActionsActiveChange,
@@ -83,6 +85,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       onCancel={onCancel}
       isCompetitionDrop={isCompetitionDrop}
       mediaImageScale={mediaImageScale}
+      mediaContainerHeightClassName={mediaContainerHeightClassName}
       fullWidthMedia={fullWidthMedia}
       hasTouch={effectiveHasTouch}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}

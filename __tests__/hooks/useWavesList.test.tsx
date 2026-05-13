@@ -5,13 +5,22 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveById } from "@/hooks/useWaveById";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
-jest.mock("@/hooks/useWavesOverview", () => ({
-  useWavesOverview: jest.fn(),
-}));
+jest.mock("@/hooks/useWavesV2", () => {
+  const actual = jest.requireActual("@/hooks/useWavesV2");
+  return {
+    ...actual,
+    useWavesV2: jest.fn(),
+  };
+});
 
 jest.mock("@/hooks/usePinnedWavesServer", () => ({
   usePinnedWavesServer: jest.fn(),
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: jest.fn(),
 }));
 
 jest.mock("@/hooks/useWaveById", () => ({
@@ -26,10 +35,12 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
 
-const useWavesOverviewMock = require("@/hooks/useWavesOverview")
-  .useWavesOverview as jest.Mock;
+const useWavesV2Mock = require("@/hooks/useWavesV2").useWavesV2 as jest.Mock;
 const usePinnedWavesServerMock = require("@/hooks/usePinnedWavesServer")
   .usePinnedWavesServer as jest.Mock;
+const useSeizeConnectContextMock =
+  require("@/components/auth/SeizeConnectContext")
+    .useSeizeConnectContext as jest.Mock;
 const useSeizeSettingsMock = require("@/contexts/SeizeSettingsContext")
   .useSeizeSettings as jest.Mock;
 const useWaveByIdMock = useWaveById as jest.Mock;
@@ -44,37 +55,81 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </AuthContext.Provider>
 );
 
-const dmWave = {
+const createSidebarWave = ({
+  id,
+  latestDropTimestamp,
+  isDirectMessage = false,
+  type = ApiWaveType.Rank,
+}: {
+  readonly id: string;
+  readonly latestDropTimestamp: number;
+  readonly isDirectMessage?: boolean;
+  readonly type?: ApiWaveType;
+}) => ({
+  id,
+  name: id,
+  type,
+  picture: null,
+  contributors: [],
+  isDirectMessage,
+  hasCompetition: type !== ApiWaveType.Chat,
+  descriptionDrop: {
+    contents: null,
+    media: [],
+  },
+  totalDropsCount: 0,
+  isPrivate: false,
+  latestDropTimestamp,
+  firstUnreadDropSerialNo: null,
+  unreadDropsCount: 0,
+  latestReadTimestamp: 0,
+  pinned: false,
+  muted: false,
+  subscribed: false,
+});
+
+const createLegacyApiWave = (id: string, latestDropTimestamp: number) =>
+  ({
+    id,
+    name: id,
+    picture: null,
+    contributors_overview: [],
+    metrics: {
+      drops_count: 0,
+      latest_drop_timestamp: latestDropTimestamp,
+      first_unread_drop_serial_no: null,
+      your_unread_drops_count: 0,
+      your_latest_read_timestamp: 0,
+      muted: false,
+    },
+    wave: { type: ApiWaveType.Rank },
+    chat: { scope: { group: { is_direct_message: false } } },
+    visibility: { scope: { group: null } },
+    description_drop: { parts: [] },
+    pinned: false,
+    subscribed_actions: [],
+  }) as any;
+
+const dmWave = createSidebarWave({
   id: "1",
-  created_at: 0,
-  metrics: { latest_drop_timestamp: 50 },
-  wave: { type: ApiWaveType.Chat },
-  chat: { scope: { group: { is_direct_message: true } } },
-} as any;
-const mainWave = {
-  id: "2",
-  created_at: 1,
-  metrics: { latest_drop_timestamp: 100 },
-  wave: { type: ApiWaveType.Rank },
-} as any;
-const pinnedExtra = {
-  id: "3",
-  created_at: 2,
-  metrics: { latest_drop_timestamp: 200 },
-  wave: { type: ApiWaveType.Rank },
-} as any;
-const announcementWave = {
+  latestDropTimestamp: 50,
+  isDirectMessage: true,
+  type: ApiWaveType.Chat,
+});
+const mainWave = createSidebarWave({ id: "2", latestDropTimestamp: 100 });
+const pinnedExtra = createSidebarWave({ id: "3", latestDropTimestamp: 200 });
+const announcementWave = createSidebarWave({
   id: "4",
-  created_at: 3,
-  metrics: { latest_drop_timestamp: 300 },
-  wave: { type: ApiWaveType.Rank },
-} as any;
+  latestDropTimestamp: 300,
+});
+const legacyAnnouncementWave = createLegacyApiWave("4", 300);
 let announcementRefetchMock: jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
   announcementRefetchMock = jest.fn();
-  useWavesOverviewMock.mockReturnValue({
+  useSeizeConnectContextMock.mockReturnValue({ address: "0xABC" });
+  useWavesV2Mock.mockReturnValue({
     waves: [dmWave, mainWave],
     isFetching: false,
     isFetchingNextPage: false,
@@ -114,8 +169,11 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   expect(waves.map((w: any) => w.id)).toEqual(["3", "2"]);
   expect(waves.every((w: any) => w.isPinned)).toBe(true);
   expect(result.current.pinnedWaves.map((w: any) => w.id)).toEqual(["3"]);
-  expect(useWavesOverviewMock).toHaveBeenCalledWith(
+  expect(useWavesV2Mock).toHaveBeenCalledWith(
     expect.objectContaining({
+      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+      pageSize: 20,
+      directMessage: false,
       refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
       refetchIntervalInBackground: false,
     })
@@ -132,7 +190,7 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     isAnnouncementsWave: (waveId: string | null | undefined) => waveId === "4",
   });
   useWaveByIdMock.mockReturnValue({
-    wave: announcementWave,
+    wave: legacyAnnouncementWave,
     isLoading: false,
     isError: false,
     error: null,
@@ -207,7 +265,7 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
     "Stale cached announcement query error"
   );
 
-  useWavesOverviewMock.mockReturnValue({
+  useWavesV2Mock.mockReturnValue({
     waves: [announcementWave, mainWave],
     isFetching: false,
     isFetchingNextPage: false,

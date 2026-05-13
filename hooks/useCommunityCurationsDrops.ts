@@ -1,8 +1,12 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
+import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { createFallbackWaveMin } from "@/services/api/drop-v2-mappers";
+import { mapLeaderboardDropV2 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -47,21 +51,34 @@ const getUniqueDrops = (
   return drops;
 };
 
+const mapCommunityCurationDropV2 = (drop: ApiDropV2): ApiDrop => {
+  const wave = createFallbackWaveMin(drop.author.badges.profile_wave_id ?? "");
+  const mappedDrop = mapLeaderboardDropV2({ drop, wave });
+
+  return {
+    ...mappedDrop,
+    wave,
+  };
+};
+
 const fetchCommunityCurationsDrops = ({
   limit,
   page,
 }: {
   readonly limit: number;
   readonly page: number;
-}): Promise<CommunityCurationsDropsPage> => {
-  return commonApiFetch<CommunityCurationsDropsPage>({
-    endpoint: "curated-profile-wave-drops",
+}): Promise<CommunityCurationsDropsPage> =>
+  commonApiFetch<ApiDropV2PageWithoutCount>({
+    endpoint: "v2/curated-profile-wave-drops",
     params: {
       page: `${page}`,
       page_size: `${limit}`,
     },
-  });
-};
+  }).then((response) => ({
+    data: response.data.map(mapCommunityCurationDropV2),
+    page: response.page,
+    next: response.next,
+  }));
 
 export function useCommunityCurationsDrops({
   limit,

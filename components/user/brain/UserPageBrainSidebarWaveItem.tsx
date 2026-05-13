@@ -3,46 +3,49 @@
 import type { ReactNode } from "react";
 import { LockClosedIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
-import type { ApiWave } from "@/generated/models/ApiWave";
 import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 import Link from "next/link";
 import Image from "next/image";
 import WavesIcon from "@/components/common/icons/WavesIcon";
+import {
+  getSidebarWaveDropsCount,
+  getSidebarWaveHref,
+  getSidebarWaveImageSrc,
+  getSidebarWaveIsDirectMessage,
+  getSidebarWaveIsPrivate,
+  getSidebarWaveLatestDropTimestamp,
+  type UserPageBrainSidebarWave,
+} from "./userPageBrainSidebarWave.helpers";
 
 type BrainSidebarWaveItemDisplay = {
   readonly href: string;
   readonly isPrivate: boolean;
   readonly isDirectMessage: boolean;
   readonly dropsCount: string;
-  readonly lastDropTimestamp: ApiWave["metrics"]["latest_drop_timestamp"];
+  readonly lastDropTimestamp: number | null;
   readonly imageSrc: string | null;
 };
 
 const getBrainSidebarWaveItemDisplay = (
-  wave: ApiWave
-): BrainSidebarWaveItemDisplay => ({
-  isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
-  href: getWaveRoute({
-    waveId: wave.id,
-    isDirectMessage: wave.chat.scope.group?.is_direct_message ?? false,
-    isApp: false,
-  }),
-  isPrivate:
-    Boolean(wave.visibility.scope.group) &&
-    !(wave.chat.scope.group?.is_direct_message ?? false),
-  dropsCount: numberWithCommas(wave.metrics.drops_count),
-  lastDropTimestamp: wave.metrics.latest_drop_timestamp,
-  imageSrc: wave.picture
-    ? getScaledImageUri(wave.picture, ImageScale.W_200_H_200)
-    : null,
-});
+  wave: UserPageBrainSidebarWave
+): BrainSidebarWaveItemDisplay => {
+  const dropsCount = getSidebarWaveDropsCount(wave);
+
+  return {
+    isDirectMessage: getSidebarWaveIsDirectMessage(wave),
+    href: getSidebarWaveHref(wave),
+    isPrivate: getSidebarWaveIsPrivate(wave),
+    dropsCount: numberWithCommas(dropsCount),
+    lastDropTimestamp: getSidebarWaveLatestDropTimestamp(wave),
+    imageSrc: getSidebarWaveImageSrc(wave, ImageScale.W_200_H_200),
+  };
+};
 
 export default function UserPageBrainSidebarWaveItem({
   wave,
 }: {
-  readonly wave: ApiWave;
+  readonly wave: UserPageBrainSidebarWave;
 }) {
   const {
     href,
@@ -55,7 +58,7 @@ export default function UserPageBrainSidebarWaveItem({
   const FallbackIcon = isDirectMessage ? ChatBubbleLeftRightIcon : WavesIcon;
   let metaContent: ReactNode = <span>No drops yet</span>;
 
-  if (lastDropTimestamp) {
+  if (lastDropTimestamp !== null && lastDropTimestamp > 0) {
     metaContent = (
       <>
         <span>{getTimeAgoShort(lastDropTimestamp)}</span>

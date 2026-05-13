@@ -1,11 +1,11 @@
 "use client";
 
 import type { QueryStatus } from "@tanstack/react-query";
-import type { ApiWave } from "@/generated/models/ApiWave";
+import type { SidebarWave } from "@/types/waves.types";
 import UserPageBrainSidebarWaveItem from "./UserPageBrainSidebarWaveItem";
 
 interface UserPageBrainSidebarMostActiveProps {
-  readonly waves: ApiWave[];
+  readonly waves: SidebarWave[];
   readonly status: QueryStatus;
 }
 

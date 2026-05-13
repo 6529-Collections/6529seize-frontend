@@ -164,6 +164,46 @@ describe("DropAuthorBadges", () => {
     expect(screen.queryByTestId("wave-creator-badge")).toBeNull();
   });
 
+  it("renders activity and wave creator badges from V2 count-only badges", () => {
+    const onArtistPreviewOpen = jest.fn();
+
+    render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          badges: {
+            artist_of_main_stage_submissions: 1,
+            artist_of_memes: 1,
+            profile_wave_id: "profile-wave-1",
+          },
+        }}
+        onArtistPreviewOpen={onArtistPreviewOpen}
+      />
+    );
+
+    const badge = screen.getByTestId("artist-activity-badge");
+    expect(badge).toHaveAttribute("data-submission-count", "1");
+    expect(badge).toHaveAttribute("data-trophy-count", "1");
+    expect(screen.getByTestId("wave-creator-badge")).toBeInTheDocument();
+
+    fireEvent.click(badge);
+
+    expect(onArtistPreviewOpen).toHaveBeenCalledWith({
+      user: expect.objectContaining({
+        active_main_stage_submission_ids: [],
+        artist_of_prevote_cards: [],
+        badges: {
+          artist_of_main_stage_submissions: 1,
+          artist_of_memes: 1,
+          profile_wave_id: "profile-wave-1",
+        },
+        is_wave_creator: true,
+        profile_wave_id: "profile-wave-1",
+      }),
+      initialTab: "active",
+    });
+  });
+
   it("renders wave creator badge when profile is wave creator", () => {
     render(
       <DropAuthorBadges

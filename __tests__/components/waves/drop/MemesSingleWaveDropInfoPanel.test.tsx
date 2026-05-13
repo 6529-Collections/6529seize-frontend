@@ -1,7 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React from "react";
-import { MemesDropFullscreenOverlay } from "@/components/waves/drop/MemesDropFullscreenOverlay";
 import { MemesSingleWaveDropInfoPanel } from "@/components/waves/drop/MemesSingleWaveDropInfoPanel";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 
@@ -66,14 +64,29 @@ jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({
 }));
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
-  () => (props: any) => (
-    <div
-      data-testid="media"
-      data-disable-modal={String(props.disableModal)}
-      data-media-mime-type={props.media_mime_type}
-      data-media-url={props.media_url}
-    />
-  )
+  () => (props: any) => {
+    const mediaMimeType = props.media_mime_type ?? "";
+    const isImage = mediaMimeType.includes("image");
+    const isVideo = mediaMimeType.includes("video");
+    const showsToolbar = !props.disableModal && (isImage || isVideo);
+
+    return (
+      <div
+        data-testid="media"
+        data-disable-modal={String(Boolean(props.disableModal))}
+        data-media-mime-type={mediaMimeType}
+        data-media-url={props.media_url}
+      >
+        {showsToolbar && (
+          <>
+            {isImage && <button type="button">Full screen</button>}
+            <button type="button">Open in new tab</button>
+            <button type="button">Download media</button>
+          </>
+        )}
+      </div>
+    );
+  }
 );
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: (drop: any) => mockUseDropInteractionRules(drop),
@@ -115,6 +128,10 @@ const dropWithMedia = (mime_type: string, url = "media") => ({
 
 describe("MemesSingleWaveDropInfoPanel", () => {
   beforeEach(() => {
+    Object.defineProperty(document.body, "requestFullscreen", {
+      configurable: true,
+      value: jest.fn(),
+    });
     mockIsMobileScreen = false;
     mockUseDropInteractionRules.mockReset();
     mockUseDropInteractionRules.mockReturnValue({
@@ -134,7 +151,7 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     );
     expect(screen.getByTestId("media")).toHaveAttribute(
       "data-disable-modal",
-      "true"
+      "false"
     );
     expect(screen.getByTestId("traits")).toBeInTheDocument();
     expect(screen.getByTestId("process")).toBeInTheDocument();
@@ -145,24 +162,60 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     expect(screen.getByText("Desc")).toBeInTheDocument();
   });
 
-  it("opens fullscreen when the hero fullscreen button is clicked", async () => {
+  it("uses compact responsive media sizing before the desktop breakpoint", () => {
     render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
 
-    expect(
-      screen.queryByRole("button", { name: "Exit fullscreen view" })
-    ).not.toBeInTheDocument();
+    const mediaFrame = screen.getByTestId("media").parentElement;
+    const heroWrapper = mediaFrame?.parentElement?.parentElement?.parentElement;
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Open fullscreen view" })
+    expect(mediaFrame).toHaveClass(
+      "tw-h-[clamp(18rem,75vw,calc(100dvh-8rem))]"
+    );
+    expect(mediaFrame).toHaveClass("lg:tw-h-[95vh]");
+    expect(heroWrapper).toHaveClass("lg:tw-min-h-screen");
+    expect(heroWrapper).not.toHaveClass("tw-min-h-screen");
+  });
+
+  it("uses the standard image media toolbar and modal path", () => {
+    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
+
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-disable-modal",
+      "false"
+    );
+    expect(screen.getByRole("button", { name: "Full screen" })).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Open in new tab" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeVisible();
+  });
+
+  it("uses the standard video media toolbar without fullscreen", () => {
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={dropWithMedia("video/mp4", "video.mp4")}
+        wave={null}
+      />
     );
 
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-media-url",
+      "video.mp4"
+    );
     expect(
-      screen.getByRole("button", { name: "Exit fullscreen view" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Open in new tab" })
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeVisible();
   });
 
   it.each([
-    ["video/mp4", "video.mp4"],
     ["text/html", "interactive.html"],
     ["model/gltf-binary", "model.glb"],
   ])("hides fullscreen while rendering %s hero media", (mime_type, url) => {
@@ -179,21 +232,8 @@ describe("MemesSingleWaveDropInfoPanel", () => {
       mime_type
     );
     expect(
-      screen.queryByRole("button", { name: "Open fullscreen view" })
+      screen.queryByRole("button", { name: "Full screen" })
     ).not.toBeInTheDocument();
-  });
-
-  it("closes fullscreen when button clicked", async () => {
-    const setState = jest.fn();
-    const spy = jest
-      .spyOn(React, "useState")
-      .mockImplementationOnce(() => [true, setState]);
-    render(<MemesSingleWaveDropInfoPanel drop={baseDrop} wave={null} />);
-    await userEvent.click(
-      screen.getByRole("button", { name: "Exit fullscreen view" })
-    );
-    expect(setState).toHaveBeenCalledWith(false);
-    spy.mockRestore();
   });
 
   it("passes single-drop close callback to resubmit source deletion", async () => {
@@ -313,186 +353,4 @@ describe("MemesSingleWaveDropInfoPanel", () => {
       "false"
     );
   });
-});
-
-describe("MemesDropFullscreenOverlay", () => {
-  const artworkMedia = baseDrop.parts[0].media[0];
-
-  it("closes when Escape is pressed", () => {
-    const onClose = jest.fn();
-
-    render(
-      <MemesDropFullscreenOverlay
-        isOpen={true}
-        artworkMedia={artworkMedia}
-        drop={baseDrop}
-        title="Title"
-        description="Desc"
-        onClose={onClose}
-      />
-    );
-
-    fireEvent.keyDown(document, { key: "Escape" });
-
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("passes null rank through to the position badge for unranked drops", () => {
-    render(
-      <MemesDropFullscreenOverlay
-        isOpen={true}
-        artworkMedia={artworkMedia}
-        drop={{ ...baseDrop, rank: null }}
-        title="Title"
-        description="Desc"
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId("position")).toHaveAttribute("data-rank", "null");
-  });
-
-  it("prevents Escape from closing the parent drop modal", () => {
-    const onClose = jest.fn();
-    const parentDropModalClose = jest.fn();
-
-    document.addEventListener("keydown", parentDropModalClose);
-
-    try {
-      render(
-        <MemesDropFullscreenOverlay
-          isOpen={true}
-          artworkMedia={artworkMedia}
-          drop={baseDrop}
-          title="Title"
-          description="Desc"
-          onClose={onClose}
-        />
-      );
-
-      fireEvent.keyDown(document, { key: "Escape" });
-
-      expect(onClose).toHaveBeenCalledTimes(1);
-      expect(parentDropModalClose).not.toHaveBeenCalled();
-    } finally {
-      document.removeEventListener("keydown", parentDropModalClose);
-    }
-  });
-
-  it("closes only when the backdrop is clicked", () => {
-    const onClose = jest.fn();
-
-    render(
-      <MemesDropFullscreenOverlay
-        isOpen={true}
-        artworkMedia={artworkMedia}
-        drop={baseDrop}
-        title="Title"
-        description="Desc"
-        onClose={onClose}
-      />
-    );
-
-    fireEvent.click(screen.getByAltText("Title"));
-    expect(onClose).not.toHaveBeenCalled();
-
-    const dialog = screen.getByRole("dialog", { name: "Title" });
-    const backdrop = dialog.parentElement;
-    expect(backdrop).not.toBeNull();
-
-    fireEvent.click(backdrop as HTMLElement);
-
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("returns focus to the previously focused element when closed", async () => {
-    const user = userEvent.setup();
-
-    function OverlayHarness() {
-      const [isOpen, setIsOpen] = React.useState(false);
-
-      return (
-        <>
-          <button type="button" onClick={() => setIsOpen(true)}>
-            Open fullscreen
-          </button>
-          <MemesDropFullscreenOverlay
-            isOpen={isOpen}
-            artworkMedia={artworkMedia}
-            drop={baseDrop}
-            title="Title"
-            description="Desc"
-            onClose={() => setIsOpen(false)}
-          />
-        </>
-      );
-    }
-
-    render(<OverlayHarness />);
-
-    const trigger = screen.getByRole("button", { name: "Open fullscreen" });
-    await user.click(trigger);
-
-    const closeButton = screen.getByRole("button", {
-      name: "Exit fullscreen view",
-    });
-    await waitFor(() => expect(closeButton).toHaveFocus());
-
-    await user.click(closeButton);
-
-    await waitFor(() => expect(trigger).toHaveFocus());
-  });
-
-  it("does not render when closed or media is missing", () => {
-    const { rerender } = render(
-      <MemesDropFullscreenOverlay
-        isOpen={false}
-        artworkMedia={artworkMedia}
-        drop={baseDrop}
-        title="Title"
-        description="Desc"
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(
-      screen.queryByRole("button", { name: "Exit fullscreen view" })
-    ).not.toBeInTheDocument();
-
-    rerender(
-      <MemesDropFullscreenOverlay
-        isOpen={true}
-        artworkMedia={null}
-        drop={baseDrop}
-        title="Title"
-        description="Desc"
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(
-      screen.queryByRole("button", { name: "Exit fullscreen view" })
-    ).not.toBeInTheDocument();
-  });
-
-  it.each(["video/mp4", "text/html", "model/gltf-binary"])(
-    "does not render image-only overlay for %s media",
-    (mime_type) => {
-      render(
-        <MemesDropFullscreenOverlay
-          isOpen={true}
-          artworkMedia={{ mime_type, url: "media" }}
-          drop={baseDrop}
-          title="Title"
-          description="Desc"
-          onClose={jest.fn()}
-        />
-      );
-
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: "Exit fullscreen view" })
-      ).not.toBeInTheDocument();
-    }
-  );
 });

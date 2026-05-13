@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useWavesOverview } from "./useWavesOverview";
+import { useWavesV2 } from "./useWavesV2";
 import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
@@ -33,9 +33,9 @@ const useDmWavesList = () => {
     fetchNextPage,
     status,
     refetch,
-  } = useWavesOverview({
-    type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
-    limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+  } = useWavesV2({
+    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     directMessage: true,
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
@@ -45,8 +45,7 @@ const useDmWavesList = () => {
   // sort by latest drop
   const sorted = useMemo(() => {
     return [...mainWaves].sort(
-      (a, b) =>
-        b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp
+      (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
     );
   }, [mainWaves]);
 
