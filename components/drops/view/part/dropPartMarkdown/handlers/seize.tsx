@@ -11,8 +11,8 @@ import {
 
 import GroupCardChat from "@/components/groups/page/list/card/GroupCardChat";
 import DropItemChat from "@/components/waves/drops/DropItemChat";
+import WaveDropLinkPreview from "@/components/waves/drops/WaveDropLinkPreview";
 import WaveItemChat from "@/components/waves/list/WaveItemChat";
-import QuorumParticipationDropLinkPreview from "@/components/waves/quorum/QuorumParticipationDropLinkPreview";
 import type { LinkHandler } from "../linkTypes";
 import { renderSeizeQuote } from "../renderers";
 
@@ -78,9 +78,10 @@ const createSeizeQuoteHandler = (
       ? [...config.quotePath, quoteCycleKey]
       : config.quotePath;
 
-    if (config.isQuorumWaveById?.(quoteInfo.waveId)) {
+    const isMemesWave = config.isMemesWaveById?.(quoteInfo.waveId) ?? false;
+    if (!isMemesWave) {
       return (
-        <QuorumParticipationDropLinkPreview
+        <WaveDropLinkPreview
           href={href}
           waveId={quoteInfo.waveId}
           serialNo={quoteInfo.serialNo}
@@ -173,11 +174,10 @@ const createSeizeDropHandler = (
         throw new Error("Seize drop link matches current drop");
       }
       const isMemesWave = config.isMemesWaveById?.(waveId) ?? false;
-      const isQuorumWave = config.isQuorumWaveById?.(waveId) ?? false;
 
-      if (!isMemesWave && isQuorumWave && waveId) {
+      if (!isMemesWave && waveId) {
         return (
-          <QuorumParticipationDropLinkPreview
+          <WaveDropLinkPreview
             href={href}
             waveId={waveId}
             dropId={dropId}
@@ -188,27 +188,6 @@ const createSeizeDropHandler = (
             maxEmbedDepth={config.maxEmbedDepth}
           />
         );
-      }
-
-      if (!isMemesWave && waveId) {
-        const content = renderSeizeQuote(
-          {
-            waveId,
-            dropId,
-          },
-          onQuoteClick,
-          href,
-          {
-            embedPath: config.embedPath,
-            quotePath: config.quotePath,
-            embedDepth: config.embedDepth + 1,
-            maxEmbedDepth: config.maxEmbedDepth,
-          }
-        );
-
-        if (content) {
-          return content;
-        }
       }
 
       return <DropItemChat href={href} dropId={dropId} />;

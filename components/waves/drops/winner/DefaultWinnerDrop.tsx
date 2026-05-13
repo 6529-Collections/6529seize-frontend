@@ -63,6 +63,10 @@ interface DefautWinnerDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly embedPath?: readonly string[] | undefined;
+  readonly quotePath?: readonly string[] | undefined;
+  readonly embedDepth?: number | undefined;
+  readonly maxEmbedDepth?: number | undefined;
 }
 
 const DefaultWinnerDrop = ({
@@ -80,6 +84,10 @@ const DefaultWinnerDrop = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  embedPath,
+  quotePath,
+  embedDepth,
+  maxEmbedDepth,
 }: DefautWinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -222,6 +230,10 @@ const DefaultWinnerDrop = ({
                 setLongPressTriggered={setLongPressTriggered}
                 isCompetitionDrop={true}
                 hasTouch={hasTouch}
+                embedPath={embedPath}
+                quotePath={quotePath}
+                embedDepth={embedDepth}
+                maxEmbedDepth={maxEmbedDepth}
               />
             </div>
           </div>

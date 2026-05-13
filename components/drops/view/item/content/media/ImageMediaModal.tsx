@@ -1,5 +1,6 @@
 "use client";
 
+import { FallbackImage } from "@/components/common/FallbackImage";
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
@@ -84,19 +85,23 @@ export function ImageMediaModal({
                   wrapperStyle={{ width: "95vw", height: "90dvh" }}
                   contentStyle={{ width: "95vw", height: "90dvh" }}
                 >
-                  <img
-                    ref={imageRef}
-                    src={src}
-                    alt="Full size drop media"
-                    style={{
-                      height: "90dvh",
-                      maxHeight: "90dvh",
-                      maxWidth: "95vw",
-                      pointerEvents: "auto",
-                      width: "95vw",
-                    }}
-                    className="tw-h-full tw-w-full tw-object-contain"
-                  />
+                  <div className="tw-relative tw-h-full tw-w-full">
+                    {/* Drop media can come from arbitrary hosts outside Next image config. */}
+                    <FallbackImage
+                      ref={imageRef}
+                      primarySrc={src}
+                      fallbackSrc={src}
+                      alt="Full size drop media"
+                      fill
+                      sizes="95vw"
+                      optimize={false}
+                      style={{
+                        objectFit: "contain",
+                        objectPosition: "center",
+                        pointerEvents: "auto",
+                      }}
+                    />
+                  </div>
                 </TransformComponent>
               </div>
             </div>
