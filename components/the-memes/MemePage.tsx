@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Container, Row } from "react-bootstrap";
 import { mainnet } from "viem/chains";
 import { AuthContext } from "@/components/auth/Auth";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
@@ -367,9 +366,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-6">
         <div>
-          <div
-            className={`${styles["nftImageWrapper"] ?? ""} tw-pb-12 tw-pt-2`}
-          >
+          <div className={`${styles["nftImageWrapper"] ?? ""}`}>
             <MemePageArtViewer
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
@@ -398,11 +395,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               fullWidth
             />
           )}
-          <MemePageLiveRightMenu
-            show={true}
-            nft={nft}
-            nftBalance={nftBalance}
-          />
+          <MemePageLiveRightMenu show={true} nft={nft} />
         </div>
       </div>
     );
@@ -416,7 +409,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <nav
         aria-label="Meme page sections"
-        className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700 tw-pb-6"
+        className="tw-relative tw-mb-6 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
@@ -440,7 +433,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
 
     return (
-      <nav aria-label="Meme history sections" className="tw-pb-5">
+      <nav aria-label="Meme history sections" className="tw-pb-8">
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_HISTORY_TAB>
             items={visibleHistoryTabItems}
@@ -457,11 +450,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   function printContent() {
     return (
       <>
-        <Container className="p-0">
+        <div className="tw-p-0">
           {activeTab === MEME_FOCUS.COLLECTORS && (
-            <Row className="pt-3">
+            <div className="tw-pt-3">
               <MemePageCollectorsRightMenu show={true} nft={nft} />
-            </Row>
+            </div>
           )}
           <MemePageLiveSubMenu
             show={activeTab === MEME_FOCUS.LIVE}
@@ -488,7 +481,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             nft={nft}
             nftMeta={nftMeta}
           />
-        </Container>
+        </div>
         {activeTab === MEME_FOCUS.HISTORY &&
           activeHistoryTab === MEME_HISTORY_TAB.ACTIVITY && (
             <MemePageActivity
@@ -510,7 +503,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   return (
     <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-black tw-pb-5 tw-text-white">
       <div className="tw-mx-auto tw-w-full tw-px-4 tw-py-10 md:tw-px-6 min-[1000px]:tw-max-w-[850px] lg:tw-px-8 min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
-        <header className="tw-pb-3">
+        <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
             <div className="tw-min-w-0">
               <div className="tw-mb-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">

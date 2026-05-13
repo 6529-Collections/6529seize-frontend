@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
@@ -10,6 +11,7 @@ import {
   getImageFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useSyncExternalStore } from "react";
 import { Carousel, Col, Container, Row } from "react-bootstrap";
@@ -22,6 +24,7 @@ export function MemePageArtViewer({
   readonly nft: NFT;
   readonly showBalance?: boolean;
 }) {
+  const { connectedProfile } = useAuth();
   const isFullScreenSupported = useSyncExternalStore(
     () => () => undefined,
     fullScreenSupported,
@@ -39,6 +42,7 @@ export function MemePageArtViewer({
   const imageHref = getResolvedImageSrc(nft);
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  const hasMultipleSlides = hasAnimation && hasImage;
   let fullscreenElementId = "";
   if (isShowingAnimation) {
     fullscreenElementId = "the-art-fullscreen-animation";
@@ -47,9 +51,82 @@ export function MemePageArtViewer({
   }
   const fileType = isShowingAnimation ? animationFormat : imageFormat;
   const currentFormat = fileType ?? "";
+  const shouldReserveBalanceSpace = showBalance && Boolean(connectedProfile);
+  const artControlsClassName = styles["artControls"] ?? "";
+  const artControlsWithBalanceClassName =
+    styles["artControlsWithBalance"] ?? "";
+  const controlClassName = shouldReserveBalanceSpace
+    ? `${artControlsClassName} ${artControlsWithBalanceClassName}`.trim()
+    : artControlsClassName;
 
   function carouselHandlerSlide(event: number) {
     setCurrentSlide(event);
+  }
+
+  function goToPreviousSlide() {
+    setCurrentSlide((slide) => Math.max(0, slide - 1));
+  }
+
+  function goToNextSlide() {
+    setCurrentSlide((slide) => Math.min(1, slide + 1));
+  }
+
+  function printArtworkControls() {
+    return (
+      <Col xs={12} className={controlClassName}>
+        <div className={styles["artControlsContent"]}>
+          <div className={styles["artControlsCenter"]}>
+            {hasMultipleSlides && (
+              <button
+                type="button"
+                aria-label="Show previous artwork media"
+                disabled={currentSlide === 0}
+                className={styles["artSlideButton"]}
+                onClick={goToPreviousSlide}
+              >
+                <ChevronLeftIcon
+                  aria-hidden="true"
+                  className={styles["artSlideIcon"]}
+                />
+              </button>
+            )}
+            <div className={styles["artControlsFormatLabel"]}>
+              {currentFormat}
+            </div>
+            {hasMultipleSlides && (
+              <button
+                type="button"
+                aria-label="Show next artwork media"
+                disabled={currentSlide === 1}
+                className={styles["artSlideButton"]}
+                onClick={goToNextSlide}
+              >
+                <ChevronRightIcon
+                  aria-hidden="true"
+                  className={styles["artSlideIcon"]}
+                />
+              </button>
+            )}
+          </div>
+          {isFullScreenSupported && (
+            <button
+              type="button"
+              aria-label="View artwork fullscreen"
+              className={styles["fullScreenButton"]}
+              onClick={() =>
+                fullscreenElementId && enterArtFullScreen(fullscreenElementId)
+              }
+            >
+              <FontAwesomeIcon
+                aria-hidden="true"
+                icon={faExpandAlt}
+                className={styles["fullScreen"]}
+              />
+            </button>
+          )}
+        </div>
+      </Col>
+    );
   }
 
   return (
@@ -57,27 +134,14 @@ export function MemePageArtViewer({
       <Row className="position-relative">
         {hasAnimation ? (
           <>
-            <Col xs={12} className={styles["artHeader"]}>
-              <div className={styles["artHeaderContent"]}>
-                <div className={styles["artFormatLabel"]}>{currentFormat}</div>
-                {isFullScreenSupported && (
-                  <FontAwesomeIcon
-                    icon={faExpandAlt}
-                    className={styles["fullScreen"]}
-                    onClick={() =>
-                      fullscreenElementId &&
-                      enterArtFullScreen(fullscreenElementId)
-                    }
-                  />
-                )}
-              </div>
-            </Col>
             <Carousel
               className={styles["memesCarousel"]}
+              activeIndex={currentSlide}
+              controls={false}
               interval={null}
               indicators={false}
               wrap={false}
-              onSlide={carouselHandlerSlide}
+              onSelect={carouselHandlerSlide}
             >
               <Carousel.Item className="text-center">
                 <NFTImage
@@ -104,24 +168,10 @@ export function MemePageArtViewer({
                 </Carousel.Item>
               )}
             </Carousel>
+            {printArtworkControls()}
           </>
         ) : (
           <>
-            <Col xs={12} className={styles["artHeader"]}>
-              <div className={styles["artHeaderContent"]}>
-                <div className={styles["artFormatLabel"]}>{currentFormat}</div>
-                {isFullScreenSupported && (
-                  <FontAwesomeIcon
-                    icon={faExpandAlt}
-                    className={styles["fullScreen"]}
-                    onClick={() =>
-                      fullscreenElementId &&
-                      enterArtFullScreen(fullscreenElementId)
-                    }
-                  />
-                )}
-              </div>
-            </Col>
             {hasImage && (
               <NFTImage
                 nft={nft}
@@ -133,6 +183,7 @@ export function MemePageArtViewer({
                 id="the-art-fullscreen-img"
               />
             )}
+            {printArtworkControls()}
           </>
         )}
       </Row>

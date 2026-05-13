@@ -23,21 +23,23 @@ export function LeaderboardCollector(
     display = display.substring(0, 25) + "...";
   }
 
-  const pfpImg = props.pfp ? (
-    <img
-      src={getScaledImageUri(props.pfp, ImageScale.W_AUTO_H_50)}
-      alt={props.consolidationKey}
-      className="tw-h-[40px] tw-bg-transparent tw-object-contain"
-    />
-  ) : (
-    <></>
+  const pfpImg = (
+    <div className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800">
+      {props.pfp && (
+        <img
+          src={getScaledImageUri(props.pfp, ImageScale.W_AUTO_H_50)}
+          alt={props.consolidationKey}
+          className="tw-h-full tw-w-full tw-bg-transparent tw-object-contain"
+        />
+      )}
+    </div>
   );
 
   return (
     <div className="tw-flex tw-items-center tw-gap-3">
       <a
         href={`/${link}`}
-        className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-iron-100 tw-no-underline hover:tw-text-white hover:tw-no-underline"
+        className="tw-flex tw-items-center tw-gap-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100 tw-no-underline hover:tw-text-white hover:tw-no-underline"
       >
         {pfpImg}
         {hasLevel ? (

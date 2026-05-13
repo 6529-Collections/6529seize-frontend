@@ -10,9 +10,7 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import { ContractType } from "@/types/enums";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import styles from "./TheMemes.module.scss";
 
 export function MemePageYourCardsRightMenu(props: {
   show: boolean;
@@ -25,246 +23,201 @@ export function MemePageYourCardsRightMenu(props: {
   myRank: NftRank | undefined;
 }) {
   function getTokenCount(transactions: Transaction[]) {
-    let count = 0;
-    [...transactions].map((e) => {
-      count += e.token_count;
-    });
-    return count;
+    return transactions.reduce((count, e) => count + e.token_count, 0);
   }
 
-  if (props.show) {
-    const firstAcquired = [...props.transactions].sort((a, b) =>
-      a.transaction_date > b.transaction_date ? 1 : -1
-    )[0];
-
-    const airdropped = props.transactions.filter(
-      (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
-    );
-
-    const transferredIn =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value === 0
-          );
-
-    const transferredOut =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value === 0
-          );
-
-    const bought =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value > 0
-          );
-
-    let boughtSum = 0;
-    bought.map((b) => {
-      boughtSum += b.value;
-    });
-
-    const sold =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value > 0
-          );
-
-    let soldSum = 0;
-    sold.map((b) => {
-      soldSum += b.value;
-    });
-
-    return (
-      <div className="tw-pt-3">
-        <Container className="p-0" fluid>
-          <Row>
-            {props.transactions.length > 0 && props.wallets.length > 0 && (
-              <>
-                {props.nftBalance > 0 && props.myOwner && (
-                  <>
-                    <Row className="pt-2">
-                      <Col
-                        xs={{ span: 12 }}
-                        sm={{ span: 12 }}
-                        md={{ span: 12 }}
-                        lg={{ span: 8 }}
-                      >
-                        <Table bordered={false}>
-                          <tbody>
-                            <tr className={`${styles["overviewColumn"]}`}>
-                              <td>Cards</td>
-                              <td className="text-right">{`x${props.nftBalance}`}</td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      </Col>
-                    </Row>
-                    {props.nftBalance > 0 && props.myOwner && props.nft?.id && (
-                      <Row className="mb-2">
-                        <Col>
-                          <TransferSingle
-                            collectionType={CollectedCollectionType.MEMES}
-                            contractType={ContractType.ERC1155}
-                            contract={MEMES_CONTRACT}
-                            tokenId={props.nft?.id}
-                            max={props.nftBalance}
-                            title={
-                              props.nft?.name ?? `The Memes #${props.nft?.id}`
-                            }
-                            thumbUrl={props.nft?.thumbnail}
-                          />
-                        </Col>
-                      </Row>
-                    )}
-                    {props.myRank && props.nft && props.myTDH ? (
-                      <Row className="pt-2">
-                        <Col
-                          xs={{ span: 12 }}
-                          sm={{ span: 12 }}
-                          md={{ span: 12 }}
-                          lg={{ span: 8 }}
-                        >
-                          <Table bordered={false}>
-                            <tbody>
-                              <tr
-                                className={`pt-1 ${styles["overviewColumn"]}`}
-                              >
-                                <td>TDH</td>
-                                <td className="text-right">
-                                  {numberWithCommas(
-                                    Math.round(props.myTDH.tdh)
-                                  )}
-                                </td>
-                              </tr>
-                              <tr className={`${styles["overviewColumn"]}`}>
-                                <td>Rank</td>
-                                <td className="text-right">
-                                  #{props.myRank?.rank}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </Col>
-                      </Row>
-                    ) : (
-                      <Row className="pb-3">
-                        <Col className={`pt-1 ${styles["overviewColumn"]}`}>
-                          No TDH accrued
-                        </Col>
-                      </Row>
-                    )}
-                  </>
-                )}
-                <Row className="pt-2 pb-2">
-                  <Col>
-                    <h3>Overview</h3>
-                  </Col>
-                </Row>
-                <Row className={`pb-2 ${styles["overviewColumn"]}`}>
-                  <Col>
-                    First acquired{" "}
-                    {printMintDate(new Date(firstAcquired!.transaction_date))}
-                  </Col>
-                </Row>
-                {airdropped.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(airdropped)} card
-                      {getTokenCount(airdropped) > 1 && "s"} airdropped
-                    </Col>
-                  </Row>
-                )}
-                {bought.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(bought)} card
-                      {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
-                      ETH
-                    </Col>
-                  </Row>
-                )}
-                {transferredIn.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(transferredIn)} card
-                      {getTokenCount(transferredIn) > 1 && "s"} transferred in
-                    </Col>
-                  </Row>
-                )}
-                {sold.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(sold)} card
-                      {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
-                    </Col>
-                  </Row>
-                )}
-                {transferredOut.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(transferredOut)} card
-                      {getTokenCount(transferredOut) > 1 && "s"} transferred out
-                    </Col>
-                  </Row>
-                )}
-              </>
-            )}
-          </Row>
-        </Container>
-      </div>
-    );
-  } else {
+  if (!props.show) {
     return <></>;
   }
+
+  const firstAcquired = [...props.transactions].sort((a, b) =>
+    a.transaction_date > b.transaction_date ? 1 : -1
+  )[0];
+
+  const airdropped = props.transactions.filter(
+    (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
+  );
+
+  const transferredIn =
+    props.wallets.length === 0
+      ? []
+      : props.transactions.filter(
+          (t) =>
+            !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
+            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+            t.value === 0
+        );
+
+  const transferredOut =
+    props.wallets.length === 0
+      ? []
+      : props.transactions.filter(
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+            t.value === 0
+        );
+
+  const bought =
+    props.wallets.length === 0
+      ? []
+      : props.transactions.filter(
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
+            t.value > 0
+        );
+
+  const boughtSum = bought.reduce((sum, b) => sum + b.value, 0);
+
+  const sold =
+    props.wallets.length === 0
+      ? []
+      : props.transactions.filter(
+          (t) =>
+            props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
+            t.value > 0
+        );
+
+  const soldSum = sold.reduce((sum, b) => sum + b.value, 0);
+
+  const transferNft =
+    props.nftBalance > 0 &&
+    props.myOwner !== undefined &&
+    props.nft !== undefined &&
+    props.nft.id !== 0
+      ? props.nft
+      : undefined;
+
+  return (
+    <div className="tw-pt-3">
+      {props.transactions.length > 0 && props.wallets.length > 0 && (
+        <>
+          {transferNft !== undefined && (
+            <div className="tw-mb-3">
+              <TransferSingle
+                collectionType={CollectedCollectionType.MEMES}
+                contractType={ContractType.ERC1155}
+                contract={MEMES_CONTRACT}
+                tokenId={transferNft.id}
+                max={props.nftBalance}
+                title={
+                  (transferNft as { name?: string }).name ??
+                  `The Memes #${transferNft.id}`
+                }
+                thumbUrl={transferNft.thumbnail}
+              >
+                <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-6 tw-gap-y-2">
+                  <div className="tw-flex tw-items-baseline tw-gap-2">
+                    <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
+                      Cards
+                    </span>
+                    <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-iron-50">{`x${props.nftBalance}`}</span>
+                  </div>
+                  {props.myRank !== undefined && props.myTDH !== undefined ? (
+                    <>
+                      <div className="tw-flex tw-items-baseline tw-gap-2">
+                        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
+                          TDH
+                        </span>
+                        <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-iron-50">
+                          {numberWithCommas(Math.round(props.myTDH.tdh))}
+                        </span>
+                      </div>
+                      <div className="tw-flex tw-items-baseline tw-gap-2">
+                        <span className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
+                          Rank
+                        </span>
+                        <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-iron-50">
+                          #{props.myRank.rank}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
+                      No TDH accrued
+                    </div>
+                  )}
+                </div>
+              </TransferSingle>
+            </div>
+          )}
+          {props.nftBalance > 0 && (
+            <h3 className="tw-mb-0 tw-text-lg tw-font-bold tw-leading-6 tw-text-white">
+              You Own {props.nftBalance} edition
+              {props.nftBalance > 1 && "s"}
+            </h3>
+          )}
+          <section className="tw-pt-4">
+            <div className="tw-space-y-1">
+              <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                First acquired{" "}
+                {printMintDate(new Date(firstAcquired!.transaction_date))}
+              </p>
+              {airdropped.length > 0 && (
+                <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {getTokenCount(airdropped)} card
+                  {getTokenCount(airdropped) > 1 && "s"} airdropped
+                </p>
+              )}
+              {bought.length > 0 && (
+                <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {getTokenCount(bought)} card
+                  {getTokenCount(bought) > 1 && "s"} bought for {boughtSum} ETH
+                </p>
+              )}
+              {transferredIn.length > 0 && (
+                <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {getTokenCount(transferredIn)} card
+                  {getTokenCount(transferredIn) > 1 && "s"} transferred in
+                </p>
+              )}
+              {sold.length > 0 && (
+                <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {getTokenCount(sold)} card
+                  {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
+                </p>
+              )}
+              {transferredOut.length > 0 && (
+                <p className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {getTokenCount(transferredOut)} card
+                  {getTokenCount(transferredOut) > 1 && "s"} transferred out
+                </p>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+    </div>
+  );
 }
 
 export function MemePageYourCardsSubMenu(props: {
   show: boolean;
   transactions: Transaction[];
 }) {
-  if (props.show) {
-    return (
-      <>
-        {props.transactions.length > 0 && (
-          <>
-            <Row className="pt-4">
-              <Col>
-                <h3>Your Transaction History</h3>
-              </Col>
-            </Row>
-            <Row className={`pt-4 ${styles["transactionsScrollContainer"]}`}>
-              <Col>
-                <Table bordered={false} className={styles["transactionsTable"]}>
-                  <tbody>
-                    {props.transactions.map((tr) => (
-                      <LatestActivityRow
-                        tr={tr}
-                        key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                      />
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </>
-        )}
-      </>
-    );
-  } else {
+  if (!props.show) {
     return <></>;
   }
+
+  return (
+    <>
+      {props.transactions.length > 0 && (
+        <section>
+          <div className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden">
+            <table className="tw-min-w-full tw-border-separate tw-border-spacing-0">
+              <tbody>
+                {props.transactions.map((tr) => (
+                  <LatestActivityRow
+                    tr={tr}
+                    variant="tailwind"
+                    rowStyle="divided"
+                    key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </>
+  );
 }

@@ -73,7 +73,7 @@ export default function NFTMarketplaceLinks({
   readonly include6529CollectionLink?: boolean;
 }) {
   const isMobile = useIsMobileScreen();
-  const size = isMobile ? 25 : 35;
+  const size = isMobile ? 20 : 28;
   const visibleMarketplaces = MARKETPLACES.filter(
     (marketplace) =>
       marketplace.enabled &&
@@ -107,7 +107,7 @@ export default function NFTMarketplaceLinks({
       }));
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-2">
+    <div className="tw-flex tw-items-center tw-gap-1.5">
       {marketplaces.map((marketplace) => (
         <Link
           key={marketplace.key}
@@ -119,7 +119,7 @@ export default function NFTMarketplaceLinks({
         >
           {marketplace.imageSrc.endsWith(".svg") ? (
             <img
-              className="tw-rounded-md"
+              className="tw-rounded-full"
               src={marketplace.imageSrc}
               alt={marketplace.alt}
               width={size}
@@ -128,7 +128,7 @@ export default function NFTMarketplaceLinks({
           ) : (
             <Image
               unoptimized
-              className="tw-rounded-md"
+              className="tw-rounded-full"
               src={marketplace.imageSrc}
               alt={marketplace.alt}
               width={size}

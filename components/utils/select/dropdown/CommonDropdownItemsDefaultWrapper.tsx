@@ -54,9 +54,9 @@ export default function CommonDropdownItemsDefaultWrapper({
 
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const dropdownEl = dropdownRef.current;
+    const width = buttonRect.width;
+    dropdownEl.style.width = `${width}px`;
 
-    // Get width from the list element if possible, otherwise the wrapper
-    const width = listRef.current?.offsetWidth ?? dropdownEl.offsetWidth;
     const height = listRef.current?.offsetHeight ?? dropdownEl.offsetHeight;
 
     const scrollX = window.scrollX;
@@ -156,7 +156,7 @@ export default function CommonDropdownItemsDefaultWrapper({
             ref={listRef}
             role="menu"
             tabIndex={-1}
-            className="tw-w-56 tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
+            className="tw-w-full tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}

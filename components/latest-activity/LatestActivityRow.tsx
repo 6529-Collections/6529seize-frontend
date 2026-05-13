@@ -135,10 +135,12 @@ interface Props {
   tr: Transaction;
   hideNextgenTokenId?: boolean | undefined;
   variant?: "default" | "tailwind" | undefined;
+  rowStyle?: "striped" | "divided" | undefined;
 }
 
 export default function LatestActivityRow(props: Readonly<Props>) {
   const isTailwind = props.variant === "tailwind";
+  const isStripedRow = isTailwind && props.rowStyle === "striped";
   const nftImageClassName = isTailwind
     ? "tw-mx-1 tw-inline-block tw-rounded-sm"
     : styles["nftImage"];
@@ -486,19 +488,22 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     return <></>;
   }
 
+  const tailwindRowClassName = isStripedRow
+    ? "odd:tw-bg-iron-950/40 even:tw-bg-iron-900/30"
+    : "";
+  const tailwindCellBorderClassName = "tw-border-b tw-border-iron-800";
+
   return (
     <tr
       key={`${props.tr.from_address}-${props.tr.to_address}-${props.tr.transaction}-${props.tr.token_id}-latestactivity-row`}
       className={
-        isTailwind
-          ? "odd:tw-bg-black even:tw-bg-iron-950/70"
-          : styles["latestActivityRow"]
+        isTailwind ? tailwindRowClassName : styles["latestActivityRow"]
       }
     >
       <td
         className={
           isTailwind
-            ? "tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+            ? `tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`
             : "align-middle text-center"
         }
       >
@@ -507,7 +512,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <td
         className={
           isTailwind
-            ? "tw-w-14 tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-text-center tw-align-middle"
+            ? `tw-w-14 tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-text-center tw-align-middle`
             : "align-middle text-center"
         }
       >
@@ -516,7 +521,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
       <td
         className={
           isTailwind
-            ? "tw-flex tw-items-center tw-justify-between tw-gap-2 tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
+            ? `tw-flex tw-items-center tw-justify-between tw-gap-2 tw-whitespace-nowrap tw-border-0 ${tailwindCellBorderClassName} tw-border-solid tw-px-4 tw-py-3 tw-align-middle tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400`
             : "d-flex align-items-center justify-content-between gap-2"
         }
       >

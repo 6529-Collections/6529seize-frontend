@@ -97,7 +97,7 @@ describe("MemePageActivity", () => {
     it("renders activity section when show is true and nft is provided", () => {
       render(<MemePageActivity show nft={nft} pageSize={10} />);
 
-      expect(screen.getByText("Card Volumes")).toBeInTheDocument();
+      expect(screen.getByText(/Card volumes/i)).toBeInTheDocument();
       expect(screen.getByText("Card Activity")).toBeInTheDocument();
     });
   });
@@ -232,7 +232,7 @@ describe("MemePageActivity", () => {
 
       // Component should still render basic structure
       expect(screen.getByText("Card Activity")).toBeInTheDocument();
-      expect(screen.getByText("Card Volumes")).toBeInTheDocument();
+      expect(screen.getByText(/Card volumes/i)).toBeInTheDocument();
     });
   });
 

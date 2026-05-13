@@ -21,7 +21,7 @@ const tableHeaderClassName =
   "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400";
 
 const tableCellClassName =
-  "tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100";
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100";
 
 interface Props {
   contract: string;
@@ -225,25 +225,15 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
           setShowSearchModal={setShowSearchModal}
         />
       </div>
-      <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+      <div className="tw-overflow-x-auto">
         <table className="tw-w-full tw-min-w-[1040px] tw-border-collapse">
-          <thead className="tw-bg-iron-900/60">
+          <thead>
             <tr>
               <th
-                rowSpan={2}
-                scope="col"
-                className="tw-w-20 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
-              >
-                Rank
-              </th>
-              <th
-                rowSpan={2}
-                scope="col"
-                className="tw-min-w-[18rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
-              >
-                Collector{" "}
-                {totalResults > 0 && `x${totalResults.toLocaleString()}`}
-              </th>
+                colSpan={2}
+                aria-hidden="true"
+                className="tw-border-0 tw-px-4 tw-py-3"
+              />
               <th
                 colSpan={3}
                 scope="colgroup"
@@ -260,6 +250,19 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               </th>
             </tr>
             <tr>
+              <th
+                scope="col"
+                className="tw-w-20 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
+              >
+                Rank
+              </th>
+              <th
+                scope="col"
+                className="tw-min-w-[18rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
+              >
+                Collector{" "}
+                {totalResults > 0 && `x${totalResults.toLocaleString()}`}
+              </th>
               {printSortableHeader("Balance", Sort.balance)}
               {printSortableHeader("TDH", Sort.boosted_tdh)}
               {printSortableHeader("Unweighted TDH", Sort.tdh__raw)}
@@ -277,12 +280,12 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               return (
                 <tr
                   key={lead.consolidation_key}
-                  className="odd:tw-bg-black even:tw-bg-iron-950/70"
+                  className="odd:tw-bg-iron-950/40 even:tw-bg-iron-900/30"
                 >
-                  <td className="tw-whitespace-nowrap tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+                  <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
                     {numberWithCommas(lead.rank)}
                   </td>
-                  <td className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-900 tw-px-4 tw-py-3">
+                  <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
                     <LeaderboardCollector
                       handle={lead.handle}
                       consolidationKey={lead.consolidation_key}

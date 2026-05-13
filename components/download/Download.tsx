@@ -87,7 +87,7 @@ export default function Download(props: Readonly<Props>) {
               e.stopPropagation();
               startDownload();
             }}
-            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-text-xs tw-font-medium tw-text-white/40 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-white"
+            className="tw-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-text-xs tw-font-medium tw-text-iron-500 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
             aria-label="Download file"
             type="button"
           >

@@ -1,20 +1,29 @@
 "use client";
 
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
+import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
-import { faFire, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FireIcon, UsersIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowUpRightIcon,
+  InformationCircleIcon as InformationCircleSolidIcon,
+} from "@heroicons/react/20/solid";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
+import { Tooltip } from "react-tooltip";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 
-const sectionHeadingClassName =
-  "tw-mb-2 tw-text-lg tw-font-bold tw-leading-6 tw-text-white";
+const UNIQUE_PERCENT_TOOLTIP =
+  "Unique % represents collectors diversity. Higher percentage means more different collectors.";
 
 export function MemeCollectorsStats({
   nftMeta,
@@ -29,76 +38,94 @@ export function MemeCollectorsStats({
       : "% Unique ex. 6529 museum";
 
   return (
-    <section className="tw-flex tw-flex-wrap tw-gap-x-14 tw-gap-y-10 tw-pt-10">
-      <CollectorStatGroup
-        title="Edition size"
-        value={numberWithCommas(nftMeta.edition_size)}
-        rank={nftMeta.edition_size_rank}
-        total={nftMeta.collection_size}
-      >
-        {nftMeta.burnt > 0 && (
-          <>
-            <CollectorDetailStat
-              label="burnt"
-              value={numberWithCommas(nftMeta.burnt)}
-              icon={
-                <FontAwesomeIcon
-                  icon={faFire}
-                  className="tw-h-4 tw-w-4 tw-text-[#c51d34]"
-                />
-              }
-            />
-            <CollectorDetailStat
-              label="ex. burnt"
-              value={numberWithCommas(nftMeta.edition_size_not_burnt)}
-              rank={nftMeta.edition_size_not_burnt_rank}
-              total={nftMeta.collection_size}
-            />
-          </>
-        )}
-        <CollectorDetailStat
-          label={editionSizeExMuseumLabel}
-          value={numberWithCommas(nftMeta.edition_size_cleaned)}
-          rank={nftMeta.edition_size_cleaned_rank}
+    <section className="tw-pt-10">
+      <MemeStatsSectionHeader title="Meme Collectors" icon={UsersIcon} />
+      <div className="tw-flex tw-flex-wrap tw-gap-x-14 tw-gap-y-10 tw-pt-8">
+        <CollectorStatGroup
+          title="Edition size"
+          value={numberWithCommas(nftMeta.edition_size)}
+          rank={nftMeta.edition_size_rank}
           total={nftMeta.collection_size}
-        />
-      </CollectorStatGroup>
-
-      <CollectorStatGroup
-        title="Collectors"
-        value={numberWithCommas(nftMeta.hodlers)}
-        rank={nftMeta.hodlers_rank}
-        total={nftMeta.collection_size}
-      >
-        <CollectorDetailStat
-          label="6529 museum"
-          value={numberWithCommas(nftMeta.museum_holdings)}
-          rank={nftMeta.museum_holdings_rank}
-          total={nftMeta.collection_size}
-        />
-        <CollectorDetailStat
-          label="% Unique"
-          value={formatPercent(nftMeta.percent_unique)}
-          rank={nftMeta.percent_unique_rank}
-          total={nftMeta.collection_size}
-          infoTitle="Percentage of cards held by unique collectors."
-        />
-        {nftMeta.burnt > 0 && (
+        >
+          {nftMeta.burnt > 0 && (
+            <>
+              <CollectorDetailStat
+                label="burnt"
+                value={numberWithCommas(nftMeta.burnt)}
+                icon={<FireIcon className="tw-h-4 tw-w-4 tw-text-red" />}
+              />
+              <CollectorDetailStat
+                label="ex. burnt"
+                value={numberWithCommas(nftMeta.edition_size_not_burnt)}
+                rank={nftMeta.edition_size_not_burnt_rank}
+                total={nftMeta.collection_size}
+              />
+            </>
+          )}
           <CollectorDetailStat
-            label="% Unique ex. burnt"
-            value={formatPercent(nftMeta.percent_unique_not_burnt)}
-            rank={nftMeta.percent_unique_not_burnt_rank}
+            label={editionSizeExMuseumLabel}
+            value={numberWithCommas(nftMeta.edition_size_cleaned)}
+            rank={nftMeta.edition_size_cleaned_rank}
             total={nftMeta.collection_size}
           />
-        )}
-        <CollectorDetailStat
-          label={percentUniqueExMuseumLabel}
-          value={formatPercent(nftMeta.percent_unique_cleaned)}
-          rank={nftMeta.percent_unique_cleaned_rank}
+        </CollectorStatGroup>
+
+        <CollectorStatGroup
+          title="Collectors"
+          value={numberWithCommas(nftMeta.hodlers)}
+          rank={nftMeta.hodlers_rank}
           total={nftMeta.collection_size}
-        />
-      </CollectorStatGroup>
+        >
+          <CollectorDetailStat
+            label="6529 museum"
+            value={numberWithCommas(nftMeta.museum_holdings)}
+            rank={nftMeta.museum_holdings_rank}
+            total={nftMeta.collection_size}
+          />
+          <CollectorDetailStat
+            label="% Unique"
+            value={formatPercent(nftMeta.percent_unique)}
+            rank={nftMeta.percent_unique_rank}
+            total={nftMeta.collection_size}
+            infoTitle={UNIQUE_PERCENT_TOOLTIP}
+          />
+          {nftMeta.burnt > 0 && (
+            <CollectorDetailStat
+              label="% Unique ex. burnt"
+              value={formatPercent(nftMeta.percent_unique_not_burnt)}
+              rank={nftMeta.percent_unique_not_burnt_rank}
+              total={nftMeta.collection_size}
+            />
+          )}
+          <CollectorDetailStat
+            label={percentUniqueExMuseumLabel}
+            value={formatPercent(nftMeta.percent_unique_cleaned)}
+            rank={nftMeta.percent_unique_cleaned_rank}
+            total={nftMeta.collection_size}
+          />
+        </CollectorStatGroup>
+      </div>
     </section>
+  );
+}
+
+function MemeStatsSectionHeader({
+  title,
+  icon,
+}: {
+  readonly title: string;
+  readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
+}) {
+  const Icon = icon;
+
+  return (
+    <div className="tw-flex tw-items-center tw-gap-3">
+      <Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
+      <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+        {title}
+      </h3>
+      <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
+    </div>
   );
 }
 
@@ -118,8 +145,8 @@ function CollectorStatGroup({
   readonly children: ReactNode;
 }) {
   return (
-    <div className={`tw-min-w-[17rem] tw-flex-1 ${className}`}>
-      <h3 className="tw-mb-4 tw-text-lg tw-font-semibold tw-text-iron-100">
+    <div className={`tw-min-w-64 tw-flex-1 ${className}`}>
+      <h3 className="tw-mb-1.5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400">
         {title}
       </h3>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
@@ -150,8 +177,12 @@ function CollectorDetailStat({
   readonly icon?: ReactNode;
   readonly infoTitle?: string | undefined;
 }) {
+  const tooltipId = infoTitle
+    ? buildTooltipId("meme-collector-stat", label, infoTitle)
+    : undefined;
+
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1.5">
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
       <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
         {label}
       </span>
@@ -162,13 +193,23 @@ function CollectorDetailStat({
       {rank !== undefined && total !== undefined && (
         <CollectorRankBadge rank={rank} total={total} />
       )}
-      {infoTitle && (
-        <span title={infoTitle} aria-label={infoTitle} role="img">
-          <FontAwesomeIcon
-            icon={faInfoCircle}
-            className="tw-h-3.5 tw-w-3.5 tw-text-iron-400"
+      {tooltipId && infoTitle && (
+        <>
+          <span
+            aria-label={infoTitle}
+            className="tw-inline-flex tw-cursor-help tw-items-center"
+            data-tooltip-id={tooltipId}
+            role="img"
+          >
+            <InformationCircleSolidIcon className="tw-h-3.5 tw-w-3.5 tw-text-iron-400" />
+          </span>
+          <Tooltip
+            id={tooltipId}
+            content={infoTitle}
+            place="top"
+            style={TOOLTIP_STYLES}
           />
-        </span>
+        </>
       )}
     </div>
   );
@@ -194,6 +235,18 @@ function formatPercent(value: number) {
 
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
   const mintDate = getMintDateParts(printMintDate(nft.mint_date));
+  const primaryArtistHandle = getPrimaryArtistHandle(nft.artist_seize_handle);
+  const { profile: artistProfile } = useIdentity({
+    handleOrWallet: primaryArtistHandle,
+    initialProfile: null,
+  });
+  const artistLabel =
+    artistProfile?.handle ?? primaryArtistHandle ?? nft.artist;
+  const artistAvatarFallback = (
+    <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-400">
+      {getInitials(artistLabel)}
+    </span>
+  );
 
   return (
     <section className="tw-py-4">
@@ -203,9 +256,12 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
             Created by
           </div>
           <div className="tw-flex tw-items-center tw-gap-2.5">
-            <span className="tw-flex tw-h-7 tw-w-7 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-[10px] tw-font-semibold tw-text-iron-400">
-              {getInitials(nft.artist_seize_handle)}
-            </span>
+            <ProfileAvatar
+              pfpUrl={artistProfile?.pfp}
+              size={ProfileBadgeSize.SMALL}
+              alt={`${artistLabel} avatar`}
+              fallbackContent={artistAvatarFallback}
+            />
             <div>
               {/* <div className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
                 {nft.artist}
@@ -250,6 +306,15 @@ function getMintDateParts(value: string) {
   return { date: match[1], relative: match[2] };
 }
 
+function getPrimaryArtistHandle(value: string | undefined) {
+  const handle = value?.split(",")[0]?.trim();
+  if (handle === undefined || handle.length === 0) {
+    return null;
+  }
+
+  return handle;
+}
+
 function getInitials(value: string | undefined) {
   if (!value) {
     return "?";
@@ -268,14 +333,15 @@ export function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
   const distributionPlanLink = getDistributionPlanLink(nft);
 
   return (
-    <section className="tw-pt-3">
+    <section className="tw-pt-6">
       <Link
         href={distributionPlanLink}
         target={nft.has_distribution ? "_self" : "_blank"}
         rel={nft.has_distribution ? undefined : "noopener noreferrer"}
-        className="tw-text-white tw-underline hover:tw-text-iron-300"
+        className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white"
       >
-        Distribution Plan
+        <span>Distribution Plan</span>
+        <ArrowUpRightIcon className="-tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-500" />
       </Link>
     </section>
   );
@@ -326,13 +392,7 @@ export function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   );
 }
 
-export function MemeNftLivePanel({
-  nft,
-  nftBalance,
-}: {
-  readonly nft: NFT;
-  readonly nftBalance: number;
-}) {
+export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
   return (
     <section className="tw-pt-5">
       <h3 className="tw-mb-5 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
@@ -365,11 +425,7 @@ export function MemeNftLivePanel({
         />
         <MemeMarketplaceLinks nft={nft} />
       </div>
-      {nftBalance > 0 && (
-        <h3 className={`${sectionHeadingClassName} tw-pt-4`}>
-          You Own {nftBalance} edition{nftBalance > 1 && "s"}
-        </h3>
-      )}
+      <MemeDistributionPlanLink nft={nft} />
     </section>
   );
 }

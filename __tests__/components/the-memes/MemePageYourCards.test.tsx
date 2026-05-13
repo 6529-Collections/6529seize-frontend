@@ -23,6 +23,13 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   ),
 }));
 
+jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
+  __esModule: true,
+  default: ({ variant }: { variant?: string }) => (
+    <tr data-testid="latest-activity-row" data-variant={variant ?? ""} />
+  ),
+}));
+
 const mockNFT = {
   id: 123,
   name: "Test Meme",
@@ -146,7 +153,7 @@ describe("MemePageYourCardsRightMenu", () => {
         );
 
         expect(screen.getByText("x3")).toBeInTheDocument();
-        expect(screen.getByText("Overview")).toBeInTheDocument();
+        expect(screen.getByText("You Own 3 editions")).toBeInTheDocument();
         expect(screen.getByText("1,500")).toBeInTheDocument();
         expect(screen.getByText("#5")).toBeInTheDocument();
       });
@@ -262,7 +269,7 @@ describe("MemePageYourCardsSubMenu", () => {
           royalties: 0,
         }));
 
-        render(
+        const { container } = render(
           <MemePageYourCardsSubMenu
             show={true}
             transactions={mockTxsWithFullData}
@@ -271,6 +278,13 @@ describe("MemePageYourCardsSubMenu", () => {
         expect(
           screen.getByText("Your Transaction History")
         ).toBeInTheDocument();
+        expect(container.querySelector(".row")).not.toBeInTheDocument();
+        expect(container.querySelector(".table")).not.toBeInTheDocument();
+        expect(screen.getAllByTestId("latest-activity-row")).toHaveLength(2);
+        expect(screen.getAllByTestId("latest-activity-row")[0]).toHaveAttribute(
+          "data-variant",
+          "tailwind"
+        );
       });
     });
   });

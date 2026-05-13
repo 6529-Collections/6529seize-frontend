@@ -16,8 +16,7 @@ import type { Transaction } from "@/entities/ITransaction";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import { fetchUrl } from "@/services/6529api";
-import { faChartLine } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
 import { useEffect, useMemo, useState } from "react";
 
 function formatEthVolume(volume: number) {
@@ -120,7 +119,7 @@ export function MemePageActivity(
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
       return (
-        <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+        <div className="tw-overflow-x-auto">
           <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
             <tbody>
               {activity.map((tr) => (
@@ -128,6 +127,7 @@ export function MemePageActivity(
                   tr={tr}
                   nft={props.nft}
                   variant="tailwind"
+                  rowStyle="striped"
                   key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
                 />
               ))}
@@ -159,19 +159,16 @@ export function MemePageActivity(
     return (
       <section className="tw-space-y-8">
         <section>
-          <div className="tw-flex tw-items-center tw-gap-4">
-            <FontAwesomeIcon
-              icon={faChartLine}
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-400"
-            />
-            <h3 className="tw-mb-0 tw-whitespace-nowrap tw-text-lg tw-font-semibold tw-text-iron-100">
+          <div className="tw-flex tw-items-center tw-gap-3">
+            <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
+            <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
               Card volumes
             </h3>
-            <div className="tw-h-px tw-min-w-10 tw-flex-1 tw-bg-iron-800" />
+            <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
           </div>
           <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-start tw-gap-x-12 tw-gap-y-6">
             {volumeStats.map((stat) => (
-              <div key={stat.label} className="tw-min-w-[8rem]">
+              <div key={stat.label} className="tw-min-w-32">
                 <div className="tw-mb-1.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400">
                   {stat.label}
                 </div>
