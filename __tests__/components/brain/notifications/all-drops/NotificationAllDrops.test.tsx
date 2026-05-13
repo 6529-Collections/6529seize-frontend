@@ -81,6 +81,19 @@ describe("NotificationAllDrops", () => {
     expect(screen.getByText("+2")).toBeInTheDocument();
   });
 
+  it("renders posted text when all-drops notification has no vote", () => {
+    render(
+      <NotificationAllDrops
+        notification={baseNotification}
+        activeDrop={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+      />
+    );
+    expect(screen.getByText("posted")).toBeInTheDocument();
+    expect(screen.queryByText("reset rating to 0")).not.toBeInTheDocument();
+  });
+
   it("uses router in reply and quote handlers", () => {
     mockRouter.push.mockClear();
     render(

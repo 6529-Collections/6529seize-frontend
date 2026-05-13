@@ -13,9 +13,50 @@ jest.mock("@/services/api/common-api");
 const drop = {
   id: "d1",
   serial_no: 1,
-  created_at: "2020",
-  wave: { id: "w" },
+  created_at: 1000,
+  updated_at: null,
+  is_signed: false,
+  hide_link_preview: false,
+  title: "Drop",
+  content: "Drop content",
+  media: [],
+  attachments: [],
+  parts_count: 1,
+  author: {
+    id: "author-id",
+    handle: "author",
+    primary_address: "0xauthor",
+    pfp: null,
+    level: 1,
+    classification: "PSEUDONYM",
+    badges: {},
+  },
+  drop_type: "CHAT",
+  referenced_nfts: [],
+  mentioned_users: [],
+  mentioned_groups: [],
+  mentioned_waves: [],
+  nft_links: [],
+  reactions: [],
+  boosts: 0,
+  context_profile_context: {
+    reaction: null,
+    boosted: false,
+    bookmarked: false,
+  },
 } as any;
+
+const wave = {
+  id: "w",
+  name: "Wave",
+  pfp: null,
+  last_drop_time: 100,
+  is_private: false,
+  context_profile_context: {
+    can_chat: true,
+    pinned: false,
+  },
+};
 
 const mockFetch = commonApiFetch as jest.Mock;
 const mockFetchRetry = commonApiFetchWithRetry as jest.Mock;
@@ -32,12 +73,12 @@ beforeEach(() => {
 
 describe("wave-messages-utils additional", () => {
   it("fetchWaveMessages returns mapped drops", async () => {
-    mockFetch.mockResolvedValue({ drops: [drop], wave: { id: "w" } });
+    mockFetch.mockResolvedValue({ drops: [drop], wave });
     const res = await fetchWaveMessages("w", null);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "waves/w/drops" })
+      expect.objectContaining({ endpoint: "v2/waves/w/drops" })
     );
-    expect(res?.[0]?.wave).toEqual({ id: "w" });
+    expect(res?.[0]?.wave).toEqual(expect.objectContaining({ id: "w" }));
   });
 
   it("fetchWaveMessages rethrows abort errors", async () => {
@@ -47,7 +88,7 @@ describe("wave-messages-utils additional", () => {
   });
 
   it("fetchAroundSerialNoWaveMessages uses retry fetch", async () => {
-    mockFetchRetry.mockResolvedValue({ drops: [drop], wave: { id: "w" } });
+    mockFetchRetry.mockResolvedValue({ drops: [drop], wave });
     const res = await fetchAroundSerialNoWaveMessages("w", 5);
     expect(mockFetchRetry).toHaveBeenCalled();
     expect(res?.[0]?.serial_no).toBe(1);
@@ -62,17 +103,16 @@ describe("wave-messages-utils additional", () => {
         return batch;
       }
 
-      if (options.endpoint === "waves/w/drops") {
+      if (options.endpoint === "v2/waves/w/drops") {
         return {
           drops: [
             {
+              ...drop,
               serial_no: 5,
               id: "full-5",
-              created_at: "2020-01-01",
-              wave: { id: "w" },
             },
           ],
-          wave: { id: "w" },
+          wave,
         };
       }
 
@@ -101,8 +141,8 @@ describe("wave-messages-utils additional", () => {
         return [];
       }
 
-      if (options.endpoint === "waves/w/drops") {
-        return { drops: [], wave: { id: "w" } };
+      if (options.endpoint === "v2/waves/w/drops") {
+        return { drops: [], wave };
       }
 
       throw new Error(`Unexpected endpoint: ${options.endpoint}`);

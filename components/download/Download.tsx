@@ -1,7 +1,7 @@
 "use client";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useDownloader from "react-use-downloader";
+import useDownloader from "@/hooks/useDownloader";
 import styles from "./Download.module.scss";
 import {
   faDownload,

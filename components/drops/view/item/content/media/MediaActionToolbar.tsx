@@ -54,23 +54,34 @@ export function InlineMediaActions({
   isDownloading,
   fullscreenTargetAvailable,
   variant,
+  position = "top-right",
 }: {
-  readonly onDownload: () => void;
+  readonly onDownload?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
   readonly onFullscreen?: (() => void) | undefined;
   readonly openLabel?: string | undefined;
   readonly isDownloading: boolean;
   readonly fullscreenTargetAvailable?: boolean | undefined;
-  readonly variant: "image" | "video";
+  readonly variant: "image" | "video" | "html";
+  readonly position?: "top-right" | "bottom-right" | undefined;
 }) {
   const canFullscreen =
-    variant === "image" &&
+    (variant === "image" || variant === "html") &&
     Boolean(onFullscreen) &&
     Boolean(fullscreenTargetAvailable) &&
     fullScreenSupported();
+  const positionClassName =
+    position === "bottom-right"
+      ? "tw-bottom-[5px] tw-right-[5px]"
+      : "tw-right-[5px] tw-top-[5px]";
 
   return (
-    <div className="tw-absolute tw-right-[5px] tw-top-[5px] tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur">
+    <div
+      className={clsx(
+        "tw-absolute tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur",
+        positionClassName
+      )}
+    >
       {canFullscreen && (
         <ToolbarButton label="Full screen" onClick={stopAndRun(onFullscreen!)}>
           <ArrowsPointingOutIcon className="tw-size-4" aria-hidden="true" />
@@ -81,13 +92,15 @@ export function InlineMediaActions({
           <ArrowTopRightOnSquareIcon className="tw-size-4" aria-hidden="true" />
         </ToolbarButton>
       )}
-      <ToolbarButton
-        label={isDownloading ? "Downloading media" : "Download media"}
-        onClick={stopAndRun(onDownload)}
-        disabled={isDownloading}
-      >
-        <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
-      </ToolbarButton>
+      {onDownload && (
+        <ToolbarButton
+          label={isDownloading ? "Downloading media" : "Download media"}
+          onClick={stopAndRun(onDownload)}
+          disabled={isDownloading}
+        >
+          <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
+        </ToolbarButton>
+      )}
     </div>
   );
 }
@@ -101,11 +114,11 @@ export function ExpandedMediaToolbar({
   isDownloading,
   fullscreenTargetAvailable,
 }: {
-  readonly onOpen: () => void;
+  readonly onOpen?: (() => void) | undefined;
   readonly onDownload: () => void;
   readonly onFullscreen?: (() => void) | undefined;
   readonly onClose: () => void;
-  readonly openLabel: string;
+  readonly openLabel?: string | undefined;
   readonly isDownloading: boolean;
   readonly fullscreenTargetAvailable?: boolean | undefined;
 }) {
@@ -125,9 +138,14 @@ export function ExpandedMediaToolbar({
             <ArrowsPointingOutIcon className="tw-size-5" aria-hidden="true" />
           </ToolbarButton>
         )}
-        <ToolbarButton label={openLabel} onClick={stopAndRun(onOpen)}>
-          <ArrowTopRightOnSquareIcon className="tw-size-5" aria-hidden="true" />
-        </ToolbarButton>
+        {onOpen && openLabel && (
+          <ToolbarButton label={openLabel} onClick={stopAndRun(onOpen)}>
+            <ArrowTopRightOnSquareIcon
+              className="tw-size-5"
+              aria-hidden="true"
+            />
+          </ToolbarButton>
+        )}
         <ToolbarButton
           label={isDownloading ? "Downloading media" : "Download media"}
           onClick={stopAndRun(onDownload)}
