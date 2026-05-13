@@ -120,6 +120,7 @@ const renderSeizeQuote = (
           dropId={dropId}
           partId={1}
           maybeDrop={null}
+          waveId={waveId}
           onQuoteClick={onQuoteClick}
           embedPath={options?.embedPath}
           quotePath={options?.quotePath}

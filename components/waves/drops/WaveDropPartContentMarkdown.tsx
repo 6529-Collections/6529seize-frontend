@@ -182,6 +182,7 @@ const WaveDropPartContentMarkdown: React.FC<
                 ? { ...part.quoted_drop.drop, wave: wave }
                 : null
             }
+            waveId={wave.id}
             onQuoteClick={onQuoteClick}
             embedPath={currentDropEmbedPath}
             quotePath={currentQuotePath}

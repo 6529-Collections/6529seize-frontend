@@ -1,8 +1,14 @@
 "use client";
 
 import React from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   DROP_DETAIL_STALE_TIME_MS,
   fetchDropByIdBatched,
@@ -14,6 +20,7 @@ interface WaveDropQuoteWithDropIdProps {
   readonly dropId: string;
   readonly partId: number;
   readonly maybeDrop: ApiDrop | null;
+  readonly waveId?: string | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
@@ -63,6 +70,7 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   dropId,
   partId,
   maybeDrop,
+  waveId,
   onQuoteClick,
   embedPath,
   quotePath,
@@ -71,16 +79,29 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
   onLinkCardActionsActiveChange,
 }) => {
   const normalizedDropId = dropId.trim();
+  const queryClient = useQueryClient();
+  const myStream = useMyStreamOptional();
+  const cachedDrop = queryClient.getQueryData<ApiDrop>(
+    getDropQueryKey(normalizedDropId)
+  );
+  const targetWaveId = waveId ?? myStream?.activeWave.id ?? null;
+  const waveMessagesDrop = targetWaveId
+    ? myStream?.waveMessagesStore
+        .getData(targetWaveId)
+        ?.drops.find(
+          (drop): drop is ExtendedDrop =>
+            drop.type === DropSize.FULL && drop.id === normalizedDropId
+        )
+    : null;
+  const initialDrop = maybeDrop ?? cachedDrop ?? waveMessagesDrop ?? null;
 
   const { data: drop, error } = useQuery<ApiDrop | undefined>({
     queryKey: getDropQueryKey(normalizedDropId),
     queryFn: () => fetchDropByIdBatched(normalizedDropId),
     placeholderData: keepPreviousData,
-    enabled: normalizedDropId.length > 0,
+    enabled: normalizedDropId.length > 0 && initialDrop === null,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
-    ...(maybeDrop === null
-      ? {}
-      : { initialData: maybeDrop, initialDataUpdatedAt: 0 }),
+    ...(initialDrop === null ? {} : { initialData: initialDrop }),
   });
 
   const isNotFound = isDropNotFoundError(error, normalizedDropId);
