@@ -108,10 +108,13 @@ export const useWaveDropsNotificationRead = ({
       const runReadSyncAttempt = async (
         currentState: ReadSyncState
       ): Promise<ReadSyncStatus> => {
+        const {
+          removeWaveDeliveredNotifications: removeForAttempt,
+          markWaveNotificationsRead: markReadForAttempt,
+        } = latestReadActionsRef.current;
+
         try {
-          const { removeWaveDeliveredNotifications: latestRemove } =
-            latestReadActionsRef.current;
-          await Promise.resolve(latestRemove(currentState.waveId));
+          await Promise.resolve(removeForAttempt(currentState.waveId));
         } catch (error) {
           console.error(
             "Failed to remove wave delivered notifications:",
@@ -120,9 +123,7 @@ export const useWaveDropsNotificationRead = ({
         }
 
         try {
-          const { markWaveNotificationsRead: latestMarkRead } =
-            latestReadActionsRef.current;
-          const readResult = await latestMarkRead(currentState.waveId, {
+          const readResult = await markReadForAttempt(currentState.waveId, {
             shouldSend: () => canSendReadForWave(currentState.waveId),
           });
           return readResult === "sent" ? "success" : "skipped";
