@@ -8,8 +8,9 @@ import type { NFT } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
-import { fetchUrl, postData } from "@/services/6529api";
+import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
+import { getStagingAuth } from "@/services/auth/auth.utils";
 import {
   faCheckCircle,
   faTimesCircle,
@@ -29,6 +30,43 @@ import styles from "./Rememes.module.scss";
 interface CheckList {
   status: boolean;
   note: string;
+}
+
+function getSubmissionErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return `Error: ${error.message}`;
+  }
+  return "Error: Failed to add Rememe";
+}
+
+async function postRememeSubmission(body: {
+  address: string | undefined;
+  signature: string;
+  rememe: {
+    contract: string | undefined;
+    token_ids: string[] | undefined;
+    references: number[] | undefined;
+  };
+}) {
+  const headers = new Headers({ "Content-Type": "application/json" });
+  const apiAuth = getStagingAuth();
+  if (apiAuth) {
+    headers.set("x-6529-auth", apiAuth);
+  }
+
+  const response = await fetch(`${publicEnv.API_ENDPOINT}/api/rememes/add`, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers,
+  });
+  const json = await response.json().catch(() => ({
+    error: `HTTP error! status: ${response.status}`,
+  }));
+
+  return {
+    status: response.status,
+    response: json as ProcessedRememe,
+  };
 }
 
 export default function RememeAddPage() {
@@ -140,43 +178,56 @@ export default function RememeAddPage() {
   }, [connectedProfile]);
 
   useEffect(() => {
-    if (signMessage.isSuccess && signMessage.data) {
+    if (signMessage.isSuccess && signMessage.data && addRememe) {
       setSubmitting(true);
-      postData(`${publicEnv.API_ENDPOINT}/api/rememes/add`, {
+      postRememeSubmission({
         address: address,
         signature: signMessage.data,
         rememe: buildRememeObject(),
-      }).then((response) => {
-        const success = response.status === 201;
-        const processedRememe: ProcessedRememe = response.response;
-        const contract = processedRememe.contract?.address;
-        const tokens = processedRememe.nfts?.map((n) => {
-          return {
-            id: n.tokenId,
-            name: n.name ? n.name : `#${n.tokenId}`,
-          };
+      })
+        .then((response) => {
+          const success = response.status === 201;
+          const processedRememe: ProcessedRememe = response.response;
+          const contract = processedRememe.contract?.address;
+          const tokens = processedRememe.nfts?.map((n) => {
+            return {
+              id: n.tokenId,
+              name: n.name ? n.name : `#${n.tokenId}`,
+            };
+          });
+
+          const nftError: string[] = processedRememe.nfts
+            ? processedRememe.nfts
+                .filter((n) => n.raw.error)
+                .map((n) => `#${n.tokenId} - ${n.raw.error}`)
+            : [];
+
+          const message = processedRememe.error
+            ? [`Error: ${processedRememe.error}`]
+            : nftError;
+          const errors =
+            !success && message.length === 0
+              ? ["Error: Failed to add Rememe"]
+              : message;
+
+          setSubmissionResult({
+            success,
+            errors,
+            contract,
+            tokens,
+          });
+        })
+        .catch((error) => {
+          setSubmissionResult({
+            success: false,
+            errors: [getSubmissionErrorMessage(error)],
+          });
+        })
+        .finally(() => {
+          setSubmitting(false);
         });
-
-        const nftError: string[] = processedRememe.nfts
-          ? processedRememe.nfts
-              .filter((n) => n.raw.error)
-              .map((n) => `#${n.tokenId} - ${n.raw.error}`)
-          : [];
-
-        const message = processedRememe.error
-          ? [`Error: ${processedRememe.error}`]
-          : nftError;
-
-        setSubmitting(false);
-        setSubmissionResult({
-          success,
-          errors: message,
-          contract,
-          tokens,
-        });
-      });
     }
-  }, [signMessage.data]);
+  }, [signMessage.data, addRememe]);
 
   function buildRememeObject() {
     return {
@@ -316,16 +367,16 @@ export default function RememeAddPage() {
             {(submitting || signMessage.isPending) && (
               <Row className="pt-3">
                 <Col xs={12}>
-                  {signMessage.isPending && "Signing Message"}
-                  {submitting && "Adding Rememe"}
-                  <div className="d-inline">
+                  <span className="d-inline-flex align-items-center gap-2">
+                    {signMessage.isPending && "Signing Message"}
+                    {submitting && "Adding Rememe"}
                     <div
                       className={`spinner-border ${styles["loader"]}`}
                       role="status"
                     >
                       <span className="sr-only"></span>
                     </div>
-                  </div>
+                  </span>
                 </Col>
               </Row>
             )}
