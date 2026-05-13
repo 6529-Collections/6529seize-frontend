@@ -380,21 +380,21 @@ export default function RememeAddComponent(props: Readonly<Props>) {
             {!verified ? (
               <Button
                 onClick={() => validate()}
-                className="seize-btn"
+                className={`seize-btn ${styles["validateButton"]}`}
                 disabled={
                   !contract || !tokenIdDisplay || references.length === 0
                 }
               >
                 Validate
                 {verifying && (
-                  <div className="d-inline">
-                    <div
+                  <span className={styles["loaderSlot"]}>
+                    <span
                       className={`spinner-border ${styles["loader"]}`}
                       role="status"
                     >
                       <span className="sr-only"></span>
-                    </div>
-                  </div>
+                    </span>
+                  </span>
                 )}
               </Button>
             ) : (

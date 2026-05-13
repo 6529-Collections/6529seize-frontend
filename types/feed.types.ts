@@ -133,7 +133,7 @@ export type INotificationAllDrops = NotificationBase &
   WithDrops & {
     readonly cause: ApiNotificationCause.AllDrops;
     readonly additional_context: {
-      readonly vote: number;
+      readonly vote?: number | undefined;
     };
   };
 
