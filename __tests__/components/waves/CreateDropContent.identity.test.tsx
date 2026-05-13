@@ -114,6 +114,21 @@ jest.mock("@/components/waves/CreateDropIdentityField", () => (props: any) => (
 ));
 
 jest.mock(
+  "@/components/waves/CreateDropIdentityPickerContent",
+  () => (props: any) => (
+    <div data-testid="identity-picker-content">
+      <div>{props.errorMessage}</div>
+      <button type="button" onClick={() => props.onSelect(mockOtherSelection)}>
+        select other
+      </button>
+      <button type="button" onClick={() => props.onSelect(mockViewerSelection)}>
+        select self
+      </button>
+    </div>
+  )
+);
+
+jest.mock(
   "@/components/waves/CreateDropIdentityPickerModal",
   () => (props: any) =>
     props.isOpen ? (
@@ -269,11 +284,13 @@ describe("CreateDropContent identity picker flow", () => {
     wave = createWave(),
     drop = null,
     submitDrop = jest.fn(),
+    identityPickerPlacement = "modal",
   }: {
     readonly isDropMode?: boolean;
     readonly wave?: any;
     readonly drop?: any;
     readonly submitDrop?: jest.Mock;
+    readonly identityPickerPlacement?: "modal" | "inline";
   } = {}) => {
     const onDropModeChange = jest.fn();
     const utils = render(
@@ -296,6 +313,7 @@ describe("CreateDropContent identity picker flow", () => {
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
+          identityPickerPlacement={identityPickerPlacement}
         />
       </ReactQueryWrapperContext.Provider>
     );
@@ -415,6 +433,67 @@ describe("CreateDropContent identity picker flow", () => {
     await userEvent.click(screen.getByText("select self"));
 
     expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
+    expect(
+      screen.getByText("Select someone else to nominate.")
+    ).toBeInTheDocument();
+  });
+
+  it("renders the inline picker instead of the modal when placement is inline", () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    expect(screen.getByTestId("identity-picker-inline")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("identity-picker-modal")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+  });
+
+  it("exits Drop mode when the inline picker closes without a selection", async () => {
+    const { onDropModeChange } = renderSubject({
+      identityPickerPlacement: "inline",
+    });
+
+    await userEvent.click(screen.getByLabelText("Close identity picker"));
+
+    expect(onDropModeChange).toHaveBeenCalledWith(false);
+  });
+
+  it("hides the inline picker and shows the composer after selecting an identity", async () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    await userEvent.click(screen.getByText("select other"));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("identity-picker-inline")
+      ).not.toBeInTheDocument();
+    });
+    expect(screen.getByTestId("identity-field")).toHaveTextContent("other");
+    expect(screen.getByTestId("input")).toBeInTheDocument();
+  });
+
+  it("reopens the inline picker when changing identity", async () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    await userEvent.click(screen.getByText("select other"));
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("identity-picker-inline")
+      ).not.toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByText("change identity"));
+
+    expect(screen.getByTestId("identity-picker-inline")).toBeInTheDocument();
+    expect(screen.queryByTestId("input")).not.toBeInTheDocument();
+  });
+
+  it("keeps the inline picker open and shows an error when selecting self in OnlyOthers mode", async () => {
+    renderSubject({ identityPickerPlacement: "inline" });
+
+    await userEvent.click(screen.getByText("select self"));
+
+    expect(screen.getByTestId("identity-picker-inline")).toBeInTheDocument();
     expect(
       screen.getByText("Select someone else to nominate.")
     ).toBeInTheDocument();

@@ -36,6 +36,7 @@ describe("WaveDropCreate", () => {
     expect(onSuccess).toHaveBeenCalled();
     expect(creatorProps.curationComposerVariant).toBe("default");
     expect(creatorProps.onExitFixedDropMode).toBe(onCancel);
+    expect(creatorProps.identityPickerPlacement).toBe("modal");
   });
 
   it("renders lightweight curation leaderboard variant", () => {
@@ -60,5 +61,18 @@ describe("WaveDropCreate", () => {
     expect(creatorProps.fixedDropMode).toBe("PARTICIPATION");
     expect(creatorProps.curationComposerVariant).toBe("default");
     expect(creatorProps.onExitFixedDropMode).toBeUndefined();
+    expect(creatorProps.identityPickerPlacement).toBe("modal");
+  });
+
+  it("passes explicit identity picker placement to the creator", () => {
+    render(
+      <WaveDropCreate
+        wave={wave}
+        onSuccess={jest.fn()}
+        identityPickerPlacement="inline"
+      />
+    );
+
+    expect(creatorProps.identityPickerPlacement).toBe("inline");
   });
 });

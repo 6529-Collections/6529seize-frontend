@@ -32,6 +32,17 @@ function FakeChildPortal() {
   );
 }
 
+function NestedAriaModalPortal() {
+  return createPortal(
+    <dialog open aria-modal="true" data-testid="fake-child-aria-modal">
+      <button type="button" data-testid="fake-child-aria-modal-button">
+        fake child modal
+      </button>
+    </dialog>,
+    document.body
+  );
+}
+
 type EscapeBlockStrategy = "stopPropagation" | "preventDefault";
 
 function EscapeBlockingChildPortal({
@@ -105,7 +116,11 @@ describe("WaveChatSubmitDropModal", () => {
     expect(waveDropCreateProps.initialCurationUrl).toBe(
       "https://example.com/art"
     );
-    expect(waveDropCreateProps.onExitFixedDropMode).toBeUndefined();
+    expect(waveDropCreateProps.onCancel).toEqual(expect.any(Function));
+    expect(waveDropCreateProps.onExitFixedDropMode).toEqual(
+      expect.any(Function)
+    );
+    expect(waveDropCreateProps.identityPickerPlacement).toBe("inline");
   });
 
   it("closes from backdrop, close button, and escape key", async () => {
@@ -213,6 +228,55 @@ describe("WaveChatSubmitDropModal", () => {
     fireEvent.keyDown(childPortalButton, { key: "Tab" });
     expect(closeButton).toHaveFocus();
     expect(panel.contains(document.activeElement)).toBe(true);
+  });
+
+  it("does not close when Escape comes from a child aria-modal dialog", async () => {
+    const onClose = jest.fn();
+
+    render(
+      <>
+        <WaveChatSubmitDropModal
+          isOpen={true}
+          wave={wave}
+          title="Submit drop"
+          onClose={onClose}
+        />
+        <NestedAriaModalPortal />
+      </>
+    );
+
+    await screen.findByTestId("chat-submit-drop-modal-panel");
+    const childModalButton = screen.getByTestId("fake-child-aria-modal-button");
+
+    childModalButton.focus();
+    expect(childModalButton).toHaveFocus();
+
+    fireEvent.keyDown(childModalButton, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("does not steal Tab focus from a child aria-modal dialog", async () => {
+    render(
+      <>
+        <WaveChatSubmitDropModal
+          isOpen={true}
+          wave={wave}
+          title="Submit drop"
+          onClose={jest.fn()}
+        />
+        <NestedAriaModalPortal />
+      </>
+    );
+
+    const closeButton = await screen.findByLabelText("Close modal");
+    const childModalButton = screen.getByTestId("fake-child-aria-modal-button");
+
+    childModalButton.focus();
+    expect(childModalButton).toHaveFocus();
+
+    fireEvent.keyDown(childModalButton, { key: "Tab" });
+    expect(closeButton).not.toHaveFocus();
+    expect(childModalButton).toHaveFocus();
   });
 
   it.each(["stopPropagation", "preventDefault"] as const)(

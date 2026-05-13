@@ -17,7 +17,10 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type { CurationComposerVariant } from "./dropComposer.types";
+import type {
+  CurationComposerVariant,
+  IdentityPickerPlacement,
+} from "./dropComposer.types";
 import { DropMode } from "./dropComposer.types";
 import type { DropPrivileges } from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -54,6 +57,7 @@ interface CreateDropProps {
     | undefined;
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
+  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
 }
 
 export interface DropMutationBody {
@@ -83,6 +87,7 @@ export default function CreateDrop({
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
   termsSignatureFlowEnabled = true,
+  identityPickerPlacement = "modal",
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -415,6 +420,7 @@ export default function CreateDrop({
       canSubmitCurationUrl: canUseCurationUrlSubmit,
       curationUrlSubmitRestrictionMessage: curationUrlRestrictionMessage,
       termsSignatureFlowEnabled,
+      identityPickerPlacement,
     };
   }, [
     activeDrop,
@@ -436,6 +442,7 @@ export default function CreateDrop({
     canUseCurationUrlSubmit,
     curationUrlRestrictionMessage,
     termsSignatureFlowEnabled,
+    identityPickerPlacement,
   ]);
 
   let dropComposerContent: ReactNode;

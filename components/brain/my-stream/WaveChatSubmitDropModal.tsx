@@ -16,6 +16,18 @@ interface WaveChatSubmitDropModalProps {
   readonly initialCurationUrl?: string | null | undefined;
 }
 
+function isEventFromNestedAriaModal(
+  event: KeyboardEvent,
+  parentDialog: HTMLDialogElement | null
+) {
+  if (!parentDialog || !(event.target instanceof Element)) {
+    return false;
+  }
+
+  const nearestAriaModal = event.target.closest('[aria-modal="true"]');
+  return nearestAriaModal !== null && nearestAriaModal !== parentDialog;
+}
+
 export function WaveChatSubmitDropModal({
   isOpen,
   wave,
@@ -25,6 +37,7 @@ export function WaveChatSubmitDropModal({
 }: WaveChatSubmitDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
   const titleId = useId();
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
@@ -68,6 +81,10 @@ export function WaveChatSubmitDropModal({
         return;
       }
 
+      if (isEventFromNestedAriaModal(event, dialogRef.current)) {
+        return;
+      }
+
       if (event.key === "Escape") {
         event.preventDefault();
         onCloseRef.current();
@@ -98,6 +115,7 @@ export function WaveChatSubmitDropModal({
 
   return createPortal(
     <dialog
+      ref={dialogRef}
       open
       aria-modal="true"
       aria-labelledby={titleId}
@@ -146,8 +164,11 @@ export function WaveChatSubmitDropModal({
               <div className="tw-px-6 tw-pb-6 tw-pt-5">
                 <WaveDropCreate
                   wave={wave}
+                  onCancel={onClose}
                   onSuccess={onClose}
+                  onExitFixedDropMode={onClose}
                   initialCurationUrl={initialCurationUrl}
+                  identityPickerPlacement="inline"
                   isModalContent
                 />
               </div>

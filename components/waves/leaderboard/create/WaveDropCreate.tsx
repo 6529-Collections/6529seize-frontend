@@ -4,6 +4,7 @@ import PrivilegedDropCreator from "@/components/waves/PrivilegedDropCreator";
 import {
   type CurationComposerVariant,
   DropMode,
+  type IdentityPickerPlacement,
 } from "@/components/waves/dropComposer.types";
 
 interface WaveDropCreateProps {
@@ -16,6 +17,7 @@ interface WaveDropCreateProps {
   readonly isModalContent?: boolean | undefined;
   readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
+  readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
 }
 
 export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
@@ -28,6 +30,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   isModalContent = false,
   onExitFixedDropMode = onCancel,
   termsSignatureFlowEnabled = true,
+  identityPickerPlacement = "modal",
 }) => {
   const curationComposerVariant: CurationComposerVariant = isCurationLeaderboard
     ? "leaderboard"
@@ -87,6 +90,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
         curationComposerVariant={curationComposerVariant}
         initialCurationUrl={initialCurationUrl}
         termsSignatureFlowEnabled={termsSignatureFlowEnabled}
+        identityPickerPlacement={identityPickerPlacement}
       />
     </div>
   );
