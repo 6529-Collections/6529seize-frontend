@@ -101,6 +101,22 @@ describe("DropListItemContentMediaImage", () => {
     expect(img).toHaveClass("tw-h-auto", "tw-w-full", "tw-max-h-64");
     expect(img).not.toHaveAttribute("data-nimg", "fill");
   });
+
+  it("retries intrinsic-height images instead of swapping to the same fallback source", () => {
+    jest.useFakeTimers();
+    const setTimeoutSpy = jest.spyOn(globalThis, "setTimeout");
+
+    render(
+      <DropListItemContentMediaImage src="img" intrinsicHeight maxRetries={1} />
+    );
+
+    fireEvent.error(screen.getByAltText("Drop media"));
+
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);
+
+    setTimeoutSpy.mockRestore();
+    jest.useRealTimers();
+  });
 });
 
 describe("DropListItemContentMediaImage retry", () => {

@@ -58,7 +58,7 @@ export default function Rememes() {
   );
 
   const queryMemeId = searchParams?.get("meme_id");
-  const parsedQueryMemeId = queryMemeId ? parseInt(queryMemeId) : 0;
+  const parsedQueryMemeId = queryMemeId ? Number.parseInt(queryMemeId) : 0;
   const [selectedMeme, setSelectedMeme] = useState<number>(
     Number.isFinite(parsedQueryMemeId) ? parsedQueryMemeId : 0
   );

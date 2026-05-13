@@ -231,10 +231,8 @@ describe("fetchNotificationsV2", () => {
     const response = await fetchNotificationsV2({ limit: "30" });
     const [notification] = response.notifications;
 
-    expect(notification).toMatchObject({
-      cause: ApiNotificationCause.AllDrops,
-      additional_context: {},
-    });
+    expect(notification?.cause).toBe(ApiNotificationCause.AllDrops);
+    expect(notification?.additional_context).toEqual({});
   });
 
   it("drops unknown notification causes safely", async () => {

@@ -137,7 +137,7 @@ describe("RememeAddPage", () => {
     });
     mockFetchUrl.mockResolvedValue({ data: [] });
     mockCommonApiFetch.mockResolvedValue({ boosted_tdh: 10000 });
-    global.fetch = jest.fn().mockResolvedValue({
+    globalThis.fetch = jest.fn().mockResolvedValue({
       status: 201,
       json: jest.fn().mockResolvedValue({
         contract: { address: "0xcontract" },
@@ -299,7 +299,7 @@ describe("RememeAddPage", () => {
       data: "signature",
     });
 
-    (global.fetch as jest.Mock).mockImplementation(
+    (globalThis.fetch as jest.Mock).mockImplementation(
       () =>
         new Promise((resolve) => {
           setTimeout(
@@ -329,7 +329,7 @@ describe("RememeAddPage", () => {
       data: "signature",
     });
 
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 201,
       json: jest.fn().mockResolvedValue({
         contract: { address: "0xcontract" },
@@ -357,7 +357,7 @@ describe("RememeAddPage", () => {
       data: "signature",
     });
 
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 400,
       json: jest.fn().mockResolvedValue({
         error: "Invalid rememe",
@@ -383,7 +383,7 @@ describe("RememeAddPage", () => {
       data: "signature",
     });
 
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 400,
       json: jest.fn().mockResolvedValue({
         valid: false,
@@ -423,7 +423,7 @@ describe("RememeAddPage", () => {
     };
     mockUseSignMessage.mockReturnValue(signMessageMock);
 
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       status: 201,
       json: jest.fn().mockResolvedValue({
         contract: { address: "0xcontract" },
@@ -438,7 +438,7 @@ describe("RememeAddPage", () => {
 
     // Wait for API call to complete and submission to succeed
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalled();
+      expect(globalThis.fetch).toHaveBeenCalled();
     });
 
     await waitFor(
