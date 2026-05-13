@@ -148,9 +148,7 @@ function DropListItemContentMediaImage({
         ref={ref}
         className={`tw-relative tw-flex tw-w-full tw-items-center ${
           intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
-        } ${
-          isCompetitionDrop ? "tw-justify-center" : ""
-        }`}
+        } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
         {!disableModal && (
           <InlineMediaActions
@@ -172,8 +170,9 @@ function DropListItemContentMediaImage({
           />
         )}
 
-        {shouldLoadImage && errorCount <= maxRetries && (
-          intrinsicHeight ? (
+        {shouldLoadImage &&
+          errorCount <= maxRetries &&
+          (intrinsicHeight ? (
             <img
               key={retryTick}
               ref={imgRef}
@@ -210,8 +209,7 @@ function DropListItemContentMediaImage({
               onClick={handleImageClick}
               onError={handleError}
             />
-          )
-        )}
+          ))}
         {errorCount > maxRetries && (
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
             <span className="tw-text-sm tw-text-iron-400">

@@ -79,48 +79,51 @@ export default function Rememes() {
       });
   }, []);
 
-  const fetchResults = useCallback((mypage: number) => {
-    setRememesLoaded(false);
-    activeFetchRequest.current?.abort();
-    const abortController = new AbortController();
-    activeFetchRequest.current = abortController;
-    let memeFilter = "";
-    if (selectedMeme) {
-      memeFilter = `&meme_id=${selectedMeme}`;
-    }
-    let tokenTypeFilter = "";
-    if (selectedTokenType !== TokenType.ALL) {
-      tokenTypeFilter = `&token_type=${selectedTokenType.replaceAll("-", "")}`;
-    }
-    let sort = "";
-    if (selectedSorting === RememeSort.CREATED_ASC) {
-      sort = "&sort=created_at&sort_direction=desc";
-    }
-    let url = `${publicEnv.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
-    fetchUrl(url, { signal: abortController.signal })
-      .then((response: DBResponse) => {
-        if (
-          abortController.signal.aborted ||
-          activeFetchRequest.current !== abortController
-        ) {
-          return;
-        }
-        setTotalResults(response.count);
-        setRememes(response.data);
-      })
-      .catch((err) => {
-        if (abortController.signal.aborted) {
-          return;
-        }
-        console.error("Error fetching rememes", err);
-      })
-      .finally(() => {
-        if (activeFetchRequest.current === abortController) {
-          activeFetchRequest.current = null;
-          setRememesLoaded(true);
-        }
-      });
-  }, [selectedMeme, selectedSorting, selectedTokenType]);
+  const fetchResults = useCallback(
+    (mypage: number) => {
+      setRememesLoaded(false);
+      activeFetchRequest.current?.abort();
+      const abortController = new AbortController();
+      activeFetchRequest.current = abortController;
+      let memeFilter = "";
+      if (selectedMeme) {
+        memeFilter = `&meme_id=${selectedMeme}`;
+      }
+      let tokenTypeFilter = "";
+      if (selectedTokenType !== TokenType.ALL) {
+        tokenTypeFilter = `&token_type=${selectedTokenType.replaceAll("-", "")}`;
+      }
+      let sort = "";
+      if (selectedSorting === RememeSort.CREATED_ASC) {
+        sort = "&sort=created_at&sort_direction=desc";
+      }
+      let url = `${publicEnv.API_ENDPOINT}/api/rememes?page_size=${PAGE_SIZE}&page=${mypage}${memeFilter}${tokenTypeFilter}${sort}`;
+      fetchUrl(url, { signal: abortController.signal })
+        .then((response: DBResponse) => {
+          if (
+            abortController.signal.aborted ||
+            activeFetchRequest.current !== abortController
+          ) {
+            return;
+          }
+          setTotalResults(response.count);
+          setRememes(response.data);
+        })
+        .catch((err) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+          console.error("Error fetching rememes", err);
+        })
+        .finally(() => {
+          if (activeFetchRequest.current === abortController) {
+            activeFetchRequest.current = null;
+            setRememesLoaded(true);
+          }
+        });
+    },
+    [selectedMeme, selectedSorting, selectedTokenType]
+  );
 
   const previousFilters = useRef({
     selectedMeme,

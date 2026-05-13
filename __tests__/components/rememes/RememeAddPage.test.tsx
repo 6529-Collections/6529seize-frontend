@@ -24,27 +24,24 @@ jest.mock("wagmi", () => ({
 }));
 
 // Mock components
-jest.mock(
-  "@/components/rememes/RememeAddComponent",
-  () => (props: any) =>
-    (
-      <div data-testid="rememe-add-component">
-        <button
-          onClick={() =>
-            props.verifiedRememe(
-              {
-                valid: true,
-                contract: { address: "0xtest", contractDeployer: "0xdeployer" },
-                nfts: [{ tokenId: "1", name: "Test NFT" }],
-              },
-              [1, 2]
-            )
-          }>
-          Verify Rememe
-        </button>
-      </div>
-    )
-);
+jest.mock("@/components/rememes/RememeAddComponent", () => (props: any) => (
+  <div data-testid="rememe-add-component">
+    <button
+      onClick={() =>
+        props.verifiedRememe(
+          {
+            valid: true,
+            contract: { address: "0xtest", contractDeployer: "0xdeployer" },
+            nfts: [{ tokenId: "1", name: "Test NFT" }],
+          },
+          [1, 2]
+        )
+      }
+    >
+      Verify Rememe
+    </button>
+  </div>
+));
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (props: any) => (
@@ -85,8 +82,7 @@ jest.mock("@/helpers/Helpers", () => ({
 
 // Get mocked functions
 const mockUseSignMessage = require("wagmi").useSignMessage as jest.Mock;
-const mockUseAuth = require("@/components/auth/Auth")
-  .useAuth as jest.Mock;
+const mockUseAuth = require("@/components/auth/Auth").useAuth as jest.Mock;
 const mockUseSeizeConnectContext =
   require("@/components/auth/SeizeConnectContext")
     .useSeizeConnectContext as jest.Mock;
