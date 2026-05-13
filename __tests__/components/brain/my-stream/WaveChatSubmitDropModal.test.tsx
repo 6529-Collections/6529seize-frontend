@@ -2,6 +2,7 @@ import { WaveChatSubmitDropModal } from "@/components/brain/my-stream/WaveChatSu
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { createPortal } from "react-dom";
 
 let waveDropCreateProps: any;
 
@@ -17,6 +18,15 @@ jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
 }));
 
 const wave = { id: "wave-1" } as any;
+
+function FakeChildPortal() {
+  return createPortal(
+    <button type="button" data-testid="fake-child-portal-button">
+      fake child portal
+    </button>,
+    document.body
+  );
+}
 
 describe("WaveChatSubmitDropModal", () => {
   beforeEach(() => {
@@ -84,8 +94,37 @@ describe("WaveChatSubmitDropModal", () => {
     await user.click(screen.getByLabelText("Close modal"));
     expect(onClose).toHaveBeenCalledTimes(2);
 
-    fireEvent.keyDown(document, { key: "Escape" });
+    const closeButton = screen.getByLabelText("Close modal");
+    closeButton.focus();
+    fireEvent.keyDown(closeButton, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(3);
+  });
+
+  it("does not close when escape starts outside the modal panel", async () => {
+    const onClose = jest.fn();
+
+    render(
+      <>
+        <WaveChatSubmitDropModal
+          isOpen={true}
+          wave={wave}
+          title="Submit drop"
+          onClose={onClose}
+        />
+        <FakeChildPortal />
+      </>
+    );
+
+    const panel = await screen.findByTestId("chat-submit-drop-modal-panel");
+    const childPortalButton = screen.getByTestId("fake-child-portal-button");
+
+    expect(panel).not.toContainElement(childPortalButton);
+
+    childPortalButton.focus();
+    expect(childPortalButton).toHaveFocus();
+
+    fireEvent.keyDown(childPortalButton, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("moves initial focus into the modal", async () => {
