@@ -8,12 +8,20 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
+  useSyncExternalStore,
 } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 
 const VIEWPORT_PADDING = 16;
 const MENU_GAP = 8;
+const DEFAULT_MENU_MIN_WIDTH = 224;
+const unsubscribeFromClientMount = () => undefined;
+const subscribeToClientMount = (onStoreChange: () => void) => {
+  onStoreChange();
+  return unsubscribeFromClientMount;
+};
+const getClientMountSnapshot = () => true;
+const getServerMountSnapshot = () => false;
 
 export default function CommonDropdownItemsDefaultWrapper({
   isOpen,
@@ -33,6 +41,11 @@ export default function CommonDropdownItemsDefaultWrapper({
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
+  const mounted = useSyncExternalStore(
+    subscribeToClientMount,
+    getClientMountSnapshot,
+    getServerMountSnapshot
+  );
   useClickAway(listRef, (e) => {
     if (
       buttonRef.current &&
@@ -54,7 +67,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const dropdownEl = dropdownRef.current;
-    const width = buttonRect.width;
+    const width = Math.max(buttonRect.width, DEFAULT_MENU_MIN_WIDTH);
     dropdownEl.style.width = `${width}px`;
 
     const height = listRef.current?.offsetHeight ?? dropdownEl.offsetHeight;
@@ -97,7 +110,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
   useLayoutEffect(() => {
     position();
-  }, [position]);
+  }, [mounted, position]);
 
   useEffect(() => {
     if (!dynamicPosition || !isOpen) return;
@@ -137,18 +150,17 @@ export default function CommonDropdownItemsDefaultWrapper({
     };
   }, [buttonRef, closeOnFocusOutside, isOpen, setOpen]);
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   if (!mounted) return null;
 
   return createPortal(
     <div
       className={`tw-absolute ${portalClassName}`}
       ref={dropdownRef}
-      style={{ left: 0, top: 0 }}
+      style={{
+        left: 0,
+        top: 0,
+        width: `${DEFAULT_MENU_MIN_WIDTH}px`,
+      }}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (

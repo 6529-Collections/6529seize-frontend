@@ -30,6 +30,10 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
+jest.mock("@/components/the-memes/MemePageArt", () => ({
+  __esModule: true,
+  MemePageArt: () => <div data-testid="meme-page-art" />,
+}));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
@@ -276,6 +280,21 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.getByText("B")).toBeInTheDocument();
   });
 
+  it("falls back to the artist name when no artist handle exists", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({
+          artist: "Unsigned Artist",
+          artist_seize_handle: "",
+        })}
+      />
+    );
+
+    expect(screen.getByText("Unsigned Artist")).toBeInTheDocument();
+    expect(screen.queryByText("not available")).not.toBeInTheDocument();
+  });
+
   it("shows distribution plan link", async () => {
     const nft = createNft({ id: 5, has_distribution: true });
     await waitFor(() => {
@@ -318,5 +337,38 @@ describe("MemePageLiveSubMenu details", () => {
     render(<MemePageLiveSubMenu show nft={nft} nftMeta={createMeta()} />);
 
     expect(screen.getByText("Interactive - HTML")).toBeInTheDocument();
+  });
+
+  it("opens additional details when the default flag changes", async () => {
+    const nft = createNft();
+    const nftMeta = createMeta();
+
+    const { rerender } = render(
+      <MemePageLiveSubMenu
+        show
+        nft={nft}
+        nftMeta={nftMeta}
+        defaultAdditionalDetailsOpen={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: /additional details/i })
+    ).toHaveAttribute("aria-expanded", "false");
+
+    rerender(
+      <MemePageLiveSubMenu
+        show
+        nft={nft}
+        nftMeta={nftMeta}
+        defaultAdditionalDetailsOpen={true}
+      />
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: /additional details/i })
+      ).toHaveAttribute("aria-expanded", "true")
+    );
   });
 });

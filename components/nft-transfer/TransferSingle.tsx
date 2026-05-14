@@ -10,7 +10,7 @@ import {
   faRightLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TransferModal from "./TransferModal";
 import {
   buildTransferKey,
@@ -26,7 +26,6 @@ interface TransferSingleProps {
   readonly title: string;
   readonly max: number;
   readonly thumbUrl?: string | undefined;
-  readonly children?: ReactNode;
 }
 
 export default function TransferSingle(props: TransferSingleProps) {
@@ -37,7 +36,36 @@ export default function TransferSingle(props: TransferSingleProps) {
   );
 }
 
+export function TransferSingleActions(props: TransferSingleProps) {
+  return (
+    <TransferProvider>
+      <TransferSingleActionsImpl {...props} layout="inline" />
+    </TransferProvider>
+  );
+}
+
 function TransferSingleImpl(props: TransferSingleProps) {
+  const { isMobileDevice } = useDeviceInfo();
+
+  if (isMobileDevice) {
+    return null;
+  }
+
+  return (
+    <div
+      className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
+      data-testid="transfer-single"
+    >
+      <TransferSingleActionsImpl {...props} layout="stacked" />
+    </div>
+  );
+}
+
+function TransferSingleActionsImpl(
+  props: TransferSingleProps & {
+    readonly layout: "inline" | "stacked";
+  }
+) {
   const {
     collectionType,
     contractType,
@@ -46,15 +74,13 @@ function TransferSingleImpl(props: TransferSingleProps) {
     title,
     max,
     thumbUrl,
-    children,
   } = props;
-  const { isMobileDevice } = useDeviceInfo();
-
-  const t = useTransfer();
+  const { selected, select, unselect, incQty, decQty } = useTransfer();
 
   const { isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
   const wantModalAfterConnect = useRef(false);
+  const [showModal, setShowModal] = useState(false);
 
   const key = useMemo(
     () =>
@@ -66,7 +92,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
   );
 
   useEffect(() => {
-    t.select({
+    select({
       key,
       contract,
       contractType,
@@ -77,33 +103,52 @@ function TransferSingleImpl(props: TransferSingleProps) {
     });
 
     return () => {
-      t.unselect(key);
+      unselect(key);
     };
   }, [
     key,
-    collectionType,
     tokenId,
     max,
     thumbUrl,
     title,
     contract,
     contractType,
+    select,
+    unselect,
   ]);
 
   useEffect(() => {
     if (isConnected && wantModalAfterConnect.current) {
-      setShowModal(true);
       wantModalAfterConnect.current = false;
+      let cancelled = false;
+      const openModal = () => {
+        if (!cancelled) {
+          setShowModal(true);
+        }
+      };
+
+      if (typeof queueMicrotask === "function") {
+        queueMicrotask(openModal);
+        return () => {
+          cancelled = true;
+        };
+      }
+
+      const timeout = globalThis.setTimeout(openModal, 0);
+      return () => {
+        cancelled = true;
+        globalThis.clearTimeout(timeout);
+      };
     }
 
     if (!isConnected && !seizeConnectOpen && wantModalAfterConnect.current) {
       wantModalAfterConnect.current = false;
     }
+
+    return undefined;
   }, [isConnected, seizeConnectOpen]);
 
-  const selectedQty = t.selected.get(key)?.qty ?? 0;
-
-  const [showModal, setShowModal] = useState(false);
+  const selectedQty = selected.get(key)?.qty ?? 0;
 
   const transferButtonAriaLabel = useMemo(() => {
     if (contractType === ContractType.ERC721) {
@@ -115,10 +160,6 @@ function TransferSingleImpl(props: TransferSingleProps) {
     }
     return "Transfer 1 copy";
   }, [selectedQty, contractType]);
-
-  if (isMobileDevice) {
-    return null;
-  }
 
   const transferTitle = (
     <div className="tw-flex tw-items-center tw-gap-2 tw-text-iron-400">
@@ -133,7 +174,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
     <div className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-1 tw-font-medium">
       <button
         type="button"
-        onClick={() => t.decQty(key)}
+        onClick={() => decQty(key)}
         disabled={selectedQty <= 1}
         aria-label="Decrease quantity"
         className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
@@ -150,7 +191,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
       </div>
       <button
         type="button"
-        onClick={() => t.incQty(key)}
+        onClick={() => incQty(key)}
         disabled={selectedQty >= max}
         aria-label="Increase quantity"
         className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
@@ -189,30 +230,27 @@ function TransferSingleImpl(props: TransferSingleProps) {
     </button>
   );
 
-  return (
-    <div
-      className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
-      data-testid="transfer-single"
-    >
-      {children ? (
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-4">
-          <div className="tw-min-w-0">{children}</div>
-          <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
-            {quantityToggle}
-            {transferButton}
-          </div>
+  if (props.layout === "inline") {
+    return (
+      <>
+        <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
+          {quantityToggle}
+          {transferButton}
         </div>
-      ) : (
-        <>
-          <div className="tw-flex tw-items-center tw-gap-3">
-            {transferTitle}
-            {quantityToggle}
-          </div>
+        <TransferModal open={showModal} onClose={() => setShowModal(false)} />
+      </>
+    );
+  }
 
-          <div className="tw-mt-4">{transferButton}</div>
-        </>
-      )}
+  return (
+    <>
+      <div className="tw-flex tw-items-center tw-gap-3">
+        {transferTitle}
+        {quantityToggle}
+      </div>
+
+      <div className="tw-mt-4">{transferButton}</div>
       <TransferModal open={showModal} onClose={() => setShowModal(false)} />
-    </div>
+    </>
   );
 }

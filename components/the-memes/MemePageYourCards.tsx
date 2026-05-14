@@ -1,4 +1,6 @@
-import TransferSingle from "@/components/nft-transfer/TransferSingle";
+"use client";
+
+import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
 import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants/constants";
 import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
@@ -9,8 +11,80 @@ import {
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ContractType } from "@/types/enums";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
+
+function MemePageYourCardsTransferCard(props: {
+  readonly transferNft: NFT;
+  readonly nftBalance: number;
+  readonly myTDH: NftTDH | undefined;
+  readonly myRank: NftRank | undefined;
+}) {
+  const { isMobileDevice } = useDeviceInfo();
+
+  if (isMobileDevice) {
+    return null;
+  }
+
+  return (
+    <div className="tw-mb-3">
+      <div
+        className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
+        data-testid="transfer-single"
+      >
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-4">
+          <div className="tw-min-w-0">
+            <div className="tw-flex tw-w-max tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1">
+              <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                  Cards
+                </span>
+                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${props.nftBalance}`}</span>
+              </div>
+              {props.myRank !== undefined && props.myTDH !== undefined ? (
+                <>
+                  <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                    <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                      TDH
+                    </span>
+                    <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
+                      {numberWithCommas(Math.round(props.myTDH.tdh))}
+                    </span>
+                  </div>
+                  <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                    <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
+                      Rank
+                    </span>
+                    <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
+                      #{props.myRank.rank}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+                  No TDH accrued
+                </div>
+              )}
+            </div>
+          </div>
+          <TransferSingleActions
+            collectionType={CollectedCollectionType.MEMES}
+            contractType={ContractType.ERC1155}
+            contract={MEMES_CONTRACT}
+            tokenId={props.transferNft.id}
+            max={props.nftBalance}
+            title={
+              (props.transferNft as { name?: string }).name ??
+              `The Memes #${props.transferNft.id}`
+            }
+            thumbUrl={props.transferNft.thumbnail}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function MemePageYourCardsRightMenu(props: {
   show: boolean;
@@ -94,53 +168,12 @@ export function MemePageYourCardsRightMenu(props: {
       {props.transactions.length > 0 && props.wallets.length > 0 && (
         <>
           {transferNft !== undefined && (
-            <div className="tw-mb-3">
-              <TransferSingle
-                collectionType={CollectedCollectionType.MEMES}
-                contractType={ContractType.ERC1155}
-                contract={MEMES_CONTRACT}
-                tokenId={transferNft.id}
-                max={props.nftBalance}
-                title={
-                  (transferNft as { name?: string }).name ??
-                  `The Memes #${transferNft.id}`
-                }
-                thumbUrl={transferNft.thumbnail}
-              >
-                <div className="tw-flex tw-w-max tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1">
-                  <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
-                    <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-                      Cards
-                    </span>
-                    <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${props.nftBalance}`}</span>
-                  </div>
-                  {props.myRank !== undefined && props.myTDH !== undefined ? (
-                    <>
-                      <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
-                        <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-                          TDH
-                        </span>
-                        <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
-                          {numberWithCommas(Math.round(props.myTDH.tdh))}
-                        </span>
-                      </div>
-                      <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
-                        <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-                          Rank
-                        </span>
-                        <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
-                          #{props.myRank.rank}
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-                      No TDH accrued
-                    </div>
-                  )}
-                </div>
-              </TransferSingle>
-            </div>
+            <MemePageYourCardsTransferCard
+              transferNft={transferNft}
+              nftBalance={props.nftBalance}
+              myTDH={props.myTDH}
+              myRank={props.myRank}
+            />
           )}
           {/*
           {props.nftBalance > 0 && (

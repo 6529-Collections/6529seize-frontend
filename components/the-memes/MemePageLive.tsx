@@ -52,6 +52,11 @@ export function MemePageLiveSubMenu(props: {
         )}
         {props.nft && props.nftMeta && (
           <MemePageAdditionalDetailsAccordion
+            key={
+              props.defaultAdditionalDetailsOpen
+                ? "additional-details-open"
+                : "additional-details-closed"
+            }
             nft={props.nft}
             nftMeta={props.nftMeta}
             defaultOpen={props.defaultAdditionalDetailsOpen ?? false}

@@ -246,7 +246,13 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
           label: handle,
           display: handle,
         }))
-      : [{ handle: null, label: nft.artist, display: "not available" }];
+      : [
+          {
+            handle: null,
+            label: nft.artist || "not available",
+            display: nft.artist || "not available",
+          },
+        ];
 
   return (
     <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8">

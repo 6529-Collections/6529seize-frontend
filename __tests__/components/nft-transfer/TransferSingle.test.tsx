@@ -1,5 +1,11 @@
 import "@testing-library/jest-dom";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 jest.mock("@/styles/Home.module.scss", () => ({ shadowBox: "shadowBox" }));
 
@@ -225,7 +231,7 @@ describe("TransferSingle", () => {
     );
   });
 
-  test("connect-first flow: click triggers seizeConnect, modal opens after connection", () => {
+  test("connect-first flow: click triggers seizeConnect, modal opens after connection", async () => {
     const connectMod = require("@/components/auth/SeizeConnectContext");
     connectMod.__state.isConnected = false;
     connectMod.__state.seizeConnectOpen = false;
@@ -241,10 +247,12 @@ describe("TransferSingle", () => {
     connectMod.__state.isConnected = true;
     connectMod.__state.seizeConnectOpen = false;
     rerender(<TransferSingle {...baseProps} />);
-    expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
-      "data-open",
-      "true"
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
+        "data-open",
+        "true"
+      );
+    });
   });
 
   test("rerender with new tokenId updates select key", () => {
