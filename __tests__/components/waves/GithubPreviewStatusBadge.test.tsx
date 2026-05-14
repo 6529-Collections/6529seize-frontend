@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadge";
@@ -18,17 +18,47 @@ jest.mock("@/components/utils/tooltip/CustomTooltip", () => ({
   ),
 }));
 
+const createDomRect = (): DOMRectReadOnly => ({
+  bottom: 0,
+  height: 0,
+  left: 0,
+  right: 0,
+  top: 0,
+  width: 0,
+  x: 0,
+  y: 0,
+  toJSON: () => ({}),
+});
+
+const createIntersectionEntry = (
+  isIntersecting: boolean
+): IntersectionObserverEntry => ({
+  boundingClientRect: createDomRect(),
+  intersectionRatio: isIntersecting ? 1 : 0,
+  intersectionRect: createDomRect(),
+  isIntersecting,
+  rootBounds: null,
+  target: document.createElement("span"),
+  time: 0,
+});
+
 describe("GithubPreviewStatusBadge", () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
+  const originalIntersectionObserver = globalThis.IntersectionObserver;
   const fetchMock = jest.fn();
 
   beforeEach(() => {
     fetchMock.mockReset();
-    global.fetch = fetchMock as unknown as typeof fetch;
+    globalThis.fetch = fetchMock;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    globalThis.IntersectionObserver = originalIntersectionObserver;
   });
 
   afterAll(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   it("does not fetch for non GitHub URLs", () => {
@@ -107,6 +137,56 @@ describe("GithubPreviewStatusBadge", () => {
     );
   });
 
+  it("does not fetch status until the badge enters the viewport", async () => {
+    let triggerIntersection = (_isIntersecting: boolean) => {};
+    class TestIntersectionObserver implements IntersectionObserver {
+      readonly root = null;
+      readonly rootMargin = "";
+      readonly thresholds = [0.1];
+
+      constructor(callback: IntersectionObserverCallback) {
+        triggerIntersection = (isIntersecting: boolean) => {
+          callback([createIntersectionEntry(isIntersecting)], this);
+        };
+      }
+
+      disconnect = jest.fn();
+      observe = jest.fn();
+      takeRecords = jest.fn(() => []);
+      unobserve = jest.fn();
+    }
+    globalThis.IntersectionObserver = TestIntersectionObserver;
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        type: "github.issue",
+        owner: "6529-Collections",
+        repo: "6529seize-frontend",
+        number: 2308,
+        title: "Remove tab",
+        state: "closed_completed",
+        url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
+      }),
+    });
+
+    render(
+      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/issues/2308" />
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    act(() => {
+      triggerIntersection(true);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("github-preview-status-badge")
+      ).toHaveTextContent("Completed");
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("renders pull request state details", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
@@ -134,6 +214,67 @@ describe("GithubPreviewStatusBadge", () => {
       expect(badge).toHaveTextContent("Open");
       expect(badge).toHaveTextContent("blocked");
     });
+  });
+
+  it("refreshes visible badges every minute without client or server cache", async () => {
+    jest.useFakeTimers();
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          type: "github.pull_request",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2309,
+          title: "Fix tab",
+          state: "open",
+          reviewState: "none",
+          mergeableState: "clean",
+          merged: false,
+          draft: false,
+          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          type: "github.pull_request",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2309,
+          title: "Fix tab",
+          state: "open",
+          reviewState: "approved",
+          mergeableState: "clean",
+          merged: false,
+          draft: false,
+          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+        }),
+      });
+
+    render(
+      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/pull/2309" />
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("github-preview-status-badge")
+      ).toHaveTextContent("Open");
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(60 * 1000);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("github-preview-status-badge")
+      ).toHaveTextContent("Approved");
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]?.[0]).toContain("refresh=1");
+    expect(fetchMock.mock.calls[1]?.[0]).toContain("ts=");
   });
 
   it("prefers pull request review state over mergeability detail", async () => {

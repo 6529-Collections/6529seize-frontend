@@ -7,7 +7,6 @@ const nextResponseJson = jest.fn(
 
 jest.mock("next/server", () => ({
   NextResponse: { json: nextResponseJson },
-  NextRequest: class {},
 }));
 
 type GetHandler = typeof import("../../../app/api/github-preview/route").GET;
@@ -20,32 +19,34 @@ async function loadRoute(): Promise<void> {
 }
 
 describe("github-preview API route", () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
   const fetchMock = jest.fn();
 
   beforeEach(async () => {
     nextResponseJson.mockClear();
     fetchMock.mockReset();
-    global.fetch = fetchMock as unknown as typeof fetch;
+    globalThis.fetch = fetchMock;
     await loadRoute();
   });
 
   afterAll(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
-  const requestFor = (url: string) =>
+  const requestFor = (url: string, refresh = false) =>
     ({
       nextUrl: new URL(
-        `https://app.local/api/github-preview?url=${encodeURIComponent(url)}`
+        `https://app.local/api/github-preview?url=${encodeURIComponent(url)}${
+          refresh ? "&refresh=1" : ""
+        }`
       ),
     }) as any;
 
-  const jsonResponse = (body: unknown) =>
-    ({
-      ok: true,
-      json: async () => body,
-    }) as Response;
+  const jsonResponse = (body: unknown, init?: ResponseInit) =>
+    new Response(JSON.stringify(body), {
+      headers: { "content-type": "application/json" },
+      ...init,
+    });
 
   it("maps open GitHub issues", async () => {
     fetchMock.mockResolvedValueOnce(
@@ -99,6 +100,38 @@ describe("github-preview API route", () => {
     await expect(notPlanned.json()).resolves.toMatchObject({
       state: "closed_not_planned",
     });
+  });
+
+  it("bypasses cached status when refresh is requested", async () => {
+    const url = "https://github.com/o/r/issues/10";
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: url,
+          title: "Live issue",
+          state: "open",
+          state_reason: null,
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: url,
+          title: "Live issue",
+          state: "closed",
+          state_reason: "completed",
+        })
+      );
+
+    const initial = await GET(requestFor(url));
+    const cached = await GET(requestFor(url));
+    const refreshed = await GET(requestFor(url, true));
+
+    await expect(initial.json()).resolves.toMatchObject({ state: "open" });
+    await expect(cached.json()).resolves.toMatchObject({ state: "open" });
+    await expect(refreshed.json()).resolves.toMatchObject({
+      state: "closed_completed",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("maps pull request state", async () => {
@@ -232,11 +265,9 @@ describe("github-preview API route", () => {
           mergeable_state: "blocked",
         })
       )
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 403,
-        json: async () => ({ message: "API rate limit exceeded" }),
-      } as Response);
+      .mockResolvedValueOnce(
+        jsonResponse({ message: "API rate limit exceeded" }, { status: 403 })
+      );
 
     const response = await GET(requestFor("https://github.com/o/r/pull/6"));
 

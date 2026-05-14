@@ -47,6 +47,9 @@ interface GithubPullReviewApiResponse {
   readonly submitted_at?: string | null;
 }
 
+type GithubResourceKind = GithubResource["kind"];
+type GithubReviewApiState = "APPROVED" | "CHANGES_REQUESTED" | "DISMISSED";
+
 const createAbortController = (): {
   readonly controller: AbortController;
   readonly cancel: () => void;
@@ -58,6 +61,17 @@ const createAbortController = (): {
     controller,
     cancel: () => clearTimeout(timeout),
   };
+};
+
+const isAbortError = (error: unknown): boolean =>
+  error instanceof Error && error.name === "AbortError";
+
+const toGithubRequestError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error("GitHub request failed.");
 };
 
 const parseGithubResource = (rawUrl: string | null): GithubResource => {
@@ -86,8 +100,7 @@ const parseGithubResource = (rawUrl: string | null): GithubResource => {
   const [owner, repo, kindSegment, numberSegment] = parsed.pathname
     .split("/")
     .filter(Boolean);
-  const kind =
-    kindSegment === "issues" ? "issue" : kindSegment === "pull" ? "pull" : null;
+  const kind = getGithubResourceKind(kindSegment);
   const number = Number.parseInt(numberSegment ?? "", 10);
 
   if (!owner || !repo || !kind || !Number.isInteger(number) || number <= 0) {
@@ -97,6 +110,20 @@ const parseGithubResource = (rawUrl: string | null): GithubResource => {
   }
 
   return { owner, repo, kind, number };
+};
+
+const getGithubResourceKind = (
+  kindSegment: string | undefined
+): GithubResourceKind | null => {
+  if (kindSegment === "issues") {
+    return "issue";
+  }
+
+  if (kindSegment === "pull") {
+    return "pull";
+  }
+
+  return null;
 };
 
 const fetchGithubJson = async <T>(path: string): Promise<T> => {
@@ -124,11 +151,11 @@ const fetchGithubJson = async <T>(path: string): Promise<T> => {
 
     return (await response.json()) as T;
   } catch (error) {
-    if ((error as { name?: unknown }).name === "AbortError") {
+    if (isAbortError(error)) {
       throw new Error("GitHub request timed out.");
     }
 
-    throw error instanceof Error ? error : new Error("GitHub request failed.");
+    throw toGithubRequestError(error);
   } finally {
     cancel();
   }
@@ -171,6 +198,95 @@ const REVIEW_STATE_PRIORITY = {
   APPROVED: 1,
 } as const;
 
+const toMeaningfulReviewState = (
+  state: string | null | undefined
+): GithubReviewApiState | null => {
+  const normalized = state?.toUpperCase();
+  if (
+    normalized === "APPROVED" ||
+    normalized === "CHANGES_REQUESTED" ||
+    normalized === "DISMISSED"
+  ) {
+    return normalized;
+  }
+
+  return null;
+};
+
+const isReviewStateActive = (
+  state: GithubReviewApiState
+): state is "APPROVED" | "CHANGES_REQUESTED" => state !== "DISMISSED";
+
+const toPreviewReviewState = (
+  state: "APPROVED" | "CHANGES_REQUESTED"
+): GithubPullRequestPreviewResponse["reviewState"] => {
+  if (state === "CHANGES_REQUESTED") {
+    return "changes_requested";
+  }
+
+  return "approved";
+};
+
+const shouldReplaceReview = (
+  current: GithubPullReviewApiResponse | undefined,
+  next: GithubPullReviewApiResponse
+): boolean => {
+  if (!current) {
+    return true;
+  }
+
+  return getReviewTimestamp(next) >= getReviewTimestamp(current);
+};
+
+const getLatestMeaningfulReviewsByUser = (
+  reviews: readonly GithubPullReviewApiResponse[]
+): Map<string, GithubPullReviewApiResponse> => {
+  const latestMeaningfulReviewByUser = new Map<
+    string,
+    GithubPullReviewApiResponse
+  >();
+
+  for (const review of reviews) {
+    if (!toMeaningfulReviewState(review.state)) {
+      continue;
+    }
+
+    const user = review.user?.login;
+    if (!user) {
+      continue;
+    }
+
+    const current = latestMeaningfulReviewByUser.get(user);
+    if (shouldReplaceReview(current, review)) {
+      latestMeaningfulReviewByUser.set(user, review);
+    }
+  }
+
+  return latestMeaningfulReviewByUser;
+};
+
+const getHighestPriorityReviewState = (
+  reviews: Iterable<GithubPullReviewApiResponse>
+): GithubPullRequestPreviewResponse["reviewState"] => {
+  let highestPriority = 0;
+  let reviewState: GithubPullRequestPreviewResponse["reviewState"] = "none";
+
+  for (const review of reviews) {
+    const state = toMeaningfulReviewState(review.state);
+    if (!state || !isReviewStateActive(state)) {
+      continue;
+    }
+
+    const priority = REVIEW_STATE_PRIORITY[state];
+    if (priority > highestPriority) {
+      highestPriority = priority;
+      reviewState = toPreviewReviewState(state);
+    }
+  }
+
+  return reviewState;
+};
+
 const getReviewTimestamp = (review: GithubPullReviewApiResponse): number => {
   if (review.submitted_at) {
     const timestamp = Date.parse(review.submitted_at);
@@ -185,50 +301,9 @@ const getReviewTimestamp = (review: GithubPullReviewApiResponse): number => {
 const getPullRequestReviewState = (
   reviews: readonly GithubPullReviewApiResponse[]
 ): GithubPullRequestPreviewResponse["reviewState"] => {
-  const latestMeaningfulReviewByUser = new Map<
-    string,
-    GithubPullReviewApiResponse
-  >();
-
-  for (const review of reviews) {
-    const state = review.state?.toUpperCase();
-    if (
-      state !== "APPROVED" &&
-      state !== "CHANGES_REQUESTED" &&
-      state !== "DISMISSED"
-    ) {
-      continue;
-    }
-
-    const user = review.user?.login;
-    if (!user) {
-      continue;
-    }
-
-    const current = latestMeaningfulReviewByUser.get(user);
-    if (!current || getReviewTimestamp(review) >= getReviewTimestamp(current)) {
-      latestMeaningfulReviewByUser.set(user, review);
-    }
-  }
-
-  let highestPriority = 0;
-  let reviewState: GithubPullRequestPreviewResponse["reviewState"] = "none";
-
-  for (const review of latestMeaningfulReviewByUser.values()) {
-    const state = review.state?.toUpperCase();
-    if (state !== "APPROVED" && state !== "CHANGES_REQUESTED") {
-      continue;
-    }
-
-    const priority = REVIEW_STATE_PRIORITY[state];
-    if (priority > highestPriority) {
-      highestPriority = priority;
-      reviewState =
-        state === "CHANGES_REQUESTED" ? "changes_requested" : "approved";
-    }
-  }
-
-  return reviewState;
+  const latestMeaningfulReviewByUser =
+    getLatestMeaningfulReviewsByUser(reviews);
+  return getHighestPriorityReviewState(latestMeaningfulReviewByUser.values());
 };
 
 const buildPullPreview = (
@@ -293,11 +368,13 @@ const resolveIssuePreview = async (
 };
 
 export const resolveGithubPreview = async (
-  rawUrl: string | null
+  rawUrl: string | null,
+  options?: { readonly bypassCache?: boolean | undefined }
 ): Promise<GithubPreviewResponse> => {
   const resource = parseGithubResource(rawUrl);
   const cacheKey = `${resource.owner}/${resource.repo}/${resource.kind}/${resource.number}`;
-  const cached = cache.get(cacheKey);
+  const bypassCache = options?.bypassCache === true;
+  const cached = bypassCache ? undefined : cache.get(cacheKey);
 
   if (cached) {
     return cached;

@@ -5,7 +5,8 @@ import { resolveGithubPreview } from "./service";
 export async function GET(request: NextRequest) {
   try {
     const preview = await resolveGithubPreview(
-      request.nextUrl.searchParams.get("url")
+      request.nextUrl.searchParams.get("url"),
+      { bypassCache: request.nextUrl.searchParams.get("refresh") === "1" }
     );
     return NextResponse.json(preview);
   } catch (error) {

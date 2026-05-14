@@ -38,6 +38,10 @@ export interface GithubPreviewEnvelope {
   readonly githubPreview?: GithubPreviewResponse | null | undefined;
 }
 
+interface FetchGithubPreviewOptions {
+  readonly bypassCache?: boolean | undefined;
+}
+
 const GITHUB_PREVIEW_CACHE_TTL_MS = 2 * 60 * 1000;
 const GITHUB_PREVIEW_CACHE_MAX_ITEMS = 200;
 
@@ -62,19 +66,28 @@ const readErrorMessage = async (response: Response): Promise<string> => {
 };
 
 export const fetchGithubPreview = async (
-  url: string
+  url: string,
+  options?: FetchGithubPreviewOptions
 ): Promise<GithubPreviewResponse> => {
   const normalized = normalizeUrl(url);
   if (!normalized) {
     throw new Error("A valid URL is required to fetch GitHub metadata.");
   }
 
-  const cached = previewCache.get(normalized);
-  if (cached) {
-    return cached;
+  const bypassCache = options?.bypassCache === true;
+  if (!bypassCache) {
+    const cached = previewCache.get(normalized);
+    if (cached) {
+      return cached;
+    }
   }
 
   const params = new URLSearchParams({ url: normalized });
+  if (bypassCache) {
+    params.set("refresh", "1");
+    params.set("ts", Date.now().toString());
+  }
+
   const request = fetch(`/api/github-preview?${params.toString()}`, {
     headers: { Accept: "application/json" },
   })
@@ -86,10 +99,15 @@ export const fetchGithubPreview = async (
       return (await response.json()) as GithubPreviewResponse;
     })
     .catch((error) => {
-      previewCache.delete(normalized);
+      if (!bypassCache) {
+        previewCache.delete(normalized);
+      }
       throw error;
     });
 
-  previewCache.set(normalized, request);
+  if (!bypassCache) {
+    previewCache.set(normalized, request);
+  }
+
   return request;
 };

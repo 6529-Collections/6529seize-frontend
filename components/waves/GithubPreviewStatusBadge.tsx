@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SignalSlashIcon } from "@heroicons/react/24/outline";
 
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
@@ -57,9 +57,15 @@ const parseGithubPreviewUrlInfo = (
   }
 
   const [, , kind] = url.pathname.split("/").filter(Boolean);
-  return kind === "pull" || kind === "issues"
-    ? { url, kind: kind === "pull" ? "pull" : "issue" }
-    : null;
+  if (kind === "pull") {
+    return { url, kind: "pull" };
+  }
+
+  if (kind === "issues") {
+    return { url, kind: "issue" };
+  }
+
+  return null;
 };
 
 const getBadgeViewModel = (preview: GithubPreviewResponse): BadgeViewModel => {
@@ -118,11 +124,49 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
     "tw-border-amber-400/40 tw-bg-amber-950/90 tw-text-amber-100 tw-shadow-amber-950/40",
 };
 
+const VISIBLE_REFRESH_INTERVAL_MS = 60 * 1000;
+
 type GithubStatusState =
   | { readonly type: "idle" }
   | { readonly type: "loading" }
   | { readonly type: "success"; readonly preview: GithubPreviewResponse }
   | { readonly type: "error"; readonly message: string };
+
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Failed to get status";
+};
+
+const getStatusViewModel = (status: GithubStatusState): BadgeViewModel => {
+  if (status.type === "success") {
+    return getBadgeViewModel(status.preview);
+  }
+
+  if (status.type === "error") {
+    return { label: "Status unavailable", tone: "red" };
+  }
+
+  return { label: "Loading status", tone: "gray", loading: true };
+};
+
+const getBadgeTitle = (
+  status: GithubStatusState,
+  viewModel: BadgeViewModel,
+  detail: string | undefined
+): string => {
+  if (status.type === "error") {
+    return "Status unavailable";
+  }
+
+  if (detail) {
+    return `${viewModel.label} · ${detail}`;
+  }
+
+  return viewModel.label;
+};
 
 export default function GithubPreviewStatusBadge({
   href,
@@ -130,11 +174,34 @@ export default function GithubPreviewStatusBadge({
   compact = false,
 }: GithubPreviewStatusBadgeProps) {
   const githubInfo = useMemo(() => parseGithubPreviewUrlInfo(href), [href]);
+  const badgeRef = useRef<HTMLSpanElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const [status, setStatus] = useState<GithubStatusState>(() =>
     initialPreview
       ? { type: "success", preview: initialPreview }
       : { type: "idle" }
   );
+
+  useEffect(() => {
+    if (!githubInfo) {
+      setIsVisible(false);
+      return;
+    }
+
+    const badge = badgeRef.current;
+    if (!badge || typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry?.isIntersecting === true),
+      { threshold: 0.1 }
+    );
+    observer.observe(badge);
+
+    return () => observer.disconnect();
+  }, [githubInfo, status.type]);
 
   useEffect(() => {
     if (!githubInfo) {
@@ -146,6 +213,12 @@ export default function GithubPreviewStatusBadge({
 
     if (initialPreview) {
       setStatus({ type: "success", preview: initialPreview });
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!isVisible) {
       return () => {
         active = false;
       };
@@ -163,8 +236,7 @@ export default function GithubPreviewStatusBadge({
         if (active) {
           setStatus({
             type: "error",
-            message:
-              error instanceof Error ? error.message : "Failed to get status",
+            message: getErrorMessage(error),
           });
         }
       });
@@ -172,27 +244,53 @@ export default function GithubPreviewStatusBadge({
     return () => {
       active = false;
     };
-  }, [githubInfo, initialPreview]);
+  }, [githubInfo, initialPreview, isVisible]);
 
-  if (!githubInfo || status.type === "idle") {
+  useEffect(() => {
+    if (!githubInfo || !isVisible) {
+      return;
+    }
+
+    let active = true;
+
+    const refreshStatus = () => {
+      fetchGithubPreview(githubInfo.url.toString(), { bypassCache: true })
+        .then((response) => {
+          if (active) {
+            setStatus({ type: "success", preview: response });
+          }
+        })
+        .catch((error: unknown) => {
+          if (active) {
+            setStatus({
+              type: "error",
+              message: getErrorMessage(error),
+            });
+          }
+        });
+    };
+
+    const interval = window.setInterval(
+      refreshStatus,
+      VISIBLE_REFRESH_INTERVAL_MS
+    );
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [githubInfo, isVisible]);
+
+  if (!githubInfo) {
     return null;
   }
 
-  const viewModel =
-    status.type === "success"
-      ? getBadgeViewModel(status.preview)
-      : status.type === "loading"
-        ? { label: "Loading status", tone: "gray" as const, loading: true }
-        : { label: "Status unavailable", tone: "red" as const };
+  const viewModel = getStatusViewModel(status);
   const detail = compact ? undefined : viewModel.detail;
-  const title =
-    status.type === "error"
-      ? "Status unavailable"
-      : detail
-        ? `${viewModel.label} · ${detail}`
-        : viewModel.label;
+  const title = getBadgeTitle(status, viewModel, detail);
   const badge = (
     <span
+      ref={badgeRef}
       className={`tw-pointer-events-auto tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-inline-flex tw-max-w-[calc(100%-1rem)] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-shadow-lg tw-backdrop-blur-md ${TONE_CLASSES[viewModel.tone]}`}
       data-testid="github-preview-status-badge"
       aria-label={title}
