@@ -320,8 +320,11 @@ describe("GithubPreviewStatusBadge", () => {
       expect(screen.getByTestId("signal-slash")).toBeInTheDocument();
     });
     expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
-      "title",
+      "aria-label",
       "Status unavailable"
+    );
+    expect(screen.getByTestId("github-preview-status-badge")).not.toHaveAttribute(
+      "title"
     );
     expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
       "data-content",

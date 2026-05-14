@@ -294,7 +294,6 @@ export default function GithubPreviewStatusBadge({
       className={`tw-pointer-events-auto tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-inline-flex tw-max-w-[calc(100%-1rem)] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-shadow-lg tw-backdrop-blur-md ${TONE_CLASSES[viewModel.tone]}`}
       data-testid="github-preview-status-badge"
       aria-label={title}
-      title={title}
     >
       {viewModel.loading && (
         <span className="tw-h-2 tw-w-2 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-current tw-border-r-transparent" />
