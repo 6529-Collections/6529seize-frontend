@@ -61,6 +61,72 @@ describe("DropListItemContentMediaImage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("closes the modal when the expanded image letterbox area is clicked", () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+    const img = screen.getByAltText("Drop media");
+    fireEvent.load(img);
+    fireEvent.click(img);
+
+    const modalImage = screen.getByAltText("Full size drop media");
+    Object.defineProperty(modalImage, "naturalWidth", {
+      configurable: true,
+      value: 100,
+    });
+    Object.defineProperty(modalImage, "naturalHeight", {
+      configurable: true,
+      value: 50,
+    });
+    modalImage.getBoundingClientRect = jest.fn(() => ({
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      top: 0,
+      left: 0,
+      right: 100,
+      bottom: 100,
+      toJSON: jest.fn(),
+    }));
+
+    fireEvent.click(modalImage, { clientX: 50, clientY: 10 });
+
+    expect(
+      screen.queryByAltText("Full size drop media")
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the modal open when the rendered image area is clicked", () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
+    const img = screen.getByAltText("Drop media");
+    fireEvent.load(img);
+    fireEvent.click(img);
+
+    const modalImage = screen.getByAltText("Full size drop media");
+    Object.defineProperty(modalImage, "naturalWidth", {
+      configurable: true,
+      value: 100,
+    });
+    Object.defineProperty(modalImage, "naturalHeight", {
+      configurable: true,
+      value: 50,
+    });
+    modalImage.getBoundingClientRect = jest.fn(() => ({
+      x: 0,
+      y: 0,
+      width: 100,
+      height: 100,
+      top: 0,
+      left: 0,
+      right: 100,
+      bottom: 100,
+      toJSON: jest.fn(),
+    }));
+
+    fireEvent.click(modalImage, { clientX: 50, clientY: 50 });
+
+    expect(screen.getByAltText("Full size drop media")).toBeInTheDocument();
+  });
+
   it("does not open modal when disableModal is true", () => {
     render(<DropListItemContentMediaImage src="img" disableModal />);
     const img = screen.getByAltText("Drop media");
@@ -99,6 +165,7 @@ describe("DropListItemContentMediaImage", () => {
     expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
     expect(wrapper).not.toHaveClass("tw-h-full");
     expect(img).toHaveClass("tw-h-auto", "tw-w-full", "tw-max-h-64");
+    expect(img).not.toHaveClass("tw-max-h-full");
     expect(img).not.toHaveAttribute("data-nimg", "fill");
   });
 

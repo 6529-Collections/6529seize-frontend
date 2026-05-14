@@ -452,7 +452,7 @@ describe("MyStreamWaveChat", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 
-  it("shows compact app submit CTA above the composer", async () => {
+  it("does not render the app submit CTA above the composer", async () => {
     const onOpen = jest.fn();
     mockIsApp = true;
     searchParamsMock.get.mockReturnValue(null);
@@ -478,19 +478,14 @@ describe("MyStreamWaveChat", () => {
       );
     });
 
-    const button = screen.getByRole("button", { name: "Submit drop" });
-
-    expect(button).toHaveTextContent("Drop");
-    expect(screen.queryByText("Submit drop")).not.toBeInTheDocument();
-    expect(button).not.toHaveClass("tw-w-full");
-
-    fireEvent.click(button);
-
-    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Submit drop" })
+    ).not.toBeInTheDocument();
+    expect(onOpen).not.toHaveBeenCalled();
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
   });
 
-  it("keeps compact app submit CTA when the modal is open", async () => {
+  it("keeps composer mounted without app submit CTA when the modal is open", async () => {
     const onOpen = jest.fn();
     mockIsApp = true;
     searchParamsMock.get.mockReturnValue(null);
@@ -521,10 +516,9 @@ describe("MyStreamWaveChat", () => {
       );
     });
 
-    const button = screen.getByRole("button", { name: "Submit drop" });
-
-    expect(button).toHaveTextContent("Drop");
-    expect(button).not.toHaveClass("tw-w-full");
+    expect(
+      screen.queryByRole("button", { name: "Submit drop" })
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-submit-drop-modal")).toBeInTheDocument();
     expect(
       capturedCreatorPropsHolder.all.map((props) => props.fixedDropMode)

@@ -5,6 +5,7 @@ import AppHeader from "@/components/header/AppHeader";
 const mockShare = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
+let mockWaveDropAction: any = null;
 
 jest.mock("@/components/header/AppSidebar", () => ({
   __esModule: true,
@@ -60,6 +61,15 @@ jest.mock("@/components/waves/WavePicture", () => ({
 jest.mock("@/contexts/NavigationHistoryContext", () => ({
   useNavigationHistoryContext: jest.fn(),
 }));
+jest.mock("@/contexts/HeaderContext", () => ({
+  useHeaderContext: () => ({
+    headerRef: { current: null },
+    setHeaderRef: jest.fn(),
+    refState: null,
+    waveDropAction: mockWaveDropAction,
+    setWaveDropAction: jest.fn(),
+  }),
+}));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) => url,
 }));
@@ -95,7 +105,10 @@ const { useWave } = require("@/hooks/useWave");
 const { useWaveViewMode } = require("@/hooks/useWaveViewMode");
 
 function setup(opts: any) {
-  const activeWaveId = opts.activeWaveId ?? opts.wave?.id ?? null;
+  const wave = opts.wave
+    ? { picture: null, contributors_overview: [], ...opts.wave }
+    : opts.wave;
+  const activeWaveId = opts.activeWaveId ?? wave?.id ?? null;
   const toggleViewMode = opts.toggleViewMode ?? jest.fn();
   (useSeizeConnectContext as jest.Mock).mockReturnValue({
     address: opts.address ?? null,
@@ -107,10 +120,12 @@ function setup(opts: any) {
   (useAuth as jest.Mock).mockReturnValue({ activeProfileProxy: opts.proxy });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
-    activeWaveId ? { activeWave: { id: activeWaveId } } : { activeWave: null }
+    activeWaveId
+      ? { activeWave: { id: activeWaveId } }
+      : { activeWave: { id: null } }
   );
   (useWaveById as jest.Mock).mockReturnValue({
-    wave: opts.wave,
+    wave,
     isLoading: opts.isLoading ?? false,
     isFetching: opts.isFetching ?? false,
   });
@@ -160,6 +175,7 @@ describe("AppHeader", () => {
     mockCopyToClipboard.mockReset();
     mockShare.mockResolvedValue(undefined);
     mockWriteText.mockResolvedValue(undefined);
+    mockWaveDropAction = null;
     setNavigatorShare(mockShare);
     setNavigatorClipboard();
   });
@@ -259,6 +275,36 @@ describe("AppHeader", () => {
     const shareButton = screen.getByRole("button", { name: "Share wave" });
     expect(shareButton).toHaveAttribute("data-wave-link-action-mode", "share");
     expect(shareButton).toHaveClass("tw-h-10", "tw-w-10");
+  });
+
+  it("shows matching wave drop action in app header", () => {
+    const onOpen = jest.fn();
+    const wave = {
+      id: "w-drop",
+      name: "Drop Wave",
+      chat: { scope: { group: { is_direct_message: false } } },
+    };
+    mockWaveDropAction = {
+      waveId: "w-drop",
+      canOpen: true,
+      label: "Submit drop",
+      compactLabel: "Drop",
+      restrictionMessage: null,
+      onOpen,
+    };
+
+    setup({
+      wave,
+      asPath: "/waves/w-drop",
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
+    });
+
+    const button = screen.getByRole("button", { name: "Submit drop" });
+    expect(button).toHaveTextContent("Drop");
+
+    fireEvent.click(button);
+
+    expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
   it("shows copy-mode wave link action when native share is unavailable", () => {
