@@ -523,7 +523,7 @@ function SubscriptionDayDetails(
           <span className="tw-text-sm tw-text-gray-400">
             SZN {displayedSeasonNumberFromIndex(props.date.seasonIndex)}
             {" / "}
-            {formatFullDate(props.date.utcDay)}
+            {formatFullDate(props.date.utcDay, "utc")}
           </span>
         </div>
       </td>

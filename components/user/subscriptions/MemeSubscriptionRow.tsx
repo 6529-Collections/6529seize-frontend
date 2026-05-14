@@ -383,7 +383,7 @@ export default function MemeSubscriptionRow(
                       </Tooltip>
                     </>
                   ) : (
-                    <span>{formatFullDate(props.date.utcDay)}</span>
+                    <span>{formatFullDate(props.date.utcDay, "utc")}</span>
                   )}
                 </>
               )}
