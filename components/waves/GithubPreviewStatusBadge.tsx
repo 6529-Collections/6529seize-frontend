@@ -270,14 +270,14 @@ export default function GithubPreviewStatusBadge({
         });
     };
 
-    const interval = window.setInterval(
+    const interval = globalThis.setInterval(
       refreshStatus,
       VISIBLE_REFRESH_INTERVAL_MS
     );
 
     return () => {
       active = false;
-      window.clearInterval(interval);
+      globalThis.clearInterval(interval);
     };
   }, [githubInfo, isVisible]);
 
