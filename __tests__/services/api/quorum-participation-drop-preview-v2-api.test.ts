@@ -3,7 +3,10 @@ import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiSubmissionDropStatus } from "@/generated/models/ApiSubmissionDropStatus";
 import { commonApiFetch } from "@/services/api/common-api";
-import { fetchQuorumParticipationDropPreviewBySerialNoV2 } from "@/services/api/quorum-participation-drop-preview-v2-api";
+import {
+  fetchQuorumParticipationDropPreviewBySerialNoV2,
+  serialPreviewBatcher,
+} from "@/services/api/quorum-participation-drop-preview-v2-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -88,7 +91,14 @@ const buildDropV2 = (
 
 describe("fetchQuorumParticipationDropPreviewBySerialNoV2", () => {
   beforeEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
+    serialPreviewBatcher.resetForTests();
+  });
+
+  afterEach(() => {
+    serialPreviewBatcher.resetForTests();
+    jest.useRealTimers();
   });
 
   it("batches same-tick serial preview requests into one drops request", async () => {
@@ -119,6 +129,7 @@ describe("fetchQuorumParticipationDropPreviewBySerialNoV2", () => {
         serial_nos: "7,8",
         page_size: "2",
       },
+      signal: expect.objectContaining({ aborted: false }),
     });
   });
 
@@ -150,6 +161,7 @@ describe("fetchQuorumParticipationDropPreviewBySerialNoV2", () => {
         serial_nos: "7",
         page_size: "1",
       },
+      signal: expect.objectContaining({ aborted: false }),
     });
   });
 
@@ -176,9 +188,7 @@ describe("fetchQuorumParticipationDropPreviewBySerialNoV2", () => {
 
   it("chunks batches above the endpoint page size", async () => {
     commonApiFetchMock.mockImplementation(async (request) => {
-      const serialNos = request.params?.serial_nos
-        .split(",")
-        .map((serialNo) => Number(serialNo));
+      const serialNos = request.params?.serial_nos.split(",").map(Number);
 
       return {
         data: serialNos?.map((serialNo) => buildDropV2(serialNo, "wave-1")),
@@ -206,6 +216,7 @@ describe("fetchQuorumParticipationDropPreviewBySerialNoV2", () => {
         ),
         page_size: "100",
       },
+      signal: expect.objectContaining({ aborted: false }),
     });
     expect(commonApiFetchMock).toHaveBeenNthCalledWith(2, {
       endpoint: "v2/drops",
@@ -213,6 +224,45 @@ describe("fetchQuorumParticipationDropPreviewBySerialNoV2", () => {
         serial_nos: "101",
         page_size: "1",
       },
+      signal: expect.objectContaining({ aborted: false }),
     });
+  });
+
+  it("aborts the underlying batch request when its caller signal is aborted", async () => {
+    jest.useFakeTimers();
+    const abortError = new DOMException("Request aborted", "AbortError");
+    let abortListener: (() => void) | undefined;
+    const callerSignal = {
+      aborted: false,
+      reason: abortError,
+      addEventListener: jest.fn((_event, listener) => {
+        abortListener = listener as () => void;
+      }),
+      removeEventListener: jest.fn(),
+      throwIfAborted: jest.fn(),
+    } as unknown as AbortSignal;
+    let requestSignal: AbortSignal | undefined;
+
+    commonApiFetchMock.mockImplementation(
+      async (request) =>
+        new Promise(() => {
+          requestSignal = request.signal;
+        })
+    );
+
+    const previewPromise = fetchQuorumParticipationDropPreviewBySerialNoV2({
+      waveId: "wave-1",
+      serialNo: 7,
+      signal: callerSignal,
+    });
+
+    jest.runOnlyPendingTimers();
+    expect(requestSignal).toBeDefined();
+
+    (callerSignal as { aborted: boolean }).aborted = true;
+    abortListener?.();
+
+    await expect(previewPromise).rejects.toBe(abortError);
+    expect(requestSignal?.aborted).toBe(true);
   });
 });

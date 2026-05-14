@@ -246,6 +246,7 @@ describe("WaveDropLinkPreview", () => {
         serial_nos: "7",
         page_size: "1",
       },
+      signal: expect.objectContaining({ aborted: false }),
     });
   });
 
