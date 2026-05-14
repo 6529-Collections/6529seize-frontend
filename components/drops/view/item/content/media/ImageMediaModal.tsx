@@ -94,14 +94,20 @@ export function ImageMediaModal({
     );
   };
 
-  const handleExpandedImageClick = (
-    event: React.MouseEvent<HTMLImageElement>
+  const handleExpandedImageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.stopPropagation();
 
+    const image = imageRef.current;
+    if (!image || event.detail === 0) {
+      onClose();
+      return;
+    }
+
     if (
       !isPointInsideRenderedImage(
-        event.currentTarget,
+        image,
         event.clientX,
         event.clientY
       )
@@ -133,17 +139,19 @@ export function ImageMediaModal({
         {() => (
           <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
             <div className="tw-pointer-events-auto tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
-              <div
-                className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center"
-                onClick={onClose}
-              >
+              <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   wrapperStyle={{ width: "95vw", height: "90dvh" }}
                   contentStyle={{ width: "95vw", height: "90dvh" }}
                 >
-                  <div className="tw-relative tw-h-full tw-w-full">
+                  <button
+                    type="button"
+                    aria-label="Close modal"
+                    className="tw-relative tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-p-0"
+                    onClick={handleExpandedImageButtonClick}
+                  >
                     {/* Drop media can come from arbitrary hosts outside Next image config. */}
                     <FallbackImage
                       ref={imageRef}
@@ -158,9 +166,8 @@ export function ImageMediaModal({
                         objectPosition: "center",
                         pointerEvents: "auto",
                       }}
-                      onClick={handleExpandedImageClick}
                     />
-                  </div>
+                  </button>
                 </TransformComponent>
               </div>
             </div>
