@@ -219,10 +219,9 @@ describe("WaveDropLinkPreview", () => {
   });
 
   it("fetches by serial number", async () => {
-    const drop = buildDropV2();
+    const drop = buildDropV2({ wave: buildWaveOverview() });
     commonApiFetchMock.mockResolvedValue({
-      drops: [drop],
-      wave: buildWaveOverview(),
+      data: [drop],
     });
 
     renderWithQueryClient(
@@ -242,11 +241,10 @@ describe("WaveDropLinkPreview", () => {
       );
     });
     expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "v2/waves/wave-1/drops",
+      endpoint: "v2/drops",
       params: {
-        limit: "1",
-        serial_no_limit: "7",
-        search_strategy: "FIND_BOTH",
+        serial_nos: "7",
+        page_size: "1",
       },
     });
   });
@@ -316,8 +314,7 @@ describe("WaveDropLinkPreview", () => {
 
   it("falls back to a not-found quote when the drop is missing", async () => {
     commonApiFetchMock.mockResolvedValue({
-      drops: [],
-      wave: { id: "wave-1", name: "Rank Wave" },
+      data: [],
     });
 
     renderWithQueryClient(

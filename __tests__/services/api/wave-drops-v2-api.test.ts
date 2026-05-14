@@ -8,6 +8,7 @@ import {
   fetchBoostedDropsV2,
   fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
+  fetchDropsV2ByIds,
   fetchDropV2ById,
   fetchWaveDropsFeedV2,
   mapLeaderboardDropV2,
@@ -460,5 +461,74 @@ describe("fetchDropV2ById", () => {
     );
     expect(result.metadata).toEqual([...priorityMetadata, ...fullMetadata]);
     expect(result.top_raters).toEqual([]);
+  });
+});
+
+describe("fetchDropsV2ByIds", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("fetches multiple drops through the v2 drops ids filter", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [
+        { ...createDrop(1), id: "drop-1", wave },
+        { ...createDrop(1), id: "drop-2", wave },
+      ],
+      page: 1,
+      next: false,
+    });
+
+    const result = await fetchDropsV2ByIds({
+      dropIds: ["drop-1", "drop-2"],
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/drops",
+      params: {
+        ids: "drop-1,drop-2",
+        page_size: "2",
+      },
+      signal: undefined,
+    });
+    expect(result.map((drop) => drop.id)).toEqual(["drop-1", "drop-2"]);
+    expect(result[0]?.wave).toEqual(
+      expect.objectContaining({
+        id: "wave-1",
+        name: "Wave 1",
+      })
+    );
+  });
+
+  it("keeps ids-filter hydration lean by default", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [createEnrichableDrop({ wave })],
+      page: 1,
+      next: false,
+    });
+
+    const result = await fetchDropsV2ByIds({
+      dropIds: ["drop-1"],
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expectNoListEnrichmentCalls();
+    expect(result[0]?.metadata).toEqual(priorityMetadata);
+    expect(result[0]?.top_raters).toEqual([]);
+  });
+
+  it("omits malformed ids-filter drops without embedded wave data", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [createDrop(1)],
+      page: 1,
+      next: false,
+    });
+
+    const result = await fetchDropsV2ByIds({
+      dropIds: ["drop-1"],
+    });
+
+    expect(result).toEqual([]);
   });
 });

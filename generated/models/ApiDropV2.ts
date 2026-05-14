@@ -25,6 +25,7 @@ import { ApiIdentityOverview } from '../models/ApiIdentityOverview';
 import { ApiMentionedWaveV2 } from '../models/ApiMentionedWaveV2';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
 import { ApiSubmissionDropContext } from '../models/ApiSubmissionDropContext';
+import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
@@ -52,6 +53,7 @@ export class ApiDropV2 {
     'reply_to_drop'?: ApiReplyToDropV2;
     'submission_context'?: ApiSubmissionDropContext;
     'context_profile_context'?: ApiDropV2ContextProfileContext;
+    'wave'?: ApiWaveOverview;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -200,6 +202,12 @@ export class ApiDropV2 {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiDropV2ContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "wave",
+            "baseName": "wave",
+            "type": "ApiWaveOverview",
             "format": ""
         }    ];
 
