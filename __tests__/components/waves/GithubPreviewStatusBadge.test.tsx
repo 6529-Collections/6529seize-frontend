@@ -263,7 +263,7 @@ describe("GithubPreviewStatusBadge", () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(60 * 1000);
+      jest.advanceTimersByTime(30 * 1000);
       await Promise.resolve();
     });
 

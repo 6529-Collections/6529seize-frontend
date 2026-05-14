@@ -124,7 +124,7 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
     "tw-border-amber-400/40 tw-bg-amber-950/90 tw-text-amber-100 tw-shadow-amber-950/40",
 };
 
-const VISIBLE_REFRESH_INTERVAL_MS = 60 * 1000;
+const VISIBLE_REFRESH_INTERVAL_MS = 30 * 1000;
 
 type GithubStatusState =
   | { readonly type: "idle" }
