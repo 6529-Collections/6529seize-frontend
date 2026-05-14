@@ -201,7 +201,7 @@ export default function GithubPreviewStatusBadge({
     observer.observe(badge);
 
     return () => observer.disconnect();
-  }, [githubInfo, status.type]);
+  }, [githubInfo]);
 
   useEffect(() => {
     if (!githubInfo) {
