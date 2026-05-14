@@ -102,6 +102,7 @@ const LINK_PREVIEW_METADATA_ERROR_MESSAGE =
   "Failed to fetch link preview metadata.";
 const LINK_PREVIEW_METADATA_TIMEOUT_ERROR_MESSAGE = `${LINK_PREVIEW_METADATA_ERROR_MESSAGE} Request timed out.`;
 const OPENSEA_CACHE_KEY_SUFFIX = "|opensea-v3-token-uri-fallback";
+const GITHUB_CACHE_KEY_SUFFIX = "|github-preview-state-v1";
 
 const linkPreviewCache = new LruTtlCache<string, Promise<LinkPreviewResponse>>({
   max: LINK_PREVIEW_CACHE_MAX_ITEMS,
@@ -113,8 +114,12 @@ const normalizeUrl = (url: string): string => url.trim();
 const buildCacheKey = (url: string): string => {
   try {
     const parsed = new URL(url);
-    if (matchesDomainOrSubdomain(parsed.hostname.toLowerCase(), "opensea.io")) {
+    const hostname = parsed.hostname.toLowerCase();
+    if (matchesDomainOrSubdomain(hostname, "opensea.io")) {
       return `${url}${OPENSEA_CACHE_KEY_SUFFIX}`;
+    }
+    if (matchesDomainOrSubdomain(hostname, "github.com")) {
+      return `${url}${GITHUB_CACHE_KEY_SUFFIX}`;
     }
   } catch {
     // fall through to default key

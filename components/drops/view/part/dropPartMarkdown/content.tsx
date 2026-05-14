@@ -1,6 +1,7 @@
 import type { ClassAttributes, HTMLAttributes, ReactNode } from "react";
 import { Children, Fragment, isValidElement } from "react";
 import type { ExtraProps } from "react-markdown";
+import emojiRegex from "emoji-regex";
 
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
@@ -54,7 +55,25 @@ interface MarkdownContentRenderers {
   readonly processContent: (content: string | null) => string | null;
 }
 
-const emojiRegex = /(:\w+:)/g;
+const customEmojiRegex = /(:\w+:)/g;
+const nativeEmojiRegex = emojiRegex();
+
+const containsOnlyNativeEmojis = (str: string): boolean => {
+  const text = str.trim();
+  if (!text) {
+    return true;
+  }
+
+  nativeEmojiRegex.lastIndex = 0;
+  let hasEmoji = false;
+  const textWithoutEmojis = text.replace(nativeEmojiRegex, () => {
+    hasEmoji = true;
+    return "";
+  });
+  nativeEmojiRegex.lastIndex = 0;
+
+  return hasEmoji && textWithoutEmojis.trim() === "";
+};
 
 export const createMarkdownContentRenderers = ({
   textSizeClass,
@@ -145,16 +164,12 @@ export const createMarkdownContentRenderers = ({
       ),
     };
 
-    const isEmoji = (str: string): boolean => {
-      const emojiTextRegex =
-        /^(?:\ud83c[\udffb-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udfff]|\ud83e[\udd00-\uddff]|\u00a9|\u00ae|\u200d|\u203c|\u2049|\u2122|\u2139|\u2194-\u21aa|\u231a-\u23fa|\u24c2|\u25aa-\u25fe|\u2600-\u27bf|\u2934-\u2b55|\u3030|\u303d|\u3297|\u3299|\ufe0f)$/;
-      return emojiTextRegex.test(str.trim());
-    };
-
     const areAllPartsEmojis = content
-      .split(emojiRegex)
+      .split(customEmojiRegex)
       .filter((part) => !!part)
-      .every((part) => part.match(emojiRegex) || isEmoji(part));
+      .every(
+        (part) => part.match(customEmojiRegex) || containsOnlyNativeEmojis(part)
+      );
 
     let currentContent = content;
 
@@ -185,9 +200,9 @@ export const createMarkdownContentRenderers = ({
           return <DropListItemContentPart key={randomId} part={partProps} />;
         }
 
-        const segments = part.split(emojiRegex);
+        const segments = part.split(customEmojiRegex);
         return segments.map((segment) =>
-          segment.match(emojiRegex) ? (
+          segment.match(customEmojiRegex) ? (
             <Fragment key={getRandomObjectId()}>
               {renderEmoji(segment, areAllPartsEmojis)}
             </Fragment>

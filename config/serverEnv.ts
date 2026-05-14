@@ -12,6 +12,8 @@ const getServerEnv = (): ServerEnv | null => {
   const raw = {
     SSR_CLIENT_ID: process.env["SSR_CLIENT_ID"],
     SSR_CLIENT_SECRET: process.env["SSR_CLIENT_SECRET"],
+    GITHUB_LINK_STATUS_PREVIEW_TOKEN:
+      process.env["GITHUB_LINK_STATUS_PREVIEW_TOKEN"],
   };
 
   const parsed = serverEnvSchema.safeParse(raw);

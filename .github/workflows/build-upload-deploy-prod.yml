@@ -142,6 +142,7 @@ jobs:
           SSR_CLIENT_ID: ${{ secrets.SSR_CLIENT_ID }}
           SSR_CLIENT_SECRET: ${{ secrets.SSR_CLIENT_SECRET }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
         run: |
           aws elasticbeanstalk update-environment \
             --application-name "${{ env.BEANSTALK_APP_NAME }}" \
@@ -151,6 +152,7 @@ jobs:
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_ID,Value=${SSR_CLIENT_ID}" \
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SSR_CLIENT_SECRET,Value=${SSR_CLIENT_SECRET}" \
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=ALCHEMY_API_KEY,Value=${ALCHEMY_API_KEY}" \
+              "Namespace=aws:elasticbeanstalk:application:environment,OptionName=GITHUB_LINK_STATUS_PREVIEW_TOKEN,Value=${GITHUB_LINK_STATUS_PREVIEW_TOKEN}" \
               "Namespace=aws:elasticbeanstalk:application:environment,OptionName=SENTRY_SERVER_INSTRUMENTATION,Value=false"
 
       - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
