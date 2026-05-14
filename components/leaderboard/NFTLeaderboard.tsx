@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { cicToType, numberWithCommas } from "@/helpers/Helpers";
 import Pagination from "../pagination/Pagination";
@@ -101,6 +101,7 @@ export interface NftTDHRanked extends NftTDH {
 }
 
 export default function NFTLeaderboard(props: Readonly<Props>) {
+  const leaderboardSectionRef = useRef<HTMLElement | null>(null);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [leaderboard, setLeaderboard] = useState<NftTDHRanked[]>([]);
@@ -213,8 +214,20 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
     );
   }
 
+  const handleLeaderboardPageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+    leaderboardSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
   return (
-    <section className="tw-pt-8" id="nft-leaderboard">
+    <section
+      ref={leaderboardSectionRef}
+      className="tw-scroll-mt-24 tw-pt-8"
+      id="nft-leaderboard"
+    >
       <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
           Collectors leaderboard
@@ -232,12 +245,12 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               <th
                 colSpan={2}
                 aria-hidden="true"
-                className="tw-border-0 tw-px-4 tw-py-3"
+                className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3"
               />
               <th
                 colSpan={3}
                 scope="colgroup"
-                className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-300"
+                className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-300"
               >
                 This Card
               </th>
@@ -263,7 +276,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 Collector{" "}
                 {totalResults > 0 && `x${totalResults.toLocaleString()}`}
               </th>
-              {printSortableHeader("Balance", Sort.balance)}
+              {printSortableHeader("Balance", Sort.balance, "tw-border-l")}
               {printSortableHeader("TDH", Sort.boosted_tdh)}
               {printSortableHeader("Unweighted TDH", Sort.tdh__raw)}
               {printSortableHeader(
@@ -294,7 +307,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                       level={lead.level}
                     />
                   </td>
-                  <td className={tableCellClassName}>
+                  <td className={`${tableCellClassName} tw-border-l`}>
                     {numberWithCommas(lead.balance)}
                   </td>
                   <td className={tableCellClassName}>
@@ -329,9 +342,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             page={page}
             pageSize={PAGE_SIZE}
             totalResults={totalResults}
-            setPage={function (newPage: number) {
-              setPage(newPage);
-            }}
+            setPage={handleLeaderboardPageChange}
           />
         </div>
       )}

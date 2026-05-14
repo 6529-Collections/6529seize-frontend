@@ -17,7 +17,14 @@ import { numberWithCommas } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import { fetchUrl } from "@/services/6529api";
 import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+const SECTION_HEADER_TITLE_CLASS =
+  "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
+const METRIC_LABEL_CLASS =
+  "tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
+const METRIC_VALUE_CLASS =
+  "tw-text-lg tw-font-semibold tw-leading-6 tw-text-white";
 
 function formatEthVolume(volume: number) {
   if (volume <= 0) {
@@ -34,6 +41,7 @@ export function MemePageActivity(
     pageSize: number;
   }>
 ) {
+  const activitySectionRef = useRef<HTMLElement | null>(null);
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
   const [activity, setActivity] = useState<Transaction[]>([]);
@@ -155,34 +163,36 @@ export function MemePageActivity(
     return;
   }, [activity, activityLoading, props.nft]);
 
+  const handleActivityPageChange = useCallback((newPage: number) => {
+    setActivityPage(newPage);
+    activitySectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
   if (props.show && props.nft) {
     return (
       <section className="tw-space-y-8">
         <section>
           <div className="tw-flex tw-items-center tw-gap-3">
             <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
-            <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-              Card volumes
-            </h3>
+            <h3 className={SECTION_HEADER_TITLE_CLASS}>Card volumes</h3>
             <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
           </div>
-          <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-start tw-gap-x-12 tw-gap-y-6">
+          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-start tw-gap-x-16 tw-gap-y-6">
             {volumeStats.map((stat) => (
-              <div key={stat.label} className="tw-min-w-32">
-                <div className="tw-mb-1.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400">
-                  {stat.label}
-                </div>
-                <div className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
-                  {stat.value}
-                </div>
+              <div key={stat.label}>
+                <div className={METRIC_LABEL_CLASS}>{stat.label}</div>
+                <div className={METRIC_VALUE_CLASS}>{stat.value}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section>
+        <section ref={activitySectionRef} className="tw-scroll-mt-24">
           <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
-            <h3 className="tw-mb-0 tw-shrink-0 tw-whitespace-nowrap tw-text-lg tw-font-semibold tw-text-iron-100">
+            <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
               Card Activity
             </h3>
             <div className="tw-w-full tw-shrink-0 md:tw-w-72">
@@ -205,10 +215,7 @@ export function MemePageActivity(
               page={activityPage}
               pageSize={props.pageSize}
               totalResults={activityTotalResults}
-              setPage={function (newPage: number) {
-                setActivityPage(newPage);
-                window.scrollTo(0, 0);
-              }}
+              setPage={handleActivityPageChange}
             />
           </div>
         )}

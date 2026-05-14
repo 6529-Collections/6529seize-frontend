@@ -25,9 +25,16 @@ const nft = {
   total_volume: 0,
 } as any;
 
+const scrollIntoViewMock = jest.fn();
+
 beforeEach(() => {
   fetchUrlMock.mockResolvedValue({ count: 0, data: [] });
   window.scrollTo = jest.fn();
+  scrollIntoViewMock.mockClear();
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    configurable: true,
+    value: scrollIntoViewMock,
+  });
 });
 
 afterEach(() => {
@@ -274,7 +281,10 @@ describe("MemePageActivity", () => {
       await userEvent.type(input, "2{enter}");
 
       await waitFor(() => {
-        expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+        expect(scrollIntoViewMock).toHaveBeenCalledWith({
+          behavior: "smooth",
+          block: "start",
+        });
       });
     });
   });

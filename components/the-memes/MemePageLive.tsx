@@ -98,7 +98,7 @@ function MemePageAdditionalDetailsAccordion({
       >
         <span className="tw-flex tw-items-center tw-gap-3">
           <span
-            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-2 tw-transition-colors tw-duration-300 tw-ease-out ${
+            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-1.5 tw-transition-colors tw-duration-300 tw-ease-out ${
               isOpen
                 ? "tw-bg-primary-500 tw-text-iron-100"
                 : "tw-bg-iron-900 tw-text-iron-500 group-hover:tw-text-iron-100"
@@ -106,7 +106,7 @@ function MemePageAdditionalDetailsAccordion({
           >
             <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           </span>
-          <span className="tw-whitespace-nowrap tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-300 tw-transition-colors tw-duration-300 tw-ease-out group-hover:tw-text-iron-50 md:tw-text-xl">
+          <span className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
             Additional details
           </span>
         </span>

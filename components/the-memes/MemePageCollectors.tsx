@@ -11,14 +11,14 @@ export function MemePageCollectorsRightMenu(props: {
   if (props.show && props.nft) {
     return (
       <section>
-        <div className="tw-flex tw-items-center tw-gap-3">
+        <div className="tw-mb-2 tw-flex tw-items-center tw-gap-3">
           <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
           <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
             TDH breakdown
           </h3>
           <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
         </div>
-        <div className="tw-mt-8 tw-flex tw-flex-wrap tw-items-start tw-gap-x-12 tw-gap-y-6">
+        <div className="tw-mt-6 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-12 lg:tw-grid-cols-3">
           <TdhBreakdownMetric
             label="TDH"
             value={numberWithCommas(
@@ -52,9 +52,9 @@ function TdhBreakdownMetric({
   readonly active?: boolean | undefined;
 }) {
   return (
-    <div className="tw-min-w-32">
+    <div className="tw-min-w-0">
       <div
-        className={`tw-mb-1.5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-leading-4 ${
+        className={`tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 ${
           active ? "tw-text-primary-400" : "tw-text-iron-400"
         }`}
       >
@@ -63,7 +63,7 @@ function TdhBreakdownMetric({
         )}
         <span>{label}</span>
       </div>
-      <div className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
+      <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6">
         {value}
       </div>
     </div>

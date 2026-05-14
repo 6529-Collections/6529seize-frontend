@@ -119,7 +119,7 @@ export default function NFTMarketplaceLinks({
         >
           {marketplace.imageSrc.endsWith(".svg") ? (
             <img
-              className="tw-rounded-full"
+              className="tw-size-6 tw-rounded-full md:tw-size-7"
               src={marketplace.imageSrc}
               alt={marketplace.alt}
               width={size}
@@ -128,7 +128,7 @@ export default function NFTMarketplaceLinks({
           ) : (
             <Image
               unoptimized
-              className="tw-rounded-full"
+              className="tw-size-6 tw-rounded-full md:tw-size-7"
               src={marketplace.imageSrc}
               alt={marketplace.alt}
               width={size}

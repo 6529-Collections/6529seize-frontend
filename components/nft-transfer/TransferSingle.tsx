@@ -105,12 +105,13 @@ function TransferSingleImpl(props: TransferSingleProps) {
 
   const [showModal, setShowModal] = useState(false);
 
-  const transferButtonText = useMemo(() => {
+  const transferButtonAriaLabel = useMemo(() => {
     if (contractType === ContractType.ERC721) {
       return "Transfer";
     }
-    if (selectedQty > 1) {
-      return `Transfer ${selectedQty} copies`;
+    const quantity = Math.max(1, selectedQty);
+    if (quantity > 1) {
+      return `Transfer ${quantity} copies`;
     }
     return "Transfer 1 copy";
   }, [selectedQty, contractType]);
@@ -120,14 +121,14 @@ function TransferSingleImpl(props: TransferSingleProps) {
   }
 
   const transferTitle = (
-    <div className="tw-flex tw-items-center tw-gap-2">
-      <span className="tw-text-lg tw-font-medium">Transfer</span>
-      <FontAwesomeIcon icon={faRightLeft} />
+    <div className="tw-flex tw-items-center tw-gap-2 tw-text-iron-300">
+      <span className="tw-text-sm tw-font-semibold">Transfer</span>
+      <FontAwesomeIcon icon={faRightLeft} className="tw-size-3.5" />
     </div>
   );
 
   const quantityToggle = max > 1 && (
-    <div className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-p-1 tw-font-medium">
+    <div className="tw-flex tw-items-center tw-justify-center tw-gap-0.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-0.5 tw-font-medium tw-shadow-sm">
       <button
         type="button"
         onClick={() => t.decQty(key)}
@@ -136,16 +137,13 @@ function TransferSingleImpl(props: TransferSingleProps) {
         className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus:tw-outline-none ${
           selectedQty <= 1
             ? "tw-cursor-not-allowed tw-bg-transparent tw-text-iron-600"
-            : "tw-cursor-pointer tw-bg-transparent tw-text-iron-200 hover:tw-bg-iron-800 hover:tw-text-iron-100"
+            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700"
         }`}
         data-testid="transfer-single-minus"
       >
-        <FontAwesomeIcon
-          icon={faMinus}
-          className="tw-size-3"
-        />
+        <FontAwesomeIcon icon={faMinus} className="tw-size-3" />
       </button>
-      <div className="tw-min-w-9 tw-select-none tw-text-center tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-100 tw-tabular-nums">
+      <div className="tw-min-w-8 tw-select-none tw-text-center tw-text-xs tw-font-semibold tw-tabular-nums tw-leading-none tw-text-iron-300">
         {selectedQty}/{max}
       </div>
       <button
@@ -155,15 +153,12 @@ function TransferSingleImpl(props: TransferSingleProps) {
         aria-label="Increase quantity"
         className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none ${
           selectedQty >= max
-            ? "tw-cursor-not-allowed tw-border-primary-500/15 tw-bg-primary-500/30 tw-text-iron-100/40"
+            ? "tw-cursor-not-allowed tw-border-primary-500/10 tw-bg-primary-500/20 tw-text-iron-500"
             : "tw-cursor-pointer tw-border-primary-500 tw-bg-primary-500 tw-text-iron-100 hover:tw-border-primary-400 hover:tw-bg-primary-400"
         }`}
         data-testid="transfer-single-plus"
       >
-        <FontAwesomeIcon
-          icon={faPlus}
-          className="tw-size-3"
-        />
+        <FontAwesomeIcon icon={faPlus} className="tw-size-3" />
       </button>
     </div>
   );
@@ -179,29 +174,35 @@ function TransferSingleImpl(props: TransferSingleProps) {
         }
         setShowModal(true);
       }}
-      className="tw-min-w-40 tw-rounded-lg tw-border-2 tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-black disabled:tw-cursor-not-allowed disabled:tw-opacity-75"
+      aria-label={transferButtonAriaLabel}
+      className="tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-950 tw-ring-1 tw-ring-inset tw-ring-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-300 hover:tw-ring-iron-300 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
       data-testid="transfer-single-submit"
     >
-      {transferButtonText}
+      <span>Transfer</span>
+      <FontAwesomeIcon
+        aria-hidden="true"
+        icon={faRightLeft}
+        className="tw-size-3.5"
+      />
     </button>
   );
 
   return (
     <div
-      className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-5 tw-py-4 tw-text-white"
+      className="tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-iron-200 tw-shadow-sm"
       data-testid="transfer-single"
     >
       {children ? (
-        <div className="tw-flex tw-items-center tw-gap-5">
+        <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-min-w-0 tw-flex-1">{children}</div>
-          <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-4">
+          <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-3">
             {quantityToggle}
             {transferButton}
           </div>
         </div>
       ) : (
         <>
-          <div className="tw-flex tw-items-center tw-gap-5">
+          <div className="tw-flex tw-items-center tw-gap-3">
             {transferTitle}
             {quantityToggle}
           </div>

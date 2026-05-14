@@ -7,7 +7,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { AuthContext } from "@/components/auth/Auth";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import { publicEnv } from "@/config/env";
@@ -64,9 +64,9 @@ const MEME_HISTORY_TABS: {
   readonly focus: MEME_HISTORY_TAB;
   readonly title: string;
 }[] = [
-  { focus: MEME_HISTORY_TAB.TIMELINE, title: "Timeline" },
   { focus: MEME_HISTORY_TAB.ACTIVITY, title: "Card Activity" },
   { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS, title: "Your Transactions" },
+  { focus: MEME_HISTORY_TAB.TIMELINE, title: "Timeline" },
 ];
 
 const MEME_FOCUS_VALUES: readonly string[] = Object.values(MEME_FOCUS);
@@ -449,9 +449,20 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
       return null;
     }
 
+    const hasMintingBox = isLastCard;
+    const cardHeaderClassName = hasMintingBox
+      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 md:tw-grid-cols-2 md:tw-gap-x-16"
+      : "tw-mb-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-16";
+    const artworkColumnClassName = hasMintingBox
+      ? "tw-order-2 tw-mt-6 tw-self-start md:tw-order-none md:tw-col-start-1 md:tw-row-start-1 md:tw-mt-0"
+      : undefined;
+    const detailsColumnClassName = hasMintingBox
+      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-4 md:tw-col-start-2 md:tw-row-start-1 md:tw-block md:[&>*]:tw-order-none md:[&>*]:tw-w-full md:[&>*:nth-child(2)]:tw-pt-8"
+      : undefined;
+
     return (
-      <div className="tw-mb-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-6">
-        <div>
+      <div className={cardHeaderClassName}>
+        <div className={artworkColumnClassName}>
           <div className={`${styles["nftImageWrapper"] ?? ""}`}>
             <MemePageArtViewer
               key={`${nft.contract}-${nft.id}`}
@@ -472,7 +483,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             />
           )}
         </div>
-        <div>
+        <div className={detailsColumnClassName}>
           {isLastCard && (
             <NowMintingCountdown
               nftId={nft.id}
@@ -589,59 +600,64 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   return (
     <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-black tw-pb-5 tw-text-white">
-      <div className="tw-mx-auto tw-w-full tw-px-4 tw-py-10 md:tw-px-6 min-[1000px]:tw-max-w-[850px] lg:tw-px-8 min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]">
+      <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-pb-8">
-          <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
-            <div className="tw-min-w-0">
-              <div className="tw-mb-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-                <h1 className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
-                  <Link
-                    href="/the-memes"
-                    className="tw-uppercase tw-text-iron-300 tw-underline tw-decoration-iron-600 tw-underline-offset-2 hover:tw-text-white"
-                  >
-                    The Memes
-                  </Link>
-                </h1>
-                {nftMeta && nft && (
-                  <>
-                    <ChevronRightIcon
-                      aria-hidden="true"
-                      className="tw-h-3 tw-w-3 tw-flex-shrink-0 tw-text-iron-500"
-                    />
-                    <div className="tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
-                      <MemeCalendarPeriods id={nft.id} />
-                    </div>
-                  </>
-                )}
-              </div>
-              {nftMeta && nft ? (
-                <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
-                  <h2 className="tw-mb-0 tw-text-lg tw-font-medium tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
-                    Card {nft.id}{" "}
-                    <span className="tw-font-light tw-text-iron-400">—</span>{" "}
-                    <span className="tw-font-semibold tw-text-iron-100">
-                      {nft.name}
-                    </span>
-                  </h2>
+          <div className="tw-flex tw-flex-col tw-gap-4">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
+              <h1 className="tw-mb-0 tw-flex tw-items-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                <Link
+                  href="/the-memes"
+                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-uppercase tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-white"
+                >
+                  <ArrowLeftIcon
+                    aria-hidden="true"
+                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                  />
+                  The Memes
+                </Link>
+              </h1>
+              {nftMeta && nft && (
+                <div className="tw-flex tw-items-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                  <MemeCalendarPeriods
+                    id={nft.id}
+                    seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                    showOnlySeasonOnMobile
+                  />
                 </div>
-              ) : (
-                isLoadingNft && <MemePageTitleSkeleton />
               )}
             </div>
             {nftMeta && nft ? (
-              <div className="tw-flex tw-shrink-0 tw-justify-end sm:tw-ml-6">
-                <NftNavigation
-                  nftId={nft.id}
-                  path="/the-memes"
-                  startIndex={1}
-                  endIndex={nftMeta.collection_size}
-                  params={searchParams}
-                />
+              <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
+                <div className="tw-min-w-0 tw-flex-1">
+                  <div className="tw-flex tw-min-w-0 tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline">
+                    <span className="tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400 sm:tw-mb-0 sm:tw-text-2xl sm:tw-font-medium sm:tw-leading-tight">
+                      Card {nft.id}
+                    </span>
+                    <span className="tw-hidden tw-font-light tw-text-iron-400 sm:tw-mx-2 sm:tw-inline">
+                      —
+                    </span>
+                    <h2 className="tw-mb-0 tw-min-w-0 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
+                      {nft.name}
+                    </h2>
+                  </div>
+                </div>
+                <div className="tw-flex tw-shrink-0 tw-justify-end">
+                  <NftNavigation
+                    nftId={nft.id}
+                    path="/the-memes"
+                    startIndex={1}
+                    endIndex={nftMeta.collection_size}
+                    params={searchParams}
+                  />
+                </div>
               </div>
             ) : (
               isLoadingNft && (
-                <div className="tw-flex tw-shrink-0 tw-justify-end sm:tw-ml-6">
-                  <MemePageNavigationSkeleton />
+                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
+                  <MemePageTitleSkeleton />
+                  <div className="tw-flex tw-shrink-0 tw-justify-end">
+                    <MemePageNavigationSkeleton />
+                  </div>
                 </div>
               )
             )}

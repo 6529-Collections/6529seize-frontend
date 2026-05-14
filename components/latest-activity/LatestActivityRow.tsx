@@ -42,7 +42,12 @@ function calculateRoyaltiesPercentage(value: number, royalties: number) {
   return Math.round((royalties / value) * 10000) / 10000;
 }
 
-export function printRoyalties(value: number, royalties: number, from: string) {
+export function printRoyalties(
+  value: number,
+  royalties: number,
+  from: string,
+  iconHeight = "25px"
+) {
   if (value == 0 || isNullAddress(from) || areEqualAddresses(from, MANIFOLD)) {
     return <></>;
   }
@@ -59,7 +64,7 @@ export function printRoyalties(value: number, royalties: number, from: string) {
         data-tooltip-id={id}
         width={0}
         height={0}
-        style={{ height: "25px", width: "auto" }}
+        style={{ height: iconHeight, width: "auto" }}
         src={`/${imgSrc}`}
         alt={imgSrc}
         className="cursor-pointer"
@@ -146,6 +151,8 @@ export default function LatestActivityRow(props: Readonly<Props>) {
     : styles["nftImage"];
   const activityIconClassName =
     "tw-h-5 tw-w-5 tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-white";
+  const activityGasIconClassName =
+    "tw-h-4 tw-w-4 tw-cursor-pointer tw-text-iron-400 tw-transition-colors hover:tw-text-white";
 
   function getNftImageSrc(nft?: NFTLite, src?: string) {
     if (!nft) {
@@ -403,13 +410,14 @@ export default function LatestActivityRow(props: Readonly<Props>) {
         {printRoyalties(
           props.tr.value,
           props.tr.royalties,
-          props.tr.from_address
+          props.tr.from_address,
+          isTailwind ? "22px" : undefined
         )}
         {printGas(
           props.tr.gas,
           props.tr.gas_gwei,
           props.tr.gas_price_gwei,
-          isTailwind ? activityIconClassName : undefined
+          isTailwind ? activityGasIconClassName : undefined
         )}
         <Link
           href={`https://etherscan.io/tx/${props.tr.transaction}`}

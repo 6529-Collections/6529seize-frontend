@@ -20,10 +20,23 @@ import {
 import Link from "next/link";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 import { Tooltip } from "react-tooltip";
-import ArtistProfileHandle from "./ArtistProfileHandle";
 
 const UNIQUE_PERCENT_TOOLTIP =
   "Unique % represents collectors diversity. Higher percentage means more different collectors.";
+const SECTION_HEADER_TITLE_CLASS =
+  "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
+const TOP_LABEL_CLASS =
+  "tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-500";
+const INLINE_METRIC_LABEL_CLASS =
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
+const COLLECTOR_GROUP_TITLE_CLASS =
+  "tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
+const MARKET_METRIC_LABEL_BASE_CLASS =
+  "tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5";
+const MARKET_METRIC_VALUE_CLASS =
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+const COLLECTOR_METRIC_VALUE_CLASS =
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 
 export function MemeCollectorsStats({
   nftMeta,
@@ -40,7 +53,7 @@ export function MemeCollectorsStats({
   return (
     <section className="tw-pt-10">
       <MemeStatsSectionHeader title="Meme Collectors" icon={UsersIcon} />
-      <div className="tw-flex tw-flex-wrap tw-gap-x-14 tw-gap-y-10 tw-pt-8">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-y-10 tw-pt-6 md:tw-grid-cols-2 md:tw-gap-x-14">
         <CollectorStatGroup
           title="Edition size"
           value={numberWithCommas(nftMeta.edition_size)}
@@ -121,9 +134,7 @@ function MemeStatsSectionHeader({
   return (
     <div className="tw-flex tw-items-center tw-gap-3">
       <Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
-      <h3 className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-        {title}
-      </h3>
+      <h3 className={SECTION_HEADER_TITLE_CLASS}>{title}</h3>
       <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
     </div>
   );
@@ -145,14 +156,10 @@ function CollectorStatGroup({
   readonly children: ReactNode;
 }) {
   return (
-    <div className={`tw-min-w-64 tw-flex-1 ${className}`}>
-      <h3 className="tw-mb-1.5 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400">
-        {title}
-      </h3>
+    <div className={`tw-min-w-0 ${className}`}>
+      <h3 className={COLLECTOR_GROUP_TITLE_CLASS}>{title}</h3>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-        <span className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
-          {value}
-        </span>
+        <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
         <CollectorRankBadge rank={rank} total={total} />
       </div>
       <div className="tw-ml-1.5 tw-mt-6 tw-space-y-3 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-800 tw-pl-5">
@@ -183,13 +190,9 @@ function CollectorDetailStat({
 
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
-      <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
-        {label}
-      </span>
+      <span className={INLINE_METRIC_LABEL_CLASS}>{label}</span>
       {icon}
-      <span className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
-        {value}
-      </span>
+      <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
       {rank !== undefined && total !== undefined && (
         <CollectorRankBadge rank={rank} total={total} />
       )}
@@ -235,52 +238,36 @@ function formatPercent(value: number) {
 
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
   const mintDate = getMintDateParts(printMintDate(nft.mint_date));
-  const primaryArtistHandle = getPrimaryArtistHandle(nft.artist_seize_handle);
-  const { profile: artistProfile } = useIdentity({
-    handleOrWallet: primaryArtistHandle,
-    initialProfile: null,
-  });
-  const artistLabel =
-    artistProfile?.handle ?? primaryArtistHandle ?? nft.artist;
-  const artistAvatarFallback = (
-    <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-400">
-      {getInitials(artistLabel)}
-    </span>
-  );
+  const artistHandles = getArtistHandles(nft.artist_seize_handle);
+  const creators =
+    artistHandles.length > 0
+      ? artistHandles.map((handle) => ({
+          handle,
+          label: handle,
+          display: handle,
+        }))
+      : [{ handle: null, label: nft.artist, display: "not available" }];
 
   return (
-    <section>
-      <div className="tw-flex tw-flex-col tw-gap-8">
-        <div>
-          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-            Created by
-          </div>
-          <div className="tw-flex tw-items-center tw-gap-2.5">
-            <ProfileAvatar
-              pfpUrl={artistProfile?.pfp}
-              size={ProfileBadgeSize.SMALL}
-              alt={`${artistLabel} avatar`}
-              fallbackContent={artistAvatarFallback}
-            />
-            <div>
-              {/* <div className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
-                {nft.artist}
-              </div> */}
-              <div className="tw-text-lg tw-font-semibold tw-leading-none tw-text-white [&_a]:tw-text-white [&_a]:tw-no-underline hover:[&_a]:tw-text-iron-300">
-                <ArtistProfileHandle nft={nft} />
-              </div>
-              {/* <div className="tw-mt-1.5 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500 [&_a]:tw-text-iron-400 [&_a]:tw-no-underline hover:[&_a]:tw-text-white">
-                <ArtistProfileHandle nft={nft} />
-              </div> */}
-            </div>
+    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-8">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-8 tw-gap-y-6">
+        <div className="tw-min-w-0">
+          <div className={TOP_LABEL_CLASS}>Created by</div>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+            {creators.map((creator) => (
+              <CreatorProfileIdentity
+                key={creator.handle ?? creator.label}
+                handle={creator.handle}
+                label={creator.label}
+                display={creator.display}
+              />
+            ))}
           </div>
         </div>
-        <div>
-          <div className="tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-            Mint date
-          </div>
-          <div className="tw-flex tw-flex-wrap tw-items-baseline">
-            <span className="tw-text-lg tw-font-semibold tw-leading-none tw-text-white">
+        <div className="tw-min-w-fit">
+          <div className={TOP_LABEL_CLASS}>Mint date</div>
+          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end">
+            <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
               {mintDate.date}
             </span>
             {mintDate.relative && (
@@ -295,6 +282,50 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
   );
 }
 
+function CreatorProfileIdentity({
+  handle,
+  label,
+  display,
+}: {
+  readonly handle: string | null;
+  readonly label: string;
+  readonly display: string;
+}) {
+  const { profile } = useIdentity({
+    handleOrWallet: handle,
+    initialProfile: null,
+  });
+  const avatarLabel = profile?.handle ?? handle ?? label;
+  const avatarFallback = (
+    <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-400">
+      {getInitials(avatarLabel)}
+    </span>
+  );
+
+  return (
+    <div className="tw-flex tw-items-center tw-gap-2.5">
+      <ProfileAvatar
+        pfpUrl={profile?.pfp}
+        size={ProfileBadgeSize.SMALL}
+        alt={`${avatarLabel} avatar`}
+        fallbackContent={avatarFallback}
+      />
+      {handle ? (
+        <Link
+          href={`/${handle}`}
+          className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline hover:tw-text-iron-300 md:tw-text-lg"
+        >
+          {display}
+        </Link>
+      ) : (
+        <span className="font-color-h tw-text-sm tw-font-semibold tw-leading-none md:tw-text-lg">
+          {display}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function getMintDateParts(value: string) {
   const normalizedValue = value.replace(/\s+/g, " ").trim();
   const match = normalizedValue.match(/^(.*?)\s*(\(.+\))$/);
@@ -306,13 +337,13 @@ function getMintDateParts(value: string) {
   return { date: match[1], relative: match[2] };
 }
 
-function getPrimaryArtistHandle(value: string | undefined) {
-  const handle = value?.split(",")[0]?.trim();
-  if (handle === undefined || handle.length === 0) {
-    return null;
-  }
-
-  return handle;
+function getArtistHandles(value: string | undefined) {
+  return (
+    value
+      ?.split(",")
+      .map((handle) => handle.trim())
+      .filter((handle) => handle.length > 0) ?? []
+  );
 }
 
 function getInitials(value: string | undefined) {
@@ -395,10 +426,10 @@ function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
 export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
   return (
     <section className="tw-pt-8">
-      <h3 className="tw-mb-4 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+      <h3 className={`${SECTION_HEADER_TITLE_CLASS} tw-mb-4`}>
         Market Overview
       </h3>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-gap-x-8">
         <MarketMetric
           label="Mint price"
           value={nft.mint_price}
@@ -451,16 +482,14 @@ function MarketMetric({
   return (
     <div>
       <div
-        className={`tw-mb-1.5 tw-text-xs tw-font-semibold tw-leading-4 ${
+        className={`${MARKET_METRIC_LABEL_BASE_CLASS} ${
           highlight ? "tw-text-primary-400" : "tw-text-iron-500"
         }`}
       >
         {label}
       </div>
       <div className="tw-flex tw-items-baseline">
-        <span className="tw-text-xl tw-font-semibold tw-leading-none tw-text-white">
-          {formattedValue}
-        </span>
+        <span className={MARKET_METRIC_VALUE_CLASS}>{formattedValue}</span>
         {unit && formattedValue !== "N/A" && (
           <span className="tw-ml-1.5 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-500">
             {unit}

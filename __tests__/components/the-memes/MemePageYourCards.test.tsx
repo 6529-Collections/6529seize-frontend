@@ -30,6 +30,11 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   ),
 }));
 
+jest.mock("@/components/nft-transfer/TransferModal", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 const mockNFT = {
   id: 123,
   name: "Test Meme",
@@ -98,7 +103,7 @@ describe("MemePageYourCardsRightMenu", () => {
 
   describe("when show is true", () => {
     describe("when no wallets connected", () => {
-      it("should display connect wallet message", () => {
+      it("should not display the ownership panel", () => {
         render(
           <MemePageYourCardsRightMenu
             show={true}
@@ -111,14 +116,13 @@ describe("MemePageYourCardsRightMenu", () => {
             myRank={undefined}
           />
         );
-        expect(
-          screen.getByText("Connect your wallet to view your cards.")
-        ).toBeInTheDocument();
+        expect(screen.queryByTestId("transfer-single")).not.toBeInTheDocument();
+        expect(screen.queryByText(/First acquired/)).not.toBeInTheDocument();
       });
     });
 
     describe("when wallets connected but no NFT balance", () => {
-      it("should display no ownership message", () => {
+      it("should not display the ownership panel", () => {
         render(
           <MemePageYourCardsRightMenu
             show={true}
@@ -131,9 +135,8 @@ describe("MemePageYourCardsRightMenu", () => {
             myRank={undefined}
           />
         );
-        expect(
-          screen.getByText("You don't own any editions of Card 123")
-        ).toBeInTheDocument();
+        expect(screen.queryByTestId("transfer-single")).not.toBeInTheDocument();
+        expect(screen.queryByText(/First acquired/)).not.toBeInTheDocument();
       });
     });
 
@@ -153,9 +156,11 @@ describe("MemePageYourCardsRightMenu", () => {
         );
 
         expect(screen.getByText("x3")).toBeInTheDocument();
-        expect(screen.getByText("You Own 3 editions")).toBeInTheDocument();
         expect(screen.getByText("1,500")).toBeInTheDocument();
         expect(screen.getByText("#5")).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: "Transfer 1 copy" })
+        ).toBeInTheDocument();
       });
 
       it("should display first acquisition date", () => {
@@ -275,9 +280,6 @@ describe("MemePageYourCardsSubMenu", () => {
             transactions={mockTxsWithFullData}
           />
         );
-        expect(
-          screen.getByText("Your Transaction History")
-        ).toBeInTheDocument();
         expect(container.querySelector(".row")).not.toBeInTheDocument();
         expect(container.querySelector(".table")).not.toBeInTheDocument();
         expect(screen.getAllByTestId("latest-activity-row")).toHaveLength(2);

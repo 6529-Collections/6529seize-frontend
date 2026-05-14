@@ -107,12 +107,12 @@ export function MemePageYourCardsRightMenu(props: {
                 }
                 thumbUrl={transferNft.thumbnail}
               >
-                <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-2">
+                <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1.5">
                   <div className="tw-flex tw-items-baseline tw-gap-1.5">
                     <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
                       Cards
                     </span>
-                    <span className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-50">{`x${props.nftBalance}`}</span>
+                    <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-200">{`x${props.nftBalance}`}</span>
                   </div>
                   {props.myRank !== undefined && props.myTDH !== undefined ? (
                     <>
@@ -120,7 +120,7 @@ export function MemePageYourCardsRightMenu(props: {
                         <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
                           TDH
                         </span>
-                        <span className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-50">
+                        <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-200">
                           {numberWithCommas(Math.round(props.myTDH.tdh))}
                         </span>
                       </div>
@@ -128,7 +128,7 @@ export function MemePageYourCardsRightMenu(props: {
                         <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
                           Rank
                         </span>
-                        <span className="tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-50">
+                        <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-200">
                           #{props.myRank.rank}
                         </span>
                       </div>

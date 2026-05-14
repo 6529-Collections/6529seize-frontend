@@ -68,7 +68,9 @@ export function MemePageArtViewer({
       <Col xs={12} className={styles["artControls"]}>
         <div className={styles["artControlsContent"]}>
           {showBalance && (
-            <div className={styles["artControlsBalance"]}>
+            <div
+              className={`${styles["artControlsBalance"] ?? ""} tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400 tw-shadow-lg`}
+            >
               <NFTImageBalance
                 contract={nft.contract}
                 tokenId={nft.id}
@@ -122,7 +124,7 @@ export function MemePageArtViewer({
               <FontAwesomeIcon
                 aria-hidden="true"
                 icon={faExpandAlt}
-                className={styles["fullScreen"]}
+                className={`${styles["fullScreen"] ?? ""} tw-text-iron-300`}
               />
             </button>
           )}
@@ -133,57 +135,61 @@ export function MemePageArtViewer({
 
   return (
     <Container className="p-0">
-      <Row className="position-relative">
+      <Row className="g-0 position-relative">
         {hasAnimation ? (
           <>
-            <Carousel
-              className={styles["memesCarousel"]}
-              activeIndex={currentSlide}
-              controls={false}
-              interval={null}
-              indicators={false}
-              wrap={false}
-              onSelect={carouselHandlerSlide}
-            >
-              <Carousel.Item className="text-center">
-                <NFTImage
-                  nft={nft}
-                  animation={true}
-                  height={650}
-                  transparentBG={true}
-                  showOriginal={true}
-                  showBalance={false}
-                  id="the-art-fullscreen-animation"
-                />
-              </Carousel.Item>
-              {hasImage && (
+            <div className="tw-w-full tw-bg-iron-950 tw-p-0">
+              <Carousel
+                className={styles["memesCarousel"]}
+                activeIndex={currentSlide}
+                controls={false}
+                interval={null}
+                indicators={false}
+                wrap={false}
+                onSelect={carouselHandlerSlide}
+              >
                 <Carousel.Item className="text-center">
                   <NFTImage
                     nft={nft}
-                    animation={false}
+                    animation={true}
                     height={650}
-                    showBalance={false}
                     transparentBG={true}
                     showOriginal={true}
-                    id="the-art-fullscreen-img"
+                    showBalance={false}
+                    id="the-art-fullscreen-animation"
                   />
                 </Carousel.Item>
-              )}
-            </Carousel>
+                {hasImage && (
+                  <Carousel.Item className="text-center">
+                    <NFTImage
+                      nft={nft}
+                      animation={false}
+                      height={650}
+                      showBalance={false}
+                      transparentBG={true}
+                      showOriginal={true}
+                      id="the-art-fullscreen-img"
+                    />
+                  </Carousel.Item>
+                )}
+              </Carousel>
+            </div>
             {printArtworkControls()}
           </>
         ) : (
           <>
             {hasImage && (
-              <NFTImage
-                nft={nft}
-                animation={false}
-                height={650}
-                transparentBG={true}
-                showOriginal={true}
-                showBalance={false}
-                id="the-art-fullscreen-img"
-              />
+              <div className="tw-w-full tw-bg-iron-950">
+                <NFTImage
+                  nft={nft}
+                  animation={false}
+                  height={650}
+                  transparentBG={true}
+                  showOriginal={true}
+                  showBalance={false}
+                  id="the-art-fullscreen-img"
+                />
+              </div>
             )}
             {printArtworkControls()}
           </>

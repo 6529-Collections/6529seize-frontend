@@ -95,7 +95,7 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   column-gap: 1rem;
   align-items: center;
-  padding: 0 1.25rem;
+  padding: 0;
 }
 
 .artControlsBalance {
@@ -106,9 +106,6 @@
   justify-self: start;
   height: 1.75rem;
   padding: 0 0.625rem;
-  border: 1px solid variables.$almost-very-dark-grey;
-  border-radius: 12px;
-  background-color: transparent;
 }
 
 .artControlsBalance span {
@@ -118,7 +115,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: variables.$lightest-grey !important;
+  color: inherit !important;
 }
 
 .artControlsCenter {
@@ -135,7 +132,7 @@
 
 .artControlsFormatLabel {
   min-width: 4.25rem;
-  color: variables.$font-color;
+  color: variables.$lightest-grey;
   text-align: center;
   font-size: 0.8125rem;
   font-weight: 700;
@@ -152,7 +149,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid variables.$almost-very-dark-grey;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: variables.$lightest-grey;
   padding: 0;
@@ -187,7 +184,7 @@
   justify-content: center;
   justify-self: end;
   border: 1px solid variables.$almost-very-dark-grey;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
   color: variables.$font-color;
   padding: 0;
@@ -234,6 +231,37 @@
 .memesCarousel {
   position: relative;
   z-index: 2;
+  height: clamp(360px, 58vw, 650px);
+  overflow: hidden;
+}
+
+.memesCarousel :global(.carousel-inner),
+.memesCarousel :global(.carousel-item) {
+  height: 100%;
+}
+
+.memesCarousel :global(.carousel-item.active),
+.memesCarousel :global(.carousel-item-next),
+.memesCarousel :global(.carousel-item-prev) {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.memesCarousel :global(.carousel-item > .col) {
+  height: 100%;
+  max-height: 100% !important;
+}
+
+.memesCarousel :global(.carousel-item iframe),
+.memesCarousel :global(.carousel-item video),
+.memesCarousel :global(.carousel-item model-viewer) {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+.memesCarousel :global(.carousel-item img) {
+  max-height: 100% !important;
 }
 
 .memesCarousel :global(.carousel-control-prev),

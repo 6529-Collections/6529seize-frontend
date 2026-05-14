@@ -208,7 +208,7 @@ export function MemePageArt(props: {
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-14 lg:tw-grid-cols-2">
         <AdditionalDetailsSection title="Stats" icon={ChartBarIcon}>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-x-12 tw-gap-y-8 sm:tw-grid-cols-2">
+          <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-12 sm:tw-gap-y-8">
             {statsRows.map((row) => (
               <MetricBlock key={row.key} label={row.label} value={row.value} />
             ))}
@@ -217,7 +217,7 @@ export function MemePageArt(props: {
 
         <AdditionalDetailsSection title="Boosts" icon={BoltIcon}>
           {boostRows.length > 0 ? (
-            <div className="tw-grid tw-grid-cols-1 tw-gap-x-12 tw-gap-y-8 sm:tw-grid-cols-2">
+            <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-12 sm:tw-gap-y-8">
               {boostRows.map((attribute) => (
                 <MetricBlock
                   key={attribute.trait_type}
@@ -281,6 +281,15 @@ function ArweaveLinkRow({ row }: { readonly row: MediaRow }) {
         {row.url}
       </Link>
       <div className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-4 md:tw-ml-auto md:tw-w-auto md:tw-shrink-0">
+        {row.downloadName && (
+          <Download
+            href={row.url}
+            name={row.downloadName}
+            extension={row.extension ?? ""}
+            variant="text"
+            alwaysShowText={true}
+          />
+        )}
         <Link
           href={row.url}
           target="_blank"
@@ -291,15 +300,6 @@ function ArweaveLinkRow({ row }: { readonly row: MediaRow }) {
           Open
           <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
         </Link>
-        {row.downloadName && (
-          <Download
-            href={row.url}
-            name={row.downloadName}
-            extension={row.extension ?? ""}
-            variant="text"
-            alwaysShowText={true}
-          />
-        )}
       </div>
     </div>
   );
@@ -360,7 +360,7 @@ function MetricBlock({
         )}
         {label}
       </div>
-      <div className="tw-text-lg tw-font-semibold tw-leading-6 tw-text-white">
+      <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6">
         {value}
       </div>
     </div>
