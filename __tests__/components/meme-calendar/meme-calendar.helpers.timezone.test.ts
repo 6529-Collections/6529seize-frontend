@@ -83,7 +83,8 @@ describe("meme calendar timezone handling", () => {
     const beforeRollbackMint = nextMintDateOnOrAfter(isoDate(2024, 9, 24)); // Fri, 25 Oct 2024
     expect(beforeRollbackMint.toISOString()).toBe("2024-10-25T00:00:00.000Z");
 
-    const beforeRollbackStart = mintStartInstantUtcForMintDay(beforeRollbackMint);
+    const beforeRollbackStart =
+      mintStartInstantUtcForMintDay(beforeRollbackMint);
     const beforeRollbackEnd = mintEndInstantUtcForMintDay(beforeRollbackMint);
 
     expect(beforeRollbackStart.toISOString()).toBe("2024-10-25T14:40:00.000Z");
