@@ -1,6 +1,7 @@
 import {
   formatUtcMonth,
   formatUtcMonthYear,
+  formatFullDate,
   mintStartInstantUtcForMintDay,
   nextMintDateOnOrAfter,
   wallTimeToUtcInstantInZone,
@@ -82,7 +83,8 @@ describe("meme calendar timezone handling", () => {
     const beforeRollbackMint = nextMintDateOnOrAfter(isoDate(2024, 9, 24)); // Fri, 25 Oct 2024
     expect(beforeRollbackMint.toISOString()).toBe("2024-10-25T00:00:00.000Z");
 
-    const beforeRollbackStart = mintStartInstantUtcForMintDay(beforeRollbackMint);
+    const beforeRollbackStart =
+      mintStartInstantUtcForMintDay(beforeRollbackMint);
     const beforeRollbackEnd = mintEndInstantUtcForMintDay(beforeRollbackMint);
 
     expect(beforeRollbackStart.toISOString()).toBe("2024-10-25T14:40:00.000Z");
@@ -142,5 +144,19 @@ describe("meme calendar timezone handling", () => {
 
     expect(formatUtcMonth(seasonStart, "long")).toBe("January");
     expect(formatUtcMonthYear(seasonStart)).toBe("Jan 2026");
+  });
+
+  it("formats UTC mint days without shifting to the viewer's previous local day", () => {
+    const fridayMintDay = isoDate(2026, 4, 15);
+    const losAngelesLabel = fridayMintDay.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      timeZone: "America/Los_Angeles",
+    });
+
+    expect(losAngelesLabel).toBe("Thu, May 14, 2026");
+    expect(formatFullDate(fridayMintDay, "utc")).toBe("Fri, May 15, 2026");
   });
 });

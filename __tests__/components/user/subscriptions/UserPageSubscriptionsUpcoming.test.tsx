@@ -211,6 +211,23 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(screen.getByText("2024-01-02 / Tuesday")).toBeInTheDocument();
   });
 
+  it("formats upcoming mint days as UTC calendar days", () => {
+    const {
+      formatFullDate,
+    } = require("@/components/meme-calendar/meme-calendar.helpers");
+
+    renderComponent();
+
+    expect(formatFullDate).toHaveBeenCalledWith(
+      mockUpcomingRows[0].utcDay,
+      "utc"
+    );
+    expect(formatFullDate).toHaveBeenCalledWith(
+      mockUpcomingRows[1].utcDay,
+      "utc"
+    );
+  });
+
   it("shows minting today message when applicable", () => {
     const {
       isMintingToday,

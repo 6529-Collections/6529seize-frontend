@@ -55,6 +55,67 @@ export function ImageMediaModal({
 
   useKeyPressEvent("Escape", onClose);
 
+  const isPointInsideRenderedImage = (
+    image: HTMLImageElement,
+    clientX: number,
+    clientY: number
+  ) => {
+    const rect = image.getBoundingClientRect();
+    const naturalWidth = image.naturalWidth;
+    const naturalHeight = image.naturalHeight;
+
+    if (
+      rect.width <= 0 ||
+      rect.height <= 0 ||
+      naturalWidth <= 0 ||
+      naturalHeight <= 0
+    ) {
+      return true;
+    }
+
+    const imageAspectRatio = naturalWidth / naturalHeight;
+    const containerAspectRatio = rect.width / rect.height;
+    const renderedWidth =
+      imageAspectRatio > containerAspectRatio
+        ? rect.width
+        : rect.height * imageAspectRatio;
+    const renderedHeight =
+      imageAspectRatio > containerAspectRatio
+        ? rect.width / imageAspectRatio
+        : rect.height;
+    const renderedLeft = rect.left + (rect.width - renderedWidth) / 2;
+    const renderedTop = rect.top + (rect.height - renderedHeight) / 2;
+
+    return (
+      clientX >= renderedLeft &&
+      clientX <= renderedLeft + renderedWidth &&
+      clientY >= renderedTop &&
+      clientY <= renderedTop + renderedHeight
+    );
+  };
+
+  const handleExpandedImageButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.stopPropagation();
+
+    const image = imageRef.current;
+    if (!image || event.detail === 0) {
+      onClose();
+      return;
+    }
+
+    if (
+      !isPointInsideRenderedImage(
+        image,
+        event.clientX,
+        event.clientY
+      )
+    ) {
+      onClose();
+    }
+  };
+
   return createPortal(
     <div
       className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
@@ -85,7 +146,12 @@ export function ImageMediaModal({
                   wrapperStyle={{ width: "95vw", height: "90dvh" }}
                   contentStyle={{ width: "95vw", height: "90dvh" }}
                 >
-                  <div className="tw-relative tw-h-full tw-w-full">
+                  <button
+                    type="button"
+                    aria-label="Close modal"
+                    className="tw-relative tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-p-0"
+                    onClick={handleExpandedImageButtonClick}
+                  >
                     {/* Drop media can come from arbitrary hosts outside Next image config. */}
                     <FallbackImage
                       ref={imageRef}
@@ -101,7 +167,7 @@ export function ImageMediaModal({
                         pointerEvents: "auto",
                       }}
                     />
-                  </div>
+                  </button>
                 </TransformComponent>
               </div>
             </div>
