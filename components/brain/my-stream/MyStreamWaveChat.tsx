@@ -7,7 +7,6 @@ import { WaveGallery } from "@/components/waves/gallery";
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import MobileMemesArtSubmissionBtn from "@/components/waves/memes/submission/MobileMemesArtSubmissionBtn";
-import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
@@ -36,7 +35,6 @@ import {
   ACCEPTED_FILE_TYPE_LABELS,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
@@ -262,8 +260,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const showCurationSubmitModal =
     activeChatSubmitDropExperience === WaveSubmissionExperience.CURATION_LEGACY;
   const closeChatSubmitDrop = onCloseChatSubmitDrop ?? noop;
-  const appChatSubmitDropTitle =
-    chatSubmitDropAction?.restrictionMessage ?? chatSubmitDropAction?.label;
   const chatCurationUrlSubmitHandler =
     chatSubmitDropAction?.isVisible === true
       ? chatSubmitDropAction.onOpenWithCurationUrl
@@ -365,7 +361,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     dragCounterRef.current = 0;
     setIsDragDropActive(false);
 
-    const droppedFiles = Array.from(event.dataTransfer.files ?? []);
+    const droppedFiles = Array.from(event.dataTransfer.files);
     if (droppedFiles.length === 0) {
       return;
     }
@@ -469,27 +465,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         />
         {!(isApp && editingDropId) && (
           <div className="tw-mt-auto">
-            {isApp && chatSubmitDropAction?.isVisible === true && (
-              <div className="tw-flex tw-flex-col tw-items-end tw-px-2 tw-pb-2">
-                <PrimaryButton
-                  loading={false}
-                  disabled={!chatSubmitDropAction.canOpen}
-                  onClicked={chatSubmitDropAction.onOpen}
-                  padding="tw-px-2.5 tw-py-2"
-                  title={appChatSubmitDropTitle}
-                  ariaLabel={chatSubmitDropAction.label}
-                >
-                  <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                  <span>{chatSubmitDropAction.compactLabel}</span>
-                </PrimaryButton>
-                {!chatSubmitDropAction.canOpen &&
-                  chatSubmitDropAction.restrictionMessage && (
-                    <p className="tw-mb-0 tw-mt-1.5 tw-text-right tw-text-xs tw-font-medium tw-text-iron-400">
-                      {chatSubmitDropAction.restrictionMessage}
-                    </p>
-                  )}
-              </div>
-            )}
             <CreateDropWaveWrapper>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}

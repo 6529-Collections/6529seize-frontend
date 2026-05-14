@@ -1,5 +1,9 @@
-import { render, waitFor } from "@testing-library/react";
+import { configureStore } from "@reduxjs/toolkit";
+import { render, screen, waitFor } from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
+import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
+import { editSlice } from "@/store/editSlice";
+import { Provider } from "react-redux";
 
 const mockRegisterWave = jest.fn();
 const mockSetQueryData = jest.fn();
@@ -15,9 +19,16 @@ const mockSearchParams = {
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
-  participation: {},
+  chat: { authenticated_user_eligible: true },
+  voting: { authenticated_user_eligible: true },
+  participation: {
+    authenticated_user_eligible: true,
+    submission_strategy: null,
+  },
+  wave: { authenticated_user_eligible_for_admin: false },
   metrics: {},
 } as any;
+let mockIsApp = false;
 
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({
@@ -40,6 +51,13 @@ jest.mock("react-use", () => ({
 
 jest.mock("@/contexts/TitleContext", () => ({
   useSetWaveData: (waveData: unknown) => mockSetWaveData(waveData),
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    activeProfileProxy: null,
+    connectedProfile: { handle: "tester" },
+  }),
 }));
 
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
@@ -77,16 +95,32 @@ jest.mock("@/hooks/useWaveViewMode", () => ({
 }));
 
 jest.mock("@/hooks/useWave", () => ({
+  SubmissionStatus: {
+    ACTIVE: "ACTIVE",
+    ENDED: "ENDED",
+    NOT_STARTED: "NOT_STARTED",
+  },
   useWave: () => ({
     isRankWave: false,
+    isApproveWave: false,
     isMemesWave: false,
+    isCurationWave: false,
+    isQuorumWave: false,
     isDm: false,
+    isChatWave: false,
+    participation: { isEligible: true },
+  }),
+}));
+
+jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
+  useApprovalWaveStatus: () => ({
+    isVotingControlsLocked: false,
   }),
 }));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({ isApp: false }),
+  default: () => ({ isApp: mockIsApp }),
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveChat", () => ({
@@ -140,18 +174,67 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveSales", () => ({
   default: () => <div data-testid="sales" />,
 }));
 
+const HeaderActionProbe = () => {
+  const { waveDropAction } = useHeaderContext();
+  return (
+    <div data-testid="header-action">{waveDropAction?.label ?? "none"}</div>
+  );
+};
+
+const renderWave = (editingDropId: string | null = null) => {
+  const store = configureStore({
+    reducer: { edit: editSlice.reducer },
+  });
+
+  if (editingDropId !== null) {
+    store.dispatch(editSlice.actions.setEditingDropId(editingDropId));
+  }
+
+  return render(
+    <Provider store={store}>
+      <HeaderProvider>
+        <MyStreamWave waveId="wave-1" />
+        <HeaderActionProbe />
+      </HeaderProvider>
+    </Provider>
+  );
+};
+
 describe("MyStreamWave registration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsApp = false;
     mockSearchParams.get.mockReturnValue(null);
     mockSearchParams.toString.mockReturnValue("");
   });
 
   it("registers the mounted wave for direct URL loads", async () => {
-    render(<MyStreamWave waveId="wave-1" />);
+    renderWave();
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+    });
+  });
+
+  it("exposes the app header drop action outside edit mode", async () => {
+    mockIsApp = true;
+
+    renderWave();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("header-action")).toHaveTextContent(
+        "Submit drop"
+      );
+    });
+  });
+
+  it("does not expose the app header drop action while editing", async () => {
+    mockIsApp = true;
+
+    renderWave("drop-1");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("header-action")).toHaveTextContent("none");
     });
   });
 });

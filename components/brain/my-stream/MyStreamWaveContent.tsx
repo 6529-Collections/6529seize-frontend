@@ -8,8 +8,13 @@ import React, {
   useState,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import { useAuth } from "@/components/auth/Auth";
 import { useSetWaveData } from "@/contexts/TitleContext";
+import {
+  type HeaderWaveDropAction,
+  useHeaderContext,
+} from "@/contexts/HeaderContext";
 import { useContentTab } from "../ContentTabContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
@@ -40,7 +45,11 @@ import {
   WaveSubmissionExperience,
 } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import type { ChatSubmitDropState } from "./chatSubmitDrop.types";
+import { selectEditingDropId } from "@/store/editSlice";
+import type {
+  ChatSubmitDropAction,
+  ChatSubmitDropState,
+} from "./chatSubmitDrop.types";
 import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
 
 export interface MyStreamWaveProps {
@@ -77,6 +86,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { isApp } = useDeviceInfo();
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const { setWaveDropAction } = useHeaderContext();
   const { waves, directMessages, registerWave } = useMyStream();
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
@@ -139,6 +149,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab } = useContentTab();
   const activeCurationId = searchParams.get("curation");
+  const loadedWaveId = wave?.id ?? null;
+  const editingDropId = useSelector(selectEditingDropId);
 
   // View mode for chat/gallery toggle
   const { viewMode, setViewMode, toggleViewMode } = useWaveViewMode(waveId);
@@ -256,6 +268,60 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     setChatSubmitDropState(null);
   }, []);
 
+  const chatSubmitDropAction = useMemo<ChatSubmitDropAction>(
+    () => ({
+      isVisible: showChatSubmitDropAction,
+      canOpen: canOpenChatSubmitDrop,
+      label: chatSubmitDropLabels.label,
+      compactLabel: chatSubmitDropLabels.compactLabel,
+      restrictionMessage: chatSubmitDropRestrictionMessage,
+      onOpen: () => openChatSubmitDrop(null),
+      onOpenWithCurationUrl: openChatSubmitDrop,
+    }),
+    [
+      canOpenChatSubmitDrop,
+      chatSubmitDropLabels.compactLabel,
+      chatSubmitDropLabels.label,
+      chatSubmitDropRestrictionMessage,
+      openChatSubmitDrop,
+      showChatSubmitDropAction,
+    ]
+  );
+
+  const headerWaveDropAction = useMemo<HeaderWaveDropAction | null>(() => {
+    if (
+      !isApp ||
+      !loadedWaveId ||
+      editingDropId !== null ||
+      activeContentTab !== MyStreamWaveTab.CHAT ||
+      activeCurationId !== null ||
+      !chatSubmitDropAction.isVisible
+    ) {
+      return null;
+    }
+
+    return {
+      waveId: loadedWaveId,
+      canOpen: chatSubmitDropAction.canOpen,
+      label: chatSubmitDropAction.label,
+      compactLabel: chatSubmitDropAction.compactLabel,
+      restrictionMessage: chatSubmitDropAction.restrictionMessage,
+      onOpen: chatSubmitDropAction.onOpen,
+    };
+  }, [
+    activeContentTab,
+    activeCurationId,
+    chatSubmitDropAction,
+    editingDropId,
+    isApp,
+    loadedWaveId,
+  ]);
+
+  useEffect(() => {
+    setWaveDropAction(headerWaveDropAction);
+    return () => setWaveDropAction(null);
+  }, [headerWaveDropAction, setWaveDropAction]);
+
   const onSelectCuration = (curationId: string | null) => {
     const params = new URLSearchParams(searchParams.toString() || "");
 
@@ -291,16 +357,6 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
           initialCurationUrl: chatSubmitDropState.initialCurationUrl,
         }
       : null;
-  const chatSubmitDropAction = {
-    isVisible: showChatSubmitDropAction,
-    canOpen: canOpenChatSubmitDrop,
-    label: chatSubmitDropLabels.label,
-    compactLabel: chatSubmitDropLabels.compactLabel,
-    restrictionMessage: chatSubmitDropRestrictionMessage,
-    onOpen: () => openChatSubmitDrop(null),
-    onOpenWithCurationUrl: openChatSubmitDrop,
-  };
-
   // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: (
