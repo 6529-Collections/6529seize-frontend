@@ -55,6 +55,61 @@ export function ImageMediaModal({
 
   useKeyPressEvent("Escape", onClose);
 
+  const isPointInsideRenderedImage = (
+    image: HTMLImageElement,
+    clientX: number,
+    clientY: number
+  ) => {
+    const rect = image.getBoundingClientRect();
+    const naturalWidth = image.naturalWidth;
+    const naturalHeight = image.naturalHeight;
+
+    if (
+      rect.width <= 0 ||
+      rect.height <= 0 ||
+      naturalWidth <= 0 ||
+      naturalHeight <= 0
+    ) {
+      return true;
+    }
+
+    const imageAspectRatio = naturalWidth / naturalHeight;
+    const containerAspectRatio = rect.width / rect.height;
+    const renderedWidth =
+      imageAspectRatio > containerAspectRatio
+        ? rect.width
+        : rect.height * imageAspectRatio;
+    const renderedHeight =
+      imageAspectRatio > containerAspectRatio
+        ? rect.width / imageAspectRatio
+        : rect.height;
+    const renderedLeft = rect.left + (rect.width - renderedWidth) / 2;
+    const renderedTop = rect.top + (rect.height - renderedHeight) / 2;
+
+    return (
+      clientX >= renderedLeft &&
+      clientX <= renderedLeft + renderedWidth &&
+      clientY >= renderedTop &&
+      clientY <= renderedTop + renderedHeight
+    );
+  };
+
+  const handleExpandedImageClick = (
+    event: React.MouseEvent<HTMLImageElement>
+  ) => {
+    event.stopPropagation();
+
+    if (
+      !isPointInsideRenderedImage(
+        event.currentTarget,
+        event.clientX,
+        event.clientY
+      )
+    ) {
+      onClose();
+    }
+  };
+
   return createPortal(
     <div
       className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
@@ -78,7 +133,10 @@ export function ImageMediaModal({
         {() => (
           <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
             <div className="tw-pointer-events-auto tw-relative tw-flex tw-h-[90dvh] tw-w-[95vw] tw-flex-col">
-              <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center">
+              <div
+                className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-justify-center"
+                onClick={onClose}
+              >
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
                   contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
@@ -100,6 +158,7 @@ export function ImageMediaModal({
                         objectPosition: "center",
                         pointerEvents: "auto",
                       }}
+                      onClick={handleExpandedImageClick}
                     />
                   </div>
                 </TransformComponent>

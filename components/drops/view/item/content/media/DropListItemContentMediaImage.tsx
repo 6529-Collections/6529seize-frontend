@@ -110,7 +110,9 @@ function DropImageContent({
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
 }) {
-  const imageClassName = `tw-max-h-full tw-max-w-full ${
+  const imageClassName = `${
+    intrinsicHeight ? "tw-max-w-full" : "tw-max-h-full tw-max-w-full"
+  } ${
     loaded ? "tw-opacity-100" : "tw-opacity-0"
   } ${disableModal ? "" : "tw-cursor-pointer"}`;
 
