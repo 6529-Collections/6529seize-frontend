@@ -67,8 +67,8 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(mediaDisplay).toHaveAttribute("data-mime", "image/*");
     expect(mediaDisplay).toHaveAttribute("data-disable", "true");
     expect(media).toContainElement(mediaDisplay);
-    expect(media).toHaveClass("tw-aspect-[16/9]");
-    expect(media).toHaveClass("tw-min-h-[14rem]");
+    expect(media).toHaveClass("tw-h-64");
+    expect(media).toHaveClass("tw-p-4");
     expect(screen.getByTestId("marketplace-item-footer")).toBeInTheDocument();
     expect(screen.getByTestId("marketplace-item-title")).toHaveTextContent(
       "Wave Artifact"

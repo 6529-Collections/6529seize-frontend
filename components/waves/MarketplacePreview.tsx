@@ -2,6 +2,7 @@
 
 import type { ReactElement } from "react";
 import MarketplaceFoundationMintPreview from "./marketplace/MarketplaceFoundationMintPreview";
+import MarketplaceGammaioPreview from "./marketplace/MarketplaceGammaioPreview";
 import MarketplaceManifoldListingPreview from "./marketplace/MarketplaceManifoldListingPreview";
 import MarketplaceOpenseaAssetPreview from "./marketplace/MarketplaceOpenseaAssetPreview";
 import MarketplaceOpenseaItemPreview from "./marketplace/MarketplaceOpenseaItemPreview";
@@ -39,6 +40,15 @@ export default function MarketplacePreview({
       content = (
         <MarketplaceFoundationMintPreview href={href} compact={compact} />
       );
+      break;
+    case "gammaio.collection":
+    case "gammaio.collection-token":
+    case "gammaio.inscription":
+    case "gammaio.ordinal":
+    case "gammaio.ordinal-inscription":
+    case "gammaio.ordinal-collection-inscription":
+    case "gammaio.stacks-nft":
+      content = <MarketplaceGammaioPreview href={href} compact={compact} />;
       break;
     case "opensea.item":
       content = <MarketplaceOpenseaItemPreview href={href} compact={compact} />;

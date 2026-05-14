@@ -36,6 +36,18 @@ export const SUPPORTED_CURATION_URL_EXAMPLES: readonly SupportedCurationUrlExamp
       example: "https://foundation.app/mint/eth/0x.../123",
     },
     {
+      label: "gammaio ordinal",
+      example: "https://gamma.io/ordinals/abc123i0",
+    },
+    {
+      label: "gammaio collection token",
+      example: "https://gamma.io/collections/collection-slug/123",
+    },
+    {
+      label: "gammaio Stacks NFT",
+      example: "https://gamma.io/stacks/nfts/SP...collection_123",
+    },
+    {
       label: "OpenSea item",
       example: "https://opensea.io/item/ethereum/0x.../123",
     },
@@ -51,6 +63,7 @@ const HAS_SCHEME_REGEX = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
 const CONTRACT_PART_REGEX = "0x[a-fA-F0-9]{40}";
 const NUMERIC_ID_PART_REGEX = "[0-9]+";
 const SLUG_ID_PART_REGEX = "[A-Za-z0-9][A-Za-z0-9._-]*";
+const GAMMAIO_ID_PART_REGEX = "[A-Za-z0-9][A-Za-z0-9._:-]*";
 const USER_PART_REGEX = "[A-Za-z0-9._-]+";
 
 const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
@@ -72,6 +85,21 @@ const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
   ],
   "foundation.app": [
     new RegExp(`^/mint/eth/${CONTRACT_PART_REGEX}/${NUMERIC_ID_PART_REGEX}/?$`),
+  ],
+  "gamma.io": [
+    new RegExp(`^/ordinals/${GAMMAIO_ID_PART_REGEX}/?$`),
+    new RegExp(`^/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`),
+    new RegExp(`^/ordinals/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`),
+    new RegExp(
+      `^/ordinals/collections/${SLUG_ID_PART_REGEX}/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`
+    ),
+    new RegExp(
+      `^/collections/${SLUG_ID_PART_REGEX}/${GAMMAIO_ID_PART_REGEX}/?$`
+    ),
+    new RegExp(
+      `^/collections/${SLUG_ID_PART_REGEX}/tokens/${GAMMAIO_ID_PART_REGEX}/?$`
+    ),
+    new RegExp(`^/stacks/nfts/${GAMMAIO_ID_PART_REGEX}/?$`),
   ],
   "opensea.io": [
     new RegExp(
