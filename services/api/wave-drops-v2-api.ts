@@ -88,6 +88,13 @@ interface FetchWaveDropsSearchV2Props {
   readonly signal?: AbortSignal | undefined;
 }
 
+interface FetchDropsV2ByIdsProps {
+  readonly dropIds: readonly string[];
+  readonly signal?: AbortSignal | undefined;
+  readonly includeFullMetadata?: boolean | undefined;
+  readonly includeTopRaters?: boolean | undefined;
+}
+
 export type ApiWaveDropsV2PageFeed = ApiWaveDropsFeed & {
   readonly count: number;
   readonly page: number;
@@ -431,6 +438,53 @@ const hydrateDropsV2 = async ({
     )
   );
 
+const hydrateDropsWithEmbeddedWavesV2 = async ({
+  drops,
+  signal,
+  includeFullMetadata = false,
+  includeTopRaters = false,
+}: {
+  readonly drops: ApiDropV2[];
+  readonly signal?: AbortSignal | undefined;
+  readonly includeFullMetadata?: boolean | undefined;
+  readonly includeTopRaters?: boolean | undefined;
+}): Promise<ApiDrop[]> => {
+  const dropsWithWaves = drops
+    .map((drop) => {
+      if (!drop.wave) {
+        return null;
+      }
+
+      return {
+        drop,
+        wave: mapApiWaveOverviewToApiWaveMin(drop.wave),
+      };
+    })
+    .filter(
+      (item): item is { readonly drop: ApiDropV2; readonly wave: ApiWaveMin } =>
+        item !== null
+    );
+
+  const results = await Promise.allSettled(
+    dropsWithWaves.map(({ drop, wave }) =>
+      hydrateDropV2({
+        drop,
+        wave,
+        signal,
+        includeFullMetadata,
+        includeTopRaters,
+      })
+    )
+  );
+
+  return results
+    .filter(
+      (result): result is PromiseFulfilledResult<ApiDrop> =>
+        result.status === "fulfilled"
+    )
+    .map((result) => result.value);
+};
+
 const getNormalizedDropId = (dropId: string): string => {
   const normalizedDropId = dropId.trim();
   if (!normalizedDropId) {
@@ -566,6 +620,33 @@ export async function fetchDropV2ById(
     signal,
     includeFullMetadata: options?.includeFullMetadata ?? false,
     includeTopRaters: options?.includeTopRaters ?? false,
+  });
+}
+
+export async function fetchDropsV2ByIds({
+  dropIds,
+  signal,
+  includeFullMetadata = false,
+  includeTopRaters = false,
+}: FetchDropsV2ByIdsProps): Promise<ApiDrop[]> {
+  if (dropIds.length === 0) {
+    return [];
+  }
+
+  const response = await commonApiFetch<ApiDropV2PageWithoutCount>({
+    endpoint: "v2/drops",
+    params: {
+      ids: dropIds.map(getNormalizedDropId).join(","),
+      page_size: dropIds.length.toString(),
+    },
+    signal,
+  });
+
+  return hydrateDropsWithEmbeddedWavesV2({
+    drops: response.data,
+    signal,
+    includeFullMetadata,
+    includeTopRaters,
   });
 }
 

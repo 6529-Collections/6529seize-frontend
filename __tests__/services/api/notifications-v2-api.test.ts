@@ -1,4 +1,5 @@
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -97,8 +98,8 @@ describe("fetchNotificationsV2", () => {
           additional_context: {
             reaction: ":green_circle:",
             reactors: [
-              { handle: "alice", pfp: "alice.png" },
-              { handle: "bob", pfp: "bob.png" },
+              { handle: "alice", pfp: "alice.png", subscribed: true },
+              { handle: "bob", pfp: "bob.png", subscribed: false },
             ],
           },
         },
@@ -127,6 +128,9 @@ describe("fetchNotificationsV2", () => {
     expect(
       response.notifications.map((n) => n.related_identity.handle)
     ).toEqual(["alice", "bob"]);
+    expect(
+      response.notifications.map((n) => n.related_identity.subscribed_actions)
+    ).toEqual([[ApiIdentitySubscriptionTargetAction.WaveCreated], []]);
     const [firstNotification] = response.notifications;
     if (
       firstNotification?.cause === ApiNotificationCause.DropReacted &&
@@ -156,7 +160,9 @@ describe("fetchNotificationsV2", () => {
           related_drops: [drop],
           additional_context: {
             reaction: ":green_circle:",
-            reactors: [{ handle: "alice", pfp: "alice-new.png" }],
+            reactors: [
+              { handle: "alice", pfp: "alice-new.png", subscribed: true },
+            ],
           },
         },
       ],

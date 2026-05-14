@@ -1112,6 +1112,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: serial_nos
+          in: query
+          description: Comma-separated list of drop serial numbers to fetch
+          required: false
+          schema:
+            type: string
         - name: contains_media
           in: query
           description: >-
@@ -2150,6 +2156,18 @@ paths:
         - name: parent_drop_id
           in: query
           description: Return replies under this parent drop.
+          required: false
+          schema:
+            type: string
+        - name: serial_nos
+          in: query
+          description: Comma-separated list of drop serial numbers to fetch.
+          required: false
+          schema:
+            type: string
+        - name: ids
+          in: query
+          description: Comma-separated list of drop IDs to fetch.
           required: false
           schema:
             type: string
@@ -10376,6 +10394,8 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropContext"
         context_profile_context:
           $ref: "#/components/schemas/ApiDropV2ContextProfileContext"
+        wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
     ApiDropV2ContextProfileContext:
       type: object
       required:
@@ -11901,8 +11921,8 @@ components:
           type: string
       description: >-
         Notification-specific additional context. For DROP_REACTED notifications
-        this includes reaction and reactors, where each reactor only has handle
-        and pfp.
+        this includes reaction and reactors, where each reactor only has handle,
+        pfp, and subscribed.
     ApiNotificationCause:
       type: string
       enum:
@@ -11920,11 +11940,15 @@ components:
         - PRIORITY_ALERT
     ApiNotificationDropReactedReactor:
       type: object
+      required:
+        - subscribed
       properties:
         handle:
           type: string
         pfp:
           type: string
+        subscribed:
+          type: boolean
     ApiNotificationsResponse:
       type: object
       required:
