@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 const nextResponseJson = jest.fn(
   (body: unknown, init?: { status?: number | undefined }) => ({
     status: init?.status ?? 200,
@@ -100,6 +104,38 @@ describe("github-preview API route", () => {
     await expect(notPlanned.json()).resolves.toMatchObject({
       state: "closed_not_planned",
     });
+  });
+
+  it("rejects GitHub URLs with partial digit issue numbers", async () => {
+    const response = await GET(
+      requestFor("https://github.com/o/r/issues/123abc")
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "Only github.com issue and pull request URLs are supported.",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("deduplicates concurrent uncached status requests", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        html_url: "https://github.com/o/r/issues/11",
+        title: "Concurrent issue",
+        state: "open",
+        state_reason: null,
+      })
+    );
+
+    const [first, second] = await Promise.all([
+      GET(requestFor("https://github.com/o/r/issues/11")),
+      GET(requestFor("https://github.com/o/r/issues/11")),
+    ]);
+
+    await expect(first.json()).resolves.toMatchObject({ state: "open" });
+    await expect(second.json()).resolves.toMatchObject({ state: "open" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("bypasses cached status when refresh is requested", async () => {

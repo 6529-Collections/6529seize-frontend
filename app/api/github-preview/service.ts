@@ -10,11 +10,13 @@ const GITHUB_API_BASE = "https://api.github.com";
 const CACHE_TTL_MS = 2 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
 const FETCH_TIMEOUT_MS = 5000;
+const GITHUB_ISSUE_OR_PULL_NUMBER_PATTERN = /^\d+$/;
 
 const cache = new LruTtlCache<string, GithubPreviewResponse>({
   max: CACHE_MAX_ITEMS,
   ttlMs: CACHE_TTL_MS,
 });
+const inFlight = new Map<string, Promise<GithubPreviewResponse>>();
 
 interface GithubResource {
   readonly owner: string;
@@ -101,7 +103,10 @@ const parseGithubResource = (rawUrl: string | null): GithubResource => {
     .split("/")
     .filter(Boolean);
   const kind = getGithubResourceKind(kindSegment);
-  const number = Number.parseInt(numberSegment ?? "", 10);
+  const isValidNumberSegment = GITHUB_ISSUE_OR_PULL_NUMBER_PATTERN.test(
+    numberSegment ?? ""
+  );
+  const number = isValidNumberSegment ? Number(numberSegment) : Number.NaN;
 
   if (!owner || !repo || !kind || !Number.isInteger(number) || number <= 0) {
     throw new Error(
@@ -380,11 +385,32 @@ export const resolveGithubPreview = async (
     return cached;
   }
 
-  const preview =
-    resource.kind === "pull"
-      ? await resolvePullPreview(resource)
-      : await resolveIssuePreview(resource);
+  if (!bypassCache) {
+    const pending = inFlight.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+  }
 
-  cache.set(cacheKey, preview);
-  return preview;
+  const previewRequest =
+    resource.kind === "pull"
+      ? resolvePullPreview(resource)
+      : resolveIssuePreview(resource);
+
+  if (bypassCache) {
+    return previewRequest;
+  }
+
+  inFlight.set(cacheKey, previewRequest);
+
+  try {
+    const preview = await previewRequest;
+    cache.set(cacheKey, preview);
+    return preview;
+  } catch (error) {
+    cache.delete(cacheKey);
+    throw error;
+  } finally {
+    inFlight.delete(cacheKey);
+  }
 };
