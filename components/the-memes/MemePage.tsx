@@ -140,7 +140,7 @@ function MemePageSkeleton() {
             <div className="tw-relative tw-h-96 tw-w-full tw-animate-pulse tw-bg-iron-800/50 sm:tw-h-[520px] lg:tw-h-[650px]" />
           </div>
         </div>
-        <div className="tw-pt-8">
+        <div className="tw-pt-6 md:tw-pt-8">
           <div className="tw-flex tw-flex-col tw-gap-8">
             <div>
               <MemePageSkeletonBlock className="tw-mb-2 tw-h-4 tw-w-24" />
@@ -452,7 +452,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     const hasMintingBox = isLastCard;
     const cardHeaderClassName = hasMintingBox
       ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 md:tw-grid-cols-2 md:tw-gap-x-16"
-      : "tw-mb-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-16";
+      : "tw-mb-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-x-10 xl:tw-gap-x-16";
     const artworkColumnClassName = hasMintingBox
       ? "tw-order-2 tw-mt-6 tw-self-start md:tw-order-none md:tw-col-start-1 md:tw-row-start-1 md:tw-mt-0"
       : undefined;
@@ -602,7 +602,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-black tw-pb-5 tw-text-white">
       <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-pb-8">
-          <div className="tw-flex tw-flex-col tw-gap-4">
+          <div className="tw-flex tw-flex-col tw-gap-2">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
               <h1 className="tw-mb-0 tw-flex tw-items-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
                 <Link

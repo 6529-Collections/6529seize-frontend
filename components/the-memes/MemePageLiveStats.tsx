@@ -249,7 +249,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
       : [{ handle: null, label: nft.artist, display: "not available" }];
 
   return (
-    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-8">
+    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-8 tw-gap-y-6">
         <div className="tw-min-w-0">
           <div className={TOP_LABEL_CLASS}>Created by</div>
@@ -266,7 +266,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
         </div>
         <div className="tw-min-w-fit">
           <div className={TOP_LABEL_CLASS}>Mint date</div>
-          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end">
+          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-baseline sm:tw-justify-end">
             <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
               {mintDate.date}
             </span>
@@ -425,7 +425,7 @@ function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
 
 export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
   return (
-    <section className="tw-pt-8">
+    <section className="tw-pt-6 md:tw-pt-8">
       <h3 className={`${SECTION_HEADER_TITLE_CLASS} tw-mb-4`}>
         Market Overview
       </h3>

@@ -121,29 +121,31 @@ function TransferSingleImpl(props: TransferSingleProps) {
   }
 
   const transferTitle = (
-    <div className="tw-flex tw-items-center tw-gap-2 tw-text-iron-300">
-      <span className="tw-text-sm tw-font-semibold">Transfer</span>
-      <FontAwesomeIcon icon={faRightLeft} className="tw-size-3.5" />
+    <div className="tw-flex tw-items-center tw-gap-2 tw-text-iron-400">
+      <span className="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider">
+        Transfer
+      </span>
+      <FontAwesomeIcon icon={faRightLeft} className="tw-size-3" />
     </div>
   );
 
   const quantityToggle = max > 1 && (
-    <div className="tw-flex tw-items-center tw-justify-center tw-gap-0.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-0.5 tw-font-medium tw-shadow-sm">
+    <div className="tw-flex tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-1 tw-font-medium">
       <button
         type="button"
         onClick={() => t.decQty(key)}
         disabled={selectedQty <= 1}
         aria-label="Decrease quantity"
-        className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors focus:tw-outline-none ${
+        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
           selectedQty <= 1
             ? "tw-cursor-not-allowed tw-bg-transparent tw-text-iron-600"
-            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700"
+            : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700 active:tw-scale-95"
         }`}
         data-testid="transfer-single-minus"
       >
         <FontAwesomeIcon icon={faMinus} className="tw-size-3" />
       </button>
-      <div className="tw-min-w-8 tw-select-none tw-text-center tw-text-xs tw-font-semibold tw-tabular-nums tw-leading-none tw-text-iron-300">
+      <div className="tw-min-w-10 tw-select-none tw-text-center tw-text-xs tw-font-bold tw-tabular-nums tw-leading-none tw-text-iron-300">
         {selectedQty}/{max}
       </div>
       <button
@@ -151,10 +153,10 @@ function TransferSingleImpl(props: TransferSingleProps) {
         onClick={() => t.incQty(key)}
         disabled={selectedQty >= max}
         aria-label="Increase quantity"
-        className={`tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none ${
+        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
           selectedQty >= max
-            ? "tw-cursor-not-allowed tw-border-primary-500/10 tw-bg-primary-500/20 tw-text-iron-500"
-            : "tw-cursor-pointer tw-border-primary-500 tw-bg-primary-500 tw-text-iron-100 hover:tw-border-primary-400 hover:tw-bg-primary-400"
+            ? "tw-cursor-not-allowed tw-bg-iron-800/50 tw-text-iron-600"
+            : "tw-cursor-pointer tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400 active:tw-scale-95"
         }`}
         data-testid="transfer-single-plus"
       >
@@ -175,27 +177,27 @@ function TransferSingleImpl(props: TransferSingleProps) {
         setShowModal(true);
       }}
       aria-label={transferButtonAriaLabel}
-      className="tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-200 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-950 tw-ring-1 tw-ring-inset tw-ring-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-300 hover:tw-ring-iron-300 focus:tw-z-10 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+      className="tw-flex tw-h-10 tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-text-sm tw-font-bold tw-text-black tw-transition-all tw-duration-200 hover:tw-bg-iron-100 active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
       data-testid="transfer-single-submit"
     >
       <span>Transfer</span>
       <FontAwesomeIcon
         aria-hidden="true"
         icon={faRightLeft}
-        className="tw-size-3.5"
+        className="tw-size-3"
       />
     </button>
   );
 
   return (
     <div
-      className="tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-iron-200 tw-shadow-sm"
+      className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
       data-testid="transfer-single"
     >
       {children ? (
-        <div className="tw-flex tw-items-center tw-gap-4">
-          <div className="tw-min-w-0 tw-flex-1">{children}</div>
-          <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-3">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-4">
+          <div className="tw-min-w-0">{children}</div>
+          <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
             {quantityToggle}
             {transferButton}
           </div>
@@ -207,7 +209,7 @@ function TransferSingleImpl(props: TransferSingleProps) {
             {quantityToggle}
           </div>
 
-          <div>{transferButton}</div>
+          <div className="tw-mt-4">{transferButton}</div>
         </>
       )}
       <TransferModal open={showModal} onClose={() => setShowModal(false)} />

@@ -107,34 +107,34 @@ export function MemePageYourCardsRightMenu(props: {
                 }
                 thumbUrl={transferNft.thumbnail}
               >
-                <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1.5">
-                  <div className="tw-flex tw-items-baseline tw-gap-1.5">
-                    <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+                <div className="tw-flex tw-w-max tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1">
+                  <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                    <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
                       Cards
                     </span>
-                    <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-200">{`x${props.nftBalance}`}</span>
+                    <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${props.nftBalance}`}</span>
                   </div>
                   {props.myRank !== undefined && props.myTDH !== undefined ? (
                     <>
-                      <div className="tw-flex tw-items-baseline tw-gap-1.5">
-                        <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+                      <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                        <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
                           TDH
                         </span>
-                        <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-200">
+                        <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
                           {numberWithCommas(Math.round(props.myTDH.tdh))}
                         </span>
                       </div>
-                      <div className="tw-flex tw-items-baseline tw-gap-1.5">
-                        <span className="tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-500">
+                      <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
+                        <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
                           Rank
                         </span>
-                        <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-200">
+                        <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
                           #{props.myRank.rank}
                         </span>
                       </div>
                     </>
                   ) : (
-                    <div className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
+                    <div className="tw-text-xs tw-font-medium tw-text-iron-500">
                       No TDH accrued
                     </div>
                   )}

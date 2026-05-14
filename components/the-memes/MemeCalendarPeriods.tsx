@@ -11,7 +11,8 @@ import {
 import clsx from "clsx";
 import Link from "next/link";
 
-const PERIOD_SEPARATOR_CLASS_NAME = "tw-text-iron-600";
+const PERIOD_SEPARATOR_CLASS_NAME = "tw-text-iron-500";
+const SECONDARY_PERIOD_TEXT_CLASS_NAME = "tw-text-iron-500";
 const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-inline";
 
 export default function MemeCalendarPeriods({
@@ -74,31 +75,56 @@ export default function MemeCalendarPeriods({
       >
         /
       </span>
-      {printPeriod("YEAR", year, undefined, secondaryPeriodClassName)}
+      {printPeriod(
+        "YEAR",
+        year,
+        undefined,
+        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
+      )}
       <span
         className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
       >
         /
       </span>
-      {printPeriod("EPOCH", epoch, undefined, secondaryPeriodClassName)}
+      {printPeriod(
+        "EPOCH",
+        epoch,
+        undefined,
+        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
+      )}
       <span
         className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
       >
         /
       </span>
-      {printPeriod("PERIOD", period, undefined, secondaryPeriodClassName)}
+      {printPeriod(
+        "PERIOD",
+        period,
+        undefined,
+        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
+      )}
       <span
         className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
       >
         /
       </span>
-      {printPeriod("ERA", era, undefined, secondaryPeriodClassName)}
+      {printPeriod(
+        "ERA",
+        era,
+        undefined,
+        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
+      )}
       <span
         className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
       >
         /
       </span>
-      {printPeriod("EON", eon, undefined, secondaryPeriodClassName)}
+      {printPeriod(
+        "EON",
+        eon,
+        undefined,
+        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
+      )}
     </span>
   );
 }
