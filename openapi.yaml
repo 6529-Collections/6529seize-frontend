@@ -11921,8 +11921,8 @@ components:
           type: string
       description: >-
         Notification-specific additional context. For DROP_REACTED notifications
-        this includes reaction and reactors, where each reactor only has handle
-        and pfp.
+        this includes reaction and reactors, where each reactor only has handle,
+        pfp, and subscribed.
     ApiNotificationCause:
       type: string
       enum:
@@ -11940,11 +11940,15 @@ components:
         - PRIORITY_ALERT
     ApiNotificationDropReactedReactor:
       type: object
+      required:
+        - subscribed
       properties:
         handle:
           type: string
         pfp:
           type: string
+        subscribed:
+          type: boolean
     ApiNotificationsResponse:
       type: object
       required:

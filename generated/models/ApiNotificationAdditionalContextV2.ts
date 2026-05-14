@@ -15,7 +15,7 @@ import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDrop
 import { HttpFile } from '../http/http';
 
 /**
-* Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle and pfp.
+* Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed.
 */
 export class ApiNotificationAdditionalContextV2 {
     'amount'?: number;

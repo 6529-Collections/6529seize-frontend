@@ -1,5 +1,6 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
+import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import type { ApiNotificationAdditionalContextV2 } from "@/generated/models/ApiNotificationAdditionalContextV2";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiNotificationDropReactedReactor } from "@/generated/models/ApiNotificationDropReactedReactor";
@@ -81,10 +82,12 @@ const emptyProfile = ({
   id,
   handle,
   pfp,
+  subscribedActions = [],
 }: {
   readonly id: string;
   readonly handle: string | null;
   readonly pfp: string | null;
+  readonly subscribedActions?: ApiProfileMin["subscribed_actions"];
 }): ApiProfileMin => ({
   id,
   handle,
@@ -101,7 +104,7 @@ const emptyProfile = ({
   classification: ApiProfileClassification.Pseudonym,
   sub_classification: null,
   primary_address: "",
-  subscribed_actions: [],
+  subscribed_actions: subscribedActions,
   archived: false,
   active_main_stage_submission_ids: [],
   winner_main_stage_drop_ids: [],
@@ -109,6 +112,17 @@ const emptyProfile = ({
   profile_wave_id: null,
   is_wave_creator: false,
 });
+
+const getReactorSubscribedActions = (
+  subscribed: boolean | undefined,
+  fallback: ApiProfileMin["subscribed_actions"] = []
+): ApiProfileMin["subscribed_actions"] => {
+  if (subscribed === undefined) {
+    return fallback;
+  }
+
+  return subscribed ? [ApiIdentitySubscriptionTargetAction.WaveCreated] : [];
+};
 
 const mapReactorToProfileMin = (
   reactor: ApiNotificationDropReactedReactor,
@@ -126,6 +140,10 @@ const mapReactorToProfileMin = (
     return {
       ...fallbackProfile,
       pfp: reactor.pfp ?? fallbackProfile.pfp,
+      subscribed_actions: getReactorSubscribedActions(
+        reactor.subscribed,
+        fallbackProfile.subscribed_actions
+      ),
     };
   }
 
@@ -133,6 +151,7 @@ const mapReactorToProfileMin = (
     id: handle ?? `reactor-${fallbackIndex}`,
     handle,
     pfp: reactor.pfp ?? null,
+    subscribedActions: getReactorSubscribedActions(reactor.subscribed),
   });
 };
 
