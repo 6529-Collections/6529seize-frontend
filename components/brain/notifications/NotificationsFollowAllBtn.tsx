@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
@@ -12,7 +12,7 @@ import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdent
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { commonApiPost } from "@/services/api/common-api";
 import type { FC } from "react";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import {
   DEFAULT_SUBSCRIPTION_BODY,
   FollowBtnCheckIcon,
@@ -29,13 +29,31 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
   size = UserFollowBtnSize.SMALL,
 }) => {
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const { setToast, requestAuth } = useAuth();
   const [mutating, setMutating] = useState(false);
 
-  const toFollow = profiles.filter(
-    (p) => p.handle && (p.subscribed_actions?.length ?? 0) === 0
-  );
-  const allFollowed = toFollow.length === 0;
+  const handlesToFollow = useMemo(() => {
+    const seenHandles = new Set<string>();
+    const handles: string[] = [];
+
+    for (const profile of profiles) {
+      const handle = profile.handle?.trim();
+      if (!handle || profile.subscribed_actions.length > 0) {
+        continue;
+      }
+
+      const normalizedHandle = handle.toLowerCase();
+      if (seenHandles.has(normalizedHandle)) {
+        continue;
+      }
+
+      seenHandles.add(normalizedHandle);
+      handles.push(handle);
+    }
+
+    return handles;
+  }, [profiles]);
+  const allFollowed = handlesToFollow.length === 0;
   const label = allFollowed ? "Following All" : "Follow All";
 
   const onFollowAll = async (): Promise<void> => {
@@ -48,12 +66,12 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
     }
     try {
       const results = await Promise.allSettled(
-        toFollow.map((profile) =>
+        handlesToFollow.map((handle) =>
           commonApiPost<
             ApiIdentitySubscriptionActions,
             ApiIdentitySubscriptionActions
           >({
-            endpoint: `identities/${profile.handle}/subscriptions`,
+            endpoint: `identities/${handle}/subscriptions`,
             body: DEFAULT_SUBSCRIPTION_BODY,
           })
         )

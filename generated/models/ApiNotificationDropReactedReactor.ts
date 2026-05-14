@@ -16,6 +16,7 @@ import { HttpFile } from '../http/http';
 export class ApiNotificationDropReactedReactor {
     'handle'?: string;
     'pfp'?: string;
+    'subscribed': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +33,12 @@ export class ApiNotificationDropReactedReactor {
             "name": "pfp",
             "baseName": "pfp",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "subscribed",
+            "baseName": "subscribed",
+            "type": "boolean",
             "format": ""
         }    ];
 
