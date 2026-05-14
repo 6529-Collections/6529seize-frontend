@@ -56,7 +56,7 @@ export default function MarketplaceItemPreviewMediaLink({
           <img
             src={mediaUrl}
             alt="Marketplace item media"
-            className="tw-block tw-h-auto tw-min-h-[12.5rem] tw-w-auto tw-min-w-[12.5rem] tw-max-h-72 tw-max-w-full tw-object-contain"
+            className="tw-block tw-h-auto tw-max-h-72 tw-min-h-[12.5rem] tw-w-auto tw-min-w-[12.5rem] tw-max-w-full tw-object-contain"
             style={{ imageRendering: "pixelated" }}
             data-testid="media-display"
             data-mime={mediaMimeType}
