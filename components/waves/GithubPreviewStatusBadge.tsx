@@ -164,9 +164,7 @@ export default function GithubPreviewStatusBadge({
           setStatus({
             type: "error",
             message:
-              error instanceof Error
-                ? error.message
-                : "Failed to get status",
+              error instanceof Error ? error.message : "Failed to get status",
           });
         }
       });
@@ -210,9 +208,7 @@ export default function GithubPreviewStatusBadge({
           strokeWidth={2}
         />
       ) : (
-        <span className="tw-line-clamp-1 tw-capitalize">
-          {viewModel.label}
-        </span>
+        <span className="tw-line-clamp-1 tw-capitalize">{viewModel.label}</span>
       )}
       {detail && (
         <span className="tw-hidden tw-font-medium tw-normal-case tw-opacity-70 sm:tw-inline">

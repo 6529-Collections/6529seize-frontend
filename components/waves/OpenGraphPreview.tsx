@@ -230,7 +230,9 @@ function deriveDomain(
   );
 }
 
-function isGithubPreviewResponse(value: unknown): value is GithubPreviewResponse {
+function isGithubPreviewResponse(
+  value: unknown
+): value is GithubPreviewResponse {
   if (typeof value !== "object" || value === null) {
     return false;
   }

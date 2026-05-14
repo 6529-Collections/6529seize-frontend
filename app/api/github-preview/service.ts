@@ -101,9 +101,7 @@ const parseGithubResource = (rawUrl: string | null): GithubResource => {
 
 const fetchGithubJson = async <T>(path: string): Promise<T> => {
   const { controller, cancel } = createAbortController();
-  const githubToken =
-    serverEnv?.GITHUB_LINK_STATUS_PREVIEW_TOKEN ??
-    process.env["GITHUB_LINK_STATUS_PREVIEW_TOKEN"];
+  const githubToken = serverEnv?.GITHUB_LINK_STATUS_PREVIEW_TOKEN;
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",

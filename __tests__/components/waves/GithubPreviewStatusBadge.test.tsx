@@ -4,7 +4,9 @@ import React from "react";
 import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadge";
 
 jest.mock("@heroicons/react/24/outline", () => ({
-  SignalSlashIcon: (props: any) => <svg data-testid="signal-slash" {...props} />,
+  SignalSlashIcon: (props: any) => (
+    <svg data-testid="signal-slash" {...props} />
+  ),
 }));
 
 jest.mock("@/components/utils/tooltip/CustomTooltip", () => ({
