@@ -7,6 +7,7 @@ import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import styles from "@/components/memelab/MemeLab.module.scss";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import {
   SortButton,
@@ -674,60 +675,67 @@ export default function MemeLabComponent() {
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <>
-              {/* Page header - visible on all devices */}
-              <Row>
-                <Col className="d-flex align-items-center justify-content-between mb-3">
-                  <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="mb-0">Meme Lab</h1>
-                    <LFGButton contract={MEMELAB_CONTRACT} />
-                  </span>
-                </Col>
-              </Row>
+    <NftBalancesProvider
+      consolidationKey={connectedProfile?.consolidation_key ?? null}
+      contract={MEMELAB_CONTRACT}
+      tokenIds={nfts.map((nft) => nft.id)}
+      enabled={isConnected}
+    >
+      <Container fluid className={styles["mainContainer"]}>
+        <Row>
+          <Col>
+            <Container className="pt-4">
+              <>
+                {/* Page header - visible on all devices */}
+                <Row>
+                  <Col className="d-flex align-items-center justify-content-between mb-3">
+                    <span className="d-flex align-items-center gap-3 flex-wrap">
+                      <h1 className="mb-0">Meme Lab</h1>
+                      <LFGButton contract={MEMELAB_CONTRACT} />
+                    </span>
+                  </Col>
+                </Row>
 
-              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
-              <Row className="d-xl-none">
-                <Col xs={12} className="mb-3">
-                  <Row>
-                    <Col xs={12} sm="auto">
-                      <CollectionsDropdown activePage="memelab" />
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col>
-                  Sort by&nbsp;&nbsp;
-                  <FontAwesomeIcon
-                    icon={faChevronCircleUp}
-                    onClick={() => setSortDir(SortDirection.ASC)}
-                    className={`${styles["sortDirection"]} ${
-                      sortDir != SortDirection.ASC ? styles["disabled"] : ""
-                    }`}
-                  />{" "}
-                  <FontAwesomeIcon
-                    icon={faChevronCircleDown}
-                    onClick={() => setSortDir(SortDirection.DESC)}
-                    className={`${styles["sortDirection"]} ${
-                      sortDir != SortDirection.DESC ? styles["disabled"] : ""
-                    }`}
-                  />
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                  {printSortButtons(sort, volumeType, setSort, setVolumeType)}
-                </Col>
-              </Row>
-              {printNftsContent()}
-            </>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+                {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+                <Row className="d-xl-none">
+                  <Col xs={12} className="mb-3">
+                    <Row>
+                      <Col xs={12} sm="auto">
+                        <CollectionsDropdown activePage="memelab" />
+                      </Col>
+                    </Row>
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col>
+                    Sort by&nbsp;&nbsp;
+                    <FontAwesomeIcon
+                      icon={faChevronCircleUp}
+                      onClick={() => setSortDir(SortDirection.ASC)}
+                      className={`${styles["sortDirection"]} ${
+                        sortDir != SortDirection.ASC ? styles["disabled"] : ""
+                      }`}
+                    />{" "}
+                    <FontAwesomeIcon
+                      icon={faChevronCircleDown}
+                      onClick={() => setSortDir(SortDirection.DESC)}
+                      className={`${styles["sortDirection"]} ${
+                        sortDir != SortDirection.DESC ? styles["disabled"] : ""
+                      }`}
+                    />
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+                    {printSortButtons(sort, volumeType, setSort, setVolumeType)}
+                  </Col>
+                </Row>
+                {printNftsContent()}
+              </>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+    </NftBalancesProvider>
   );
 }

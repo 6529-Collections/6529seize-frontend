@@ -4,8 +4,10 @@ import styles from "./MemeLab.module.scss";
 
 import { AuthContext } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { publicEnv } from "@/config/env";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
@@ -147,7 +149,12 @@ export default function LabCollection({
   }
 
   return (
-    <>
+    <NftBalancesProvider
+      consolidationKey={connectedProfile?.consolidation_key ?? null}
+      contract={MEMELAB_CONTRACT}
+      tokenIds={nfts.map((nft) => nft.id)}
+      enabled={!!connectedProfile}
+    >
       <Container fluid className={styles["mainContainer"]}>
         <Row>
           <Col>
@@ -222,6 +229,6 @@ export default function LabCollection({
           </Col>
         </Row>
       </Container>
-    </>
+    </NftBalancesProvider>
   );
 }
