@@ -69,6 +69,13 @@ export default function DropListItemRateGive({
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const clearHoldTimer = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
   const getIncreaseAmount = (startTime: number) => {
     const elapsedSeconds = (Time.now().toMillis() - startTime) / 1000;
 
@@ -162,6 +169,14 @@ export default function DropListItemRateGive({
     });
     setOnProgressRate(memeticRate);
 
+    if (
+      (changeType === RateChangeType.DECREASE && memeticRate <= minRating) ||
+      (changeType === RateChangeType.INCREASE && memeticRate >= maxRating)
+    ) {
+      clearHoldTimer();
+      return;
+    }
+
     // Decrease interval time by 50%
     const newIntervalTime = Math.max(10, intervalTime * 0.9); // Minimum interval time is 10ms
     const waitForMemetic = isMemetic ? memeticWaitTime : newIntervalTime;
@@ -190,10 +205,7 @@ export default function DropListItemRateGive({
   };
 
   const handleMouseUp = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    clearHoldTimer();
   };
 
   const getRateText = () =>

@@ -52,7 +52,7 @@ describe("DropListItemRateGive", () => {
     submitMock.mockClear();
   });
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    jest.clearAllTimers();
     jest.useRealTimers();
   });
 
@@ -91,6 +91,29 @@ describe("DropListItemRateGive", () => {
     });
     expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("0");
     expect(decBtn).toBeDisabled();
+  });
+
+  it("stops held decrease timer at zero when negative votes are forbidden", () => {
+    renderComponent({
+      wave: { forbid_negative_votes: true },
+      context_profile_context: { rating: 0, max_rating: 5, min_rating: -5 },
+    });
+
+    const decBtn = screen.getByLabelText("Decrease vote");
+
+    act(() => {
+      fireEvent.mouseDown(decBtn);
+    });
+
+    expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("0");
+    expect(decBtn).toBeDisabled();
+    expect(jest.getTimerCount()).toBe(0);
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("0");
   });
 
   it("allows decreasing a pending positive vote when negative votes are forbidden", () => {
