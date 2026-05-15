@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import type { ResolvedPreviewHref } from "./MarketplaceItemPreviewCard.types";
@@ -38,6 +39,46 @@ export default function MarketplaceItemPreviewMediaLink({
   const mediaFrameClassName = useDirectImageRendering
     ? "tw-box-border tw-w-full tw-bg-inherit tw-p-4 md:tw-p-6"
     : MARKETPLACE_MEDIA_FRAME_CLASS;
+  let mediaContent: ReactNode;
+
+  if (useDirectImageRendering) {
+    mediaContent = (
+      <img
+        src={mediaUrl}
+        alt="Marketplace item media"
+        className="tw-block tw-h-auto tw-max-h-72 tw-min-h-[12.5rem] tw-w-auto tw-min-w-[12.5rem] tw-max-w-full tw-object-contain"
+        style={{ imageRendering: "pixelated" }}
+        data-testid="media-display"
+        data-mime={mediaMimeType}
+        data-url={mediaUrl}
+        data-disable="true"
+      />
+    );
+  } else if (isVideo) {
+    mediaContent = (
+      <video
+        src={mediaUrl}
+        className="tw-h-full tw-w-full tw-rounded-xl tw-object-contain"
+        muted
+        loop
+        playsInline
+        preload="auto"
+        autoPlay
+        data-testid="media-display"
+        data-mime={mediaMimeType}
+        data-url={mediaUrl}
+        data-disable="true"
+      />
+    );
+  } else {
+    mediaContent = (
+      <MediaDisplay
+        media_mime_type={mediaMimeType}
+        media_url={mediaUrl}
+        disableMediaInteraction={true}
+      />
+    );
+  }
 
   return (
     <Link
@@ -52,38 +93,7 @@ export default function MarketplaceItemPreviewMediaLink({
         className={`${mediaFrameClassName} tw-relative tw-flex tw-items-center tw-justify-center tw-overflow-hidden`}
         data-testid="manifold-item-media"
       >
-        {useDirectImageRendering ? (
-          <img
-            src={mediaUrl}
-            alt="Marketplace item media"
-            className="tw-block tw-h-auto tw-max-h-72 tw-min-h-[12.5rem] tw-w-auto tw-min-w-[12.5rem] tw-max-w-full tw-object-contain"
-            style={{ imageRendering: "pixelated" }}
-            data-testid="media-display"
-            data-mime={mediaMimeType}
-            data-url={mediaUrl}
-            data-disable="true"
-          />
-        ) : isVideo ? (
-          <video
-            src={mediaUrl}
-            className="tw-h-full tw-w-full tw-rounded-xl tw-object-contain"
-            muted
-            loop
-            playsInline
-            preload="auto"
-            autoPlay
-            data-testid="media-display"
-            data-mime={mediaMimeType}
-            data-url={mediaUrl}
-            data-disable="true"
-          />
-        ) : (
-          <MediaDisplay
-            media_mime_type={mediaMimeType}
-            media_url={mediaUrl}
-            disableMediaInteraction={true}
-          />
-        )}
+        {mediaContent}
       </div>
     </Link>
   );

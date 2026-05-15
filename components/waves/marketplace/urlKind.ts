@@ -25,7 +25,8 @@ const GAMMAIO_ORDINAL_INSCRIPTION_PATH_PATTERN =
   /^\/ordinals\/inscriptions\/[^/?#]+\/?$/i;
 const GAMMAIO_ORDINAL_COLLECTION_INSCRIPTION_PATH_PATTERN =
   /^\/ordinals\/collections\/[^/?#]+\/inscriptions\/[^/?#]+\/?$/i;
-const GAMMAIO_COLLECTION_PATH_PATTERN = /^\/collections\/[^/?#]+\/[^/?#]+\/?$/i;
+const GAMMAIO_COLLECTION_PATH_PATTERN =
+  /^\/collections\/[^/?#]+\/(?!tokens\/?$)[^/?#]+\/?$/i;
 const GAMMAIO_COLLECTION_TOKEN_PATH_PATTERN =
   /^\/collections\/[^/?#]+\/tokens\/[^/?#]+\/?$/i;
 const GAMMAIO_STACKS_NFT_PATH_PATTERN = /^\/stacks\/nfts\/[^/?#]+\/?$/i;

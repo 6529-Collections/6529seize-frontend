@@ -94,7 +94,7 @@ const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
       `^/ordinals/collections/${SLUG_ID_PART_REGEX}/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`
     ),
     new RegExp(
-      `^/collections/${SLUG_ID_PART_REGEX}/${GAMMAIO_ID_PART_REGEX}/?$`
+      `^/collections/${SLUG_ID_PART_REGEX}/(?!tokens/?$)${GAMMAIO_ID_PART_REGEX}/?$`
     ),
     new RegExp(
       `^/collections/${SLUG_ID_PART_REGEX}/tokens/${GAMMAIO_ID_PART_REGEX}/?$`

@@ -67,6 +67,7 @@ describe("marketplace url kind", () => {
     "https://opensea.io/item/base/0x495f947276749ce646f68ac8c248420045cb7b5e/1",
     "https://opensea.io/collection/example",
     "https://gamma.io/collections",
+    "https://gamma.io/collections/example-collection/tokens",
     "https://gamma.io/ordinals/collections/example-collection",
     "https://gamma.io/stacks",
     "https://gamma.io/stacks/nfts",

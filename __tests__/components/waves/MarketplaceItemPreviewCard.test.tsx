@@ -124,6 +124,27 @@ describe("MarketplaceItemPreviewCard", () => {
     );
   });
 
+  it("renders Gamma.io branding in the CTA", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://gamma.io/collections/example-collection/123"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.getByAltText("Gamma.io logo")).toHaveAttribute(
+      "src",
+      "/gammaio.jpg"
+    );
+    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveAttribute(
+      "aria-label",
+      "Open on Gamma.io"
+    );
+  });
+
   it("uses fallback title in full mode and copies link from footer action", async () => {
     const href = "https://example.com/item/1";
 

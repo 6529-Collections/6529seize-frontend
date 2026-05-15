@@ -115,6 +115,14 @@ describe("validateCurationDropInput", () => {
       error: true,
       helperText: "URL must match a supported curation link format.",
     });
+    expect(
+      validateCurationDropInput(
+        "gamma.io/collections/example-collection/tokens"
+      )
+    ).toEqual({
+      error: true,
+      helperText: "URL must match a supported curation link format.",
+    });
   });
 
   it("rejects unsupported non-www subdomains", () => {
