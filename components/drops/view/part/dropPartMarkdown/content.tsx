@@ -273,7 +273,7 @@ export const createMarkdownContentRenderers = ({
       return (
         <p
           key={getRandomObjectId()}
-          className={`word-break tw-mb-1.5 tw-mt-0 last:tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+          className={`word-break tw-mb-1.5 tw-mt-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out last:tw-mb-0 ${textSizeClass}`}
         >
           {customRenderer(paragraphParams.children)}
         </p>
