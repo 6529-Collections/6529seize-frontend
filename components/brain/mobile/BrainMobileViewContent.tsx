@@ -1,9 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import BrainMobileAbout from "./BrainMobileAbout";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import CommunityCurations from "@/components/community-curations/CommunityCurations";
 import MyStreamWaveLeaderboard from "../my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveSubmissions from "../my-stream/MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "../my-stream/MyStreamWaveOutcome";
@@ -15,6 +18,7 @@ import BrainMobileMessages from "./BrainMobileMessages";
 import BrainNotifications from "../notifications/NotificationsContainer";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import { BrainView } from "./brainMobileViews";
+import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface BrainMobileViewContentProps {
   readonly activeView: BrainView;
@@ -28,6 +32,28 @@ interface BrainMobileViewContentProps {
   readonly onOpenQuickVote: () => void;
   readonly onPrefetchQuickVote?: (() => void) | undefined;
   readonly wave: ApiWave | null | undefined;
+}
+
+function BrainMobileProfileFeed() {
+  const { mobileWavesViewStyle } = useLayout();
+
+  return (
+    <CommunityCurations
+      heightStyle={mobileWavesViewStyle}
+      topContent={
+        <div className="tw-mb-5">
+          <Link
+            href="/waves"
+            prefetch={false}
+            className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+          >
+            <ArrowLeftIcon className="tw-size-4" aria-hidden="true" />
+            <span>Back to Waves</span>
+          </Link>
+        </div>
+      }
+    />
+  );
 }
 
 export default function BrainMobileViewContent({
@@ -102,6 +128,7 @@ export default function BrainMobileViewContent({
         onPrefetchQuickVote={onPrefetchQuickVote}
       />
     ),
+    [BrainView.PROFILE_FEED]: <BrainMobileProfileFeed />,
     [BrainView.MESSAGES]: <BrainMobileMessages />,
     [BrainView.NOTIFICATIONS]: <BrainNotifications />,
   };

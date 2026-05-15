@@ -2,6 +2,14 @@ type MarketplaceUrlKind =
   | "manifold.listing"
   | "superrare.artwork"
   | "foundation.mint"
+  | "gammaio.collection"
+  | "gammaio.collection-token"
+  | "gammaio.inscription"
+  | "gammaio.ordinal"
+  | "gammaio.ordinal-inscription"
+  | "gammaio.ordinal-collection-inscription"
+  | "gammaio.ordinal-print-details"
+  | "gammaio.stacks-nft"
   | "opensea.item"
   | "opensea.asset"
   | "transient.nft"
@@ -12,6 +20,19 @@ const SUPER_RARE_ARTWORK_PATH_PATTERN =
   /^\/artwork\/eth\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const FOUNDATION_MINT_PATH_PATTERN =
   /^\/mint\/eth\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
+const GAMMAIO_ORDINAL_PATH_PATTERN = /^\/ordinals\/[^/?#]+\/?$/i;
+const GAMMAIO_INSCRIPTION_PATH_PATTERN = /^\/inscriptions\/[^/?#]+\/?$/i;
+const GAMMAIO_ORDINAL_INSCRIPTION_PATH_PATTERN =
+  /^\/ordinals\/inscriptions\/[^/?#]+\/?$/i;
+const GAMMAIO_ORDINAL_COLLECTION_INSCRIPTION_PATH_PATTERN =
+  /^\/ordinals\/collections\/[^/?#]+\/inscriptions\/[^/?#]+\/?$/i;
+const GAMMAIO_ORDINAL_PRINT_DETAILS_PATH_PATTERN =
+  /^\/ordinals\/prints\/[^/?#]+\/details\/?$/i;
+const GAMMAIO_COLLECTION_PATH_PATTERN =
+  /^\/collections\/[^/?#]+\/(?!tokens\/?$)[^/?#]+\/?$/i;
+const GAMMAIO_COLLECTION_TOKEN_PATH_PATTERN =
+  /^\/collections\/[^/?#]+\/tokens\/[^/?#]+\/?$/i;
+const GAMMAIO_STACKS_NFT_PATH_PATTERN = /^\/stacks\/nfts\/[^/?#]+\/?$/i;
 const OPENSEA_ITEM_PATH_PATTERN =
   /^\/item\/ethereum\/0x[a-f0-9]{40}\/[^/?#]+\/?$/i;
 const OPENSEA_ASSET_PATH_PATTERN =
@@ -23,6 +44,7 @@ const TRANSIENT_MINT_PATH_PATTERN = /^\/mint\/[^/?#]+\/?$/i;
 const MANIFOLD_HOST = "manifold.xyz";
 const SUPER_RARE_HOST = "superrare.com";
 const FOUNDATION_HOST = "foundation.app";
+const GAMMAIO_HOST = "gamma.io";
 const OPENSEA_HOST = "opensea.io";
 const TRANSIENT_HOST = "transient.xyz";
 
@@ -56,6 +78,34 @@ const MARKETPLACE_HOST_MATCHERS: readonly MarketplaceHostMatcher[] = [
     domain: FOUNDATION_HOST,
     matchers: [
       { pattern: FOUNDATION_MINT_PATH_PATTERN, kind: "foundation.mint" },
+    ],
+  },
+  {
+    domain: GAMMAIO_HOST,
+    matchers: [
+      { pattern: GAMMAIO_ORDINAL_PATH_PATTERN, kind: "gammaio.ordinal" },
+      {
+        pattern: GAMMAIO_INSCRIPTION_PATH_PATTERN,
+        kind: "gammaio.inscription",
+      },
+      {
+        pattern: GAMMAIO_ORDINAL_INSCRIPTION_PATH_PATTERN,
+        kind: "gammaio.ordinal-inscription",
+      },
+      {
+        pattern: GAMMAIO_ORDINAL_COLLECTION_INSCRIPTION_PATH_PATTERN,
+        kind: "gammaio.ordinal-collection-inscription",
+      },
+      {
+        pattern: GAMMAIO_ORDINAL_PRINT_DETAILS_PATH_PATTERN,
+        kind: "gammaio.ordinal-print-details",
+      },
+      {
+        pattern: GAMMAIO_COLLECTION_TOKEN_PATH_PATTERN,
+        kind: "gammaio.collection-token",
+      },
+      { pattern: GAMMAIO_COLLECTION_PATH_PATTERN, kind: "gammaio.collection" },
+      { pattern: GAMMAIO_STACKS_NFT_PATH_PATTERN, kind: "gammaio.stacks-nft" },
     ],
   },
   {

@@ -1,4 +1,5 @@
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -14,11 +15,13 @@ jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
 }));
 
 import { useAuth } from "@/components/auth/Auth";
-import { useNftBalance } from "@/hooks/useNftBalance";
+import { useNftBalance, useNftContractBalances } from "@/hooks/useNftBalance";
 
 const mockUseNftBalance = useNftBalance as jest.MockedFunction<
   typeof useNftBalance
 >;
+const mockUseNftContractBalances =
+  useNftContractBalances as jest.MockedFunction<typeof useNftContractBalances>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 describe("NFTImageBalance", () => {
@@ -34,7 +37,13 @@ describe("NFTImageBalance", () => {
 
     // Reset mocks
     mockUseNftBalance.mockReset();
+    mockUseNftContractBalances.mockReset();
     mockUseAuth.mockReset();
+    mockUseNftContractBalances.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    } as any);
   });
 
   const renderWithProviders = (component: React.ReactElement) => {
@@ -77,6 +86,7 @@ describe("NFTImageBalance", () => {
         consolidationKey: null,
         contract: defaultProps.contract,
         tokenId: defaultProps.tokenId,
+        enabled: true,
       });
     });
   });
@@ -259,6 +269,7 @@ describe("NFTImageBalance", () => {
           consolidationKey: mockProfile.consolidation_key,
           contract: defaultProps.contract,
           tokenId: defaultProps.tokenId,
+          enabled: true,
         });
       });
 
@@ -279,6 +290,44 @@ describe("NFTImageBalance", () => {
           consolidationKey: null,
           contract: defaultProps.contract,
           tokenId: defaultProps.tokenId,
+          enabled: true,
+        });
+      });
+
+      it("uses provider balance and disables the per-token request", () => {
+        mockUseNftContractBalances.mockReturnValue({
+          data: [
+            {
+              contract: defaultProps.contract,
+              token_id: defaultProps.tokenId,
+              balance: 7,
+            },
+          ],
+          isLoading: false,
+          error: null,
+        } as any);
+        mockUseNftBalance.mockReturnValue({
+          balance: 0,
+          isLoading: false,
+          error: null,
+        });
+
+        renderWithProviders(
+          <NftBalancesProvider
+            consolidationKey={mockProfile.consolidation_key}
+            contract={defaultProps.contract.toUpperCase()}
+            tokenIds={[defaultProps.tokenId]}
+          >
+            <NFTImageBalance {...defaultProps} />
+          </NftBalancesProvider>
+        );
+
+        expect(screen.getByText("SEIZED x7")).toBeInTheDocument();
+        expect(mockUseNftBalance).toHaveBeenCalledWith({
+          consolidationKey: mockProfile.consolidation_key,
+          contract: defaultProps.contract,
+          tokenId: defaultProps.tokenId,
+          enabled: false,
         });
       });
     });

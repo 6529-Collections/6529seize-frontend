@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
-import { DropContentPartType } from "@/components/drops/view/part/DropPartMarkdown";
+import { DropContentPartType } from "@/components/drops/view/item/content/DropListItemContentPart.types";
 
 jest.mock(
   "@/components/drops/view/item/content/nft-tag/DropListItemContentNft",

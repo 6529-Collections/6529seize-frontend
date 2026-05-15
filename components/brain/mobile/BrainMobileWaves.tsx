@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useRef } from "react";
+import Link from "next/link";
+import { Squares2X2Icon } from "@heroicons/react/24/outline";
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import MemesWaveFooter from "../left-sidebar/waves/MemesWaveFooter";
 import { useLayout } from "../my-stream/layout/LayoutContext";
@@ -26,6 +28,23 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
       style={mobileWavesViewStyle}
     >
       <div className={scrollContainerClassName} ref={scrollContainerRef}>
+        <Link
+          href="/waves?view=profile-feed"
+          prefetch={false}
+          className="tw-group tw-flex tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-iron-200 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
+        >
+          <span className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:group-hover:tw-bg-iron-800">
+            <Squares2X2Icon className="tw-size-5" aria-hidden="true" />
+          </span>
+          <span className="tw-min-w-0">
+            <span className="tw-block tw-text-sm tw-font-semibold">
+              Profile Waves Feed
+            </span>
+            <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+              Featured drops from profile waves
+            </span>
+          </span>
+        </Link>
         <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>
       <MemesWaveFooter
