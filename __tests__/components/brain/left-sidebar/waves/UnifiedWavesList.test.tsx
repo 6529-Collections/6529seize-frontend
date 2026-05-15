@@ -1,10 +1,16 @@
 import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import React from "react";
 import UnifiedWavesList from "@/components/brain/left-sidebar/waves/UnifiedWavesList";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 jest.mock("@/hooks/useDeviceInfo");
+const mockOpenWave = jest.fn();
+jest.mock("@/hooks/useCreateModalState", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ openWave: mockOpenWave })),
+}));
 jest.mock(
   "@/components/brain/left-sidebar/waves/UnifiedWavesListLoader",
   () => ({
@@ -56,6 +62,7 @@ const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
 
 beforeEach(() => {
   sentinel = null;
+  mockOpenWave.mockClear();
   useDeviceInfoMock.mockReturnValue({
     isApp: false,
     isMobileDevice: false,
@@ -65,11 +72,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
 });
 
 describe("UnifiedWavesList", () => {
-  it("shows create link when not in app", () => {
+  it("opens create wave locally when not in app", async () => {
     render(
       <UnifiedWavesList
         waves={[]}
@@ -81,7 +88,8 @@ describe("UnifiedWavesList", () => {
         scrollContainerRef={React.createRef()}
       />
     );
-    expect(screen.getByText("Create Wave")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
+    expect(mockOpenWave).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("loader")).toHaveTextContent("false");
   });
 

@@ -1,7 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import React, { useCallback, useMemo, useSyncExternalStore } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -40,8 +45,9 @@ interface Props {
   readonly children: ReactNode;
 }
 
-const BrainMobile: React.FC<Props> = ({ children }) => {
+const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
@@ -143,10 +149,10 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const closeCreateOverlay = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("create");
-    const base = pathname;
+    const base = pathname || getHomeRoute();
     const next = params.toString() ? `${base}?${params.toString()}` : base;
-    router.replace(next, { scroll: false });
-  }, [router, pathname, searchParams]);
+    globalThis.window.history.replaceState(null, "", next);
+  }, [pathname, searchParams]);
 
   const createOverlay = useMemo(() => {
     if (!isApp) return null;
@@ -244,5 +250,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     </div>
   );
 };
+
+const BrainMobile: React.FC<Props> = (props) => (
+  <Suspense fallback={null}>
+    <BrainMobileContent {...props} />
+  </Suspense>
+);
 
 export default BrainMobile;
