@@ -12,7 +12,9 @@ import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPreviewContext";
-import DropPartMarkdownImage from "../DropPartMarkdownImage";
+import DropPartMarkdownImage, {
+  type DropPartMarkdownImageLayout,
+} from "../DropPartMarkdownImage";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
@@ -100,12 +102,18 @@ export const createLinkRenderer = ({
   });
   let inlineShowControlRendered = false;
 
-  const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
+  const renderImage: LinkRenderer["renderImage"] = ({ src, ...props }) => {
     if (typeof src !== "string") {
       return null;
     }
 
-    return <DropPartMarkdownImage src={src} />;
+    const layout =
+      (props as { readonly layout?: DropPartMarkdownImageLayout | undefined })
+        .layout === "grouped"
+        ? "grouped"
+        : undefined;
+
+    return <DropPartMarkdownImage src={src} layout={layout} />;
   };
 
   const renderAnchor: LinkRenderer["renderAnchor"] = (props) => {

@@ -1,5 +1,10 @@
-import type { ClassAttributes, HTMLAttributes, ReactNode } from "react";
-import { Children, Fragment, isValidElement } from "react";
+import type {
+  ClassAttributes,
+  HTMLAttributes,
+  ReactElement,
+  ReactNode,
+} from "react";
+import { Children, Fragment, cloneElement, isValidElement } from "react";
 import type { ExtraProps } from "react-markdown";
 import emojiRegex from "emoji-regex";
 
@@ -16,6 +21,10 @@ import {
   hasMentionedGroup,
   markAllGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
+import {
+  DropPartMarkdownImageGroup,
+  type DropPartMarkdownImageLayout,
+} from "../DropPartMarkdownImage";
 
 export enum DropContentPartType {
   MENTION = "MENTION",
@@ -55,8 +64,39 @@ interface MarkdownContentRenderers {
   readonly processContent: (content: string | null) => string | null;
 }
 
+type MarkdownImageElement = ReactElement<{
+  readonly layout?: DropPartMarkdownImageLayout | undefined;
+  readonly src?: unknown;
+}>;
+
+type MarkdownLinkElement = ReactElement<{
+  readonly href: string;
+}>;
+
 const customEmojiRegex = /(:\w+:)/g;
 const nativeEmojiRegex = emojiRegex();
+
+const isWhitespaceOnlyTextNode = (node: ReactNode): boolean =>
+  typeof node === "string" && node.trim().length === 0;
+
+const isMarkdownImageElement = (
+  node: ReactNode
+): node is MarkdownImageElement =>
+  isValidElement<{ readonly src?: unknown }>(node) &&
+  typeof node.props.src === "string" &&
+  node.props.src.length > 0;
+
+const isSmartLinkElement = (
+  node: ReactNode,
+  isSmartLink: (href: string) => boolean
+): node is MarkdownLinkElement => {
+  if (!isValidElement<{ readonly href?: unknown }>(node)) {
+    return false;
+  }
+
+  const { href } = node.props;
+  return typeof href === "string" && href.length > 0 && isSmartLink(href);
+};
 
 const containsOnlyNativeEmojis = (str: string): boolean => {
   const text = str.trim();
@@ -262,6 +302,7 @@ export const createMarkdownContentRenderers = ({
 
     const elements: ReactNode[] = [];
     let currentTextChunk: ReactNode[] = [];
+    let currentImageChunk: MarkdownImageElement[] = [];
 
     const flushTextChunk = () => {
       if (currentTextChunk.length > 0) {
@@ -270,18 +311,53 @@ export const createMarkdownContentRenderers = ({
       }
     };
 
-    for (const node of flattened) {
-      const element = isValidElement(node);
-      const src = element && (node.props as any)?.src;
-      const href = element && (node.props as any)?.href;
-      if (src || (href && isSmartLink(href))) {
-        flushTextChunk();
-        elements.push(node);
-      } else {
-        currentTextChunk.push(node);
+    const flushImageChunk = () => {
+      if (currentImageChunk.length === 0) {
+        return;
       }
+
+      if (currentImageChunk.length === 1) {
+        elements.push(currentImageChunk[0]);
+        currentImageChunk = [];
+        return;
+      }
+
+      elements.push(
+        <DropPartMarkdownImageGroup key={getRandomObjectId()}>
+          {currentImageChunk.map((image) =>
+            cloneElement(image, {
+              key: image.key ?? getRandomObjectId(),
+              layout: "grouped",
+            })
+          )}
+        </DropPartMarkdownImageGroup>
+      );
+      currentImageChunk = [];
+    };
+
+    for (const node of flattened) {
+      if (isMarkdownImageElement(node)) {
+        flushTextChunk();
+        currentImageChunk.push(node);
+        continue;
+      }
+
+      if (currentImageChunk.length > 0 && isWhitespaceOnlyTextNode(node)) {
+        continue;
+      }
+
+      if (isSmartLinkElement(node, isSmartLink)) {
+        flushTextChunk();
+        flushImageChunk();
+        elements.push(node);
+        continue;
+      }
+
+      flushImageChunk();
+      currentTextChunk.push(node);
     }
 
+    flushImageChunk();
     flushTextChunk();
 
     return <>{elements}</>;

@@ -210,6 +210,80 @@ describe("DropPartMarkdown", () => {
     );
   });
 
+  it("renders one markdown image as a standalone image", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](/one.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+    expect(
+      container.querySelector(".tw-relative.tw-mt-2.tw-w-full")
+    ).not.toBeNull();
+  });
+
+  it("groups consecutive markdown images in one responsive grid", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](/one.png)![Seize](/two.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group).toHaveClass(
+      "tw-mt-2",
+      "tw-gap-2",
+      "sm:tw-grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),16rem))]"
+    );
+    expect(group?.querySelectorAll("img")).toHaveLength(2);
+    expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("keeps whitespace-only markdown between images in the same image group", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\n   ![Seize](/two.png)"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group?.querySelectorAll("img")).toHaveLength(2);
+  });
+
+  it("does not group markdown images when visible text is between them", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](/one.png) text ![Seize](/two.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(2);
+    expect(screen.getByText("text")).toBeInTheDocument();
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+  });
+
   it("handles external links", () => {
     const content = "[link](https://google.com)";
     render(
