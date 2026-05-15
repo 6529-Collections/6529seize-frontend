@@ -21,7 +21,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import {
   getInitialRouterValues,
@@ -42,6 +42,7 @@ export default function LabCollection({
   const [website, setWebsite] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
+  const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
 
@@ -152,7 +153,7 @@ export default function LabCollection({
     <NftBalancesProvider
       consolidationKey={connectedProfile?.consolidation_key ?? null}
       contract={MEMELAB_CONTRACT}
-      tokenIds={nfts.map((nft) => nft.id)}
+      tokenIds={tokenIds}
       enabled={!!connectedProfile}
     >
       <Container fluid className={styles["mainContainer"]}>

@@ -34,7 +34,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 export function getInitialRouterValues(
@@ -464,6 +464,7 @@ export default function MemeLabComponent() {
   const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
+  const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
 
   const [nftsLoaded, setNftsLoaded] = useState(false);
@@ -678,7 +679,7 @@ export default function MemeLabComponent() {
     <NftBalancesProvider
       consolidationKey={connectedProfile?.consolidation_key ?? null}
       contract={MEMELAB_CONTRACT}
-      tokenIds={nfts.map((nft) => nft.id)}
+      tokenIds={tokenIds}
       enabled={isConnected}
     >
       <Container fluid className={styles["mainContainer"]}>

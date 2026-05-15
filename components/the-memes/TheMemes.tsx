@@ -30,7 +30,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 interface Meme {
@@ -156,6 +156,7 @@ export default function TheMemesComponent() {
   const [fetching, setFetching] = useState(true);
 
   const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
+  const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftsNextPage, setNftsNextPage] = useState<string>();
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
@@ -440,7 +441,7 @@ export default function TheMemesComponent() {
     <NftBalancesProvider
       consolidationKey={connectedProfile?.consolidation_key ?? null}
       contract={MEMES_CONTRACT}
-      tokenIds={nfts.map((nft) => nft.id)}
+      tokenIds={tokenIds}
       enabled={!!connectedProfile}
     >
       <Container fluid className={styles["mainContainer"]}>
