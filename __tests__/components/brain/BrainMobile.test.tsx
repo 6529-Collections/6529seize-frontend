@@ -10,7 +10,15 @@ import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: ({ alt, height, src, width }: any) => (
+    <span
+      aria-label={alt || undefined}
+      data-next-image-height={height}
+      data-next-image-src={typeof src === "string" ? src : src?.src}
+      data-next-image-width={width}
+      role={alt ? "img" : undefined}
+    />
+  ),
 }));
 
 let mockSearchParams = new URLSearchParams();
@@ -130,6 +138,18 @@ const mockBrainMobileWaves = jest.fn(
 jest.mock("@/components/brain/mobile/BrainMobileWaves", () => ({
   __esModule: true,
   default: (props: any) => mockBrainMobileWaves(props),
+}));
+
+const mockCommunityCurations = jest.fn(() => (
+  <div data-testid="profile-feed" />
+));
+jest.mock("@/components/community-curations/CommunityCurations", () => ({
+  __esModule: true,
+  default: (props: any) => mockCommunityCurations(props),
+}));
+
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ mobileWavesViewStyle: { height: "42px" } }),
 }));
 
 jest.mock("@/components/brain/mobile/BrainMobileMessages", () => ({
@@ -344,6 +364,21 @@ describe("BrainMobile", () => {
 
     expect(mockDialogMountCount).toBe(1);
     expect(screen.queryByTestId("quick-vote-dialog")).toBeNull();
+  });
+
+  it("shows the profile feed for app /waves?view=profile-feed without quick vote", async () => {
+    mockPathname = "/waves";
+    mockSearchParams = new URLSearchParams("view=profile-feed");
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("profile-feed")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId("waves")).toBeNull();
+    expect(mockBrainMobileWaves).not.toHaveBeenCalled();
+    expect(mockDialogMountCount).toBe(0);
   });
 
   it("drops a stale local tab selection when navigation context changes", async () => {

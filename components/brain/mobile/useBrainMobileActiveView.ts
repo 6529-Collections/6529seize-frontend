@@ -8,6 +8,7 @@ import { BrainView } from "./brainMobileViews";
 const GLOBAL_VIEWS = new Set([
   BrainView.DEFAULT,
   BrainView.WAVES,
+  BrainView.PROFILE_FEED,
   BrainView.MESSAGES,
   BrainView.NOTIFICATIONS,
 ]);
@@ -16,6 +17,7 @@ const NON_WAVE_VIEWS = new Set([
   BrainView.NOTIFICATIONS,
   BrainView.MESSAGES,
   BrainView.WAVES,
+  BrainView.PROFILE_FEED,
 ]);
 
 interface UseBrainMobileActiveViewParams {
@@ -64,6 +66,15 @@ function getRouteDefaultView({
     (!waveId && viewParam === "messages")
   ) {
     return BrainView.MESSAGES;
+  }
+
+  if (
+    !waveId &&
+    isApp &&
+    pathname === "/waves" &&
+    viewParam === "profile-feed"
+  ) {
+    return BrainView.PROFILE_FEED;
   }
 
   if (
