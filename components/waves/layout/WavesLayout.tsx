@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import { useAuthenticatedContent } from "../../../hooks/useAuthenticatedContent";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
-import ConnectWallet from "../../common/ConnectWallet";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 import WavesDesktop from "../WavesDesktop";
 import WavesMobile from "../WavesMobile";
@@ -45,15 +44,13 @@ function getNotAuthenticatedContent({
   readonly containerClassName: string;
   readonly isApp: boolean;
 }): ReactNode {
-  if (isApp) {
-    return <ConnectWallet />;
-  }
+  const Component = isApp ? WavesMobile : WavesDesktop;
 
   return (
     <div className="tw-flex-1" id="waves-content">
-      <WavesDesktop showLeftSidebar={true}>
+      <Component>
         <div className={containerClassName}>{children}</div>
-      </WavesDesktop>
+      </Component>
     </div>
   );
 }
