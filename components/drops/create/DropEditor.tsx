@@ -124,6 +124,9 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     }));
 
     const onRemovePart = (index: number) => {
+      if (loading) {
+        return;
+      }
       if (!drop?.parts.length) {
         return;
       }
@@ -170,11 +173,12 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           onCanSubmitChange={onCanSubmitChange}
           key={dropEditorRefreshKey}
         >
-          {!!drop?.parts.length && isStormMode && !loading ? (
+          {drop !== null && drop.parts.length > 0 && isStormMode ? (
             <CreateDropStormView
               drop={drop}
               profile={profile}
               wave={wave}
+              disabled={loading}
               removePart={onRemovePart}
             />
           ) : null}

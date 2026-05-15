@@ -177,11 +177,61 @@ const CreateDropWrapper = forwardRef<
     const [editorState, setEditorState] = useState<EditorState | null>(null);
     const [files, setFiles] = useState<File[]>([]);
 
+    const setFilesWhenUnlocked = (newFiles: File[]) => {
+      if (loading) {
+        return;
+      }
+      setFiles(newFiles);
+    };
+
+    const setEditorStateWhenUnlocked = (newEditorState: EditorState | null) => {
+      if (loading) {
+        return;
+      }
+      setEditorState(newEditorState);
+    };
+
+    const setViewTypeWhenUnlocked = (newViewType: CreateDropViewType) => {
+      if (loading) {
+        return;
+      }
+      setViewType(newViewType);
+    };
+
+    const setTitleWhenUnlocked = (newTitle: string | null) => {
+      if (loading) {
+        return;
+      }
+      setTitle(newTitle);
+    };
+
+    const onMentionedUserWhenUnlocked = (
+      newUser: Omit<MentionedUser, "current_handle">
+    ) => {
+      if (loading) {
+        return;
+      }
+      onMentionedUser(newUser);
+    };
+
+    const onMentionedWaveWhenUnlocked = (newWave: MentionedWave) => {
+      if (loading) {
+        return;
+      }
+      onMentionedWave(newWave);
+    };
+
     const onFileRemove = (file: File) => {
+      if (loading) {
+        return;
+      }
       setFiles((prev) => prev.filter((f) => f !== file));
     };
 
     const onMetadataEdit = ({ data_key, data_value }: DropMetadata) => {
+      if (loading) {
+        return;
+      }
       const index = metadata.findIndex((m) => m.data_key === data_key);
       if (index === -1) {
         setMetadata([...metadata, { data_key, data_value }]);
@@ -192,10 +242,16 @@ const CreateDropWrapper = forwardRef<
       }
     };
     const onMetadataRemove = (data_key: string) => {
+      if (loading) {
+        return;
+      }
       setMetadata(metadata.filter((m) => m.data_key !== data_key));
     };
 
     const onReferencedNft = (newNft: ReferencedNft) => {
+      if (loading) {
+        return;
+      }
       setReferencedNfts([
         ...referencedNfts.filter(
           (i) => !(i.token === newNft.token && i.contract === newNft.contract)
@@ -462,17 +518,26 @@ const CreateDropWrapper = forwardRef<
     };
 
     const onDropPart = (): CreateDropConfig => {
+      if (loading) {
+        return getDropSnapshot();
+      }
       const currentDrop = getDropSnapshot();
       setDrop(currentDrop);
       clearInputState();
       return currentDrop;
     };
     const onDrop = () => {
+      if (loading) {
+        return;
+      }
       const currentDrop = onDropPart();
       onSubmitDrop(currentDrop);
     };
 
     const onStormDropPart = () => {
+      if (loading) {
+        return getDropSnapshot();
+      }
       setIsStormMode(true);
       return onDropPart();
     };
@@ -501,12 +566,12 @@ const CreateDropWrapper = forwardRef<
           showDropError={showDropError}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
-          onViewChange={setViewType}
-          onEditorState={setEditorState}
-          onMentionedUser={onMentionedUser}
-          onMentionedWave={onMentionedWave}
+          onViewChange={setViewTypeWhenUnlocked}
+          onEditorState={setEditorStateWhenUnlocked}
+          onMentionedUser={onMentionedUserWhenUnlocked}
+          onMentionedWave={onMentionedWaveWhenUnlocked}
           onReferencedNft={onReferencedNft}
-          setFiles={setFiles}
+          setFiles={setFilesWhenUnlocked}
           onFileRemove={onFileRemove}
           onDrop={onDrop}
           onDropPart={onStormDropPart}
@@ -532,15 +597,15 @@ const CreateDropWrapper = forwardRef<
           showDropError={showDropError}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
-          onTitle={setTitle}
+          onTitle={setTitleWhenUnlocked}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
-          onViewChange={setViewType}
-          onEditorState={setEditorState}
-          onMentionedUser={onMentionedUser}
-          onMentionedWave={onMentionedWave}
+          onViewChange={setViewTypeWhenUnlocked}
+          onEditorState={setEditorStateWhenUnlocked}
+          onMentionedUser={onMentionedUserWhenUnlocked}
+          onMentionedWave={onMentionedWaveWhenUnlocked}
           onReferencedNft={onReferencedNft}
-          setFiles={setFiles}
+          setFiles={setFilesWhenUnlocked}
           onFileRemove={onFileRemove}
           onDrop={onDrop}
           onDropPart={onStormDropPart}

@@ -6,8 +6,11 @@ import {
   CreateDropViewType,
 } from "@/components/drops/create/types";
 
+let mockWrapperProps: any = null;
+
 jest.mock("@/components/drops/create/utils/CreateDropWrapper", () => {
   return React.forwardRef((props: any, ref: any) => {
+    mockWrapperProps = props;
     React.useImperativeHandle(ref, () => ({
       getDropSnapshot: () => ({ id: "snapshot" }),
       requestDrop: () => ({ id: "drop" }),
@@ -20,7 +23,7 @@ jest.mock("@/components/drops/create/utils/CreateDropWrapper", () => {
   });
 });
 
-function setup(refreshKey = 0) {
+function setup(refreshKey = 0, loading = false) {
   const ref = createRef<any>();
   const profile = { handle: "user" } as any;
   render(
@@ -29,7 +32,7 @@ function setup(refreshKey = 0) {
       profile={profile}
       quotedDrop={null}
       type={CreateDropType.DROP}
-      loading={false}
+      loading={loading}
       dropEditorRefreshKey={refreshKey}
       wave={null}
       waveId={null}
@@ -47,6 +50,11 @@ test("exposes requestDrop via ref", () => {
 test("exposes getDropSnapshot via ref", () => {
   const ref = setup();
   expect(ref.current?.getDropSnapshot()).toEqual({ id: "snapshot" });
+});
+
+test("passes loading lock to create drop wrapper", () => {
+  setup(0, true);
+  expect(mockWrapperProps.loading).toBe(true);
 });
 
 test("resets state when refresh key changes", () => {

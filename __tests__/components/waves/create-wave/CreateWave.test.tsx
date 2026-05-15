@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -94,7 +100,7 @@ jest.mock(
   "@/components/waves/create-wave/description/CreateWaveDescription",
   () => {
     return React.forwardRef(function MockCreateWaveDescription(
-      { showDropError, onHaveDropToSubmitChange }: any,
+      { submitting, showDropError, onHaveDropToSubmitChange }: any,
       ref: any
     ) {
       React.useImperativeHandle(ref, () => ({
@@ -105,6 +111,7 @@ jest.mock(
       return (
         <div
           data-testid="create-wave-description"
+          data-submitting={submitting}
           data-show-drop-error={showDropError}
         >
           Description Step
@@ -367,6 +374,43 @@ describe("CreateWave", () => {
         expect(mockRequestDrop).not.toHaveBeenCalled();
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
         expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+      });
+    });
+
+    it("locks the description while submit work is pending", async () => {
+      let resolveAuth: ((value: { success: boolean }) => void) | undefined;
+      mockAuthContext.requestAuth.mockReturnValue(
+        new Promise((resolve) => {
+          resolveAuth = resolve;
+        })
+      );
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "true"
+        );
+      });
+
+      await act(async () => {
+        resolveAuth?.({ success: false });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "false"
+        );
       });
     });
 

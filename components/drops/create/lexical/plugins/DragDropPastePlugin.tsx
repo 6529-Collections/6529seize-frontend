@@ -61,16 +61,23 @@ async function uploadImage(file: File): Promise<string> {
 }
 
 export default function DragDropPaste({
+  disabled = false,
   onAttachmentFiles,
 }: {
+  readonly disabled?: boolean | undefined;
   readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
 }): null {
   const { setToast } = useAuth();
   const onAttachmentFilesRef = useRef(onAttachmentFiles);
+  const disabledRef = useRef(disabled);
 
   useEffect(() => {
     onAttachmentFilesRef.current = onAttachmentFiles;
   }, [onAttachmentFiles]);
+
+  useEffect(() => {
+    disabledRef.current = disabled;
+  }, [disabled]);
 
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
@@ -78,6 +85,10 @@ export default function DragDropPaste({
     const unregister = editor.registerCommand(
       DRAG_DROP_PASTE,
       (files) => {
+        if (disabledRef.current) {
+          return true;
+        }
+
         (async () => {
           const filesResult = await mediaFileReader(
             files,
@@ -107,7 +118,7 @@ export default function DragDropPaste({
                 const key = imageNode.getKey();
                 uploadImage(file)
                   .then((url: string) => {
-                    if (!isMounted) return;
+                    if (!isMounted || disabledRef.current) return;
                     editor.update(() => {
                       const node = $getNodeByKey(key);
                       if (node) {
@@ -116,7 +127,7 @@ export default function DragDropPaste({
                     });
                   })
                   .catch((err: unknown) => {
-                    if (!isMounted) return;
+                    if (!isMounted || disabledRef.current) return;
                     editor.update(() => {
                       const node = $getNodeByKey(key);
                       if (node) {

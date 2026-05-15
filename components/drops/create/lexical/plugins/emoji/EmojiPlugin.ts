@@ -2,15 +2,14 @@
 
 import { useCallback, useEffect, useMemo } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import type {
-  LexicalEditor} from "lexical";
+import type { LexicalEditor } from "lexical";
 import {
   $getRoot,
   $getSelection,
   $isRangeSelection,
   $createRangeSelection,
   $setSelection,
-  TextNode
+  TextNode,
 } from "lexical";
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import { useEmoji } from "@/contexts/EmojiContext";
@@ -127,7 +126,11 @@ function transformEmojiTextToNode(
   });
 }
 
-const EmojiPlugin = () => {
+const EmojiPlugin = ({
+  disabled = false,
+}: {
+  readonly disabled?: boolean | undefined;
+}) => {
   const [editor] = useLexicalComposerContext();
   const { emojiMap, findNativeEmoji } = useEmoji();
 
@@ -153,6 +156,10 @@ const EmojiPlugin = () => {
   );
 
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
+
     transformEmojiTextToNode(editor, isEmojiIdValid);
 
     return editor.registerTextContentListener((textContent) => {
@@ -160,7 +167,7 @@ const EmojiPlugin = () => {
         transformEmojiTextToNode(editor, isEmojiIdValid);
       }
     });
-  }, [editor, isEmojiIdValid]);
+  }, [disabled, editor, isEmojiIdValid]);
 
   return null;
 };

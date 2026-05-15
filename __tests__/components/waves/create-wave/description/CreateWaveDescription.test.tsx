@@ -84,6 +84,7 @@ describe("CreateWaveDescription", () => {
   const defaultProps = {
     profile: mockProfile,
     wave: mockWave,
+    submitting: false,
     showDropError: false,
     onHaveDropToSubmitChange: jest.fn(),
   };
@@ -145,6 +146,12 @@ describe("CreateWaveDescription", () => {
     render(<CreateWaveDescription {...defaultProps} showDropError={true} />);
 
     expect(screen.getByTestId("show-drop-error")).toHaveTextContent("true");
+  });
+
+  it("passes submitting state to DropEditor loading", () => {
+    render(<CreateWaveDescription {...defaultProps} submitting={true} />);
+
+    expect(screen.getByTestId("loading")).toHaveTextContent("true");
   });
 
   it("handles wave with null image", () => {

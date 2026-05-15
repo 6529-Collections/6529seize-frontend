@@ -127,6 +127,7 @@ const CreateDropCompact = forwardRef<
                 type={type}
                 waveId={waveId}
                 drop={drop}
+                loading={loading}
                 canAddPart={canAddPart}
                 canSubmit={canSubmit}
                 missingMedia={missingMedia}
@@ -136,7 +137,11 @@ const CreateDropCompact = forwardRef<
                 onMentionedWave={onMentionedWave}
                 onReferencedNft={onReferencedNft}
                 onDrop={onDrop}
-                onViewClick={() => onViewChange(CreateDropViewType.FULL)}
+                onViewClick={() => {
+                  if (!loading) {
+                    onViewChange(CreateDropViewType.FULL);
+                  }
+                }}
                 setFiles={setFiles}
                 onDropPart={onDropPart}
               >
@@ -145,7 +150,7 @@ const CreateDropCompact = forwardRef<
                     {onDrop && (
                       <PrimaryButton
                         onClicked={onDrop}
-                        disabled={!canSubmit}
+                        disabled={!canSubmit || loading}
                         loading={loading}
                         padding={
                           screenType === CreateDropScreenType.MOBILE
@@ -174,9 +179,14 @@ const CreateDropCompact = forwardRef<
                   </p>
                 </div>
                 <button
-                  onClick={() => onFileRemove(file)}
+                  onClick={() => {
+                    if (!loading) {
+                      onFileRemove(file);
+                    }
+                  }}
                   type="button"
                   aria-label="Remove file"
+                  disabled={loading}
                   className="-tw-mb-0.5 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
                 >
                   <svg

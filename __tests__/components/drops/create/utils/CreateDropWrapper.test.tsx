@@ -494,5 +494,36 @@ describe("CreateDropWrapper Authentication Validation", () => {
       expect(setDrop).toHaveBeenCalledWith(result);
       expect(result.parts[0].content).toBe("saved draft");
     });
+
+    it("ignores editor state and storm part changes while loading", () => {
+      mockMarkdown = "locked draft";
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const setDrop = jest.fn();
+      const component = React.createRef<any>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            loading={true}
+            setDrop={setDrop}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      fireEvent.click(getByTestId("set-full-editor-state"));
+      fireEvent.click(getByTestId("add-full-part"));
+
+      const result = component.current?.getDropSnapshot();
+
+      expect(setDrop).not.toHaveBeenCalled();
+      expect(result.parts).toEqual([]);
+    });
   });
 });

@@ -112,6 +112,21 @@ describe("DragDropPastePlugin", () => {
     expect(toastMock).not.toHaveBeenCalled();
   });
 
+  it("does not add files or upload images while disabled", async () => {
+    const onAttachmentFiles = jest.fn();
+    renderPlugin({ disabled: true, onAttachmentFiles });
+
+    await act(async () => {
+      await commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    expect(onAttachmentFiles).not.toHaveBeenCalled();
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    expect($insertNodes).not.toHaveBeenCalled();
+    expect(toastMock).not.toHaveBeenCalled();
+  });
+
   it("replaces loading image after parent rerenders with a new attachment handler", async () => {
     let resolveUpload: ((value: { url: string }) => void) | undefined;
     const replace = jest.fn();
@@ -138,6 +153,32 @@ describe("DragDropPastePlugin", () => {
     });
 
     expect(replace).toHaveBeenCalled();
+  });
+
+  it("does not finish an in-flight inline upload after becoming disabled", async () => {
+    let resolveUpload: ((value: { url: string }) => void) | undefined;
+    const replace = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpload = resolve;
+      })
+    );
+
+    const { rerender } = render(<DragDropPastePlugin />);
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(<DragDropPastePlugin disabled />);
+    await act(async () => {
+      resolveUpload?.({ url: "uploaded" });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("removes loading image and shows an error when inline upload hangs", async () => {
