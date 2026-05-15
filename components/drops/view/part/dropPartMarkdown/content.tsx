@@ -4,7 +4,6 @@ import type { ExtraProps } from "react-markdown";
 import emojiRegex from "emoji-regex";
 
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import type { DropListItemContentPartProps } from "@/components/drops/view/item/content/DropListItemContentPart";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import { ApiDropGroupMention as ApiDropGroupMentionValue } from "@/generated/models/ApiDropGroupMention";
@@ -12,17 +11,16 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import DropListItemContentPart from "@/components/drops/view/item/content/DropListItemContentPart";
 import {
+  DropContentPartType,
+  type DropListItemContentPartProps,
+} from "@/components/drops/view/item/content/DropListItemContentPart.types";
+import {
   ALL_GROUP_MENTION_TEXT,
   hasMentionedGroup,
   markAllGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
 
-export enum DropContentPartType {
-  MENTION = "MENTION",
-  GROUP_MENTION = "GROUP_MENTION",
-  HASHTAG = "HASHTAG",
-  WAVE_MENTION = "WAVE_MENTION",
-}
+export { DropContentPartType };
 
 interface EmojiCategory {
   emojis: Array<{ id: string; skins: Array<{ src: string }> }>;
@@ -33,6 +31,17 @@ interface NativeEmojiSkin {
 }
 
 type FindNativeEmoji = (emojiId: string) => { skins: NativeEmojiSkin[] } | null;
+
+interface CustomEmojiImageProps {
+  readonly alt: string;
+  readonly bigEmoji: boolean;
+  readonly src: string | undefined;
+}
+
+interface MarkdownElementProps {
+  readonly href?: unknown;
+  readonly src?: unknown;
+}
 
 interface MarkdownContentConfig {
   readonly textSizeClass: string;
@@ -58,22 +67,58 @@ interface MarkdownContentRenderers {
 const customEmojiRegex = /(:\w+:)/g;
 const nativeEmojiRegex = emojiRegex();
 
+const isReactNodeArray = (
+  content: ReactNode | undefined
+): content is ReactNode[] => Array.isArray(content);
+
+const isCustomEmojiToken = (value: string): boolean => {
+  customEmojiRegex.lastIndex = 0;
+  const isMatch = customEmojiRegex.test(value);
+  customEmojiRegex.lastIndex = 0;
+  return isMatch;
+};
+
 const containsOnlyNativeEmojis = (str: string): boolean => {
   const text = str.trim();
-  if (!text) {
+  if (text.length === 0) {
     return true;
   }
 
   nativeEmojiRegex.lastIndex = 0;
-  let hasEmoji = false;
-  const textWithoutEmojis = text.replace(nativeEmojiRegex, () => {
-    hasEmoji = true;
-    return "";
-  });
+  const hasEmoji = nativeEmojiRegex.test(text);
   nativeEmojiRegex.lastIndex = 0;
 
-  return hasEmoji && textWithoutEmojis.trim() === "";
+  if (!hasEmoji) {
+    return false;
+  }
+
+  const textWithoutEmojis = text.replace(nativeEmojiRegex, "");
+  nativeEmojiRegex.lastIndex = 0;
+
+  return textWithoutEmojis.trim() === "";
 };
+
+const CustomEmojiImage = ({ alt, bigEmoji, src }: CustomEmojiImageProps) => (
+  // eslint-disable-next-line @next/next/no-img-element -- Emoji markdown tokens have dynamic inline dimensions.
+  <img
+    src={src}
+    alt={alt}
+    className={`${bigEmoji ? "emoji-node-big" : "emoji-node"}`}
+  />
+);
+
+const getMarkdownElementProps = (
+  node: ReactNode
+): MarkdownElementProps | null =>
+  isValidElement<MarkdownElementProps>(node) ? node.props : null;
+
+const hasElementSrc = (elementProps: MarkdownElementProps | null): boolean =>
+  elementProps?.src !== undefined && elementProps.src !== null;
+
+const getSmartHref = (
+  elementProps: MarkdownElementProps | null
+): string | null =>
+  typeof elementProps?.href === "string" ? elementProps.href : null;
 
 export const createMarkdownContentRenderers = ({
   textSizeClass,
@@ -106,10 +151,10 @@ export const createMarkdownContentRenderers = ({
     }
 
     return (
-      <img
+      <CustomEmojiImage
         src={emoji.skins[0]?.src}
         alt={emojiId}
-        className={`${bigEmoji ? "emoji-node-big" : "emoji-node"}`}
+        bigEmoji={bigEmoji}
       />
     );
   };
@@ -166,9 +211,9 @@ export const createMarkdownContentRenderers = ({
 
     const areAllPartsEmojis = content
       .split(customEmojiRegex)
-      .filter((part) => !!part)
+      .filter((part) => part.length > 0)
       .every(
-        (part) => part.match(customEmojiRegex) || containsOnlyNativeEmojis(part)
+        (part) => isCustomEmojiToken(part) || containsOnlyNativeEmojis(part)
       );
 
     let currentContent = content;
@@ -190,10 +235,10 @@ export const createMarkdownContentRenderers = ({
       });
     }
 
-    const parts = currentContent
+    return currentContent
       .split(splitter)
       .filter((part) => part !== "")
-      .map((part) => {
+      .map((part): ReactNode => {
         const partProps = values[part];
         if (partProps) {
           const randomId = getRandomObjectId();
@@ -201,25 +246,24 @@ export const createMarkdownContentRenderers = ({
         }
 
         const segments = part.split(customEmojiRegex);
-        return segments.map((segment) =>
-          segment.match(customEmojiRegex) ? (
-            <Fragment key={getRandomObjectId()}>
-              {renderEmoji(segment, areAllPartsEmojis)}
-            </Fragment>
-          ) : (
-            <span
-              key={getRandomObjectId()}
-              className={
-                areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
-              }
-            >
-              {segment}
-            </span>
-          )
+        return segments.map(
+          (segment): ReactNode =>
+            isCustomEmojiToken(segment) ? (
+              <Fragment key={getRandomObjectId()}>
+                {renderEmoji(segment, areAllPartsEmojis)}
+              </Fragment>
+            ) : (
+              <span
+                key={getRandomObjectId()}
+                className={
+                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
+                }
+              >
+                {segment}
+              </span>
+            )
         );
       });
-
-    return parts;
   };
 
   const customRenderer = (content: ReactNode | undefined): ReactNode => {
@@ -227,8 +271,8 @@ export const createMarkdownContentRenderers = ({
       return customPartRenderer(content);
     }
 
-    if (Array.isArray(content)) {
-      return content.map((child) => {
+    if (isReactNodeArray(content)) {
+      return content.map((child): ReactNode => {
         if (typeof child === "string") {
           return customPartRenderer(child);
         }
@@ -248,14 +292,37 @@ export const createMarkdownContentRenderers = ({
       paragraphParams: ClassAttributes<HTMLParagraphElement> &
         HTMLAttributes<HTMLParagraphElement> &
         ExtraProps
-    ) => (
-      <p
-        key={getRandomObjectId()}
-        className={`word-break tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
-      >
-        {customRenderer(paragraphParams.children)}
-      </p>
-    );
+    ) => {
+      const paragraphChildren = Children.toArray(paragraphParams.children);
+      const isBlankLineParagraph =
+        paragraphChildren.length > 0 &&
+        paragraphChildren.every(
+          (child) =>
+            typeof child === "string" &&
+            child.replaceAll("\u00a0", "").trim().length === 0
+        );
+
+      if (isBlankLineParagraph) {
+        return (
+          <p
+            key={getRandomObjectId()}
+            aria-hidden="true"
+            className="word-break tw-my-1 tw-h-2 tw-leading-none"
+          >
+            {"\u00a0"}
+          </p>
+        );
+      }
+
+      return (
+        <p
+          key={getRandomObjectId()}
+          className={`word-break tw-mb-1.5 tw-mt-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out last:tw-mb-0 ${textSizeClass}`}
+        >
+          {customRenderer(paragraphParams.children)}
+        </p>
+      );
+    };
 
     const { children } = params;
     const flattened = Children.toArray(children);
@@ -271,10 +338,9 @@ export const createMarkdownContentRenderers = ({
     };
 
     for (const node of flattened) {
-      const element = isValidElement(node);
-      const src = element && (node.props as any)?.src;
-      const href = element && (node.props as any)?.href;
-      if (src || (href && isSmartLink(href))) {
+      const elementProps = getMarkdownElementProps(node);
+      const href = getSmartHref(elementProps);
+      if (hasElementSrc(elementProps) || (href !== null && isSmartLink(href))) {
         flushTextChunk();
         elements.push(node);
       } else {
@@ -288,7 +354,7 @@ export const createMarkdownContentRenderers = ({
   };
 
   const processContent = (content: string | null) => {
-    if (!content) {
+    if (content === null || content.length === 0) {
       return content;
     }
 

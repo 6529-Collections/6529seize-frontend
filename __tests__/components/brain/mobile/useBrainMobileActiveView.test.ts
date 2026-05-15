@@ -7,8 +7,8 @@ type UseBrainMobileActiveViewProps = Parameters<
   typeof useBrainMobileActiveView
 >[0];
 
-const createSearchParams = (): ReadonlyURLSearchParams =>
-  new URLSearchParams() as unknown as ReadonlyURLSearchParams;
+const createSearchParams = (query = ""): ReadonlyURLSearchParams =>
+  new URLSearchParams(query) as unknown as ReadonlyURLSearchParams;
 
 const createProps = (
   overrides: Partial<UseBrainMobileActiveViewProps> = {}
@@ -55,6 +55,38 @@ describe("useBrainMobileActiveView", () => {
           isApproveWave: true,
           isRankWave: false,
           wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
+
+  it("uses the profile feed view for app /waves?view=profile-feed without a wave", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isApp: true,
+          searchParams: createSearchParams("view=profile-feed"),
+          wave: null,
+          waveId: null,
+        })
+      )
+    );
+
+    expect(result.current.activeView).toBe(BrainView.PROFILE_FEED);
+  });
+
+  it("ignores the profile feed query when a wave is selected", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isApp: true,
+          isCompleted: false,
+          isRankWave: false,
+          searchParams: createSearchParams("view=profile-feed"),
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+          waveId: "wave-1",
         })
       )
     );

@@ -1,7 +1,7 @@
 import type { LinkPreviewVariant } from "../LinkPreviewContext";
 
 export const MARKETPLACE_MEDIA_FRAME_CLASS =
-  "tw-aspect-[16/9] tw-min-h-[14rem] tw-w-full tw-bg-inherit md:tw-min-h-[15rem]";
+  "tw-box-border tw-h-64 tw-w-full tw-bg-inherit tw-p-4 md:tw-h-72 md:tw-p-6";
 
 export function getMarketplaceContainerClass(
   variant: LinkPreviewVariant,
