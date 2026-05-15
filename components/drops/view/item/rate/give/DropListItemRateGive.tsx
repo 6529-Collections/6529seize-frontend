@@ -42,7 +42,6 @@ export default function DropListItemRateGive({
   const minRating = drop.wave.forbid_negative_votes
     ? Math.max(0, rawMinRating) - currentRating
     : rawMinRating;
-  const canDecrease = !drop.wave.forbid_negative_votes || currentRating > 0;
   const rawProgressRate =
     progressRateState.dropId === drop.id ? progressRateState.rate : 1;
 
@@ -57,6 +56,7 @@ export default function DropListItemRateGive({
   };
 
   const onProgressRate = canVote ? getCorrectedNewRate(rawProgressRate) : 0;
+  const canDecrease = onProgressRate > minRating;
 
   const setOnProgressRate = (rate: number) => {
     setProgressRateState({ dropId: drop.id, rate });

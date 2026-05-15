@@ -84,11 +84,35 @@ describe("DropListItemRateGive", () => {
       context_profile_context: { rating: 0, max_rating: 5, min_rating: -5 },
     });
     const decBtn = screen.getByLabelText("Decrease vote");
-    expect(decBtn).toBeDisabled();
+    expect(decBtn).not.toBeDisabled();
     act(() => {
       fireEvent.mouseDown(decBtn);
-      jest.advanceTimersByTime(500);
+      fireEvent.mouseUp(decBtn);
     });
-    expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("1");
+    expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("0");
+    expect(decBtn).toBeDisabled();
+  });
+
+  it("allows decreasing a pending positive vote when negative votes are forbidden", () => {
+    renderComponent({
+      wave: { forbid_negative_votes: true },
+      context_profile_context: { rating: 0, max_rating: 5, min_rating: -5 },
+    });
+
+    const incBtn = screen.getByLabelText("Choose positive votes");
+    act(() => {
+      fireEvent.mouseDown(incBtn);
+      jest.advanceTimersByTime(500);
+      fireEvent.mouseUp(incBtn);
+    });
+    expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("3");
+
+    const decBtn = screen.getByLabelText("Decrease vote");
+    expect(decBtn).not.toBeDisabled();
+    act(() => {
+      fireEvent.mouseDown(decBtn);
+      fireEvent.mouseUp(decBtn);
+    });
+    expect(screen.getByTestId("submit").getAttribute("data-rate")).toBe("2");
   });
 });
