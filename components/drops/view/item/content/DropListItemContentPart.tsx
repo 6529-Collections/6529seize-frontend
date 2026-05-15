@@ -24,6 +24,6 @@ export default function DropListItemContentPart({
     case DropContentPartType.WAVE_MENTION:
       return <DropListItemContentWaveMention wave={value} />;
     default:
-      assertUnreachable(type);
+      return assertUnreachable(type);
   }
 }

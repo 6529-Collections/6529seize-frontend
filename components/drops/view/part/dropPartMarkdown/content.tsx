@@ -20,8 +20,6 @@ import {
   markAllGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
 
-export { DropContentPartType };
-
 interface EmojiCategory {
   emojis: Array<{ id: string; skins: Array<{ src: string }> }>;
 }
