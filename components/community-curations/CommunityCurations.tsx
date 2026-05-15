@@ -5,6 +5,7 @@ import CommunityCurationsMasonry from "@/components/community-curations/Communit
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { useCallback, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 const COMMUNITY_CURATIONS_SKELETON_COLUMNS = [
   {
@@ -127,7 +128,15 @@ function CommunityCurationsEmptyState({
   );
 }
 
-export default function CommunityCurations() {
+interface CommunityCurationsProps {
+  readonly heightStyle?: CSSProperties | undefined;
+  readonly topContent?: ReactNode | undefined;
+}
+
+export default function CommunityCurations({
+  heightStyle,
+  topContent,
+}: CommunityCurationsProps = {}) {
   const { waveViewStyle } = useLayout();
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
@@ -158,9 +167,10 @@ export default function CommunityCurations() {
     <section
       ref={setScrollContainer}
       className="tw-flex tw-min-h-0 tw-w-full tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-px-6 lg:tw-px-8"
-      style={waveViewStyle}
+      style={heightStyle ?? waveViewStyle}
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
+        {topContent}
         <div className="tw-flex tw-flex-col tw-gap-4">
           <div className="tw-max-w-2xl">
             <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">

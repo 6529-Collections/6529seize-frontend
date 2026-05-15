@@ -10,15 +10,24 @@ import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: ({ alt, height, src, width }: any) => (
+    <span
+      aria-label={alt || undefined}
+      data-next-image-height={height}
+      data-next-image-src={typeof src === "string" ? src : src?.src}
+      data-next-image-width={width}
+      role={alt ? "img" : undefined}
+    />
+  ),
 }));
 
 let mockSearchParams = new URLSearchParams();
 let mockPathname = "/";
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace }),
   useSearchParams: () => mockSearchParams,
   usePathname: () => mockPathname,
 }));
@@ -132,6 +141,18 @@ jest.mock("@/components/brain/mobile/BrainMobileWaves", () => ({
   default: (props: any) => mockBrainMobileWaves(props),
 }));
 
+const mockCommunityCurations = jest.fn(() => (
+  <div data-testid="profile-feed" />
+));
+jest.mock("@/components/community-curations/CommunityCurations", () => ({
+  __esModule: true,
+  default: (props: any) => mockCommunityCurations(props),
+}));
+
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ mobileWavesViewStyle: { height: "42px" } }),
+}));
+
 jest.mock("@/components/brain/mobile/BrainMobileMessages", () => ({
   __esModule: true,
   default: () => <div data-testid="messages" />,
@@ -172,6 +193,44 @@ jest.mock(
 jest.mock("@/components/brain/notifications/NotificationsContainer", () => ({
   __esModule: true,
   default: () => <div data-testid="notifications" />,
+}));
+
+const mockCreateWaveModal = jest.fn(
+  ({
+    isOpen,
+    onClose,
+  }: {
+    readonly isOpen: boolean;
+    readonly onClose: () => void;
+  }) =>
+    isOpen ? (
+      <button type="button" onClick={onClose}>
+        Close create wave
+      </button>
+    ) : null
+);
+jest.mock("@/components/waves/create-wave/CreateWaveModal", () => ({
+  __esModule: true,
+  default: (props: any) => mockCreateWaveModal(props),
+}));
+
+const mockCreateDirectMessageModal = jest.fn(
+  ({
+    isOpen,
+    onClose,
+  }: {
+    readonly isOpen: boolean;
+    readonly onClose: () => void;
+  }) =>
+    isOpen ? (
+      <button type="button" onClick={onClose}>
+        Close create dm
+      </button>
+    ) : null
+);
+jest.mock("@/components/waves/create-dm/CreateDirectMessageModal", () => ({
+  __esModule: true,
+  default: (props: any) => mockCreateDirectMessageModal(props),
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveLeaderboard", () => ({
@@ -227,6 +286,7 @@ describe("BrainMobile", () => {
     mockSearchParams = new URLSearchParams();
     mockPathname = "/";
     mockPush.mockClear();
+    mockReplace.mockClear();
     dropData = null;
     waveData = null;
     isApp = true;
@@ -234,6 +294,9 @@ describe("BrainMobile", () => {
     mockFirstDecisionDone = true;
     latestTabsProps = null;
     mockDialogMountCount = 0;
+    mockCreateWaveModal.mockClear();
+    mockCreateDirectMessageModal.mockClear();
+    globalThis.history.replaceState(null, "", "/");
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice" },
     });
@@ -243,6 +306,11 @@ describe("BrainMobile", () => {
       isRankWave: true,
       isDm: incomingWave?.chat?.scope?.group?.is_direct_message ?? false,
     }));
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    globalThis.history.replaceState(null, "", "/");
   });
 
   it("renders BrainDesktopDrop when drop is open", () => {
@@ -346,6 +414,21 @@ describe("BrainMobile", () => {
     expect(screen.queryByTestId("quick-vote-dialog")).toBeNull();
   });
 
+  it("shows the profile feed for app /waves?view=profile-feed without quick vote", async () => {
+    mockPathname = "/waves";
+    mockSearchParams = new URLSearchParams("view=profile-feed");
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("profile-feed")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId("waves")).toBeNull();
+    expect(mockBrainMobileWaves).not.toHaveBeenCalled();
+    expect(mockDialogMountCount).toBe(0);
+  });
+
   it("drops a stale local tab selection when navigation context changes", async () => {
     mockSearchParams.set("wave", "1");
     waveData = createWave(false);
@@ -443,6 +526,31 @@ describe("BrainMobile", () => {
       expect(screen.getByTestId("messages")).toBeInTheDocument();
       expect(screen.queryByTestId("waves")).toBeNull();
     });
+  });
+
+  it("closes app create overlay by replacing only the create query param", () => {
+    isApp = true;
+    mockPathname = "/waves";
+    mockSearchParams = new URLSearchParams(
+      "view=following&create=wave&drop=d1"
+    );
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/waves?view=following&create=wave&drop=d1"
+    );
+    const replaceState = jest.spyOn(globalThis.history, "replaceState");
+
+    render(<BrainMobile>child</BrainMobile>);
+
+    fireEvent.click(screen.getByRole("button", { name: "Close create wave" }));
+
+    expect(replaceState).toHaveBeenCalledWith(
+      null,
+      "",
+      "/waves?view=following&drop=d1"
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it("reuses the page-owned quick-vote dialog across repeated waves footer openings", async () => {

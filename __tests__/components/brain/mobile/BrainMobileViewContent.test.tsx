@@ -21,6 +21,21 @@ jest.mock("@/components/brain/mobile/BrainMobileWaves", () => ({
   default: (props: any) => mockBrainMobileWaves(props),
 }));
 
+const mockCommunityCurations = jest.fn(({ topContent }: any) => (
+  <div data-testid="profile-feed">
+    {topContent}
+    <div data-testid="profile-feed-body" />
+  </div>
+));
+jest.mock("@/components/community-curations/CommunityCurations", () => ({
+  __esModule: true,
+  default: (props: any) => mockCommunityCurations(props),
+}));
+
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayout: () => ({ mobileWavesViewStyle: { height: "42px" } }),
+}));
+
 const mockBrainMobileMessages = jest.fn(() => <div data-testid="messages" />);
 jest.mock("@/components/brain/mobile/BrainMobileMessages", () => ({
   __esModule: true,
@@ -200,6 +215,34 @@ describe("BrainMobileViewContent", () => {
       </BrainMobileViewContent>
     );
     expect(screen.getByTestId("notifications")).toBeInTheDocument();
+  });
+
+  it("renders the profile feed with a back link", () => {
+    render(
+      <BrainMobileViewContent
+        activeView={BrainView.PROFILE_FEED}
+        activeWaveId={null}
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={false}
+        onDropClick={jest.fn()}
+        onOpenQuickVote={jest.fn()}
+        wave={null}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(screen.getByTestId("profile-feed")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /back to waves/i })
+    ).toHaveAttribute("href", "/waves");
+    expect(mockCommunityCurations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        heightStyle: { height: "42px" },
+        topContent: expect.anything(),
+      })
+    );
   });
 
   it("renders leaderboard and forwards wave props when available", () => {

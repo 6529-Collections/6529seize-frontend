@@ -34,6 +34,9 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   );
 
   expect((container.firstChild as HTMLElement).style.height).toBe("42px");
+  expect(
+    screen.getByRole("link", { name: /profile waves feed/i })
+  ).toHaveAttribute("href", "/waves?view=profile-feed");
   expect(receivedRef).toBeDefined();
   expect(receivedRef.current).not.toBe(container.firstChild);
   expect(receivedRef.current).toContainElement(screen.getByTestId("waves"));

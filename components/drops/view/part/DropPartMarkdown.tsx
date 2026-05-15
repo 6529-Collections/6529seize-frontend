@@ -35,10 +35,7 @@ import {
 } from "@/components/waves/LinkPreviewContext";
 import { primeMarketplacePreviewCacheFromNftLinks } from "@/components/waves/marketplace/common";
 
-import {
-  DropContentPartType,
-  createMarkdownContentRenderers,
-} from "./dropPartMarkdown/content";
+import { createMarkdownContentRenderers } from "./dropPartMarkdown/content";
 import { highlightCodeElement } from "./dropPartMarkdown/highlight";
 import {
   createLinkRenderer,
@@ -456,7 +453,5 @@ function DropPartMarkdown({
     </LinkPreviewProvider>
   );
 }
-
-export { DropContentPartType };
 
 export default memo(DropPartMarkdown);
