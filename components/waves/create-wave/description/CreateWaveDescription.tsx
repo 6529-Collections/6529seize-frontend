@@ -3,10 +3,9 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
 
-import type {
-  DropEditorHandles,
-} from "@/components/drops/create/DropEditor";
+import type { DropEditorHandles } from "@/components/drops/create/DropEditor";
 import DropEditor from "@/components/drops/create/DropEditor";
+import { CreateDropEmojiPickerLayerProvider } from "@/components/waves/CreateDropEmojiPickerLayerContext";
 import { profileAndConsolidationsToProfileMin } from "@/helpers/ProfileHelpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateDropType } from "@/components/drops/create/types";
@@ -47,29 +46,34 @@ const CreateWaveDescription = forwardRef<
 
   return (
     <div>
-      <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
+      <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
         Description
       </p>
-      <p className="tw-mt-2 tw-mb-0 tw-text-base tw-font-normal tw-text-iron-400">
+      <p className="tw-mb-0 tw-mt-2 tw-text-base tw-font-normal tw-text-iron-400">
         Give a good description of your wave so participants know what you
         expect in this wave. More information, including any content moderation
         parameters, is better than less.
       </p>
       <div className="tw-mt-6">
-        <DropEditor
-          ref={dropEditorRef}
-          waveId={null}
-          profile={profileMin}
-          quotedDrop={null}
-          type={CreateDropType.DROP}
-          loading={false}
-          showSubmit={false}
-          dropEditorRefreshKey={1}
-          showDropError={showDropError}
-          wave={wave}
-          onSubmitDrop={() => {}}
-          onCanSubmitChange={onHaveDropToSubmitChange}
-        />
+        <CreateDropEmojiPickerLayerProvider
+          desktopZIndex={10000}
+          mobileZIndexClassName="tw-z-[10000]"
+        >
+          <DropEditor
+            ref={dropEditorRef}
+            waveId={null}
+            profile={profileMin}
+            quotedDrop={null}
+            type={CreateDropType.DROP}
+            loading={false}
+            showSubmit={false}
+            dropEditorRefreshKey={1}
+            showDropError={showDropError}
+            wave={wave}
+            onSubmitDrop={() => {}}
+            onCanSubmitChange={onHaveDropToSubmitChange}
+          />
+        </CreateDropEmojiPickerLayerProvider>
       </div>
     </div>
   );

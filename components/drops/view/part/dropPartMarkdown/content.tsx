@@ -248,14 +248,37 @@ export const createMarkdownContentRenderers = ({
       paragraphParams: ClassAttributes<HTMLParagraphElement> &
         HTMLAttributes<HTMLParagraphElement> &
         ExtraProps
-    ) => (
-      <p
-        key={getRandomObjectId()}
-        className={`word-break tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
-      >
-        {customRenderer(paragraphParams.children)}
-      </p>
-    );
+    ) => {
+      const paragraphChildren = Children.toArray(paragraphParams.children);
+      const isBlankLineParagraph =
+        paragraphChildren.length > 0 &&
+        paragraphChildren.every(
+          (child) =>
+            typeof child === "string" &&
+            child.replaceAll("\u00a0", "").trim().length === 0
+        );
+
+      if (isBlankLineParagraph) {
+        return (
+          <p
+            key={getRandomObjectId()}
+            aria-hidden="true"
+            className="word-break tw-my-1 tw-h-2 tw-leading-none"
+          >
+            {"\u00a0"}
+          </p>
+        );
+      }
+
+      return (
+        <p
+          key={getRandomObjectId()}
+          className={`word-break tw-mb-1.5 tw-mt-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out last:tw-mb-0 ${textSizeClass}`}
+        >
+          {customRenderer(paragraphParams.children)}
+        </p>
+      );
+    };
 
     const { children } = params;
     const flattened = Children.toArray(children);

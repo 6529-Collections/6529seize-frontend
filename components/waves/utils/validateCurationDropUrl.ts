@@ -13,37 +13,33 @@ type SupportedCurationUrlExample = {
   readonly example: string;
 };
 
+const toSupportedCurationUrlExample = (
+  [label, example]: readonly [string, string]
+): SupportedCurationUrlExample => ({
+  label,
+  example,
+});
+
 export const SUPPORTED_CURATION_URL_EXAMPLES: readonly SupportedCurationUrlExample[] =
-  [
-    {
-      label: "SuperRare artwork",
-      example: "https://superrare.com/artwork/eth/0x.../123",
-    },
-    {
-      label: "Transient NFT",
-      example: "https://transient.xyz/nfts/ethereum/0x.../123",
-    },
-    {
-      label: "Transient mint",
-      example: "https://transient.xyz/mint/your-drop-slug",
-    },
-    {
-      label: "Manifold listing",
-      example: "https://manifold.xyz/@creator/id/123",
-    },
-    {
-      label: "Foundation mint",
-      example: "https://foundation.app/mint/eth/0x.../123",
-    },
-    {
-      label: "OpenSea item",
-      example: "https://opensea.io/item/ethereum/0x.../123",
-    },
-    {
-      label: "OpenSea asset",
-      example: "https://opensea.io/assets/ethereum/0x.../123",
-    },
-  ];
+  ([
+    ["SuperRare artwork", "https://superrare.com/artwork/eth/0x.../123"],
+    ["Transient NFT", "https://transient.xyz/nfts/ethereum/0x.../123"],
+    ["Transient mint", "https://transient.xyz/mint/your-drop-slug"],
+    ["Manifold listing", "https://manifold.xyz/@creator/id/123"],
+    ["Foundation mint", "https://foundation.app/mint/eth/0x.../123"],
+    ["gammaio ordinal", "https://gamma.io/ordinals/abc123i0"],
+    [
+      "gammaio print details",
+      "https://gamma.io/ordinals/prints/your-print-id/details",
+    ],
+    [
+      "gammaio collection token",
+      "https://gamma.io/collections/collection-slug/123",
+    ],
+    ["gammaio Stacks NFT", "https://gamma.io/stacks/nfts/SP...collection_123"],
+    ["OpenSea item", "https://opensea.io/item/ethereum/0x.../123"],
+    ["OpenSea asset", "https://opensea.io/assets/ethereum/0x.../123"],
+  ] as const).map(toSupportedCurationUrlExample);
 
 const HAS_WHITESPACE_REGEX = /\s/;
 const HAS_SCHEME_REGEX = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
@@ -51,6 +47,7 @@ const HAS_SCHEME_REGEX = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
 const CONTRACT_PART_REGEX = "0x[a-fA-F0-9]{40}";
 const NUMERIC_ID_PART_REGEX = "[0-9]+";
 const SLUG_ID_PART_REGEX = "[A-Za-z0-9][A-Za-z0-9._-]*";
+const GAMMAIO_ID_PART_REGEX = "[A-Za-z0-9][A-Za-z0-9._:-]*";
 const USER_PART_REGEX = "[A-Za-z0-9._-]+";
 
 const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
@@ -72,6 +69,23 @@ const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
   ],
   "foundation.app": [
     new RegExp(`^/mint/eth/${CONTRACT_PART_REGEX}/${NUMERIC_ID_PART_REGEX}/?$`),
+  ],
+  "gamma.io": [
+    new RegExp(
+      `^/ordinals/(?:${GAMMAIO_ID_PART_REGEX}|prints/${GAMMAIO_ID_PART_REGEX}/details)/?$`
+    ),
+    new RegExp(`^/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`),
+    new RegExp(`^/ordinals/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`),
+    new RegExp(
+      `^/ordinals/collections/${SLUG_ID_PART_REGEX}/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`
+    ),
+    new RegExp(
+      `^/collections/${SLUG_ID_PART_REGEX}/(?!tokens/?$)${GAMMAIO_ID_PART_REGEX}/?$`
+    ),
+    new RegExp(
+      `^/collections/${SLUG_ID_PART_REGEX}/tokens/${GAMMAIO_ID_PART_REGEX}/?$`
+    ),
+    new RegExp(`^/stacks/nfts/${GAMMAIO_ID_PART_REGEX}/?$`),
   ],
   "opensea.io": [
     new RegExp(
