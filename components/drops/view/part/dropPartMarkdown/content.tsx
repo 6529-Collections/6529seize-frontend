@@ -66,12 +66,17 @@ interface MarkdownContentRenderers {
 
 type MarkdownImageElement = ReactElement<{
   readonly layout?: DropPartMarkdownImageLayout | undefined;
-  readonly src?: unknown;
+  readonly src: string;
 }>;
 
 type MarkdownLinkElement = ReactElement<{
   readonly href: string;
 }>;
+
+interface MarkdownImageChunkItem {
+  readonly image: MarkdownImageElement;
+  readonly flattenedIndex: number;
+}
 
 const customEmojiRegex = /(:\w+:)/g;
 const nativeEmojiRegex = emojiRegex();
@@ -85,6 +90,17 @@ const isMarkdownImageElement = (
   isValidElement<{ readonly src?: unknown }>(node) &&
   typeof node.props.src === "string" &&
   node.props.src.length > 0;
+
+const getMarkdownImageStableKey = ({
+  image,
+  flattenedIndex,
+}: MarkdownImageChunkItem): string =>
+  image.key ?? `${image.props.src}:${flattenedIndex}`;
+
+const getMarkdownImageGroupKey = (
+  items: readonly MarkdownImageChunkItem[]
+): string =>
+  `markdown-image-group:${items.map(getMarkdownImageStableKey).join("|")}`;
 
 const isSmartLinkElement = (
   node: ReactNode,
@@ -302,7 +318,7 @@ export const createMarkdownContentRenderers = ({
 
     const elements: ReactNode[] = [];
     let currentTextChunk: ReactNode[] = [];
-    let currentImageChunk: MarkdownImageElement[] = [];
+    let currentImageChunk: MarkdownImageChunkItem[] = [];
 
     const flushTextChunk = () => {
       if (currentTextChunk.length > 0) {
@@ -317,16 +333,21 @@ export const createMarkdownContentRenderers = ({
       }
 
       if (currentImageChunk.length === 1) {
-        elements.push(currentImageChunk[0]);
+        const [item] = currentImageChunk;
+        if (item) {
+          elements.push(item.image);
+        }
         currentImageChunk = [];
         return;
       }
 
       elements.push(
-        <DropPartMarkdownImageGroup key={getRandomObjectId()}>
-          {currentImageChunk.map((image) =>
-            cloneElement(image, {
-              key: image.key ?? getRandomObjectId(),
+        <DropPartMarkdownImageGroup
+          key={getMarkdownImageGroupKey(currentImageChunk)}
+        >
+          {currentImageChunk.map((item) =>
+            cloneElement(item.image, {
+              key: getMarkdownImageStableKey(item),
               layout: "grouped",
             })
           )}
@@ -335,10 +356,10 @@ export const createMarkdownContentRenderers = ({
       currentImageChunk = [];
     };
 
-    for (const node of flattened) {
+    for (const [flattenedIndex, node] of flattened.entries()) {
       if (isMarkdownImageElement(node)) {
         flushTextChunk();
-        currentImageChunk.push(node);
+        currentImageChunk.push({ image: node, flattenedIndex });
         continue;
       }
 

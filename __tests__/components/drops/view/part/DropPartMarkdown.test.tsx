@@ -115,6 +115,27 @@ jest.mock("react-tweet", () => ({
 jest.mock("@/services/api/youtube", () => ({
   fetchYoutubePreview: jest.fn(),
 }));
+jest.mock(
+  "@/components/drops/view/item/content/media/DropListItemContentMediaImage",
+  () => {
+    let mountId = 0;
+
+    function MockDropListItemContentMediaImage({
+      src,
+    }: {
+      readonly src: string;
+    }) {
+      const [currentMountId] = React.useState(() => String(++mountId));
+
+      return <img alt="Drop media" src={src} data-mount-id={currentMountId} />;
+    }
+
+    return {
+      __esModule: true,
+      default: MockDropListItemContentMediaImage,
+    };
+  }
+);
 
 const mockFetchYoutubePreview = fetchYoutubePreview as jest.MockedFunction<
   typeof fetchYoutubePreview
@@ -249,6 +270,40 @@ describe("DropPartMarkdown", () => {
     );
     expect(group?.querySelectorAll("img")).toHaveLength(2);
     expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("keeps grouped markdown images mounted across parent rerenders", () => {
+    const content = "![Seize](/one.png)![Seize](/two.png)";
+    const { rerender } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const originalMountIds = screen
+      .getAllByRole("img", { name: "Drop media" })
+      .map((image) => image.getAttribute("data-mount-id"));
+    expect(originalMountIds).toHaveLength(2);
+
+    rerender(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={content}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen
+        .getAllByRole("img", { name: "Drop media" })
+        .map((image) => image.getAttribute("data-mount-id"))
+    ).toEqual(originalMountIds);
   });
 
   it("keeps whitespace-only markdown between images in the same image group", () => {
