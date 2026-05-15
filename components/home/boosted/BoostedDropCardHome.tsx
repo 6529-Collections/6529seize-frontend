@@ -17,9 +17,13 @@ import {
   memo,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
+  useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import BoostedDropCardHomeContent from "./BoostedDropCardHomeContent";
 
@@ -33,6 +37,7 @@ interface BoostedDropCardHomeProps {
 }
 
 const MAX_FIRE_ICONS = 5;
+const BOOST_HEADER_HIDE_MS = 3000;
 const CARD_CLASSES =
   "tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/70 tw-p-0 tw-text-left tw-transition-all tw-duration-500 tw-ease-out hover:-tw-translate-y-1.5 hover:tw-shadow-[0_0_32px_-10px_rgba(255,255,255,0.12)]";
 const CARD_BORDER_CLASSES =
@@ -127,42 +132,59 @@ const BoostedDropCardHeader = memo(
   ({
     createdAt,
     fireIconsToShow,
+    isBoostHeaderHidden,
     isChatVariant,
     remainingBoosts,
   }: {
     readonly createdAt: ApiDrop["created_at"];
     readonly fireIconsToShow: number;
+    readonly isBoostHeaderHidden: boolean;
     readonly isChatVariant: boolean;
     readonly remainingBoosts: number;
-  }) => (
-    <div
-      className={`${HEADER_CLASSES} ${isChatVariant ? "tw-justify-end" : ""}`}
-    >
-      {!isChatVariant && (
-        <div className={HEADER_LEFT_CLASSES}>
-          <div className={PILL_CLASSES}>
-            <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-300">
-              {getTimeAgoShort(createdAt)}
-            </span>
+  }) => {
+    let chatHeaderClasses = "";
+    let chatBoostPillClasses = "";
+
+    if (isChatVariant) {
+      chatHeaderClasses = "tw-pointer-events-none tw-justify-end";
+      chatBoostPillClasses =
+        "tw-pointer-events-none tw-transition-opacity tw-duration-150 desktop-hover:group-hover:tw-opacity-0";
+    }
+
+    if (isChatVariant && isBoostHeaderHidden) {
+      chatBoostPillClasses = `${chatBoostPillClasses} tw-opacity-0`;
+    }
+
+    return (
+      <div className={`${HEADER_CLASSES} ${chatHeaderClasses}`}>
+        {!isChatVariant && (
+          <div className={HEADER_LEFT_CLASSES}>
+            <div className={PILL_CLASSES}>
+              <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-300">
+                {getTimeAgoShort(createdAt)}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
-      <div className={`${PILL_CLASSES} tw-gap-0.5 sm:tw-ml-auto`}>
-        {Array.from({ length: fireIconsToShow }).map((_, index) => (
-          <BoostIcon
-            key={index}
-            className="tw-size-3 tw-flex-shrink-0 tw-text-orange-400 tw-drop-shadow-sm"
-            variant="filled"
-          />
-        ))}
-        {remainingBoosts > 0 && (
-          <span className="tw-ml-1 tw-text-[10px] tw-font-bold tw-tabular-nums tw-leading-4 tw-text-iron-50">
-            +{remainingBoosts}
-          </span>
         )}
+        <div
+          className={`${PILL_CLASSES} tw-gap-0.5 sm:tw-ml-auto ${chatBoostPillClasses}`}
+        >
+          {Array.from({ length: fireIconsToShow }).map((_, index) => (
+            <BoostIcon
+              key={index}
+              className="tw-size-3 tw-flex-shrink-0 tw-text-orange-400 tw-drop-shadow-sm"
+              variant="filled"
+            />
+          ))}
+          {remainingBoosts > 0 && (
+            <span className="tw-ml-1 tw-text-[10px] tw-font-bold tw-tabular-nums tw-leading-4 tw-text-iron-50">
+              +{remainingBoosts}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
-  )
+    );
+  }
 );
 
 BoostedDropCardHeader.displayName = "BoostedDropCardHeader";
@@ -229,6 +251,10 @@ BoostedDropCardFooter.displayName = "BoostedDropCardFooter";
 
 const BoostedDropCardHome = memo(
   ({ drop, onClick, variant = "home" }: BoostedDropCardHomeProps) => {
+    const [isBoostHeaderHidden, setIsBoostHeaderHidden] = useState(false);
+    const boostHeaderHideTimeoutRef = useRef<ReturnType<
+      typeof globalThis.setTimeout
+    > | null>(null);
     const part = drop.parts[0];
     const { author, wave, boosts } = drop;
     const fireIconsToShow = Math.min(boosts, MAX_FIRE_ICONS);
@@ -241,18 +267,64 @@ const BoostedDropCardHome = memo(
       isApp: false,
     });
 
+    const hideBoostHeaderTemporarily = useCallback(() => {
+      if (!isChatVariant) {
+        return;
+      }
+
+      setIsBoostHeaderHidden(true);
+
+      if (boostHeaderHideTimeoutRef.current) {
+        globalThis.clearTimeout(boostHeaderHideTimeoutRef.current);
+      }
+
+      boostHeaderHideTimeoutRef.current = globalThis.setTimeout(() => {
+        setIsBoostHeaderHidden(false);
+        boostHeaderHideTimeoutRef.current = null;
+      }, BOOST_HEADER_HIDE_MS);
+    }, [isChatVariant]);
+
+    const handleCardPointerDownCapture = useCallback(
+      (event: ReactPointerEvent<HTMLDivElement>) => {
+        if (event.pointerType !== "mouse") {
+          hideBoostHeaderTemporarily();
+        }
+      },
+      [hideBoostHeaderTemporarily]
+    );
+
+    const handleCardTouchStartCapture = useCallback(() => {
+      hideBoostHeaderTemporarily();
+    }, [hideBoostHeaderTemporarily]);
+
+    useEffect(
+      () => () => {
+        if (boostHeaderHideTimeoutRef.current) {
+          globalThis.clearTimeout(boostHeaderHideTimeoutRef.current);
+        }
+      },
+      []
+    );
+
     return (
       <div
         role="button"
         tabIndex={0}
         onClick={onClick}
         onKeyDown={handleCardKeyDown}
+        onPointerDownCapture={
+          isChatVariant ? handleCardPointerDownCapture : undefined
+        }
+        onTouchStartCapture={
+          isChatVariant ? handleCardTouchStartCapture : undefined
+        }
         className={CARD_CLASSES}
       >
         <div className={CARD_BORDER_CLASSES} />
         <BoostedDropCardHeader
           createdAt={drop.created_at}
           fireIconsToShow={fireIconsToShow}
+          isBoostHeaderHidden={isBoostHeaderHidden}
           isChatVariant={isChatVariant}
           remainingBoosts={remainingBoosts}
         />
