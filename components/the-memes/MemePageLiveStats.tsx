@@ -268,7 +268,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
               {mintDate.date}
             </span>
             {mintDate.relative && (
-              <span className="tw-ml-1.5 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
+              <span className="tw-ml-1.5 tw-mt-1 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
                 {mintDate.relative}
               </span>
             )}
@@ -317,13 +317,20 @@ function CreatorProfileIdentity({
 
 function getMintDateParts(value: string) {
   const normalizedValue = value.replace(/\s+/g, " ").trim();
-  const match = normalizedValue.match(/^(.*?)\s*(\(.+\))$/);
+  const relativeStartIndex = normalizedValue.lastIndexOf("(");
 
-  if (!match) {
+  if (
+    relativeStartIndex <= 0 ||
+    !normalizedValue.endsWith(")") ||
+    relativeStartIndex === normalizedValue.length - 1
+  ) {
     return { date: normalizedValue };
   }
 
-  return { date: match[1], relative: match[2] };
+  return {
+    date: normalizedValue.slice(0, relativeStartIndex).trimEnd(),
+    relative: normalizedValue.slice(relativeStartIndex),
+  };
 }
 
 function getArtistHandles(value: string | undefined) {
