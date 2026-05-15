@@ -204,13 +204,13 @@ describe("TransferSingle", () => {
     expect(mockFns.incQty).toHaveBeenCalledWith(key);
   });
 
-  test("ERC1155 keeps the visible button compact while exposing selected qty", () => {
+  test("ERC1155 shows the selected quantity in the transfer button", () => {
     const props = { ...baseProps, max: 10, contractType: ContractType.ERC1155 };
     const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 3, max: 10 }]]);
     render(<TransferSingle {...props} />);
     expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
-      "Transfer"
+      "Transfer 3 copies"
     );
     expect(screen.getByText("3/10")).toBeInTheDocument();
     expect(

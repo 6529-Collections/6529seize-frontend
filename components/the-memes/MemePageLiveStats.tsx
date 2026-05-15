@@ -298,7 +298,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
               {mintDate.date}
             </span>
             {mintDate.relative && (
-              <span className="tw-ml-1.5 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-600">
+              <span className="tw-ml-1.5 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
                 {mintDate.relative}
               </span>
             )}
@@ -470,12 +470,7 @@ export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
           decimals={100000}
           unit="ETH"
         />
-        <MarketMetric
-          label="Floor price"
-          value={nft.floor_price}
-          unit="ETH"
-          highlight={true}
-        />
+        <MarketMetric label="Floor price" value={nft.floor_price} unit="ETH" />
         <MarketMetric
           label="Market cap"
           value={nft.market_cap}
@@ -500,13 +495,11 @@ function MarketMetric({
   value,
   decimals = 1000,
   unit,
-  highlight = false,
 }: {
   readonly label: string;
   readonly value: number;
   readonly decimals?: number | undefined;
   readonly unit?: string | undefined;
-  readonly highlight?: boolean | undefined;
 }) {
   const formattedValue =
     value > 0
@@ -515,17 +508,13 @@ function MarketMetric({
 
   return (
     <div>
-      <div
-        className={`${MARKET_METRIC_LABEL_BASE_CLASS} ${
-          highlight ? "tw-text-primary-400" : "tw-text-iron-500"
-        }`}
-      >
+      <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {label}
       </div>
       <div className="tw-flex tw-items-baseline">
         <span className={MARKET_METRIC_VALUE_CLASS}>{formattedValue}</span>
         {unit && formattedValue !== "N/A" && (
-          <span className="tw-ml-1.5 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-500">
+          <span className="tw-ml-1.5 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-400">
             {unit}
           </span>
         )}

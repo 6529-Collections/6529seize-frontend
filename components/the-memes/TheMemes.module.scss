@@ -105,7 +105,7 @@
   align-items: center;
   justify-self: start;
   height: 1.75rem;
-  padding: 0 0.625rem;
+  padding: 0 0.75rem;
 }
 
 .artControlsBalance span {
@@ -131,12 +131,23 @@
 }
 
 .artControlsFormatLabel {
-  min-width: 4.25rem;
+  display: inline-flex;
+  min-width: 3.25rem;
+  height: 1.625rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid variables.$almost-very-dark-grey;
+  border-radius: 4px;
+  background: transparent;
   color: variables.$lightest-grey;
+  padding: 0 0.5rem;
   text-align: center;
-  font-size: 0.8125rem;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   line-height: 1;
   text-transform: uppercase;
 }

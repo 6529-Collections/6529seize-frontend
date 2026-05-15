@@ -113,7 +113,7 @@ function MemePageSkeletonBlock({ className }: { readonly className: string }) {
 function MemePageTitleSkeleton() {
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
-      <MemePageSkeletonBlock className="tw-h-7 tw-w-64 tw-max-w-full" />
+      <MemePageSkeletonBlock className="tw-h-8 tw-w-72 tw-max-w-full" />
     </div>
   );
 }
@@ -451,13 +451,13 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
     const hasMintingBox = isLastCard;
     const cardHeaderClassName = hasMintingBox
-      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 md:tw-grid-cols-2 md:tw-gap-x-16"
-      : "tw-mb-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-x-10 xl:tw-gap-x-16";
+      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-2 lg:tw-gap-x-16"
+      : "tw-mb-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-x-10 xl:tw-gap-x-16";
     const artworkColumnClassName = hasMintingBox
-      ? "tw-order-2 tw-mt-6 tw-self-start md:tw-order-none md:tw-col-start-1 md:tw-row-start-1 md:tw-mt-0"
+      ? "tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0"
       : undefined;
     const detailsColumnClassName = hasMintingBox
-      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-4 md:tw-col-start-2 md:tw-row-start-1 md:tw-block md:[&>*]:tw-order-none md:[&>*]:tw-w-full md:[&>*:nth-child(2)]:tw-pt-8"
+      ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-4 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-8"
       : undefined;
 
     return (
@@ -472,7 +472,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           </div>
           {userLoaded && (
             <MemePageYourCardsRightMenu
-              show={hasUserTransactions}
+              show={true}
               transactions={transactions}
               wallets={connectedWallets}
               nft={nft}
@@ -599,15 +599,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const isLoadingNft = !nft && !nftNotFound;
 
   return (
-    <main className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-black tw-pb-5 tw-text-white">
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
       <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-pb-8">
-          <div className="tw-flex tw-flex-col tw-gap-2">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-2">
-              <h1 className="tw-mb-0 tw-flex tw-items-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+          <div className="tw-flex tw-flex-col tw-gap-4">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+              <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
                   href="/the-memes"
-                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-uppercase tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-white"
+                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-text-white"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
@@ -615,9 +615,9 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                   />
                   The Memes
                 </Link>
-              </h1>
+              </div>
               {nftMeta && nft && (
-                <div className="tw-flex tw-items-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                <div className="tw-flex tw-min-w-0 tw-items-center">
                   <MemeCalendarPeriods
                     id={nft.id}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
@@ -629,17 +629,20 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             {nftMeta && nft ? (
               <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
                 <div className="tw-min-w-0 tw-flex-1">
-                  <div className="tw-flex tw-min-w-0 tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline">
+                  <h1
+                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline"
+                    aria-label={`Card ${nft.id} — ${nft.name}`}
+                  >
                     <span className="tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400 sm:tw-mb-0 sm:tw-text-2xl sm:tw-font-medium sm:tw-leading-tight">
                       Card {nft.id}
                     </span>
                     <span className="tw-hidden tw-font-light tw-text-iron-400 sm:tw-mx-2 sm:tw-inline">
                       —
                     </span>
-                    <h2 className="tw-mb-0 tw-min-w-0 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
+                    <span className="tw-mb-0 tw-min-w-0 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
                       {nft.name}
-                    </h2>
-                  </div>
+                    </span>
+                  </h1>
                 </div>
                 <div className="tw-flex tw-shrink-0 tw-justify-end">
                   <NftNavigation
@@ -674,6 +677,6 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
         )}
         {nftNotFound && <UpcomingMemePage id={nftId} />}
       </div>
-    </main>
+    </div>
   );
 }

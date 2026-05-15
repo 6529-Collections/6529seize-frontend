@@ -73,7 +73,7 @@ function MemePageCardDescription({ nft }: { readonly nft: NFT }) {
   return (
     <section className="tw-max-w-4xl tw-text-pretty tw-pb-3">
       <div
-        className="tw-text-base tw-font-normal tw-text-iron-400"
+        className="tw-text-base tw-font-normal tw-text-iron-300"
         dangerouslySetInnerHTML={{
           __html: parseNftDescriptionToHtml(nft.description),
         }}
@@ -121,11 +121,22 @@ function MemePageAdditionalDetailsAccordion({
           }`}
         />
       </button>
-      {isOpen && (
-        <div>
+      <div
+        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-300 tw-ease-out ${
+          isOpen
+            ? "tw-grid-rows-[1fr] tw-opacity-100"
+            : "tw-grid-rows-[0fr] tw-opacity-0"
+        }`}
+      >
+        <div
+          aria-hidden={!isOpen}
+          inert={!isOpen}
+          tabIndex={isOpen ? undefined : -1}
+          className={isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"}
+        >
           <MemePageArt show={true} nft={nft} nftMeta={nftMeta} />
         </div>
-      )}
+      </div>
     </section>
   );
 }

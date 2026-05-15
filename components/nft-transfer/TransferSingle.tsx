@@ -119,44 +119,23 @@ function TransferSingleActionsImpl(
 
   useEffect(() => {
     if (isConnected && wantModalAfterConnect.current) {
+      setShowModal(true);
       wantModalAfterConnect.current = false;
-      let cancelled = false;
-      const openModal = () => {
-        if (!cancelled) {
-          setShowModal(true);
-        }
-      };
-
-      if (typeof queueMicrotask === "function") {
-        queueMicrotask(openModal);
-        return () => {
-          cancelled = true;
-        };
-      }
-
-      const timeout = globalThis.setTimeout(openModal, 0);
-      return () => {
-        cancelled = true;
-        globalThis.clearTimeout(timeout);
-      };
     }
 
     if (!isConnected && !seizeConnectOpen && wantModalAfterConnect.current) {
       wantModalAfterConnect.current = false;
     }
-
-    return undefined;
   }, [isConnected, seizeConnectOpen]);
 
   const selectedQty = selected.get(key)?.qty ?? 0;
 
-  const transferButtonAriaLabel = useMemo(() => {
+  const transferButtonText = useMemo(() => {
     if (contractType === ContractType.ERC721) {
       return "Transfer";
     }
-    const quantity = Math.max(1, selectedQty);
-    if (quantity > 1) {
-      return `Transfer ${quantity} copies`;
+    if (selectedQty > 1) {
+      return `Transfer ${selectedQty} copies`;
     }
     return "Transfer 1 copy";
   }, [selectedQty, contractType]);
@@ -177,7 +156,7 @@ function TransferSingleActionsImpl(
         onClick={() => decQty(key)}
         disabled={selectedQty <= 1}
         aria-label="Decrease quantity"
-        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
+        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
           selectedQty <= 1
             ? "tw-cursor-not-allowed tw-bg-transparent tw-text-iron-600"
             : "tw-cursor-pointer tw-bg-iron-800 tw-text-iron-100 hover:tw-bg-iron-700 active:tw-scale-95"
@@ -194,7 +173,7 @@ function TransferSingleActionsImpl(
         onClick={() => incQty(key)}
         disabled={selectedQty >= max}
         aria-label="Increase quantity"
-        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
+        className={`tw-flex tw-size-[1.875rem] tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-all focus:tw-outline-none ${
           selectedQty >= max
             ? "tw-cursor-not-allowed tw-bg-iron-800/50 tw-text-iron-600"
             : "tw-cursor-pointer tw-bg-primary-500 tw-text-white hover:tw-bg-primary-400 active:tw-scale-95"
@@ -217,11 +196,11 @@ function TransferSingleActionsImpl(
         }
         setShowModal(true);
       }}
-      aria-label={transferButtonAriaLabel}
-      className="tw-flex tw-h-10 tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-text-sm tw-font-bold tw-text-black tw-transition-all tw-duration-200 hover:tw-bg-iron-100 active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+      aria-label={transferButtonText}
+      className="tw-flex tw-h-10 tw-flex-1 tw-items-center tw-justify-center tw-gap-x-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-text-sm tw-font-bold tw-text-black tw-transition-all tw-duration-200 hover:tw-bg-iron-100 active:tw-scale-[0.98] disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @lg:tw-flex-none"
       data-testid="transfer-single-submit"
     >
-      <span>Transfer</span>
+      <span>{transferButtonText}</span>
       <FontAwesomeIcon
         aria-hidden="true"
         icon={faRightLeft}
@@ -233,7 +212,7 @@ function TransferSingleActionsImpl(
   if (props.layout === "inline") {
     return (
       <>
-        <div className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
+        <div className="tw-flex tw-w-full tw-max-w-full tw-flex-nowrap tw-items-center tw-justify-end tw-gap-4">
           {quantityToggle}
           {transferButton}
         </div>

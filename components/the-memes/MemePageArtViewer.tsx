@@ -69,7 +69,7 @@ export function MemePageArtViewer({
         <div className={styles["artControlsContent"]}>
           {showBalance && (
             <div
-              className={`${styles["artControlsBalance"] ?? ""} tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400 tw-shadow-lg`}
+              className={`${styles["artControlsBalance"] ?? ""} tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-text-iron-300`}
             >
               <NFTImageBalance
                 contract={nft.contract}

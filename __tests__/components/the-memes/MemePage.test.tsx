@@ -2,7 +2,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import MemePage from "@/components/the-memes/MemePage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -556,10 +556,11 @@ describe("MemePage loading states", () => {
 
     renderPage();
 
-    // Should render title and basic structure even while loading
-    expect(
-      screen.getByRole("heading", { name: "The Memes" })
-    ).toBeInTheDocument();
+    // Should render basic navigation structure even while loading
+    expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
+      "href",
+      "/the-memes"
+    );
   });
 
   it("shows content only after metadata and NFT load", async () => {
@@ -595,22 +596,17 @@ describe("MemePage navigation integration", () => {
     await waitFor(
       () => {
         expect(screen.getByText(/SZN/)).toBeInTheDocument();
-        expect(screen.getByText("YEAR").parentElement).toHaveClass(
-          "tw-hidden",
-          "md:tw-inline"
+        const calendarPosition = screen.getByLabelText(
+          "Meme calendar position"
         );
-        expect(screen.getByText("EPOCH").parentElement).toHaveClass(
-          "tw-hidden",
-          "md:tw-inline"
-        );
+        expect(calendarPosition).toHaveClass("tw-hidden", "md:tw-flex");
+        expect(within(calendarPosition).getByText("YEAR")).toBeInTheDocument();
+        expect(within(calendarPosition).getByText("EPOCH")).toBeInTheDocument();
         expect(screen.getByText(/Card 1/)).toBeInTheDocument();
         expect(
-          screen.getByRole("heading", { level: 2, name: "Meme" })
-        ).not.toHaveTextContent("Card 1");
+          screen.getByRole("heading", { level: 1, name: "Card 1 — Meme" })
+        ).toHaveTextContent("Meme");
         expect(screen.getByTestId("nft-navigation")).toBeInTheDocument();
-        expect(
-          screen.getByRole("heading", { name: "The Memes" })
-        ).toBeInTheDocument();
         expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
           "href",
           "/the-memes"

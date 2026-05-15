@@ -23,63 +23,69 @@ function MemePageYourCardsTransferCard(props: {
 }) {
   const { isMobileDevice } = useDeviceInfo();
 
-  if (isMobileDevice) {
-    return null;
-  }
+  const statsContent = (
+    <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-3 sm:tw-w-auto sm:tw-shrink-0 sm:tw-justify-start sm:tw-gap-x-8">
+      <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap sm:tw-flex sm:tw-flex-col sm:tw-gap-1">
+        <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          {isMobileDevice ? "Your Cards" : "Cards"}
+        </span>
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${props.nftBalance}`}</span>
+      </div>
+      {props.myRank && props.myTDH ? (
+        <>
+          <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap sm:tw-flex sm:tw-flex-col sm:tw-gap-1">
+            <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              TDH
+            </span>
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
+              {numberWithCommas(Math.round(props.myTDH.tdh))}
+            </span>
+          </div>
+          <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap sm:tw-flex sm:tw-flex-col sm:tw-gap-1">
+            <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              Rank
+            </span>
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
+              #{props.myRank.rank}
+            </span>
+          </div>
+        </>
+      ) : (
+        <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+          No TDH accrued
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="tw-mb-3">
       <div
-        className="tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
+        className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
         data-testid="transfer-single"
       >
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-4">
-          <div className="tw-min-w-0">
-            <div className="tw-flex tw-w-max tw-max-w-full tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1">
-              <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
-                <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-                  Cards
-                </span>
-                <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${props.nftBalance}`}</span>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-4 tw-px-4 tw-py-4 tw-@container">
+          {statsContent}
+          {!isMobileDevice && (
+            <div className="tw-flex tw-min-w-0 tw-flex-[1_1_20rem] tw-items-center tw-gap-x-6">
+              <div className="tw-hidden tw-h-10 tw-w-px tw-shrink-0 tw-bg-iron-800 @lg:tw-block" />
+
+              <div className="tw-min-w-0 tw-flex-1">
+                <TransferSingleActions
+                  collectionType={CollectedCollectionType.MEMES}
+                  contractType={ContractType.ERC1155}
+                  contract={MEMES_CONTRACT}
+                  tokenId={props.transferNft.id}
+                  max={props.nftBalance}
+                  title={
+                    (props.transferNft as { name?: string }).name ??
+                    `The Memes #${props.transferNft.id}`
+                  }
+                  thumbUrl={props.transferNft.thumbnail}
+                />
               </div>
-              {props.myRank !== undefined && props.myTDH !== undefined ? (
-                <>
-                  <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
-                    <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-                      TDH
-                    </span>
-                    <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
-                      {numberWithCommas(Math.round(props.myTDH.tdh))}
-                    </span>
-                  </div>
-                  <div className="tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap">
-                    <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
-                      Rank
-                    </span>
-                    <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
-                      #{props.myRank.rank}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <div className="tw-text-xs tw-font-medium tw-text-iron-500">
-                  No TDH accrued
-                </div>
-              )}
             </div>
-          </div>
-          <TransferSingleActions
-            collectionType={CollectedCollectionType.MEMES}
-            contractType={ContractType.ERC1155}
-            contract={MEMES_CONTRACT}
-            tokenId={props.transferNft.id}
-            max={props.nftBalance}
-            title={
-              (props.transferNft as { name?: string }).name ??
-              `The Memes #${props.transferNft.id}`
-            }
-            thumbUrl={props.transferNft.thumbnail}
-          />
+          )}
         </div>
       </div>
     </div>
@@ -101,6 +107,18 @@ export function MemePageYourCardsRightMenu(props: {
   }
 
   if (!props.show) {
+    return <></>;
+  }
+
+  const transferNft =
+    props.nftBalance > 0 &&
+    props.myOwner &&
+    props.nft !== undefined &&
+    props.nft.id !== 0
+      ? props.nft
+      : undefined;
+
+  if (transferNft === undefined) {
     return <></>;
   }
 
@@ -155,26 +173,16 @@ export function MemePageYourCardsRightMenu(props: {
 
   const soldSum = sold.reduce((sum, b) => sum + b.value, 0);
 
-  const transferNft =
-    props.nftBalance > 0 &&
-    props.myOwner !== undefined &&
-    props.nft !== undefined &&
-    props.nft.id !== 0
-      ? props.nft
-      : undefined;
-
   return (
     <div className="tw-pt-3">
       {props.transactions.length > 0 && props.wallets.length > 0 && (
         <>
-          {transferNft !== undefined && (
-            <MemePageYourCardsTransferCard
-              transferNft={transferNft}
-              nftBalance={props.nftBalance}
-              myTDH={props.myTDH}
-              myRank={props.myRank}
-            />
-          )}
+          <MemePageYourCardsTransferCard
+            transferNft={transferNft}
+            nftBalance={props.nftBalance}
+            myTDH={props.myTDH}
+            myRank={props.myRank}
+          />
           {/*
           {props.nftBalance > 0 && (
             <h3 className="tw-mb-0 tw-text-lg tw-font-bold tw-leading-6 tw-text-white">
@@ -185,7 +193,7 @@ export function MemePageYourCardsRightMenu(props: {
           */}
           <section>
             <div className="tw-space-y-1">
-              <p className="tw-m-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+              <p className="tw-m-0 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300">
                 First acquired{" "}
                 {printMintDate(new Date(firstAcquired!.transaction_date))}
               </p>

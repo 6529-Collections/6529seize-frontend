@@ -11,9 +11,7 @@ import {
 import clsx from "clsx";
 import Link from "next/link";
 
-const PERIOD_SEPARATOR_CLASS_NAME = "tw-text-iron-500";
-const SECONDARY_PERIOD_TEXT_CLASS_NAME = "tw-text-iron-500";
-const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-inline";
+const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-flex";
 
 export default function MemeCalendarPeriods({
   id,
@@ -33,98 +31,51 @@ export default function MemeCalendarPeriods({
   const year = displayedYearNumberFromIndex(idx);
   const szn = displayedSeasonNumberFromIndex(idx);
 
-  const printPeriod = (
-    label: string,
-    number: number,
-    href?: string,
-    className?: string
-  ) => {
-    const content = (
-      <span className={clsx("tw-whitespace-nowrap", className)}>
-        <span>{label}</span> <span className="tw-font-semibold">{number}</span>
-      </span>
-    );
-
-    if (!href) {
-      return content;
-    }
-
-    return (
-      <Link
-        href={href}
-        aria-label={`View ${label} ${number} cards`}
-        className={clsx(
-          "tw-text-iron-200 tw-underline tw-decoration-iron-600 tw-underline-offset-4 tw-transition-colors hover:tw-text-primary-300 hover:tw-decoration-primary-400",
-          className
-        )}
-      >
-        {content}
-      </Link>
-    );
-  };
+  const printSecondaryPeriod = (label: string, number: number) => (
+    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400">
+      <span>{label}</span>
+      <span className="tw-font-semibold tw-text-iron-200">{number}</span>
+    </span>
+  );
+  const seasonContent = (
+    <>
+      <span>SZN</span>
+      <span>{szn}</span>
+    </>
+  );
 
   const secondaryPeriodClassName = showOnlySeasonOnMobile
     ? SECONDARY_PERIOD_CLASS_NAME
     : undefined;
 
   return (
-    <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-      {printPeriod("SZN", szn, seasonHref)}
-      <span
-        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
-      >
-        /
-      </span>
-      {printPeriod(
-        "YEAR",
-        year,
-        undefined,
-        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
+    <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      {seasonHref ? (
+        <Link
+          href={seasonHref}
+          aria-label={`View SZN ${szn} cards`}
+          className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300"
+        >
+          {seasonContent}
+        </Link>
+      ) : (
+        <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100">
+          {seasonContent}
+        </span>
       )}
       <span
-        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
+        aria-label="Meme calendar position"
+        className={clsx(
+          "tw-flex-wrap tw-items-center tw-gap-1.5",
+          secondaryPeriodClassName
+        )}
       >
-        /
+        {printSecondaryPeriod("YEAR", year)}
+        {printSecondaryPeriod("EPOCH", epoch)}
+        {printSecondaryPeriod("PERIOD", period)}
+        {printSecondaryPeriod("ERA", era)}
+        {printSecondaryPeriod("EON", eon)}
       </span>
-      {printPeriod(
-        "EPOCH",
-        epoch,
-        undefined,
-        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
-      )}
-      <span
-        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
-      >
-        /
-      </span>
-      {printPeriod(
-        "PERIOD",
-        period,
-        undefined,
-        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
-      )}
-      <span
-        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
-      >
-        /
-      </span>
-      {printPeriod(
-        "ERA",
-        era,
-        undefined,
-        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
-      )}
-      <span
-        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
-      >
-        /
-      </span>
-      {printPeriod(
-        "EON",
-        eon,
-        undefined,
-        clsx(SECONDARY_PERIOD_TEXT_CLASS_NAME, secondaryPeriodClassName)
-      )}
     </span>
   );
 }

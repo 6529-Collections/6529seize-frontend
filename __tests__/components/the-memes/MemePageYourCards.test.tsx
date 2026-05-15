@@ -3,6 +3,7 @@ import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "@/components/the-memes/MemePageYourCards";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -34,6 +35,15 @@ jest.mock("@/components/nft-transfer/TransferModal", () => ({
   __esModule: true,
   default: () => null,
 }));
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isMobileDevice: false })),
+}));
+
+const useDeviceInfoMock = useDeviceInfo as jest.MockedFunction<
+  typeof useDeviceInfo
+>;
 
 const mockNFT = {
   id: 123,
@@ -83,6 +93,10 @@ const renderMemePageYourCardsWithProviders = (component: React.ReactNode) => {
 };
 
 describe("MemePageYourCardsRightMenu", () => {
+  beforeEach(() => {
+    useDeviceInfoMock.mockReturnValue({ isMobileDevice: false } as any);
+  });
+
   describe("when show is false", () => {
     it("should render empty fragment", () => {
       const { container } = render(
@@ -104,7 +118,7 @@ describe("MemePageYourCardsRightMenu", () => {
   describe("when show is true", () => {
     describe("when no wallets connected", () => {
       it("should not display the ownership panel", () => {
-        render(
+        const { container } = render(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={[]}
@@ -116,6 +130,7 @@ describe("MemePageYourCardsRightMenu", () => {
             myRank={undefined}
           />
         );
+        expect(container.firstChild).toBeNull();
         expect(screen.queryByTestId("transfer-single")).not.toBeInTheDocument();
         expect(screen.queryByText(/First acquired/)).not.toBeInTheDocument();
       });
@@ -123,7 +138,7 @@ describe("MemePageYourCardsRightMenu", () => {
 
     describe("when wallets connected but no NFT balance", () => {
       it("should not display the ownership panel", () => {
-        render(
+        const { container } = render(
           <MemePageYourCardsRightMenu
             show={true}
             transactions={[]}
@@ -135,6 +150,7 @@ describe("MemePageYourCardsRightMenu", () => {
             myRank={undefined}
           />
         );
+        expect(container.firstChild).toBeNull();
         expect(screen.queryByTestId("transfer-single")).not.toBeInTheDocument();
         expect(screen.queryByText(/First acquired/)).not.toBeInTheDocument();
       });
@@ -161,6 +177,31 @@ describe("MemePageYourCardsRightMenu", () => {
         expect(
           screen.getByRole("button", { name: "Transfer 1 copy" })
         ).toBeInTheDocument();
+      });
+
+      it("should show ownership stats without transfer actions on mobile devices", () => {
+        useDeviceInfoMock.mockReturnValue({ isMobileDevice: true } as any);
+
+        renderMemePageYourCardsWithProviders(
+          <MemePageYourCardsRightMenu
+            show={true}
+            transactions={mockTransactions}
+            wallets={["0x456"]}
+            nft={mockNFT}
+            nftBalance={3}
+            myOwner={mockConsolidatedTDH}
+            myTDH={{ tdh: 1500 } as any}
+            myRank={{ rank: 5 } as any}
+          />
+        );
+
+        expect(screen.getByTestId("transfer-single")).toBeInTheDocument();
+        expect(screen.getByText("x3")).toBeInTheDocument();
+        expect(screen.getByText("1,500")).toBeInTheDocument();
+        expect(screen.getByText("#5")).toBeInTheDocument();
+        expect(
+          screen.queryByTestId("transfer-single-submit")
+        ).not.toBeInTheDocument();
       });
 
       it("should display first acquisition date", () => {
@@ -231,6 +272,35 @@ describe("MemePageYourCardsRightMenu", () => {
         expect(
           screen.getByText("2 cards bought for 1.5 ETH")
         ).toBeInTheDocument();
+      });
+
+      it("should not display transferred in cards for now", () => {
+        renderMemePageYourCardsWithProviders(
+          <MemePageYourCardsRightMenu
+            show={true}
+            transactions={
+              [
+                {
+                  transaction_date: new Date("2023-01-03"),
+                  from_address: "0x789",
+                  to_address: "0x456",
+                  value: 0,
+                  token_count: 2,
+                },
+              ] as any
+            }
+            wallets={["0x456"]}
+            nft={mockNFT}
+            nftBalance={2}
+            myOwner={mockConsolidatedTDH}
+            myTDH={undefined}
+            myRank={undefined}
+          />
+        );
+
+        expect(
+          screen.queryByText("2 cards transferred in")
+        ).not.toBeInTheDocument();
       });
     });
   });
