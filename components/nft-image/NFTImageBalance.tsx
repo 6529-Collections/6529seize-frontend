@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import styles from "@/components/nft-image/NFTImage.module.scss";
+import { useNftBalanceFromContext } from "@/components/nft-image/NftBalancesContext";
 import { useNftBalance } from "@/hooks/useNftBalance";
 
 interface Props {
@@ -18,20 +19,32 @@ export default function NFTImageBalance({
   inline = false,
 }: Props) {
   const { connectedProfile } = useAuth();
+  const consolidationKey = connectedProfile?.consolidation_key ?? null;
+  const contextBalance = useNftBalanceFromContext({
+    consolidationKey,
+    contract,
+    tokenId,
+  });
 
   const {
     balance: nftBalance,
     isLoading,
     error,
   } = useNftBalance({
-    consolidationKey: connectedProfile?.consolidation_key ?? null,
+    consolidationKey,
     contract,
     tokenId,
+    enabled: !contextBalance,
   });
+  const balanceState = contextBalance ?? {
+    balance: nftBalance,
+    isLoading,
+    error,
+  };
 
   const printBalance = () => {
-    if (nftBalance > 0) {
-      return printBalanceSpan(`SEIZED x${nftBalance}`);
+    if (balanceState.balance > 0) {
+      return printBalanceSpan(`SEIZED x${balanceState.balance}`);
     } else {
       return printBalanceSpan("UNSEIZED");
     }
@@ -57,12 +70,12 @@ export default function NFTImageBalance({
     return null;
   }
 
-  if (isLoading) {
+  if (balanceState.isLoading) {
     return printBalanceSpan("...");
   }
 
-  if (error) {
-    console.error("Failed to fetch NFT balance:", error);
+  if (balanceState.error) {
+    console.error("Failed to fetch NFT balance:", balanceState.error);
     return printBalanceSpan("N/A");
   }
 

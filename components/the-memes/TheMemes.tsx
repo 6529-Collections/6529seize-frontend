@@ -5,6 +5,7 @@ import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDr
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { VolumeTypeDropdown } from "@/components/the-memes/MemeShared";
 import styles from "@/components/the-memes/TheMemes.module.scss";
@@ -29,7 +30,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 
 interface Meme {
@@ -155,6 +156,7 @@ export default function TheMemesComponent() {
   const [fetching, setFetching] = useState(true);
 
   const [nfts, setNfts] = useState<NFTWithMemesExtendedData[]>([]);
+  const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftsNextPage, setNftsNextPage] = useState<string>();
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
@@ -436,103 +438,110 @@ export default function TheMemesComponent() {
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <>
-              {/* Page header - visible on all devices */}
-              <Row>
-                <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                  <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="no-wrap mb-0">The Memes</h1>
-                    <LFGButton contract={MEMES_CONTRACT} />
-                  </span>
-                  <div className="d-none d-sm-block tw-w-40">
-                    <SeasonsGridDropdown
-                      selected={selectedSeason}
-                      setSelected={handleSeasonChange}
-                      initialSeasonId={seasonId}
-                    />
-                  </div>
-                </Col>
-              </Row>
-
-              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
-              <Row className="d-xl-none">
-                <Col xs={12} className="mb-3">
-                  <Row>
-                    <Col xs={12} sm="auto">
-                      <CollectionsDropdown activePage="memes" />
-                    </Col>
-                  </Row>
-                </Col>
-                <Col xs={12} className="mb-3 d-flex d-sm-none">
-                  <div className="text-start tw-w-40">
-                    <SeasonsGridDropdown
-                      selected={selectedSeason}
-                      setSelected={handleSeasonChange}
-                      initialSeasonId={seasonId}
-                    />
-                  </div>
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col>
-                  Sort by&nbsp;&nbsp;
-                  <FontAwesomeIcon
-                    icon={faChevronCircleUp}
-                    onClick={() => setSortDir(SortDirection.ASC)}
-                    width={16}
-                    color={sortDir != SortDirection.ASC ? "#9a9a9a" : "#fff"}
-                    cursor={"pointer"}
-                    className={styles["sortDirection"]}
-                  />{" "}
-                  <FontAwesomeIcon
-                    icon={faChevronCircleDown}
-                    onClick={() => setSortDir(SortDirection.DESC)}
-                    width={16}
-                    color={sortDir != SortDirection.DESC ? "#9a9a9a" : "#fff"}
-                    cursor={"pointer"}
-                    className={styles["sortDirection"]}
-                  />
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                  {Object.values(MemesSort)
-                    .filter((v) => v != MemesSort.VOLUME)
-                    .map((v) => (
-                      <SortButton
-                        key={v}
-                        currentSort={sort}
-                        sort={v}
-                        select={() => setSort(v)}
-                      />
-                    ))}
-                  {printVolumeTypeDropdown(
-                    sort === MemesSort.VOLUME,
-                    setVolumeType,
-                    () => setSort(MemesSort.VOLUME),
-                    volumeType
-                  )}
-                </Col>
-              </Row>
-              {nfts.length > 0 && sort === MemesSort.MEME
-                ? printMemes()
-                : printNfts()}
-              {fetching && nftsNextPage && (
+    <NftBalancesProvider
+      consolidationKey={connectedProfile?.consolidation_key ?? null}
+      contract={MEMES_CONTRACT}
+      tokenIds={tokenIds}
+      enabled={!!connectedProfile}
+    >
+      <Container fluid className={styles["mainContainer"]}>
+        <Row>
+          <Col>
+            <Container className="pt-4">
+              <>
+                {/* Page header - visible on all devices */}
                 <Row>
-                  <Col className="pt-3 pb-5">
-                    Fetching <DotLoader />
+                  <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <span className="d-flex align-items-center gap-3 flex-wrap">
+                      <h1 className="no-wrap mb-0">The Memes</h1>
+                      <LFGButton contract={MEMES_CONTRACT} />
+                    </span>
+                    <div className="d-none d-sm-block tw-w-40">
+                      <SeasonsGridDropdown
+                        selected={selectedSeason}
+                        setSelected={handleSeasonChange}
+                        initialSeasonId={seasonId}
+                      />
+                    </div>
                   </Col>
                 </Row>
-              )}
-            </>
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+
+                {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+                <Row className="d-xl-none">
+                  <Col xs={12} className="mb-3">
+                    <Row>
+                      <Col xs={12} sm="auto">
+                        <CollectionsDropdown activePage="memes" />
+                      </Col>
+                    </Row>
+                  </Col>
+                  <Col xs={12} className="mb-3 d-flex d-sm-none">
+                    <div className="text-start tw-w-40">
+                      <SeasonsGridDropdown
+                        selected={selectedSeason}
+                        setSelected={handleSeasonChange}
+                        initialSeasonId={seasonId}
+                      />
+                    </div>
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col>
+                    Sort by&nbsp;&nbsp;
+                    <FontAwesomeIcon
+                      icon={faChevronCircleUp}
+                      onClick={() => setSortDir(SortDirection.ASC)}
+                      width={16}
+                      color={sortDir != SortDirection.ASC ? "#9a9a9a" : "#fff"}
+                      cursor={"pointer"}
+                      className={styles["sortDirection"]}
+                    />{" "}
+                    <FontAwesomeIcon
+                      icon={faChevronCircleDown}
+                      onClick={() => setSortDir(SortDirection.DESC)}
+                      width={16}
+                      color={sortDir != SortDirection.DESC ? "#9a9a9a" : "#fff"}
+                      cursor={"pointer"}
+                      className={styles["sortDirection"]}
+                    />
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+                    {Object.values(MemesSort)
+                      .filter((v) => v != MemesSort.VOLUME)
+                      .map((v) => (
+                        <SortButton
+                          key={v}
+                          currentSort={sort}
+                          sort={v}
+                          select={() => setSort(v)}
+                        />
+                      ))}
+                    {printVolumeTypeDropdown(
+                      sort === MemesSort.VOLUME,
+                      setVolumeType,
+                      () => setSort(MemesSort.VOLUME),
+                      volumeType
+                    )}
+                  </Col>
+                </Row>
+                {nfts.length > 0 && sort === MemesSort.MEME
+                  ? printMemes()
+                  : printNfts()}
+                {fetching && nftsNextPage && (
+                  <Row>
+                    <Col className="pt-3 pb-5">
+                      Fetching <DotLoader />
+                    </Col>
+                  </Row>
+                )}
+              </>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+    </NftBalancesProvider>
   );
 }
 

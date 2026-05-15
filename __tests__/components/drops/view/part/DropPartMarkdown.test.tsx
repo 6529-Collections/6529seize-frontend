@@ -713,7 +713,7 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs).toHaveLength(2);
     expect(paragraphs[0]).toHaveTextContent("First");
     expect(paragraphs[1]).toHaveTextContent("Second");
-    expect(paragraphs[0]?.className).toContain("tw-mb-0");
+    expect(paragraphs[0]?.className).toContain("tw-mb-1.5");
     expect(paragraphs[0]?.className).not.toContain("tw-mb-3");
   });
 
@@ -732,6 +732,8 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs).toHaveLength(3);
     expect(paragraphs[0]).toHaveTextContent("First");
     expect(paragraphs[1]?.textContent).toBe("\u00a0");
+    expect(paragraphs[1]?.className).toContain("tw-h-2");
+    expect(paragraphs[1]?.className).toContain("tw-leading-none");
     expect(paragraphs[2]).toHaveTextContent("Second");
   });
 

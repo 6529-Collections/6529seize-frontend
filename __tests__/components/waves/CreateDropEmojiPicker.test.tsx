@@ -26,23 +26,26 @@ jest.mock("@emoji-mart/react", () => ({
   default: ({ onEmojiSelect }: { onEmojiSelect: (emoji: any) => void }) => (
     <button
       data-testid="picker"
-      onClick={() => onEmojiSelect({ native: "😊", id: "smile" })}>
+      onClick={() => onEmojiSelect({ native: "😊", id: "smile" })}
+    >
       Pick Emoji
     </button>
   ),
 }));
 jest.mock("@emoji-mart/data", () => ({ __esModule: true, default: {} }));
-jest.mock(
-  "@/components/mobile-wrapper-dialog/MobileWrapperDialog",
-  () => ({
-    __esModule: true,
-    default: ({ isOpen, children }: any) =>
-      isOpen ? <div data-testid="mobile-dialog">{children}</div> : null,
-  })
-);
+jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
+  __esModule: true,
+  default: ({ isOpen, children, zIndexClassName }: any) =>
+    isOpen ? (
+      <div data-testid="mobile-dialog" data-z-index-class={zIndexClassName}>
+        {children}
+      </div>
+    ) : null,
+}));
 
 // 3. Now import under test
 import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
+import { CreateDropEmojiPickerLayerProvider } from "@/components/waves/CreateDropEmojiPickerLayerContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -54,9 +57,9 @@ describe("CreateDropEmojiPicker", () => {
   const mockUseLexical = useLexicalComposerContext as jest.Mock;
 
   // Fake editor: update is a no-op function (does not execute callback)
-  const fakeEditor = { 
+  const fakeEditor = {
     update: jest.fn(),
-    focus: jest.fn()
+    focus: jest.fn(),
   };
 
   beforeEach(() => {
@@ -137,10 +140,10 @@ describe("CreateDropEmojiPicker", () => {
 
   it("uses mobile dialog on mobile screens and inserts emoji", async () => {
     mockUseIsMobile.mockReturnValue(true);
-    
+
     // Clear the mock call count before this test
     fakeEditor.update.mockClear();
-    
+
     render(<CreateDropEmojiPicker />);
     const toggleButton = screen.getByRole("button", { hidden: true });
 
@@ -155,6 +158,55 @@ describe("CreateDropEmojiPicker", () => {
     expect(fakeEditor.update).toHaveBeenCalled();
     await waitFor(() =>
       expect(screen.queryByTestId("mobile-dialog")).toBeNull()
+    );
+  });
+
+  it("uses scoped layer values when provided", async () => {
+    render(
+      <CreateDropEmojiPickerLayerProvider
+        desktopZIndex={10000}
+        mobileZIndexClassName="tw-z-[10000]"
+      >
+        <CreateDropEmojiPicker />
+      </CreateDropEmojiPickerLayerProvider>
+    );
+    const toggleButton = screen.getByRole("button", { hidden: true });
+
+    jest.spyOn(toggleButton, "getBoundingClientRect").mockReturnValue({
+      top: 100,
+      left: 200,
+      width: 0,
+      height: 0,
+      right: 0,
+      bottom: 0,
+    } as DOMRect);
+
+    fireEvent.click(toggleButton);
+    const picker = await screen.findByTestId("picker");
+
+    await waitFor(() => {
+      expect(picker.parentElement!.style.zIndex).toBe("10000");
+    });
+  });
+
+  it("passes scoped layer values to the mobile dialog", async () => {
+    mockUseIsMobile.mockReturnValue(true);
+
+    render(
+      <CreateDropEmojiPickerLayerProvider
+        desktopZIndex={10000}
+        mobileZIndexClassName="tw-z-[10000]"
+      >
+        <CreateDropEmojiPicker />
+      </CreateDropEmojiPickerLayerProvider>
+    );
+    const toggleButton = screen.getByRole("button", { hidden: true });
+
+    fireEvent.click(toggleButton);
+
+    expect(await screen.findByTestId("mobile-dialog")).toHaveAttribute(
+      "data-z-index-class",
+      "tw-z-[10000]"
     );
   });
 });
