@@ -91,13 +91,14 @@ const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
     new RegExp(`^/mint/eth/${CONTRACT_PART_REGEX}/${NUMERIC_ID_PART_REGEX}/?$`),
   ],
   "gamma.io": [
-    new RegExp(`^/ordinals/${GAMMAIO_ID_PART_REGEX}/?$`),
+    new RegExp(
+      `^/ordinals/(?:${GAMMAIO_ID_PART_REGEX}|prints/${GAMMAIO_ID_PART_REGEX}/details)/?$`
+    ),
     new RegExp(`^/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`),
     new RegExp(`^/ordinals/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`),
     new RegExp(
       `^/ordinals/collections/${SLUG_ID_PART_REGEX}/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`
     ),
-    new RegExp(`^/ordinals/prints/${GAMMAIO_ID_PART_REGEX}/details/?$`),
     new RegExp(
       `^/collections/${SLUG_ID_PART_REGEX}/(?!tokens/?$)${GAMMAIO_ID_PART_REGEX}/?$`
     ),
