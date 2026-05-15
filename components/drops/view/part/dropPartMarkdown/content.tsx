@@ -94,8 +94,10 @@ const isMarkdownImageElement = (
 const getMarkdownImageStableKey = ({
   image,
   flattenedIndex,
-}: MarkdownImageChunkItem): string =>
-  image.key ?? `${image.props.src}:${flattenedIndex}`;
+}: MarkdownImageChunkItem): string => {
+  const fallbackKey = `index-${flattenedIndex}`;
+  return `${String(image.key ?? fallbackKey)}:${image.props.src}`;
+};
 
 const getMarkdownImageGroupKey = (
   items: readonly MarkdownImageChunkItem[]

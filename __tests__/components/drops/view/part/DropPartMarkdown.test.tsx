@@ -274,13 +274,17 @@ describe("DropPartMarkdown", () => {
 
   it("keeps grouped markdown images mounted across parent rerenders", () => {
     const content = "![Seize](/one.png)![Seize](/two.png)";
+    const mentionedUsers = [];
+    const mentionedWaves = [];
+    const referencedNfts = [];
+    const onQuoteClick = jest.fn();
     const { rerender } = render(
       <DropPartMarkdown
-        mentionedUsers={[]}
-        mentionedWaves={[]}
-        referencedNfts={[]}
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
         partContent={content}
-        onQuoteClick={jest.fn()}
+        onQuoteClick={onQuoteClick}
       />
     );
 
@@ -291,11 +295,11 @@ describe("DropPartMarkdown", () => {
 
     rerender(
       <DropPartMarkdown
-        mentionedUsers={[]}
-        mentionedWaves={[]}
-        referencedNfts={[]}
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
         partContent={content}
-        onQuoteClick={jest.fn()}
+        onQuoteClick={onQuoteClick}
       />
     );
 
@@ -304,6 +308,46 @@ describe("DropPartMarkdown", () => {
         .getAllByRole("img", { name: "Drop media" })
         .map((image) => image.getAttribute("data-mount-id"))
     ).toEqual(originalMountIds);
+  });
+
+  it("remounts grouped markdown images when URLs change in the same slots", () => {
+    const mentionedUsers = [];
+    const mentionedWaves = [];
+    const referencedNfts = [];
+    const onQuoteClick = jest.fn();
+    const { rerender } = render(
+      <DropPartMarkdown
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
+        partContent="![Seize](/one.png)![Seize](/two.png)"
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    const originalMountIds = screen
+      .getAllByRole("img", { name: "Drop media" })
+      .map((image) => image.getAttribute("data-mount-id"));
+    expect(originalMountIds).toHaveLength(2);
+
+    rerender(
+      <DropPartMarkdown
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
+        partContent="![Seize](/three.png)![Seize](/four.png)"
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    const updatedImages = screen.getAllByRole("img", { name: "Drop media" });
+    expect(updatedImages.map((image) => image.getAttribute("src"))).toEqual([
+      "/three.png",
+      "/four.png",
+    ]);
+    expect(
+      updatedImages.map((image) => image.getAttribute("data-mount-id"))
+    ).not.toEqual(originalMountIds);
   });
 
   it("keeps whitespace-only markdown between images in the same image group", () => {
