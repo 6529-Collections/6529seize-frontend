@@ -1112,6 +1112,12 @@ paths:
           required: false
           schema:
             type: string
+        - name: serial_nos
+          in: query
+          description: Comma-separated list of drop serial numbers to fetch
+          required: false
+          schema:
+            type: string
         - name: contains_media
           in: query
           description: >-
@@ -2012,6 +2018,12 @@ paths:
         - DropsV2
       summary: Get V2 boosted drops.
       operationId: getBoostedDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetBoostedDropsV2
       parameters:
         - name: author
           in: query
@@ -2097,6 +2109,12 @@ paths:
         profile curation it is used; otherwise the oldest curation in the
         profile wave is used. Reply drops are included when curated.
       operationId: getCuratedProfileWaveDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetCuratedProfileWaveDropsV2
       parameters:
         - name: page
           in: query
@@ -2128,10 +2146,28 @@ paths:
         - DropsV2
       summary: Get V2 drops.
       operationId: getDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropsV2
       parameters:
         - name: parent_drop_id
           in: query
           description: Return replies under this parent drop.
+          required: false
+          schema:
+            type: string
+        - name: serial_nos
+          in: query
+          description: Comma-separated list of drop serial numbers to fetch.
+          required: false
+          schema:
+            type: string
+        - name: ids
+          in: query
+          description: Comma-separated list of drop IDs to fetch.
           required: false
           schema:
             type: string
@@ -2165,6 +2201,12 @@ paths:
         - DropsV2
       summary: Get V2 drop by ID.
       operationId: getDropV2ById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2ById
       parameters:
         - name: id
           in: path
@@ -2186,6 +2228,12 @@ paths:
         - DropsV2
       summary: Get V2 drop metadata by drop ID.
       operationId: getDropV2MetadataById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2MetadataById
       parameters:
         - name: id
           in: path
@@ -2209,6 +2257,12 @@ paths:
         - DropsV2
       summary: Get a single V2 drop part by drop ID and part number.
       operationId: getDropV2PartById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2PartById
       parameters:
         - name: id
           in: path
@@ -2239,6 +2293,12 @@ paths:
         - DropsV2
       summary: Get V2 drop boosts by drop ID.
       operationId: getDropV2BoostsById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2BoostsById
       parameters:
         - name: id
           in: path
@@ -2262,6 +2322,12 @@ paths:
         - DropsV2
       summary: Get V2 drop reactions by drop ID.
       operationId: getDropV2ReactionsById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2ReactionsById
       parameters:
         - name: id
           in: path
@@ -2285,6 +2351,12 @@ paths:
         - DropsV2
       summary: Get V2 drop voters by drop ID.
       operationId: getDropV2VotersById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2VotersById
       parameters:
         - name: id
           in: path
@@ -2331,6 +2403,12 @@ paths:
         - DropsV2
       summary: Download V2 drop voters by drop ID as CSV.
       operationId: downloadDropV2VotersById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleDownloadDropV2VotersById
       parameters:
         - name: id
           in: path
@@ -2353,6 +2431,12 @@ paths:
         - DropsV2
       summary: Get V2 drop vote edit logs by drop ID.
       operationId: getDropV2VoteEditLogsById
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drops-v2.handlers"
+          name: handleGetDropV2VoteEditLogsById
       parameters:
         - name: id
           in: path
@@ -3608,6 +3692,12 @@ paths:
         - NotificationsV2
       summary: Get V2 notifications for authenticated user.
       operationId: getNotificationsV2
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/notifications/notifications-v2.handlers"
+          name: handleGetNotificationsV2
       parameters:
         - name: limit
           in: query
@@ -6958,6 +7048,12 @@ paths:
         hot waves, and view=FAVOURITES for waves where an identity has written
         the most messages.
       operationId: getWavesV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWavesV2
       parameters:
         - name: view
           in: query
@@ -7068,6 +7164,12 @@ paths:
         - WavesV2
       summary: Get V2 drops related to wave
       operationId: getWaveDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWaveDropsV2
       parameters:
         - name: id
           in: path
@@ -7117,6 +7219,12 @@ paths:
         - WavesV2
       summary: List V2 drops in a curation for wave
       operationId: listWaveCurationDropsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleListWaveCurationDropsV2
       parameters:
         - name: id
           in: path
@@ -7160,6 +7268,12 @@ paths:
         - WavesV2
       summary: Get already decided V2 wave decision outcomes
       operationId: getWaveDecisionsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWaveDecisionsV2
       parameters:
         - name: id
           in: path
@@ -7215,6 +7329,12 @@ paths:
         - WavesV2
       summary: Get V2 waves leaderboard
       operationId: getWaveLeaderboardV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWaveLeaderboardV2
       parameters:
         - name: id
           in: path
@@ -7316,6 +7436,12 @@ paths:
         - WavesV2
       summary: Search for V2 drops in wave by content
       operationId: searchDropsInWaveV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleSearchDropsInWaveV2
       parameters:
         - name: waveId
           in: path
@@ -10268,6 +10394,8 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropContext"
         context_profile_context:
           $ref: "#/components/schemas/ApiDropV2ContextProfileContext"
+        wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
     ApiDropV2ContextProfileContext:
       type: object
       required:
@@ -11793,8 +11921,8 @@ components:
           type: string
       description: >-
         Notification-specific additional context. For DROP_REACTED notifications
-        this includes reaction and reactors, where each reactor only has handle
-        and pfp.
+        this includes reaction and reactors, where each reactor only has handle,
+        pfp, and subscribed.
     ApiNotificationCause:
       type: string
       enum:
@@ -11812,11 +11940,15 @@ components:
         - PRIORITY_ALERT
     ApiNotificationDropReactedReactor:
       type: object
+      required:
+        - subscribed
       properties:
         handle:
           type: string
         pfp:
           type: string
+        subscribed:
+          type: boolean
     ApiNotificationsResponse:
       type: object
       required:

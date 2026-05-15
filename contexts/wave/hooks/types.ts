@@ -26,5 +26,3 @@ export type WaveMessages = {
 export type WaveMessagesUpdate = Partial<WaveMessages> & {
   key: string;
 };
-
-export { ApiDropSearchStrategy as WaveDropsSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";

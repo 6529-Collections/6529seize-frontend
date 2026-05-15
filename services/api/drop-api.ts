@@ -1,10 +1,11 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
+import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 
 export const DROP_DETAIL_STALE_TIME_MS = 60 * 1000;
 export const DROP_BATCH_STALE_TIME_MS = 5 * 60 * 1000;
+const DROP_IDS_BATCH_SIZE = 100;
 
 export const getDropQueryKey = (dropId: string | null | undefined) =>
   [
@@ -28,6 +29,16 @@ const getUniqueDropIds = (dropIds: readonly string[]): string[] => {
   }
 
   return uniqueDropIds;
+};
+
+const chunkDropIds = (dropIds: readonly string[]): string[][] => {
+  const chunks: string[][] = [];
+
+  for (let i = 0; i < dropIds.length; i += DROP_IDS_BATCH_SIZE) {
+    chunks.push(dropIds.slice(i, i + DROP_IDS_BATCH_SIZE));
+  }
+
+  return chunks;
 };
 
 export const orderDropsByIds = (
@@ -65,31 +76,53 @@ const fetchDropResultsByIds = async (
     return [];
   }
 
-  const results = await Promise.allSettled(
-    uniqueDropIds.map((dropId) =>
-      fetchDropV2ById(dropId, undefined, {
+  const chunks = chunkDropIds(uniqueDropIds);
+  const chunkResults = await Promise.allSettled(
+    chunks.map((chunk) =>
+      fetchDropsV2ByIds({
+        dropIds: chunk,
         includeFullMetadata: false,
         includeTopRaters: false,
       })
     )
   );
 
-  return results.map((result, index) => {
-    const dropId = uniqueDropIds[index]!;
-    if (result.status === "fulfilled") {
-      return {
-        dropId,
-        status: "fulfilled",
-        drop: result.value,
-      };
+  const results: DropFetchResult[] = [];
+
+  chunkResults.forEach((result, index) => {
+    const chunk = chunks[index]!;
+    if (result.status === "rejected") {
+      results.push(
+        ...chunk.map((dropId) => ({
+          dropId,
+          status: "rejected" as const,
+          error: result.reason as unknown,
+        }))
+      );
+      return;
     }
 
-    return {
-      dropId,
-      status: "rejected",
-      error: result.reason as unknown,
-    };
+    const dropsById = new Map(result.value.map((drop) => [drop.id, drop]));
+    chunk.forEach((dropId) => {
+      const drop = dropsById.get(dropId);
+      if (!drop) {
+        results.push({
+          dropId,
+          status: "rejected",
+          error: new Error(`Drop ${dropId} not found`),
+        });
+        return;
+      }
+
+      results.push({
+        dropId,
+        status: "fulfilled",
+        drop,
+      });
+    });
   });
+
+  return results;
 };
 
 export const fetchDropsByIds = async (

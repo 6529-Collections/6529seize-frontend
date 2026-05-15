@@ -4,7 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { removeBaseEndpoint } from "@/helpers/Helpers";
+import type {
+  GithubPreviewEnvelope,
+  GithubPreviewResponse,
+} from "@/services/api/github-preview-api";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
+import GithubPreviewStatusBadge from "./GithubPreviewStatusBadge";
 import {
   useLinkPreviewVariant,
   type LinkPreviewVariant,
@@ -225,6 +230,25 @@ function deriveDomain(
   );
 }
 
+function isGithubPreviewResponse(
+  value: unknown
+): value is GithubPreviewResponse {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const type = (value as { readonly type?: unknown }).type;
+  return type === "github.issue" || type === "github.pull_request";
+}
+
+function extractGithubPreview(
+  preview: OpenGraphPreviewData | null | undefined
+): GithubPreviewResponse | null {
+  const githubPreview = (preview as GithubPreviewEnvelope | null | undefined)
+    ?.githubPreview;
+  return isGithubPreviewResponse(githubPreview) ? githubPreview : null;
+}
+
 function getRelativeHref(href: string): string | undefined {
   const relative = removeBaseEndpoint(href);
   if (typeof relative !== "string" || relative.length === 0) {
@@ -352,6 +376,7 @@ export default function OpenGraphPreview({
   const description = readFirstString(preview, DESCRIPTION_KEYS);
   const imageUrl = extractImageUrl(preview);
   const domain = deriveDomain(href, preview);
+  const githubPreview = extractGithubPreview(preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
 
   if (imageOnly && imageUrl) {
@@ -458,6 +483,11 @@ export default function OpenGraphPreview({
           className="tw-relative tw-block tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
           data-testid="og-preview-card"
         >
+          <GithubPreviewStatusBadge
+            href={href}
+            initialPreview={githubPreview}
+            compact
+          />
           {imageUrl && (
             <Image
               src={imageUrl}
@@ -490,9 +520,13 @@ export default function OpenGraphPreview({
         </Link>
       ) : (
         <div
-          className="tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
+          className="tw-relative tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
           data-testid="og-preview-card"
         >
+          <GithubPreviewStatusBadge
+            href={href}
+            initialPreview={githubPreview}
+          />
           <div
             className={
               imageUrl

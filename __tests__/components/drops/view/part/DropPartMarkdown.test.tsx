@@ -54,6 +54,17 @@ import userEvent from "@testing-library/user-event";
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
+class MockIntersectionObserver {
+  observe = jest.fn();
+  unobserve = jest.fn();
+  disconnect = jest.fn();
+}
+
+Object.defineProperty(globalThis, "IntersectionObserver", {
+  writable: true,
+  value: MockIntersectionObserver,
+});
+
 const setQueryDataMock = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
@@ -247,6 +258,35 @@ describe("DropPartMarkdown", () => {
     expect(screen.getByText("hello @all")).not.toHaveClass(
       "tw-text-primary-400"
     );
+  });
+
+  it("renders a standalone check mark emoji with the large emoji style", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="✅"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("✅")).toHaveClass("emoji-text-node");
+  });
+
+  it("does not apply the large emoji style when emoji content includes text", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="✅ done"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("✅ done")).not.toHaveClass("emoji-text-node");
+    expect(screen.getByText("✅ done")).toHaveClass("tw-align-middle");
   });
 
   it("renders Art Blocks token card when feature enabled", async () => {

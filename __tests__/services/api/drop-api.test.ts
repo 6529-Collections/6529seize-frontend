@@ -1,12 +1,12 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { fetchDropByIdBatched, fetchDropsByIds } from "@/services/api/drop-api";
-import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
+import { fetchDropsV2ByIds } from "@/services/api/wave-drops-v2-api";
 
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
-  fetchDropV2ById: jest.fn(),
+  fetchDropsV2ByIds: jest.fn(),
 }));
 
-const fetchDropV2ByIdMock = fetchDropV2ById as jest.Mock;
+const fetchDropsV2ByIdsMock = fetchDropsV2ByIds as jest.Mock;
 
 beforeEach(() => {
   jest.useRealTimers();
@@ -20,12 +20,13 @@ afterEach(() => {
 describe("fetchDropsByIds", () => {
   it("fetches drops with lean v2 drop detail hydration", async () => {
     const replyDrop = { id: "reply-1" } as ApiDrop;
-    fetchDropV2ByIdMock.mockResolvedValue(replyDrop);
+    fetchDropsV2ByIdsMock.mockResolvedValue([replyDrop]);
 
     const result = await fetchDropsByIds(["reply-1"]);
 
-    expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(1);
-    expect(fetchDropV2ByIdMock).toHaveBeenCalledWith("reply-1", undefined, {
+    expect(fetchDropsV2ByIdsMock).toHaveBeenCalledTimes(1);
+    expect(fetchDropsV2ByIdsMock).toHaveBeenCalledWith({
+      dropIds: ["reply-1"],
       includeFullMetadata: false,
       includeTopRaters: false,
     });
@@ -35,48 +36,61 @@ describe("fetchDropsByIds", () => {
   it("returns fetched drops in requested ID order", async () => {
     const firstDrop = { id: "drop-1" } as ApiDrop;
     const secondDrop = { id: "reply-1" } as ApiDrop;
-    fetchDropV2ByIdMock
-      .mockResolvedValueOnce(firstDrop)
-      .mockResolvedValueOnce(secondDrop);
+    fetchDropsV2ByIdsMock.mockResolvedValueOnce([secondDrop, firstDrop]);
 
     const result = await fetchDropsByIds(["drop-1", "reply-1"]);
 
     expect(result).toEqual([firstDrop, secondDrop]);
   });
 
-  it("keeps fulfilled drops when another drop request fails", async () => {
+  it("keeps fulfilled drops when another requested id is missing", async () => {
     const validDrop = { id: "valid-drop" } as ApiDrop;
-    fetchDropV2ByIdMock
-      .mockResolvedValueOnce(validDrop)
-      .mockRejectedValueOnce(new Error("Drop deleted"));
+    fetchDropsV2ByIdsMock.mockResolvedValueOnce([validDrop]);
 
     const result = await fetchDropsByIds(["valid-drop", "deleted-drop"]);
 
-    expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(2);
+    expect(fetchDropsV2ByIdsMock).toHaveBeenCalledTimes(1);
     expect(result).toEqual([validDrop]);
   });
 
-  it("resolves valid batched requests when another batched id fails", async () => {
+  it("resolves valid batched requests when another batched id is missing", async () => {
     jest.useFakeTimers();
     const validDrop = { id: "valid-drop" } as ApiDrop;
-    const deletedDropError = new Error("Drop deleted");
-    fetchDropV2ByIdMock.mockImplementation(async (dropId: string) => {
-      if (dropId === "valid-drop") {
-        return validDrop;
-      }
-      throw deletedDropError;
-    });
+    fetchDropsV2ByIdsMock.mockResolvedValueOnce([validDrop]);
 
     const validPromise = fetchDropByIdBatched("valid-drop");
     const deletedPromise = fetchDropByIdBatched("deleted-drop");
     const assertions = Promise.all([
       expect(validPromise).resolves.toBe(validDrop),
-      expect(deletedPromise).rejects.toBe(deletedDropError),
+      expect(deletedPromise).rejects.toThrow("Drop deleted-drop not found"),
     ]);
 
     jest.runOnlyPendingTimers();
 
     await assertions;
-    expect(fetchDropV2ByIdMock).toHaveBeenCalledTimes(2);
+    expect(fetchDropsV2ByIdsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("chunks requests above the v2 drops page size", async () => {
+    const dropIds = Array.from({ length: 101 }, (_, index) => `drop-${index}`);
+    fetchDropsV2ByIdsMock.mockImplementation(
+      async ({ dropIds: requestedDropIds }: { dropIds: string[] }) =>
+        requestedDropIds.map((id) => ({ id }) as ApiDrop)
+    );
+
+    const result = await fetchDropsByIds(dropIds);
+
+    expect(result.map((drop) => drop.id)).toEqual(dropIds);
+    expect(fetchDropsV2ByIdsMock).toHaveBeenCalledTimes(2);
+    expect(fetchDropsV2ByIdsMock).toHaveBeenNthCalledWith(1, {
+      dropIds: dropIds.slice(0, 100),
+      includeFullMetadata: false,
+      includeTopRaters: false,
+    });
+    expect(fetchDropsV2ByIdsMock).toHaveBeenNthCalledWith(2, {
+      dropIds: dropIds.slice(100),
+      includeFullMetadata: false,
+      includeTopRaters: false,
+    });
   });
 });
