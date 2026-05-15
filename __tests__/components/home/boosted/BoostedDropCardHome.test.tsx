@@ -1,7 +1,17 @@
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import { AuthContext } from "@/components/auth/Auth";
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import type { ReactElement } from "react";
+import {
+  act,
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import {
+  createElement,
+  type ImgHTMLAttributes,
+  type ReactElement,
+} from "react";
 
 const mockToggleBoost = jest.fn();
 const mockBoostedDropLinkPreview = jest.fn();
@@ -12,7 +22,8 @@ type ResizeObserverHarness = {
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: ImgHTMLAttributes<HTMLImageElement>) =>
+    createElement("img", props),
 }));
 
 jest.mock("next/link", () => ({
@@ -179,6 +190,32 @@ const mockElementRect = (element: Element, height: number) =>
     .spyOn(element, "getBoundingClientRect")
     .mockReturnValue(createDomRect(height));
 
+const getBoostPill = (): HTMLElement => {
+  const pill = screen.getByText("+2").parentElement;
+
+  expect(pill).not.toBeNull();
+
+  return pill as HTMLElement;
+};
+
+const getBoostedCard = (): HTMLElement => {
+  const card = screen.getByText("+2").closest('[role="button"]');
+
+  expect(card).not.toBeNull();
+
+  return card as HTMLElement;
+};
+
+const firePointerDown = (element: HTMLElement, pointerType: string) => {
+  const event = createEvent.pointerDown(element);
+
+  Object.defineProperty(event, "pointerType", {
+    value: pointerType,
+  });
+
+  fireEvent(element, event);
+};
+
 describe("BoostedDropCardHome", () => {
   beforeEach(() => {
     mockBoostedDropLinkPreview.mockClear();
@@ -220,6 +257,154 @@ describe("BoostedDropCardHome", () => {
     expect(screen.queryByText("1m")).not.toBeInTheDocument();
     expect(screen.queryByText("Spec Wave")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Boost" })).toBeInTheDocument();
+  });
+
+  it("adds chat-only hover fade classes to the boost pill", () => {
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop()}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={2}
+      />
+    );
+
+    expect(getBoostPill()).toHaveClass(
+      "desktop-hover:group-hover:tw-opacity-0",
+      "tw-transition-opacity",
+      "tw-duration-150",
+      "tw-pointer-events-none"
+    );
+  });
+
+  it("temporarily hides the chat boost pill on touch pointer press", () => {
+    jest.useFakeTimers();
+    const view = renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop()}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={2}
+      />
+    );
+
+    try {
+      const pill = getBoostPill();
+
+      expect(pill).not.toHaveClass("tw-opacity-0");
+
+      firePointerDown(getBoostedCard(), "touch");
+
+      expect(pill).toHaveClass("tw-opacity-0");
+
+      act(() => {
+        jest.advanceTimersByTime(2999);
+      });
+
+      expect(pill).toHaveClass("tw-opacity-0");
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+
+      expect(pill).not.toHaveClass("tw-opacity-0");
+    } finally {
+      view.unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("uses touch start as a fallback to hide the chat boost pill", () => {
+    jest.useFakeTimers();
+    const view = renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop()}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={2}
+      />
+    );
+
+    try {
+      const pill = getBoostPill();
+
+      fireEvent.touchStart(getBoostedCard());
+
+      expect(pill).toHaveClass("tw-opacity-0");
+
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+
+      expect(pill).not.toHaveClass("tw-opacity-0");
+    } finally {
+      view.unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("does not hide the chat boost pill on mouse pointer press", () => {
+    renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop()}
+        onClick={jest.fn()}
+        variant="chat"
+        rank={2}
+      />
+    );
+
+    const pill = getBoostPill();
+
+    firePointerDown(getBoostedCard(), "mouse");
+
+    expect(pill).not.toHaveClass("tw-opacity-0");
+  });
+
+  it("keeps the outer card click after touch pointer press", () => {
+    jest.useFakeTimers();
+    const onClick = jest.fn();
+
+    const view = renderWithAuth(
+      <BoostedDropCardHome
+        drop={createDrop()}
+        onClick={onClick}
+        variant="chat"
+        rank={2}
+      />
+    );
+
+    try {
+      const card = getBoostedCard();
+
+      firePointerDown(card, "touch");
+      fireEvent.click(card);
+
+      expect(onClick).toHaveBeenCalledTimes(1);
+    } finally {
+      view.unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("does not add chat-only hide behavior to the home variant", () => {
+    renderWithAuth(
+      <BoostedDropCardHome drop={createDrop()} onClick={jest.fn()} />
+    );
+
+    const pill = getBoostPill();
+
+    for (const className of [
+      "desktop-hover:group-hover:tw-opacity-0",
+      "tw-pointer-events-none",
+      "tw-transition-opacity",
+      "tw-duration-150",
+    ]) {
+      expect(pill).not.toHaveClass(className);
+    }
+
+    firePointerDown(getBoostedCard(), "touch");
+
+    expect(pill).not.toHaveClass("tw-opacity-0");
   });
 
   it("uses a capped auto-height text frame in the chat variant", () => {
