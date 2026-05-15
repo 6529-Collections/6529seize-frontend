@@ -4,6 +4,7 @@ import NFTImage from "@/components/nft-image/NFTImage";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import { InlineMediaActions } from "@/components/drops/view/item/content/media/MediaActionToolbar";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
+import { useAuth } from "@/components/auth/Auth";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
 import type { NFT } from "@/entities/INFT";
@@ -42,6 +43,7 @@ export function MemePageArtViewer({
   readonly nft: NFT;
   readonly showBalance?: boolean;
 }) {
+  const { connectedProfile } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const animationHref = getResolvedAnimationSrc(nft);
@@ -78,6 +80,7 @@ export function MemePageArtViewer({
       };
   const currentFormat = activeMedia.format ?? "";
   const activeMediaUrl = activeMedia.url ?? "";
+  const showBalanceControl = showBalance && Boolean(connectedProfile);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: activeMediaUrl,
@@ -121,10 +124,14 @@ export function MemePageArtViewer({
   }
 
   function printArtworkControls() {
+    if (!showBalanceControl && !hasMultipleSlides) {
+      return null;
+    }
+
     return (
       <Col xs={12} className={styles["artControls"]}>
         <div className={styles["artControlsContent"]}>
-          {showBalance && (
+          {showBalanceControl && (
             <div
               className={`${styles["artControlsBalance"] ?? ""} tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-text-iron-400`}
             >
@@ -136,14 +143,14 @@ export function MemePageArtViewer({
               />
             </div>
           )}
-          <div
-            className={`${styles["artControlsCenter"] ?? ""} ${
-              hasMultipleSlides
-                ? (styles["artControlsCenterGrouped"] ?? "")
-                : ""
-            }`}
-          >
-            {hasMultipleSlides && (
+          {hasMultipleSlides && (
+            <div
+              className={`${styles["artControlsCenter"] ?? ""} ${
+                showBalanceControl
+                  ? (styles["artControlsCenterWithBalance"] ?? "")
+                  : ""
+              } ${styles["artControlsCenterGrouped"] ?? ""}`}
+            >
               <button
                 type="button"
                 aria-label="Show previous artwork media"
@@ -156,11 +163,9 @@ export function MemePageArtViewer({
                   className={styles["artSlideIcon"]}
                 />
               </button>
-            )}
-            <div className={styles["artControlsFormatLabel"]}>
-              {currentFormat}
-            </div>
-            {hasMultipleSlides && (
+              <div className={styles["artControlsFormatLabel"]}>
+                {currentFormat}
+              </div>
               <button
                 type="button"
                 aria-label="Show next artwork media"
@@ -173,21 +178,21 @@ export function MemePageArtViewer({
                   className={styles["artSlideIcon"]}
                 />
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </Col>
     );
   }
 
   return (
-    <Container className="p-0">
-      <Row className="g-0 position-relative">
+    <Container className="p-0 tw-flex tw-h-full tw-flex-col">
+      <Row className="g-0 tw-flex-1 tw-flex-col">
         {hasAnimation ? (
           <>
-            <div className="tw-relative tw-w-full tw-bg-iron-950 tw-p-0">
+            <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">
               <Carousel
-                className={styles["memesCarousel"]}
+                className={`${styles["memesCarousel"] ?? ""} tw-w-full`}
                 activeIndex={currentSlide}
                 controls={false}
                 interval={null}
@@ -201,7 +206,6 @@ export function MemePageArtViewer({
                     animation={true}
                     height={650}
                     transparentBG={true}
-                    showOriginal={true}
                     showBalance={false}
                     id="the-art-fullscreen-animation"
                   />
@@ -214,7 +218,6 @@ export function MemePageArtViewer({
                       height={650}
                       showBalance={false}
                       transparentBG={true}
-                      showOriginal={true}
                       id="the-art-fullscreen-img"
                     />
                   </Carousel.Item>
@@ -227,13 +230,12 @@ export function MemePageArtViewer({
         ) : (
           <>
             {hasImage && (
-              <div className="tw-relative tw-w-full tw-bg-iron-950">
+              <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950">
                 <NFTImage
                   nft={nft}
                   animation={false}
                   height={650}
                   transparentBG={true}
-                  showOriginal={true}
                   showBalance={false}
                   id="the-art-fullscreen-img"
                 />

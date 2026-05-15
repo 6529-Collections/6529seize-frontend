@@ -348,11 +348,17 @@ describe("MemePage search params handling", () => {
     const artViewer = screen.getByTestId("art-viewer");
     const detailsColumn = mintCountdown.parentElement;
     const artworkColumn = artViewer.parentElement?.parentElement;
+    const headerGrid = artworkColumn?.parentElement;
 
     expect(screen.getAllByTestId("mint-countdown")).toHaveLength(1);
+    expect(headerGrid).toHaveClass("lg:tw-items-center");
+    expect(headerGrid?.className).toContain(
+      "lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)]"
+    );
     expect(detailsColumn?.className).toContain("tw-contents");
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
     expect(artworkColumn).toHaveClass("tw-order-2");
+    expect(artworkColumn).toHaveClass("lg:tw-self-center");
   });
 
   it("sets focus from valid search param", async () => {

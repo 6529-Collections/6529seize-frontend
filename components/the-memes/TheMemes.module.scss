@@ -90,9 +90,8 @@
 
 .artControlsContent {
   position: relative;
-  display: grid;
+  display: flex;
   min-height: 2.5rem;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   column-gap: 1rem;
   align-items: center;
   padding: 0;
@@ -100,10 +99,9 @@
 
 .artControlsBalance {
   display: flex;
+  flex: 0 1 auto;
   min-width: 0;
-  grid-column: 1;
   align-items: center;
-  justify-self: start;
   height: 1.75rem;
   padding: 0 0.75rem;
 }
@@ -122,14 +120,16 @@
 .artControlsCenter {
   display: flex;
   min-width: 0;
-  grid-column: 3;
   align-items: center;
-  justify-content: flex-end;
-  justify-self: end;
+  justify-content: flex-start;
   gap: 0.375rem;
   height: 2.25rem;
   padding: 0;
   background-color: transparent;
+}
+
+.artControlsCenterWithBalance {
+  margin-left: auto;
 }
 
 .artControlsCenterGrouped {
@@ -427,7 +427,8 @@
 
 .nftImageWrapper {
   display: flex;
-  align-items: center;
+  min-width: 0;
+  flex-direction: column;
 }
 
 .seasonDropdown {

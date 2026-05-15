@@ -22,7 +22,6 @@ import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
 import {
-  MemePageCollectorsRightMenu,
   MemePageCollectorsSubMenu,
 } from "./MemePageCollectors";
 import { MemePageArtViewer } from "./MemePageArtViewer";
@@ -450,12 +449,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
 
     const hasMintingBox = isLastCard;
+    const artworkColumnBaseClassName =
+      "tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch";
     const cardHeaderClassName = hasMintingBox
-      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-gap-x-16"
+      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-items-center lg:tw-gap-x-16"
       : "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16";
     const artworkColumnClassName = hasMintingBox
-      ? "tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0"
-      : undefined;
+      ? `${artworkColumnBaseClassName} tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0`
+      : artworkColumnBaseClassName;
     const detailsColumnClassName = hasMintingBox
       ? "tw-contents [&>*:first-child]:tw-order-1 [&>*:nth-child(2)]:tw-order-3 [&>*:nth-child(2)]:tw-pt-4 lg:tw-col-start-2 lg:tw-row-start-1 lg:tw-block lg:[&>*]:tw-order-none lg:[&>*]:tw-w-full lg:[&>*:nth-child(2)]:tw-pt-8"
       : undefined;
@@ -463,7 +464,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <div className={cardHeaderClassName}>
         <div className={artworkColumnClassName}>
-          <div className={`${styles["nftImageWrapper"] ?? ""}`}>
+          <div className={`${styles["nftImageWrapper"] ?? ""} lg:tw-flex-1`}>
             <MemePageArtViewer
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
@@ -492,7 +493,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               fullWidth
             />
           )}
-          <MemePageLiveRightMenu show={true} nft={nft} />
+          <MemePageLiveRightMenu show={true} nft={nft} nftMeta={nftMeta} />
         </div>
       </div>
     );
@@ -506,7 +507,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <nav
         aria-label="Meme page sections"
-        className="tw-relative tw-mb-6 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
@@ -548,11 +549,6 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <>
         <div className="tw-p-0">
-          {activeTab === MEME_FOCUS.COLLECTORS && (
-            <div className="tw-pt-3">
-              <MemePageCollectorsRightMenu show={true} nft={nft} />
-            </div>
-          )}
           <MemePageLiveSubMenu
             show={activeTab === MEME_FOCUS.LIVE}
             nft={nft}

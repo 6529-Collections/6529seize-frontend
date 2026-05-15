@@ -3,6 +3,7 @@
 import Download from "@/components/download/Download";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import type { IAttribute, MemesExtendedData, NFT } from "@/entities/INFT";
+import { numberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   getAnimationDimensionsFromMetadata,
@@ -14,6 +15,7 @@ import {
   ArrowTopRightOnSquareIcon,
   BoltIcon,
   ChartBarIcon,
+  ChartBarSquareIcon,
   LinkIcon,
   SwatchIcon,
 } from "@heroicons/react/24/outline";
@@ -177,6 +179,24 @@ export function MemePageArt(props: {
   const boostRows = attributes.filter(
     (attribute) => attribute.display_type === "boost_percentage"
   );
+  const tdhRows = [
+    {
+      key: "tdh",
+      label: "TDH",
+      value: numberWithCommas(Math.round(nft.boosted_tdh * 100) / 100),
+      highlightedLabel: true,
+    },
+    {
+      key: "unweighted-tdh",
+      label: "Unweighted TDH",
+      value: numberWithCommas(Math.round(nft.tdh__raw * 100) / 100),
+    },
+    {
+      key: "meme-rank",
+      label: "Meme Rank",
+      value: nft.tdh_rank ? `#${numberWithCommas(nft.tdh_rank)}` : "-",
+    },
+  ];
 
   return (
     <div className="tw-space-y-14 tw-pb-8 tw-pt-8">
@@ -204,6 +224,22 @@ export function MemePageArt(props: {
         ) : (
           <EmptyDetailsState>No properties found.</EmptyDetailsState>
         )}
+      </AdditionalDetailsSection>
+
+      <AdditionalDetailsSection
+        title="TDH breakdown"
+        icon={ChartBarSquareIcon}
+      >
+        <div className="tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-16">
+          {tdhRows.map((row) => (
+            <MetricBlock
+              key={row.key}
+              label={row.label}
+              value={row.value}
+              highlightedLabel={row.highlightedLabel}
+            />
+          ))}
+        </div>
       </AdditionalDetailsSection>
 
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-14 lg:tw-grid-cols-2">

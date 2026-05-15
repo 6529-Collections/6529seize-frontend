@@ -266,16 +266,24 @@ describe("MemePageReferencesSubMenu sorting", () => {
 });
 
 describe("MemePageLiveRightMenu distribution link", () => {
-  it("shows separate creator avatars for multiple artist handles", () => {
+  it("preserves every artist handle when there are fewer artist names", () => {
     render(
       <MemePageLiveRightMenu
         show
-        nft={createNft({ artist_seize_handle: "alice, bob" })}
+        nft={createNft({
+          artist: "Alice Collective",
+          artist_seize_handle: "alice, bob",
+        })}
       />
     );
 
-    expect(screen.getByText("alice")).toBeInTheDocument();
-    expect(screen.getByText("bob")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Alice Collective" })
+    ).toHaveAttribute("href", "/alice");
+    expect(screen.getByRole("link", { name: "bob" })).toHaveAttribute(
+      "href",
+      "/bob"
+    );
     expect(screen.getByText("A")).toBeInTheDocument();
     expect(screen.getByText("B")).toBeInTheDocument();
   });

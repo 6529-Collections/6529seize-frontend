@@ -11,6 +11,7 @@ import { useState } from "react";
 import {
   MemeArtworkDetails,
   MemeCardFileType,
+  MemeEditionSizeStats,
   MemeNftLivePanel,
 } from "./MemePageLiveStats";
 
@@ -21,11 +22,13 @@ const MemePageArt = dynamic(() =>
 export function MemePageLiveRightMenu(props: {
   show: boolean;
   nft: NFT | undefined;
+  nftMeta?: MemesExtendedData | undefined;
 }) {
   if (props.show && props.nft) {
     return (
-      <div className="tw-w-full tw-pt-8">
+      <div className="tw-w-full">
         <MemeArtworkDetails nft={props.nft} />
+        {props.nftMeta && <MemeEditionSizeStats nftMeta={props.nftMeta} />}
         <MemeNftLivePanel nft={props.nft} />
       </div>
     );

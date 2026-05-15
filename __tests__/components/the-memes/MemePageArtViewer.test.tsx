@@ -3,6 +3,15 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockDownloadMediaUrl = jest.fn().mockResolvedValue(undefined);
+const mockNFTImage = jest.fn(
+  ({
+    animation,
+    id,
+  }: {
+    readonly animation: boolean;
+    readonly id?: string | undefined;
+  }) => <div data-testid={animation ? "animation-art" : "image-art"} id={id} />
+);
 
 jest.mock("react-bootstrap", () => {
   const Carousel = ({
@@ -45,13 +54,7 @@ jest.mock("react-bootstrap", () => {
 
 jest.mock("@/components/nft-image/NFTImage", () => ({
   __esModule: true,
-  default: ({
-    animation,
-    id,
-  }: {
-    readonly animation: boolean;
-    readonly id?: string | undefined;
-  }) => <div data-testid={animation ? "animation-art" : "image-art"} id={id} />,
+  default: (...args: unknown[]) => mockNFTImage(...(args as [any])),
 }));
 
 jest.mock("@/components/nft-image/NFTImageBalance", () => ({
@@ -79,9 +82,31 @@ jest.mock("@/helpers/media-download.helpers", () => ({
 }));
 
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
+import { AuthContext } from "@/components/auth/Auth";
 
 const mockHelpers = jest.requireMock("@/helpers/Helpers") as {
   enterArtFullScreen: jest.Mock;
+};
+
+const renderWithConnectedProfile = (component: React.ReactNode) => {
+  return render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: { consolidation_key: "profile-key" },
+          fetchingProfile: false,
+          receivedProfileProxies: [],
+          activeProfileProxy: null,
+          showWaves: false,
+          requestAuth: jest.fn(),
+          setToast: jest.fn(),
+          setActiveProfileProxy: jest.fn(),
+        } as any
+      }
+    >
+      {component}
+    </AuthContext.Provider>
+  );
 };
 
 const baseNft = {
@@ -132,6 +157,53 @@ afterEach(() => {
 });
 
 describe("MemePageArtViewer", () => {
+  it("does not render an empty balance control for signed-out viewers", () => {
+    render(<MemePageArtViewer nft={baseNft as any} showBalance />);
+
+    expect(screen.queryByTestId("nft-balance")).not.toBeInTheDocument();
+    expect(screen.getByText("MP4").parentElement).not.toHaveClass(
+      "artControlsCenterWithBalance"
+    );
+  });
+
+  it("pushes media controls right when the balance control is visible", () => {
+    renderWithConnectedProfile(
+      <MemePageArtViewer nft={baseNft as any} showBalance />
+    );
+
+    expect(screen.getByTestId("nft-balance")).toBeInTheDocument();
+    expect(screen.getByText("MP4").parentElement).toHaveClass(
+      "artControlsCenterWithBalance"
+    );
+  });
+
+  it("does not render a standalone media format tag for single-media artwork", () => {
+    renderWithConnectedProfile(
+      <MemePageArtViewer
+        nft={
+          {
+            ...baseNft,
+            animation: "",
+            metadata: {
+              image: "https://media.example/card.png",
+              image_details: { format: "PNG" },
+            },
+          } as any
+        }
+        showBalance
+      />
+    );
+
+    expect(screen.getByTestId("nft-balance")).toBeInTheDocument();
+    expect(screen.queryByText("PNG")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show previous artwork media" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show next artwork media" })
+    ).not.toBeInTheDocument();
+  });
+
   it("renders inline media actions for the active artwork", async () => {
     const user = userEvent.setup();
 
@@ -154,6 +226,25 @@ describe("MemePageArtViewer", () => {
 
     expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
       "the-art-fullscreen-animation"
+    );
+  });
+
+  it("uses optimized media for the top artwork viewer", () => {
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    expect(mockNFTImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        animation: true,
+        showOriginal: undefined,
+      }),
+      undefined
+    );
+    expect(mockNFTImage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        animation: false,
+        showOriginal: undefined,
+      }),
+      undefined
     );
   });
 

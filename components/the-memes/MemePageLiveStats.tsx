@@ -12,13 +12,13 @@ import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
-import { FireIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { FireIcon } from "@heroicons/react/24/outline";
 import {
   ArrowUpRightIcon,
   InformationCircleIcon as InformationCircleSolidIcon,
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import type { ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 
 const UNIQUE_PERCENT_TOOLTIP =
@@ -31,147 +31,110 @@ const CREATOR_NAME_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
 const INLINE_METRIC_LABEL_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
-const COLLECTOR_GROUP_TITLE_CLASS =
-  "tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
   "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const COLLECTOR_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+const INLINE_STATS_ROW_CLASS =
+  "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
 
 export function MemeCollectorsStats({
   nftMeta,
 }: {
   readonly nftMeta: MemesExtendedData;
 }) {
-  const editionSizeExMuseumLabel =
-    nftMeta.burnt > 0 ? "ex. burnt and 6529 museum" : "ex. 6529 museum";
   const percentUniqueExMuseumLabel =
     nftMeta.burnt > 0
       ? "% Unique ex. burnt and 6529 museum"
       : "% Unique ex. 6529 museum";
 
   return (
-    <section className="tw-pt-10">
-      <MemeStatsSectionHeader title="Meme Collectors" icon={UsersIcon} />
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-10 tw-pt-6 md:tw-grid-cols-2 md:tw-gap-x-14">
-        <CollectorStatGroup
-          title="Edition size"
-          value={numberWithCommas(nftMeta.edition_size)}
-          rank={nftMeta.edition_size_rank}
-          total={nftMeta.collection_size}
-        >
-          {nftMeta.burnt > 0 && (
-            <>
-              <CollectorDetailStat
-                label="burnt"
-                value={numberWithCommas(nftMeta.burnt)}
-                icon={<FireIcon className="tw-h-4 tw-w-4 tw-text-red" />}
-              />
-              <CollectorDetailStat
-                label="ex. burnt"
-                value={numberWithCommas(nftMeta.edition_size_not_burnt)}
-                rank={nftMeta.edition_size_not_burnt_rank}
-                total={nftMeta.collection_size}
-              />
-            </>
-          )}
-          <CollectorDetailStat
-            label={editionSizeExMuseumLabel}
-            value={numberWithCommas(nftMeta.edition_size_cleaned)}
-            rank={nftMeta.edition_size_cleaned_rank}
-            total={nftMeta.collection_size}
-          />
-        </CollectorStatGroup>
-
-        <CollectorStatGroup
-          title="Collectors"
+    <section>
+      <div className={INLINE_STATS_ROW_CLASS}>
+        <InlineStatsMetric
+          label="Collectors"
           value={numberWithCommas(nftMeta.hodlers)}
           rank={nftMeta.hodlers_rank}
           total={nftMeta.collection_size}
-        >
-          <CollectorDetailStat
-            label="6529 museum"
-            value={numberWithCommas(nftMeta.museum_holdings)}
-            rank={nftMeta.museum_holdings_rank}
+        />
+        <InlineStatsMetric
+          label="6529 museum"
+          value={numberWithCommas(nftMeta.museum_holdings)}
+          rank={nftMeta.museum_holdings_rank}
+          total={nftMeta.collection_size}
+        />
+        <InlineStatsMetric
+          label="% Unique"
+          value={formatPercent(nftMeta.percent_unique)}
+          rank={nftMeta.percent_unique_rank}
+          total={nftMeta.collection_size}
+          infoTitle={UNIQUE_PERCENT_TOOLTIP}
+        />
+        {nftMeta.burnt > 0 && (
+          <InlineStatsMetric
+            label="% Unique ex. burnt"
+            value={formatPercent(nftMeta.percent_unique_not_burnt)}
+            rank={nftMeta.percent_unique_not_burnt_rank}
             total={nftMeta.collection_size}
           />
-          <CollectorDetailStat
-            label="% Unique"
-            value={formatPercent(nftMeta.percent_unique)}
-            rank={nftMeta.percent_unique_rank}
-            total={nftMeta.collection_size}
-            infoTitle={UNIQUE_PERCENT_TOOLTIP}
-          />
-          {nftMeta.burnt > 0 && (
-            <CollectorDetailStat
-              label="% Unique ex. burnt"
-              value={formatPercent(nftMeta.percent_unique_not_burnt)}
-              rank={nftMeta.percent_unique_not_burnt_rank}
-              total={nftMeta.collection_size}
-            />
-          )}
-          <CollectorDetailStat
-            label={percentUniqueExMuseumLabel}
-            value={formatPercent(nftMeta.percent_unique_cleaned)}
-            rank={nftMeta.percent_unique_cleaned_rank}
-            total={nftMeta.collection_size}
-          />
-        </CollectorStatGroup>
+        )}
+        <InlineStatsMetric
+          label={percentUniqueExMuseumLabel}
+          value={formatPercent(nftMeta.percent_unique_cleaned)}
+          rank={nftMeta.percent_unique_cleaned_rank}
+          total={nftMeta.collection_size}
+        />
       </div>
     </section>
   );
 }
 
-function MemeStatsSectionHeader({
-  title,
-  icon,
+export function MemeEditionSizeStats({
+  nftMeta,
 }: {
-  readonly title: string;
-  readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
+  readonly nftMeta: MemesExtendedData;
 }) {
-  const Icon = icon;
+  const editionSizeExMuseumLabel =
+    nftMeta.burnt > 0 ? "ex. burnt and 6529 museum" : "ex. 6529 museum";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
-      <Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
-      <h3 className={SECTION_HEADER_TITLE_CLASS}>{title}</h3>
-      <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
-    </div>
+    <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
+      <div className={INLINE_STATS_ROW_CLASS}>
+        <InlineStatsMetric
+          label="Edition size"
+          value={numberWithCommas(nftMeta.edition_size)}
+          rank={nftMeta.edition_size_rank}
+          total={nftMeta.collection_size}
+        />
+        {nftMeta.burnt > 0 && (
+          <>
+            <InlineStatsMetric
+              label="burnt"
+              value={numberWithCommas(nftMeta.burnt)}
+              icon={<FireIcon className="tw-h-4 tw-w-4 tw-text-red" />}
+            />
+            <InlineStatsMetric
+              label="ex. burnt"
+              value={numberWithCommas(nftMeta.edition_size_not_burnt)}
+              rank={nftMeta.edition_size_not_burnt_rank}
+              total={nftMeta.collection_size}
+            />
+          </>
+        )}
+        <InlineStatsMetric
+          label={editionSizeExMuseumLabel}
+          value={numberWithCommas(nftMeta.edition_size_cleaned)}
+          rank={nftMeta.edition_size_cleaned_rank}
+          total={nftMeta.collection_size}
+        />
+      </div>
+    </section>
   );
 }
 
-function CollectorStatGroup({
-  title,
-  value,
-  rank,
-  total,
-  className = "",
-  children,
-}: {
-  readonly title: string;
-  readonly value: string;
-  readonly rank: number;
-  readonly total: number;
-  readonly className?: string | undefined;
-  readonly children: ReactNode;
-}) {
-  return (
-    <div className={`tw-min-w-0 ${className}`}>
-      <h3 className={COLLECTOR_GROUP_TITLE_CLASS}>{title}</h3>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-        <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
-        <CollectorRankBadge rank={rank} total={total} />
-      </div>
-      <div className="tw-ml-1.5 tw-mt-6 tw-space-y-3 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-800 tw-pl-5">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function CollectorDetailStat({
+function InlineStatsMetric({
   label,
   value,
   rank,
@@ -191,31 +154,35 @@ function CollectorDetailStat({
     : undefined;
 
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
-      <span className={INLINE_METRIC_LABEL_CLASS}>{label}</span>
-      {icon}
-      <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
-      {rank !== undefined && total !== undefined && (
-        <CollectorRankBadge rank={rank} total={total} />
-      )}
-      {tooltipId && infoTitle && (
-        <>
-          <span
-            aria-label={infoTitle}
-            className="tw-inline-flex tw-cursor-help tw-items-center"
-            data-tooltip-id={tooltipId}
-            role="img"
-          >
-            <InformationCircleSolidIcon className="tw-h-3.5 tw-w-3.5 tw-text-iron-400" />
-          </span>
-          <Tooltip
-            id={tooltipId}
-            content={infoTitle}
-            place="top"
-            style={TOOLTIP_STYLES}
-          />
-        </>
-      )}
+    <div className="tw-min-w-[8.5rem]">
+      <div className="tw-mb-1 tw-flex tw-items-center tw-gap-2 md:tw-mb-2">
+        {icon}
+        <span className={INLINE_METRIC_LABEL_CLASS}>{label}</span>
+        {tooltipId && infoTitle && (
+          <>
+            <span
+              aria-label={infoTitle}
+              className="tw-inline-flex tw-cursor-help tw-items-center"
+              data-tooltip-id={tooltipId}
+              role="img"
+            >
+              <InformationCircleSolidIcon className="tw-h-3.5 tw-w-3.5 tw-text-iron-400" />
+            </span>
+            <Tooltip
+              id={tooltipId}
+              content={infoTitle}
+              place="top"
+              style={TOOLTIP_STYLES}
+            />
+          </>
+        )}
+      </div>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5">
+        <span className={COLLECTOR_METRIC_VALUE_CLASS}>{value}</span>
+        {rank !== undefined && total !== undefined && (
+          <CollectorRankBadge rank={rank} total={total} />
+        )}
+      </div>
     </div>
   );
 }
@@ -242,13 +209,16 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
   const mintDate = getMintDateParts(printMintDate(nft.mint_date));
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
   const artistNames = getArtistNames(nft.artist);
-  const creatorNames = artistNames.length > 0 ? artistNames : artistHandles;
+  const creatorCount = Math.max(artistNames.length, artistHandles.length);
   const creators =
-    creatorNames.length > 0
-      ? creatorNames.map((display, index) => ({
-          handle: artistHandles[index] ?? null,
-          display,
-        }))
+    creatorCount > 0
+      ? Array.from({ length: creatorCount }, (_, index) => {
+          const handle = artistHandles[index] ?? null;
+          return {
+            handle,
+            display: artistNames[index] ?? handle ?? "not available",
+          };
+        })
       : [{ handle: null, display: "not available" }];
 
   return (
