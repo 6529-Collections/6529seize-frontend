@@ -2,16 +2,13 @@
 
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import React, { useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import useCreateModalState, {
-  CREATE_DIRECT_MESSAGE_VALUE,
-} from "@/hooks/useCreateModalState";
+import useCreateModalState from "@/hooks/useCreateModalState";
 
 const BrainLeftSidebarCreateADirectMessageButton: React.FC = () => {
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const { getHrefForMode } = useCreateModalState();
+  const { openDirectMessage } = useCreateModalState();
 
   const isConnectedIdentity = useMemo(() => {
     return !!connectedProfile?.handle && !activeProfileProxy;
@@ -25,15 +22,17 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC = () => {
   }, [isConnectedIdentity]);
 
   return (
-    <Link
-      href={getHrefForMode(CREATE_DIRECT_MESSAGE_VALUE)}
-      className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300">
+    <button
+      type="button"
+      onClick={openDirectMessage}
+      className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition-all tw-duration-300 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-ring-iron-700"
+    >
       <FontAwesomeIcon
         icon={faPaperPlane}
-        className="tw-size-3 -tw-ml-1.5 tw-flex-shrink-0"
+        className="-tw-ml-1.5 tw-size-3 tw-flex-shrink-0"
       />
       <span>{label}</span>
-    </Link>
+    </button>
   );
 };
 

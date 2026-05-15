@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -42,10 +43,14 @@ export default function MarketplaceItemPreviewMediaLink({
   let mediaContent: ReactNode;
 
   if (useDirectImageRendering) {
+    // Gamma media can resolve through several hosts, so this direct preview skips optimization.
     mediaContent = (
-      <img
+      <Image
         src={mediaUrl}
         alt="Marketplace item media"
+        width={320}
+        height={320}
+        unoptimized
         className="tw-block tw-h-auto tw-max-h-72 tw-min-h-[12.5rem] tw-w-auto tw-min-w-[12.5rem] tw-max-w-full tw-object-contain"
         style={{ imageRendering: "pixelated" }}
         data-testid="media-display"

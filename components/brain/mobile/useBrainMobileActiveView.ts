@@ -40,6 +40,16 @@ interface UseBrainMobileActiveViewResult {
   readonly onViewChange: (view: BrainView) => void;
 }
 
+interface WaveViewState {
+  readonly firstDecisionDone: boolean;
+  readonly hasAuthenticatedProfile: boolean;
+  readonly isApproveWave: boolean;
+  readonly isCompleted: boolean;
+  readonly isCurationWave: boolean;
+  readonly isMemesWave: boolean;
+  readonly isRankWave: boolean;
+}
+
 function getRouteDefaultView({
   createParam,
   isApp,
@@ -91,6 +101,43 @@ function getRouteDefaultView({
   return null;
 }
 
+function getWaveDefaultView({
+  hasLoadedWave,
+  isApproveWave,
+  isCompleted,
+  isRankWave,
+}: Pick<WaveViewState, "isApproveWave" | "isCompleted" | "isRankWave"> & {
+  readonly hasLoadedWave: boolean;
+}): BrainView {
+  return hasLoadedWave && isRankWave && !isApproveWave && isCompleted
+    ? BrainView.SUBMISSIONS
+    : BrainView.DEFAULT;
+}
+
+function getWaveViewAvailability({
+  firstDecisionDone,
+  hasAuthenticatedProfile,
+  isApproveWave,
+  isCompleted,
+  isCurationWave,
+  isMemesWave,
+  isRankWave,
+}: WaveViewState): Partial<Record<BrainView, boolean>> {
+  const isCompetitionWave = isRankWave || isApproveWave;
+
+  return {
+    [BrainView.LEADERBOARD]: isCompetitionWave,
+    [BrainView.SUBMISSIONS]: isRankWave && !isApproveWave && isCompleted,
+    [BrainView.SALES]: isCurationWave,
+    [BrainView.WINNERS]:
+      isCompetitionWave && (isApproveWave || firstDecisionDone),
+    [BrainView.OUTCOME]: isCompetitionWave && !isCurationWave,
+    [BrainView.MY_VOTES]:
+      isCompetitionWave && (isCurationWave || hasAuthenticatedProfile),
+    [BrainView.FAQ]: isMemesWave,
+  };
+}
+
 function normalizeActiveView({
   activeView,
   firstDecisionDone,
@@ -117,14 +164,21 @@ function normalizeActiveView({
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
   const hasLoadedWave = wave !== null && wave !== undefined;
-  const isCompetitionWave = isRankWave || isApproveWave;
-  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
-  const canUseMyVotesView =
-    isCompetitionWave && (isCurationWave || hasAuthenticatedProfile);
-  const waveDefaultView =
-    hasLoadedWave && isRankWave && !isApproveWave && isCompleted
-      ? BrainView.SUBMISSIONS
-      : BrainView.DEFAULT;
+  const waveViewState: WaveViewState = {
+    firstDecisionDone,
+    hasAuthenticatedProfile,
+    isApproveWave,
+    isCompleted,
+    isCurationWave,
+    isMemesWave,
+    isRankWave,
+  };
+  const waveDefaultView = getWaveDefaultView({
+    hasLoadedWave,
+    isApproveWave,
+    isCompleted,
+    isRankWave,
+  });
 
   if (!hasWave) {
     if (!GLOBAL_VIEWS.has(activeView)) {
@@ -144,25 +198,15 @@ function normalizeActiveView({
 
   if (
     activeView === BrainView.LEADERBOARD &&
-    isRankWave &&
-    !isApproveWave &&
-    isCompleted
+    waveDefaultView === BrainView.SUBMISSIONS
   ) {
     return BrainView.SUBMISSIONS;
   }
 
-  const shouldResetToDefault =
-    (activeView === BrainView.LEADERBOARD && !isCompetitionWave) ||
-    (activeView === BrainView.SUBMISSIONS &&
-      (!isRankWave || isApproveWave || !isCompleted)) ||
-    (activeView === BrainView.SALES && !isCurationWave) ||
-    (activeView === BrainView.WINNERS &&
-      (!isCompetitionWave || (!isApproveWave && !firstDecisionDone))) ||
-    (activeView === BrainView.OUTCOME && !supportsOutcomeView) ||
-    (activeView === BrainView.MY_VOTES && !canUseMyVotesView) ||
-    (activeView === BrainView.FAQ && !isMemesWave);
+  const isCurrentViewAvailable =
+    getWaveViewAvailability(waveViewState)[activeView] ?? true;
 
-  return shouldResetToDefault ? waveDefaultView : activeView;
+  return isCurrentViewAvailable ? activeView : waveDefaultView;
 }
 
 interface ActiveViewSelection {
@@ -202,10 +246,12 @@ export function useBrainMobileActiveView({
     [currentContextKey]
   );
   const hasLoadedWave = wave !== null && wave !== undefined;
-  const waveDefaultView =
-    hasWave && hasLoadedWave && isRankWave && !isApproveWave && isCompleted
-      ? BrainView.SUBMISSIONS
-      : BrainView.DEFAULT;
+  const waveDefaultView = getWaveDefaultView({
+    hasLoadedWave: hasWave && hasLoadedWave,
+    isApproveWave,
+    isCompleted,
+    isRankWave,
+  });
   const baseView = hasWave
     ? waveDefaultView
     : (routeDefaultView ?? BrainView.DEFAULT);
