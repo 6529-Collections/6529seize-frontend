@@ -47,6 +47,7 @@ export default function MarketplacePreview({
     case "gammaio.ordinal":
     case "gammaio.ordinal-inscription":
     case "gammaio.ordinal-collection-inscription":
+    case "gammaio.ordinal-print-details":
     case "gammaio.stacks-nft":
       content = <MarketplaceGammaioPreview href={href} compact={compact} />;
       break;

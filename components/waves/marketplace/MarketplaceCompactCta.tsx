@@ -52,6 +52,7 @@ export default function MarketplaceCompactCta({
           alt={`${marketplaceBrand.displayName} logo`}
           width={16}
           height={16}
+          unoptimized
           className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-rounded-sm tw-object-cover"
         />
       ) : (

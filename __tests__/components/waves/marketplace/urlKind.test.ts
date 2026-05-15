@@ -25,6 +25,10 @@ describe("marketplace url kind", () => {
       "gammaio.ordinal-collection-inscription",
     ],
     [
+      "https://gamma.io/ordinals/prints/cmlzfnfj50002l904lujsztqj/details",
+      "gammaio.ordinal-print-details",
+    ],
+    [
       "https://gamma.io/collections/example-collection/123",
       "gammaio.collection",
     ],
@@ -69,6 +73,8 @@ describe("marketplace url kind", () => {
     "https://gamma.io/collections",
     "https://gamma.io/collections/example-collection/tokens",
     "https://gamma.io/ordinals/collections/example-collection",
+    "https://gamma.io/ordinals/prints/cmlzfnfj50002l904lujsztqj",
+    "https://gamma.io/ordinals/prints/cmlzfnfj50002l904lujsztqj/detail",
     "https://gamma.io/stacks",
     "https://gamma.io/stacks/nfts",
     "https://transient.xyz/about",

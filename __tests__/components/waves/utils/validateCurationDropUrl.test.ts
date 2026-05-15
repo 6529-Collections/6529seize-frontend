@@ -18,6 +18,7 @@ describe("validateCurationDropInput", () => {
     "gamma.io/inscriptions/abc123i0",
     "gamma.io/ordinals/inscriptions/b3fdff64ba328f2c49bd11abb9df79ad90dc0b851cb0544cfa86af7fceaca5e5i0",
     "gamma.io/ordinals/collections/example-collection/inscriptions/abc123i0",
+    "gamma.io/ordinals/prints/cmlzfnfj50002l904lujsztqj/details",
     `gamma.io/collections/example-collection/${id}`,
     `gamma.io/collections/example-collection/tokens/${id}`,
     "gamma.io/stacks/nfts/SP16SRR777TVB1WS5XSS9QT3YEZEC9JQFKYZENRAJ.bitcoin-pepe_1842",

@@ -46,6 +46,7 @@ export const getMarketplaceBrand = (href: string): MarketplaceBrand | null => {
     case "gammaio.ordinal":
     case "gammaio.ordinal-inscription":
     case "gammaio.ordinal-collection-inscription":
+    case "gammaio.ordinal-print-details":
     case "gammaio.stacks-nft":
       return { displayName: "Gamma.io", logoSrc: "/gammaio.jpg" };
     case "opensea.item":

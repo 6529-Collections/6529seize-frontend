@@ -8,6 +8,7 @@ type MarketplaceUrlKind =
   | "gammaio.ordinal"
   | "gammaio.ordinal-inscription"
   | "gammaio.ordinal-collection-inscription"
+  | "gammaio.ordinal-print-details"
   | "gammaio.stacks-nft"
   | "opensea.item"
   | "opensea.asset"
@@ -25,6 +26,8 @@ const GAMMAIO_ORDINAL_INSCRIPTION_PATH_PATTERN =
   /^\/ordinals\/inscriptions\/[^/?#]+\/?$/i;
 const GAMMAIO_ORDINAL_COLLECTION_INSCRIPTION_PATH_PATTERN =
   /^\/ordinals\/collections\/[^/?#]+\/inscriptions\/[^/?#]+\/?$/i;
+const GAMMAIO_ORDINAL_PRINT_DETAILS_PATH_PATTERN =
+  /^\/ordinals\/prints\/[^/?#]+\/details\/?$/i;
 const GAMMAIO_COLLECTION_PATH_PATTERN =
   /^\/collections\/[^/?#]+\/(?!tokens\/?$)[^/?#]+\/?$/i;
 const GAMMAIO_COLLECTION_TOKEN_PATH_PATTERN =
@@ -92,6 +95,10 @@ const MARKETPLACE_HOST_MATCHERS: readonly MarketplaceHostMatcher[] = [
       {
         pattern: GAMMAIO_ORDINAL_COLLECTION_INSCRIPTION_PATH_PATTERN,
         kind: "gammaio.ordinal-collection-inscription",
+      },
+      {
+        pattern: GAMMAIO_ORDINAL_PRINT_DETAILS_PATH_PATTERN,
+        kind: "gammaio.ordinal-print-details",
       },
       {
         pattern: GAMMAIO_COLLECTION_TOKEN_PATH_PATTERN,

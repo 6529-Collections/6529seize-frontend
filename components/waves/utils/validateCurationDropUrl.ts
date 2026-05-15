@@ -40,6 +40,10 @@ export const SUPPORTED_CURATION_URL_EXAMPLES: readonly SupportedCurationUrlExamp
       example: "https://gamma.io/ordinals/abc123i0",
     },
     {
+      label: "gammaio print details",
+      example: "https://gamma.io/ordinals/prints/your-print-id/details",
+    },
+    {
       label: "gammaio collection token",
       example: "https://gamma.io/collections/collection-slug/123",
     },
@@ -93,6 +97,7 @@ const ALLOWED_DOMAIN_PATH_PATTERNS: Readonly<
     new RegExp(
       `^/ordinals/collections/${SLUG_ID_PART_REGEX}/inscriptions/${GAMMAIO_ID_PART_REGEX}/?$`
     ),
+    new RegExp(`^/ordinals/prints/${GAMMAIO_ID_PART_REGEX}/details/?$`),
     new RegExp(
       `^/collections/${SLUG_ID_PART_REGEX}/(?!tokens/?$)${GAMMAIO_ID_PART_REGEX}/?$`
     ),
