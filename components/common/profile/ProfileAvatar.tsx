@@ -42,7 +42,7 @@ export default function ProfileAvatar({
               <img
                 src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
                 alt={alt}
-                className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
+                className="tw-h-full tw-w-full tw-bg-transparent tw-object-cover"
               />
             ) : (
               fallbackContent

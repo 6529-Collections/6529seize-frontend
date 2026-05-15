@@ -49,8 +49,9 @@ export default function CommonDropdownItem<T, U = unknown>(
         role="menuitem"
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
-        onMouseLeave={() => setShouldRotate(false)}>
-        <div className="tw-flex tw-flex-1 tw-items-center tw-gap-x-2 tw-min-w-0">
+        onMouseLeave={() => setShouldRotate(false)}
+      >
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2">
           <span className="tw-truncate tw-text-sm tw-font-medium">{label}</span>
           {sortDirection && (
             <span className="-tw-mt-0.5">
@@ -61,18 +62,18 @@ export default function CommonDropdownItem<T, U = unknown>(
               />
             </span>
           )}
-          {item.value === activeItem && (
-            <FontAwesomeIcon
-              icon={faCheck}
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-200 tw-ease-out"
-              aria-hidden="true"
-            />
-          )}
         </div>
         {isValidElement(children) &&
           cloneElement(children, {
             onCopy,
           })}
+        {item.value === activeItem && (
+          <FontAwesomeIcon
+            icon={faCheck}
+            className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-200 tw-ease-out"
+            aria-hidden="true"
+          />
+        )}
       </button>
     </li>
   );
