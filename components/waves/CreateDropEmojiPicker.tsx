@@ -1,6 +1,6 @@
 "use client";
 
-import type { FC} from "react";
+import type { FC } from "react";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Picker from "@emoji-mart/react";
@@ -10,13 +10,18 @@ import { $createTextNode, $insertNodes } from "lexical";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEmoji } from "@/contexts/EmojiContext";
+import { useCreateDropEmojiPickerLayer } from "./CreateDropEmojiPickerLayerContext";
 
 interface CreateDropEmojiPickerProps {
   top?: string | undefined;
 }
 
-const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2" }) => {
+const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
+  top = "tw-top-2",
+}) => {
   const isMobile = useIsMobileScreen();
+  const { desktopZIndex, mobileZIndexClassName } =
+    useCreateDropEmojiPickerLayer();
 
   const { emojiMap, categories, categoryIcons } = useEmoji();
 
@@ -29,7 +34,40 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
     left: number;
   }>({ top: 0, left: 0 });
 
-  const addEmoji = (emoji: { native?: string | undefined; id?: string | undefined }) => {
+  const getPickerPosition = () => {
+    const button = buttonRef.current;
+
+    if (!button) {
+      return null;
+    }
+
+    const rect = button.getBoundingClientRect();
+
+    return {
+      top: rect.top + globalThis.scrollY - 420,
+      left: rect.left + globalThis.scrollX - 250,
+    };
+  };
+
+  const handleTogglePicker = () => {
+    if (showPicker) {
+      setShowPicker(false);
+      return;
+    }
+
+    const nextPickerPosition = getPickerPosition();
+
+    if (nextPickerPosition) {
+      setPickerPosition(nextPickerPosition);
+    }
+
+    setShowPicker(true);
+  };
+
+  const addEmoji = (emoji: {
+    native?: string | undefined;
+    id?: string | undefined;
+  }) => {
     let emojiText = emoji.native;
     if (!emojiText && emoji.id) {
       emojiText = `:${emoji.id}:`;
@@ -39,7 +77,7 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
         const emojiNode = $createTextNode(emojiText);
         $insertNodes([emojiNode]);
       });
-      
+
       // Ensure editor is focused and state is updated
       requestAnimationFrame(() => {
         editor.focus();
@@ -51,17 +89,6 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
     }
     setShowPicker(false);
   };
-
-  useEffect(() => {
-    if (showPicker && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-
-      setPickerPosition({
-        top: rect.top + window.scrollY - 420,
-        left: rect.left + window.scrollX - 250,
-      });
-    }
-  }, [showPicker]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -86,14 +113,16 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
 
   return (
     <>
-      <div className={`tw-absolute tw-right-2 ${top} tw-flex tw-justify-center tw-items-start`}>
+      <div
+        className={`tw-absolute tw-right-2 ${top} tw-flex tw-items-start tw-justify-center`}
+      >
         <button
           ref={buttonRef}
-          className="tw-p-[0.35rem] tw-border-none tw-rounded tw-bg-transparent hover:tw-bg-[rgb(40,40,40)] tw-opacity-50 hover:tw-opacity-100 tw-transition tw-duration-150 tw-flex tw-items-center tw-justify-center hover:tw-text-[#FFCC22]"
-          onClick={() => setShowPicker(!showPicker)}
+          className="tw-flex tw-items-center tw-justify-center tw-rounded tw-border-none tw-bg-transparent tw-p-[0.35rem] tw-opacity-50 tw-transition tw-duration-150 hover:tw-bg-[rgb(40,40,40)] hover:tw-text-[#FFCC22] hover:tw-opacity-100"
+          onClick={handleTogglePicker}
         >
           <svg
-            className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"
             xmlns="http://www.w3.org/2000/svg"
             fill="currentColor"
             aria-hidden="true"
@@ -116,9 +145,9 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
                 position: "absolute",
                 top: pickerPosition.top,
                 left: pickerPosition.left,
-                zIndex: 1000,
+                zIndex: desktopZIndex,
               }}
-              className="tw-shadow-lg tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px]"
+              className="tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px] tw-shadow-lg"
             >
               <Picker
                 theme="dark"
@@ -137,9 +166,10 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({ top = "tw-top-2
         <MobileWrapperDialog
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}
+          zIndexClassName={mobileZIndexClassName}
         >
           <div
-            className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
+            className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
             onTouchMove={(e) => e.stopPropagation()}
           >
             <Picker
