@@ -65,7 +65,6 @@ export default function MarketplaceFullFooter({
                 alt={`${marketplaceBrand.displayName} logo`}
                 width={14}
                 height={14}
-                unoptimized
                 className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-rounded-sm tw-object-cover"
               />
             )}

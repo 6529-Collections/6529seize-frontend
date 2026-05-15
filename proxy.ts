@@ -84,6 +84,7 @@ const STATIC_PATH_PREFIXES = [
 ] as const;
 const STATIC_PATH_SUFFIXES = [
   "favicon.ico",
+  ".jpg",
   ".jpeg",
   ".png",
   ".gif",
