@@ -1,7 +1,9 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveDecisions } from "@/hooks/waves/useWaveDecisions";
 import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
+import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
 
 type NextMintDropState = {
   readonly nextMint: ApiDrop | null;
@@ -15,16 +17,27 @@ type NextMintDropState = {
 export const useNextMintDrop = (): NextMintDropState => {
   const { seizeSettings, isLoaded } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
+  const { wave } = useWaveById(waveId, {
+    enabled: !!waveId,
+  });
 
   const { decisionPoints, isFetching } = useWaveDecisions({
     waveId: waveId ?? "",
     enabled: !!waveId,
+    pageSize: 1,
   });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];
-  const nextMint =
+  const rawNextMint =
     getRenderableWaveDecisionWinners(latestDecision?.winners ?? [])[0]?.drop ??
     null;
+  const nextMint =
+    rawNextMint && wave
+      ? {
+          ...rawNextMint,
+          wave: toApiWaveMin(wave),
+        }
+      : rawNextMint;
 
   const nextMintTitle =
     nextMint?.title ??
