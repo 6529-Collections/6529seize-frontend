@@ -4,8 +4,10 @@ import styles from "./MemeLab.module.scss";
 
 import { AuthContext } from "@/components/auth/Auth";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { publicEnv } from "@/config/env";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
@@ -19,7 +21,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import {
   getInitialRouterValues,
@@ -40,6 +42,7 @@ export default function LabCollection({
   const [website, setWebsite] = useState<string>();
 
   const [nfts, setNfts] = useState<LabNFT[]>([]);
+  const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
   const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
   const [nftsLoaded, setNftsLoaded] = useState(false);
 
@@ -147,7 +150,12 @@ export default function LabCollection({
   }
 
   return (
-    <>
+    <NftBalancesProvider
+      consolidationKey={connectedProfile?.consolidation_key ?? null}
+      contract={MEMELAB_CONTRACT}
+      tokenIds={tokenIds}
+      enabled={!!connectedProfile}
+    >
       <Container fluid className={styles["mainContainer"]}>
         <Row>
           <Col>
@@ -222,6 +230,6 @@ export default function LabCollection({
           </Col>
         </Row>
       </Container>
-    </>
+    </NftBalancesProvider>
   );
 }
