@@ -1,6 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import LabCollection from "@/components/memelab/MemeLabCollection";
 import { fetchAllPages } from "@/services/6529api";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
@@ -34,10 +35,18 @@ beforeEach(() => {
 const collectionName = "Cool Collection";
 
 function renderComponent() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
   return render(
-    <AuthContext.Provider value={{ connectedProfile: null } as any}>
-      <LabCollection collectionName={collectionName} />
-    </AuthContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider value={{ connectedProfile: null } as any}>
+        <LabCollection collectionName={collectionName} />
+      </AuthContext.Provider>
+    </QueryClientProvider>
   );
 }
 
