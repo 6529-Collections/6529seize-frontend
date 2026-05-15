@@ -3,7 +3,7 @@
 import type { MarketplaceTypePreviewProps } from "./common";
 import MarketplacePreview from "./MarketplacePreview";
 
-export default function MarketplaceSuperrareArtworkPreview({
+export default function MarketplaceGammaioPreview({
   href,
   compact = false,
 }: MarketplaceTypePreviewProps) {
