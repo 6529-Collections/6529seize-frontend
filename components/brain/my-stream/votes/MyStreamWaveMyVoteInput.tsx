@@ -45,9 +45,15 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
     null
   );
-  const currentVoteValue = drop.context_profile_context?.rating ?? 0;
-  const minRating = drop.context_profile_context?.min_rating ?? 0;
+  const rawCurrentVoteValue = drop.context_profile_context?.rating ?? 0;
+  const rawMinRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
+  const minRating = drop.wave.forbid_negative_votes
+    ? Math.max(0, rawMinRating)
+    : rawMinRating;
+  const currentVoteValue = drop.wave.forbid_negative_votes
+    ? Math.max(rawCurrentVoteValue, minRating)
+    : rawCurrentVoteValue;
   const hasMatchingOptimisticState =
     optimisticVoteState !== null &&
     optimisticVoteState.dropId === drop.id &&
@@ -78,6 +84,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     });
   };
 
+  const clampVoteValue = (value: number) => {
+    const clampedValue = Math.min(Math.max(value, minRating), liveMaxRating);
+    return drop.wave.forbid_negative_votes
+      ? Math.max(0, clampedValue)
+      : clampedValue;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isVotingClosed) {
       return;
@@ -89,15 +102,14 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    if (inputValue === "-") {
+    if (minRating < 0 && inputValue === "-") {
       setVoteDraftValue(inputValue);
       return;
     }
 
     const value = Number.parseInt(inputValue, 10);
     if (Number.isNaN(value)) return;
-    const clampedValue = Math.min(Math.max(value, minRating), liveMaxRating);
-    setVoteDraftValue(String(clampedValue));
+    setVoteDraftValue(String(clampVoteValue(value)));
   };
 
   const handleBlur = () => {
@@ -110,10 +122,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    const clampedValue = Math.min(
-      Math.max(parsedVoteValue, minRating),
-      liveMaxRating
-    );
+    const clampedValue = clampVoteValue(parsedVoteValue);
     if (clampedValue === liveCurrentVoteValue) {
       setVoteDraftState(null);
       return;
@@ -170,10 +179,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    const clampedValue = Math.min(
-      Math.max(parsedVoteValue, minRating),
-      liveMaxRating
-    );
+    const clampedValue = clampVoteValue(parsedVoteValue);
     if (clampedValue === liveCurrentVoteValue) {
       setVoteDraftState(null);
     } else {
@@ -235,7 +241,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             disabled={isResetting || isVotingClosed}
-            pattern="-?[0-9]*"
+            pattern={minRating < 0 ? "-?[0-9]*" : "[0-9]*"}
             inputMode="numeric"
             className="tw-h-8 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-700 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400"
           />

@@ -114,6 +114,18 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const theme =
       position && position <= 3 ? rankingThemes[position] : defaultTheme;
 
+    const getVoteError = () => {
+      if (!Number.isFinite(newRating)) {
+        return "Enter a valid vote.";
+      }
+
+      if (drop.wave.forbid_negative_votes && newRating < 0) {
+        return "Negative votes are not allowed in this wave.";
+      }
+
+      return null;
+    };
+
     useEffect(() => {
       const triangleBurst = new mojs.Burst({
         parent: `.vote-button-container-${randomID}`,
@@ -213,6 +225,15 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
     const handleClick = async () => {
       if (isProcessing || loading || isSpinnerExiting || isTextExiting) return;
+
+      const voteError = getVoteError();
+      if (voteError) {
+        setToast({
+          message: voteError,
+          type: "warning",
+        });
+        return;
+      }
 
       setIsProcessing(true);
       setIsTextExiting(true);

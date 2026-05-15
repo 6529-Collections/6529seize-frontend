@@ -45,9 +45,15 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     appliedDropState.baseRating === baseRating
       ? appliedDropState.drop
       : drop;
-  const currentVoteValue = displayDrop.context_profile_context?.rating ?? 0;
-  const minRating = displayDrop.context_profile_context?.min_rating ?? 0;
+  const rawCurrentVoteValue = displayDrop.context_profile_context?.rating ?? 0;
+  const rawMinRating = displayDrop.context_profile_context?.min_rating ?? 0;
   const maxRating = displayDrop.context_profile_context?.max_rating ?? 0;
+  const minRating = displayDrop.wave.forbid_negative_votes
+    ? Math.max(0, rawMinRating)
+    : rawMinRating;
+  const currentVoteValue = displayDrop.wave.forbid_negative_votes
+    ? Math.max(rawCurrentVoteValue, minRating)
+    : rawCurrentVoteValue;
   const voteSourceKey = `${displayDrop.id}:${currentVoteValue}:${minRating}:${maxRating}`;
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
     null
