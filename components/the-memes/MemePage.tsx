@@ -134,7 +134,7 @@ function MemePageNavigationSkeleton() {
 function MemePageSkeleton() {
   return (
     <div aria-hidden="true">
-      <div className="tw-mb-6 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 md:tw-gap-x-6">
+      <div className="tw-mb-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-gap-x-10 xl:tw-gap-x-16">
         <div>
           <div className="tw-relative tw-w-full tw-overflow-hidden">
             <div className="tw-relative tw-h-96 tw-w-full tw-animate-pulse tw-bg-iron-800/50 sm:tw-h-[520px] lg:tw-h-[650px]" />
@@ -451,8 +451,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
     const hasMintingBox = isLastCard;
     const cardHeaderClassName = hasMintingBox
-      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-2 lg:tw-gap-x-16"
-      : "tw-mb-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-x-10 xl:tw-gap-x-16";
+      ? "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-y-0 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-gap-x-16"
+      : "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16";
     const artworkColumnClassName = hasMintingBox
       ? "tw-order-2 tw-mt-6 tw-self-start lg:tw-order-none lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-mt-0"
       : undefined;
@@ -607,7 +607,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
                   href="/the-memes"
-                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-text-white"
+                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-text-white"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"

@@ -204,7 +204,7 @@ describe("MemePageYourCardsRightMenu", () => {
         ).not.toBeInTheDocument();
       });
 
-      it("should display first acquisition date", () => {
+      it("should not display duplicate transaction summary under the transfer card", () => {
         renderMemePageYourCardsWithProviders(
           <MemePageYourCardsRightMenu
             show={true}
@@ -218,7 +218,12 @@ describe("MemePageYourCardsRightMenu", () => {
           />
         );
 
-        expect(screen.getByText(/First acquired/)).toBeInTheDocument();
+        expect(screen.getByTestId("transfer-single")).toBeInTheDocument();
+        expect(screen.queryByText(/First acquired/)).not.toBeInTheDocument();
+        expect(screen.queryByText("1 card airdropped")).not.toBeInTheDocument();
+        expect(
+          screen.queryByText("2 cards bought for 1.5 ETH")
+        ).not.toBeInTheDocument();
       });
 
       it("should display no TDH message when no TDH data", () => {
@@ -236,71 +241,6 @@ describe("MemePageYourCardsRightMenu", () => {
         );
 
         expect(screen.getByText("No TDH accrued")).toBeInTheDocument();
-      });
-
-      it("should categorize airdropped cards", () => {
-        renderMemePageYourCardsWithProviders(
-          <MemePageYourCardsRightMenu
-            show={true}
-            transactions={mockTransactions}
-            wallets={["0x456"]}
-            nft={mockNFT}
-            nftBalance={3}
-            myOwner={mockConsolidatedTDH}
-            myTDH={undefined}
-            myRank={undefined}
-          />
-        );
-
-        expect(screen.getByText("1 card airdropped")).toBeInTheDocument();
-      });
-
-      it("should categorize bought cards", () => {
-        renderMemePageYourCardsWithProviders(
-          <MemePageYourCardsRightMenu
-            show={true}
-            transactions={mockTransactions}
-            wallets={["0x456"]}
-            nft={mockNFT}
-            nftBalance={3}
-            myOwner={mockConsolidatedTDH}
-            myTDH={undefined}
-            myRank={undefined}
-          />
-        );
-
-        expect(
-          screen.getByText("2 cards bought for 1.5 ETH")
-        ).toBeInTheDocument();
-      });
-
-      it("should not display transferred in cards for now", () => {
-        renderMemePageYourCardsWithProviders(
-          <MemePageYourCardsRightMenu
-            show={true}
-            transactions={
-              [
-                {
-                  transaction_date: new Date("2023-01-03"),
-                  from_address: "0x789",
-                  to_address: "0x456",
-                  value: 0,
-                  token_count: 2,
-                },
-              ] as any
-            }
-            wallets={["0x456"]}
-            nft={mockNFT}
-            nftBalance={2}
-            myOwner={mockConsolidatedTDH}
-            myTDH={undefined}
-            myRank={undefined}
-          />
-        );
-
-        expect(
-          screen.queryByText("2 cards transferred in")
-        ).not.toBeInTheDocument();
       });
     });
   });

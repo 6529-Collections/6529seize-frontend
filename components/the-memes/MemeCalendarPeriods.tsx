@@ -32,9 +32,9 @@ export default function MemeCalendarPeriods({
   const szn = displayedSeasonNumberFromIndex(idx);
 
   const printSecondaryPeriod = (label: string, number: number) => (
-    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400">
+    <span className="tw-inline-flex tw-items-center tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
       <span>{label}</span>
-      <span className="tw-font-semibold tw-text-iron-200">{number}</span>
+      <span className="tw-font-semibold tw-text-iron-300">{number}</span>
     </span>
   );
   const seasonContent = (
@@ -54,12 +54,12 @@ export default function MemeCalendarPeriods({
         <Link
           href={seasonHref}
           aria-label={`View SZN ${szn} cards`}
-          className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300"
+          className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300"
         >
           {seasonContent}
         </Link>
       ) : (
-        <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100">
+        <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100">
           {seasonContent}
         </span>
       )}
