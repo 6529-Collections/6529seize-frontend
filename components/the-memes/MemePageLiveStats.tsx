@@ -7,7 +7,7 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
-import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
+import { getDateDisplay, numberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -206,7 +206,7 @@ function formatPercent(value: number) {
 }
 
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
-  const mintDate = getMintDateParts(printMintDate(nft.mint_date));
+  const mintDate = getMintDateParts(nft.mint_date);
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
   const artistNames = getArtistNames(nft.artist);
   const creatorCount = Math.max(artistNames.length, artistHandles.length);
@@ -315,21 +315,24 @@ function CreatorProfileIdentity({
   );
 }
 
-function getMintDateParts(value: string) {
-  const normalizedValue = value.replace(/\s+/g, " ").trim();
-  const relativeStartIndex = normalizedValue.lastIndexOf("(");
+function getMintDateParts(date?: Date) {
+  if (!date) {
+    return { date: "-" };
+  }
 
-  if (
-    relativeStartIndex <= 0 ||
-    !normalizedValue.endsWith(")") ||
-    relativeStartIndex === normalizedValue.length - 1
-  ) {
-    return { date: normalizedValue };
+  const mintDate = new Date(date);
+
+  if (Number.isNaN(mintDate.getTime())) {
+    return { date: "-" };
   }
 
   return {
-    date: normalizedValue.slice(0, relativeStartIndex).trimEnd(),
-    relative: normalizedValue.slice(relativeStartIndex),
+    date: mintDate.toLocaleString("default", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    relative: `(${getDateDisplay(mintDate)})`,
   };
 }
 
