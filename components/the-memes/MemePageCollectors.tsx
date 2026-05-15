@@ -18,7 +18,7 @@ export function MemePageCollectorsRightMenu(props: {
           </h3>
           <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
         </div>
-        <div className="tw-mt-6 tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-12 lg:tw-grid-cols-3">
+        <div className="tw-mt-6 tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-16 lg:tw-grid-cols-3">
           <TdhBreakdownMetric
             label="TDH"
             value={numberWithCommas(
@@ -54,7 +54,7 @@ function TdhBreakdownMetric({
   return (
     <div className="tw-min-w-0">
       <div
-        className={`tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 ${
+        className={`tw-mb-1 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 md:tw-mb-2 ${
           active ? "tw-text-primary-400" : "tw-text-iron-400"
         }`}
       >

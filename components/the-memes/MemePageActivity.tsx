@@ -22,9 +22,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 const SECTION_HEADER_TITLE_CLASS =
   "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 const METRIC_LABEL_CLASS =
-  "tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
+  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
 const METRIC_VALUE_CLASS =
-  "tw-text-lg tw-font-semibold tw-leading-6 tw-text-white";
+  "tw-text-sm md:tw-text-lg tw-font-semibold tw-leading-6 tw-text-white";
 
 function formatEthVolume(volume: number) {
   if (volume <= 0) {

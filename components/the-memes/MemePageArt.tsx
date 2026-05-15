@@ -280,7 +280,7 @@ function ArweaveLinkRow({ row }: { readonly row: MediaRow }) {
       >
         {row.url}
       </Link>
-      <div className="tw-flex tw-w-full tw-items-center tw-justify-end tw-gap-4 md:tw-ml-auto md:tw-w-auto md:tw-shrink-0">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-4 md:tw-ml-auto md:tw-w-auto md:tw-shrink-0 md:tw-justify-end">
         {row.downloadName && (
           <Download
             href={row.url}
@@ -351,7 +351,7 @@ function MetricBlock({
   return (
     <div>
       <div
-        className={`tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5 ${
+        className={`tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 md:tw-mb-2 ${
           highlightedLabel ? "tw-text-primary-400" : "tw-text-iron-400"
         }`}
       >

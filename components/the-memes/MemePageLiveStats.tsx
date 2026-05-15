@@ -27,12 +27,14 @@ const SECTION_HEADER_TITLE_CLASS =
   "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
 const TOP_LABEL_CLASS =
   "tw-mb-2 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-500";
+const CREATOR_NAME_CLASS =
+  "tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
 const INLINE_METRIC_LABEL_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
 const COLLECTOR_GROUP_TITLE_CLASS =
   "tw-mb-2 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
-  "tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5";
+  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const COLLECTOR_METRIC_VALUE_CLASS =
@@ -239,40 +241,59 @@ function formatPercent(value: number) {
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
   const mintDate = getMintDateParts(printMintDate(nft.mint_date));
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
+  const artistNames = getArtistNames(nft.artist);
+  const creatorNames = artistNames.length > 0 ? artistNames : artistHandles;
   const creators =
-    artistHandles.length > 0
-      ? artistHandles.map((handle) => ({
-          handle,
-          label: handle,
-          display: handle,
+    creatorNames.length > 0
+      ? creatorNames.map((display, index) => ({
+          handle: artistHandles[index] ?? null,
+          display,
         }))
-      : [
-          {
-            handle: null,
-            label: nft.artist || "not available",
-            display: nft.artist || "not available",
-          },
-        ];
+      : [{ handle: null, display: "not available" }];
 
   return (
     <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-8 tw-gap-y-6">
         <div className="tw-min-w-0">
           <div className={TOP_LABEL_CLASS}>Created by</div>
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
-            {creators.map((creator) => (
-              <CreatorProfileIdentity
-                key={creator.handle ?? creator.label}
-                handle={creator.handle}
-                label={creator.label}
-                display={creator.display}
-              />
-            ))}
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2">
+            {creators.map((creator, index) => {
+              const nextCreator = creators[index + 1];
+              const hasNextCreator = nextCreator !== undefined;
+              const showComma =
+                hasNextCreator &&
+                (creator.handle === null || nextCreator.handle === null);
+
+              return (
+                <div
+                  key={`${creator.display}-${creator.handle ?? "plain"}-${index}`}
+                  className={`tw-flex tw-items-center ${
+                    hasNextCreator && !showComma ? "tw-mr-4" : ""
+                  }`}
+                >
+                  {creator.handle !== null ? (
+                    <CreatorProfileIdentity
+                      handle={creator.handle}
+                      display={creator.display}
+                    />
+                  ) : (
+                    <span className={CREATOR_NAME_CLASS}>
+                      {creator.display}
+                    </span>
+                  )}
+                  {showComma && (
+                    <span className="tw-whitespace-pre tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-500 md:tw-text-lg">
+                      {" , "}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
         <div className="tw-min-w-fit">
           <div className={TOP_LABEL_CLASS}>Mint date</div>
-          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-baseline sm:tw-justify-end">
+          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end">
             <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
               {mintDate.date}
             </span>
@@ -290,18 +311,16 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
 
 function CreatorProfileIdentity({
   handle,
-  label,
   display,
 }: {
-  readonly handle: string | null;
-  readonly label: string;
+  readonly handle: string;
   readonly display: string;
 }) {
   const { profile } = useIdentity({
     handleOrWallet: handle,
     initialProfile: null,
   });
-  const avatarLabel = profile?.handle ?? handle ?? label;
+  const avatarLabel = profile?.handle ?? handle;
   const avatarFallback = (
     <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-400">
       {getInitials(avatarLabel)}
@@ -316,18 +335,12 @@ function CreatorProfileIdentity({
         alt={`${avatarLabel} avatar`}
         fallbackContent={avatarFallback}
       />
-      {handle ? (
-        <Link
-          href={`/${handle}`}
-          className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline hover:tw-text-iron-300 md:tw-text-lg"
-        >
-          {display}
-        </Link>
-      ) : (
-        <span className="font-color-h tw-text-sm tw-font-semibold tw-leading-none md:tw-text-lg">
-          {display}
-        </span>
-      )}
+      <Link
+        href={`/${handle}`}
+        className={`${CREATOR_NAME_CLASS} hover:tw-text-iron-300`}
+      >
+        {display}
+      </Link>
     </div>
   );
 }
@@ -349,6 +362,21 @@ function getArtistHandles(value: string | undefined) {
       ?.split(",")
       .map((handle) => handle.trim())
       .filter((handle) => handle.length > 0) ?? []
+  );
+}
+
+function getArtistNames(value: string | undefined) {
+  return (
+    value
+      ?.split(" / ")
+      .join(",")
+      .split(", ")
+      .join(",")
+      .split(" and ")
+      .join(",")
+      .split(",")
+      .map((name) => name.trim())
+      .filter((name) => name.length > 0) ?? []
   );
 }
 
