@@ -11,6 +11,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { CreateDropType } from "@/components/drops/create/types";
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
+  getDropSnapshot: () => CreateDropConfig | null;
 }
 
 interface CreateWaveDescriptionWaveProps {
@@ -35,8 +36,11 @@ const CreateWaveDescription = forwardRef<
 
   const requestDrop = (): CreateDropConfig | null =>
     dropEditorRef.current?.requestDrop() ?? null;
+  const getDropSnapshot = (): CreateDropConfig | null =>
+    dropEditorRef.current?.getDropSnapshot() ?? null;
 
   useImperativeHandle(ref, () => ({
+    getDropSnapshot,
     requestDrop,
   }));
 

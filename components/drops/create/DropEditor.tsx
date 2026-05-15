@@ -24,6 +24,7 @@ import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;
+  getDropSnapshot: () => CreateDropConfig | null;
 }
 
 interface DropEditorWaveProps {
@@ -114,8 +115,11 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
     const createDropWrapperRef = useRef<CreateDropWrapperHandles | null>(null);
     const requestDrop = (): CreateDropConfig | null =>
       createDropWrapperRef.current?.requestDrop() ?? null;
+    const getDropSnapshot = (): CreateDropConfig | null =>
+      createDropWrapperRef.current?.getDropSnapshot() ?? null;
 
     useImperativeHandle(ref, () => ({
+      getDropSnapshot,
       requestDrop,
     }));
 

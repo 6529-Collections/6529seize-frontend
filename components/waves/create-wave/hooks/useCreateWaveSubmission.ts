@@ -121,7 +121,7 @@ export function useCreateWaveSubmission({
         return;
       }
 
-      const drop = descriptionRef.current?.requestDrop() ?? null;
+      const drop = descriptionRef.current?.getDropSnapshot() ?? null;
       if (drop === null || drop.parts.length === 0) {
         setSubmitting(false);
         setShowDropError(true);

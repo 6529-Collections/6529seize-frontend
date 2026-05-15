@@ -87,6 +87,9 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => {
   };
 });
 
+const mockGetDropSnapshot = jest.fn();
+const mockRequestDrop = jest.fn();
+
 jest.mock(
   "@/components/waves/create-wave/description/CreateWaveDescription",
   () => {
@@ -95,13 +98,8 @@ jest.mock(
       ref: any
     ) {
       React.useImperativeHandle(ref, () => ({
-        requestDrop: () => ({
-          parts: [{ content: "Test content" }],
-          title: "Test Drop",
-          referenced_nfts: [],
-          mentioned_users: [],
-          metadata: [],
-        }),
+        getDropSnapshot: mockGetDropSnapshot,
+        requestDrop: mockRequestDrop,
       }));
 
       return (
@@ -249,6 +247,20 @@ describe("CreateWave", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetDropSnapshot.mockReturnValue({
+      parts: [{ content: "Test content" }],
+      title: "Test Drop",
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
+    mockRequestDrop.mockReturnValue({
+      parts: [{ content: "Saved content" }],
+      title: "Saved Drop",
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
     mockedUseRouter.mockReturnValue(mockRouter);
     mockedUseWaveConfig.mockReturnValue(mockWaveConfig);
     mockedUseAddWaveMutation.mockReturnValue(mockAddWaveMutation);
@@ -351,6 +363,8 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
         expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
       });
@@ -377,29 +391,7 @@ describe("CreateWave", () => {
     });
 
     it("shows drop error when no drop content is provided", async () => {
-      // Create a mock for empty drop by updating the mocked component
-      jest.doMock(
-        "../../../../components/waves/create-wave/description/CreateWaveDescription",
-        () => {
-          return React.forwardRef(function MockCreateWaveDescriptionEmpty(
-            { showDropError }: any,
-            ref: any
-          ) {
-            React.useImperativeHandle(ref, () => ({
-              requestDrop: () => ({ parts: [] }),
-            }));
-
-            return (
-              <div
-                data-testid="create-wave-description"
-                data-show-drop-error={showDropError}
-              >
-                Description Step
-              </div>
-            );
-          });
-        }
-      );
+      mockGetDropSnapshot.mockReturnValue({ parts: [] });
 
       const configOnDescriptionStep = {
         ...mockWaveConfig,
@@ -414,6 +406,12 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-show-drop-error",
+          "true"
+        );
         expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
       });
     });
@@ -533,6 +531,8 @@ describe("CreateWave", () => {
           message: errorMessage,
           type: "error",
         });
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
       });
     });
   });

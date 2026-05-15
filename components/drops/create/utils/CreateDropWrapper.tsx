@@ -16,6 +16,7 @@ import CreateDropFull from "../full/CreateDropFull";
 import type { EditorState } from "lexical";
 import type {
   CreateDropConfig,
+  CreateDropPart,
   DropMetadata,
   MentionedUser,
   MentionedWave,
@@ -48,6 +49,7 @@ export enum CreateDropScreenType {
 
 export interface CreateDropWrapperHandles {
   requestDrop: () => CreateDropConfig;
+  getDropSnapshot: () => CreateDropConfig;
 }
 
 interface CreateDropWrapperWaveProps {
@@ -356,84 +358,111 @@ const CreateDropWrapper = forwardRef<
       createDropContendCompactRef.current?.clearEditorState();
       setFiles([]);
     };
-    const onDropPart = (): CreateDropConfig => {
-      const markdown = getMarkdown();
-      if (!markdown?.length && !files.length) {
-        const currentDrop: CreateDropConfig = {
-          title,
-          parts: drop?.parts.length ? drop.parts : [],
-          mentioned_users: drop?.mentioned_users ?? [],
-          mentioned_waves: drop?.mentioned_waves ?? [],
-          referenced_nfts: drop?.referenced_nfts ?? [],
-          metadata,
-          signature: null,
-          is_safe_signature: isSafeWallet,
-          ...{ ...(address && { signer_address: address }) },
-        };
-        setDrop(currentDrop);
-        clearInputState();
-        return currentDrop;
+
+    const getExistingPartsSnapshot = (): CreateDropPart[] =>
+      drop?.parts.map((part) => ({
+        ...part,
+        media: [...part.media],
+        ...(part.attachments !== undefined && {
+          attachments: [...part.attachments],
+        }),
+        ...(part.uploaded_attachments !== undefined && {
+          uploaded_attachments: [...part.uploaded_attachments],
+        }),
+        ...(part.mentioned_groups !== undefined && {
+          mentioned_groups: [...part.mentioned_groups],
+        }),
+      })) ?? [];
+
+    const getDraftPart = (
+      markdown: string | null,
+      existingPartsCount: number
+    ): CreateDropPart | null => {
+      const hasMarkdown = markdown !== null && markdown.length > 0;
+
+      if (!hasMarkdown && files.length === 0) {
+        return null;
       }
+
+      return {
+        content: hasMarkdown ? markdown : null,
+        quoted_drop:
+          quotedDrop && existingPartsCount === 0
+            ? {
+                drop_id: quotedDrop.dropId,
+                drop_part_id: quotedDrop.partId,
+              }
+            : null,
+        media: [...files],
+      };
+    };
+
+    const getDropReferences = (markdown: string | null) => {
       const mentions = mentionedUsers.filter((user) =>
         markdown?.includes(`@[${user.handle_in_content}]`)
       );
       const partMentions = mentions.map((mention) => ({
         ...mention,
       }));
+      const existingMentions = drop?.mentioned_users ?? [];
       const notAddedMentions = partMentions.filter(
         (mention) =>
-          !drop?.mentioned_users.some(
+          !existingMentions.some(
             (existing) =>
               existing.mentioned_profile_id === mention.mentioned_profile_id
           )
       );
-      const allMentions = [
-        ...(drop?.mentioned_users ?? []),
-        ...notAddedMentions,
-      ];
+      const allMentions = [...existingMentions, ...notAddedMentions];
       const partNfts = referencedNfts.filter((nft) =>
         markdown?.includes(`$[${nft.name}]`)
       );
+      const existingNfts = drop?.referenced_nfts ?? [];
       const notAddedNfts = partNfts.filter(
         (nft) =>
-          !drop?.referenced_nfts.some(
+          !existingNfts.some(
             (existing) =>
               existing.contract === nft.contract && existing.token === nft.token
           )
       );
-      const allNfts = [...(drop?.referenced_nfts ?? []), ...notAddedNfts];
+      const allNfts = [...existingNfts, ...notAddedNfts];
       const partWaves = mentionedWaves.filter((w) =>
         markdown?.includes(`#[${w.wave_name_in_content}]`)
       );
+      const existingWaves = drop?.mentioned_waves ?? [];
       const notAddedWaves = partWaves.filter(
-        (w) =>
-          !drop?.mentioned_waves?.some(
-            (existing) => existing.wave_id === w.wave_id
-          )
+        (w) => !existingWaves.some((existing) => existing.wave_id === w.wave_id)
       );
-      const allWaves = [...(drop?.mentioned_waves ?? []), ...notAddedWaves];
-      const currentDrop: CreateDropConfig = {
-        title,
-        parts: drop?.parts.length ? drop.parts : [],
+      const allWaves = [...existingWaves, ...notAddedWaves];
+
+      return {
         mentioned_users: allMentions,
         mentioned_waves: allWaves,
         referenced_nfts: allNfts,
-        metadata,
+      };
+    };
+
+    const getDropSnapshot = (): CreateDropConfig => {
+      const markdown = getMarkdown();
+      const parts = getExistingPartsSnapshot();
+      const draftPart = getDraftPart(markdown, parts.length);
+      if (draftPart) {
+        parts.push(draftPart);
+      }
+      const references = getDropReferences(markdown);
+
+      return {
+        title,
+        parts,
+        ...references,
+        metadata: [...metadata],
         signature: null,
         is_safe_signature: isSafeWallet,
         ...{ ...(address && { signer_address: address }) },
       };
-      currentDrop.parts.push({
-        content: markdown?.length ? markdown : null,
-        quoted_drop:
-          quotedDrop && !currentDrop.parts.length
-            ? {
-                drop_id: quotedDrop.dropId,
-                drop_part_id: quotedDrop.partId,
-              }
-            : null,
-        media: files,
-      });
+    };
+
+    const onDropPart = (): CreateDropConfig => {
+      const currentDrop = getDropSnapshot();
       setDrop(currentDrop);
       clearInputState();
       return currentDrop;
@@ -451,6 +480,7 @@ const CreateDropWrapper = forwardRef<
     const requestDrop = (): CreateDropConfig => onDropPart();
 
     useImperativeHandle(ref, () => ({
+      getDropSnapshot,
       requestDrop,
     }));
 

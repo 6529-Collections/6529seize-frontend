@@ -24,6 +24,7 @@ jest.mock("@/components/drops/create/DropEditor", () =>
     const emojiPickerLayer = useCreateDropEmojiPickerLayer();
 
     React.useImperativeHandle(ref, () => ({
+      getDropSnapshot: () => ({ content: "snapshot drop" }),
       requestDrop: () => ({ content: "test drop" }),
     }));
 
@@ -176,6 +177,14 @@ describe("CreateWaveDescription", () => {
 
     const result = ref.current?.requestDrop();
     expect(result).toEqual({ content: "test drop" });
+  });
+
+  it("exposes getDropSnapshot through ref", () => {
+    const ref = React.createRef<CreateWaveDescriptionHandles>();
+    render(<CreateWaveDescription {...defaultProps} ref={ref} />);
+
+    const result = ref.current?.getDropSnapshot();
+    expect(result).toEqual({ content: "snapshot drop" });
   });
 
   it("handles onHaveDropToSubmitChange callback", () => {
