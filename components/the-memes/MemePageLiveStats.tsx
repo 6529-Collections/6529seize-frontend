@@ -39,6 +39,13 @@ const COLLECTOR_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
+const MEME_MINT_DATE_LOCALE = "en-US";
+const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+};
 
 export function MemeCollectorsStats({
   nftMeta,
@@ -327,11 +334,10 @@ function getMintDateParts(date?: Date) {
   }
 
   return {
-    date: mintDate.toLocaleString("default", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }),
+    date: mintDate.toLocaleString(
+      MEME_MINT_DATE_LOCALE,
+      MEME_MINT_DATE_FORMAT
+    ),
     relative: `(${getDateDisplay(mintDate)})`,
   };
 }
