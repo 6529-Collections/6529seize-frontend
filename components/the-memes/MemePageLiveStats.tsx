@@ -7,7 +7,7 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
-import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
+import { getDateDisplay, numberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -39,6 +39,13 @@ const COLLECTOR_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
+const MEME_MINT_DATE_LOCALE = "en-US";
+const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+};
 
 export function MemeCollectorsStats({
   nftMeta,
@@ -206,7 +213,7 @@ function formatPercent(value: number) {
 }
 
 export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
-  const mintDate = getMintDateParts(printMintDate(nft.mint_date));
+  const mintDate = getMintDateParts(nft.mint_date);
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
   const artistNames = getArtistNames(nft.artist);
   const creatorCount = Math.max(artistNames.length, artistHandles.length);
@@ -268,7 +275,7 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
               {mintDate.date}
             </span>
             {mintDate.relative && (
-              <span className="tw-ml-1.5 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
+              <span className="tw-ml-1.5 tw-mt-1 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
                 {mintDate.relative}
               </span>
             )}
@@ -315,15 +322,24 @@ function CreatorProfileIdentity({
   );
 }
 
-function getMintDateParts(value: string) {
-  const normalizedValue = value.replace(/\s+/g, " ").trim();
-  const match = normalizedValue.match(/^(.*?)\s*(\(.+\))$/);
-
-  if (!match) {
-    return { date: normalizedValue };
+function getMintDateParts(date?: Date) {
+  if (!date) {
+    return { date: "-" };
   }
 
-  return { date: match[1], relative: match[2] };
+  const mintDate = new Date(date);
+
+  if (Number.isNaN(mintDate.getTime())) {
+    return { date: "-" };
+  }
+
+  return {
+    date: mintDate.toLocaleString(
+      MEME_MINT_DATE_LOCALE,
+      MEME_MINT_DATE_FORMAT
+    ),
+    relative: `(${getDateDisplay(mintDate)})`,
+  };
 }
 
 function getArtistHandles(value: string | undefined) {
