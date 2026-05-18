@@ -91,18 +91,16 @@ const isMarkdownImageElement = (
   typeof node.props.src === "string" &&
   node.props.src.length > 0;
 
-const getMarkdownImageStableKey = ({
-  image,
+const getMarkdownImageKey = ({
   flattenedIndex,
-}: MarkdownImageChunkItem): string => {
-  const fallbackKey = `index-${flattenedIndex}`;
-  return `${String(image.key ?? fallbackKey)}:${image.props.src}`;
-};
+  image,
+}: MarkdownImageChunkItem): string =>
+  `markdown-image:${flattenedIndex}:${image.props.src}`;
 
 const getMarkdownImageGroupKey = (
   items: readonly MarkdownImageChunkItem[]
 ): string =>
-  `markdown-image-group:${items.map(getMarkdownImageStableKey).join("|")}`;
+  `markdown-image-group:${items.map((item) => item.flattenedIndex).join("|")}`;
 
 const isSmartLinkElement = (
   node: ReactNode,
@@ -349,7 +347,7 @@ export const createMarkdownContentRenderers = ({
         >
           {currentImageChunk.map((item) =>
             cloneElement(item.image, {
-              key: getMarkdownImageStableKey(item),
+              key: getMarkdownImageKey(item),
               layout: "grouped",
             })
           )}

@@ -83,16 +83,20 @@ const originalArtBlocksFlags = {
 };
 
 jest.mock("@/hooks/isMobileScreen", () => () => false);
-jest.mock("@/contexts/EmojiContext", () => ({
-  useEmoji: () => ({
+jest.mock("@/contexts/EmojiContext", () => {
+  const emojiContext = {
     emojiMap: [],
     loading: false,
     categories: [],
     categoryIcons: {},
     findNativeEmoji: jest.fn(),
     findCustomEmoji: jest.fn(),
-  }),
-}));
+  };
+
+  return {
+    useEmoji: () => emojiContext,
+  };
+});
 
 const tweetMock = jest.fn(({ id, components, onError }: any) => {
   if (id === "1111111111") {
@@ -310,7 +314,7 @@ describe("DropPartMarkdown", () => {
     ).toEqual(originalMountIds);
   });
 
-  it("remounts grouped markdown images when URLs change in the same slots", () => {
+  it("only remounts the grouped markdown image whose URL changes", () => {
     const mentionedUsers = [];
     const mentionedWaves = [];
     const referencedNfts = [];
@@ -329,25 +333,38 @@ describe("DropPartMarkdown", () => {
       .getAllByRole("img", { name: "Drop media" })
       .map((image) => image.getAttribute("data-mount-id"));
     expect(originalMountIds).toHaveLength(2);
+    const [firstOriginalMountId, secondOriginalMountId] = originalMountIds;
+    if (!firstOriginalMountId || !secondOriginalMountId) {
+      throw new Error("Expected initial markdown images to have mount IDs");
+    }
 
     rerender(
       <DropPartMarkdown
         mentionedUsers={mentionedUsers}
         mentionedWaves={mentionedWaves}
         referencedNfts={referencedNfts}
-        partContent="![Seize](/three.png)![Seize](/four.png)"
+        partContent="![Seize](/one.png)![Seize](/three.png)"
         onQuoteClick={onQuoteClick}
       />
     );
 
     const updatedImages = screen.getAllByRole("img", { name: "Drop media" });
     expect(updatedImages.map((image) => image.getAttribute("src"))).toEqual([
+      "/one.png",
       "/three.png",
-      "/four.png",
     ]);
-    expect(
-      updatedImages.map((image) => image.getAttribute("data-mount-id"))
-    ).not.toEqual(originalMountIds);
+    const [firstUpdatedImage, secondUpdatedImage] = updatedImages;
+    if (!firstUpdatedImage || !secondUpdatedImage) {
+      throw new Error("Expected updated markdown images to render");
+    }
+
+    expect(firstUpdatedImage).toHaveAttribute(
+      "data-mount-id",
+      firstOriginalMountId
+    );
+    expect(secondUpdatedImage.getAttribute("data-mount-id")).not.toBe(
+      secondOriginalMountId
+    );
   });
 
   it("keeps whitespace-only markdown between images in the same image group", () => {
