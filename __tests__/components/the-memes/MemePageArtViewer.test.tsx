@@ -1,17 +1,17 @@
 import type React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockDownloadMediaUrl = jest.fn().mockResolvedValue(undefined);
-const mockNFTImage = jest.fn(
-  ({
-    animation,
-    id,
-  }: {
-    readonly animation: boolean;
-    readonly id?: string | undefined;
-  }) => <div data-testid={animation ? "animation-art" : "image-art"} id={id} />
-);
+type MockNFTImageProps = {
+  readonly animation: boolean;
+  readonly id?: string | undefined;
+  readonly showOriginal?: boolean | undefined;
+};
+
+const mockNFTImage = jest.fn(({ animation, id }: MockNFTImageProps) => (
+  <div data-testid={animation ? "animation-art" : "image-art"} id={id} />
+));
 
 jest.mock("react-bootstrap", () => {
   const Carousel = ({
@@ -87,6 +87,18 @@ import { AuthContext } from "@/components/auth/Auth";
 const mockHelpers = jest.requireMock("@/helpers/Helpers") as {
   enterArtFullScreen: jest.Mock;
 };
+
+function getLatestNFTImageProps(animation: boolean) {
+  const call = [...mockNFTImage.mock.calls]
+    .reverse()
+    .find(([props]) => (props as MockNFTImageProps).animation === animation);
+
+  if (!call) {
+    throw new Error(`No NFTImage render found for animation=${animation}`);
+  }
+
+  return call[0] as MockNFTImageProps;
+}
 
 const renderWithConnectedProfile = (component: React.ReactNode) => {
   return render(
@@ -230,23 +242,33 @@ describe("MemePageArtViewer", () => {
     );
   });
 
-  it("uses original media for the top artwork viewer", () => {
+  it("uses optimized media for the initial artwork render", () => {
     render(<MemePageArtViewer nft={baseNft as any} />);
 
-    expect(mockNFTImage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        animation: true,
-        showOriginal: true,
-      }),
-      undefined
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
+  });
+
+  it("uses original media only while the active artwork is fullscreen", async () => {
+    const user = userEvent.setup();
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+
+    await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
+    expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
+      "the-art-fullscreen-animation"
     );
-    expect(mockNFTImage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        animation: false,
-        showOriginal: true,
-      }),
-      undefined
-    );
+
+    act(() => {
+      document.dispatchEvent(new Event("fullscreenchange"));
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
   });
 
   it("switches toolbar open and download targets with the carousel slide", async () => {
