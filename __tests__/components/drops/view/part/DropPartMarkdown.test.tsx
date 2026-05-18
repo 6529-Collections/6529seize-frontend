@@ -272,6 +272,45 @@ describe("DropPartMarkdown", () => {
     expect(paragraphs[0]?.textContent?.startsWith("\ncaption")).toBe(true);
   });
 
+  it("does not render image-to-smart-link whitespace as a text paragraph", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\nhttps://google.com"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(screen.getAllByTestId("link-preview")).toHaveLength(1);
+    expect(
+      paragraphs.some((paragraph) => paragraph.textContent?.trim() === "")
+    ).toBe(false);
+  });
+
+  it("does not render trailing image whitespace as an empty paragraph", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\n"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(
+      paragraphs.some((paragraph) => paragraph.textContent?.trim() === "")
+    ).toBe(false);
+  });
+
   it("groups consecutive markdown images in one responsive grid", () => {
     const { container } = render(
       <DropPartMarkdown

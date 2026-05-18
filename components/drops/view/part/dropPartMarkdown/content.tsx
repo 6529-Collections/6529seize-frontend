@@ -377,6 +377,17 @@ export const createMarkdownContentRenderers = ({
         continue;
       }
 
+      if (
+        currentImageChunk.length > 0 &&
+        isSmartLinkElement(node, isSmartLink)
+      ) {
+        flushImageChunk();
+        pendingWhitespaceAfterImage = [];
+        flushTextChunk();
+        elements.push(node);
+        continue;
+      }
+
       if (currentImageChunk.length > 0) {
         flushImageChunk();
         restorePendingWhitespaceAfterImage();
@@ -392,7 +403,6 @@ export const createMarkdownContentRenderers = ({
     }
 
     flushImageChunk();
-    restorePendingWhitespaceAfterImage();
     flushTextChunk();
 
     return <>{elements}</>;
