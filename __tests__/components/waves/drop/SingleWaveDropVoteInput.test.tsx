@@ -79,6 +79,25 @@ describe("SingleWaveDropVoteInput", () => {
     expect(setVoteValue).toHaveBeenCalledWith("");
   });
 
+  it("keeps a dash draft even when the minimum is zero", () => {
+    const setVoteValue = jest.fn();
+
+    render(
+      <SingleWaveDropVoteInput
+        {...defaultProps}
+        minValue={0}
+        voteValue="-5"
+        setVoteValue={setVoteValue}
+      />
+    );
+
+    fireEvent.change(screen.getByDisplayValue("-5"), {
+      target: { value: "-" },
+    });
+
+    expect(setVoteValue).toHaveBeenCalledWith("-");
+  });
+
   it("handles numeric input", async () => {
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const setVoteValue = jest.fn();

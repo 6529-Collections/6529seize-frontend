@@ -131,6 +131,40 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
+  it("keeps a dash draft for a legacy negative vote before submitting zero", async () => {
+    const dropWithLegacyNegativeRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: -5, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithLegacyNegativeRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    fireEvent.change(input, { target: { value: "-" } });
+
+    expect(input.value).toBe("-");
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+
+    fireEvent.change(input, { target: { value: "0" } });
+
+    expect(input.value).toBe("0");
+    expect(submitButton).not.toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0 });
+  });
+
   it("submits zero when a legacy negative vote is manually changed to zero", async () => {
     const dropWithLegacyNegativeRating = {
       ...drop,

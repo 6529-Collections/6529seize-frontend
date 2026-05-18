@@ -154,7 +154,7 @@ export const SingleWaveDropVoteInput: React.FC<
       return;
     }
 
-    if (allowsNegativeValues && inputValue === "-") {
+    if (inputValue === "-") {
       setVoteValue(inputValue);
       return;
     }

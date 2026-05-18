@@ -97,7 +97,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    if (minRating < 0 && inputValue === "-") {
+    if (inputValue === "-") {
       setVoteDraftValue(inputValue);
       return;
     }
