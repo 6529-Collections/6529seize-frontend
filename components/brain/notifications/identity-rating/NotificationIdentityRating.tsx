@@ -20,6 +20,33 @@ interface NotificationIdentityRatingProps {
   readonly notification: INotificationIdentityRep | INotificationIdentityNic;
 }
 
+function getTotalLabel({
+  isRep,
+  category,
+}: {
+  readonly isRep: boolean;
+  readonly category: string | undefined;
+}): ReactNode {
+  if (isRep && category) {
+    return (
+      <>
+        Total for{" "}
+        <span className="tw-font-medium tw-text-iron-300">{category}</span>
+      </>
+    );
+  }
+
+  if (isRep) {
+    return "Total REP";
+  }
+
+  return (
+    <>
+      Total <span className="tw-font-medium tw-text-iron-300">NIC</span>
+    </>
+  );
+}
+
 function NotificationRatingInlinePart({
   label,
   value,
@@ -74,7 +101,7 @@ export default function NotificationIdentityRating({
   const ratingPhrase = (
     <>
       <span className="tw-font-medium tw-text-iron-300">{ratingLabel}</span>
-      {!isRep ? " rating" : null}
+      {isRep ? null : " rating"}
       {category ? (
         <>
           {" "}
@@ -84,19 +111,7 @@ export default function NotificationIdentityRating({
       ) : null}
     </>
   );
-  const totalLabel =
-    isRep && category ? (
-      <>
-        Total for{" "}
-        <span className="tw-font-medium tw-text-iron-300">{category}</span>
-      </>
-    ) : isRep ? (
-      "Total REP"
-    ) : (
-      <>
-        Total <span className="tw-font-medium tw-text-iron-300">NIC</span>
-      </>
-    );
+  const totalLabel = getTotalLabel({ isRep, category });
 
   return (
     <div className="tw-w-full">
