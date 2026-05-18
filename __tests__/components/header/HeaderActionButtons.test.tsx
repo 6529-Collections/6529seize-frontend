@@ -19,24 +19,29 @@ const {
 } = require("next/navigation");
 const { default: useDeviceInfo } = require("@/hooks/useDeviceInfo");
 
-afterEach(() => jest.clearAllMocks());
+afterEach(() => {
+  jest.clearAllMocks();
+  jest.restoreAllMocks();
+  globalThis.history.replaceState(null, "", "/");
+});
 
 describe("HeaderActionButtons", () => {
   beforeEach(() => {
+    globalThis.history.replaceState(null, "", "/waves");
     (usePn as jest.Mock).mockReturnValue("/waves");
     (useSp as jest.Mock).mockReturnValue(new URLSearchParams());
     (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   });
 
-  it("creates new wave on the waves route", async () => {
+  it("creates new wave on the waves route with native history", async () => {
     const push = jest.fn();
     const replace = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
     render(<HeaderActionButtons />);
     await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
-    expect(replace).toHaveBeenCalledWith("/waves?create=wave", {
-      scroll: false,
-    });
+    expect(pushState).toHaveBeenCalledWith(null, "", "/waves?create=wave");
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("creates new wave on app when on waves route", async () => {
@@ -48,20 +53,22 @@ describe("HeaderActionButtons", () => {
     expect(push).toHaveBeenCalledWith("/waves/create");
   });
 
-  it("creates new dm on the messages route", async () => {
+  it("creates new dm on the messages route with native history", async () => {
+    globalThis.history.replaceState(null, "", "/messages");
     (usePn as jest.Mock).mockReturnValue("/messages");
     const push = jest.fn();
     const replace = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
     render(<HeaderActionButtons />);
     await userEvent.click(screen.getByRole("button", { name: "Create DM" }));
-    expect(replace).toHaveBeenCalledWith("/messages?create=dm", {
-      scroll: false,
-    });
+    expect(pushState).toHaveBeenCalledWith(null, "", "/messages?create=dm");
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("creates new dm on app when on messages route", async () => {
     (useDeviceInfo as jest.Mock).mockReturnValueOnce({ isApp: true });
+    globalThis.history.replaceState(null, "", "/messages");
     (usePn as jest.Mock).mockReturnValue("/messages");
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace: jest.fn() });

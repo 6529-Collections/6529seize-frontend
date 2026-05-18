@@ -23,15 +23,29 @@ function getSrc(
   return nft.image;
 }
 
+function getMetadataImage(nft: BaseRendererProps["nft"]): string | undefined {
+  if (!("metadata" in nft)) {
+    return undefined;
+  }
+
+  const metadata: unknown = nft.metadata;
+  if (metadata === null || typeof metadata !== "object") {
+    return undefined;
+  }
+
+  const image = (metadata as { readonly image?: unknown }).image;
+  return typeof image === "string" ? image : undefined;
+}
+
 export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
   const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
-  const marginBottomClass = props.height === "full" ? "" : "mb-2";
+  const imageWrapperClassName = styles["imageWrapper"] ?? "";
 
   return (
     <Col
       xs={12}
-      className={`${marginBottomClass} text-center d-flex align-items-center justify-content-center ${styles["imageWrapper"]} ${props.heightStyle} ${props.bgStyle}`.trim()}
+      className={`text-center d-flex align-items-center justify-content-center ${imageWrapperClassName} ${props.heightStyle} ${props.bgStyle}`.trim()}
     >
       <Image
         loading={shouldLazyLoad ? "lazy" : "eager"}
@@ -57,8 +71,11 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
               : props.nft.image;
           } else if (currentTarget.src === props.nft.scaled) {
             currentTarget.src = props.nft.image;
-          } else if ("metadata" in props.nft) {
-            currentTarget.src = props.nft.metadata.image;
+          } else {
+            const metadataImage = getMetadataImage(props.nft);
+            if (metadataImage) {
+              currentTarget.src = metadataImage;
+            }
           }
         })}
       />

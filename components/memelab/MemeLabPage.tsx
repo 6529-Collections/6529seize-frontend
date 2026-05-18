@@ -73,6 +73,18 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 
 const ACTIVITY_PAGE_SIZE = 25;
+const MEME_LAB_TAB_FOCUSES = [
+  MEME_FOCUS.LIVE,
+  MEME_FOCUS.YOUR_CARDS,
+  MEME_FOCUS.THE_ART,
+  MEME_FOCUS.COLLECTORS,
+  MEME_FOCUS.ACTIVITY,
+  MEME_FOCUS.TIMELINE,
+] as const;
+const MEME_LAB_FOCUS_VALUES = new Set<MEME_FOCUS>(MEME_LAB_TAB_FOCUSES);
+const isMemeLabFocus = (focus: MEME_FOCUS): boolean =>
+  MEME_LAB_FOCUS_VALUES.has(focus);
+const MEME_LAB_TABS = MEME_TABS.filter((tab) => isMemeLabFocus(tab.focus));
 
 const isAbortError = (error: unknown): boolean => {
   if (error instanceof DOMException) {
@@ -147,7 +159,10 @@ export default function MemeLabPageComponent({
       const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
         (sd) => sd === routerFocus
       );
-      if (resolvedRouterFocus) {
+      if (
+        resolvedRouterFocus !== undefined &&
+        isMemeLabFocus(resolvedRouterFocus)
+      ) {
         initialFocus = resolvedRouterFocus;
       }
     }
@@ -1483,7 +1498,7 @@ export default function MemeLabPageComponent({
                 </Row>
                 <Row className="pt-3 pb-3">
                   <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    {MEME_TABS.map((tab) => (
+                    {MEME_LAB_TABS.map((tab) => (
                       <TabButton
                         key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
                         tab={tab}
