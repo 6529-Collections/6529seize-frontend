@@ -35,7 +35,7 @@ function getConnectPrompt(
   }
 }
 
-function getNotAuthenticatedContent({
+function getWavesContent({
   children,
   containerClassName,
   isApp,
@@ -66,17 +66,8 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
 
   let content: ReactNode = null;
 
-  if (contentState === "ready") {
-    const Component = isApp ? WavesMobile : WavesDesktop;
-    content = (
-      <div className="tw-flex-1" id="waves-content">
-        <Component>
-          <div className={containerClassName}>{children}</div>
-        </Component>
-      </div>
-    );
-  } else if (contentState === "not-authenticated") {
-    content = getNotAuthenticatedContent({
+  if (contentState === "ready" || contentState === "not-authenticated") {
+    content = getWavesContent({
       children,
       containerClassName,
       isApp,
