@@ -71,11 +71,15 @@ function renderFixedPicker({
   onContractChange = jest.fn(),
   defaultValue,
   outputMode = "number",
+  maxSelectedCount,
+  maxSelectedCountMessage,
 }: {
   readonly onChange?: jest.Mock;
   readonly onContractChange?: jest.Mock;
   readonly defaultValue?: NftPickerProps["defaultValue"];
   readonly outputMode?: NftPickerProps["outputMode"];
+  readonly maxSelectedCount?: NftPickerProps["maxSelectedCount"];
+  readonly maxSelectedCountMessage?: NftPickerProps["maxSelectedCountMessage"];
 } = {}) {
   render(
     <NftPicker
@@ -84,6 +88,8 @@ function renderFixedPicker({
       onContractChange={onContractChange}
       defaultValue={defaultValue}
       outputMode={outputMode}
+      maxSelectedCount={maxSelectedCount}
+      maxSelectedCountMessage={maxSelectedCountMessage}
     />
   );
 
@@ -171,6 +177,41 @@ describe("NftPicker fixedContract", () => {
     expect(
       await screen.findByText(/Some token IDs exceed Number\.MAX_SAFE_INTEGER/)
     ).toBeInTheDocument();
+  });
+
+  it("shows max-count errors beside the add-token input", async () => {
+    const user = userEvent.setup();
+    const maxSelectedCountMessage = "Select no more than two tokens.";
+    const { onChange } = renderFixedPicker({
+      maxSelectedCount: 2,
+      maxSelectedCountMessage,
+    });
+
+    await user.type(screen.getByLabelText("Add token IDs or ranges"), "1-3");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText(maxSelectedCountMessage)).toBeInTheDocument();
+  });
+
+  it("clears add-token max-count errors when the add input changes", async () => {
+    const user = userEvent.setup();
+    const maxSelectedCountMessage = "Select no more than two tokens.";
+    renderFixedPicker({
+      maxSelectedCount: 2,
+      maxSelectedCountMessage,
+    });
+
+    const addInput = screen.getByLabelText("Add token IDs or ranges");
+    await user.type(addInput, "1-3");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+    expect(screen.getByText(maxSelectedCountMessage)).toBeInTheDocument();
+
+    await user.clear(addInput);
+    await user.type(addInput, "1");
+
+    expect(screen.queryByText(maxSelectedCountMessage)).not.toBeInTheDocument();
+    expect(screen.getByText(/Looks good: 1/)).toBeInTheDocument();
   });
 });
 

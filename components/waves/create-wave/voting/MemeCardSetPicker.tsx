@@ -30,17 +30,20 @@ const FULL_SET_MESSAGE =
   "Selecting all Meme cards is the same as normal TDH. Choose a smaller set.";
 const MAX_SELECTED_MESSAGE = "Leave at least one Meme card unselected.";
 const NON_MEME_MESSAGE = "Only Meme cards can be added.";
+const INVALID_MEME_ID_MESSAGE = "Only existing Meme card IDs can be added.";
 
 const isMemeContract = (contract: string): boolean =>
   contract.toLowerCase() === MEMES_CONTRACT_LOWER;
 
-const toMemeCreditNfts = (tokenIds: readonly number[]): ApiWaveCreditNft[] => {
-  const uniqueIds = Array.from(
+const getNormalizedMemeTokenIds = (tokenIds: readonly number[]): number[] =>
+  Array.from(
     new Set(
       tokenIds.filter((tokenId) => Number.isInteger(tokenId) && tokenId > 0)
     )
-  );
-  uniqueIds.sort((left, right) => left - right);
+  ).toSorted((left, right) => left - right);
+
+const toMemeCreditNfts = (tokenIds: readonly number[]): ApiWaveCreditNft[] => {
+  const uniqueIds = getNormalizedMemeTokenIds(tokenIds);
   return uniqueIds.map((tokenId) => ({
     contract: MEMES_CONTRACT,
     token_id: tokenId,
@@ -296,6 +299,25 @@ export default function MemeCardSetPicker({
     onCreditNftsChange(nextCreditNfts);
   };
 
+  const validateTypedTokenIds = (tokenIds: readonly number[]) => {
+    const normalizedTokenIds = getNormalizedMemeTokenIds(tokenIds);
+    if (normalizedTokenIds.length === 0) {
+      return true;
+    }
+    const highestExistingMemeCardId = hasValidMemeCount ? memeCount : null;
+    if (highestExistingMemeCardId === null) {
+      setLocalError(INVALID_MEME_ID_MESSAGE);
+      return false;
+    }
+    if (
+      normalizedTokenIds.some((tokenId) => tokenId > highestExistingMemeCardId)
+    ) {
+      setLocalError(INVALID_MEME_ID_MESSAGE);
+      return false;
+    }
+    return true;
+  };
+
   const handlePickerChange = (change: NftPickerChange) => {
     if (!change) {
       applyTokenIds([]);
@@ -317,6 +339,9 @@ export default function MemeCardSetPicker({
       change.outputMode === "number"
         ? change.tokenIds
         : change.tokenIds.map((tokenId) => Number(tokenId));
+    if (!validateTypedTokenIds(tokenIds)) {
+      return;
+    }
     applyTokenIds(tokenIds);
   };
 

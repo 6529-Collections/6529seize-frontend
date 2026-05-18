@@ -50,6 +50,32 @@ jest.mock("@/components/nft-picker/NftPicker", () => {
               contractAddress: MEMES_CONTRACT,
               allSelected: false,
               outputMode: "number",
+              tokenIds: [100],
+            })
+          }
+        >
+          emit-at-count
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            props.onChange({
+              contractAddress: MEMES_CONTRACT,
+              allSelected: false,
+              outputMode: "number",
+              tokenIds: [999999],
+            })
+          }
+        >
+          emit-above-count
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            props.onChange({
+              contractAddress: MEMES_CONTRACT,
+              allSelected: false,
+              outputMode: "number",
               tokenIds: [3, 1, 3, -1, 2.5],
             })
           }
@@ -198,6 +224,29 @@ describe("MemeCardSetPicker", () => {
       screen.getByText(
         "Selecting all Meme cards is the same as normal TDH. Choose a smaller set."
       )
+    ).toBeInTheDocument();
+  });
+
+  it("allows typed Meme card IDs equal to the loaded count", async () => {
+    const user = userEvent.setup();
+    const { onCreditNftsChange } = renderPicker({ memeCount: 100 });
+
+    await user.click(screen.getByRole("button", { name: "emit-at-count" }));
+
+    expect(onCreditNftsChange).toHaveBeenCalledWith([
+      { contract: MEMES_CONTRACT, token_id: 100 },
+    ]);
+  });
+
+  it("blocks typed Meme card IDs above the loaded count", async () => {
+    const user = userEvent.setup();
+    const { onCreditNftsChange } = renderPicker({ memeCount: 100 });
+
+    await user.click(screen.getByRole("button", { name: "emit-above-count" }));
+
+    expect(onCreditNftsChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Only existing Meme card IDs can be added.")
     ).toBeInTheDocument();
   });
 
