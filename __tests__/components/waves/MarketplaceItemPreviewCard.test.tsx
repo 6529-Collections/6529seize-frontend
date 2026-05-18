@@ -67,8 +67,8 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(mediaDisplay).toHaveAttribute("data-mime", "image/*");
     expect(mediaDisplay).toHaveAttribute("data-disable", "true");
     expect(media).toContainElement(mediaDisplay);
-    expect(media).toHaveClass("tw-aspect-[16/9]");
-    expect(media).toHaveClass("tw-min-h-[14rem]");
+    expect(media).toHaveClass("tw-h-64");
+    expect(media).toHaveClass("tw-p-4");
     expect(screen.getByTestId("marketplace-item-footer")).toBeInTheDocument();
     expect(screen.getByTestId("marketplace-item-title")).toHaveTextContent(
       "Wave Artifact"
@@ -121,6 +121,27 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.getByTestId("marketplace-item-cta-link")).toHaveAttribute(
       "aria-label",
       "Open on Foundation - 0.77 ETH"
+    );
+  });
+
+  it("renders Gamma.io branding in the CTA", () => {
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href="https://gamma.io/collections/example-collection/123"
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+        />
+      </LinkPreviewProvider>
+    );
+
+    expect(screen.getByAltText("Gamma.io logo")).toHaveAttribute(
+      "src",
+      "/gammaio.jpg"
+    );
+    expect(screen.getByTestId("marketplace-item-cta-link")).toHaveAttribute(
+      "aria-label",
+      "Open on Gamma.io"
     );
   });
 

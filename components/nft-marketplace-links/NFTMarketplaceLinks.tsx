@@ -1,7 +1,10 @@
+import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import Image from "next/image";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Link from "next/link";
 import { isGradientsContract, isMemesContract } from "@/helpers/Helpers";
+import { Fragment } from "react";
+import { Tooltip } from "react-tooltip";
 
 type MarketplaceLink = {
   key: string;
@@ -73,7 +76,7 @@ export default function NFTMarketplaceLinks({
   readonly include6529CollectionLink?: boolean;
 }) {
   const isMobile = useIsMobileScreen();
-  const size = isMobile ? 25 : 35;
+  const size = isMobile ? 20 : 28;
   const visibleMarketplaces = MARKETPLACES.filter(
     (marketplace) =>
       marketplace.enabled &&
@@ -107,36 +110,45 @@ export default function NFTMarketplaceLinks({
       }));
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-2">
-      {marketplaces.map((marketplace) => (
-        <Link
-          key={marketplace.key}
-          title={marketplace.title}
-          className="tw-flex tw-items-center hover:tw-opacity-75"
-          href={marketplace.href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {marketplace.imageSrc.endsWith(".svg") ? (
-            <img
-              className="tw-rounded-md"
-              src={marketplace.imageSrc}
-              alt={marketplace.alt}
-              width={size}
-              height={size}
-            />
-          ) : (
-            <Image
-              unoptimized
-              className="tw-rounded-md"
-              src={marketplace.imageSrc}
-              alt={marketplace.alt}
-              width={size}
-              height={size}
-            />
-          )}
-        </Link>
-      ))}
+    <div className="tw-flex tw-items-center tw-gap-1.5">
+      {marketplaces.map((marketplace) => {
+        const tooltipId = buildTooltipId(
+          "nft-marketplace",
+          contract,
+          id,
+          marketplace.key
+        );
+
+        return (
+          <Fragment key={marketplace.key}>
+            <Link
+              aria-label={`Open ${marketplace.title}`}
+              className="tw-flex tw-items-center hover:tw-opacity-75"
+              href={marketplace.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              {...(!isMobile ? { "data-tooltip-id": tooltipId } : {})}
+            >
+              <Image
+                unoptimized
+                className="tw-size-6 tw-rounded-full md:tw-size-7"
+                src={marketplace.imageSrc}
+                alt={marketplace.alt}
+                width={size}
+                height={size}
+              />
+            </Link>
+            {!isMobile && (
+              <Tooltip
+                id={tooltipId}
+                content={marketplace.title}
+                place="top"
+                style={TOOLTIP_STYLES}
+              />
+            )}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }

@@ -105,21 +105,25 @@ function RecipientSelectedDisplay({
         const hasDisplay =
           w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
         const classes = [
-          "tw-flex tw-min-h-[58px] tw-w-full tw-flex-col tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2",
+          "tw-flex tw-min-h-[58px] tw-w-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50 tw-p-3 tw-transition-all",
           hasDisplay
             ? "tw-items-start tw-justify-between"
             : "tw-items-start tw-justify-center",
-          isSel ? "tw-border-2 tw-border-solid !tw-border-emerald-400" : "",
+          isSel
+            ? "!tw-border-primary-500 tw-bg-primary-500/10"
+            : "tw-border-transparent",
         ].join(" ");
 
         if (isWalletSelectionDisabled) {
           return (
             <div key={w.wallet} className={classes}>
-              <div className="tw-text-sm tw-font-medium">
+              <div className="tw-text-sm tw-font-bold tw-text-white">
                 {w.display || w.wallet}
               </div>
               {hasDisplay && (
-                <div className="tw-text-[11px] tw-opacity-60">{w.wallet}</div>
+                <div className="tw-text-[11px] tw-font-medium tw-text-iron-500">
+                  {w.wallet}
+                </div>
               )}
             </div>
           );
@@ -130,13 +134,15 @@ function RecipientSelectedDisplay({
             key={w.wallet}
             type="button"
             onClick={() => onWalletSelect(w.wallet)}
-            className={[classes, "hover:tw-bg-white/15"].join(" ")}
+            className={[classes, "hover:tw-bg-iron-800"].join(" ")}
           >
-            <div className="tw-text-sm tw-font-medium">
+            <div className="tw-text-sm tw-font-bold tw-text-white">
               {w.display || w.wallet}
             </div>
             {hasDisplay && (
-              <div className="tw-text-[11px] tw-opacity-60">{w.wallet}</div>
+              <div className="tw-text-[11px] tw-font-medium tw-text-iron-500">
+                {w.wallet}
+              </div>
             )}
           </button>
         );
@@ -147,7 +153,7 @@ function RecipientSelectedDisplay({
   return (
     <>
       {showSelectedProfileCard && (
-        <div className="tw-flex tw-items-center tw-justify-between tw-rounded-lg tw-bg-white/10 tw-px-3 tw-py-2">
+        <div className="tw-flex tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50 tw-px-4 tw-py-3">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
             <TransferModalPfp
               src={selectedProfile.pfp}
@@ -159,11 +165,11 @@ function RecipientSelectedDisplay({
               level={selectedProfile.level}
             />
             <div className="tw-min-w-0">
-              <div className="tw-truncate tw-text-sm tw-font-medium">
+              <div className="tw-truncate tw-text-sm tw-font-bold tw-text-white">
                 {selectedProfile.handle || selectedProfile.display}
               </div>
-              <div className="tw-truncate tw-text-[11px] tw-opacity-60">
-                TDH: {selectedProfile.tdh.toLocaleString()} - Level:{" "}
+              <div className="tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-500">
+                TDH: {selectedProfile.tdh.toLocaleString()} — Level:{" "}
                 {selectedProfile.level}
               </div>
             </div>
@@ -171,7 +177,7 @@ function RecipientSelectedDisplay({
           {allowProfileChange && (
             <button
               type="button"
-              className="tw-rounded-md tw-border-2 tw-border-solid tw-border-[#444] tw-bg-white/10 tw-px-2 tw-py-1 !tw-text-xs tw-font-medium hover:tw-bg-white/15"
+              className="tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-xs tw-font-bold tw-text-iron-200 tw-transition-colors hover:tw-bg-iron-700"
               onClick={onClear}
             >
               Change
@@ -181,21 +187,23 @@ function RecipientSelectedDisplay({
       )}
 
       <div
-        className={`tw-flex tw-min-h-0 tw-flex-col tw-space-y-2 ${showSelectedProfileCard ? "tw-pt-4" : "tw-pt-0"}`}
+        className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-space-y-3 ${showSelectedProfileCard ? "tw-pt-6" : "tw-pt-0"}`}
       >
         {(showSelectedProfileCard
           ? wallets.length > 1
           : wallets.length > 0) && (
-          <div className="tw-text-sm">Choose destination wallet</div>
+          <div className="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
+            Choose destination wallet
+          </div>
         )}
         <div
           ref={walletsListRef}
-          className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"
+          className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/20"
         >
           {walletsContent}
         </div>
         {walletsHasOverflow && (
-          <div className="tw-text-center tw-text-xs tw-opacity-75">
+          <div className="tw-text-center tw-text-xs tw-text-iron-500">
             <FontAwesomeIcon icon={walletsAtEnd ? faAnglesUp : faAnglesDown} />{" "}
             Scroll for more
           </div>
@@ -230,26 +238,30 @@ function RecipientSearchDisplay({
 }) {
   return (
     <>
-      <input
-        autoFocus
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={placeholder ?? "Search profile by handle, ens or wallet"}
-        className="tw-h-14 tw-w-full tw-rounded-lg tw-border-none tw-bg-white/10 tw-px-3 tw-py-2 focus:tw-bg-white/20 focus:tw-outline-none"
-        ref={searchInputRef}
-      />
-      <div className="tw-text-xs tw-opacity-60">{searchStatusText}</div>
+      <div className="tw-relative">
+        <input
+          autoFocus
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={placeholder ?? "Search profile by handle, ens or wallet"}
+          className="tw-h-12 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-text-white tw-placeholder-iron-500 tw-transition-all focus:tw-border-primary-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-500"
+          ref={searchInputRef}
+        />
+      </div>
+      <div className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+        {searchStatusText}
+      </div>
       <div
         ref={resultsListRef}
-        className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/30 hover:tw-scrollbar-thumb-white/50"
+        className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/20"
       >
         {results.map((r) => (
           <button
             key={r.profile_id ?? r.wallet}
             type="button"
             onClick={() => onPick(r)}
-            className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-white/10 tw-bg-white/10 tw-p-2 tw-text-left hover:tw-bg-white/15"
+            className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-bg-iron-900/50 tw-p-3 tw-text-left tw-transition-all hover:tw-border-iron-700 hover:tw-bg-iron-800"
           >
             <TransferModalPfp
               src={r.pfp}
@@ -257,18 +269,18 @@ function RecipientSearchDisplay({
               level={r.level}
             />
             <div className="tw-min-w-0 tw-flex-1">
-              <div className="tw-truncate tw-text-sm tw-font-medium">
+              <div className="tw-truncate tw-text-sm tw-font-bold tw-text-white">
                 {r.handle || r.display}
               </div>
-              <div className="tw-truncate tw-text-[11px] tw-opacity-60">
-                TDH: {r.tdh.toLocaleString()} - Level: {r.level}
+              <div className="tw-truncate tw-text-[11px] tw-font-medium tw-text-iron-500">
+                TDH: {r.tdh.toLocaleString()} — Level: {r.level}
               </div>
             </div>
           </button>
         ))}
       </div>
       {resultsHasOverflow && (
-        <div className="tw-text-center tw-text-xs tw-opacity-75">
+        <div className="tw-text-center tw-text-xs tw-text-iron-500">
           <FontAwesomeIcon icon={resultsAtEnd ? faAnglesUp : faAnglesDown} />{" "}
           Scroll for more
         </div>
@@ -550,10 +562,10 @@ export default function RecipientSelector({
   };
 
   return (
-    <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-space-y-3">
       {showLabel && (
         <div
-          className={`tw-font-semibold ${selectedProfile ? "tw-mb-2" : "tw-mb-0"}`}
+          className={`tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400 ${selectedProfile ? "tw-mb-2" : "tw-mb-0"}`}
         >
           {label}
         </div>

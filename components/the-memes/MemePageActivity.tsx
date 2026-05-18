@@ -16,9 +16,23 @@ import type { Transaction } from "@/entities/ITransaction";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import { fetchUrl } from "@/services/6529api";
-import { useEffect, useMemo, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
-import styles from "./TheMemes.module.scss";
+import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+const SECTION_HEADER_TITLE_CLASS =
+  "tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
+const METRIC_LABEL_CLASS =
+  "tw-mb-1 md:tw-mb-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400";
+const METRIC_VALUE_CLASS =
+  "tw-text-sm md:tw-text-lg tw-font-semibold tw-leading-6 tw-text-white";
+
+function formatEthVolume(volume: number) {
+  if (volume <= 0) {
+    return "N/A";
+  }
+
+  return `${numberWithCommas(Math.round(volume * 100) / 100)} ETH`;
+}
 
 export function MemePageActivity(
   props: Readonly<{
@@ -27,6 +41,7 @@ export function MemePageActivity(
     pageSize: number;
   }>
 ) {
+  const activitySectionRef = useRef<HTMLElement | null>(null);
   const [activityPage, setActivityPage] = useState(1);
   const [activityTotalResults, setActivityTotalResults] = useState(0);
   const [activity, setActivity] = useState<Transaction[]>([]);
@@ -34,6 +49,26 @@ export function MemePageActivity(
     TypeFilter.ALL
   );
   const [activityLoading, setActivityLoading] = useState(false);
+  const volumeStats = props.nft
+    ? [
+        {
+          label: "24 Hours",
+          value: formatEthVolume(props.nft.total_volume_last_24_hours),
+        },
+        {
+          label: "7 Days",
+          value: formatEthVolume(props.nft.total_volume_last_7_days),
+        },
+        {
+          label: "1 Month",
+          value: formatEthVolume(props.nft.total_volume_last_1_month),
+        },
+        {
+          label: "All Time",
+          value: formatEthVolume(props.nft.total_volume),
+        },
+      ]
+    : [];
 
   useEffect(() => {
     if (!props.show || !props.nft?.id) {
@@ -92,17 +127,21 @@ export function MemePageActivity(
   const activityContent = useMemo(() => {
     if (activity.length > 0) {
       return (
-        <Table bordered={false} className={styles["transactionsTable"]}>
-          <tbody>
-            {activity.map((tr) => (
-              <LatestActivityRow
-                tr={tr}
-                nft={props.nft}
-                key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-              />
-            ))}
-          </tbody>
-        </Table>
+        <div className="tw-overflow-x-auto">
+          <table className="tw-w-full tw-min-w-[760px] tw-border-collapse">
+            <tbody>
+              {activity.map((tr) => (
+                <LatestActivityRow
+                  tr={tr}
+                  nft={props.nft}
+                  variant="tailwind"
+                  rowStyle="striped"
+                  key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       );
     }
 
@@ -124,107 +163,63 @@ export function MemePageActivity(
     return;
   }, [activity, activityLoading, props.nft]);
 
+  const handleActivityPageChange = useCallback((newPage: number) => {
+    setActivityPage(newPage);
+    activitySectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
   if (props.show && props.nft) {
     return (
-      <Container className="p-0">
-        {props.nft && (
-          <>
-            <Row className="pt-2">
-              <Col>
-                <h3>Card Volumes</h3>
-              </Col>
-            </Row>
-            <Row className="pt-2">
-              <Col>
-                <Table className="text-center">
-                  <thead>
-                    <tr>
-                      <th>24 Hours</th>
-                      <th>7 Days</th>
-                      <th>1 Month</th>
-                      <th>All Time</th>
-                    </tr>
-                  </thead>
-                  <tbody className="pt-3">
-                    <tr>
-                      <td>
-                        {props.nft.total_volume_last_24_hours > 0
-                          ? `${numberWithCommas(
-                              Math.round(
-                                props.nft.total_volume_last_24_hours * 100
-                              ) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                      <td>
-                        {props.nft.total_volume_last_7_days > 0
-                          ? `${numberWithCommas(
-                              Math.round(
-                                props.nft.total_volume_last_7_days * 100
-                              ) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                      <td>
-                        {props.nft.total_volume_last_1_month > 0
-                          ? `${numberWithCommas(
-                              Math.round(
-                                props.nft.total_volume_last_1_month * 100
-                              ) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                      <td>
-                        {props.nft.total_volume > 0
-                          ? `${numberWithCommas(
-                              Math.round(props.nft.total_volume * 100) / 100
-                            )} ETH`
-                          : `N/A`}
-                      </td>
-                    </tr>
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </>
-        )}
-        <Row className="tw-py-3">
-          <Col>
-            <div className="tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
-              <h3 className="tw-mb-0 tw-shrink-0 tw-whitespace-nowrap">
-                Card Activity
-              </h3>
-              <div className="tw-w-full tw-shrink-0 md:tw-w-72">
-                <CommonDropdown
-                  items={ActivityTypeItems}
-                  activeItem={activityTypeFilter}
-                  filterLabel="Transaction Type"
-                  setSelected={(filter) => {
-                    setActivityPage(1);
-                    setActivityTypeFilter(filter);
-                  }}
-                />
+      <section className="tw-space-y-8">
+        <section>
+          <div className="tw-flex tw-items-center tw-gap-3">
+            <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
+            <h3 className={SECTION_HEADER_TITLE_CLASS}>Card volumes</h3>
+            <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
+          </div>
+          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-start tw-gap-x-16 tw-gap-y-6">
+            {volumeStats.map((stat) => (
+              <div key={stat.label}>
+                <div className={METRIC_LABEL_CLASS}>{stat.label}</div>
+                <div className={METRIC_VALUE_CLASS}>{stat.value}</div>
               </div>
+            ))}
+          </div>
+        </section>
+
+        <section ref={activitySectionRef} className="tw-scroll-mt-24">
+          <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
+            <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200">
+              Card Activity
+            </h3>
+            <div className="tw-w-full tw-shrink-0 md:tw-w-72">
+              <CommonDropdown
+                items={ActivityTypeItems}
+                activeItem={activityTypeFilter}
+                filterLabel="Transaction Type"
+                setSelected={(filter) => {
+                  setActivityPage(1);
+                  setActivityTypeFilter(filter);
+                }}
+              />
             </div>
-          </Col>
-        </Row>
-        <Row className={`pt-2 ${styles["transactionsScrollContainer"]}`}>
-          <Col>{activityContent}</Col>
-        </Row>
+          </div>
+          {activityContent}
+        </section>
         {activity.length > 0 && !activityLoading && (
-          <Row className="text-center pt-2 pb-3">
+          <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4">
             <Pagination
               page={activityPage}
               pageSize={props.pageSize}
               totalResults={activityTotalResults}
-              setPage={function (newPage: number) {
-                setActivityPage(newPage);
-                window.scrollTo(0, 0);
-              }}
+              setPage={handleActivityPageChange}
             />
-          </Row>
+          </div>
         )}
-      </Container>
+      </section>
     );
   } else {
     return <></>;

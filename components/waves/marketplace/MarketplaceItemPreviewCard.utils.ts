@@ -40,6 +40,15 @@ export const getMarketplaceBrand = (href: string): MarketplaceBrand | null => {
       return { displayName: "SuperRare", logoSrc: "/superrare-icon.png" };
     case "foundation.mint":
       return { displayName: "Foundation", logoSrc: "/foundation.png" };
+    case "gammaio.collection":
+    case "gammaio.collection-token":
+    case "gammaio.inscription":
+    case "gammaio.ordinal":
+    case "gammaio.ordinal-inscription":
+    case "gammaio.ordinal-collection-inscription":
+    case "gammaio.ordinal-print-details":
+    case "gammaio.stacks-nft":
+      return { displayName: "Gamma.io", logoSrc: "/gammaio.jpg" };
     case "opensea.item":
     case "opensea.asset":
       return { displayName: "OpenSea", logoSrc: "/opensea.png" };

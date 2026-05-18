@@ -92,6 +92,13 @@
   bottom: -45px;
 }
 
+.balanceInline {
+  font-family: variables.$main-font;
+  font-size: variables.$font-size;
+  color: variables.$lightest-grey !important;
+  white-space: nowrap;
+}
+
 .transparentBG {
   background-color: transparent !important;
 }

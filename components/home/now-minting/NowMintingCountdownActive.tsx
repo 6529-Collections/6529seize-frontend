@@ -13,7 +13,7 @@ export default function NowMintingCountdownActive({
   countdown,
 }: NowMintingCountdownActiveProps) {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/40 tw-p-3 tw-text-left md:tw-p-4">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-p-3 tw-text-left md:tw-p-4">
       {countdown.showAllowlistInfo && (
         <Tooltip
           id="allowlist-info"
