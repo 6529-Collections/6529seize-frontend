@@ -155,7 +155,7 @@ describe("DragDropPastePlugin", () => {
     expect(replace).toHaveBeenCalled();
   });
 
-  it("does not finish an in-flight inline upload after becoming disabled", async () => {
+  it("finishes an in-flight inline upload after becoming disabled", async () => {
     let resolveUpload: ((value: { url: string }) => void) | undefined;
     const replace = jest.fn();
     ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
@@ -178,7 +178,37 @@ describe("DragDropPastePlugin", () => {
       await Promise.resolve();
     });
 
-    expect(replace).not.toHaveBeenCalled();
+    expect(replace).toHaveBeenCalled();
+  });
+
+  it("removes loading image and shows an error when in-flight upload fails after becoming disabled", async () => {
+    let rejectUpload: ((reason: Error) => void) | undefined;
+    const remove = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectUpload = reject;
+      })
+    );
+
+    const { rerender } = render(<DragDropPastePlugin />);
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(<DragDropPastePlugin disabled />);
+    await act(async () => {
+      rejectUpload?.(new Error("Upload failed"));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(remove).toHaveBeenCalled();
+    expect(toastMock).toHaveBeenCalledWith({
+      message: "Upload failed",
+      type: "error",
+    });
   });
 
   it("removes loading image and shows an error when inline upload hangs", async () => {

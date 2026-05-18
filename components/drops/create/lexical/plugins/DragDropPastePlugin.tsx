@@ -89,7 +89,7 @@ export default function DragDropPaste({
           return true;
         }
 
-        (async () => {
+        void (async () => {
           const filesResult = await mediaFileReader(
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
@@ -118,7 +118,7 @@ export default function DragDropPaste({
                 const key = imageNode.getKey();
                 uploadImage(file)
                   .then((url: string) => {
-                    if (!isMounted || disabledRef.current) return;
+                    if (!isMounted) return;
                     editor.update(() => {
                       const node = $getNodeByKey(key);
                       if (node) {
@@ -127,7 +127,7 @@ export default function DragDropPaste({
                     });
                   })
                   .catch((err: unknown) => {
-                    if (!isMounted || disabledRef.current) return;
+                    if (!isMounted) return;
                     editor.update(() => {
                       const node = $getNodeByKey(key);
                       if (node) {
