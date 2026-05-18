@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 import CreateWaveVotingThreshold from "./CreateWaveVotingThreshold";
+import MemeCardSetPicker from "./MemeCardSetPicker";
 import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
 import TimeWeightedVoting from "./TimeWeightedVoting";
@@ -17,8 +19,8 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
   [ApiWaveCreditType.TdhPlusXtdh]: 0,
   [ApiWaveCreditType.Tdh]: 1,
   [ApiWaveCreditType.Rep]: 2,
+  [ApiWaveCreditType.CardSetTdh]: 3,
   [ApiWaveCreditType.Xtdh]: undefined,
-  [ApiWaveCreditType.CardSetTdh]: undefined,
 };
 
 const TIME_WEIGHTED_DURATION_ERROR =
@@ -27,17 +29,30 @@ const TIME_WEIGHTED_DURATION_ERROR =
 const VOTING_SETTINGS_GRID_CLASSES =
   "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
 
+const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
+  if (votingType === ApiWaveCreditType.CardSetTdh) {
+    return "Meme Card TDH";
+  }
+
+  return WAVE_VOTING_LABELS[votingType];
+};
+
 export default function CreateWaveVoting({
   waveType,
   selectedType,
   category,
   profileId,
+  creditNfts,
+  memeCount,
+  isMemeCountLoading,
+  isMemeCountError,
   maxVotesPerIdentityPerDrop,
   approvalThreshold,
   errors,
   onTypeChange,
   setCategory,
   setProfileId,
+  setCreditNfts,
   setMaxVotesPerIdentityPerDrop,
   setApprovalThreshold,
   timeWeighted,
@@ -47,12 +62,17 @@ export default function CreateWaveVoting({
   readonly selectedType: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly creditNfts: ApiWaveCreditNft[];
+  readonly memeCount: number | null;
+  readonly isMemeCountLoading: boolean;
+  readonly isMemeCountError: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly approvalThreshold: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
+  readonly setCreditNfts: (creditNfts: ApiWaveCreditNft[]) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
   readonly setApprovalThreshold: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
@@ -105,7 +125,7 @@ export default function CreateWaveVoting({
                     : "tw-text-iron-300 group-hover:tw-text-white"
                 }`}
               >
-                {`By ${WAVE_VOTING_LABELS[votingType]}`}
+                {`By ${getCreateWaveVotingLabel(votingType)}`}
               </span>
             </CommonBorderedRadioButton>
           ))}
@@ -119,6 +139,16 @@ export default function CreateWaveVoting({
               setProfileId={setProfileId}
             />
           </div>
+        )}
+        {selectedType === ApiWaveCreditType.CardSetTdh && (
+          <MemeCardSetPicker
+            creditNfts={creditNfts}
+            memeCount={memeCount}
+            isMemeCountLoading={isMemeCountLoading}
+            isMemeCountError={isMemeCountError}
+            errors={errors}
+            onCreditNftsChange={setCreditNfts}
+          />
         )}
       </div>
 

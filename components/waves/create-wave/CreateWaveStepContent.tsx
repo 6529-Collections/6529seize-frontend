@@ -38,6 +38,8 @@ export default function CreateWaveStepContent({
     selectedOutcomeType,
     errors,
     groupsCache,
+    isMemeCountLoading,
+    isMemeCountError,
     setOverview,
     setDates,
     setDrops,
@@ -48,6 +50,7 @@ export default function CreateWaveStepContent({
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onCreditNftsChange,
     onMaxVotesPerIdentityPerDropChange,
     onTimeWeightedVotingChange,
     onThresholdChange,
@@ -104,12 +107,17 @@ export default function CreateWaveStepContent({
           selectedType={config.voting.type}
           category={config.voting.category}
           profileId={config.voting.profileId}
+          creditNfts={config.voting.creditNfts}
+          memeCount={config.voting.creditNftMemeCount}
+          isMemeCountLoading={isMemeCountLoading}
+          isMemeCountError={isMemeCountError}
           maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
           approvalThreshold={config.approval.threshold}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
+          setCreditNfts={onCreditNftsChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
           setApprovalThreshold={onThresholdChange}
           timeWeighted={config.voting.timeWeighted}

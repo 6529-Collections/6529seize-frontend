@@ -1,5 +1,6 @@
 import type { ApiCreateNewWave } from "@/generated/models/ApiCreateNewWave";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
@@ -413,6 +414,14 @@ export const getCreateNewWaveBody = ({
         max: endDate,
       },
       forbid_negative_votes: false,
+      ...(config.voting.type === ApiWaveCreditType.CardSetTdh
+        ? {
+            credit_nfts: config.voting.creditNfts.map((nft) => ({
+              contract: MEMES_CONTRACT,
+              token_id: nft.token_id,
+            })),
+          }
+        : {}),
     },
     visibility: {
       scope: {
