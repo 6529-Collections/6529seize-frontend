@@ -3,6 +3,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
+import WaveSlowMode from "./WaveSlowMode";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
@@ -49,6 +50,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
               <WaveAuthor wave={wave} />
             </div>
           </div>
+
+          {isChatWave && <WaveSlowMode wave={wave} />}
         </div>
       </div>
     </div>

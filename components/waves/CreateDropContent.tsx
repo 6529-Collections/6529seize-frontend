@@ -51,6 +51,7 @@ import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
+import SlowModeChatNotice from "./SlowModeChatNotice";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
@@ -154,6 +155,7 @@ interface CreateDropContentProps {
   readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
+  readonly isChatBlockedBySlowMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
   readonly canSubmitCurationUrl?: boolean | undefined;
   readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
@@ -509,6 +511,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   submitDrop,
   dropModeToggleExitLabel,
   canExitDropMode,
+  isChatBlockedBySlowMode,
   submissionExperience,
   canSubmitCurationUrl = true,
   curationUrlSubmitRestrictionMessage = null,
@@ -760,7 +763,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) ?? 0) >= 24000;
 
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
-  const canSubmit = getCanSubmit();
+  const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
+  const canSubmit = getCanSubmit() && !isSlowModeSubmitBlocked;
   const canAddPart = getCanAddPart();
   const normalizedCurationDropUrl = useMemo(() => {
     if (!isCurationSubmissionExperience || isDropMode) {
@@ -1268,6 +1272,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
+      return;
+    }
+
+    if (isSlowModeSubmitBlocked) {
       return;
     }
 
@@ -1886,6 +1894,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                     )}
                   </div>
                 )}
+                <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
               </div>
             </div>
             <div className="tw-ml-2 lg:tw-ml-3">

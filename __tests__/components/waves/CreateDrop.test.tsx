@@ -4,11 +4,21 @@ import userEvent from "@testing-library/user-event";
 import type { DropMutationBody } from "@/components/waves/CreateDrop";
 import CreateDrop from "@/components/waves/CreateDrop";
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useWave } from "@/hooks/useWave";
 import { commonApiPost } from "@/services/api/common-api";
 
+const mockSetQueryData = jest.fn();
+const mockInvalidateQueries = jest.fn(() => Promise.resolve());
+
 jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({
+    setQueryData: mockSetQueryData,
+    invalidateQueries: mockInvalidateQueries,
+  }),
   useMutation: (options: any) => ({
     mutateAsync: jest.fn(async (variables: any) => {
       try {
@@ -39,10 +49,14 @@ const PREFILL_URL =
 jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
   <div>
     <div data-testid="submission-experience">{props.submissionExperience}</div>
+    <div data-testid="slow-mode-blocked">
+      {String(props.isChatBlockedBySlowMode)}
+    </div>
+    <div data-testid="is-drop-mode">{String(props.isDropMode)}</div>
     <button
       onClick={() =>
         props.submitDrop({
-          drop: { wave_id: "1" },
+          drop: { wave_id: "1", drop_type: "CHAT" },
           dropId: null,
         } as DropMutationBody)
       }
@@ -67,7 +81,7 @@ jest.mock("@/components/waves/CreateCurationDropContent", () => ({
       <button
         onClick={() =>
           props.submitDrop({
-            drop: { wave_id: "1" },
+            drop: { wave_id: "1", drop_type: "PARTICIPATORY" },
             dropId: null,
           } as DropMutationBody)
         }
@@ -87,7 +101,7 @@ jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
         <button
           onClick={() =>
             props.submitDrop({
-              drop: { wave_id: "1" },
+              drop: { wave_id: "1", drop_type: "PARTICIPATORY" },
               dropId: null,
             } as DropMutationBody)
           }
@@ -103,6 +117,7 @@ const commonApiPostMock = commonApiPost as jest.Mock;
 
 const wave = {
   id: "1",
+  author: { handle: "creator" },
   wave: { authenticated_user_eligible_for_admin: false },
   chat: { authenticated_user_eligible: true },
   participation: { authenticated_user_eligible: true },
@@ -116,6 +131,10 @@ describe("CreateDrop", () => {
       isCurationWave: false,
     } as any);
     commonApiPostMock.mockResolvedValue({ id: "server-drop", wave_id: "1" });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("processes queued drop and calls mutation", async () => {
@@ -142,6 +161,123 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("starts local slow mode cooldown after a chat drop", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    const slowWave = {
+      ...wave,
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={slowWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit"));
+
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
+    const updateWave = mockSetQueryData.mock.calls[0][1] as (
+      currentWave: typeof slowWave
+    ) => typeof slowWave;
+    expect(updateWave(slowWave).chat.next_drop_allowed).toBe(40_000);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE, { wave_id: "1" }],
+    });
+    dateNowSpy.mockRestore();
+  });
+
+  it("does not start slow mode cooldown for participatory drops", async () => {
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              chat: {
+                ...wave.chat,
+                slow_mode_cooldown_ms: 30_000,
+              },
+            }}
+            dropId={null}
+            fixedDropMode={"PARTICIPATION" as any}
+            privileges={{ chatRestriction: "SLOW_MODE" } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit curation"));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(mockSetQueryData).not.toHaveBeenCalled();
+  });
+
+  it("keeps both-mode composer in chat mode during slow mode cooldown", () => {
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              chat: { authenticated_user_eligible: false },
+            }}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{ chatRestriction: "SLOW_MODE" } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("slow-mode-blocked")).toHaveTextContent("true");
+    expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("false");
   });
 
   it("shows success toast for leaderboard curation submissions", async () => {

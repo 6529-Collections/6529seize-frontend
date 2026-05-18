@@ -46,6 +46,21 @@ describe("DropPlaceholder", () => {
       ).toBeInTheDocument();
     });
 
+    it("renders slow mode message for chat", () => {
+      render(
+        <DropPlaceholder
+          type="chat"
+          chatRestriction={ChatRestriction.SLOW_MODE}
+        />
+      );
+
+      expect(
+        screen.getByText(
+          "Slow mode is active. Please wait before posting again"
+        )
+      ).toBeInTheDocument();
+    });
+
     it("renders disabled message for chat", () => {
       render(
         <DropPlaceholder

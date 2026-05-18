@@ -1,6 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
@@ -64,25 +64,31 @@ export default function PrivilegedDropCreator({
     canChat: wave.chat.authenticated_user_eligible,
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,
+    slowModeCooldownMs: wave.chat.slow_mode_cooldown_ms ?? null,
+    nextDropAllowed: wave.chat.next_drop_allowed ?? null,
     submissionStarts: wave.participation.period?.min ?? null,
     submissionEnds: wave.participation.period?.max ?? null,
     maxDropsCount:
       wave.participation.no_of_applications_allowed_per_participant ?? null,
     identityDropsCount: wave.metrics.your_participation_drops_count,
   });
+  const blockingChatRestriction =
+    chatRestriction === ChatRestriction.SLOW_MODE ? null : chatRestriction;
 
-  if (submissionRestriction !== null && chatRestriction !== null) {
+  if (submissionRestriction !== null && blockingChatRestriction !== null) {
     return (
       <DropPlaceholder
         type="both"
-        chatRestriction={chatRestriction}
+        chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
       />
     );
   }
 
-  if (fixedDropMode === DropMode.CHAT && chatRestriction !== null) {
-    return <DropPlaceholder type="chat" chatRestriction={chatRestriction} />;
+  if (fixedDropMode === DropMode.CHAT && blockingChatRestriction !== null) {
+    return (
+      <DropPlaceholder type="chat" chatRestriction={blockingChatRestriction} />
+    );
   }
 
   if (

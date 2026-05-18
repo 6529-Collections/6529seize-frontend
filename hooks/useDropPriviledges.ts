@@ -1,5 +1,6 @@
 "use client";
 
+import { isSlowModeCoolingDown } from "@/helpers/waves/slow-mode.helpers";
 import { useMemo } from "react";
 
 enum SubmissionStatus {
@@ -20,6 +21,7 @@ export enum SubmissionRestriction {
 export enum ChatRestriction {
   NOT_LOGGED_IN = "NOT_LOGGED_IN",
   PROXY_USER = "PROXY_USER",
+  SLOW_MODE = "SLOW_MODE",
   NO_PERMISSION = "NO_PERMISSION",
   DISABLED = "DISABLED",
 }
@@ -30,6 +32,8 @@ interface DropPrivilegesInput {
   readonly canChat: boolean;
   readonly canDrop: boolean;
   readonly chatDisabled: boolean;
+  readonly slowModeCooldownMs: number | null;
+  readonly nextDropAllowed: number | null;
   readonly submissionStarts: number | null;
   readonly submissionEnds: number | null;
   readonly maxDropsCount: number | null;
@@ -47,6 +51,8 @@ export function useDropPrivileges({
   canChat,
   canDrop,
   chatDisabled,
+  slowModeCooldownMs,
+  nextDropAllowed,
   submissionStarts,
   submissionEnds,
   maxDropsCount,
@@ -88,38 +94,53 @@ export function useDropPrivileges({
       submissionStatus = SubmissionStatus.NOT_STARTED;
     }
 
-    return {
-      submissionRestriction: !isLoggedIn
-        ? SubmissionRestriction.NOT_LOGGED_IN
-        : isProxy
-        ? SubmissionRestriction.PROXY_USER
-        : !canDrop
-        ? SubmissionRestriction.NO_PERMISSION
-        : maxDropsCount !== null &&
-          identityDropsCount !== null &&
-          identityDropsCount >= maxDropsCount
-        ? SubmissionRestriction.MAX_DROPS_REACHED
-        : submissionStatus !== SubmissionStatus.ACTIVE
-        ? submissionStatus === SubmissionStatus.NOT_STARTED
-          ? SubmissionRestriction.NOT_STARTED
-          : SubmissionRestriction.ENDED
-        : null,
-      chatRestriction: !isLoggedIn
-        ? ChatRestriction.NOT_LOGGED_IN
-        : isProxy
-        ? ChatRestriction.PROXY_USER
-        : !canChat
-        ? ChatRestriction.NO_PERMISSION
-        : chatDisabled
-        ? ChatRestriction.DISABLED
-        : null,
-    };
+    const hasReachedMaxDrops =
+      maxDropsCount !== null &&
+      identityDropsCount !== null &&
+      identityDropsCount >= maxDropsCount;
+    const isChatCoolingDown = isSlowModeCoolingDown({
+      cooldownMs: slowModeCooldownMs,
+      nextDropAllowed,
+      now,
+    });
+
+    let submissionRestriction: SubmissionRestriction | null = null;
+    if (!isLoggedIn) {
+      submissionRestriction = SubmissionRestriction.NOT_LOGGED_IN;
+    } else if (isProxy) {
+      submissionRestriction = SubmissionRestriction.PROXY_USER;
+    } else if (!canDrop) {
+      submissionRestriction = SubmissionRestriction.NO_PERMISSION;
+    } else if (hasReachedMaxDrops) {
+      submissionRestriction = SubmissionRestriction.MAX_DROPS_REACHED;
+    } else if (submissionStatus === SubmissionStatus.NOT_STARTED) {
+      submissionRestriction = SubmissionRestriction.NOT_STARTED;
+    } else if (submissionStatus === SubmissionStatus.ENDED) {
+      submissionRestriction = SubmissionRestriction.ENDED;
+    }
+
+    let chatRestriction: ChatRestriction | null = null;
+    if (!isLoggedIn) {
+      chatRestriction = ChatRestriction.NOT_LOGGED_IN;
+    } else if (isProxy) {
+      chatRestriction = ChatRestriction.PROXY_USER;
+    } else if (isChatCoolingDown) {
+      chatRestriction = ChatRestriction.SLOW_MODE;
+    } else if (!canChat) {
+      chatRestriction = ChatRestriction.NO_PERMISSION;
+    } else if (chatDisabled) {
+      chatRestriction = ChatRestriction.DISABLED;
+    }
+
+    return { submissionRestriction, chatRestriction };
   }, [
     isLoggedIn,
     isProxy,
     canChat,
     canDrop,
     chatDisabled,
+    slowModeCooldownMs,
+    nextDropAllowed,
     submissionStarts,
     submissionEnds,
     maxDropsCount,

@@ -8,12 +8,16 @@ import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import CreateCurationDropContent from "./CreateCurationDropContent";
 import QuorumProposalDropModal from "./quorum/QuorumProposalDropModal";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { AuthContext } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -22,7 +26,10 @@ import type {
   IdentityPickerPlacement,
 } from "./dropComposer.types";
 import { DropMode } from "./dropComposer.types";
-import type { DropPrivileges } from "@/hooks/useDropPriviledges";
+import {
+  ChatRestriction,
+  type DropPrivileges,
+} from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
@@ -89,8 +96,9 @@ export default function CreateDrop({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
 }: CreateDropProps) {
-  const { setToast } = useContext(AuthContext);
+  const { setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
+  const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
@@ -113,6 +121,9 @@ export default function CreateDrop({
     isQuorumWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
+  const canUseChatComposer =
+    wave.chat.authenticated_user_eligible ||
+    privileges.chatRestriction === ChatRestriction.SLOW_MODE;
   const getDefaultIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -120,7 +131,7 @@ export default function CreateDrop({
     if (fixedDropMode === DropMode.PARTICIPATION) {
       return true;
     }
-    if (wave.chat.authenticated_user_eligible) return false;
+    if (canUseChatComposer) return false;
     if (wave.participation.authenticated_user_eligible) return true;
     if (activeDrop) return false;
     return false;
@@ -130,7 +141,9 @@ export default function CreateDrop({
     activeDrop === null
       ? "none"
       : `${activeDrop.action}:${activeDrop.drop.id}:${activeDrop.partId}`;
-  const modeScopeKey = `${wave.id}:${fixedDropMode}:${wave.chat.authenticated_user_eligible}:${wave.participation.authenticated_user_eligible}:${activeDropScope}`;
+  const modeScopeKey =
+    `${wave.id}:${fixedDropMode}:${canUseChatComposer}:` +
+    `${wave.participation.authenticated_user_eligible}:${activeDropScope}`;
   const modeScopeToken = modeScopeKey;
   const defaultIsDropMode = getDefaultIsDropMode();
   const isDropMode =
@@ -178,7 +191,7 @@ export default function CreateDrop({
         return false;
       }
 
-      if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
+      if (!newIsDropMode && !canUseChatComposer) {
         setToast({
           message: "You are not eligible to chat in this wave",
           type: "error",
@@ -188,7 +201,7 @@ export default function CreateDrop({
 
       return true;
     },
-    [fixedDropMode, setToast, wave]
+    [canUseChatComposer, fixedDropMode, setToast, wave]
   );
 
   const onDropModeChange = useCallback(
@@ -240,10 +253,7 @@ export default function CreateDrop({
   );
 
   const onCloseQuorumProposal = useCallback(() => {
-    if (
-      fixedDropMode === DropMode.BOTH &&
-      wave.chat.authenticated_user_eligible
-    ) {
+    if (fixedDropMode === DropMode.BOTH && canUseChatComposer) {
       onDropModeChange(false);
       return;
     }
@@ -259,10 +269,10 @@ export default function CreateDrop({
     setDismissedQuorumProposalScope(quorumProposalScopeKey);
   }, [
     fixedDropMode,
+    canUseChatComposer,
     onExitFixedDropMode,
     onDropModeChange,
     quorumProposalScopeKey,
-    wave.chat.authenticated_user_eligible,
   ]);
 
   const onOpenQuorumProposal = useCallback(() => {
@@ -294,6 +304,51 @@ export default function CreateDrop({
     [canMentionAll]
   );
 
+  const startLocalSlowModeCooldown = useCallback(
+    (dropRequest: ApiCreateDropRequest) => {
+      const cooldownMs = wave.chat.slow_mode_cooldown_ms;
+      const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
+      const isCreator =
+        connectedHandle !== null &&
+        wave.author.handle?.toLowerCase() === connectedHandle;
+      const isAdmin = wave.wave.authenticated_user_eligible_for_admin === true;
+
+      if (typeof cooldownMs !== "number") {
+        return;
+      }
+
+      if (
+        dropRequest.drop_type !== ApiDropType.Chat ||
+        connectedHandle === null ||
+        isCreator ||
+        isAdmin
+      ) {
+        return;
+      }
+
+      const nextDropAllowed = Date.now() + cooldownMs;
+      queryClient.setQueryData<ApiWave>(
+        [QueryKey.WAVE, { wave_id: wave.id }],
+        (currentWave) => {
+          const sourceWave = currentWave ?? wave;
+          return {
+            ...sourceWave,
+            chat: {
+              ...sourceWave.chat,
+              next_drop_allowed: nextDropAllowed,
+            },
+          };
+        }
+      );
+      void queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+        })
+        .catch(() => undefined);
+    },
+    [connectedProfile?.handle, queryClient, wave]
+  );
+
   const addDropMutation = useMutation({
     mutationFn: async (body: DropMutationBody) => {
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
@@ -305,6 +360,7 @@ export default function CreateDrop({
       if (body.dropId) {
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
+      startLocalSlowModeCooldown(body.drop);
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
       body.onSuccess?.();
 
@@ -413,8 +469,11 @@ export default function CreateDrop({
           : null,
       canExitDropMode:
         (fixedDropMode === DropMode.BOTH &&
-          privileges.chatRestriction === null) ||
+          (privileges.chatRestriction === null ||
+            privileges.chatRestriction === ChatRestriction.SLOW_MODE)) ||
         (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
+      isChatBlockedBySlowMode:
+        privileges.chatRestriction === ChatRestriction.SLOW_MODE,
       externalAttachmentDrop,
       onExternalAttachmentDropConsumed,
       canSubmitCurationUrl: canUseCurationUrlSubmit,
