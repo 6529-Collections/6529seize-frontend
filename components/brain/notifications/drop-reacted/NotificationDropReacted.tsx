@@ -47,10 +47,12 @@ function NotificationVoteInlinePart({
   label,
   value,
   separator = "bullet",
+  textClassName = "tw-text-sm",
 }: {
   readonly label: string;
   readonly value: number | null | undefined;
   readonly separator?: "bullet" | "arrow";
+  readonly textClassName?: "tw-text-sm" | "tw-text-base";
 }) {
   if (!isNotificationNumber(value)) {
     return null;
@@ -61,19 +63,19 @@ function NotificationVoteInlinePart({
       <span
         className={
           separator === "arrow"
-            ? "tw-text-sm tw-font-bold tw-text-iron-400"
+            ? `${textClassName} tw-font-bold tw-text-iron-400`
             : "tw-text-xs tw-font-bold tw-text-iron-400"
         }
       >
         {separator === "arrow" ? "\u2192" : "\u2022"}
       </span>
-      <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+      <span className={`${textClassName} tw-font-normal tw-text-iron-400`}>
         {label}:
       </span>
       <span
         className={`${getNotificationVoteColor(
           value
-        )} tw-text-sm tw-font-medium tw-tabular-nums`}
+        )} ${textClassName} tw-font-medium tw-tabular-nums`}
       >
         {formatSignedNotificationNumber(value)}
       </span>
@@ -102,6 +104,7 @@ export default function NotificationDropReacted({
   let actionElement: React.ReactNode = null;
 
   if (isVoted) {
+    const voteTextClassName = "tw-text-base";
     const voteValue = notification.additional_context.vote;
     const voteChange = notification.additional_context.vote_change;
     const totalVote = notification.additional_context.total_vote;
@@ -112,26 +115,30 @@ export default function NotificationDropReacted({
       <>
         {isInitialRating ? (
           <>
-            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+            <span
+              className={`${voteTextClassName} tw-font-normal tw-text-iron-400`}
+            >
               rated
             </span>
             <span
               className={`${getNotificationVoteColor(
                 voteValue
-              )} tw-text-sm tw-font-medium tw-tabular-nums`}
+              )} ${voteTextClassName} tw-font-medium tw-tabular-nums`}
             >
               {formatSignedNotificationNumber(voteValue)}
             </span>
           </>
         ) : (
           <>
-            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+            <span
+              className={`${voteTextClassName} tw-font-normal tw-text-iron-400`}
+            >
               updated rating by
             </span>
             <span
               className={`${getNotificationVoteColor(
                 voteChange
-              )} tw-text-sm tw-font-medium tw-tabular-nums`}
+              )} ${voteTextClassName} tw-font-medium tw-tabular-nums`}
             >
               {formatSignedNotificationNumber(voteChange)}
             </span>
@@ -139,11 +146,19 @@ export default function NotificationDropReacted({
               label="New rating"
               value={voteValue}
               separator="arrow"
+              textClassName={voteTextClassName}
             />
           </>
         )}
-        <NotificationVoteInlinePart label="New Total" value={totalVote} />
-        <NotificationTimestamp createdAt={notification.created_at} />
+        <NotificationVoteInlinePart
+          label="New Total"
+          value={totalVote}
+          textClassName={voteTextClassName}
+        />
+        <NotificationTimestamp
+          createdAt={notification.created_at}
+          className={voteTextClassName}
+        />
       </>
     );
   } else if (isBoosted) {
@@ -179,6 +194,7 @@ export default function NotificationDropReacted({
     <div className="tw-flex tw-w-full tw-flex-col tw-space-y-2">
       <NotificationHeader
         author={notification.related_identity}
+        authorClassName={isVoted ? "tw-text-base" : undefined}
         actions={
           <NotificationsFollowBtn
             profile={notification.related_identity}
