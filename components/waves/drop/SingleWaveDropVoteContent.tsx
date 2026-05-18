@@ -48,7 +48,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   const rawCurrentVoteValue = displayDrop.context_profile_context?.rating ?? 0;
   const rawMinRating = displayDrop.context_profile_context?.min_rating ?? 0;
   const maxRating = displayDrop.context_profile_context?.max_rating ?? 0;
-  const minRating = displayDrop.wave.forbid_negative_votes ? 0 : rawMinRating;
+  const minRating = displayDrop.wave.forbid_negative_votes
+    ? Math.max(0, rawMinRating)
+    : rawMinRating;
   const currentVoteValue = rawCurrentVoteValue;
   const voteSourceKey = `${displayDrop.id}:${currentVoteValue}:${minRating}:${maxRating}`;
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
@@ -67,6 +69,38 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
 
+  const clampVoteValue = useCallback(
+    (value: number) => Math.min(Math.max(value, minRating), maxRating),
+    [maxRating, minRating]
+  );
+
+  const normalizeDraftValue = useCallback(
+    (value: string | number) => {
+      if (value === "" || value === "-") {
+        return value;
+      }
+
+      const numericValue = Number(value);
+      if (!Number.isFinite(numericValue)) {
+        return value;
+      }
+
+      return clampVoteValue(numericValue);
+    },
+    [clampVoteValue]
+  );
+
+  const getSubmitVoteValue = (value: string | number) => {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return numericValue;
+    }
+
+    return clampVoteValue(numericValue);
+  };
+
+  const submitVoteValue = getSubmitVoteValue(voteValue);
+
   const setVoteValue = useCallback(
     (nextValue: SetStateAction<string | number>) => {
       setVoteDraftState((current) => {
@@ -81,11 +115,11 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
         return {
           sourceKey: voteSourceKey,
-          value,
+          value: normalizeDraftValue(value),
         };
       });
     },
-    [currentVoteValue, voteSourceKey]
+    [currentVoteValue, normalizeDraftValue, voteSourceKey]
   );
 
   const handleVoteApplied = useCallback(
@@ -158,7 +192,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           <div className="tw-h-8 tw-flex-shrink-0">
             <SingleWaveDropVoteSubmit
               drop={displayDrop}
-              newRating={Number(voteValue)}
+              newRating={submitVoteValue}
               ref={submitRef}
               onVoteApplied={handleVoteApplied}
               onVoteSuccess={onVoteSuccess}
@@ -205,7 +239,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         <div className="tw-flex-shrink-0">
           <SingleWaveDropVoteSubmit
             drop={displayDrop}
-            newRating={Number(voteValue)}
+            newRating={submitVoteValue}
             ref={submitRef}
             onVoteApplied={handleVoteApplied}
             onVoteSuccess={onVoteSuccess}

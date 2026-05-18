@@ -218,6 +218,28 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   });
 
+  it("warns when a direct negative rating is submitted to a no-negative wave", () => {
+    renderComponent({
+      drop: {
+        ...mockDrop,
+        wave: {
+          ...mockDrop.wave,
+          forbid_negative_votes: true,
+        },
+      },
+      newRating: -5,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+      message: "Negative votes are not allowed in this wave.",
+      type: "warning",
+    });
+    expect(mockAuthContext.requestAuth).not.toHaveBeenCalled();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+  });
+
   it("calls onVoteApplied with the updated drop after a successful mutation", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
     const updatedDrop = {

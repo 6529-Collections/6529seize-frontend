@@ -172,6 +172,30 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(input.value).toBe("0");
   });
 
+  it("keeps a positive API minimum when negative votes are forbidden", async () => {
+    const dropWithPositiveMinimum = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: 20, min_rating: 10, max_rating: 100 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithPositiveMinimum} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    fireEvent.change(input, { target: { value: "5" } });
+
+    expect(input.value).toBe("10");
+    expect(submitButton).not.toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 10 });
+  });
+
   it("clamps vote value within limits and submits on click", async () => {
     render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
     const input = screen.getByRole("textbox");

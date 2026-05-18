@@ -48,7 +48,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const rawCurrentVoteValue = drop.context_profile_context?.rating ?? 0;
   const rawMinRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
-  const minRating = drop.wave.forbid_negative_votes ? 0 : rawMinRating;
+  const minRating = drop.wave.forbid_negative_votes
+    ? Math.max(0, rawMinRating)
+    : rawMinRating;
   const currentVoteValue = rawCurrentVoteValue;
   const hasMatchingOptimisticState =
     optimisticVoteState !== null &&
@@ -62,7 +64,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     ? optimisticVoteState.nextMaxRating
     : maxRating;
   const liveCurrentVoteValueString = String(liveCurrentVoteValue);
-  const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${liveMaxRating}`;
+  const voteSourceKey = `${drop.id}:${liveCurrentVoteValue}:${minRating}:${liveMaxRating}`;
   const voteValue =
     voteDraftState?.sourceKey === voteSourceKey
       ? voteDraftState.value
@@ -81,10 +83,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   };
 
   const clampVoteValue = (value: number) => {
-    const clampedValue = Math.min(Math.max(value, minRating), liveMaxRating);
-    return drop.wave.forbid_negative_votes
-      ? Math.max(0, clampedValue)
-      : clampedValue;
+    return Math.min(Math.max(value, minRating), liveMaxRating);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

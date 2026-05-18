@@ -181,7 +181,7 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("slider-value")).toHaveTextContent("-5");
     expect(screen.getByTestId("slider-input")).toHaveAttribute("min", "0");
-    expect(screen.getByTestId("new-rating")).toHaveTextContent("-5");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("0");
 
     fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
 
@@ -192,6 +192,44 @@ describe("SingleWaveDropVoteContent", () => {
     fireEvent.change(numericInput, { target: { value: "0" } });
 
     expect(screen.getByTestId("new-rating")).toHaveTextContent("0");
+  });
+
+  it("keeps a positive API minimum when negative votes are forbidden", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: 5,
+        min_rating: 10,
+        max_rating: 100,
+      },
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        forbid_negative_votes: true,
+      } as any,
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("slider-value")).toHaveTextContent("5");
+    expect(screen.getByTestId("slider-input")).toHaveAttribute("min", "10");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("10");
+
+    fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
+
+    const numericInput = screen.getByTestId("numeric-input");
+    expect(numericInput).toHaveAttribute("min", "10");
+    expect((numericInput as HTMLInputElement).value).toBe("5");
+
+    fireEvent.change(numericInput, { target: { value: "7" } });
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("10");
   });
 
   it("starts in slider mode by default", () => {
