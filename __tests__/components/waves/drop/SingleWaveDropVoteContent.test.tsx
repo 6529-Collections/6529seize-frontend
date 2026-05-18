@@ -17,6 +17,10 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
       <div data-testid="vote-submit">
         <button
           onClick={() => {
+            if (props.submitBlockReason) {
+              return;
+            }
+
             props.onVoteApplied?.({
               ...props.drop,
               context_profile_context: props.drop.context_profile_context
@@ -31,7 +35,10 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
         >
           Submit Vote
         </button>
-        <span data-testid="new-rating">{props.newRating}</span>
+        <span data-testid="new-rating">{String(props.newRating)}</span>
+        <span data-testid="submit-block-reason">
+          {props.submitBlockReason ?? ""}
+        </span>
       </div>
     );
   });
@@ -60,7 +67,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteInput", () => ({
     <div data-testid="vote-input">
       <input
         data-testid="numeric-input"
-        type="number"
+        type="text"
         min={props.minValue}
         max={props.maxValue}
         value={props.voteValue}
@@ -181,7 +188,14 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("slider-value")).toHaveTextContent("-5");
     expect(screen.getByTestId("slider-input")).toHaveAttribute("min", "0");
-    expect(screen.getByTestId("new-rating")).toHaveTextContent("0");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("-5");
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Change this vote before submitting."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
 
@@ -192,6 +206,12 @@ describe("SingleWaveDropVoteContent", () => {
     fireEvent.change(numericInput, { target: { value: "0" } });
 
     expect(screen.getByTestId("new-rating")).toHaveTextContent("0");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("current-rating")).toHaveTextContent("0");
   });
 
   it("keeps a positive API minimum when negative votes are forbidden", () => {
@@ -219,7 +239,14 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("slider-value")).toHaveTextContent("5");
     expect(screen.getByTestId("slider-input")).toHaveAttribute("min", "10");
-    expect(screen.getByTestId("new-rating")).toHaveTextContent("10");
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("5");
+    expect(screen.getByTestId("submit-block-reason")).toHaveTextContent(
+      "Change this vote before submitting."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
 
@@ -229,7 +256,46 @@ describe("SingleWaveDropVoteContent", () => {
 
     fireEvent.change(numericInput, { target: { value: "7" } });
 
+    expect((numericInput as HTMLInputElement).value).toBe("10");
     expect(screen.getByTestId("new-rating")).toHaveTextContent("10");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.click(screen.getByRole("button", { name: /submit vote/i }));
+
+    expect(mockOnVoteSuccess).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("current-rating")).toHaveTextContent("10");
+  });
+
+  it("treats empty and lone minus drafts as invalid submit values", () => {
+    const drop = createMockDrop({
+      context_profile_context: {
+        rating: 1,
+        min_rating: -10,
+        max_rating: 10,
+      },
+    });
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /numeric/i }));
+
+    const numericInput = screen.getByTestId("numeric-input");
+
+    fireEvent.change(numericInput, { target: { value: "" } });
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("NaN");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
+
+    fireEvent.change(numericInput, { target: { value: "-" } });
+
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("NaN");
+    expect(screen.getByTestId("submit-block-reason").textContent).toBe("");
   });
 
   it("starts in slider mode by default", () => {

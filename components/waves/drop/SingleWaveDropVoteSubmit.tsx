@@ -57,6 +57,7 @@ interface Props {
   readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
+  readonly submitBlockReason?: string | null | undefined;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<
@@ -70,6 +71,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
       onVoteApplied,
       onVoteSuccess,
       size = SingleWaveDropVoteSize.NORMAL,
+      submitBlockReason = null,
     }: Props,
     ref
   ) => {
@@ -115,6 +117,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
       position && position <= 3 ? rankingThemes[position] : defaultTheme;
 
     const getVoteError = () => {
+      if (submitBlockReason) {
+        return submitBlockReason;
+      }
+
       if (!Number.isFinite(newRating)) {
         return "Enter a valid vote.";
       }
@@ -335,7 +341,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           } ${isProcessing ? styles["processing"] : ""}`}
           onClick={(e) => {
             e.stopPropagation();
-            handleClick();
+            void handleClick();
           }}
         >
           {getButtonContent()}

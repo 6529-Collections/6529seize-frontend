@@ -56,10 +56,12 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
     null
   );
-  const voteValue =
-    voteDraftState?.sourceKey === voteSourceKey
-      ? voteDraftState.value
-      : currentVoteValue;
+  const activeVoteDraft =
+    voteDraftState !== null && voteDraftState.sourceKey === voteSourceKey
+      ? voteDraftState
+      : null;
+  const hasVoteDraft = activeVoteDraft !== null;
+  const voteValue = activeVoteDraft?.value ?? currentVoteValue;
   const [isSliderMode, setIsSliderMode] = useState(
     size !== SingleWaveDropVoteSize.MINI
   );
@@ -90,16 +92,26 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     [clampVoteValue]
   );
 
-  const getSubmitVoteValue = (value: string | number) => {
+  const getSubmitVoteValue = (value: string | number, shouldClamp: boolean) => {
+    if (value === "" || value === "-") {
+      return Number.NaN;
+    }
+
     const numericValue = Number(value);
     if (!Number.isFinite(numericValue)) {
       return numericValue;
     }
 
-    return clampVoteValue(numericValue);
+    return shouldClamp ? clampVoteValue(numericValue) : numericValue;
   };
 
-  const submitVoteValue = getSubmitVoteValue(voteValue);
+  const submitVoteValue = getSubmitVoteValue(voteValue, hasVoteDraft);
+  const loadedVoteOutOfRange =
+    !hasVoteDraft &&
+    (currentVoteValue < minRating || currentVoteValue > maxRating);
+  const submitBlockReason = loadedVoteOutOfRange
+    ? "Change this vote before submitting."
+    : null;
 
   const setVoteValue = useCallback(
     (nextValue: SetStateAction<string | number>) => {
@@ -135,9 +147,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     [baseRating, drop.id, invalidateDrops]
   );
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (submitRef.current) {
-      await submitRef.current.handleClick();
+      void submitRef.current.handleClick();
     }
   };
 
@@ -197,6 +209,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               onVoteApplied={handleVoteApplied}
               onVoteSuccess={onVoteSuccess}
               size={size}
+              submitBlockReason={submitBlockReason}
             />
           </div>
         </div>
@@ -243,6 +256,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             ref={submitRef}
             onVoteApplied={handleVoteApplied}
             onVoteSuccess={onVoteSuccess}
+            submitBlockReason={submitBlockReason}
           />
         </div>
       </div>

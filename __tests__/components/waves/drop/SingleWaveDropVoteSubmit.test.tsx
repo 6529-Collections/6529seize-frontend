@@ -240,6 +240,21 @@ describe("SingleWaveDropVoteSubmit", () => {
     expect(commonApi.commonApiPost).not.toHaveBeenCalled();
   });
 
+  it("shows submitBlockReason without requesting auth or calling the API", () => {
+    renderComponent({
+      submitBlockReason: "Change this vote before submitting.",
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+      message: "Change this vote before submitting.",
+      type: "warning",
+    });
+    expect(mockAuthContext.requestAuth).not.toHaveBeenCalled();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+  });
+
   it("calls onVoteApplied with the updated drop after a successful mutation", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
     const updatedDrop = {
@@ -374,7 +389,7 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     // Call the exposed method
     if (ref.current) {
-      ref.current.handleClick();
+      void ref.current.handleClick();
     }
 
     jest.advanceTimersByTime(300);
