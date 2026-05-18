@@ -24,6 +24,10 @@ type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
 };
 
+type ApiWaveOverviewWithVoteRestrictions = ApiWaveOverview & {
+  readonly forbid_negative_votes?: boolean;
+};
+
 const getIdentitySubscribedActions = (
   identity: ApiIdentityOverview
 ): ApiIdentitySubscriptionTargetAction[] =>
@@ -72,7 +76,7 @@ export const mapPriorityMetadataV2ToDropMetadata = (
   }));
 
 export const mapApiWaveOverviewToApiWaveMin = (
-  wave: ApiWaveOverview
+  wave: ApiWaveOverviewWithVoteRestrictions
 ): ApiWaveMin => ({
   id: wave.id,
   name: wave.name,
@@ -95,7 +99,7 @@ export const mapApiWaveOverviewToApiWaveMin = (
   voting_credit_type: ApiWaveCreditType.Tdh,
   voting_credit_nfts: null,
   admin_drop_deletion_enabled: false,
-  forbid_negative_votes: false,
+  forbid_negative_votes: wave.forbid_negative_votes === true,
   pinned: wave.context_profile_context?.pinned ?? false,
   identity_wave: false,
 });
