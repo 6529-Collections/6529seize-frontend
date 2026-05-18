@@ -8,13 +8,18 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: toastMock }),
 }));
 
-const update = (fn: any) => fn();
+const editorState = { id: "editor-state" };
+const update = (fn: any, options?: { onUpdate?: () => void }) => {
+  fn();
+  options?.onUpdate?.();
+};
 let commandHandler: any;
 const editor = {
   registerCommand: jest.fn((_cmd: any, fn: any) => {
     commandHandler = fn;
     return () => {};
   }),
+  getEditorState: jest.fn(() => editorState),
   update,
 } as any;
 
@@ -155,9 +160,10 @@ describe("DragDropPastePlugin", () => {
     expect(replace).toHaveBeenCalled();
   });
 
-  it("finishes an in-flight inline upload after becoming disabled", async () => {
+  it("finishes an in-flight inline upload after becoming disabled and syncs editor state", async () => {
     let resolveUpload: ((value: { url: string }) => void) | undefined;
     const replace = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
     ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
     (multiPartUpload as jest.Mock).mockReturnValue(
       new Promise((resolve) => {
@@ -165,13 +171,22 @@ describe("DragDropPastePlugin", () => {
       })
     );
 
-    const { rerender } = render(<DragDropPastePlugin />);
+    const { rerender } = render(
+      <DragDropPastePlugin
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
     await act(async () => {
       commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
       await Promise.resolve();
     });
 
-    rerender(<DragDropPastePlugin disabled />);
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
     await act(async () => {
       resolveUpload?.({ url: "uploaded" });
       await Promise.resolve();
@@ -179,11 +194,13 @@ describe("DragDropPastePlugin", () => {
     });
 
     expect(replace).toHaveBeenCalled();
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 
-  it("removes loading image and shows an error when in-flight upload fails after becoming disabled", async () => {
+  it("removes loading image, shows an error, and syncs editor state when in-flight upload fails after becoming disabled", async () => {
     let rejectUpload: ((reason: Error) => void) | undefined;
     const remove = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
     ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
     (multiPartUpload as jest.Mock).mockReturnValue(
       new Promise((_resolve, reject) => {
@@ -191,13 +208,22 @@ describe("DragDropPastePlugin", () => {
       })
     );
 
-    const { rerender } = render(<DragDropPastePlugin />);
+    const { rerender } = render(
+      <DragDropPastePlugin
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
     await act(async () => {
       commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
       await Promise.resolve();
     });
 
-    rerender(<DragDropPastePlugin disabled />);
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
     await act(async () => {
       rejectUpload?.(new Error("Upload failed"));
       await Promise.resolve();
@@ -209,6 +235,7 @@ describe("DragDropPastePlugin", () => {
       message: "Upload failed",
       type: "error",
     });
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 
   it("removes loading image and shows an error when inline upload hangs", async () => {

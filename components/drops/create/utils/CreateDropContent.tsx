@@ -334,7 +334,10 @@ const CreateDropContent = forwardRef<
                 ref={hashtagPluginRef}
               />
               <MaxLengthPlugin maxLength={25000} />
-              <DragDropPastePlugin disabled={loading} />
+              <DragDropPastePlugin
+                disabled={loading}
+                onUploadEditorStateChange={onEditorState}
+              />
               <ListPlugin />
               <PlainTextPastePlugin disabled={loading} />
               <MarkdownShortcutPlugin

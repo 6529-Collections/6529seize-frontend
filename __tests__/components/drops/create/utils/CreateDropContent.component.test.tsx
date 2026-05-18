@@ -240,7 +240,11 @@ describe("CreateDropContent basic", () => {
     expect(mockActionsRowProps.disabled).toBe(true);
     expect(mockToggleViewProps.disabled).toBe(true);
 
-    mockOnChangeProps.onChange({} as any);
+    const lockedEditorState = { id: "locked-editor-state" } as any;
+    mockOnChangeProps.onChange(lockedEditorState);
     expect(onEditorState).not.toHaveBeenCalled();
+
+    mockDragDropPasteProps.onUploadEditorStateChange(lockedEditorState);
+    expect(onEditorState).toHaveBeenCalledWith(lockedEditorState);
   });
 });

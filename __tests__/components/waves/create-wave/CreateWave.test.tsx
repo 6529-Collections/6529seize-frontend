@@ -460,6 +460,52 @@ describe("CreateWave", () => {
       });
     });
 
+    it("blocks submission while inline image uploads are still pending", async () => {
+      mockGetDropSnapshot.mockReturnValue({
+        parts: [{ content: "Draft with ![Seize](loading)" }],
+        title: "Test Drop",
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      });
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            image: new File([""], "test.jpg", { type: "image/jpeg" }),
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      const completeButton = screen.getByRole("button", { name: /complete/i });
+      fireEvent.click(completeButton);
+
+      await waitFor(() => {
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: "Please wait for image uploads to finish.",
+          type: "error",
+        });
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "false"
+        );
+      });
+
+      expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+      expect(mockGetDropSnapshot).toHaveBeenCalled();
+      expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
+      expect(mockedGenerateDropPart).not.toHaveBeenCalled();
+      expect(mockedMultiPartUpload).not.toHaveBeenCalled();
+      expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+    });
+
     it("shows error when admin group retrieval fails", async () => {
       mockedGetAdminGroupId.mockResolvedValue(null);
 

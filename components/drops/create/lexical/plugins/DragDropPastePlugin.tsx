@@ -3,8 +3,9 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { DRAG_DROP_PASTE } from "@lexical/rich-text";
 import { isMimeType, mediaFileReader } from "@lexical/utils";
+import type { EditorState } from "lexical";
 import { $getNodeByKey, $insertNodes, COMMAND_PRIORITY_LOW } from "lexical";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { $createImageNode } from "../nodes/ImageNode";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { useAuth } from "@/components/auth/Auth";
@@ -63,25 +64,42 @@ async function uploadImage(file: File): Promise<string> {
 export default function DragDropPaste({
   disabled = false,
   onAttachmentFiles,
+  onUploadEditorStateChange,
 }: {
   readonly disabled?: boolean | undefined;
   readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
+  readonly onUploadEditorStateChange?:
+    | ((editorState: EditorState) => void)
+    | undefined;
 }): null {
   const { setToast } = useAuth();
   const onAttachmentFilesRef = useRef(onAttachmentFiles);
+  const onUploadEditorStateChangeRef = useRef(onUploadEditorStateChange);
   const disabledRef = useRef(disabled);
 
   useEffect(() => {
     onAttachmentFilesRef.current = onAttachmentFiles;
   }, [onAttachmentFiles]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    onUploadEditorStateChangeRef.current = onUploadEditorStateChange;
+  }, [onUploadEditorStateChange]);
+
+  useLayoutEffect(() => {
     disabledRef.current = disabled;
   }, [disabled]);
 
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     let isMounted = true;
+    const syncUploadEditorStateWhenDisabled = () => {
+      if (!disabledRef.current) {
+        return;
+      }
+
+      onUploadEditorStateChangeRef.current?.(editor.getEditorState());
+    };
+
     const unregister = editor.registerCommand(
       DRAG_DROP_PASTE,
       (files) => {
@@ -119,21 +137,43 @@ export default function DragDropPaste({
                 uploadImage(file)
                   .then((url: string) => {
                     if (!isMounted) return;
-                    editor.update(() => {
-                      const node = $getNodeByKey(key);
-                      if (node) {
-                        node.replace($createImageNode({ src: url }));
+                    let replacedLoadingImage = false;
+                    editor.update(
+                      () => {
+                        const node = $getNodeByKey(key);
+                        if (node) {
+                          node.replace($createImageNode({ src: url }));
+                          replacedLoadingImage = true;
+                        }
+                      },
+                      {
+                        onUpdate: () => {
+                          if (replacedLoadingImage) {
+                            syncUploadEditorStateWhenDisabled();
+                          }
+                        },
                       }
-                    });
+                    );
                   })
                   .catch((err: unknown) => {
                     if (!isMounted) return;
-                    editor.update(() => {
-                      const node = $getNodeByKey(key);
-                      if (node) {
-                        node.remove();
+                    let removedLoadingImage = false;
+                    editor.update(
+                      () => {
+                        const node = $getNodeByKey(key);
+                        if (node) {
+                          node.remove();
+                          removedLoadingImage = true;
+                        }
+                      },
+                      {
+                        onUpdate: () => {
+                          if (removedLoadingImage) {
+                            syncUploadEditorStateWhenDisabled();
+                          }
+                        },
                       }
-                    });
+                    );
                     setToast({
                       message:
                         err instanceof Error
