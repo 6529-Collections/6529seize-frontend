@@ -1,9 +1,9 @@
 "use client";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useCreateModalState from "@/hooks/useCreateModalState";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
 import React, { useEffect, useEffectEvent, useRef } from "react";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
@@ -31,6 +31,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   scrollContainerRef,
 }) => {
   const { isApp } = useDeviceInfo();
+  const { openWave } = useCreateModalState();
   // Refs to the scroll container and sentinel
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
 
@@ -79,16 +80,17 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
       <div className="tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
         {!isApp && (
           <div className="tw-mb-4 tw-w-full tw-px-4">
-            <Link
-              href="/waves?create=wave"
-              className="tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition-all tw-duration-300 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-ring-iron-700"
+            <button
+              type="button"
+              onClick={openWave}
+              className="tw-flex tw-w-full tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition-all tw-duration-300 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-ring-iron-700"
             >
               <FontAwesomeIcon
                 icon={faPlus}
                 className="-tw-ml-1.5 tw-size-3.5 tw-flex-shrink-0"
               />
               <span className="tw-text-xs tw-font-semibold">Create Wave</span>
-            </Link>
+            </button>
           </div>
         )}
 

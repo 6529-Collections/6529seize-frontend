@@ -13,33 +13,39 @@ type SupportedCurationUrlExample = {
   readonly example: string;
 };
 
-const toSupportedCurationUrlExample = (
-  [label, example]: readonly [string, string]
-): SupportedCurationUrlExample => ({
+const toSupportedCurationUrlExample = ([label, example]: readonly [
+  string,
+  string,
+]): SupportedCurationUrlExample => ({
   label,
   example,
 });
 
 export const SUPPORTED_CURATION_URL_EXAMPLES: readonly SupportedCurationUrlExample[] =
-  ([
-    ["SuperRare artwork", "https://superrare.com/artwork/eth/0x.../123"],
-    ["Transient NFT", "https://transient.xyz/nfts/ethereum/0x.../123"],
-    ["Transient mint", "https://transient.xyz/mint/your-drop-slug"],
-    ["Manifold listing", "https://manifold.xyz/@creator/id/123"],
-    ["Foundation mint", "https://foundation.app/mint/eth/0x.../123"],
-    ["gammaio ordinal", "https://gamma.io/ordinals/abc123i0"],
+  (
     [
-      "gammaio print details",
-      "https://gamma.io/ordinals/prints/your-print-id/details",
-    ],
-    [
-      "gammaio collection token",
-      "https://gamma.io/collections/collection-slug/123",
-    ],
-    ["gammaio Stacks NFT", "https://gamma.io/stacks/nfts/SP...collection_123"],
-    ["OpenSea item", "https://opensea.io/item/ethereum/0x.../123"],
-    ["OpenSea asset", "https://opensea.io/assets/ethereum/0x.../123"],
-  ] as const).map(toSupportedCurationUrlExample);
+      ["SuperRare artwork", "https://superrare.com/artwork/eth/0x.../123"],
+      ["Transient NFT", "https://transient.xyz/nfts/ethereum/0x.../123"],
+      ["Transient mint", "https://transient.xyz/mint/your-drop-slug"],
+      ["Manifold listing", "https://manifold.xyz/@creator/id/123"],
+      ["Foundation mint", "https://foundation.app/mint/eth/0x.../123"],
+      ["gammaio ordinal", "https://gamma.io/ordinals/abc123i0"],
+      [
+        "gammaio print details",
+        "https://gamma.io/ordinals/prints/your-print-id/details",
+      ],
+      [
+        "gammaio collection token",
+        "https://gamma.io/collections/collection-slug/123",
+      ],
+      [
+        "gammaio Stacks NFT",
+        "https://gamma.io/stacks/nfts/SP...collection_123",
+      ],
+      ["OpenSea item", "https://opensea.io/item/ethereum/0x.../123"],
+      ["OpenSea asset", "https://opensea.io/assets/ethereum/0x.../123"],
+    ] as const
+  ).map(toSupportedCurationUrlExample);
 
 const HAS_WHITESPACE_REGEX = /\s/;
 const HAS_SCHEME_REGEX = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;

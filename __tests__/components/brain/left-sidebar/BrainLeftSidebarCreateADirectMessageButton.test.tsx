@@ -1,44 +1,30 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useAuth } from "@/components/auth/Auth";
 import BrainLeftSidebarCreateADirectMessageButton from "@/components/brain/left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
 
-jest.mock("next/link", () => ({
+const mockOpenDirectMessage = jest.fn();
+jest.mock("@/hooks/useCreateModalState", () => ({
   __esModule: true,
-  default: ({ href, children }: any) => <a href={href}>{children}</a>,
-}));
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(() => ({ replace: jest.fn(), push: jest.fn() })),
-  usePathname: jest.fn(() => "/messages"),
-  useSearchParams: jest.fn(() => new URLSearchParams()),
-}));
-jest.mock("@/hooks/useDeviceInfo", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({ isApp: false })),
+  default: jest.fn(() => ({ openDirectMessage: mockOpenDirectMessage })),
 }));
 jest.mock("@/components/auth/Auth");
 
 const mockedUseAuth = useAuth as jest.Mock;
-const { useRouter, usePathname, useSearchParams } = require("next/navigation");
-const { default: useDeviceInfo } = require("@/hooks/useDeviceInfo");
 
 describe("BrainLeftSidebarCreateADirectMessageButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({ replace: jest.fn(), push: jest.fn() });
-    (usePathname as jest.Mock).mockReturnValue("/messages");
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-    (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   });
 
-  it('shows "Create DM" when user is connected with no active proxy', () => {
+  it('shows "Create DM" and opens locally when user is connected with no active proxy', async () => {
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "john" },
       activeProfileProxy: null,
     });
     render(<BrainLeftSidebarCreateADirectMessageButton />);
-    const link = screen.getByRole("link");
-    expect(link).toHaveAttribute("href", "/messages?create=dm");
-    expect(screen.getByText("Create DM")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Create DM" }));
+    expect(mockOpenDirectMessage).toHaveBeenCalledTimes(1);
   });
 
   it('shows "Direct Message" when no connected profile or active proxy present', () => {

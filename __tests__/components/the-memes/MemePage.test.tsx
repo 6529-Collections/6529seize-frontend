@@ -2,7 +2,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import MemePage from "@/components/the-memes/MemePage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -53,9 +53,18 @@ jest.mock("@/components/the-memes/MemePageActivity", () => ({
     show ? <div data-testid="activity">Activity</div> : null,
 }));
 
+jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
+  MemePageArtViewer: () => <div data-testid="art-viewer" />,
+}));
+
 jest.mock("@/components/the-memes/MemePageArt", () => ({
   MemePageArt: ({ show }: any) =>
     show ? <div data-testid="art">Art</div> : null,
+}));
+
+jest.mock("@/components/the-memes/MemePageReferences", () => ({
+  MemePageReferencesSubMenu: ({ show }: any) =>
+    show ? <div data-testid="references-sub">References</div> : null,
 }));
 
 jest.mock("@/components/the-memes/MemePageTimeline", () => ({
@@ -81,10 +90,12 @@ jest.mock("@/components/nft-navigation/NftNavigation", () => {
   return MockNftNavigation;
 });
 
-const mockReplace = jest.fn((url: string, _options?: { scroll?: boolean | undefined }) => {
-  const parsedUrl = new URL(url, "https://example.com");
-  currentFocus = parsedUrl.searchParams.get("focus");
-});
+const mockReplace = jest.fn(
+  (url: string, _options?: { scroll?: boolean | undefined }) => {
+    const parsedUrl = new URL(url, "https://example.com");
+    currentFocus = parsedUrl.searchParams.get("focus");
+  }
+);
 let currentFocus: string | null = null;
 const mockSearchParams = {
   get: jest.fn((key: string) => (key === "focus" ? currentFocus : null)),
@@ -171,6 +182,7 @@ const nft = {
   tdh_rank: 0,
   hodl_rate: 0,
   highest_offer: 0,
+  has_distribution: true,
 };
 
 (fetchUrl as jest.Mock).mockImplementation((url: string) => {
@@ -215,11 +227,21 @@ function renderPage() {
     title: "Test Title",
   };
 
-  return render(
+  const page = render(
     <AuthContext.Provider value={mockAuthContext as any}>
       <MemePage nftId="1" />
     </AuthContext.Provider>
   );
+
+  return {
+    ...page,
+    rerenderPage: () =>
+      page.rerender(
+        <AuthContext.Provider value={mockAuthContext as any}>
+          <MemePage nftId="1" />
+        </AuthContext.Provider>
+      ),
+  };
 }
 
 // Mock TitleContext
@@ -244,36 +266,59 @@ describe("MemePage tab navigation", () => {
   });
 
   it.each([
-    ["Live", MEME_FOCUS.LIVE, "live-right"],
-    ["Your Cards", MEME_FOCUS.YOUR_CARDS, "yourcards-right"],
-    ["The Art", MEME_FOCUS.THE_ART, "art"],
     ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-right"],
-    ["Activity", MEME_FOCUS.ACTIVITY, "activity"],
-    ["Timeline", MEME_FOCUS.TIMELINE, "timeline"],
+    ["History", MEME_FOCUS.ACTIVITY, "activity"],
+    ["References", MEME_FOCUS.REFERENCES, "references-sub"],
   ])(
     "selecting %s shows component and updates query",
     async (label, focus, testId) => {
-      renderPage();
+      const page = renderPage();
       await waitFor(() =>
         expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
       );
 
       mockReplace.mockClear();
-      const btn = screen.getByRole("button", { name: label });
-      await userEvent.click(btn);
+      await userEvent.click(screen.getByRole("button", { name: label }));
+
+      expect(mockReplace).toHaveBeenLastCalledWith(
+        `/the-memes/1?focus=${focus}`,
+        { scroll: false }
+      );
+
+      page.rerenderPage();
 
       await waitFor(() => {
         expect(screen.getByTestId(testId)).toBeInTheDocument();
       });
-
-      if (label !== "Live") {
-        expect(mockReplace).toHaveBeenLastCalledWith(
-          `/the-memes/1?focus=${focus}`,
-          { scroll: false }
-        );
-      }
     }
   );
+
+  it("selects the Timeline history subtab", async () => {
+    const page = renderPage();
+    await waitFor(() =>
+      expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "History" }));
+    page.rerenderPage();
+    await waitFor(() => {
+      expect(screen.getByTestId("activity")).toBeInTheDocument();
+    });
+
+    mockReplace.mockClear();
+    await userEvent.click(screen.getByRole("tab", { name: "Timeline" }));
+
+    expect(mockReplace).toHaveBeenLastCalledWith(
+      `/the-memes/1?focus=${MEME_FOCUS.TIMELINE}`,
+      { scroll: false }
+    );
+
+    page.rerenderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("timeline")).toBeInTheDocument();
+    });
+  });
 });
 
 describe("MemePage search params handling", () => {
@@ -289,6 +334,31 @@ describe("MemePage search params handling", () => {
     await waitFor(() => {
       expect(screen.getByTestId("live-right")).toBeInTheDocument();
     });
+  });
+
+  it("uses mobile-first Tailwind ordering for the minting box and artwork", async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("mint-countdown")).toBeInTheDocument();
+      expect(screen.getByTestId("art-viewer")).toBeInTheDocument();
+    });
+
+    const mintCountdown = screen.getByTestId("mint-countdown");
+    const artViewer = screen.getByTestId("art-viewer");
+    const detailsColumn = mintCountdown.parentElement;
+    const artworkColumn = artViewer.parentElement?.parentElement;
+    const headerGrid = artworkColumn?.parentElement;
+
+    expect(screen.getAllByTestId("mint-countdown")).toHaveLength(1);
+    expect(headerGrid).toHaveClass("lg:tw-items-center");
+    expect(headerGrid?.className).toContain(
+      "lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)]"
+    );
+    expect(detailsColumn?.className).toContain("tw-contents");
+    expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
+    expect(artworkColumn).toHaveClass("tw-order-2");
+    expect(artworkColumn).toHaveClass("lg:tw-self-center");
   });
 
   it("sets focus from valid search param", async () => {
@@ -314,11 +384,11 @@ describe("MemePage search params handling", () => {
       expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
     );
 
-    const artButton = screen.getByRole("button", { name: "The Art" });
-    await userEvent.click(artButton);
+    const referencesButton = screen.getByRole("button", { name: "References" });
+    await userEvent.click(referencesButton);
 
     expect(mockReplace).toHaveBeenCalledWith(
-      `/the-memes/1?focus=${MEME_FOCUS.THE_ART}`,
+      `/the-memes/1?focus=${MEME_FOCUS.REFERENCES}`,
       { scroll: false }
     );
   });
@@ -492,10 +562,11 @@ describe("MemePage loading states", () => {
 
     renderPage();
 
-    // Should render title and basic structure even while loading
-    expect(
-      screen.getByRole("heading", { name: "The Memes" })
-    ).toBeInTheDocument();
+    // Should render basic navigation structure even while loading
+    expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
+      "href",
+      "/the-memes"
+    );
   });
 
   it("shows content only after metadata and NFT load", async () => {
@@ -516,7 +587,7 @@ describe("MemePage loading states", () => {
     await waitFor(
       () => {
         expect(
-          screen.getByRole("button", { name: "Live" })
+          screen.getByRole("button", { name: "Overview" })
         ).toBeInTheDocument();
       },
       { timeout: 3000 }
@@ -530,11 +601,25 @@ describe("MemePage navigation integration", () => {
 
     await waitFor(
       () => {
-        expect(screen.getByText(/SZN1/)).toBeInTheDocument();
+        expect(screen.getByText(/SZN/)).toBeInTheDocument();
+        const calendarPosition = screen.getByLabelText(
+          "Meme calendar position"
+        );
+        expect(calendarPosition).toHaveClass("tw-hidden", "md:tw-flex");
+        expect(within(calendarPosition).getByText("YEAR")).toBeInTheDocument();
+        expect(within(calendarPosition).getByText("EPOCH")).toBeInTheDocument();
         expect(screen.getByText(/Card 1/)).toBeInTheDocument();
         expect(
-          screen.getByRole("heading", { name: "The Memes" })
-        ).toBeInTheDocument();
+          screen.getByRole("heading", { level: 1, name: "Card 1 — Meme" })
+        ).toHaveTextContent("Meme");
+        expect(screen.getByTestId("nft-navigation")).toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
+          "href",
+          "/the-memes"
+        );
+        expect(
+          screen.getByRole("link", { name: "View SZN 1 cards" })
+        ).toHaveAttribute("href", "/the-memes?szn=1&sort=age&sort_dir=ASC");
       },
       { timeout: 5000 }
     );
