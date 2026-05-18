@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  SLOW_MODE_MIN_MS,
-  isSlowModeCoolingDown,
-} from "@/helpers/waves/slow-mode.helpers";
-import { useEffect, useMemo, useState } from "react";
+import { isSlowModeCoolingDown } from "@/helpers/waves/slow-mode.helpers";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 enum SubmissionStatus {
   NOT_STARTED = "NOT_STARTED",
@@ -41,6 +38,7 @@ interface DropPrivilegesInput {
   readonly submissionEnds: number | null;
   readonly maxDropsCount: number | null;
   readonly identityDropsCount: number | null;
+  readonly onSlowModeCooldownExpired?: (() => void) | undefined;
 }
 
 export interface DropPrivileges {
@@ -60,25 +58,42 @@ export function useDropPrivileges({
   submissionEnds,
   maxDropsCount,
   identityDropsCount,
+  onSlowModeCooldownExpired,
 }: DropPrivilegesInput): DropPrivileges {
   const [slowModeClockTick, setSlowModeClockTick] = useState(0);
+  const notifiedExpiredSlowModeRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (slowModeCooldownMs === null || nextDropAllowed === null) {
       return;
     }
 
+    const notifyExpiredSlowMode = () => {
+      if (
+        canChat ||
+        onSlowModeCooldownExpired === undefined ||
+        notifiedExpiredSlowModeRef.current === nextDropAllowed
+      ) {
+        return;
+      }
+
+      notifiedExpiredSlowModeRef.current = nextDropAllowed;
+      onSlowModeCooldownExpired();
+    };
+
     const remainingMs = nextDropAllowed - Date.now();
     if (remainingMs <= 0) {
+      notifyExpiredSlowMode();
       return;
     }
 
     const timeout = setTimeout(() => {
       setSlowModeClockTick((current) => current + 1);
+      notifyExpiredSlowMode();
     }, remainingMs);
 
     return () => clearTimeout(timeout);
-  }, [nextDropAllowed, slowModeCooldownMs]);
+  }, [canChat, nextDropAllowed, onSlowModeCooldownExpired, slowModeCooldownMs]);
 
   return useMemo(() => {
     const now = Date.now();
@@ -125,14 +140,6 @@ export function useDropPrivileges({
       nextDropAllowed,
       now,
     });
-    const hasSlowModeGate =
-      typeof slowModeCooldownMs === "number" &&
-      !Number.isNaN(slowModeCooldownMs) &&
-      slowModeCooldownMs >= SLOW_MODE_MIN_MS &&
-      typeof nextDropAllowed === "number" &&
-      !Number.isNaN(nextDropAllowed) &&
-      nextDropAllowed > 0;
-
     let submissionRestriction: SubmissionRestriction | null = null;
     if (!isLoggedIn) {
       submissionRestriction = SubmissionRestriction.NOT_LOGGED_IN;
@@ -155,7 +162,7 @@ export function useDropPrivileges({
       chatRestriction = ChatRestriction.PROXY_USER;
     } else if (chatDisabled) {
       chatRestriction = ChatRestriction.DISABLED;
-    } else if (isChatCoolingDown || (!canChat && hasSlowModeGate)) {
+    } else if (isChatCoolingDown) {
       chatRestriction = ChatRestriction.SLOW_MODE;
     } else if (!canChat) {
       chatRestriction = ChatRestriction.NO_PERMISSION;

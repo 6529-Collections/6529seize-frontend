@@ -3,8 +3,16 @@ import React from "react";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useDropPrivileges } from "@/hooks/useDropPriviledges";
 
+const mockInvalidateQueries = jest.fn(() => Promise.resolve());
+
+jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+  }),
+}));
 jest.mock("@/hooks/useDropPriviledges", () => ({
   useDropPrivileges: jest.fn(),
   ChatRestriction: { SLOW_MODE: "SLOW_MODE" },
@@ -23,12 +31,18 @@ jest.mock("@/components/waves/CreateDrop", () => ({
 
 const mockPriv = useDropPrivileges as jest.Mock;
 const wave: any = {
+  id: "wave-1",
   chat: { authenticated_user_eligible: true, enabled: true },
   participation: { authenticated_user_eligible: true },
   metrics: {},
 };
 
 describe("PrivilegedDropCreator", () => {
+  beforeEach(() => {
+    mockPriv.mockReset();
+    mockInvalidateQueries.mockClear();
+  });
+
   it("shows both placeholder when both restricted", () => {
     mockPriv.mockReturnValue({
       submissionRestriction: "SUB",
@@ -127,5 +141,29 @@ describe("PrivilegedDropCreator", () => {
     );
     expect(screen.getByTestId("create")).toBeInTheDocument();
     expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+  });
+
+  it("invalidates the wave when the slow mode expiry callback fires", () => {
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: null,
+    });
+    render(
+      <PrivilegedDropCreator
+        activeDrop={null}
+        onCancelReplyQuote={() => {}}
+        onDropAddedToQueue={() => {}}
+        wave={wave}
+        dropId={null}
+        fixedDropMode={DropMode.CHAT}
+      />
+    );
+
+    const privilegesInput = mockPriv.mock.calls[0][0];
+    privilegesInput.onSlowModeCooldownExpired();
+
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
+    });
   });
 });

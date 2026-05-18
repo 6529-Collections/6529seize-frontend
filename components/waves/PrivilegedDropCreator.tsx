@@ -1,6 +1,9 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
@@ -57,7 +60,16 @@ export default function PrivilegedDropCreator({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
 }: PrivilegedDropCreatorProps) {
+  const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const refreshWaveAfterSlowModeExpires = useCallback(() => {
+    void queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+      })
+      .catch(() => undefined);
+  }, [queryClient, wave.id]);
+
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: !!connectedProfile?.handle,
     isProxy: !!activeProfileProxy,
@@ -71,6 +83,7 @@ export default function PrivilegedDropCreator({
     maxDropsCount:
       wave.participation.no_of_applications_allowed_per_participant ?? null,
     identityDropsCount: wave.metrics.your_participation_drops_count,
+    onSlowModeCooldownExpired: refreshWaveAfterSlowModeExpires,
   });
   const blockingChatRestriction =
     chatRestriction === ChatRestriction.SLOW_MODE ? null : chatRestriction;
