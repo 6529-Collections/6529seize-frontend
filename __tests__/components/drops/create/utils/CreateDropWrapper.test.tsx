@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import CreateDropWrapper from "@/components/drops/create/utils/CreateDropWrapper";
 import { WalletValidationError } from "@/src/errors/wallet";
@@ -60,7 +60,10 @@ jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
     }));
 
     return (
-      <div data-testid="create-drop-compact">
+      <div
+        data-can-add-part={props.canAddPart}
+        data-testid="create-drop-compact"
+      >
         Compact View
         <button
           data-testid="set-compact-editor-state"
@@ -68,6 +71,13 @@ jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
           type="button"
         >
           Set editor
+        </button>
+        <button
+          data-testid="sync-compact-upload-editor-state"
+          onClick={() => props.onUploadEditorStateChange({})}
+          type="button"
+        >
+          Sync upload editor
         </button>
       </div>
     );
@@ -81,7 +91,7 @@ jest.mock("@/components/drops/create/full/CreateDropFull", () => {
     }));
 
     return (
-      <div data-testid="create-drop-full">
+      <div data-can-add-part={props.canAddPart} data-testid="create-drop-full">
         Full View
         <button
           data-testid="set-full-editor-state"
@@ -89,6 +99,13 @@ jest.mock("@/components/drops/create/full/CreateDropFull", () => {
           type="button"
         >
           Set editor
+        </button>
+        <button
+          data-testid="sync-full-upload-editor-state"
+          onClick={() => props.onUploadEditorStateChange({})}
+          type="button"
+        >
+          Sync upload editor
         </button>
         <button
           data-testid="add-full-part"
@@ -524,6 +541,146 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(result.parts).toEqual([]);
+    });
+
+    it("syncs upload editor state while loading", () => {
+      mockMarkdown = "uploaded ![Seize](https://cdn.example/image.png)";
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const setDrop = jest.fn();
+      const component = React.createRef<any>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            loading={true}
+            setDrop={setDrop}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      fireEvent.click(getByTestId("sync-full-upload-editor-state"));
+
+      const result = component.current?.getDropSnapshot();
+
+      expect(setDrop).not.toHaveBeenCalled();
+      expect(result.parts[0].content).toBe(
+        "uploaded ![Seize](https://cdn.example/image.png)"
+      );
+    });
+
+    it("disables adding a storm part while inline image upload markdown is pending", async () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const component = React.createRef<any>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      mockMarkdown = "ready part";
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "true"
+        );
+      });
+
+      mockMarkdown = "pending ![Seize](loading)";
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-add-part",
+          "false"
+        );
+      });
+    });
+
+    it("does not save a storm part while inline image upload markdown is pending", () => {
+      mockMarkdown = "pending ![Seize](loading)";
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const setDrop = jest.fn();
+      const setIsStormMode = jest.fn();
+      const component = React.createRef<any>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            setDrop={setDrop}
+            setIsStormMode={setIsStormMode}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      fireEvent.click(getByTestId("set-full-editor-state"));
+      fireEvent.click(getByTestId("add-full-part"));
+
+      const result = component.current?.getDropSnapshot();
+
+      expect(setDrop).not.toHaveBeenCalled();
+      expect(setIsStormMode).not.toHaveBeenCalled();
+      expect(result.parts[0].content).toBe("pending ![Seize](loading)");
+    });
+
+    it("saves a storm part once inline image markdown has an uploaded URL", () => {
+      mockMarkdown = "ready ![Seize](https://cdn.example/image.png)";
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const setDrop = jest.fn();
+      const setIsStormMode = jest.fn();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            {...defaultProps}
+            setDrop={setDrop}
+            setIsStormMode={setIsStormMode}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      fireEvent.click(getByTestId("set-full-editor-state"));
+      fireEvent.click(getByTestId("add-full-part"));
+
+      expect(setIsStormMode).toHaveBeenCalledWith(true);
+      expect(setDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          parts: [
+            expect.objectContaining({
+              content: "ready ![Seize](https://cdn.example/image.png)",
+            }),
+          ],
+        })
+      );
     });
   });
 });

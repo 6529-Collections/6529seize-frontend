@@ -53,6 +53,7 @@ interface CreateDropFullDesktopProps {
   readonly onMetadataRemove: (data_key: string) => void;
   readonly onTitle: (newV: string | null) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -90,6 +91,7 @@ const CreateDropFullDesktop = forwardRef<
       onMetadataRemove,
       onTitle,
       onEditorState,
+      onUploadEditorStateChange,
       onMentionedUser,
       onMentionedWave,
       onReferencedNft,
@@ -219,6 +221,7 @@ const CreateDropFullDesktop = forwardRef<
                 canSubmit={canSubmit}
                 onDrop={onDrop}
                 onEditorState={onEditorState}
+                onUploadEditorStateChange={onUploadEditorStateChange}
                 onMentionedUser={onMentionedUser}
                 onMentionedWave={onMentionedWave}
                 onReferencedNft={onReferencedNft}

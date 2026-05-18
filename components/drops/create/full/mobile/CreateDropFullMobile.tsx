@@ -49,6 +49,7 @@ interface CreateDropFullMobileProps {
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
   readonly onMetadataRemove: (key: string) => void;
   readonly onMentionedUser: (
@@ -85,6 +86,7 @@ const CreateDropFullMobile = forwardRef<
       missingMetadata,
       children,
       onEditorState,
+      onUploadEditorStateChange,
       onMetadataEdit,
       onMetadataRemove,
       onMentionedUser,
@@ -203,6 +205,7 @@ const CreateDropFullMobile = forwardRef<
               missingMedia={missingMedia}
               missingMetadata={missingMetadata}
               onEditorState={onEditorState}
+              onUploadEditorStateChange={onUploadEditorStateChange}
               onDrop={onDrop}
               onMentionedUser={onMentionedUser}
               onMentionedWave={onMentionedWave}

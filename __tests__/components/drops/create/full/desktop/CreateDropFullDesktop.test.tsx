@@ -63,6 +63,7 @@ function renderComponent(
       onMetadataRemove={jest.fn()}
       onViewChange={props.onViewChange ?? jest.fn()}
       onEditorState={jest.fn()}
+      onUploadEditorStateChange={jest.fn()}
       onMentionedUser={jest.fn()}
       onMentionedWave={jest.fn()}
       onReferencedNft={jest.fn()}

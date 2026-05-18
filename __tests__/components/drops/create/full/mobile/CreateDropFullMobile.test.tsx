@@ -61,6 +61,7 @@ describe("CreateDropFullMobile", () => {
         onMetadataRemove={jest.fn()}
         onViewChange={onViewChange}
         onEditorState={jest.fn()}
+        onUploadEditorStateChange={jest.fn()}
         onMentionedUser={jest.fn()}
         onMentionedWave={jest.fn()}
         onReferencedNft={jest.fn()}

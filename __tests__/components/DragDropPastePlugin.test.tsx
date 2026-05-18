@@ -262,6 +262,40 @@ describe("DragDropPastePlugin", () => {
       type: "error",
     });
   });
+
+  it("removes loading image and syncs editor state when inline upload hangs after becoming disabled", async () => {
+    jest.useFakeTimers();
+    const remove = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    (multiPartUpload as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    const { rerender } = render(
+      <DragDropPastePlugin
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(30_000);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(remove).toHaveBeenCalled();
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
+  });
 });
 
 function renderPlugin(props = {}) {

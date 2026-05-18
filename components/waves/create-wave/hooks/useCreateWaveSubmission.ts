@@ -7,9 +7,9 @@ import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import type { CreateDropConfig } from "@/entities/IDrop";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
+import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
 import type { CreateWaveDescriptionHandles } from "../description/CreateWaveDescription";
 import { getCreateWaveDropRequest } from "../services/createWaveDropRequest";
 import { multiPartUpload } from "../services/multiPartUpload";
@@ -22,8 +22,6 @@ interface UseCreateWaveSubmissionParams {
   readonly onSuccess?: (() => void) | undefined;
 }
 
-const INLINE_IMAGE_UPLOAD_MARKDOWN_PLACEHOLDER = "![Seize](loading)";
-
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (typeof error === "string") {
     return error;
@@ -35,11 +33,6 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 
   return fallback;
 };
-
-const hasPendingInlineImageUpload = (drop: CreateDropConfig): boolean =>
-  drop.parts.some((part) =>
-    part.content?.includes(INLINE_IMAGE_UPLOAD_MARKDOWN_PLACEHOLDER)
-  );
 
 export function useCreateWaveSubmission({
   config,
@@ -136,7 +129,7 @@ export function useCreateWaveSubmission({
         return;
       }
 
-      if (hasPendingInlineImageUpload(drop)) {
+      if (hasPendingInlineImageUploadDrop(drop)) {
         setToast({
           message: "Please wait for image uploads to finish.",
           type: "error",

@@ -39,6 +39,7 @@ interface CreateDropCompactProps {
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -72,6 +73,7 @@ const CreateDropCompact = forwardRef<
       children,
       onViewChange,
       onEditorState,
+      onUploadEditorStateChange,
       onMentionedUser,
       onMentionedWave,
       onReferencedNft,
@@ -133,6 +135,7 @@ const CreateDropCompact = forwardRef<
                 missingMedia={missingMedia}
                 missingMetadata={missingMetadata}
                 onEditorState={onEditorState}
+                onUploadEditorStateChange={onUploadEditorStateChange}
                 onMentionedUser={onMentionedUser}
                 onMentionedWave={onMentionedWave}
                 onReferencedNft={onReferencedNft}

@@ -44,6 +44,7 @@ interface CreateDropFullProps {
   readonly onMetadataRemove: (key: string) => void;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -79,6 +80,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       onMetadataRemove,
       onViewChange,
       onEditorState,
+      onUploadEditorStateChange,
       onMentionedUser,
       onMentionedWave,
       onReferencedNft,
@@ -122,6 +124,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
           onEditorState={onEditorState}
+          onUploadEditorStateChange={onUploadEditorStateChange}
           onMentionedUser={onMentionedUser}
           onMentionedWave={onMentionedWave}
           onReferencedNft={onReferencedNft}
@@ -151,6 +154,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onEditorState={onEditorState}
+          onUploadEditorStateChange={onUploadEditorStateChange}
           onMetadataEdit={onMetadataEdit}
           onMetadataRemove={onMetadataRemove}
           onMentionedUser={onMentionedUser}

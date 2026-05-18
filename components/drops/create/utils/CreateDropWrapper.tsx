@@ -41,6 +41,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { WalletValidationError } from "@/src/errors/wallet";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { hasPendingInlineImageUploadMarkdown } from "@/helpers/waves/inline-image-upload.helpers";
 
 export enum CreateDropScreenType {
   DESKTOP = "DESKTOP",
@@ -188,6 +189,10 @@ const CreateDropWrapper = forwardRef<
       if (loading) {
         return;
       }
+      setEditorState(newEditorState);
+    };
+
+    const syncUploadEditorState = (newEditorState: EditorState) => {
       setEditorState(newEditorState);
     };
 
@@ -391,7 +396,10 @@ const CreateDropWrapper = forwardRef<
     };
 
     const getCanAddPart = () =>
-      getHaveMarkdownOrFile() && !getIsDropLimit() && !getIsCharsLimit();
+      getHaveMarkdownOrFile() &&
+      !hasPendingInlineImageUploadMarkdown(getMarkdown()) &&
+      !getIsDropLimit() &&
+      !getIsCharsLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
     useEffect(() => {
       setCanSubmit(getCanSubmit());
@@ -538,6 +546,9 @@ const CreateDropWrapper = forwardRef<
       if (loading) {
         return getDropSnapshot();
       }
+      if (hasPendingInlineImageUploadMarkdown(getMarkdown())) {
+        return getDropSnapshot();
+      }
       setIsStormMode(true);
       return onDropPart();
     };
@@ -568,6 +579,7 @@ const CreateDropWrapper = forwardRef<
           missingMetadata={missingMetadata}
           onViewChange={setViewTypeWhenUnlocked}
           onEditorState={setEditorStateWhenUnlocked}
+          onUploadEditorStateChange={syncUploadEditorState}
           onMentionedUser={onMentionedUserWhenUnlocked}
           onMentionedWave={onMentionedWaveWhenUnlocked}
           onReferencedNft={onReferencedNft}
@@ -602,6 +614,7 @@ const CreateDropWrapper = forwardRef<
           onMetadataRemove={onMetadataRemove}
           onViewChange={setViewTypeWhenUnlocked}
           onEditorState={setEditorStateWhenUnlocked}
+          onUploadEditorStateChange={syncUploadEditorState}
           onMentionedUser={onMentionedUserWhenUnlocked}
           onMentionedWave={onMentionedWaveWhenUnlocked}
           onReferencedNft={onReferencedNft}

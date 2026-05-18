@@ -92,6 +92,7 @@ const CreateDropContent = forwardRef<
     readonly missingMetadata: ApiWaveRequiredMetadata[];
     readonly onDrop?: (() => void) | undefined;
     readonly onEditorState: (editorState: EditorState) => void;
+    readonly onUploadEditorStateChange: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
     readonly onMentionedUser: (
       mentionedUser: Omit<MentionedUser, "current_handle">
@@ -116,6 +117,7 @@ const CreateDropContent = forwardRef<
       missingMedia,
       missingMetadata,
       onEditorState,
+      onUploadEditorStateChange,
       onReferencedNft,
       onMentionedUser,
       onMentionedWave,
@@ -336,7 +338,7 @@ const CreateDropContent = forwardRef<
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin
                 disabled={loading}
-                onUploadEditorStateChange={onEditorState}
+                onUploadEditorStateChange={onUploadEditorStateChange}
               />
               <ListPlugin />
               <PlainTextPastePlugin disabled={loading} />

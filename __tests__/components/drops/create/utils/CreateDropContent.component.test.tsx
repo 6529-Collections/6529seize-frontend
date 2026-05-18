@@ -197,6 +197,7 @@ describe("CreateDropContent basic", () => {
         setFiles={jest.fn()}
         onViewClick={jest.fn()}
         onDropPart={jest.fn()}
+        onUploadEditorStateChange={jest.fn()}
       />
     );
     expect(getByText("Drop a post")).toBeInTheDocument();
@@ -208,6 +209,7 @@ describe("CreateDropContent basic", () => {
 
   it("passes loading as a read-only lock to editor controls", () => {
     const onEditorState = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
     render(
       <CreateDropContent
         waveId={null}
@@ -227,6 +229,7 @@ describe("CreateDropContent basic", () => {
         setFiles={jest.fn()}
         onViewClick={jest.fn()}
         onDropPart={jest.fn()}
+        onUploadEditorStateChange={onUploadEditorStateChange}
       />
     );
 
@@ -244,7 +247,11 @@ describe("CreateDropContent basic", () => {
     mockOnChangeProps.onChange(lockedEditorState);
     expect(onEditorState).not.toHaveBeenCalled();
 
+    expect(mockDragDropPasteProps.onUploadEditorStateChange).toBe(
+      onUploadEditorStateChange
+    );
     mockDragDropPasteProps.onUploadEditorStateChange(lockedEditorState);
-    expect(onEditorState).toHaveBeenCalledWith(lockedEditorState);
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(lockedEditorState);
+    expect(onEditorState).not.toHaveBeenCalled();
   });
 });
