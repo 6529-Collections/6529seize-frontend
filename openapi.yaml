@@ -9376,6 +9376,10 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
         enabled:
           type: boolean
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1000
     ApiCreateNewWaveParticipationConfig:
       type: object
       required:
@@ -13478,6 +13482,13 @@ components:
           type: boolean
         authenticated_user_eligible:
           type: boolean
+        next_drop_allowed:
+          type: integer
+          format: int64
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1000
     ApiWaveConfig:
       type: object
       required:
@@ -14141,6 +14152,9 @@ components:
           type: boolean
         can_chat:
           type: boolean
+        next_drop_allowed:
+          type: integer
+          format: int64
         unread_drops:
           type: integer
           format: int64
