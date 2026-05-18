@@ -23,6 +23,31 @@ import styles from "./TheMemes.module.scss";
 
 type InlineMediaVariant = "image" | "html";
 
+const FULLSCREEN_CHANGE_EVENTS = [
+  "fullscreenchange",
+  "webkitfullscreenchange",
+  "mozfullscreenchange",
+  "MSFullscreenChange",
+] as const;
+
+type FullscreenDocument = Document & {
+  readonly webkitFullscreenElement?: Element | null;
+  readonly mozFullScreenElement?: Element | null;
+  readonly msFullscreenElement?: Element | null;
+};
+
+function getCurrentFullscreenElement(doc: Document): Element | null {
+  const fullscreenDocument = doc as FullscreenDocument;
+
+  return (
+    fullscreenDocument.fullscreenElement ??
+    fullscreenDocument.webkitFullscreenElement ??
+    fullscreenDocument.mozFullScreenElement ??
+    fullscreenDocument.msFullscreenElement ??
+    null
+  );
+}
+
 function getInlineMediaVariant(
   mimeType: string | null | undefined
 ): InlineMediaVariant {
@@ -100,32 +125,20 @@ export function MemePageArtViewer({
 
     const doc = globalThis.document;
 
-    function getFullscreenElement() {
-      return (
-        doc.fullscreenElement ??
-        (doc as { readonly webkitFullscreenElement?: Element | null })
-          .webkitFullscreenElement ??
-        (doc as { readonly mozFullScreenElement?: Element | null })
-          .mozFullScreenElement ??
-        (doc as { readonly msFullscreenElement?: Element | null })
-          .msFullscreenElement ??
-        null
-      );
-    }
-
     function clearOriginalAfterFullscreenExit() {
-      if (!getFullscreenElement()) {
+      if (!getCurrentFullscreenElement(doc)) {
         setFullscreenOriginalTargetId(null);
       }
     }
 
-    doc.addEventListener("fullscreenchange", clearOriginalAfterFullscreenExit);
+    FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+      doc.addEventListener(eventName, clearOriginalAfterFullscreenExit);
+    });
 
     return () => {
-      doc.removeEventListener(
-        "fullscreenchange",
-        clearOriginalAfterFullscreenExit
-      );
+      FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+        doc.removeEventListener(eventName, clearOriginalAfterFullscreenExit);
+      });
     };
   }, []);
 
@@ -142,15 +155,29 @@ export function MemePageArtViewer({
   }
 
   function enterActiveMediaFullScreen() {
-    if (!activeMedia.fullscreenElementId) {
+    const fullscreenElementId = activeMedia.fullscreenElementId;
+
+    if (!fullscreenElementId) {
       return;
     }
 
     flushSync(() => {
-      setFullscreenOriginalTargetId(activeMedia.fullscreenElementId);
+      setFullscreenOriginalTargetId(fullscreenElementId);
     });
 
-    void enterArtFullScreen(activeMedia.fullscreenElementId);
+    const clearAttemptedOriginalTarget = () => {
+      setFullscreenOriginalTargetId((currentTargetId) =>
+        currentTargetId === fullscreenElementId ? null : currentTargetId
+      );
+    };
+
+    void (async () => {
+      const didEnterFullscreen = await enterArtFullScreen(fullscreenElementId);
+
+      if (!didEnterFullscreen) {
+        clearAttemptedOriginalTarget();
+      }
+    })().catch(clearAttemptedOriginalTarget);
   }
 
   function printMediaActions() {

@@ -100,6 +100,15 @@ function getLatestNFTImageProps(animation: boolean) {
   return call[0] as MockNFTImageProps;
 }
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+
+  return { promise, resolve };
+}
+
 const renderWithConnectedProfile = (component: React.ReactNode) => {
   return render(
     <AuthContext.Provider
@@ -162,6 +171,7 @@ const baseNft = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockHelpers.enterArtFullScreen.mockResolvedValue(true);
   jest.spyOn(window, "open").mockImplementation(() => null);
 });
 
@@ -249,8 +259,10 @@ describe("MemePageArtViewer", () => {
     expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
   });
 
-  it("uses original media only while the active artwork is fullscreen", async () => {
+  it("uses original media while fullscreen is requested and until fullscreen exits", async () => {
     const user = userEvent.setup();
+    const fullscreenRequest = createDeferred<boolean>();
+    mockHelpers.enterArtFullScreen.mockReturnValue(fullscreenRequest.promise);
 
     render(<MemePageArtViewer nft={baseNft as any} />);
 
@@ -264,8 +276,50 @@ describe("MemePageArtViewer", () => {
       "the-art-fullscreen-animation"
     );
 
+    await act(async () => {
+      fullscreenRequest.resolve(true);
+      await fullscreenRequest.promise;
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
     act(() => {
       document.dispatchEvent(new Event("fullscreenchange"));
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+  });
+
+  it("clears original media when fullscreen request reports failure", async () => {
+    const user = userEvent.setup();
+    const fullscreenRequest = createDeferred<boolean>();
+    mockHelpers.enterArtFullScreen.mockReturnValue(fullscreenRequest.promise);
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+    await act(async () => {
+      fullscreenRequest.resolve(false);
+      await fullscreenRequest.promise;
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+  });
+
+  it("clears original media on prefixed fullscreen exit events", async () => {
+    const user = userEvent.setup();
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+    act(() => {
+      document.dispatchEvent(new Event("webkitfullscreenchange"));
     });
 
     expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
