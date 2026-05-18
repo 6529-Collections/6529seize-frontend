@@ -257,7 +257,7 @@ export default function Rememes() {
             <Row className="mb-3">
               <Col xs={12} sm={8} md={9} className="pb-3 pb-sm-0">
                 <span className="d-flex align-items-center gap-3 flex-wrap">
-                  <span className="d-flex align-items-center gap-2">
+                  <span className="d-none d-xl-flex align-items-center gap-2">
                     <Image
                       unoptimized
                       loading={"eager"}
@@ -284,6 +284,30 @@ export default function Rememes() {
                       </span>
                     )}
                   </span>
+                  <span className="d-xl-none">
+                    <CollectionsDropdown
+                      activePage="rememes"
+                      variant="brand"
+                      triggerContent={
+                        <span className="tw-inline-flex tw-items-center tw-gap-2">
+                          <Image
+                            unoptimized
+                            loading={"eager"}
+                            width="0"
+                            height="0"
+                            style={{ width: "150px", height: "auto" }}
+                            src="/re-memes.png"
+                            alt="re-memes"
+                          />
+                          {totalResults > 0 && (
+                            <span className="font-color-h font-larger">
+                              (x{numberWithCommas(totalResults)})
+                            </span>
+                          )}
+                        </span>
+                      }
+                    />
+                  </span>
                   <LFGButton contract={"rememes"} />
                 </span>
               </Col>
@@ -308,11 +332,6 @@ export default function Rememes() {
               </Col>
             </Row>
 
-            <Row className="d-xl-none mb-3">
-              <Col xs={12} sm="auto">
-                <CollectionsDropdown activePage="rememes" />
-              </Col>
-            </Row>
             {rememesLoaded && (
               <Row className="pt-2">
                 <Col

@@ -34,7 +34,8 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
         data-testid="nft-image-balance"
         data-contract={contract}
         data-token-id={tokenId}
-        data-height={height}>
+        data-height={height}
+      >
         {balance > 0 && (
           <span data-testid="seized-text">SEIZED x{balance}</span>
         )}
@@ -80,7 +81,7 @@ const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT =>
       animation_url: "https://example.com/animation_url-model.glb",
     },
     ...overrides,
-  } as BaseNFT);
+  }) as BaseNFT;
 
 const createDefaultProps = (
   overrides: Partial<BaseRendererProps> = {}
@@ -136,9 +137,9 @@ describe("NFTModelRenderer", () => {
       expect(wrapper).toHaveClass("custom-bg");
       expect(wrapper).toHaveClass("custom-image");
       expect(wrapper).toHaveClass("nftAnimation");
-      expect(wrapper).toHaveClass("d-flex");
-      expect(wrapper).toHaveClass("justify-content-center");
-      expect(wrapper).toHaveClass("align-items-center");
+      expect(wrapper).toHaveClass("tw-flex");
+      expect(wrapper).toHaveClass("tw-justify-center");
+      expect(wrapper).toHaveClass("tw-items-center");
     });
 
     it("renders NFTImageBalance component", () => {
@@ -149,12 +150,12 @@ describe("NFTModelRenderer", () => {
       expect(balance).toBeInTheDocument();
     });
 
-    it("uses Bootstrap Col component as container", () => {
+    it("uses Tailwind media container", () => {
       const props = createDefaultProps();
       const { container } = render(<NFTModelRenderer {...props} />);
 
       const colElement = container.querySelector(
-        ".d-flex.justify-content-center.align-items-center"
+        ".tw-flex.tw-justify-center.tw-items-center"
       );
       expect(colElement).toBeInTheDocument();
     });
@@ -469,13 +470,13 @@ describe("NFTModelRenderer", () => {
       const props = createDefaultProps();
       const { container } = render(<NFTModelRenderer {...props} />);
 
-      // Should have Col as root element
+      // Should have the Tailwind media container as root element
       const colElement = container.firstChild;
-      expect(colElement).toHaveClass("col");
+      expect(colElement).toHaveClass("tw-w-full");
       expect(colElement).toHaveClass("nftAnimation");
-      expect(colElement).toHaveClass("d-flex");
-      expect(colElement).toHaveClass("justify-content-center");
-      expect(colElement).toHaveClass("align-items-center");
+      expect(colElement).toHaveClass("tw-flex");
+      expect(colElement).toHaveClass("tw-justify-center");
+      expect(colElement).toHaveClass("tw-items-center");
 
       // Should contain both NFTImageBalance and NFTModel
       const balance = screen.getByTestId("nft-image-balance");
