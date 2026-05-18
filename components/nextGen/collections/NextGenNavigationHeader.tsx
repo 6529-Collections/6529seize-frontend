@@ -88,7 +88,6 @@ export default function NextGenNavigationHeader(
               triggerContent={
                 <Image
                   unoptimized
-                  priority
                   width="0"
                   height="0"
                   style={{
