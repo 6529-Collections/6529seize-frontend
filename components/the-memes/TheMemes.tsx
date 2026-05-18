@@ -26,7 +26,13 @@ import {
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface Meme {
   meme: number;
@@ -130,6 +136,24 @@ function getInitialSeasonId(searchParams: SearchParamReader): number | null {
   return !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
 }
 
+function getSortQueryParam(
+  sort: MemesSort,
+  volumeType: VolumeType
+): string {
+  if (sort === MemesSort.VOLUME) {
+    const volKey = Object.entries(VolumeType).find(
+      ([_, value]) => value === volumeType
+    )?.[0];
+
+    return volKey === undefined
+      ? "volume_all_time"
+      : `volume_${volKey.toLowerCase()}`;
+  }
+
+  const found = Object.entries(MemesSort).find(([_, value]) => value === sort);
+  return found === undefined ? sort.toLowerCase() : found[0].toLowerCase();
+}
+
 export default function TheMemesComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -187,27 +211,10 @@ export default function TheMemesComponent() {
   useEffect(() => {
     if (!routerLoaded) return;
 
-    let sortParam: string;
-
-    if (sort === MemesSort.VOLUME) {
-      const volKey = Object.entries(VolumeType).find(
-        ([_, value]) => value === volumeType
-      )?.[0];
-
-      if (volKey === undefined) {
-        sortParam = "volume_all_time"; // fallback
-      } else {
-        sortParam = `volume_${volKey.toLowerCase()}`;
-      }
-    } else {
-      const found = Object.entries(MemesSort).find(
-        ([_, value]) => value === sort
-      );
-      sortParam =
-        found === undefined ? sort.toLowerCase() : found[0].toLowerCase();
-    }
-
-    let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
+    let queryString = `sort=${getSortQueryParam(
+      sort,
+      volumeType
+    )}&sort_dir=${sortDir.toLowerCase()}`;
     if (seasonId !== null) {
       queryString += `&szn=${seasonId}`;
     }
@@ -423,7 +430,7 @@ export default function TheMemesComponent() {
             aria-label="Meme sorting"
             className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4"
           >
-            <div className="tw-flex tw-flex-col tw-gap-y-2 tw-gap-x-6 sm:tw-flex-row sm:tw-items-start">
+            <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-2 md:tw-flex-row md:tw-items-start">
               <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   Sort by
@@ -454,12 +461,12 @@ export default function TheMemesComponent() {
                     />
                   ))}
                 <div className="tw-shrink-0">
-                  {printVolumeTypeDropdown(
-                    sort === MemesSort.VOLUME,
-                    setVolumeType,
-                    () => setSort(MemesSort.VOLUME),
-                    volumeType
-                  )}
+                  <VolumeTypeDropdown
+                    isVolumeSort={sort === MemesSort.VOLUME}
+                    selectedVolumeSort={volumeType}
+                    setVolumeType={setVolumeType}
+                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                  />
                 </div>
               </div>
             </div>
