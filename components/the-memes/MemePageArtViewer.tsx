@@ -207,6 +207,7 @@ export function MemePageArtViewer({
                     height={650}
                     transparentBG={true}
                     showBalance={false}
+                    showOriginal={true}
                     id="the-art-fullscreen-animation"
                   />
                 </Carousel.Item>
@@ -217,6 +218,7 @@ export function MemePageArtViewer({
                       animation={false}
                       height={650}
                       showBalance={false}
+                      showOriginal={true}
                       transparentBG={true}
                       id="the-art-fullscreen-img"
                     />
@@ -237,6 +239,7 @@ export function MemePageArtViewer({
                   height={650}
                   transparentBG={true}
                   showBalance={false}
+                  showOriginal={true}
                   id="the-art-fullscreen-img"
                 />
                 {printMediaActions()}

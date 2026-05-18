@@ -124,9 +124,10 @@ const baseNft = {
   uri: "https://metadata.example/meme.json",
   icon: "",
   thumbnail: "",
-  scaled: "",
+  scaled: "https://media.example/card-scaled.png",
   image: "https://media.example/card.png",
   animation: "https://media.example/animation.mp4",
+  compressed_animation: "https://media.example/animation-compressed.mp4",
   metadata: {
     image: "https://media.example/card.png",
     animation_url: "https://media.example/animation.mp4",
@@ -229,20 +230,20 @@ describe("MemePageArtViewer", () => {
     );
   });
 
-  it("uses optimized media for the top artwork viewer", () => {
+  it("uses original media for the top artwork viewer", () => {
     render(<MemePageArtViewer nft={baseNft as any} />);
 
     expect(mockNFTImage).toHaveBeenCalledWith(
       expect.objectContaining({
         animation: true,
-        showOriginal: undefined,
+        showOriginal: true,
       }),
       undefined
     );
     expect(mockNFTImage).toHaveBeenCalledWith(
       expect.objectContaining({
         animation: false,
-        showOriginal: undefined,
+        showOriginal: true,
       }),
       undefined
     );
