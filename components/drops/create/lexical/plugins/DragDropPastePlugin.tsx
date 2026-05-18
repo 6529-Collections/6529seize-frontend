@@ -112,6 +112,11 @@ export default function DragDropPaste({
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
           );
+
+          if (disabledRef.current || !isMounted) {
+            return;
+          }
+
           const currentOnAttachmentFiles = onAttachmentFilesRef.current;
           const attachmentFiles = currentOnAttachmentFiles
             ? files.filter(isAcceptableAttachment)

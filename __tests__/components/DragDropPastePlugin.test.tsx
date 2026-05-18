@@ -67,6 +67,7 @@ describe("DragDropPastePlugin", () => {
     (mediaFileReader as jest.Mock).mockResolvedValue([
       { file: new File(["a"], "a.png", { type: "image/png" }) },
     ]);
+    (multiPartUpload as jest.Mock).mockResolvedValue({ url: "uploaded" });
   });
 
   afterEach(() => {
@@ -130,6 +131,55 @@ describe("DragDropPastePlugin", () => {
     expect(multiPartUpload).not.toHaveBeenCalled();
     expect($insertNodes).not.toHaveBeenCalled();
     expect(toastMock).not.toHaveBeenCalled();
+  });
+
+  it("does not add files or upload images when disabled before file reading finishes", async () => {
+    const { mediaFileReader } = require("@lexical/utils");
+    let resolveFileReader: ((value: Array<{ file: File }>) => void) | undefined;
+    const imageFile = new File(["a"], "a.png", { type: "image/png" });
+    const attachmentFile = new File(["b"], "b.pdf", {
+      type: "application/pdf",
+    });
+    const onAttachmentFiles = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
+
+    (mediaFileReader as jest.Mock).mockReturnValue(
+      new Promise<Array<{ file: File }>>((resolve) => {
+        resolveFileReader = resolve;
+      })
+    );
+    (multiPartUpload as jest.Mock).mockRejectedValue(
+      new Error("Upload failed")
+    );
+
+    const { rerender } = renderPlugin({
+      onAttachmentFiles,
+      onUploadEditorStateChange,
+    });
+
+    act(() => {
+      commandHandler([imageFile, attachmentFile]);
+    });
+
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onAttachmentFiles={onAttachmentFiles}
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+
+    await act(async () => {
+      resolveFileReader?.([{ file: imageFile }]);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(onAttachmentFiles).not.toHaveBeenCalled();
+    expect($insertNodes).not.toHaveBeenCalled();
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    expect(toastMock).not.toHaveBeenCalled();
+    expect(onUploadEditorStateChange).not.toHaveBeenCalled();
   });
 
   it("replaces loading image after parent rerenders with a new attachment handler", async () => {
