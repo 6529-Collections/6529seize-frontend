@@ -1,6 +1,5 @@
 "use client";
 
-/* eslint-disable react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-chain-state-updates */
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.scss";

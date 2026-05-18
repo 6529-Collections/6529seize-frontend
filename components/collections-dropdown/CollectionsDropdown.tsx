@@ -103,9 +103,9 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
       type="button"
       aria-haspopup="true"
       aria-expanded={isOpen}
-      {...(!isDefaultVariant
-        ? { "aria-label": `Collection: ${activeCollection.name}` }
-        : {})}
+      {...(isDefaultVariant
+        ? {}
+        : { "aria-label": `Collection: ${activeCollection.name}` })}
       onClick={() => setIsOpen(!isOpen)}
       className={triggerClassNames[variant]}
     >

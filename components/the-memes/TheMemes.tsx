@@ -1,6 +1,5 @@
 "use client";
 
-/* eslint-disable react-hooks/set-state-in-effect, react-you-might-not-need-an-effect/no-chain-state-updates, react-you-might-not-need-an-effect/no-derived-state, react-you-might-not-need-an-effect/no-event-handler */
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -102,9 +101,9 @@ function getInitialSortAndVolume(searchParams: SearchParamReader): {
     return {
       sort: MemesSort.VOLUME,
       volumeType:
-        volMatch !== undefined
-          ? VolumeType[volMatch as keyof typeof VolumeType]
-          : VolumeType.ALL_TIME,
+        volMatch === undefined
+          ? VolumeType.ALL_TIME
+          : VolumeType[volMatch as keyof typeof VolumeType],
     };
   }
 
@@ -114,9 +113,9 @@ function getInitialSortAndVolume(searchParams: SearchParamReader): {
 
   return {
     sort:
-      resolvedKey !== undefined
-        ? MemesSort[resolvedKey as keyof typeof MemesSort]
-        : MemesSort.AGE,
+      resolvedKey === undefined
+        ? MemesSort.AGE
+        : MemesSort[resolvedKey as keyof typeof MemesSort],
     volumeType: VolumeType.ALL_TIME,
   };
 }
@@ -195,17 +194,17 @@ export default function TheMemesComponent() {
         ([_, value]) => value === volumeType
       )?.[0];
 
-      if (volKey !== undefined) {
-        sortParam = `volume_${volKey.toLowerCase()}`;
-      } else {
+      if (volKey === undefined) {
         sortParam = "volume_all_time"; // fallback
+      } else {
+        sortParam = `volume_${volKey.toLowerCase()}`;
       }
     } else {
       const found = Object.entries(MemesSort).find(
         ([_, value]) => value === sort
       );
       sortParam =
-        found !== undefined ? found[0].toLowerCase() : sort.toLowerCase();
+        found === undefined ? sort.toLowerCase() : found[0].toLowerCase();
     }
 
     let queryString = `sort=${sortParam}&sort_dir=${sortDir.toLowerCase()}`;
@@ -223,13 +222,13 @@ export default function TheMemesComponent() {
 
     for (const nft of nfts) {
       const existing = memesMap.get(nft.meme);
-      if (existing !== undefined) {
-        existing.items.push(nft);
-      } else {
+      if (existing === undefined) {
         memesMap.set(nft.meme, {
           meme: { meme: nft.meme, meme_name: nft.meme_name },
           items: [nft],
         });
+      } else {
+        existing.items.push(nft);
       }
     }
 
@@ -429,11 +428,8 @@ export default function TheMemesComponent() {
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
                   Sort by
                 </span>
-                <div
-                  aria-label="Sort direction"
-                  className="tw-flex tw-shrink-0 tw-items-center"
-                  role="group"
-                >
+                <fieldset className="tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-border-0 tw-p-0">
+                  <legend className="tw-sr-only">Sort direction</legend>
                   {printSortDirectionButton(
                     SortDirection.ASC,
                     faChevronCircleUp,
@@ -444,7 +440,7 @@ export default function TheMemesComponent() {
                     faChevronCircleDown,
                     "Sort descending"
                   )}
-                </div>
+                </fieldset>
               </div>
               <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-x-auto tw-overflow-y-hidden tw-pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0 [&::-webkit-scrollbar]:tw-hidden">
                 {Object.values(MemesSort)

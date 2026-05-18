@@ -34,7 +34,6 @@ export default function CommonDropdownItemsWrapper({
 
   useEffect(() => {
     // Existing consumers derive item density from the wrapper breakpoint.
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent
     onIsMobile(isMobile);
   }, [isMobile, onIsMobile]);
 
