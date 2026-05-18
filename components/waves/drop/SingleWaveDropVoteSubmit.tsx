@@ -16,7 +16,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "@/components/auth/Auth";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 type ThemeColors = {

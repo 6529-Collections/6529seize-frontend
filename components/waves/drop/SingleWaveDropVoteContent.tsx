@@ -1,9 +1,9 @@
 "use client";
 
-import type { FC, SetStateAction } from "react";
-import { useCallback, useContext, useRef, useState } from "react";
+import type { FC } from "react";
+import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import type { SingleWaveDropVoteSubmitHandles } from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSubmit from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
@@ -12,7 +12,7 @@ import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
@@ -20,48 +20,22 @@ interface SingleWaveDropVoteContentProps {
   readonly onVoteSuccess?: (() => void) | undefined;
 }
 
-interface AppliedDropState {
-  readonly baseDropId: string;
-  readonly baseRating: number;
-  readonly drop: ApiDrop;
-}
-
-interface VoteDraftState {
-  readonly sourceKey: string;
-  readonly value: number | string;
-}
-
 export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   drop,
   size,
   onVoteSuccess,
 }) => {
-  const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const [appliedDropState, setAppliedDropState] =
-    useState<AppliedDropState | null>(null);
-  const baseRating = drop.context_profile_context?.rating ?? 0;
-  const displayDrop =
-    appliedDropState?.baseDropId === drop.id &&
-    appliedDropState.baseRating === baseRating
-      ? appliedDropState.drop
-      : drop;
-  const rawCurrentVoteValue = displayDrop.context_profile_context?.rating ?? 0;
-  const rawMinRating = displayDrop.context_profile_context?.min_rating ?? 0;
-  const maxRating = displayDrop.context_profile_context?.max_rating ?? 0;
-  const minRating = displayDrop.wave.forbid_negative_votes
-    ? Math.max(0, rawMinRating)
-    : rawMinRating;
-  const currentVoteValue = rawCurrentVoteValue;
-  const voteSourceKey = `${displayDrop.id}:${currentVoteValue}:${minRating}:${maxRating}`;
-  const [voteDraftState, setVoteDraftState] = useState<VoteDraftState | null>(
-    null
-  );
-  const activeVoteDraft =
-    voteDraftState !== null && voteDraftState.sourceKey === voteSourceKey
-      ? voteDraftState
-      : null;
-  const hasVoteDraft = activeVoteDraft !== null;
-  const voteValue = activeVoteDraft?.value ?? currentVoteValue;
+  const {
+    displayDrop,
+    minRating,
+    maxRating,
+    voteValue,
+    setVoteValue,
+    submitVoteValue,
+    submitBlockReason,
+    handleSliderValueAccepted,
+    handleVoteApplied,
+  } = useSingleWaveDropVoteState({ drop });
   const [isSliderMode, setIsSliderMode] = useState(
     size !== SingleWaveDropVoteSize.MINI
   );
@@ -71,86 +45,8 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
 
-  const clampVoteValue = useCallback(
-    (value: number) => Math.min(Math.max(value, minRating), maxRating),
-    [maxRating, minRating]
-  );
-
-  const normalizeDraftValue = useCallback(
-    (value: string | number) => {
-      if (value === "" || value === "-") {
-        return value;
-      }
-
-      const numericValue = Number(value);
-      if (!Number.isFinite(numericValue)) {
-        return value;
-      }
-
-      return clampVoteValue(numericValue);
-    },
-    [clampVoteValue]
-  );
-
-  const getSubmitVoteValue = (value: string | number, shouldClamp: boolean) => {
-    if (value === "" || value === "-") {
-      return Number.NaN;
-    }
-
-    const numericValue = Number(value);
-    if (!Number.isFinite(numericValue)) {
-      return numericValue;
-    }
-
-    return shouldClamp ? clampVoteValue(numericValue) : numericValue;
-  };
-
-  const submitVoteValue = getSubmitVoteValue(voteValue, hasVoteDraft);
-  const loadedVoteOutOfRange =
-    !hasVoteDraft &&
-    (currentVoteValue < minRating || currentVoteValue > maxRating);
-  const submitBlockReason = loadedVoteOutOfRange
-    ? "Change this vote before submitting."
-    : null;
-
-  const setVoteValue = useCallback(
-    (nextValue: SetStateAction<string | number>) => {
-      setVoteDraftState((current) => {
-        const previousValue =
-          current?.sourceKey === voteSourceKey
-            ? current.value
-            : currentVoteValue;
-        const value =
-          typeof nextValue === "function"
-            ? nextValue(previousValue)
-            : nextValue;
-
-        return {
-          sourceKey: voteSourceKey,
-          value: normalizeDraftValue(value),
-        };
-      });
-    },
-    [currentVoteValue, normalizeDraftValue, voteSourceKey]
-  );
-
-  const handleVoteApplied = useCallback(
-    (updatedDrop: ApiDrop) => {
-      setAppliedDropState({
-        baseDropId: drop.id,
-        baseRating,
-        drop: updatedDrop,
-      });
-      setVoteDraftState(null);
-      invalidateDrops();
-    },
-    [baseRating, drop.id, invalidateDrops]
-  );
-
   const handleSubmit = () => {
-    if (submitRef.current) {
-      void submitRef.current.handleClick();
-    }
+    void submitRef.current?.handleClick();
   };
 
   if (size === SingleWaveDropVoteSize.MINI) {
@@ -185,6 +81,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
                 maxValue={maxRating}
                 label={voteLabel}
                 setVoteValue={setVoteValue}
+                onValueAccepted={handleSliderValueAccepted}
                 rank={displayDrop.rank}
                 size={size}
               />
@@ -235,6 +132,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               minValue={minRating}
               maxValue={maxRating}
               setVoteValue={setVoteValue}
+              onValueAccepted={handleSliderValueAccepted}
               rank={displayDrop.rank}
               label={voteLabel}
             />

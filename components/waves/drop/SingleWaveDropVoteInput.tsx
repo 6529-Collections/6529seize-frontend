@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 
 interface SingleWaveDropVoteInputProps {
   readonly voteValue: number | string;

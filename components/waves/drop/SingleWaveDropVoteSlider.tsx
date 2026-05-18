@@ -11,13 +11,14 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
   readonly minValue: number;
   readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
+  readonly onValueAccepted?: ((value: number) => void) | undefined;
   readonly rank?: number | null | undefined;
   readonly label: string;
   readonly size?: SingleWaveDropVoteSize | undefined;
@@ -105,6 +106,7 @@ const transformFromLog = (
 export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
+  onValueAccepted,
   minValue,
   maxValue,
   rank = null,
@@ -119,9 +121,17 @@ export default function WaveDropVoteSlider({
   const thumbHitHeight = isMini ? 48 : 64;
   const theme = getSliderTheme(rank);
 
-  const handleSliderChange = (newValue: number) => {
+  const getAcceptedVoteValue = (newValue: number) => {
     const transformedValue = transformFromLog(newValue, minValue, maxValue);
-    setVoteValue(clampToRange(transformedValue, minValue, maxValue));
+    return clampToRange(transformedValue, minValue, maxValue);
+  };
+
+  const handleSliderChange = (newValue: number) => {
+    setVoteValue(getAcceptedVoteValue(newValue));
+  };
+
+  const handleSliderValueAccepted = (newValue: number) => {
+    onValueAccepted?.(getAcceptedVoteValue(newValue));
   };
 
   const numericVoteValue =
@@ -175,10 +185,18 @@ export default function WaveDropVoteSlider({
               max={maxValue}
               value={logValue}
               onChange={(e) => handleSliderChange(Number(e.target.value))}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSliderValueAccepted(Number(e.currentTarget.value));
+              }}
               onTouchStart={(e) => {
                 e.stopPropagation();
                 // Force immediate focus to allow dragging without double-tap
                 e.currentTarget.focus();
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                handleSliderValueAccepted(Number(e.currentTarget.value));
               }}
               className="tw-absolute tw-left-0 tw-right-0 tw-z-10 tw-w-full tw-cursor-pointer tw-appearance-none tw-opacity-0"
               style={{
@@ -216,6 +234,10 @@ export default function WaveDropVoteSlider({
                 max={maxValue}
                 value={logValue}
                 onChange={(e) => handleSliderChange(Number(e.target.value))}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSliderValueAccepted(Number(e.currentTarget.value));
+                }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   setIsDragging(true);
@@ -233,6 +255,7 @@ export default function WaveDropVoteSlider({
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                   setIsDragging(false);
+                  handleSliderValueAccepted(Number(e.currentTarget.value));
                 }}
                 className="tw-absolute tw-inset-y-0 tw-left-0 tw-right-0 tw-w-full tw-cursor-pointer tw-appearance-none tw-opacity-0"
               />
