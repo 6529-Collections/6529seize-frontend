@@ -1,11 +1,11 @@
 "use client";
 
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
+import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.scss";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { useEffect, useMemo, useState } from "react";
-import { Col } from "react-bootstrap";
 import {
   getArweaveGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
@@ -72,8 +72,9 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
   };
 
   return (
-    <Col
-      className={`${animationClassName} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle} d-flex justify-content-center align-items-center`}
+    <NFTMediaContainer
+      forceIronBackground={props.bgStyle === ""}
+      className={`${animationClassName} ${props.heightStyle} ${props.imageStyle} ${props.bgStyle}`}
     >
       {props.showBalance && (
         <NFTImageBalance
@@ -94,6 +95,6 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
           onError={advanceToNextUrl}
         />
       ) : null}
-    </Col>
+    </NFTMediaContainer>
   );
 }
