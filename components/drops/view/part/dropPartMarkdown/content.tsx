@@ -319,6 +319,7 @@ export const createMarkdownContentRenderers = ({
     const elements: ReactNode[] = [];
     let currentTextChunk: ReactNode[] = [];
     let currentImageChunk: MarkdownImageChunkItem[] = [];
+    let pendingWhitespaceAfterImage: ReactNode[] = [];
 
     const flushTextChunk = () => {
       if (currentTextChunk.length > 0) {
@@ -356,29 +357,42 @@ export const createMarkdownContentRenderers = ({
       currentImageChunk = [];
     };
 
+    const restorePendingWhitespaceAfterImage = () => {
+      if (pendingWhitespaceAfterImage.length > 0) {
+        currentTextChunk.push(...pendingWhitespaceAfterImage);
+        pendingWhitespaceAfterImage = [];
+      }
+    };
+
     for (const [flattenedIndex, node] of flattened.entries()) {
       if (isMarkdownImageElement(node)) {
         flushTextChunk();
+        pendingWhitespaceAfterImage = [];
         currentImageChunk.push({ image: node, flattenedIndex });
         continue;
       }
 
       if (currentImageChunk.length > 0 && isWhitespaceOnlyTextNode(node)) {
+        pendingWhitespaceAfterImage.push(node);
         continue;
+      }
+
+      if (currentImageChunk.length > 0) {
+        flushImageChunk();
+        restorePendingWhitespaceAfterImage();
       }
 
       if (isSmartLinkElement(node, isSmartLink)) {
         flushTextChunk();
-        flushImageChunk();
         elements.push(node);
         continue;
       }
 
-      flushImageChunk();
       currentTextChunk.push(node);
     }
 
     flushImageChunk();
+    restorePendingWhitespaceAfterImage();
     flushTextChunk();
 
     return <>{elements}</>;

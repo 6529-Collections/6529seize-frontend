@@ -253,6 +253,25 @@ describe("DropPartMarkdown", () => {
     ).not.toBeNull();
   });
 
+  it("preserves whitespace between a markdown image and following text", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\ncaption"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p"));
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]?.textContent?.startsWith("\ncaption")).toBe(true);
+  });
+
   it("groups consecutive markdown images in one responsive grid", () => {
     const { container } = render(
       <DropPartMarkdown
