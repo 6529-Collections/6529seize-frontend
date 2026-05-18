@@ -56,12 +56,15 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
     <button
       onClick={() =>
         props.submitDrop({
-          drop: { wave_id: props.wave.id, drop_type: "CHAT" },
+          drop: {
+            wave_id: props.wave.id,
+            drop_type: props.isDropMode ? "PARTICIPATORY" : "CHAT",
+          },
           dropId: null,
         } as DropMutationBody)
       }
     >
-      submit
+      submit current mode
     </button>
     <button
       onClick={() =>
@@ -71,6 +74,9 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
       }
     >
       switch to drop
+    </button>
+    <button onClick={() => props.onDropModeChange(false)}>
+      switch to chat
     </button>
   </div>
 ));
@@ -123,6 +129,23 @@ const wave = {
   participation: { authenticated_user_eligible: true },
 } as any;
 
+type PendingPost = {
+  readonly body: { readonly wave_id: string; readonly drop_type?: string };
+  readonly resolve: (drop: unknown) => void;
+  readonly reject: (error: unknown) => void;
+};
+
+const mockPendingPosts = () => {
+  const posts: PendingPost[] = [];
+  commonApiPostMock.mockImplementation(
+    ({ body }: { body: PendingPost["body"] }) =>
+      new Promise((resolve, reject) => {
+        posts.push({ body, resolve, reject });
+      })
+  );
+  return posts;
+};
+
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -156,7 +179,7 @@ describe("CreateDrop", () => {
       </AuthContext.Provider>
     );
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
 
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
@@ -198,7 +221,7 @@ describe("CreateDrop", () => {
       </AuthContext.Provider>
     );
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
 
     await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
     const updateWave = mockSetQueryData.mock.calls[0][1] as (
@@ -252,10 +275,10 @@ describe("CreateDrop", () => {
       </AuthContext.Provider>
     );
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
 
     expect(onDropAdded).toHaveBeenCalledTimes(1);
     expect(commonApiPostMock).toHaveBeenCalledTimes(1);
@@ -316,11 +339,11 @@ describe("CreateDrop", () => {
 
     const { rerender } = render(renderComposer(slowWaveA));
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
 
     rerender(renderComposer(slowWaveB));
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
 
     expect(onDropAdded).toHaveBeenCalledTimes(2);
     expect(commonApiPostMock).toHaveBeenCalledTimes(1);
@@ -400,12 +423,12 @@ describe("CreateDrop", () => {
 
     const { rerender } = render(renderComposer(slowWaveA));
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
     await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
     expect(onDropAdded).toHaveBeenCalledTimes(1);
 
     rerender(renderComposer(slowWaveB));
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
 
     expect(onDropAdded).toHaveBeenCalledTimes(2);
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
@@ -455,6 +478,152 @@ describe("CreateDrop", () => {
     expect(mockSetQueryData).not.toHaveBeenCalled();
   });
 
+  it("keeps a queued slow-mode chat reservation after a participatory drop succeeds", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    const posts = mockPendingPosts();
+    const onDropAdded = jest.fn();
+    const slowWave = {
+      ...wave,
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={onDropAdded}
+            wave={slowWave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("switch to drop"));
+    await waitFor(() =>
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("true")
+    );
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]?.body.drop_type).toBe("PARTICIPATORY");
+
+    await userEvent.click(screen.getByText("switch to chat"));
+    await waitFor(() =>
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("false")
+    );
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    expect(onDropAdded).toHaveBeenCalledTimes(2);
+    expect(posts).toHaveLength(1);
+
+    posts[0]?.resolve({ id: "server-participatory", wave_id: "1" });
+    await waitFor(() => expect(posts).toHaveLength(2));
+    expect(posts[1]?.body.drop_type).toBe("CHAT");
+    expect(mockSetQueryData).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(onDropAdded).toHaveBeenCalledTimes(2);
+    expect(posts).toHaveLength(2);
+
+    posts[1]?.resolve({ id: "server-chat", wave_id: "1" });
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalledTimes(1));
+    const updateWave = mockSetQueryData.mock.calls[0][1] as (
+      currentWave: typeof slowWave
+    ) => typeof slowWave;
+    expect(updateWave(slowWave).chat.next_drop_allowed).toBe(40_000);
+    dateNowSpy.mockRestore();
+  });
+
+  it("keeps a queued slow-mode chat reservation after a participatory drop fails", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    const posts = mockPendingPosts();
+    const onDropAdded = jest.fn();
+    const slowWave = {
+      ...wave,
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={onDropAdded}
+            wave={slowWave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("switch to drop"));
+    await waitFor(() =>
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("true")
+    );
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]?.body.drop_type).toBe("PARTICIPATORY");
+
+    await userEvent.click(screen.getByText("switch to chat"));
+    await waitFor(() =>
+      expect(screen.getByTestId("is-drop-mode")).toHaveTextContent("false")
+    );
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    expect(onDropAdded).toHaveBeenCalledTimes(2);
+    expect(posts).toHaveLength(1);
+
+    posts[0]?.reject(new Error("participatory failed"));
+    await waitFor(() => expect(posts).toHaveLength(2));
+    expect(posts[1]?.body.drop_type).toBe("CHAT");
+    expect(mockSetQueryData).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(onDropAdded).toHaveBeenCalledTimes(2);
+    expect(posts).toHaveLength(2);
+
+    posts[1]?.resolve({ id: "server-chat", wave_id: "1" });
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalledTimes(1));
+    const updateWave = mockSetQueryData.mock.calls[0][1] as (
+      currentWave: typeof slowWave
+    ) => typeof slowWave;
+    expect(updateWave(slowWave).chat.next_drop_allowed).toBe(40_000);
+    dateNowSpy.mockRestore();
+  });
+
   it("does not reuse chat slow-mode state for participatory drops", async () => {
     const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
     useWaveMock.mockReturnValue({
@@ -500,7 +669,7 @@ describe("CreateDrop", () => {
       </AuthContext.Provider>
     );
 
-    await userEvent.click(screen.getByText("submit"));
+    await userEvent.click(screen.getByText("submit current mode"));
     await waitFor(() => expect(mockSetQueryData).toHaveBeenCalledTimes(1));
 
     await userEvent.click(screen.getByText("switch to drop"));

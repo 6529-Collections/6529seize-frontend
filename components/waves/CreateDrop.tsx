@@ -76,8 +76,18 @@ export interface DropMutationBody {
 
 const ANIMATION_DURATION = 0.3;
 
+interface SlowModeChatReservation {
+  readonly id: number;
+  readonly waveId: string;
+  readonly cooldownMs: number;
+}
+
+interface QueuedDropMutationBody extends DropMutationBody {
+  readonly slowModeChatReservation?: SlowModeChatReservation | undefined;
+}
+
 interface SlowModeChatWaveState {
-  pending: boolean;
+  pendingReservationId: number | null;
   cooldownUntil: number | null;
   cooldownMs: number | null;
 }
@@ -313,6 +323,7 @@ export default function CreateDrop({
   const slowModeChatStateByWaveRef = useRef<Map<string, SlowModeChatWaveState>>(
     new Map()
   );
+  const slowModeChatReservationIdRef = useRef(0);
 
   const getSlowModeChatWaveState = useCallback((waveId: string) => {
     const currentState = slowModeChatStateByWaveRef.current.get(waveId);
@@ -321,7 +332,7 @@ export default function CreateDrop({
     }
 
     const nextState: SlowModeChatWaveState = {
-      pending: false,
+      pendingReservationId: null,
       cooldownUntil: null,
       cooldownMs: null,
     };
@@ -370,11 +381,11 @@ export default function CreateDrop({
     (dropRequest: ApiCreateDropRequest) => {
       const cooldownMs = getLocalSlowModeCooldownMs(dropRequest);
       if (cooldownMs === null) {
-        return true;
+        return null;
       }
 
       const waveState = getSlowModeChatWaveState(dropRequest.wave_id);
-      if (waveState.pending) {
+      if (waveState.pendingReservationId !== null) {
         return false;
       }
 
@@ -385,53 +396,64 @@ export default function CreateDrop({
 
       waveState.cooldownUntil = null;
       waveState.cooldownMs = cooldownMs;
-      waveState.pending = true;
-      return true;
+      slowModeChatReservationIdRef.current += 1;
+      const reservation: SlowModeChatReservation = {
+        id: slowModeChatReservationIdRef.current,
+        waveId: dropRequest.wave_id,
+        cooldownMs,
+      };
+      waveState.pendingReservationId = reservation.id;
+      return reservation;
     },
     [getLocalSlowModeCooldownMs, getSlowModeChatWaveState]
   );
 
   const clearSlowModeChatPending = useCallback(
-    (dropRequest: ApiCreateDropRequest) => {
+    (reservation: SlowModeChatReservation | null | undefined) => {
+      if (reservation === null || reservation === undefined) {
+        return;
+      }
+
       const waveState = slowModeChatStateByWaveRef.current.get(
-        dropRequest.wave_id
+        reservation.waveId
       );
       if (waveState === undefined) {
         return;
       }
 
-      waveState.pending = false;
+      if (waveState.pendingReservationId !== reservation.id) {
+        return;
+      }
+
+      waveState.pendingReservationId = null;
+      waveState.cooldownMs = null;
     },
     []
   );
 
   const startLocalSlowModeCooldown = useCallback(
-    (dropRequest: ApiCreateDropRequest) => {
-      const requestWaveId = dropRequest.wave_id;
-      const currentWaveState =
-        slowModeChatStateByWaveRef.current.get(requestWaveId);
-      const reservedCooldownMs =
-        currentWaveState?.pending === true ? currentWaveState.cooldownMs : null;
-      const cooldownMs =
-        reservedCooldownMs ?? getLocalSlowModeCooldownMs(dropRequest);
-      if (cooldownMs === null) {
-        if (currentWaveState !== undefined) {
-          currentWaveState.pending = false;
-        }
+    (body: QueuedDropMutationBody) => {
+      const reservation = body.slowModeChatReservation;
+      if (reservation === undefined) {
         return;
       }
 
-      const waveState =
-        currentWaveState ?? getSlowModeChatWaveState(requestWaveId);
-      const nextDropAllowed = Date.now() + cooldownMs;
-      waveState.pending = false;
+      const waveState = slowModeChatStateByWaveRef.current.get(
+        reservation.waveId
+      );
+      if (waveState?.pendingReservationId !== reservation.id) {
+        return;
+      }
+
+      const nextDropAllowed = Date.now() + reservation.cooldownMs;
+      waveState.pendingReservationId = null;
       waveState.cooldownUntil = nextDropAllowed;
-      waveState.cooldownMs = cooldownMs;
+      waveState.cooldownMs = reservation.cooldownMs;
       queryClient.setQueryData<ApiWave>(
-        [QueryKey.WAVE, { wave_id: requestWaveId }],
+        [QueryKey.WAVE, { wave_id: reservation.waveId }],
         (currentWave) => {
           const sourceWave =
-            currentWave ?? (wave.id === requestWaveId ? wave : undefined);
+            currentWave ?? (wave.id === reservation.waveId ? wave : undefined);
           if (sourceWave === undefined) {
             return currentWave;
           }
@@ -447,15 +469,15 @@ export default function CreateDrop({
       );
       void queryClient
         .invalidateQueries({
-          queryKey: [QueryKey.WAVE, { wave_id: requestWaveId }],
+          queryKey: [QueryKey.WAVE, { wave_id: reservation.waveId }],
         })
         .catch(() => undefined);
     },
-    [getLocalSlowModeCooldownMs, getSlowModeChatWaveState, queryClient, wave]
+    [queryClient, wave]
   );
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: DropMutationBody) => {
+    mutationFn: async (body: QueuedDropMutationBody) => {
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
@@ -465,7 +487,7 @@ export default function CreateDrop({
       if (body.dropId) {
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
-      startLocalSlowModeCooldown(body.drop);
+      startLocalSlowModeCooldown(body);
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
       body.onSuccess?.();
 
@@ -480,7 +502,7 @@ export default function CreateDrop({
       }
     },
     onError: (error, body) => {
-      clearSlowModeChatPending(body.drop);
+      clearSlowModeChatPending(body.slowModeChatReservation);
       setTimeout(() => {
         if (body.dropId) {
           processDropRemoved(body.drop.wave_id, body.dropId);
@@ -497,7 +519,7 @@ export default function CreateDrop({
   });
 
   // Use refs to avoid stale closures - fixes the stream unmounting issue
-  const queueRef = useRef<DropMutationBody[]>([]);
+  const queueRef = useRef<QueuedDropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
   const hasBatchErrorsRef = useRef(false);
   const inFlightProcessNextDropRef = useRef<Promise<void> | null>(null);
@@ -533,12 +555,23 @@ export default function CreateDrop({
 
   const submitDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {
-      if (!reserveSlowModeChatQueueSlot(dropRequest.drop)) {
+      const slowModeChatReservation = reserveSlowModeChatQueueSlot(
+        dropRequest.drop
+      );
+      if (slowModeChatReservation === false) {
         return false;
       }
 
+      const queuedDropRequest: QueuedDropMutationBody =
+        slowModeChatReservation === null
+          ? dropRequest
+          : {
+              ...dropRequest,
+              slowModeChatReservation,
+            };
+
       // Add to queue
-      queueRef.current.push(dropRequest);
+      queueRef.current.push(queuedDropRequest);
 
       // Process immediately - avoids state update timing issues
       inFlightProcessNextDropRef.current = processNextDrop();
