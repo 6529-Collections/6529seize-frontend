@@ -1,7 +1,7 @@
 "use client";
 
 import { isSlowModeCoolingDown } from "@/helpers/waves/slow-mode.helpers";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 enum SubmissionStatus {
   NOT_STARTED = "NOT_STARTED",
@@ -58,6 +58,25 @@ export function useDropPrivileges({
   maxDropsCount,
   identityDropsCount,
 }: DropPrivilegesInput): DropPrivileges {
+  const [slowModeClockTick, setSlowModeClockTick] = useState(0);
+
+  useEffect(() => {
+    if (slowModeCooldownMs === null || nextDropAllowed === null) {
+      return;
+    }
+
+    const remainingMs = nextDropAllowed - Date.now();
+    if (remainingMs <= 0) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSlowModeClockTick((current) => current + 1);
+    }, remainingMs);
+
+    return () => clearTimeout(timeout);
+  }, [nextDropAllowed, slowModeCooldownMs]);
+
   return useMemo(() => {
     const now = Date.now();
 
@@ -145,5 +164,6 @@ export function useDropPrivileges({
     submissionEnds,
     maxDropsCount,
     identityDropsCount,
+    slowModeClockTick,
   ]);
 }

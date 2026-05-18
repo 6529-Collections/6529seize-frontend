@@ -152,7 +152,7 @@ interface CreateDropContentProps {
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
-  readonly submitDrop: (dropRequest: DropMutationBody) => void;
+  readonly submitDrop: (dropRequest: DropMutationBody) => boolean;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
   readonly isChatBlockedBySlowMode: boolean;
@@ -1144,6 +1144,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (dropRequest.drop_type === ApiDropType.Chat && isChatBlockedBySlowMode) {
+      return;
+    }
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -1199,6 +1203,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
 
+      const submitAccepted = submitDrop({
+        drop: updatedDropRequest,
+        dropId: optimisticDrop?.id ?? null,
+        onSuccess:
+          isDropMode && canExitDropMode
+            ? () => handleDropModeChange(false)
+            : undefined,
+        onError:
+          isDropMode && canExitDropMode
+            ? handleDuplicateIdentitySubmissionError
+            : undefined,
+      });
+      if (!submitAccepted) {
+        return;
+      }
+
       if (optimisticDrop) {
         const optimisticDropWithAttachments = {
           ...optimisticDrop,
@@ -1236,19 +1256,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         });
       }
       refreshState();
-
-      submitDrop({
-        drop: updatedDropRequest,
-        dropId: optimisticDrop?.id ?? null,
-        onSuccess:
-          isDropMode && canExitDropMode
-            ? () => handleDropModeChange(false)
-            : undefined,
-        onError:
-          isDropMode && canExitDropMode
-            ? handleDuplicateIdentitySubmissionError
-            : undefined,
-      });
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),

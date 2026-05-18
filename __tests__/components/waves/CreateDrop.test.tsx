@@ -211,6 +211,59 @@ describe("CreateDrop", () => {
     dateNowSpy.mockRestore();
   });
 
+  it("queues only one slow-mode chat request while the first request is pending", async () => {
+    let resolvePost: ((drop: unknown) => void) | null = null;
+    commonApiPostMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePost = resolve;
+        })
+    );
+    const onDropAdded = jest.fn();
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={onDropAdded}
+            wave={{
+              ...wave,
+              chat: {
+                ...wave.chat,
+                slow_mode_cooldown_ms: 30_000,
+              },
+            }}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+
+    await userEvent.click(screen.getByText("submit"));
+
+    expect(onDropAdded).toHaveBeenCalledTimes(1);
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+
+    resolvePost?.({ id: "server-drop", wave_id: "1" });
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
+  });
+
   it("does not start slow mode cooldown for participatory drops", async () => {
     useWaveMock.mockReturnValue({
       isMemesWave: false,

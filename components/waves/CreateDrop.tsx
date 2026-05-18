@@ -304,7 +304,10 @@ export default function CreateDrop({
     [canMentionAll]
   );
 
-  const startLocalSlowModeCooldown = useCallback(
+  const slowModeChatPendingRef = useRef(false);
+  const slowModeChatCooldownUntilRef = useRef<number | null>(null);
+
+  const getLocalSlowModeCooldownMs = useCallback(
     (dropRequest: ApiCreateDropRequest) => {
       const cooldownMs = wave.chat.slow_mode_cooldown_ms;
       const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
@@ -314,7 +317,7 @@ export default function CreateDrop({
       const isAdmin = wave.wave.authenticated_user_eligible_for_admin === true;
 
       if (typeof cooldownMs !== "number") {
-        return;
+        return null;
       }
 
       if (
@@ -323,10 +326,62 @@ export default function CreateDrop({
         isCreator ||
         isAdmin
       ) {
+        return null;
+      }
+
+      return cooldownMs;
+    },
+    [
+      connectedProfile?.handle,
+      wave.author.handle,
+      wave.chat.slow_mode_cooldown_ms,
+      wave.wave.authenticated_user_eligible_for_admin,
+    ]
+  );
+
+  const reserveSlowModeChatQueueSlot = useCallback(
+    (dropRequest: ApiCreateDropRequest) => {
+      if (getLocalSlowModeCooldownMs(dropRequest) === null) {
+        return true;
+      }
+
+      if (slowModeChatPendingRef.current) {
+        return false;
+      }
+
+      const cooldownUntil = slowModeChatCooldownUntilRef.current;
+      if (cooldownUntil !== null && Date.now() < cooldownUntil) {
+        return false;
+      }
+
+      slowModeChatCooldownUntilRef.current = null;
+      slowModeChatPendingRef.current = true;
+      return true;
+    },
+    [getLocalSlowModeCooldownMs]
+  );
+
+  const clearSlowModeChatPending = useCallback(
+    (dropRequest: ApiCreateDropRequest) => {
+      if (getLocalSlowModeCooldownMs(dropRequest) === null) {
+        return;
+      }
+
+      slowModeChatPendingRef.current = false;
+    },
+    [getLocalSlowModeCooldownMs]
+  );
+
+  const startLocalSlowModeCooldown = useCallback(
+    (dropRequest: ApiCreateDropRequest) => {
+      const cooldownMs = getLocalSlowModeCooldownMs(dropRequest);
+      if (cooldownMs === null) {
         return;
       }
 
       const nextDropAllowed = Date.now() + cooldownMs;
+      slowModeChatPendingRef.current = false;
+      slowModeChatCooldownUntilRef.current = nextDropAllowed;
       queryClient.setQueryData<ApiWave>(
         [QueryKey.WAVE, { wave_id: wave.id }],
         (currentWave) => {
@@ -346,7 +401,7 @@ export default function CreateDrop({
         })
         .catch(() => undefined);
     },
-    [connectedProfile?.handle, queryClient, wave]
+    [getLocalSlowModeCooldownMs, queryClient, wave]
   );
 
   const addDropMutation = useMutation({
@@ -375,6 +430,7 @@ export default function CreateDrop({
       }
     },
     onError: (error, body) => {
+      clearSlowModeChatPending(body.drop);
       setTimeout(() => {
         if (body.dropId) {
           processDropRemoved(body.drop.wave_id, body.dropId);
@@ -426,7 +482,11 @@ export default function CreateDrop({
   }, [addDropMutation, onAllDropsAdded, waitAndInvalidateDrops]);
 
   const submitDrop = useCallback(
-    (dropRequest: DropMutationBody) => {
+    (dropRequest: DropMutationBody): boolean => {
+      if (!reserveSlowModeChatQueueSlot(dropRequest.drop)) {
+        return false;
+      }
+
       // Add to queue
       queueRef.current.push(dropRequest);
 
@@ -445,8 +505,15 @@ export default function CreateDrop({
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
+
+      return true;
     },
-    [onDropAddedToQueue, processNextDrop, unreadDividerContext]
+    [
+      onDropAddedToQueue,
+      processNextDrop,
+      reserveSlowModeChatQueueSlot,
+      unreadDividerContext,
+    ]
   );
 
   const createDropContentProps = useMemo(() => {
