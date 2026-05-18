@@ -23,7 +23,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { waves } = useMyStream();
   const { pinnedIds, isOperationInProgress, canPinWave } =
     usePinnedWavesServer();
-  const { setToast } = useAuth();
+  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
@@ -72,6 +72,10 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       window.removeEventListener("resize", checkTouch);
     };
   }, []);
+
+  if (!connectedProfile?.handle || activeProfileProxy) {
+    return null;
+  }
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
