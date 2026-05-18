@@ -1,6 +1,9 @@
 "use client";
 
-import { isSlowModeCoolingDown } from "@/helpers/waves/slow-mode.helpers";
+import {
+  SLOW_MODE_MIN_MS,
+  isSlowModeCoolingDown,
+} from "@/helpers/waves/slow-mode.helpers";
 import { useEffect, useMemo, useState } from "react";
 
 enum SubmissionStatus {
@@ -122,6 +125,13 @@ export function useDropPrivileges({
       nextDropAllowed,
       now,
     });
+    const hasSlowModeGate =
+      typeof slowModeCooldownMs === "number" &&
+      !Number.isNaN(slowModeCooldownMs) &&
+      slowModeCooldownMs >= SLOW_MODE_MIN_MS &&
+      typeof nextDropAllowed === "number" &&
+      !Number.isNaN(nextDropAllowed) &&
+      nextDropAllowed > 0;
 
     let submissionRestriction: SubmissionRestriction | null = null;
     if (!isLoggedIn) {
@@ -143,12 +153,12 @@ export function useDropPrivileges({
       chatRestriction = ChatRestriction.NOT_LOGGED_IN;
     } else if (isProxy) {
       chatRestriction = ChatRestriction.PROXY_USER;
-    } else if (isChatCoolingDown) {
+    } else if (chatDisabled) {
+      chatRestriction = ChatRestriction.DISABLED;
+    } else if (isChatCoolingDown || (!canChat && hasSlowModeGate)) {
       chatRestriction = ChatRestriction.SLOW_MODE;
     } else if (!canChat) {
       chatRestriction = ChatRestriction.NO_PERMISSION;
-    } else if (chatDisabled) {
-      chatRestriction = ChatRestriction.DISABLED;
     }
 
     return { submissionRestriction, chatRestriction };

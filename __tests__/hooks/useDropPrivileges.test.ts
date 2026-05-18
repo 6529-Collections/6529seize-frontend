@@ -76,6 +76,27 @@ describe("useDropPrivileges", () => {
     expect(result.current.chatRestriction).toBe(ChatRestriction.SLOW_MODE);
   });
 
+  it("returns disabled before slow mode", () => {
+    const now = Date.now();
+    const { result } = renderHook(() =>
+      useDropPrivileges({
+        isLoggedIn: true,
+        isProxy: false,
+        canChat: true,
+        canDrop: true,
+        chatDisabled: true,
+        slowModeCooldownMs: 30_000,
+        nextDropAllowed: now + 20_000,
+        submissionStarts: null,
+        submissionEnds: null,
+        maxDropsCount: null,
+        identityDropsCount: null,
+      })
+    );
+
+    expect(result.current.chatRestriction).toBe(ChatRestriction.DISABLED);
+  });
+
   it("does not apply slow mode after countdown expires", () => {
     const now = Date.now();
     const { result } = renderHook(() =>
@@ -93,6 +114,47 @@ describe("useDropPrivileges", () => {
         identityDropsCount: null,
       })
     );
+
+    expect(result.current.chatRestriction).toBeNull();
+  });
+
+  it("keeps stale slow mode until fresh chat permission data arrives", () => {
+    const now = Date.now();
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useDropPrivileges>[0]) =>
+        useDropPrivileges(props),
+      {
+        initialProps: {
+          isLoggedIn: true,
+          isProxy: false,
+          canChat: false,
+          canDrop: true,
+          chatDisabled: false,
+          slowModeCooldownMs: 30_000,
+          nextDropAllowed: now - 1,
+          submissionStarts: null,
+          submissionEnds: null,
+          maxDropsCount: null,
+          identityDropsCount: null,
+        },
+      }
+    );
+
+    expect(result.current.chatRestriction).toBe(ChatRestriction.SLOW_MODE);
+
+    rerender({
+      isLoggedIn: true,
+      isProxy: false,
+      canChat: true,
+      canDrop: true,
+      chatDisabled: false,
+      slowModeCooldownMs: null,
+      nextDropAllowed: null,
+      submissionStarts: null,
+      submissionEnds: null,
+      maxDropsCount: null,
+      identityDropsCount: null,
+    });
 
     expect(result.current.chatRestriction).toBeNull();
   });
