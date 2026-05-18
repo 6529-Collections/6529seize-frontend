@@ -94,7 +94,7 @@ export default function TheMemesCard({
   return (
     <Link
       href={`/the-memes/${nft.id}`}
-      className="tw-group tw-block tw-min-w-0 tw-rounded-xl tw-overflow-hidden tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
       <div className="tw-relative tw-mb-2 tw-bg-iron-950">
         <NFTImage
@@ -117,7 +117,7 @@ export default function TheMemesCard({
           </div>
         </div>
       )}
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-4 tw-pb-4 tw-pt-4 tw-text-center">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
         <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
           {mediaMimeType && (
             <MediaTypeBadge
