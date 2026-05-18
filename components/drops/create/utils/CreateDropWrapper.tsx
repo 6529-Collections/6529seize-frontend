@@ -428,19 +428,24 @@ const CreateDropWrapper = forwardRef<
     };
 
     const getExistingPartsSnapshot = (): CreateDropPart[] =>
-      drop?.parts.map((part) => ({
-        ...part,
-        media: [...part.media],
-        ...(part.attachments !== undefined && {
-          attachments: [...part.attachments],
-        }),
-        ...(part.uploaded_attachments !== undefined && {
-          uploaded_attachments: [...part.uploaded_attachments],
-        }),
-        ...(part.mentioned_groups !== undefined && {
-          mentioned_groups: [...part.mentioned_groups],
-        }),
-      })) ?? [];
+      drop?.parts.map((part) => {
+        const media = (part as { readonly media?: CreateDropPart["media"] })
+          .media;
+
+        return {
+          ...part,
+          ...(media !== undefined && { media: [...media] }),
+          ...(part.attachments !== undefined && {
+            attachments: [...part.attachments],
+          }),
+          ...(part.uploaded_attachments !== undefined && {
+            uploaded_attachments: [...part.uploaded_attachments],
+          }),
+          ...(part.mentioned_groups !== undefined && {
+            mentioned_groups: [...part.mentioned_groups],
+          }),
+        };
+      }) ?? [];
 
     const getDraftPart = (
       markdown: string | null,
