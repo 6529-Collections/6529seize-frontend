@@ -62,6 +62,7 @@ jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
     return (
       <div
         data-can-add-part={props.canAddPart}
+        data-can-submit={props.canSubmit}
         data-testid="create-drop-compact"
       >
         Compact View
@@ -79,6 +80,13 @@ jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
         >
           Sync upload editor
         </button>
+        <button
+          data-testid="submit-compact-drop"
+          onClick={() => props.onDrop()}
+          type="button"
+        >
+          Submit drop
+        </button>
       </div>
     );
   });
@@ -91,7 +99,11 @@ jest.mock("@/components/drops/create/full/CreateDropFull", () => {
     }));
 
     return (
-      <div data-can-add-part={props.canAddPart} data-testid="create-drop-full">
+      <div
+        data-can-add-part={props.canAddPart}
+        data-can-submit={props.canSubmit}
+        data-testid="create-drop-full"
+      >
         Full View
         <button
           data-testid="set-full-editor-state"
@@ -113,6 +125,13 @@ jest.mock("@/components/drops/create/full/CreateDropFull", () => {
           type="button"
         >
           Add part
+        </button>
+        <button
+          data-testid="submit-full-drop"
+          onClick={() => props.onDrop()}
+          type="button"
+        >
+          Submit drop
         </button>
       </div>
     );
@@ -644,6 +663,47 @@ describe("CreateDropWrapper Authentication Validation", () => {
 
       expect(setDrop).not.toHaveBeenCalled();
       expect(setIsStormMode).not.toHaveBeenCalled();
+      expect(result.parts[0].content).toBe("pending ![Seize](loading)");
+    });
+
+    it("does not submit while inline image upload markdown is pending", async () => {
+      mockMarkdown = "pending ![Seize](loading)";
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const setDrop = jest.fn();
+      const onSubmitDrop = jest.fn();
+      const component = React.createRef<any>();
+      const { getByTestId } = render(
+        <QueryClientProvider client={queryClient}>
+          <CreateDropWrapper
+            ref={component}
+            {...defaultProps}
+            setDrop={setDrop}
+            onSubmitDrop={onSubmitDrop}
+            viewType={CreateDropViewType.FULL}
+          />
+        </QueryClientProvider>
+      );
+
+      fireEvent.click(getByTestId("set-full-editor-state"));
+
+      await waitFor(() => {
+        expect(getByTestId("create-drop-full")).toHaveAttribute(
+          "data-can-submit",
+          "false"
+        );
+      });
+
+      fireEvent.click(getByTestId("submit-full-drop"));
+
+      const result = component.current?.getDropSnapshot();
+
+      expect(setDrop).not.toHaveBeenCalled();
+      expect(onSubmitDrop).not.toHaveBeenCalled();
       expect(result.parts[0].content).toBe("pending ![Seize](loading)");
     });
 

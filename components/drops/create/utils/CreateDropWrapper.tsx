@@ -275,6 +275,9 @@ const CreateDropWrapper = forwardRef<
           ])
         : null;
 
+    const getHasPendingInlineImageUpload = () =>
+      hasPendingInlineImageUploadMarkdown(getMarkdown());
+
     const getMissingRequiredMetadata = (): ApiWaveRequiredMetadata[] => {
       if (!waveProps?.id) {
         return [];
@@ -374,6 +377,7 @@ const CreateDropWrapper = forwardRef<
 
     const getCanSubmit = () =>
       !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
+      !getHasPendingInlineImageUpload() &&
       !missingMedia.length &&
       !missingMetadata.length &&
       !!(drop?.parts.length ? getCanSubmitStorm() : true);
@@ -397,7 +401,7 @@ const CreateDropWrapper = forwardRef<
 
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
-      !hasPendingInlineImageUploadMarkdown(getMarkdown()) &&
+      !getHasPendingInlineImageUpload() &&
       !getIsDropLimit() &&
       !getIsCharsLimit();
     const [canAddPart, setCanAddPart] = useState(getCanAddPart());
@@ -529,6 +533,9 @@ const CreateDropWrapper = forwardRef<
       if (loading) {
         return getDropSnapshot();
       }
+      if (getHasPendingInlineImageUpload()) {
+        return getDropSnapshot();
+      }
       const currentDrop = getDropSnapshot();
       setDrop(currentDrop);
       clearInputState();
@@ -536,6 +543,9 @@ const CreateDropWrapper = forwardRef<
     };
     const onDrop = () => {
       if (loading) {
+        return;
+      }
+      if (getHasPendingInlineImageUpload()) {
         return;
       }
       const currentDrop = onDropPart();
@@ -546,7 +556,7 @@ const CreateDropWrapper = forwardRef<
       if (loading) {
         return getDropSnapshot();
       }
-      if (hasPendingInlineImageUploadMarkdown(getMarkdown())) {
+      if (getHasPendingInlineImageUpload()) {
         return getDropSnapshot();
       }
       setIsStormMode(true);
