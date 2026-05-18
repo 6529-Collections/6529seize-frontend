@@ -12,6 +12,7 @@ jest.mock("@/components/auth/Auth");
 jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
   balance: "balance",
   balanceBigger: "balanceBigger",
+  balanceInline: "balanceInline",
 }));
 
 import { useAuth } from "@/components/auth/Auth";
@@ -360,6 +361,22 @@ describe("NFTImageBalance", () => {
         );
         const outerSpan = container.querySelector("span.balance.balanceBigger");
         expect(outerSpan).toBeInTheDocument();
+        expect(outerSpan).toHaveTextContent("SEIZED x3");
+      });
+
+      it("renders inline balance without positional classes", () => {
+        mockUseNftBalance.mockReturnValue({
+          balance: 3,
+          isLoading: false,
+          error: null,
+        });
+        const { container } = renderWithProviders(
+          <NFTImageBalance {...defaultProps} height={650} inline />
+        );
+        const outerSpan = container.querySelector("span.balanceInline");
+        expect(outerSpan).toBeInTheDocument();
+        expect(outerSpan).not.toHaveClass("balance");
+        expect(outerSpan).not.toHaveClass("balanceBigger");
         expect(outerSpan).toHaveTextContent("SEIZED x3");
       });
     });

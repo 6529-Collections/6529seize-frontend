@@ -3,9 +3,13 @@ import {
   MemePageLiveRightMenu,
   MemePageLiveSubMenu,
 } from "@/components/the-memes/MemePageLive";
+import { MemePageReferencesSubMenu } from "@/components/the-memes/MemePageReferences";
 import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+let mockCountry = "US";
+let mockIsIos = false;
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -26,6 +30,10 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
+jest.mock("@/components/the-memes/MemePageArt", () => ({
+  __esModule: true,
+  MemePageArt: () => <div data-testid="meme-page-art" />,
+}));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
@@ -42,6 +50,34 @@ jest.mock("@/components/nft-attributes/NftStats", () => ({
       <tr data-testid="nft-stats" />
     </>
   ),
+}));
+
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  CookieConsentProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  useCookieConsent: () => ({ country: mockCountry }),
+}));
+
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isIos: mockIsIos }),
+}));
+
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: ({
+    handleOrWallet,
+  }: {
+    readonly handleOrWallet?: string | null | undefined;
+  }) => ({
+    profile: handleOrWallet ? { handle: handleOrWallet, pfp: null } : null,
+    isLoading: false,
+  }),
+}));
+
+jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
+  __esModule: true,
+  default: () => <div data-testid="marketplace-links" />,
 }));
 
 const mockFetchUrl = jest.fn();
@@ -62,6 +98,8 @@ jest.mock("@/services/api/common-api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCountry = "US";
+  mockIsIos = false;
 });
 
 afterEach(() => {
@@ -164,7 +202,7 @@ function createRememe(name: string): Rememe {
   } as Rememe;
 }
 
-describe("MemePageLiveSubMenu sorting", () => {
+describe("MemePageReferencesSubMenu sorting", () => {
   it("loads rememes according to selected sort", async () => {
     const nft = createNft();
     const firstData = [createRememe("Random Rememe")];
@@ -174,7 +212,7 @@ describe("MemePageLiveSubMenu sorting", () => {
       .mockResolvedValueOnce({ data: [], count: 0 }) // meme lab
       .mockResolvedValueOnce({ data: firstData, count: 21 }); // initial rememes
 
-    render(<MemePageLiveSubMenu show nft={nft} />);
+    render(<MemePageReferencesSubMenu show nft={nft} />);
 
     expect(mockFetchUrl).toHaveBeenCalledWith(
       `https://api.test.6529.io/api/nfts_memelab?sort_direction=asc&meme_id=${nft.id}`
@@ -209,7 +247,7 @@ describe("MemePageLiveSubMenu sorting", () => {
       .mockResolvedValueOnce({ data: firstData, count: 21 })
       .mockResolvedValueOnce({ data: refreshed, count: 21 });
 
-    const { container } = render(<MemePageLiveSubMenu show nft={nft} />);
+    const { container } = render(<MemePageReferencesSubMenu show nft={nft} />);
 
     await waitFor(() =>
       expect(screen.getByText(/Random1/)).toBeInTheDocument()
@@ -228,13 +266,49 @@ describe("MemePageLiveSubMenu sorting", () => {
 });
 
 describe("MemePageLiveRightMenu distribution link", () => {
+  it("preserves every artist handle when there are fewer artist names", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({
+          artist: "Alice Collective",
+          artist_seize_handle: "alice, bob",
+        })}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Alice Collective" })
+    ).toHaveAttribute("href", "/alice");
+    expect(screen.getByRole("link", { name: "bob" })).toHaveAttribute(
+      "href",
+      "/bob"
+    );
+    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("B")).toBeInTheDocument();
+  });
+
+  it("falls back to the artist name when no artist handle exists", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({
+          artist: "Unsigned Artist",
+          artist_seize_handle: "",
+        })}
+      />
+    );
+
+    expect(screen.getByText("Unsigned Artist")).toBeInTheDocument();
+    expect(screen.queryByText("not available")).not.toBeInTheDocument();
+  });
+
   it("shows distribution plan link", async () => {
     const nft = createNft({ id: 5, has_distribution: true });
-    const meta = createMeta();
     await waitFor(() => {
       render(
         <CookieConsentProvider>
-          <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
+          <MemePageLiveRightMenu show nft={nft} />
         </CookieConsentProvider>
       );
     });
@@ -242,7 +316,24 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
   });
 
-  it("renders the media type row below metadata", async () => {
+  it("shows marketplace links outside non-US iOS", async () => {
+    render(<MemePageLiveRightMenu show nft={createNft()} />);
+
+    expect(screen.getByTestId("marketplace-links")).toBeInTheDocument();
+  });
+
+  it("hides marketplace links for non-US iOS", async () => {
+    mockCountry = "EE";
+    mockIsIos = true;
+
+    render(<MemePageLiveRightMenu show nft={createNft()} />);
+
+    expect(screen.queryByTestId("marketplace-links")).not.toBeInTheDocument();
+  });
+});
+
+describe("MemePageLiveSubMenu details", () => {
+  it("renders the media type badge", () => {
     const nft = createNft({
       metadata: {
         animation_details: {
@@ -250,21 +341,42 @@ describe("MemePageLiveRightMenu distribution link", () => {
         },
       },
     });
-    const meta = createMeta();
 
-    await waitFor(() => {
-      render(
-        <CookieConsentProvider>
-          <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
-        </CookieConsentProvider>
-      );
-    });
+    render(<MemePageLiveSubMenu show nft={nft} nftMeta={createMeta()} />);
 
-    const metadataCell = screen.getByText("Metadata");
-    const metadataRow = metadataCell.closest("tr");
-    const fileTypeRow = metadataRow?.nextElementSibling;
+    expect(screen.getByText("Interactive - HTML")).toBeInTheDocument();
+  });
 
-    expect(fileTypeRow?.textContent).toContain("File Type");
-    expect(fileTypeRow?.textContent).toContain("Interactive - HTML");
+  it("opens additional details when the default flag changes", async () => {
+    const nft = createNft();
+    const nftMeta = createMeta();
+
+    const { rerender } = render(
+      <MemePageLiveSubMenu
+        show
+        nft={nft}
+        nftMeta={nftMeta}
+        defaultAdditionalDetailsOpen={false}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: /additional details/i })
+    ).toHaveAttribute("aria-expanded", "false");
+
+    rerender(
+      <MemePageLiveSubMenu
+        show
+        nft={nft}
+        nftMeta={nftMeta}
+        defaultAdditionalDetailsOpen={true}
+      />
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: /additional details/i })
+      ).toHaveAttribute("aria-expanded", "true")
+    );
   });
 });

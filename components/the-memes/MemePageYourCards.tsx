@@ -1,18 +1,94 @@
-import TransferSingle from "@/components/nft-transfer/TransferSingle";
-import { MEMES_CONTRACT, NULL_ADDRESS } from "@/constants/constants";
+"use client";
+
+import { TransferSingleActions } from "@/components/nft-transfer/TransferSingle";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFT, NftRank, NftTDH } from "@/entities/INFT";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
-import {
-  areEqualAddresses,
-  numberWithCommas,
-  printMintDate,
-} from "@/helpers/Helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ContractType } from "@/types/enums";
-import { Col, Container, Row, Table } from "react-bootstrap";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
-import styles from "./TheMemes.module.scss";
+
+function MemePageYourCardsTransferCard(props: {
+  readonly transferNft: NFT;
+  readonly nftBalance: number;
+  readonly myTDH: NftTDH | undefined;
+  readonly myRank: NftRank | undefined;
+}) {
+  const { isMobileDevice } = useDeviceInfo();
+  const statClassName =
+    "tw-inline-flex tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap";
+
+  const statsContent = (
+    <div className="tw-flex tw-w-full tw-flex-none tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-3 @lg:tw-w-auto @lg:tw-justify-start">
+      <div className={statClassName}>
+        <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          {isMobileDevice ? "Your Cards" : "Cards"}
+        </span>
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${props.nftBalance}`}</span>
+      </div>
+      {props.myRank && props.myTDH ? (
+        <>
+          <div className={statClassName}>
+            <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              TDH
+            </span>
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
+              {numberWithCommas(Math.round(props.myTDH.tdh))}
+            </span>
+          </div>
+          <div className={statClassName}>
+            <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              Rank
+            </span>
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">
+              #{props.myRank.rank}
+            </span>
+          </div>
+        </>
+      ) : (
+        <div className="tw-text-xs tw-font-medium tw-text-iron-500">
+          No TDH accrued
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="tw-mb-3">
+      <div
+        className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl tw-ring-1 tw-ring-white/5"
+        data-testid="transfer-single"
+      >
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-4 tw-px-4 tw-py-4 tw-@container">
+          {statsContent}
+          {!isMobileDevice && (
+            <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-6 @lg:tw-w-auto @lg:tw-flex-1">
+              <div className="tw-hidden tw-h-10 tw-w-px tw-shrink-0 tw-bg-iron-800 @lg:tw-block" />
+
+              <div className="tw-min-w-0 tw-flex-1">
+                <TransferSingleActions
+                  collectionType={CollectedCollectionType.MEMES}
+                  contractType={ContractType.ERC1155}
+                  contract={MEMES_CONTRACT}
+                  tokenId={props.transferNft.id}
+                  max={props.nftBalance}
+                  title={
+                    (props.transferNft as { name?: string }).name ??
+                    `The Memes #${props.transferNft.id}`
+                  }
+                  thumbUrl={props.transferNft.thumbnail}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function MemePageYourCardsRightMenu(props: {
   show: boolean;
@@ -24,270 +100,66 @@ export function MemePageYourCardsRightMenu(props: {
   myTDH: NftTDH | undefined;
   myRank: NftRank | undefined;
 }) {
-  function getTokenCount(transactions: Transaction[]) {
-    let count = 0;
-    [...transactions].map((e) => {
-      count += e.token_count;
-    });
-    return count;
-  }
-
-  if (props.show) {
-    const firstAcquired = [...props.transactions].sort((a, b) =>
-      a.transaction_date > b.transaction_date ? 1 : -1
-    )[0];
-
-    const airdropped = props.transactions.filter(
-      (t) => t.value === 0 && areEqualAddresses(t.from_address, NULL_ADDRESS)
-    );
-
-    const transferredIn =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              !areEqualAddresses(t.from_address, NULL_ADDRESS) &&
-              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value === 0
-          );
-
-    const transferredOut =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value === 0
-          );
-
-    const bought =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.to_address, w)) &&
-              t.value > 0
-          );
-
-    let boughtSum = 0;
-    bought.map((b) => {
-      boughtSum += b.value;
-    });
-
-    const sold =
-      props.wallets.length === 0
-        ? []
-        : props.transactions.filter(
-            (t) =>
-              props.wallets.some((w) => areEqualAddresses(t.from_address, w)) &&
-              t.value > 0
-          );
-
-    let soldSum = 0;
-    sold.map((b) => {
-      soldSum += b.value;
-    });
-
-    return (
-      <Col
-        xs={{ span: 12 }}
-        sm={{ span: 12 }}
-        md={{ span: 6 }}
-        lg={{ span: 6 }}
-      >
-        <Container className="p-0">
-          <Row>
-            {props.wallets.length === 0 && (
-              <Row className="pt-2">
-                <Col>
-                  <h4>Connect your wallet to view your cards.</h4>
-                </Col>
-              </Row>
-            )}
-            {props.nftBalance === 0 &&
-              props.wallets.length > 0 &&
-              props.nft && (
-                <Row className="pt-2">
-                  <Col>
-                    <h3>
-                      You don&apos;t own any editions of Card {props.nft.id}
-                    </h3>
-                  </Col>
-                </Row>
-              )}
-            {props.transactions.length > 0 && props.wallets.length > 0 && (
-              <>
-                {props.nftBalance > 0 && props.myOwner && (
-                  <>
-                    <Row className="pt-2">
-                      <Col
-                        xs={{ span: 12 }}
-                        sm={{ span: 12 }}
-                        md={{ span: 12 }}
-                        lg={{ span: 8 }}
-                      >
-                        <Table bordered={false}>
-                          <tbody>
-                            <tr className={`${styles["overviewColumn"]}`}>
-                              <td>Cards</td>
-                              <td className="text-right">{`x${props.nftBalance}`}</td>
-                            </tr>
-                          </tbody>
-                        </Table>
-                      </Col>
-                    </Row>
-                    {props.nftBalance > 0 && props.myOwner && props.nft?.id && (
-                      <Row className="mb-2">
-                        <Col>
-                          <TransferSingle
-                            collectionType={CollectedCollectionType.MEMES}
-                            contractType={ContractType.ERC1155}
-                            contract={MEMES_CONTRACT}
-                            tokenId={props.nft?.id}
-                            max={props.nftBalance}
-                            title={
-                              props.nft?.name ?? `The Memes #${props.nft?.id}`
-                            }
-                            thumbUrl={props.nft?.thumbnail}
-                          />
-                        </Col>
-                      </Row>
-                    )}
-                    {props.myRank && props.nft && props.myTDH ? (
-                      <Row className="pt-2">
-                        <Col
-                          xs={{ span: 12 }}
-                          sm={{ span: 12 }}
-                          md={{ span: 12 }}
-                          lg={{ span: 8 }}
-                        >
-                          <Table bordered={false}>
-                            <tbody>
-                              <tr
-                                className={`pt-1 ${styles["overviewColumn"]}`}
-                              >
-                                <td>TDH</td>
-                                <td className="text-right">
-                                  {numberWithCommas(
-                                    Math.round(props.myTDH.tdh)
-                                  )}
-                                </td>
-                              </tr>
-                              <tr className={`${styles["overviewColumn"]}`}>
-                                <td>Rank</td>
-                                <td className="text-right">
-                                  #{props.myRank?.rank}
-                                </td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </Col>
-                      </Row>
-                    ) : (
-                      <Row className="pb-3">
-                        <Col className={`pt-1 ${styles["overviewColumn"]}`}>
-                          No TDH accrued
-                        </Col>
-                      </Row>
-                    )}
-                  </>
-                )}
-                <Row className="pt-2 pb-2">
-                  <Col>
-                    <h3>Overview</h3>
-                  </Col>
-                </Row>
-                <Row className={`pb-2 ${styles["overviewColumn"]}`}>
-                  <Col>
-                    First acquired{" "}
-                    {printMintDate(new Date(firstAcquired!.transaction_date))}
-                  </Col>
-                </Row>
-                {airdropped.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(airdropped)} card
-                      {getTokenCount(airdropped) > 1 && "s"} airdropped
-                    </Col>
-                  </Row>
-                )}
-                {bought.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(bought)} card
-                      {getTokenCount(bought) > 1 && "s"} bought for {boughtSum}{" "}
-                      ETH
-                    </Col>
-                  </Row>
-                )}
-                {transferredIn.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(transferredIn)} card
-                      {getTokenCount(transferredIn) > 1 && "s"} transferred in
-                    </Col>
-                  </Row>
-                )}
-                {sold.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(sold)} card
-                      {getTokenCount(sold) > 1 && "s"} sold for {soldSum} ETH
-                    </Col>
-                  </Row>
-                )}
-                {transferredOut.length > 0 && (
-                  <Row className={`pt-1 ${styles["overviewColumn"]}`}>
-                    <Col>
-                      {getTokenCount(transferredOut)} card
-                      {getTokenCount(transferredOut) > 1 && "s"} transferred out
-                    </Col>
-                  </Row>
-                )}
-              </>
-            )}
-          </Row>
-        </Container>
-      </Col>
-    );
-  } else {
+  if (!props.show) {
     return <></>;
   }
+
+  const transferNft =
+    props.nftBalance > 0 &&
+    props.myOwner &&
+    props.nft !== undefined &&
+    props.nft.id !== 0
+      ? props.nft
+      : undefined;
+
+  if (transferNft === undefined) {
+    return <></>;
+  }
+
+  return (
+    <div className="tw-pt-6">
+      {props.transactions.length > 0 && props.wallets.length > 0 && (
+        <>
+          <MemePageYourCardsTransferCard
+            transferNft={transferNft}
+            nftBalance={props.nftBalance}
+            myTDH={props.myTDH}
+            myRank={props.myRank}
+          />
+        </>
+      )}
+    </div>
+  );
 }
 
 export function MemePageYourCardsSubMenu(props: {
   show: boolean;
   transactions: Transaction[];
 }) {
-  if (props.show) {
-    return (
-      <>
-        {props.transactions.length > 0 && (
-          <>
-            <Row className="pt-4">
-              <Col>
-                <h3>Your Transaction History</h3>
-              </Col>
-            </Row>
-            <Row className={`pt-4 ${styles["transactionsScrollContainer"]}`}>
-              <Col>
-                <Table bordered={false} className={styles["transactionsTable"]}>
-                  <tbody>
-                    {props.transactions.map((tr) => (
-                      <LatestActivityRow
-                        tr={tr}
-                        key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
-                      />
-                    ))}
-                  </tbody>
-                </Table>
-              </Col>
-            </Row>
-          </>
-        )}
-      </>
-    );
-  } else {
+  if (!props.show) {
     return <></>;
   }
+
+  return (
+    <>
+      {props.transactions.length > 0 && (
+        <section>
+          <div className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden">
+            <table className="tw-min-w-full tw-border-separate tw-border-spacing-0">
+              <tbody>
+                {props.transactions.map((tr) => (
+                  <LatestActivityRow
+                    tr={tr}
+                    variant="tailwind"
+                    rowStyle="striped"
+                    key={`${tr.from_address}-${tr.to_address}-${tr.transaction}-${tr.token_id}`}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+    </>
+  );
 }

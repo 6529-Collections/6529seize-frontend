@@ -9,9 +9,15 @@ interface Props {
   readonly contract: string;
   readonly tokenId: number;
   readonly height: 300 | 650 | "full";
+  readonly inline?: boolean | undefined;
 }
 
-export default function NFTImageBalance({ contract, tokenId, height }: Props) {
+export default function NFTImageBalance({
+  contract,
+  tokenId,
+  height,
+  inline = false,
+}: Props) {
   const { connectedProfile } = useAuth();
   const consolidationKey = connectedProfile?.consolidation_key ?? null;
   const contextBalance = useNftBalanceFromContext({
@@ -45,6 +51,10 @@ export default function NFTImageBalance({ contract, tokenId, height }: Props) {
   };
 
   const printBalanceSpan = (b: string) => {
+    if (inline) {
+      return <span className={styles["balanceInline"]}>{b}</span>;
+    }
+
     return (
       <span
         className={`${styles["balance"]} ${

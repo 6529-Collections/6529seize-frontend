@@ -1,11 +1,13 @@
 import "@testing-library/jest-dom";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 jest.mock("@/styles/Home.module.scss", () => ({ shadowBox: "shadowBox" }));
-
-jest.mock("@/enums", () => ({
-  ContractType: { ERC721: "ERC721", ERC1155: "ERC1155" },
-}));
 
 jest.mock("@/entities/IProfile", () => ({
   COLLECTED_COLLECTION_TYPE_TO_CONTRACT: {
@@ -202,7 +204,7 @@ describe("TransferSingle", () => {
     expect(mockFns.incQty).toHaveBeenCalledWith(key);
   });
 
-  test("button label for ERC1155 reflects selected qty (copies)", () => {
+  test("ERC1155 shows the selected quantity in the transfer button", () => {
     const props = { ...baseProps, max: 10, contractType: ContractType.ERC1155 };
     const key = `${props.collectionType}:${props.tokenId}`;
     mockSelected = new Map([[key, { qty: 3, max: 10 }]]);
@@ -210,6 +212,10 @@ describe("TransferSingle", () => {
     expect(screen.getByTestId("transfer-single-submit")).toHaveTextContent(
       "Transfer 3 copies"
     );
+    expect(screen.getByText("3/10")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Transfer 3 copies" })
+    ).toBeInTheDocument();
   });
 
   test("opens modal immediately when already connected", () => {
@@ -225,7 +231,7 @@ describe("TransferSingle", () => {
     );
   });
 
-  test("connect-first flow: click triggers seizeConnect, modal opens after connection", () => {
+  test("connect-first flow: click triggers seizeConnect, modal opens after connection", async () => {
     const connectMod = require("@/components/auth/SeizeConnectContext");
     connectMod.__state.isConnected = false;
     connectMod.__state.seizeConnectOpen = false;
@@ -241,10 +247,12 @@ describe("TransferSingle", () => {
     connectMod.__state.isConnected = true;
     connectMod.__state.seizeConnectOpen = false;
     rerender(<TransferSingle {...baseProps} />);
-    expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
-      "data-open",
-      "true"
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId("transfer-modal")).toHaveAttribute(
+        "data-open",
+        "true"
+      );
+    });
   });
 
   test("rerender with new tokenId updates select key", () => {
