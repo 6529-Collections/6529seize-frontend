@@ -434,7 +434,7 @@ const CreateDropWrapper = forwardRef<
 
         return {
           ...part,
-          ...(media !== undefined && { media: [...media] }),
+          media: media !== undefined ? [...media] : [],
           ...(part.attachments !== undefined && {
             attachments: [...part.attachments],
           }),
