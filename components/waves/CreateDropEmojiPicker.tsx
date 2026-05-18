@@ -17,9 +17,14 @@ interface CreateDropEmojiPickerProps {
   top?: string | undefined;
 }
 
-const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
-  disabled = false,
-  top = "tw-top-2",
+interface CreateDropEmojiPickerContentProps {
+  disabled: boolean;
+  top: string;
+}
+
+const CreateDropEmojiPickerContent: FC<CreateDropEmojiPickerContentProps> = ({
+  disabled,
+  top,
 }) => {
   const isMobile = useIsMobileScreen();
   const { desktopZIndex, mobileZIndexClassName } =
@@ -35,10 +40,6 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
     top: number;
     left: number;
   }>({ top: 0, left: 0 });
-
-  if (disabled && showPicker) {
-    setShowPicker(false);
-  }
 
   const isPickerOpen = showPicker && !disabled;
 
@@ -205,5 +206,16 @@ const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
     </>
   );
 };
+
+const CreateDropEmojiPicker: FC<CreateDropEmojiPickerProps> = ({
+  disabled = false,
+  top = "tw-top-2",
+}) => (
+  <CreateDropEmojiPickerContent
+    key={disabled ? "disabled" : "enabled"}
+    disabled={disabled}
+    top={top}
+  />
+);
 
 export default CreateDropEmojiPicker;
