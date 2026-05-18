@@ -3,10 +3,9 @@
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useAnimate } from "framer-motion";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type CollectionType = "memes" | "gradient" | "nextgen" | "memelab" | "rememes";
 type CollectionsDropdownVariant = "default" | "title" | "brand";
@@ -41,19 +40,10 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
   const variant = props.variant ?? "default";
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [iconScope, animateIcon] = useAnimate();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const activeCollection =
     COLLECTIONS.find((c) => c.id === props.activePage) ?? DEFAULT_COLLECTION;
-
-  useEffect(() => {
-    const iconElement: unknown = iconScope.current;
-    if (!(iconElement instanceof SVGSVGElement)) {
-      return;
-    }
-    animateIcon(iconElement, { rotate: isOpen ? 0 : -90 });
-  }, [animateIcon, iconScope, isOpen]);
 
   const handleSelect = (collection: CollectionItem) => {
     setIsOpen(false);
@@ -80,8 +70,9 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
 
   const chevron = (
     <svg
-      ref={iconScope}
-      className={iconClassNames[variant]}
+      className={`${iconClassNames[variant]} tw-transition-transform tw-duration-200 ${
+        isOpen ? "tw-rotate-0" : "-tw-rotate-90"
+      }`}
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"
@@ -131,7 +122,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
 
   const renderTrigger = () => {
     if (variant === "title") {
-      return <h1 className="tw-mb-0 tw-min-w-0">{triggerButton}</h1>;
+      return <span className="tw-min-w-0">{triggerButton}</span>;
     }
 
     if (isDefaultVariant) {
@@ -159,6 +150,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
           <li key={`collection-${collection.id}`} className="tw-h-full" role="none">
             <button
               type="button"
+              role="menuitem"
               onClick={() => handleSelect(collection)}
               className={`${
                 isMobile ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2"

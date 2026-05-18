@@ -268,16 +268,6 @@ export default function Rememes() {
                       src="/re-memes.png"
                       alt="re-memes"
                     />
-                    <Image
-                      unoptimized
-                      loading={"eager"}
-                      width="0"
-                      height="0"
-                      style={{ width: "150px", height: "auto" }}
-                      className="d-md-none"
-                      src="/re-memes.png"
-                      alt="re-memes"
-                    />
                     {totalResults > 0 && (
                       <span className="font-color-h font-larger">
                         (x{numberWithCommas(totalResults)})
