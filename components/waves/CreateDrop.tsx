@@ -76,6 +76,12 @@ export interface DropMutationBody {
 
 const ANIMATION_DURATION = 0.3;
 
+interface SlowModeChatWaveState {
+  pending: boolean;
+  cooldownUntil: number | null;
+  cooldownMs: number | null;
+}
+
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
@@ -304,11 +310,31 @@ export default function CreateDrop({
     [canMentionAll]
   );
 
-  const slowModeChatPendingRef = useRef(false);
-  const slowModeChatCooldownUntilRef = useRef<number | null>(null);
+  const slowModeChatStateByWaveRef = useRef<Map<string, SlowModeChatWaveState>>(
+    new Map()
+  );
+
+  const getSlowModeChatWaveState = useCallback((waveId: string) => {
+    const currentState = slowModeChatStateByWaveRef.current.get(waveId);
+    if (currentState !== undefined) {
+      return currentState;
+    }
+
+    const nextState: SlowModeChatWaveState = {
+      pending: false,
+      cooldownUntil: null,
+      cooldownMs: null,
+    };
+    slowModeChatStateByWaveRef.current.set(waveId, nextState);
+    return nextState;
+  }, []);
 
   const getLocalSlowModeCooldownMs = useCallback(
     (dropRequest: ApiCreateDropRequest) => {
+      if (dropRequest.wave_id !== wave.id) {
+        return null;
+      }
+
       const cooldownMs = wave.chat.slow_mode_cooldown_ms;
       const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
       const isCreator =
@@ -335,57 +361,81 @@ export default function CreateDrop({
       connectedProfile?.handle,
       wave.author.handle,
       wave.chat.slow_mode_cooldown_ms,
+      wave.id,
       wave.wave.authenticated_user_eligible_for_admin,
     ]
   );
 
   const reserveSlowModeChatQueueSlot = useCallback(
     (dropRequest: ApiCreateDropRequest) => {
-      if (getLocalSlowModeCooldownMs(dropRequest) === null) {
+      const cooldownMs = getLocalSlowModeCooldownMs(dropRequest);
+      if (cooldownMs === null) {
         return true;
       }
 
-      if (slowModeChatPendingRef.current) {
+      const waveState = getSlowModeChatWaveState(dropRequest.wave_id);
+      if (waveState.pending) {
         return false;
       }
 
-      const cooldownUntil = slowModeChatCooldownUntilRef.current;
+      const cooldownUntil = waveState.cooldownUntil;
       if (cooldownUntil !== null && Date.now() < cooldownUntil) {
         return false;
       }
 
-      slowModeChatCooldownUntilRef.current = null;
-      slowModeChatPendingRef.current = true;
+      waveState.cooldownUntil = null;
+      waveState.cooldownMs = cooldownMs;
+      waveState.pending = true;
       return true;
     },
-    [getLocalSlowModeCooldownMs]
+    [getLocalSlowModeCooldownMs, getSlowModeChatWaveState]
   );
 
   const clearSlowModeChatPending = useCallback(
     (dropRequest: ApiCreateDropRequest) => {
-      if (getLocalSlowModeCooldownMs(dropRequest) === null) {
+      const waveState = slowModeChatStateByWaveRef.current.get(
+        dropRequest.wave_id
+      );
+      if (waveState === undefined) {
         return;
       }
 
-      slowModeChatPendingRef.current = false;
+      waveState.pending = false;
     },
-    [getLocalSlowModeCooldownMs]
+    []
   );
 
   const startLocalSlowModeCooldown = useCallback(
     (dropRequest: ApiCreateDropRequest) => {
-      const cooldownMs = getLocalSlowModeCooldownMs(dropRequest);
+      const requestWaveId = dropRequest.wave_id;
+      const currentWaveState =
+        slowModeChatStateByWaveRef.current.get(requestWaveId);
+      const reservedCooldownMs =
+        currentWaveState?.pending === true ? currentWaveState.cooldownMs : null;
+      const cooldownMs =
+        reservedCooldownMs ?? getLocalSlowModeCooldownMs(dropRequest);
       if (cooldownMs === null) {
+        if (currentWaveState !== undefined) {
+          currentWaveState.pending = false;
+        }
         return;
       }
 
+      const waveState =
+        currentWaveState ?? getSlowModeChatWaveState(requestWaveId);
       const nextDropAllowed = Date.now() + cooldownMs;
-      slowModeChatPendingRef.current = false;
-      slowModeChatCooldownUntilRef.current = nextDropAllowed;
+      waveState.pending = false;
+      waveState.cooldownUntil = nextDropAllowed;
+      waveState.cooldownMs = cooldownMs;
       queryClient.setQueryData<ApiWave>(
-        [QueryKey.WAVE, { wave_id: wave.id }],
+        [QueryKey.WAVE, { wave_id: requestWaveId }],
         (currentWave) => {
-          const sourceWave = currentWave ?? wave;
+          const sourceWave =
+            currentWave ?? (wave.id === requestWaveId ? wave : undefined);
+          if (sourceWave === undefined) {
+            return currentWave;
+          }
+
           return {
             ...sourceWave,
             chat: {
@@ -397,11 +447,11 @@ export default function CreateDrop({
       );
       void queryClient
         .invalidateQueries({
-          queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+          queryKey: [QueryKey.WAVE, { wave_id: requestWaveId }],
         })
         .catch(() => undefined);
     },
-    [getLocalSlowModeCooldownMs, queryClient, wave]
+    [getLocalSlowModeCooldownMs, getSlowModeChatWaveState, queryClient, wave]
   );
 
   const addDropMutation = useMutation({

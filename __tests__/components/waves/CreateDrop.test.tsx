@@ -56,7 +56,7 @@ jest.mock("@/components/waves/CreateDropContent", () => (props: any) => (
     <button
       onClick={() =>
         props.submitDrop({
-          drop: { wave_id: "1", drop_type: "CHAT" },
+          drop: { wave_id: props.wave.id, drop_type: "CHAT" },
           dropId: null,
         } as DropMutationBody)
       }
@@ -81,7 +81,7 @@ jest.mock("@/components/waves/CreateCurationDropContent", () => ({
       <button
         onClick={() =>
           props.submitDrop({
-            drop: { wave_id: "1", drop_type: "PARTICIPATORY" },
+            drop: { wave_id: props.wave.id, drop_type: "PARTICIPATORY" },
             dropId: null,
           } as DropMutationBody)
         }
@@ -101,7 +101,7 @@ jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
         <button
           onClick={() =>
             props.submitDrop({
-              drop: { wave_id: "1", drop_type: "PARTICIPATORY" },
+              drop: { wave_id: props.wave.id, drop_type: "PARTICIPATORY" },
               dropId: null,
             } as DropMutationBody)
           }
@@ -264,6 +264,154 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
   });
 
+  it("allows a slow-mode chat submit in another wave while the first wave request is pending", async () => {
+    const resolvePosts: Array<(drop: unknown) => void> = [];
+    commonApiPostMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePosts.push(resolve);
+        })
+    );
+    const onDropAdded = jest.fn();
+    const slowWaveA = {
+      ...wave,
+      id: "1",
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+    const slowWaveB = {
+      ...wave,
+      id: "2",
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+    const renderComposer = (currentWave: typeof wave) => (
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={onDropAdded}
+            wave={currentWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const { rerender } = render(renderComposer(slowWaveA));
+
+    await userEvent.click(screen.getByText("submit"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+
+    rerender(renderComposer(slowWaveB));
+    await userEvent.click(screen.getByText("submit"));
+
+    expect(onDropAdded).toHaveBeenCalledTimes(2);
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+
+    resolvePosts[0]?.({ id: "server-drop-a", wave_id: "1" });
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
+    expect(mockSetQueryData.mock.calls[0][0]).toEqual([
+      QueryKey.WAVE,
+      { wave_id: "1" },
+    ]);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE, { wave_id: "1" }],
+    });
+
+    resolvePosts[1]?.({ id: "server-drop-b", wave_id: "2" });
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalledTimes(2));
+    expect(mockSetQueryData.mock.calls[1][0]).toEqual([
+      QueryKey.WAVE,
+      { wave_id: "2" },
+    ]);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE, { wave_id: "2" }],
+    });
+  });
+
+  it("allows a slow-mode chat submit in another wave after the first wave starts cooldown", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    commonApiPostMock.mockImplementation(
+      ({ body }: { body: { wave_id: string } }) =>
+        Promise.resolve({
+          id: `server-drop-${body.wave_id}`,
+          wave_id: body.wave_id,
+        })
+    );
+    const onDropAdded = jest.fn();
+    const slowWaveA = {
+      ...wave,
+      id: "1",
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+    const slowWaveB = {
+      ...wave,
+      id: "2",
+      chat: {
+        ...wave.chat,
+        slow_mode_cooldown_ms: 30_000,
+      },
+    };
+    const renderComposer = (currentWave: typeof wave) => (
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={onDropAdded}
+            wave={currentWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const { rerender } = render(renderComposer(slowWaveA));
+
+    await userEvent.click(screen.getByText("submit"));
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalled());
+    expect(onDropAdded).toHaveBeenCalledTimes(1);
+
+    rerender(renderComposer(slowWaveB));
+    await userEvent.click(screen.getByText("submit"));
+
+    expect(onDropAdded).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    dateNowSpy.mockRestore();
+  });
+
   it("does not start slow mode cooldown for participatory drops", async () => {
     useWaveMock.mockReturnValue({
       isMemesWave: false,
@@ -305,6 +453,65 @@ describe("CreateDrop", () => {
 
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
     expect(mockSetQueryData).not.toHaveBeenCalled();
+  });
+
+  it("does not reuse chat slow-mode state for participatory drops", async () => {
+    const dateNowSpy = jest.spyOn(Date, "now").mockReturnValue(10_000);
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+    commonApiPostMock.mockImplementation(
+      ({ body }: { body: { drop_type: string; wave_id: string } }) =>
+        Promise.resolve({
+          id: `server-drop-${body.drop_type}`,
+          wave_id: body.wave_id,
+        })
+    );
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            setToast: jest.fn(),
+            connectedProfile: { handle: "viewer" },
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={{
+              ...wave,
+              chat: {
+                ...wave.chat,
+                slow_mode_cooldown_ms: 30_000,
+              },
+            }}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit"));
+    await waitFor(() => expect(mockSetQueryData).toHaveBeenCalledTimes(1));
+
+    await userEvent.click(screen.getByText("switch to drop"));
+    await waitFor(() =>
+      expect(screen.getByText("submit curation")).toBeInTheDocument()
+    );
+    await userEvent.click(screen.getByText("submit curation"));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(mockSetQueryData).toHaveBeenCalledTimes(1);
+    dateNowSpy.mockRestore();
   });
 
   it("keeps both-mode composer in chat mode during slow mode cooldown", () => {
