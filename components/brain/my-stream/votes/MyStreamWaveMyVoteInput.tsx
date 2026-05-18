@@ -48,12 +48,8 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const rawCurrentVoteValue = drop.context_profile_context?.rating ?? 0;
   const rawMinRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
-  const minRating = drop.wave.forbid_negative_votes
-    ? Math.max(0, rawMinRating)
-    : rawMinRating;
-  const currentVoteValue = drop.wave.forbid_negative_votes
-    ? Math.max(rawCurrentVoteValue, minRating)
-    : rawCurrentVoteValue;
+  const minRating = drop.wave.forbid_negative_votes ? 0 : rawMinRating;
+  const currentVoteValue = rawCurrentVoteValue;
   const hasMatchingOptimisticState =
     optimisticVoteState !== null &&
     optimisticVoteState.dropId === drop.id &&
@@ -122,12 +118,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    const clampedValue = clampVoteValue(parsedVoteValue);
-    if (clampedValue === liveCurrentVoteValue) {
+    if (parsedVoteValue === liveCurrentVoteValue) {
       setVoteDraftState(null);
       return;
     }
 
+    const clampedValue = clampVoteValue(parsedVoteValue);
     setVoteDraftValue(String(clampedValue));
   };
 
@@ -179,12 +175,13 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       return;
     }
 
-    const clampedValue = clampVoteValue(parsedVoteValue);
-    if (clampedValue === liveCurrentVoteValue) {
+    if (parsedVoteValue === liveCurrentVoteValue) {
       setVoteDraftState(null);
-    } else {
-      setVoteDraftValue(String(clampedValue));
+      return;
     }
+
+    const clampedValue = clampVoteValue(parsedVoteValue);
+    setVoteDraftValue(String(clampedValue));
 
     setIsProcessing(true);
 

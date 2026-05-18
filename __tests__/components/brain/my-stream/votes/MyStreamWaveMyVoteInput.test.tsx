@@ -107,6 +107,71 @@ describe("MyStreamWaveMyVoteInput", () => {
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
   });
 
+  it("keeps an unchanged legacy negative vote when negative votes are forbidden", () => {
+    const dropWithLegacyNegativeRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: -5, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithLegacyNegativeRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    expect(input.value).toBe("-5");
+    expect(submitButton).toBeDisabled();
+
+    fireEvent.blur(input);
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(input.value).toBe("-5");
+    expect(auth.requestAuth).not.toHaveBeenCalled();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it("submits zero when a legacy negative vote is manually changed to zero", async () => {
+    const dropWithLegacyNegativeRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: -5, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithLegacyNegativeRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    const submitButton = screen.getByRole("button", { name: "Submit vote" });
+
+    fireEvent.change(input, { target: { value: "0" } });
+
+    expect(input.value).toBe("0");
+    expect(submitButton).not.toBeDisabled();
+
+    fireEvent.click(submitButton);
+
+    await waitFor(() => expect(auth.requestAuth).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ rate: 0 });
+  });
+
+  it("clamps typed negative values to zero when negative votes are forbidden", () => {
+    const dropWithPositiveRating = {
+      ...drop,
+      wave: { ...drop.wave, forbid_negative_votes: true },
+      context_profile_context: { rating: 4, min_rating: -10, max_rating: 10 },
+    };
+    render(<MyStreamWaveMyVoteInput drop={dropWithPositiveRating} />, {
+      wrapper,
+    });
+
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+
+    fireEvent.change(input, { target: { value: "-3" } });
+
+    expect(input.value).toBe("0");
+  });
+
   it("clamps vote value within limits and submits on click", async () => {
     render(<MyStreamWaveMyVoteInput drop={drop} />, { wrapper });
     const input = screen.getByRole("textbox");
