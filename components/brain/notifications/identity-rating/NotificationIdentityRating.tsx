@@ -1,30 +1,59 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type {
   INotificationIdentityNic,
   INotificationIdentityRep,
 } from "@/types/feed.types";
 import Link from "next/link";
-import { useContext } from "react";
+import { useContext, type ReactNode } from "react";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import NotificationHeader from "../subcomponents/NotificationHeader";
 import NotificationTimestamp from "../subcomponents/NotificationTimestamp";
+import {
+  formatSignedNotificationNumber,
+  getNotificationRatingColor,
+  isNotificationNumber,
+} from "../utils/notificationRatingUtils";
 
 interface NotificationIdentityRatingProps {
   readonly notification: INotificationIdentityRep | INotificationIdentityNic;
 }
 
-function getRatingColor(rating: number): string {
-  if (rating > 0) return "tw-text-green";
-  if (rating < 0) return "tw-text-red";
-  return "tw-text-iron-400";
-}
+function NotificationRatingInlinePart({
+  label,
+  value,
+  separator = "bullet",
+}: {
+  readonly label: ReactNode;
+  readonly value: number | null | undefined;
+  readonly separator?: "bullet" | "arrow";
+}) {
+  if (!isNotificationNumber(value)) {
+    return null;
+  }
 
-function formatRating(rating: number): string {
-  const prefix = rating > 0 ? "+" : "";
-  return `${prefix}${formatNumberWithCommas(rating)}`;
+  return (
+    <>
+      <span
+        className={
+          separator === "arrow"
+            ? "tw-text-base tw-font-bold tw-text-iron-400"
+            : "tw-text-xs tw-font-bold tw-text-iron-400"
+        }
+      >
+        {separator === "arrow" ? "\u2192" : "\u2022"}
+      </span>
+      <span className="tw-text-iron-400">{label}:</span>
+      <span
+        className={`tw-font-medium tw-tabular-nums ${getNotificationRatingColor(
+          value
+        )}`}
+      >
+        {formatSignedNotificationNumber(value)}
+      </span>
+    </>
+  );
 }
 
 export default function NotificationIdentityRating({
@@ -32,25 +61,48 @@ export default function NotificationIdentityRating({
 }: NotificationIdentityRatingProps) {
   const { connectedProfile } = useContext(AuthContext);
   const isRep = notification.cause === ApiNotificationCause.IdentityRep;
-  const { amount, total } = notification.additional_context;
+  const { amount, rater_rating, total } = notification.additional_context;
   const category =
     "category" in notification.additional_context
       ? notification.additional_context.category
-      : null;
-
-  const myHandle = connectedProfile?.handle;
-  const getProfileLink = (): string | null => {
-    if (!myHandle) return null;
-    return `/${myHandle}`;
-  };
-  const linkHref = getProfileLink();
+      : undefined;
 
   const ratingLabel = isRep ? "REP" : "NIC";
+  const profileHref = connectedProfile?.handle
+    ? `/${connectedProfile.handle}`
+    : null;
+  const ratingPhrase = (
+    <>
+      <span className="tw-font-medium tw-text-iron-300">{ratingLabel}</span>
+      {!isRep ? " rating" : null}
+      {category ? (
+        <>
+          {" "}
+          for{" "}
+          <span className="tw-font-medium tw-text-iron-300">{category}</span>
+        </>
+      ) : null}
+    </>
+  );
+  const totalLabel =
+    isRep && category ? (
+      <>
+        Total for{" "}
+        <span className="tw-font-medium tw-text-iron-300">{category}</span>
+      </>
+    ) : isRep ? (
+      "Total REP"
+    ) : (
+      <>
+        Total <span className="tw-font-medium tw-text-iron-300">NIC</span>
+      </>
+    );
 
   return (
     <div className="tw-w-full">
       <NotificationHeader
         author={notification.related_identity}
+        authorClassName="tw-text-base"
         actions={
           <NotificationsFollowBtn
             profile={notification.related_identity}
@@ -58,55 +110,30 @@ export default function NotificationIdentityRating({
           />
         }
       >
-        <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+        <span className="tw-text-base tw-font-normal tw-text-iron-400">
           updated your{" "}
+          {profileHref ? (
+            <Link
+              href={profileHref}
+              className="tw-text-base tw-no-underline hover:tw-underline"
+            >
+              {ratingPhrase}
+            </Link>
+          ) : (
+            ratingPhrase
+          )}
         </span>
-        {linkHref ? (
-          <Link
-            href={linkHref}
-            className="tw-text-sm tw-no-underline hover:tw-underline"
-          >
-            <span className="tw-font-medium tw-text-iron-300">
-              {ratingLabel}
-            </span>
-            {category && (
-              <span className="tw-font-normal tw-text-iron-400">
-                {" "}
-                for category &apos;{category}&apos;
-              </span>
-            )}
-            <span className="tw-font-normal tw-text-iron-400"> by </span>
-            <span className={`tw-font-medium ${getRatingColor(amount)}`}>
-              {formatRating(amount)}
-            </span>
-          </Link>
-        ) : (
-          <span className="tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-300">
-              {ratingLabel}
-            </span>
-            {category && (
-              <span className="tw-font-normal tw-text-iron-400">
-                {" "}
-                for category &apos;{category}&apos;
-              </span>
-            )}
-            <span className="tw-font-normal tw-text-iron-400"> by </span>
-            <span className={`tw-font-medium ${getRatingColor(amount)}`}>
-              {formatRating(amount)}
-            </span>
-          </span>
-        )}
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-400">
-          <span className="tw-mr-1 tw-text-xs tw-font-bold tw-text-iron-400">
-            &#8226;
-          </span>
-          New Total:{" "}
-          <span className={`tw-font-medium ${getRatingColor(total)}`}>
-            {formatNumberWithCommas(total)}
-          </span>
-        </span>
-        <NotificationTimestamp createdAt={notification.created_at} />
+        <NotificationRatingInlinePart label="Change" value={amount} />
+        <NotificationRatingInlinePart
+          label="New rating"
+          value={rater_rating}
+          separator="arrow"
+        />
+        <NotificationRatingInlinePart label={totalLabel} value={total} />
+        <NotificationTimestamp
+          createdAt={notification.created_at}
+          className="tw-text-base"
+        />
       </NotificationHeader>
     </div>
   );

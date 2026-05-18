@@ -60,6 +60,7 @@ export type INotificationIdentityRep = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentityRep;
   readonly additional_context: {
     readonly amount: number;
+    readonly rater_rating?: number | undefined;
     readonly total: number;
     readonly category: string;
   };
@@ -69,6 +70,7 @@ export type INotificationIdentityNic = NotificationBase & {
   readonly cause: ApiNotificationCause.IdentityNic;
   readonly additional_context: {
     readonly amount: number;
+    readonly rater_rating?: number | undefined;
     readonly total: number;
   };
 };
@@ -83,6 +85,8 @@ export type INotificationDropVoted = NotificationBase &
     readonly cause: ApiNotificationCause.DropVoted;
     readonly additional_context: {
       readonly vote: number;
+      readonly vote_change?: number | undefined;
+      readonly total_vote?: number | undefined;
     };
   };
 
