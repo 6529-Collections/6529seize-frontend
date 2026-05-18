@@ -57,7 +57,7 @@ function NotificationVoteInlinePart({
   }
 
   return (
-    <>
+    <span className="tw-inline-flex tw-items-center tw-gap-x-1 tw-whitespace-nowrap">
       <span
         className={
           separator === "arrow"
@@ -77,7 +77,7 @@ function NotificationVoteInlinePart({
       >
         {formatSignedNotificationNumber(value)}
       </span>
-    </>
+    </span>
   );
 }
 

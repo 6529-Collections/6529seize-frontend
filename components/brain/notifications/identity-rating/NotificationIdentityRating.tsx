@@ -34,7 +34,7 @@ function NotificationRatingInlinePart({
   }
 
   return (
-    <>
+    <span className="tw-inline-flex tw-items-center tw-gap-x-1 tw-whitespace-nowrap">
       <span
         className={
           separator === "arrow"
@@ -52,7 +52,7 @@ function NotificationRatingInlinePart({
       >
         {formatSignedNotificationNumber(value)}
       </span>
-    </>
+    </span>
   );
 }
 
