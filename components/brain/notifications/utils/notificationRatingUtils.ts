@@ -1,3 +1,5 @@
+import { formatNumberWithCommas } from "@/helpers/Helpers";
+
 export function isNotificationNumber(
   value: number | null | undefined
 ): value is number {
@@ -12,6 +14,6 @@ export function getNotificationRatingColor(value: number): string {
 
 export function formatSignedNotificationNumber(value: number): string {
   if (value === 0) return "0";
-  const formattedValue = value.toLocaleString();
+  const formattedValue = formatNumberWithCommas(value);
   return value > 0 ? `+${formattedValue}` : formattedValue;
 }

@@ -37,7 +37,11 @@ function getTotalLabel({
   }
 
   if (isRep) {
-    return "Total REP";
+    return (
+      <>
+        Total <span className="tw-font-medium tw-text-iron-300">REP</span>
+      </>
+    );
   }
 
   return (
