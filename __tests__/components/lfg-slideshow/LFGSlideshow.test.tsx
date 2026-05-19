@@ -20,6 +20,11 @@ describe("LFGSlideshow", () => {
     mockFetch.mockResolvedValue([{ id: "1", image: "img.png", animation: "" }]);
   });
 
+  afterEach(() => {
+    document.body.style.overflow = "";
+    mockFetch.mockReset();
+  });
+
   it("opens slideshow on button click", async () => {
     const { container } = render(<LFGButton contract="c" />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
@@ -29,6 +34,24 @@ describe("LFGSlideshow", () => {
     expect(screen.getByAltText("LFG Slide 1")).toBeInTheDocument();
     expect(container.querySelector("#lfg-slideshow")).not.toBeInTheDocument();
     expect(document.getElementById("lfg-slideshow")).toBeInTheDocument();
+  });
+
+  it("locks body scroll only while the slideshow is open", async () => {
+    document.body.style.overflow = "scroll";
+
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(document.body.style.overflow).toBe("hidden");
+
+    fireEvent.keyDown(window, { key: "Escape" });
+
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe("scroll");
+    });
   });
 
   it("falls back to the image when video loading fails", async () => {
