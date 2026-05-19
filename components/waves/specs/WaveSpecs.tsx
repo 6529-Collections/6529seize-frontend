@@ -15,6 +15,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
+  const showSlowMode = wave.chat.enabled;
 
   return (
     <div
@@ -51,7 +52,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
             </div>
           </div>
 
-          {isChatWave && <WaveSlowMode wave={wave} />}
+          {showSlowMode && <WaveSlowMode wave={wave} />}
         </div>
       </div>
     </div>

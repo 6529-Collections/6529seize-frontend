@@ -1,10 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import PrivilegedDropCreator, {
   DropMode,
 } from "@/components/waves/PrivilegedDropCreator";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import {
+  useWaveEligibility,
+  WaveEligibilityProvider,
+} from "@/contexts/wave/WaveEligibilityContext";
 
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
 
@@ -37,6 +41,39 @@ const wave: any = {
   metrics: {},
 };
 
+const renderPrivilegedDropCreator = (
+  props: Partial<React.ComponentProps<typeof PrivilegedDropCreator>> = {}
+) =>
+  render(
+    <WaveEligibilityProvider>
+      <PrivilegedDropCreator
+        activeDrop={null}
+        onCancelReplyQuote={() => {}}
+        onDropAddedToQueue={() => {}}
+        wave={wave}
+        dropId={null}
+        fixedDropMode={DropMode.CHAT}
+        {...props}
+      />
+    </WaveEligibilityProvider>
+  );
+
+const EligibilityProbe = ({
+  waveId,
+  onEligibility,
+}: {
+  readonly waveId: string;
+  readonly onEligibility: (eligibility: any) => void;
+}) => {
+  const { getEligibility } = useWaveEligibility();
+
+  React.useEffect(() => {
+    onEligibility(getEligibility(waveId));
+  }, [getEligibility, onEligibility, waveId]);
+
+  return null;
+};
+
 describe("PrivilegedDropCreator", () => {
   beforeEach(() => {
     mockPriv.mockReset();
@@ -48,16 +85,7 @@ describe("PrivilegedDropCreator", () => {
       submissionRestriction: "SUB",
       chatRestriction: "CHAT",
     });
-    render(
-      <PrivilegedDropCreator
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
-        onDropAddedToQueue={() => {}}
-        wave={wave}
-        dropId={null}
-        fixedDropMode={DropMode.BOTH}
-      />
-    );
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
     expect(screen.getByTestId("placeholder")).toHaveAttribute(
       "data-type",
       "both"
@@ -69,16 +97,7 @@ describe("PrivilegedDropCreator", () => {
       submissionRestriction: null,
       chatRestriction: "CHAT",
     });
-    render(
-      <PrivilegedDropCreator
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
-        onDropAddedToQueue={() => {}}
-        wave={wave}
-        dropId={null}
-        fixedDropMode={DropMode.CHAT}
-      />
-    );
+    renderPrivilegedDropCreator();
     expect(screen.getByTestId("placeholder")).toHaveAttribute(
       "data-type",
       "chat"
@@ -90,16 +109,7 @@ describe("PrivilegedDropCreator", () => {
       submissionRestriction: "SUB",
       chatRestriction: null,
     });
-    render(
-      <PrivilegedDropCreator
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
-        onDropAddedToQueue={() => {}}
-        wave={wave}
-        dropId={null}
-        fixedDropMode={DropMode.PARTICIPATION}
-      />
-    );
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.PARTICIPATION });
     expect(screen.getByTestId("placeholder")).toHaveAttribute(
       "data-type",
       "submission"
@@ -111,36 +121,48 @@ describe("PrivilegedDropCreator", () => {
       submissionRestriction: null,
       chatRestriction: null,
     });
-    render(
-      <PrivilegedDropCreator
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
-        onDropAddedToQueue={() => {}}
-        wave={wave}
-        dropId={null}
-        fixedDropMode={DropMode.BOTH}
-      />
-    );
+    renderPrivilegedDropCreator({ fixedDropMode: DropMode.BOTH });
     expect(screen.getByTestId("create")).toBeInTheDocument();
   });
 
   it("keeps chat composer visible during slow mode cooldown", () => {
     mockPriv.mockReturnValue({
       submissionRestriction: null,
-      chatRestriction: "SLOW_MODE",
+      chatRestriction: ChatRestriction.SLOW_MODE,
     });
-    render(
-      <PrivilegedDropCreator
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
-        onDropAddedToQueue={() => {}}
-        wave={wave}
-        dropId={null}
-        fixedDropMode={DropMode.CHAT}
-      />
-    );
+    renderPrivilegedDropCreator();
     expect(screen.getByTestId("create")).toBeInTheDocument();
     expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+  });
+
+  it("writes slow mode chat restriction to wave eligibility context", async () => {
+    const onEligibility = jest.fn();
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: ChatRestriction.SLOW_MODE,
+    });
+
+    render(
+      <WaveEligibilityProvider>
+        <PrivilegedDropCreator
+          activeDrop={null}
+          onCancelReplyQuote={() => {}}
+          onDropAddedToQueue={() => {}}
+          wave={wave}
+          dropId={null}
+          fixedDropMode={DropMode.CHAT}
+        />
+        <EligibilityProbe waveId={wave.id} onEligibility={onEligibility} />
+      </WaveEligibilityProvider>
+    );
+
+    await waitFor(() =>
+      expect(onEligibility).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          authenticated_user_chat_restriction: ChatRestriction.SLOW_MODE,
+        })
+      )
+    );
   });
 
   it("invalidates the wave when the slow mode expiry callback fires", () => {
@@ -148,16 +170,7 @@ describe("PrivilegedDropCreator", () => {
       submissionRestriction: null,
       chatRestriction: null,
     });
-    render(
-      <PrivilegedDropCreator
-        activeDrop={null}
-        onCancelReplyQuote={() => {}}
-        onDropAddedToQueue={() => {}}
-        wave={wave}
-        dropId={null}
-        fixedDropMode={DropMode.CHAT}
-      />
-    );
+    renderPrivilegedDropCreator();
 
     const privilegesInput = mockPriv.mock.calls[0][0];
     privilegesInput.onSlowModeCooldownExpired();

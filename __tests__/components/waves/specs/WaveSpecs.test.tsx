@@ -26,6 +26,8 @@ const makeWave = (
   overrides: {
     readonly slowModeCooldownMs?: number | undefined;
     readonly canAdmin?: boolean | undefined;
+    readonly chatEnabled?: boolean | undefined;
+    readonly waveType?: ApiWaveType | undefined;
   } = {}
 ): any => ({
   id: "wave-1",
@@ -44,7 +46,7 @@ const makeWave = (
   visibility: { scope: { group: null } },
   chat: {
     scope: { group: null },
-    enabled: true,
+    enabled: overrides.chatEnabled ?? true,
     authenticated_user_eligible: true,
     slow_mode_cooldown_ms: overrides.slowModeCooldownMs,
   },
@@ -60,7 +62,7 @@ const makeWave = (
   },
   wave: {
     admin_drop_deletion_enabled: false,
-    type: ApiWaveType.Chat,
+    type: overrides.waveType ?? ApiWaveType.Chat,
     winning_threshold: null,
     max_winners: null,
     max_votes_per_identity_to_drop: null,
@@ -120,6 +122,21 @@ describe("WaveSpecs", () => {
     renderWaveSpecs({ wave: makeWave({ slowModeCooldownMs: 300_000 }) });
 
     expect(screen.getByText("On · 5m")).toBeInTheDocument();
+  });
+
+  it.each([ApiWaveType.Rank, ApiWaveType.Approve])(
+    "shows slow mode for %s waves when chat is enabled",
+    (waveType) => {
+      renderWaveSpecs({ wave: makeWave({ waveType }) });
+
+      expect(screen.getByText("Slow mode")).toBeInTheDocument();
+    }
+  );
+
+  it("hides slow mode when chat is disabled", () => {
+    renderWaveSpecs({ wave: makeWave({ chatEnabled: false }) });
+
+    expect(screen.queryByText("Slow mode")).not.toBeInTheDocument();
   });
 
   it("shows edit icon only when user can edit wave", () => {

@@ -2,8 +2,9 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
@@ -62,6 +63,7 @@ export default function PrivilegedDropCreator({
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const { updateEligibility } = useWaveEligibility();
   const refreshWaveAfterSlowModeExpires = useCallback(() => {
     void queryClient
       .invalidateQueries({
@@ -87,6 +89,12 @@ export default function PrivilegedDropCreator({
   });
   const blockingChatRestriction =
     chatRestriction === ChatRestriction.SLOW_MODE ? null : chatRestriction;
+
+  useEffect(() => {
+    updateEligibility(wave.id, {
+      authenticated_user_chat_restriction: chatRestriction,
+    });
+  }, [chatRestriction, updateEligibility, wave.id]);
 
   if (submissionRestriction !== null && blockingChatRestriction !== null) {
     return (
