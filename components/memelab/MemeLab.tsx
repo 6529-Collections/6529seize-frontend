@@ -1,12 +1,13 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
-import styles from "@/components/memelab/MemeLab.module.scss";
 import NFTImage from "@/components/nft-image/NFTImage";
+import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import {
@@ -27,15 +28,12 @@ import {
 import { getNftMimeType } from "@/helpers/nft.helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
-import {
-  faChevronCircleDown,
-  faChevronCircleUp,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+
+const COLLECTION_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
 
 export function getInitialRouterValues(
   sortDir: string | null,
@@ -80,13 +78,7 @@ export function getInitialRouterValues(
   return { initialSortDir, initialSort };
 }
 
-export function printSortButtons(
-  sort: MemeLabSort,
-  volumeType: VolumeType,
-  setSort: (sort: MemeLabSort) => void,
-  setVolumeType: (volumeType: VolumeType) => void,
-  isCollection?: boolean
-) {
+function getMemeLabSortOptions(isCollection?: boolean) {
   let enumValues = Object.values(MemeLabSort).filter(
     (v) => v != MemeLabSort.VOLUME
   );
@@ -96,6 +88,18 @@ export function printSortButtons(
       (v) => v != MemeLabSort.ARTISTS && v != MemeLabSort.COLLECTIONS
     );
   }
+
+  return enumValues;
+}
+
+export function printSortButtons(
+  sort: MemeLabSort,
+  volumeType: VolumeType,
+  setSort: (sort: MemeLabSort) => void,
+  setVolumeType: (volumeType: VolumeType) => void,
+  isCollection?: boolean
+) {
+  const enumValues = getMemeLabSortOptions(isCollection);
 
   return (
     <>
@@ -543,71 +547,73 @@ export default function MemeLabComponent() {
     const mediaMimeType = getNftMimeType(nft);
 
     return (
-      <Col
+      <Link
         key={`${nft.contract}-${nft.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}
+        href={`/meme-lab/${nft.id}`}
+        className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <Link
-          href={`/meme-lab/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
-          <Container fluid>
-            <Row className={isConnected ? styles["nftImagePadding"] : ""}>
-              <NFTImage
-                nft={nft}
-                animation={false}
+        <div className="tw-relative tw-mb-2 tw-bg-iron-900">
+          <NFTImage
+            nft={nft}
+            animation={false}
+            height={300}
+            showBalance={false}
+            showThumbnail={true}
+          />
+        </div>
+        {isConnected && (
+          <div className="tw-flex tw-justify-center tw-px-4">
+            <div className="tw-inline-flex tw-h-7 tw-min-w-0 tw-flex-none tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-px-3 tw-text-iron-400 [&>span]:tw-overflow-hidden [&>span]:tw-text-ellipsis [&>span]:tw-text-[0.65625rem] [&>span]:tw-font-medium [&>span]:tw-uppercase [&>span]:tw-leading-none [&>span]:tw-tracking-[0.1em]">
+              <NFTImageBalance
+                contract={nft.contract}
+                tokenId={nft.id}
                 height={300}
-                showBalance={true}
-                showThumbnail={true}
+                inline
               />
-            </Row>
-            <Row>
-              <Col className="text-center pt-2">
-                <span>
-                  {mediaMimeType && (
-                    <MediaTypeBadge
-                      mimeType={mediaMimeType}
-                      dropId={`${nft.contract}-${nft.id}`}
-                      size="sm"
-                      iconClassName="tw-size-5"
-                      className="tw-mr-1.5 tw-inline-flex tw-align-[0.02em]"
-                    />
-                  )}
-                  #{nft.id} - {nft.name}
-                </span>
-              </Col>
-            </Row>
-            <Row>
-              <Col className="text-center pt-1">
-                {printNftContent(nft, sort, nftMetas, volumeType)}
-              </Col>
-            </Row>
-          </Container>
-        </Link>
-      </Col>
+            </div>
+          </div>
+        )}
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+            {mediaMimeType && (
+              <MediaTypeBadge
+                mimeType={mediaMimeType}
+                dropId={`${nft.contract}-${nft.id}`}
+                size="sm"
+                iconClassName="tw-size-5 tw-inline"
+                className="tw-mr-3 tw-inline-flex tw-align-[-0.25rem]"
+              />
+            )}
+            <span className="tw-relative tw-top-0.5">
+              #{nft.id} - {nft.name}
+            </span>
+          </div>
+          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
+            {printNftContent(nft, sort, nftMetas, volumeType)}
+          </div>
+        </div>
+      </Link>
     );
   }
 
   function printNfts() {
-    return <Row className="pt-2">{nfts.map((nft) => printNft(nft))}</Row>;
+    return <div className={COLLECTION_GRID_CLASS}>{nfts.map(printNft)}</div>;
   }
 
   function printArtists() {
     return labArtists.map((artist) => {
       const artistNfts = [...nfts].filter((n) => n.artist === artist);
       return (
-        <Row key={`${artist}-row`}>
-          <Col xs={12} className="pt-3">
-            <h4>{artist}</h4>
-          </Col>
-          {[...artistNfts]
-            .sort((a, b) => a.id - b.id)
-            .map((nft: LabNFT) => printNft(nft))}
-        </Row>
+        <section key={`${artist}-row`} className="tw-pt-6">
+          <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {artist}
+          </h2>
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+            {[...artistNfts]
+              .sort((a, b) => a.id - b.id)
+              .map((nft: LabNFT) => printNft(nft))}
+          </div>
+        </section>
       );
     });
   }
@@ -621,24 +627,26 @@ export default function MemeLabComponent() {
         collectionNftsMetas.some((a) => a.id === n.id)
       );
       return (
-        <Row key={`${collection}-row`}>
-          <Col xs={12} className="pt-3">
-            <h4>
-              {collection}&nbsp;
-              <a
-                className={styles["collectionLink"]}
-                href={`/meme-lab/collection/${encodeURIComponent(
-                  collection.replace(" ", "-")
-                )}`}
-              >
-                view
-              </a>
-            </h4>
-          </Col>
-          {[...collectionNfts]
-            .sort((a, b) => a.id - b.id)
-            .map((nft: LabNFT) => printNft(nft))}
-        </Row>
+        <section key={`${collection}-row`} className="tw-pt-6">
+          <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+            <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+              {collection}
+            </h2>
+            <Link
+              className="hover:tw-text-primary-200 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition"
+              href={`/meme-lab/collection/${encodeURIComponent(
+                collection.replace(" ", "-")
+              )}`}
+            >
+              view
+            </Link>
+          </div>
+          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+            {[...collectionNfts]
+              .sort((a, b) => a.id - b.id)
+              .map((nft: LabNFT) => printNft(nft))}
+          </div>
+        </section>
       );
     });
   }
@@ -657,18 +665,16 @@ export default function MemeLabComponent() {
         }
       } else {
         content = (
-          <Col>
+          <div>
             <NothingHereYetSummer />
-          </Col>
+          </div>
         );
       }
     } else {
       content = (
-        <Row>
-          <Col className="pt-3">
-            Fetching <DotLoader />
-          </Col>
-        </Row>
+        <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
+          Fetching <DotLoader />
+        </div>
       );
     }
 
@@ -682,56 +688,39 @@ export default function MemeLabComponent() {
       tokenIds={tokenIds}
       enabled={isConnected}
     >
-      <Container fluid className={styles["mainContainer"]}>
-        <Row>
-          <Col>
-            <Container className="pt-4">
-              <>
-                {/* Page header - visible on all devices */}
-                <Row>
-                  <Col className="d-flex align-items-center justify-content-between mb-3">
-                    <span className="d-flex align-items-center gap-3 flex-wrap">
-                      <span className="d-xl-none">
-                        <CollectionsDropdown
-                          activePage="memelab"
-                          variant="title"
-                        />
-                      </span>
-                      <h1 className="mb-0 d-none d-xl-block">Meme Lab</h1>
-                      <LFGButton contract={MEMELAB_CONTRACT} />
-                    </span>
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col>
-                    Sort by&nbsp;&nbsp;
-                    <FontAwesomeIcon
-                      icon={faChevronCircleUp}
-                      onClick={() => setSortDir(SortDirection.ASC)}
-                      className={`${styles["sortDirection"]} ${
-                        sortDir != SortDirection.ASC ? styles["disabled"] : ""
-                      }`}
-                    />{" "}
-                    <FontAwesomeIcon
-                      icon={faChevronCircleDown}
-                      onClick={() => setSortDir(SortDirection.DESC)}
-                      className={`${styles["sortDirection"]} ${
-                        sortDir != SortDirection.DESC ? styles["disabled"] : ""
-                      }`}
-                    />
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-                    {printSortButtons(sort, volumeType, setSort, setVolumeType)}
-                  </Col>
-                </Row>
-                {printNftsContent()}
-              </>
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+          <header className="tw-pb-5">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+              <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
+                <div className="tw-min-w-0 min-[1200px]:tw-hidden">
+                  <CollectionsDropdown activePage="memelab" variant="title" />
+                </div>
+                <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
+                  Meme Lab
+                </h1>
+                <LFGButton contract={MEMELAB_CONTRACT} />
+              </div>
+            </div>
+          </header>
+          <CollectionSortControls
+            ariaLabel="Meme Lab sorting"
+            sortDirection={sortDir}
+            setSortDirection={setSortDir}
+            currentSort={sort}
+            sortOptions={getMemeLabSortOptions()}
+            setSort={setSort}
+          >
+            {printVolumeTypeDropdown(
+              sort === MemeLabSort.VOLUME,
+              setVolumeType,
+              () => setSort(MemeLabSort.VOLUME),
+              volumeType
+            )}
+          </CollectionSortControls>
+          {printNftsContent()}
+        </div>
+      </div>
     </NftBalancesProvider>
   );
 }
