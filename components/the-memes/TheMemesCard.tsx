@@ -96,7 +96,7 @@ export default function TheMemesCard({
       href={`/the-memes/${nft.id}`}
       className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
-      <div className="tw-relative tw-mb-2 tw-bg-iron-950">
+      <div className="tw-relative tw-mb-2 tw-bg-iron-900">
         <NFTImage
           nft={nft}
           animation={false}
