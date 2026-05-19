@@ -15,6 +15,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 const VIEWPORT_PADDING = 16;
 const MENU_GAP = 8;
 const DEFAULT_MENU_MIN_WIDTH = 224;
+type DropdownHorizontalAlign = "auto" | "left" | "right";
 const unsubscribeFromClientMount = () => undefined;
 const subscribeToClientMount = (onStoreChange: () => void) => {
   onStoreChange();
@@ -29,6 +30,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   buttonRef,
   dynamicPosition = true,
   closeOnFocusOutside = true,
+  horizontalAlign = "auto",
   portalClassName = "tw-z-[999]",
   children,
 }: {
@@ -37,6 +39,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
   readonly dynamicPosition?: boolean | undefined;
   readonly closeOnFocusOutside?: boolean | undefined;
+  readonly horizontalAlign?: DropdownHorizontalAlign | undefined;
   readonly portalClassName?: string | undefined;
   readonly children: ReactNode;
 }) {
@@ -92,21 +95,20 @@ export default function CommonDropdownItemsDefaultWrapper({
     const maxTop = Math.max(viewportTop, viewportBottom - height);
     const top = Math.min(Math.max(unclampedTop, viewportTop), maxTop);
 
-    // Horizontal position: default to left align
-    let left = buttonRect.left + scrollX;
-
-    // Check if it overflows right edge of viewport
-    if (buttonRect.left + width > window.innerWidth - VIEWPORT_PADDING) {
-      // Switch to right align (align right edge of dropdown with right edge of button)
-      left = buttonRect.right + scrollX - width;
-    }
+    const shouldRightAlign =
+      horizontalAlign === "right" ||
+      (horizontalAlign === "auto" &&
+        buttonRect.left + width > window.innerWidth - VIEWPORT_PADDING);
+    let left = shouldRightAlign
+      ? buttonRect.right + scrollX - width
+      : buttonRect.left + scrollX;
 
     const maxLeft = Math.max(viewportLeft, viewportRight - width);
     left = Math.min(Math.max(left, viewportLeft), maxLeft);
 
     dropdownEl.style.top = `${top}px`;
     dropdownEl.style.left = `${left}px`;
-  }, [dynamicPosition, isOpen, buttonRef]);
+  }, [dynamicPosition, horizontalAlign, isOpen, buttonRef]);
 
   useLayoutEffect(() => {
     position();
