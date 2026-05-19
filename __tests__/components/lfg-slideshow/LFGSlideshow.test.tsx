@@ -47,7 +47,7 @@ describe("LFGSlideshow", () => {
 
     expect(document.body.style.overflow).toBe("hidden");
 
-    fireEvent.keyDown(window, { key: "Escape" });
+    fireEvent.keyDown(globalThis, { key: "Escape" });
 
     await waitFor(() => {
       expect(document.body.style.overflow).toBe("scroll");
@@ -66,9 +66,12 @@ describe("LFGSlideshow", () => {
 
     const video = document.querySelector("video");
     expect(video).toBeInTheDocument();
-    expect(video?.querySelector("track")).not.toBeInTheDocument();
+    expect(video?.querySelector("track")).toHaveAttribute(
+      "src",
+      expect.stringContaining("data:text/vtt")
+    );
 
-    fireEvent.error(video as HTMLVideoElement);
+    fireEvent.error(video);
     expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
       "src",
       "fallback.png"

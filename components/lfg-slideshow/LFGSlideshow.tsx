@@ -13,6 +13,7 @@ import { createPortal } from "react-dom";
 
 const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
+const EMPTY_CAPTIONS_SRC = "data:text/vtt,WEBVTT%0A%0A";
 
 type LFGMedia = ApiNftMedia & {
   image_compact?: string | null;
@@ -309,6 +310,12 @@ const LFGSlideshow: React.FC<{
               }
             }}
           >
+            <track
+              kind="captions"
+              src={EMPTY_CAPTIONS_SRC}
+              srcLang="en"
+              label="No captions available"
+            />
             Your browser does not support the video tag.
           </video>
         ) : (
