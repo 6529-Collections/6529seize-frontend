@@ -65,7 +65,7 @@ export default function PrivilegedDropCreator({
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { updateEligibility } = useWaveEligibility();
   const refreshWaveAfterSlowModeExpires = useCallback(() => {
-    void queryClient
+    queryClient
       .invalidateQueries({
         queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
       })
