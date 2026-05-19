@@ -28,7 +28,7 @@ const REMEMES_PAGE_SIZE = 20;
 function buildRememesUrl(memeId: number, page: number, sorting: RememeSort) {
   const sort =
     sorting === RememeSort.CREATED_ASC
-      ? "&sort=created_at&sort_direction=asc"
+      ? "&sort=created_at&sort_direction=desc"
       : "";
 
   return `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${memeId}&page_size=${REMEMES_PAGE_SIZE}&page=${page}${sort}`;
