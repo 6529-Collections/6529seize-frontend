@@ -353,7 +353,7 @@ const CreateDropContent = forwardRef<
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={loading}
               />
-              {!loading && <AutoFocusPlugin />}
+              <AutoFocusPlugin />
               <EmojiPlugin disabled={loading} />
             </div>
             {children && <div>{children}</div>}

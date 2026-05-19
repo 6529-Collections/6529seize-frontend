@@ -93,10 +93,19 @@ jest.mock(
     return null;
   }
 );
-jest.mock(
-  "@/components/drops/create/lexical/plugins/AutoFocusPlugin",
-  () => () => null
-);
+jest.mock("@/components/drops/create/lexical/plugins/AutoFocusPlugin", () => {
+  function MockAutoFocusPlugin() {
+    React.useEffect(() => {
+      mockAutoFocusMounts += 1;
+      return () => {
+        mockAutoFocusUnmounts += 1;
+      };
+    }, []);
+    return null;
+  }
+
+  return MockAutoFocusPlugin;
+});
 jest.mock(
   "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin",
   () => (props: any) => {
@@ -150,6 +159,8 @@ jest.mock("@/components/waves/drops/normalizeDropMarkdown", () => ({
 let linkProps: any = null;
 let mockClear: any;
 let mockActionsRowProps: any = null;
+let mockAutoFocusMounts = 0;
+let mockAutoFocusUnmounts = 0;
 let mockContentEditableProps: any = null;
 let mockDragDropPasteProps: any = null;
 let mockEditablePluginProps: any = null;
@@ -160,10 +171,38 @@ let mockOnChangeProps: any = null;
 let mockPlainTextPasteProps: any = null;
 let mockToggleViewProps: any = null;
 
+const renderCreateDropContent = (
+  props: Partial<React.ComponentProps<typeof CreateDropContent>> = {}
+) => (
+  <CreateDropContent
+    waveId={null}
+    viewType={CreateDropViewType.COMPACT}
+    editorState={null as any}
+    type={CreateDropType.DROP}
+    drop={null}
+    loading={false}
+    canAddPart={false}
+    canSubmit={false}
+    missingMedia={[]}
+    missingMetadata={[]}
+    onEditorState={jest.fn()}
+    onReferencedNft={jest.fn()}
+    onMentionedUser={jest.fn()}
+    onMentionedWave={jest.fn()}
+    setFiles={jest.fn()}
+    onViewClick={jest.fn()}
+    onDropPart={jest.fn()}
+    onUploadEditorStateChange={jest.fn()}
+    {...props}
+  />
+);
+
 describe("CreateDropContent basic", () => {
   beforeEach(() => {
     linkProps = null;
     mockActionsRowProps = null;
+    mockAutoFocusMounts = 0;
+    mockAutoFocusUnmounts = 0;
     mockContentEditableProps = null;
     mockDragDropPasteProps = null;
     mockEditablePluginProps = null;
@@ -253,5 +292,22 @@ describe("CreateDropContent basic", () => {
     mockDragDropPasteProps.onUploadEditorStateChange(lockedEditorState);
     expect(onUploadEditorStateChange).toHaveBeenCalledWith(lockedEditorState);
     expect(onEditorState).not.toHaveBeenCalled();
+  });
+
+  it("keeps autofocus mounted while loading toggles", () => {
+    const { rerender } = render(renderCreateDropContent({ loading: false }));
+
+    expect(mockAutoFocusMounts).toBe(1);
+    expect(mockAutoFocusUnmounts).toBe(0);
+
+    rerender(renderCreateDropContent({ loading: true }));
+
+    expect(mockAutoFocusMounts).toBe(1);
+    expect(mockAutoFocusUnmounts).toBe(0);
+
+    rerender(renderCreateDropContent({ loading: false }));
+
+    expect(mockAutoFocusMounts).toBe(1);
+    expect(mockAutoFocusUnmounts).toBe(0);
   });
 });
