@@ -30,6 +30,13 @@ const FULLSCREEN_CHANGE_EVENTS = [
   "MSFullscreenChange",
 ] as const;
 
+const FULLSCREEN_ERROR_EVENTS = [
+  "fullscreenerror",
+  "webkitfullscreenerror",
+  "mozfullscreenerror",
+  "MSFullscreenError",
+] as const;
+
 type FullscreenDocument = Document & {
   readonly webkitFullscreenElement?: Element | null;
   readonly mozFullScreenElement?: Element | null;
@@ -134,9 +141,15 @@ export function MemePageArtViewer({
     FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
       doc.addEventListener(eventName, clearOriginalAfterFullscreenExit);
     });
+    FULLSCREEN_ERROR_EVENTS.forEach((eventName) => {
+      doc.addEventListener(eventName, clearOriginalAfterFullscreenExit);
+    });
 
     return () => {
       FULLSCREEN_CHANGE_EVENTS.forEach((eventName) => {
+        doc.removeEventListener(eventName, clearOriginalAfterFullscreenExit);
+      });
+      FULLSCREEN_ERROR_EVENTS.forEach((eventName) => {
         doc.removeEventListener(eventName, clearOriginalAfterFullscreenExit);
       });
     };

@@ -325,6 +325,40 @@ describe("MemePageArtViewer", () => {
     expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
   });
 
+  it("clears original media on fullscreen error events", async () => {
+    const user = userEvent.setup();
+    const fullscreenErrorEvents = [
+      "fullscreenerror",
+      "webkitfullscreenerror",
+      "mozfullscreenerror",
+      "MSFullscreenError",
+    ];
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    for (const eventName of fullscreenErrorEvents) {
+      const fullscreenRequest = createDeferred<boolean>();
+      mockHelpers.enterArtFullScreen.mockReturnValueOnce(
+        fullscreenRequest.promise
+      );
+
+      await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+      expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+      act(() => {
+        document.dispatchEvent(new Event(eventName));
+      });
+
+      expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+
+      await act(async () => {
+        fullscreenRequest.resolve(true);
+        await fullscreenRequest.promise;
+      });
+    }
+  });
+
   it("switches toolbar open and download targets with the carousel slide", async () => {
     const user = userEvent.setup();
 
