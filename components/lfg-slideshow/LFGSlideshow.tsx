@@ -40,10 +40,10 @@ const uniqueSources = (...sources: unknown[]) =>
 const getImageCandidates = (mediaItem: LFGMedia) =>
   uniqueSources(mediaItem.image_compact, mediaItem.image);
 
-const getVideoSource = (mediaItem: LFGMedia) =>
-  uniqueSources(mediaItem.animation_compact, mediaItem.animation).find(
+const getVideoCandidates = (mediaItem: LFGMedia) =>
+  uniqueSources(mediaItem.animation_compact, mediaItem.animation).filter(
     isVideo
-  ) ?? "";
+  );
 
 const getCurrentSource = (
   candidates: string[],
@@ -52,7 +52,7 @@ const getCurrentSource = (
 ) => candidates[sourceIndexes[mediaKey] ?? 0] ?? "";
 
 const preloadMedia = (mediaItem: LFGMedia) => {
-  const animation = getVideoSource(mediaItem);
+  const animation = getVideoCandidates(mediaItem)[0] ?? "";
   const image = getImageCandidates(mediaItem)[0] ?? "";
 
   if (animation.length > 0) {
@@ -99,10 +99,14 @@ const getMediaKey = (mediaItem: LFGMedia, index: number) => {
 const shouldShowVideo = (
   mediaItem: LFGMedia,
   index: number,
-  videoLoadErrors: Record<string, boolean>
+  videoLoadErrors: Record<string, boolean>,
+  videoSourceIndexes: Record<string, number>
 ) =>
-  getVideoSource(mediaItem).length > 0 &&
-  videoLoadErrors[getMediaKey(mediaItem, index)] !== true;
+  getCurrentSource(
+    getVideoCandidates(mediaItem),
+    videoSourceIndexes,
+    getMediaKey(mediaItem, index)
+  ).length > 0 && videoLoadErrors[getMediaKey(mediaItem, index)] !== true;
 
 const LFGSlideshow: React.FC<{
   isOpen: boolean;
@@ -117,14 +121,13 @@ const LFGSlideshow: React.FC<{
   const [imageSourceIndexes, setImageSourceIndexes] = useState<
     Record<string, number>
   >({});
+  const [videoSourceIndexes, setVideoSourceIndexes] = useState<
+    Record<string, number>
+  >({});
   const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const [media, setMedia] = useState<LFGMedia[]>([]);
-
-  const closeSlideshow = () => {
-    setIsOpen(false);
-  };
 
   const nextSlide = useCallback(() => {
     if (slideTimer.current !== null) {
@@ -136,12 +139,29 @@ const LFGSlideshow: React.FC<{
     );
   }, [media.length]);
 
+  const resetSession = useCallback(() => {
+    if (slideTimer.current !== null) {
+      clearTimeout(slideTimer.current);
+      slideTimer.current = null;
+    }
+    setCurrentIndex(0);
+    setIsMuted(false);
+    setVideoLoadErrors({});
+    setImageSourceIndexes({});
+    setVideoSourceIndexes({});
+  }, []);
+
+  const closeSlideshow = useCallback(() => {
+    resetSession();
+    setIsOpen(false);
+  }, [resetSession, setIsOpen]);
+
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        closeSlideshow();
       }
     };
 
@@ -149,7 +169,7 @@ const LFGSlideshow: React.FC<{
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, setIsOpen]);
+  }, [closeSlideshow, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -177,6 +197,7 @@ const LFGSlideshow: React.FC<{
         setCurrentIndex(0);
         setVideoLoadErrors({});
         setImageSourceIndexes({});
+        setVideoSourceIndexes({});
         const firstMedia = loadedMedia[0];
         if (firstMedia) {
           preloadMedia(firstMedia);
@@ -202,7 +223,14 @@ const LFGSlideshow: React.FC<{
 
     preloadNext(media, currentIndex);
 
-    if (shouldShowVideo(currentMedia, currentIndex, videoLoadErrors)) {
+    if (
+      shouldShowVideo(
+        currentMedia,
+        currentIndex,
+        videoLoadErrors,
+        videoSourceIndexes
+      )
+    ) {
       const videoElement = videoRef.current;
       if (videoElement !== null) {
         const handleEnded = () => {
@@ -230,7 +258,14 @@ const LFGSlideshow: React.FC<{
         slideTimer.current = null;
       }
     };
-  }, [currentIndex, isOpen, media, nextSlide, videoLoadErrors]);
+  }, [
+    currentIndex,
+    isOpen,
+    media,
+    nextSlide,
+    videoLoadErrors,
+    videoSourceIndexes,
+  ]);
 
   const currentMedia = media[currentIndex];
 
@@ -242,10 +277,16 @@ const LFGSlideshow: React.FC<{
   const showVideo = shouldShowVideo(
     currentMedia,
     currentIndex,
-    videoLoadErrors
+    videoLoadErrors,
+    videoSourceIndexes
   );
+  const videoCandidates = getVideoCandidates(currentMedia);
   const imageCandidates = getImageCandidates(currentMedia);
-  const currentAnimation = getVideoSource(currentMedia);
+  const currentAnimation = getCurrentSource(
+    videoCandidates,
+    videoSourceIndexes,
+    currentMediaKey
+  );
   const currentImage = getCurrentSource(
     imageCandidates,
     imageSourceIndexes,
@@ -253,6 +294,15 @@ const LFGSlideshow: React.FC<{
   );
 
   const handleVideoUnavailable = () => {
+    const nextVideoIndex = (videoSourceIndexes[currentMediaKey] ?? 0) + 1;
+    if (nextVideoIndex < videoCandidates.length) {
+      setVideoSourceIndexes((indexes) => ({
+        ...indexes,
+        [currentMediaKey]: nextVideoIndex,
+      }));
+      return;
+    }
+
     setVideoLoadErrors((errors) => ({
       ...errors,
       [currentMediaKey]: true,

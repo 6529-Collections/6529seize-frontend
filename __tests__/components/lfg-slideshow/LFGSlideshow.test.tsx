@@ -78,6 +78,73 @@ describe("LFGSlideshow", () => {
     );
   });
 
+  it("tries the full video before falling back to the image", async () => {
+    mockFetch.mockResolvedValue([
+      {
+        id: "1",
+        image: "fallback.png",
+        animation_compact: "compact.mp4",
+        animation: "full.mp4",
+      },
+    ]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    const compactVideo = document.querySelector("video");
+    expect(compactVideo).toHaveAttribute("src", "compact.mp4");
+
+    fireEvent.error(compactVideo);
+
+    await waitFor(() => {
+      expect(document.querySelector("video")).toHaveAttribute(
+        "src",
+        "full.mp4"
+      );
+    });
+
+    fireEvent.error(document.querySelector("video"));
+
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "fallback.png"
+    );
+  });
+
+  it("clears media fallback state when reopening", async () => {
+    mockFetch.mockResolvedValue([
+      {
+        id: "1",
+        image: "fallback.png",
+        animation: "video.mp4",
+      },
+    ]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    fireEvent.error(document.querySelector("video"));
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "fallback.png"
+    );
+
+    fireEvent.keyDown(globalThis, { key: "Escape" });
+    await waitFor(() => {
+      expect(screen.queryByAltText("LFG Slide 1")).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(document.querySelector("video")).toHaveAttribute("src", "video.mp4");
+  });
+
   it("opens when API media omits optional fields", async () => {
     mockFetch.mockResolvedValue([{ image: "img.png" }]);
     render(<LFGButton contract="c" />);
