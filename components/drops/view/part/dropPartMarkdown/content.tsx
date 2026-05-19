@@ -24,6 +24,7 @@ import {
   hasMentionedGroup,
   markAllGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
+import { isDirectImageUrl } from "./linkUtils";
 import {
   DropPartMarkdownImageGroup,
   type DropPartMarkdownImageLayout,
@@ -46,6 +47,7 @@ interface CustomEmojiImageProps {
 }
 
 interface MarkdownElementProps {
+  readonly children?: ReactNode | undefined;
   readonly href?: unknown;
   readonly src?: unknown;
 }
@@ -72,8 +74,10 @@ interface MarkdownContentRenderers {
 }
 
 type MarkdownImageElement = ReactElement<{
+  readonly children?: ReactNode | undefined;
+  readonly href?: string | undefined;
   readonly layout?: DropPartMarkdownImageLayout | undefined;
-  readonly src: string;
+  readonly src?: string | undefined;
 }>;
 
 type MarkdownLinkElement = ReactElement<{
@@ -109,23 +113,54 @@ const hasElementSrc = (
 ): elementProps is MarkdownElementProps & { readonly src: string } =>
   typeof elementProps?.src === "string" && elementProps.src.length > 0;
 
+const getTextFromChildren = (children: ReactNode | undefined): string | null =>
+  Children.toArray(children).reduce<string | null>((text, child) => {
+    if (text === null) {
+      return null;
+    }
+
+    if (typeof child === "string" || typeof child === "number") {
+      return `${text}${child}`;
+    }
+
+    return null;
+  }, "");
+
 const getSmartHref = (
   elementProps: MarkdownElementProps | null
 ): string | null =>
   typeof elementProps?.href === "string" ? elementProps.href : null;
+
+const getBareImageHref = (
+  elementProps: MarkdownElementProps | null
+): string | null => {
+  const href = getSmartHref(elementProps);
+  if (!href || !isDirectImageUrl(href)) {
+    return null;
+  }
+
+  const linkText = getTextFromChildren(elementProps?.children);
+  return linkText?.trim() === href.trim() ? href : null;
+};
 
 const isWhitespaceOnlyTextNode = (node: ReactNode): boolean =>
   typeof node === "string" && node.trim().length === 0;
 
 const isMarkdownImageElement = (
   node: ReactNode
-): node is MarkdownImageElement => hasElementSrc(getMarkdownElementProps(node));
+): node is MarkdownImageElement => {
+  const elementProps = getMarkdownElementProps(node);
+  return hasElementSrc(elementProps) || getBareImageHref(elementProps) !== null;
+};
+
+const getMarkdownImageSource = (image: MarkdownImageElement): string =>
+  image.props.src ?? image.props.href ?? "";
 
 const getMarkdownImageKey = ({
   flattenedIndex,
   image,
 }: MarkdownImageChunkItem): string =>
-  `markdown-image:${flattenedIndex}:${image.props.src}`;
+  `markdown-image:${flattenedIndex}:${getMarkdownImageSource(image)}`;
 
 const getMarkdownImageGroupKey = (
   items: readonly MarkdownImageChunkItem[]

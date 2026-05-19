@@ -442,6 +442,44 @@ describe("DropPartMarkdown", () => {
     expect(group?.querySelectorAll("img")).toHaveLength(2);
   });
 
+  it("groups consecutive bare image URLs in one responsive grid", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={
+          "https://cdn.example.com/one.jpg\nhttps://cdn.example.com/two.gif?cache=1"
+        }
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group?.querySelectorAll("img")).toHaveLength(2);
+    expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("keeps named image URL markdown links as links", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="[open image](https://cdn.example.com/one.jpg)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+    expect(screen.getByRole("link", { name: "open image" })).toHaveAttribute(
+      "href",
+      "https://cdn.example.com/one.jpg"
+    );
+  });
+
   it("does not group markdown images when visible text is between them", () => {
     const { container } = render(
       <DropPartMarkdown
