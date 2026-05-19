@@ -6,6 +6,9 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Pagination from "@/components/pagination/Pagination";
+import PrimaryButton from "@/components/utils/button/PrimaryButton";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -17,14 +20,11 @@ import {
   numberWithCommas,
 } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
-import { faPlusCircle, faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowPathIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
-import styles from "./Rememes.module.scss";
 
 const PAGE_SIZE = 40;
 
@@ -38,6 +38,15 @@ export enum RememeSort {
   RANDOM = "Random",
   CREATED_ASC = "Recently Added",
 }
+
+const FILTER_LABEL_CLASS =
+  "tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500";
+
+const FILTER_INLINE_LABEL_CLASS =
+  "tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
+
+const REMEMES_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-x-6 tw-pt-2 sm:tw-grid-cols-3 md:tw-grid-cols-4";
 
 export default function Rememes() {
   useSetTitle("ReMemes | Collections");
@@ -67,6 +76,27 @@ export default function Rememes() {
   const [selectedSorting, setSelectedSorting] = useState<RememeSort>(
     RememeSort.RANDOM
   );
+  const sortingItems: CommonSelectItem<RememeSort>[] = sorting.map((sort) => ({
+    label: sort,
+    value: sort,
+    key: `sorting-${sort}`,
+  }));
+  const tokenTypeItems: CommonSelectItem<TokenType>[] = tokenTypes.map(
+    (tokenType) => ({
+      label: tokenType,
+      value: tokenType,
+      key: `token-type-${tokenType}`,
+    })
+  );
+  const memeReferenceItems: CommonSelectItem<number>[] = [
+    { label: "All", value: 0, key: "meme-all" },
+    ...memes.map((meme) => ({
+      label: `#${meme.id} - ${meme.name}`,
+      mobileLabel: `#${meme.id}`,
+      value: meme.id,
+      key: `meme-${meme.id}`,
+    })),
+  ];
   const activeFetchRequest = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -173,278 +203,203 @@ export default function Rememes() {
 
   function printRememe(rememe: Rememe) {
     return (
-      <Col
+      <a
         key={`${rememe.contract}-${rememe.id}`}
-        className="pt-3 pb-3"
-        xs={{ span: 6 }}
-        sm={{ span: 4 }}
-        md={{ span: 3 }}
-        lg={{ span: 3 }}
+        href={`/rememes/${rememe.contract}/${rememe.id}`}
+        className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <a
-          href={`/rememes/${rememe.contract}/${rememe.id}`}
-          className="decoration-none scale-hover"
-        >
-          <Container fluid>
-            <Row>
-              <RememeImage nft={rememe} animation={false} height={300} />
-            </Row>
-            <Row>
-              <Col>
-                <Container>
-                  <Row>
-                    <Col className="font-smaller font-color-h d-flex justify-content-center align-items-center">
-                      {areEqualAddresses(
-                        rememe.contract,
-                        OPENSEA_STORE_FRONT_CONTRACT
-                      ) ? (
-                        <>{rememe.contract_opensea_data.collectionName}</>
-                      ) : (
-                        <>
-                          {rememe.contract_opensea_data.collectionName
-                            ? rememe.contract_opensea_data.collectionName
-                            : formatAddress(rememe.contract)}{" "}
-                          #{rememe.id}
-                        </>
-                      )}
-                      {rememe.replicas.length > 1 && (
-                        <>&nbsp;(x{numberWithCommas(rememe.replicas.length)})</>
-                      )}
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col className="d-flex justify-content-center align-items-center">
-                      <span className="text-center">
-                        {rememe.metadata.name
-                          ? rememe.metadata.name
-                          : `${formatAddress(rememe.contract)} #${rememe.id}`}
-                      </span>
-                    </Col>
-                  </Row>
-                </Container>
-              </Col>
-            </Row>
-          </Container>
-        </a>
-      </Col>
+        <div className="tw-relative tw-mb-2 tw-bg-iron-900">
+          <RememeImage nft={rememe} animation={false} height={300} />
+        </div>
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+            {rememe.metadata.name
+              ? rememe.metadata.name
+              : `${formatAddress(rememe.contract)} #${rememe.id}`}
+          </div>
+          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
+            {areEqualAddresses(
+              rememe.contract,
+              OPENSEA_STORE_FRONT_CONTRACT
+            ) ? (
+              <>{rememe.contract_opensea_data.collectionName}</>
+            ) : (
+              <>
+                {rememe.contract_opensea_data.collectionName
+                  ? rememe.contract_opensea_data.collectionName
+                  : formatAddress(rememe.contract)}{" "}
+                #{rememe.id}
+              </>
+            )}
+            {rememe.replicas.length > 1 && (
+              <>&nbsp;(x{numberWithCommas(rememe.replicas.length)})</>
+            )}
+          </div>
+        </div>
+      </a>
     );
   }
 
   function printRememes() {
     if (rememes.length === 0) {
       return (
-        <Row>
-          <Col>
-            <NothingHereYetSummer />
-          </Col>
-        </Row>
+        <div>
+          <NothingHereYetSummer />
+        </div>
       );
     }
-    return (
-      <>
-        <Row className="pt-2">
-          {rememes.map((rememe) => printRememe(rememe))}
-        </Row>
-      </>
-    );
+    return <div className={REMEMES_GRID_CLASS}>{rememes.map(printRememe)}</div>;
   }
 
   return (
-    <Container fluid className={styles["mainContainer"]}>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <Row className="mb-3">
-              <Col xs={12} sm={8} md={9} className="pb-3 pb-sm-0">
-                <span className="d-flex align-items-center gap-3 flex-wrap">
-                  <span className="d-none d-xl-flex align-items-center gap-2">
-                    <Image
-                      unoptimized
-                      loading={"eager"}
-                      width="0"
-                      height="0"
-                      style={{ width: "250px", height: "auto" }}
-                      className="d-none d-md-block"
-                      src="/re-memes.png"
-                      alt="re-memes"
-                    />
-                    {totalResults > 0 && (
-                      <span className="font-color-h font-larger">
-                        (x{numberWithCommas(totalResults)})
-                      </span>
-                    )}
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+      <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+        <div className="tw-mb-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-12">
+          <div className="tw-pb-3 sm:tw-col-span-8 sm:tw-pb-0 md:tw-col-span-9">
+            <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+              <span className="tw-hidden tw-items-center tw-gap-2 xl:tw-flex">
+                <Image
+                  unoptimized
+                  loading={"eager"}
+                  width="0"
+                  height="0"
+                  style={{ width: "250px", height: "auto" }}
+                  className="tw-hidden md:tw-block"
+                  src="/re-memes.png"
+                  alt="re-memes"
+                />
+                {totalResults > 0 && (
+                  <span className="tw-text-lg tw-text-iron-300">
+                    (x{numberWithCommas(totalResults)})
                   </span>
-                  <span className="d-xl-none">
-                    <CollectionsDropdown
-                      activePage="rememes"
-                      variant="brand"
-                      triggerContent={
-                        <span className="tw-inline-flex tw-items-center tw-gap-2">
-                          <Image
-                            unoptimized
-                            loading={"eager"}
-                            width="0"
-                            height="0"
-                            style={{ width: "150px", height: "auto" }}
-                            src="/re-memes.png"
-                            alt="re-memes"
-                          />
-                          {totalResults > 0 && (
-                            <span className="font-color-h font-larger">
-                              (x{numberWithCommas(totalResults)})
-                            </span>
-                          )}
+                )}
+              </span>
+              <span className="xl:tw-hidden">
+                <CollectionsDropdown
+                  activePage="rememes"
+                  variant="brand"
+                  triggerContent={
+                    <span className="tw-inline-flex tw-items-center tw-gap-2">
+                      <Image
+                        unoptimized
+                        loading={"eager"}
+                        width="0"
+                        height="0"
+                        style={{ width: "150px", height: "auto" }}
+                        src="/re-memes.png"
+                        alt="re-memes"
+                      />
+                      {totalResults > 0 && (
+                        <span className="tw-text-lg tw-text-iron-300">
+                          (x{numberWithCommas(totalResults)})
                         </span>
-                      }
-                    />
-                  </span>
-                  <LFGButton contract={"rememes"} />
-                </span>
-              </Col>
-              <Col
-                xs={12}
-                sm={4}
-                md={3}
-                className="d-flex justify-content-sm-end align-items-center"
+                      )}
+                    </span>
+                  }
+                />
+              </span>
+              <LFGButton contract={"rememes"} />
+            </span>
+          </div>
+          <div className="tw-flex tw-items-center sm:tw-col-span-4 sm:tw-justify-end md:tw-col-span-3">
+            <div className="tw-w-full sm:tw-w-auto [&>button]:tw-w-full sm:[&>button]:tw-w-auto">
+              <PrimaryButton
+                loading={false}
+                disabled={false}
+                onClicked={() => {
+                  window.location.href = "/rememes/add";
+                }}
               >
-                <Button
-                  className="seize-btn btn-white d-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto"
-                  onClick={() => {
-                    window.location.href = "/rememes/add";
-                  }}
-                >
-                  Add ReMeme{" "}
-                  <FontAwesomeIcon
-                    icon={faPlusCircle}
-                    className={styles["buttonIcon"]}
+                Add ReMeme
+                <PlusCircleIcon className="tw-size-4 tw-shrink-0 [stroke-width:2.25]" />
+              </PrimaryButton>
+            </div>
+          </div>
+        </div>
+
+        {rememesLoaded && (
+          <div className="tw-flex tw-flex-col tw-gap-4 tw-py-2 xl:tw-flex-row xl:tw-items-center xl:tw-justify-between">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              <span className={FILTER_LABEL_CLASS}>Sort:</span>
+              <div className="tw-w-40">
+                <CommonDropdown
+                  items={sortingItems}
+                  activeItem={selectedSorting}
+                  filterLabel="Sort"
+                  setSelected={setSelectedSorting}
+                  size="sm"
+                />
+              </div>
+              {selectedSorting === RememeSort.RANDOM && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Refresh results"
+                    onClick={() => fetchResults(page)}
+                    data-tooltip-id="refresh-rememes-results"
+                    className="tw-inline-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-white/[0.05] tw-text-iron-300 tw-transition hover:tw-border-white/25 hover:tw-bg-white/[0.07] hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-white/20"
+                  >
+                    <ArrowPathIcon className="tw-size-5" />
+                  </button>
+                  <Tooltip
+                    id="refresh-rememes-results"
+                    place="top"
+                    delayShow={250}
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      color: "#212529",
+                      padding: "4px 8px",
+                    }}
+                  >
+                    Refresh results
+                  </Tooltip>
+                </>
+              )}
+            </div>
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3 xl:tw-justify-end">
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <span className={FILTER_INLINE_LABEL_CLASS}>Token Type:</span>
+                <div className="tw-w-[5.25rem]">
+                  <CommonDropdown
+                    items={tokenTypeItems}
+                    activeItem={selectedTokenType}
+                    filterLabel="Token Type"
+                    setSelected={setSelectedTokenType}
+                    size="sm"
                   />
-                </Button>
-              </Col>
-            </Row>
-
-            {rememesLoaded && (
-              <Row className="pt-2">
-                <Col
-                  className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}
+                </div>
+              </div>
+              <span className="tw-hidden tw-h-8 tw-w-px tw-bg-iron-800 md:tw-block" />
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+                <span className={FILTER_INLINE_LABEL_CLASS}>
+                  Meme Reference:
+                </span>
+                <div
+                  className={selectedMeme === 0 ? "tw-w-[5.25rem]" : "tw-w-60"}
                 >
-                  <span className="d-flex align-items-center gap-1">
-                    <Dropdown
-                      className={styles["memeRefDropdown"]}
-                      drop={"down-centered"}
-                    >
-                      <Dropdown.Toggle>Sort: {selectedSorting}</Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {sorting.map((s) => (
-                          <Dropdown.Item
-                            key={`sorting-${s}`}
-                            onClick={() => {
-                              setSelectedSorting(s);
-                            }}
-                          >
-                            {s}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                    {selectedSorting === RememeSort.RANDOM && (
-                      <>
-                        <FontAwesomeIcon
-                          icon={faRefresh}
-                          className={styles["buttonIcon"]}
-                          onClick={() => {
-                            fetchResults(page);
-                          }}
-                          data-tooltip-id="refresh-rememes-results"
-                        />
-                        <Tooltip
-                          id="refresh-rememes-results"
-                          place="top"
-                          delayShow={250}
-                          style={{
-                            backgroundColor: "#f8f9fa",
-                            color: "#212529",
-                            padding: "4px 8px",
-                          }}
-                        >
-                          Refresh results
-                        </Tooltip>
-                      </>
-                    )}
-                  </span>
-                  <span className="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                    <Dropdown
-                      className={styles["memeRefDropdown"]}
-                      drop={"down-centered"}
-                    >
-                      <Dropdown.Toggle>
-                        Token Type: {selectedTokenType}
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {tokenTypes.map((t) => (
-                          <Dropdown.Item
-                            key={`token-type-${t}`}
-                            onClick={() => {
-                              setSelectedTokenType(t);
-                            }}
-                          >
-                            {t}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                    <Dropdown
-                      className={styles["memeRefDropdown"]}
-                      drop={"down-centered"}
-                    >
-                      <Dropdown.Toggle>
-                        Meme Reference:{" "}
-                        {queryMemeId
-                          ? memes.find((m) => m.id.toString() === queryMemeId)
-                            ? `${queryMemeId} - ${
-                                memes.find(
-                                  (m) => m.id.toString() === queryMemeId
-                                )?.name
-                              }`
-                            : `${queryMemeId}`
-                          : `All`}
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        <Dropdown.Item
-                          onClick={() => {
-                            setSelectedMeme(0);
-                          }}
-                        >
-                          All
-                        </Dropdown.Item>
-                        {memes.map((m) => (
-                          <Dropdown.Item
-                            key={`meme-${m.id}`}
-                            onClick={() => {
-                              setSelectedMeme(m.id);
-                            }}
-                          >
-                            #{m.id} - {m.name}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </span>
-                </Col>
-              </Row>
-            )}
+                  <CommonDropdown
+                    items={memeReferenceItems}
+                    activeItem={selectedMeme}
+                    filterLabel="Meme Reference"
+                    setSelected={setSelectedMeme}
+                    size="sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-            {rememesLoaded ? (
-              printRememes()
-            ) : (
-              <Col className="pt-3">
-                Fetching <DotLoader />
-              </Col>
-            )}
-          </Container>
-        </Col>
-      </Row>
+        {rememesLoaded ? (
+          printRememes()
+        ) : (
+          <div className="tw-pt-3">
+            Fetching <DotLoader />
+          </div>
+        )}
+      </div>
       {totalResults > PAGE_SIZE && rememesLoaded && (
-        <Row className="text-center pt-4 pb-4">
+        <div className="tw-py-4 tw-text-center">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -454,8 +409,8 @@ export default function Rememes() {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }
