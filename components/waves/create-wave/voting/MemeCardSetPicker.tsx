@@ -220,6 +220,7 @@ export default function MemeCardSetPicker({
   readonly onCreditNftsChange: (creditNfts: ApiWaveCreditNft[]) => void;
 }) {
   const [localError, setLocalError] = useState<string | null>(null);
+  const [pickerSyncVersion, setPickerSyncVersion] = useState(0);
 
   const selectedTokenIds = useMemo(
     () => getCreditNftTokenIds(creditNfts),
@@ -231,14 +232,21 @@ export default function MemeCardSetPicker({
     [selectedTokenIds]
   );
 
+  const pickerValueInput = useMemo(
+    () => ({ selectedTokenIds, syncVersion: pickerSyncVersion }),
+    [selectedTokenIds, pickerSyncVersion]
+  );
+
   const pickerValue = useMemo(
     () => ({
       chain: "ethereum" as const,
       contractAddress: MEMES_CONTRACT as `0x${string}`,
-      selectedIds: selectedTokenIds.map((tokenId) => BigInt(tokenId)),
+      selectedIds: pickerValueInput.selectedTokenIds.map((tokenId) =>
+        BigInt(tokenId)
+      ),
       allSelected: false,
     }),
-    [selectedTokenIds]
+    [pickerValueInput]
   );
 
   const fixedContract = useMemo(
@@ -284,6 +292,11 @@ export default function MemeCardSetPicker({
     )
   );
 
+  const rejectPickerChange = (message: string) => {
+    setLocalError(message);
+    setPickerSyncVersion((version) => version + 1);
+  };
+
   const applyTokenIds = (tokenIds: readonly number[]) => {
     const nextCreditNfts = toMemeCreditNfts(tokenIds);
     if (
@@ -292,7 +305,7 @@ export default function MemeCardSetPicker({
         memeCount,
       })
     ) {
-      setLocalError(FULL_SET_MESSAGE);
+      rejectPickerChange(FULL_SET_MESSAGE);
       return;
     }
     setLocalError(null);
@@ -306,13 +319,13 @@ export default function MemeCardSetPicker({
     }
     const highestExistingMemeCardId = hasValidMemeCount ? memeCount : null;
     if (highestExistingMemeCardId === null) {
-      setLocalError(INVALID_MEME_ID_MESSAGE);
+      rejectPickerChange(INVALID_MEME_ID_MESSAGE);
       return false;
     }
     if (
       normalizedTokenIds.some((tokenId) => tokenId > highestExistingMemeCardId)
     ) {
-      setLocalError(INVALID_MEME_ID_MESSAGE);
+      rejectPickerChange(INVALID_MEME_ID_MESSAGE);
       return false;
     }
     return true;
@@ -324,15 +337,15 @@ export default function MemeCardSetPicker({
       return;
     }
     if ("type" in change) {
-      setLocalError(change.error);
+      rejectPickerChange(change.error);
       return;
     }
     if (!isMemeContract(change.contractAddress)) {
-      setLocalError(NON_MEME_MESSAGE);
+      rejectPickerChange(NON_MEME_MESSAGE);
       return;
     }
     if (change.allSelected === true) {
-      setLocalError(FULL_SET_MESSAGE);
+      rejectPickerChange(FULL_SET_MESSAGE);
       return;
     }
     const tokenIds: readonly number[] =
