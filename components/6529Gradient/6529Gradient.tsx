@@ -196,16 +196,15 @@ export default function GradientsComponent() {
               <Row>
                 <Col className="d-flex align-items-center justify-content-between mb-3">
                   <span className="d-flex align-items-center gap-3 flex-wrap">
-                    <h1 className="mb-0">6529 Gradient</h1>
+                    <span className="d-xl-none">
+                      <CollectionsDropdown
+                        activePage="gradient"
+                        variant="title"
+                      />
+                    </span>
+                    <h1 className="mb-0 d-none d-xl-block">6529 Gradient</h1>
                     <LFGButton contract={GRADIENT_CONTRACT} />
                   </span>
-                </Col>
-              </Row>
-
-              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
-              <Row className="d-xl-none">
-                <Col xs={12} sm="auto" className="mb-3">
-                  <CollectionsDropdown activePage="gradient" />
                 </Col>
               </Row>
               <Row className="pt-2">

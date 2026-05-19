@@ -1,27 +1,194 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import React from 'react';
-import { LFGButton } from '@/components/lfg-slideshow/LFGSlideshow';
-import { commonApiFetch } from '@/services/api/common-api';
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import React from "react";
+import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
+import { commonApiFetch } from "@/services/api/common-api";
 
-jest.mock('@/services/api/common-api');
-jest.mock('@/helpers/Helpers', () => ({
+jest.mock("@/services/api/common-api");
+jest.mock("@/helpers/Helpers", () => ({
   enterArtFullScreen: jest.fn(),
   fullScreenSupported: () => true,
 }));
-jest.mock('react-bootstrap', () => ({ Button: (p: any) => <button onClick={p.onClick}>{p.children}</button> }));
-jest.mock('@/components/lfg-slideshow/LFGSlideshow.module.scss', () => ({}));
+jest.mock("react-bootstrap", () => ({
+  Button: (p: any) => <button onClick={p.onClick}>{p.children}</button>,
+}));
+jest.mock("@/components/lfg-slideshow/LFGSlideshow.module.scss", () => ({}));
 
 const mockFetch = commonApiFetch as jest.Mock;
 
-describe('LFGSlideshow', () => {
+describe("LFGSlideshow", () => {
   beforeEach(() => {
-    mockFetch.mockResolvedValue([{ image: 'img.png', animation: '' }]);
+    mockFetch.mockResolvedValue([{ id: "1", image: "img.png", animation: "" }]);
   });
 
-  it('opens slideshow on button click', async () => {
+  afterEach(() => {
+    document.body.style.overflow = "";
+    mockFetch.mockReset();
+  });
+
+  it("opens slideshow on button click", async () => {
+    const { container } = render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+    expect(screen.getByAltText("LFG Slide 1")).toBeInTheDocument();
+    expect(container.querySelector("#lfg-slideshow")).not.toBeInTheDocument();
+    expect(document.getElementById("lfg-slideshow")).toBeInTheDocument();
+  });
+
+  it("locks body scroll only while the slideshow is open", async () => {
+    document.body.style.overflow = "scroll";
+
     render(<LFGButton contract="c" />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    fireEvent.click(screen.getByRole('button', { name: 'LFG: Start the Show!' }));
-    expect(screen.getByAltText('LFG Slide 1')).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(document.body.style.overflow).toBe("hidden");
+
+    fireEvent.keyDown(globalThis, { key: "Escape" });
+
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe("scroll");
+    });
+  });
+
+  it("falls back to the image when video loading fails", async () => {
+    mockFetch.mockResolvedValue([
+      { id: "1", image: "fallback.png", animation: "video.mp4" },
+    ]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    const video = document.querySelector("video");
+    expect(video).toBeInTheDocument();
+    expect(video?.querySelector("track")).toHaveAttribute(
+      "src",
+      expect.stringContaining("data:text/vtt")
+    );
+
+    fireEvent.error(video);
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "fallback.png"
+    );
+  });
+
+  it("tries the full video before falling back to the image", async () => {
+    mockFetch.mockResolvedValue([
+      {
+        id: "1",
+        image: "fallback.png",
+        animation_compact: "compact.mp4",
+        animation: "full.mp4",
+      },
+    ]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    const compactVideo = document.querySelector("video");
+    expect(compactVideo).toHaveAttribute("src", "compact.mp4");
+
+    fireEvent.error(compactVideo);
+
+    await waitFor(() => {
+      expect(document.querySelector("video")).toHaveAttribute(
+        "src",
+        "full.mp4"
+      );
+    });
+
+    fireEvent.error(document.querySelector("video"));
+
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "fallback.png"
+    );
+  });
+
+  it("clears media fallback state when reopening", async () => {
+    mockFetch.mockResolvedValue([
+      {
+        id: "1",
+        image: "fallback.png",
+        animation: "video.mp4",
+      },
+    ]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    fireEvent.error(document.querySelector("video"));
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "fallback.png"
+    );
+
+    fireEvent.keyDown(globalThis, { key: "Escape" });
+    await waitFor(() => {
+      expect(screen.queryByAltText("LFG Slide 1")).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(document.querySelector("video")).toHaveAttribute("src", "video.mp4");
+  });
+
+  it("opens when API media omits optional fields", async () => {
+    mockFetch.mockResolvedValue([{ image: "img.png" }]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "img.png"
+    );
+  });
+
+  it("tries image variants and advances when they fail", async () => {
+    mockFetch.mockResolvedValue([
+      {
+        id: 1,
+        image: "original.png",
+        image_compact: "compact.png",
+        animation: null,
+      },
+      { id: 2, image: "next.png", animation: null },
+    ]);
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "compact.png"
+    );
+
+    fireEvent.error(screen.getByAltText("LFG Slide 1"));
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "original.png"
+    );
+
+    fireEvent.error(screen.getByAltText("LFG Slide 1"));
+    expect(screen.getByAltText("LFG Slide 2")).toHaveAttribute(
+      "src",
+      "next.png"
+    );
   });
 });
