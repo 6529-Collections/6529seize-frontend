@@ -60,17 +60,17 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
 
   const updateWave = async (body: ApiUpdateWaveRequest): Promise<void> => {
     setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setToast({
-        type: "error",
-        message: "Failed to authenticate",
-      });
-      setMutating(false);
-      return;
-    }
 
     try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setToast({
+          type: "error",
+          message: "Failed to authenticate",
+        });
+        return;
+      }
+
       await commonApiPost<ApiUpdateWaveRequest, ApiWave>({
         endpoint: `waves/${wave.id}`,
         body,

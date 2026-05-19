@@ -108,7 +108,7 @@ export const WaveEligibilityProvider: React.FC<
           authenticated_user_eligible_to_chat:
             wave.chat.authenticated_user_eligible,
           authenticated_user_eligible_to_vote:
-            wave.participation.authenticated_user_eligible,
+            wave.voting.authenticated_user_eligible,
           authenticated_user_eligible_to_participate:
             wave.participation.authenticated_user_eligible,
           authenticated_user_admin: false, // This needs to be obtained from drops, not main wave object
