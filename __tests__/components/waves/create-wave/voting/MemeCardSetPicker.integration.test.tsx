@@ -57,6 +57,24 @@ function renderControlledPicker() {
 }
 
 describe("MemeCardSetPicker with real NftPicker", () => {
+  it("rejects typed Meme card ranges that include zero", async () => {
+    const user = userEvent.setup();
+    renderControlledPicker();
+
+    const tokenInput = screen.getByLabelText("Add token IDs or ranges");
+    await user.type(tokenInput, "0-2");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(
+      screen.getByText("Only existing Meme card IDs can be added.")
+    ).toBeInTheDocument();
+    expect(screen.getByText("0 Meme cards selected")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByTestId("token-list")).not.toBeInTheDocument();
+    });
+  });
+
   it("rolls back a rejected typed Meme card ID in the picker UI", async () => {
     const user = userEvent.setup();
     renderControlledPicker();

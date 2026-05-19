@@ -268,6 +268,16 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
   };
 
   const handleSelectAll = () => {
+    if (
+      maxSelectedCountBigInt !== null &&
+      (contractTotalSupply === null ||
+        contractTotalSupply < BigInt(0) ||
+        contractTotalSupply > maxSelectedCountBigInt)
+    ) {
+      setAddTokenMaxError(maxSelectionMessage);
+      setParseErrors([]);
+      return;
+    }
     selectAll();
     setAddTokenMaxError(null);
     setIsEditingText(false);

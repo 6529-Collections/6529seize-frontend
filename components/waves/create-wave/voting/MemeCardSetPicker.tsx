@@ -313,6 +313,13 @@ export default function MemeCardSetPicker({
   };
 
   const validateTypedTokenIds = (tokenIds: readonly number[]) => {
+    const hasInvalidTokenId = tokenIds.some(
+      (tokenId) => !Number.isInteger(tokenId) || tokenId <= 0
+    );
+    if (hasInvalidTokenId) {
+      rejectPickerChange(INVALID_MEME_ID_MESSAGE);
+      return false;
+    }
     const normalizedTokenIds = getNormalizedMemeTokenIds(tokenIds);
     if (normalizedTokenIds.length === 0) {
       return true;

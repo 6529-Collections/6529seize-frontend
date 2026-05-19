@@ -156,6 +156,20 @@ describe("NftPicker fixedContract", () => {
     expect(onContractChange).not.toHaveBeenCalled();
   });
 
+  it("emits Select All for uncapped fixed contracts", async () => {
+    const user = userEvent.setup();
+    const { onChange } = renderFixedPicker();
+
+    await user.click(screen.getByRole("button", { name: "Select All(100)" }));
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      contractAddress: fixedContract.address,
+      allSelected: true,
+      outputMode: "number",
+      tokenIds: [],
+    });
+  });
+
   it("emits the unsafe-token error payload and warning", async () => {
     const user = userEvent.setup();
     const { onChange } = renderFixedPicker();
@@ -191,6 +205,22 @@ describe("NftPicker fixedContract", () => {
     await user.click(screen.getByRole("button", { name: "Add" }));
 
     expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText(maxSelectedCountMessage)).toBeInTheDocument();
+  });
+
+  it("blocks Select All when the fixed contract exceeds the max count", async () => {
+    const user = userEvent.setup();
+    const maxSelectedCountMessage = "Select no more than two tokens.";
+    const { onChange } = renderFixedPicker({
+      maxSelectedCount: 2,
+      maxSelectedCountMessage,
+    });
+
+    await user.click(screen.getByRole("button", { name: "Select All(100)" }));
+
+    expect(onChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ allSelected: true })
+    );
     expect(screen.getByText(maxSelectedCountMessage)).toBeInTheDocument();
   });
 

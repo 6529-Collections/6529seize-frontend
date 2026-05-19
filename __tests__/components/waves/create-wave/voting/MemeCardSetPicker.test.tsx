@@ -76,11 +76,50 @@ jest.mock("@/components/nft-picker/NftPicker", () => {
               contractAddress: MEMES_CONTRACT,
               allSelected: false,
               outputMode: "number",
-              tokenIds: [3, 1, 3, -1, 2.5],
+              tokenIds: [3, 1, 3],
             })
           }
         >
-          emit-unsorted-invalid
+          emit-unsorted-duplicates
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            props.onChange({
+              contractAddress: MEMES_CONTRACT,
+              allSelected: false,
+              outputMode: "number",
+              tokenIds: [0],
+            })
+          }
+        >
+          emit-zero
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            props.onChange({
+              contractAddress: MEMES_CONTRACT,
+              allSelected: false,
+              outputMode: "number",
+              tokenIds: [0, 1, 2],
+            })
+          }
+        >
+          emit-zero-range
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            props.onChange({
+              contractAddress: MEMES_CONTRACT,
+              allSelected: false,
+              outputMode: "number",
+              tokenIds: [1, -1, 2.5],
+            })
+          }
+        >
+          emit-negative-decimal
         </button>
         <button
           type="button"
@@ -250,6 +289,44 @@ describe("MemeCardSetPicker", () => {
     ).toBeInTheDocument();
   });
 
+  it("blocks typed Meme card ID zero", async () => {
+    const user = userEvent.setup();
+    const { onCreditNftsChange } = renderPicker({ memeCount: 100 });
+
+    await user.click(screen.getByRole("button", { name: "emit-zero" }));
+
+    expect(onCreditNftsChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Only existing Meme card IDs can be added.")
+    ).toBeInTheDocument();
+  });
+
+  it("blocks typed Meme card ranges that include zero", async () => {
+    const user = userEvent.setup();
+    const { onCreditNftsChange } = renderPicker({ memeCount: 100 });
+
+    await user.click(screen.getByRole("button", { name: "emit-zero-range" }));
+
+    expect(onCreditNftsChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Only existing Meme card IDs can be added.")
+    ).toBeInTheDocument();
+  });
+
+  it("blocks typed negative and decimal Meme card IDs", async () => {
+    const user = userEvent.setup();
+    const { onCreditNftsChange } = renderPicker({ memeCount: 100 });
+
+    await user.click(
+      screen.getByRole("button", { name: "emit-negative-decimal" })
+    );
+
+    expect(onCreditNftsChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Only existing Meme card IDs can be added.")
+    ).toBeInTheDocument();
+  });
+
   it("shows count loading state from props", () => {
     renderPicker({ memeCount: null, isMemeCountLoading: true });
 
@@ -316,7 +393,7 @@ describe("MemeCardSetPicker", () => {
     const { onCreditNftsChange } = renderPicker({ memeCount: 100 });
 
     await user.click(
-      screen.getByRole("button", { name: "emit-unsorted-invalid" })
+      screen.getByRole("button", { name: "emit-unsorted-duplicates" })
     );
 
     expect(onCreditNftsChange).toHaveBeenCalledWith([
