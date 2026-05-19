@@ -54,6 +54,7 @@ describe("TheMemes helpers", () => {
 
   it("renders volume type options", () => {
     render(printVolumeTypeDropdown(false, jest.fn(), jest.fn()));
+    fireEvent.click(screen.getByRole("button", { name: /Volume/ }));
     expect(screen.getByText(VolumeType.ALL_TIME)).toBeInTheDocument();
     expect(screen.getByText(VolumeType.DAYS_7)).toBeInTheDocument();
   });

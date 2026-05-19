@@ -95,9 +95,9 @@ describe("NFTVideoRenderer", () => {
       expect(wrapper).toHaveClass("custom-height");
       expect(wrapper).toHaveClass("custom-bg");
       expect(wrapper).toHaveClass("nftAnimation");
-      expect(wrapper).toHaveClass("d-flex");
-      expect(wrapper).toHaveClass("justify-content-center");
-      expect(wrapper).toHaveClass("align-items-center");
+      expect(wrapper).toHaveClass("tw-flex");
+      expect(wrapper).toHaveClass("tw-justify-center");
+      expect(wrapper).toHaveClass("tw-items-center");
 
       expect(video).toHaveClass("custom-image");
     });
@@ -110,12 +110,12 @@ describe("NFTVideoRenderer", () => {
       expect(balance).toBeInTheDocument();
     });
 
-    it("uses Bootstrap Col component as container", () => {
+    it("uses Tailwind media container", () => {
       const props = createDefaultProps();
       const { container } = render(<NFTVideoRenderer {...props} />);
 
       const colElement = container.querySelector(
-        ".d-flex.justify-content-center.align-items-center"
+        ".tw-flex.tw-justify-center.tw-items-center"
       );
       expect(colElement).toBeInTheDocument();
     });

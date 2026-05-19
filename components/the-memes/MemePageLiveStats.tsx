@@ -229,8 +229,8 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
       : [{ handle: null, display: "not available" }];
 
   return (
-    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-8 tw-gap-y-6">
+    <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-8 md:tw-pb-8 lg:tw-pt-0">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-6">
         <div className="tw-min-w-0">
           <div className={TOP_LABEL_CLASS}>Created by</div>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2">

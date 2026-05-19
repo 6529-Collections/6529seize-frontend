@@ -94,9 +94,9 @@ describe("NFTHTMLRenderer", () => {
       expect(wrapper).toHaveClass("custom-bg");
       expect(wrapper).toHaveClass("custom-image");
       expect(wrapper).toHaveClass("nftAnimation");
-      expect(wrapper).toHaveClass("d-flex");
-      expect(wrapper).toHaveClass("justify-content-center");
-      expect(wrapper).toHaveClass("align-items-center");
+      expect(wrapper).toHaveClass("tw-flex");
+      expect(wrapper).toHaveClass("tw-justify-center");
+      expect(wrapper).toHaveClass("tw-items-center");
     });
 
     it("renders NFTImageBalance component", () => {
@@ -107,12 +107,12 @@ describe("NFTHTMLRenderer", () => {
       expect(balance).toBeInTheDocument();
     });
 
-    it("uses Bootstrap Col component as container", () => {
+    it("uses Tailwind media container", () => {
       const props = createDefaultProps();
       const { container } = render(<NFTHTMLRenderer {...props} />);
 
       const colElement = container.querySelector(
-        ".d-flex.justify-content-center.align-items-center"
+        ".tw-flex.tw-justify-center.tw-items-center"
       );
       expect(colElement).toBeInTheDocument();
     });
