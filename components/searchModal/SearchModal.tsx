@@ -14,18 +14,18 @@ import styles from "./SearchModal.module.scss";
 
 interface Props {
   show: boolean;
-  setShow(show: boolean): any;
+  setShow(show: boolean): void;
   searchWallets: string[];
-  addSearchWallet(wallet: string): any;
-  removeSearchWallet(wallet: string): any;
-  clearSearchWallets(): any;
+  addSearchWallet(wallet: string): void;
+  removeSearchWallet(wallet: string): void;
+  clearSearchWallets(): void;
 }
 
 function SearchModal(props: Readonly<Props>) {
   const [invalidWalletAdded, setInvalidWalletAdded] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  function addSearchWallet() {
+  function addSearchWallet(): void {
     if (!props.searchWallets.some((sw) => sw === searchValue)) {
       props.addSearchWallet(searchValue);
       setSearchValue("");
@@ -41,7 +41,9 @@ function SearchModal(props: Readonly<Props>) {
     <Modal
       show={props.show}
       centered={true}
-      onHide={() => props.setShow(false)}
+      onHide={() => {
+        props.setShow(false);
+      }}
     >
       <Modal.Header>
         <Modal.Title>Search</Modal.Title>
@@ -108,13 +110,17 @@ function SearchModal(props: Readonly<Props>) {
         <Button
           disabled={props.searchWallets.length === 0}
           className={`${styles["modalButtonClear"]} mt-3 mb-2`}
-          onClick={() => props.clearSearchWallets()}
+          onClick={() => {
+            props.clearSearchWallets();
+          }}
         >
           Clear All
         </Button>
         <Button
           className={`${styles["modalButtonDone"]} mt-3 mb-2`}
-          onClick={() => props.setShow(false)}
+          onClick={() => {
+            props.setShow(false);
+          }}
         >
           Done
         </Button>
