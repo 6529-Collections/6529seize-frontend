@@ -171,15 +171,17 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const detailsLoading = detailsLoadingDropId === drop.id;
 
   const reactionsWithDetails = useMemo(() => {
+    const reactions = drop.reactions ?? [];
+
     if (!detailedReactions) {
-      return drop.reactions;
+      return reactions;
     }
 
     const detailsByReaction = new Map(
       detailedReactions.map((reaction) => [reaction.reaction, reaction])
     );
 
-    return drop.reactions.map((reaction) => {
+    return reactions.map((reaction) => {
       const detailedReaction = detailsByReaction.get(reaction.reaction);
       if (!detailedReaction) {
         return reaction;

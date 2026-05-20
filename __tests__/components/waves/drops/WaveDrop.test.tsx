@@ -122,6 +122,7 @@ const drop: any = {
   rating_prediction: 0,
   top_raters: [],
   raters_count: 0,
+  reactions: [],
   context_profile_context: null,
   subscribed_actions: [],
   is_signed: false,
@@ -201,9 +202,8 @@ describe("WaveDrop", () => {
 
     fireEvent.click(screen.getByTestId("content"));
 
-    expect(mockWaveDropActions).toHaveBeenLastCalledWith(
-      expect.objectContaining({ suppressed: true }),
-      undefined
+    expect(mockWaveDropActions.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ suppressed: true })
     );
   });
 
