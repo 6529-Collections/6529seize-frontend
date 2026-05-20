@@ -1,6 +1,6 @@
 "use client";
 
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import NFTImage from "@/components/nft-image/NFTImage";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
@@ -96,7 +96,7 @@ export default function TheMemesCard({
       href={`/the-memes/${nft.id}`}
       className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
-      <div className="tw-relative tw-mb-2 tw-bg-iron-900">
+      <div className="tw-bg-iron-900">
         <NFTImage
           nft={nft}
           animation={false}
@@ -105,32 +105,23 @@ export default function TheMemesCard({
           showBalance={false}
         />
       </div>
-      {hasConnectedProfile && (
-        <div className="tw-flex tw-justify-center tw-px-4">
-          <div className="tw-inline-flex tw-h-7 tw-min-w-0 tw-flex-none tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-px-3 tw-text-iron-400 [&>span]:tw-overflow-hidden [&>span]:tw-text-ellipsis [&>span]:tw-text-[0.65625rem] [&>span]:tw-font-medium [&>span]:tw-uppercase [&>span]:tw-leading-none [&>span]:tw-tracking-[0.1em]">
-            <NFTImageBalance
-              contract={nft.contract}
-              tokenId={nft.id}
-              height={300}
-              inline
-            />
-          </div>
-        </div>
-      )}
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+      <CollectionCardMetadataRow
+        tokenId={nft.id}
+        mediaMimeType={mediaMimeType}
+        mediaBadgeId={`${nft.contract}-${nft.id}`}
+      >
+        {hasConnectedProfile && (
+          <NFTImageBalance
+            contract={nft.contract}
+            tokenId={nft.id}
+            height={300}
+            variant="collection-card"
+          />
+        )}
+      </CollectionCardMetadataRow>
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-3 tw-text-center md:tw-px-4">
         <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
-          {mediaMimeType && (
-            <MediaTypeBadge
-              mimeType={mediaMimeType}
-              dropId={`${nft.contract}-${nft.id}`}
-              size="sm"
-              className="tw-mr-3 tw-inline-flex tw-align-[-0.25rem]"
-              iconClassName="tw-size-5 tw-inline"
-            />
-          )}
-          <span className="tw-relative tw-top-0.5">
-            #{nft.id} - {nft.name}
-          </span>
+          {nft.name}
         </div>
         <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
           {metricText}

@@ -74,13 +74,17 @@ describe("Rememes component", () => {
       "https://api.test.6529.io/api/rememes?page_size=40&page=1",
       expect.objectContaining({ signal: expect.any(Object) })
     );
+    expect(screen.getByText("#1")).toBeInTheDocument();
+    expect(screen.queryByText("0x #1")).not.toBeInTheDocument();
     expect(
       (fetchUrl as jest.Mock).mock.calls.filter(([url]: [string]) =>
         url.includes("/api/rememes?")
       )
     ).toHaveLength(1);
-    await screen.findByText("Sort: Random");
-    await userEvent.click(screen.getByText("Sort: Random"));
+    const sortButton = await screen.findByRole("button", {
+      name: "Sort: Random",
+    });
+    await userEvent.click(sortButton);
     await userEvent.click(screen.getByText(RememeSort.CREATED_ASC));
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(

@@ -115,6 +115,25 @@ describe("NFTImageBalance", () => {
         expect(screen.getByText("SEIZED x5")).toBeInTheDocument();
       });
 
+      it("renders a green collection-card badge when balance is positive", () => {
+        mockUseNftBalance.mockReturnValue({
+          balance: 5,
+          isLoading: false,
+          error: null,
+        });
+
+        renderWithProviders(
+          <NFTImageBalance {...defaultProps} variant="collection-card" />
+        );
+
+        const balance = screen.getByText("Seized x 5");
+        expect(balance).toHaveClass(
+          "tw-bg-emerald-500/15",
+          "tw-text-emerald-200"
+        );
+        expect(balance).not.toHaveClass("balance");
+      });
+
       it("renders with correct CSS classes for different heights", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 1,
@@ -187,6 +206,22 @@ describe("NFTImageBalance", () => {
         expect(unseizedElement).toHaveClass("balance");
         expect(unseizedElement).not.toHaveClass("balanceBigger");
         expect(screen.getByText("UNSEIZED")).toBeInTheDocument();
+      });
+
+      it("renders a quiet gray collection-card badge when balance is zero", () => {
+        mockUseNftBalance.mockReturnValue({
+          balance: 0,
+          isLoading: false,
+          error: null,
+        });
+
+        renderWithProviders(
+          <NFTImageBalance {...defaultProps} variant="collection-card" />
+        );
+
+        const balance = screen.getByText("Unseized");
+        expect(balance).toHaveClass("tw-bg-transparent", "tw-text-iron-500");
+        expect(balance).not.toHaveClass("balance");
       });
     });
 

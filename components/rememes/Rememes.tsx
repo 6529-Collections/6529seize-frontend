@@ -1,5 +1,6 @@
 "use client";
 
+import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
@@ -10,15 +11,10 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { publicEnv } from "@/config/env";
-import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFTLite, Rememe } from "@/entities/INFT";
-import {
-  areEqualAddresses,
-  formatAddress,
-  numberWithCommas,
-} from "@/helpers/Helpers";
+import { formatAddress, numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { ArrowPathIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -47,6 +43,22 @@ const FILTER_INLINE_LABEL_CLASS =
 
 const REMEMES_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-x-6 tw-pt-2 sm:tw-grid-cols-3 md:tw-grid-cols-4";
+
+function getRememeCollectionName(rememe: Rememe) {
+  return (
+    rememe.contract_opensea_data?.collectionName?.trim() ||
+    formatAddress(rememe.contract)
+  );
+}
+
+function getRememeTitle(rememe: Rememe) {
+  const metadataName =
+    typeof rememe.metadata?.name === "string"
+      ? rememe.metadata.name.trim()
+      : "";
+
+  return metadataName || getRememeCollectionName(rememe);
+}
 
 export default function Rememes() {
   useSetTitle("ReMemes | Collections");
@@ -208,29 +220,16 @@ export default function Rememes() {
         href={`/rememes/${rememe.contract}/${rememe.id}`}
         className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <div className="tw-relative tw-mb-2 tw-bg-iron-900">
+        <div className="tw-bg-iron-900">
           <RememeImage nft={rememe} animation={false} height={300} />
         </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+        <CollectionCardMetadataRow tokenId={rememe.id} />
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-3 tw-text-center md:tw-px-4">
           <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
-            {rememe.metadata.name
-              ? rememe.metadata.name
-              : `${formatAddress(rememe.contract)} #${rememe.id}`}
+            {getRememeTitle(rememe)}
           </div>
           <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            {areEqualAddresses(
-              rememe.contract,
-              OPENSEA_STORE_FRONT_CONTRACT
-            ) ? (
-              <>{rememe.contract_opensea_data.collectionName}</>
-            ) : (
-              <>
-                {rememe.contract_opensea_data.collectionName
-                  ? rememe.contract_opensea_data.collectionName
-                  : formatAddress(rememe.contract)}{" "}
-                #{rememe.id}
-              </>
-            )}
+            {getRememeCollectionName(rememe)}
             {rememe.replicas.length > 1 && (
               <>&nbsp;(x{numberWithCommas(rememe.replicas.length)})</>
             )}

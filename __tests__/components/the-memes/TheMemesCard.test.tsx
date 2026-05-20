@@ -24,16 +24,19 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => ({
       contract,
       tokenId,
       inline,
+      variant,
     }: {
       readonly contract: string;
       readonly tokenId: number;
       readonly inline?: boolean | undefined;
+      readonly variant?: string | undefined;
     }) => (
       <span
         data-testid="nft-balance"
         data-contract={contract}
         data-token-id={tokenId}
         data-inline={inline}
+        data-variant={variant}
       >
         UNSEIZED
       </span>
@@ -137,13 +140,22 @@ describe("TheMemesCard", () => {
       "data-show-balance",
       "false"
     );
+    const tokenBadge = screen.getByText("#6529").parentElement;
+    expect(tokenBadge).toBeInTheDocument();
+    expect(tokenBadge).not.toHaveClass("tw-absolute");
+    expect(tokenBadge).toHaveClass("tw-bg-transparent", "tw-text-iron-500");
+    expect(tokenBadge?.parentElement).toHaveClass("tw-pt-3");
     expect(screen.getByTestId("media-type")).toHaveTextContent("image/jpeg");
-    expect(screen.getByText("#6529 - Test Meme")).toBeInTheDocument();
+    expect(screen.getByText("Test Meme")).toBeInTheDocument();
+    expect(screen.queryByText("#6529 - Test Meme")).not.toBeInTheDocument();
+    expect(screen.getByText("Test Meme").parentElement).not.toContainElement(
+      screen.getByTestId("media-type")
+    );
     expect(screen.getByText("Edition Size: 1,000")).toBeInTheDocument();
     expect(screen.queryByTestId("nft-balance")).not.toBeInTheDocument();
   });
 
-  it("renders connected balance with the separate meme view inline pill styling", () => {
+  it("renders connected balance in the metadata row with the collection-card variant", () => {
     render(
       <TheMemesCard
         nft={nft}
@@ -156,15 +168,8 @@ describe("TheMemesCard", () => {
     const balance = screen.getByTestId("nft-balance");
     expect(balance).toHaveAttribute("data-contract", "0xmemes");
     expect(balance).toHaveAttribute("data-token-id", "6529");
-    expect(balance).toHaveAttribute("data-inline", "true");
-    expect(balance.parentElement).toHaveClass(
-      "tw-rounded-md",
-      "tw-border-iron-800",
-      "tw-bg-transparent",
-      "tw-text-iron-400"
-    );
-    expect(balance.parentElement?.className).toContain(
-      "[&>span]:tw-text-[0.65625rem]"
-    );
+    expect(balance).toHaveAttribute("data-variant", "collection-card");
+    expect(balance).not.toHaveAttribute("data-inline", "true");
+    expect(balance.parentElement).toHaveClass("tw-min-w-0", "tw-shrink");
   });
 });
