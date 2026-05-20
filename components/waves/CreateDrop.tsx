@@ -584,8 +584,11 @@ export default function CreateDrop({
       // Trigger UI updates
       onDropAddedToQueue();
 
-      // Explicitly blur any focused input to close keyboard
-      if (document.activeElement instanceof HTMLElement) {
+      // Explicitly blur any focused input to close keyboard for drop flows.
+      if (
+        dropRequest.drop.drop_type !== ApiDropType.Chat &&
+        document.activeElement instanceof HTMLElement
+      ) {
         document.activeElement.blur();
       }
 
