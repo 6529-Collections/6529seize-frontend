@@ -11904,12 +11904,21 @@ components:
         amount:
           type: number
           format: double
+        rater_rating:
+          type: number
+          format: double
         total:
           type: number
           format: double
         category:
           type: string
         vote:
+          type: number
+          format: double
+        vote_change:
+          type: number
+          format: double
+        total_vote:
           type: number
           format: double
         reaction:
