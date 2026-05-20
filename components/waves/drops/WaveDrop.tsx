@@ -285,10 +285,7 @@ const getAuthorHeader = ({
     <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-min-w-0 tw-flex-1">
-        <DropMinimalIdentityRow
-          drop={drop}
-          timestampLayout={timestampLayout}
-        />
+        <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
       </div>
     </div>
   );
@@ -373,9 +370,7 @@ const getContentBlock = ({
     <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left">
       <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col">
         {authorHeader}
-        <div
-          className={`tw-w-full tw-pl-4 ${showAuthorInfo ? "tw-mt-2" : ""}`}
-        >
+        <div className={`tw-w-full tw-pl-4 ${showAuthorInfo ? "tw-mt-2" : ""}`}>
           <WaveDropContent
             drop={drop}
             activePartIndex={activePartIndex}
