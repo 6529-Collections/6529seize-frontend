@@ -125,13 +125,17 @@ export default function GradientsComponent() {
   }, [nftsLoaded, nftsRaw, sort, sortDir]);
 
   function printNft(nft: GradientNFT) {
+    const ownsNft = wallets.some((wallet) =>
+      areEqualAddresses(wallet, nft.owner)
+    );
+
     return (
       <Link
         key={`${nft.contract}-${nft.id}`}
         href={`/6529-gradient/${nft.id}`}
         className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <div className="tw-relative tw-mb-2 tw-bg-iron-900">
+        <div className="tw-bg-iron-900">
           <NFTImage
             nft={nft}
             animation={false}
@@ -140,11 +144,11 @@ export default function GradientsComponent() {
             showThumbnail={true}
           />
         </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
-          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-md tw-font-semibold tw-leading-snug tw-text-iron-50">
             {nft.name}
           </div>
-          <div className="tw-flex tw-min-h-5 tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-gap-1 tw-text-xs tw-leading-5 tw-text-iron-500">
+          <div className="tw-mt-2 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
             {nft.owner.length > 0 && (
               <Address
                 wallets={[nft.owner]}
@@ -152,16 +156,15 @@ export default function GradientsComponent() {
                 hideCopy={true}
               />
             )}
-            {wallets.some((w) => areEqualAddresses(w, nft.owner)) && (
-              <YouOwnNftBadge />
-            )}
+            {ownsNft && <YouOwnNftBadge />}
           </div>
-          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            TDH:{" "}
+          <div className="tw-mt-2 tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5">
+            <span className="tw-text-iron-500">TDH: </span>
             <span className="tw-font-semibold tw-text-iron-200">
               {numberWithCommas(Math.round(nft.boosted_tdh))}
-            </span>{" "}
-            | Rank:{" "}
+            </span>
+            <span className="tw-text-iron-600"> | </span>
+            <span className="tw-text-iron-500">Rank: </span>
             <span className="tw-font-semibold tw-text-iron-200">
               {nft.tdh_rank}/{nfts.length}
             </span>
@@ -180,7 +183,7 @@ export default function GradientsComponent() {
   }
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-pb-5">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">

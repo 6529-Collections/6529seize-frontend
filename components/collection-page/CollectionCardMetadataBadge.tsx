@@ -16,7 +16,7 @@ export default function CollectionCardMetadataBadge({
   return (
     <div
       aria-label={`Token #${tokenId}`}
-      className="tw-inline-flex tw-h-6 tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-2 tw-text-[0.65625rem] tw-font-medium tw-leading-none tw-text-iron-500"
+      className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500"
     >
       <span className="tw-truncate">#{tokenId}</span>
       {mediaMimeType && (

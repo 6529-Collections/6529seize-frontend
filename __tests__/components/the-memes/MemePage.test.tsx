@@ -266,7 +266,7 @@ describe("MemePage tab navigation", () => {
   });
 
   it.each([
-    ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-right"],
+    ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-sub"],
     ["History", MEME_FOCUS.ACTIVITY, "activity"],
     ["References", MEME_FOCUS.REFERENCES, "references-sub"],
   ])(
@@ -358,7 +358,7 @@ describe("MemePage search params handling", () => {
     expect(detailsColumn?.className).toContain("tw-contents");
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
     expect(artworkColumn).toHaveClass("tw-order-2");
-    expect(artworkColumn).toHaveClass("lg:tw-self-center");
+    expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
   });
 
   it("sets focus from valid search param", async () => {
@@ -563,10 +563,14 @@ describe("MemePage loading states", () => {
     renderPage();
 
     // Should render basic navigation structure even while loading
-    expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
-      "href",
-      "/the-memes"
-    );
+    const backLink = screen.getByRole("link", { name: "The Memes" });
+    expect(backLink).toHaveAttribute("href", "/the-memes");
+    expect(backLink).not.toHaveClass("tw-uppercase");
+    expect(backLink).not.toHaveClass("tw-border");
+    expect(backLink).not.toHaveClass("tw-border-solid");
+    expect(backLink).not.toHaveClass("hover:tw-bg-iron-900/70");
+    expect(backLink).toHaveClass("hover:tw-text-iron-400");
+    expect(backLink).toHaveClass("tw-text-xs", "tw-px-2", "tw-py-2");
   });
 
   it("shows content only after metadata and NFT load", async () => {
@@ -608,6 +612,7 @@ describe("MemePage navigation integration", () => {
         expect(calendarPosition).toHaveClass("tw-hidden", "md:tw-flex");
         expect(within(calendarPosition).getByText("YEAR")).toBeInTheDocument();
         expect(within(calendarPosition).getByText("EPOCH")).toBeInTheDocument();
+        expect(within(calendarPosition).getAllByText("/")).toHaveLength(4);
         expect(screen.getByText(/Card 1/)).toBeInTheDocument();
         expect(
           screen.getByRole("heading", { level: 1, name: "Card 1 — Meme" })

@@ -5,10 +5,9 @@ import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "@/services/api/common-api";
+import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import type { ApiNftMedia } from "@/generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
-import { Button } from "react-bootstrap";
-import clsx from "clsx";
 import { createPortal } from "react-dom";
 
 const DEFAULT_TIMEOUT = 10000;
@@ -235,12 +234,9 @@ export const LFGButton: React.FC<{
   return (
     <>
       <LFGSlideshow contract={contract} isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Button
-        onClick={() => setIsOpen(true)}
-        className={clsx(styles["lfgButton"], "no-wrap")}
-      >
+      <SecondaryButton size="sm" onClicked={() => setIsOpen(true)}>
         LFG: Start the Show!
-      </Button>
+      </SecondaryButton>
     </>
   );
 };

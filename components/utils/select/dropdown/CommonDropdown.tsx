@@ -21,21 +21,25 @@ export default function CommonDropdown<T, U = unknown>(
     disabled = false,
     theme = "dark",
     size = "md",
+    variant = "default",
     renderItemChildren,
     closeOnSelect = true,
     showFilterLabel = false,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
+  const isEditorial = variant === "editorial";
 
   useEffect(() => {
     if (!iconScope.current) return;
-    if (isOpen) {
+    if (isEditorial) {
+      animateIcon(iconScope.current, { rotate: isOpen ? 180 : 0 });
+    } else if (isOpen) {
       animateIcon(iconScope.current, { rotate: 0 });
     } else {
       animateIcon(iconScope.current, { rotate: -90 });
     }
-  }, [animateIcon, iconScope, isOpen]);
+  }, [animateIcon, iconScope, isEditorial, isOpen]);
 
   const activeItemMatch = useMemo(
     () => items.find((item) => item.value === activeItem),
@@ -66,6 +70,25 @@ export default function CommonDropdown<T, U = unknown>(
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const buttonClasses = isEditorial
+    ? `${
+        disabled
+          ? "tw-border-iron-900 tw-text-iron-500 tw-opacity-50"
+          : "tw-border-iron-700/70 tw-text-iron-200 hover:tw-border-iron-600 hover:tw-bg-iron-900/50 hover:tw-text-white"
+      } tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-py-2 tw-pl-3.5 tw-pr-8 tw-text-left tw-text-xs tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-none tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`
+    : `${
+        disabled
+          ? "tw-text-iron-400 tw-opacity-50"
+          : "tw-text-iron-300 hover:tw-ring-iron-700"
+      } ${
+        theme === "dark" ? "tw-bg-iron-800 lg:tw-bg-iron-900" : "tw-bg-iron-800"
+      } ${
+        size === "md"
+          ? "tw-py-3 tw-text-sm"
+          : size === "tabs"
+            ? "tw-py-[11px] tw-text-sm"
+            : "tw-py-2.5 tw-text-xs"
+      } tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-8 tw-text-left tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`;
 
   return (
     <div className="tailwind-scope tw-h-full tw-w-full">
@@ -78,21 +101,7 @@ export default function CommonDropdown<T, U = unknown>(
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`${
-            disabled
-              ? "tw-text-iron-400 tw-opacity-50"
-              : "tw-text-iron-300 hover:tw-ring-iron-700"
-          } ${
-            theme === "dark"
-              ? "tw-bg-iron-800 lg:tw-bg-iron-900"
-              : "tw-bg-iron-800"
-          } ${
-            size === "md"
-              ? "tw-py-3 tw-text-sm"
-              : size === "tabs"
-                ? "tw-py-[11px] tw-text-sm"
-                : "tw-py-2.5 tw-text-xs"
-          } tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-8 tw-text-left tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`}
+          className={buttonClasses}
         >
           {showFilterLabel && (
             <span className="tw-font-semibold tw-text-iron-500">

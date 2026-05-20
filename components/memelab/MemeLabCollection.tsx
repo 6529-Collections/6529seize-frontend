@@ -2,9 +2,9 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
+import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
 import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import NFTImage from "@/components/nft-image/NFTImage";
-import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
@@ -127,30 +127,29 @@ export default function LabCollection({
             showThumbnail={true}
           />
         </div>
-        <CollectionCardMetadataRow
-          tokenId={nft.id}
-          mediaMimeType={mediaMimeType}
-          mediaBadgeId={`${nft.contract}-${nft.id}`}
-        >
-          {connectedProfile !== null && (
-            <NFTImageBalance
-              contract={nft.contract}
-              tokenId={nft.id}
-              height={300}
-              variant="collection-card"
-            />
-          )}
-        </CollectionCardMetadataRow>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-3 tw-text-center md:tw-px-4">
-          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-md tw-font-semibold tw-leading-snug tw-text-iron-50">
             {nft.name}
           </div>
-          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            Artists: {nft.artist}
-          </div>
-          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            {printNftContent(nft, sort, nftMetas, volumeType)}
-          </div>
+          <CollectionCardMetadataRow
+            tokenId={nft.id}
+            mediaMimeType={mediaMimeType}
+            mediaBadgeId={`${nft.contract}-${nft.id}`}
+            align="center"
+            ownership={{
+              contract: nft.contract,
+              tokenId: nft.id,
+              show: connectedProfile !== null,
+            }}
+          />
+          <CollectionCardMetricLine
+            text={`Artists: ${nft.artist}`}
+            align="center"
+          />
+          <CollectionCardMetricLine
+            text={printNftContent(nft, sort, nftMetas, volumeType)}
+            align="center"
+          />
         </div>
       </Link>
     );

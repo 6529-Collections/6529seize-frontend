@@ -3,11 +3,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
+import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
-import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import {
@@ -127,67 +127,57 @@ export function printNftContent(
   nftMetas: LabExtendedData[],
   volumeType: VolumeType
 ) {
-  return (
-    <>
-      {sort &&
-        (sort === MemeLabSort.AGE || sort === MemeLabSort.ARTISTS) &&
-        printMintDate(nft.mint_date)}
-      {sort === MemeLabSort.COLLECTIONS && `Artists: ${nft.artist}`}
-      {sort === MemeLabSort.EDITION_SIZE &&
-        `Edition Size: ${numberWithCommas(nft.supply)}`}
-      {sort === MemeLabSort.HODLERS &&
-        `Collectors: ${numberWithCommas(
-          nftMetas.find((nftm) => nftm.id === nft.id)!.hodlers
-        )}`}
-      {sort === MemeLabSort.UNIQUE_PERCENT &&
-        `Unique: ${
-          Math.round(
-            nftMetas.find((nftm) => nftm.id === nft.id)?.percent_unique! *
-              100 *
-              10
-          ) / 10
-        }%`}
-      {sort === MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM &&
-        `Unique Ex-Museum: ${
-          Math.round(
-            nftMetas.find((nftm) => nftm.id === nft.id)
-              ?.percent_unique_cleaned! *
-              100 *
-              10
-          ) / 10
-        }%`}
-      {sort === MemeLabSort.FLOOR_PRICE &&
-        (nft.floor_price > 0
-          ? `Floor Price: ${numberWithCommas(
-              Math.round(nft.floor_price * 100) / 100
-            )} ETH`
-          : `Floor Price: N/A`)}
-      {sort === MemeLabSort.MARKET_CAP &&
-        (nft.market_cap > 0
-          ? `Market Cap: ${numberWithCommas(
-              Math.round(nft.market_cap * 100) / 100
-            )} ETH`
-          : `Market Cap: N/A`)}
-      {sort === MemeLabSort.HIGHEST_OFFER &&
-        (nft.highest_offer > 0
-          ? `Highest Offer: ${numberWithCommas(
-              Math.round(nft.highest_offer * 1000) / 1000
-            )} ETH`
-          : `Highest Offer: N/A`)}
-      {sort === MemeLabSort.VOLUME &&
-        `Volume (${volumeType}): ${numberWithCommas(
-          Math.round(
-            (volumeType === VolumeType.HOURS_24
-              ? nft.total_volume_last_24_hours
-              : volumeType === VolumeType.DAYS_7
-                ? nft.total_volume_last_7_days
-                : volumeType === VolumeType.DAYS_30
-                  ? nft.total_volume_last_1_month
-                  : nft.total_volume) * 100
-          ) / 100
-        )} ETH`}
-    </>
-  );
+  const nftMeta = nftMetas.find((nftm) => nftm.id === nft.id);
+
+  switch (sort) {
+    case MemeLabSort.AGE:
+    case MemeLabSort.ARTISTS:
+      return printMintDate(nft.mint_date);
+    case MemeLabSort.COLLECTIONS:
+      return `Artists: ${nft.artist}`;
+    case MemeLabSort.EDITION_SIZE:
+      return `Edition Size: ${numberWithCommas(nft.supply)}`;
+    case MemeLabSort.HODLERS:
+      return `Collectors: ${numberWithCommas(nftMeta!.hodlers)}`;
+    case MemeLabSort.UNIQUE_PERCENT:
+      return `Unique: ${Math.round(nftMeta?.percent_unique! * 100 * 10) / 10}%`;
+    case MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM:
+      return `Unique Ex-Museum: ${
+        Math.round(nftMeta?.percent_unique_cleaned! * 100 * 10) / 10
+      }%`;
+    case MemeLabSort.FLOOR_PRICE:
+      return nft.floor_price > 0
+        ? `Floor Price: ${numberWithCommas(
+            Math.round(nft.floor_price * 100) / 100
+          )} ETH`
+        : "Floor Price: N/A";
+    case MemeLabSort.MARKET_CAP:
+      return nft.market_cap > 0
+        ? `Market Cap: ${numberWithCommas(
+            Math.round(nft.market_cap * 100) / 100
+          )} ETH`
+        : "Market Cap: N/A";
+    case MemeLabSort.HIGHEST_OFFER:
+      return nft.highest_offer > 0
+        ? `Highest Offer: ${numberWithCommas(
+            Math.round(nft.highest_offer * 1000) / 1000
+          )} ETH`
+        : "Highest Offer: N/A";
+    case MemeLabSort.VOLUME:
+      return `Volume (${volumeType}): ${numberWithCommas(
+        Math.round(
+          (volumeType === VolumeType.HOURS_24
+            ? nft.total_volume_last_24_hours
+            : volumeType === VolumeType.DAYS_7
+              ? nft.total_volume_last_7_days
+              : volumeType === VolumeType.DAYS_30
+                ? nft.total_volume_last_1_month
+                : nft.total_volume) * 100
+        ) / 100
+      )} ETH`;
+  }
+
+  return "";
 }
 
 export function sortChanged(
@@ -561,27 +551,25 @@ export default function MemeLabComponent() {
             showThumbnail={true}
           />
         </div>
-        <CollectionCardMetadataRow
-          tokenId={nft.id}
-          mediaMimeType={mediaMimeType}
-          mediaBadgeId={`${nft.contract}-${nft.id}`}
-        >
-          {isConnected && (
-            <NFTImageBalance
-              contract={nft.contract}
-              tokenId={nft.id}
-              height={300}
-              variant="collection-card"
-            />
-          )}
-        </CollectionCardMetadataRow>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-3 tw-text-center md:tw-px-4">
-          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-md tw-font-semibold tw-leading-snug tw-text-iron-50">
             {nft.name}
           </div>
-          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            {printNftContent(nft, sort, nftMetas, volumeType)}
-          </div>
+          <CollectionCardMetadataRow
+            tokenId={nft.id}
+            mediaMimeType={mediaMimeType}
+            mediaBadgeId={`${nft.contract}-${nft.id}`}
+            align="center"
+            ownership={{
+              contract: nft.contract,
+              tokenId: nft.id,
+              show: isConnected,
+            }}
+          />
+          <CollectionCardMetricLine
+            text={printNftContent(nft, sort, nftMetas, volumeType)}
+            align="center"
+          />
         </div>
       </Link>
     );
@@ -679,7 +667,7 @@ export default function MemeLabComponent() {
       tokenIds={tokenIds}
       enabled={isConnected}
     >
-      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
           <header className="tw-pb-5">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">

@@ -1,6 +1,5 @@
 "use client";
 
-import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
@@ -42,7 +41,7 @@ const FILTER_INLINE_LABEL_CLASS =
   "tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
 
 const REMEMES_GRID_CLASS =
-  "tw-grid tw-grid-cols-2 tw-gap-x-6 tw-pt-2 sm:tw-grid-cols-3 md:tw-grid-cols-4";
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
 
 function getRememeCollectionName(rememe: Rememe) {
   return (
@@ -104,7 +103,6 @@ export default function Rememes() {
     { label: "All", value: 0, key: "meme-all" },
     ...memes.map((meme) => ({
       label: `#${meme.id} - ${meme.name}`,
-      mobileLabel: `#${meme.id}`,
       value: meme.id,
       key: `meme-${meme.id}`,
     })),
@@ -214,25 +212,38 @@ export default function Rememes() {
   }, [fetchResults, page, selectedMeme, selectedSorting, selectedTokenType]);
 
   function printRememe(rememe: Rememe) {
+    const collectionName = getRememeCollectionName(rememe);
+    const replicaCount = rememe.replicas.length;
+
     return (
       <a
         key={`${rememe.contract}-${rememe.id}`}
         href={`/rememes/${rememe.contract}/${rememe.id}`}
-        className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        className="tw-group tw-flex tw-h-full tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
         <div className="tw-bg-iron-900">
           <RememeImage nft={rememe} animation={false} height={300} />
         </div>
-        <CollectionCardMetadataRow tokenId={rememe.id} />
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-3 tw-text-center md:tw-px-4">
-          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+          <div className="tw-line-clamp-2 tw-w-full tw-max-w-full tw-break-words tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-50 md:tw-text-md">
             {getRememeTitle(rememe)}
           </div>
-          <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            {getRememeCollectionName(rememe)}
-            {rememe.replicas.length > 1 && (
-              <>&nbsp;(x{numberWithCommas(rememe.replicas.length)})</>
-            )}
+          <div className="tw-mt-2 tw-flex tw-min-h-5 tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1.5 tw-gap-y-0.5 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
+            <span className="tw-break-words">
+              {collectionName}
+              {replicaCount > 1 && (
+                <>&nbsp;(x{numberWithCommas(replicaCount)})</>
+              )}
+            </span>
+            <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-600">
+              ·
+            </span>
+            <span
+              aria-label={`Token #${rememe.id}`}
+              className="tw-min-w-0 tw-truncate tw-font-medium"
+            >
+              #{rememe.id}
+            </span>
           </div>
         </div>
       </a>
@@ -327,6 +338,7 @@ export default function Rememes() {
                   filterLabel="Sort"
                   setSelected={setSelectedSorting}
                   size="sm"
+                  variant="editorial"
                 />
               </div>
               {selectedSorting === RememeSort.RANDOM && (
@@ -336,7 +348,7 @@ export default function Rememes() {
                     aria-label="Refresh results"
                     onClick={() => fetchResults(page)}
                     data-tooltip-id="refresh-rememes-results"
-                    className="tw-inline-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-white/[0.05] tw-text-iron-300 tw-transition hover:tw-border-white/25 hover:tw-bg-white/[0.07] hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-white/20"
+                    className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/70 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-900/50 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
                   >
                     <ArrowPathIcon className="tw-size-5" />
                   </button>
@@ -365,6 +377,7 @@ export default function Rememes() {
                     filterLabel="Token Type"
                     setSelected={setSelectedTokenType}
                     size="sm"
+                    variant="editorial"
                   />
                 </div>
               </div>
@@ -382,6 +395,7 @@ export default function Rememes() {
                     filterLabel="Meme Reference"
                     setSelected={setSelectedMeme}
                     size="sm"
+                    variant="editorial"
                   />
                 </div>
               </div>

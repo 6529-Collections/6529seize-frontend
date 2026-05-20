@@ -14,7 +14,7 @@ import { render, screen } from "@testing-library/react";
 jest.mock("@/helpers/Helpers", () => ({
   printMintDate: jest.fn((date: Date | string) => {
     if (!date) return "-";
-    return "Jan 1, 2023 (1 year ago)";
+    return "Jan 1, 2023";
   }),
   numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
   getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {

@@ -26,13 +26,7 @@ import {
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 interface Meme {
   meme: number;
@@ -136,10 +130,7 @@ function getInitialSeasonId(searchParams: SearchParamReader): number | null {
   return !Number.isNaN(parsed) && parsed > 0 ? parsed : null;
 }
 
-function getSortQueryParam(
-  sort: MemesSort,
-  volumeType: VolumeType
-): string {
+function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
   if (sort === MemesSort.VOLUME) {
     const volKey = Object.entries(VolumeType).find(
       ([_, value]) => value === volumeType
@@ -402,7 +393,7 @@ export default function TheMemesComponent() {
       tokenIds={tokenIds}
       enabled={connectedProfile !== null}
     >
-      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
           <header className="tw-pb-5">
             <div className="tw-flex tw-flex-col tw-gap-4">

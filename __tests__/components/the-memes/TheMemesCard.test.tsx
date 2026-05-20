@@ -24,11 +24,13 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => ({
       contract,
       tokenId,
       inline,
+      size,
       variant,
     }: {
       readonly contract: string;
       readonly tokenId: number;
       readonly inline?: boolean | undefined;
+      readonly size?: string | undefined;
       readonly variant?: string | undefined;
     }) => (
       <span
@@ -36,6 +38,7 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => ({
         data-contract={contract}
         data-token-id={tokenId}
         data-inline={inline}
+        data-size={size}
         data-variant={variant}
       >
         UNSEIZED
@@ -55,6 +58,7 @@ import NFTImage from "@/components/nft-image/NFTImage";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import { VolumeType, type NFTWithMemesExtendedData } from "@/entities/INFT";
+import { printMintDate } from "@/helpers/Helpers";
 import { MemesSort } from "@/types/enums";
 import { render, screen } from "@testing-library/react";
 
@@ -140,22 +144,42 @@ describe("TheMemesCard", () => {
       "data-show-balance",
       "false"
     );
-    const tokenBadge = screen.getByText("#6529").parentElement;
+    const title = screen.getByText("Test Meme");
+    const token = screen.getByText("#6529");
+    const tokenBadge = token.parentElement;
     expect(tokenBadge).toBeInTheDocument();
     expect(tokenBadge).not.toHaveClass("tw-absolute");
-    expect(tokenBadge).toHaveClass("tw-bg-transparent", "tw-text-iron-500");
-    expect(tokenBadge?.parentElement).toHaveClass("tw-pt-3");
-    expect(screen.getByTestId("media-type")).toHaveTextContent("image/jpeg");
-    expect(screen.getByText("Test Meme")).toBeInTheDocument();
-    expect(screen.queryByText("#6529 - Test Meme")).not.toBeInTheDocument();
-    expect(screen.getByText("Test Meme").parentElement).not.toContainElement(
-      screen.getByTestId("media-type")
+    expect(tokenBadge).not.toHaveClass("tw-border", "tw-rounded-md");
+    expect(tokenBadge).toHaveClass(
+      "tw-inline-flex",
+      "tw-text-xs",
+      "tw-text-iron-500"
     );
-    expect(screen.getByText("Edition Size: 1,000")).toBeInTheDocument();
+    expect(tokenBadge?.parentElement).toHaveClass("tw-justify-center");
+    expect(tokenBadge?.parentElement).not.toHaveClass("tw-ml-auto");
+    expect(screen.getByTestId("media-type")).toHaveTextContent("image/jpeg");
+    expect(title).toBeInTheDocument();
+    expect(title).toHaveClass(
+      "tw-text-sm",
+      "md:tw-text-md",
+      "tw-text-iron-50",
+      "tw-text-center"
+    );
+    expect(
+      Boolean(
+        title.compareDocumentPosition(token) & Node.DOCUMENT_POSITION_FOLLOWING
+      )
+    ).toBe(true);
+    expect(screen.queryByText("#6529 - Test Meme")).not.toBeInTheDocument();
+    expect(title).not.toContainElement(screen.getByTestId("media-type"));
+    const metricLabel = screen.getByText("Edition Size:");
+    expect(metricLabel.parentElement).toHaveTextContent("Edition Size: 1,000");
+    expect(metricLabel).toHaveClass("tw-text-iron-500");
+    expect(screen.getByText("1,000")).toHaveClass("tw-text-iron-200");
     expect(screen.queryByTestId("nft-balance")).not.toBeInTheDocument();
   });
 
-  it("renders connected balance in the metadata row with the collection-card variant", () => {
+  it("renders connected balance in the metadata row with the compact variant", () => {
     render(
       <TheMemesCard
         nft={nft}
@@ -168,8 +192,30 @@ describe("TheMemesCard", () => {
     const balance = screen.getByTestId("nft-balance");
     expect(balance).toHaveAttribute("data-contract", "0xmemes");
     expect(balance).toHaveAttribute("data-token-id", "6529");
-    expect(balance).toHaveAttribute("data-variant", "collection-card");
+    expect(balance).toHaveAttribute("data-variant", "compact");
+    expect(balance).toHaveAttribute("data-size", "sm");
     expect(balance).not.toHaveAttribute("data-inline", "true");
-    expect(balance.parentElement).toHaveClass("tw-min-w-0", "tw-shrink");
+    expect(balance.parentElement).toHaveClass("tw-shrink-0");
+    expect(balance.parentElement?.parentElement).toHaveClass(
+      "tw-justify-center",
+      "tw-w-full"
+    );
+    expect(screen.getByText("#6529").parentElement?.parentElement).toHaveClass(
+      "tw-justify-center"
+    );
+    expect(
+      screen.getByText("#6529").parentElement?.parentElement
+    ).not.toHaveClass("tw-ml-auto");
+    expect(
+      screen.getByText("#6529").parentElement?.parentElement?.parentElement
+    ).toBe(balance.parentElement?.parentElement);
+
+    const date = screen.getByText(
+      printMintDate(nft.mint_date).replace(/\s+/g, " ").trim()
+    );
+    expect(date).toHaveClass("tw-w-full", "tw-text-center", "tw-text-iron-500");
+    expect(date).not.toBe(
+      screen.getByText("#6529").parentElement?.parentElement
+    );
   });
 });

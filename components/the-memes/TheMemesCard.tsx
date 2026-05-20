@@ -1,8 +1,8 @@
 "use client";
 
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
+import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
 import NFTImage from "@/components/nft-image/NFTImage";
-import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { numberWithCommas, printMintDate } from "@/helpers/Helpers";
@@ -105,27 +105,22 @@ export default function TheMemesCard({
           showBalance={false}
         />
       </div>
-      <CollectionCardMetadataRow
-        tokenId={nft.id}
-        mediaMimeType={mediaMimeType}
-        mediaBadgeId={`${nft.contract}-${nft.id}`}
-      >
-        {hasConnectedProfile && (
-          <NFTImageBalance
-            contract={nft.contract}
-            tokenId={nft.id}
-            height={300}
-            variant="collection-card"
-          />
-        )}
-      </CollectionCardMetadataRow>
-      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-y-2 tw-px-2 tw-pb-4 tw-pt-3 tw-text-center md:tw-px-4">
-        <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+        <div className="tw-w-full tw-max-w-full tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-50 md:tw-text-md">
           {nft.name}
         </div>
-        <div className="tw-min-h-5 tw-w-full tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-          {metricText}
-        </div>
+        <CollectionCardMetadataRow
+          tokenId={nft.id}
+          mediaMimeType={mediaMimeType}
+          mediaBadgeId={`${nft.contract}-${nft.id}`}
+          align="center"
+          ownership={{
+            contract: nft.contract,
+            tokenId: nft.id,
+            show: hasConnectedProfile,
+          }}
+        />
+        <CollectionCardMetricLine text={metricText} align="center" />
       </div>
     </Link>
   );

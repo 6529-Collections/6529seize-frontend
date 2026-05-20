@@ -115,7 +115,7 @@ describe("NFTImageBalance", () => {
         expect(screen.getByText("SEIZED x5")).toBeInTheDocument();
       });
 
-      it("renders a green collection-card badge when balance is positive", () => {
+      it("renders the shared compact meme-view badge when balance is positive", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 5,
           isLoading: false,
@@ -123,14 +123,17 @@ describe("NFTImageBalance", () => {
         });
 
         renderWithProviders(
-          <NFTImageBalance {...defaultProps} variant="collection-card" />
+          <NFTImageBalance {...defaultProps} variant="compact" />
         );
 
-        const balance = screen.getByText("Seized x 5");
+        const balance = screen.getByLabelText("SEIZED x5");
         expect(balance).toHaveClass(
-          "tw-bg-emerald-500/15",
-          "tw-text-emerald-200"
+          "tw-border-primary-400/25",
+          "tw-bg-primary-400/[0.035]",
+          "tw-text-primary-300/90",
+          "tw-uppercase"
         );
+        expect(screen.getByText("x5")).toHaveClass("tw-text-primary-300/90");
         expect(balance).not.toHaveClass("balance");
       });
 
@@ -208,7 +211,7 @@ describe("NFTImageBalance", () => {
         expect(screen.getByText("UNSEIZED")).toBeInTheDocument();
       });
 
-      it("renders a quiet gray collection-card badge when balance is zero", () => {
+      it("renders a quiet gray compact badge when balance is zero", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 0,
           isLoading: false,
@@ -216,11 +219,15 @@ describe("NFTImageBalance", () => {
         });
 
         renderWithProviders(
-          <NFTImageBalance {...defaultProps} variant="collection-card" />
+          <NFTImageBalance {...defaultProps} variant="compact" />
         );
 
-        const balance = screen.getByText("Unseized");
-        expect(balance).toHaveClass("tw-bg-transparent", "tw-text-iron-500");
+        const balance = screen.getByText("UNSEIZED");
+        expect(balance).toHaveClass(
+          "tw-border-iron-800",
+          "tw-bg-white/[0.025]",
+          "tw-text-iron-400"
+        );
         expect(balance).not.toHaveClass("balance");
       });
     });
