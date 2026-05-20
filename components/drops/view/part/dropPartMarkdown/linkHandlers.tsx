@@ -23,6 +23,7 @@ import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
 import {
   isDirectImageUrl,
+  isSafeMarkdownImageSrc,
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
@@ -140,6 +141,10 @@ export const createLinkRenderer = ({
 
   const renderImage: LinkRenderer["renderImage"] = ({ src, ...props }) => {
     if (typeof src !== "string") {
+      return null;
+    }
+
+    if (!isSafeMarkdownImageSrc(src)) {
       return null;
     }
 

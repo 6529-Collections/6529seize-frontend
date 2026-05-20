@@ -32,6 +32,40 @@ const DIRECT_IMAGE_EXTENSIONS = [
   ".webp",
   ".avif",
 ] as const;
+const SAFE_DATA_IMAGE_REGEX =
+  /^data:image\/(?:gif|png|jpe?g|webp|avif);base64,[a-z0-9+/=\s]+$/i;
+
+const isSafeDataImageUrl = (href: string): boolean => {
+  return SAFE_DATA_IMAGE_REGEX.test(href.trim());
+};
+
+const isSafeRelativeImagePath = (href: string): boolean => {
+  return (
+    (href.startsWith("/") && !href.startsWith("//")) ||
+    href.startsWith("./") ||
+    href.startsWith("../")
+  );
+};
+
+const isSafeMarkdownImageSrc = (href: string): boolean => {
+  const trimmedHref = href.trim();
+
+  if (trimmedHref.length === 0) {
+    return false;
+  }
+
+  if (isSafeDataImageUrl(trimmedHref)) {
+    return true;
+  }
+
+  const parsedUrl = parseUrl(trimmedHref);
+  if (!parsedUrl) {
+    return isSafeRelativeImagePath(trimmedHref);
+  }
+
+  const protocol = parsedUrl.protocol.toLowerCase();
+  return protocol === "http:" || protocol === "https:";
+};
 
 const isDirectImageUrl = (href: string, parsedUrl?: URL | null): boolean => {
   const url = parsedUrl ?? parseUrl(href);
@@ -139,6 +173,7 @@ const isValidLink = (href: string): boolean => {
 
 export {
   isDirectImageUrl,
+  isSafeMarkdownImageSrc,
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
