@@ -165,7 +165,9 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     allSelected,
     contractTotalSupply,
   });
-  const [addTokenMaxError, setAddTokenMaxError] = useState<string | null>(null);
+  const [addTokenInputError, setAddTokenInputError] = useState<string | null>(
+    null
+  );
 
   const selectedCount = useMemo(() => countRanges(ranges), [ranges]);
   const unsafeCount = useMemo(
@@ -213,18 +215,18 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     };
     if (source === "text-editor") {
       setParseErrors([error]);
-      setAddTokenMaxError(null);
+      setAddTokenInputError(null);
     } else {
-      setAddTokenMaxError(maxSelectionMessage);
+      setAddTokenInputError(maxSelectionMessage);
     }
     return false;
   };
 
   let cappedHelperState = helperState;
-  if (addTokenMaxError !== null) {
+  if (addTokenInputError !== null) {
     cappedHelperState = {
       tone: "error" as const,
-      text: addTokenMaxError,
+      text: addTokenInputError,
     } as const;
   } else if (maxSelectionReached && !allSelected) {
     const maxSelectionTone = maxSelectionExceeded ? "error" : "muted";
@@ -250,7 +252,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     setAllSelected(false);
 
     setTokenInput("");
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     setIsEditingText(false);
   };
 
@@ -261,7 +263,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     clearContract();
     setQuery("");
     setTokenInput("");
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     setParseErrors([]);
     setIsEditingText(false);
     inputRef.current?.focus();
@@ -274,12 +276,12 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
         contractTotalSupply < BigInt(0) ||
         contractTotalSupply > maxSelectedCountBigInt)
     ) {
-      setAddTokenMaxError(maxSelectionMessage);
+      setAddTokenInputError(maxSelectionMessage);
       setParseErrors([]);
       return;
     }
     selectAll();
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     setIsEditingText(false);
     setTokenInput("");
     setTimeout(() => {
@@ -289,7 +291,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   const handleDeselectAll = () => {
     deselectAll();
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     setIsEditingText(false);
     setTokenInput("");
     setTimeout(() => {
@@ -305,14 +307,19 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
     if (!validateMaxSelectedCount(nextRanges, tokenInput.trim(), "add-input")) {
       return;
     }
-    addTokenRanges(tokenPreview.ranges);
+    const result = addTokenRanges(tokenPreview.ranges);
+    if (result && "error" in result) {
+      setAddTokenInputError(result.error.message);
+      setParseErrors([]);
+      return;
+    }
     setTokenInput("");
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     setParseErrors([]);
   };
 
   const handleApplyText = () => {
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     try {
       const canonical = parseTokenExpressionToRanges(textValue);
       if (
@@ -333,19 +340,19 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
   const handleTokenInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (addTokenMaxError !== null) {
-      setAddTokenMaxError(null);
+    if (addTokenInputError !== null) {
+      setAddTokenInputError(null);
     }
     setTokenInput(event.target.value);
   };
 
   const handleClearTokens = () => {
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     clearTokens();
   };
 
   const handleRemoveToken = (tokenId: bigint) => {
-    setAddTokenMaxError(null);
+    setAddTokenInputError(null);
     removeToken(tokenId);
   };
 
@@ -375,7 +382,7 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
 
   const activeSuggestionId =
     isOpen && suggestionList[activeIndex]
-      ? `nft - suggestion - ${activeIndex} `
+      ? `nft-suggestion-${activeIndex}`
       : undefined;
 
   const wrapperClassName = clsx(
@@ -491,14 +498,14 @@ export function NftPicker(props: Readonly<NftPickerProps>) {
                 onToggle={() => setIsEditingText((prev) => !prev)}
                 onTextChange={(val) => {
                   if (parseErrors.length) setParseErrors([]);
-                  if (addTokenMaxError !== null) setAddTokenMaxError(null);
+                  if (addTokenInputError !== null) setAddTokenInputError(null);
                   setTextValue(val);
                 }}
                 onApply={handleApplyText}
                 onCancel={() => {
                   setTextValue(formatCanonical(ranges));
                   setParseErrors([]);
-                  setAddTokenMaxError(null);
+                  setAddTokenInputError(null);
                   setIsEditingText(false);
                 }}
                 onClear={handleClearTokens}

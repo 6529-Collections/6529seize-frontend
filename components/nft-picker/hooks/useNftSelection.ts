@@ -222,13 +222,16 @@ export function useNftSelection({
       return;
     }
     const canonical = mergeCanonicalRanges(ranges, newRanges);
+    const result = effectiveSelectedContract
+      ? emitChange(effectiveSelectedContract, canonical, false)
+      : {};
+    if ("error" in result) {
+      return result;
+    }
     setRanges(canonical);
     setAllSelected(false);
     previousRangesRef.current = null;
-    if (effectiveSelectedContract) {
-      return emitChange(effectiveSelectedContract, canonical, false);
-    }
-    return {};
+    return result;
   };
 
   const removeToken = (tokenId: bigint) => {
@@ -288,13 +291,16 @@ export function useNftSelection({
   };
 
   const setSelectionFromText = (canonical: TokenRange[]) => {
+    const result = effectiveSelectedContract
+      ? emitChange(effectiveSelectedContract, canonical, false)
+      : {};
+    if ("error" in result) {
+      return result;
+    }
     setRanges(canonical);
     setAllSelected(false);
     previousRangesRef.current = null;
-    if (effectiveSelectedContract) {
-      return emitChange(effectiveSelectedContract, canonical, false);
-    }
-    return {};
+    return result;
   };
 
   return {

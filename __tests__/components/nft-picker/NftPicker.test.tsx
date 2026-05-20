@@ -66,6 +66,10 @@ const searchContract: ContractOverview = {
   bannerImageUrl: null,
 };
 
+function makeSequentialTokenIds(count: number): bigint[] {
+  return Array.from({ length: count }, (_, index) => BigInt(index + 1));
+}
+
 function renderFixedPicker({
   onChange = jest.fn(),
   onContractChange = jest.fn(),
@@ -242,6 +246,32 @@ describe("NftPicker fixedContract", () => {
 
     expect(screen.queryByText(maxSelectedCountMessage)).not.toBeInTheDocument();
     expect(screen.getByText(/Looks good: 1/)).toBeInTheDocument();
+  });
+
+  it("keeps add input when a merged selection exceeds the enumeration limit", async () => {
+    const user = userEvent.setup();
+    const { onChange } = renderFixedPicker({
+      defaultValue: {
+        contractAddress: fixedContract.address,
+        selectedIds: makeSequentialTokenIds(10_000),
+        allSelected: false,
+      },
+    });
+
+    expect(
+      await screen.findByText("10,000 tokens selected")
+    ).toBeInTheDocument();
+
+    const addInput = screen.getByLabelText("Add token IDs or ranges");
+    await user.type(addInput, "10001");
+    await user.click(screen.getByRole("button", { name: "Add" }));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(/exceeding the limit of 10,?000/i)
+    ).toBeInTheDocument();
+    expect(addInput).toHaveValue("10001");
+    expect(screen.getByText("10,000 tokens selected")).toBeInTheDocument();
   });
 });
 
