@@ -253,6 +253,41 @@ describe("DropPartMarkdown", () => {
     ).not.toBeNull();
   });
 
+  it("renders a markdown image with a safe base64 data URI", () => {
+    const dataUri =
+      "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2w==";
+
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`hello\n\n![Seize](${dataUri})`}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("hello")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Drop media" })).toHaveAttribute(
+      "src",
+      dataUri
+    );
+  });
+
+  it("does not render markdown images with non-image data URIs", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
   it("preserves whitespace between a markdown image and following text", () => {
     const { container } = render(
       <DropPartMarkdown
