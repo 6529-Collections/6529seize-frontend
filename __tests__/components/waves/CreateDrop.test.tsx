@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { DropMutationBody } from "@/components/waves/CreateDrop";
 import CreateDrop from "@/components/waves/CreateDrop";
@@ -184,6 +184,66 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("does not blur when a chat drop is queued", async () => {
+    const blurSpy = jest.spyOn(HTMLElement.prototype, "blur");
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"CHAT" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+      expect(blurSpy).not.toHaveBeenCalled();
+    } finally {
+      blurSpy.mockRestore();
+    }
+  });
+
+  it("keeps blur behavior when a participatory drop is queued", async () => {
+    const blurSpy = jest.spyOn(HTMLElement.prototype, "blur");
+    try {
+      render(
+        <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+          <ReactQueryWrapperContext.Provider
+            value={{ waitAndInvalidateDrops: jest.fn() } as any}
+          >
+            <CreateDrop
+              activeDrop={null}
+              onCancelReplyQuote={() => {}}
+              onDropAddedToQueue={jest.fn()}
+              wave={wave}
+              dropId={null}
+              fixedDropMode={"PARTICIPATION" as any}
+              privileges={{ chatRestriction: null } as any}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+
+      fireEvent.click(screen.getByText("submit current mode"));
+
+      await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+      expect(blurSpy).toHaveBeenCalled();
+    } finally {
+      blurSpy.mockRestore();
+    }
   });
 
   it("starts local slow mode cooldown after a chat drop", async () => {
