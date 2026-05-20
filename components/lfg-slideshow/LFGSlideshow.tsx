@@ -15,47 +15,17 @@ const DEFAULT_TIMEOUT = 10000;
 const SLIDESHOW_ID = "lfg-slideshow";
 const EMPTY_CAPTIONS_SRC = "data:text/vtt,WEBVTT%0A%0A";
 
-type LFGMedia = ApiNftMedia & {
-  image_compact?: string | null;
-  animation_compact?: string | null;
-};
-
 const getMediaField = (value: unknown) =>
   typeof value === "string" ? value : "";
-
-const getMediaIdentityField = (value: unknown) =>
-  typeof value === "string" || typeof value === "number" ? `${value}` : "";
 
 const isVideo = (url: string | null | undefined) =>
   getMediaField(url).toLowerCase().endsWith(".mp4");
 
-const uniqueSources = (...sources: unknown[]) =>
-  sources
-    .map(getMediaField)
-    .filter((source) => source.length > 0)
-    .filter(
-      (source, index, allSources) => allSources.indexOf(source) === index
-    );
+const preloadMedia = (mediaItem: ApiNftMedia) => {
+  const animation = getMediaField(mediaItem.animation);
+  const image = getMediaField(mediaItem.image);
 
-const getImageCandidates = (mediaItem: LFGMedia) =>
-  uniqueSources(mediaItem.image_compact, mediaItem.image);
-
-const getVideoCandidates = (mediaItem: LFGMedia) =>
-  uniqueSources(mediaItem.animation_compact, mediaItem.animation).filter(
-    isVideo
-  );
-
-const getCurrentSource = (
-  candidates: string[],
-  sourceIndexes: Record<string, number>,
-  mediaKey: string
-) => candidates[sourceIndexes[mediaKey] ?? 0] ?? "";
-
-const preloadMedia = (mediaItem: LFGMedia) => {
-  const animation = getVideoCandidates(mediaItem)[0] ?? "";
-  const image = getImageCandidates(mediaItem)[0] ?? "";
-
-  if (animation.length > 0) {
+  if (isVideo(animation)) {
     const video = document.createElement("video");
     video.src = animation;
     video.load();
@@ -65,7 +35,7 @@ const preloadMedia = (mediaItem: LFGMedia) => {
   }
 };
 
-const preloadNext = (mediaItems: LFGMedia[], index: number) => {
+const preloadNext = (mediaItems: ApiNftMedia[], index: number) => {
   const nextIndex = (index + 1) % mediaItems.length;
   const nextMedia = mediaItems[nextIndex];
 
@@ -76,38 +46,6 @@ const preloadNext = (mediaItems: LFGMedia[], index: number) => {
   preloadMedia(nextMedia);
 };
 
-const getMediaKey = (mediaItem: LFGMedia, index: number) => {
-  const id = getMediaIdentityField(mediaItem.id);
-  const animation = getMediaField(mediaItem.animation);
-  const image = getMediaField(mediaItem.image);
-
-  if (id.length > 0) {
-    return id;
-  }
-
-  if (animation.length > 0) {
-    return animation;
-  }
-
-  if (image.length > 0) {
-    return image;
-  }
-
-  return `media-${index}`;
-};
-
-const shouldShowVideo = (
-  mediaItem: LFGMedia,
-  index: number,
-  videoLoadErrors: Record<string, boolean>,
-  videoSourceIndexes: Record<string, number>
-) =>
-  getCurrentSource(
-    getVideoCandidates(mediaItem),
-    videoSourceIndexes,
-    getMediaKey(mediaItem, index)
-  ).length > 0 && videoLoadErrors[getMediaKey(mediaItem, index)] !== true;
-
 const LFGSlideshow: React.FC<{
   isOpen: boolean;
   contract: string;
@@ -115,46 +53,29 @@ const LFGSlideshow: React.FC<{
 }> = ({ isOpen, contract, setIsOpen }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
-  const [videoLoadErrors, setVideoLoadErrors] = useState<
-    Record<string, boolean>
-  >({});
-  const [imageSourceIndexes, setImageSourceIndexes] = useState<
-    Record<string, number>
-  >({});
-  const [videoSourceIndexes, setVideoSourceIndexes] = useState<
-    Record<string, number>
-  >({});
   const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const [media, setMedia] = useState<LFGMedia[]>([]);
+  const [media, setMedia] = useState<ApiNftMedia[]>([]);
 
-  const nextSlide = useCallback(() => {
+  const clearSlideTimer = useCallback(() => {
     if (slideTimer.current !== null) {
       clearTimeout(slideTimer.current);
       slideTimer.current = null;
     }
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    clearSlideTimer();
     setCurrentIndex((prevIndex) =>
       media.length > 0 ? (prevIndex + 1) % media.length : prevIndex
     );
-  }, [media.length]);
-
-  const resetSession = useCallback(() => {
-    if (slideTimer.current !== null) {
-      clearTimeout(slideTimer.current);
-      slideTimer.current = null;
-    }
-    setCurrentIndex(0);
-    setIsMuted(false);
-    setVideoLoadErrors({});
-    setImageSourceIndexes({});
-    setVideoSourceIndexes({});
-  }, []);
+  }, [clearSlideTimer, media.length]);
 
   const closeSlideshow = useCallback(() => {
-    resetSession();
+    clearSlideTimer();
     setIsOpen(false);
-  }, [resetSession, setIsOpen]);
+  }, [clearSlideTimer, setIsOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -185,7 +106,7 @@ const LFGSlideshow: React.FC<{
   useEffect(() => {
     let canceled = false;
 
-    void commonApiFetch<LFGMedia[]>({
+    void commonApiFetch<ApiNftMedia[]>({
       endpoint: `nfts/${contract}/media`,
     })
       .then((loadedMedia) => {
@@ -195,9 +116,6 @@ const LFGSlideshow: React.FC<{
 
         setMedia(loadedMedia);
         setCurrentIndex(0);
-        setVideoLoadErrors({});
-        setImageSourceIndexes({});
-        setVideoSourceIndexes({});
         const firstMedia = loadedMedia[0];
         if (firstMedia) {
           preloadMedia(firstMedia);
@@ -223,14 +141,7 @@ const LFGSlideshow: React.FC<{
 
     preloadNext(media, currentIndex);
 
-    if (
-      shouldShowVideo(
-        currentMedia,
-        currentIndex,
-        videoLoadErrors,
-        videoSourceIndexes
-      )
-    ) {
+    if (isVideo(currentMedia.animation)) {
       const videoElement = videoRef.current;
       if (videoElement !== null) {
         const handleEnded = () => {
@@ -253,19 +164,9 @@ const LFGSlideshow: React.FC<{
     }
 
     return () => {
-      if (slideTimer.current !== null) {
-        clearTimeout(slideTimer.current);
-        slideTimer.current = null;
-      }
+      clearSlideTimer();
     };
-  }, [
-    currentIndex,
-    isOpen,
-    media,
-    nextSlide,
-    videoLoadErrors,
-    videoSourceIndexes,
-  ]);
+  }, [clearSlideTimer, currentIndex, isOpen, media, nextSlide]);
 
   const currentMedia = media[currentIndex];
 
@@ -273,56 +174,8 @@ const LFGSlideshow: React.FC<{
     return <></>;
   }
 
-  const currentMediaKey = getMediaKey(currentMedia, currentIndex);
-  const showVideo = shouldShowVideo(
-    currentMedia,
-    currentIndex,
-    videoLoadErrors,
-    videoSourceIndexes
-  );
-  const videoCandidates = getVideoCandidates(currentMedia);
-  const imageCandidates = getImageCandidates(currentMedia);
-  const currentAnimation = getCurrentSource(
-    videoCandidates,
-    videoSourceIndexes,
-    currentMediaKey
-  );
-  const currentImage = getCurrentSource(
-    imageCandidates,
-    imageSourceIndexes,
-    currentMediaKey
-  );
-
-  const handleVideoUnavailable = () => {
-    const nextVideoIndex = (videoSourceIndexes[currentMediaKey] ?? 0) + 1;
-    if (nextVideoIndex < videoCandidates.length) {
-      setVideoSourceIndexes((indexes) => ({
-        ...indexes,
-        [currentMediaKey]: nextVideoIndex,
-      }));
-      return;
-    }
-
-    setVideoLoadErrors((errors) => ({
-      ...errors,
-      [currentMediaKey]: true,
-    }));
-  };
-
-  const handleImageUnavailable = () => {
-    const nextImageIndex = (imageSourceIndexes[currentMediaKey] ?? 0) + 1;
-    if (nextImageIndex < imageCandidates.length) {
-      setImageSourceIndexes((indexes) => ({
-        ...indexes,
-        [currentMediaKey]: nextImageIndex,
-      }));
-      return;
-    }
-
-    if (media.length > 1) {
-      nextSlide();
-    }
-  };
+  const currentAnimation = getMediaField(currentMedia.animation);
+  const currentImage = getMediaField(currentMedia.image);
 
   const slideshow = (
     <div className={styles["slideshowContainer"]}>
@@ -341,7 +194,7 @@ const LFGSlideshow: React.FC<{
         />
       </span>
       <div className={styles["slide"]} id={SLIDESHOW_ID}>
-        {showVideo ? (
+        {isVideo(currentAnimation) ? (
           <video
             ref={videoRef}
             autoPlay
@@ -350,15 +203,6 @@ const LFGSlideshow: React.FC<{
             muted={isMuted}
             src={currentAnimation}
             poster={currentImage.length > 0 ? currentImage : undefined}
-            onError={handleVideoUnavailable}
-            onLoadedMetadata={({ currentTarget }) => {
-              if (
-                currentTarget.videoWidth === 0 ||
-                currentTarget.videoHeight === 0
-              ) {
-                handleVideoUnavailable();
-              }
-            }}
           >
             <track
               kind="captions"
@@ -369,14 +213,8 @@ const LFGSlideshow: React.FC<{
             Your browser does not support the video tag.
           </video>
         ) : (
-          currentImage.length > 0 && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={currentImage}
-              alt={`LFG Slide ${currentIndex + 1}`}
-              onError={handleImageUnavailable}
-            />
-          )
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={currentImage} alt={`LFG Slide ${currentIndex + 1}`} />
         )}
       </div>
     </div>
