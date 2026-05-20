@@ -172,6 +172,62 @@ describe("WaveSpecs", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("opens slow mode editor in a portal outside the specs scroll container", async () => {
+    const user = userEvent.setup();
+    const { container } = renderWaveSpecs({
+      wave: makeWave({ canAdmin: true }),
+    });
+
+    const editButton = screen.getByRole("button", {
+      name: "Edit slow mode",
+    });
+    expect(editButton).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(editButton);
+
+    const editorId = editButton.getAttribute("aria-controls");
+    expect(editorId).toBeTruthy();
+    const editor = globalThis.document.getElementById(editorId as string);
+    const scrollContainer = container.firstElementChild;
+
+    expect(editButton).toHaveAttribute("aria-expanded", "true");
+    expect(editor).toBeInTheDocument();
+    expect(globalThis.document.body).toContainElement(editor);
+    expect(scrollContainer).not.toContainElement(editor);
+    expect(screen.getByLabelText("Slow mode value")).toHaveFocus();
+  });
+
+  it("closes slow mode editor on Escape", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
+
+    await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
+    expect(screen.getByLabelText("Slow mode value")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() =>
+      expect(screen.queryByLabelText("Slow mode value")).not.toBeInTheDocument()
+    );
+    expect(
+      screen.getByRole("button", { name: "Edit slow mode" })
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes slow mode editor on outside click", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
+
+    await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
+    expect(screen.getByLabelText("Slow mode value")).toBeInTheDocument();
+
+    await user.click(screen.getByText("General"));
+
+    await waitFor(() =>
+      expect(screen.queryByLabelText("Slow mode value")).not.toBeInTheDocument()
+    );
+  });
+
   it("saves slow mode as milliseconds", async () => {
     const user = userEvent.setup();
     renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });

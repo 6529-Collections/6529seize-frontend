@@ -91,7 +91,7 @@ function ActiveSlowModeChatNotice({
 
   return (
     <p
-      className="tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
+      className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
       aria-live={remainingMs > 0 ? "polite" : undefined}
     >
       {message}

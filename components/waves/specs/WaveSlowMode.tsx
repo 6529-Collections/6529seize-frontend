@@ -9,7 +9,6 @@ import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveReque
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   SLOW_MODE_MIN_MS,
-  SLOW_MODE_UNITS,
   formatSlowModeInterval,
   getSlowModeInputParts,
   getSlowModeMs,
@@ -20,20 +19,51 @@ import {
   convertWaveToUpdateWave,
 } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
-import { useContext, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import WaveSlowModeEditorForm from "./WaveSlowModeEditorForm";
 
 interface WaveSlowModeProps {
   readonly wave: ApiWave;
 }
 
-const isSlowModeUnit = (value: string): value is SlowModeUnit =>
-  SLOW_MODE_UNITS.some((unit) => unit === value);
+const VIEWPORT_PADDING_PX = 16;
+const POPOVER_GAP_PX = 8;
+const POPOVER_WIDTH_PX = 256;
+
+const shouldUseBottomSheet = () => {
+  if (typeof globalThis.matchMedia !== "function") {
+    return false;
+  }
+
+  return globalThis.matchMedia("(max-width: 767px), (pointer: coarse)").matches;
+};
+
+const isInsideElement = (
+  element: HTMLElement | null,
+  target: EventTarget | null
+) => {
+  if (!element || typeof globalThis.Node === "undefined") {
+    return false;
+  }
+
+  return target instanceof globalThis.Node && element.contains(target);
+};
 
 export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
     useContext(AuthContext);
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
+  const editorId = useId();
   const canEdit = canEditWave({ connectedProfile, activeProfileProxy, wave });
   const cooldownMs = wave.chat.slow_mode_cooldown_ms ?? null;
   const isSlowModeEnabled =
@@ -46,17 +76,136 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
   const [value, setValue] = useState(String(initialParts.value));
   const [unit, setUnit] = useState<SlowModeUnit>(initialParts.unit);
   const [mutating, setMutating] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [useBottomSheet, setUseBottomSheet] = useState(false);
+  const [popoverPosition, setPopoverPosition] = useState<{
+    readonly left: number;
+    readonly top: number;
+  } | null>(null);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useClickAway(popoverRef, () => setIsEditorOpen(false));
-  useKeyPressEvent("Escape", () => setIsEditorOpen(false));
+  const closeEditor = useCallback(() => {
+    setIsEditorOpen(false);
+  }, []);
 
-  const openEditor = () => {
+  useClickAway(editorRef, (event) => {
+    if (isInsideElement(editButtonRef.current, event.target)) {
+      return;
+    }
+    closeEditor();
+  });
+  useKeyPressEvent("Escape", closeEditor);
+
+  const openEditor = useCallback(() => {
     const nextParts = getSlowModeInputParts(cooldownMs);
     setValue(String(nextParts.value));
     setUnit(nextParts.unit);
+    setPopoverPosition(null);
     setIsEditorOpen(true);
+  }, [cooldownMs]);
+
+  const toggleEditor = () => {
+    if (isEditorOpen) {
+      closeEditor();
+      return;
+    }
+
+    openEditor();
   };
+
+  const updatePopoverPosition = useCallback(() => {
+    if (!isEditorOpen || useBottomSheet) {
+      return;
+    }
+
+    const button = editButtonRef.current;
+    const editor = editorRef.current;
+    if (!button || !editor) {
+      return;
+    }
+
+    const buttonRect = button.getBoundingClientRect();
+    const editorWidth = editor.offsetWidth || POPOVER_WIDTH_PX;
+    const editorHeight = editor.offsetHeight;
+    const viewportWidth =
+      globalThis.innerWidth ||
+      globalThis.document?.documentElement.clientWidth ||
+      POPOVER_WIDTH_PX + VIEWPORT_PADDING_PX * 2;
+    const viewportHeight =
+      globalThis.innerHeight ||
+      globalThis.document?.documentElement.clientHeight ||
+      editorHeight + VIEWPORT_PADDING_PX * 2;
+
+    const maxLeft = Math.max(
+      VIEWPORT_PADDING_PX,
+      viewportWidth - VIEWPORT_PADDING_PX - editorWidth
+    );
+    const left = Math.min(
+      Math.max(buttonRect.right - editorWidth, VIEWPORT_PADDING_PX),
+      maxLeft
+    );
+
+    const availableAbove = buttonRect.top - VIEWPORT_PADDING_PX;
+    const availableBelow =
+      viewportHeight - buttonRect.bottom - VIEWPORT_PADDING_PX;
+    const shouldOpenAbove =
+      editorHeight > 0 &&
+      availableBelow < editorHeight + POPOVER_GAP_PX &&
+      availableAbove > availableBelow;
+    const unclampedTop = shouldOpenAbove
+      ? buttonRect.top - editorHeight - POPOVER_GAP_PX
+      : buttonRect.bottom + POPOVER_GAP_PX;
+    const maxTop = Math.max(
+      VIEWPORT_PADDING_PX,
+      viewportHeight - VIEWPORT_PADDING_PX - editorHeight
+    );
+    const top = Math.min(Math.max(unclampedTop, VIEWPORT_PADDING_PX), maxTop);
+
+    setPopoverPosition({ left, top });
+  }, [isEditorOpen, useBottomSheet]);
+
+  useEffect(() => {
+    setMounted(true);
+    const updateSurfaceMode = () => {
+      setUseBottomSheet(shouldUseBottomSheet());
+    };
+
+    updateSurfaceMode();
+    globalThis.addEventListener("resize", updateSurfaceMode);
+
+    return () => {
+      globalThis.removeEventListener("resize", updateSurfaceMode);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    updatePopoverPosition();
+  }, [updatePopoverPosition]);
+
+  useEffect(() => {
+    if (!isEditorOpen || useBottomSheet) {
+      return;
+    }
+
+    globalThis.addEventListener("resize", updatePopoverPosition);
+    globalThis.addEventListener("scroll", updatePopoverPosition, true);
+
+    return () => {
+      globalThis.removeEventListener("resize", updatePopoverPosition);
+      globalThis.removeEventListener("scroll", updatePopoverPosition, true);
+    };
+  }, [isEditorOpen, updatePopoverPosition, useBottomSheet]);
+
+  useEffect(() => {
+    if (!isEditorOpen) {
+      return;
+    }
+
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, [isEditorOpen, useBottomSheet]);
 
   const updateWave = async (body: ApiUpdateWaveRequest): Promise<void> => {
     setMutating(true);
@@ -76,7 +225,7 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
         body,
       });
       onWaveCreated();
-      setIsEditorOpen(false);
+      closeEditor();
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
@@ -125,17 +274,79 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
     void updateWave(body);
   };
 
+  const editorForm = (
+    <WaveSlowModeEditorForm
+      disabled={mutating}
+      inputRef={inputRef}
+      isSlowModeEnabled={isSlowModeEnabled}
+      onCancel={closeEditor}
+      onDisable={handleDisable}
+      onSave={handleSave}
+      onUnitChange={setUnit}
+      onValueChange={setValue}
+      unit={unit}
+      value={value}
+    />
+  );
+
+  const editorSurface =
+    mounted && isEditorOpen
+      ? createPortal(
+          useBottomSheet ? (
+            <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1200] tw-flex tw-items-end tw-bg-black/60 tw-px-3 tw-pb-3 tw-pt-10">
+              <dialog
+                open
+                aria-modal="true"
+                aria-label="Edit slow mode"
+                className="tw-relative tw-m-0 tw-w-full tw-max-w-none tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit"
+              >
+                <div
+                  id={editorId}
+                  ref={editorRef}
+                  className="tw-w-full tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
+                >
+                  {editorForm}
+                </div>
+              </dialog>
+            </div>
+          ) : (
+            <div
+              className="tailwind-scope tw-fixed tw-z-[1200]"
+              style={{
+                left: popoverPosition?.left ?? 0,
+                top: popoverPosition?.top ?? 0,
+                visibility: popoverPosition ? "visible" : "hidden",
+                width: POPOVER_WIDTH_PX,
+              }}
+            >
+              <div
+                id={editorId}
+                ref={editorRef}
+                className="tw-w-64 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-3 tw-shadow-xl"
+              >
+                {editorForm}
+              </div>
+            </div>
+          ),
+          globalThis.document.body
+        )
+      : null;
+
   return (
-    <div className="tw-group tw-relative tw-flex tw-min-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
+    <div className="tw-group tw-flex tw-min-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
       <span className="tw-font-medium tw-text-iron-400">Slow mode</span>
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <span className="tw-font-medium tw-text-iron-200">{slowModeLabel}</span>
         {canEdit && (
           <button
+            ref={editButtonRef}
             type="button"
             aria-label="Edit slow mode"
+            aria-controls={editorId}
+            aria-expanded={isEditorOpen}
+            aria-haspopup="dialog"
             title="Edit slow mode"
-            onClick={openEditor}
+            onClick={toggleEditor}
             className="tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
           >
             <PencilIcon size={PencilIconSize.SMALL} />
@@ -143,76 +354,7 @@ export default function WaveSlowMode({ wave }: WaveSlowModeProps) {
         )}
       </div>
 
-      {isEditorOpen && (
-        <div
-          ref={popoverRef}
-          className="tw-absolute tw-right-0 tw-top-7 tw-z-20 tw-w-64 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-3 tw-shadow-xl"
-        >
-          <form
-            className="tw-flex tw-flex-col tw-gap-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              handleSave();
-            }}
-          >
-            <div className="tw-flex tw-gap-2">
-              <input
-                aria-label="Slow mode value"
-                className="tw-min-w-0 tw-flex-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none"
-                disabled={mutating}
-                min={1}
-                step={1}
-                type="number"
-                value={value}
-                onChange={(event) => setValue(event.target.value)}
-              />
-              <select
-                aria-label="Slow mode unit"
-                className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none"
-                disabled={mutating}
-                value={unit}
-                onChange={(event) => {
-                  if (isSlowModeUnit(event.target.value)) {
-                    setUnit(event.target.value);
-                  }
-                }}
-              >
-                {SLOW_MODE_UNITS.map((slowModeUnit) => (
-                  <option key={slowModeUnit} value={slowModeUnit}>
-                    {slowModeUnit}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="tw-flex tw-items-center tw-justify-end tw-gap-2">
-              <button
-                type="button"
-                disabled={mutating}
-                onClick={() => setIsEditorOpen(false)}
-                className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={mutating || !isSlowModeEnabled}
-                onClick={handleDisable}
-                className="tw-rounded-md tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-red tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-red desktop-hover:hover:tw-text-red"
-              >
-                Disable
-              </button>
-              <button
-                type="submit"
-                disabled={mutating}
-                className="tw-rounded-md tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600"
-              >
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {editorSurface}
     </div>
   );
 }

@@ -1844,28 +1844,33 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           <div className="tw-flex tw-w-full tw-items-end">
             <div
               ref={setActionsContainerRef}
-              className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+              className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
             >
-              <CreateDropActions
-                isStormMode={isStormModeActive}
-                isDropMode={isDropMode}
-                canAddPart={canAddPart}
-                submitting={submitting}
-                showOptions={showOptions}
-                animateOptions={
-                  !isWideContainer && hasUserToggledOptionsRef.current
-                }
-                isRequiredMetadataMissing={
-                  !!missingRequirements.metadata.length
-                }
-                isRequiredMediaMissing={!!missingRequirements.media.length}
-                handleFileChange={handleFileChange}
-                onAddMetadataClick={openMetadata}
-                breakIntoStorm={breakIntoStorm}
-                setShowOptions={handleSetShowOptions}
-                onGifDrop={onGifDrop}
-              />
-              <div className="tw-w-full tw-flex-grow">
+              <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
+                <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
+              </div>
+              <div className="tw-col-start-1 tw-row-start-2 tw-self-center">
+                <CreateDropActions
+                  isStormMode={isStormModeActive}
+                  isDropMode={isDropMode}
+                  canAddPart={canAddPart}
+                  submitting={submitting}
+                  showOptions={showOptions}
+                  animateOptions={
+                    !isWideContainer && hasUserToggledOptionsRef.current
+                  }
+                  isRequiredMetadataMissing={
+                    !!missingRequirements.metadata.length
+                  }
+                  isRequiredMediaMissing={!!missingRequirements.media.length}
+                  handleFileChange={handleFileChange}
+                  onAddMetadataClick={openMetadata}
+                  breakIntoStorm={breakIntoStorm}
+                  setShowOptions={handleSetShowOptions}
+                  onGifDrop={onGifDrop}
+                />
+              </div>
+              <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
                 <CreateDropInput
                   waveId={wave.id}
                   key={dropEditorRefreshKey}
@@ -1901,7 +1906,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                     )}
                   </div>
                 )}
-                <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
               </div>
             </div>
             <div className="tw-ml-2 lg:tw-ml-3">
