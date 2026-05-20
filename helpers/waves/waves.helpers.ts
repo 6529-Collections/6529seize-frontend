@@ -67,6 +67,7 @@ export const convertWaveToUpdateWave = (
       group_id: wave.chat.scope.group?.id ?? null,
     },
     enabled: wave.chat.enabled,
+    links_disabled: wave.chat.links_disabled === true,
     ...getSlowModeUpdate(wave.chat.slow_mode_cooldown_ms),
   },
   participation: {

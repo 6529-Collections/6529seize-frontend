@@ -18,7 +18,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { AuthContext } from "../auth/Auth";
+import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type {
@@ -112,7 +112,7 @@ export default function CreateDrop({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
 }: CreateDropProps) {
-  const { setToast, connectedProfile } = useContext(AuthContext);
+  const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();

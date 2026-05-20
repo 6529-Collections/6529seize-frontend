@@ -3,6 +3,7 @@ import {
   type SlowModeUnit,
 } from "@/helpers/waves/slow-mode.helpers";
 import type { RefObject } from "react";
+import WaveSettingEditorActions from "./WaveSettingEditorActions";
 
 interface WaveSlowModeEditorFormProps {
   readonly disabled: boolean;
@@ -44,12 +45,14 @@ export default function WaveSlowModeEditorForm({
         <input
           ref={inputRef}
           aria-label="Slow mode value"
+          autoFocus
           className="tw-min-w-0 tw-flex-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none"
           disabled={disabled}
           min={1}
           step={1}
           type="number"
           value={value}
+          onFocus={(event) => event.currentTarget.select()}
           onChange={(event) => onValueChange(event.target.value)}
         />
         <select
@@ -71,31 +74,15 @@ export default function WaveSlowModeEditorForm({
         </select>
       </div>
 
-      <div className="tw-flex tw-items-center tw-justify-end tw-gap-2">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={onCancel}
-          className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-100"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          disabled={disabled || !isSlowModeEnabled}
-          onClick={onDisable}
-          className="tw-rounded-md tw-border tw-border-solid tw-border-red/40 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-red tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-red desktop-hover:hover:tw-text-red"
-        >
-          Disable
-        </button>
-        <button
-          type="submit"
-          disabled={disabled}
-          className="tw-rounded-md tw-border tw-border-solid tw-border-primary-500 tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-text-white tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600"
-        >
-          Save
-        </button>
-      </div>
+      <WaveSettingEditorActions
+        disabled={disabled}
+        onCancel={onCancel}
+        secondaryAction={{
+          disabled: !isSlowModeEnabled,
+          label: "Disable",
+          onClick: onDisable,
+        }}
+      />
     </form>
   );
 }
