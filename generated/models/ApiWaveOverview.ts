@@ -25,6 +25,7 @@ export class ApiWaveOverview {
     'subscribers_count': number;
     'has_competition': boolean;
     'is_dm_wave': boolean;
+    'links_disabled': boolean;
     'description_drop': ApiWaveOverviewDescriptionDrop;
     'total_drops_count': number;
     'is_private': boolean;
@@ -81,6 +82,12 @@ export class ApiWaveOverview {
         {
             "name": "is_dm_wave",
             "baseName": "is_dm_wave",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "links_disabled",
+            "baseName": "links_disabled",
             "type": "boolean",
             "format": ""
         },

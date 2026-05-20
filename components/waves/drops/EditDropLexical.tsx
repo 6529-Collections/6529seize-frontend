@@ -81,6 +81,7 @@ import {
   normalizeDropMarkdown,
 } from "./normalizeDropMarkdown";
 import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
+import { containsOpenGraphPreviewLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -90,6 +91,7 @@ interface EditDropLexicalProps {
   readonly canMentionAll: boolean;
   readonly waveId: string | null;
   readonly isSaving: boolean;
+  readonly linkRestrictionMessage?: string | null | undefined;
   readonly onSave: (
     content: string,
     mentions: ApiDropMentionedUser[],
@@ -366,6 +368,7 @@ function KeyboardPlugin({
   onSave,
   onCancel,
   isSaving,
+  isSaveBlocked,
   isMobileOrApp,
   initialContent,
   initialGroupMentions,
@@ -377,6 +380,7 @@ function KeyboardPlugin({
   onSave: () => void;
   onCancel: () => void;
   isSaving: boolean;
+  isSaveBlocked: boolean;
   isMobileOrApp: boolean;
   initialContent: string;
   initialGroupMentions: ApiDropGroupMention[];
@@ -416,7 +420,7 @@ function KeyboardPlugin({
           return false;
         }
 
-        if (!isSaving) {
+        if (!isSaving && !isSaveBlocked) {
           const currentMarkdown = exportDropMarkdown(
             editor.getEditorState(),
             transformers
@@ -454,6 +458,7 @@ function KeyboardPlugin({
     onSave,
     onCancel,
     isSaving,
+    isSaveBlocked,
     isMobileOrApp,
     initialContent,
     initialGroupMentions,
@@ -475,6 +480,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
   canMentionAll,
   waveId,
   isSaving,
+  linkRestrictionMessage = null,
   onSave,
   onCancel,
 }) => {
@@ -542,6 +548,18 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     setEditorState(editorState);
   }, []);
 
+  const currentMarkdown = useMemo(() => {
+    if (!editorState) {
+      return normalizedInitialContent;
+    }
+
+    return removeBlankLinePlaceholders(
+      exportDropMarkdown(editorState, exportMarkdownTransformers)
+    );
+  }, [editorState, exportMarkdownTransformers, normalizedInitialContent]);
+  const isSaveBlockedByLinks =
+    !!linkRestrictionMessage && containsOpenGraphPreviewLink(currentMarkdown);
+
   const handleMentionSelect = useCallback(
     (user: Omit<MentionedUser, "current_handle">) => {
       const newMention: ApiDropMentionedUser = {
@@ -579,13 +597,9 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
 
   const handleSave = useCallback(() => {
     if (!editorState) return;
+    if (isSaveBlockedByLinks) return;
 
-    const markdown = exportDropMarkdown(
-      editorState,
-      exportMarkdownTransformers
-    );
-
-    const sanitizedMarkdown = removeBlankLinePlaceholders(markdown);
+    const sanitizedMarkdown = currentMarkdown;
     const sanitizedMentionedGroups = getMentionedGroupsFromEditorState(
       editorState,
       canResolveAllGroupMention
@@ -612,6 +626,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     mentionedWaves,
     canResolveAllGroupMention,
     initialGroupMentions,
+    currentMarkdown,
+    isSaveBlockedByLinks,
     onSave,
     normalizedInitialContent,
     onCancel,
@@ -669,6 +685,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             onSave={handleSave}
             onCancel={onCancel}
             isSaving={isSaving}
+            isSaveBlocked={isSaveBlockedByLinks}
             isMobileOrApp={isMobileOrApp}
             initialContent={normalizedInitialContent}
             initialGroupMentions={initialGroupMentions}
@@ -692,7 +709,13 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
           {isMobileDevice ? "• " : "• enter to "}
           <button
             onClick={handleSave}
-            className="tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-underline"
+            disabled={isSaveBlockedByLinks || isSaving}
+            title={isSaveBlockedByLinks ? linkRestrictionMessage : undefined}
+            className={`tw-rounded-md tw-border-0 tw-bg-transparent tw-px-[3px] tw-font-medium tw-text-primary-400 tw-transition focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
+              isSaveBlockedByLinks || isSaving
+                ? "tw-cursor-not-allowed tw-opacity-50"
+                : "tw-cursor-pointer desktop-hover:hover:tw-underline"
+            }`}
           >
             save
           </button>
@@ -711,7 +734,8 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
             </button>
             <button
               onClick={handleSave}
-              disabled={isSaving}
+              disabled={isSaving || isSaveBlockedByLinks}
+              title={isSaveBlockedByLinks ? linkRestrictionMessage : undefined}
               className="tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-white tw-transition-colors tw-duration-150 active:tw-bg-primary-600 disabled:tw-opacity-50"
             >
               {isSaving ? "Saving..." : "Save"}

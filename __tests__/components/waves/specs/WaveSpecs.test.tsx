@@ -27,6 +27,7 @@ const makeWave = (
     readonly slowModeCooldownMs?: number | undefined;
     readonly canAdmin?: boolean | undefined;
     readonly chatEnabled?: boolean | undefined;
+    readonly linksDisabled?: boolean | undefined;
     readonly waveType?: ApiWaveType | undefined;
   } = {}
 ): any => ({
@@ -48,6 +49,7 @@ const makeWave = (
     scope: { group: null },
     enabled: overrides.chatEnabled ?? true,
     authenticated_user_eligible: true,
+    links_disabled: overrides.linksDisabled ?? false,
     slow_mode_cooldown_ms: overrides.slowModeCooldownMs,
   },
   participation: {
@@ -115,7 +117,7 @@ describe("WaveSpecs", () => {
     renderWaveSpecs({ wave: makeWave() });
 
     expect(screen.getByText("Slow mode")).toBeInTheDocument();
-    expect(screen.getByText("Off")).toBeInTheDocument();
+    expect(screen.getAllByText("Off").length).toBeGreaterThan(0);
   });
 
   it("shows slow mode on with interval", () => {
@@ -137,6 +139,7 @@ describe("WaveSpecs", () => {
     renderWaveSpecs({ wave: makeWave({ chatEnabled: false }) });
 
     expect(screen.queryByText("Slow mode")).not.toBeInTheDocument();
+    expect(screen.queryByText("Disable links")).not.toBeInTheDocument();
   });
 
   it("shows edit icon only when user can edit wave", () => {
@@ -146,6 +149,9 @@ describe("WaveSpecs", () => {
 
     expect(
       screen.getByRole("button", { name: "Edit slow mode" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Edit disable links" })
     ).toBeInTheDocument();
 
     rerender(
@@ -169,6 +175,9 @@ describe("WaveSpecs", () => {
 
     expect(
       screen.queryByRole("button", { name: "Edit slow mode" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit disable links" })
     ).not.toBeInTheDocument();
   });
 
@@ -243,6 +252,7 @@ describe("WaveSpecs", () => {
 
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
     expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
+      links_disabled: false,
       slow_mode_cooldown_ms: 300_000,
     });
   });
@@ -260,5 +270,31 @@ describe("WaveSpecs", () => {
     expect(commonApiPostMock.mock.calls[0][0].body.chat).not.toHaveProperty(
       "slow_mode_cooldown_ms"
     );
+    expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
+      links_disabled: false,
+    });
+  });
+
+  it("shows disable links state", () => {
+    renderWaveSpecs({ wave: makeWave({ linksDisabled: true }) });
+
+    expect(screen.getByText("Disable links")).toBeInTheDocument();
+    expect(screen.getByText("On")).toBeInTheDocument();
+  });
+
+  it("saves disable links setting", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
+
+    await user.click(
+      screen.getByRole("button", { name: "Edit disable links" })
+    );
+    await user.click(screen.getByLabelText("Disable links"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
+      links_disabled: true,
+    });
   });
 });

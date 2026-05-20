@@ -7,6 +7,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
+import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
@@ -68,7 +69,9 @@ export const getOptimisticDrop = (
       submission_type: wave.participation.submission_strategy?.type ?? null,
       identity_wave: wave.identity_wave,
       voting_credit_nfts: wave.voting.credit_nfts,
-    },
+      links_disabled: wave.chat.links_disabled,
+      wave_author_handle: wave.author.handle ?? null,
+    } as ApiWaveMinWithChatLinkSettings,
     author: {
       id: connectedProfile.id,
       handle: connectedProfile.handle,
