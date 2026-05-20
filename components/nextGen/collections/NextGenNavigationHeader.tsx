@@ -7,7 +7,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "react-bootstrap";
+import { Container } from "react-bootstrap";
 
 export default function NextGenNavigationHeader(
   props: Readonly<{
@@ -81,12 +81,32 @@ export default function NextGenNavigationHeader(
         }}
       >
         <div className="d-flex align-items-center gap-3 flex-wrap">
+          <span className="d-xl-none">
+            <CollectionsDropdown
+              activePage="nextgen"
+              variant="brand"
+              triggerContent={
+                <Image
+                  unoptimized
+                  width="0"
+                  height="0"
+                  style={{
+                    width: "250px",
+                    maxWidth: "85vw",
+                    height: "auto",
+                  }}
+                  src="/nextgen-logo.png"
+                  alt="nextgen"
+                />
+              }
+            />
+          </span>
           <Image
             unoptimized
             priority
             width="0"
             height="0"
-            className="cursor-pointer"
+            className="cursor-pointer d-none d-xl-block"
             style={{
               width: "250px",
               maxWidth: "85vw",
@@ -118,14 +138,6 @@ export default function NextGenNavigationHeader(
             {printView(NextgenView.ABOUT)}
           </span>
         </div>
-      </Container>
-
-      <Container className="d-xl-none pb-3 px-5 pl-md-4 pr-md-0">
-        <Row className="justify-content-xs-start justify-content-sm-center justify-content-md-start">
-          <Col xs={12} sm="auto" className="px-0">
-            <CollectionsDropdown activePage="nextgen" />
-          </Col>
-        </Row>
       </Container>
 
       <hr className={styles["navigationHeaderHr"]} />
