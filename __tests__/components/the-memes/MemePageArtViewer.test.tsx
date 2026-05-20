@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -157,6 +159,18 @@ afterEach(() => {
 });
 
 describe("MemePageArtViewer", () => {
+  it("sizes carousel renderer wrappers without depending on Bootstrap Col", () => {
+    const styles = readFileSync(
+      join(process.cwd(), "components/the-memes/TheMemes.module.scss"),
+      "utf8"
+    );
+
+    expect(styles).toContain(".memesCarousel :global(.carousel-item > *)");
+    expect(styles).not.toContain(
+      ".memesCarousel :global(.carousel-item > .col)"
+    );
+  });
+
   it("does not render an empty balance control for signed-out viewers", () => {
     render(<MemePageArtViewer nft={baseNft as any} showBalance />);
 
@@ -233,19 +247,16 @@ describe("MemePageArtViewer", () => {
     render(<MemePageArtViewer nft={baseNft as any} />);
 
     expect(mockNFTImage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        animation: true,
-        showOriginal: undefined,
-      }),
+      expect.objectContaining({ animation: true }),
       undefined
     );
     expect(mockNFTImage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        animation: false,
-        showOriginal: undefined,
-      }),
+      expect.objectContaining({ animation: false }),
       undefined
     );
+    for (const [props] of mockNFTImage.mock.calls) {
+      expect(props).not.toHaveProperty("showOriginal");
+    }
   });
 
   it("switches toolbar open and download targets with the carousel slide", async () => {
