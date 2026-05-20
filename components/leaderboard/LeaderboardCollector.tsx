@@ -3,6 +3,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
+import Image from "next/image";
 
 export function LeaderboardCollector(
   props: Readonly<{
@@ -15,20 +16,25 @@ export function LeaderboardCollector(
 ) {
   const hasLevel = props.level !== undefined && props.level !== null;
   const link = props.handle ?? props.consolidationKey.split("-")[0];
-  let display =
+  const collectorName =
     props.handle ??
     props.consolidationDisplay ??
     formatAddress(props.consolidationKey);
+  let display = collectorName;
   if (display.length > 25) {
     display = display.substring(0, 25) + "...";
   }
 
   const pfpImg = (
     <div className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800">
+      {/* Collector profile images can come from arbitrary remote hosts. */}
       {props.pfp && (
-        <img
+        <Image
           src={getScaledImageUri(props.pfp, ImageScale.W_AUTO_H_50)}
-          alt={props.consolidationKey}
+          alt={`${collectorName} profile picture`}
+          width={40}
+          height={40}
+          unoptimized
           className="tw-h-full tw-w-full tw-bg-transparent tw-object-contain"
         />
       )}

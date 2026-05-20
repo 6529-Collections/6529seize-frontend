@@ -83,16 +83,20 @@ const originalArtBlocksFlags = {
 };
 
 jest.mock("@/hooks/isMobileScreen", () => () => false);
-jest.mock("@/contexts/EmojiContext", () => ({
-  useEmoji: () => ({
+jest.mock("@/contexts/EmojiContext", () => {
+  const emojiContext = {
     emojiMap: [],
     loading: false,
     categories: [],
     categoryIcons: {},
     findNativeEmoji: jest.fn(),
     findCustomEmoji: jest.fn(),
-  }),
-}));
+  };
+
+  return {
+    useEmoji: () => emojiContext,
+  };
+});
 
 const tweetMock = jest.fn(({ id, components, onError }: any) => {
   if (id === "1111111111") {
@@ -115,6 +119,27 @@ jest.mock("react-tweet", () => ({
 jest.mock("@/services/api/youtube", () => ({
   fetchYoutubePreview: jest.fn(),
 }));
+jest.mock(
+  "@/components/drops/view/item/content/media/DropListItemContentMediaImage",
+  () => {
+    let mountId = 0;
+
+    function MockDropListItemContentMediaImage({
+      src,
+    }: {
+      readonly src: string;
+    }) {
+      const [currentMountId] = React.useState(() => String(++mountId));
+
+      return <img alt="Drop media" src={src} data-mount-id={currentMountId} />;
+    }
+
+    return {
+      __esModule: true,
+      default: MockDropListItemContentMediaImage,
+    };
+  }
+);
 
 const mockFetchYoutubePreview = fetchYoutubePreview as jest.MockedFunction<
   typeof fetchYoutubePreview
@@ -208,6 +233,267 @@ describe("DropPartMarkdown", () => {
       "src",
       "https://media.tenor.com/test.gif"
     );
+  });
+
+  it("renders one markdown image as a standalone image", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](/one.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+    expect(
+      container.querySelector(".tw-relative.tw-mt-2.tw-w-full")
+    ).not.toBeNull();
+  });
+
+  it("preserves whitespace between a markdown image and following text", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\ncaption"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p"));
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+    expect(paragraphs).toHaveLength(1);
+    expect(paragraphs[0]?.textContent?.startsWith("\ncaption")).toBe(true);
+  });
+
+  it("does not render image-to-smart-link whitespace as a text paragraph", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\nhttps://google.com"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(screen.getAllByTestId("link-preview")).toHaveLength(1);
+    expect(
+      paragraphs.some((paragraph) => paragraph.textContent?.trim() === "")
+    ).toBe(false);
+  });
+
+  it("does not render trailing image whitespace as an empty paragraph", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\n"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const paragraphs = Array.from(container.querySelectorAll("p.word-break"));
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(1);
+    expect(
+      paragraphs.some((paragraph) => paragraph.textContent?.trim() === "")
+    ).toBe(false);
+  });
+
+  it("groups consecutive markdown images in one responsive grid", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](/one.png)![Seize](/two.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group).toHaveClass(
+      "tw-mt-2",
+      "tw-gap-2",
+      "sm:tw-grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),16rem))]"
+    );
+    expect(group?.querySelectorAll("img")).toHaveLength(2);
+    expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("keeps grouped markdown images mounted across parent rerenders", () => {
+    const content = "![Seize](/one.png)![Seize](/two.png)";
+    const mentionedUsers = [];
+    const mentionedWaves = [];
+    const referencedNfts = [];
+    const onQuoteClick = jest.fn();
+    const { rerender } = render(
+      <DropPartMarkdown
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
+        partContent={content}
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    const originalMountIds = screen
+      .getAllByRole("img", { name: "Drop media" })
+      .map((image) => image.getAttribute("data-mount-id"));
+    expect(originalMountIds).toHaveLength(2);
+
+    rerender(
+      <DropPartMarkdown
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
+        partContent={content}
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    expect(
+      screen
+        .getAllByRole("img", { name: "Drop media" })
+        .map((image) => image.getAttribute("data-mount-id"))
+    ).toEqual(originalMountIds);
+  });
+
+  it("only remounts the grouped markdown image whose URL changes", () => {
+    const mentionedUsers = [];
+    const mentionedWaves = [];
+    const referencedNfts = [];
+    const onQuoteClick = jest.fn();
+    const { rerender } = render(
+      <DropPartMarkdown
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
+        partContent="![Seize](/one.png)![Seize](/two.png)"
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    const originalMountIds = screen
+      .getAllByRole("img", { name: "Drop media" })
+      .map((image) => image.getAttribute("data-mount-id"));
+    expect(originalMountIds).toHaveLength(2);
+    const [firstOriginalMountId, secondOriginalMountId] = originalMountIds;
+    if (!firstOriginalMountId || !secondOriginalMountId) {
+      throw new Error("Expected initial markdown images to have mount IDs");
+    }
+
+    rerender(
+      <DropPartMarkdown
+        mentionedUsers={mentionedUsers}
+        mentionedWaves={mentionedWaves}
+        referencedNfts={referencedNfts}
+        partContent="![Seize](/one.png)![Seize](/three.png)"
+        onQuoteClick={onQuoteClick}
+      />
+    );
+
+    const updatedImages = screen.getAllByRole("img", { name: "Drop media" });
+    expect(updatedImages.map((image) => image.getAttribute("src"))).toEqual([
+      "/one.png",
+      "/three.png",
+    ]);
+    const [firstUpdatedImage, secondUpdatedImage] = updatedImages;
+    if (!firstUpdatedImage || !secondUpdatedImage) {
+      throw new Error("Expected updated markdown images to render");
+    }
+
+    expect(firstUpdatedImage).toHaveAttribute(
+      "data-mount-id",
+      firstOriginalMountId
+    );
+    expect(secondUpdatedImage.getAttribute("data-mount-id")).not.toBe(
+      secondOriginalMountId
+    );
+  });
+
+  it("keeps whitespace-only markdown between images in the same image group", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={"![Seize](/one.png)\n   ![Seize](/two.png)"}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group?.querySelectorAll("img")).toHaveLength(2);
+  });
+
+  it("groups consecutive bare image URLs in one responsive grid", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={
+          "https://cdn.example.com/one.jpg\nhttps://cdn.example.com/two.gif?cache=1"
+        }
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group?.querySelectorAll("img")).toHaveLength(2);
+    expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("keeps named image URL markdown links as links", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="[open image](https://cdn.example.com/one.jpg)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+    expect(screen.getByRole("link", { name: "open image" })).toHaveAttribute(
+      "href",
+      "https://cdn.example.com/one.jpg"
+    );
+  });
+
+  it("does not group markdown images when visible text is between them", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](/one.png) text ![Seize](/two.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getAllByRole("img", { name: "Drop media" })).toHaveLength(2);
+    expect(screen.getByText("text")).toBeInTheDocument();
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
   });
 
   it("handles external links", () => {
