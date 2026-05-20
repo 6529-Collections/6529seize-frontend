@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -21,6 +27,7 @@ describe("LFGSlideshow", () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     document.body.style.overflow = "";
     mockFetch.mockReset();
   });
@@ -34,6 +41,83 @@ describe("LFGSlideshow", () => {
     expect(screen.getByAltText("LFG Slide 1")).toBeInTheDocument();
     expect(container.querySelector("#lfg-slideshow")).not.toBeInTheDocument();
     expect(document.getElementById("lfg-slideshow")).toBeInTheDocument();
+  });
+
+  it("reopens on the last visible slide", async () => {
+    mockFetch.mockResolvedValue([
+      { id: "1", image: "first.png", animation: "" },
+      { id: "2", image: "second.png", animation: "" },
+    ]);
+
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+
+    jest.useFakeTimers();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "first.png"
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
+    expect(screen.getByAltText("LFG Slide 2")).toHaveAttribute(
+      "src",
+      "second.png"
+    );
+
+    fireEvent.keyDown(globalThis, { key: "Escape" });
+    expect(screen.queryByAltText("LFG Slide 2")).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(screen.getByAltText("LFG Slide 2")).toHaveAttribute(
+      "src",
+      "second.png"
+    );
+  });
+
+  it("does not advance image timers while closed", async () => {
+    mockFetch.mockResolvedValue([
+      { id: "1", image: "first.png", animation: "" },
+      { id: "2", image: "second.png", animation: "" },
+    ]);
+
+    render(<LFGButton contract="c" />);
+    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+
+    jest.useFakeTimers();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "first.png"
+    );
+
+    fireEvent.keyDown(globalThis, { key: "Escape" });
+    expect(screen.queryByAltText("LFG Slide 1")).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    );
+
+    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
+      "src",
+      "first.png"
+    );
   });
 
   it("locks body scroll only while the slideshow is open", async () => {
@@ -54,9 +138,15 @@ describe("LFGSlideshow", () => {
     });
   });
 
-  it("falls back to the image when video loading fails", async () => {
+  it("uses the original video and image fields", async () => {
     mockFetch.mockResolvedValue([
-      { id: "1", image: "fallback.png", animation: "video.mp4" },
+      {
+        id: "1",
+        image: "poster.png",
+        image_compact: "compact-poster.png",
+        animation: "video.mp4",
+        animation_compact: "compact-video.mp4",
+      },
     ]);
     render(<LFGButton contract="c" />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
@@ -66,25 +156,21 @@ describe("LFGSlideshow", () => {
 
     const video = document.querySelector("video");
     expect(video).toBeInTheDocument();
+    expect(video).toHaveAttribute("src", "video.mp4");
+    expect(video).toHaveAttribute("poster", "poster.png");
     expect(video?.querySelector("track")).toHaveAttribute(
       "src",
       expect.stringContaining("data:text/vtt")
     );
-
-    fireEvent.error(video);
-    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
-      "src",
-      "fallback.png"
-    );
   });
 
-  it("tries the full video before falling back to the image", async () => {
+  it("uses the original image field", async () => {
     mockFetch.mockResolvedValue([
       {
         id: "1",
-        image: "fallback.png",
-        animation_compact: "compact.mp4",
-        animation: "full.mp4",
+        image: "original.png",
+        image_compact: "compact.png",
+        animation: null,
       },
     ]);
     render(<LFGButton contract="c" />);
@@ -93,56 +179,10 @@ describe("LFGSlideshow", () => {
       screen.getByRole("button", { name: "LFG: Start the Show!" })
     );
 
-    const compactVideo = document.querySelector("video");
-    expect(compactVideo).toHaveAttribute("src", "compact.mp4");
-
-    fireEvent.error(compactVideo);
-
-    await waitFor(() => {
-      expect(document.querySelector("video")).toHaveAttribute(
-        "src",
-        "full.mp4"
-      );
-    });
-
-    fireEvent.error(document.querySelector("video"));
-
     expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
       "src",
-      "fallback.png"
+      "original.png"
     );
-  });
-
-  it("clears media fallback state when reopening", async () => {
-    mockFetch.mockResolvedValue([
-      {
-        id: "1",
-        image: "fallback.png",
-        animation: "video.mp4",
-      },
-    ]);
-    render(<LFGButton contract="c" />);
-    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    fireEvent.click(
-      screen.getByRole("button", { name: "LFG: Start the Show!" })
-    );
-
-    fireEvent.error(document.querySelector("video"));
-    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
-      "src",
-      "fallback.png"
-    );
-
-    fireEvent.keyDown(globalThis, { key: "Escape" });
-    await waitFor(() => {
-      expect(screen.queryByAltText("LFG Slide 1")).not.toBeInTheDocument();
-    });
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "LFG: Start the Show!" })
-    );
-
-    expect(document.querySelector("video")).toHaveAttribute("src", "video.mp4");
   });
 
   it("opens when API media omits optional fields", async () => {
@@ -158,34 +198,33 @@ describe("LFGSlideshow", () => {
     );
   });
 
-  it("tries image variants and advances when they fail", async () => {
+  it("advances when image timer completes", async () => {
     mockFetch.mockResolvedValue([
       {
         id: 1,
         image: "original.png",
-        image_compact: "compact.png",
         animation: null,
       },
       { id: 2, image: "next.png", animation: null },
     ]);
     render(<LFGButton contract="c" />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
+
+    jest.useFakeTimers();
+
     fireEvent.click(
       screen.getByRole("button", { name: "LFG: Start the Show!" })
     );
 
     expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
       "src",
-      "compact.png"
-    );
-
-    fireEvent.error(screen.getByAltText("LFG Slide 1"));
-    expect(screen.getByAltText("LFG Slide 1")).toHaveAttribute(
-      "src",
       "original.png"
     );
 
-    fireEvent.error(screen.getByAltText("LFG Slide 1"));
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
     expect(screen.getByAltText("LFG Slide 2")).toHaveAttribute(
       "src",
       "next.png"

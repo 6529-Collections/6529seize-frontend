@@ -18,6 +18,8 @@ export class ApiWaveChatConfig {
     'scope': ApiWaveScope;
     'enabled': boolean;
     'authenticated_user_eligible': boolean;
+    'next_drop_allowed'?: number;
+    'slow_mode_cooldown_ms'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -41,6 +43,18 @@ export class ApiWaveChatConfig {
             "baseName": "authenticated_user_eligible",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "next_drop_allowed",
+            "baseName": "next_drop_allowed",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "slow_mode_cooldown_ms",
+            "baseName": "slow_mode_cooldown_ms",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

@@ -228,6 +228,9 @@ const mapNotificationV2 = (
           cause: ApiNotificationCause.IdentityRep,
           additional_context: {
             amount: context.amount ?? 0,
+            ...(typeof context.rater_rating === "number"
+              ? { rater_rating: context.rater_rating }
+              : {}),
             total: context.total ?? 0,
             category: context.category ?? "",
           },
@@ -240,6 +243,9 @@ const mapNotificationV2 = (
           cause: ApiNotificationCause.IdentityNic,
           additional_context: {
             amount: context.amount ?? 0,
+            ...(typeof context.rater_rating === "number"
+              ? { rater_rating: context.rater_rating }
+              : {}),
             total: context.total ?? 0,
           },
         },
@@ -260,6 +266,12 @@ const mapNotificationV2 = (
           related_drops: relatedDrops,
           additional_context: {
             vote: context.vote ?? 0,
+            ...(typeof context.vote_change === "number"
+              ? { vote_change: context.vote_change }
+              : {}),
+            ...(typeof context.total_vote === "number"
+              ? { total_vote: context.total_vote }
+              : {}),
           },
         },
       ];
