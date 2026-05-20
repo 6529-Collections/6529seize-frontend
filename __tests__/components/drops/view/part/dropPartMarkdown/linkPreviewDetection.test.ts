@@ -5,6 +5,11 @@ describe("linkPreviewDetection", () => {
     expect(
       containsOpenGraphPreviewLink("[article](https://example.com/post)")
     ).toBe(true);
+    expect(
+      containsOpenGraphPreviewLink(
+        "[wiki](https://en.wikipedia.org/wiki/Function_(mathematics))"
+      )
+    ).toBe(true);
     expect(containsOpenGraphPreviewLink("read https://example.com/post")).toBe(
       true
     );
@@ -20,6 +25,9 @@ describe("linkPreviewDetection", () => {
     expect(containsOpenGraphPreviewLink("https://example.com/image.png")).toBe(
       false
     );
+    expect(
+      containsOpenGraphPreviewLink("![preview](https://example.com/post)")
+    ).toBe(false);
   });
 
   it("ignores urls handled by non-OpenGraph cards", () => {

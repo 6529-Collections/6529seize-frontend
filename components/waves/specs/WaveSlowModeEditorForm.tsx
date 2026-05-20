@@ -44,12 +44,14 @@ export default function WaveSlowModeEditorForm({
         <input
           ref={inputRef}
           aria-label="Slow mode value"
+          autoFocus
           className="tw-min-w-0 tw-flex-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none"
           disabled={disabled}
           min={1}
           step={1}
           type="number"
           value={value}
+          onFocus={(event) => event.currentTarget.select()}
           onChange={(event) => onValueChange(event.target.value)}
         />
         <select
