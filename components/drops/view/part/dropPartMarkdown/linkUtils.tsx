@@ -39,6 +39,14 @@ const isSafeDataImageUrl = (href: string): boolean => {
   return SAFE_DATA_IMAGE_REGEX.test(href.trim());
 };
 
+const isSafeRelativeImagePath = (href: string): boolean => {
+  return (
+    (href.startsWith("/") && !href.startsWith("//")) ||
+    href.startsWith("./") ||
+    href.startsWith("../")
+  );
+};
+
 const isSafeMarkdownImageSrc = (href: string): boolean => {
   const trimmedHref = href.trim();
 
@@ -52,7 +60,7 @@ const isSafeMarkdownImageSrc = (href: string): boolean => {
 
   const parsedUrl = parseUrl(trimmedHref);
   if (!parsedUrl) {
-    return true;
+    return isSafeRelativeImagePath(trimmedHref);
   }
 
   const protocol = parsedUrl.protocol.toLowerCase();

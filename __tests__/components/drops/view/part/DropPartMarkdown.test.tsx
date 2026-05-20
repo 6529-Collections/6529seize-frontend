@@ -287,6 +287,20 @@ describe("DropPartMarkdown", () => {
     expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
   });
 
+  it("does not render markdown images with unsafe invalid sources", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="![Seize](javascript:alert(1)) ![Seize](//example.com/image.png)"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
   it("preserves whitespace between a markdown image and following text", () => {
     const { container } = render(
       <DropPartMarkdown
