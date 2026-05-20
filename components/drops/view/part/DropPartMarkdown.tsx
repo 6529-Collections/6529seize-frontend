@@ -11,7 +11,11 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
-import Markdown, { type Components, type ExtraProps } from "react-markdown";
+import Markdown, {
+  defaultUrlTransform,
+  type Components,
+  type ExtraProps,
+} from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
@@ -41,6 +45,7 @@ import {
   createLinkRenderer,
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
+import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
 
 const BreakComponent = () => <br />;
 
@@ -417,6 +422,12 @@ function DropPartMarkdown({
             code: ["className"],
             pre: ["className"],
           },
+          protocols: {
+            cite: ["http", "https"],
+            href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
+            longDesc: ["http", "https"],
+            src: ["http", "https", "data"],
+          },
         },
       ],
     ],
@@ -447,6 +458,17 @@ function DropPartMarkdown({
         remarkPlugins={remarkPlugins}
         className="tw-w-full"
         components={markdownComponents}
+        urlTransform={(url, key, node) => {
+          if (
+            key === "src" &&
+            node.tagName === "img" &&
+            isSafeMarkdownImageSrc(url)
+          ) {
+            return url;
+          }
+
+          return defaultUrlTransform(url);
+        }}
       >
         {processedContent}
       </Markdown>

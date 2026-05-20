@@ -159,7 +159,10 @@ export default function MemeLabPageComponent({
       const resolvedRouterFocus = Object.values(MEME_FOCUS).find(
         (sd) => sd === routerFocus
       );
-      if (resolvedRouterFocus && isMemeLabFocus(resolvedRouterFocus)) {
+      if (
+        resolvedRouterFocus !== undefined &&
+        isMemeLabFocus(resolvedRouterFocus)
+      ) {
         initialFocus = resolvedRouterFocus;
       }
     }

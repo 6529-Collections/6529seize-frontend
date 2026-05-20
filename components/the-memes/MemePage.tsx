@@ -21,9 +21,7 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
-import {
-  MemePageCollectorsSubMenu,
-} from "./MemePageCollectors";
+import { MemePageCollectorsSubMenu } from "./MemePageCollectors";
 import { MemePageArtViewer } from "./MemePageArtViewer";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";

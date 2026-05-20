@@ -2,8 +2,10 @@ import type {
   AnchorHTMLAttributes,
   ClassAttributes,
   ImgHTMLAttributes,
+  ReactNode,
   ReactElement,
 } from "react";
+import { Children } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { ExtraProps } from "react-markdown";
 
@@ -12,12 +14,16 @@ import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 
 import LinkPreviewCard from "@/components/waves/LinkPreviewCard";
 import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPreviewContext";
-import DropPartMarkdownImage from "../DropPartMarkdownImage";
+import DropPartMarkdownImage, {
+  type DropPartMarkdownImageLayout,
+} from "../DropPartMarkdownImage";
 import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
 import {
+  isDirectImageUrl,
+  isSafeMarkdownImageSrc,
   isValidLink,
   parseUrl,
   renderExternalOrInternalLink,
@@ -71,6 +77,39 @@ const findMatch = (
   return null;
 };
 
+const getTextFromChildren = (children: ReactNode): string | null => {
+  const childNodes = Children.toArray(children);
+
+  if (childNodes.length === 0) {
+    return "";
+  }
+
+  return childNodes.reduce<string | null>((text, child) => {
+    if (text === null) {
+      return null;
+    }
+
+    if (typeof child === "string" || typeof child === "number") {
+      return `${text}${child}`;
+    }
+
+    return null;
+  }, "");
+};
+
+const isBareHrefLabel = (children: ReactNode, href: string): boolean =>
+  getTextFromChildren(children)?.trim() === href.trim();
+
+const getImageLayout = (
+  props: unknown
+): DropPartMarkdownImageLayout | undefined => {
+  if (typeof props !== "object" || props === null || !("layout" in props)) {
+    return undefined;
+  }
+
+  return props.layout === "grouped" ? "grouped" : undefined;
+};
+
 export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
@@ -100,12 +139,16 @@ export const createLinkRenderer = ({
   });
   let inlineShowControlRendered = false;
 
-  const renderImage: LinkRenderer["renderImage"] = ({ src }) => {
+  const renderImage: LinkRenderer["renderImage"] = ({ src, ...props }) => {
     if (typeof src !== "string") {
       return null;
     }
 
-    return <DropPartMarkdownImage src={src} />;
+    if (!isSafeMarkdownImageSrc(src)) {
+      return null;
+    }
+
+    return <DropPartMarkdownImage src={src} layout={getImageLayout(props)} />;
   };
 
   const renderAnchor: LinkRenderer["renderAnchor"] = (props) => {
@@ -121,6 +164,19 @@ export const createLinkRenderer = ({
     }
 
     const parsedUrl = parseUrl(stableHref);
+    if (
+      isDirectImageUrl(stableHref, parsedUrl) &&
+      (isBareHrefLabel(props.children, rawHref) ||
+        isBareHrefLabel(props.children, stableHref))
+    ) {
+      return (
+        <DropPartMarkdownImage
+          src={stableHref}
+          layout={getImageLayout(props)}
+        />
+      );
+    }
+
     const anchorProps = { ...props, href: stableHref };
     const renderFallbackAnchor = () =>
       renderExternalOrInternalLink(stableHref, anchorProps);

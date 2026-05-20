@@ -2,6 +2,7 @@ import {
   addProtocol,
   areEqualURLS,
   classNames,
+  enterArtFullScreen,
   formatAddress,
   formatNumberWithCommasOrDash,
   getDateFilters,
@@ -14,6 +15,31 @@ import {
   printMintDate,
 } from "@/helpers/Helpers";
 import { DateIntervalsSelection } from "@/types/enums";
+
+type FullscreenRequestKey =
+  | "requestFullscreen"
+  | "mozRequestFullScreen"
+  | "webkitRequestFullscreen"
+  | "msRequestFullscreen";
+
+function appendFullscreenTarget(id: string) {
+  const element = document.createElement("div");
+  element.id = id;
+  document.body.appendChild(element);
+
+  return element;
+}
+
+function setFullscreenRequest(
+  element: HTMLElement,
+  key: FullscreenRequestKey,
+  request: jest.Mock | undefined
+) {
+  Object.defineProperty(element, key, {
+    configurable: true,
+    value: request,
+  });
+}
 
 describe("Helpers utility functions", () => {
   test("addProtocol adds https scheme when missing", () => {
@@ -60,6 +86,95 @@ describe("Helpers utility functions", () => {
 
   test("classNames joins truthy strings", () => {
     expect(classNames("a", "", "b", undefined as any, "c")).toBe("a b c");
+  });
+});
+
+describe("enterArtFullScreen", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+  let consoleWarnSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    document.body.replaceChildren();
+    consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    consoleWarnSpy = jest
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    document.body.replaceChildren();
+    consoleErrorSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+  });
+
+  test("returns false when the element is missing", async () => {
+    await expect(enterArtFullScreen("missing-art")).resolves.toBe(false);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Element with ID 'missing-art' not found."
+    );
+  });
+
+  test("returns false when no fullscreen request method exists", async () => {
+    const element = appendFullscreenTarget("no-fullscreen-api");
+    setFullscreenRequest(element, "requestFullscreen", undefined);
+    setFullscreenRequest(element, "mozRequestFullScreen", undefined);
+    setFullscreenRequest(element, "webkitRequestFullscreen", undefined);
+    setFullscreenRequest(element, "msRequestFullscreen", undefined);
+
+    await expect(enterArtFullScreen("no-fullscreen-api")).resolves.toBe(false);
+
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "Fullscreen API is not supported by this browser."
+    );
+  });
+
+  test("returns false when the fullscreen request rejects", async () => {
+    const element = appendFullscreenTarget("rejected-fullscreen");
+    const requestFullscreen = jest
+      .fn()
+      .mockRejectedValue(new Error("Request blocked"));
+    setFullscreenRequest(element, "requestFullscreen", requestFullscreen);
+
+    await expect(enterArtFullScreen("rejected-fullscreen")).resolves.toBe(
+      false
+    );
+
+    expect(requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error attempting to enable fullscreen mode: Error: Request blocked"
+    );
+  });
+
+  test("returns true when the fullscreen request succeeds", async () => {
+    const element = appendFullscreenTarget("successful-fullscreen");
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    setFullscreenRequest(element, "requestFullscreen", requestFullscreen);
+
+    await expect(enterArtFullScreen("successful-fullscreen")).resolves.toBe(
+      true
+    );
+
+    expect(requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(requestFullscreen.mock.contexts[0]).toBe(element);
+  });
+
+  test("keeps prefixed fullscreen request support", async () => {
+    const element = appendFullscreenTarget("prefixed-fullscreen");
+    const webkitRequestFullscreen = jest.fn().mockResolvedValue(undefined);
+    setFullscreenRequest(element, "requestFullscreen", undefined);
+    setFullscreenRequest(
+      element,
+      "webkitRequestFullscreen",
+      webkitRequestFullscreen
+    );
+
+    await expect(enterArtFullScreen("prefixed-fullscreen")).resolves.toBe(true);
+
+    expect(webkitRequestFullscreen).toHaveBeenCalledTimes(1);
+    expect(webkitRequestFullscreen.mock.contexts[0]).toBe(element);
   });
 });
 
