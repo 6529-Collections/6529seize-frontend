@@ -44,6 +44,7 @@ interface CreateDropFullMobileProps {
   readonly type: CreateDropType;
   readonly loading: boolean;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly drop: CreateDropConfig | null;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
@@ -81,6 +82,7 @@ const CreateDropFullMobile = forwardRef<
       type,
       loading,
       showSubmit,
+      submitOnEnter = true,
       drop,
       missingMedia,
       missingMetadata,
@@ -200,6 +202,7 @@ const CreateDropFullMobile = forwardRef<
               waveId={waveId}
               drop={drop}
               loading={loading}
+              submitOnEnter={submitOnEnter}
               canAddPart={canAddPart}
               canSubmit={canSubmit}
               missingMedia={missingMedia}

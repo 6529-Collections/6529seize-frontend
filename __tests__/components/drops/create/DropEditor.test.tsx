@@ -23,7 +23,11 @@ jest.mock("@/components/drops/create/utils/CreateDropWrapper", () => {
   });
 });
 
-function setup(refreshKey = 0, loading = false) {
+function setup(
+  refreshKey = 0,
+  loading = false,
+  props: Partial<React.ComponentProps<typeof DropEditor>> = {}
+) {
   const ref = createRef<any>();
   const profile = { handle: "user" } as any;
   render(
@@ -37,6 +41,7 @@ function setup(refreshKey = 0, loading = false) {
       wave={null}
       waveId={null}
       onSubmitDrop={jest.fn()}
+      {...props}
     />
   );
   return ref;
@@ -55,6 +60,16 @@ test("exposes getDropSnapshot via ref", () => {
 test("passes loading lock to create drop wrapper", () => {
   setup(0, true);
   expect(mockWrapperProps.loading).toBe(true);
+});
+
+test("defaults submitOnEnter to true", () => {
+  setup();
+  expect(mockWrapperProps.submitOnEnter).toBe(true);
+});
+
+test("passes explicit submitOnEnter override to create drop wrapper", () => {
+  setup(0, false, { submitOnEnter: false });
+  expect(mockWrapperProps.submitOnEnter).toBe(false);
 });
 
 test("resets state when refresh key changes", () => {

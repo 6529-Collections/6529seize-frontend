@@ -33,6 +33,7 @@ interface CreateDropCompactProps {
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
@@ -65,6 +66,7 @@ const CreateDropCompact = forwardRef<
       canAddPart,
       loading,
       showSubmit,
+      submitOnEnter = true,
       type,
       drop,
       showDropError = false,
@@ -130,6 +132,7 @@ const CreateDropCompact = forwardRef<
                 waveId={waveId}
                 drop={drop}
                 loading={loading}
+                submitOnEnter={submitOnEnter}
                 canAddPart={canAddPart}
                 canSubmit={canSubmit}
                 missingMedia={missingMedia}

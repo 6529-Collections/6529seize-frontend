@@ -44,6 +44,7 @@ interface DropEditorProps {
   readonly loading: boolean;
   readonly dropEditorRefreshKey: number;
   readonly showSubmit?: boolean | undefined;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly wave: DropEditorWaveProps | null;
   readonly waveId: string | null;
@@ -64,6 +65,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       loading,
       dropEditorRefreshKey,
       showSubmit = true,
+      submitOnEnter = true,
       showDropError = false,
       wave,
       waveId,
@@ -159,6 +161,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           drop={drop}
           viewType={viewType}
           showSubmit={showSubmit}
+          submitOnEnter={submitOnEnter}
           showDropError={showDropError}
           wave={wave}
           setIsStormMode={setIsStormMode}

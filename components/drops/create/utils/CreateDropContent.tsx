@@ -86,6 +86,7 @@ const CreateDropContent = forwardRef<
     readonly type: CreateDropType;
     readonly drop: CreateDropConfig | null;
     readonly loading: boolean;
+    readonly submitOnEnter?: boolean | undefined;
     readonly canAddPart: boolean;
     readonly canSubmit: boolean;
     readonly missingMedia: ApiWaveParticipationRequirement[];
@@ -111,6 +112,7 @@ const CreateDropContent = forwardRef<
       type,
       drop,
       loading,
+      submitOnEnter = true,
       canAddPart,
       canSubmit,
       waveId,
@@ -257,7 +259,10 @@ const CreateDropContent = forwardRef<
       !!waveMentionsPluginRef.current?.isWaveMentionsOpen();
 
     const canSubmitWithEnter = () =>
-      !isMentionsOpen() && !isHashtagsOpen() && !isWaveMentionsOpen();
+      submitOnEnter &&
+      !isMentionsOpen() &&
+      !isHashtagsOpen() &&
+      !isWaveMentionsOpen();
 
     const canSubmitRef = useRef(canSubmit);
     const onDropRef = useRef(onDrop);

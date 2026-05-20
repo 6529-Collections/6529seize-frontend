@@ -32,6 +32,7 @@ interface CreateDropFullProps {
   readonly canAddPart: boolean;
   readonly loading: boolean;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
   readonly showDropError?: boolean | undefined;
@@ -68,6 +69,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       canAddPart,
       loading,
       showSubmit,
+      submitOnEnter = true,
       type,
       drop,
       showDropError = false,
@@ -116,6 +118,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           files={files}
           loading={loading}
           showSubmit={showSubmit}
+          submitOnEnter={submitOnEnter}
           drop={drop}
           showDropError={showDropError}
           missingMedia={missingMedia}
@@ -151,6 +154,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           loading={loading}
           drop={drop}
           showSubmit={showSubmit}
+          submitOnEnter={submitOnEnter}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
           onEditorState={onEditorState}

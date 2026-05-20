@@ -43,6 +43,7 @@ interface CreateDropFullDesktopProps {
   readonly loading: boolean;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
@@ -81,6 +82,7 @@ const CreateDropFullDesktop = forwardRef<
       loading,
       drop,
       showSubmit,
+      submitOnEnter = true,
       showDropError = false,
       missingMedia,
       missingMetadata,
@@ -215,6 +217,7 @@ const CreateDropFullDesktop = forwardRef<
                 waveId={waveId}
                 drop={drop}
                 loading={loading}
+                submitOnEnter={submitOnEnter}
                 canAddPart={canAddPart}
                 missingMedia={missingMedia}
                 missingMetadata={missingMetadata}

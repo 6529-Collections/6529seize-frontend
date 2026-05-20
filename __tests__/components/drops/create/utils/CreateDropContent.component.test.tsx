@@ -310,4 +310,16 @@ describe("CreateDropContent basic", () => {
     expect(mockAutoFocusMounts).toBe(1);
     expect(mockAutoFocusUnmounts).toBe(0);
   });
+
+  it("allows Enter submit by default when suggestion menus are closed", () => {
+    render(renderCreateDropContent());
+
+    expect(mockEnterKeyProps.canSubmitWithEnter()).toBe(true);
+  });
+
+  it("lets the editor handle Enter when submitOnEnter is false", () => {
+    render(renderCreateDropContent({ submitOnEnter: false }));
+
+    expect(mockEnterKeyProps.canSubmitWithEnter()).toBe(false);
+  });
 });

@@ -74,6 +74,7 @@ interface CreateDropWrapperProps {
   readonly drop: CreateDropConfig | null;
   readonly viewType: CreateDropViewType;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly wave: CreateDropWrapperWaveProps | null;
   readonly waveId: string | null;
@@ -114,6 +115,7 @@ const CreateDropWrapper = forwardRef<
       drop,
       viewType,
       showSubmit,
+      submitOnEnter = true,
       showDropError = false,
       wave: waveProps,
       waveId,
@@ -589,6 +591,7 @@ const CreateDropWrapper = forwardRef<
           loading={loading}
           type={type}
           showSubmit={showSubmit}
+          submitOnEnter={submitOnEnter}
           showDropError={showDropError}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}
@@ -621,6 +624,7 @@ const CreateDropWrapper = forwardRef<
           type={type}
           drop={drop}
           showSubmit={showSubmit}
+          submitOnEnter={submitOnEnter}
           showDropError={showDropError}
           missingMedia={missingMedia}
           missingMetadata={missingMetadata}

@@ -76,6 +76,7 @@ const CreateWaveDescription = forwardRef<
               type={CreateDropType.DROP}
               loading={submitting}
               showSubmit={false}
+              submitOnEnter={false}
               dropEditorRefreshKey={1}
               showDropError={showDropError}
               wave={wave}

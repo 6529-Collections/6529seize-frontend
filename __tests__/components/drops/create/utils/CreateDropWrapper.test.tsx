@@ -63,6 +63,7 @@ jest.mock("@/components/drops/create/compact/CreateDropCompact", () => {
       <div
         data-can-add-part={props.canAddPart}
         data-can-submit={props.canSubmit}
+        data-submit-on-enter={props.submitOnEnter}
         data-testid="create-drop-compact"
       >
         Compact View
@@ -102,6 +103,7 @@ jest.mock("@/components/drops/create/full/CreateDropFull", () => {
       <div
         data-can-add-part={props.canAddPart}
         data-can-submit={props.canSubmit}
+        data-submit-on-enter={props.submitOnEnter}
         data-testid="create-drop-full"
       >
         Full View
@@ -323,6 +325,48 @@ describe("CreateDropWrapper Authentication Validation", () => {
       const { getByTestId } = renderComponent();
 
       expect(getByTestId("create-drop-compact")).toBeInTheDocument();
+    });
+
+    it("passes submitOnEnter true by default", () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const { getByTestId } = renderComponent();
+
+      expect(getByTestId("create-drop-compact")).toHaveAttribute(
+        "data-submit-on-enter",
+        "true"
+      );
+    });
+
+    it("passes explicit submitOnEnter false to compact and full views", () => {
+      mockUseSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        address: "0x1234567890123456789012345678901234567890",
+        isSafeWallet: false,
+      });
+
+      const compact = renderComponent({ submitOnEnter: false });
+
+      expect(compact.getByTestId("create-drop-compact")).toHaveAttribute(
+        "data-submit-on-enter",
+        "false"
+      );
+
+      compact.unmount();
+
+      const full = renderComponent({
+        submitOnEnter: false,
+        viewType: CreateDropViewType.FULL,
+      });
+
+      expect(full.getByTestId("create-drop-full")).toHaveAttribute(
+        "data-submit-on-enter",
+        "false"
+      );
     });
   });
 

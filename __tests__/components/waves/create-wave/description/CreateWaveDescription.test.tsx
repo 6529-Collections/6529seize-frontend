@@ -36,6 +36,9 @@ jest.mock("@/components/drops/create/DropEditor", () =>
         <div data-testid="show-submit">
           {props.showSubmit ? "true" : "false"}
         </div>
+        <div data-testid="submit-on-enter">
+          {props.submitOnEnter ? "true" : "false"}
+        </div>
         <div data-testid="show-drop-error">
           {props.showDropError ? "true" : "false"}
         </div>
@@ -123,6 +126,7 @@ describe("CreateWaveDescription", () => {
     expect(screen.getByTestId("type")).toHaveTextContent("DROP");
     expect(screen.getByTestId("loading")).toHaveTextContent("false");
     expect(screen.getByTestId("show-submit")).toHaveTextContent("false");
+    expect(screen.getByTestId("submit-on-enter")).toHaveTextContent("false");
     expect(screen.getByTestId("show-drop-error")).toHaveTextContent("false");
     expect(screen.getByTestId("wave-name")).toHaveTextContent("Test Wave");
     expect(screen.getByTestId("wave-image")).toHaveTextContent(
