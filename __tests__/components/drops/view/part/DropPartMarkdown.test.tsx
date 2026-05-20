@@ -254,8 +254,7 @@ describe("DropPartMarkdown", () => {
   });
 
   it("renders a markdown image with a safe base64 data URI", () => {
-    const dataUri =
-      "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2w==";
+    const dataUri = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2w==";
 
     render(
       <DropPartMarkdown
