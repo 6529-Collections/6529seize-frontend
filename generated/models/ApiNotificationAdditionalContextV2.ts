@@ -19,9 +19,12 @@ import { HttpFile } from '../http/http';
 */
 export class ApiNotificationAdditionalContextV2 {
     'amount'?: number;
+    'rater_rating'?: number;
     'total'?: number;
     'category'?: string;
     'vote'?: number;
+    'vote_change'?: number;
+    'total_vote'?: number;
     'reaction'?: string;
     'reactors'?: Array<ApiNotificationDropReactedReactor>;
     'quote_drop_id'?: string;
@@ -45,6 +48,12 @@ export class ApiNotificationAdditionalContextV2 {
             "format": "double"
         },
         {
+            "name": "rater_rating",
+            "baseName": "rater_rating",
+            "type": "number",
+            "format": "double"
+        },
+        {
             "name": "total",
             "baseName": "total",
             "type": "number",
@@ -59,6 +68,18 @@ export class ApiNotificationAdditionalContextV2 {
         {
             "name": "vote",
             "baseName": "vote",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "vote_change",
+            "baseName": "vote_change",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "total_vote",
+            "baseName": "total_vote",
             "type": "number",
             "format": "double"
         },
