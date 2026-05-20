@@ -809,6 +809,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
+  const shouldRefocusAfterChatSubmitRef = useRef(false);
   const isInitialMountRef = useRef(true);
 
   const identityValidationMessage = useMemo(() => {
@@ -1082,6 +1083,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    if (!shouldRefocusAfterChatSubmitRef.current || submitting) {
+      return;
+    }
+
+    shouldRefocusAfterChatSubmitRef.current = false;
+    const frameId = requestAnimationFrame(() => {
+      createDropInputRef.current?.focus();
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [dropEditorRefreshKey, submitting]);
+
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
   ): Promise<ApiCreateDropRequest | null> => {
@@ -1219,6 +1233,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         return;
       }
 
+      const shouldKeepChatFocused =
+        updatedDropRequest.drop_type === ApiDropType.Chat;
+
       if (optimisticDrop) {
         const optimisticDropWithAttachments = {
           ...optimisticDrop,
@@ -1238,12 +1255,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         );
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
-      (document.activeElement as HTMLElement).blur();
-      if (isApp) {
-        import("@capacitor/core").then(({ Capacitor }) => {
+      if (shouldKeepChatFocused) {
+        shouldRefocusAfterChatSubmitRef.current = true;
+      } else if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      if (isApp && !shouldKeepChatFocused) {
+        void import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
-            import("@capacitor/keyboard").then(({ Keyboard }) => {
-              Keyboard.hide().catch(() => {});
+            void import("@capacitor/keyboard").then(({ Keyboard }) => {
+              void Keyboard.hide().catch(() => {});
             });
           }
         });
