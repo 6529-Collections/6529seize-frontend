@@ -133,6 +133,27 @@ describe("waves.helpers", () => {
       });
     });
 
+    it("preserves existing slow mode cooldown", () => {
+      const wave = makeWave();
+      wave.chat.slow_mode_cooldown_ms = 30_000;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat).toEqual({
+        scope: { group_id: "chat" },
+        enabled: true,
+        slow_mode_cooldown_ms: 30_000,
+      });
+    });
+
+    it("omits slow mode when wave has no slow mode", () => {
+      const wave = makeWave();
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat).not.toHaveProperty("slow_mode_cooldown_ms");
+    });
+
     it.each([
       ["voting", null],
       ["voting", undefined],
