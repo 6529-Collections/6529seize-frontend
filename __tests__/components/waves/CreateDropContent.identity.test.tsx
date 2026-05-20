@@ -23,6 +23,7 @@ const mockOtherSelection = {
   profileId: "other-id",
 };
 const mockSetToast = jest.fn();
+const mockRequestAuth = jest.fn(async () => ({ success: true }));
 const mockUploadFile = new File(["upload"], "duplicate.pdf", {
   type: "application/pdf",
 });
@@ -98,6 +99,14 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     >
       add upload file
     </button>
+    <button
+      type="button"
+      onClick={() => {
+        void props.onGifDrop("https://example.com/test.gif");
+      }}
+    >
+      select gif
+    </button>
   </div>
 ));
 jest.mock("@/components/waves/CreateDropInput", () => () => (
@@ -112,6 +121,9 @@ jest.mock("@/components/waves/CreateDropMetadata", () => () => (
 jest.mock("@/components/waves/CreateDropContentFiles", () => ({
   CreateDropContentFiles: () => <div data-testid="files" />,
 }));
+jest.mock("@/components/waves/SlowModeChatNotice", () => () => (
+  <div data-testid="slow-mode-notice" />
+));
 jest.mock("@/components/waves/CreateDropSubmit", () => ({
   CreateDropSubmit: (props: any) => (
     <button type="button" onClick={() => void props.onDrop()}>
@@ -187,7 +199,7 @@ jest.mock("@/components/waves/hooks/useDropMetadata", () => ({
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(() => ({
-    requestAuth: jest.fn(async () => ({ success: true })),
+    requestAuth: mockRequestAuth,
     setToast: mockSetToast,
     connectedProfile: {
       id: mockViewerSelection.profileId,
@@ -228,6 +240,7 @@ describe("CreateDropContent identity picker flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSetToast.mockClear();
+    mockRequestAuth.mockClear();
     (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
       observe: jest.fn(),
       unobserve: jest.fn(),
@@ -306,13 +319,15 @@ describe("CreateDropContent identity picker flow", () => {
     isDropMode = true,
     wave = createWave(),
     drop = null,
-    submitDrop = jest.fn(),
+    submitDrop = jest.fn(() => true),
+    isChatBlockedBySlowMode = false,
     identityPickerPlacement = "modal",
   }: {
     readonly isDropMode?: boolean;
     readonly wave?: any;
     readonly drop?: any;
     readonly submitDrop?: jest.Mock;
+    readonly isChatBlockedBySlowMode?: boolean;
     readonly identityPickerPlacement?: "modal" | "inline";
   } = {}) => {
     const onDropModeChange = jest.fn();
@@ -335,6 +350,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={submitDrop}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={isChatBlockedBySlowMode}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
           identityPickerPlacement={identityPickerPlacement}
         />
@@ -347,6 +363,18 @@ describe("CreateDropContent identity picker flow", () => {
       submitDrop,
     };
   };
+
+  it("does not submit a GIF chat drop while slow mode is active", async () => {
+    const { submitDrop } = renderSubject({
+      isDropMode: false,
+      isChatBlockedBySlowMode: true,
+    });
+
+    await userEvent.click(screen.getByText("select gif"));
+
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(submitDrop).not.toHaveBeenCalled();
+  });
 
   it("auto-opens the picker and exits Drop mode when closed without a selection", async () => {
     const { onDropModeChange } = renderSubject();
@@ -442,6 +470,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -581,6 +610,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -605,6 +635,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -644,6 +675,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -670,6 +702,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -706,6 +739,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -742,6 +776,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -770,6 +805,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -811,6 +847,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -850,6 +887,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
@@ -890,6 +928,7 @@ describe("CreateDropContent identity picker flow", () => {
           submitDrop={jest.fn()}
           dropModeToggleExitLabel={null}
           canExitDropMode={true}
+          isChatBlockedBySlowMode={false}
           submissionExperience={WaveSubmissionExperience.IDENTITY}
         />
       </ReactQueryWrapperContext.Provider>
