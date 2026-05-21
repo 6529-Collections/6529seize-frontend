@@ -2,7 +2,8 @@
 
 ## Overview
 
-Use `Voting` in `Rank` wave creation to define how votes are counted.
+Use `Voting` in `Rank` and `Approve` wave creation to define how votes are
+counted.
 Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 
 ## Location in the Site
@@ -14,12 +15,12 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
   - `/messages`
   - `/messages?wave={waveId}`
 - Step label: `Voting`
-- User-reachable only in `Rank` creation (`Approve` is shown in `Overview` but
-  disabled)
+- User-reachable in `Rank` and `Approve` creation
 
 ## Step Path
 
 - `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+- `Approve`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
 
 ## Navigation Behavior
 
@@ -39,7 +40,7 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 2. If `Rep` is selected, set at least one scope field:
    - `Rep Category`, or
    - `Profile` (identity search)
-3. Review `Allow Negative Votes` (shown but disabled).
+3. Set `Allow Negative Votes`.
 4. Optional: enable `Time-Weighted Voting`.
 5. If enabled, set `Averaging Interval` in `Minutes` or `Hours`.
 6. Click `Next` to continue to `Outcomes`.
@@ -56,8 +57,10 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
   selected-unit minimum (`5` minutes or `1` hour).
 - If interval is above maximum, it is capped (`1440` minutes or `24` hours).
 - Switching between `Minutes` and `Hours` converts and clamps the interval.
-- Wave create payload always sends `forbid_negative_votes: false` (negative
-  votes allowed).
+- `Allow Negative Votes` defaults on, so existing behavior still allows
+  negative votes.
+- Wave create payload sends the inverse backend flag:
+  `forbid_negative_votes: false` when allowed, and `true` when blocked.
 
 ## Failure and Recovery
 
@@ -70,10 +73,9 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 
 - Creator-facing voting options are only `TDH + XTDH`, `TDH`, `Rep`, and
   `Memes TDH`.
-- `Allow Negative Votes` is currently non-interactive in create-wave.
-- Time-weighted voting is available only for `Rank` waves.
-- `Approve` paths exist in code, but users cannot reach them from the current
-  type picker.
+- `Allow Negative Votes` is interactive for `Rank` and `Approve` waves.
+- Time-weighted voting is available for `Rank` and `Approve` waves.
+- `Approve` is available in the create-wave type picker.
 
 ## Related Pages
 

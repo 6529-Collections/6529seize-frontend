@@ -413,7 +413,7 @@ export const getCreateNewWaveBody = ({
         min: config.dates.votingStartDate,
         max: endDate,
       },
-      forbid_negative_votes: false,
+      forbid_negative_votes: config.voting.allowNegativeVotes === false,
       ...(config.voting.type === ApiWaveCreditType.CardSetTdh
         ? {
             credit_nfts: config.voting.creditNfts.map((nft) => ({

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
@@ -48,6 +47,7 @@ export default function CreateWaveVoting({
   memeCount,
   isMemeCountLoading,
   isMemeCountError,
+  allowNegativeVotes,
   maxVotesPerIdentityPerDrop,
   approvalThreshold,
   errors,
@@ -55,6 +55,7 @@ export default function CreateWaveVoting({
   setCategory,
   setProfileId,
   setCreditNfts,
+  onAllowNegativeVotesChange,
   setMaxVotesPerIdentityPerDrop,
   setApprovalThreshold,
   timeWeighted,
@@ -68,6 +69,7 @@ export default function CreateWaveVoting({
   readonly memeCount: number | null;
   readonly isMemeCountLoading: boolean;
   readonly isMemeCountError: boolean;
+  readonly allowNegativeVotes: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly approvalThreshold: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
@@ -75,14 +77,12 @@ export default function CreateWaveVoting({
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
   readonly setCreditNfts: (creditNfts: ApiWaveCreditNft[]) => void;
+  readonly onAllowNegativeVotesChange: (allowNegativeVotes: boolean) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
   readonly setApprovalThreshold: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
-  // Still using local state for negative voting toggle for now
-  const [allowNegativeVotes, setAllowNegativeVotes] = useState(true);
-
   const TITLES: Record<ApiWaveType, string> = {
     [ApiWaveType.Chat]: "How Drops are Rated",
     [ApiWaveType.Rank]: "How Drops are Voted",
@@ -179,7 +179,8 @@ export default function CreateWaveVoting({
       {waveType !== ApiWaveType.Chat && (
         <NegativeVotingToggle
           allowNegativeVotes={allowNegativeVotes}
-          onChange={setAllowNegativeVotes}
+          onChange={onAllowNegativeVotesChange}
+          isDisabled={false}
         />
       )}
 

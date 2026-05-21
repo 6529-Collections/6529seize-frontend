@@ -8,6 +8,22 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.valida
 const mockTimeWeightedVoting = jest.fn((props: { errorMessage?: string }) => (
   <div data-testid="time-weighted">{props.errorMessage}</div>
 ));
+const mockNegativeVotingToggle = jest.fn(
+  (props: {
+    allowNegativeVotes: boolean;
+    onChange: (allowNegativeVotes: boolean) => void;
+    isDisabled?: boolean;
+  }) => (
+    <button
+      type="button"
+      data-testid="negative"
+      data-disabled={props.isDisabled}
+      onClick={() => props.onChange(!props.allowNegativeVotes)}
+    >
+      {String(props.allowNegativeVotes)}
+    </button>
+  )
+);
 
 jest.mock(
   "@/components/utils/radio/CommonBorderedRadioButton",
@@ -46,7 +62,13 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/create-wave/voting/NegativeVotingToggle",
-  () => () => <div data-testid="negative" />
+  () =>
+    (props: {
+      allowNegativeVotes: boolean;
+      onChange: (allowNegativeVotes: boolean) => void;
+      isDisabled?: boolean;
+    }) =>
+      mockNegativeVotingToggle(props)
 );
 jest.mock(
   "@/components/waves/create-wave/voting/TimeWeightedVoting",
@@ -63,6 +85,7 @@ describe("CreateWaveVoting", () => {
     memeCount: null,
     isMemeCountLoading: false,
     isMemeCountError: false,
+    allowNegativeVotes: true,
     maxVotesPerIdentityPerDrop: null,
     approvalThreshold: null,
     errors: [],
@@ -70,6 +93,7 @@ describe("CreateWaveVoting", () => {
     setCategory: jest.fn(),
     setProfileId: jest.fn(),
     setCreditNfts: jest.fn(),
+    onAllowNegativeVotesChange: jest.fn(),
     setMaxVotesPerIdentityPerDrop: jest.fn(),
     setApprovalThreshold: jest.fn(),
     timeWeighted: {
@@ -79,6 +103,10 @@ describe("CreateWaveVoting", () => {
     } as any,
     onTimeWeightedChange: jest.fn(),
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it("returns null when no selected type", () => {
     const { container } = render(
@@ -102,6 +130,31 @@ describe("CreateWaveVoting", () => {
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
     ).toHaveClass("tw-rounded-xl", "tw-border-white/5", "tw-bg-iron-900");
     expect(screen.queryByTestId("approval-threshold-setting")).toBeNull();
+  });
+
+  it("passes enabled negative voting props from config", async () => {
+    const user = userEvent.setup();
+    const onAllowNegativeVotesChange = jest.fn();
+
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        allowNegativeVotes={false}
+        onAllowNegativeVotesChange={onAllowNegativeVotesChange}
+      />
+    );
+
+    const negativeVotingProps = mockNegativeVotingToggle.mock.calls[0]?.[0];
+
+    expect(negativeVotingProps).toMatchObject({
+      allowNegativeVotes: false,
+      isDisabled: false,
+    });
+    expect(negativeVotingProps?.onChange).toBe(onAllowNegativeVotesChange);
+
+    await user.click(screen.getByTestId("negative"));
+
+    expect(onAllowNegativeVotesChange).toHaveBeenCalledWith(true);
   });
 
   it("invokes onTypeChange when radio clicked", async () => {

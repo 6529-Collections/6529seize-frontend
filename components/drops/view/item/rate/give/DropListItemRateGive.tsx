@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import DropListItemRateGiveChangeButton from "./DropListItemRateGiveChangeButton";
 import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -12,6 +12,11 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 export enum RateChangeType {
   INCREASE = "INCREASE",
   DECREASE = "DECREASE",
+}
+
+interface ProgressRateState {
+  readonly dropId: string;
+  readonly rate: number;
 }
 
 export default function DropListItemRateGive({
@@ -28,21 +33,34 @@ export default function DropListItemRateGive({
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
   const { canVote } = useDropInteractionRules(drop);
-  const [onProgressRate, setOnProgressRate] = useState<number>(1);
+  const [progressRateState, setProgressRateState] = useState<ProgressRateState>(
+    { dropId: drop.id, rate: 1 }
+  );
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
-  const minRating = drop.context_profile_context?.min_rating ?? 0;
+  const currentRating = drop.context_profile_context?.rating ?? 0;
+  const rawMinRating = drop.context_profile_context?.min_rating ?? 0;
+  const minRating = drop.wave.forbid_negative_votes
+    ? Math.max(0, rawMinRating) - currentRating
+    : rawMinRating;
+  const rawProgressRate =
+    progressRateState.dropId === drop.id ? progressRateState.rate : 1;
 
-  useEffect(() => {
-    if (!canVote) {
-      setOnProgressRate(0);
-      return;
+  const getCorrectedNewRate = (newValue: number) => {
+    if (newValue > maxRating) {
+      return maxRating;
     }
-    if (Math.abs(onProgressRate) > maxRating) {
-      setOnProgressRate(onProgressRate > 0 ? maxRating : minRating);
-      return;
+    if (newValue < minRating) {
+      return minRating;
     }
-    setOnProgressRate(1);
-  }, [canVote, drop]);
+    return newValue;
+  };
+
+  const onProgressRate = canVote ? getCorrectedNewRate(rawProgressRate) : 0;
+  const canDecrease = onProgressRate > minRating;
+
+  const setOnProgressRate = (rate: number) => {
+    setProgressRateState({ dropId: drop.id, rate });
+  };
 
   const onSuccessfulRateChange = () => {
     setOnProgressRate(1);
@@ -50,6 +68,13 @@ export default function DropListItemRateGive({
   };
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearHoldTimer = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
   const getIncreaseAmount = (startTime: number) => {
     const elapsedSeconds = (Time.now().toMillis() - startTime) / 1000;
@@ -64,16 +89,6 @@ export default function DropListItemRateGive({
       return 100;
     }
     return 1000;
-  };
-
-  const getCorrectedNewRate = (newValue: number) => {
-    if (newValue > maxRating) {
-      return maxRating;
-    }
-    if (newValue < minRating) {
-      return minRating;
-    }
-    return newValue;
   };
 
   const getMemeticNewRate = ({
@@ -154,6 +169,14 @@ export default function DropListItemRateGive({
     });
     setOnProgressRate(memeticRate);
 
+    if (
+      (changeType === RateChangeType.DECREASE && memeticRate <= minRating) ||
+      (changeType === RateChangeType.INCREASE && memeticRate >= maxRating)
+    ) {
+      clearHoldTimer();
+      return;
+    }
+
     // Decrease interval time by 50%
     const newIntervalTime = Math.max(10, intervalTime * 0.9); // Minimum interval time is 10ms
     const waitForMemetic = isMemetic ? memeticWaitTime : newIntervalTime;
@@ -182,10 +205,7 @@ export default function DropListItemRateGive({
   };
 
   const handleMouseUp = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    clearHoldTimer();
   };
 
   const getRateText = () =>
@@ -210,16 +230,16 @@ export default function DropListItemRateGive({
   return (
     <>
       <div
-        className="tw-relative tw-gap-y-1 tw-flex tw-flex-col tw-items-center"
+        className="tw-relative tw-flex tw-flex-col tw-items-center tw-gap-y-1"
         {...(getShowRate() ? { "data-tooltip-id": tooltipId } : {})}
       >
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
-          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}
+          } tw-inline-flex tw-w-full tw-items-center tw-gap-x-1`}
         >
           <DropListItemRateGiveChangeButton
-            canVote={canVote}
+            canVote={canVote && canDecrease}
             type={RateChangeType.DECREASE}
             handleMouseDown={handleMouseDown}
             handleMouseUp={handleMouseUp}
@@ -253,7 +273,7 @@ export default function DropListItemRateGive({
         >
           <div className="tw-text-center">
             <span
-              className={`${getRateClasses()} tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out`}
+              className={`${getRateClasses()} tw-w-full tw-text-center tw-text-xs tw-font-normal tw-transition tw-duration-300 tw-ease-out`}
             >
               {getRateText()}
             </span>

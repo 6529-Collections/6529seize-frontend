@@ -67,6 +67,7 @@ export interface CreateWaveVotingConfig {
   readonly profileId: string | null;
   readonly creditNfts: ApiWaveCreditNft[];
   readonly creditNftMemeCount: number | null;
+  readonly allowNegativeVotes: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly winningThreshold: number | null;
   readonly timeWeighted: TimeWeightedVotingSettings;

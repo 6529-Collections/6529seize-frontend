@@ -52,6 +52,7 @@ const createBaseConfig = (waveType: ApiWaveType) =>
       type: null,
       category: null,
       profileId: null,
+      allowNegativeVotes: true,
       timeWeighted: {
         enabled: false,
         averagingInterval: 5,
@@ -191,8 +192,48 @@ describe("create-wave.helpers", () => {
         { name: "m", type: ApiWaveMetadataType.String },
       ]);
       expect(res.voting.period.max).toBe(2 + 3 + 5);
+      expect(res.voting.forbid_negative_votes).toBe(false);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
       expect(res.wave.max_votes_per_identity_to_drop).toBeNull();
+    });
+
+    it("maps allowed negative votes to the inverse backend flag", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.allowNegativeVotes = true;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.forbid_negative_votes).toBe(false);
+    });
+
+    it("maps blocked negative votes to the inverse backend flag", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.allowNegativeVotes = false;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.forbid_negative_votes).toBe(true);
+    });
+
+    it("defaults omitted negative vote config to allowed", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      delete config.voting.allowNegativeVotes;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.forbid_negative_votes).toBe(false);
     });
 
     it("includes identity submission strategy when configured", () => {

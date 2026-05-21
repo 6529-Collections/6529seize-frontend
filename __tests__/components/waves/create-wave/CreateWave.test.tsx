@@ -208,6 +208,7 @@ describe("CreateWave", () => {
         profileId: null,
         creditNfts: [],
         creditNftMemeCount: null,
+        allowNegativeVotes: true,
         maxVotesPerIdentityPerDrop: null,
         winningThreshold: null,
         timeWeighted: {
@@ -243,6 +244,7 @@ describe("CreateWave", () => {
     onProfileIdChange: jest.fn(),
     onCreditNftsChange: jest.fn(),
     onMaxVotesPerIdentityPerDropChange: jest.fn(),
+    onAllowNegativeVotesChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),
     onWinningThresholdChange: jest.fn(),
     onThresholdChange: jest.fn(),

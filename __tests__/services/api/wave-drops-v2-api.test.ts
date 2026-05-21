@@ -221,6 +221,24 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(result.drops[0]?.metadata).toEqual(priorityMetadata);
   });
 
+  it("preserves no-negative vote waves on feed and drop results", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave: {
+        ...wave,
+        forbid_negative_votes: true,
+      },
+      drops: [createDrop(1)],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.wave.forbid_negative_votes).toBe(true);
+    expect(result.drops[0]?.wave.forbid_negative_votes).toBe(true);
+  });
+
   it("does not fetch full metadata or top raters for list drops", async () => {
     commonApiFetchMock.mockResolvedValueOnce({
       wave,

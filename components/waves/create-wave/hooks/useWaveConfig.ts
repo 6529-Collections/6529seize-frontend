@@ -73,6 +73,7 @@ export function useWaveConfig() {
         profileId: null,
         creditNfts: [],
         creditNftMemeCount: null,
+        allowNegativeVotes: true,
         maxVotesPerIdentityPerDrop: null,
         winningThreshold: null,
         timeWeighted: {
@@ -291,6 +292,7 @@ export function useWaveConfig() {
         creditNfts:
           type === ApiWaveCreditType.CardSetTdh ? prev.voting.creditNfts : [],
         creditNftMemeCount: null,
+        allowNegativeVotes: prev.voting.allowNegativeVotes,
         maxVotesPerIdentityPerDrop: prev.voting.maxVotesPerIdentityPerDrop,
         winningThreshold: prev.voting.winningThreshold,
         timeWeighted: prev.voting.timeWeighted,
@@ -357,6 +359,16 @@ export function useWaveConfig() {
       voting: {
         ...prev.voting,
         maxVotesPerIdentityPerDrop,
+      },
+    }));
+  };
+
+  const onAllowNegativeVotesChange = (allowNegativeVotes: boolean) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        allowNegativeVotes,
       },
     }));
   };
@@ -430,6 +442,7 @@ export function useWaveConfig() {
     onProfileIdChange,
     onCreditNftsChange,
     onMaxVotesPerIdentityPerDropChange,
+    onAllowNegativeVotesChange,
     onTimeWeightedVotingChange,
     onWinningThresholdChange,
     onThresholdChange,
