@@ -334,9 +334,7 @@ const getAuthorHeader = ({
 
   if (identityMode === "default") {
     return (
-      <div
-        className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2"
-      >
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2">
         <WaveDropAuthorPfp drop={drop} />
         <div className="tw-min-w-0 tw-flex-1">
           <WaveDropHeader
@@ -355,9 +353,7 @@ const getAuthorHeader = ({
   }
 
   return (
-    <div
-      className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2"
-    >
+    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2">
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-min-w-0 tw-flex-1">
         <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
