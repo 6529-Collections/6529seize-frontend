@@ -14,6 +14,7 @@ export default function CommonDropdownItemsWrapper({
   buttonRef,
   dynamicPosition = true,
   horizontalAlign = "auto",
+  minWidth,
   portalClassName,
   setOpen,
   onIsMobile,
@@ -24,6 +25,7 @@ export default function CommonDropdownItemsWrapper({
   readonly buttonRef: RefObject<HTMLButtonElement | HTMLDivElement | null>;
   readonly dynamicPosition?: boolean | undefined;
   readonly horizontalAlign?: DropdownHorizontalAlign | undefined;
+  readonly minWidth?: number | undefined;
   readonly portalClassName?: string | undefined;
   readonly setOpen: (isOpen: boolean) => void;
   readonly onIsMobile: (isMobile: boolean) => void;
@@ -53,6 +55,7 @@ export default function CommonDropdownItemsWrapper({
           setOpen={setOpen}
           dynamicPosition={dynamicPosition}
           horizontalAlign={horizontalAlign}
+          minWidth={minWidth}
           portalClassName={portalClassName}
           buttonRef={buttonRef}
         >

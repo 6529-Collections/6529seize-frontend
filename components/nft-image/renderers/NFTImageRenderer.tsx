@@ -45,7 +45,6 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <NFTMediaContainer
       textCenter
-      forceIronBackground={props.bgStyle === ""}
       className={`${imageWrapperClassName} ${props.heightStyle} ${props.bgStyle}`}
     >
       <Image

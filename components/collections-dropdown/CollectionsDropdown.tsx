@@ -24,7 +24,7 @@ const DEFAULT_COLLECTION: CollectionItem = {
 
 const COLLECTIONS: CollectionItem[] = [
   DEFAULT_COLLECTION,
-  { id: "gradient", name: "Gradient", path: "/6529-gradient" },
+  { id: "gradient", name: "6529 Gradient", path: "/6529-gradient" },
   { id: "nextgen", name: "NextGen", path: "/nextgen" },
   { id: "memelab", name: "Meme Lab", path: "/meme-lab" },
   { id: "rememes", name: "ReMemes", path: "/rememes" },
@@ -147,7 +147,11 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
         onIsMobile={setIsMobile}
       >
         {COLLECTIONS.map((collection) => (
-          <li key={`collection-${collection.id}`} className="tw-h-full" role="none">
+          <li
+            key={`collection-${collection.id}`}
+            className="tw-h-full"
+            role="none"
+          >
             <button
               type="button"
               role="menuitem"

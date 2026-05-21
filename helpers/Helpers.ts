@@ -381,14 +381,11 @@ export function printMintDate(date?: Date) {
     return "-";
   }
   const mintDate = new Date(date);
-  return `
-      ${mintDate.toLocaleString("default", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })}
-      (${getDateDisplay(mintDate)})
-    `;
+  return mintDate.toLocaleString("default", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export function getRandomColor() {

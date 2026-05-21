@@ -14,6 +14,11 @@ type MockNFTImageProps = {
 const mockNFTImage = jest.fn(({ animation, id }: MockNFTImageProps) => (
   <div data-testid={animation ? "animation-art" : "image-art"} id={id} />
 ));
+const mockNFTImageBalance = jest.fn(
+  ({ variant }: { readonly variant?: string | undefined }) => (
+    <div data-testid="nft-balance" data-variant={variant} />
+  )
+);
 
 jest.mock("react-bootstrap", () => {
   const Carousel = ({
@@ -61,7 +66,7 @@ jest.mock("@/components/nft-image/NFTImage", () => ({
 
 jest.mock("@/components/nft-image/NFTImageBalance", () => ({
   __esModule: true,
-  default: () => <div data-testid="nft-balance" />,
+  default: (...args: unknown[]) => mockNFTImageBalance(...(args as [any])),
 }));
 
 jest.mock("@/helpers/Helpers", () => ({
@@ -209,6 +214,10 @@ describe("MemePageArtViewer", () => {
     );
 
     expect(screen.getByTestId("nft-balance")).toBeInTheDocument();
+    expect(mockNFTImageBalance).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: "compact" }),
+      undefined
+    );
     expect(screen.getByText("MP4").parentElement).toHaveClass(
       "artControlsCenterWithBalance"
     );

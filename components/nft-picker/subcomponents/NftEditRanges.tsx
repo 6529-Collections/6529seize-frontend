@@ -37,6 +37,7 @@ interface NftEditRangesProps {
   readonly isEditing: boolean;
   readonly textValue: string;
   readonly parseErrors: ParseError[];
+  readonly allowAll?: boolean | undefined;
   readonly onToggle: () => void;
   readonly onTextChange: (value: string) => void;
   readonly onApply: () => void;
@@ -49,6 +50,7 @@ export function NftEditRanges({
   isEditing,
   textValue,
   parseErrors,
+  allowAll = true,
   onToggle,
   onTextChange,
   onApply,
@@ -70,9 +72,10 @@ export function NftEditRanges({
   const selectionLabel = hasTokens
     ? `${countLabel} ${tokenLabel} selected`
     : "No tokens selected";
-  const summaryText = hasTokens
-    ? canonical
-    : "Add tokens using the input above or choose Select All to include every token.";
+  const emptySummaryText = allowAll
+    ? "Add tokens using the input above or choose Select All to include every token."
+    : "Add tokens using the input above.";
+  const summaryText = hasTokens ? canonical : emptySummaryText;
   const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
 
   useEffect(() => {

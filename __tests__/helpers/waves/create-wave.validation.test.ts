@@ -6,6 +6,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CreateWaveStep } from "@/types/waves.types";
 import { Time } from "@/helpers/time";
+import { MEMES_CONTRACT } from "@/constants/constants";
 
 describe("create-wave.validation", () => {
   const HOUR_IN_MS = 60 * 60 * 1000;
@@ -842,6 +843,100 @@ describe("create-wave.validation", () => {
     );
     expect(errors).not.toContain(
       CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_CANNOT_BE_EMPTY
+    );
+  });
+
+  it("card set TDH requires at least one Meme card and loaded Meme count", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [],
+        creditNftMemeCount: null,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_REQUIRED
+    );
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_MEME_COUNT_UNAVAILABLE
+    );
+  });
+
+  it("card set TDH rejects non-Meme contracts", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [{ contract: "0xnotmemes", token_id: 1 }],
+        creditNftMemeCount: 100,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_NFTS_CONTRACT_INVALID
+    );
+  });
+
+  it("card set TDH rejects full Meme set selection", () => {
+    const config = {
+      ...baseConfig,
+      voting: {
+        type: ApiWaveCreditType.CardSetTdh,
+        category: null,
+        profileId: null,
+        creditNfts: [
+          { contract: MEMES_CONTRACT, token_id: 1 },
+          { contract: MEMES_CONTRACT, token_id: 2 },
+          { contract: MEMES_CONTRACT, token_id: 3 },
+        ],
+        creditNftMemeCount: 3,
+        maxVotesPerIdentityPerDrop: null,
+        winningThreshold: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 5,
+          averagingIntervalUnit: "minutes",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED
     );
   });
 

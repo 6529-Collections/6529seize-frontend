@@ -4,10 +4,8 @@
 
 Use this area to create:
 
-- new waves (`Chat` and `Rank`)
+- new waves (`Chat`, `Rank`, and `Approve`)
 - new direct messages
-
-`Approve` appears in the wave-type selector but is disabled.
 
 ## Features
 
@@ -38,15 +36,19 @@ Use this area to create:
 - Step pages:
   1. [Wave Creation Overview Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
-  3. [Wave Creation Dates and Timeline](feature-dates-step.md) (`Rank` only)
-  4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` only)
-  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank`
-     only)
-  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` only)
+  3. [Wave Creation Dates and Timeline](feature-dates-step.md) (`Rank` and
+     `Approve`)
+  4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
+     `Approve`)
+  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
+     `Approve`)
+  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
+     `Approve`)
   7. [Wave Creation Description Step](feature-description-step.md)
 - Step path by wave type:
   - `Chat`: `Overview -> Groups -> Description`
   - `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+  - `Approve`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
 
 ### Direct-Message Journey
 

@@ -3,7 +3,7 @@
 ## Overview
 
 Use `Groups` to set who can view, drop, vote, chat, and administer a wave.
-This step is user-reachable for `Chat` and `Rank`.
+This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 ## Location in the Site
 
@@ -11,12 +11,13 @@ This step is user-reachable for `Chat` and `Rank`.
 - Desktop modal create route mode: `?create=wave` on `/waves`,
   `/waves/{waveId}`, `/messages`, and `/messages?wave={waveId}`
 - Step label: `Groups`
-- `Approve` is shown in `Overview` but disabled
 
 ## Step Paths
 
 - `Chat`: `Overview` -> `Groups` -> `Description`
 - `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
+  `Outcomes` -> `Description`
+- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
   `Outcomes` -> `Description`
 
 ## Entry Points
@@ -28,11 +29,11 @@ This step is user-reachable for `Chat` and `Rank`.
 ## What You Configure
 
 - `Chat` rows: `Who can view`, `Who can chat`, `Admin`
-- `Rank` rows: `Who can view`, `Who can drop`, `Who can vote`, `Who can chat`,
-  `Admin`
-- `Rank` only:
+- `Rank` and `Approve` rows: `Who can view`, `Who can drop`, `Who can vote`,
+  `Who can chat`, `Admin`
+- `Rank` and `Approve` only:
   - `Enable chat` toggle controls whether `Who can chat` is editable
-- `Chat` and `Rank`:
+- All wave types:
   - `Allow admins to delete posts` toggle sets admin delete permission
 - Defaults:
   - `Anyone` for view/drop/vote/chat
@@ -60,7 +61,8 @@ This step is user-reachable for `Chat` and `Rank`.
 
 - If both `Who can view` and `Admin` are set to explicit groups, `Warning:
   Limited Access` appears.
-- On `Rank`, turning `Enable chat` off disables editing for `Who can chat`.
+- On `Rank` and `Approve`, turning `Enable chat` off disables editing for
+  `Who can chat`.
 - `Allow admins to delete posts` does not show extra helper text when enabled.
 
 ## Failure and Recovery
@@ -75,8 +77,7 @@ This step is user-reachable for `Chat` and `Rank`.
 ## Limitations / Notes
 
 - `Groups` only selects existing groups; it does not create or edit groups.
-- `Approve` is disabled in the type picker, so approve-specific group settings
-  are not user-selectable in normal UI flow.
+- `Approve` uses the same group rows as `Rank`.
 
 ## Related Pages
 

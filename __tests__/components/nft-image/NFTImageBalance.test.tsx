@@ -115,6 +115,28 @@ describe("NFTImageBalance", () => {
         expect(screen.getByText("SEIZED x5")).toBeInTheDocument();
       });
 
+      it("renders the shared compact meme-view badge when balance is positive", () => {
+        mockUseNftBalance.mockReturnValue({
+          balance: 5,
+          isLoading: false,
+          error: null,
+        });
+
+        renderWithProviders(
+          <NFTImageBalance {...defaultProps} variant="compact" />
+        );
+
+        const balance = screen.getByLabelText("SEIZED x5");
+        expect(balance).toHaveClass(
+          "tw-border-primary-400/25",
+          "tw-bg-primary-400/[0.035]",
+          "tw-text-primary-300/90",
+          "tw-uppercase"
+        );
+        expect(screen.getByText("x5")).toHaveClass("tw-text-primary-300/90");
+        expect(balance).not.toHaveClass("balance");
+      });
+
       it("renders with correct CSS classes for different heights", () => {
         mockUseNftBalance.mockReturnValue({
           balance: 1,
@@ -187,6 +209,26 @@ describe("NFTImageBalance", () => {
         expect(unseizedElement).toHaveClass("balance");
         expect(unseizedElement).not.toHaveClass("balanceBigger");
         expect(screen.getByText("UNSEIZED")).toBeInTheDocument();
+      });
+
+      it("renders a quiet gray compact badge when balance is zero", () => {
+        mockUseNftBalance.mockReturnValue({
+          balance: 0,
+          isLoading: false,
+          error: null,
+        });
+
+        renderWithProviders(
+          <NFTImageBalance {...defaultProps} variant="compact" />
+        );
+
+        const balance = screen.getByText("UNSEIZED");
+        expect(balance).toHaveClass(
+          "tw-border-iron-800",
+          "tw-bg-white/[0.025]",
+          "tw-text-iron-400"
+        );
+        expect(balance).not.toHaveClass("balance");
       });
     });
 

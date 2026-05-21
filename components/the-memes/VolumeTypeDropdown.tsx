@@ -7,6 +7,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState } from "react";
 
 const VOLUME_TYPES = Object.values(VolumeType);
+const VOLUME_TRIGGER_LABEL_CLASS =
+  "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
+const VOLUME_TRIGGER_VALUE_CLASS =
+  "tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 group-hover:tw-text-white";
 
 export default function VolumeTypeDropdown({
   isVolumeSort,
@@ -43,16 +47,25 @@ export default function VolumeTypeDropdown({
         aria-expanded={isOpen}
         aria-label={`Volume: ${selectedVolumeSort}`}
         onClick={() => setIsOpen(!isOpen)}
-        className={`tw-relative tw-m-0 tw-inline-flex tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1 tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-sm tw-font-medium tw-leading-5 tw-no-underline tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-shrink ${
+        className={`tw-group tw-relative tw-m-0 tw-inline-flex tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-left tw-no-underline tw-shadow-none tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus:tw-outline-none focus-visible:tw-text-iron-100 focus-visible:tw-outline-none sm:tw-shrink ${
           isVolumeSort
             ? "tw-text-white after:tw-scale-x-100 after:tw-bg-primary-400"
             : "tw-text-iron-500 after:tw-scale-x-0 after:tw-bg-iron-700 hover:tw-text-iron-200 hover:after:tw-scale-x-100"
         }`}
       >
-        <span>Volume{isVolumeSort ? ` (${selectedVolumeSort})` : ""}</span>
+        <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
+          <span className={VOLUME_TRIGGER_LABEL_CLASS}>
+            Volume{isVolumeSort ? ":" : ""}
+          </span>
+          {isVolumeSort && (
+            <span className={VOLUME_TRIGGER_VALUE_CLASS}>
+              {selectedVolumeSort}
+            </span>
+          )}
+        </span>
         <FontAwesomeIcon
           icon={faChevronDown}
-          className={`tw-h-3 tw-w-3 tw-transition-transform tw-duration-200 ${
+          className={`tw-h-3 tw-w-3 tw-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 group-hover:tw-text-iron-300 ${
             isOpen ? "tw-rotate-180" : ""
           }`}
           aria-hidden="true"

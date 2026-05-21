@@ -5,6 +5,7 @@ import type { ApiWaveParticipationSubmissionStrategy } from "@/generated/models/
 import type { ApiWaveOutcomeDistributionItem } from "@/generated/models/ApiWaveOutcomeDistributionItem";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
@@ -64,6 +65,8 @@ export interface CreateWaveVotingConfig {
   readonly type: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly creditNfts: ApiWaveCreditNft[];
+  readonly creditNftMemeCount: number | null;
   readonly allowNegativeVotes: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly winningThreshold: number | null;

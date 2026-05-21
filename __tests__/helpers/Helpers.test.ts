@@ -220,16 +220,11 @@ jest.mock("@/helpers/Helpers", () => ({
       return "-";
     }
     const mintDate = new Date(date);
-    return `
-      ${mintDate.toLocaleString("en-US", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })}
-      (${Math.floor(
-        (Date.now() - mintDate.getTime()) / (1000 * 60 * 60 * 24)
-      )} days ago)
-    `;
+    return mintDate.toLocaleString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
   }),
 }));
 

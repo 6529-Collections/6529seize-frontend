@@ -11,7 +11,9 @@ import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generat
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import { MEMES_CONTRACT } from "@/constants/constants";
 import {
   CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
@@ -361,6 +363,41 @@ describe("create-wave.helpers", () => {
       expect(res.participation.period.max).toBeNull();
       expect(res.voting.period.max).toBeNull();
       expect(res.wave.max_winners).toBeNull();
+    });
+
+    it("includes credit_nfts only for Card Set TDH voting", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.type = ApiWaveCreditType.CardSetTdh;
+      config.voting.creditNfts = [
+        { contract: MEMES_CONTRACT, token_id: 1 },
+        { contract: "0xnotmemes", token_id: 2 },
+      ];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.credit_type).toBe(ApiWaveCreditType.CardSetTdh);
+      expect(res.voting.credit_nfts).toEqual([
+        { contract: MEMES_CONTRACT, token_id: 1 },
+        { contract: MEMES_CONTRACT, token_id: 2 },
+      ]);
+    });
+
+    it("omits credit_nfts for non-card voting", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.type = ApiWaveCreditType.Tdh;
+      config.voting.creditNfts = [{ contract: MEMES_CONTRACT, token_id: 1 }];
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect("credit_nfts" in res.voting).toBe(false);
     });
 
     it("does not send fractional approve max winners", () => {

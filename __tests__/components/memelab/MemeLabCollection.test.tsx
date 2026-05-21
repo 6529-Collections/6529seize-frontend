@@ -61,6 +61,8 @@ describe("MemeLabCollection", () => {
     await waitFor(() => expect(fetchAllPages).toHaveBeenCalledTimes(2));
     expect(screen.getByText(collectionName)).toBeInTheDocument();
     expect(screen.getByTestId("nft-1")).toHaveTextContent("NFT");
+    expect(screen.getByText("#1")).toBeInTheDocument();
+    expect(screen.queryByText("#1 - NFT")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "example.com" })).toHaveAttribute(
       "href",
       "https://example.com"
