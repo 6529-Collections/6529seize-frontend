@@ -21,8 +21,9 @@ const CIDV1_PATTERN = /^b[a-z2-7]{52,}$/;
 
 const ARWEAVE_TX_ID_PATTERN = /^[a-zA-Z0-9_-]{43,87}$/;
 
-const IPFS_PATH_PATTERN = /^\/ipfs\/([^/]+)$/;
+const IPFS_PATH_PATTERN = /^\/ipfs\/([^/]+)(?:\/(.*))?$/;
 const ARWEAVE_PATH_PATTERN = /^\/([^/]+)$/;
+const IPFS_HTML_PATH_PATTERN = /\.html?$/i;
 
 export const canonicalizeInteractiveMediaHostname = (
   hostname: string
@@ -69,6 +70,35 @@ const isValidIpfsCid = (cid: string): boolean =>
 
 const isValidArweaveTransactionId = (txId: string): boolean =>
   ARWEAVE_TX_ID_PATTERN.test(txId);
+
+const isSafeIpfsNestedContentPath = (path: string | undefined): boolean => {
+  if (!path) {
+    return true;
+  }
+
+  if (!IPFS_HTML_PATH_PATTERN.test(path)) {
+    return false;
+  }
+
+  return path.split("/").every((segment) => {
+    if (!segment || segment === "." || segment === "..") {
+      return false;
+    }
+
+    try {
+      const decodedSegment = decodeURIComponent(segment);
+      return (
+        decodedSegment === segment &&
+        decodedSegment !== "." &&
+        decodedSegment !== ".." &&
+        !decodedSegment.includes("/") &&
+        !decodedSegment.includes("\\")
+      );
+    } catch {
+      return false;
+    }
+  });
+};
 
 export const isInteractiveMediaContentIdentifier = (
   provider: InteractiveMediaProvider,
@@ -118,11 +148,7 @@ export const isInteractiveMediaContentPathAllowed = (
       return false;
     }
 
-    if (normalizedPath === pathname) {
-      return true;
-    }
-
-    return pathname === `${normalizedPath}/`;
+    return isSafeIpfsNestedContentPath(match[2]);
   }
 
   if (provider === "arweave") {
@@ -171,7 +197,7 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
     return null;
   }
 
-  if (parsedUrl.search || parsedUrl.hash) {
+  if (parsedUrl.hash) {
     return null;
   }
 
@@ -210,7 +236,6 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
   parsedUrl.username = "";
   parsedUrl.password = "";
   parsedUrl.hash = "";
-  parsedUrl.search = "";
 
   return parsedUrl.toString();
 };

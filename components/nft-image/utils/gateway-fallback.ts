@@ -126,7 +126,7 @@ function classifyGatewayAssetUrl(url: string):
   return { kind: "other", sourceUrl: trimmed };
 }
 
-export function getArweaveGatewayFallbackUrls(url: string): string[] {
+export function getMediaGatewayFallbackUrls(url: string): string[] {
   const assetUrl = classifyGatewayAssetUrl(url);
   if (assetUrl.kind === "empty") {
     return [];

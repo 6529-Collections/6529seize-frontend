@@ -323,6 +323,8 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
   });
 
   it.each([
+    ["html", "text/html"],
+    ["htm", "text/html"],
     ["mp4", "video/mp4"],
     ["webm", "video/webm"],
     ["mov", "video/quicktime"],
@@ -357,6 +359,28 @@ describe("primeMarketplacePreviewCacheFromNftLinks", () => {
       });
     }
   );
+
+  it("infers text/html for OpenSea IPFS animation urls with query params", () => {
+    const queryClient = createTestQueryClient();
+    const href =
+      "https://opensea.io/item/ethereum/0x4af0370076a44c8ddc23db9ae5cecba669280372/455";
+    const mediaUri =
+      "https://ipfs.io/ipfs/QmULf712pVAVBPDBenmE4PGQGA8EWY9uFRiiRmLksfu6Tn/pendulums_mint_script.html?seed=374131294";
+
+    primeMarketplacePreviewCacheFromNftLinks({
+      queryClient,
+      nftLinks: [createNftLinkWithMediaUri({ href, mediaUri })],
+    });
+
+    const seeded = queryClient.getQueryData<MarketplacePreviewData>(
+      getMarketplacePreviewQueryKey(href, "default")
+    );
+
+    expect(seeded?.media).toEqual({
+      url: mediaUri,
+      mimeType: "text/html",
+    });
+  });
 
   it("falls back to image/* when media_uri extension is unknown", () => {
     const queryClient = createTestQueryClient();
