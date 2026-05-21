@@ -334,7 +334,7 @@ const getAuthorHeader = ({
 
   if (identityMode === "default") {
     return (
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2">
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-3 tw-pb-1.5 tw-pt-2 md:tw-px-4">
         <WaveDropAuthorPfp drop={drop} />
         <div className="tw-min-w-0 tw-flex-1">
           <WaveDropHeader
@@ -353,7 +353,7 @@ const getAuthorHeader = ({
   }
 
   return (
-    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2">
+    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-3 tw-pb-1.5 tw-pt-2 md:tw-px-4">
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-min-w-0 tw-flex-1">
         <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
@@ -367,6 +367,7 @@ const getContentBlock = ({
   onReplyClick,
   replyTo,
   drop,
+  useInnerActiveState,
   showAuthorInfo,
   authorHeader,
   activePartIndex,
@@ -396,6 +397,7 @@ const getContentBlock = ({
   readonly onReplyClick: (serialNo: number) => void;
   readonly replyTo: ExtendedDrop["reply_to"];
   readonly drop: ExtendedDrop;
+  readonly useInnerActiveState: boolean;
   readonly showAuthorInfo: boolean;
   readonly authorHeader: React.ReactNode;
   readonly activePartIndex: number;
@@ -435,6 +437,9 @@ const getContentBlock = ({
     level: drop.author.level,
     authorKey,
   });
+  const activeMessageClass = useInnerActiveState
+    ? "tw-bg-[#3CCB7F]/10 tw-ring-1 tw-ring-inset tw-ring-[#3CCB7F]/55"
+    : "";
   const content = (
     <WaveDropContent
       drop={drop}
@@ -467,7 +472,9 @@ const getContentBlock = ({
           maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
         />
       )}
-      <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left desktop-hover:group-hover:tw-bg-iron-800/50">
+      <div
+        className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left desktop-hover:group-hover:tw-bg-iron-800/50 ${activeMessageClass}`}
+      >
         <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col">
           {showAuthorInfo ? (
             <div
@@ -475,22 +482,25 @@ const getContentBlock = ({
               style={highlightStyle}
             >
               {authorHeader}
-              <div className="tw-px-6 tw-pb-1 tw-pt-1.5">{content}</div>
+              <div className="tw-px-3 tw-pb-1 tw-pt-1.5 md:tw-px-4">
+                {content}
+              </div>
             </div>
           ) : (
-            <div className="tw-w-full tw-px-6">{content}</div>
+            <div className="tw-w-full tw-px-3 md:tw-px-4">{content}</div>
           )}
         </div>
+        {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
+          <WaveDropActions
+            placement="message-top"
+            drop={drop}
+            activePartIndex={activePartIndex}
+            onReply={handleOnReply}
+            onEdit={handleOnEdit}
+            suppressed={hasActiveLinkCardActions}
+          />
+        )}
       </div>
-      {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
-        <WaveDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          onReply={handleOnReply}
-          onEdit={handleOnEdit}
-          suppressed={hasActiveLinkCardActions}
-        />
-      )}
     </>
   );
 };
@@ -577,6 +587,8 @@ const WaveDrop = ({
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
   const isProfileView = location === DropLocation.PROFILE;
+  const useInnerActiveState =
+    isActiveDrop && !isDrop && location === DropLocation.WAVE;
   const showAuthorInfo = shouldShowAuthorInfo({
     identityMode,
     shouldGroupWithPreviousDrop,
@@ -805,7 +817,7 @@ const WaveDrop = ({
   const effectiveIsSlideUp = isSlideUp && !isEditing;
 
   const dropClasses = getDropClasses(
-    isActiveDrop,
+    useInnerActiveState ? false : isActiveDrop,
     groupingClass,
     location,
     drop.rank,
@@ -817,6 +829,7 @@ const WaveDrop = ({
     onReplyClick,
     replyTo,
     drop,
+    useInnerActiveState,
     showAuthorInfo,
     authorHeader,
     activePartIndex,
@@ -844,7 +857,7 @@ const WaveDrop = ({
   });
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
-    <div className="tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pl-6">
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-3 md:tw-px-4">
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
       )}
@@ -855,7 +868,7 @@ const WaveDrop = ({
     </div>
   );
   const footerRow = hasDropFooter(footer) && (
-    <div className="tw-mx-2 tw-mt-2 tw-pl-6">{footer}</div>
+    <div className="tw-mt-2 tw-px-3 md:tw-px-4">{footer}</div>
   );
 
   return (

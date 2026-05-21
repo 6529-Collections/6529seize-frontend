@@ -22,6 +22,7 @@ interface WaveDropActionsProps {
   readonly onReply: () => void;
   readonly onEdit?: (() => void) | undefined;
   readonly suppressed?: boolean | undefined;
+  readonly placement?: "legacy" | "message-top";
 }
 
 export default function WaveDropActions({
@@ -31,6 +32,7 @@ export default function WaveDropActions({
   onReply,
   onEdit,
   suppressed = false,
+  placement = "legacy",
 }: WaveDropActionsProps) {
   const { isMemesWave } = useSeizeSettings();
   const { connectedProfile } = useAuth();
@@ -53,11 +55,16 @@ export default function WaveDropActions({
     visibilityClasses = "tw-pointer-events-none tw-opacity-0";
   }
 
+  let positionClass = "-tw-top-9";
+  if (placement === "message-top") {
+    positionClass = "-tw-top-9";
+  } else if (compact) {
+    positionClass = "-tw-top-4";
+  }
+
   return (
     <div
-      className={`tw-absolute tw-right-2 tw-z-20 ${
-        compact ? "-tw-top-4" : "-tw-top-9"
-      } tw-transition-opacity tw-duration-200 tw-ease-in-out ${visibilityClasses}`}
+      className={`tw-absolute tw-right-2 tw-z-20 ${positionClass} tw-transition-opacity tw-duration-200 tw-ease-in-out ${visibilityClasses}`}
     >
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">

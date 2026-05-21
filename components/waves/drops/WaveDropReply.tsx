@@ -28,6 +28,8 @@ export default function WaveDropReply({
   onReplyClick,
 }: WaveDropReplyProps) {
   const fixedReplyHeightClasses = "tw-h-[24px] tw-min-h-[24px] tw-max-h-[24px]";
+  const connectorClasses = "tw-left-5 tw-top-2.5 tw-w-6";
+  const contentOffsetClass = "tw-ml-[60px] md:tw-ml-16";
   const { drop, content, isLoading } = useDropContent(dropId, 1, maybeDrop);
   const replyPreviewContent = useMemo(() => {
     if (content.apiMedia.length > 0 || content.segments.length !== 1) {
@@ -102,10 +104,12 @@ export default function WaveDropReply({
   return (
     <div className="tw-relative tw-mb-3" data-text-selection-exclude="true">
       <div
-        className="tw-absolute tw-left-5 tw-top-2.5 tw-w-6 tw-cursor-pointer tw-rounded-tl-[12px] tw-border-0 tw-border-l-[1.5px] tw-border-t-[1.5px] tw-border-solid tw-border-iron-700"
+        className={`tw-absolute ${connectorClasses} tw-cursor-pointer tw-rounded-tl-[12px] tw-border-0 tw-border-l-[1.5px] tw-border-t-[1.5px] tw-border-solid tw-border-iron-700`}
         style={{ height: "calc(100% - 3px)" }}
       ></div>
-      <div className="tw-ml-[52px] tw-flex tw-items-center tw-gap-x-1.5">
+      <div
+        className={`${contentOffsetClass} tw-flex tw-items-center tw-gap-x-1.5`}
+      >
         <div
           data-testid="wave-drop-reply-fixed-container"
           className={`${fixedReplyHeightClasses} tw-flex tw-w-full tw-items-center tw-overflow-hidden`}
