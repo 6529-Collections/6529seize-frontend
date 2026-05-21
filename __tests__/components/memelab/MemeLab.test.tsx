@@ -7,7 +7,7 @@ import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/types/enums";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 // Mock helper functions
 jest.mock("@/helpers/Helpers", () => ({

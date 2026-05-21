@@ -125,9 +125,11 @@ export default function GradientsComponent() {
   }, [nftsLoaded, nftsRaw, sort, sortDir]);
 
   function printNft(nft: GradientNFT) {
-    const ownsNft = wallets.some((wallet) =>
-      areEqualAddresses(wallet, nft.owner)
-    );
+    const owner = nft.owner;
+    const ownsNft =
+      owner !== undefined &&
+      owner !== null &&
+      wallets.some((wallet) => areEqualAddresses(wallet, owner));
 
     return (
       <Link
@@ -149,9 +151,9 @@ export default function GradientsComponent() {
             {nft.name}
           </div>
           <div className="tw-mt-2 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            {nft.owner.length > 0 && (
+            {owner !== undefined && owner !== null && owner.length > 0 && (
               <Address
-                wallets={[nft.owner]}
+                wallets={[owner]}
                 display={nft.owner_display}
                 hideCopy={true}
               />

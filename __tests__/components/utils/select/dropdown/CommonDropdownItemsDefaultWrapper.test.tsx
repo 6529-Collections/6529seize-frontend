@@ -58,11 +58,11 @@ function getPortalWrapper() {
 }
 
 afterEach(() => {
-  Object.defineProperty(window, "innerWidth", {
+  Object.defineProperty(globalThis, "innerWidth", {
     configurable: true,
     value: originalInnerWidth,
   });
-  Object.defineProperty(window, "innerHeight", {
+  Object.defineProperty(globalThis, "innerHeight", {
     configurable: true,
     value: originalInnerHeight,
   });
@@ -85,11 +85,11 @@ test("closes on escape press", () => {
 });
 
 test("positions the dropdown below the trigger when there is space", async () => {
-  Object.defineProperty(window, "innerWidth", {
+  Object.defineProperty(globalThis, "innerWidth", {
     configurable: true,
     value: 1280,
   });
-  Object.defineProperty(window, "innerHeight", {
+  Object.defineProperty(globalThis, "innerHeight", {
     configurable: true,
     value: 720,
   });

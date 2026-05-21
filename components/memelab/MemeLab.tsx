@@ -89,6 +89,33 @@ function getMemeLabSortOptions(isCollection?: boolean) {
   return enumValues;
 }
 
+function formatEthMetric(label: string, value: number, precision: number) {
+  if (value <= 0) {
+    return `${label}: N/A`;
+  }
+
+  const scale = 10 ** precision;
+  return `${label}: ${numberWithCommas(Math.round(value * scale) / scale)} ETH`;
+}
+
+function getVolumeForType(nft: LabNFT, volumeType: VolumeType) {
+  switch (volumeType) {
+    case VolumeType.HOURS_24:
+      return nft.total_volume_last_24_hours;
+    case VolumeType.DAYS_7:
+      return nft.total_volume_last_7_days;
+    case VolumeType.DAYS_30:
+      return nft.total_volume_last_1_month;
+    default:
+      return nft.total_volume;
+  }
+}
+
+function formatVolumeMetric(nft: LabNFT, volumeType: VolumeType) {
+  const volume = Math.round(getVolumeForType(nft, volumeType) * 100) / 100;
+  return `Volume (${volumeType}): ${numberWithCommas(volume)} ETH`;
+}
+
 export function printNftContent(
   nft: LabNFT,
   sort: MemeLabSort,
@@ -114,35 +141,13 @@ export function printNftContent(
         Math.round(nftMeta?.percent_unique_cleaned! * 100 * 10) / 10
       }%`;
     case MemeLabSort.FLOOR_PRICE:
-      return nft.floor_price > 0
-        ? `Floor Price: ${numberWithCommas(
-            Math.round(nft.floor_price * 100) / 100
-          )} ETH`
-        : "Floor Price: N/A";
+      return formatEthMetric("Floor Price", nft.floor_price, 2);
     case MemeLabSort.MARKET_CAP:
-      return nft.market_cap > 0
-        ? `Market Cap: ${numberWithCommas(
-            Math.round(nft.market_cap * 100) / 100
-          )} ETH`
-        : "Market Cap: N/A";
+      return formatEthMetric("Market Cap", nft.market_cap, 2);
     case MemeLabSort.HIGHEST_OFFER:
-      return nft.highest_offer > 0
-        ? `Highest Offer: ${numberWithCommas(
-            Math.round(nft.highest_offer * 1000) / 1000
-          )} ETH`
-        : "Highest Offer: N/A";
+      return formatEthMetric("Highest Offer", nft.highest_offer, 3);
     case MemeLabSort.VOLUME:
-      return `Volume (${volumeType}): ${numberWithCommas(
-        Math.round(
-          (volumeType === VolumeType.HOURS_24
-            ? nft.total_volume_last_24_hours
-            : volumeType === VolumeType.DAYS_7
-              ? nft.total_volume_last_7_days
-              : volumeType === VolumeType.DAYS_30
-                ? nft.total_volume_last_1_month
-                : nft.total_volume) * 100
-        ) / 100
-      )} ETH`;
+      return formatVolumeMetric(nft, volumeType);
   }
 
   return "";

@@ -3,7 +3,7 @@ import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNav
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => <img {...props} alt={props.alt ?? ""} />,
 }));
 
 jest.mock("@/components/collections-dropdown/CollectionsDropdown", () => ({
@@ -18,17 +18,17 @@ jest.mock("@/components/lfg-slideshow/LFGSlideshow", () => ({
 }));
 
 describe("NextGenNavigationHeader", () => {
-  const originalInnerWidth = window.innerWidth;
+  const originalInnerWidth = globalThis.innerWidth;
 
   afterEach(() => {
-    Object.defineProperty(window, "innerWidth", {
+    Object.defineProperty(globalThis, "innerWidth", {
       configurable: true,
       value: originalInnerWidth,
     });
   });
 
   it("keeps the mobile logo and LFG button on one row", async () => {
-    Object.defineProperty(window, "innerWidth", {
+    Object.defineProperty(globalThis, "innerWidth", {
       configurable: true,
       value: 500,
     });
@@ -59,7 +59,7 @@ describe("NextGenNavigationHeader", () => {
   });
 
   it("moves tabs to their own row before the mobile logo breakpoint", async () => {
-    Object.defineProperty(window, "innerWidth", {
+    Object.defineProperty(globalThis, "innerWidth", {
       configurable: true,
       value: 1000,
     });
