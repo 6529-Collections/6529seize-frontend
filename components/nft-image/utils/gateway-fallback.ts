@@ -100,7 +100,9 @@ type MediaErrorEvent = React.SyntheticEvent<
 const DS_ORIGINAL = "arweaveOriginalSrc";
 const DS_LAST_HOST = "arweaveLastGatewayHost";
 
-function classifyGatewayAssetUrl(url: string):
+function classifyGatewayAssetUrl(
+  url: string
+):
   | { kind: "empty" }
   | { kind: "ipfs"; sourceUrl: string }
   | { kind: "arweave"; sourceUrl: string }
