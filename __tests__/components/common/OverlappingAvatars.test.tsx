@@ -32,7 +32,7 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
 }));
 
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
-  getArweaveGatewayFallbackUrls: (url: string) =>
+  getMediaGatewayFallbackUrls: (url: string) =>
     url === "ipfs://gpebbles"
       ? ["https://ipfs.6529.io/ipfs/gpebbles", "https://ipfs.io/ipfs/gpebbles"]
       : [url],

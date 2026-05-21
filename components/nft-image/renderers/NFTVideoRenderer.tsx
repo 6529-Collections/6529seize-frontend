@@ -31,7 +31,6 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
 
   return (
     <NFTMediaContainer
-      forceIronBackground={props.bgStyle === ""}
       className={`${animationClassName} ${props.heightStyle} ${props.bgStyle}`}
     >
       {props.showBalance && (

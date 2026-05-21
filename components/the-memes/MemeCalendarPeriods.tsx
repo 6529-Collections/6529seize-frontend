@@ -12,6 +12,8 @@ import clsx from "clsx";
 import Link from "next/link";
 
 const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-flex";
+const PERIOD_SEPARATOR_CLASS_NAME =
+  "tw-text-xs tw-font-medium tw-text-iron-700";
 
 export default function MemeCalendarPeriods({
   id,
@@ -37,6 +39,13 @@ export default function MemeCalendarPeriods({
       <span className="tw-font-semibold tw-text-iron-300">{number}</span>
     </span>
   );
+  const secondaryPeriods = [
+    { label: "YEAR", number: year },
+    { label: "EPOCH", number: epoch },
+    { label: "PERIOD", number: period },
+    { label: "ERA", number: era },
+    { label: "EON", number: eon },
+  ];
   const seasonContent = (
     <>
       <span>SZN</span>
@@ -64,17 +73,31 @@ export default function MemeCalendarPeriods({
         </span>
       )}
       <span
+        aria-hidden="true"
+        className={clsx(PERIOD_SEPARATOR_CLASS_NAME, secondaryPeriodClassName)}
+      >
+        /
+      </span>
+      <span
         aria-label="Meme calendar position"
         className={clsx(
           "tw-flex-wrap tw-items-center tw-gap-1.5",
           secondaryPeriodClassName
         )}
       >
-        {printSecondaryPeriod("YEAR", year)}
-        {printSecondaryPeriod("EPOCH", epoch)}
-        {printSecondaryPeriod("PERIOD", period)}
-        {printSecondaryPeriod("ERA", era)}
-        {printSecondaryPeriod("EON", eon)}
+        {secondaryPeriods.map(({ label, number }, index) => (
+          <span
+            key={label}
+            className="tw-inline-flex tw-items-center tw-gap-1.5"
+          >
+            {index > 0 && (
+              <span aria-hidden="true" className={PERIOD_SEPARATOR_CLASS_NAME}>
+                /
+              </span>
+            )}
+            {printSecondaryPeriod(label, number)}
+          </span>
+        ))}
       </span>
     </span>
   );

@@ -1,13 +1,13 @@
 "use client";
 
+import { AuthContext } from "@/components/auth/Auth";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
-import { AuthContext } from "@/components/auth/Auth";
-import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
-import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
 import { publicEnv } from "@/config/env";
@@ -21,9 +21,9 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
-import { MemePageCollectorsSubMenu } from "./MemePageCollectors";
-import { MemePageArtViewer } from "./MemePageArtViewer";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
+import { MemePageArtViewer } from "./MemePageArtViewer";
+import { MemePageCollectorsSubMenu } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
 import { MemePageReferencesSubMenu } from "./MemePageReferences";
 import {
@@ -505,7 +505,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     return (
       <nav
         aria-label="Meme page sections"
-        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
@@ -593,7 +593,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const isLoadingNft = !nft && !nftNotFound;
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
       <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
@@ -601,11 +601,11 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
                   href="/the-memes"
-                  className="tw-group tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-text-white"
+                  className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
-                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
                   />
                   The Memes
                 </Link>

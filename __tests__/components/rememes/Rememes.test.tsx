@@ -29,58 +29,83 @@ jest.mock("@/components/pagination/Pagination", () => (props: any) => (
 jest.mock("@/components/lfg-slideshow/LFGSlideshow", () => ({
   LFGButton: () => <div data-testid="lfg-button" />,
 }));
-jest.mock("@/components/collections-dropdown/CollectionsDropdown", () => () => (
-  <div data-testid="collections-dropdown" />
-));
+jest.mock("@/components/collections-dropdown/CollectionsDropdown", () => ({
+  __esModule: true,
+  default: ({ triggerContent }: any) => (
+    <div data-testid="collections-dropdown">{triggerContent}</div>
+  ),
+}));
 jest.mock("react-tooltip", () => ({
-  Tooltip: ({ children, id }: any) => (
-    <div data-testid="react-tooltip" data-tooltip-id={id}>
+  Tooltip: ({ children, className, id, style }: any) => (
+    <div
+      data-testid="react-tooltip"
+      data-tooltip-id={id}
+      data-has-inline-style={style ? "true" : "false"}
+      className={className}
+    >
       {children}
     </div>
   ),
 }));
 
-(fetchUrl as jest.Mock).mockImplementation((url: string) => {
-  if (url.includes("memes_lite")) return Promise.resolve({ data: [] });
-  return Promise.resolve({
-    count: 1,
-    data: [
-      {
-        contract: "0x",
-        id: 1,
-        metadata: {},
-        contract_opensea_data: {},
-        replicas: [],
-        image: "",
-      },
-    ],
+const rememeResponse = {
+  count: 1,
+  data: [
+    {
+      contract: "0x",
+      id: 1,
+      metadata: {},
+      contract_opensea_data: {},
+      replicas: [],
+      image: "",
+    },
+  ],
+};
+
+function mockRememesApi(memes: { id: number; name: string }[] = []) {
+  (fetchUrl as jest.Mock).mockImplementation((url: string) => {
+    if (url.includes("memes_lite")) {
+      return Promise.resolve({ data: memes });
+    }
+    return Promise.resolve(rememeResponse);
   });
-});
+}
+
+function renderRememes() {
+  return render(
+    <TitleProvider>
+      <Rememes />
+    </TitleProvider>
+  );
+}
 
 describe("Rememes component", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRememesApi();
     global.fetch = jest.fn(() => Promise.resolve({ json: () => ({}) } as any));
   });
 
   it("fetches rememes and changes sorting", async () => {
-    render(
-      <TitleProvider>
-        <Rememes />
-      </TitleProvider>
-    );
+    renderRememes();
     await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
     expect(fetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/rememes?page_size=40&page=1",
       expect.objectContaining({ signal: expect.any(Object) })
     );
+    expect(screen.getByText("#1")).toBeInTheDocument();
+    expect(screen.queryByText("0x #1")).not.toBeInTheDocument();
+    const tooltip = screen.getByTestId("react-tooltip");
+    expect(tooltip).toHaveAttribute("data-has-inline-style", "true");
     expect(
       (fetchUrl as jest.Mock).mock.calls.filter(([url]: [string]) =>
         url.includes("/api/rememes?")
       )
     ).toHaveLength(1);
-    await screen.findByText("Sort: Random");
-    await userEvent.click(screen.getByText("Sort: Random"));
+    const sortButton = await screen.findByRole("button", {
+      name: "Sort: Random",
+    });
+    await userEvent.click(sortButton);
     await userEvent.click(screen.getByText(RememeSort.CREATED_ASC));
     await waitFor(() =>
       expect(fetchUrl).toHaveBeenLastCalledWith(
@@ -88,5 +113,55 @@ describe("Rememes component", () => {
         expect.objectContaining({ signal: expect.any(Object) })
       )
     );
+  });
+
+  it("opens the inline token type trigger and filters by token type", async () => {
+    renderRememes();
+    const tokenTypeButton = await screen.findByRole("button", {
+      name: "Token Type: All",
+    });
+
+    await userEvent.click(tokenTypeButton);
+    await userEvent.click(screen.getByText("ERC-721"));
+
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&token_type=ERC721",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
+  });
+
+  it("shows full meme reference labels and filters by selected meme", async () => {
+    mockRememesApi([{ id: 1, name: "6529Seizing" }]);
+    renderRememes();
+    const memeReferenceButton = await screen.findByRole("button", {
+      name: "Meme Reference: All",
+    });
+
+    await userEvent.click(memeReferenceButton);
+    await userEvent.click(screen.getByText("#1 - 6529Seizing"));
+
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=1",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
+  });
+
+  it("renders the total count as secondary header metadata", async () => {
+    renderRememes();
+
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
+
+    screen.getAllByText("(x1)").forEach((count) => {
+      expect(count).toHaveClass(
+        "tw-text-sm",
+        "tw-font-medium",
+        "tw-text-iron-500"
+      );
+      expect(count).not.toHaveClass("tw-text-lg", "tw-text-iron-300");
+    });
   });
 });

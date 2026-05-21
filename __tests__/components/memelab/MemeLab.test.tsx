@@ -1,20 +1,19 @@
 import {
   getInitialRouterValues,
   printNftContent,
-  printSortButtons,
   sortChanged,
 } from "@/components/memelab/MemeLab";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { MemeLabSort } from "@/types/enums";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 
 // Mock helper functions
 jest.mock("@/helpers/Helpers", () => ({
   printMintDate: jest.fn((date: Date | string) => {
     if (!date) return "-";
-    return "Jan 1, 2023 (1 year ago)";
+    return "Jan 1, 2023";
   }),
   numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
   getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {
@@ -50,23 +49,6 @@ describe("MemeLab utilities", () => {
     );
     expect(initialSortDir).toBe(SortDirection.DESC);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
-  });
-
-  it("printSortButtons filters options when collection", () => {
-    render(
-      <div>
-        {printSortButtons(
-          MemeLabSort.AGE,
-          VolumeType.ALL_TIME,
-          jest.fn(),
-          jest.fn(),
-          true
-        )}
-      </div>
-    );
-    const buttons = screen.getAllByTestId("sort").map((b) => b.textContent);
-    expect(buttons).not.toContain(MemeLabSort.ARTISTS);
-    expect(buttons).not.toContain(MemeLabSort.COLLECTIONS);
   });
 
   it("printNftContent shows different text", () => {

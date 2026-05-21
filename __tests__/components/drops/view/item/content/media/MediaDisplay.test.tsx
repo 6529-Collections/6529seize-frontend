@@ -82,7 +82,7 @@ jest.mock(
 );
 
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
-  getArweaveGatewayFallbackUrls: (...args: unknown[]) =>
+  getMediaGatewayFallbackUrls: (...args: unknown[]) =>
     mockGetArweaveGatewayFallbackUrls(...args),
   shouldUseIframeFallbackTimeout: (...args: unknown[]) =>
     mockShouldUseIframeFallbackTimeout(...args),
