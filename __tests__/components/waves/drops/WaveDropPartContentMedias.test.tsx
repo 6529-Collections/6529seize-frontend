@@ -17,7 +17,9 @@ jest.mock(
 
 jest.mock("@/components/waves/drops/WaveDropPartContentMediaImage", () => ({
   __esModule: true,
-  default: () => <div data-testid="wave-image-media" />,
+  default: ({ src }: { readonly src: string }) => (
+    <div data-testid="wave-image-media" data-src={src} />
+  ),
 }));
 
 const basePart: any = {
@@ -37,18 +39,54 @@ describe("WaveDropPartContentMedias", () => {
   });
 
   it("renders standard media actions for image and video media by default", () => {
-    render(<WaveDropPartContentMedias activePart={basePart} />);
+    const { container } = render(
+      <WaveDropPartContentMedias activePart={basePart} />
+    );
+
     expect(screen.getByTestId("wave-image-media")).toBeInTheDocument();
     expect(screen.getByTestId("drop-media")).toBeInTheDocument();
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
+  });
+
+  it("groups consecutive image media in one responsive grid", () => {
+    const { container } = render(
+      <WaveDropPartContentMedias
+        activePart={{
+          ...basePart,
+          media: [
+            { mime_type: "image/png", url: "u1" },
+            { mime_type: "image/jpeg", url: "u2" },
+          ],
+        }}
+      />
+    );
+
+    const group = container.querySelector(".tw-grid.tw-grid-cols-1");
+
+    expect(group).not.toBeNull();
+    expect(group).toHaveClass(
+      "tw-w-full",
+      "tw-gap-2",
+      "sm:tw-grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),16rem))]"
+    );
+    expect(screen.getAllByTestId("wave-image-media")).toHaveLength(2);
   });
 
   it("uses MediaDisplay when disabled", () => {
-    render(
+    const { container } = render(
       <WaveDropPartContentMedias
-        activePart={basePart}
+        activePart={{
+          ...basePart,
+          media: [
+            { mime_type: "image/png", url: "u1" },
+            { mime_type: "image/jpeg", url: "u2" },
+          ],
+        }}
         disableMediaInteraction
       />
     );
+
     expect(screen.getAllByTestId("media-display")).toHaveLength(2);
+    expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
   });
 });

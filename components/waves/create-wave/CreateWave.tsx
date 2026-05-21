@@ -61,6 +61,7 @@ export default function CreateWave({
           controller={waveConfig}
           profile={profile}
           descriptionRef={descriptionRef}
+          submitting={submitting}
           showDropError={showDropError}
           onHaveDropToSubmitChange={onHaveDropToSubmitChange}
           onInlineGroupCreate={onInlineGroupCreate}

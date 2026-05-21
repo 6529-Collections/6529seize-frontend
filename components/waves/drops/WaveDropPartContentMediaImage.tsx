@@ -143,7 +143,7 @@ export default function WaveDropPartContentMediaImage({
 
   return (
     <>
-      <div className="tw-relative tw-w-full">
+      <div className="tw-relative tw-w-full tw-min-w-0">
         <InlineMediaActions
           variant="image"
           onOpen={openMedia}

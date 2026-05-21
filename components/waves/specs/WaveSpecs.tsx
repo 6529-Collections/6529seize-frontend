@@ -3,6 +3,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
+import WaveSlowMode from "./WaveSlowMode";
+import WaveDisableLinks from "./WaveDisableLinks";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
@@ -14,6 +16,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
+  const showSlowMode = wave.chat.enabled;
 
   return (
     <div
@@ -49,6 +52,13 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
               <WaveAuthor wave={wave} />
             </div>
           </div>
+
+          {showSlowMode && (
+            <>
+              <WaveSlowMode wave={wave} />
+              <WaveDisableLinks wave={wave} />
+            </>
+          )}
         </div>
       </div>
     </div>

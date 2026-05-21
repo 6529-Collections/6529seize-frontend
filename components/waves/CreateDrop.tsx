@@ -8,13 +8,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import CreateDropContent from "./CreateDropContent";
 import CreateCurationDropContent from "./CreateCurationDropContent";
 import QuorumProposalDropModal from "./quorum/QuorumProposalDropModal";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPost } from "@/services/api/common-api";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { AuthContext } from "../auth/Auth";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { useAuth } from "../auth/Auth";
 import { useKeyPressEvent } from "react-use";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type {
@@ -22,7 +26,10 @@ import type {
   IdentityPickerPlacement,
 } from "./dropComposer.types";
 import { DropMode } from "./dropComposer.types";
-import type { DropPrivileges } from "@/hooks/useDropPriviledges";
+import {
+  ChatRestriction,
+  type DropPrivileges,
+} from "@/hooks/useDropPriviledges";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
@@ -69,6 +76,22 @@ export interface DropMutationBody {
 
 const ANIMATION_DURATION = 0.3;
 
+interface SlowModeChatReservation {
+  readonly id: number;
+  readonly waveId: string;
+  readonly cooldownMs: number;
+}
+
+interface QueuedDropMutationBody extends DropMutationBody {
+  readonly slowModeChatReservation?: SlowModeChatReservation | undefined;
+}
+
+interface SlowModeChatWaveState {
+  pendingReservationId: number | null;
+  cooldownUntil: number | null;
+  cooldownMs: number | null;
+}
+
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
@@ -89,8 +112,9 @@ export default function CreateDrop({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
 }: CreateDropProps) {
-  const { setToast } = useContext(AuthContext);
+  const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
+  const queryClient = useQueryClient();
   const unreadDividerContext = useUnreadDividerOptional();
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
@@ -113,6 +137,9 @@ export default function CreateDrop({
     isQuorumWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
+  const canUseChatComposer =
+    wave.chat.authenticated_user_eligible ||
+    privileges.chatRestriction === ChatRestriction.SLOW_MODE;
   const getDefaultIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -120,7 +147,7 @@ export default function CreateDrop({
     if (fixedDropMode === DropMode.PARTICIPATION) {
       return true;
     }
-    if (wave.chat.authenticated_user_eligible) return false;
+    if (canUseChatComposer) return false;
     if (wave.participation.authenticated_user_eligible) return true;
     if (activeDrop) return false;
     return false;
@@ -130,7 +157,9 @@ export default function CreateDrop({
     activeDrop === null
       ? "none"
       : `${activeDrop.action}:${activeDrop.drop.id}:${activeDrop.partId}`;
-  const modeScopeKey = `${wave.id}:${fixedDropMode}:${wave.chat.authenticated_user_eligible}:${wave.participation.authenticated_user_eligible}:${activeDropScope}`;
+  const modeScopeKey =
+    `${wave.id}:${fixedDropMode}:${canUseChatComposer}:` +
+    `${wave.participation.authenticated_user_eligible}:${activeDropScope}`;
   const modeScopeToken = modeScopeKey;
   const defaultIsDropMode = getDefaultIsDropMode();
   const isDropMode =
@@ -178,7 +207,7 @@ export default function CreateDrop({
         return false;
       }
 
-      if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
+      if (!newIsDropMode && !canUseChatComposer) {
         setToast({
           message: "You are not eligible to chat in this wave",
           type: "error",
@@ -188,7 +217,7 @@ export default function CreateDrop({
 
       return true;
     },
-    [fixedDropMode, setToast, wave]
+    [canUseChatComposer, fixedDropMode, setToast, wave]
   );
 
   const onDropModeChange = useCallback(
@@ -240,10 +269,7 @@ export default function CreateDrop({
   );
 
   const onCloseQuorumProposal = useCallback(() => {
-    if (
-      fixedDropMode === DropMode.BOTH &&
-      wave.chat.authenticated_user_eligible
-    ) {
+    if (fixedDropMode === DropMode.BOTH && canUseChatComposer) {
       onDropModeChange(false);
       return;
     }
@@ -259,10 +285,10 @@ export default function CreateDrop({
     setDismissedQuorumProposalScope(quorumProposalScopeKey);
   }, [
     fixedDropMode,
+    canUseChatComposer,
     onExitFixedDropMode,
     onDropModeChange,
     quorumProposalScopeKey,
-    wave.chat.authenticated_user_eligible,
   ]);
 
   const onOpenQuorumProposal = useCallback(() => {
@@ -294,8 +320,164 @@ export default function CreateDrop({
     [canMentionAll]
   );
 
+  const slowModeChatStateByWaveRef = useRef<Map<string, SlowModeChatWaveState>>(
+    new Map()
+  );
+  const slowModeChatReservationIdRef = useRef(0);
+
+  const getSlowModeChatWaveState = useCallback((waveId: string) => {
+    const currentState = slowModeChatStateByWaveRef.current.get(waveId);
+    if (currentState !== undefined) {
+      return currentState;
+    }
+
+    const nextState: SlowModeChatWaveState = {
+      pendingReservationId: null,
+      cooldownUntil: null,
+      cooldownMs: null,
+    };
+    slowModeChatStateByWaveRef.current.set(waveId, nextState);
+    return nextState;
+  }, []);
+
+  const getLocalSlowModeCooldownMs = useCallback(
+    (dropRequest: ApiCreateDropRequest) => {
+      if (dropRequest.wave_id !== wave.id) {
+        return null;
+      }
+
+      const cooldownMs = wave.chat.slow_mode_cooldown_ms;
+      const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
+      const isCreator =
+        connectedHandle !== null &&
+        wave.author.handle?.toLowerCase() === connectedHandle;
+      const isAdmin = wave.wave.authenticated_user_eligible_for_admin === true;
+
+      if (typeof cooldownMs !== "number") {
+        return null;
+      }
+
+      if (
+        dropRequest.drop_type !== ApiDropType.Chat ||
+        connectedHandle === null ||
+        isCreator ||
+        isAdmin
+      ) {
+        return null;
+      }
+
+      return cooldownMs;
+    },
+    [
+      connectedProfile?.handle,
+      wave.author.handle,
+      wave.chat.slow_mode_cooldown_ms,
+      wave.id,
+      wave.wave.authenticated_user_eligible_for_admin,
+    ]
+  );
+
+  const reserveSlowModeChatQueueSlot = useCallback(
+    (dropRequest: ApiCreateDropRequest) => {
+      const cooldownMs = getLocalSlowModeCooldownMs(dropRequest);
+      if (cooldownMs === null) {
+        return null;
+      }
+
+      const waveState = getSlowModeChatWaveState(dropRequest.wave_id);
+      if (waveState.pendingReservationId !== null) {
+        return false;
+      }
+
+      const cooldownUntil = waveState.cooldownUntil;
+      if (cooldownUntil !== null && Date.now() < cooldownUntil) {
+        return false;
+      }
+
+      waveState.cooldownUntil = null;
+      waveState.cooldownMs = cooldownMs;
+      slowModeChatReservationIdRef.current += 1;
+      const reservation: SlowModeChatReservation = {
+        id: slowModeChatReservationIdRef.current,
+        waveId: dropRequest.wave_id,
+        cooldownMs,
+      };
+      waveState.pendingReservationId = reservation.id;
+      return reservation;
+    },
+    [getLocalSlowModeCooldownMs, getSlowModeChatWaveState]
+  );
+
+  const clearSlowModeChatPending = useCallback(
+    (reservation: SlowModeChatReservation | null | undefined) => {
+      if (reservation === null || reservation === undefined) {
+        return;
+      }
+
+      const waveState = slowModeChatStateByWaveRef.current.get(
+        reservation.waveId
+      );
+      if (waveState === undefined) {
+        return;
+      }
+
+      if (waveState.pendingReservationId !== reservation.id) {
+        return;
+      }
+
+      waveState.pendingReservationId = null;
+      waveState.cooldownMs = null;
+    },
+    []
+  );
+
+  const startLocalSlowModeCooldown = useCallback(
+    (body: QueuedDropMutationBody) => {
+      const reservation = body.slowModeChatReservation;
+      if (reservation === undefined) {
+        return;
+      }
+
+      const waveState = slowModeChatStateByWaveRef.current.get(
+        reservation.waveId
+      );
+      if (waveState?.pendingReservationId !== reservation.id) {
+        return;
+      }
+
+      const nextDropAllowed = Date.now() + reservation.cooldownMs;
+      waveState.pendingReservationId = null;
+      waveState.cooldownUntil = nextDropAllowed;
+      waveState.cooldownMs = reservation.cooldownMs;
+      queryClient.setQueryData<ApiWave>(
+        [QueryKey.WAVE, { wave_id: reservation.waveId }],
+        (currentWave) => {
+          const sourceWave =
+            currentWave ?? (wave.id === reservation.waveId ? wave : undefined);
+          if (sourceWave === undefined) {
+            return currentWave;
+          }
+
+          return {
+            ...sourceWave,
+            chat: {
+              ...sourceWave.chat,
+              next_drop_allowed: nextDropAllowed,
+            },
+          };
+        }
+      );
+      void queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVE, { wave_id: reservation.waveId }],
+        })
+        .catch(() => undefined);
+    },
+    [queryClient, wave]
+  );
+
   const addDropMutation = useMutation({
-    mutationFn: async (body: DropMutationBody) => {
+    mutationFn: async (body: QueuedDropMutationBody) => {
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
         body: body.drop,
@@ -305,6 +487,7 @@ export default function CreateDrop({
       if (body.dropId) {
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
+      startLocalSlowModeCooldown(body);
       processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT);
       body.onSuccess?.();
 
@@ -319,6 +502,7 @@ export default function CreateDrop({
       }
     },
     onError: (error, body) => {
+      clearSlowModeChatPending(body.slowModeChatReservation);
       setTimeout(() => {
         if (body.dropId) {
           processDropRemoved(body.drop.wave_id, body.dropId);
@@ -335,7 +519,7 @@ export default function CreateDrop({
   });
 
   // Use refs to avoid stale closures - fixes the stream unmounting issue
-  const queueRef = useRef<DropMutationBody[]>([]);
+  const queueRef = useRef<QueuedDropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
   const hasBatchErrorsRef = useRef(false);
   const inFlightProcessNextDropRef = useRef<Promise<void> | null>(null);
@@ -370,9 +554,24 @@ export default function CreateDrop({
   }, [addDropMutation, onAllDropsAdded, waitAndInvalidateDrops]);
 
   const submitDrop = useCallback(
-    (dropRequest: DropMutationBody) => {
+    (dropRequest: DropMutationBody): boolean => {
+      const slowModeChatReservation = reserveSlowModeChatQueueSlot(
+        dropRequest.drop
+      );
+      if (slowModeChatReservation === false) {
+        return false;
+      }
+
+      const queuedDropRequest: QueuedDropMutationBody =
+        slowModeChatReservation === null
+          ? dropRequest
+          : {
+              ...dropRequest,
+              slowModeChatReservation,
+            };
+
       // Add to queue
-      queueRef.current.push(dropRequest);
+      queueRef.current.push(queuedDropRequest);
 
       // Process immediately - avoids state update timing issues
       inFlightProcessNextDropRef.current = processNextDrop();
@@ -385,12 +584,22 @@ export default function CreateDrop({
       // Trigger UI updates
       onDropAddedToQueue();
 
-      // Explicitly blur any focused input to close keyboard
-      if (document.activeElement instanceof HTMLElement) {
+      // Explicitly blur any focused input to close keyboard for drop flows.
+      if (
+        dropRequest.drop.drop_type !== ApiDropType.Chat &&
+        document.activeElement instanceof HTMLElement
+      ) {
         document.activeElement.blur();
       }
+
+      return true;
     },
-    [onDropAddedToQueue, processNextDrop, unreadDividerContext]
+    [
+      onDropAddedToQueue,
+      processNextDrop,
+      reserveSlowModeChatQueueSlot,
+      unreadDividerContext,
+    ]
   );
 
   const createDropContentProps = useMemo(() => {
@@ -413,8 +622,11 @@ export default function CreateDrop({
           : null,
       canExitDropMode:
         (fixedDropMode === DropMode.BOTH &&
-          privileges.chatRestriction === null) ||
+          (privileges.chatRestriction === null ||
+            privileges.chatRestriction === ChatRestriction.SLOW_MODE)) ||
         (fixedDropMode === DropMode.PARTICIPATION && hasExitFixedDropMode),
+      isChatBlockedBySlowMode:
+        privileges.chatRestriction === ChatRestriction.SLOW_MODE,
       externalAttachmentDrop,
       onExternalAttachmentDropConsumed,
       canSubmitCurationUrl: canUseCurationUrlSubmit,

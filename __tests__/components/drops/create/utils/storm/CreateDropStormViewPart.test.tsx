@@ -67,4 +67,18 @@ describe("CreateDropStormViewPart", () => {
     fireEvent.click(screen.getByRole("button", { name: /remove part/i }));
     expect(removePart).toHaveBeenCalledWith(3);
   });
+
+  it("does not remove part when disabled", () => {
+    const removePart = jest.fn();
+    render(
+      <CreateDropStormViewPart
+        {...baseProps}
+        disabled
+        removePart={removePart}
+        partIndex={3}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /remove part/i }));
+    expect(removePart).not.toHaveBeenCalled();
+  });
 });

@@ -138,6 +138,34 @@ describe("CreateDropEmojiPicker", () => {
     await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
   });
 
+  it("does not open the picker when disabled", () => {
+    render(<CreateDropEmojiPicker disabled />);
+    const toggleButton = screen.getByRole("button", { hidden: true });
+
+    fireEvent.click(toggleButton);
+
+    expect(toggleButton).toBeDisabled();
+    expect(screen.queryByTestId("picker")).toBeNull();
+  });
+
+  it("closes an open picker when disabled and keeps it closed when re-enabled", async () => {
+    const { rerender } = render(<CreateDropEmojiPicker />);
+    const toggleButton = screen.getByRole("button", { hidden: true });
+
+    fireEvent.click(toggleButton);
+    expect(await screen.findByTestId("picker")).toBeInTheDocument();
+
+    rerender(<CreateDropEmojiPicker disabled />);
+
+    await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
+    expect(screen.getByRole("button", { hidden: true })).toBeDisabled();
+
+    rerender(<CreateDropEmojiPicker />);
+
+    expect(screen.getByRole("button", { hidden: true })).not.toBeDisabled();
+    expect(screen.queryByTestId("picker")).toBeNull();
+  });
+
   it("uses mobile dialog on mobile screens and inserts emoji", async () => {
     mockUseIsMobile.mockReturnValue(true);
 

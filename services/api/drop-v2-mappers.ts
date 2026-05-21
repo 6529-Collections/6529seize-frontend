@@ -18,7 +18,10 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
-import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
+import {
+  toApiWaveMin,
+  type ApiWaveMinWithChatLinkSettings,
+} from "@/helpers/waves/wave.helpers";
 
 type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
@@ -73,7 +76,7 @@ export const mapPriorityMetadataV2ToDropMetadata = (
 
 export const mapApiWaveOverviewToApiWaveMin = (
   wave: ApiWaveOverview
-): ApiWaveMin => ({
+): ApiWaveMinWithChatLinkSettings => ({
   id: wave.id,
   name: wave.name,
   picture: wave.pfp ?? null,
@@ -98,6 +101,7 @@ export const mapApiWaveOverviewToApiWaveMin = (
   forbid_negative_votes: false,
   pinned: wave.context_profile_context?.pinned ?? false,
   identity_wave: false,
+  links_disabled: wave.links_disabled,
 });
 
 export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({

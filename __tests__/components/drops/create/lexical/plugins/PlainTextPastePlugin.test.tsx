@@ -72,7 +72,8 @@ const createClipboardEvent = ({
   };
 };
 
-const renderPlugin = () => render(<PlainTextPastePlugin />);
+const renderPlugin = (props = {}) =>
+  render(<PlainTextPastePlugin {...props} />);
 
 const getCommandHandler = (): PasteHandler => {
   if (!commandHandler) {
@@ -111,6 +112,17 @@ describe("PlainTextPastePlugin", () => {
 
     expect(handled).toBe(false);
     expect(preventDefault).not.toHaveBeenCalled();
+  });
+
+  it("prevents paste while disabled", () => {
+    renderPlugin({ disabled: true });
+
+    const { event, preventDefault } = createClipboardEvent({ text: "text" });
+    const handled = getCommandHandler()(event);
+
+    expect(handled).toBe(true);
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect($getSelection).not.toHaveBeenCalled();
   });
 
   it("returns false when paste includes files", () => {

@@ -31,6 +31,16 @@ const getPeriodUpdate = <T>(
   return { period };
 };
 
+const getSlowModeUpdate = (
+  slowModeCooldownMs: number | null | undefined
+): Partial<{ readonly slow_mode_cooldown_ms: number }> => {
+  if (slowModeCooldownMs === null || slowModeCooldownMs === undefined) {
+    return {};
+  }
+
+  return { slow_mode_cooldown_ms: slowModeCooldownMs };
+};
+
 export const convertWaveToUpdateWave = (
   wave: ApiWave
 ): ApiUpdateWaveRequest => ({
@@ -57,6 +67,8 @@ export const convertWaveToUpdateWave = (
       group_id: wave.chat.scope.group?.id ?? null,
     },
     enabled: wave.chat.enabled,
+    links_disabled: wave.chat.links_disabled === true,
+    ...getSlowModeUpdate(wave.chat.slow_mode_cooldown_ms),
   },
   participation: {
     scope: {

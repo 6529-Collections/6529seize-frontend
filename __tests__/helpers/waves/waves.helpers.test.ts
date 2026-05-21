@@ -110,7 +110,11 @@ describe("waves.helpers", () => {
           forbid_negative_votes: true,
         },
         visibility: { scope: { group_id: "vis" } },
-        chat: { scope: { group_id: "chat" }, enabled: true },
+        chat: {
+          scope: { group_id: "chat" },
+          enabled: true,
+          links_disabled: false,
+        },
         participation: {
           scope: { group_id: "part" },
           no_of_applications_allowed_per_participant: 2,
@@ -130,6 +134,39 @@ describe("waves.helpers", () => {
           admin_group: { group_id: "admin" },
           decisions_strategy: "strategy",
         },
+      });
+    });
+
+    it("preserves existing slow mode cooldown", () => {
+      const wave = makeWave();
+      wave.chat.slow_mode_cooldown_ms = 30_000;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat).toEqual({
+        scope: { group_id: "chat" },
+        enabled: true,
+        links_disabled: false,
+        slow_mode_cooldown_ms: 30_000,
+      });
+    });
+
+    it("omits slow mode when wave has no slow mode", () => {
+      const wave = makeWave();
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat).not.toHaveProperty("slow_mode_cooldown_ms");
+    });
+
+    it("preserves disabled links", () => {
+      const wave = makeWave();
+      wave.chat.links_disabled = true;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat).toMatchObject({
+        links_disabled: true,
       });
     });
 

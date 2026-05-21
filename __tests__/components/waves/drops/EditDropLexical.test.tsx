@@ -13,6 +13,7 @@ const useDeviceInfoMock = jest.fn(() => ({
   isApp: false,
   isMobileDevice: false,
 }));
+const mockContainsOpenGraphPreviewLink = jest.fn(() => false);
 
 const rootMock = {
   getChildren: jest.fn(() => [] as unknown[]),
@@ -222,6 +223,13 @@ const {
   exportDropMarkdown: jest.Mock;
 };
 jest.mock(
+  "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection",
+  () => ({
+    containsOpenGraphPreviewLink: (...args: unknown[]) =>
+      mockContainsOpenGraphPreviewLink(...args),
+  })
+);
+jest.mock(
   "@/components/drops/create/lexical/utils/groupMentionDetection",
   () => ({
     getMentionedGroupsFromEditorState: jest.fn(() => []),
@@ -280,6 +288,7 @@ describe("EditDropLexical", () => {
     rootMock.getChildren.mockReturnValue([]);
     rootMock.getAllTextNodes.mockReturnValue([]);
     mentionSelectHandler = null;
+    mockContainsOpenGraphPreviewLink.mockReturnValue(false);
     useDeviceInfoMock.mockReturnValue({
       isApp: false,
       isMobileDevice: false,
@@ -493,6 +502,36 @@ describe("EditDropLexical", () => {
     });
 
     expect(handled).toBe(true);
+    expect(onSave).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("disables save while the link restriction matches current markdown", async () => {
+    const user = userEvent.setup();
+    const onSave = jest.fn();
+    const onCancel = jest.fn();
+    exportDropMarkdownMock.mockReturnValue("https://example.com/article");
+    mockContainsOpenGraphPreviewLink.mockReturnValue(true);
+
+    render(
+      <EditDropLexical
+        {...defaultProps}
+        linkRestrictionMessage="Links are not allowed in this wave"
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+
+    const saveButton = screen.getByRole("button", { name: /save/i });
+
+    expect(saveButton).toBeDisabled();
+    expect(saveButton).toHaveAttribute(
+      "title",
+      "Links are not allowed in this wave"
+    );
+
+    await user.click(saveButton);
+
     expect(onSave).not.toHaveBeenCalled();
     expect(onCancel).not.toHaveBeenCalled();
   });
