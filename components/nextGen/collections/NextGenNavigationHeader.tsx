@@ -6,8 +6,25 @@ import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDr
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NextgenView } from "@/types/enums";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Container } from "react-bootstrap";
+
+const MOBILE_HEADER_MAX_WIDTH = 750;
+const COMPACT_HEADER_MAX_WIDTH = 575;
+const STACKED_HEADER_MAX_WIDTH = 1199;
+
+function subscribeToHeaderResize(onStoreChange: () => void) {
+  window.addEventListener("resize", onStoreChange);
+  return () => window.removeEventListener("resize", onStoreChange);
+}
+
+function getHeaderViewportWidth() {
+  return window.innerWidth;
+}
+
+function getServerHeaderViewportWidth() {
+  return STACKED_HEADER_MAX_WIDTH + 1;
+}
 
 export default function NextGenNavigationHeader(
   props: Readonly<{
@@ -15,26 +32,14 @@ export default function NextGenNavigationHeader(
     setView?: ((view: NextgenView | undefined) => void) | undefined;
   }>
 ) {
-  const [isMobile, setIsMobile] = useState(false);
-
-  function checkMobile() {
-    const screenSize = window.innerWidth;
-    if (screenSize <= 750) {
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
-    }
-  }
-
-  useEffect(() => {
-    checkMobile();
-  }, []);
-
-  useEffect(() => {
-    const handleResize = () => checkMobile();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const headerViewportWidth = useSyncExternalStore(
+    subscribeToHeaderResize,
+    getHeaderViewportWidth,
+    getServerHeaderViewportWidth
+  );
+  const isMobile = headerViewportWidth <= MOBILE_HEADER_MAX_WIDTH;
+  const isCompactHeader = headerViewportWidth <= COMPACT_HEADER_MAX_WIDTH;
+  const isStackedHeader = headerViewportWidth <= STACKED_HEADER_MAX_WIDTH;
 
   function printView(v: NextgenView | undefined) {
     let styles: any = { borderBottom: "1px solid white", cursor: "default" };
@@ -69,19 +74,50 @@ export default function NextGenNavigationHeader(
     );
   }
 
+  let mobileLogoWidth = "250px";
+  if (isCompactHeader) {
+    mobileLogoWidth = "140px";
+  } else if (isMobile) {
+    mobileLogoWidth = "170px";
+  }
+
+  let mobileLogoMaxWidth = "85vw";
+  if (isCompactHeader) {
+    mobileLogoMaxWidth = "38vw";
+  } else if (isMobile) {
+    mobileLogoMaxWidth = "48vw";
+  }
+
+  let headerControlsClassName = "gap-3 flex-nowrap";
+  if (isStackedHeader) {
+    let stackedJustifyClassName = "justify-content-start";
+    if (isCompactHeader) {
+      stackedJustifyClassName = "justify-content-between";
+    }
+    headerControlsClassName = `gap-2 flex-nowrap ${stackedJustifyClassName} w-100`;
+  }
+
+  let headerPaddingTop = "0";
+  if (isStackedHeader) {
+    headerPaddingTop = "10px";
+    if (isMobile) {
+      headerPaddingTop = "20px";
+    }
+  }
+
   return (
     <>
       <Container
         className={`${styles["navigationHeader"]} ${
-          isMobile ? `flex-column gap-2` : `justify-content-between`
+          isStackedHeader ? `flex-column gap-2` : `justify-content-between`
         }`}
         style={{
-          height: isMobile ? "auto" : "90px",
-          paddingTop: isMobile ? "20px" : "0",
+          height: isStackedHeader ? "auto" : "90px",
+          paddingTop: headerPaddingTop,
         }}
       >
-        <div className="d-flex align-items-center gap-3 flex-wrap">
-          <span className="d-xl-none">
+        <div className={`d-flex align-items-center ${headerControlsClassName}`}>
+          <span className="d-xl-none flex-shrink-1 overflow-hidden">
             <CollectionsDropdown
               activePage="nextgen"
               variant="brand"
@@ -91,8 +127,8 @@ export default function NextGenNavigationHeader(
                   width="0"
                   height="0"
                   style={{
-                    width: "250px",
-                    maxWidth: "85vw",
+                    width: mobileLogoWidth,
+                    maxWidth: mobileLogoMaxWidth,
                     height: "auto",
                   }}
                   src="/nextgen-logo.png"
@@ -122,16 +158,18 @@ export default function NextGenNavigationHeader(
               }
             }}
           />
-          <LFGButton contract={"nextgen"} />
+          <span className="flex-shrink-0">
+            <LFGButton contract={"nextgen"} />
+          </span>
         </div>
         <div
           className={`d-flex align-items-center ${
-            isMobile
-              ? "justify-content-center pt-3 pb-3"
+            isStackedHeader
+              ? "w-100 justify-content-center pt-3 pb-3"
               : "justify-content-end"
           }`}
         >
-          <span className="d-flex gap-4">
+          <span className="d-flex justify-content-center justify-content-md-end gap-3 gap-md-4">
             {printView(undefined)}
             {printView(NextgenView.COLLECTIONS)}
             {printView(NextgenView.ARTISTS)}

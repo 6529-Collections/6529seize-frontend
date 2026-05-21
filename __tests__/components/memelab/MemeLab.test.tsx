@@ -1,7 +1,6 @@
 import {
   getInitialRouterValues,
   printNftContent,
-  printSortButtons,
   sortChanged,
 } from "@/components/memelab/MemeLab";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
@@ -50,23 +49,6 @@ describe("MemeLab utilities", () => {
     );
     expect(initialSortDir).toBe(SortDirection.DESC);
     expect(initialSort).toBe(MemeLabSort.EDITION_SIZE);
-  });
-
-  it("printSortButtons filters options when collection", () => {
-    render(
-      <div>
-        {printSortButtons(
-          MemeLabSort.AGE,
-          VolumeType.ALL_TIME,
-          jest.fn(),
-          jest.fn(),
-          true
-        )}
-      </div>
-    );
-    const buttons = screen.getAllByTestId("sort").map((b) => b.textContent);
-    expect(buttons).not.toContain(MemeLabSort.ARTISTS);
-    expect(buttons).not.toContain(MemeLabSort.COLLECTIONS);
   });
 
   it("printNftContent shows different text", () => {

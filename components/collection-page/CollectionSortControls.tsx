@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 
 type SortValue = string;
 
-export function CollectionSortButton<TSort extends SortValue>({
+function CollectionSortButton<TSort extends SortValue>({
   currentSort,
   sort,
   select,

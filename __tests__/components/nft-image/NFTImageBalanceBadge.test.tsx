@@ -1,6 +1,4 @@
-import NFTImageBalanceBadge, {
-  getNFTImageBalanceLabel,
-} from "@/components/nft-image/NFTImageBalanceBadge";
+import NFTImageBalanceBadge from "@/components/nft-image/NFTImageBalanceBadge";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
@@ -11,10 +9,19 @@ jest.mock("@/components/nft-image/NFTImage.module.scss", () => ({
 
 describe("NFTImageBalanceBadge", () => {
   it("uses consistent labels for ownership states", () => {
-    expect(getNFTImageBalanceLabel("seized", 3)).toBe("SEIZED x3");
-    expect(getNFTImageBalanceLabel("unseized")).toBe("UNSEIZED");
-    expect(getNFTImageBalanceLabel("loading")).toBe("...");
-    expect(getNFTImageBalanceLabel("error")).toBe("N/A");
+    const { rerender } = render(
+      <NFTImageBalanceBadge state="seized" balance={3} height={300} />
+    );
+    expect(screen.getByText("SEIZED x3")).toBeInTheDocument();
+
+    rerender(<NFTImageBalanceBadge state="unseized" height={300} />);
+    expect(screen.getByText("UNSEIZED")).toBeInTheDocument();
+
+    rerender(<NFTImageBalanceBadge state="loading" height={300} />);
+    expect(screen.getByText("...")).toBeInTheDocument();
+
+    rerender(<NFTImageBalanceBadge state="error" height={300} />);
+    expect(screen.getByText("N/A")).toBeInTheDocument();
   });
 
   it("renders the compact seized style from the meme artwork controls", () => {

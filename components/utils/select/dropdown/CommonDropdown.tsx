@@ -25,6 +25,7 @@ export default function CommonDropdown<T, U = unknown>(
     renderItemChildren,
     closeOnSelect = true,
     showFilterLabel = false,
+    menuMinWidth,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -70,12 +71,22 @@ export default function CommonDropdown<T, U = unknown>(
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const rootClassName = isEditorial
+    ? "tailwind-scope tw-inline-flex tw-h-full tw-max-w-full"
+    : "tailwind-scope tw-h-full tw-w-full";
+  const triggerWrapperClassName = isEditorial
+    ? "tw-relative tw-inline-flex tw-max-w-full"
+    : "tw-relative tw-w-full";
+  const editorialUnderlineClass =
+    isOpen && !disabled
+      ? "after:tw-scale-x-100 after:tw-bg-primary-400"
+      : "after:tw-scale-x-0 after:tw-bg-iron-700 hover:after:tw-scale-x-100";
   const buttonClasses = isEditorial
     ? `${
         disabled
-          ? "tw-border-iron-900 tw-text-iron-500 tw-opacity-50"
-          : "tw-border-iron-700/70 tw-text-iron-200 hover:tw-border-iron-600 hover:tw-bg-iron-900/50 hover:tw-text-white"
-      } tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-bg-transparent tw-py-2 tw-pl-3.5 tw-pr-8 tw-text-left tw-text-xs tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-none tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`
+          ? "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-50"
+          : "tw-text-iron-300 hover:tw-text-iron-100"
+      } ${editorialUnderlineClass} tw-group tw-relative tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-left tw-text-sm tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-none tw-transition tw-duration-200 tw-ease-out after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus:tw-outline-none focus-visible:tw-outline-none focus-visible:tw-text-iron-100`
     : `${
         disabled
           ? "tw-text-iron-400 tw-opacity-50"
@@ -89,10 +100,19 @@ export default function CommonDropdown<T, U = unknown>(
             ? "tw-py-[11px] tw-text-sm"
             : "tw-py-2.5 tw-text-xs"
       } tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-pl-3.5 tw-pr-8 tw-text-left tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400`;
+  const labelClassName = isEditorial
+    ? "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500"
+    : "tw-font-semibold tw-text-iron-500";
+  const valueClassName = isEditorial
+    ? "tw-truncate tw-text-iron-200 group-hover:tw-text-white"
+    : "";
+  const chevronClassName = isEditorial
+    ? "tw-pointer-events-none tw-inline-flex tw-shrink-0 tw-items-center tw-text-iron-500 group-hover:tw-text-iron-300"
+    : "tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5";
 
   return (
-    <div className="tailwind-scope tw-h-full tw-w-full">
-      <div className="tw-relative tw-w-full">
+    <div className={rootClassName}>
+      <div className={triggerWrapperClassName}>
         <button
           ref={buttonRef}
           type="button"
@@ -103,18 +123,24 @@ export default function CommonDropdown<T, U = unknown>(
           disabled={disabled}
           className={buttonClasses}
         >
-          {showFilterLabel && (
-            <span className="tw-font-semibold tw-text-iron-500">
-              {filterLabel}:{" "}
-            </span>
-          )}
-          {computedLabel}
+          <span
+            className={
+              isEditorial ? "tw-flex tw-min-w-0 tw-items-center tw-gap-1.5" : ""
+            }
+          >
+            {showFilterLabel && (
+              <span className={labelClassName}>
+                {filterLabel}:{isEditorial ? "" : " "}
+              </span>
+            )}
+            <span className={valueClassName}>{computedLabel}</span>
+          </span>
           {sortDirection && (
             <span className="-tw-mt-0.5 tw-ml-2">
               <CommonTableSortIcon direction={sortDirection} isActive={true} />
             </span>
           )}
-          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5">
+          <span className={chevronClassName}>
             <svg
               ref={iconScope}
               className="tw-h-4 tw-w-4"
@@ -131,7 +157,7 @@ export default function CommonDropdown<T, U = unknown>(
                 strokeLinejoin="round"
               />
             </svg>
-          </div>
+          </span>
         </button>
       </div>
       <CommonDropdownItemsWrapper
@@ -140,6 +166,8 @@ export default function CommonDropdown<T, U = unknown>(
         buttonRef={buttonRef}
         filterLabel={filterLabel}
         dynamicPosition={dynamicPosition}
+        horizontalAlign={isEditorial ? "right" : "auto"}
+        minWidth={menuMinWidth}
         onIsMobile={setIsMobile}
       >
         {items.map((item, i) => (

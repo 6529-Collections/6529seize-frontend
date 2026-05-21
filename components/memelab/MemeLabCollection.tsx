@@ -182,7 +182,7 @@ export default function LabCollection({
       tokenIds={tokenIds}
       enabled={!!connectedProfile}
     >
-      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
           <header className="tw-pb-5">
             <div className="tw-flex tw-flex-col tw-gap-3">

@@ -1,19 +1,16 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
+import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import {
-  SortButton,
-  printVolumeTypeDropdown,
-} from "@/components/the-memes/TheMemes";
+import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -90,35 +87,6 @@ function getMemeLabSortOptions(isCollection?: boolean) {
   }
 
   return enumValues;
-}
-
-export function printSortButtons(
-  sort: MemeLabSort,
-  volumeType: VolumeType,
-  setSort: (sort: MemeLabSort) => void,
-  setVolumeType: (volumeType: VolumeType) => void,
-  isCollection?: boolean
-) {
-  const enumValues = getMemeLabSortOptions(isCollection);
-
-  return (
-    <>
-      {enumValues.map((v) => (
-        <SortButton
-          key={v}
-          currentSort={sort}
-          sort={v}
-          select={() => setSort(v)}
-        />
-      ))}
-      {printVolumeTypeDropdown(
-        sort === MemeLabSort.VOLUME,
-        setVolumeType,
-        () => setSort(MemeLabSort.VOLUME),
-        volumeType
-      )}
-    </>
-  );
 }
 
 export function printNftContent(
@@ -667,7 +635,7 @@ export default function MemeLabComponent() {
       tokenIds={tokenIds}
       enabled={isConnected}
     >
-      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
         <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
           <header className="tw-pb-5">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">

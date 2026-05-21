@@ -210,6 +210,105 @@ test("uses trigger width when it is wider than the minimum menu width", async ()
   });
 });
 
+test("uses a custom minimum menu width when provided", async () => {
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: 1280,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    configurable: true,
+    value: 720,
+  });
+  jest.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(120);
+
+  const button = document.createElement("button");
+  Object.defineProperty(button, "getBoundingClientRect", {
+    configurable: true,
+    value: () =>
+      createRect({
+        top: 200,
+        bottom: 232,
+        left: 100,
+        right: 132,
+      }),
+  });
+
+  render(
+    <CommonDropdownItemsDefaultWrapper
+      isOpen={true}
+      setOpen={() => {}}
+      buttonRef={{ current: button }}
+      minWidth={320}
+    >
+      <li>item</li>
+    </CommonDropdownItemsDefaultWrapper>
+  );
+
+  await waitFor(() => {
+    const wrapper = getPortalWrapper();
+    expect(wrapper.style.width).toBe("320px");
+  });
+});
+
+test("right-aligns the dropdown to the trigger when requested", async () => {
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    value: 1280,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    configurable: true,
+    value: 720,
+  });
+  jest.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(120);
+
+  const button = document.createElement("button");
+  Object.defineProperty(button, "getBoundingClientRect", {
+    configurable: true,
+    value: () =>
+      createRect({
+        top: 200,
+        bottom: 232,
+        left: 500,
+        right: 600,
+      }),
+  });
+
+  render(
+    <CommonDropdownItemsDefaultWrapper
+      isOpen={true}
+      setOpen={() => {}}
+      buttonRef={{ current: button }}
+      horizontalAlign="right"
+    >
+      <li>item</li>
+    </CommonDropdownItemsDefaultWrapper>
+  );
+
+  await waitFor(() => {
+    const wrapper = getPortalWrapper();
+    expect(wrapper.style.left).toBe("376px");
+  });
+});
+
+test("renders the menu scroll region with dark scrollbar styling", async () => {
+  render(
+    <CommonDropdownItemsDefaultWrapper
+      isOpen={true}
+      setOpen={() => {}}
+      buttonRef={{ current: null }}
+    >
+      <li>item</li>
+    </CommonDropdownItemsDefaultWrapper>
+  );
+
+  const scrollRegion = screen.getByRole("menu")
+    .firstElementChild as HTMLElement;
+  expect(scrollRegion).toHaveClass(
+    "[scrollbar-color:#3f3f46_#18181b]",
+    "[scrollbar-width:thin]"
+  );
+});
+
 test("closes when focus moves outside the trigger and portaled menu by default", async () => {
   const setOpen = jest.fn();
   const buttonRef = React.createRef<HTMLButtonElement>();

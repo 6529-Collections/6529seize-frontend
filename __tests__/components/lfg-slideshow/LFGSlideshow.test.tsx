@@ -33,7 +33,11 @@ describe("LFGSlideshow", () => {
     const { container } = render(<LFGButton contract="c" />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
     const button = screen.getByRole("button", { name: "LFG: Start the Show!" });
-    expect(button).toHaveClass("tw-border-iron-800", "tw-bg-iron-800");
+    expect(button).toHaveClass(
+      "tw-border-primary-500/60",
+      "tw-bg-primary-500/10",
+      "tw-text-primary-300"
+    );
     expect(button).not.toHaveClass("tw-bg-primary-500");
     fireEvent.click(button);
     expect(screen.getByAltText("LFG Slide 1")).toBeInTheDocument();

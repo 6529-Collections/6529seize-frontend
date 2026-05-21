@@ -14,6 +14,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFTLite, Rememe } from "@/entities/INFT";
 import { formatAddress, numberWithCommas } from "@/helpers/Helpers";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { fetchUrl } from "@/services/6529api";
 import { ArrowPathIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
@@ -34,14 +35,10 @@ export enum RememeSort {
   CREATED_ASC = "Recently Added",
 }
 
-const FILTER_LABEL_CLASS =
-  "tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500";
-
-const FILTER_INLINE_LABEL_CLASS =
-  "tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
-
 const REMEMES_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+const REMEMES_TOTAL_COUNT_CLASS =
+  "tw-shrink-0 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-500 sm:tw-text-base";
 
 function getRememeCollectionName(rememe: Rememe) {
   return (
@@ -262,85 +259,86 @@ export default function Rememes() {
   }
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0A0A0B] tw-pb-5 tw-text-white">
+    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
       <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
-        <div className="tw-mb-3 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-12">
-          <div className="tw-pb-3 sm:tw-col-span-8 sm:tw-pb-0 md:tw-col-span-9">
-            <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-              <span className="tw-hidden tw-items-center tw-gap-2 xl:tw-flex">
-                <Image
-                  unoptimized
-                  loading={"eager"}
-                  width="0"
-                  height="0"
-                  style={{ width: "250px", height: "auto" }}
-                  className="tw-hidden md:tw-block"
-                  src="/re-memes.png"
-                  alt="re-memes"
-                />
-                {totalResults > 0 && (
-                  <span className="tw-text-lg tw-text-iron-300">
-                    (x{numberWithCommas(totalResults)})
-                  </span>
-                )}
-              </span>
-              <span className="xl:tw-hidden">
-                <CollectionsDropdown
-                  activePage="rememes"
-                  variant="brand"
-                  triggerContent={
-                    <span className="tw-inline-flex tw-items-center tw-gap-2">
-                      <Image
-                        unoptimized
-                        loading={"eager"}
-                        width="0"
-                        height="0"
-                        style={{ width: "150px", height: "auto" }}
-                        src="/re-memes.png"
-                        alt="re-memes"
-                      />
-                      {totalResults > 0 && (
-                        <span className="tw-text-lg tw-text-iron-300">
-                          (x{numberWithCommas(totalResults)})
-                        </span>
-                      )}
+        <header className="tw-pb-5">
+          <div className="tw-flex tw-flex-col tw-gap-4">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+              <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
+                <div className="tw-hidden tw-min-w-0 tw-items-center tw-gap-2 xl:tw-flex">
+                  <Image
+                    unoptimized
+                    loading={"eager"}
+                    width="0"
+                    height="0"
+                    style={{ width: "250px", height: "auto" }}
+                    className="tw-hidden md:tw-block"
+                    src="/re-memes.png"
+                    alt="re-memes"
+                  />
+                  {totalResults > 0 && (
+                    <span className={REMEMES_TOTAL_COUNT_CLASS}>
+                      (x{numberWithCommas(totalResults)})
                     </span>
-                  }
-                />
-              </span>
-              <LFGButton contract={"rememes"} />
-            </span>
-          </div>
-          <div className="tw-flex tw-items-center sm:tw-col-span-4 sm:tw-justify-end md:tw-col-span-3">
-            <div className="tw-w-full sm:tw-w-auto [&>button]:tw-w-full sm:[&>button]:tw-w-auto">
-              <PrimaryButton
-                loading={false}
-                disabled={false}
-                onClicked={() => {
-                  window.location.href = "/rememes/add";
-                }}
-              >
-                Add ReMeme
-                <PlusCircleIcon className="tw-size-4 tw-shrink-0 [stroke-width:2.25]" />
-              </PrimaryButton>
+                  )}
+                </div>
+                <div className="tw-min-w-0 xl:tw-hidden">
+                  <CollectionsDropdown
+                    activePage="rememes"
+                    variant="brand"
+                    triggerContent={
+                      <span className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2">
+                        <Image
+                          unoptimized
+                          loading={"eager"}
+                          width="0"
+                          height="0"
+                          style={{ width: "150px", height: "auto" }}
+                          className="tw-shrink tw-basis-auto"
+                          src="/re-memes.png"
+                          alt="re-memes"
+                        />
+                        {totalResults > 0 && (
+                          <span className={REMEMES_TOTAL_COUNT_CLASS}>
+                            (x{numberWithCommas(totalResults)})
+                          </span>
+                        )}
+                      </span>
+                    }
+                  />
+                </div>
+                <LFGButton contract={"rememes"} />
+              </div>
+              <div className="tw-flex tw-w-full tw-items-center sm:tw-w-auto sm:tw-justify-end">
+                <div className="tw-w-full sm:tw-w-auto [&>button]:tw-w-full sm:[&>button]:tw-w-auto">
+                  <PrimaryButton
+                    loading={false}
+                    disabled={false}
+                    onClicked={() => {
+                      window.location.href = "/rememes/add";
+                    }}
+                  >
+                    Add ReMeme
+                    <PlusCircleIcon className="tw-size-4 tw-shrink-0 [stroke-width:2.25]" />
+                  </PrimaryButton>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </header>
 
         {rememesLoaded && (
-          <div className="tw-flex tw-flex-col tw-gap-4 tw-py-2 xl:tw-flex-row xl:tw-items-center xl:tw-justify-between">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-              <span className={FILTER_LABEL_CLASS}>Sort:</span>
-              <div className="tw-w-40">
-                <CommonDropdown
-                  items={sortingItems}
-                  activeItem={selectedSorting}
-                  filterLabel="Sort"
-                  setSelected={setSelectedSorting}
-                  size="sm"
-                  variant="editorial"
-                />
-              </div>
+          <div className="tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-6 tw-gap-y-2 tw-overflow-x-auto tw-overflow-y-hidden tw-py-2 tw-pb-3 [-ms-overflow-style:none] [scrollbar-width:none] sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-2 md:tw-justify-between [&::-webkit-scrollbar]:tw-hidden">
+            <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
+              <CommonDropdown
+                items={sortingItems}
+                activeItem={selectedSorting}
+                filterLabel="Sort"
+                setSelected={setSelectedSorting}
+                size="sm"
+                variant="editorial"
+                showFilterLabel
+              />
               {selectedSorting === RememeSort.RANDOM && (
                 <>
                   <button
@@ -348,56 +346,43 @@ export default function Rememes() {
                     aria-label="Refresh results"
                     onClick={() => fetchResults(page)}
                     data-tooltip-id="refresh-rememes-results"
-                    className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/70 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-border-iron-600 hover:tw-bg-iron-900/50 hover:tw-text-white focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                    className="tw-inline-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition hover:tw-bg-white/[0.04] hover:tw-text-iron-200 focus:tw-outline-none focus-visible:tw-outline-none"
                   >
                     <ArrowPathIcon className="tw-size-5" />
                   </button>
                   <Tooltip
                     id="refresh-rememes-results"
                     place="top"
-                    delayShow={250}
-                    style={{
-                      backgroundColor: "#f8f9fa",
-                      color: "#212529",
-                      padding: "4px 8px",
-                    }}
+                    opacity={1}
+                    style={TOOLTIP_STYLES}
                   >
                     Refresh results
                   </Tooltip>
                 </>
               )}
             </div>
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-3 xl:tw-justify-end">
-              <div className="tw-flex tw-items-center tw-gap-2">
-                <span className={FILTER_INLINE_LABEL_CLASS}>Token Type:</span>
-                <div className="tw-w-[5.25rem]">
-                  <CommonDropdown
-                    items={tokenTypeItems}
-                    activeItem={selectedTokenType}
-                    filterLabel="Token Type"
-                    setSelected={setSelectedTokenType}
-                    size="sm"
-                    variant="editorial"
-                  />
-                </div>
-              </div>
-              <span className="tw-hidden tw-h-8 tw-w-px tw-bg-iron-800 md:tw-block" />
-              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-                <span className={FILTER_INLINE_LABEL_CLASS}>
-                  Meme Reference:
-                </span>
-                <div
-                  className={selectedMeme === 0 ? "tw-w-[5.25rem]" : "tw-w-60"}
-                >
-                  <CommonDropdown
-                    items={memeReferenceItems}
-                    activeItem={selectedMeme}
-                    filterLabel="Meme Reference"
-                    setSelected={setSelectedMeme}
-                    size="sm"
-                    variant="editorial"
-                  />
-                </div>
+            <div className="tw-flex tw-shrink-0 tw-flex-nowrap tw-items-center tw-gap-x-6 tw-gap-y-2 sm:tw-flex-wrap md:tw-ml-auto">
+              <CommonDropdown
+                items={tokenTypeItems}
+                activeItem={selectedTokenType}
+                filterLabel="Token Type"
+                setSelected={setSelectedTokenType}
+                size="sm"
+                variant="editorial"
+                showFilterLabel
+              />
+              <div className="tw-shrink-0">
+                <CommonDropdown
+                  items={memeReferenceItems}
+                  activeItem={selectedMeme}
+                  filterLabel="Meme Reference"
+                  noneLabel={queryMemeId ?? undefined}
+                  setSelected={setSelectedMeme}
+                  size="sm"
+                  variant="editorial"
+                  menuMinWidth={320}
+                  showFilterLabel
+                />
               </div>
             </div>
           </div>

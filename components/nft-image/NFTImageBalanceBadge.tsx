@@ -38,7 +38,7 @@ const COMPACT_STATE_CLASSES: Record<NFTImageBalanceBadgeState, string> = {
 
 const COMPACT_SEIZED_QUANTITY_CLASS = "tw-text-primary-300/90";
 
-export function getNFTImageBalanceLabel(
+function getNFTImageBalanceLabel(
   state: NFTImageBalanceBadgeState,
   balance = 0
 ) {
