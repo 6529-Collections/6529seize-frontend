@@ -2,7 +2,7 @@
 
 ## Overview
 
-Use `Outcomes` to define winner rewards in `Rank` wave creation.
+Use `Outcomes` to define winner rewards in `Rank` and `Approve` wave creation.
 You must save at least one outcome before `Next` can move to `Description`.
 
 ## Location in the Site
@@ -10,11 +10,12 @@ You must save at least one outcome before `Next` can move to `Description`.
 - Full-page create route: `/waves/create`
 - Desktop modal create mode: `?create=wave` on waves/messages shells
 - Step label: `Outcomes`
-- User-reachable only in `Rank` creation (`Approve` is disabled in `Overview`)
+- User-reachable in `Rank` and `Approve` creation
 
 ## Step Path
 
 - `Rank`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
+- `Approve`: `Overview -> Groups -> Dates -> Drops -> Voting -> Outcomes -> Description`
 
 ## Outcome Types
 
@@ -75,7 +76,7 @@ You must save at least one outcome before `Next` can move to `Description`.
 ## Limitations / Notes
 
 - Percentage distribution mode is not exposed in the current outcomes UI.
-- `Approve` outcomes paths exist in code but are not user-reachable from the type picker.
+- `Approve` outcomes use approve-specific forms and payload mapping.
 
 ## Related Pages
 

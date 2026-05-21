@@ -19,7 +19,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - `Chat`: `Overview` -> `Groups` -> `Description`
 - `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
   `Outcomes` -> `Description`
-- `Approve` appears in the picker but is disabled in the current UI.
+- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
+  `Outcomes` -> `Description`
 
 ## What You Can Set
 
@@ -30,7 +31,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - `Wave Type`
   - `Chat`
   - `Rank`
-  - `Approve` (shown but disabled)
+  - `Approve`
 - Uploaded image shows a preview; `Delete` removes it.
 - File input and drag-drop both use the first selected file.
 
@@ -65,7 +66,6 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Limitations / Notes
 
-- `Approve` cannot be selected in the current picker UI.
 - This page documents wave-creation `Overview` only.
 - Direct-message creation is documented separately.
 
