@@ -56,9 +56,7 @@ export default function WaveDropActions({
   }
 
   let positionClass = "-tw-top-9";
-  if (placement === "message-top") {
-    positionClass = "-tw-top-9";
-  } else if (compact) {
+  if (compact && placement === "legacy") {
     positionClass = "-tw-top-4";
   }
 
