@@ -6,22 +6,24 @@ import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import {
   getDisplayQuickVoteAmounts,
+  getQuickVoteAbsoluteRemainingPower,
+  getQuickVoteRatingRange,
   isMemesQuickVoteVoteableDrop,
 } from "@/hooks/memesQuickVote.helpers";
 import {
   applyFailedDropRestoreState,
   applyFetchedWindowState,
   applyOptimisticAdvanceState,
-  clampDropMaxRating,
-  createInitialOptimisticRemainingPowerState,
+  clampDropRatingRange,
+  createInitialOptimisticRemainingVotePowerState,
   createInitialSessionState,
-  getCurrentOptimisticRemainingPowerState,
-  getEffectiveOptimisticRemainingPower,
+  getCurrentOptimisticRemainingVotePowerState,
+  getEffectiveOptimisticRemainingVotePower,
   getUniqueDrops,
-  reconcileOptimisticRemainingPower,
-  reduceOptimisticRemainingPower,
-  restoreOptimisticRemainingPower,
-  type KeyedOptimisticRemainingPowerState,
+  reconcileOptimisticRemainingVotePower,
+  reduceOptimisticRemainingVotePower,
+  restoreOptimisticRemainingVotePower,
+  type KeyedOptimisticRemainingVotePowerState,
   type MemesQuickVoteSessionState,
 } from "@/hooks/memesQuickVote.queue.state";
 import {
@@ -596,7 +598,7 @@ const useMemesQuickVoteQueueSubmission = ({
   requestAuth,
   session,
   setAndPersistRecentAmounts,
-  setOptimisticRemainingPowerState,
+  setOptimisticRemainingVotePowerState,
   setToast,
   stateKey,
 }: {
@@ -606,8 +608,8 @@ const useMemesQuickVoteQueueSubmission = ({
   readonly setAndPersistRecentAmounts: (
     updater: (current: number[]) => number[]
   ) => void;
-  readonly setOptimisticRemainingPowerState: Dispatch<
-    SetStateAction<KeyedOptimisticRemainingPowerState>
+  readonly setOptimisticRemainingVotePowerState: Dispatch<
+    SetStateAction<KeyedOptimisticRemainingVotePowerState>
   >;
   readonly setToast: ContextType<typeof AuthContext>["setToast"];
   readonly stateKey: string;
@@ -617,14 +619,16 @@ const useMemesQuickVoteQueueSubmission = ({
       session.restoreFailedDrop(drop);
 
       if (type === "vote") {
-        setOptimisticRemainingPowerState((current) =>
-          restoreOptimisticRemainingPower({
+        setOptimisticRemainingVotePowerState((current) =>
+          restoreOptimisticRemainingVotePower({
             amount,
-            current: getCurrentOptimisticRemainingPowerState({
+            current: getCurrentOptimisticRemainingVotePowerState({
               key: stateKey,
               state: current,
             }),
-            maxRating: drop.context_profile_context?.max_rating ?? 0,
+            remainingPower: getQuickVoteAbsoluteRemainingPower(
+              getQuickVoteRatingRange(drop)
+            ),
           })
         );
       }
@@ -635,23 +639,25 @@ const useMemesQuickVoteQueueSubmission = ({
       session.advanceVisibleDrop(drop);
 
       if (type === "vote") {
-        setOptimisticRemainingPowerState((current) =>
-          reduceOptimisticRemainingPower({
+        setOptimisticRemainingVotePowerState((current) =>
+          reduceOptimisticRemainingVotePower({
             amount,
-            current: getCurrentOptimisticRemainingPowerState({
+            current: getCurrentOptimisticRemainingVotePowerState({
               key: stateKey,
               state: current,
             }),
-            maxRating: drop.context_profile_context?.max_rating ?? 0,
+            remainingPower: getQuickVoteAbsoluteRemainingPower(
+              getQuickVoteRatingRange(drop)
+            ),
           })
         );
       }
     },
     onRatingSuccess: (_drop, _amount, nextRemainingPower, type) => {
       if (type === "vote") {
-        setOptimisticRemainingPowerState((current) =>
-          reconcileOptimisticRemainingPower({
-            current: getCurrentOptimisticRemainingPowerState({
+        setOptimisticRemainingVotePowerState((current) =>
+          reconcileOptimisticRemainingVotePower({
+            current: getCurrentOptimisticRemainingVotePowerState({
               key: stateKey,
               state: current,
             }),
@@ -686,10 +692,12 @@ export const useMemesQuickVoteQueue = ({
       ? memesWaveId
       : null;
   const stateKey = `${sessionId}:${waveId ?? ""}:${contextProfile ?? ""}`;
-  const [optimisticRemainingPowerState, setOptimisticRemainingPowerState] =
-    useState<KeyedOptimisticRemainingPowerState>(() =>
-      createInitialOptimisticRemainingPowerState(stateKey)
-    );
+  const [
+    optimisticRemainingVotePowerState,
+    setOptimisticRemainingVotePowerState,
+  ] = useState<KeyedOptimisticRemainingVotePowerState>(() =>
+    createInitialOptimisticRemainingVotePowerState(stateKey)
+  );
   const { recentAmountsByRecency, setAndPersistRecentAmounts } =
     useMemesQuickVoteStorage({
       contextProfile,
@@ -718,7 +726,7 @@ export const useMemesQuickVoteQueue = ({
       requestAuth,
       session,
       setAndPersistRecentAmounts,
-      setOptimisticRemainingPowerState,
+      setOptimisticRemainingVotePowerState,
       setToast,
       stateKey,
     });
@@ -730,11 +738,11 @@ export const useMemesQuickVoteQueue = ({
   const activeApiDrop = session.sessionState.currentDrop;
   const nextApiDrop = session.sessionState.lookaheadDrops[0] ?? null;
   const effectiveOptimisticRemainingPower =
-    getEffectiveOptimisticRemainingPower({
+    getEffectiveOptimisticRemainingVotePower({
       activeApiDrop,
-      state: getCurrentOptimisticRemainingPowerState({
+      state: getCurrentOptimisticRemainingVotePowerState({
         key: stateKey,
-        state: optimisticRemainingPowerState,
+        state: optimisticRemainingVotePowerState,
       }),
     });
   const activeDropCandidate = useMemo(() => {
@@ -742,7 +750,7 @@ export const useMemesQuickVoteQueue = ({
       return null;
     }
 
-    return clampDropMaxRating(
+    return clampDropRatingRange(
       convertApiDropToExtendedDrop(activeApiDrop),
       effectiveOptimisticRemainingPower
     );
@@ -755,7 +763,7 @@ export const useMemesQuickVoteQueue = ({
       return null;
     }
 
-    return clampDropMaxRating(
+    return clampDropRatingRange(
       convertApiDropToExtendedDrop(nextApiDrop),
       effectiveOptimisticRemainingPower
     );
@@ -782,7 +790,9 @@ export const useMemesQuickVoteQueue = ({
     },
     skipDrop: submitSkip,
     submitVote,
-    uncastPower: activeDrop?.context_profile_context?.max_rating ?? null,
+    uncastPower: activeDrop
+      ? getQuickVoteAbsoluteRemainingPower(getQuickVoteRatingRange(activeDrop))
+      : null,
     unratedCount: session.sessionState.unratedCount,
     votingLabel: activeDrop
       ? WAVE_VOTING_LABELS[activeDrop.wave.voting_credit_type]

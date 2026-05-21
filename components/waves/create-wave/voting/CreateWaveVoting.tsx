@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
@@ -32,12 +31,14 @@ export default function CreateWaveVoting({
   selectedType,
   category,
   profileId,
+  allowNegativeVotes,
   maxVotesPerIdentityPerDrop,
   approvalThreshold,
   errors,
   onTypeChange,
   setCategory,
   setProfileId,
+  onAllowNegativeVotesChange,
   setMaxVotesPerIdentityPerDrop,
   setApprovalThreshold,
   timeWeighted,
@@ -47,20 +48,19 @@ export default function CreateWaveVoting({
   readonly selectedType: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly allowNegativeVotes: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly approvalThreshold: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
+  readonly onAllowNegativeVotesChange: (allowNegativeVotes: boolean) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
   readonly setApprovalThreshold: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
-  // Still using local state for negative voting toggle for now
-  const [allowNegativeVotes, setAllowNegativeVotes] = useState(true);
-
   const TITLES: Record<ApiWaveType, string> = {
     [ApiWaveType.Chat]: "How Drops are Rated",
     [ApiWaveType.Rank]: "How Drops are Voted",
@@ -147,7 +147,8 @@ export default function CreateWaveVoting({
       {waveType !== ApiWaveType.Chat && (
         <NegativeVotingToggle
           allowNegativeVotes={allowNegativeVotes}
-          onChange={setAllowNegativeVotes}
+          onChange={onAllowNegativeVotesChange}
+          isDisabled={false}
         />
       )}
 

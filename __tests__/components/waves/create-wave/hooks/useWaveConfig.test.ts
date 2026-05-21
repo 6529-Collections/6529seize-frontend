@@ -61,6 +61,7 @@ describe("useWaveConfig", () => {
       );
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(result.current.config.voting.allowNegativeVotes).toBe(true);
       expect(
         result.current.config.voting.maxVotesPerIdentityPerDrop
       ).toBeNull();
@@ -355,11 +356,13 @@ describe("useWaveConfig", () => {
       act(() => {
         result.current.onCategoryChange("test-category");
         result.current.onProfileIdChange("test-profile");
+        result.current.onAllowNegativeVotesChange(false);
         result.current.onMaxVotesPerIdentityPerDropChange(1);
       });
 
       expect(result.current.config.voting.category).toBe("test-category");
       expect(result.current.config.voting.profileId).toBe("test-profile");
+      expect(result.current.config.voting.allowNegativeVotes).toBe(false);
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
 
       // Change voting type - should reset dependent fields
@@ -370,6 +373,7 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.type).toBe(ApiWaveCreditType.Rep);
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
+      expect(result.current.config.voting.allowNegativeVotes).toBe(false);
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
       expect(result.current.config.voting.winningThreshold).toBeNull();
       expect(result.current.config.voting.timeWeighted).toEqual({
@@ -415,6 +419,22 @@ describe("useWaveConfig", () => {
       expect(
         result.current.config.voting.maxVotesPerIdentityPerDrop
       ).toBeNull();
+    });
+
+    it("should update allow negative votes", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onAllowNegativeVotesChange(false);
+      });
+
+      expect(result.current.config.voting.allowNegativeVotes).toBe(false);
+
+      act(() => {
+        result.current.onAllowNegativeVotesChange(true);
+      });
+
+      expect(result.current.config.voting.allowNegativeVotes).toBe(true);
     });
 
     it("should update time weighted voting settings", () => {
