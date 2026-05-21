@@ -83,6 +83,16 @@ describe("GradientsComponent", () => {
     let links = await screen.findAllByRole("link");
     expect(links[0]).toHaveAttribute("href", "/6529-gradient/1");
     expect(links[1]).toHaveAttribute("href", "/6529-gradient/2");
+    expect(links[0]).toHaveClass("tw-text-iron-100");
+    expect(links[0].querySelector(".tw-bg-iron-900")).toBeInTheDocument();
+    expect(
+      links[0].querySelector(".tw-text-center.tw-text-md.tw-text-iron-50")
+    ).toHaveTextContent("NFT1");
+    expect(
+      links[0].querySelector(
+        ".tw-mt-2.tw-min-h-5.tw-w-full.tw-text-center.tw-text-xs.tw-leading-5"
+      )
+    ).toHaveTextContent("TDH: 1 | Rank: 1/2");
 
     const icons = screen.getAllByTestId("icon");
     await userEvent.click(icons[1]); // click to switch sort direction to DESC

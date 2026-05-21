@@ -31,6 +31,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   dynamicPosition = true,
   closeOnFocusOutside = true,
   horizontalAlign = "auto",
+  minWidth = DEFAULT_MENU_MIN_WIDTH,
   portalClassName = "tw-z-[999]",
   children,
 }: {
@@ -40,6 +41,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   readonly dynamicPosition?: boolean | undefined;
   readonly closeOnFocusOutside?: boolean | undefined;
   readonly horizontalAlign?: DropdownHorizontalAlign | undefined;
+  readonly minWidth?: number | undefined;
   readonly portalClassName?: string | undefined;
   readonly children: ReactNode;
 }) {
@@ -70,7 +72,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const dropdownEl = dropdownRef.current;
-    const width = Math.max(buttonRect.width, DEFAULT_MENU_MIN_WIDTH);
+    const width = Math.max(buttonRect.width, minWidth);
     dropdownEl.style.width = `${width}px`;
 
     const height = listRef.current?.offsetHeight ?? dropdownEl.offsetHeight;
@@ -108,7 +110,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
     dropdownEl.style.top = `${top}px`;
     dropdownEl.style.left = `${left}px`;
-  }, [dynamicPosition, horizontalAlign, isOpen, buttonRef]);
+  }, [dynamicPosition, horizontalAlign, isOpen, buttonRef, minWidth]);
 
   useLayoutEffect(() => {
     position();
@@ -161,7 +163,7 @@ export default function CommonDropdownItemsDefaultWrapper({
       style={{
         left: 0,
         top: 0,
-        width: `${DEFAULT_MENU_MIN_WIDTH}px`,
+        width: `${minWidth}px`,
       }}
     >
       <AnimatePresence mode="wait" initial={false}>
@@ -176,7 +178,7 @@ export default function CommonDropdownItemsDefaultWrapper({
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden">
+            <div className="tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-color:#3f3f46_#18181b] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb:hover]:tw-bg-iron-600 [&::-webkit-scrollbar-thumb]:tw-rounded-full [&::-webkit-scrollbar-thumb]:tw-bg-iron-700 [&::-webkit-scrollbar-track]:tw-bg-iron-900 [&::-webkit-scrollbar]:tw-w-2">
               <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-0.5 tw-px-2">
                 {children}
               </ul>

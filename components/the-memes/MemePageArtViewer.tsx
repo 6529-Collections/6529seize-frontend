@@ -220,14 +220,12 @@ export function MemePageArtViewer({
       <Col xs={12} className={styles["artControls"]}>
         <div className={styles["artControlsContent"]}>
           {showBalanceControl && (
-            <div
-              className={`${styles["artControlsBalance"] ?? ""} tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-text-iron-400`}
-            >
+            <div className={styles["artControlsBalance"] ?? ""}>
               <NFTImageBalance
                 contract={nft.contract}
                 tokenId={nft.id}
                 height={650}
-                inline
+                variant="compact"
               />
             </div>
           )}

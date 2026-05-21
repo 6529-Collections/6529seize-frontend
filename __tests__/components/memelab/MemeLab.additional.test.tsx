@@ -12,7 +12,7 @@ import { render } from "@testing-library/react";
 jest.mock("@/helpers/Helpers", () => ({
   printMintDate: jest.fn((date: Date | string) => {
     if (!date) return "-";
-    return "Jan 1, 2023 (1 year ago)";
+    return "Jan 1, 2023";
   }),
   numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
   getValuesForVolumeType: jest.fn((volumeType: VolumeType, nft: any) => {
@@ -135,7 +135,7 @@ describe("MemeLab extra tests", () => {
         {printNftContent(nft, MemeLabSort.AGE, [meta], VolumeType.ALL_TIME)}
       </div>
     );
-    expect(container.textContent).toContain("Jan 1, 2023 (1 year ago)");
+    expect(container.textContent).toContain("Jan 1, 2023");
   });
 
   it("printNftContent displays mint date for ARTISTS sort", () => {
@@ -179,7 +179,7 @@ describe("MemeLab extra tests", () => {
         {printNftContent(nft, MemeLabSort.ARTISTS, [meta], VolumeType.ALL_TIME)}
       </div>
     );
-    expect(container.textContent).toContain("Jan 1, 2023 (1 year ago)");
+    expect(container.textContent).toContain("Jan 1, 2023");
   });
 
   it("printNftContent displays artist name for COLLECTIONS sort", () => {

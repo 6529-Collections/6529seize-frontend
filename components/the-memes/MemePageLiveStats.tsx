@@ -7,7 +7,7 @@ import ProfileAvatar, {
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
-import { getDateDisplay, numberWithCommas } from "@/helpers/Helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -274,11 +274,6 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
             <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
               {mintDate.date}
             </span>
-            {mintDate.relative && (
-              <span className="tw-ml-1.5 tw-mt-1 tw-text-xs tw-font-medium tw-leading-none tw-text-iron-500">
-                {mintDate.relative}
-              </span>
-            )}
           </div>
         </div>
       </div>
@@ -335,7 +330,6 @@ function getMintDateParts(date?: Date) {
 
   return {
     date: mintDate.toLocaleString(MEME_MINT_DATE_LOCALE, MEME_MINT_DATE_FORMAT),
-    relative: `(${getDateDisplay(mintDate)})`,
   };
 }
 

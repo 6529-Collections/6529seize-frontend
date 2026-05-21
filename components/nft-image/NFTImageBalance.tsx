@@ -1,7 +1,11 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import styles from "@/components/nft-image/NFTImage.module.scss";
+import NFTImageBalanceBadge, {
+  type NFTImageBalanceBadgeSize,
+  type NFTImageBalanceBadgeState,
+  type NFTImageBalanceBadgeVariant,
+} from "@/components/nft-image/NFTImageBalanceBadge";
 import { useNftBalanceFromContext } from "@/components/nft-image/NftBalancesContext";
 import { useNftBalance } from "@/hooks/useNftBalance";
 
@@ -10,6 +14,8 @@ interface Props {
   readonly tokenId: number;
   readonly height: 300 | 650 | "full";
   readonly inline?: boolean | undefined;
+  readonly size?: NFTImageBalanceBadgeSize | undefined;
+  readonly variant?: NFTImageBalanceBadgeVariant;
 }
 
 export default function NFTImageBalance({
@@ -17,6 +23,8 @@ export default function NFTImageBalance({
   tokenId,
   height,
   inline = false,
+  size,
+  variant = "default",
 }: Props) {
   const { connectedProfile } = useAuth();
   const consolidationKey = connectedProfile?.consolidation_key ?? null;
@@ -42,42 +50,33 @@ export default function NFTImageBalance({
     error,
   };
 
-  const printBalance = () => {
-    if (balanceState.balance > 0) {
-      return printBalanceSpan(`SEIZED x${balanceState.balance}`);
-    } else {
-      return printBalanceSpan("UNSEIZED");
-    }
-  };
-
-  const printBalanceSpan = (b: string) => {
-    if (inline) {
-      return <span className={styles["balanceInline"]}>{b}</span>;
-    }
-
-    return (
-      <span
-        className={`${styles["balance"]} ${
-          height === 650 ? styles["balanceBigger"] : ""
-        } `}
-      >
-        {b}
-      </span>
-    );
-  };
+  const renderBadge = (state: NFTImageBalanceBadgeState) => (
+    <NFTImageBalanceBadge
+      state={state}
+      balance={balanceState.balance}
+      height={height}
+      inline={inline}
+      size={size}
+      variant={variant}
+    />
+  );
 
   if (!connectedProfile) {
     return null;
   }
 
   if (balanceState.isLoading) {
-    return printBalanceSpan("...");
+    return renderBadge("loading");
   }
 
   if (balanceState.error) {
     console.error("Failed to fetch NFT balance:", balanceState.error);
-    return printBalanceSpan("N/A");
+    return renderBadge("error");
   }
 
-  return printBalance();
+  if (balanceState.balance > 0) {
+    return renderBadge("seized");
+  }
+
+  return renderBadge("unseized");
 }

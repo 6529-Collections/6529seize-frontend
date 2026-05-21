@@ -7,8 +7,6 @@ import { faExpand, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiNftMedia } from "@/generated/models/ApiNftMedia";
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
-import { Button } from "react-bootstrap";
-import clsx from "clsx";
 import { createPortal } from "react-dom";
 
 const DEFAULT_TIMEOUT = 10000;
@@ -213,7 +211,6 @@ const LFGSlideshow: React.FC<{
             Your browser does not support the video tag.
           </video>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={currentImage} alt={`LFG Slide ${currentIndex + 1}`} />
         )}
       </div>
@@ -235,12 +232,13 @@ export const LFGButton: React.FC<{
   return (
     <>
       <LFGSlideshow contract={contract} isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Button
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className={clsx(styles["lfgButton"], "no-wrap")}
+        className="hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-primary-500/60 tw-bg-primary-500/10 tw-px-3.5 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-primary-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-border-primary-400 hover:tw-bg-primary-500/15 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
       >
         LFG: Start the Show!
-      </Button>
+      </button>
     </>
   );
 };

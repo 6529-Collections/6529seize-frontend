@@ -14,9 +14,6 @@ jest.mock("@/helpers/Helpers", () => ({
   enterArtFullScreen: jest.fn(),
   fullScreenSupported: () => true,
 }));
-jest.mock("react-bootstrap", () => ({
-  Button: (p: any) => <button onClick={p.onClick}>{p.children}</button>,
-}));
 jest.mock("@/components/lfg-slideshow/LFGSlideshow.module.scss", () => ({}));
 
 const mockFetch = commonApiFetch as jest.Mock;
@@ -35,9 +32,14 @@ describe("LFGSlideshow", () => {
   it("opens slideshow on button click", async () => {
     const { container } = render(<LFGButton contract="c" />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    fireEvent.click(
-      screen.getByRole("button", { name: "LFG: Start the Show!" })
+    const button = screen.getByRole("button", { name: "LFG: Start the Show!" });
+    expect(button).toHaveClass(
+      "tw-border-primary-500/60",
+      "tw-bg-primary-500/10",
+      "tw-text-primary-300"
     );
+    expect(button).not.toHaveClass("tw-bg-primary-500");
+    fireEvent.click(button);
     expect(screen.getByAltText("LFG Slide 1")).toBeInTheDocument();
     expect(container.querySelector("#lfg-slideshow")).not.toBeInTheDocument();
     expect(document.getElementById("lfg-slideshow")).toBeInTheDocument();
