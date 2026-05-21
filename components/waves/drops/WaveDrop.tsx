@@ -478,7 +478,7 @@ const getContentBlock = ({
               <div className="tw-px-6 tw-pb-1 tw-pt-1.5">{content}</div>
             </div>
           ) : (
-            <div className="tw-w-full tw-pl-6">{content}</div>
+            <div className="tw-w-full tw-px-6">{content}</div>
           )}
         </div>
       </div>
