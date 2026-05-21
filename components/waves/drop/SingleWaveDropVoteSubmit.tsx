@@ -16,7 +16,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "@/components/auth/Auth";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 type ThemeColors = {
@@ -57,6 +57,7 @@ interface Props {
   readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
+  readonly submitBlockReason?: string | null | undefined;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<
@@ -70,6 +71,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
       onVoteApplied,
       onVoteSuccess,
       size = SingleWaveDropVoteSize.NORMAL,
+      submitBlockReason = null,
     }: Props,
     ref
   ) => {
@@ -113,6 +115,22 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
     const theme =
       position && position <= 3 ? rankingThemes[position] : defaultTheme;
+
+    const getVoteError = () => {
+      if (submitBlockReason) {
+        return submitBlockReason;
+      }
+
+      if (!Number.isFinite(newRating)) {
+        return "Enter a valid vote.";
+      }
+
+      if (drop.wave.forbid_negative_votes && newRating < 0) {
+        return "Negative votes are not allowed in this wave.";
+      }
+
+      return null;
+    };
 
     useEffect(() => {
       const triangleBurst = new mojs.Burst({
@@ -214,6 +232,15 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const handleClick = async () => {
       if (isProcessing || loading || isSpinnerExiting || isTextExiting) return;
 
+      const voteError = getVoteError();
+      if (voteError) {
+        setToast({
+          message: voteError,
+          type: "warning",
+        });
+        return;
+      }
+
       setIsProcessing(true);
       setIsTextExiting(true);
       setLoading(true);
@@ -314,7 +341,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           } ${isProcessing ? styles["processing"] : ""}`}
           onClick={(e) => {
             e.stopPropagation();
-            handleClick();
+            void handleClick();
           }}
         >
           {getButtonContent()}

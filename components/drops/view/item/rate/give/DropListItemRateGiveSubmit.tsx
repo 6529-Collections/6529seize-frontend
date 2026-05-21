@@ -102,7 +102,16 @@ export default function DropListItemRateGiveSubmit({
 
     const previousRate = drop.context_profile_context?.rating ?? 0;
     const rateIncrement = rate * clickCount;
-    const newRate = previousRate + rateIncrement;
+    const calculatedNewRate = previousRate + rateIncrement;
+    const newRate = drop.wave.forbid_negative_votes
+      ? Math.max(0, calculatedNewRate)
+      : calculatedNewRate;
+
+    if (newRate === previousRate) {
+      setMutating(false);
+      setClickCount(0);
+      return;
+    }
 
     if (applyOptimisticDropUpdate && drop.wave.id) {
       const previousHasRating = previousRate !== 0;

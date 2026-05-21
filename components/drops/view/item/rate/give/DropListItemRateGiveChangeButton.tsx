@@ -1,7 +1,7 @@
 "use client";
 
 import { RateChangeType } from "./DropListItemRateGive";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 
@@ -27,7 +27,7 @@ export default function DropListItemRateGiveChangeButton({
 
   const ariaLabels: Record<RateChangeType, string> = {
     [RateChangeType.INCREASE]: "Choose positive votes",
-    [RateChangeType.DECREASE]: "Choose negative votes",
+    [RateChangeType.DECREASE]: "Decrease vote",
   };
 
   const onMouseDown = () => {
@@ -51,13 +51,7 @@ export default function DropListItemRateGiveChangeButton({
     return "tw-text-iron-500";
   };
 
-  const [buttonClasses, setButtonClasses] = useState<string | null>(
-    getButtonClasses(canVote)
-  );
-
-  useEffect(() => {
-    setButtonClasses(getButtonClasses(canVote));
-  }, [canVote]);
+  const buttonClasses = getButtonClasses(canVote);
 
   return (
     <button
@@ -74,19 +68,21 @@ export default function DropListItemRateGiveChangeButton({
       onClick={(e) => e.stopPropagation()}
       disabled={!canVote}
       aria-label={ariaLabels[type]}
-      className={`tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-lg tw-ring-1 tw-ring-iron-700/50 tw-text-iron-300 tw-transition-all tw-duration-300 ${
+      className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-ring-1 tw-ring-iron-700/50 tw-transition-all tw-duration-300 ${
         isMobile
-          ? "tw-bg-iron-800 tw-size-10 active:tw-bg-iron-600 active:tw-scale-95"
-          : "tw-bg-iron-900 tw-size-6 hover:tw-bg-iron-800 hover:tw-ring-iron-600/50 hover:tw-text-iron-200"
-      } tw-transition-all tw-duration-150 ${buttonClasses}`}>
+          ? "tw-size-10 tw-bg-iron-800 active:tw-scale-95 active:tw-bg-iron-600"
+          : "tw-size-6 tw-bg-iron-900 hover:tw-bg-iron-800 hover:tw-text-iron-200 hover:tw-ring-iron-600/50"
+      } tw-transition-all tw-duration-150 ${buttonClasses}`}
+    >
       <svg
         className={`${
           isMobile ? "tw-size-6" : "tw-size-4"
-        } tw-rotate-90 tw-flex-shrink-0`}
+        } tw-flex-shrink-0 tw-rotate-90`}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg">
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <path
           d={svgpaths[type]}
           stroke="currentColor"
