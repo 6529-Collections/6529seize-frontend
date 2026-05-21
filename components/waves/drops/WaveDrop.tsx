@@ -13,6 +13,7 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import type { CSSProperties } from "react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createBreakpoint } from "react-use";
@@ -89,15 +90,12 @@ const getColorClasses = ({
 
   if (!isDrop) {
     const isWaveView = location === DropLocation.WAVE;
-    const hoverClass = isWaveView
-      ? "desktop-hover:hover:tw-bg-iron-800/50"
-      : "";
     const ringClasses = isWaveView
       ? ""
       : "tw-ring-1 tw-ring-inset tw-ring-iron-800";
     const bgClass = isWaveView ? "" : "tw-bg-iron-950/80";
 
-    return `${bgClass} ${ringClasses} ${hoverClass}`.trim();
+    return `${bgClass} ${ringClasses}`.trim();
   }
 
   const rankClass = RANK_STYLES[rank as keyof typeof RANK_STYLES];
@@ -112,7 +110,7 @@ const getDropClasses = (
   isDrop: boolean
 ): string => {
   const baseClasses =
-    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-transition-colors tw-duration-300";
 
   const streamClasses = "tw-rounded-xl";
 
@@ -139,6 +137,79 @@ const shouldShowAuthorInfo = ({
 }): boolean =>
   identityMode !== "hidden" &&
   (!shouldGroupWithPreviousDrop || isProfileView || identityMode === "minimal");
+
+const AUTHOR_HIGHLIGHT_LEVEL_CLASSES = [
+  {
+    minLevel: 80,
+    hue: 143,
+    saturation: 38,
+    lightness: 51,
+  },
+  {
+    minLevel: 60,
+    hue: 71,
+    saturation: 38,
+    lightness: 58,
+  },
+  {
+    minLevel: 40,
+    hue: 50,
+    saturation: 62,
+    lightness: 62,
+  },
+  {
+    minLevel: 20,
+    hue: 37,
+    saturation: 62,
+    lightness: 62,
+  },
+  {
+    minLevel: 0,
+    hue: 22,
+    saturation: 62,
+    lightness: 62,
+  },
+] as const;
+
+const getAuthorHighlightBase = (level: number) => {
+  const levelClass = AUTHOR_HIGHLIGHT_LEVEL_CLASSES.find(
+    (item) => item.minLevel <= level
+  );
+
+  return levelClass ?? AUTHOR_HIGHLIGHT_LEVEL_CLASSES.at(-1)!;
+};
+
+const getStableHash = (value: string): number => {
+  let hash = 0;
+
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+
+  return hash;
+};
+
+const getAuthorHighlightStyle = ({
+  level,
+  authorKey,
+}: {
+  readonly level: number;
+  readonly authorKey: string;
+}): CSSProperties => {
+  const base = getAuthorHighlightBase(level);
+  const hash = getStableHash(authorKey);
+  const hue = base.hue + (hash % 17) - 8;
+  const saturation = base.saturation + ((hash >>> 5) % 9) - 4;
+  const lightness = base.lightness + ((hash >>> 9) % 7) - 3;
+  return {
+    "--author-highlight-hue": `${hue}`,
+    "--author-highlight-saturation": `${saturation}%`,
+    "--author-highlight-lightness": `${lightness}%`,
+    "--author-highlight-opacity": "0.08",
+    backgroundImage:
+      "linear-gradient(to bottom, hsla(var(--author-highlight-hue), var(--author-highlight-saturation), var(--author-highlight-lightness), var(--author-highlight-opacity)), #131316)",
+  } as CSSProperties;
+};
 
 const getGroupingClass = ({
   isProfileView,
@@ -263,7 +334,9 @@ const getAuthorHeader = ({
 
   if (identityMode === "default") {
     return (
-      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+      <div
+        className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2"
+      >
         <WaveDropAuthorPfp drop={drop} />
         <div className="tw-min-w-0 tw-flex-1">
           <WaveDropHeader
@@ -282,7 +355,9 @@ const getAuthorHeader = ({
   }
 
   return (
-    <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+    <div
+      className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-px-2.5 tw-pb-1.5 tw-pt-2"
+    >
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-min-w-0 tw-flex-1">
         <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
@@ -357,53 +432,72 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
-}): React.ReactNode => (
-  <>
-    {shouldShowReplyHeader && replyTo && (
-      <WaveDropReply
-        onReplyClick={onReplyClick}
-        dropId={replyTo.drop_id}
-        dropPartId={replyTo.drop_part_id}
-        maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
-      />
-    )}
-    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left">
-      <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col">
-        {authorHeader}
-        <div className={`tw-w-full tw-pl-4 ${showAuthorInfo ? "tw-mt-2" : ""}`}>
-          <WaveDropContent
-            drop={drop}
-            activePartIndex={activePartIndex}
-            setActivePartIndex={setActivePartIndex}
-            onLongPress={handleLongPress}
-            onDropContentClick={onDropContentClick}
-            onQuoteClick={onQuoteClick}
-            setLongPressTriggered={setLongPressTriggered}
-            isEditing={isEditing}
-            isSaving={isSaving}
-            onSave={handleEditSave}
-            onCancel={handleEditCancel}
-            hasTouch={allowLongPress}
-            onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
-            embedPath={embedPath}
-            quotePath={quotePath}
-            embedDepth={embedDepth}
-            maxEmbedDepth={maxEmbedDepth}
-          />
+}): React.ReactNode => {
+  const authorKey =
+    drop.author.handle ?? drop.author.primary_address ?? drop.author.id;
+  const highlightStyle = getAuthorHighlightStyle({
+    level: drop.author.level,
+    authorKey,
+  });
+  const content = (
+    <WaveDropContent
+      drop={drop}
+      activePartIndex={activePartIndex}
+      setActivePartIndex={setActivePartIndex}
+      onLongPress={handleLongPress}
+      onDropContentClick={onDropContentClick}
+      onQuoteClick={onQuoteClick}
+      setLongPressTriggered={setLongPressTriggered}
+      isEditing={isEditing}
+      isSaving={isSaving}
+      onSave={handleEditSave}
+      onCancel={handleEditCancel}
+      hasTouch={allowLongPress}
+      onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+      embedPath={embedPath}
+      quotePath={quotePath}
+      embedDepth={embedDepth}
+      maxEmbedDepth={maxEmbedDepth}
+    />
+  );
+
+  return (
+    <>
+      {shouldShowReplyHeader && replyTo && (
+        <WaveDropReply
+          onReplyClick={onReplyClick}
+          dropId={replyTo.drop_id}
+          dropPartId={replyTo.drop_part_id}
+          maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
+        />
+      )}
+      <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left desktop-hover:group-hover:tw-bg-iron-800/50">
+        <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-col">
+          {showAuthorInfo ? (
+            <div
+              className="tw-w-full tw-overflow-hidden desktop-hover:group-hover:[--author-highlight-opacity:0.105]"
+              style={highlightStyle}
+            >
+              {authorHeader}
+              <div className="tw-px-6 tw-pb-1 tw-pt-1.5">{content}</div>
+            </div>
+          ) : (
+            <div className="tw-w-full tw-pl-6">{content}</div>
+          )}
         </div>
       </div>
-    </div>
-    {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
-      <WaveDropActions
-        drop={drop}
-        activePartIndex={activePartIndex}
-        onReply={handleOnReply}
-        onEdit={handleOnEdit}
-        suppressed={hasActiveLinkCardActions}
-      />
-    )}
-  </>
-);
+      {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
+        <WaveDropActions
+          drop={drop}
+          activePartIndex={activePartIndex}
+          onReply={handleOnReply}
+          onEdit={handleOnEdit}
+          suppressed={hasActiveLinkCardActions}
+        />
+      )}
+    </>
+  );
+};
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
@@ -754,7 +848,7 @@ const WaveDrop = ({
   });
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
-    <div className="tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pl-4">
+    <div className="tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-pl-6">
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
       )}
@@ -765,7 +859,7 @@ const WaveDrop = ({
     </div>
   );
   const footerRow = hasDropFooter(footer) && (
-    <div className="tw-mx-2 tw-mt-2 tw-pl-4">{footer}</div>
+    <div className="tw-mx-2 tw-mt-2 tw-pl-6">{footer}</div>
   );
 
   return (

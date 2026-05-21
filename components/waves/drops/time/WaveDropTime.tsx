@@ -94,7 +94,7 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp, size = "xs" }) =
   const textSizeClass = compact ? "tw-text-[11px] tw-leading-4" : SIZE_CLASSES[size];
 
   return (
-    <p className={`${textSizeClass} tw-mb-0 tw-whitespace-nowrap tw-leading-none tw-text-white/40`}>
+    <p className={`${textSizeClass} tw-mb-0 tw-whitespace-nowrap tw-leading-none tw-text-white/50`}>
       {formatTime()}
     </p>
   );
