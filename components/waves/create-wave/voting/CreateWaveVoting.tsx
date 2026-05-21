@@ -28,10 +28,12 @@ const TIME_WEIGHTED_DURATION_ERROR =
 
 const VOTING_SETTINGS_GRID_CLASSES =
   "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
+const VOTING_OPTIONS_GRID_CLASSES =
+  "tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
 
 const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
   if (votingType === ApiWaveCreditType.CardSetTdh) {
-    return "Meme Card TDH";
+    return "Memes TDH";
   }
 
   return WAVE_VOTING_LABELS[votingType];
@@ -106,7 +108,7 @@ export default function CreateWaveVoting({
       <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
         {TITLES[waveType]}
       </p>
-      <div className="tw-mt-3 tw-grid tw-gap-x-4 tw-gap-y-4 lg:tw-grid-cols-3">
+      <div className={VOTING_OPTIONS_GRID_CLASSES}>
         {(Object.keys(VOTING_TYPES_ORDER) as ApiWaveCreditType[])
           .filter((votingType) => VOTING_TYPES_ORDER[votingType] !== undefined)
           .map((votingType) => (
@@ -125,7 +127,7 @@ export default function CreateWaveVoting({
                     : "tw-text-iron-300 group-hover:tw-text-white"
                 }`}
               >
-                {`By ${getCreateWaveVotingLabel(votingType)}`}
+                {getCreateWaveVotingLabel(votingType)}
               </span>
             </CommonBorderedRadioButton>
           ))}

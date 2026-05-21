@@ -32,10 +32,11 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 ## What You Can Set
 
 1. Choose one vote mode:
-   - `By TDH + XTDH` (default)
-   - `By TDH`
-   - `By Rep`
-2. If `By Rep` is selected, set at least one scope field:
+   - `TDH + XTDH` (default)
+   - `TDH`
+   - `Rep`
+   - `Memes TDH`
+2. If `Rep` is selected, set at least one scope field:
    - `Rep Category`, or
    - `Profile` (identity search)
 3. Review `Allow Negative Votes` (shown but disabled).
@@ -45,9 +46,9 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 
 ## Validation and State Rules
 
-- `By Rep` blocks forward navigation when both `Rep Category` and `Profile` are
+- `Rep` blocks forward navigation when both `Rep Category` and `Profile` are
   empty.
-- Switching from `By Rep` to `By TDH + XTDH` or `By TDH` clears saved `Rep`
+- Switching from `Rep` to `TDH + XTDH`, `TDH`, or `Memes TDH` clears saved `Rep`
   fields.
 - `XTDH` is not offered as a standalone selectable mode.
 - Time-weighted interval must stay between `5 minutes` and `24 hours`.
@@ -60,15 +61,15 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 
 ## Failure and Recovery
 
-- If `By Rep` validation blocks progress, fill either `Rep Category` or
+- If `Rep` validation blocks progress, fill either `Rep Category` or
   `Profile`, then click `Next` again.
 - If time-weighted interval validation appears, set a value in range and retry.
 - If submit fails later in `Description`, keep voting settings and retry submit.
 
 ## Limitations / Notes
 
-- Creator-facing voting options are only `By TDH + XTDH`, `By TDH`, and
-  `By Rep`.
+- Creator-facing voting options are only `TDH + XTDH`, `TDH`, `Rep`, and
+  `Memes TDH`.
 - `Allow Negative Votes` is currently non-interactive in create-wave.
 - Time-weighted voting is available only for `Rank` waves.
 - `Approve` paths exist in code, but users cannot reach them from the current

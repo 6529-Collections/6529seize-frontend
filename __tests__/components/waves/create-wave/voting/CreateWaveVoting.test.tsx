@@ -111,12 +111,22 @@ describe("CreateWaveVoting", () => {
     expect(baseProps.onTypeChange).toHaveBeenCalledWith(ApiWaveCreditType.Tdh);
   });
 
-  it("renders Meme Card TDH for rank and approve waves", () => {
+  it("renders compact voting option labels", () => {
     const { rerender } = render(<CreateWaveVoting {...baseProps} />);
 
     expect(
+      screen.getByTestId(`radio-${ApiWaveCreditType.TdhPlusXtdh}`)
+    ).toHaveTextContent("TDH + XTDH");
+    expect(
+      screen.getByTestId(`radio-${ApiWaveCreditType.Tdh}`)
+    ).toHaveTextContent("TDH");
+    expect(
+      screen.getByTestId(`radio-${ApiWaveCreditType.Rep}`)
+    ).toHaveTextContent("Rep");
+    expect(
       screen.getByTestId(`radio-${ApiWaveCreditType.CardSetTdh}`)
-    ).toHaveTextContent("By Meme Card TDH");
+    ).toHaveTextContent("Memes TDH");
+    expect(screen.queryByText(/^By /)).toBeNull();
 
     rerender(
       <CreateWaveVoting {...baseProps} waveType={ApiWaveType.Approve} />
@@ -124,7 +134,8 @@ describe("CreateWaveVoting", () => {
 
     expect(
       screen.getByTestId(`radio-${ApiWaveCreditType.CardSetTdh}`)
-    ).toHaveTextContent("By Meme Card TDH");
+    ).toHaveTextContent("Memes TDH");
+    expect(screen.queryByText(/^By /)).toBeNull();
   });
 
   it("shows Meme card picker when Meme Card TDH is selected", () => {
