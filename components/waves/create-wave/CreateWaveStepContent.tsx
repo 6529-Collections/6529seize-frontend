@@ -19,6 +19,7 @@ export default function CreateWaveStepContent({
   controller,
   profile,
   descriptionRef,
+  submitting,
   showDropError,
   onHaveDropToSubmitChange,
   onInlineGroupCreate,
@@ -26,6 +27,7 @@ export default function CreateWaveStepContent({
   readonly controller: WaveConfigController;
   readonly profile: ApiIdentity;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
+  readonly submitting: boolean;
   readonly showDropError: boolean;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onInlineGroupCreate: (
@@ -140,6 +142,7 @@ export default function CreateWaveStepContent({
         <CreateWaveDescription
           ref={descriptionRef}
           profile={profile}
+          submitting={submitting}
           showDropError={showDropError}
           wave={{
             name: config.overview.name,

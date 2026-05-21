@@ -9394,6 +9394,8 @@ components:
           type: integer
           format: int64
           minimum: 1000
+        links_disabled:
+          type: boolean
     ApiCreateNewWaveParticipationConfig:
       type: object
       required:
@@ -13497,11 +13499,14 @@ components:
       required:
         - scope
         - enabled
+        - links_disabled
         - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
         enabled:
+          type: boolean
+        links_disabled:
           type: boolean
         authenticated_user_eligible:
           type: boolean
@@ -14124,6 +14129,7 @@ components:
         - subscribers_count
         - has_competition
         - is_dm_wave
+        - links_disabled
         - description_drop
         - total_drops_count
         - is_private
@@ -14146,6 +14152,8 @@ components:
         has_competition:
           type: boolean
         is_dm_wave:
+          type: boolean
+        links_disabled:
           type: boolean
         description_drop:
           $ref: "#/components/schemas/ApiWaveOverviewDescriptionDrop"

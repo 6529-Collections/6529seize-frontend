@@ -8,13 +8,18 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: toastMock }),
 }));
 
-const update = (fn: any) => fn();
+const editorState = { id: "editor-state" };
+const update = (fn: any, options?: { onUpdate?: () => void }) => {
+  fn();
+  options?.onUpdate?.();
+};
 let commandHandler: any;
 const editor = {
   registerCommand: jest.fn((_cmd: any, fn: any) => {
     commandHandler = fn;
     return () => {};
   }),
+  getEditorState: jest.fn(() => editorState),
   update,
 } as any;
 
@@ -62,6 +67,7 @@ describe("DragDropPastePlugin", () => {
     (mediaFileReader as jest.Mock).mockResolvedValue([
       { file: new File(["a"], "a.png", { type: "image/png" }) },
     ]);
+    (multiPartUpload as jest.Mock).mockResolvedValue({ url: "uploaded" });
   });
 
   afterEach(() => {
@@ -112,6 +118,70 @@ describe("DragDropPastePlugin", () => {
     expect(toastMock).not.toHaveBeenCalled();
   });
 
+  it("does not add files or upload images while disabled", async () => {
+    const onAttachmentFiles = jest.fn();
+    renderPlugin({ disabled: true, onAttachmentFiles });
+
+    await act(async () => {
+      await commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    expect(onAttachmentFiles).not.toHaveBeenCalled();
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    expect($insertNodes).not.toHaveBeenCalled();
+    expect(toastMock).not.toHaveBeenCalled();
+  });
+
+  it("does not add files or upload images when disabled before file reading finishes", async () => {
+    const { mediaFileReader } = require("@lexical/utils");
+    let resolveFileReader: ((value: Array<{ file: File }>) => void) | undefined;
+    const imageFile = new File(["a"], "a.png", { type: "image/png" });
+    const attachmentFile = new File(["b"], "b.pdf", {
+      type: "application/pdf",
+    });
+    const onAttachmentFiles = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
+
+    (mediaFileReader as jest.Mock).mockReturnValue(
+      new Promise<Array<{ file: File }>>((resolve) => {
+        resolveFileReader = resolve;
+      })
+    );
+    (multiPartUpload as jest.Mock).mockRejectedValue(
+      new Error("Upload failed")
+    );
+
+    const { rerender } = renderPlugin({
+      onAttachmentFiles,
+      onUploadEditorStateChange,
+    });
+
+    act(() => {
+      commandHandler([imageFile, attachmentFile]);
+    });
+
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onAttachmentFiles={onAttachmentFiles}
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+
+    await act(async () => {
+      resolveFileReader?.([{ file: imageFile }]);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(onAttachmentFiles).not.toHaveBeenCalled();
+    expect($insertNodes).not.toHaveBeenCalled();
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    expect(toastMock).not.toHaveBeenCalled();
+    expect(onUploadEditorStateChange).not.toHaveBeenCalled();
+  });
+
   it("replaces loading image after parent rerenders with a new attachment handler", async () => {
     let resolveUpload: ((value: { url: string }) => void) | undefined;
     const replace = jest.fn();
@@ -140,6 +210,84 @@ describe("DragDropPastePlugin", () => {
     expect(replace).toHaveBeenCalled();
   });
 
+  it("finishes an in-flight inline upload after becoming disabled and syncs editor state", async () => {
+    let resolveUpload: ((value: { url: string }) => void) | undefined;
+    const replace = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpload = resolve;
+      })
+    );
+
+    const { rerender } = render(
+      <DragDropPastePlugin
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () => {
+      resolveUpload?.({ url: "uploaded" });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(replace).toHaveBeenCalled();
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
+  });
+
+  it("removes loading image, shows an error, and syncs editor state when in-flight upload fails after becoming disabled", async () => {
+    let rejectUpload: ((reason: Error) => void) | undefined;
+    const remove = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectUpload = reject;
+      })
+    );
+
+    const { rerender } = render(
+      <DragDropPastePlugin
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () => {
+      rejectUpload?.(new Error("Upload failed"));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(remove).toHaveBeenCalled();
+    expect(toastMock).toHaveBeenCalledWith({
+      message: "Upload failed",
+      type: "error",
+    });
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
+  });
+
   it("removes loading image and shows an error when inline upload hangs", async () => {
     jest.useFakeTimers();
     const remove = jest.fn();
@@ -163,6 +311,40 @@ describe("DragDropPastePlugin", () => {
       message: "Image upload timed out. Please try again.",
       type: "error",
     });
+  });
+
+  it("removes loading image and syncs editor state when inline upload hangs after becoming disabled", async () => {
+    jest.useFakeTimers();
+    const remove = jest.fn();
+    const onUploadEditorStateChange = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    (multiPartUpload as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+    const { rerender } = render(
+      <DragDropPastePlugin
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () => {
+      commandHandler([new File(["a"], "a.png", { type: "image/png" })]);
+      await Promise.resolve();
+    });
+
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+
+    await act(async () => {
+      jest.advanceTimersByTime(30_000);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(remove).toHaveBeenCalled();
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 });
 

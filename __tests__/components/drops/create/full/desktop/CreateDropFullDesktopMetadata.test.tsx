@@ -1,10 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import CreateDropFullDesktopMetadata from '@/components/drops/create/full/desktop/CreateDropFullDesktopMetadata';
-import type { DropMetadata } from '@/entities/IDrop';
+import { fireEvent, render, screen } from "@testing-library/react";
+import CreateDropFullDesktopMetadata from "@/components/drops/create/full/desktop/CreateDropFullDesktopMetadata";
+import type { DropMetadata } from "@/entities/IDrop";
 
-describe('CreateDropFullDesktopMetadata', () => {
+describe("CreateDropFullDesktopMetadata", () => {
   const metadata: DropMetadata[] = [
-    { data_key: 'Category', data_value: 'Art' },
+    { data_key: "Category", data_value: "Art" },
   ];
   const onMetadataEdit = jest.fn();
   const onMetadataRemove = jest.fn();
@@ -13,7 +13,7 @@ describe('CreateDropFullDesktopMetadata', () => {
     jest.clearAllMocks();
   });
 
-  it('renders existing metadata items', () => {
+  it("renders existing metadata items", () => {
     render(
       <CreateDropFullDesktopMetadata
         metadata={metadata}
@@ -25,7 +25,7 @@ describe('CreateDropFullDesktopMetadata', () => {
     expect(screen.getByText(/art/i)).toBeInTheDocument();
   });
 
-  it('calls onMetadataEdit when form is submitted and resets fields', () => {
+  it("calls onMetadataEdit when form is submitted and resets fields", () => {
     render(
       <CreateDropFullDesktopMetadata
         metadata={[]}
@@ -34,15 +34,43 @@ describe('CreateDropFullDesktopMetadata', () => {
       />
     );
 
-    const keyInput = screen.getByPlaceholderText('Category') as HTMLInputElement;
-    const valueInput = screen.getByPlaceholderText('Value') as HTMLInputElement;
-    fireEvent.change(keyInput, { target: { value: 'Type' } });
-    fireEvent.change(valueInput, { target: { value: 'Value' } });
-    fireEvent.click(screen.getByRole('button', { name: /add metadata/i }));
+    const keyInput = screen.getByPlaceholderText(
+      "Category"
+    ) as HTMLInputElement;
+    const valueInput = screen.getByPlaceholderText("Value") as HTMLInputElement;
+    fireEvent.change(keyInput, { target: { value: "Type" } });
+    fireEvent.change(valueInput, { target: { value: "Value" } });
+    fireEvent.click(screen.getByRole("button", { name: /add metadata/i }));
 
-    expect(onMetadataEdit).toHaveBeenCalledWith({ data_key: 'Type', data_value: 'Value' });
-    expect(keyInput.value).toBe('');
-    expect(valueInput.value).toBe('');
+    expect(onMetadataEdit).toHaveBeenCalledWith({
+      data_key: "Type",
+      data_value: "Value",
+    });
+    expect(keyInput.value).toBe("");
+    expect(valueInput.value).toBe("");
     expect(keyInput).toHaveFocus();
+  });
+
+  it("does not add or remove metadata when disabled", () => {
+    render(
+      <CreateDropFullDesktopMetadata
+        metadata={metadata}
+        onMetadataEdit={onMetadataEdit}
+        onMetadataRemove={onMetadataRemove}
+        disabled
+      />
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Category"), {
+      target: { value: "Type" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Value"), {
+      target: { value: "Value" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /add metadata/i }));
+    fireEvent.click(screen.getByRole("button", { name: /remove file/i }));
+
+    expect(onMetadataEdit).not.toHaveBeenCalled();
+    expect(onMetadataRemove).not.toHaveBeenCalled();
   });
 });

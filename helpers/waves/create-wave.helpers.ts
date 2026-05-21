@@ -449,6 +449,7 @@ export const getCreateNewWaveBody = ({
         group_id: config.groups.canChat,
       },
       enabled: config.chat.enabled,
+      links_disabled: false,
     },
     wave: {
       admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,
