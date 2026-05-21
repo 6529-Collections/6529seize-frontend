@@ -2,8 +2,9 @@
 
 ## Overview
 
-The `Dates` step sets when a `Rank` wave accepts submissions, when voting
-starts, and when winners are announced.
+The `Dates` step sets timing for `Rank` and `Approve` waves.
+`Rank` waves set submission, voting, and winner announcement timing.
+`Approve` waves set when the wave opens and an optional end date.
 
 If recurring announcements are enabled, this step can also set an optional
 `Wave End Date`.
@@ -13,17 +14,19 @@ If recurring announcements are enabled, this step can also set an optional
 - Full-page create route: `/waves/create`
 - Create-wave modal flows that reuse the same step sequence
 - Step label: `Dates`
-- User-reachable in `Rank` wave creation (`Approve` is shown in `Overview` but
-  disabled)
+- User-reachable in `Rank` and `Approve` wave creation
 
 ## Entry Points
 
-- Start a `Rank` create flow and continue `Overview -> Groups -> Dates`.
+- Start a `Rank` or `Approve` create flow and continue
+  `Overview -> Groups -> Dates`.
 - Use `Back` from `Drops`, `Voting`, `Outcomes`, or `Description`.
 - On large screens, use the step rail to return to `Dates` after you have
   moved past it.
 
 ## User Journey
+
+For `Rank` waves:
 
 1. Set `Drops Submission Opens`.
 2. Set `Drops Voting Begins` (must be at or after submission start).
@@ -35,6 +38,12 @@ If recurring announcements are enabled, this step can also set an optional
    additional interval exists.
 6. If recurring is enabled, optionally set `Wave End Date`.
 7. Continue to `Drops`.
+
+For `Approve` waves:
+
+1. Set `Wave Starts`.
+2. Optionally set `Wave End`.
+3. Continue to `Drops`.
 
 ## Common Scenarios
 

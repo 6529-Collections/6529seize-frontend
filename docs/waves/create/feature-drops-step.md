@@ -2,7 +2,8 @@
 
 ## Overview
 
-Use `Drops` in `Rank` wave creation to define submission requirements:
+Use `Drops` in `Rank` and `Approve` wave creation to define submission
+requirements:
 
 - one required media type
 - optional required metadata keys
@@ -18,12 +19,12 @@ Use `Drops` in `Rank` wave creation to define submission requirements:
   - `/messages`
   - `/messages?wave={waveId}`
 - Step label: `Drops`
-- User-reachable in `Rank` creation (`Approve` appears in `Overview` but is
-  disabled)
+- User-reachable in `Rank` and `Approve` creation
 
 ## Entry Points
 
-- Follow the `Rank` path: `Overview -> Groups -> Dates -> Drops`.
+- Follow the `Rank` or `Approve` path:
+  `Overview -> Groups -> Dates -> Drops`.
 - Use `Back` from `Voting` to return in one step.
 - On large screens, use the step rail after you move past `Drops`.
 
@@ -76,8 +77,6 @@ Use `Drops` in `Rank` wave creation to define submission requirements:
 ## Limitations / Notes
 
 - `Chat` waves skip `Drops`.
-- `Approve` has drops-step code paths, but `Approve` is disabled in the
-  user-visible wave-type picker.
 - Required metadata is optional.
 - Participation terms are optional.
 

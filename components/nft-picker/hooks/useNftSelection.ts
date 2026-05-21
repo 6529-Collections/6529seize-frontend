@@ -27,6 +27,7 @@ type UseNftSelectionProps = {
   defaultValue?: NftPickerProps["defaultValue"] | undefined;
   onChange: NftPickerProps["onChange"];
   onContractChange?: NftPickerProps["onContractChange"] | undefined;
+  fixedContract?: NftPickerProps["fixedContract"] | undefined;
   outputMode: OutputMode;
 };
 
@@ -35,16 +36,17 @@ export function useNftSelection({
   defaultValue,
   onChange,
   onContractChange,
+  fixedContract,
   outputMode,
 }: UseNftSelectionProps) {
   const [ranges, setRanges] = useState<TokenRange[]>([]);
-  const [selectedContract, setSelectedContract] = useState<ContractOverview | null>(null);
+  const [selectedContract, setSelectedContract] =
+    useState<ContractOverview | null>(null);
+  const effectiveSelectedContract = fixedContract ?? selectedContract;
   const [allSelected, setAllSelected] = useState<boolean>(false);
-  const [unsafeCount, setUnsafeCount] = useState<number>(0);
 
   const previousRangesRef = useRef<TokenRange[] | null>(null);
   const hasHydratedInitialValueRef = useRef(false);
-  const pendingPropEmitRef = useRef<string | null>(null);
   const onContractChangeRef = useRef(onContractChange);
   const isControlled = value !== undefined;
 
@@ -52,9 +54,12 @@ export function useNftSelection({
     onContractChangeRef.current = onContractChange;
   }, [onContractChange]);
 
-  const emitContractChange = useCallback((contract: ContractOverview | null) => {
-    onContractChangeRef.current?.(contract);
-  }, []);
+  const emitContractChange = useCallback(
+    (contract: ContractOverview | null) => {
+      onContractChangeRef.current?.(contract);
+    },
+    []
+  );
 
   const getSelectionFromRanges = useCallback(
     (
@@ -88,19 +93,19 @@ export function useNftSelection({
   );
 
   const emitChange = useCallback(
-    (contract: ContractOverview, canonicalRanges: TokenRange[], isAll: boolean) => {
-      pendingPropEmitRef.current = null;
-      if (!contract) {
-        return;
-      }
+    (
+      contract: ContractOverview,
+      canonicalRanges: TokenRange[],
+      isAll: boolean
+    ) => {
       const { selection: selectionIds, error } = getSelectionFromRanges(
         canonicalRanges,
         isAll
       );
       if (error) {
         // We need to handle this error in the UI, but emitChange is mostly for prop updates.
-        // For now, we'll return the error so the caller can handle it if needed, 
-        // or we might need a state for it. 
+        // For now, we'll return the error so the caller can handle it if needed,
+        // or we might need a state for it.
         // The original code setParseErrors([error]) here.
         // We'll return it.
         return { error };
@@ -120,7 +125,6 @@ export function useNftSelection({
       }
       if (outputMode === "number") {
         const { numbers, unsafeCount: unsafe } = tryToNumberArray(selectionIds);
-        setUnsafeCount(unsafe);
         if (unsafe > 0) {
           const errorPayload: NftPickerSelectionError = {
             type: "error",
@@ -166,14 +170,13 @@ export function useNftSelection({
 
   // Hydration logic
   useEffect(() => {
-    pendingPropEmitRef.current = null;
     if (!value) {
       return;
     }
     hasHydratedInitialValueRef.current = true;
     if (value.contractAddress) {
       setSelectedContract((prev) =>
-        prev && prev.address === value.contractAddress ? prev : null
+        prev?.address === value.contractAddress ? prev : null
       );
     } else {
       setSelectedContract(null);
@@ -211,36 +214,24 @@ export function useNftSelection({
       setAllSelected(false);
       previousRangesRef.current = null;
     }
-    pendingPropEmitRef.current = defaultValue.contractAddress ?? null;
     hasHydratedInitialValueRef.current = true;
   }, [isControlled, defaultValue]);
-
-  // Sync prop emit
-  useEffect(() => {
-    const pendingContractAddress = pendingPropEmitRef.current;
-    if (!pendingContractAddress) {
-      return;
-    }
-    if (!selectedContract || selectedContract.address !== pendingContractAddress) {
-      return;
-    }
-    pendingPropEmitRef.current = null;
-    emitChange(selectedContract, ranges, allSelected);
-  }, [selectedContract, ranges, allSelected, emitChange]);
 
   const addTokenRanges = (newRanges: TokenRange[]) => {
     if (!newRanges.length) {
       return;
     }
     const canonical = mergeCanonicalRanges(ranges, newRanges);
+    const result = effectiveSelectedContract
+      ? emitChange(effectiveSelectedContract, canonical, false)
+      : {};
+    if ("error" in result) {
+      return result;
+    }
     setRanges(canonical);
     setAllSelected(false);
-    setUnsafeCount(0);
     previousRangesRef.current = null;
-    if (selectedContract) {
-      return emitChange(selectedContract, canonical, false);
-    }
-    return {};
+    return result;
   };
 
   const removeToken = (tokenId: bigint) => {
@@ -248,33 +239,32 @@ export function useNftSelection({
     setRanges(canonical);
     setAllSelected(false);
     previousRangesRef.current = null;
-    if (selectedContract) {
-      emitChange(selectedContract, canonical, false);
+    if (effectiveSelectedContract) {
+      emitChange(effectiveSelectedContract, canonical, false);
     }
   };
 
   const clearTokens = () => {
-    if (!selectedContract) {
+    if (!effectiveSelectedContract) {
       return;
     }
     setRanges([]);
     setAllSelected(false);
-    setUnsafeCount(0);
     previousRangesRef.current = null;
-    emitChange(selectedContract, [], false);
+    emitChange(effectiveSelectedContract, [], false);
   };
 
   const selectAll = () => {
-    if (!selectedContract || allSelected) {
+    if (!effectiveSelectedContract || allSelected) {
       return;
     }
     previousRangesRef.current = ranges;
     setAllSelected(true);
-    emitChange(selectedContract, ranges, true);
+    emitChange(effectiveSelectedContract, ranges, true);
   };
 
   const deselectAll = () => {
-    if (!selectedContract) {
+    if (!effectiveSelectedContract) {
       return;
     }
     const previous = previousRangesRef.current;
@@ -282,41 +272,44 @@ export function useNftSelection({
     if (previous?.length) {
       setRanges(previous);
       previousRangesRef.current = null;
-      emitChange(selectedContract, previous, false);
+      emitChange(effectiveSelectedContract, previous, false);
       return;
     }
-    emitChange(selectedContract, ranges, false);
+    emitChange(effectiveSelectedContract, ranges, false);
   };
 
   const clearContract = () => {
+    if (fixedContract) {
+      return;
+    }
     setSelectedContract(null);
     setRanges([]);
     setAllSelected(false);
     emitContractChange(null);
     onChange(null);
-    setUnsafeCount(0);
     previousRangesRef.current = null;
   };
 
   const setSelectionFromText = (canonical: TokenRange[]) => {
+    const result = effectiveSelectedContract
+      ? emitChange(effectiveSelectedContract, canonical, false)
+      : {};
+    if ("error" in result) {
+      return result;
+    }
     setRanges(canonical);
     setAllSelected(false);
     previousRangesRef.current = null;
-    if (selectedContract) {
-      return emitChange(selectedContract, canonical, false);
-    }
-    return {};
+    return result;
   };
 
   return {
     ranges,
     setRanges,
-    selectedContract,
+    selectedContract: effectiveSelectedContract,
     setSelectedContract,
     allSelected,
     setAllSelected,
-    unsafeCount,
-    setUnsafeCount,
     emitContractChange,
     emitChange,
     addTokenRanges,

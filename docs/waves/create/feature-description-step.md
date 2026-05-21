@@ -2,7 +2,7 @@
 
 ## Overview
 
-`Description` is the last user-reachable step in wave creation.
+`Description` is the last step in wave creation.
 You write the first wave drop here, then click `Complete`.
 
 ## Location in the Site
@@ -10,13 +10,14 @@ You write the first wave drop here, then click `Complete`.
 - Full-page flow: `/waves/create`
 - Desktop modal flow: `?create=wave` (same step sequence)
 - Step label: `Description`
-- Available for `Chat` and `Rank`
-- `Approve` exists in code paths but is disabled in the type picker
+- Available for `Chat`, `Rank`, and `Approve`
 
 ## Step Paths
 
 - `Chat`: `Overview` -> `Groups` -> `Description`
 - `Rank`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
+  `Outcomes` -> `Description`
+- `Approve`: `Overview` -> `Groups` -> `Dates` -> `Drops` -> `Voting` ->
   `Outcomes` -> `Description`
 
 ## What You Can Add
