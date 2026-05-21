@@ -17,6 +17,8 @@ import { HttpFile } from '../http/http';
 export class ApiCreateNewWaveChatConfig {
     'scope': ApiCreateNewWaveScope;
     'enabled': boolean;
+    'slow_mode_cooldown_ms'?: number;
+    'links_disabled'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,6 +34,18 @@ export class ApiCreateNewWaveChatConfig {
         {
             "name": "enabled",
             "baseName": "enabled",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "slow_mode_cooldown_ms",
+            "baseName": "slow_mode_cooldown_ms",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "links_disabled",
+            "baseName": "links_disabled",
             "type": "boolean",
             "format": ""
         }    ];

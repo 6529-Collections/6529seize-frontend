@@ -15,11 +15,18 @@ interface CreateDropStormViewProps {
   readonly drop: CreateDropConfig;
   readonly profile: ProfileMinWithoutSubs;
   readonly wave: CreateDropStormViewWaveProps | null;
+  readonly disabled?: boolean | undefined;
   readonly removePart: (index: number) => void;
 }
 
 const CreateDropStormView = memo(
-  ({ drop, profile, wave, removePart }: CreateDropStormViewProps) => {
+  ({
+    drop,
+    profile,
+    wave,
+    disabled = false,
+    removePart,
+  }: CreateDropStormViewProps) => {
     const now = Time.currentMillis();
     return (
       <div className="tw-mb-4 tw-flex tw-flex-col">
@@ -37,6 +44,7 @@ const CreateDropStormView = memo(
               partIndex={index}
               wave={wave}
               dropTitle={drop.title ?? null}
+              disabled={disabled}
               removePart={removePart}
             />
           ))}

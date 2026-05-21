@@ -1,19 +1,19 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockDownloadMediaUrl = jest.fn().mockResolvedValue(undefined);
-const mockNFTImage = jest.fn(
-  ({
-    animation,
-    id,
-  }: {
-    readonly animation: boolean;
-    readonly id?: string | undefined;
-  }) => <div data-testid={animation ? "animation-art" : "image-art"} id={id} />
-);
+type MockNFTImageProps = {
+  readonly animation: boolean;
+  readonly id?: string | undefined;
+  readonly showOriginal?: boolean | undefined;
+};
+
+const mockNFTImage = jest.fn(({ animation, id }: MockNFTImageProps) => (
+  <div data-testid={animation ? "animation-art" : "image-art"} id={id} />
+));
 const mockNFTImageBalance = jest.fn(
   ({ variant }: { readonly variant?: string | undefined }) => (
     <div data-testid="nft-balance" data-variant={variant} />
@@ -95,6 +95,27 @@ const mockHelpers = jest.requireMock("@/helpers/Helpers") as {
   enterArtFullScreen: jest.Mock;
 };
 
+function getLatestNFTImageProps(animation: boolean) {
+  const call = [...mockNFTImage.mock.calls]
+    .reverse()
+    .find(([props]) => (props as MockNFTImageProps).animation === animation);
+
+  if (!call) {
+    throw new Error(`No NFTImage render found for animation=${animation}`);
+  }
+
+  return call[0] as MockNFTImageProps;
+}
+
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+
+  return { promise, resolve };
+}
+
 const renderWithConnectedProfile = (component: React.ReactNode) => {
   return render(
     <AuthContext.Provider
@@ -131,9 +152,10 @@ const baseNft = {
   uri: "https://metadata.example/meme.json",
   icon: "",
   thumbnail: "",
-  scaled: "",
+  scaled: "https://media.example/card-scaled.png",
   image: "https://media.example/card.png",
   animation: "https://media.example/animation.mp4",
+  compressed_animation: "https://media.example/animation-compressed.mp4",
   metadata: {
     image: "https://media.example/card.png",
     animation_url: "https://media.example/animation.mp4",
@@ -156,6 +178,7 @@ const baseNft = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockHelpers.enterArtFullScreen.mockResolvedValue(true);
   jest.spyOn(window, "open").mockImplementation(() => null);
 });
 
@@ -252,19 +275,110 @@ describe("MemePageArtViewer", () => {
     );
   });
 
-  it("uses optimized media for the top artwork viewer", () => {
+  it("uses optimized media for the initial artwork render", () => {
     render(<MemePageArtViewer nft={baseNft as any} />);
 
-    expect(mockNFTImage).toHaveBeenCalledWith(
-      expect.objectContaining({ animation: true }),
-      undefined
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(false);
+    expect(getLatestNFTImageProps(false).showOriginal).toBe(false);
+  });
+
+  it("uses original media while fullscreen is requested and until fullscreen exits", async () => {
+    const user = userEvent.setup();
+    const fullscreenRequest = createDeferred<boolean>();
+    mockHelpers.enterArtFullScreen.mockReturnValue(fullscreenRequest.promise);
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+
+    await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
+    expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
+      "the-art-fullscreen-animation"
     );
-    expect(mockNFTImage).toHaveBeenCalledWith(
-      expect.objectContaining({ animation: false }),
-      undefined
-    );
-    for (const [props] of mockNFTImage.mock.calls) {
-      expect(props).not.toHaveProperty("showOriginal");
+
+    await act(async () => {
+      fullscreenRequest.resolve(true);
+      await fullscreenRequest.promise;
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+    act(() => {
+      document.dispatchEvent(new Event("fullscreenchange"));
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+  });
+
+  it("clears original media when fullscreen request reports failure", async () => {
+    const user = userEvent.setup();
+    const fullscreenRequest = createDeferred<boolean>();
+    mockHelpers.enterArtFullScreen.mockReturnValue(fullscreenRequest.promise);
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+    await act(async () => {
+      fullscreenRequest.resolve(false);
+      await fullscreenRequest.promise;
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+  });
+
+  it("clears original media on prefixed fullscreen exit events", async () => {
+    const user = userEvent.setup();
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+    act(() => {
+      document.dispatchEvent(new Event("webkitfullscreenchange"));
+    });
+
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+  });
+
+  it("clears original media on fullscreen error events", async () => {
+    const user = userEvent.setup();
+    const fullscreenErrorEvents = [
+      "fullscreenerror",
+      "webkitfullscreenerror",
+      "mozfullscreenerror",
+      "MSFullscreenError",
+    ];
+
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    for (const eventName of fullscreenErrorEvents) {
+      const fullscreenRequest = createDeferred<boolean>();
+      mockHelpers.enterArtFullScreen.mockReturnValueOnce(
+        fullscreenRequest.promise
+      );
+
+      await user.click(screen.getByRole("button", { name: "Full screen" }));
+
+      expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+
+      act(() => {
+        document.dispatchEvent(new Event(eventName));
+      });
+
+      expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+
+      await act(async () => {
+        fullscreenRequest.resolve(true);
+        await fullscreenRequest.promise;
+      });
     }
   });
 

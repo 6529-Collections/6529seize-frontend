@@ -28,6 +28,8 @@ export default function DropPlaceholder({
           return "Please log in to participate in chat";
         case ChatRestriction.PROXY_USER:
           return "Proxy users cannot participate in chat";
+        case ChatRestriction.SLOW_MODE:
+          return "Slow mode is active. Please wait before posting again";
         case ChatRestriction.NO_PERMISSION:
           return "You don't have permission to chat in this wave";
         case ChatRestriction.DISABLED:

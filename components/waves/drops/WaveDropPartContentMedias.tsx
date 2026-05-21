@@ -40,6 +40,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     return null;
   }
 
+  const imageGridClassName =
+    "tw-grid tw-w-full tw-grid-cols-1 tw-items-start tw-justify-start tw-gap-2 sm:tw-grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),16rem))]";
+
   const hasContentBeforeMedia =
     Boolean(activePart.content?.trim()) ||
     Boolean(activePart.quoted_drop?.drop_id);
@@ -53,12 +56,18 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
   const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
   const getMediaContainerClassName = ({
+    groupedImage,
     useIntrinsicHeightMedia,
     useCompactLink,
   }: {
+    readonly groupedImage: boolean;
     readonly useIntrinsicHeightMedia: boolean;
     readonly useCompactLink: boolean;
   }) => {
+    if (groupedImage) {
+      return "tw-min-w-0 tw-w-full";
+    }
+
     if (useCompactLink) {
       return "tw-w-full";
     }
@@ -74,62 +83,105 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     );
   };
 
-  return (
-    <div className={mediaStackClassName}>
-      {activePart.media.map((media, i) => {
-        const useNaturalHeightImage =
-          fullWidthMedia && media.mime_type.includes("image");
-        const useImageIntrinsicHeight =
-          !fullWidthMedia && media.mime_type.includes("image");
-        const useVideoIntrinsicHeight = media.mime_type.includes("video");
-        const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
-        const mediaContainerClassName = getMediaContainerClassName({
-          useIntrinsicHeightMedia:
-            useNaturalHeightImage ||
-            useImageIntrinsicHeight ||
-            useVideoIntrinsicHeight,
-          useCompactLink,
-        });
-        let mediaContent;
+  const renderMedia = (
+    media: ApiDropPart["media"][number],
+    i: number,
+    groupedImage = false
+  ) => {
+    const useNaturalHeightImage =
+      fullWidthMedia && media.mime_type.includes("image");
+    const useImageIntrinsicHeight =
+      !fullWidthMedia && media.mime_type.includes("image");
+    const useVideoIntrinsicHeight = media.mime_type.includes("video");
+    const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
+    const mediaContainerClassName = getMediaContainerClassName({
+      groupedImage,
+      useIntrinsicHeightMedia:
+        useNaturalHeightImage ||
+        useImageIntrinsicHeight ||
+        useVideoIntrinsicHeight,
+      useCompactLink,
+    });
+    let mediaContent;
 
-        if (disableMediaInteraction) {
-          mediaContent = (
-            <MediaDisplay
-              media_mime_type={media.mime_type}
-              media_url={media.url}
-              disableMediaInteraction={disableMediaInteraction}
-              imageScale={imageScale}
-            />
-          );
-        } else if (useNaturalHeightImage || useImageIntrinsicHeight) {
-          mediaContent = (
-            <WaveDropPartContentMediaImage
-              src={media.url}
-              imageScale={imageScale}
-              imageObjectPosition={
-                useImageIntrinsicHeight ? "left top" : "center"
-              }
-            />
-          );
-        } else {
-          mediaContent = (
-            <DropListItemContentMedia
-              media_mime_type={media.mime_type}
-              media_url={media.url}
-              isCompetitionDrop={isCompetitionDrop}
-              imageScale={imageScale}
-            />
-          );
-        }
+    if (disableMediaInteraction) {
+      mediaContent = (
+        <MediaDisplay
+          media_mime_type={media.mime_type}
+          media_url={media.url}
+          disableMediaInteraction={disableMediaInteraction}
+          imageScale={imageScale}
+        />
+      );
+    } else if (useNaturalHeightImage || useImageIntrinsicHeight) {
+      mediaContent = (
+        <WaveDropPartContentMediaImage
+          src={media.url}
+          imageScale={imageScale}
+          imageObjectPosition={useImageIntrinsicHeight ? "left top" : "center"}
+        />
+      );
+    } else {
+      mediaContent = (
+        <DropListItemContentMedia
+          media_mime_type={media.mime_type}
+          media_url={media.url}
+          isCompetitionDrop={isCompetitionDrop}
+          imageScale={imageScale}
+        />
+      );
+    }
 
-        return (
-          <div key={`part-${i}-media-${media.url}`}>
-            <div className={mediaContainerClassName}>{mediaContent}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
+    return (
+      <div key={`part-${i}-media-${media.url}`}>
+        <div className={mediaContainerClassName}>{mediaContent}</div>
+      </div>
+    );
+  };
+
+  const mediaElements: React.ReactNode[] = [];
+  let imageRun: Array<{ media: ApiDropPart["media"][number]; index: number }> =
+    [];
+
+  const flushImageRun = () => {
+    if (imageRun.length === 0) {
+      return;
+    }
+
+    if (imageRun.length === 1) {
+      const [item] = imageRun;
+      if (item) {
+        mediaElements.push(renderMedia(item.media, item.index));
+      }
+      imageRun = [];
+      return;
+    }
+
+    mediaElements.push(
+      <div
+        key={`image-media-group:${imageRun
+          .map((item) => `${item.index}:${item.media.url}`)
+          .join("|")}`}
+        className={imageGridClassName}
+      >
+        {imageRun.map((item) => renderMedia(item.media, item.index, true))}
+      </div>
+    );
+    imageRun = [];
+  };
+
+  activePart.media.forEach((media, i) => {
+    if (!disableMediaInteraction && media.mime_type.includes("image")) {
+      imageRun.push({ media, index: i });
+      return;
+    }
+
+    flushImageRun();
+    mediaElements.push(renderMedia(media, i));
+  });
+  flushImageRun();
+
+  return <div className={mediaStackClassName}>{mediaElements}</div>;
 };
 
 export default WaveDropPartContentMedias;

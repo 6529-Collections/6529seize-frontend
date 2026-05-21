@@ -51,8 +51,10 @@ import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
+import SlowModeChatNotice from "./SlowModeChatNotice";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { containsOpenGraphPreviewLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -102,6 +104,11 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { IdentityPickerPlacement } from "./dropComposer.types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CHAT_LINK_RESTRICTION_MESSAGE,
+  areHandlesEqual,
+  isChatLinkRestrictionApplicable,
+} from "@/helpers/waves/chat-link-restriction.helpers";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -151,9 +158,10 @@ interface CreateDropContentProps {
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly onSwitchToDropModeWithUrl: (url: string) => void;
-  readonly submitDrop: (dropRequest: DropMutationBody) => void;
+  readonly submitDrop: (dropRequest: DropMutationBody) => boolean;
   readonly dropModeToggleExitLabel: string | null;
   readonly canExitDropMode: boolean;
+  readonly isChatBlockedBySlowMode: boolean;
   readonly submissionExperience: WaveSubmissionExperience;
   readonly canSubmitCurationUrl?: boolean | undefined;
   readonly curationUrlSubmitRestrictionMessage?: string | null | undefined;
@@ -509,6 +517,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   submitDrop,
   dropModeToggleExitLabel,
   canExitDropMode,
+  isChatBlockedBySlowMode,
   submissionExperience,
   canSubmitCurationUrl = true,
   curationUrlSubmitRestrictionMessage = null,
@@ -760,7 +769,31 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     ) ?? 0) >= 24000;
 
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
-  const canSubmit = getCanSubmit();
+  const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
+  const isChatLinksRestrictionActive = isChatLinkRestrictionApplicable({
+    dropType: ApiDropType.Chat,
+    linksDisabled: wave.chat.links_disabled === true,
+    isWaveAdmin: wave.wave.authenticated_user_eligible_for_admin === true,
+    isWaveCreator: areHandlesEqual(
+      connectedProfile?.handle,
+      wave.author.handle
+    ),
+  });
+  const hasChatContentWithLink = useMemo(() => {
+    if (!isChatLinksRestrictionActive || isDropMode) {
+      return false;
+    }
+
+    const contentParts = [
+      getMarkdown,
+      ...(drop?.parts.map((part) => part.content ?? null) ?? []),
+    ];
+
+    return contentParts.some(containsOpenGraphPreviewLink);
+  }, [drop?.parts, getMarkdown, isChatLinksRestrictionActive, isDropMode]);
+  const isLinksSubmitBlocked = hasChatContentWithLink;
+  const canSubmit =
+    getCanSubmit() && !isSlowModeSubmitBlocked && !isLinksSubmitBlocked;
   const canAddPart = getCanAddPart();
   const normalizedCurationDropUrl = useMemo(() => {
     if (!isCurationSubmissionExperience || isDropMode) {
@@ -805,6 +838,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
+  const shouldRefocusAfterChatSubmitRef = useRef(false);
   const isInitialMountRef = useRef(true);
 
   const identityValidationMessage = useMemo(() => {
@@ -1078,6 +1112,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    if (!shouldRefocusAfterChatSubmitRef.current || submitting) {
+      return;
+    }
+
+    shouldRefocusAfterChatSubmitRef.current = false;
+    const frameId = requestAnimationFrame(() => {
+      createDropInputRef.current?.focus();
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [dropEditorRefreshKey, submitting]);
+
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
   ): Promise<ApiCreateDropRequest | null> => {
@@ -1140,6 +1187,20 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (dropRequest.drop_type === ApiDropType.Chat && isChatBlockedBySlowMode) {
+      return;
+    }
+
+    if (
+      dropRequest.drop_type === ApiDropType.Chat &&
+      isChatLinksRestrictionActive &&
+      dropRequest.parts.some((part) =>
+        containsOpenGraphPreviewLink(part.content)
+      )
+    ) {
+      return;
+    }
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -1195,6 +1256,25 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
       );
 
+      const submitAccepted = submitDrop({
+        drop: updatedDropRequest,
+        dropId: optimisticDrop?.id ?? null,
+        onSuccess:
+          isDropMode && canExitDropMode
+            ? () => handleDropModeChange(false)
+            : undefined,
+        onError:
+          isDropMode && canExitDropMode
+            ? handleDuplicateIdentitySubmissionError
+            : undefined,
+      });
+      if (!submitAccepted) {
+        return;
+      }
+
+      const shouldKeepChatFocused =
+        updatedDropRequest.drop_type === ApiDropType.Chat;
+
       if (optimisticDrop) {
         const optimisticDropWithAttachments = {
           ...optimisticDrop,
@@ -1214,12 +1294,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         );
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
-      (document.activeElement as HTMLElement).blur();
-      if (isApp) {
-        import("@capacitor/core").then(({ Capacitor }) => {
+      if (shouldKeepChatFocused) {
+        shouldRefocusAfterChatSubmitRef.current = true;
+      } else if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      if (isApp && !shouldKeepChatFocused) {
+        void import("@capacitor/core").then(({ Capacitor }) => {
           if (Capacitor.getPlatform() === "android") {
-            import("@capacitor/keyboard").then(({ Keyboard }) => {
-              Keyboard.hide().catch(() => {});
+            void import("@capacitor/keyboard").then(({ Keyboard }) => {
+              void Keyboard.hide().catch(() => {});
             });
           }
         });
@@ -1232,19 +1316,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         });
       }
       refreshState();
-
-      submitDrop({
-        drop: updatedDropRequest,
-        dropId: optimisticDrop?.id ?? null,
-        onSuccess:
-          isDropMode && canExitDropMode
-            ? () => handleDropModeChange(false)
-            : undefined,
-        onError:
-          isDropMode && canExitDropMode
-            ? handleDuplicateIdentitySubmissionError
-            : undefined,
-      });
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
@@ -1268,6 +1339,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
+      return;
+    }
+
+    if (isSlowModeSubmitBlocked) {
+      return;
+    }
+
+    if (isLinksSubmitBlocked) {
       return;
     }
 
@@ -1829,28 +1908,41 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           <div className="tw-flex tw-w-full tw-items-end">
             <div
               ref={setActionsContainerRef}
-              className="tw-flex tw-w-full tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+              className="tw-grid tw-w-full tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
             >
-              <CreateDropActions
-                isStormMode={isStormModeActive}
-                isDropMode={isDropMode}
-                canAddPart={canAddPart}
-                submitting={submitting}
-                showOptions={showOptions}
-                animateOptions={
-                  !isWideContainer && hasUserToggledOptionsRef.current
-                }
-                isRequiredMetadataMissing={
-                  !!missingRequirements.metadata.length
-                }
-                isRequiredMediaMissing={!!missingRequirements.media.length}
-                handleFileChange={handleFileChange}
-                onAddMetadataClick={openMetadata}
-                breakIntoStorm={breakIntoStorm}
-                setShowOptions={handleSetShowOptions}
-                onGifDrop={onGifDrop}
-              />
-              <div className="tw-w-full tw-flex-grow">
+              <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
+                <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
+                {isLinksSubmitBlocked && (
+                  <p
+                    className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
+                    aria-live="polite"
+                  >
+                    {CHAT_LINK_RESTRICTION_MESSAGE}
+                  </p>
+                )}
+              </div>
+              <div className="tw-col-start-1 tw-row-start-2 tw-self-center">
+                <CreateDropActions
+                  isStormMode={isStormModeActive}
+                  isDropMode={isDropMode}
+                  canAddPart={canAddPart}
+                  submitting={submitting}
+                  showOptions={showOptions}
+                  animateOptions={
+                    !isWideContainer && hasUserToggledOptionsRef.current
+                  }
+                  isRequiredMetadataMissing={
+                    !!missingRequirements.metadata.length
+                  }
+                  isRequiredMediaMissing={!!missingRequirements.media.length}
+                  handleFileChange={handleFileChange}
+                  onAddMetadataClick={openMetadata}
+                  breakIntoStorm={breakIntoStorm}
+                  setShowOptions={handleSetShowOptions}
+                  onGifDrop={onGifDrop}
+                />
+              </div>
+              <div className="tw-col-start-2 tw-row-start-2 tw-w-full tw-min-w-0">
                 <CreateDropInput
                   waveId={wave.id}
                   key={dropEditorRefreshKey}
@@ -1895,6 +1987,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   canSubmit={canSubmit}
                   onDrop={onDrop}
                   isDropMode={isDropMode}
+                  disabledTooltip={
+                    isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
+                  }
                 />
               </div>
             </div>

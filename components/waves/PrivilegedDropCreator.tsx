@@ -1,6 +1,10 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 import { useAuth } from "../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
 import CreateDrop from "./CreateDrop";
@@ -57,32 +61,55 @@ export default function PrivilegedDropCreator({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
 }: PrivilegedDropCreatorProps) {
+  const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const { updateEligibility } = useWaveEligibility();
+  const refreshWaveAfterSlowModeExpires = useCallback(() => {
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVE, { wave_id: wave.id }],
+      })
+      .catch(() => undefined);
+  }, [queryClient, wave.id]);
+
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: !!connectedProfile?.handle,
     isProxy: !!activeProfileProxy,
     canChat: wave.chat.authenticated_user_eligible,
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,
+    slowModeCooldownMs: wave.chat.slow_mode_cooldown_ms ?? null,
+    nextDropAllowed: wave.chat.next_drop_allowed ?? null,
     submissionStarts: wave.participation.period?.min ?? null,
     submissionEnds: wave.participation.period?.max ?? null,
     maxDropsCount:
       wave.participation.no_of_applications_allowed_per_participant ?? null,
     identityDropsCount: wave.metrics.your_participation_drops_count,
+    onSlowModeCooldownExpired: refreshWaveAfterSlowModeExpires,
   });
+  const blockingChatRestriction =
+    chatRestriction === ChatRestriction.SLOW_MODE ? null : chatRestriction;
 
-  if (submissionRestriction !== null && chatRestriction !== null) {
+  useEffect(() => {
+    updateEligibility(wave.id, {
+      authenticated_user_chat_restriction: chatRestriction,
+    });
+  }, [chatRestriction, updateEligibility, wave.id]);
+
+  if (submissionRestriction !== null && blockingChatRestriction !== null) {
     return (
       <DropPlaceholder
         type="both"
-        chatRestriction={chatRestriction}
+        chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
       />
     );
   }
 
-  if (fixedDropMode === DropMode.CHAT && chatRestriction !== null) {
-    return <DropPlaceholder type="chat" chatRestriction={chatRestriction} />;
+  if (fixedDropMode === DropMode.CHAT && blockingChatRestriction !== null) {
+    return (
+      <DropPlaceholder type="chat" chatRestriction={blockingChatRestriction} />
+    );
   }
 
   if (

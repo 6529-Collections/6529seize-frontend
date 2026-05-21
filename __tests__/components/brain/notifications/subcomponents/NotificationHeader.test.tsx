@@ -46,7 +46,7 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
 }));
 
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
-  getArweaveGatewayFallbackUrls: (url: string) =>
+  getMediaGatewayFallbackUrls: (url: string) =>
     url === "ipfs://gelato"
       ? ["https://ipfs.6529.io/ipfs/gelato", "https://ipfs.io/ipfs/gelato"]
       : [url],

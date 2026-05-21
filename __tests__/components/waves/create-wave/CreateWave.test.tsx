@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -87,26 +93,25 @@ jest.mock("@/components/waves/create-wave/utils/CreateWaveActions", () => {
   };
 });
 
+const mockGetDropSnapshot = jest.fn();
+const mockRequestDrop = jest.fn();
+
 jest.mock(
   "@/components/waves/create-wave/description/CreateWaveDescription",
   () => {
     return React.forwardRef(function MockCreateWaveDescription(
-      { showDropError, onHaveDropToSubmitChange }: any,
+      { submitting, showDropError, onHaveDropToSubmitChange }: any,
       ref: any
     ) {
       React.useImperativeHandle(ref, () => ({
-        requestDrop: () => ({
-          parts: [{ content: "Test content" }],
-          title: "Test Drop",
-          referenced_nfts: [],
-          mentioned_users: [],
-          metadata: [],
-        }),
+        getDropSnapshot: mockGetDropSnapshot,
+        requestDrop: mockRequestDrop,
       }));
 
       return (
         <div
           data-testid="create-wave-description"
+          data-submitting={submitting}
           data-show-drop-error={showDropError}
         >
           Description Step
@@ -201,6 +206,7 @@ describe("CreateWave", () => {
         type: "TDH",
         category: null,
         profileId: null,
+        allowNegativeVotes: true,
         maxVotesPerIdentityPerDrop: null,
         winningThreshold: null,
         timeWeighted: {
@@ -233,6 +239,7 @@ describe("CreateWave", () => {
     onCategoryChange: jest.fn(),
     onProfileIdChange: jest.fn(),
     onMaxVotesPerIdentityPerDropChange: jest.fn(),
+    onAllowNegativeVotesChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),
     onWinningThresholdChange: jest.fn(),
     onThresholdChange: jest.fn(),
@@ -249,6 +256,20 @@ describe("CreateWave", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetDropSnapshot.mockReturnValue({
+      parts: [{ content: "Test content" }],
+      title: "Test Drop",
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
+    mockRequestDrop.mockReturnValue({
+      parts: [{ content: "Saved content" }],
+      title: "Saved Drop",
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+    });
     mockedUseRouter.mockReturnValue(mockRouter);
     mockedUseWaveConfig.mockReturnValue(mockWaveConfig);
     mockedUseAddWaveMutation.mockReturnValue(mockAddWaveMutation);
@@ -351,8 +372,47 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
         expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+      });
+    });
+
+    it("locks the description while submit work is pending", async () => {
+      let resolveAuth: ((value: { success: boolean }) => void) | undefined;
+      mockAuthContext.requestAuth.mockReturnValue(
+        new Promise((resolve) => {
+          resolveAuth = resolve;
+        })
+      );
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "true"
+        );
+      });
+
+      await act(async () => {
+        resolveAuth?.({ success: false });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "false"
+        );
       });
     });
 
@@ -377,29 +437,7 @@ describe("CreateWave", () => {
     });
 
     it("shows drop error when no drop content is provided", async () => {
-      // Create a mock for empty drop by updating the mocked component
-      jest.doMock(
-        "../../../../components/waves/create-wave/description/CreateWaveDescription",
-        () => {
-          return React.forwardRef(function MockCreateWaveDescriptionEmpty(
-            { showDropError }: any,
-            ref: any
-          ) {
-            React.useImperativeHandle(ref, () => ({
-              requestDrop: () => ({ parts: [] }),
-            }));
-
-            return (
-              <div
-                data-testid="create-wave-description"
-                data-show-drop-error={showDropError}
-              >
-                Description Step
-              </div>
-            );
-          });
-        }
-      );
+      mockGetDropSnapshot.mockReturnValue({ parts: [] });
 
       const configOnDescriptionStep = {
         ...mockWaveConfig,
@@ -414,7 +452,93 @@ describe("CreateWave", () => {
 
       await waitFor(() => {
         expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-show-drop-error",
+          "true"
+        );
         expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+      });
+    });
+
+    it("blocks submission while inline image uploads are still pending", async () => {
+      mockGetDropSnapshot.mockReturnValue({
+        parts: [{ content: "Draft with ![Seize](loading)" }],
+        title: "Test Drop",
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      });
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            image: new File([""], "test.jpg", { type: "image/jpeg" }),
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      const completeButton = screen.getByRole("button", { name: /complete/i });
+      fireEvent.click(completeButton);
+
+      await waitFor(() => {
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: "Please wait for image uploads to finish.",
+          type: "error",
+        });
+        expect(screen.getByTestId("create-wave-description")).toHaveAttribute(
+          "data-submitting",
+          "false"
+        );
+      });
+
+      expect(mockAuthContext.requestAuth).toHaveBeenCalled();
+      expect(mockGetDropSnapshot).toHaveBeenCalled();
+      expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
+      expect(mockedGenerateDropPart).not.toHaveBeenCalled();
+      expect(mockedMultiPartUpload).not.toHaveBeenCalled();
+      expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+    });
+
+    it("allows submission once inline image uploads have finished", async () => {
+      mockGetDropSnapshot.mockReturnValue({
+        parts: [
+          { content: "Draft with ![Seize](https://cdn.example/image.png)" },
+        ],
+        title: "Test Drop",
+        referenced_nfts: [],
+        mentioned_users: [],
+        metadata: [],
+      });
+
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave();
+
+      const completeButton = screen.getByRole("button", { name: /complete/i });
+      fireEvent.click(completeButton);
+
+      await waitFor(() => {
+        expect(mockedGetAdminGroupId).toHaveBeenCalled();
+        expect(mockedGenerateDropPart).toHaveBeenCalled();
+        expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+      });
+
+      expect(mockAuthContext.setToast).not.toHaveBeenCalledWith({
+        message: "Please wait for image uploads to finish.",
+        type: "error",
       });
     });
 
@@ -533,6 +657,8 @@ describe("CreateWave", () => {
           message: errorMessage,
           type: "error",
         });
+        expect(mockGetDropSnapshot).toHaveBeenCalled();
+        expect(mockRequestDrop).not.toHaveBeenCalled();
       });
     });
   });

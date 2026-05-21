@@ -9,6 +9,7 @@ import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
+import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
 import type { CreateWaveDescriptionHandles } from "../description/CreateWaveDescription";
 import { getCreateWaveDropRequest } from "../services/createWaveDropRequest";
 import { multiPartUpload } from "../services/multiPartUpload";
@@ -121,10 +122,19 @@ export function useCreateWaveSubmission({
         return;
       }
 
-      const drop = descriptionRef.current?.requestDrop() ?? null;
+      const drop = descriptionRef.current?.getDropSnapshot() ?? null;
       if (drop === null || drop.parts.length === 0) {
         setSubmitting(false);
         setShowDropError(true);
+        return;
+      }
+
+      if (hasPendingInlineImageUploadDrop(drop)) {
+        setToast({
+          message: "Please wait for image uploads to finish.",
+          type: "error",
+        });
+        setSubmitting(false);
         return;
       }
 

@@ -4,6 +4,7 @@ import PrimaryButton from "../utils/button/PrimaryButton";
 interface CreateDropSubmitProps {
   readonly submitting: boolean;
   readonly canSubmit: boolean;
+  readonly disabledTooltip?: string | null | undefined;
   readonly isDropMode: boolean;
   readonly onDrop: () => void;
 }
@@ -11,16 +12,19 @@ interface CreateDropSubmitProps {
 export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
   submitting,
   canSubmit,
+  disabledTooltip = null,
   isDropMode,
   onDrop,
 }) => {
   const submitLabel = isDropMode ? "Drop" : "Post";
+  const title = !canSubmit && disabledTooltip ? disabledTooltip : undefined;
 
-  return (
+  const button = (
     <PrimaryButton
       onClicked={onDrop}
       loading={submitting}
       disabled={!canSubmit}
+      title={title}
       padding="tw-w-10 tw-px-2.5 tw-py-3 lg:tw-w-[3.875rem] lg:tw-px-3.5"
       ariaLabel={submitting ? `${submitLabel} in progress` : submitLabel}
       hideChildrenWhenLoading
@@ -36,5 +40,13 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
         <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
       </svg>
     </PrimaryButton>
+  );
+
+  return title ? (
+    <span className="tw-inline-flex" title={title}>
+      {button}
+    </span>
+  ) : (
+    button
   );
 };

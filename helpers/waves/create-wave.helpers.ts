@@ -412,7 +412,7 @@ export const getCreateNewWaveBody = ({
         min: config.dates.votingStartDate,
         max: endDate,
       },
-      forbid_negative_votes: false,
+      forbid_negative_votes: config.voting.allowNegativeVotes === false,
     },
     visibility: {
       scope: {
@@ -449,6 +449,7 @@ export const getCreateNewWaveBody = ({
         group_id: config.groups.canChat,
       },
       enabled: config.chat.enabled,
+      links_disabled: false,
     },
     wave: {
       admin_drop_deletion_enabled: config.drops.adminCanDeleteDrops,

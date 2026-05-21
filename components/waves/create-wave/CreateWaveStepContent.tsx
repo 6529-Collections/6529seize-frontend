@@ -19,6 +19,7 @@ export default function CreateWaveStepContent({
   controller,
   profile,
   descriptionRef,
+  submitting,
   showDropError,
   onHaveDropToSubmitChange,
   onInlineGroupCreate,
@@ -26,6 +27,7 @@ export default function CreateWaveStepContent({
   readonly controller: WaveConfigController;
   readonly profile: ApiIdentity;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
+  readonly submitting: boolean;
   readonly showDropError: boolean;
   readonly onHaveDropToSubmitChange: (haveDrop: boolean) => void;
   readonly onInlineGroupCreate: (
@@ -49,6 +51,7 @@ export default function CreateWaveStepContent({
     onCategoryChange,
     onProfileIdChange,
     onMaxVotesPerIdentityPerDropChange,
+    onAllowNegativeVotesChange,
     onTimeWeightedVotingChange,
     onThresholdChange,
     onApprovalMaxWinnersChange,
@@ -104,12 +107,14 @@ export default function CreateWaveStepContent({
           selectedType={config.voting.type}
           category={config.voting.category}
           profileId={config.voting.profileId}
+          allowNegativeVotes={config.voting.allowNegativeVotes}
           maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
           approvalThreshold={config.approval.threshold}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
+          onAllowNegativeVotesChange={onAllowNegativeVotesChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
           setApprovalThreshold={onThresholdChange}
           timeWeighted={config.voting.timeWeighted}
@@ -137,6 +142,7 @@ export default function CreateWaveStepContent({
         <CreateWaveDescription
           ref={descriptionRef}
           profile={profile}
+          submitting={submitting}
           showDropError={showDropError}
           wave={{
             name: config.overview.name,

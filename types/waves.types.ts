@@ -64,6 +64,7 @@ export interface CreateWaveVotingConfig {
   readonly type: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly allowNegativeVotes: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly winningThreshold: number | null;
   readonly timeWeighted: TimeWeightedVotingSettings;

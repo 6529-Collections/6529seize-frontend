@@ -18,12 +18,21 @@ import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import styles from "./TheMemes.module.scss";
 
 const REMEMES_PAGE_SIZE = 20;
+
+function buildRememesUrl(memeId: number, page: number, sorting: RememeSort) {
+  const sort =
+    sorting === RememeSort.CREATED_ASC
+      ? "&sort=created_at&sort_direction=desc"
+      : "";
+
+  return `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${memeId}&page_size=${REMEMES_PAGE_SIZE}&page=${page}${sort}`;
+}
 
 function getRememeName(rememe: Rememe) {
   const metadata = rememe.metadata as unknown;
@@ -58,30 +67,21 @@ export function MemePageReferencesSubMenu(props: {
   const [selectedRememeSorting, setSelectedRememeSorting] =
     useState<RememeSort>(RememeSort.RANDOM);
 
-  const fetchRememes = useCallback(
-    (meme_id: number) => {
-      let sort = "";
-      if (selectedRememeSorting === RememeSort.CREATED_ASC) {
-        sort = "&sort=created_at&sort_direction=desc";
-      }
-      void fetchUrl(
-        `${publicEnv.API_ENDPOINT}/api/rememes?meme_id=${meme_id}&page_size=${REMEMES_PAGE_SIZE}&page=${rememesPage}${sort}`
-      )
-        .then((response: DBResponse) => {
-          setRememesTotalResults(response.count);
-          setRememes(response.data);
-          setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
-          setRememesLoaded(true);
-        })
-        .catch(() => {
-          setRememesTotalResults(0);
-          setRememes([]);
-          setShowRememesSort(false);
-          setRememesLoaded(true);
-        });
-    },
-    [rememesPage, selectedRememeSorting]
-  );
+  function refreshRememes(memeId: number) {
+    void fetchUrl(buildRememesUrl(memeId, rememesPage, selectedRememeSorting))
+      .then((response: DBResponse) => {
+        setRememesTotalResults(response.count);
+        setRememes(response.data);
+        setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
+        setRememesLoaded(true);
+      })
+      .catch(() => {
+        setRememesTotalResults(0);
+        setRememes([]);
+        setShowRememesSort(false);
+        setRememesLoaded(true);
+      });
+  }
 
   useEffect(() => {
     if (props.show && props.nft) {
@@ -101,9 +101,23 @@ export function MemePageReferencesSubMenu(props: {
 
   useEffect(() => {
     if (props.show && props.nft) {
-      fetchRememes(props.nft.id);
+      void fetchUrl(
+        buildRememesUrl(props.nft.id, rememesPage, selectedRememeSorting)
+      )
+        .then((response: DBResponse) => {
+          setRememesTotalResults(response.count);
+          setRememes(response.data);
+          setShowRememesSort(response.count > REMEMES_PAGE_SIZE);
+          setRememesLoaded(true);
+        })
+        .catch(() => {
+          setRememesTotalResults(0);
+          setRememes([]);
+          setShowRememesSort(false);
+          setRememesLoaded(true);
+        });
     }
-  }, [props.show, props.nft, fetchRememes]);
+  }, [props.show, props.nft, rememesPage, selectedRememeSorting]);
 
   if (!props.show) {
     return <></>;
@@ -171,7 +185,7 @@ export function MemePageReferencesSubMenu(props: {
                     className={styles["buttonIcon"]}
                     onClick={() => {
                       if (props.nft) {
-                        fetchRememes(props.nft.id);
+                        refreshRememes(props.nft.id);
                       }
                     }}
                     data-tooltip-id="refresh-rememes"

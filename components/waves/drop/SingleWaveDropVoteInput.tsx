@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 
 interface SingleWaveDropVoteInputProps {
   readonly voteValue: number | string;
@@ -37,6 +37,14 @@ export const SingleWaveDropVoteInput: React.FC<
   const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressStartTime = useRef<number | null>(null);
   const isPressed = useRef<boolean>(false);
+  const allowsNegativeValues = minValue < 0;
+  const quickPercentages = allowsNegativeValues
+    ? QUICK_PERCENTAGES
+    : QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
+  const mobileQuickPercentages = allowsNegativeValues
+    ? MOBILE_QUICK_PERCENTAGES
+    : MOBILE_QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
+  const inputPattern = allowsNegativeValues ? "-?[0-9]*" : "[0-9]*";
 
   const clampValue = (value: number) =>
     Math.min(Math.max(value, minValue), maxValue);
@@ -63,14 +71,16 @@ export const SingleWaveDropVoteInput: React.FC<
     increment: boolean,
     currentValue: number,
     newValue: number
-  ) => {
+  ): number | null => {
     const possibleValues = MEMETIC_VALUES.filter((mv) =>
-      increment ? mv > currentValue && mv <= newValue : mv < currentValue && mv >= newValue
+      increment
+        ? mv > currentValue && mv <= newValue
+        : mv < currentValue && mv >= newValue
     );
     if (possibleValues.length === 0) return null;
     return increment
-      ? possibleValues[0]
-      : possibleValues.at(-1) ?? null;
+      ? (possibleValues[0] ?? null)
+      : (possibleValues.at(-1) ?? null);
   };
 
   const computeNextVoteValue = (
@@ -90,7 +100,10 @@ export const SingleWaveDropVoteInput: React.FC<
     );
 
     if (crossingMemeticValue !== null) {
-      return { nextValue: crossingMemeticValue, crossedMemetic: true };
+      return {
+        nextValue: clampValue(crossingMemeticValue),
+        crossedMemetic: true,
+      };
     }
 
     const roundedValue = Math.round(newValue / delta) * delta;
@@ -136,7 +149,12 @@ export const SingleWaveDropVoteInput: React.FC<
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
 
-    if (inputValue === "" || inputValue === "-") {
+    if (inputValue === "") {
+      setVoteValue(inputValue);
+      return;
+    }
+
+    if (inputValue === "-") {
       setVoteValue(inputValue);
       return;
     }
@@ -203,17 +221,17 @@ export const SingleWaveDropVoteInput: React.FC<
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
       <div className="tw-flex tw-items-center">
-        <div className="tw-relative tw-w-full tw-h-full">
+        <div className="tw-relative tw-h-full tw-w-full">
           <input
             type="text"
-            pattern="-?[0-9]*"
+            pattern={inputPattern}
             inputMode="numeric"
-            className="tw-w-full tw-px-3 tw-pr-12 tw-h-8 tw-bg-iron-950 tw-rounded-md tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-outline-none tw-border tw-border-solid tw-border-iron-700 desktop-hover:hover:tw-border-primary-400 focus:tw-border-primary-400 tw-transition-all focus:tw-bg-iron-950 tw-duration-300 tw-ease-out"
+            className="tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-pr-12 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-transition-all tw-duration-300 tw-ease-out focus:tw-border-primary-400 focus:tw-bg-iron-950 desktop-hover:hover:tw-border-primary-400"
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
-          <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-text-iron-400 tw-pointer-events-none">
+          <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-text-iron-400">
             {label}
           </div>
         </div>
@@ -227,14 +245,14 @@ export const SingleWaveDropVoteInput: React.FC<
         <div className="tw-relative tw-w-full xl:tw-max-w-xs">
           <input
             type="text"
-            pattern="-?[0-9]*"
+            pattern={inputPattern}
             inputMode="numeric"
-            className="tw-w-full tw-px-3 tw-pr-24 tw-h-10 tw-bg-iron-900 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-800 focus:tw-ring-primary-400/50 desktop-hover:hover:tw-ring-primary-400/30 tw-outline-none tw-transition-all desktop-hover:hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80"
+            className="tw-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-pr-24 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-800 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400/50 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400/30"
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
-          <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400 tw-pointer-events-none">
+          <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400">
             {label}
           </div>
         </div>
@@ -246,11 +264,11 @@ export const SingleWaveDropVoteInput: React.FC<
             onMouseLeave={stopPress}
             onTouchStart={() => startPress(true)}
             onTouchEnd={stopPress}
-            className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-emerald-400/50 tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
+            className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-emerald-400 tw-ring-1 tw-ring-iron-800 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-ring-emerald-400/50"
           >
             <FontAwesomeIcon
               icon={faArrowUp}
-              className="tw-w-4 tw-h-4 tw-flex-shrink-0"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             />
           </button>
           <button
@@ -259,23 +277,23 @@ export const SingleWaveDropVoteInput: React.FC<
             onMouseLeave={stopPress}
             onTouchStart={() => startPress(false)}
             onTouchEnd={stopPress}
-            className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-rose-400/50 tw-text-rose-400 desktop-hover:hover:tw-text-rose-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
+            className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-rose-400 tw-ring-1 tw-ring-iron-800 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-rose-300 desktop-hover:hover:tw-ring-rose-400/50"
           >
             <FontAwesomeIcon
               icon={faArrowDown}
-              className="tw-w-4 tw-h-4 tw-flex-shrink-0"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
             />
           </button>
         </div>
       </div>
 
       <div className="tw-mt-2 tw-flex tw-gap-1.5 tw-overflow-x-auto tw-scrollbar-none">
-        <div className="sm:tw-hidden tw-flex tw-gap-1.5">
-          {MOBILE_QUICK_PERCENTAGES.map((percentage) => (
+        <div className="tw-flex tw-gap-1.5 sm:tw-hidden">
+          {mobileQuickPercentages.map((percentage) => (
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-rounded tw-transition-colors tw-duration-200 tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+              className={`tw-flex-shrink-0 tw-rounded tw-border-0 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
               )}`}
@@ -286,12 +304,12 @@ export const SingleWaveDropVoteInput: React.FC<
           ))}
         </div>
 
-        <div className="tw-hidden sm:tw-flex tw-gap-1.5">
-          {QUICK_PERCENTAGES.map((percentage) => (
+        <div className="tw-hidden tw-gap-1.5 sm:tw-flex">
+          {quickPercentages.map((percentage) => (
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-rounded tw-transition-colors tw-duration-200 tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+              className={`tw-flex-shrink-0 tw-rounded tw-border-0 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
               )}`}

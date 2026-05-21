@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import {
-  getArweaveGatewayFallbackUrls,
+  getMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -52,7 +52,7 @@ function InteractiveHtmlMediaDisplay({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [isActivated, setIsActivated] = useState(!requireInteractionToLoad);
   const urls = useMemo(
-    () => getArweaveGatewayFallbackUrls(media_url),
+    () => getMediaGatewayFallbackUrls(media_url),
     [media_url]
   );
   const [activeIndex, setActiveIndex] = useState(0);

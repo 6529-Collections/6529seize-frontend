@@ -33,12 +33,14 @@ interface CreateDropCompactProps {
   readonly type: CreateDropType;
   readonly drop: CreateDropConfig | null;
   readonly showSubmit: boolean;
+  readonly submitOnEnter?: boolean | undefined;
   readonly showDropError?: boolean | undefined;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onEditorState: (editorState: EditorState | null) => void;
+  readonly onUploadEditorStateChange: (editorState: EditorState) => void;
   readonly onMentionedUser: (
     newUser: Omit<MentionedUser, "current_handle">
   ) => void;
@@ -64,6 +66,7 @@ const CreateDropCompact = forwardRef<
       canAddPart,
       loading,
       showSubmit,
+      submitOnEnter = true,
       type,
       drop,
       showDropError = false,
@@ -72,6 +75,7 @@ const CreateDropCompact = forwardRef<
       children,
       onViewChange,
       onEditorState,
+      onUploadEditorStateChange,
       onMentionedUser,
       onMentionedWave,
       onReferencedNft,
@@ -127,16 +131,23 @@ const CreateDropCompact = forwardRef<
                 type={type}
                 waveId={waveId}
                 drop={drop}
+                loading={loading}
+                submitOnEnter={submitOnEnter}
                 canAddPart={canAddPart}
                 canSubmit={canSubmit}
                 missingMedia={missingMedia}
                 missingMetadata={missingMetadata}
                 onEditorState={onEditorState}
+                onUploadEditorStateChange={onUploadEditorStateChange}
                 onMentionedUser={onMentionedUser}
                 onMentionedWave={onMentionedWave}
                 onReferencedNft={onReferencedNft}
                 onDrop={onDrop}
-                onViewClick={() => onViewChange(CreateDropViewType.FULL)}
+                onViewClick={() => {
+                  if (!loading) {
+                    onViewChange(CreateDropViewType.FULL);
+                  }
+                }}
                 setFiles={setFiles}
                 onDropPart={onDropPart}
               >
@@ -145,7 +156,7 @@ const CreateDropCompact = forwardRef<
                     {onDrop && (
                       <PrimaryButton
                         onClicked={onDrop}
-                        disabled={!canSubmit}
+                        disabled={!canSubmit || loading}
                         loading={loading}
                         padding={
                           screenType === CreateDropScreenType.MOBILE
@@ -174,9 +185,14 @@ const CreateDropCompact = forwardRef<
                   </p>
                 </div>
                 <button
-                  onClick={() => onFileRemove(file)}
+                  onClick={() => {
+                    if (!loading) {
+                      onFileRemove(file);
+                    }
+                  }}
                   type="button"
                   aria-label="Remove file"
+                  disabled={loading}
                   className="-tw-mb-0.5 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent hover:tw-bg-iron-800"
                 >
                   <svg

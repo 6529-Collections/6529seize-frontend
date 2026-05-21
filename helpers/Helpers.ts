@@ -211,28 +211,60 @@ export const fullScreenSupported = (): boolean => {
   return check;
 };
 
-export const enterArtFullScreen = async (elementId: string): Promise<void> => {
-  const element: any = document.getElementById(elementId);
+type FullscreenRequestElement = Omit<HTMLElement, "requestFullscreen"> & {
+  readonly requestFullscreen?: (() => Promise<void> | void) | undefined;
+  readonly mozRequestFullScreen?: (() => Promise<void> | void) | undefined;
+  readonly webkitRequestFullscreen?: (() => Promise<void> | void) | undefined;
+  readonly msRequestFullscreen?: (() => Promise<void> | void) | undefined;
+};
+
+export const enterArtFullScreen = async (
+  elementId: string
+): Promise<boolean> => {
+  if (typeof globalThis.document === "undefined") {
+    return false;
+  }
+
+  const element = globalThis.document.getElementById(
+    elementId
+  ) as FullscreenRequestElement | null;
 
   if (!element) {
     console.error(`Element with ID '${elementId}' not found.`);
-    return;
+    return false;
   }
 
-  const request =
-    element.requestFullscreen ||
-    element.mozRequestFullScreen ||
-    element.webkitRequestFullscreen ||
-    element.msRequestFullscreen;
-
-  if (request) {
-    try {
-      await request.call(element);
-    } catch (err) {
-      console.error(`Error attempting to enable fullscreen mode: ${err}`);
+  try {
+    if (element.requestFullscreen !== undefined) {
+      await element.requestFullscreen();
+      return true;
     }
-  } else {
+    if (element.mozRequestFullScreen !== undefined) {
+      await element.mozRequestFullScreen();
+      return true;
+    }
+    if (element.webkitRequestFullscreen !== undefined) {
+      await element.webkitRequestFullscreen();
+      return true;
+    }
+    if (element.msRequestFullscreen !== undefined) {
+      await element.msRequestFullscreen();
+      return true;
+    }
+
     console.warn("Fullscreen API is not supported by this browser.");
+    return false;
+  } catch (err) {
+    let errorMessage = "Unknown fullscreen error";
+    if (err instanceof Error) {
+      errorMessage = `${err.name}: ${err.message}`;
+    } else if (typeof err === "string") {
+      errorMessage = err;
+    }
+    console.error(
+      `Error attempting to enable fullscreen mode: ${errorMessage}`
+    );
+    return false;
   }
 };
 

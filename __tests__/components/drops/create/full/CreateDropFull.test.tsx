@@ -1,27 +1,34 @@
-import React, { createRef } from 'react';
-import { render, screen } from '@testing-library/react';
-import type { CreateDropFullHandles } from '@/components/drops/create/full/CreateDropFull';
-import CreateDropFull from '@/components/drops/create/full/CreateDropFull';
-import { CreateDropScreenType } from '@/components/drops/create/utils/CreateDropWrapper';
-import { CreateDropType } from '@/components/drops/create/types';
+import React, { createRef } from "react";
+import { render, screen } from "@testing-library/react";
+import type { CreateDropFullHandles } from "@/components/drops/create/full/CreateDropFull";
+import CreateDropFull from "@/components/drops/create/full/CreateDropFull";
+import { CreateDropScreenType } from "@/components/drops/create/utils/CreateDropWrapper";
+import { CreateDropType } from "@/components/drops/create/types";
 
-jest.mock('react-use', () => ({
-  createBreakpoint: () => () => 'LG',
+jest.mock("react-use", () => ({
+  createBreakpoint: () => () => "LG",
 }));
 
 const desktopClearMock = jest.fn();
 const mobileClearMock = jest.fn();
 
-jest.mock('@/components/drops/create/full/desktop/CreateDropFullDesktop', () => {
-  return React.forwardRef((props: any, ref) => {
-    React.useImperativeHandle(ref, () => ({ clearEditorState: desktopClearMock }));
-    return <div data-testid="desktop">{props.children}</div>;
-  });
-});
+jest.mock(
+  "@/components/drops/create/full/desktop/CreateDropFullDesktop",
+  () => {
+    return React.forwardRef((props: any, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        clearEditorState: desktopClearMock,
+      }));
+      return <div data-testid="desktop">{props.children}</div>;
+    });
+  }
+);
 
-jest.mock('@/components/drops/create/full/mobile/CreateDropFullMobile', () => {
+jest.mock("@/components/drops/create/full/mobile/CreateDropFullMobile", () => {
   return React.forwardRef((props: any, ref) => {
-    React.useImperativeHandle(ref, () => ({ clearEditorState: mobileClearMock }));
+    React.useImperativeHandle(ref, () => ({
+      clearEditorState: mobileClearMock,
+    }));
     return <div data-testid="mobile">{props.children}</div>;
   });
 });
@@ -52,7 +59,9 @@ function renderComponent(screenType: CreateDropScreenType) {
       onMetadataRemove={jest.fn()}
       onViewChange={jest.fn()}
       onEditorState={jest.fn()}
+      onUploadEditorStateChange={jest.fn()}
       onMentionedUser={jest.fn()}
+      onMentionedWave={jest.fn()}
       onReferencedNft={jest.fn()}
       onFileRemove={jest.fn()}
       setFiles={jest.fn()}
@@ -65,27 +74,26 @@ function renderComponent(screenType: CreateDropScreenType) {
   return ref;
 }
 
-describe('CreateDropFull', () => {
+describe("CreateDropFull", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders desktop component and delegates clearEditorState', () => {
+  it("renders desktop component and delegates clearEditorState", () => {
     const ref = renderComponent(CreateDropScreenType.DESKTOP);
-    expect(screen.getByTestId('desktop')).toBeInTheDocument();
-    expect(screen.queryByTestId('mobile')).toBeNull();
+    expect(screen.getByTestId("desktop")).toBeInTheDocument();
+    expect(screen.queryByTestId("mobile")).toBeNull();
     ref.current?.clearEditorState();
     expect(desktopClearMock).toHaveBeenCalled();
     expect(mobileClearMock).not.toHaveBeenCalled();
   });
 
-  it('renders mobile component and delegates clearEditorState', () => {
+  it("renders mobile component and delegates clearEditorState", () => {
     const ref = renderComponent(CreateDropScreenType.MOBILE);
-    expect(screen.getByTestId('mobile')).toBeInTheDocument();
-    expect(screen.queryByTestId('desktop')).toBeNull();
+    expect(screen.getByTestId("mobile")).toBeInTheDocument();
+    expect(screen.queryByTestId("desktop")).toBeNull();
     ref.current?.clearEditorState();
     expect(mobileClearMock).toHaveBeenCalled();
     expect(desktopClearMock).not.toHaveBeenCalled();
   });
 });
-

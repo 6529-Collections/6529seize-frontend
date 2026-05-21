@@ -687,8 +687,8 @@ paths:
         - Distributions
       summary: Get distributions
       description: >-
-        At least one filter parameter (search, card_id, contract, or wallet) is
-        required
+        At least one filter parameter (search, card_id, contract, wallet, phase,
+        or minted) is required
       operationId: getDistributions
       parameters:
         - name: page_size
@@ -732,6 +732,20 @@ paths:
           required: false
           schema:
             type: string
+        - name: phase
+          in: query
+          description: Filter by distribution phase(s), comma-separated for multiple
+          required: false
+          schema:
+            type: string
+        - name: minted
+          in: query
+          description: >-
+            Filter by mint status. true returns wallets with minted count
+            greater than 0; false returns wallets with minted count equal to 0
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -9376,6 +9390,12 @@ components:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
         enabled:
           type: boolean
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1000
+        links_disabled:
+          type: boolean
     ApiCreateNewWaveParticipationConfig:
       type: object
       required:
@@ -11886,12 +11906,21 @@ components:
         amount:
           type: number
           format: double
+        rater_rating:
+          type: number
+          format: double
         total:
           type: number
           format: double
         category:
           type: string
         vote:
+          type: number
+          format: double
+        vote_change:
+          type: number
+          format: double
+        total_vote:
           type: number
           format: double
         reaction:
@@ -13470,14 +13499,24 @@ components:
       required:
         - scope
         - enabled
+        - links_disabled
         - authenticated_user_eligible
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
         enabled:
           type: boolean
+        links_disabled:
+          type: boolean
         authenticated_user_eligible:
           type: boolean
+        next_drop_allowed:
+          type: integer
+          format: int64
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1000
     ApiWaveConfig:
       type: object
       required:
@@ -14090,6 +14129,7 @@ components:
         - subscribers_count
         - has_competition
         - is_dm_wave
+        - links_disabled
         - description_drop
         - total_drops_count
         - is_private
@@ -14112,6 +14152,8 @@ components:
         has_competition:
           type: boolean
         is_dm_wave:
+          type: boolean
+        links_disabled:
           type: boolean
         description_drop:
           $ref: "#/components/schemas/ApiWaveOverviewDescriptionDrop"
@@ -14141,6 +14183,9 @@ components:
           type: boolean
         can_chat:
           type: boolean
+        next_drop_allowed:
+          type: integer
+          format: int64
         unread_drops:
           type: integer
           format: int64

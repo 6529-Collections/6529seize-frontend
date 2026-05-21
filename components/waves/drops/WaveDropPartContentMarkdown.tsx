@@ -8,11 +8,19 @@ import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedN
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import React from "react";
+import { useAuth } from "@/components/auth/Auth";
 import QuorumProposalCompactContent from "@/components/waves/quorum/QuorumProposalCompactContent";
 import { parseQuorumProposalMarkdown } from "@/components/waves/quorum/quorumProposalMarkdown";
 import type { DropContentPresentation } from "./dropContentPresentation";
 import EditDropLexical from "./EditDropLexical";
 import WaveDropQuoteWithDropId from "./WaveDropQuoteWithDropId";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
+import {
+  CHAT_LINK_RESTRICTION_MESSAGE,
+  areHandlesEqual,
+  isChatLinkRestrictionApplicable,
+} from "@/helpers/waves/chat-link-restriction.helpers";
 
 interface WaveDropPartContentMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -66,6 +74,7 @@ const WaveDropPartContentMarkdown: React.FC<
   embedDepth,
   maxEmbedDepth,
 }) => {
+  const { connectedProfile } = useAuth();
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
   const dropId = drop?.id;
   const dropSerialNo = drop?.serial_no;
@@ -95,6 +104,18 @@ const WaveDropPartContentMarkdown: React.FC<
     contentPresentation === "quorumCompact"
       ? parseQuorumProposalMarkdown(part.content)
       : null;
+  const waveWithLinkSettings = drop?.wave as
+    | ApiWaveMinWithChatLinkSettings
+    | undefined;
+  const editLinkRestrictionApplies = isChatLinkRestrictionApplicable({
+    dropType: drop?.drop_type ?? ApiDropType.Chat,
+    linksDisabled: waveWithLinkSettings?.links_disabled === true,
+    isWaveAdmin: drop?.wave.authenticated_user_admin === true,
+    isWaveCreator: areHandlesEqual(
+      connectedProfile?.handle,
+      waveWithLinkSettings?.wave_author_handle
+    ),
+  });
 
   if (isEditing) {
     return (
@@ -106,6 +127,9 @@ const WaveDropPartContentMarkdown: React.FC<
         canMentionAll={drop?.wave.authenticated_user_admin === true}
         waveId={wave.id}
         isSaving={isSaving}
+        linkRestrictionMessage={
+          editLinkRestrictionApplies ? CHAT_LINK_RESTRICTION_MESSAGE : null
+        }
         onSave={(
           content: string,
           mentions: ApiDropMentionedUser[],
