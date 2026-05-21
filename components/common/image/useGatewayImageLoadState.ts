@@ -1,6 +1,6 @@
 "use client";
 
-import { getArweaveGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
+import { getMediaGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
 import { useMemo, useState } from "react";
 
 type GatewayImageLoadMode = "optimized" | "unoptimized" | "placeholder";
@@ -14,7 +14,7 @@ type GatewayImageLoadState = {
 export function useGatewayImageLoadState(src: string | null = null) {
   const normalizedSrc = src;
   const candidateUrls = useMemo(
-    () => (normalizedSrc ? getArweaveGatewayFallbackUrls(normalizedSrc) : []),
+    () => (normalizedSrc ? getMediaGatewayFallbackUrls(normalizedSrc) : []),
     [normalizedSrc]
   );
 
