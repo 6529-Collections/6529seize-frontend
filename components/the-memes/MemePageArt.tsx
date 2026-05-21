@@ -298,22 +298,23 @@ function AdditionalDetailsSection({
 
 function ArweaveLinkRow({ row }: { readonly row: MediaRow }) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3 last:tw-border-b-0 md:tw-flex-row md:tw-items-center md:tw-gap-6">
-      <div className="tw-w-16 tw-shrink-0 tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
+    <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3 last:tw-border-b-0 md:tw-grid-cols-[4rem_minmax(10rem,16rem)_minmax(0,1fr)_auto] md:tw-items-center md:tw-gap-6">
+      <div className="tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
         {row.label}
       </div>
-      <div className="tw-w-64 tw-shrink-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100">
+      <div className="tw-min-w-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 md:tw-truncate">
         {row.title}
       </div>
       <Link
         href={row.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="tw-min-w-0 tw-truncate tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-flex-1"
+        title={row.url}
+        className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal"
       >
         {row.url}
       </Link>
-      <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-4 md:tw-ml-auto md:tw-w-auto md:tw-shrink-0 md:tw-justify-end">
+      <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-4 md:tw-w-auto md:tw-justify-end">
         {row.downloadName && (
           <Download
             href={row.url}
@@ -384,7 +385,7 @@ function MetricBlock({
   return (
     <div>
       <div
-        className={`tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 md:tw-mb-2 ${
+        className={`tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 md:tw-mb-2 ${
           highlightedLabel ? "tw-text-primary-400" : "tw-text-iron-400"
         }`}
       >

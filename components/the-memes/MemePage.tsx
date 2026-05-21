@@ -597,7 +597,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
       <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
                   href="/the-memes"
@@ -611,7 +611,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 </Link>
               </div>
               {nftMeta && nft && (
-                <div className="tw-flex tw-min-w-0 tw-items-center">
+                <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center md:tw-ml-0">
                   <MemeCalendarPeriods
                     id={nft.id}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
@@ -621,24 +621,8 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               )}
             </div>
             {nftMeta && nft ? (
-              <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
-                <div className="tw-min-w-0 tw-flex-1">
-                  <h1
-                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-col sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-baseline"
-                    aria-label={`Card ${nft.id} — ${nft.name}`}
-                  >
-                    <span className="tw-mb-1 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400 sm:tw-mb-0 sm:tw-text-2xl sm:tw-font-medium sm:tw-leading-tight">
-                      Card {nft.id}
-                    </span>
-                    <span className="tw-hidden tw-font-light tw-text-iron-400 sm:tw-mx-2 sm:tw-inline">
-                      —
-                    </span>
-                    <span className="tw-mb-0 tw-min-w-0 tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
-                      {nft.name}
-                    </span>
-                  </h1>
-                </div>
-                <div className="tw-flex tw-shrink-0 tw-justify-end">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
+                <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
                   <NftNavigation
                     nftId={nft.id}
                     path="/the-memes"
@@ -647,13 +631,32 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                     params={searchParams}
                   />
                 </div>
+                <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
+                  <h1
+                    className="tw-mb-0 tw-flex tw-min-w-0 tw-items-baseline"
+                    aria-label={`Card ${nft.id} — ${nft.name}`}
+                  >
+                    <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
+                      Card {nft.id}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
+                    />
+                    <span className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
+                      {nft.name}
+                    </span>
+                  </h1>
+                </div>
               </div>
             ) : (
               isLoadingNft && (
-                <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 sm:tw-items-end">
-                  <MemePageTitleSkeleton />
-                  <div className="tw-flex tw-shrink-0 tw-justify-end">
+                <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3 md:tw-flex-wrap md:tw-justify-start">
+                  <div className="tw-order-2 tw-flex tw-shrink-0 tw-justify-end md:tw-order-1">
                     <MemePageNavigationSkeleton />
+                  </div>
+                  <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
+                    <MemePageTitleSkeleton />
                   </div>
                 </div>
               )
