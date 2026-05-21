@@ -1,11 +1,8 @@
 import dynamic from "next/dynamic";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 
-export enum SingleWaveDropVoteSize {
-  NORMAL = "NORMAL",
-  COMPACT = "COMPACT",
-  MINI = "MINI",
-}
+export { SingleWaveDropVoteSize };
 
 interface SingleWaveDropVoteProps {
   readonly drop: ApiDrop;

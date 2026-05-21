@@ -19,6 +19,7 @@ interface MemesQuickVoteActionBarProps {
   readonly isVoteFeedbackActive: boolean;
   readonly latestUsedAmount: number | null;
   readonly quickAmounts: readonly number[];
+  readonly allowsNegativeVotes: boolean;
   readonly uncastPower: number | null;
   readonly votingLabel: string | null;
   readonly onCustomChange: (value: string) => void;
@@ -37,6 +38,7 @@ export default function MemesQuickVoteActionBar({
   isVoteFeedbackActive,
   latestUsedAmount,
   quickAmounts,
+  allowsNegativeVotes,
   uncastPower,
   votingLabel,
   onCustomChange,
@@ -50,9 +52,12 @@ export default function MemesQuickVoteActionBar({
   const isCustomRowVisible = !hasQuickAmounts || isCustomOpen;
   const customInputRef = useRef<HTMLInputElement | null>(null);
   const previousCustomRowVisibleRef = useRef(isCustomRowVisible);
+  const parsedCustomValue = Number.parseInt(customValue, 10);
   const customAmountLabel =
-    customValue.trim().length > 0 && Number.parseInt(customValue, 10) > 0
-      ? formatNumberWithCommas(Number.parseInt(customValue, 10))
+    customValue.trim().length > 0 &&
+    Number.isFinite(parsedCustomValue) &&
+    parsedCustomValue !== 0
+      ? formatNumberWithCommas(parsedCustomValue)
       : null;
 
   useEffect(() => {
@@ -142,6 +147,7 @@ export default function MemesQuickVoteActionBar({
                 customInputRef={customInputRef}
                 customValue={customValue}
                 feedbackSource={feedbackSource}
+                allowsNegativeVotes={allowsNegativeVotes}
                 hasQuickAmounts={hasQuickAmounts}
                 isCustomRowVisible={isCustomRowVisible}
                 isSubmitting={isSubmitting}

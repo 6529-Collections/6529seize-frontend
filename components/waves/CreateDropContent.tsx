@@ -54,6 +54,7 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import SlowModeChatNotice from "./SlowModeChatNotice";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { containsOpenGraphPreviewLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -103,6 +104,11 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
 import type { IdentityPickerPlacement } from "./dropComposer.types";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CHAT_LINK_RESTRICTION_MESSAGE,
+  areHandlesEqual,
+  isChatLinkRestrictionApplicable,
+} from "@/helpers/waves/chat-link-restriction.helpers";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -764,7 +770,30 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
   const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
-  const canSubmit = getCanSubmit() && !isSlowModeSubmitBlocked;
+  const isChatLinksRestrictionActive = isChatLinkRestrictionApplicable({
+    dropType: ApiDropType.Chat,
+    linksDisabled: wave.chat.links_disabled === true,
+    isWaveAdmin: wave.wave.authenticated_user_eligible_for_admin === true,
+    isWaveCreator: areHandlesEqual(
+      connectedProfile?.handle,
+      wave.author.handle
+    ),
+  });
+  const hasChatContentWithLink = useMemo(() => {
+    if (!isChatLinksRestrictionActive || isDropMode) {
+      return false;
+    }
+
+    const contentParts = [
+      getMarkdown,
+      ...(drop?.parts.map((part) => part.content ?? null) ?? []),
+    ];
+
+    return contentParts.some(containsOpenGraphPreviewLink);
+  }, [drop?.parts, getMarkdown, isChatLinksRestrictionActive, isDropMode]);
+  const isLinksSubmitBlocked = hasChatContentWithLink;
+  const canSubmit =
+    getCanSubmit() && !isSlowModeSubmitBlocked && !isLinksSubmitBlocked;
   const canAddPart = getCanAddPart();
   const normalizedCurationDropUrl = useMemo(() => {
     if (!isCurationSubmissionExperience || isDropMode) {
@@ -1162,6 +1191,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (
+      dropRequest.drop_type === ApiDropType.Chat &&
+      isChatLinksRestrictionActive &&
+      dropRequest.parts.some((part) =>
+        containsOpenGraphPreviewLink(part.content)
+      )
+    ) {
+      return;
+    }
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -1304,6 +1343,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     if (isSlowModeSubmitBlocked) {
+      return;
+    }
+
+    if (isLinksSubmitBlocked) {
       return;
     }
 
@@ -1869,6 +1912,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             >
               <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
                 <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
+                {isLinksSubmitBlocked && (
+                  <p
+                    className="tw-mb-2 tw-mt-0 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-iron-400"
+                    aria-live="polite"
+                  >
+                    {CHAT_LINK_RESTRICTION_MESSAGE}
+                  </p>
+                )}
               </div>
               <div className="tw-col-start-1 tw-row-start-2 tw-self-center">
                 <CreateDropActions
@@ -1936,6 +1987,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   canSubmit={canSubmit}
                   onDrop={onDrop}
                   isDropMode={isDropMode}
+                  disabledTooltip={
+                    isLinksSubmitBlocked ? CHAT_LINK_RESTRICTION_MESSAGE : null
+                  }
                 />
               </div>
             </div>

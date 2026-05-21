@@ -27,13 +27,13 @@ jest.mock("@/lib/media/arweave-gateways", () => ({
 }));
 
 import {
-  getArweaveGatewayFallbackUrls,
+  getMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 
 describe("gateway fallback helpers", () => {
   it("prefers the configured gateway for ipfs protocol urls", () => {
-    expect(getArweaveGatewayFallbackUrls("ipfs://bafy-test")).toEqual([
+    expect(getMediaGatewayFallbackUrls("ipfs://bafy-test")).toEqual([
       "https://ipfs.6529.io/ipfs/bafy-test",
       "https://ipfs.io/ipfs/bafy-test",
     ]);
@@ -41,7 +41,7 @@ describe("gateway fallback helpers", () => {
 
   it("normalizes ipfs gateway urls back to configured gateway first", () => {
     expect(
-      getArweaveGatewayFallbackUrls("https://ipfs.io/ipfs/bafy-test")
+      getMediaGatewayFallbackUrls("https://ipfs.io/ipfs/bafy-test")
     ).toEqual([
       "https://ipfs.6529.io/ipfs/bafy-test",
       "https://ipfs.io/ipfs/bafy-test",

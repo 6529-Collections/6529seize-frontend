@@ -22,6 +22,7 @@ interface MemesQuickVoteControlsProps {
   readonly leftThisRoundCount: number;
   readonly latestUsedAmount: number | null;
   readonly quickAmounts: readonly number[];
+  readonly allowsNegativeVotes: boolean;
   readonly uncastPower: number | null;
   readonly unratedCount: number;
   readonly votingLabel: string | null;
@@ -63,6 +64,7 @@ export default function MemesQuickVoteControls({
   leftThisRoundCount,
   latestUsedAmount,
   quickAmounts,
+  allowsNegativeVotes,
   uncastPower,
   unratedCount,
   votingLabel,
@@ -124,6 +126,7 @@ export default function MemesQuickVoteControls({
         isVoteFeedbackActive={isVoteFeedbackActive}
         latestUsedAmount={latestUsedAmount}
         quickAmounts={quickAmounts}
+        allowsNegativeVotes={allowsNegativeVotes}
         uncastPower={uncastPower}
         votingLabel={votingLabel}
         onCustomChange={onCustomChange}

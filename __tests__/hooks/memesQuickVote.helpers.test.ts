@@ -1,124 +1,110 @@
-import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   addRecentQuickVoteAmount,
-  appendSkippedDropId,
-  deriveMemesQuickVoteStatsFromDrop,
   getDefaultQuickVoteAmount,
   getDisplayQuickVoteAmounts,
+  getQuickVoteAbsoluteRemainingPower,
+  getQuickVoteRatingRange,
+  isMemesQuickVoteVoteableDrop,
   normalizeQuickVoteAmount,
   sanitizeStoredAmounts,
-  sanitizeStoredDropIds,
 } from "@/hooks/memesQuickVote.helpers";
 
 const createDrop = ({
-  id = "drop-1",
   maxRating = 5_000,
+  minRating = 0,
+  rating = 0,
 }: {
-  readonly id?: string;
   readonly maxRating?: number;
+  readonly minRating?: number;
+  readonly rating?: number;
 } = {}) =>
   ({
-    id,
-    serial_no: 1,
-    drop_type: "PARTICIPATORY",
     context_profile_context: {
-      rating: 0,
+      rating,
+      min_rating: minRating,
       max_rating: maxRating,
     },
-    wave: {
-      id: "wave-1",
-      name: "The Memes",
-      voting_credit_type: ApiWaveCreditType.Tdh,
-      authenticated_user_eligible_to_vote: true,
-      voting_period_start: null,
-      voting_period_end: null,
-    },
-    author: {
-      handle: "artist",
-      primary_address: "0x123",
-    },
-    parts: [
-      {
-        content: "hello",
-        media: [],
-      },
-    ],
-    metadata: [],
-    created_at: new Date(1_000).toISOString(),
   }) as any;
 
 describe("memesQuickVote.helpers", () => {
-  it("sanitizes stored drop ids by trimming, deduping, and removing invalid values", () => {
-    expect(
-      sanitizeStoredDropIds([
-        " drop-1 ",
-        "drop-2",
-        "drop-1",
-        "",
-        "   ",
-        10,
-        null,
-      ])
-    ).toEqual(["drop-1", "drop-2"]);
-  });
-
-  it("sanitizes stored quick-vote amounts and keeps the last five unique values", () => {
+  it("sanitizes stored signed quick-vote amounts and keeps the last five unique values", () => {
     expect(
       sanitizeStoredAmounts([
-        500, 500, 250, 0, -1, 1000, 2000, 3000, 4000, 5000,
+        500,
+        -250,
+        -250,
+        0,
+        1.5,
+        "50",
+        1_000,
+        -750,
+        2_000,
+        -3_000,
+        4_000,
       ])
-    ).toEqual([250, 1000, 2000, 3000, 4000, 5000].slice(-5));
+    ).toEqual([1_000, -750, 2_000, -3_000, 4_000]);
   });
 
-  it("derives footer stats from the first returned unvoted drop", () => {
-    expect(
-      deriveMemesQuickVoteStatsFromDrop({
-        count: 7,
-        drop: createDrop({ maxRating: 750 }),
-      })
-    ).toEqual({
-      uncastPower: 750,
-      unratedCount: 7,
-      votingLabel: "TDH",
-    });
-  });
-
-  it("returns empty stats when there is no usable first drop", () => {
-    expect(
-      deriveMemesQuickVoteStatsFromDrop({
-        count: 0,
-        drop: createDrop(),
-      })
-    ).toEqual({
-      uncastPower: null,
-      unratedCount: 0,
-      votingLabel: null,
-    });
-  });
-
-  it("keeps the last five unique quick-vote amounts and renders them ascending", () => {
-    const recent = [50, 125, 250, 500];
-    const withDuplicate = addRecentQuickVoteAmount(recent, 125);
-    const withNewAmount = addRecentQuickVoteAmount(withDuplicate, 1_000);
+  it("keeps the last five unique signed quick-vote amounts and renders them ascending", () => {
+    const recent = [-250, 50, 125, 500];
+    const withDuplicate = addRecentQuickVoteAmount(recent, -250);
+    const withNewAmount = addRecentQuickVoteAmount(withDuplicate, -1_000);
     const capped = addRecentQuickVoteAmount(withNewAmount, 2_000);
 
-    expect(capped).toEqual([250, 500, 125, 1_000, 2_000]);
+    expect(capped).toEqual([125, 500, -250, -1_000, 2_000]);
     expect(getDisplayQuickVoteAmounts(capped)).toEqual([
-      125, 250, 500, 1000, 2000,
+      -1_000, -250, 125, 500, 2_000,
     ]);
   });
 
-  it("moves re-skipped drop ids to the tail", () => {
-    expect(
-      appendSkippedDropId(["drop-30", "drop-10", "drop-20"], "drop-10")
-    ).toEqual(["drop-30", "drop-20", "drop-10"]);
-  });
-
-  it("derives and clamps quick-vote amounts safely", () => {
+  it("keeps positive-only normalization behavior", () => {
     expect(getDefaultQuickVoteAmount(5_000)).toBe(50);
     expect(getDefaultQuickVoteAmount(99)).toBe(1);
     expect(normalizeQuickVoteAmount("777", 500)).toBe(500);
     expect(normalizeQuickVoteAmount("0", 500)).toBe(1);
+    expect(normalizeQuickVoteAmount("-250", 500)).toBe(1);
     expect(normalizeQuickVoteAmount("nope", 500)).toBeNull();
+    expect(normalizeQuickVoteAmount("1", 0)).toBeNull();
+  });
+
+  it("normalizes signed quick-vote amounts against the full rating range", () => {
+    const range = { minRating: -5_000, maxRating: 1_000 };
+
+    expect(normalizeQuickVoteAmount("-250", range)).toBe(-250);
+    expect(normalizeQuickVoteAmount("-6000", range)).toBe(-5_000);
+    expect(normalizeQuickVoteAmount("6000", range)).toBe(1_000);
+    expect(normalizeQuickVoteAmount("0", range)).toBeNull();
+    expect(normalizeQuickVoteAmount("", range)).toBeNull();
+    expect(normalizeQuickVoteAmount("-", range)).toBeNull();
+  });
+
+  it("uses max and min rating to decide quick-vote availability", () => {
+    expect(isMemesQuickVoteVoteableDrop(createDrop({ maxRating: 1 }))).toBe(
+      true
+    );
+    expect(
+      isMemesQuickVoteVoteableDrop(
+        createDrop({ minRating: -500, maxRating: 0 })
+      )
+    ).toBe(true);
+    expect(
+      isMemesQuickVoteVoteableDrop(createDrop({ maxRating: 1, rating: 10 }))
+    ).toBe(false);
+    expect(isMemesQuickVoteVoteableDrop(createDrop({ maxRating: 0 }))).toBe(
+      false
+    );
+  });
+
+  it("derives signed rating ranges and absolute remaining voting power", () => {
+    const positiveDominantRange = getQuickVoteRatingRange(
+      createDrop({ minRating: -300, maxRating: 500 })
+    );
+    const negativeDominantRange = getQuickVoteRatingRange(
+      createDrop({ minRating: -700, maxRating: 500 })
+    );
+
+    expect(positiveDominantRange).toEqual({ minRating: -300, maxRating: 500 });
+    expect(getQuickVoteAbsoluteRemainingPower(positiveDominantRange)).toBe(500);
+    expect(getQuickVoteAbsoluteRemainingPower(negativeDominantRange)).toBe(700);
   });
 });

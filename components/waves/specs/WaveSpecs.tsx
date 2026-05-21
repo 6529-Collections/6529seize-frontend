@@ -4,6 +4,7 @@ import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
 import WaveSlowMode from "./WaveSlowMode";
+import WaveDisableLinks from "./WaveDisableLinks";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
@@ -52,7 +53,12 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
             </div>
           </div>
 
-          {showSlowMode && <WaveSlowMode wave={wave} />}
+          {showSlowMode && (
+            <>
+              <WaveSlowMode wave={wave} />
+              <WaveDisableLinks wave={wave} />
+            </>
+          )}
         </div>
       </div>
     </div>

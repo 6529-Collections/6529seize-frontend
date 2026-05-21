@@ -25,19 +25,23 @@ export default function MemesQuickVoteAmountButton({
   isVoteFeedbackActive,
   onVoteAmount,
 }: MemesQuickVoteAmountButtonProps) {
+  const isNegativeAmount = amount < 0;
   const isQuickVoteFeedbackTarget =
     isVoteFeedbackActive &&
     feedbackSource === "quick-amount" &&
     feedbackAmount === amount;
-  let buttonToneClassName =
-    "tw-border-white/5 tw-bg-white/[0.03] tw-text-[14px] tw-font-bold tw-text-zinc-300 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white";
+  let buttonToneClassName = isNegativeAmount
+    ? "tw-border-rose-500/25 tw-bg-rose-500/10 tw-text-[14px] tw-font-bold tw-text-rose-200 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-rose-500/15 desktop-hover:hover:tw-text-rose-100"
+    : "tw-border-white/5 tw-bg-white/[0.03] tw-text-[14px] tw-font-bold tw-text-zinc-300 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white";
 
   if (isQuickVoteFeedbackTarget) {
-    buttonToneClassName =
-      "tw-border-emerald-500/35 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.15)]";
+    buttonToneClassName = isNegativeAmount
+      ? "tw-border-rose-500/40 tw-bg-rose-500/20 tw-text-rose-100 tw-shadow-[0_0_20px_rgba(244,63,94,0.14)]"
+      : "tw-border-emerald-500/35 tw-bg-emerald-500/15 tw-text-emerald-100 tw-shadow-[0_0_20px_rgba(16,185,129,0.15)]";
   } else if (isLatestUsed) {
-    buttonToneClassName =
-      "tw-border-blue-500/30 tw-bg-blue-500/15 tw-text-primary-300 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-blue-500/25 desktop-hover:hover:tw-text-primary-200";
+    buttonToneClassName = isNegativeAmount
+      ? "tw-border-rose-500/35 tw-bg-rose-500/15 tw-text-rose-200 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-rose-500/25 desktop-hover:hover:tw-text-rose-100"
+      : "tw-border-blue-500/30 tw-bg-blue-500/15 tw-text-primary-300 tw-shadow-sm tw-transition-all desktop-hover:hover:tw-bg-blue-500/25 desktop-hover:hover:tw-text-primary-200";
   }
 
   return (
@@ -62,7 +66,8 @@ export default function MemesQuickVoteAmountButton({
         <span
           className={clsx(
             "tw-font-bold tw-leading-none",
-            isLatestUsed && "tw-text-primary-300"
+            isLatestUsed &&
+              (isNegativeAmount ? "tw-text-rose-200" : "tw-text-primary-300")
           )}
         >
           {formatNumberWithCommas(amount)}
