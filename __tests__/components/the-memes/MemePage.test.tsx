@@ -336,6 +336,28 @@ describe("MemePage search params handling", () => {
     });
   });
 
+  it("keeps card navigation logic before the title while using mobile-first visual ordering", async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("nft-navigation")).toBeInTheDocument();
+    });
+
+    const navigation = screen.getByTestId("nft-navigation");
+    const title = screen.getByRole("heading", { name: "Card 1 — Meme" });
+
+    expect(
+      navigation.compareDocumentPosition(title) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(navigation.parentElement).toHaveClass("tw-order-2", "md:tw-order-1");
+    expect(navigation.parentElement?.parentElement).toHaveClass(
+      "tw-justify-between",
+      "md:tw-justify-start",
+      "tw-items-center"
+    );
+  });
+
   it("uses mobile-first Tailwind ordering for the minting box and artwork", async () => {
     renderPage();
 
