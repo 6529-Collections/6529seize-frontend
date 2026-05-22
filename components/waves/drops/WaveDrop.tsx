@@ -1,6 +1,5 @@
 "use client";
 
-import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -129,12 +128,18 @@ const getDropClasses = (
   return `${baseClasses} ${groupingClass} ${locationClasses} ${rankClasses}`.trim();
 };
 
-const getContentOffsetClass = (compact: boolean): string => {
-  if (compact) {
-    return "tw-ml-11 tw-w-[calc(100%-2.5rem)]";
+const getDropContentClass = ({
+  showAuthorInfo,
+}: {
+  readonly showAuthorInfo: boolean;
+}): string => {
+  const classes = ["tw-w-full"];
+
+  if (showAuthorInfo) {
+    classes.push("tw-mt-2");
   }
 
-  return "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]";
+  return classes.join(" ");
 };
 
 const shouldShowAuthorInfo = ({
@@ -297,8 +302,6 @@ const getContentBlock = ({
   drop,
   showAuthorInfo,
   authorHeader,
-  shouldGroupWithPreviousDrop,
-  isProfileView,
   activePartIndex,
   setActivePartIndex,
   handleLongPress,
@@ -328,8 +331,6 @@ const getContentBlock = ({
   readonly drop: ExtendedDrop;
   readonly showAuthorInfo: boolean;
   readonly authorHeader: React.ReactNode;
-  readonly shouldGroupWithPreviousDrop: boolean;
-  readonly isProfileView: boolean;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly handleLongPress: () => void;
@@ -370,21 +371,18 @@ const getContentBlock = ({
         maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
       />
     )}
-    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-      {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
-      <div
-        className="tw-flex tw-w-full tw-flex-col"
-        style={{
-          maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
-        }}
-      >
-        {authorHeader}
+    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left">
+      {showAuthorInfo && (
+        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+          <WaveDropAuthorPfp drop={drop} />
+          <div className="tw-min-w-0 tw-flex-1">{authorHeader}</div>
+        </div>
+      )}
+      <div className="tw-flex tw-w-full tw-flex-col">
         <div
-          className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
-            shouldGroupWithPreviousDrop && !isProfileView
-              ? "tw-pl-[3.25rem]"
-              : ""
-          }`}
+          className={getDropContentClass({
+            showAuthorInfo,
+          })}
         >
           <WaveDropContent
             drop={drop}
@@ -499,7 +497,6 @@ const WaveDrop = ({
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
   const allowLongPress = showInteractions && hasTouch && !isMdUp;
-  const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
   const isProfileView = location === DropLocation.PROFILE;
@@ -745,8 +742,6 @@ const WaveDrop = ({
     drop,
     showAuthorInfo,
     authorHeader,
-    shouldGroupWithPreviousDrop,
-    isProfileView,
     activePartIndex,
     setActivePartIndex,
     handleLongPress,
@@ -772,9 +767,7 @@ const WaveDrop = ({
   });
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
-    <div
-      className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${getContentOffsetClass(compact)}`}
-    >
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
       )}
@@ -784,13 +777,8 @@ const WaveDrop = ({
       {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
   );
-  const shouldOffsetFooter =
-    showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
-  const footerOffsetClass = shouldOffsetFooter
-    ? getContentOffsetClass(compact)
-    : "";
   const footerRow = hasDropFooter(footer) && (
-    <div className={`tw-mx-2 tw-mt-2 ${footerOffsetClass}`}>{footer}</div>
+    <div className="tw-mt-2">{footer}</div>
   );
 
   return (
