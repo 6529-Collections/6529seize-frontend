@@ -303,6 +303,39 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.queryByText("not available")).not.toBeInTheDocument();
   });
 
+  it("shows collector count alongside edition size stats", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft()}
+        nftMeta={{
+          ...createMeta(),
+          collection_size: 498,
+          hodlers: 97,
+          hodlers_rank: 480,
+        }}
+      />
+    );
+
+    expect(screen.getByText("Edition size")).toBeInTheDocument();
+    const collectorsLabel = screen.getByText("Collectors");
+    const exMuseumLabel = screen.getByText("ex. 6529 museum");
+    expect(collectorsLabel).toBeInTheDocument();
+    expect(screen.getByText("97")).toBeInTheDocument();
+    expect(screen.getByText("Rank 480/498")).toHaveClass(
+      "tw-text-[10px]",
+      "md:tw-text-xs"
+    );
+    expect(exMuseumLabel).toBeInTheDocument();
+    expect(
+      exMuseumLabel.compareDocumentPosition(collectorsLabel) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      collectorsLabel.parentElement?.parentElement?.parentElement
+    ).toHaveClass("tw-flex", "tw-flex-wrap");
+  });
+
   it("shows distribution plan link", async () => {
     const nft = createNft({ id: 5, has_distribution: true });
     await waitFor(() => {
@@ -320,6 +353,9 @@ describe("MemePageLiveRightMenu distribution link", () => {
     render(<MemePageLiveRightMenu show nft={createNft()} />);
 
     expect(screen.getByTestId("marketplace-links")).toBeInTheDocument();
+    expect(
+      screen.getByText("Mint price").parentElement?.parentElement
+    ).toHaveClass("tw-flex", "tw-flex-wrap");
   });
 
   it("hides marketplace links for non-US iOS", async () => {
