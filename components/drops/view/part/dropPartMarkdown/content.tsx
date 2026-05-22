@@ -339,9 +339,7 @@ export const createMarkdownContentRenderers = ({
             ) : (
               <span
                 key={getRandomObjectId()}
-                className={
-                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
-                }
+                className={areAllPartsEmojis ? "emoji-text-node" : undefined}
               >
                 {segment}
               </span>
