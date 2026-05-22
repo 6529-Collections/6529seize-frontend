@@ -4,6 +4,7 @@ import {
   convertWaveToUpdateWave,
   getCreateWaveStepStatus,
 } from "@/helpers/waves/waves.helpers";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CreateWaveStepStatus } from "@/types/waves.types";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -168,6 +169,33 @@ describe("waves.helpers", () => {
       expect(result.chat).toMatchObject({
         links_disabled: true,
       });
+    });
+
+    it("preserves card-set TDH credit NFTs", () => {
+      const creditNfts = [
+        { contract: "0xmemes", token_id: 1 },
+        { contract: "0xmemes", token_id: 2 },
+      ];
+      const wave = makeWave();
+      wave.voting.credit_type = ApiWaveCreditType.CardSetTdh;
+      wave.voting.credit_nfts = creditNfts;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.voting).toMatchObject({
+        credit_type: ApiWaveCreditType.CardSetTdh,
+        credit_nfts: creditNfts,
+      });
+    });
+
+    it("does not add credit NFTs for standard voting", () => {
+      const wave = makeWave();
+      wave.voting.credit_type = ApiWaveCreditType.Tdh;
+      wave.voting.credit_nfts = [{ contract: "0xmemes", token_id: 1 }];
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.voting).not.toHaveProperty("credit_nfts");
     });
 
     it.each([

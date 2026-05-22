@@ -1,5 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
+import WaveRatingCardSetTdh from "./WaveRatingCardSetTdh";
 import WaveRatingRep from "./WaveRatingRep";
 
 const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
@@ -16,6 +17,10 @@ interface WaveRatingProps {
 
 export default function WaveRating({ wave }: WaveRatingProps) {
   const creditType = wave.voting.credit_type;
+
+  if (creditType === ApiWaveCreditType.CardSetTdh) {
+    return <WaveRatingCardSetTdh creditNfts={wave.voting.credit_nfts} />;
+  }
 
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-items-end tw-gap-2 tw-text-sm">
