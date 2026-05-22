@@ -577,6 +577,7 @@ describe("DropPartMarkdown", () => {
     );
 
     expect(screen.getByText("@all")).toHaveClass("tw-text-primary-400");
+    expect(screen.getByText("@all")).toHaveClass("tw-align-middle");
 
     rerender(
       <DropPartMarkdown
@@ -592,6 +593,35 @@ describe("DropPartMarkdown", () => {
     expect(screen.getByText("hello @all")).not.toHaveClass(
       "tw-text-primary-400"
     );
+  });
+
+  it("renders bold markdown on the browser baseline without aligning plain text spans", () => {
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent="our votes my **Residual Barrier** piece"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const strong = container.querySelector("strong");
+    if (!strong) {
+      throw new Error("Expected bold markdown to render a strong element");
+    }
+    expect(strong).toHaveTextContent("Residual Barrier");
+
+    const plainTextSpans = Array.from(
+      container.querySelectorAll("p > span")
+    ).filter((span) =>
+      ["our votes my ", " piece"].includes(span.textContent ?? "")
+    );
+    expect(plainTextSpans).toHaveLength(2);
+    plainTextSpans.forEach((span) => {
+      expect(span).not.toHaveClass("emoji-text-node");
+      expect(span).not.toHaveClass("tw-align-middle");
+    });
   });
 
   it("renders a standalone check mark emoji with the large emoji style", () => {
@@ -620,7 +650,7 @@ describe("DropPartMarkdown", () => {
     );
 
     expect(screen.getByText("✅ done")).not.toHaveClass("emoji-text-node");
-    expect(screen.getByText("✅ done")).toHaveClass("tw-align-middle");
+    expect(screen.getByText("✅ done")).not.toHaveClass("tw-align-middle");
   });
 
   it("renders Art Blocks token card when feature enabled", async () => {

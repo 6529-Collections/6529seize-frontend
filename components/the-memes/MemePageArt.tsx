@@ -227,7 +227,7 @@ export function MemePageArt(props: {
       </AdditionalDetailsSection>
 
       <AdditionalDetailsSection title="TDH breakdown" icon={ChartBarSquareIcon}>
-        <div className="tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-16">
+        <div className="tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-6 sm:tw-gap-x-16">
           {tdhRows.map((row) => (
             <MetricBlock
               key={row.key}
