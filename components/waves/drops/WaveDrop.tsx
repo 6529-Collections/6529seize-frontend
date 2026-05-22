@@ -112,7 +112,7 @@ const getDropClasses = (
   isDrop: boolean
 ): string => {
   const baseClasses =
-    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
+    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 md:tw-px-5";
 
   const streamClasses = "tw-rounded-xl";
 
