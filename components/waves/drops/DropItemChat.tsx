@@ -24,6 +24,7 @@ export default function DropItemChat({
   const title =
     drop?.metadata?.find((m) => m.data_key === "title")?.data_value ||
     drop?.title;
+  const canOpenDrop = drop?.drop_type !== ApiDropType.Chat;
 
   if (!drop) {
     return <Link href={relativeLink}>{href}</Link>;
@@ -43,9 +44,13 @@ export default function DropItemChat({
                 />
               )}
               <h3 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100 sm:tw-text-lg">
-                <Link className="tw-no-underline" href={relativeLink}>
-                  {title}
-                </Link>
+                {canOpenDrop ? (
+                  <Link className="tw-no-underline" href={relativeLink}>
+                    {title}
+                  </Link>
+                ) : (
+                  title
+                )}
               </h3>
             </div>
             {drop?.drop_type === ApiDropType.Participatory && (
