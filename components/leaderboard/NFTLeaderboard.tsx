@@ -18,10 +18,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const tableHeaderClassName =
-  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400";
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-px-4 md:tw-py-3";
 
 const tableCellClassName =
-  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100";
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm";
 
 interface Props {
   contract: string;
@@ -239,7 +239,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         />
       </div>
       <div className="tw-overflow-x-auto">
-        <table className="tw-w-full tw-min-w-[1040px] tw-border-collapse">
+        <table className="tw-w-full tw-min-w-[23rem] tw-border-collapse md:tw-min-w-[1040px]">
           <thead>
             <tr>
               <th
@@ -265,13 +265,13 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
             <tr>
               <th
                 scope="col"
-                className="tw-w-20 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
+                className="tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3"
               >
                 Rank
               </th>
               <th
                 scope="col"
-                className="tw-min-w-[18rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400"
+                className="tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3"
               >
                 Collector{" "}
                 {totalResults > 0 && `x${totalResults.toLocaleString()}`}
@@ -295,10 +295,10 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                   key={lead.consolidation_key}
                   className="odd:tw-bg-transparent even:tw-bg-iron-900/45 hover:tw-bg-iron-900/70"
                 >
-                  <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100">
+                  <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm">
                     {numberWithCommas(lead.rank)}
                   </td>
-                  <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
+                  <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3">
                     <LeaderboardCollector
                       handle={lead.handle}
                       consolidationKey={lead.consolidation_key}

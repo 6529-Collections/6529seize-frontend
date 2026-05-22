@@ -180,7 +180,7 @@ export function MemePageActivity(
             <h3 className={SECTION_HEADER_TITLE_CLASS}>Card volumes</h3>
             <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
           </div>
-          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-start tw-gap-x-16 tw-gap-y-6">
+          <div className="tw-mt-6 tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 sm:tw-gap-x-16">
             {volumeStats.map((stat) => (
               <div key={stat.label}>
                 <div className={METRIC_LABEL_CLASS}>{stat.label}</div>
