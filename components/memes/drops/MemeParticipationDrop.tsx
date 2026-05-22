@@ -19,7 +19,6 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
   useCallback,
-  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
 } from "react";
@@ -123,7 +122,7 @@ export default function MemeParticipationDrop({
   }, [onReply, drop]);
 
   const handleContentClick = useCallback(
-    (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
+    (event: MouseEvent<HTMLButtonElement>) => {
       const selection = globalThis.getSelection?.() ?? null;
       if (selection?.toString()) {
         return;
@@ -139,36 +138,11 @@ export default function MemeParticipationDrop({
     [drop, onDropContentClick]
   );
 
-  const handleContentKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      if (!onDropContentClick) {
-        return;
-      }
-
-      const isActivationKey =
-        event.key === "Enter" || event.key === " " || event.key === "Space";
-
-      if (!isActivationKey) {
-        return;
-      }
-
-      event.preventDefault();
-      handleContentClick(event);
-    },
-    [handleContentClick, onDropContentClick]
-  );
-
   const isContentInteractive =
     !drop.id.startsWith("temp-") && !!onDropContentClick;
 
-  const content = (
-    <div
-      className={isContentInteractive ? "tw-cursor-pointer" : undefined}
-      onClick={handleContentClick}
-      onKeyDown={handleContentKeyDown}
-      role={isContentInteractive ? "button" : undefined}
-      tabIndex={isContentInteractive ? 0 : undefined}
-    >
+  const contentBody = (
+    <>
       <div className="tw-p-4">
         <MemeDropArtistInfo drop={drop} />
         <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
@@ -195,7 +169,19 @@ export default function MemeParticipationDrop({
       <div className="tw-px-4 tw-py-4">
         <MemeDropTraits drop={drop} />
       </div>
-    </div>
+    </>
+  );
+
+  const content = isContentInteractive ? (
+    <button
+      className="tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+      onClick={handleContentClick}
+      type="button"
+    >
+      {contentBody}
+    </button>
+  ) : (
+    <div>{contentBody}</div>
   );
 
   return (
