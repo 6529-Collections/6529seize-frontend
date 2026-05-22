@@ -44,9 +44,10 @@ const makeWave = ({
   creditor = null,
 }: {
   readonly creditType?: ApiWaveCreditType;
-  readonly creditNfts?:
-    | ReadonlyArray<{ readonly contract: string; readonly token_id: number }>
-    | null;
+  readonly creditNfts?: ReadonlyArray<{
+    readonly contract: string;
+    readonly token_id: number;
+  }> | null;
   readonly creditCategory?: string | null;
   readonly creditor?: unknown;
 } = {}): any => ({
@@ -258,9 +259,14 @@ describe("WaveRating", () => {
     await user.click(screen.getByRole("button", { name: "View set" }));
 
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(2));
-    expect(fetchUrlMock.mock.calls[0][0]).toContain("&id=1,2,3");
-    expect(fetchUrlMock.mock.calls[0][0]).toContain(",100");
-    expect(fetchUrlMock.mock.calls[0][0]).not.toContain(",101");
-    expect(fetchUrlMock.mock.calls[1][0]).toContain("&id=101");
+    const firstRequestUrl = new URL(fetchUrlMock.mock.calls[0][0]);
+    const secondRequestUrl = new URL(fetchUrlMock.mock.calls[1][0]);
+
+    expect(firstRequestUrl.searchParams.get("id")).toBe(
+      Array.from({ length: 100 }, (_, index) => `${index + 1}`).join(",")
+    );
+    expect(firstRequestUrl.searchParams.get("page_size")).toBe("100");
+    expect(secondRequestUrl.searchParams.get("id")).toBe("101");
+    expect(secondRequestUrl.searchParams.get("page_size")).toBe("1");
   });
 });

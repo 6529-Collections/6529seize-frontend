@@ -67,7 +67,7 @@ async function fetchMemeCardMetadata(
       fetchUrl<DBResponse<MemeCardMetadata>>(
         `${publicEnv.API_ENDPOINT}/api/nfts?contract=${MEMES_CONTRACT}&id=${chunk.join(
           ","
-        )}`,
+        )}&page_size=${chunk.length}`,
         { signal }
       )
     )
