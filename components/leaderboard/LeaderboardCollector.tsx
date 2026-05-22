@@ -26,7 +26,7 @@ export function LeaderboardCollector(
   }
 
   const pfpImg = (
-    <div className="tw-flex tw-h-10 tw-w-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800">
+    <div className="tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 md:tw-h-10 md:tw-w-10">
       {/* Collector profile images can come from arbitrary remote hosts. */}
       {props.pfp && (
         <Image
@@ -42,22 +42,22 @@ export function LeaderboardCollector(
   );
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-3">
+    <div className="tw-flex tw-min-w-0 tw-items-center">
       <a
         href={`/${link}`}
-        className="tw-flex tw-items-center tw-gap-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400 desktop-hover:hover:tw-no-underline"
+        className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-100 tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400 desktop-hover:hover:tw-no-underline md:tw-gap-3 md:tw-text-sm"
       >
         {pfpImg}
         {hasLevel ? (
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <span>{display}</span>
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 md:tw-gap-2">
+            <span className="tw-min-w-0 tw-truncate">{display}</span>
             <UserCICAndLevel
               level={props.level}
               size={UserCICAndLevelSize.SMALL}
             />
           </div>
         ) : (
-          <span>{display}</span>
+          <span className="tw-min-w-0 tw-truncate">{display}</span>
         )}
       </a>
     </div>

@@ -39,6 +39,10 @@ const COLLECTOR_METRIC_VALUE_CLASS =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
+const EDITION_STATS_ROW_CLASS =
+  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
+const MARKET_OVERVIEW_ROW_CLASS =
+  "tw-flex tw-flex-wrap tw-items-start tw-gap-x-6 tw-gap-y-6 md:tw-gap-x-10";
 const MEME_MINT_DATE_LOCALE = "en-US";
 const MEME_MINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -108,7 +112,7 @@ export function MemeEditionSizeStats({
 
   return (
     <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8">
-      <div className={INLINE_STATS_ROW_CLASS}>
+      <div className={EDITION_STATS_ROW_CLASS}>
         <InlineStatsMetric
           label="Edition size"
           value={numberWithCommas(nftMeta.edition_size)}
@@ -134,6 +138,12 @@ export function MemeEditionSizeStats({
           label={editionSizeExMuseumLabel}
           value={numberWithCommas(nftMeta.edition_size_cleaned)}
           rank={nftMeta.edition_size_cleaned_rank}
+          total={nftMeta.collection_size}
+        />
+        <InlineStatsMetric
+          label="Collectors"
+          value={numberWithCommas(nftMeta.hodlers)}
+          rank={nftMeta.hodlers_rank}
           total={nftMeta.collection_size}
         />
       </div>
@@ -202,7 +212,7 @@ function CollectorRankBadge({
   readonly total: number;
 }) {
   return (
-    <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-leading-none tw-text-iron-400">
+    <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-[11px] md:tw-leading-4">
       Rank {numberWithCommas(rank)}/{numberWithCommas(total)}
     </span>
   );
@@ -428,7 +438,7 @@ function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   }
 
   return (
-    <div className="tw-flex tw-items-end">
+    <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
     </div>
   );
@@ -440,7 +450,7 @@ export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
       <h3 className={`${SECTION_HEADER_TITLE_CLASS} tw-mb-4`}>
         Market Overview
       </h3>
-      <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-5 sm:tw-gap-x-8">
+      <div className={MARKET_OVERVIEW_ROW_CLASS}>
         <MarketMetric
           label="Mint price"
           value={nft.mint_price}
@@ -484,7 +494,7 @@ function MarketMetric({
       : "N/A";
 
   return (
-    <div>
+    <div className="tw-min-w-[8.5rem]">
       <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {label}
       </div>
