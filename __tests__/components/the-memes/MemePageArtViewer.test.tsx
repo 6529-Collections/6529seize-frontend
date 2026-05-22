@@ -275,6 +275,35 @@ describe("MemePageArtViewer", () => {
     );
   });
 
+  it("renders only fullscreen for html artwork media actions", () => {
+    render(
+      <MemePageArtViewer
+        nft={
+          {
+            ...baseNft,
+            image: "",
+            animation: "https://media.example/interactive.html",
+            metadata: {
+              image: "",
+              animation_url: "https://media.example/interactive.html",
+              animation_details: { format: "HTML" },
+            },
+          } as any
+        }
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Full screen" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open in new tab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Download media" })
+    ).not.toBeInTheDocument();
+  });
+
   it("uses optimized media for the initial artwork render", () => {
     render(<MemePageArtViewer nft={baseNft as any} />);
 
