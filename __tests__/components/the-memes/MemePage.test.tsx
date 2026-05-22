@@ -345,6 +345,7 @@ describe("MemePage search params handling", () => {
 
     const navigation = screen.getByTestId("nft-navigation");
     const title = screen.getByRole("heading", { name: "Card 1 — Meme" });
+    const nftName = within(title).getByText("Meme");
 
     expect(
       navigation.compareDocumentPosition(title) &
@@ -356,6 +357,13 @@ describe("MemePage search params handling", () => {
       "md:tw-justify-start",
       "tw-items-center"
     );
+    expect(title).toHaveClass("tw-flex-wrap", "md:tw-flex-nowrap");
+    expect(nftName).toHaveClass(
+      "tw-whitespace-normal",
+      "tw-break-words",
+      "md:tw-truncate"
+    );
+    expect(nftName).not.toHaveClass("tw-truncate");
   });
 
   it("uses mobile-first Tailwind ordering for the minting box and artwork", async () => {

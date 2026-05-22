@@ -594,7 +594,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
   return (
     <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
-      <div className="tw-px-4 tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+      <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
@@ -633,7 +633,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 </div>
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
-                    className="tw-mb-0 tw-flex tw-min-w-0 tw-items-baseline"
+                    className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
                     aria-label={`Card ${nft.id} — ${nft.name}`}
                   >
                     <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
@@ -643,7 +643,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                       aria-hidden="true"
                       className="tw-mx-3 tw-h-5 tw-w-px tw-self-center tw-bg-white/[0.16] sm:tw-h-6"
                     />
-                    <span className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl">
+                    <span className="tw-mb-0 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-text-iron-100 sm:tw-text-2xl md:tw-truncate">
                       {nft.name}
                     </span>
                   </h1>

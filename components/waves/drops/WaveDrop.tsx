@@ -131,10 +131,32 @@ const getDropClasses = (
 
 const getContentOffsetClass = (compact: boolean): string => {
   if (compact) {
-    return "tw-ml-11 tw-w-[calc(100%-2.5rem)]";
+    return "md:tw-ml-11 md:tw-w-[calc(100%-2.5rem)]";
   }
 
-  return "tw-ml-[3.25rem] tw-w-[calc(100%-3.25rem)]";
+  return "md:tw-ml-[3.25rem] md:tw-w-[calc(100%-3.25rem)]";
+};
+
+const getDropContentClass = ({
+  showAuthorInfo,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
+}: {
+  readonly showAuthorInfo: boolean;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
+}): string => {
+  const classes = ["tw-w-full"];
+
+  if (showAuthorInfo) {
+    classes.push("tw-mt-2");
+  }
+
+  if (shouldGroupWithPreviousDrop && !isProfileView) {
+    classes.push("md:tw-pl-[3.25rem]");
+  }
+
+  return classes.join(" ");
 };
 
 const shouldShowAuthorInfo = ({
@@ -370,21 +392,31 @@ const getContentBlock = ({
         maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
       />
     )}
-    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-      {showAuthorInfo && <WaveDropAuthorPfp drop={drop} />}
+    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left md:tw-flex-row md:tw-gap-x-3">
+      {showAuthorInfo && (
+        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 md:tw-block md:tw-w-auto md:tw-flex-shrink-0">
+          <WaveDropAuthorPfp drop={drop} />
+          <div className="tw-min-w-0 tw-flex-1 md:tw-hidden">
+            {authorHeader}
+          </div>
+        </div>
+      )}
       <div
-        className="tw-flex tw-w-full tw-flex-col"
-        style={{
-          maxWidth: showAuthorInfo ? "calc(100% - 3.5rem)" : "100%",
-        }}
+        className={`tw-flex tw-w-full tw-flex-col ${
+          showAuthorInfo ? "md:tw-max-w-[calc(100%-3.5rem)]" : ""
+        }`}
       >
-        {authorHeader}
+        {showAuthorInfo ? (
+          <div className="tw-hidden md:tw-block">{authorHeader}</div>
+        ) : (
+          authorHeader
+        )}
         <div
-          className={`tw-w-full ${showAuthorInfo ? "tw-mt-2" : ""}${
-            shouldGroupWithPreviousDrop && !isProfileView
-              ? "tw-pl-[3.25rem]"
-              : ""
-          }`}
+          className={getDropContentClass({
+            showAuthorInfo,
+            shouldGroupWithPreviousDrop,
+            isProfileView,
+          })}
         >
           <WaveDropContent
             drop={drop}
@@ -773,7 +805,7 @@ const WaveDrop = ({
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
     <div
-      className={`tw-mx-2 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 ${getContentOffsetClass(compact)}`}
+      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${getContentOffsetClass(compact)}`}
     >
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
@@ -790,7 +822,7 @@ const WaveDrop = ({
     ? getContentOffsetClass(compact)
     : "";
   const footerRow = hasDropFooter(footer) && (
-    <div className={`tw-mx-2 tw-mt-2 ${footerOffsetClass}`}>{footer}</div>
+    <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
   );
 
   return (
