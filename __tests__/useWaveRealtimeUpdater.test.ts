@@ -5,6 +5,8 @@ import {
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
+const mockSetQueriesData = jest.fn();
+
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: () => ({ isConnected: true }),
 }));
@@ -39,9 +41,17 @@ jest.mock("@/services/api/drop-api", () => ({
   fetchDropByIdBatched: jest.fn(),
 }));
 
+jest.mock("@/utils/monitoring/dropReactionMonitoring", () => ({
+  recordReactionRealtimeReconciliation: jest.fn(() => ({
+    shouldApplyCanonicalDrop: true,
+    expectedReaction: null,
+    serverReaction: null,
+  })),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
-    setQueriesData: jest.fn(),
+    setQueriesData: mockSetQueriesData,
   })),
 }));
 
@@ -49,6 +59,9 @@ const {
   commonApiPostWithoutBodyAndResponse,
 } = require("@/services/api/common-api");
 const { fetchDropByIdBatched } = require("@/services/api/drop-api");
+const {
+  recordReactionRealtimeReconciliation,
+} = require("@/utils/monitoring/dropReactionMonitoring");
 const { getAuthJwt } = require("@/services/auth/auth.utils");
 const getAuthJwtMock = getAuthJwt as jest.Mock;
 
@@ -68,6 +81,11 @@ describe("useWaveRealtimeUpdater", () => {
   beforeEach(() => {
     setDocumentVisibilityState("visible");
     getAuthJwtMock.mockReturnValue("test-jwt");
+    (recordReactionRealtimeReconciliation as jest.Mock).mockReturnValue({
+      shouldApplyCanonicalDrop: true,
+      expectedReaction: null,
+      serverReaction: null,
+    });
   });
 
   afterEach(() => {
@@ -184,7 +202,64 @@ describe("useWaveRealtimeUpdater", () => {
     );
     await flushPromises();
     expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4");
+    expect(recordReactionRealtimeReconciliation).toHaveBeenCalledWith({
+      drop: {
+        id: "d4",
+        wave: { id: "wave1" },
+        context_profile_context: null,
+      },
+      websocketStatus: "connected",
+    });
+    expect(mockSetQueriesData).toHaveBeenCalled();
     expect(props.updateData).toHaveBeenCalled();
+  });
+
+  it("skips stale DROP_REACTION_UPDATE canonical drops", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "d4-stale",
+            type: DropSize.FULL,
+            stableKey: "d4-stale",
+            stableHash: "d4-stale",
+            author: {},
+          },
+        ],
+        latestFetchedSerialNo: 20,
+      },
+    };
+    const props = baseProps(store);
+    fetchDropByIdBatched.mockResolvedValue({
+      id: "d4-stale",
+      author: {},
+      wave: { id: "wave1" },
+      context_profile_context: { reaction: ":old:" },
+    });
+    (recordReactionRealtimeReconciliation as jest.Mock).mockReturnValueOnce({
+      shouldApplyCanonicalDrop: false,
+      expectedReaction: ":new:",
+      serverReaction: ":old:",
+      supersededByMutationId: "mutation-2",
+    });
+
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const drop: any = {
+      id: "d4-stale",
+      wave: { id: "wave1" },
+      author: {},
+    };
+    await act(async () =>
+      result.current.processIncomingDrop(
+        drop,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      )
+    );
+    await flushPromises();
+
+    expect(fetchDropByIdBatched).toHaveBeenCalledWith("d4-stale");
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockSetQueriesData).not.toHaveBeenCalled();
   });
 
   it("does not process when wave is missing", async () => {

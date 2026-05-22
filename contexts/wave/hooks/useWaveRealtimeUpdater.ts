@@ -201,7 +201,9 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
-      updateDropInCachedDrops(queryClient, drop);
+      if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
+        updateDropInCachedDrops(queryClient, drop);
+      }
 
       const waveId = drop.wave.id;
 
@@ -244,7 +246,7 @@ export function useWaveRealtimeUpdater({
         const apiDrop = await fetchDropByIdBatched(drop.id);
         if (apiDrop) {
           if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-            recordReactionRealtimeReconciliation({
+            const reconciliation = recordReactionRealtimeReconciliation({
               drop: {
                 id: apiDrop.id,
                 wave: { id: apiDrop.wave.id },
@@ -252,6 +254,10 @@ export function useWaveRealtimeUpdater({
               },
               websocketStatus: WebSocketStatus.CONNECTED,
             });
+            if (!reconciliation.shouldApplyCanonicalDrop) {
+              return;
+            }
+            updateDropInCachedDrops(queryClient, apiDrop);
           }
           updateData({
             key: waveId,
