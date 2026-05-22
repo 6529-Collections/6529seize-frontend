@@ -120,6 +120,20 @@ describe("WaveSpecs", () => {
     expect(screen.getAllByText("Off").length).toBeGreaterThan(0);
   });
 
+  it("hides voting for chat waves", () => {
+    renderWaveSpecs({ wave: makeWave({ waveType: ApiWaveType.Chat }) });
+
+    expect(screen.queryByText("Voting")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("wave-rating")).not.toBeInTheDocument();
+  });
+
+  it("shows voting for non-chat waves", () => {
+    renderWaveSpecs({ wave: makeWave({ waveType: ApiWaveType.Rank }) });
+
+    expect(screen.getByText("Voting")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-rating")).toBeInTheDocument();
+  });
+
   it("shows slow mode on with interval", () => {
     renderWaveSpecs({ wave: makeWave({ slowModeCooldownMs: 300_000 }) });
 
