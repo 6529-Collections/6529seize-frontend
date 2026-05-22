@@ -19,6 +19,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
   useCallback,
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
 } from "react";
@@ -51,6 +52,9 @@ const getMetadataValue = (drop: ExtendedDrop, dataKey: string): string | null =>
   getNonEmptyText(
     drop.metadata.find((metadata) => metadata.data_key === dataKey)?.data_value
   );
+
+const isKeyboardActivation = (key: string): boolean =>
+  key === "Enter" || key === " ";
 
 // Border styling based on rank
 const getBorderClasses = (drop: ExtendedDrop, isActiveDrop: boolean) => {
@@ -121,31 +125,48 @@ export default function MemeParticipationDrop({
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
+  const isContentInteractive =
+    !drop.id.startsWith("temp-") && !!onDropContentClick;
+
   const handleContentClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
+    (event: MouseEvent<HTMLDivElement>) => {
       const selection = globalThis.getSelection?.() ?? null;
       if (selection?.toString()) {
         return;
       }
 
-      if (drop.id.startsWith("temp-") || !onDropContentClick) {
+      if (!isContentInteractive || !onDropContentClick) {
         return;
       }
 
       event.stopPropagation();
       onDropContentClick(drop);
     },
-    [drop, onDropContentClick]
+    [drop, isContentInteractive, onDropContentClick]
   );
 
-  const isContentInteractive =
-    !drop.id.startsWith("temp-") && !!onDropContentClick;
+  const handleContentKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!isKeyboardActivation(event.key)) {
+        return;
+      }
+
+      if (!isContentInteractive || !onDropContentClick) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      onDropContentClick(drop);
+    },
+    [drop, isContentInteractive, onDropContentClick]
+  );
 
   const contentBody = (
     <>
       <div className="tw-p-4">
         <MemeDropArtistInfo drop={drop} />
-        <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
+        <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-mt-1.5">
           <MemeDropHeader title={title} />
           <MemeDropDescription description={description} />
         </div>
@@ -173,13 +194,16 @@ export default function MemeParticipationDrop({
   );
 
   const content = isContentInteractive ? (
-    <button
+    <div
+      aria-label={title}
       className="tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       onClick={handleContentClick}
-      type="button"
+      onKeyDown={handleContentKeyDown}
+      role="button"
+      tabIndex={0}
     >
       {contentBody}
-    </button>
+    </div>
   ) : (
     <div>{contentBody}</div>
   );
