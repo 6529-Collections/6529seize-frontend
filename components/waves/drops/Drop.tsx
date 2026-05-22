@@ -77,6 +77,9 @@ export default function Drop({
   embedDepth,
   maxEmbedDepth,
 }: DropProps) {
+  const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
+  const openDropContentClick = canOpenDrop ? onDropContentClick : undefined;
+
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
       <ParticipationDrop
@@ -86,7 +89,7 @@ export default function Drop({
         location={location}
         onReply={onReply}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={onDropContentClick}
+        onDropContentClick={openDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
         footer={footer}
@@ -114,7 +117,7 @@ export default function Drop({
         onReply={onReply}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={onDropContentClick}
+        onDropContentClick={openDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
         footer={footer}
@@ -141,7 +144,7 @@ export default function Drop({
         onReply={onReply}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={undefined}
+        onDropContentClick={openDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         wrapContentOnly={wrapContentOnly}
         footer={footer}
