@@ -1,5 +1,6 @@
 "use client";
 
+import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiCreateDropPart } from "@/generated/models/ApiCreateDropPart";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -112,7 +113,7 @@ const getDropClasses = (
   isDrop: boolean
 ): string => {
   const baseClasses =
-    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300 md:tw-px-5";
+    "touch-select-none tw-cursor-default tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
 
   const streamClasses = "tw-rounded-xl";
 
@@ -128,15 +129,31 @@ const getDropClasses = (
   return `${baseClasses} ${groupingClass} ${locationClasses} ${rankClasses}`.trim();
 };
 
+const getContentOffsetClass = (compact: boolean): string => {
+  if (compact) {
+    return "md:tw-ml-11 md:tw-w-[calc(100%-2.5rem)]";
+  }
+
+  return "md:tw-ml-[3.25rem] md:tw-w-[calc(100%-3.25rem)]";
+};
+
 const getDropContentClass = ({
   showAuthorInfo,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
 }: {
   readonly showAuthorInfo: boolean;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
 }): string => {
   const classes = ["tw-w-full"];
 
   if (showAuthorInfo) {
     classes.push("tw-mt-2");
+  }
+
+  if (shouldGroupWithPreviousDrop && !isProfileView) {
+    classes.push("md:tw-pl-[3.25rem]");
   }
 
   return classes.join(" ");
@@ -302,6 +319,8 @@ const getContentBlock = ({
   drop,
   showAuthorInfo,
   authorHeader,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
   activePartIndex,
   setActivePartIndex,
   handleLongPress,
@@ -331,6 +350,8 @@ const getContentBlock = ({
   readonly drop: ExtendedDrop;
   readonly showAuthorInfo: boolean;
   readonly authorHeader: React.ReactNode;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly handleLongPress: () => void;
@@ -371,17 +392,30 @@ const getContentBlock = ({
         maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
       />
     )}
-    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left">
+    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left md:tw-flex-row md:tw-gap-x-3">
       {showAuthorInfo && (
-        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 md:tw-block md:tw-w-auto md:tw-flex-shrink-0">
           <WaveDropAuthorPfp drop={drop} />
-          <div className="tw-min-w-0 tw-flex-1">{authorHeader}</div>
+          <div className="tw-min-w-0 tw-flex-1 md:tw-hidden">
+            {authorHeader}
+          </div>
         </div>
       )}
-      <div className="tw-flex tw-w-full tw-flex-col">
+      <div
+        className={`tw-flex tw-w-full tw-flex-col ${
+          showAuthorInfo ? "md:tw-max-w-[calc(100%-3.5rem)]" : ""
+        }`}
+      >
+        {showAuthorInfo ? (
+          <div className="tw-hidden md:tw-block">{authorHeader}</div>
+        ) : (
+          authorHeader
+        )}
         <div
           className={getDropContentClass({
             showAuthorInfo,
+            shouldGroupWithPreviousDrop,
+            isProfileView,
           })}
         >
           <WaveDropContent
@@ -497,6 +531,7 @@ const WaveDrop = ({
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
   const allowLongPress = showInteractions && hasTouch && !isMdUp;
+  const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
   const isProfileView = location === DropLocation.PROFILE;
@@ -742,6 +777,8 @@ const WaveDrop = ({
     drop,
     showAuthorInfo,
     authorHeader,
+    shouldGroupWithPreviousDrop,
+    isProfileView,
     activePartIndex,
     setActivePartIndex,
     handleLongPress,
@@ -767,7 +804,9 @@ const WaveDrop = ({
   });
 
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
-    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+    <div
+      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${getContentOffsetClass(compact)}`}
+    >
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
       )}
@@ -777,8 +816,13 @@ const WaveDrop = ({
       {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
   );
+  const shouldOffsetFooter =
+    showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
+  const footerOffsetClass = shouldOffsetFooter
+    ? getContentOffsetClass(compact)
+    : "";
   const footerRow = hasDropFooter(footer) && (
-    <div className="tw-mt-2">{footer}</div>
+    <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
   );
 
   return (

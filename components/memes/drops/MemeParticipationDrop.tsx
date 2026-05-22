@@ -147,7 +147,7 @@ export default function MemeParticipationDrop({
         <MemeDropArtistInfo drop={drop} />
         {isContentInteractive ? (
           <button
-            className="tw-mt-2 tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-mt-1.5"
+            className="tw-mt-2 tw-block tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-ml-[3.25rem] sm:tw-mt-1.5 sm:tw-w-auto"
             onClick={handleContentClick}
             type="button"
           >
@@ -155,7 +155,7 @@ export default function MemeParticipationDrop({
             <MemeDropDescription description={description} />
           </button>
         ) : (
-          <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-mt-1.5">
+          <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
             <MemeDropHeader title={title} />
             <MemeDropDescription description={description} />
           </div>
