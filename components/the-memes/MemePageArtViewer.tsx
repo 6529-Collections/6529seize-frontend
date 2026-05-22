@@ -116,6 +116,7 @@ export function MemePageArtViewer({
       };
   const currentFormat = activeMedia.format ?? "";
   const activeMediaUrl = activeMedia.url ?? "";
+  const canUseBrowserMediaActions = activeMedia.variant !== "html";
   const showBalanceControl = showBalance && Boolean(connectedProfile);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -201,9 +202,9 @@ export function MemePageArtViewer({
     return (
       <InlineMediaActions
         variant={activeMedia.variant}
-        onDownload={downloadMedia}
-        onOpen={openMedia}
-        openLabel={openLabel}
+        onDownload={canUseBrowserMediaActions ? downloadMedia : undefined}
+        onOpen={canUseBrowserMediaActions ? openMedia : undefined}
+        openLabel={canUseBrowserMediaActions ? openLabel : undefined}
         isDownloading={isDownloading}
         onFullscreen={enterActiveMediaFullScreen}
         fullscreenTargetAvailable={Boolean(activeMedia.fullscreenElementId)}
