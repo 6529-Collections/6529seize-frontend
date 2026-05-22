@@ -17,7 +17,12 @@ import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import { useCallback, type ReactNode } from "react";
+import {
+  useCallback,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
@@ -31,11 +36,22 @@ interface MemeParticipationDropProps {
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly footer?: ReactNode;
   readonly showInteractions?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
+
+const getNonEmptyText = (value: string | null | undefined): string | null => {
+  const text = value?.trim();
+  return text && text.length > 0 ? text : null;
+};
+
+const getMetadataValue = (drop: ExtendedDrop, dataKey: string): string | null =>
+  getNonEmptyText(
+    drop.metadata.find((metadata) => metadata.data_key === dataKey)?.data_value
+  );
 
 // Border styling based on rank
 const getBorderClasses = (drop: ExtendedDrop, isActiveDrop: boolean) => {
@@ -70,6 +86,7 @@ export default function MemeParticipationDrop({
   showReplyAndQuote,
   location,
   onReply,
+  onDropContentClick,
   footer,
   showInteractions = true,
   isVotingClosed = false,
@@ -86,16 +103,18 @@ export default function MemeParticipationDrop({
   const isMobile = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
 
-  // Extract metadata
+  const firstPart = drop.parts.at(0);
   const title =
-    drop.metadata.find((m) => m.data_key === "title")?.data_value ??
+    getNonEmptyText(drop.title) ??
+    getMetadataValue(drop, "title") ??
     "Artwork Title";
   const description =
-    drop.metadata.find((m) => m.data_key === "description")?.data_value ??
+    getNonEmptyText(firstPart?.content) ??
+    getMetadataValue(drop, "description") ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media.at(0);
+  const artworkMedia = firstPart?.media.at(0);
 
   const borderClasses = getBorderClasses(drop, isActiveDrop);
 
@@ -103,8 +122,53 @@ export default function MemeParticipationDrop({
     onReply({ drop, partId: drop.parts[0]?.part_id! });
   }, [onReply, drop]);
 
+  const handleContentClick = useCallback(
+    (event: MouseEvent<HTMLDivElement> | KeyboardEvent<HTMLDivElement>) => {
+      const selection = globalThis.getSelection?.() ?? null;
+      if (selection?.toString()) {
+        return;
+      }
+
+      if (drop.id.startsWith("temp-") || !onDropContentClick) {
+        return;
+      }
+
+      event.stopPropagation();
+      onDropContentClick(drop);
+    },
+    [drop, onDropContentClick]
+  );
+
+  const handleContentKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!onDropContentClick) {
+        return;
+      }
+
+      const isActivationKey =
+        event.key === "Enter" || event.key === " " || event.key === "Space";
+
+      if (!isActivationKey) {
+        return;
+      }
+
+      event.preventDefault();
+      handleContentClick(event);
+    },
+    [handleContentClick, onDropContentClick]
+  );
+
+  const isContentInteractive =
+    !drop.id.startsWith("temp-") && !!onDropContentClick;
+
   const content = (
-    <>
+    <div
+      className={isContentInteractive ? "tw-cursor-pointer" : undefined}
+      onClick={handleContentClick}
+      onKeyDown={handleContentKeyDown}
+      role={isContentInteractive ? "button" : undefined}
+      tabIndex={isContentInteractive ? 0 : undefined}
+    >
       <div className="tw-p-4">
         <MemeDropArtistInfo drop={drop} />
         <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
@@ -131,7 +195,7 @@ export default function MemeParticipationDrop({
       <div className="tw-px-4 tw-py-4">
         <MemeDropTraits drop={drop} />
       </div>
-    </>
+    </div>
   );
 
   return (

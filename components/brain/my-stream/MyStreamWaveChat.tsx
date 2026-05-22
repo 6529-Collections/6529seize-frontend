@@ -458,6 +458,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           dividerSerialNo={dividerTarget}
           unreadCount={wave.metrics.your_unread_drops_count}
           dropId={null}
+          onDropContentClick={onDropClick}
           isMuted={wave.metrics.muted}
           winningThreshold={winningThreshold}
           isVotingClosed={isVotingClosed}
