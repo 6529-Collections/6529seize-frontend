@@ -141,7 +141,7 @@ export default function Drop({
         onReply={onReply}
         onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
-        onDropContentClick={onDropContentClick}
+        onDropContentClick={undefined}
         showReplyAndQuote={showReplyAndQuote}
         wrapContentOnly={wrapContentOnly}
         footer={footer}
