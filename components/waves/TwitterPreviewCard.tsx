@@ -92,19 +92,26 @@ function LoadingCard() {
       className={`${TWITTER_CARD_CLASSES} tw-p-4`}
       data-testid="twitter-post-skeleton"
     >
-      <div className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-3">
+      <div className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-4">
         <div className="tw-flex tw-items-center tw-gap-x-3">
-          <div className="tw-h-12 tw-w-12 tw-rounded-full tw-bg-[#263544]" />
+          <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-[#263544]" />
           <div className="tw-flex tw-flex-col tw-gap-y-2">
-            <div className="tw-h-4 tw-w-32 tw-rounded tw-bg-[#263544]" />
-            <div className="tw-h-3 tw-w-24 tw-rounded tw-bg-[#263544]/80" />
+            <div className="tw-h-4 tw-w-40 tw-rounded tw-bg-[#263544]" />
+            <div className="tw-h-3 tw-w-36 tw-rounded tw-bg-[#263544]/80" />
           </div>
         </div>
         <div className="tw-space-y-2">
           <div className="tw-h-4 tw-w-full tw-rounded tw-bg-[#263544]" />
-          <div className="tw-h-4 tw-w-4/5 tw-rounded tw-bg-[#263544]" />
+          <div className="tw-h-4 tw-w-11/12 tw-rounded tw-bg-[#263544]" />
         </div>
-        <div className="tw-h-20 tw-rounded-xl tw-bg-[#263544]/80" />
+        <div className="tw-h-56 tw-rounded-xl tw-bg-[#263544]/80" />
+        <div className="tw-h-4 tw-w-44 tw-rounded tw-bg-[#263544]" />
+        <div className="tw-h-px tw-w-full tw-bg-[#42566b]" />
+        <div className="tw-flex tw-gap-x-8">
+          <div className="tw-h-4 tw-w-16 tw-rounded tw-bg-[#263544]" />
+          <div className="tw-h-4 tw-w-20 tw-rounded tw-bg-[#263544]" />
+          <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-[#263544]" />
+        </div>
       </div>
     </div>
   );
@@ -252,8 +259,8 @@ function TweetHeader({
   readonly preview: TweetPreview;
 }) {
   return (
-    <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
-      <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-x-3">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
+      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
         <AuthorAvatar
           authorHref={authorHref}
           authorName={authorName}
