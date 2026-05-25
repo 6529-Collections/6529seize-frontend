@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { TweetContainer, enrichTweet, useTweet } from "react-tweet";
+import type { Tweet } from "react-tweet/api";
 
 import styles from "./ExpandableTweetPreview.module.css";
 import CompactControls from "./ExpandableTweetPreviewCompactControls";
@@ -28,6 +29,45 @@ interface ExpandableTweetPreviewProps {
 const COMPACT_PX = 256;
 const COMPACT_THRESHOLD_MULTIPLIER = 1.5;
 const COMPACT_THRESHOLD_PX = COMPACT_PX * COMPACT_THRESHOLD_MULTIPLIER;
+
+const normalizeTweetEntities = (
+  entities: Tweet["entities"] | null | undefined
+): Tweet["entities"] => ({
+  hashtags: Array.isArray(entities?.hashtags) ? entities.hashtags : [],
+  urls: Array.isArray(entities?.urls) ? entities.urls : [],
+  user_mentions: Array.isArray(entities?.user_mentions)
+    ? entities.user_mentions
+    : [],
+  symbols: Array.isArray(entities?.symbols) ? entities.symbols : [],
+  ...(Array.isArray(entities?.media) ? { media: entities.media } : {}),
+});
+
+export const normalizeTweetForEnrichment = (tweet: Tweet): Tweet => {
+  const normalizedTweet = {
+    ...tweet,
+    entities: normalizeTweetEntities(tweet.entities),
+  };
+
+  if (!tweet.quoted_tweet) {
+    return normalizedTweet;
+  }
+
+  return {
+    ...normalizedTweet,
+    quoted_tweet: {
+      ...tweet.quoted_tweet,
+      entities: normalizeTweetEntities(tweet.quoted_tweet.entities),
+    },
+  };
+};
+
+const enrichTweetSafely = (tweet: Tweet): EnrichedTweet | null => {
+  try {
+    return enrichTweet(normalizeTweetForEnrichment(tweet));
+  } catch {
+    return null;
+  }
+};
 
 const LoadingPlaceholder = () => (
   <div className="tw-flex tw-h-full tw-w-full tw-animate-pulse tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-900/60 tw-text-iron-300">
@@ -63,7 +103,7 @@ function ExpandableTweetPreviewInner({
 }: ExpandableTweetPreviewProps) {
   const { data, isLoading } = useTweet(tweetId);
   const tweet = useMemo<EnrichedTweet | null>(
-    () => (data ? enrichTweet(data) : null),
+    () => (data ? enrichTweetSafely(data) : null),
     [data]
   );
   const [isExpanded, setIsExpanded] = useState(false);
