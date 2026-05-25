@@ -10,10 +10,10 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useMemo } from "react";
 import DropContext from "./DropContext";
+import { DropLocation } from "./drop.types";
 import type {
   DropIdentityMode,
   DropInteractionParams,
-  DropLocation,
   DropTimestampLayout,
 } from "./drop.types";
 import ParticipationDrop from "./participation/ParticipationDrop";
@@ -77,7 +77,8 @@ export default function Drop({
   embedDepth,
   maxEmbedDepth,
 }: DropProps) {
-  const canOpenDrop = drop.drop_type !== ApiDropType.Chat;
+  const canOpenDrop =
+    drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
   const openDropContentClick = canOpenDrop ? onDropContentClick : undefined;
 
   const components: Record<ApiDropType, React.ReactNode> = {
