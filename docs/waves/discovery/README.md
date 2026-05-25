@@ -7,13 +7,13 @@ surfaces.
 
 - Dedicated discovery route: `/discover`
 - Related wave entry points still exist on `/`, `/waves`, and
-  `/messages?wave={waveId}`
+  `/messages/{waveId}`
 
 ## Route Coverage
 
 - Active discovery route: `/discover`
 - Current wave entry routes: `/`, `/waves`, `/waves/{waveId}`
-- Current direct-message entry routes: `/messages`, `/messages?wave={waveId}`
+- Current direct-message entry routes: `/messages`, `/messages/{waveId}`
 
 ## Query Coverage
 

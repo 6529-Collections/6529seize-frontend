@@ -31,7 +31,6 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import { useTweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 import {
   LinkPreviewProvider,
   useLinkPreviewContext,
@@ -292,7 +291,6 @@ function DropPartMarkdown({
   const isMobile = useIsMobileScreen();
   const { emojiMap, findNativeEmoji } = useEmoji();
   const seizeSettings = useSeizeSettingsOptional();
-  const tweetPreviewMode = useTweetPreviewMode();
   const { variant: linkPreviewVariant } = useLinkPreviewContext();
 
   useLayoutEffect(() => {
@@ -332,7 +330,6 @@ function DropPartMarkdown({
         onQuoteClick,
         currentDropId,
         hideLinkPreviews,
-        tweetPreviewMode,
         isMemesWaveById: seizeSettings?.isMemesWave,
         isQuorumWaveById: seizeSettings?.isQuorumWave,
         embedPath: normalizedEmbedPath,
@@ -344,7 +341,6 @@ function DropPartMarkdown({
       onQuoteClick,
       currentDropId,
       hideLinkPreviews,
-      tweetPreviewMode,
       seizeSettings?.isMemesWave,
       seizeSettings?.isQuorumWave,
       normalizedEmbedPath,

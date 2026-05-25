@@ -10,7 +10,7 @@ and lets users review recent sale links without opening each winner from
 ## Location in the Site
 
 - Curation wave thread routes: `/waves/{waveId}`
-- Curation-wave direct-message routes: `/messages?wave={waveId}`
+- Curation-wave direct-message routes: `/messages/{waveId}`
 - Desktop and mobile wave tab rows when `Sales` is available
 
 ## Entry Points

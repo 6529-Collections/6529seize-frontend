@@ -13,7 +13,7 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Wave/DM drop cards and quoted-drop cards that reuse the shared markdown renderer.
 
 ## Entry Points

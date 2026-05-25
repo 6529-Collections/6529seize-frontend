@@ -20,7 +20,7 @@ In the app layout, the header adapts to route and thread state. It controls:
 
 - Open any app-shell route.
 - Open a thread (`/waves/{waveId}`, `/waves?wave={waveId}`, or
-  `/messages?wave={waveId}`).
+  `/messages/{waveId}`).
 - Open create routes (`/waves/create`, `/messages/create`).
 - Return to `/` to access the home-only health shortcut.
 

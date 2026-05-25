@@ -14,7 +14,7 @@ as one-time setup values and removes them from the URL.
 ## Location in the Site
 
 - `/waves/{waveId}`
-- `/messages?wave={waveId}`
+- `/messages/{waveId}`
 - Thread query values: `serialNo` and `divider`
 - `divider` is applied only when `serialNo` is valid
 
@@ -22,7 +22,7 @@ as one-time setup values and removes them from the URL.
 
 - Open a serial-target link:
   - `/waves/{waveId}?serialNo={serialNo}`
-  - `/messages?wave={waveId}&serialNo={serialNo}`
+  - `/messages/{waveId}?serialNo={serialNo}`
 - Select a result from thread `Search messages`.
 - Select a result from header search `In this Wave`.
 - Use jump controls that target a serial:

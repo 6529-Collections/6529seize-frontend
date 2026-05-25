@@ -13,7 +13,7 @@ Legacy tooltip-only links should resolve here.
 ## Location in the Site
 
 - Web left sidebar rows on `/waves`, `/waves/{waveId}`, `/messages`, and
-  `/messages?wave={waveId}`.
+  `/messages/{waveId}`.
 - Mobile/app Waves and Messages list rows that reuse the same `Last drop`
   source but do not use hover tooltips.
 - Collapsed web rows hide `Last drop` and show name via tooltip.

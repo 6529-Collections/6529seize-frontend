@@ -19,7 +19,7 @@ content-only leaderboard action sheets, the same toggle is labeled
 
 Not shown on:
 
-- Direct-message thread drops: `/messages?wave={waveId}`
+- Direct-message thread drops: `/messages/{waveId}`
 - Leaderboard gallery cards (including memes gallery-style cards)
 
 ## Entry Points

@@ -38,7 +38,7 @@ documented separately in
    above the feed.
 6. Select a drop or quote preview to open its thread:
    - public wave drop: `/waves/{waveId}?serialNo={serialNo}`
-   - direct-message drop: `/messages?wave={waveId}&serialNo={serialNo}`
+   - direct-message drop: `/messages/{waveId}?serialNo={serialNo}`
 7. Scroll to load older drops.
 
 ## Common Scenarios

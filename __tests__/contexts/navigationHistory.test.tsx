@@ -22,9 +22,11 @@ const routerMock = {
   events: { on: jest.fn(), off: jest.fn() },
 };
 const hardBack = jest.fn();
+let mockPathname = "/";
+let mockSearchParams = new URLSearchParams();
 (useRouter as jest.Mock).mockReturnValue(routerMock);
-(usePathname as jest.Mock).mockReturnValue("/");
-(useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+(usePathname as jest.Mock).mockImplementation(() => mockPathname);
+(useSearchParams as jest.Mock).mockImplementation(() => mockSearchParams);
 (useViewContext as jest.Mock).mockReturnValue({ hardBack });
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -32,6 +34,13 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 describe("NavigationHistoryContext", () => {
+  beforeEach(() => {
+    routerMock.push.mockClear();
+    hardBack.mockClear();
+    mockPathname = "/";
+    mockSearchParams = new URLSearchParams();
+  });
+
   it("pushes view and navigates back to previous route", () => {
     const { result } = renderHook(() => useNavigationHistoryContext(), {
       wrapper,
@@ -57,5 +66,26 @@ describe("NavigationHistoryContext", () => {
       result.current.goBack();
     });
     expect(hardBack).toHaveBeenCalledWith("v1");
+  });
+
+  it("stores canonical message paths for query-style message routes", () => {
+    mockPathname = "/messages";
+    mockSearchParams = new URLSearchParams("wave=dm-wave");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      {
+        wrapper,
+      }
+    );
+
+    mockPathname = "/waves/wave-1";
+    mockSearchParams = new URLSearchParams();
+    rerender();
+
+    act(() => {
+      result.current.goBack();
+    });
+
+    expect(routerMock.push).toHaveBeenCalledWith("/messages/dm-wave");
   });
 });

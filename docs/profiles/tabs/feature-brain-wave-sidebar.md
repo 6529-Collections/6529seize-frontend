@@ -36,7 +36,7 @@ created, or into the waves where that profile is most active.
    open `Waves by {profile}`.
 6. Select any wave row or pill to open that wave:
    - standard wave: `/waves/{waveId}`
-   - direct-message result: `/messages?wave={waveId}`
+   - direct-message result: `/messages/{waveId}`
 7. In the created-waves modal, scroll to load more created waves.
 
 ## Common Scenarios
