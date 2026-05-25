@@ -37,4 +37,30 @@ describe("linkPreviewDetection", () => {
       )
     ).toBe(false);
   });
+
+  it("ignores exact CloudFront-origin links allowed by chat restrictions", () => {
+    expect(
+      containsOpenGraphPreviewLink(
+        "uploaded https://d3lqz0a4bldqgf.cloudfront.net/drops/asset.mp4"
+      )
+    ).toBe(false);
+    expect(
+      containsOpenGraphPreviewLink(
+        "[download](https://d3lqz0a4bldqgf.cloudfront.net/drops/asset.html)"
+      )
+    ).toBe(false);
+    expect(
+      containsOpenGraphPreviewLink(
+        "https://d3lqz0a4bldqgf.cloudfront.net/drops/asset"
+      )
+    ).toBe(false);
+  });
+
+  it("does not ignore CloudFront lookalike hosts", () => {
+    expect(
+      containsOpenGraphPreviewLink(
+        "https://d3lqz0a4bldqgf.cloudfront.net.evil/drops/asset.mp4"
+      )
+    ).toBe(true);
+  });
 });

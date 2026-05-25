@@ -349,6 +349,43 @@ describe("CreateDropContent chat refocus", () => {
     expect(submitDrop).not.toHaveBeenCalled();
   });
 
+  it("does not disable chat submit for allowed CloudFront links", async () => {
+    const submitDrop = jest.fn(() => true);
+    renderSubject({
+      isDropMode: false,
+      submitDrop,
+      waveOverride: {
+        ...wave,
+        chat: {
+          ...wave.chat,
+          links_disabled: true,
+        },
+      },
+      drop: {
+        ...createStoredDrop(),
+        parts: [
+          {
+            content: "https://d3lqz0a4bldqgf.cloudfront.net/drops/asset.mp4",
+            quoted_drop: null,
+            media: [],
+          },
+        ],
+      },
+    });
+
+    const submitButton = screen.getByText("submit");
+
+    expect(
+      screen.queryByText("Links are not allowed in this wave")
+    ).not.toBeInTheDocument();
+    expect(submitButton).not.toBeDisabled();
+
+    await userEvent.click(submitButton);
+
+    await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+    expect(submitDrop.mock.calls[0]?.[0].drop.drop_type).toBe(ApiDropType.Chat);
+  });
+
   it("does not block participatory submit with a link", async () => {
     const submitDrop = jest.fn(() => true);
     renderSubject({

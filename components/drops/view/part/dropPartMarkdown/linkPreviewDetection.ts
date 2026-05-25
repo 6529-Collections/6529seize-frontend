@@ -1,4 +1,5 @@
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
+import { publicEnv } from "@/config/env";
 
 import {
   isDirectImageUrl,
@@ -6,6 +7,7 @@ import {
   shouldUseOpenGraphPreview,
 } from "./linkUtils";
 
+const DEFAULT_CLOUDFRONT_DOMAIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const RAW_URL_REGEX = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
 
 const stripMarkdownCode = (content: string): string =>
@@ -43,6 +45,23 @@ const normalizeHrefCandidate = (href: string): string => {
   return trimmed;
 };
 
+const getUrlOrigin = (href: string): string | null => {
+  try {
+    return new URL(href).origin;
+  } catch {
+    return null;
+  }
+};
+
+const getAllowedCloudfrontOrigin = (): string =>
+  getUrlOrigin(publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ?? "") ??
+  DEFAULT_CLOUDFRONT_DOMAIN;
+
+const isAllowedCloudfrontHref = (href: string): boolean => {
+  const hrefOrigin = getUrlOrigin(href);
+  return hrefOrigin !== null && hrefOrigin === getAllowedCloudfrontOrigin();
+};
+
 const isOpenGraphPreviewHref = (href: string): boolean => {
   const normalizedHref = normalizeHrefCandidate(href);
   if (!normalizedHref) {
@@ -51,6 +70,10 @@ const isOpenGraphPreviewHref = (href: string): boolean => {
 
   const stableHref = ensureStableSeizeLink(normalizedHref);
   const parsedUrl = parseUrl(stableHref);
+
+  if (isAllowedCloudfrontHref(stableHref)) {
+    return false;
+  }
 
   if (isDirectImageUrl(stableHref, parsedUrl)) {
     return false;
