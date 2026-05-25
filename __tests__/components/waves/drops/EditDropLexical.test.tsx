@@ -13,7 +13,7 @@ const useDeviceInfoMock = jest.fn(() => ({
   isApp: false,
   isMobileDevice: false,
 }));
-const mockContainsOpenGraphPreviewLink = jest.fn(() => false);
+const mockContainsDisallowedLink = jest.fn(() => false);
 
 const rootMock = {
   getChildren: jest.fn(() => [] as unknown[]),
@@ -225,8 +225,8 @@ const {
 jest.mock(
   "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection",
   () => ({
-    containsOpenGraphPreviewLink: (...args: unknown[]) =>
-      mockContainsOpenGraphPreviewLink(...args),
+    containsDisallowedLink: (...args: unknown[]) =>
+      mockContainsDisallowedLink(...args),
   })
 );
 jest.mock(
@@ -288,7 +288,7 @@ describe("EditDropLexical", () => {
     rootMock.getChildren.mockReturnValue([]);
     rootMock.getAllTextNodes.mockReturnValue([]);
     mentionSelectHandler = null;
-    mockContainsOpenGraphPreviewLink.mockReturnValue(false);
+    mockContainsDisallowedLink.mockReturnValue(false);
     useDeviceInfoMock.mockReturnValue({
       isApp: false,
       isMobileDevice: false,
@@ -511,7 +511,7 @@ describe("EditDropLexical", () => {
     const onSave = jest.fn();
     const onCancel = jest.fn();
     exportDropMarkdownMock.mockReturnValue("https://example.com/article");
-    mockContainsOpenGraphPreviewLink.mockReturnValue(true);
+    mockContainsDisallowedLink.mockReturnValue(true);
 
     render(
       <EditDropLexical
