@@ -54,25 +54,37 @@ describe("linkPreviewDetection", () => {
     ).toBe(false);
   });
 
-  it("ignores official Tenor content links allowed by chat restrictions", () => {
+  it("ignores allowed Tenor media links", () => {
     expect(
       containsDisallowedLink("https://media.tenor.com/abc/tenor.gif")
     ).toBe(false);
     expect(
       containsDisallowedLink("https://media.tenor.com/abc/tenor.mp4")
     ).toBe(false);
-    expect(containsDisallowedLink("https://c.tenor.com/abc/tenor.webm")).toBe(
+    expect(containsDisallowedLink("https://c.tenor.com/abc/tenor.jpg")).toBe(
       false
     );
-    expect(containsDisallowedLink("https://tenor.com/view/funny-cat-123")).toBe(
+    expect(containsDisallowedLink("https://c.tenor.com/abc/tenor.webp")).toBe(
       false
     );
     expect(
-      containsDisallowedLink("https://www.tenor.com/view/funny-cat-123")
+      containsDisallowedLink("https://media.tenor.com/abc/tenor.gif?itemid=1")
     ).toBe(false);
     expect(
       containsDisallowedLink("![gif](https://media.tenor.com/abc/tenor.gif)")
     ).toBe(false);
+  });
+
+  it("blocks Tenor urls without allowed media extensions", () => {
+    expect(containsDisallowedLink("https://c.tenor.com/abc/tenor.webm")).toBe(
+      true
+    );
+    expect(containsDisallowedLink("https://tenor.com/view/funny-cat-123")).toBe(
+      true
+    );
+    expect(
+      containsDisallowedLink("https://www.tenor.com/view/funny-cat-123")
+    ).toBe(true);
   });
 
   it("does not ignore CloudFront or Tenor lookalike hosts", () => {
