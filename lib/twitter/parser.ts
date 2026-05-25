@@ -14,6 +14,11 @@ const readString = (value: unknown): string | undefined => {
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
+const normalizeUrlCandidate = (value: string): string => {
+  const trimmed = value.trim();
+  return /^[a-z][a-z\d+\-.]*:/i.test(trimmed) ? trimmed : `https://${trimmed}`;
+};
+
 const parseHandleFromUrl = (url: string | undefined): string | undefined => {
   if (!url) {
     return undefined;
@@ -57,7 +62,7 @@ const findMediaLink = (
 
 const isPicTwitterUrl = (value: string): boolean => {
   try {
-    const parsed = new URL(value);
+    const parsed = new URL(normalizeUrlCandidate(value));
     return matchesDomainOrSubdomain(parsed.hostname, "pic.twitter.com");
   } catch {
     return false;

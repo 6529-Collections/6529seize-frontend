@@ -38,8 +38,8 @@ describe("TwitterPreviewCard", () => {
       mediaLink: "https://t.co/example",
       mediaImageUrl: "https://pbs.twimg.com/media/example.jpg",
       createdAtIso: "2026-04-28T19:02:00.000Z",
-      favoriteCount: 7,
-      conversationCount: 1,
+      favoriteCount: 94626,
+      conversationCount: 3951,
     });
 
     render(
@@ -72,7 +72,7 @@ describe("TwitterPreviewCard", () => {
       screen.getByRole("img", { name: "These jobs won't be here forever." })
     ).toHaveAttribute("src", "https://pbs.twimg.com/media/example.jpg");
     expect(screen.getByText(/· Apr 28, 2026/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /7/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /94,626/i })).toHaveAttribute(
       "href",
       "https://x.com/intent/like?tweet_id=2049202644879565155"
     );
@@ -80,7 +80,9 @@ describe("TwitterPreviewCard", () => {
       "href",
       "https://x.com/intent/tweet?in_reply_to=2049202644879565155"
     );
-    expect(screen.getByRole("link", { name: "Read 1 reply" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Read 3,951 replies" })
+    ).toHaveAttribute(
       "href",
       "https://x.com/Mayudropsphotos/status/2049202644879565155"
     );

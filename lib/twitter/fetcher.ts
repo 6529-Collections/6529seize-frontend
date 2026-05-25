@@ -141,27 +141,56 @@ const readRecord = (value: unknown): Record<string, unknown> | undefined =>
 const readArray = (value: unknown): readonly unknown[] =>
   Array.isArray(value) ? value : [];
 
+const isMp4VideoVariant = (
+  variant: Record<string, unknown>,
+  url: string
+): boolean => {
+  const contentType = readString(variant["content_type"])?.toLowerCase();
+  return contentType === "video/mp4" || url.toLowerCase().endsWith(".mp4");
+};
+
+const findBestVideoVariantUrl = (
+  variants: readonly unknown[],
+  urlKey: "src" | "url"
+): string | undefined => {
+  let fallbackUrl: string | undefined;
+
+  for (const variant of variants) {
+    const variantRecord = readRecord(variant);
+    const url = readString(variantRecord?.[urlKey]);
+    if (!url) {
+      continue;
+    }
+
+    if (variantRecord && isMp4VideoVariant(variantRecord, url)) {
+      return url;
+    }
+
+    fallbackUrl ??= url;
+  }
+
+  return fallbackUrl;
+};
+
 const findVideoUrl = (record: Record<string, unknown>): string | undefined => {
   const video = readRecord(record["video"]);
-  const videoVariants = readArray(video?.["variants"]);
-  for (const variant of videoVariants) {
-    const variantRecord = readRecord(variant);
-    const src = readString(variantRecord?.["src"]);
-    if (src) {
-      return src;
-    }
+  const videoUrl = findBestVideoVariantUrl(
+    readArray(video?.["variants"]),
+    "src"
+  );
+  if (videoUrl) {
+    return videoUrl;
   }
 
   const mediaDetails = readArray(record["mediaDetails"]);
   for (const mediaDetail of mediaDetails) {
     const videoInfo = readRecord(readRecord(mediaDetail)?.["video_info"]);
-    const variants = readArray(videoInfo?.["variants"]);
-    for (const variant of variants) {
-      const variantRecord = readRecord(variant);
-      const url = readString(variantRecord?.["url"]);
-      if (url) {
-        return url;
-      }
+    const url = findBestVideoVariantUrl(
+      readArray(videoInfo?.["variants"]),
+      "url"
+    );
+    if (url) {
+      return url;
     }
   }
 

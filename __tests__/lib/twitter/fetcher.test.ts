@@ -89,4 +89,42 @@ describe("fetchTweetPreview", () => {
 
     expect(preview.mediaImageUrl).toBeUndefined();
   });
+
+  it("prefers MP4 video variants when multiple formats are available", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2057513333985554492",
+        text: "Post text",
+        user: {
+          name: "Mayudrops",
+          screen_name: "Mayudropsphotos",
+        },
+        video: {
+          variants: [
+            {
+              src: "https://video.twimg.com/tweet_video/example.m3u8",
+              content_type: "application/x-mpegURL",
+            },
+            {
+              src: "https://video.twimg.com/tweet_video/example.mp4",
+              content_type: "video/mp4",
+            },
+          ],
+        },
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      { fetchImpl }
+    );
+
+    expect(preview.mediaVideoUrl).toBe(
+      "https://video.twimg.com/tweet_video/example.mp4"
+    );
+  });
 });

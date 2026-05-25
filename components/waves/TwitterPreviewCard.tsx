@@ -82,6 +82,10 @@ function formatTweetTimestamp(preview: TweetPreview): string | undefined {
   return preview.createdAtText;
 }
 
+function formatCount(value: number): string {
+  return value.toLocaleString();
+}
+
 function LoadingCard() {
   return (
     <div
@@ -211,12 +215,12 @@ function TweetAuthorBlock({
         target="_blank"
         rel="noopener noreferrer nofollow"
         onClick={stopCardEvent}
-        className="tw-line-clamp-1 tw-text-sm tw-font-bold tw-leading-5 tw-text-[#f7f9f9] tw-no-underline hover:tw-underline"
+        className="tw-line-clamp-1 tw-text-sm tw-font-bold tw-leading-4 tw-text-[#f7f9f9] tw-no-underline hover:tw-underline"
       >
         {authorName}
       </Link>
       {authorHandle && (
-        <div className="tw-line-clamp-1 tw-text-xs tw-leading-5 tw-text-[#8b98a5]">
+        <div className="tw-line-clamp-1 tw-text-xs tw-leading-4 tw-text-[#8b98a5]">
           <span>@{authorHandle}</span>
           <span className="tw-px-1">·</span>
           <Link
@@ -420,7 +424,11 @@ function TweetActions({
         className={`${ACTION_CLASSES} hover:tw-text-[#f91880]`}
       >
         <HeartIcon className="tw-h-5 tw-w-5" />
-        <span>{preview.favoriteCount ?? "Like"}</span>
+        <span>
+          {preview.favoriteCount === undefined
+            ? "Like"
+            : formatCount(preview.favoriteCount)}
+        </span>
       </Link>
       <Link
         href={`https://x.com/intent/tweet?in_reply_to=${tweetId}`}
@@ -455,7 +463,8 @@ function TweetRepliesLink({
       onClick={stopCardEvent}
       className="tw-flex tw-h-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-[#42566b] tw-bg-transparent tw-px-4 tw-text-sm tw-font-semibold tw-text-[#6ecbff] tw-no-underline tw-transition hover:tw-border-[#5a7088] hover:tw-text-[#9bddff]"
     >
-      Read {conversationCount} {conversationCount === 1 ? "reply" : "replies"}
+      Read {formatCount(conversationCount)}{" "}
+      {conversationCount === 1 ? "reply" : "replies"}
     </Link>
   );
 }
@@ -470,6 +479,7 @@ export default function TwitterPreviewCard({
 
   useEffect(() => {
     let active = true;
+    setState({ type: "loading" });
 
     fetchTwitterPreview(href)
       .then((preview) => {
