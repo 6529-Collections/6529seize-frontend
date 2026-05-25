@@ -3,6 +3,12 @@ import { publicEnv } from "@/config/env";
 
 const DEFAULT_CLOUDFRONT_DOMAIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const TENOR_DOMAIN = "tenor.com";
+const ALLOWED_TENOR_PATH_EXTENSIONS = [
+  ".mp4",
+  ".gif",
+  ".jpg",
+  ".webp",
+] as const;
 const RAW_URL_REGEX = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
 
 const stripMarkdownCode = (content: string): string =>
@@ -74,7 +80,14 @@ const isAllowedTenorHref = (href: string): boolean => {
     return false;
   }
 
-  return isDomainOrSubdomain(url.hostname.toLowerCase(), TENOR_DOMAIN);
+  if (!isDomainOrSubdomain(url.hostname.toLowerCase(), TENOR_DOMAIN)) {
+    return false;
+  }
+
+  const pathname = url.pathname.toLowerCase();
+  return ALLOWED_TENOR_PATH_EXTENSIONS.some((extension) =>
+    pathname.endsWith(extension)
+  );
 };
 
 const isDisallowedLinkHref = (href: string): boolean => {
