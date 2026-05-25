@@ -12,7 +12,7 @@ Quote rendering is cycle-guarded and depth-limited to `4` nested quote levels.
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}`
+- Direct-message threads: `/messages/{waveId}`
 - Drop markdown that contains supported same-origin wave serial links.
 
 ## Supported Source Links
@@ -26,7 +26,7 @@ Rules:
 - `serialNo` must be numeric. Trailing slash values are normalized (for example
   `serialNo=10/` becomes `10`).
 - Links with `drop=...` do not use quote-card rendering.
-- `/messages?wave={waveId}&serialNo={serialNo}` is a navigation destination for
+- `/messages/{waveId}?serialNo={serialNo}` is a navigation destination for
   DM targets, not a quote-card source format.
 
 ## User Journey
@@ -37,7 +37,7 @@ Rules:
 4. Select the card:
    - Same wave: jump to the target serial in place.
    - Different non-DM wave: open `/waves/{waveId}?serialNo={serialNo}`.
-   - Different DM wave: open `/messages?wave={waveId}&serialNo={serialNo}`.
+   - Different DM wave: open `/messages/{waveId}?serialNo={serialNo}`.
 
 ## Common Scenarios
 
@@ -51,7 +51,7 @@ Rules:
 
 ## Edge Cases
 
-- `/messages?wave={waveId}&serialNo={serialNo}` links do not render as quote cards.
+- `/messages/{waveId}?serialNo={serialNo}` links do not render as quote cards.
 - Links with `drop` query are handled by drop-open link behavior, not quote-card behavior.
 - Non-UUID `waveId` or non-numeric `serialNo` values stay plain links.
 - Missing `serialNo` values stay plain links.
@@ -80,7 +80,7 @@ Rules:
 
 - Quote cards parse only same-origin `/waves` serial links in markdown:
   `/waves/{waveId}?serialNo={serialNo}` and `/waves?wave={waveId}&serialNo={serialNo}`.
-- `/messages?wave={waveId}&serialNo={serialNo}` is a destination format used
+- `/messages/{waveId}?serialNo={serialNo}` is a destination format used
   after card click for DM targets, not a quote-card source format.
 - Quote previews render the target drop part used by the quote renderer (part `1` for serial links).
 

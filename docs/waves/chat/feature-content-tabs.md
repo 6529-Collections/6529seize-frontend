@@ -13,7 +13,7 @@ restores it whenever that wave is opened again and the tab is still available.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages with an active wave: `/messages?wave={waveId}`
+- Direct messages with an active wave: `/messages/{waveId}`
 - In the web layout, tabs appear below the wave header and above the main
   content panel.
 

@@ -14,7 +14,7 @@ This flow appears in two places:
 
 - Curation wave threads: `/waves/{waveId}`
 - Direct-message thread context with an active wave:
-  `/messages?wave={waveId}` (no `/messages/{waveId}` route)
+  `/messages/{waveId}`
 - Leaderboard view inside those same thread routes
 
 ## Entry Points

@@ -15,7 +15,7 @@ This page covers:
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Home-style drop cards that reuse wave markdown preview rendering
 
 ## Entry Points

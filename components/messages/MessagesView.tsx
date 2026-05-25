@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
 import PrimaryButton from "../utils/button/PrimaryButton";
@@ -11,15 +11,17 @@ import CreateDirectMessageModal from "../waves/create-dm/CreateDirectMessageModa
 import { useAuth } from "../auth/Auth";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 const MessagesView: React.FC = () => {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { connectedProfile } = useAuth();
   const { isApp } = useDeviceInfo();
   const { isDirectMessageModalOpen, openDirectMessage, close } =
     useCreateModalState();
 
-  const serialisedWaveId = searchParams?.get("wave") || null;
+  const serialisedWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
 
   const showPlaceholder = !serialisedWaveId && !isApp;
 

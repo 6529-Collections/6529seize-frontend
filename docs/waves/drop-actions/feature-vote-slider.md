@@ -16,7 +16,7 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Mini inline vote card in artist active-submission cards.
 - Route contexts:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
   - single-drop overlay from thread context (`?drop={dropId}`)
 
 ## Entry Points

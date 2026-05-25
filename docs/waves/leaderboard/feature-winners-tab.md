@@ -8,7 +8,7 @@ right sidebar, and what users see for loading and empty states.
 ## Where Users See It
 
 - Rank-wave thread routes: `/waves/{waveId}`
-- Rank-wave direct-message routes: `/messages?wave={waveId}`
+- Rank-wave direct-message routes: `/messages/{waveId}`
 - Main thread tab row on desktop and mobile
 - Right-sidebar `Winners` tab on rank waves
 

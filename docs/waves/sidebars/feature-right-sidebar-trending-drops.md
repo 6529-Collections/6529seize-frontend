@@ -11,7 +11,7 @@ actions. Cross-section jump ownership stays in
 
 ## Location in the Site
 
-- `/waves/{waveId}` and `/messages?wave={waveId}`
+- `/waves/{waveId}` and `/messages/{waveId}`
 - Web right sidebar:
   - rank waves: `About` tab content
   - non-rank waves: default sidebar content (no tab row)

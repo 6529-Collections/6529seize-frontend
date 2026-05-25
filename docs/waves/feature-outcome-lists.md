@@ -11,7 +11,7 @@ This page owns both so users can map configured outcomes to per-rank results.
 
 ## Location in the Site
 
-- `Outcome` tab on `/waves/{waveId}` and `/messages?wave={waveId}` when that tab
+- `Outcome` tab on `/waves/{waveId}` and `/messages/{waveId}` when that tab
   is available.
 - Curation waves do not show the `Outcome` tab.
 - Ranked surfaces that can show outcome summaries:

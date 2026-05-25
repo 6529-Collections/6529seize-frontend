@@ -21,7 +21,7 @@ All actions stay in the current wave thread context.
 
 ## Location in the Site
 
-- Right sidebar on `/waves/{waveId}` and `/messages?wave={waveId}`
+- Right sidebar on `/waves/{waveId}` and `/messages/{waveId}`
 - Inline and overlay right-sidebar variants
 - Right sidebar is hidden while a `drop` overlay is open
 

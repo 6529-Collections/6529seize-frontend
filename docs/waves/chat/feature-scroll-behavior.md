@@ -10,7 +10,7 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 ## Location in the Site
 
 - `/waves/{waveId}`
-- `/messages?wave={waveId}`
+- `/messages/{waveId}`
 - Thread message list and floating bottom-right controls.
 
 ## Entry Points

@@ -15,7 +15,7 @@ The thread composer uses `Enter` for submit and `Shift+Enter` for line breaks.
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}` (canonical DM route; no
+- Direct-message threads: `/messages/{waveId}` (canonical DM route; no
   `/messages/{waveId}` route)
 - Drop/post composer input in the thread footer
 

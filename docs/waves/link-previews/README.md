@@ -16,7 +16,7 @@ Internal Seize embed cards (wave/group/drop/quote) are documented in
 ## Route and Surface Coverage
 
 - wave threads at `/waves/{waveId}`
-- direct-message threads at `/messages?wave={waveId}`
+- direct-message threads at `/messages/{waveId}`
 - boosted-card previews on `/`
 - home-style preview variants inside wave leaderboard card content
 

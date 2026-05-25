@@ -9,7 +9,7 @@ rebuilding them.
 ## Location in the Site
 
 - Wave detail threads: `/waves/{waveId}`
-- Direct-message wave threads: `/messages?wave={waveId}`
+- Direct-message wave threads: `/messages/{waveId}`
 - Drop action menus where `Edit Message` is available
 
 ## Entry Points

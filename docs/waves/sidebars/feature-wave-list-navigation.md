@@ -12,7 +12,7 @@ Wave and DM rows in the left list control which thread is open.
 
 - Web left sidebar on:
   - `/waves` and `/waves/{waveId}`
-  - `/messages` and `/messages?wave={waveId}`
+  - `/messages` and `/messages/{waveId}`
 - Mobile/app Waves and Messages list views that reuse the same row behavior.
 
 ## Entry Points
@@ -33,7 +33,7 @@ Wave and DM rows in the left list control which thread is open.
 ## Common Scenarios
 
 - Wave rows open `/waves/{waveId}`.
-- Direct-message rows open `/messages?wave={waveId}`.
+- Direct-message rows open `/messages/{waveId}`.
 - Active-row re-click returns to `/waves` or `/messages`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.

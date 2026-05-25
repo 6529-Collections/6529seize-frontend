@@ -16,7 +16,7 @@ This page covers:
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Boosted cards on `/`
 - Wave leaderboard card content that reuses markdown rendering
 

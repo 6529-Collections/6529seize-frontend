@@ -18,7 +18,7 @@ Badge state decides which section opens first.
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/xtdh`,
   `/{user}/subscriptions`, and `/{user}/proxy`.
 - Wave and direct-message drop headers:
-  `/waves/{waveId}` and `/messages?wave={waveId}`.
+  `/waves/{waveId}` and `/messages/{waveId}`.
 - Single-drop overlays opened with `drop={dropId}` in the current route.
 - Meme participation and meme leaderboard drop rows.
 

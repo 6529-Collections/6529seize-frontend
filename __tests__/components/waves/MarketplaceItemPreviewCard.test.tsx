@@ -26,6 +26,7 @@ describe("MarketplaceItemPreviewCard", () => {
   beforeEach(() => {
     mockClipboardWriteText.mockReset();
     mockClipboardWriteText.mockResolvedValue(undefined);
+    jest.spyOn(window, "open").mockImplementation(() => null);
 
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -33,6 +34,10 @@ describe("MarketplaceItemPreviewCard", () => {
         writeText: mockClipboardWriteText,
       },
     });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("renders full-mode footer layout with title, price, and actions", () => {
@@ -56,7 +61,11 @@ describe("MarketplaceItemPreviewCard", () => {
     const mediaLink = screen.getByTestId("marketplace-item-media-link");
     const ctaLink = screen.getByTestId("marketplace-item-cta-link");
 
-    expect(mediaLink).toHaveAttribute("href", href);
+    expect(mediaLink).not.toHaveAttribute("href");
+    expect(screen.getByTestId("manifold-item-card")).toHaveAttribute(
+      "role",
+      "link"
+    );
     expect(ctaLink).toHaveAttribute("href", href);
     expect(ctaLink).toHaveAttribute("target", "_blank");
     expect(ctaLink).toHaveAttribute("rel", "noopener noreferrer");
@@ -92,6 +101,52 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(ctaLink).not.toHaveClass("tw-absolute");
     expect(screen.getByAltText("Manifold logo")).toBeInTheDocument();
     expect(screen.queryByTestId("marketplace-item-title-row")).toBeNull();
+  });
+
+  it("opens the marketplace when clicking the card body", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.click(screen.getByTestId("manifold-item-card"));
+
+    expect(window.open).toHaveBeenCalledWith(
+      href,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  });
+
+  it("does not hijack copy button clicks", async () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("marketplace-item-copy-button"));
+      await Promise.resolve();
+    });
+
+    expect(window.open).not.toHaveBeenCalled();
+    expect(mockClipboardWriteText).toHaveBeenCalledWith(href);
   });
 
   it("renders Foundation logo and price in full mode CTA", () => {

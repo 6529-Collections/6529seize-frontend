@@ -11,7 +11,7 @@ markdown keep visible vertical spacing after posting and after edit saves.
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}` (canonical DM route; no
+- Direct-message threads: `/messages/{waveId}` (canonical DM route; no
   `/messages/{waveId}` route)
 - Existing drop edit modal opened from a drop action menu (`Edit Message`,
   shown only on your own drops)

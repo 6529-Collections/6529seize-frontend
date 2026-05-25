@@ -14,7 +14,7 @@ consistent across headers, rows, chips, and hover cards.
 - Active thread surfaces that show the shared wave avatar, including:
   - app header active-thread avatar
   - right-sidebar `About` header on `/waves/{waveId}` and
-    `/messages?wave={waveId}`
+    `/messages/{waveId}`
 - Wave and direct-message rows in `/waves*` and `/messages*` shells.
 - Native app recent-thread/pinned-thread cards that reuse the same avatar.
 - Wave hover cards on `#wave` mention links.

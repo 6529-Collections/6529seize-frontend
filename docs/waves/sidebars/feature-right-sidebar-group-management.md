@@ -14,7 +14,7 @@ Users can:
 ## Location in the Site
 
 - Wave thread: `/waves/{waveId}`
-- Direct-message thread: `/messages?wave={waveId}`
+- Direct-message thread: `/messages/{waveId}`
 - Rank waves: open the right-sidebar `About` tab
 - Non-rank waves: same content in default non-tabbed sidebar layout
 - Mobile `About` view reuses the same group-management content

@@ -1,0 +1,89 @@
+import * as cheerio from "cheerio";
+
+import type { TweetPreview, TwitterOEmbedResponse } from "./types";
+import { parseTweetUrl } from "./url";
+
+const readString = (value: unknown): string | undefined => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const parseHandleFromUrl = (url: string | undefined): string | undefined => {
+  if (!url) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(url);
+    const [firstSegment] = parsed.pathname
+      .split("/")
+      .map((segment) => segment.trim())
+      .filter((segment) => segment.length > 0);
+    return firstSegment && firstSegment.toLowerCase() !== "i"
+      ? firstSegment
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const findMediaLink = (
+  $: ReturnType<typeof cheerio.load>
+): string | undefined => {
+  const anchors = $("blockquote p a").toArray();
+  const mediaAnchor = anchors.find(
+    (element: ReturnType<typeof $.root>[number]) => {
+      const href = $(element).attr("href") ?? "";
+      const text = $(element).text();
+      return (
+        href.includes("pic.twitter.com") || text.includes("pic.twitter.com")
+      );
+    }
+  );
+
+  if (!mediaAnchor) {
+    return undefined;
+  }
+
+  const wrappedAnchor = $(mediaAnchor);
+  return (
+    readString(wrappedAnchor.attr("href")) ?? readString(wrappedAnchor.text())
+  );
+};
+
+export function parseTwitterOEmbed(
+  oembed: TwitterOEmbedResponse,
+  sourceUrl: string,
+  tweetId: string
+): TweetPreview {
+  const $ = cheerio.load(oembed.html ?? "");
+  const paragraph = $("blockquote p").first();
+  paragraph.find("br").replaceWith("\n");
+  const text = readString(paragraph.clone().children().remove().end().text());
+  const tweetUrl =
+    readString($("blockquote a").last().attr("href")) ?? sourceUrl;
+  const createdAtText = readString($("blockquote a").last().text());
+  const authorUrl = readString(oembed.author_url);
+  const parsedSource = parseTweetUrl(sourceUrl);
+  const authorHandle =
+    parseHandleFromUrl(authorUrl) ??
+    parseHandleFromUrl(tweetUrl) ??
+    parsedSource?.authorHandle;
+  const authorName = readString(oembed.author_name);
+  const mediaLink = findMediaLink($);
+
+  return {
+    tweetId,
+    url: tweetUrl,
+    ...(authorName ? { authorName } : {}),
+    ...(authorUrl ? { authorUrl } : {}),
+    ...(authorHandle ? { authorHandle } : {}),
+    ...(text ? { text } : {}),
+    ...(mediaLink ? { mediaLink } : {}),
+    ...(createdAtText ? { createdAtText } : {}),
+  };
+}

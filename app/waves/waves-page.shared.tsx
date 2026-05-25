@@ -6,6 +6,7 @@ import {
 import { Suspense, cache } from "react";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -18,10 +19,14 @@ import { Time } from "@/helpers/time";
 import { formatAddress } from "@/helpers/Helpers";
 import { formatCount } from "@/helpers/format.helpers";
 import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
+import {
+  getWaveRouteWithSearchParams,
+  type RouteSearchParams,
+} from "@/helpers/navigation.helpers";
 
-export type WavesSearchParams = Record<string, string | string[] | undefined>;
+export type WavesSearchParams = RouteSearchParams;
 
-type WaveRequestContext = {
+export type WaveRequestContext = {
   readonly waveId: string | null;
   readonly wave: ApiWave | null;
   readonly headers: Record<string, string>;
@@ -67,7 +72,10 @@ const fetchWaveCached = cache(
   }
 );
 
-async function fetchWaveContext(
+export const isApiWaveDirectMessage = (wave: ApiWave): boolean =>
+  wave.chat?.scope?.group?.is_direct_message === true;
+
+export async function fetchWaveContext(
   waveId: string | null,
   providedCookies?: CookieStore
 ): Promise<WaveRequestContext> {
@@ -94,15 +102,31 @@ async function fetchWaveContext(
 export async function renderWavesPageContent({
   waveId,
   searchParams,
+  routeContext = "waves",
 }: {
   waveId: string | null;
   searchParams: WavesSearchParams;
+  routeContext?: "waves" | "messages" | undefined;
 }) {
   const cookieStore = await cookies();
   const context = await fetchWaveContext(waveId, cookieStore);
   const queryClient = new QueryClient();
 
   if (context.waveId && context.wave) {
+    const isDirectMessage = isApiWaveDirectMessage(context.wave);
+    if (
+      (routeContext === "waves" && isDirectMessage) ||
+      (routeContext === "messages" && !isDirectMessage)
+    ) {
+      redirect(
+        getWaveRouteWithSearchParams({
+          waveId: context.waveId,
+          searchParams,
+          isDirectMessage,
+        })
+      );
+    }
+
     queryClient.setQueryData(
       [QueryKey.WAVE, { wave_id: context.waveId }],
       context.wave

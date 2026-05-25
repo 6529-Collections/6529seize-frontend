@@ -78,11 +78,14 @@ const HOST_OVERRIDES: readonly HostOverrides[] = [
   },
 ];
 
-function findHostOverrides(hostname: string): HostOverrides | undefined {
+function matchesDomainOrSubdomain(hostname: string, domain: string): boolean {
   const normalizedHost = hostname.toLowerCase();
-  return HOST_OVERRIDES.find(
-    ({ domain }) =>
-      normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+  return normalizedHost === domain || normalizedHost.endsWith(`.${domain}`);
+}
+
+function findHostOverrides(hostname: string): HostOverrides | undefined {
+  return HOST_OVERRIDES.find(({ domain }) =>
+    matchesDomainOrSubdomain(hostname, domain)
   );
 }
 

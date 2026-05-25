@@ -10,7 +10,7 @@
 ## Location in the Site
 
 - `/waves/{waveId}`
-- `/messages?wave={waveId}`
+- `/messages/{waveId}`
 - Thread message list and floating bottom-right control area
 
 ## Entry Points

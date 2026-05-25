@@ -246,7 +246,7 @@ describe("ViewContext", () => {
       getCapturedContext().handleNavClick(messagesItem);
     });
 
-    expect(push).toHaveBeenCalledWith("/messages?wave=dm-wave");
+    expect(push).toHaveBeenCalledWith("/messages/dm-wave");
   });
 
   it("from a normal wave, clicking Waves clears the normal wave", async () => {

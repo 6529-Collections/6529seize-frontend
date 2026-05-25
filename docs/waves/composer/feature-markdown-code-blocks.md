@@ -12,8 +12,8 @@ compose, post, and edit without switching to a separate code-block widget.
 
 - Wave threads: `/waves/{waveId}` (canonical thread route; `/waves?wave={waveId}`
   redirects to this route)
-- Direct-message threads: `/messages?wave={waveId}` (canonical DM route; there is
-  no `/messages/{waveId}` thread route)
+- Direct-message threads: `/messages/{waveId}` (canonical DM route;
+  `/messages?wave={waveId}` redirects to this route)
 - Inline `Edit Message` mode opened from drop actions (shown only on your own
   non-participatory drops)
 - Wave/DM drop rendering surfaces that use the shared markdown renderer

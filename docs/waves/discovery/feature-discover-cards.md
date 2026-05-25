@@ -17,7 +17,7 @@ from home discovery.
 
 - Discovery route: `/discover`
 - Non-DM card destination: `/waves/{waveId}`
-- Direct-message card destination: `/messages?wave={waveId}`
+- Direct-message card destination: `/messages/{waveId}`
 - Home comparison surface: `/`
 
 ## Entry Points
@@ -32,12 +32,12 @@ from home discovery.
 3. When data resolves, up to 20 cards render in a responsive grid.
 4. Select a wave entry.
 5. The app opens `/waves/{waveId}` for non-DM waves or
-   `/messages?wave={waveId}` for DM waves.
+   `/messages/{waveId}` for DM waves.
 
 ## Common Scenarios
 
 - Open a discovery card to jump directly into wave chat context.
-- Open a DM-targeting card to jump into `/messages?wave={waveId}`.
+- Open a DM-targeting card to jump into `/messages/{waveId}`.
 - Review the compact preview row when a wave description drop has usable text
   or media content.
 - Use `/discover` as the larger browse surface when home six-card discovery is
@@ -53,7 +53,7 @@ from home discovery.
   still opens the target wave route without rendering the compact preview row.
 - Auth/profile requirements still apply after entering `/waves` or `/messages`
   content from a card.
-- DM waves continue to use query-style thread routes (`/messages?wave={waveId}`).
+- DM waves use canonical thread routes (`/messages/{waveId}`).
 
 ## Failure and Recovery
 

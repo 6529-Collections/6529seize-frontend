@@ -10,9 +10,9 @@ Use this area for wave and message sidebar behavior:
 
 Route scope:
 
-- Thread views: `/waves/{waveId}`, `/messages?wave={waveId}`
+- Thread views: `/waves/{waveId}`, `/messages/{waveId}`
 - List/sidebar views: `/waves`, `/waves/{waveId}`, `/messages`,
-  `/messages?wave={waveId}`
+  `/messages/{waveId}`
 - Mobile Waves/Messages list views that reuse the same row behavior
 
 ## Features

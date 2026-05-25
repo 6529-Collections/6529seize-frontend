@@ -13,20 +13,20 @@ Use this area to create:
 
 - Desktop wave create mode (`create=wave`) can open on:
   `/waves`, `/waves/{waveId}`, `/messages`, or
-  `/messages?wave={waveId}`.
+  `/messages/{waveId}`.
 - Desktop wave-create controls are available on:
   - `/waves` and `/waves/{waveId}` left-sidebar `Waves` section (`+`)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).
 - Desktop direct-message mode (`create=dm`) is supported on `/messages` and
-  `/messages?wave={waveId}`.
+  `/messages/{waveId}`.
 - App create routes:
   - wave: `/waves/create`
   - direct message: `/messages/create`
 - Success routes:
   - wave: `/waves/{waveId}`
-  - direct message: `/messages?wave={waveId}`
+  - direct message: `/messages/{waveId}`
 - On desktop, closing create mode removes only `create` and keeps all other
   route/query context.
 

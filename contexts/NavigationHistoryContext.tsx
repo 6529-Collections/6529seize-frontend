@@ -14,7 +14,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { ViewKey } from "@/components/navigation/navTypes";
 import { useViewContext } from "@/components/navigation/ViewContext";
 import {
-  getWaveIdFromPathname,
+  getActiveWaveIdFromUrl,
+  getMessagePathRoute,
   getWavePathRoute,
   mainSegment,
   sameMainPath,
@@ -99,9 +100,10 @@ export const NavigationHistoryProvider: React.FC<{
 
     const isProfile = pathname?.startsWith("/[user]");
     const [pathOnly, searchOnly = ""] = url.split("?");
-    const waveIdFromPath = getWaveIdFromPathname(pathOnly);
-    const waveIdFromQuery = new URLSearchParams(searchOnly).get("wave");
-    const activeWaveId = waveIdFromPath ?? waveIdFromQuery;
+    const activeWaveId = getActiveWaveIdFromUrl({
+      pathname: pathOnly,
+      searchParams: new URLSearchParams(searchOnly),
+    });
     const isWaveRoute =
       Boolean(activeWaveId) &&
       (pathOnly === "/" ||
@@ -114,7 +116,7 @@ export const NavigationHistoryProvider: React.FC<{
     } else if (isWaveRoute && activeWaveId) {
       const isMessagesRoute = pathOnly?.startsWith("/messages");
       pathKey = isMessagesRoute
-        ? `/messages?wave=${encodeURIComponent(activeWaveId)}`
+        ? getMessagePathRoute(activeWaveId)
         : getWavePathRoute(activeWaveId);
     } else {
       pathKey = url.split(/[?#]/)[0]!;

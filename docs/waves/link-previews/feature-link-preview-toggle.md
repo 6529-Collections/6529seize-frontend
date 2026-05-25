@@ -17,7 +17,7 @@ Drop authors can hide or restore link previews for a single drop.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Link preview cards and quote cards inside drop markdown:
   `Link actions` -> `Hide link previews`
 - Thread desktop `More` menu: `Restore link previews` when the authored drop is

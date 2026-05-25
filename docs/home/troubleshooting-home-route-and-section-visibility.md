@@ -98,8 +98,8 @@ This page covers:
 - Open `/discover` when you need the dedicated 20-card discovery surface;
   return to `/` for the full home route.
 - For direct-message wave targets, retry from:
-  - `/messages?wave={waveId}`
-  - `/messages?wave={waveId}&serialNo={serialNo}` for boosted-drop deep links.
+  - `/messages/{waveId}`
+  - `/messages/{waveId}?serialNo={serialNo}` for boosted-drop deep links.
 
 ## Limitations / Notes
 
