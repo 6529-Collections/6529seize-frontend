@@ -13,8 +13,7 @@ Wave and DM composers support tracked NFT hashtag references.
 ## Location in the Site
 
 - Wave thread composer: `/waves/{waveId}`
-- Direct-message thread composer: `/messages/{waveId}` (no
-  `/messages/{waveId}` route)
+- Direct-message thread composer: `/messages/{waveId}` (legacy query links redirect here)
 
 ## Entry Points
 

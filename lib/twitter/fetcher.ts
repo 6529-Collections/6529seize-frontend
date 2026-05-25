@@ -1,4 +1,5 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import { parseTwitterOEmbed } from "./parser";
 import type { TweetPreview, TwitterOEmbedResponse } from "./types";
@@ -21,6 +22,10 @@ type FetchTweetPreviewOptions = {
   readonly fetchImpl?: typeof fetch;
 };
 
+type MutableTweetPreview = {
+  -readonly [Key in keyof TweetPreview]: TweetPreview[Key];
+};
+
 const getSyndicationToken = (tweetId: string): string =>
   ((Number(tweetId) / 1e15) * Math.PI).toString(36).replaceAll(/(0+|\.)/g, "");
 
@@ -40,6 +45,9 @@ const normalizeProfileImageUrl = (
   value: string | undefined
 ): string | undefined => value?.replace("_normal.", "_bigger.");
 
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+
 const removeTrailingMediaUrl = (
   text: string | undefined,
   mediaLink: string | undefined
@@ -50,9 +58,7 @@ const removeTrailingMediaUrl = (
 
   const withoutMedia = mediaLink
     ? text.replace(
-        new RegExp(
-          `\\s*${mediaLink.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`
-        ),
+        new RegExp(String.raw`\s*${escapeRegExp(mediaLink)}\s*$`),
         ""
       )
     : text;
@@ -63,10 +69,9 @@ const removeTrailingMediaUrl = (
 const isImageUrl = (value: string): boolean => {
   try {
     const url = new URL(value);
-    const hostname = url.hostname.toLowerCase();
     const pathname = url.pathname.toLowerCase();
     return (
-      hostname.endsWith("twimg.com") ||
+      matchesDomainOrSubdomain(url.hostname, "twimg.com") ||
       pathname.endsWith(".jpg") ||
       pathname.endsWith(".jpeg") ||
       pathname.endsWith(".png") ||
@@ -77,19 +82,34 @@ const isImageUrl = (value: string): boolean => {
   }
 };
 
+const findFirstImageInArray = (
+  values: readonly unknown[]
+): string | undefined => {
+  for (const entry of values) {
+    const imageUrl = findFirstImageUrl(entry);
+    if (imageUrl) {
+      return imageUrl;
+    }
+  }
+  return undefined;
+};
+
+const findFirstImageInRecord = (
+  record: Record<string, unknown>
+): string | undefined => {
+  const directImageUrl = findFirstImageInArray(
+    ["url", "media_url_https", "media_url", "src"].map((key) => record[key])
+  );
+  return directImageUrl ?? findFirstImageInArray(Object.values(record));
+};
+
 const findFirstImageUrl = (value: unknown): string | undefined => {
   if (typeof value === "string") {
     return isImageUrl(value) ? value : undefined;
   }
 
   if (Array.isArray(value)) {
-    for (const entry of value) {
-      const imageUrl = findFirstImageUrl(entry);
-      if (imageUrl) {
-        return imageUrl;
-      }
-    }
-    return undefined;
+    return findFirstImageInArray(value);
   }
 
   if (typeof value !== "object" || value === null) {
@@ -97,21 +117,7 @@ const findFirstImageUrl = (value: unknown): string | undefined => {
   }
 
   const record = value as Record<string, unknown>;
-  for (const key of ["url", "media_url_https", "media_url", "src"]) {
-    const imageUrl = findFirstImageUrl(record[key]);
-    if (imageUrl) {
-      return imageUrl;
-    }
-  }
-
-  for (const entry of Object.values(record)) {
-    const imageUrl = findFirstImageUrl(entry);
-    if (imageUrl) {
-      return imageUrl;
-    }
-  }
-
-  return undefined;
+  return findFirstImageInRecord(record);
 };
 
 const findMediaImageUrl = (
@@ -132,11 +138,12 @@ const readRecord = (value: unknown): Record<string, unknown> | undefined =>
     ? (value as Record<string, unknown>)
     : undefined;
 
+const readArray = (value: unknown): readonly unknown[] =>
+  Array.isArray(value) ? value : [];
+
 const findVideoUrl = (record: Record<string, unknown>): string | undefined => {
   const video = readRecord(record["video"]);
-  const videoVariants = Array.isArray(video?.["variants"])
-    ? video["variants"]
-    : [];
+  const videoVariants = readArray(video?.["variants"]);
   for (const variant of videoVariants) {
     const variantRecord = readRecord(variant);
     const src = readString(variantRecord?.["src"]);
@@ -145,14 +152,10 @@ const findVideoUrl = (record: Record<string, unknown>): string | undefined => {
     }
   }
 
-  const mediaDetails = Array.isArray(record["mediaDetails"])
-    ? record["mediaDetails"]
-    : [];
+  const mediaDetails = readArray(record["mediaDetails"]);
   for (const mediaDetail of mediaDetails) {
     const videoInfo = readRecord(readRecord(mediaDetail)?.["video_info"]);
-    const variants = Array.isArray(videoInfo?.["variants"])
-      ? videoInfo["variants"]
-      : [];
+    const variants = readArray(videoInfo?.["variants"]);
     for (const variant of variants) {
       const variantRecord = readRecord(variant);
       const url = readString(variantRecord?.["url"]);
@@ -170,6 +173,31 @@ const findVideoPosterUrl = (
 ): string | undefined => {
   const videoPoster = readString(readRecord(record["video"])?.["poster"]);
   return videoPoster ?? findMediaImageUrl(record);
+};
+
+const firstRecord = (values: readonly unknown[]): Record<string, unknown> =>
+  readRecord(values[0]) ?? {};
+
+const getSyndicationEntities = (
+  record: Record<string, unknown>
+): Record<string, unknown> => readRecord(record["entities"]) ?? {};
+
+const getSyndicationUser = (
+  record: Record<string, unknown>
+): Record<string, unknown> => readRecord(record["user"]) ?? {};
+
+const getFirstSyndicationMedia = (
+  entities: Record<string, unknown>
+): Record<string, unknown> => firstRecord(readArray(entities["media"]));
+
+const setPreviewValue = <Key extends keyof TweetPreview>(
+  preview: MutableTweetPreview,
+  key: Key,
+  value: TweetPreview[Key] | undefined
+): void => {
+  if (value !== undefined) {
+    preview[key] = value;
+  }
 };
 
 const extractMetaImage = (html: string): string | undefined => {
@@ -203,12 +231,12 @@ async function fetchWithTimeout(
 
 function assertOEmbedResponse(value: unknown): TwitterOEmbedResponse {
   if (typeof value !== "object" || value === null) {
-    throw new Error("Invalid Twitter oEmbed response.");
+    throw new TypeError("Invalid Twitter oEmbed response.");
   }
 
   const record = value as Record<string, unknown>;
   if (typeof record["html"] !== "string") {
-    throw new Error("Twitter oEmbed response did not include HTML.");
+    throw new TypeError("Twitter oEmbed response did not include HTML.");
   }
 
   return {
@@ -256,58 +284,67 @@ function parseSyndicationPreview(
   }
 
   const record = payload as Record<string, unknown>;
-  if (record["__typename"] !== "Tweet") {
-    return undefined;
+  if (record["__typename"] === "Tweet") {
+    return buildSyndicationPreview(record, href, tweetId);
   }
 
-  const user =
-    typeof record["user"] === "object" && record["user"] !== null
-      ? (record["user"] as Record<string, unknown>)
-      : {};
-  const entities =
-    typeof record["entities"] === "object" && record["entities"] !== null
-      ? (record["entities"] as Record<string, unknown>)
-      : {};
-  const mediaEntries = Array.isArray(entities["media"])
-    ? entities["media"]
-    : [];
-  const firstMedia =
-    typeof mediaEntries[0] === "object" && mediaEntries[0] !== null
-      ? (mediaEntries[0] as Record<string, unknown>)
-      : {};
+  return undefined;
+}
+
+function buildSyndicationPreview(
+  record: Record<string, unknown>,
+  href: string,
+  tweetId: string
+): TweetPreview {
+  const user = getSyndicationUser(record);
+  const entities = getSyndicationEntities(record);
+  const firstMedia = getFirstSyndicationMedia(entities);
   const authorHandle = readString(user["screen_name"]);
   const mediaLink = readString(firstMedia["url"]);
-  const text = removeTrailingMediaUrl(readString(record["text"]), mediaLink);
-  const authorUrl = authorHandle
-    ? `https://twitter.com/${authorHandle}`
-    : undefined;
-  const mediaImageUrl = findMediaImageUrl(record);
   const mediaVideoUrl = findVideoUrl(record);
-  const mediaPosterUrl = mediaVideoUrl ? findVideoPosterUrl(record) : undefined;
-  const authorProfileImageUrl = normalizeProfileImageUrl(
-    readString(user["profile_image_url_https"])
-  );
-  const createdAtIso = readString(record["created_at"]);
-  const authorName = readString(user["name"]);
-  const favoriteCount = readNumber(record["favorite_count"]);
-  const conversationCount = readNumber(record["conversation_count"]);
-
-  return {
+  const preview: MutableTweetPreview = {
     tweetId,
     url: href,
-    ...(authorName ? { authorName } : {}),
-    ...(authorUrl ? { authorUrl } : {}),
-    ...(authorHandle ? { authorHandle } : {}),
-    ...(authorProfileImageUrl ? { authorProfileImageUrl } : {}),
-    ...(text ? { text } : {}),
-    ...(mediaLink ? { mediaLink } : {}),
-    ...(mediaImageUrl ? { mediaImageUrl } : {}),
-    ...(mediaVideoUrl ? { mediaVideoUrl } : {}),
-    ...(mediaPosterUrl ? { mediaPosterUrl } : {}),
-    ...(createdAtIso ? { createdAtIso } : {}),
-    ...(favoriteCount !== undefined ? { favoriteCount } : {}),
-    ...(conversationCount !== undefined ? { conversationCount } : {}),
   };
+
+  setPreviewValue(preview, "authorName", readString(user["name"]));
+  setPreviewValue(
+    preview,
+    "authorUrl",
+    authorHandle ? `https://twitter.com/${authorHandle}` : undefined
+  );
+  setPreviewValue(preview, "authorHandle", authorHandle);
+  setPreviewValue(
+    preview,
+    "authorProfileImageUrl",
+    normalizeProfileImageUrl(readString(user["profile_image_url_https"]))
+  );
+  setPreviewValue(
+    preview,
+    "text",
+    removeTrailingMediaUrl(readString(record["text"]), mediaLink)
+  );
+  setPreviewValue(preview, "mediaLink", mediaLink);
+  setPreviewValue(preview, "mediaImageUrl", findMediaImageUrl(record));
+  setPreviewValue(preview, "mediaVideoUrl", mediaVideoUrl);
+  setPreviewValue(
+    preview,
+    "mediaPosterUrl",
+    mediaVideoUrl ? findVideoPosterUrl(record) : undefined
+  );
+  setPreviewValue(preview, "createdAtIso", readString(record["created_at"]));
+  setPreviewValue(
+    preview,
+    "favoriteCount",
+    readNumber(record["favorite_count"])
+  );
+  setPreviewValue(
+    preview,
+    "conversationCount",
+    readNumber(record["conversation_count"])
+  );
+
+  return preview;
 }
 
 async function fetchSyndicationPreview(

@@ -56,4 +56,34 @@ describe("twitter preview API route", () => {
     expect(response.status).toBe(400);
     expect(mockFetchTweetPreview).not.toHaveBeenCalled();
   });
+
+  it("returns a client error when the Twitter URL is invalid", async () => {
+    mockFetchTweetPreview.mockRejectedValue(
+      new Error("Invalid Twitter/X status URL.")
+    );
+
+    const { GET } = await import("../../../app/api/twitter/preview/route");
+    const response = await GET({
+      nextUrl: new URL("https://app.local/api/twitter/preview?url=not-a-tweet"),
+    } as any);
+
+    expect(response.status).toBe(400);
+    expect(mockFetchTweetPreview).toHaveBeenCalledWith("not-a-tweet");
+  });
+
+  it("returns an upstream error when Twitter metadata fetch fails", async () => {
+    mockFetchTweetPreview.mockRejectedValue(new Error("upstream failed"));
+
+    const { GET } = await import("../../../app/api/twitter/preview/route");
+    const response = await GET({
+      nextUrl: new URL(
+        "https://app.local/api/twitter/preview?url=https://twitter.com/Mayudropsphotos/status/2057513333985554492"
+      ),
+    } as any);
+
+    expect(response.status).toBe(502);
+    expect(mockFetchTweetPreview).toHaveBeenCalledWith(
+      "https://twitter.com/Mayudropsphotos/status/2057513333985554492"
+    );
+  });
 });

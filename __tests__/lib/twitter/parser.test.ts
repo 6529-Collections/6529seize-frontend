@@ -46,4 +46,24 @@ describe("Twitter preview parsing", () => {
       createdAtText: "May 21, 2026",
     });
   });
+
+  it("ignores media-looking text when it is not a pic.twitter.com URL", () => {
+    const preview = parseTwitterOEmbed(
+      {
+        author_name: "Mayudrops",
+        author_url: "https://twitter.com/Mayudropsphotos",
+        html: `<blockquote class="twitter-tweet">
+          <p>
+            Text with a suspicious link.
+            <a href="https://example.com/?next=pic.twitter.com">pic.twitter.com/not-media</a>
+          </p>
+          <a href="https://twitter.com/Mayudropsphotos/status/2057513333985554492">May 21, 2026</a>
+        </blockquote>`,
+      },
+      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "2057513333985554492"
+    );
+
+    expect(preview.mediaLink).toBeUndefined();
+  });
 });

@@ -1,5 +1,7 @@
 import * as cheerio from "cheerio";
 
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
+
 import type { TweetPreview, TwitterOEmbedResponse } from "./types";
 import { parseTweetUrl } from "./url";
 
@@ -19,10 +21,10 @@ const parseHandleFromUrl = (url: string | undefined): string | undefined => {
 
   try {
     const parsed = new URL(url);
-    const [firstSegment] = parsed.pathname
+    const firstSegment = parsed.pathname
       .split("/")
       .map((segment) => segment.trim())
-      .filter((segment) => segment.length > 0);
+      .find((segment) => segment.length > 0);
     return firstSegment && firstSegment.toLowerCase() !== "i"
       ? firstSegment
       : undefined;
@@ -39,9 +41,7 @@ const findMediaLink = (
     (element: ReturnType<typeof $.root>[number]) => {
       const href = $(element).attr("href") ?? "";
       const text = $(element).text();
-      return (
-        href.includes("pic.twitter.com") || text.includes("pic.twitter.com")
-      );
+      return isPicTwitterUrl(href) || isPicTwitterUrl(text);
     }
   );
 
@@ -53,6 +53,15 @@ const findMediaLink = (
   return (
     readString(wrappedAnchor.attr("href")) ?? readString(wrappedAnchor.text())
   );
+};
+
+const isPicTwitterUrl = (value: string): boolean => {
+  try {
+    const parsed = new URL(value);
+    return matchesDomainOrSubdomain(parsed.hostname, "pic.twitter.com");
+  } catch {
+    return false;
+  }
 };
 
 export function parseTwitterOEmbed(

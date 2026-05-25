@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
       error instanceof Error
         ? error.message
         : "Unable to fetch Twitter/X post.";
-    return NextResponse.json({ error: message }, { status: 502 });
+    const status = message === "Invalid Twitter/X status URL." ? 400 : 502;
+    return NextResponse.json({ error: message }, { status });
   }
 }

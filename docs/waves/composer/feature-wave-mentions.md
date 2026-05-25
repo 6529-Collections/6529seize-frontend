@@ -13,8 +13,7 @@ Wave and direct-message composers support tracked wave mentions.
 
 - Wave thread composer: `/waves/{waveId}` (legacy `/waves?wave={waveId}`
   redirects here first)
-- Direct-message thread composer: `/messages/{waveId}` (no
-  `/messages/{waveId}` route)
+- Direct-message thread composer: `/messages/{waveId}` (legacy query links redirect here)
 - Inline `Edit Message` composer in these thread routes
 
 ## Entry Points

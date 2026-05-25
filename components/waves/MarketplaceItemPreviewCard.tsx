@@ -132,7 +132,7 @@ export default function MarketplaceItemPreviewCard({
       return;
     }
 
-    if (event.key !== "Enter" && event.key !== " ") {
+    if (event.key !== "Enter") {
       return;
     }
 

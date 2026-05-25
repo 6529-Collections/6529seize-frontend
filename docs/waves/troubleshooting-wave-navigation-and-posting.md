@@ -135,7 +135,7 @@ is blocked.
 - `/waves` shows no thread content on signed-out desktop web:
   `Select a Wave` is the expected placeholder when no wave is selected yet.
 - `/messages` shows no thread content:
-  `Select a Conversation` is expected when no `wave` query is active.
+  `Select a Conversation` is expected when no conversation is selected.
 
 ## Edge Cases
 

@@ -45,7 +45,7 @@ Wave and DM rows in the left list control which thread is open.
 
 ## Edge Cases
 
-- Direct-message navigation does not use `/messages/{waveId}`.
+- Direct-message navigation uses `/messages/{waveId}`; legacy query links are redirected.
 - If first unread is known, row navigation can add `divider={serialNo}`.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.

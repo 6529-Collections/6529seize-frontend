@@ -10,6 +10,7 @@ export interface TweetPreview {
   readonly mediaImageUrl?: string;
   readonly mediaVideoUrl?: string;
   readonly mediaPosterUrl?: string;
+  readonly mediaCaptionsUrl?: string;
   readonly createdAtText?: string;
   readonly createdAtIso?: string;
   readonly favoriteCount?: number;

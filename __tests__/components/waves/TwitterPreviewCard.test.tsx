@@ -117,6 +117,10 @@ describe("TwitterPreviewCard", () => {
       "https://pbs.twimg.com/tweet_video_thumb/example.jpg"
     );
     expect(video).toHaveAttribute("controls");
+    expect(container.querySelector("track")).toHaveAttribute(
+      "kind",
+      "captions"
+    );
   });
 
   it("copies the original Twitter/X post link", async () => {

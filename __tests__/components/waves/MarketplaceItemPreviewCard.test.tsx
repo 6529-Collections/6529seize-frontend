@@ -26,7 +26,7 @@ describe("MarketplaceItemPreviewCard", () => {
   beforeEach(() => {
     mockClipboardWriteText.mockReset();
     mockClipboardWriteText.mockResolvedValue(undefined);
-    jest.spyOn(window, "open").mockImplementation(() => null);
+    jest.spyOn(globalThis, "open").mockImplementation(() => null);
 
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -119,11 +119,55 @@ describe("MarketplaceItemPreviewCard", () => {
 
     fireEvent.click(screen.getByTestId("manifold-item-card"));
 
-    expect(window.open).toHaveBeenCalledWith(
+    expect(globalThis.open).toHaveBeenCalledWith(
       href,
       "_blank",
       "noopener,noreferrer"
     );
+  });
+
+  it("opens the marketplace when pressing Enter on the card", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.keyDown(screen.getByTestId("manifold-item-card"), {
+      key: "Enter",
+    });
+
+    expect(globalThis.open).toHaveBeenCalledWith(
+      href,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  });
+
+  it("does not open the marketplace when pressing Space on the card", () => {
+    const href = "https://manifold.xyz/@andrew-hooker/id/4098474224";
+
+    render(
+      <LinkPreviewProvider variant="home">
+        <MarketplaceItemPreviewCard
+          href={href}
+          mediaUrl="https://arweave.net/test-image"
+          mediaMimeType="image/*"
+          title="Wave Artifact"
+        />
+      </LinkPreviewProvider>
+    );
+
+    fireEvent.keyDown(screen.getByTestId("manifold-item-card"), { key: " " });
+
+    expect(globalThis.open).not.toHaveBeenCalled();
   });
 
   it("does not hijack copy button clicks", async () => {
@@ -145,7 +189,7 @@ describe("MarketplaceItemPreviewCard", () => {
       await Promise.resolve();
     });
 
-    expect(window.open).not.toHaveBeenCalled();
+    expect(globalThis.open).not.toHaveBeenCalled();
     expect(mockClipboardWriteText).toHaveBeenCalledWith(href);
   });
 

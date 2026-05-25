@@ -9,8 +9,7 @@ emoji while you type. The same conversion also runs in inline drop edit mode.
 
 - Wave thread composer: `/waves/{waveId}` (legacy `/waves?wave={waveId}`
   redirects here before the composer loads)
-- Direct-message thread composer: `/messages/{waveId}` (no
-  `/messages/{waveId}` route)
+- Direct-message thread composer: `/messages/{waveId}` (legacy query links redirect here)
 - Inline drop edit composer in wave and direct-message threads
 
 ## Entry Points
