@@ -66,7 +66,7 @@ describe("fetchTweetPreview", () => {
   });
 
   it("does not treat arbitrary hosts containing twimg.com as Twitter media", async () => {
-    const fetchImpl = jest.fn().mockResolvedValueOnce({
+    const response = {
       ok: true,
       status: 200,
       json: async () => ({
@@ -79,7 +79,8 @@ describe("fetchTweetPreview", () => {
         },
         photos: [{ url: "https://twimg.com.evil.example/media/post.jpg" }],
       }),
-    } as Response);
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
       "https://x.com/Mayudropsphotos/status/2057513333985554492",
