@@ -157,23 +157,16 @@ function MemeLabDistributionPlanLink({ nft }: { readonly nft: LabNFT }) {
 export function MemeLabStaticCardHeader({
   nft,
   nftMeta,
-  hasImagePadding,
   showMarketplaceLinks,
-  nftBalance,
+  artworkFooter,
 }: {
   readonly nft: LabNFT;
   readonly nftMeta: LabExtendedData;
-  readonly hasImagePadding: boolean;
   readonly showMarketplaceLinks: boolean;
-  readonly nftBalance: number;
+  readonly artworkFooter?: ReactNode | undefined;
 }) {
   return (
-    <div
-      className={clsx(
-        "tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16",
-        hasImagePadding && "tw-pb-[35px]"
-      )}
-    >
+    <div className="tw-mb-6 tw-grid tw-grid-cols-1 tw-gap-x-10 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] xl:tw-gap-x-16">
       <div className="tw-relative lg:tw-flex lg:tw-flex-col lg:tw-self-stretch">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-pb-5 tw-pt-2 lg:tw-flex-1">
           <MemePageArtViewer
@@ -182,13 +175,13 @@ export function MemeLabStaticCardHeader({
             showBalance={true}
           />
         </div>
+        {artworkFooter}
       </div>
       <div className="tw-pt-6 md:tw-pt-8 lg:tw-pt-2">
         <MemeLabLiveDetails
           nft={nft}
           nftMeta={nftMeta}
           showMarketplaceLinks={showMarketplaceLinks}
-          nftBalance={nftBalance}
         />
       </div>
     </div>
@@ -199,12 +192,10 @@ function MemeLabLiveDetails({
   nft,
   nftMeta,
   showMarketplaceLinks,
-  nftBalance,
 }: {
   readonly nft: LabNFT;
   readonly nftMeta: LabExtendedData;
   readonly showMarketplaceLinks: boolean;
-  readonly nftBalance: number;
 }) {
   return (
     <div className="tw-w-full">
@@ -248,13 +239,6 @@ function MemeLabLiveDetails({
           )}
         </div>
         <MemeLabDistributionPlanLink nft={nft} />
-        {nftBalance > 0 && (
-          <div className="tw-pt-6">
-            <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-primary-300">
-              You Own {nftBalance} edition{nftBalance > 1 && "s"}
-            </h3>
-          </div>
-        )}
       </section>
     </div>
   );

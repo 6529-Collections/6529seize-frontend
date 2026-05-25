@@ -120,6 +120,12 @@ jest.mock("@/components/nft-image/NFTImage", () => ({
   default: () => <div data-testid="nft-image" />,
 }));
 
+jest.mock("@/components/nft-transfer/TransferSingle", () => ({
+  __esModule: true,
+  default: () => <div data-testid="transfer-single" />,
+  TransferSingleActions: () => <div data-testid="transfer-single-actions" />,
+}));
+
 jest.mock("@/components/nft-navigation/NftNavigation", () => ({
   __esModule: true,
   default: () => <div data-testid="nft-navigation" />,
@@ -203,14 +209,15 @@ const expectAbortSignalOptions = expect.objectContaining({
 });
 
 function mockSearchParamsWithFocus(focus: MEME_FOCUS | null = null) {
+  const values = new Map<string, string>();
+  if (focus) {
+    values.set("focus", focus);
+  }
+  const queryString = new URLSearchParams(Array.from(values)).toString();
+
   mockUseSearchParams.mockReturnValue({
-    get: jest.fn((key: string) => {
-      if (key === "focus") {
-        return focus;
-      }
-      return null;
-    }),
-    toString: jest.fn().mockReturnValue(focus ? `focus=${focus}` : ""),
+    get: jest.fn((key: string) => values.get(key) ?? null),
+    toString: jest.fn().mockReturnValue(queryString),
   });
 }
 
@@ -482,7 +489,7 @@ describe("MemeLabPageComponent", () => {
     });
   });
 
-  it("handles your cards tab", async () => {
+  it("routes legacy your cards focus to overview while preserving ownership content", async () => {
     mockSearchParamsWithFocus(MEME_FOCUS.YOUR_CARDS);
 
     setupMockApiCalls(1);
@@ -510,6 +517,13 @@ describe("MemeLabPageComponent", () => {
           expect.stringContaining("transactions_memelab?wallet=0xabc"),
           expectAbortSignalOptions
         );
+        expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
+          "tw-border-primary-400"
+        );
+        expect(
+          screen.queryByRole("button", { name: "Your Cards" })
+        ).not.toBeInTheDocument();
+        expect(screen.getByText("x1")).toBeInTheDocument();
       },
       { timeout: 5000 }
     );

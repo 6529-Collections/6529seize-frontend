@@ -56,7 +56,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const ACTIVITY_PAGE_SIZE = 25;
 const MEME_LAB_TAB_FOCUSES = [
   MEME_FOCUS.LIVE,
-  MEME_FOCUS.YOUR_CARDS,
   MEME_FOCUS.COLLECTORS,
   MEME_FOCUS.HISTORY,
   MEME_FOCUS.REFERENCES,
@@ -228,27 +227,19 @@ export default function MemeLabPageComponent({
   );
   const [activityLoading, setActivityLoading] = useState(false);
   const hasUserCards = userLoaded && nftBalance > 0;
+  const hasOwnershipContext = hasUserCards;
   const hasUserTransactions =
     userLoaded &&
     (connectedProfile?.wallets?.length ?? 0) > 0 &&
     transactions.length > 0;
-  const activeTab =
-    routeTab === MEME_FOCUS.YOUR_CARDS && !hasUserCards
-      ? MEME_FOCUS.LIVE
-      : routeTab;
+  const activeTab = routeTab;
   const requestedHistoryTab = getMemeLabHistoryTabForFocus(focusParam);
   const activeHistoryTab =
     requestedHistoryTab === MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS &&
     !hasUserTransactions
       ? MEME_LAB_HISTORY_TAB.ACTIVITY
       : requestedHistoryTab;
-  const visibleMemeLabTabs = useMemo(
-    () =>
-      MEME_LAB_TABS.filter(
-        (tab) => tab.focus !== MEME_FOCUS.YOUR_CARDS || hasUserCards
-      ),
-    [hasUserCards]
-  );
+  const visibleMemeLabTabs = MEME_LAB_TABS;
   const visibleHistoryTabItems = useMemo(
     () =>
       MEME_LAB_HISTORY_TABS.filter(
@@ -663,19 +654,6 @@ export default function MemeLabPageComponent({
       return printOverview();
     }
 
-    if (activeTab === MEME_FOCUS.YOUR_CARDS) {
-      return (
-        <MemeLabYourCardsPanel
-          nft={nft}
-          nftBalance={nftBalance}
-          transactions={transactions}
-          wallets={connectedProfile?.wallets ?? []}
-          userLoaded={userLoaded}
-          hasImagePadding={Boolean(connectedProfile)}
-        />
-      );
-    }
-
     if (activeTab === MEME_FOCUS.HISTORY) {
       if (activeHistoryTab === MEME_LAB_HISTORY_TAB.TIMELINE) {
         return printTimeline();
@@ -735,9 +713,12 @@ export default function MemeLabPageComponent({
       <MemeLabStaticCardHeader
         nft={nft}
         nftMeta={nftMeta}
-        hasImagePadding={Boolean(connectedProfile)}
         showMarketplaceLinks={!capacitor.isIos || country === "US"}
-        nftBalance={nftBalance}
+        artworkFooter={
+          hasOwnershipContext ? (
+            <MemeLabYourCardsPanel nft={nft} nftBalance={nftBalance} />
+          ) : undefined
+        }
       />
     );
   }
