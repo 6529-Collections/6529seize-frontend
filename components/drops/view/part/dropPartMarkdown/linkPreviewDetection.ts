@@ -1,13 +1,8 @@
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
 import { publicEnv } from "@/config/env";
 
-import {
-  isDirectImageUrl,
-  parseUrl,
-  shouldUseOpenGraphPreview,
-} from "./linkUtils";
-
 const DEFAULT_CLOUDFRONT_DOMAIN = "https://d3lqz0a4bldqgf.cloudfront.net";
+const TENOR_DOMAIN = "tenor.com";
 const RAW_URL_REGEX = /\b(?:https?:\/\/|www\.)[^\s<>"'`]+/gi;
 
 const stripMarkdownCode = (content: string): string =>
@@ -45,13 +40,16 @@ const normalizeHrefCandidate = (href: string): string => {
   return trimmed;
 };
 
-const getUrlOrigin = (href: string): string | null => {
+const parseUrl = (href: string): URL | null => {
   try {
-    return new URL(href).origin;
+    return new URL(href);
   } catch {
     return null;
   }
 };
+
+const getUrlOrigin = (href: string): string | null =>
+  parseUrl(href)?.origin ?? null;
 
 const getAllowedCloudfrontOrigin = (): string =>
   getUrlOrigin(publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ?? "") ??
@@ -62,24 +60,37 @@ const isAllowedCloudfrontHref = (href: string): boolean => {
   return hrefOrigin !== null && hrefOrigin === getAllowedCloudfrontOrigin();
 };
 
-const isOpenGraphPreviewHref = (href: string): boolean => {
+const isDomainOrSubdomain = (hostname: string, domain: string): boolean =>
+  hostname === domain || hostname.endsWith(`.${domain}`);
+
+const isAllowedTenorHref = (href: string): boolean => {
+  const url = parseUrl(href);
+  if (!url) {
+    return false;
+  }
+
+  const protocol = url.protocol.toLowerCase();
+  if (protocol !== "http:" && protocol !== "https:") {
+    return false;
+  }
+
+  return isDomainOrSubdomain(url.hostname.toLowerCase(), TENOR_DOMAIN);
+};
+
+const isDisallowedLinkHref = (href: string): boolean => {
   const normalizedHref = normalizeHrefCandidate(href);
   if (!normalizedHref) {
     return false;
   }
 
   const stableHref = ensureStableSeizeLink(normalizedHref);
-  const parsedUrl = parseUrl(stableHref);
-
-  if (isAllowedCloudfrontHref(stableHref)) {
+  if (!parseUrl(stableHref)) {
     return false;
   }
 
-  if (isDirectImageUrl(stableHref, parsedUrl)) {
-    return false;
-  }
-
-  return shouldUseOpenGraphPreview(stableHref, parsedUrl);
+  return (
+    !isAllowedCloudfrontHref(stableHref) && !isAllowedTenorHref(stableHref)
+  );
 };
 
 const skipWhitespace = (content: string, startIndex: number): number => {
@@ -164,65 +175,6 @@ const readMarkdownHref = (
     : readPlainHref(content, hrefStart);
 };
 
-const isMarkdownImageLink = (
-  content: string,
-  openBracketIndex: number
-): boolean => openBracketIndex > 0 && content[openBracketIndex - 1] === "!";
-
-const getMarkdownImageEnd = (
-  content: string,
-  imageStartIndex: number
-): number | null => {
-  const closeBracketIndex = content.indexOf("](", imageStartIndex + 2);
-  const newlineIndex = content.indexOf("\n", imageStartIndex + 2);
-
-  if (
-    closeBracketIndex === -1 ||
-    (newlineIndex !== -1 && newlineIndex < closeBracketIndex)
-  ) {
-    return null;
-  }
-
-  const hrefStart = skipWhitespace(content, closeBracketIndex + 2);
-  const hrefEnd =
-    content[hrefStart] === "<"
-      ? getAngleWrappedHrefEnd(content, hrefStart)
-      : getPlainHrefEnd(content, hrefStart);
-
-  if (hrefEnd === null) {
-    return null;
-  }
-
-  const closeParenIndex = skipWhitespace(content, hrefEnd);
-  return content[closeParenIndex] === ")" ? closeParenIndex + 1 : null;
-};
-
-const stripMarkdownImages = (content: string): string => {
-  let stripped = "";
-  let searchIndex = 0;
-
-  while (searchIndex < content.length) {
-    const imageStartIndex = content.indexOf("![", searchIndex);
-    if (imageStartIndex === -1) {
-      stripped += content.slice(searchIndex);
-      break;
-    }
-
-    stripped += content.slice(searchIndex, imageStartIndex);
-    const imageEndIndex = getMarkdownImageEnd(content, imageStartIndex);
-    if (imageEndIndex === null) {
-      stripped += content.slice(imageStartIndex, imageStartIndex + 2);
-      searchIndex = imageStartIndex + 2;
-      continue;
-    }
-
-    stripped += " ";
-    searchIndex = imageEndIndex;
-  }
-
-  return stripped;
-};
-
 const extractMarkdownLinkHrefs = (content: string): string[] => {
   const hrefs: string[] = [];
   let searchIndex = 0;
@@ -234,10 +186,7 @@ const extractMarkdownLinkHrefs = (content: string): string[] => {
     }
 
     const openBracketIndex = content.lastIndexOf("[", closeBracketIndex);
-    if (
-      openBracketIndex === -1 ||
-      isMarkdownImageLink(content, openBracketIndex)
-    ) {
+    if (openBracketIndex === -1) {
       searchIndex = closeBracketIndex + 2;
       continue;
     }
@@ -253,7 +202,7 @@ const extractMarkdownLinkHrefs = (content: string): string[] => {
   return hrefs;
 };
 
-export const containsOpenGraphPreviewLink = (
+export const containsDisallowedLink = (
   content: string | null | undefined
 ): boolean => {
   if (!content) {
@@ -264,17 +213,15 @@ export const containsOpenGraphPreviewLink = (
   let match: RegExpExecArray | null;
 
   for (const href of extractMarkdownLinkHrefs(withoutCode)) {
-    if (isOpenGraphPreviewHref(href)) {
+    if (isDisallowedLinkHref(href)) {
       return true;
     }
   }
 
-  const withoutMarkdownImages = stripMarkdownImages(withoutCode);
-
   RAW_URL_REGEX.lastIndex = 0;
-  while ((match = RAW_URL_REGEX.exec(withoutMarkdownImages)) !== null) {
+  while ((match = RAW_URL_REGEX.exec(withoutCode)) !== null) {
     const href = match[0];
-    if (href && isOpenGraphPreviewHref(href)) {
+    if (href && isDisallowedLinkHref(href)) {
       return true;
     }
   }

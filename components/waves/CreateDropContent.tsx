@@ -54,7 +54,7 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import SlowModeChatNotice from "./SlowModeChatNotice";
 
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
-import { containsOpenGraphPreviewLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
+import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -789,7 +789,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       ...(drop?.parts.map((part) => part.content ?? null) ?? []),
     ];
 
-    return contentParts.some(containsOpenGraphPreviewLink);
+    return contentParts.some(containsDisallowedLink);
   }, [drop?.parts, getMarkdown, isChatLinksRestrictionActive, isDropMode]);
   const isLinksSubmitBlocked = hasChatContentWithLink;
   const canSubmit =
@@ -1194,9 +1194,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (
       dropRequest.drop_type === ApiDropType.Chat &&
       isChatLinksRestrictionActive &&
-      dropRequest.parts.some((part) =>
-        containsOpenGraphPreviewLink(part.content)
-      )
+      dropRequest.parts.some((part) => containsDisallowedLink(part.content))
     ) {
       return;
     }
