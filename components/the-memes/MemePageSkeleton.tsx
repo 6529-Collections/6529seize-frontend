@@ -7,6 +7,21 @@ function MemePageSkeletonBlock({ className }: { readonly className: string }) {
   );
 }
 
+const DETAILS_SKELETON_ITEMS = [
+  "mint-price",
+  "metadata",
+  "floor-price",
+  "market-cap",
+  "highest-offer",
+  "marketplaces",
+] as const;
+const TAB_SKELETON_ITEMS = [
+  "live",
+  "your-cards",
+  "collectors",
+  "history",
+] as const;
+
 export function MemePageTitleSkeleton() {
   return (
     <div className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0">
@@ -58,8 +73,8 @@ export function MemePageSkeleton() {
             <div>
               <MemePageSkeletonBlock className="tw-mb-4 tw-h-4 tw-w-28" />
               <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index}>
+                {DETAILS_SKELETON_ITEMS.map((item) => (
+                  <div key={item}>
                     <MemePageSkeletonBlock className="tw-mb-1.5 tw-h-4 tw-w-20" />
                     <MemePageSkeletonBlock className="tw-h-6 tw-w-24" />
                   </div>
@@ -72,9 +87,9 @@ export function MemePageSkeleton() {
       </div>
       <div className="tw-mb-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700">
         <div className="-tw-mb-px tw-flex tw-gap-x-4">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {TAB_SKELETON_ITEMS.map((item) => (
             <MemePageSkeletonBlock
-              key={index}
+              key={item}
               className="tw-my-4 tw-h-4 tw-w-20"
             />
           ))}

@@ -18,9 +18,13 @@ jest.mock("@/components/leaderboard/LeaderboardCollector", () => ({
 }));
 
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
-  <div data-testid="pagination" onClick={() => props.setPage(props.page + 1)}>
+  <button
+    type="button"
+    data-testid="pagination"
+    onClick={() => props.setPage(props.page + 1)}
+  >
     next
-  </div>
+  </button>
 ));
 
 const {

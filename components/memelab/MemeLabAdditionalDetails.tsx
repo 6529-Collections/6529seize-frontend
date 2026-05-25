@@ -67,16 +67,14 @@ function getMemeLabMediaMetadata(metadata: unknown): MemeLabMediaMetadata {
   }
 
   if (typeof metadata === "object") {
-    return metadata as MemeLabMediaMetadata;
+    return metadata;
   }
 
   return undefined;
 }
 
 function getMemeLabMetadataLinks(metadata: unknown): MemeLabMetadataLinks {
-  return metadata !== null && typeof metadata === "object"
-    ? (metadata as MemeLabMetadataLinks)
-    : {};
+  return metadata !== null && typeof metadata === "object" ? metadata : {};
 }
 
 function getFirstNonEmptyValue(values: readonly string[]): string {
