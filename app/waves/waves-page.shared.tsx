@@ -26,7 +26,7 @@ import {
 
 export type WavesSearchParams = RouteSearchParams;
 
-export type WaveRequestContext = {
+type WaveRequestContext = {
   readonly waveId: string | null;
   readonly wave: ApiWave | null;
   readonly headers: Record<string, string>;

@@ -14,12 +14,11 @@ jest.mock("@/helpers/waves/waves.helpers", () => ({
 
 jest.mock(
   "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSelect",
-  () => (props: any) =>
-    (
-      <button onClick={() => props.onIdentitySelect({ wallet: "0x2" })}>
-        add
-      </button>
-    )
+  () => (props: any) => (
+    <button onClick={() => props.onIdentitySelect({ wallet: "0x2" })}>
+      add
+    </button>
+  )
 );
 
 const push = jest.fn();

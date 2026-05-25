@@ -2,7 +2,7 @@ import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 export const TWITTER_DOMAINS = ["twitter.com", "x.com"] as const;
 
-export interface TweetUrlParts {
+interface TweetUrlParts {
   readonly tweetId: string;
   readonly href: string;
   readonly authorHandle?: string;
