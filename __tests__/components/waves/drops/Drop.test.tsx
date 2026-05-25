@@ -62,6 +62,31 @@ it("renders chat drop", () => {
   expect(waveProps.onDropContentClick).toBeUndefined();
 });
 
+it("keeps chat drops clickable outside wave context", () => {
+  const onDropContentClick = jest.fn();
+
+  render(
+    <Drop
+      drop={base}
+      previousDrop={null}
+      nextDrop={null}
+      showWaveInfo={false}
+      activeDrop={null}
+      location={DropLocation.MY_STREAM}
+      dropViewDropId={null}
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+      onReplyClick={jest.fn()}
+      onQuoteClick={jest.fn()}
+      onDropContentClick={onDropContentClick}
+      showReplyAndQuote={false}
+    />
+  );
+
+  expect(screen.getByTestId("wave")).toBeInTheDocument();
+  expect(waveProps.onDropContentClick).toBe(onDropContentClick);
+});
+
 it("renders winner drop", () => {
   const drop = { ...base, drop_type: ApiDropType.Winner };
   const onDropContentClick = jest.fn();

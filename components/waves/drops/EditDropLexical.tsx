@@ -81,7 +81,7 @@ import {
   normalizeDropMarkdown,
 } from "./normalizeDropMarkdown";
 import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
-import { containsOpenGraphPreviewLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
+import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 
 interface EditDropLexicalProps {
   readonly initialContent: string;
@@ -558,7 +558,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     );
   }, [editorState, exportMarkdownTransformers, normalizedInitialContent]);
   const isSaveBlockedByLinks =
-    !!linkRestrictionMessage && containsOpenGraphPreviewLink(currentMarkdown);
+    !!linkRestrictionMessage && containsDisallowedLink(currentMarkdown);
 
   const handleMentionSelect = useCallback(
     (user: Omit<MentionedUser, "current_handle">) => {
