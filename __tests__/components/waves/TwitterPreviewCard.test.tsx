@@ -56,7 +56,11 @@ describe("TwitterPreviewCard", () => {
     });
 
     expect(screen.getByText("Mayudrops")).toBeInTheDocument();
-    expect(screen.getByText("@Mayudropsphotos")).toBeInTheDocument();
+    expect(screen.getByText(/@Mayudropsphotos/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Follow" })).toHaveAttribute(
+      "href",
+      "https://x.com/intent/follow?screen_name=Mayudropsphotos"
+    );
     expect(
       screen.getByText("These jobs won't be here forever.")
     ).toBeInTheDocument();
@@ -67,7 +71,7 @@ describe("TwitterPreviewCard", () => {
     expect(
       screen.getByRole("img", { name: "These jobs won't be here forever." })
     ).toHaveAttribute("src", "https://pbs.twimg.com/media/example.jpg");
-    expect(screen.getByText(/Apr 28, 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/· Apr 28, 2026/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /7/i })).toHaveAttribute(
       "href",
       "https://x.com/intent/like?tweet_id=2049202644879565155"
@@ -76,6 +80,43 @@ describe("TwitterPreviewCard", () => {
       "href",
       "https://x.com/intent/tweet?in_reply_to=2049202644879565155"
     );
+    expect(screen.getByRole("link", { name: "Read 1 reply" })).toHaveAttribute(
+      "href",
+      "https://x.com/Mayudropsphotos/status/2049202644879565155"
+    );
+  });
+
+  it("renders playable video media when available", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2057727911914844378",
+      url: "https://x.com/elonmusk/status/2057727911914844378",
+      authorName: "Elon Musk",
+      authorHandle: "elonmusk",
+      text: "Humans using Mythos as seen by Mythos",
+      mediaImageUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
+      mediaVideoUrl: "https://video.twimg.com/tweet_video/example.mp4",
+      mediaPosterUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
+    });
+
+    const { container } = render(
+      <TwitterPreviewCard
+        href="https://x.com/elonmusk/status/2057727911914844378"
+        tweetId="2057727911914844378"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+    const video = container.querySelector("video");
+
+    expect(video).toHaveAttribute(
+      "src",
+      "https://video.twimg.com/tweet_video/example.mp4"
+    );
+    expect(video).toHaveAttribute(
+      "poster",
+      "https://pbs.twimg.com/tweet_video_thumb/example.jpg"
+    );
+    expect(video).toHaveAttribute("controls");
   });
 
   it("copies the original Twitter/X post link", async () => {
@@ -112,23 +153,21 @@ describe("TwitterPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("twitter-post-fallback")).toBeInTheDocument();
     });
-    expect(
-      screen.getByText("Twitter/X post preview unavailable")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Tweet preview unavailable")).toBeInTheDocument();
     expect(
       screen.getByText(
         "https://x.com/Mayudropsphotos/status/2057513333985554492"
       )
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Open post on X" })
-    ).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Open on X" })).toHaveAttribute(
       "href",
       "https://x.com/Mayudropsphotos/status/2057513333985554492"
     );
+    expect(
+      screen.queryByRole("link", { name: /like/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /reply/i })
+    ).not.toBeInTheDocument();
   });
 });
-expect(screen.getByRole("link", { name: "Read 1 reply" })).toHaveAttribute(
-  "href",
-  "https://x.com/Mayudropsphotos/status/2049202644879565155"
-);

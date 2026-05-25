@@ -3,7 +3,6 @@
 import {
   ChatBubbleOvalLeftIcon,
   HeartIcon,
-  InformationCircleIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -35,7 +34,7 @@ interface TwitterPreviewCardProps {
 }
 
 const TWITTER_CARD_CLASSES =
-  "tw-w-full tw-min-w-0 tw-max-w-[480px] tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-[#42566b] tw-bg-[#15202b] tw-text-[#f7f9f9] tw-shadow-sm";
+  "tw-w-full tw-min-w-0 tw-max-w-[430px] tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-[#42566b] tw-bg-[#15202b] tw-text-[#f7f9f9] tw-shadow-sm";
 
 const ACTION_CLASSES =
   "tw-inline-flex tw-items-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-py-1 tw-text-sm tw-font-semibold tw-text-[#8b98a5] tw-no-underline tw-transition tw-duration-200 hover:tw-text-[#1d9bf0] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
@@ -67,13 +66,16 @@ function formatTweetTimestamp(preview: TweetPreview): string | undefined {
   if (preview.createdAtIso) {
     const date = new Date(preview.createdAtIso);
     if (!Number.isNaN(date.getTime())) {
-      return new Intl.DateTimeFormat("en-US", {
+      const time = new Intl.DateTimeFormat("en-US", {
         hour: "numeric",
         minute: "2-digit",
+      }).format(date);
+      const day = new Intl.DateTimeFormat("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
       }).format(date);
+      return `${time} · ${day}`;
     }
   }
 
@@ -86,7 +88,7 @@ function LoadingCard() {
       className={`${TWITTER_CARD_CLASSES} tw-p-4`}
       data-testid="twitter-post-skeleton"
     >
-      <div className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-4">
+      <div className="tw-flex tw-animate-pulse tw-flex-col tw-gap-y-3">
         <div className="tw-flex tw-items-center tw-gap-x-3">
           <div className="tw-h-12 tw-w-12 tw-rounded-full tw-bg-[#263544]" />
           <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -98,9 +100,63 @@ function LoadingCard() {
           <div className="tw-h-4 tw-w-full tw-rounded tw-bg-[#263544]" />
           <div className="tw-h-4 tw-w-4/5 tw-rounded tw-bg-[#263544]" />
         </div>
-        <div className="tw-h-24 tw-rounded-xl tw-bg-[#263544]/80" />
+        <div className="tw-h-20 tw-rounded-xl tw-bg-[#263544]/80" />
       </div>
     </div>
+  );
+}
+
+function UnavailableCard({
+  href,
+  copied,
+  onCopy,
+}: {
+  readonly href: string;
+  readonly copied: boolean;
+  readonly onCopy: (event: MouseEvent<HTMLButtonElement>) => void;
+}) {
+  return (
+    <article
+      className={TWITTER_CARD_CLASSES}
+      data-testid="twitter-post-fallback"
+    >
+      <div className="tw-flex tw-flex-col tw-gap-y-3 tw-p-4">
+        <div className="tw-flex tw-items-start tw-gap-x-3">
+          <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#0f1720] tw-p-2">
+            <XIcon />
+          </div>
+          <div className="tw-min-w-0 tw-flex-1">
+            <p className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-[#f7f9f9]">
+              Tweet preview unavailable
+            </p>
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              onClick={stopCardEvent}
+              className="tw-mt-1 tw-block tw-truncate tw-text-sm tw-leading-5 tw-text-[#8b98a5] tw-no-underline hover:tw-text-[#f7f9f9]"
+            >
+              {href}
+            </Link>
+          </div>
+        </div>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            onClick={stopCardEvent}
+            className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-[#42566b] tw-bg-transparent tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-[#6ecbff] tw-no-underline tw-transition hover:tw-border-[#5a7088] hover:tw-text-[#9bddff]"
+          >
+            Open on X
+          </Link>
+          <button type="button" onClick={onCopy} className={ACTION_CLASSES}>
+            <LinkIcon className="tw-h-5 tw-w-5" />
+            <span>{copied ? "Copied" : "Copy link"}</span>
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -149,10 +205,15 @@ export default function TwitterPreviewCard({
   const authorName =
     preview.authorName ??
     preview.authorHandle ??
-    (state.type === "ready" ? "Twitter/X post" : " ");
+    (state.type === "ready" ? "Twitter post" : " ");
   const authorHref =
     preview.authorUrl ??
     (preview.authorHandle ? `https://x.com/${preview.authorHandle}` : href);
+  const followHref = preview.authorHandle
+    ? `https://x.com/intent/follow?screen_name=${encodeURIComponent(
+        preview.authorHandle
+      )}`
+    : undefined;
   const xPostPath = useMemo(
     () => getXPostPath(preview.url || href),
     [href, preview.url]
@@ -163,6 +224,10 @@ export default function TwitterPreviewCard({
     return <LoadingCard />;
   }
 
+  if (state.fallback) {
+    return <UnavailableCard href={href} copied={copied} onCopy={copyLink} />;
+  }
+
   return (
     <article
       className={TWITTER_CARD_CLASSES}
@@ -170,38 +235,56 @@ export default function TwitterPreviewCard({
         state.fallback ? "twitter-post-fallback" : "twitter-post-preview"
       }
     >
-      <div className="tw-flex tw-flex-col tw-gap-y-4 tw-p-4">
+      <div className="tw-flex tw-flex-col tw-gap-y-3 tw-p-3">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
-          <Link
-            href={authorHref}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            onClick={stopCardEvent}
-            className="tw-flex tw-min-w-0 tw-items-start tw-gap-x-3 tw-text-inherit tw-no-underline"
-          >
-            {preview.authorProfileImageUrl ? (
-              <img
-                src={preview.authorProfileImageUrl}
-                alt={authorName}
-                className="tw-h-12 tw-w-12 tw-flex-shrink-0 tw-rounded-full tw-object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="tw-flex tw-h-12 tw-w-12 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#0f1720] tw-p-2">
-                <XIcon />
-              </div>
-            )}
+          <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-x-3">
+            <Link
+              href={authorHref}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              onClick={stopCardEvent}
+              className="tw-flex-shrink-0 tw-text-inherit tw-no-underline"
+            >
+              {preview.authorProfileImageUrl ? (
+                <img
+                  src={preview.authorProfileImageUrl}
+                  alt={authorName}
+                  className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-full tw-object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-[#0f1720] tw-p-2">
+                  <XIcon />
+                </div>
+              )}
+            </Link>
             <div className="tw-min-w-0">
-              <div className="tw-line-clamp-1 tw-text-base tw-font-bold tw-italic tw-leading-6 tw-text-[#f7f9f9]">
+              <Link
+                href={authorHref}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                onClick={stopCardEvent}
+                className="tw-line-clamp-1 tw-text-sm tw-font-bold tw-leading-5 tw-text-[#f7f9f9] tw-no-underline hover:tw-underline"
+              >
                 {authorName}
-              </div>
+              </Link>
               {preview.authorHandle && (
-                <div className="tw-line-clamp-1 tw-text-sm tw-leading-5 tw-text-[#8b98a5]">
-                  @{preview.authorHandle}
+                <div className="tw-line-clamp-1 tw-text-xs tw-leading-5 tw-text-[#8b98a5]">
+                  <span>@{preview.authorHandle}</span>
+                  <span className="tw-px-1">·</span>
+                  <Link
+                    href={followHref ?? authorHref}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    onClick={stopCardEvent}
+                    className="tw-font-semibold tw-text-[#6ecbff] tw-no-underline hover:tw-text-[#9bddff]"
+                  >
+                    Follow
+                  </Link>
                 </div>
               )}
             </div>
-          </Link>
+          </div>
           <Link
             href={href}
             target="_blank"
@@ -215,13 +298,13 @@ export default function TwitterPreviewCard({
         </div>
 
         {preview.text ? (
-          <p className="tw-m-0 tw-whitespace-pre-line tw-break-words tw-text-xl tw-font-normal tw-leading-7 tw-text-[#f7f9f9]">
+          <p className="tw-m-0 tw-whitespace-pre-line tw-break-words tw-text-base tw-font-normal tw-leading-6 tw-text-[#f7f9f9]">
             {preview.text}
           </p>
         ) : (
           <div className="tw-flex tw-flex-col tw-gap-y-2">
             <p className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-[#f7f9f9]">
-              Twitter/X post preview unavailable
+              Tweet preview unavailable
             </p>
             <p className="tw-m-0 tw-break-all tw-text-sm tw-leading-5 tw-text-[#8b98a5]">
               {href}
@@ -229,7 +312,18 @@ export default function TwitterPreviewCard({
           </div>
         )}
 
-        {preview.mediaImageUrl ? (
+        {preview.mediaVideoUrl ? (
+          <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#42566b] tw-bg-black">
+            <video
+              src={preview.mediaVideoUrl}
+              poster={preview.mediaPosterUrl ?? preview.mediaImageUrl}
+              className="tw-block tw-h-auto tw-max-h-[24rem] tw-w-full tw-object-contain"
+              controls
+              playsInline
+              preload="metadata"
+            />
+          </div>
+        ) : preview.mediaImageUrl ? (
           <Link
             href={href}
             target="_blank"
@@ -240,7 +334,7 @@ export default function TwitterPreviewCard({
             <img
               src={preview.mediaImageUrl}
               alt={preview.text ?? authorName}
-              className="tw-h-auto tw-max-h-[32rem] tw-w-full tw-object-contain"
+              className="tw-h-auto tw-max-h-[24rem] tw-w-full tw-object-contain"
               loading="lazy"
             />
           </Link>
@@ -256,7 +350,7 @@ export default function TwitterPreviewCard({
           </Link>
         ) : null}
 
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-border-0 tw-border-b tw-border-solid tw-border-[#42566b] tw-pb-3 tw-text-sm tw-text-[#8b98a5]">
+        <div className="tw-flex tw-items-center tw-border-0 tw-border-b tw-border-solid tw-border-[#42566b] tw-pb-3 tw-text-sm tw-text-[#8b98a5]">
           <Link
             href={href}
             target="_blank"
@@ -265,16 +359,6 @@ export default function TwitterPreviewCard({
             className="tw-min-w-0 tw-truncate tw-text-[#8b98a5] tw-no-underline hover:tw-text-[#f7f9f9]"
           >
             {timestamp ?? `x.com${xPostPath}`}
-          </Link>
-          <Link
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            onClick={stopCardEvent}
-            aria-label="View post information on X"
-            className="tw-flex-shrink-0 tw-text-[#8b98a5] tw-no-underline hover:tw-text-[#f7f9f9]"
-          >
-            <InformationCircleIcon className="tw-h-5 tw-w-5" />
           </Link>
         </div>
 

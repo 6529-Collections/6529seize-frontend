@@ -114,6 +114,64 @@ const findFirstImageUrl = (value: unknown): string | undefined => {
   return undefined;
 };
 
+const findMediaImageUrl = (
+  record: Record<string, unknown>
+): string | undefined => {
+  for (const key of ["photos", "mediaDetails"]) {
+    const imageUrl = findFirstImageUrl(record[key]);
+    if (imageUrl) {
+      return imageUrl;
+    }
+  }
+
+  return undefined;
+};
+
+const readRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+const findVideoUrl = (record: Record<string, unknown>): string | undefined => {
+  const video = readRecord(record["video"]);
+  const videoVariants = Array.isArray(video?.["variants"])
+    ? video["variants"]
+    : [];
+  for (const variant of videoVariants) {
+    const variantRecord = readRecord(variant);
+    const src = readString(variantRecord?.["src"]);
+    if (src) {
+      return src;
+    }
+  }
+
+  const mediaDetails = Array.isArray(record["mediaDetails"])
+    ? record["mediaDetails"]
+    : [];
+  for (const mediaDetail of mediaDetails) {
+    const videoInfo = readRecord(readRecord(mediaDetail)?.["video_info"]);
+    const variants = Array.isArray(videoInfo?.["variants"])
+      ? videoInfo["variants"]
+      : [];
+    for (const variant of variants) {
+      const variantRecord = readRecord(variant);
+      const url = readString(variantRecord?.["url"]);
+      if (url) {
+        return url;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+const findVideoPosterUrl = (
+  record: Record<string, unknown>
+): string | undefined => {
+  const videoPoster = readString(readRecord(record["video"])?.["poster"]);
+  return videoPoster ?? findMediaImageUrl(record);
+};
+
 const extractMetaImage = (html: string): string | undefined => {
   const match =
     /<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image|twitter:image:src)["'][^>]+content=["']([^"']+)["'][^>]*>/i.exec(
@@ -223,7 +281,9 @@ function parseSyndicationPreview(
   const authorUrl = authorHandle
     ? `https://twitter.com/${authorHandle}`
     : undefined;
-  const mediaImageUrl = findFirstImageUrl(record);
+  const mediaImageUrl = findMediaImageUrl(record);
+  const mediaVideoUrl = findVideoUrl(record);
+  const mediaPosterUrl = mediaVideoUrl ? findVideoPosterUrl(record) : undefined;
   const authorProfileImageUrl = normalizeProfileImageUrl(
     readString(user["profile_image_url_https"])
   );
@@ -242,6 +302,8 @@ function parseSyndicationPreview(
     ...(text ? { text } : {}),
     ...(mediaLink ? { mediaLink } : {}),
     ...(mediaImageUrl ? { mediaImageUrl } : {}),
+    ...(mediaVideoUrl ? { mediaVideoUrl } : {}),
+    ...(mediaPosterUrl ? { mediaPosterUrl } : {}),
     ...(createdAtIso ? { createdAtIso } : {}),
     ...(favoriteCount !== undefined ? { favoriteCount } : {}),
     ...(conversationCount !== undefined ? { conversationCount } : {}),

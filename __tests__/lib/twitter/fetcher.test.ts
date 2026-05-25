@@ -21,6 +21,14 @@ const createSyndicationResponse = () =>
         media: [{ url: "https://t.co/media" }],
       },
       photos: [{ url: "https://pbs.twimg.com/media/example.jpg" }],
+      video: {
+        poster: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
+        variants: [
+          {
+            src: "https://video.twimg.com/tweet_video/example.mp4",
+          },
+        ],
+      },
     }),
   }) as Response;
 
@@ -39,6 +47,8 @@ describe("fetchTweetPreview", () => {
       authorName: "Mayudrops",
       text: "Post text",
       mediaImageUrl: "https://pbs.twimg.com/media/example.jpg",
+      mediaVideoUrl: "https://video.twimg.com/tweet_video/example.mp4",
+      mediaPosterUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
       authorProfileImageUrl:
         "https://pbs.twimg.com/profile_images/avatar_bigger.jpg",
       createdAtIso: "2026-05-21T17:26:20.000Z",
