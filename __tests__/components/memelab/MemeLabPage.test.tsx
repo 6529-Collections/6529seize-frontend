@@ -2,13 +2,7 @@ import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, render, screen, within, waitFor } from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
@@ -85,6 +79,7 @@ jest.mock("next/image", () => ({
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
+  usePathname: jest.fn(),
 }));
 
 // Mock contexts
@@ -100,6 +95,17 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(),
+}));
+
+jest.mock("@/hooks/useIdentity", () => ({
+  useIdentity: ({
+    handleOrWallet,
+  }: {
+    readonly handleOrWallet?: string | null | undefined;
+  }) => ({
+    profile: handleOrWallet ? { handle: handleOrWallet, pfp: null } : null,
+    isLoading: false,
+  }),
 }));
 
 // Mock API services
@@ -174,6 +180,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 // Import mocks
 const mockUseRouter = jest.fn();
 const mockUseSearchParams = jest.fn();
+const mockUsePathname = jest.fn();
 const mockFetchUrl = jest.fn();
 const mockFetchAllPages = jest.fn();
 const mockUseAuth = jest.fn();
@@ -183,6 +190,7 @@ const mockUseCapacitor = jest.fn();
 // Setup mock implementations
 require("next/navigation").useRouter = mockUseRouter;
 require("next/navigation").useSearchParams = mockUseSearchParams;
+require("next/navigation").usePathname = mockUsePathname;
 require("@/services/6529api").fetchUrl = mockFetchUrl;
 require("@/services/6529api").fetchAllPages = mockFetchAllPages;
 require("@/components/auth/Auth").useAuth = mockUseAuth;
@@ -194,13 +202,24 @@ const expectAbortSignalOptions = expect.objectContaining({
   signal: expect.objectContaining({ aborted: false }),
 });
 
+function mockSearchParamsWithFocus(focus: MEME_FOCUS | null = null) {
+  mockUseSearchParams.mockReturnValue({
+    get: jest.fn((key: string) => {
+      if (key === "focus") {
+        return focus;
+      }
+      return null;
+    }),
+    toString: jest.fn().mockReturnValue(focus ? `focus=${focus}` : ""),
+  });
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
 
   // Setup default mock returns
-  mockUseSearchParams.mockReturnValue({
-    get: jest.fn().mockReturnValue(null),
-  });
+  mockSearchParamsWithFocus();
+  mockUsePathname.mockReturnValue("/meme-lab/1");
 
   mockUseRouter.mockReturnValue({
     replace: jest.fn(),
@@ -224,15 +243,18 @@ beforeEach(() => {
   mockFetchUrl.mockResolvedValue({ data: [], count: 0 });
 });
 
-// Test wrapper with QueryClient
-const renderWithQueryClient = (component: React.ReactElement) => {
-  const queryClient = new QueryClient({
+const createTestQueryClient = () =>
+  new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
       },
     },
   });
+
+// Test wrapper with QueryClient
+const renderWithQueryClient = (component: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
   );
@@ -340,8 +362,12 @@ function createMockTransactions(balance: number) {
   };
 }
 
-function setupMockApiCalls(balance = 1, nftOverrides: any = {}) {
-  const meta = createMockMeta();
+function setupMockApiCalls(
+  balance = 1,
+  nftOverrides: any = {},
+  metaOverrides: any = {}
+) {
+  const meta = createMockMeta(metaOverrides);
   const nft = createMockNft(nftOverrides);
   const transactions = createMockTransactions(balance);
   const activity = { data: [], count: 0 };
@@ -358,15 +384,6 @@ function setupMockApiCalls(balance = 1, nftOverrides: any = {}) {
   });
 }
 
-function getCardDetailValue(label: string): string {
-  const labelCell = screen.getByText(label);
-  const row = labelCell.closest("tr");
-  const value = row?.querySelectorAll("td")[1]?.textContent;
-
-  expect(value).toBeTruthy();
-  return value ?? "";
-}
-
 describe("MemeLabPageComponent", () => {
   it("renders without crashing", async () => {
     setupMockApiCalls();
@@ -376,8 +393,48 @@ describe("MemeLabPageComponent", () => {
     });
 
     expect(
-      screen.getByRole("heading", { name: "Meme Lab" })
+      screen.getByRole("heading", { name: "Meme Lab Card 1 - Test NFT" })
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Meme Lab" })).toHaveAttribute(
+      "href",
+      "/meme-lab"
+    );
+    expect(
+      screen.getByRole("navigation", { name: "Meme Lab page sections" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveClass(
+      "tw-border-primary-400"
+    );
+    expect(
+      screen.queryByRole("button", { name: "The Art" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "The Memes References" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Created by")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Test Artist" })).toHaveAttribute(
+      "href",
+      "/testartist"
+    );
+    expect(screen.getAllByText("Collection").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("link", { name: "Test Collection" })
+    ).toHaveAttribute("href", "/meme-lab/collection/Test-Collection");
+    expect(screen.queryByRole("heading", { name: "NFT" })).toBeNull();
+    expect(screen.queryByText("Artist Name")).not.toBeInTheDocument();
+    expect(screen.queryByText("Artist Profile")).not.toBeInTheDocument();
+    expect(
+      within(screen.getByRole("region", { name: "Card details" })).queryByText(
+        "Collectors"
+      )
+    ).toBeNull();
+    expect(
+      screen.queryByRole("heading", { name: "Edition Stats" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Meme Collectors" })
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByTestId("nft-image")).toHaveLength(1);
   });
 
   it("fetches lab extended data on mount", async () => {
@@ -426,12 +483,7 @@ describe("MemeLabPageComponent", () => {
   });
 
   it("handles your cards tab", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.YOUR_CARDS;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.YOUR_CARDS);
 
     setupMockApiCalls(1);
 
@@ -498,12 +550,7 @@ describe("MemeLabPageComponent", () => {
   });
 
   it("handles different focus tabs from URL params", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.ACTIVITY;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.ACTIVITY);
 
     setupMockApiCalls();
 
@@ -511,19 +558,177 @@ describe("MemeLabPageComponent", () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
 
-    // Should set active tab based on URL param
-    expect(mockUseRouter().replace).toHaveBeenCalledWith(
-      expect.stringContaining(`focus=${MEME_FOCUS.ACTIVITY}`)
+    await waitFor(() => {
+      expect(
+        screen.getByRole("region", { name: "Meme Lab activity" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("syncs additional details default with legacy The Art focus changes", async () => {
+    setupMockApiCalls();
+
+    const queryClient = createTestQueryClient();
+    const page = (nftId = "1") => (
+      <QueryClientProvider client={queryClient}>
+        <MemeLabPageComponent nftId={nftId} />
+      </QueryClientProvider>
     );
+    const { rerender } = render(page());
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Additional details" })
+      ).toHaveAttribute("aria-expanded", "false");
+    });
+
+    mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
+
+    await act(async () => {
+      rerender(page());
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Additional details" })
+      ).toHaveAttribute("aria-expanded", "true");
+    });
+
+    mockSearchParamsWithFocus(MEME_FOCUS.LIVE);
+
+    await act(async () => {
+      rerender(page());
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Additional details" })
+      ).toHaveAttribute("aria-expanded", "false");
+    });
+  });
+
+  it("renders activity tab content", async () => {
+    mockSearchParamsWithFocus(MEME_FOCUS.ACTIVITY);
+
+    setupMockApiCalls();
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("region", { name: "Meme Lab activity" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Card Volumes" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: "Card Activity" })
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("renders collectors tab leaderboard", async () => {
+    mockSearchParamsWithFocus(MEME_FOCUS.COLLECTORS);
+
+    setupMockApiCalls();
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      const collectorsRegion = screen.getByRole("region", {
+        name: "Meme Lab collectors leaderboard",
+      });
+
+      expect(collectorsRegion).toBeInTheDocument();
+      expect(
+        within(collectorsRegion).getByText("Collectors")
+      ).toBeInTheDocument();
+      expect(within(collectorsRegion).getByText("10")).toBeInTheDocument();
+      expect(
+        within(collectorsRegion).getByText("6529 Museum")
+      ).toBeInTheDocument();
+      expect(
+        within(collectorsRegion).getByText("% Unique")
+      ).toBeInTheDocument();
+      expect(
+        within(collectorsRegion).getByText("% Unique ex. 6529 Museum")
+      ).toBeInTheDocument();
+      expect(within(collectorsRegion).getAllByText("10%")).toHaveLength(2);
+      expect(within(collectorsRegion).queryByText("Edition Size")).toBeNull();
+      expect(
+        within(collectorsRegion).queryByText("Edition Size ex. 6529 Museum")
+      ).toBeNull();
+      expect(
+        within(collectorsRegion).getByTestId("meme-lab-leaderboard")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("renders burnt collector stats when editions are burnt", async () => {
+    mockSearchParamsWithFocus(MEME_FOCUS.COLLECTORS);
+
+    setupMockApiCalls(
+      1,
+      {},
+      {
+        burnt: 1,
+        edition_size_not_burnt: 99,
+        edition_size_not_burnt_rank: 2,
+        percent_unique_not_burnt: 0.09,
+        percent_unique_not_burnt_rank: 3,
+      }
+    );
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      const collectorsRegion = screen.getByRole("region", {
+        name: "Meme Lab collectors leaderboard",
+      });
+
+      expect(
+        within(collectorsRegion).getByText("% Unique ex. Burnt")
+      ).toBeInTheDocument();
+      expect(
+        within(collectorsRegion).getByText("% Unique ex. Burnt and 6529 Museum")
+      ).toBeInTheDocument();
+      expect(within(collectorsRegion).queryByText("Burnt")).toBeNull();
+      expect(
+        within(collectorsRegion).queryByText("Edition Size ex. Burnt")
+      ).toBeNull();
+      expect(
+        within(collectorsRegion).queryByText(
+          "Edition Size ex. Burnt and 6529 Museum"
+        )
+      ).toBeNull();
+    });
+  });
+
+  it("renders timeline tab content", async () => {
+    mockSearchParamsWithFocus(MEME_FOCUS.TIMELINE);
+
+    setupMockApiCalls();
+
+    await act(async () => {
+      renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("region", { name: "Meme Lab timeline" })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("timeline")).toBeInTheDocument();
+    });
   });
 
   it("falls back to top-level media URLs for art links", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.THE_ART;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 
     setupMockApiCalls(1, {
       image: "https://top-level.example/image.png",
@@ -568,12 +773,7 @@ describe("MemeLabPageComponent", () => {
   });
 
   it("prefers metadata animation_url over top-level animation for art links", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.THE_ART;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 
     setupMockApiCalls(1, {
       animation: "https://cdn.example.com/animation.mp4",
@@ -602,12 +802,7 @@ describe("MemeLabPageComponent", () => {
   });
 
   it("ignores whitespace metadata.image and falls back to the top-level image", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.THE_ART;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 
     setupMockApiCalls(1, {
       image: "  https://top-level.example/image.png  ",
@@ -639,12 +834,7 @@ describe("MemeLabPageComponent", () => {
   });
 
   it("does not crash on live tab when API media fields are null", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.LIVE;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.LIVE);
 
     setupMockApiCalls(1, {
       uri: null,
@@ -663,17 +853,14 @@ describe("MemeLabPageComponent", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "NFT" })).toBeInTheDocument();
+      expect(screen.getByText("Created by")).toBeInTheDocument();
+      expect(screen.getAllByText("Collection").length).toBeGreaterThan(0);
+      expect(screen.queryByRole("heading", { name: "NFT" })).toBeNull();
     });
   });
 
   it("treats metadata.animation_url-only NFTs as animated", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.THE_ART;
-        return null;
-      }),
-    });
+    mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 
     setupMockApiCalls(1, {
       animation: "",
@@ -692,6 +879,9 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
+      expect(
+        screen.getByRole("button", { name: "Additional details" })
+      ).toHaveAttribute("aria-expanded", "true");
       expect(
         screen.getByRole("link", {
           name: "https://metadata.example/animation.html",
@@ -703,26 +893,21 @@ describe("MemeLabPageComponent", () => {
       expect(
         screen.getByRole("link", { name: "Open animation in new tab" })
       ).toHaveAttribute("href", "https://metadata.example/animation.html");
-      expect(getCardDetailValue("File Type")).toBe("Interactive - HTML");
-      expect(getCardDetailValue("Dimensions")).toBe("1,920 x 1,080");
+      expect(screen.getByText("File type")).toBeInTheDocument();
+      expect(screen.getByText("Animation - HTML")).toBeInTheDocument();
+      expect(screen.getByText("Dimensions")).toBeInTheDocument();
+      expect(screen.getByText("1,920 x 1,080")).toBeInTheDocument();
     });
   });
 
-  it("switches card details to image metadata on the image slide", async () => {
-    mockUseSearchParams.mockReturnValue({
-      get: jest.fn((key: string) => {
-        if (key === "focus") return MEME_FOCUS.THE_ART;
-        return null;
-      }),
-    });
+  it("shows image metadata in additional details when the NFT has no animation", async () => {
+    mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
 
     setupMockApiCalls(1, {
-      animation: "",
+      image: "https://metadata.example/image.png",
       metadata: {
         attributes: [],
         image_details: { format: "PNG", width: 1200, height: 800 },
-        animation_details: { format: "HTML", width: 1920, height: 1080 },
-        animation_url: "https://metadata.example/animation.html",
         image: "https://metadata.example/image.png",
       },
     });
@@ -732,14 +917,9 @@ describe("MemeLabPageComponent", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
-    });
-
-    fireEvent.click(screen.getByTestId("carousel-slide-1"));
-
-    await waitFor(() => {
-      expect(getCardDetailValue("File Type")).toBe("Image - PNG");
-      expect(getCardDetailValue("Dimensions")).toBe("1,200 x 800");
+      expect(screen.getAllByTestId("nft-image")).toHaveLength(1);
+      expect(screen.getByText("Image - PNG")).toBeInTheDocument();
+      expect(screen.getByText("1,200 x 800")).toBeInTheDocument();
     });
   });
 
@@ -909,10 +1089,14 @@ describe("MemeLabPageComponent", () => {
         renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
       });
 
-      // Should update URL with default focus
+      await act(async () => {
+        screen.getByRole("button", { name: "Collectors" }).click();
+      });
+
       await waitFor(() => {
         expect(mockReplace).toHaveBeenCalledWith(
-          expect.stringContaining("focus=")
+          "/meme-lab/1?focus=collectors",
+          { scroll: false }
         );
       });
     });

@@ -6,7 +6,7 @@ import ProfileAvatar, {
 } from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
-import type { MemesExtendedData, NFT } from "@/entities/INFT";
+import type { BaseNFT, MemesExtendedData, NFT } from "@/entities/INFT";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
@@ -222,7 +222,13 @@ function formatPercent(value: number) {
   return `${Math.round(value * 100 * 10) / 10}%`;
 }
 
-export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
+export function MemeArtworkDetails({
+  nft,
+  layout = "default",
+}: {
+  readonly nft: BaseNFT;
+  readonly layout?: "default" | "aligned";
+}) {
   const mintDate = getMintDateParts(nft.mint_date);
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
   const artistNames = getArtistNames(nft.artist);
@@ -237,10 +243,19 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
           };
         })
       : [{ handle: null, display: "not available" }];
+  const isAligned = layout === "aligned";
+  const rowClassName = isAligned
+    ? "tw-grid tw-grid-cols-1 tw-items-start tw-gap-x-8 tw-gap-y-6 sm:tw-grid-cols-2"
+    : "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-6";
+  const itemClassName = isAligned
+    ? "tw-min-w-[8.5rem] sm:tw-justify-self-end sm:tw-text-right"
+    : "tw-min-w-fit";
+  const mintDateClassName =
+    "tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end";
 
   return (
     <section className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-8 md:tw-pb-8 lg:tw-pt-0">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-6">
+      <div className={rowClassName}>
         <div className="tw-min-w-0">
           <div className={TOP_LABEL_CLASS}>Created by</div>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2">
@@ -278,9 +293,9 @@ export function MemeArtworkDetails({ nft }: { readonly nft: NFT }) {
             })}
           </div>
         </div>
-        <div className="tw-min-w-fit">
+        <div className={itemClassName}>
           <div className={TOP_LABEL_CLASS}>Mint date</div>
-          <div className="tw-flex tw-h-7 tw-flex-wrap tw-items-center sm:tw-justify-end">
+          <div className={mintDateClassName}>
             <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
               {mintDate.date}
             </span>

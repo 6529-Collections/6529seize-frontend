@@ -47,12 +47,12 @@ interface ReactionMutationContext {
   supersededByMutationId?: string | null;
 }
 
-export interface ReactionMutationResult {
+interface ReactionMutationResult {
   readonly isLatestMutation: boolean;
   readonly supersededByMutationId: string | null;
 }
 
-export interface ReactionRealtimeReconciliationResult {
+interface ReactionRealtimeReconciliationResult {
   readonly shouldApplyCanonicalDrop: boolean;
   readonly expectedReaction: string | null;
   readonly serverReaction: string | null;
