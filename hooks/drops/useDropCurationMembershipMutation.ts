@@ -68,7 +68,7 @@ const getErrorMessageFromResponse = async (
   }
 };
 
-const addDropToCuration = async ({
+export const addDropToCuration = async ({
   dropId,
   body,
 }: {
