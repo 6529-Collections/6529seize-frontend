@@ -261,7 +261,7 @@ describe("fetchTweetPreview", () => {
     );
   });
 
-  it("limits long expanded tweet text to a 300 character excerpt", async () => {
+  it("limits long expanded tweet text to a 260 character excerpt", async () => {
     const longText = [
       "5/ 6529 Seizing is the NFT that inaugurates The Memes by 6529, a close-up of @punk6529's Cryptopunk NFT with the words Seize the Memes of Production occupying the pixels on its mouth.",
       "Here sharing a display with @Viva_La_Vandal's Meme Enjoyoor and @BillyNFTees' The Sacrifice of the Memes, two irreverent derivatives of Punk 6529's persona.",
@@ -288,6 +288,6 @@ describe("fetchTweetPreview", () => {
     );
 
     expect(preview.text).toMatch(/\.\.\.$/u);
-    expect(Array.from(preview.text ?? "").length).toBeLessThanOrEqual(303);
+    expect(Array.from(preview.text ?? "").length).toBeLessThanOrEqual(263);
   });
 });
