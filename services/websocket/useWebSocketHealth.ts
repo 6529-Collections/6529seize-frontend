@@ -197,7 +197,7 @@ export function useWebSocketHealth() {
   }, [performResumeHealthCheck]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis.window === "undefined") {
       return;
     }
 
@@ -287,7 +287,7 @@ export function useWebSocketHealth() {
   }, [performHealthCheck]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (typeof globalThis.window === "undefined") {
       return;
     }
 
@@ -295,9 +295,12 @@ export function useWebSocketHealth() {
       performHealthCheck();
     };
 
-    window.addEventListener(AUTH_TOKEN_CHANGED_EVENT, handleAuthTokenChanged);
+    globalThis.addEventListener(
+      AUTH_TOKEN_CHANGED_EVENT,
+      handleAuthTokenChanged
+    );
     return () => {
-      window.removeEventListener(
+      globalThis.removeEventListener(
         AUTH_TOKEN_CHANGED_EVENT,
         handleAuthTokenChanged
       );

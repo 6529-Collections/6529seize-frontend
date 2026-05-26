@@ -362,7 +362,7 @@ describe("useWebSocketHealth", () => {
     mockGetAuthJwt.mockReturnValue("token-b");
 
     act(() => {
-      window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT));
+      globalThis.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT));
     });
 
     expect(mockConnect).toHaveBeenCalledWith("token-b");
