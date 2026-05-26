@@ -94,10 +94,19 @@ function normalizeMediaFormat(
 
 function getUrlExtension(url: string | null | undefined): string | null {
   if (!url) return null;
-  const clean = url.split("?")[0]?.split("#")[0] ?? "";
-  const parts = clean.split(".");
-  if (parts.length < 2) return null;
-  return parts.at(-1)?.toLowerCase() ?? null;
+  try {
+    const { pathname } = new URL(url);
+    if (pathname.endsWith("/")) return null;
+    const lastSegment = pathname.split("/").at(-1);
+    if (!lastSegment) return null;
+    const extensionIndex = lastSegment.lastIndexOf(".");
+    if (extensionIndex <= 0 || extensionIndex === lastSegment.length - 1) {
+      return null;
+    }
+    return lastSegment.slice(extensionIndex + 1).toLowerCase();
+  } catch {
+    return null;
+  }
 }
 
 function getImageMediaTypeLabel(claim: MintingClaim): string | null {
