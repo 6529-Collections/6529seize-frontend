@@ -14,7 +14,7 @@ reduce layout shift while loading.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Home-style drop cards that reuse wave link-preview rendering (for example
   boosted cards on `/` and wave leaderboard content cards)
 

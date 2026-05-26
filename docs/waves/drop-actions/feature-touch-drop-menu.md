@@ -7,7 +7,7 @@ Use the touch drop menu to run drop actions without leaving the thread.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Single-drop overlay in the current thread route: `?drop={dropId}`
 - Touch leaderboard list cards that expose the compact slide-up action sheet
 

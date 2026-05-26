@@ -12,7 +12,7 @@ The tab is available only on eligible rank-wave layouts:
 ## Location in the Site
 
 - Rank-wave thread routes: `/waves/{waveId}`
-- Rank-wave direct-message routes: `/messages?wave={waveId}`
+- Rank-wave direct-message routes: `/messages/{waveId}`
 - Desktop and mobile wave tab rows when `My Votes` is available
 
 ## Entry Points

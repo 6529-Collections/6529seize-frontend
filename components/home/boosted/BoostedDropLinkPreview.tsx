@@ -4,8 +4,8 @@ import type { SyntheticEvent } from "react";
 
 import { ensureTwitterLink } from "@/components/drops/view/part/dropPartMarkdown/twitter";
 import SmartLinkPreview from "@/components/waves/SmartLinkPreview";
+import TwitterPreviewCard from "@/components/waves/TwitterPreviewCard";
 import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
-import BoostedTweetPreview from "./BoostedTweetPreview";
 
 const getFallbackLabel = (href: string): string => {
   try {
@@ -48,7 +48,7 @@ export default function BoostedDropLinkPreview({
         onPointerDown={stopPropagation}
         onTouchStart={stopPropagation}
       >
-        <BoostedTweetPreview href={normalizedHref} tweetId={tweetId} />
+        <TwitterPreviewCard href={normalizedHref} tweetId={tweetId} />
       </div>
     );
   }

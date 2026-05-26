@@ -9,7 +9,7 @@ Old links to this page are kept so existing bookmarks still resolve.
 ## Location in the Site
 
 - Web left sidebar rows on `/waves`, `/waves/{waveId}`, `/messages`, and
-  `/messages?wave={waveId}`.
+  `/messages/{waveId}`.
 - Applies to both wave rows and direct-message rows in the web sidebar list.
 
 ## Current User Behavior

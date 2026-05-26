@@ -12,7 +12,7 @@ This page owns compact-list behavior only. Drop-open action ownership stays in
 
 ## Location in the Site
 
-- Right sidebar on `/waves/{waveId}` and `/messages?wave={waveId}`
+- Right sidebar on `/waves/{waveId}` and `/messages/{waveId}`
 - Rank-wave `Leaderboard` tab in inline and overlay sidebar variants
 - Available until voting is completed (includes pre-vote and in-progress time)
 - Hidden while a full drop overlay is open (`drop={dropId}`)

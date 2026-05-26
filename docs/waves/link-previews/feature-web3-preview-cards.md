@@ -13,7 +13,7 @@ external preview or a plain link.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Home-style markdown cards that reuse link-preview rendering:
   - Boosted cards on `/`
   - Wave leaderboard grid cards

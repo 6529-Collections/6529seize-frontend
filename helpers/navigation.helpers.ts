@@ -20,10 +20,16 @@ interface SearchParamsLike {
   get: (key: string) => string | null;
 }
 
+export type RouteSearchParams = Record<string, string | string[] | undefined>;
+
 const WAVE_CREATE_SEGMENT = "create";
+const MESSAGE_CREATE_SEGMENT = "create";
 
 export const getWavePathRoute = (waveId: string): string =>
   `/waves/${encodeURIComponent(waveId)}`;
+
+export const getMessagePathRoute = (waveId: string): string =>
+  `/messages/${encodeURIComponent(waveId)}`;
 
 export const getWaveIdFromPathname = (
   pathname: string | null | undefined
@@ -48,6 +54,29 @@ export const getWaveIdFromPathname = (
   }
 };
 
+export const getMessageIdFromPathname = (
+  pathname: string | null | undefined
+): string | null => {
+  if (!pathname?.startsWith("/messages/")) {
+    return null;
+  }
+
+  const [, messagesSegment, waveSegment] = pathname.split("/");
+  if (
+    messagesSegment !== "messages" ||
+    !waveSegment ||
+    waveSegment === MESSAGE_CREATE_SEGMENT
+  ) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(waveSegment);
+  } catch {
+    return waveSegment;
+  }
+};
+
 export const getActiveWaveIdFromUrl = ({
   pathname,
   searchParams,
@@ -58,6 +87,11 @@ export const getActiveWaveIdFromUrl = ({
   const waveIdFromPath = getWaveIdFromPathname(pathname);
   if (waveIdFromPath) {
     return waveIdFromPath;
+  }
+
+  const messageIdFromPath = getMessageIdFromPathname(pathname);
+  if (messageIdFromPath) {
+    return messageIdFromPath;
   }
 
   const waveIdFromQuery = searchParams?.get("wave");
@@ -88,12 +122,8 @@ export const getWaveRoute = ({
   }
 
   const base = isDirectMessage
-    ? getMessagesBaseRoute(_isApp)
+    ? getMessagePathRoute(waveId)
     : getWavePathRoute(waveId);
-
-  if (isDirectMessage) {
-    queryEntries.push(["wave", waveId]);
-  }
 
   if (serialNo !== undefined) {
     queryEntries.push(["serialNo", `${serialNo}`]);
@@ -111,6 +141,39 @@ export const getWaveRoute = ({
     .join("&");
 
   return `${base}?${query}`;
+};
+
+export const getWaveRouteWithSearchParams = ({
+  waveId,
+  searchParams,
+  isDirectMessage,
+}: {
+  waveId: string;
+  searchParams: RouteSearchParams;
+  isDirectMessage: boolean;
+}): string => {
+  const params = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (key === "wave" || value === undefined) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        params.append(key, item);
+      }
+      continue;
+    }
+
+    params.set(key, value);
+  }
+
+  const path = isDirectMessage
+    ? getMessagePathRoute(waveId)
+    : getWavePathRoute(waveId);
+  const queryString = params.toString();
+  return queryString ? `${path}?${queryString}` : path;
 };
 
 export const getWaveHomeRoute = ({

@@ -12,9 +12,9 @@ identities.
 
 - Desktop DM-create mode (`?create=dm`) is supported in these layouts:
   - `/messages`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - App create route: `/messages/create`.
-- Success route after submit: `/messages?wave={waveId}`.
+- Success route after submit: `/messages/{waveId}`.
 
 ## Entry Points
 
@@ -42,7 +42,7 @@ identities.
    `No results`.
 7. Select one or more recipients; selected recipients appear as removable chips.
 8. Click `Create`; the button switches to `Creating...` while submit runs.
-9. On success, the app opens `/messages?wave={waveId}`.
+9. On success, the app opens `/messages/{waveId}`.
 
 ## Common Scenarios
 

@@ -17,7 +17,6 @@ import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPrevie
 import DropPartMarkdownImage, {
   type DropPartMarkdownImageLayout,
 } from "../DropPartMarkdownImage";
-import type { TweetPreviewMode } from "@/components/tweets/TweetPreviewModeContext";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
@@ -34,7 +33,6 @@ interface LinkRendererConfig {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly currentDropId?: string | undefined;
   readonly hideLinkPreviews?: boolean | undefined;
-  readonly tweetPreviewMode?: TweetPreviewMode | undefined;
   readonly isMemesWaveById?:
     | ((waveId: string | undefined | null) => boolean)
     | undefined;
@@ -114,7 +112,6 @@ export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
   hideLinkPreviews = false,
-  tweetPreviewMode = "auto",
   isMemesWaveById,
   isQuorumWaveById,
   embedPath,
@@ -134,7 +131,6 @@ export const createLinkRenderer = ({
     isQuorumWaveById,
   });
   const handlers = createLinkHandlers({
-    tweetPreviewMode,
     linkPreviewVariant: "chat",
   });
   let inlineShowControlRendered = false;

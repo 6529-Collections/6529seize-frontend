@@ -17,7 +17,7 @@ requirements:
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Step label: `Drops`
 - User-reachable in `Rank` and `Approve` creation
 

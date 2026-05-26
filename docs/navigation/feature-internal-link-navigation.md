@@ -14,7 +14,7 @@ Hash links jump to a section when the target ID exists.
 - `NFT Activity` header links to `/nft-activity`.
 - Profile TDH boost link to `/network/tdh#tdh-1-4`.
 - Mapping-tool `#how-to-use` anchors.
-- Drop markdown links in `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Drop markdown links in `/waves/{waveId}` and `/messages/{waveId}`.
 
 ## Entry Points
 

@@ -9,10 +9,10 @@ behavior across thread header controls and sidebar wave rows.
 
 - Thread header controls:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Sidebar wave rows:
   - `/waves`, `/waves/{waveId}`
-  - `/messages`, `/messages?wave={waveId}`
+  - `/messages`, `/messages/{waveId}`
 
 ## Control Availability
 

@@ -8,7 +8,7 @@ into a horizontal decision strip.
 
 ## Where Users See It
 
-- Routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Only when the wave still has an available `Leaderboard` tab.
 - At the top of leaderboard content, above sticky sort and filter controls.
 - Same behavior on desktop and mobile.

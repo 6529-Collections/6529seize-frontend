@@ -19,6 +19,7 @@ export default async function WavePage({
   return await renderWavesPageContent({
     waveId: wave,
     searchParams: resolvedParams,
+    routeContext: "waves",
   });
 }
 

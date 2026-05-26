@@ -16,7 +16,7 @@ availability is exposed through the Chat tab `Submit drop` action.
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}`
+- Direct-message threads: `/messages/{waveId}`
 - Same footer rules in single-drop thread context (`drop={dropId}`)
 
 ## Footer States

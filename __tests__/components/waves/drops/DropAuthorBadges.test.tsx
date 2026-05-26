@@ -10,6 +10,7 @@ const mockArtistHandleBadgeClick = jest.fn();
 const mockArtistHandleModalClose = jest.fn();
 const mockWaveCreatorHandleBadgeClick = jest.fn();
 const mockWaveCreatorHandleModalClose = jest.fn();
+const mockRouterPush = jest.fn();
 
 const mockUseArtistPreviewModal = jest.fn();
 const mockUseWaveCreatorPreviewModal = jest.fn();
@@ -24,6 +25,9 @@ type ArtistActivityBadgeProps = {
 type WaveCreatorBadgeProps = {
   readonly tooltipId?: string;
   readonly onBadgeClick?: () => void;
+  readonly showWaveDetails?: boolean;
+  readonly waveName?: string | null;
+  readonly wavePfp?: string | null;
 };
 
 type ArtistPreviewModalProps = {
@@ -46,6 +50,12 @@ jest.mock("@/hooks/useArtistPreviewModal", () => ({
 
 jest.mock("@/hooks/useWaveCreatorPreviewModal", () => ({
   useWaveCreatorPreviewModal: () => mockUseWaveCreatorPreviewModal(),
+}));
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
 }));
 
 jest.mock("@/helpers/tooltip.helpers", () => ({
@@ -74,11 +84,20 @@ jest.mock("@/components/waves/drops/ArtistActivityBadge", () => ({
 }));
 
 jest.mock("@/components/waves/drops/WaveCreatorBadge", () => ({
-  WaveCreatorBadge: ({ tooltipId, onBadgeClick }: WaveCreatorBadgeProps) => (
+  WaveCreatorBadge: ({
+    tooltipId,
+    onBadgeClick,
+    showWaveDetails,
+    waveName,
+    wavePfp,
+  }: WaveCreatorBadgeProps) => (
     <button
       type="button"
       data-testid="wave-creator-badge"
       data-tooltip-id={tooltipId}
+      data-show-wave-details={String(showWaveDetails)}
+      data-wave-name={waveName ?? ""}
+      data-wave-pfp={wavePfp ?? ""}
       onClick={onBadgeClick}
     >
       Wave Creator
@@ -125,6 +144,7 @@ const baseProfile = {
 describe("DropAuthorBadges", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRouterPush.mockClear();
     mockUseArtistPreviewModal.mockReturnValue({
       isModalOpen: false,
       activeTab: "active",
@@ -175,6 +195,8 @@ describe("DropAuthorBadges", () => {
             artist_of_main_stage_submissions: 1,
             artist_of_memes: 1,
             profile_wave_id: "profile-wave-1",
+            profile_wave_name: "Profile Wave",
+            profile_wave_pfp: "https://example.com/wave.png",
           },
         }}
         onArtistPreviewOpen={onArtistPreviewOpen}
@@ -196,6 +218,8 @@ describe("DropAuthorBadges", () => {
           artist_of_main_stage_submissions: 1,
           artist_of_memes: 1,
           profile_wave_id: "profile-wave-1",
+          profile_wave_name: "Profile Wave",
+          profile_wave_pfp: "https://example.com/wave.png",
         },
         is_wave_creator: true,
         profile_wave_id: "profile-wave-1",
@@ -216,6 +240,38 @@ describe("DropAuthorBadges", () => {
 
     expect(screen.getByTestId("wave-creator-badge")).toBeInTheDocument();
     expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
+  });
+
+  it("passes profile wave details to the chat feed badge and opens the wave", () => {
+    render(
+      <DropAuthorBadges
+        profile={{
+          ...baseProfile,
+          badges: {
+            artist_of_main_stage_submissions: 0,
+            artist_of_memes: 0,
+            profile_wave_id: "profile-wave-1",
+            profile_wave_name: "Profile Wave",
+            profile_wave_pfp: "https://example.com/wave.png",
+          },
+        }}
+        showProfileWaveDetails
+      />
+    );
+
+    const badge = screen.getByTestId("wave-creator-badge");
+    expect(badge).toHaveAttribute("data-show-wave-details", "true");
+    expect(badge).toHaveAttribute("data-wave-name", "Profile Wave");
+    expect(badge).toHaveAttribute(
+      "data-wave-pfp",
+      "https://example.com/wave.png"
+    );
+
+    fireEvent.click(badge);
+
+    expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith("/waves/profile-wave-1");
+    expect(mockWaveCreatorHandleBadgeClick).not.toHaveBeenCalled();
   });
 
   it("renders both badges and forwards tooltip id prefix", () => {

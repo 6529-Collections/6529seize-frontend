@@ -43,7 +43,7 @@ sidebar, app drawer, mobile bottom navigation, and search `Pages` results.
 1. Open `/discover` from a direct URL or a shell navigation entry.
 2. While data loads, the route renders discovery-card skeletons.
 3. When data resolves, the page shows up to 20 active-wave cards.
-4. Select a card to open `/waves/{waveId}` or `/messages?wave={waveId}` for
+4. Select a card to open `/waves/{waveId}` or `/messages/{waveId}` for
    direct-message waves.
 5. Continue thread interaction in wave/message routes.
 
@@ -58,7 +58,7 @@ sidebar, app drawer, mobile bottom navigation, and search `Pages` results.
 
 - If discovery fetch fails or returns no waves, the route can render as a blank
   page body because the shared section hides on empty/error.
-- Cards still route to `/messages?wave={waveId}` for direct-message waves.
+- Cards still route to `/messages/{waveId}` for direct-message waves.
 - `/discover` does not expose legacy `identity` filters, section tabs, or local
   search controls.
 - The route does not render a `View all` footer link because it is already the

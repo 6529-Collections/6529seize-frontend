@@ -15,7 +15,7 @@ Both lists are capped at **20** items. They are independent and do not sync.
 
 - Header pin button in selected thread routes:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}` (DM route; no `/messages/{waveId}` thread route)
+  - `/messages/{waveId}` (DM route)
 - Left sidebar wave rows in the Waves list (`/waves*` only; DM rows do not show
   row pin controls).
 - Native app small-screen (`<1024px`) shortcuts rail above Waves or Messages
