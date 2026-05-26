@@ -24,6 +24,11 @@ import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
+import {
+  getDropForgeAnimationMediaTypeLabel,
+  getDropForgeImageMediaTypeLabel,
+  isDropForgeVideoUrl,
+} from "@/components/drop-forge/drop-forge-media-type.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
@@ -108,19 +113,7 @@ function formatNullableEditionSize(value: number | null | undefined): string {
 }
 
 function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const raw = url.trim();
-  if (raw.length === 0) return false;
-  if (raw.toLowerCase().startsWith("data:video/")) return true;
-
-  const hasVideoExtension = (value: string) =>
-    /\.(mp4|webm)(?:$|[?#])/.test(value.toLowerCase());
-
-  try {
-    return hasVideoExtension(new URL(raw).pathname);
-  } catch {
-    return hasVideoExtension(raw);
-  }
+  return isDropForgeVideoUrl(url);
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -267,20 +260,6 @@ function getAnimationPreviewMimeType({
   }
 
   return null;
-}
-
-function getAnimationPreviewLabel(mimeType: string | null): string {
-  if (mimeType?.startsWith("video/")) {
-    return "Video";
-  }
-  if (mimeType?.startsWith("model/gltf")) {
-    return "GLB";
-  }
-  if (mimeType === "text/html") {
-    return "HTML";
-  }
-
-  return "Animation";
 }
 
 function getAnimationSourceCardProps({
@@ -529,6 +508,8 @@ export default function DropForgeCraftClaimPageClient({
   const hasPendingPageChanges =
     imageDirty || animationDirty || coreInfoDirty || metadataDirty;
   const hasAnimation = Boolean(claim.animation_url);
+  const imageMediaTypeLabel = getDropForgeImageMediaTypeLabel(claim);
+  const animationMediaTypeLabel = getDropForgeAnimationMediaTypeLabel(claim);
   const coreInformationHeaderPills = (
     <span className="tw-inline-flex tw-items-center tw-gap-2">
       <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
@@ -557,7 +538,17 @@ export default function DropForgeCraftClaimPageClient({
       />
 
       <div className="tw-flex tw-flex-col tw-gap-5">
-        <DropForgeAccordionSection title="Image" defaultOpen>
+        <DropForgeAccordionSection
+          title="Image"
+          defaultOpen
+          headerRight={
+            imageMediaTypeLabel ? (
+              <DropForgeMediaTypePill label={imageMediaTypeLabel} />
+            ) : null
+          }
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <ImageSection
             claim={claim}
             claimId={claimId}
@@ -566,7 +557,17 @@ export default function DropForgeCraftClaimPageClient({
           />
         </DropForgeAccordionSection>
 
-        <DropForgeAccordionSection title="Animation" defaultOpen={hasAnimation}>
+        <DropForgeAccordionSection
+          title="Animation"
+          defaultOpen={hasAnimation}
+          headerRight={
+            animationMediaTypeLabel ? (
+              <DropForgeMediaTypePill label={animationMediaTypeLabel} />
+            ) : null
+          }
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <AnimationSection
             claim={claim}
             claimId={claimId}
@@ -903,9 +904,6 @@ function AnimationSection({
     animationDisplayUrl,
     mediaType,
   });
-  const animationPreviewLabel = getAnimationPreviewLabel(
-    animationPreviewMimeType
-  );
   const animationSourceCardProps = getAnimationSourceCardProps({
     pendingAnimationFile,
     pendingAnimation,
@@ -1139,9 +1137,8 @@ function AnimationSection({
         )}
         {showAnimationControls && (
           <>
-            <DropForgeMediaTypePill label={animationPreviewLabel} />
             {animationDisplayUrl && animationPreviewMimeType && (
-              <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
+              <div className="tw-relative tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
