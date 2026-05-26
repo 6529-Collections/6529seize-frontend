@@ -86,7 +86,9 @@ type DistributionSectionKey =
   | "phase2"
   | "public";
 
-function normalizeMediaFormat(format: string | null | undefined): string | null {
+function normalizeMediaFormat(
+  format: string | null | undefined
+): string | null {
   return format ? format.toUpperCase() : null;
 }
 
