@@ -169,6 +169,8 @@ describe("fetchWaveDropsFeedV2", () => {
       artist_of_main_stage_submissions: 1,
       artist_of_memes: 1,
       profile_wave_id: "profile-wave-1",
+      profile_wave_name: "Profile Wave",
+      profile_wave_pfp: "https://example.com/wave.png",
     };
 
     commonApiFetchMock.mockResolvedValueOnce({

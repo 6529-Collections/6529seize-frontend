@@ -3,9 +3,7 @@ import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { Tweet } from "react-tweet/api";
 
-import ExpandableTweetPreview, {
-  normalizeTweetForEnrichment,
-} from "@/components/tweets/ExpandableTweetPreview";
+import ExpandableTweetPreview from "@/components/tweets/ExpandableTweetPreview";
 import { enrichTweet, useTweet } from "react-tweet";
 
 jest.mock("react-tweet", () => ({
@@ -86,15 +84,33 @@ describe("ExpandableTweetPreview", () => {
       quoted_tweet: quotedTweet,
     } as unknown as Tweet;
 
-    const normalized = normalizeTweetForEnrichment(tweet);
+    const href = "https://x.com/6529/status/123";
+    mockUseTweet.mockReturnValue({
+      data: tweet,
+      isLoading: false,
+      error: undefined,
+    });
+    mockEnrichTweet.mockReturnValue(null as never);
 
-    expect(normalized.entities).toEqual({
+    render(
+      <ExpandableTweetPreview
+        href={href}
+        tweetId="123"
+        renderFallback={(fallbackHref) => (
+          <a href={fallbackHref}>Open fallback tweet</a>
+        )}
+      />
+    );
+
+    const normalizedTweet = mockEnrichTweet.mock.calls[0]?.[0];
+
+    expect(normalizedTweet?.entities).toEqual({
       hashtags: [],
       urls: [],
       user_mentions: [],
       symbols: [],
     });
-    expect(normalized.quoted_tweet?.entities).toEqual({
+    expect(normalizedTweet?.quoted_tweet?.entities).toEqual({
       hashtags: [],
       urls: [],
       user_mentions: [],
