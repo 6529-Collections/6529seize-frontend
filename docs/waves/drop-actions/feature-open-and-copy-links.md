@@ -17,7 +17,7 @@ Drop-level `Open` / `Open drop` actions and link-card `Open link` /
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Thread desktop `More` menu: `Open`, `Copy link`
 - Thread mobile action sheet: `Open drop`, `Copy link`
 - Link preview and quote cards in thread markdown: `Link actions` ->

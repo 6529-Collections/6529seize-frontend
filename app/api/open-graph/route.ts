@@ -8,6 +8,7 @@ import {
   parsePublicUrl,
   type UrlGuardOptions,
 } from "@/lib/security/urlGuard";
+import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
@@ -79,10 +80,8 @@ const HOST_OVERRIDES: readonly HostOverrides[] = [
 ];
 
 function findHostOverrides(hostname: string): HostOverrides | undefined {
-  const normalizedHost = hostname.toLowerCase();
-  return HOST_OVERRIDES.find(
-    ({ domain }) =>
-      normalizedHost === domain || normalizedHost.endsWith(`.${domain}`)
+  return HOST_OVERRIDES.find(({ domain }) =>
+    matchesDomainOrSubdomain(hostname, domain)
   );
 }
 

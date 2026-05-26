@@ -11,7 +11,7 @@ This page covers:
 
 ## Location in the Site
 
-- Wave thread routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Wave thread routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Full `Leaderboard` tab in the main thread content area.
 - Right-sidebar `Leaderboard` tab on rank waves while voting is still active.
 

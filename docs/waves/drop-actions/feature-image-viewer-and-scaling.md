@@ -11,7 +11,7 @@ Attachment images use larger scaling in single-drop views than in thread cards.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Single-drop overlay in the same route context via `?drop={dropId}`
 - Image attachments and markdown-embedded images in drop bodies
 

@@ -8,7 +8,7 @@ works from the card.
 
 ## Location in the Site
 
-- `/waves/{waveId}` and `/messages?wave={waveId}` when `Leaderboard` is available.
+- `/waves/{waveId}` and `/messages/{waveId}` when `Leaderboard` is available.
 - `Leaderboard` tab with `Grid view` selected on memes waves.
 - Card order and membership follow active `Sort` and optional `Group` filter context.
 

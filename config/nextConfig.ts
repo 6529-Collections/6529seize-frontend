@@ -40,7 +40,6 @@ export function sharedConfig(
       formats: ["image/avif", "image/webp"],
       qualities: [100, 75],
     },
-    transpilePackages: ["react-tweet"],
     poweredByHeader: false,
     logging: {
       incomingRequests: false,

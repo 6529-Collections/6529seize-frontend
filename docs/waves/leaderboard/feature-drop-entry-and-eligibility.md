@@ -15,8 +15,7 @@ Entry behavior differs by wave type:
 - Wave thread route: `/waves/{waveId}`
 - Legacy wave route: `/waves?wave={waveId}` redirects to `/waves/{waveId}` and
   keeps other query params
-- Direct-message wave route: `/messages?wave={waveId}` (there is no
-  `/messages/{waveId}` route)
+- Direct-message wave route: `/messages/{waveId}`
 - Entry controls appear in leaderboard header, leaderboard empty states, meme
   tabs header, or curation `Drop Artwork` modal entry actions
 

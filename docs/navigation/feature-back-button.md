@@ -9,7 +9,7 @@ contexts, then runs route rules before history.
 
 - App header in app-layout routes.
 - Create routes: `/waves/create`, `/messages/create`.
-- Active wave routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Active wave routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Legacy `/waves?wave={waveId}` links are normalized to `/waves/{waveId}`.
 - Profile routes (`/{user}` and tabs) only when in-app history can go back.
 

@@ -1,48 +1,6 @@
 /** @jest-environment jsdom */
 import React from "react";
 
-jest.mock("next/dynamic", () => {
-  let mode: "skeleton" | "eager" = "eager";
-  const calls: any[] = [];
-  const mock = jest.fn((loader: any, options: any) => {
-    calls.push([loader, options]);
-    const Comp = (props: any) => {
-      if (mode === "skeleton") {
-        const L = options?.loading as React.ComponentType | undefined;
-        return L ? <L /> : null;
-      }
-      // Eager mode: immediately render the underlying component.
-      // We know the loader resolves to react-tweet's Tweet, so just render that mock directly.
-      const { Tweet } = require("react-tweet");
-      const T = Tweet as React.ComponentType<any>;
-      return <T {...props} />;
-    };
-    (Comp as any).__loader = loader;
-    (Comp as any).__options = options;
-    return Comp;
-  });
-  const setMode = (m: "skeleton" | "eager") => {
-    mode = m;
-  };
-  return {
-    __esModule: true,
-    default: mock,
-    __calls: calls,
-    __setMode: setMode,
-  };
-});
-
-// Use this in assertions: dynamicSpy.mock.calls[0] => [loader, options]
-const {
-  default: dynamicSpy,
-  __calls: dynamicCalls,
-  __setMode: setDynamicMode,
-} = require("next/dynamic") as {
-  default: jest.Mock;
-  __calls: any[];
-  __setMode: (m: "skeleton" | "eager") => void;
-};
-
 import { publicEnv } from "@/config/env";
 import {
   fetchYoutubePreview,
@@ -98,24 +56,6 @@ jest.mock("@/contexts/EmojiContext", () => {
   };
 });
 
-const tweetMock = jest.fn(({ id, components, onError }: any) => {
-  if (id === "1111111111") {
-    throw new Error("boom");
-  }
-
-  if (id === "2222222222") {
-    const error = new Error("not found");
-    onError?.(error);
-    const NotFound = components?.TweetNotFound;
-    return NotFound ? <NotFound error={error} /> : null;
-  }
-
-  return <div>tweet:{id}</div>;
-});
-
-jest.mock("react-tweet", () => ({
-  Tweet: (props: any) => tweetMock(props),
-}));
 jest.mock("@/services/api/youtube", () => ({
   fetchYoutubePreview: jest.fn(),
 }));
@@ -163,6 +103,14 @@ const mockFarcasterCard = jest.fn(({ href }: any) => (
   <div data-testid="farcaster-card" data-href={href} />
 ));
 
+const mockTwitterPreviewCard = jest.fn(({ href, tweetId }: any) => (
+  <div
+    data-testid="twitter-post-preview"
+    data-href={href}
+    data-tweet-id={tweetId}
+  />
+));
+
 jest.mock("@/components/waves/LinkPreviewCard", () => ({
   __esModule: true,
   default: (props: any) => mockLinkPreviewCard(props),
@@ -176,6 +124,11 @@ jest.mock("@/src/components/waves/ArtBlocksTokenCard", () => ({
 jest.mock("@/components/waves/FarcasterCard", () => ({
   __esModule: true,
   default: (props: any) => mockFarcasterCard(props),
+}));
+
+jest.mock("@/components/waves/TwitterPreviewCard", () => ({
+  __esModule: true,
+  default: (props: any) => mockTwitterPreviewCard(props),
 }));
 
 jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
@@ -199,10 +152,7 @@ beforeEach(() => {
   mockLinkPreviewCard.mockClear();
   mockArtBlocksTokenCard.mockClear();
   mockFarcasterCard.mockClear();
-});
-
-afterEach(() => {
-  tweetMock.mockClear();
+  mockTwitterPreviewCard.mockClear();
 });
 
 describe("DropPartMarkdown", () => {
@@ -384,9 +334,9 @@ describe("DropPartMarkdown", () => {
 
   it("keeps grouped markdown images mounted across parent rerenders", () => {
     const content = "![Seize](/one.png)![Seize](/two.png)";
-    const mentionedUsers = [];
-    const mentionedWaves = [];
-    const referencedNfts = [];
+    const mentionedUsers: never[] = [];
+    const mentionedWaves: never[] = [];
+    const referencedNfts: never[] = [];
     const onQuoteClick = jest.fn();
     const { rerender } = render(
       <DropPartMarkdown
@@ -421,9 +371,9 @@ describe("DropPartMarkdown", () => {
   });
 
   it("only remounts the grouped markdown image whose URL changes", () => {
-    const mentionedUsers = [];
-    const mentionedWaves = [];
-    const referencedNfts = [];
+    const mentionedUsers: never[] = [];
+    const mentionedWaves: never[] = [];
+    const referencedNfts: never[] = [];
     const onQuoteClick = jest.fn();
     const { rerender } = render(
       <DropPartMarkdown
@@ -556,7 +506,10 @@ describe("DropPartMarkdown", () => {
       />
     );
     expect(mockLinkPreviewCard).toHaveBeenCalledTimes(1);
-    const previewCall = mockLinkPreviewCard.mock.calls[0][0];
+    const previewCall = mockLinkPreviewCard.mock.calls[0]?.[0];
+    if (!previewCall) {
+      throw new Error("Expected link preview card props");
+    }
     expect(previewCall.href).toBe("https://google.com");
 
     const a = screen.getByRole("link", { name: "link" });
@@ -670,7 +623,10 @@ describe("DropPartMarkdown", () => {
     await waitFor(() =>
       expect(mockArtBlocksTokenCard).toHaveBeenCalledTimes(1)
     );
-    const call = mockArtBlocksTokenCard.mock.calls[0][0];
+    const call = mockArtBlocksTokenCard.mock.calls[0]?.[0];
+    if (!call) {
+      throw new Error("Expected Art Blocks card props");
+    }
     expect(call.href).toBe("https://www.artblocks.io/token/662000");
     expect(call.id).toEqual({ tokenId: "662000" });
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
@@ -691,7 +647,10 @@ describe("DropPartMarkdown", () => {
 
     expect(mockFarcasterCard).toHaveBeenCalledTimes(1);
     expect(mockLinkPreviewCard).not.toHaveBeenCalled();
-    const call = mockFarcasterCard.mock.calls[0][0];
+    const call = mockFarcasterCard.mock.calls[0]?.[0];
+    if (!call) {
+      throw new Error("Expected Farcaster card props");
+    }
     expect(call.href).toBe("https://warpcast.com/alice/0x123");
   });
 
@@ -740,7 +699,7 @@ describe("DropPartMarkdown", () => {
     );
   });
 
-  it("renders a fallback link when tweet data is unavailable", async () => {
+  it("renders Twitter/X links with the local Twitter preview card", () => {
     const content = "[tweet](https://twitter.com/someuser/status/2222222222)";
 
     render(
@@ -753,28 +712,32 @@ describe("DropPartMarkdown", () => {
       />
     );
 
-    const fallbackLink = await screen.findByRole("link", {
-      name: /tweet unavailable/i,
-    });
-
-    expect(fallbackLink).toHaveAttribute(
-      "href",
-      "https://twitter.com/someuser/status/2222222222"
+    expect(mockTwitterPreviewCard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: "https://twitter.com/someuser/status/2222222222",
+        tweetId: "2222222222",
+      })
     );
-    expect(fallbackLink).toHaveAttribute("target", "_blank");
-    expect(fallbackLink).toHaveTextContent(/Tweet unavailable/i);
-    expect(fallbackLink).toHaveTextContent(/Open on X/i);
-    const tweetWrapper = fallbackLink.parentElement;
+    expect(screen.getByTestId("twitter-post-preview")).toHaveAttribute(
+      "data-tweet-id",
+      "2222222222"
+    );
+    const tweetWrapper = screen.getByTestId(
+      "twitter-post-preview"
+    ).parentElement;
     if (!tweetWrapper) {
-      throw new Error("Expected tweet fallback wrapper");
+      throw new Error("Expected Twitter preview card wrapper");
     }
     expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[480px]");
   });
 
-  it("renders a fallback link when the tweet embed throws", async () => {
+  it("falls back to regular link when the local Twitter preview card throws", async () => {
     const consoleErrorSpy = jest
       .spyOn(console, "error")
       .mockImplementation(() => {});
+    mockTwitterPreviewCard.mockImplementationOnce(() => {
+      throw new Error("boom");
+    });
 
     try {
       const content = "[tweet](https://twitter.com/foo/status/1111111111)";
@@ -789,19 +752,12 @@ describe("DropPartMarkdown", () => {
         />
       );
 
-      const fallbackLink = await screen.findByRole("link", {
-        name: /tweet unavailable/i,
-      });
+      const fallbackLink = await screen.findByRole("link", { name: "tweet" });
 
       expect(fallbackLink).toHaveAttribute(
         "href",
         "https://twitter.com/foo/status/1111111111"
       );
-      const tweetWrapper = fallbackLink.parentElement;
-      if (!tweetWrapper) {
-        throw new Error("Expected tweet fallback wrapper");
-      }
-      expect(tweetWrapper).toHaveClass("tw-w-full", "lg:tw-max-w-[480px]");
     } finally {
       consoleErrorSpy.mockRestore();
     }
@@ -1010,38 +966,6 @@ describe("DropPartMarkdown", () => {
     );
     expect(fallbackLink).toHaveAttribute("href", url);
     expect(fallbackLink).toHaveTextContent(/youtube preview unavailable/i);
-  });
-
-  it("lazy loads tweet embeds with a loading skeleton", async () => {
-    setDynamicMode("skeleton");
-    try {
-      const content =
-        "Check this [tweet](https://twitter.com/user/status/1234567890)";
-
-      render(
-        <DropPartMarkdown
-          mentionedUsers={[]}
-          mentionedWaves={[]}
-          referencedNfts={[]}
-          partContent={content}
-          onQuoteClick={jest.fn()}
-        />
-      );
-
-      expect(
-        screen.queryByTestId("tweet-embed-loading") ??
-          screen.queryByText("Tweet unavailable")
-      ).not.toBeNull();
-
-      expect(dynamicCalls.length).toBeGreaterThanOrEqual(1);
-      const [loader, options] = dynamicCalls[0];
-      expect(options?.ssr).toBe(false);
-
-      const loadedTweetComponent = await loader();
-      expect(loadedTweetComponent).toBeDefined();
-    } finally {
-      setDynamicMode("eager");
-    }
   });
 
   it("renders plain links when link previews are hidden for the drop", () => {

@@ -17,7 +17,7 @@ Sidebar layout and `Trending` shell behavior are documented in
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Full drop cards in thread message lists
 - Boosted cards in the thread list and right-sidebar `Trending`
 

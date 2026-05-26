@@ -21,6 +21,7 @@ describe("Wave page", () => {
     expect(renderWavesPageContent).toHaveBeenCalledWith({
       waveId: "test-wave-123",
       searchParams: { serialNo: "42" },
+      routeContext: "waves",
     });
     expect(result).toBe("wave-content");
   });

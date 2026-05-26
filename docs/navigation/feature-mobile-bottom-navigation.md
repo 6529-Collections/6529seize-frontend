@@ -34,7 +34,7 @@ drawer/account surfaces.
 2. Tap a tab:
    - `Discovery` -> `/discover`
    - `Waves` -> `/waves`, or cached non-DM thread (`/waves/{waveId}`)
-   - `Messages` -> `/messages`, or cached DM thread (`/messages?wave={waveId}`)
+   - `Messages` -> `/messages`, or cached DM thread (`/messages/{waveId}`)
    - `Home` -> `/`
    - `Network` -> `/network`
    - `Collections` -> `/the-memes`
@@ -50,7 +50,7 @@ drawer/account surfaces.
 - Use the app drawer/profile avatar when you need your own profile route.
 - From `/waves/{waveId}`, tap `Waves` once to clear cached wave thread state
   and return to `/waves`.
-- From `/messages?wave={id}`, tap `Messages` once to clear cached DM thread
+- From `/messages/{id}`, tap `Messages` once to clear cached DM thread
   state and return to `/messages`.
 - From `/waves` or `/messages` roots, tap the same tab to reopen the last
   cached thread in that category (if one exists).

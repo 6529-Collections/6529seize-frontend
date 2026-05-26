@@ -16,17 +16,16 @@ Use this area for wave and direct-message tasks:
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
 - Messages list: `/messages`
-- Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
-  route)
+- Direct-message thread: `/messages/{waveId}`
 - App create routes: `/waves/create` and `/messages/create`
 
 ## Query Coverage
 
 - Web wave-create mode (`create=wave`) uses the current stream route
   (for example `/waves`, `/waves/{waveId}`, `/messages`, or
-  `/messages?wave={waveId}`).
+  `/messages/{waveId}`).
 - Web direct-message mode (`create=dm`) is supported on `/messages` and
-  `/messages?wave={waveId}`.
+  `/messages/{waveId}`.
 - `drop={dropId}` opens a single-drop overlay in the current thread context.
 - If a URL contains both `drop` and `serialNo`, drop-open behavior is handled
   first.
@@ -98,7 +97,7 @@ Use this area for wave and direct-message tasks:
 
 - [Wave Navigation and Posting Troubleshooting](troubleshooting-wave-navigation-and-posting.md):
   route, tab, posting, and deep-link recovery for `/waves/{waveId}` and
-  `/messages?wave={waveId}` thread contexts.
+  `/messages/{waveId}` thread contexts.
 
 ## Stubs
 

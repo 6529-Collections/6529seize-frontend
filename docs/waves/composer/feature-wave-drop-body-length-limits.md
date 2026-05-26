@@ -15,8 +15,7 @@ These rules apply to non-curation thread composer flows in both `Post` and
 ## Location in the Site
 
 - Wave threads: `/waves/{waveId}`
-- Direct-message threads: `/messages?wave={waveId}` (no `/messages/{waveId}`
-  route)
+- Direct-message threads: `/messages/{waveId}`
 - Thread footer composer on desktop and mobile
 
 ## Entry Points

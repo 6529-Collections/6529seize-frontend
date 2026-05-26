@@ -12,7 +12,7 @@ context.
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - App create uses `/waves/create`.
 
 ## Entry Points
@@ -41,7 +41,7 @@ context.
 
 - Start a new wave from `/waves` and keep waves-list context behind the modal.
 - Start a new wave from desktop waves sidebar while browsing existing waves.
-- Open `/messages?create=wave` or `/messages?wave={waveId}&create=wave` to open
+- Open `/messages?create=wave` or `/messages/{waveId}?create=wave` to open
   create-wave inside messages layout.
 - Reopen the modal by using a URL that already includes `create=wave`.
 - Open create-wave from `/waves` placeholder before selecting an active wave.

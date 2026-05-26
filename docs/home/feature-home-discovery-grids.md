@@ -16,12 +16,12 @@ why a section can disappear.
 - Route: `/`
 - Boosted card actions:
   - Card click: `/waves/{waveId}?serialNo={serialNo}` or
-    `/messages?wave={waveId}&serialNo={serialNo}` for direct-message waves
+    `/messages/{waveId}?serialNo={serialNo}` for direct-message waves
   - Author link: `/{handle}` when a handle exists
   - Author fallback: shows `Anonymous`; no profile route is available
   - Wave link: `/waves/{waveId}`
 - Most active waves actions:
-  - Card click: `/waves/{waveId}` or `/messages?wave={waveId}` for
+  - Card click: `/waves/{waveId}` or `/messages/{waveId}` for
     direct-message waves
   - `View all`: `/waves`
 
@@ -78,7 +78,7 @@ why a section can disappear.
 - If either section is missing, refresh `/` to re-run section queries.
 - If card navigation is unavailable, open `/waves` and navigate from there.
 - If a boosted deep-link fails, open `/waves/{waveId}` or
-  `/messages?wave={waveId}` and find the drop in chat history.
+  `/messages/{waveId}` and find the drop in chat history.
 
 ## Limitations / Notes
 

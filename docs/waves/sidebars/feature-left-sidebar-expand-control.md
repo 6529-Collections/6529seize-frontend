@@ -11,18 +11,18 @@ panel.
 
 - Thread routes with a selected wave:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}` (no `/messages/{waveId}` route)
+  - `/messages/{waveId}`
 - Legacy `/waves?wave={waveId}` redirects to `/waves/{waveId}` and keeps other
   query params.
 - The control exists only when the right sidebar is inline (`>=1024px`).
 
 ## Entry Points
 
-- Open `/waves/{waveId}` or `/messages?wave={waveId}` on desktop.
+- Open `/waves/{waveId}` or `/messages/{waveId}` on desktop.
 - In the thread header, click `Toggle right sidebar`.
 - In the collapsed left rail, click:
   - `Expand waves panel` on `/waves/{waveId}`
-  - `Expand messages panel` on `/messages?wave={waveId}`
+  - `Expand messages panel` on `/messages/{waveId}`
 
 ## Visibility Rules
 
@@ -52,7 +52,7 @@ The control is hidden when any are true:
 ## Failure and Recovery
 
 - If the control is missing, confirm you are on `/waves/{waveId}` or
-  `/messages?wave={waveId}` and that the right sidebar is open.
+  `/messages/{waveId}` and that the right sidebar is open.
 - If your viewport is below `1024px`, the sidebar opens as overlay, so this
   control is not available.
 - If a full drop overlay is open, close it first.

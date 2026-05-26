@@ -9,7 +9,7 @@ Selecting the avatar pencil opens `Update wave picture`.
 
 - Wave `About` header in right-sidebar surfaces on:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Mobile `About` uses the same header component.
 - The pencil overlay is hover-only (`@media (any-hover: hover)`), so touch-only
   web layouts do not show this action.

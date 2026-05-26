@@ -5,7 +5,9 @@ Parent: [Wave Link Previews Index](README.md)
 ## Overview
 
 Supported Twitter/X status URLs render as inline tweet cards instead of plain
-links.
+links. Cards are rendered by the frontend using native UI fed by the
+server-side Twitter oEmbed preview endpoint, not by embedding the third-party
+X/Twitter widget.
 
 This page covers:
 
@@ -17,7 +19,7 @@ This page covers:
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Boosted cards on `/`
 - Wave leaderboard card content that reuses markdown rendering
 
@@ -47,11 +49,12 @@ Links that do not match these rules stay regular links.
 
 1. Open a surface with a supported Twitter/X status link.
 2. The renderer validates the link and extracts the tweet ID.
-3. A loading state appears (`Loading tweet...`).
-4. If tweet data loads, the tweet renders inline.
-5. In auto-compact contexts, long tweets show `Show full tweet`; selecting it
-   expands the tweet inline.
-6. In wave/DM chat layouts, side actions (open/copy) appear beside the card.
+3. A tweet-shaped loading state appears.
+4. The app requests `/api/twitter/preview`, which fetches
+   `https://publish.twitter.com/oembed` server-side and parses the returned HTML.
+5. If oEmbed metadata loads, the post text and media link render inline.
+6. The card includes X intent actions for liking and replying, plus copy link.
+7. In wave/DM chat layouts, side actions (open/copy) appear beside the card.
    In home-style layouts, side actions are hidden.
 
 ## Common Scenarios
@@ -61,8 +64,8 @@ Links that do not match these rules stay regular links.
   shown again.
 - Hidden previews can be restored from the desktop `More` menu on eligible
   thread drops.
-- During serial-jump or history-load scroll operations, newly inserted drops can
-  stay in auto-compact mode.
+- During serial-jump or history-load scroll operations, the card uses the same
+  local Twitter preview card and server-side oEmbed metadata cache.
 
 ## Edge Cases
 
@@ -70,17 +73,17 @@ Links that do not match these rules stay regular links.
 - Links missing `status`/`statuses` do not render as tweet cards.
 - Invalid Twitter/X links do not fall back to generic OpenGraph cards; they remain
   regular links.
-- Short tweets render without `Show full tweet`.
+- Supported links render with the local Twitter preview card instead of the generic
+  OpenGraph card.
 
 ## Failure and Recovery
 
-- If tweet data is unavailable in markdown-rendered cards, users see
-  `Tweet unavailable` with `Open on X`.
-- If tweet rendering throws in markdown-rendered cards, the same fallback appears.
-- In boosted cards on `/`, unavailable tweet data falls back to an `X post` card
-  linking to the original URL.
-- If `Show full tweet` appears, users can expand in place without leaving the
-  current surface.
+- If oEmbed metadata is unavailable, users still see a native fallback card with
+  the original URL and `Open on X`.
+- If local Twitter preview card rendering throws in markdown-rendered cards, the
+  renderer falls back to a regular link.
+- In boosted cards on `/`, supported Twitter/X status URLs use the same local
+  Twitter preview card.
 
 ## Limitations / Notes
 
@@ -88,6 +91,8 @@ Links that do not match these rules stay regular links.
 - This page covers tweet cards in wave/DM markdown, leaderboard markdown, and
   boosted `/` cards.
 - This page does not cover non-drop tweet surfaces.
+- Real-time X engagement counts are not fetched; actions link out to X intent
+  routes.
 
 ## Related Pages
 

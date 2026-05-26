@@ -14,7 +14,7 @@ to the replied drop instead of opening that URL.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Thread cards: chat drops and standard winner drops.
 
 ## Entry Points

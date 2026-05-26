@@ -8,7 +8,7 @@ threads.
 ### Route coverage
 
 - `/waves/{waveId}`
-- `/messages?wave={waveId}`
+- `/messages/{waveId}`
 - Single-drop overlay in current thread route via `?drop={dropId}`
 
 ### Ownership

@@ -13,9 +13,9 @@ reposition to stay visible in the viewport.
 
 - Profile hover cards on identity triggers in wave feeds, leaderboard/winner
   rows, and notifications across routes such as `/discover`,
-  `/waves/{waveId}`, `/messages?wave={waveId}`, and `/notifications`.
+  `/waves/{waveId}`, `/messages/{waveId}`, and `/notifications`.
 - Wave mention hover cards on `#wave` links inside drop content on
-  `/waves/{waveId}` and `/messages?wave={waveId}`.
+  `/waves/{waveId}` and `/messages/{waveId}`.
 - Helper tooltips in xTDH stat and grant-action surfaces (for example
   `/{user}/xtdh` and group xTDH grant setup screens).
 - Helper tooltips in network health metric cards in the Network area.

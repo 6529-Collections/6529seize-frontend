@@ -14,7 +14,7 @@ cards.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Single-drop mode chat panel opened with `drop={dropId}`
 - Full drop cards rendered in the thread feed
 

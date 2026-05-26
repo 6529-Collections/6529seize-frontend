@@ -20,7 +20,7 @@ Users can:
 
 - Right-sidebar `About` tab on:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Mobile `About` view for an active wave.
 
 ## Entry Points
