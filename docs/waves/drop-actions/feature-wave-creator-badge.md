@@ -39,8 +39,9 @@ directly.
 3. Select the badge.
 4. The shared `Waves by {profile}` viewer opens, or the profile wave opens
    directly from the chat-feed badge.
-5. Review created-wave rows, then select a row to open that wave at
-   `/waves/{waveId}`.
+5. If the viewer opened, review created-wave rows, then select a row to open
+   that wave at `/waves/{waveId}`; if the profile wave opened directly, skip
+   this step.
 
 ## Common Scenarios
 

@@ -7,7 +7,7 @@ import { faWater } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
 interface WaveCreatorBadgeProps {
   readonly tooltipId?: string | undefined;
@@ -45,7 +45,7 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
   const normalizedWaveName = getTrimmedText(waveName);
   const normalizedWavePfp = getTrimmedText(wavePfp);
   const waveImageSrc = normalizedWavePfp
-    ? resolveIpfsUrlSync(normalizedWavePfp)
+    ? getScaledImageUri(normalizedWavePfp, ImageScale.W_AUTO_H_50)
     : null;
   const shouldShowWaveDetails = showWaveDetails && size !== "compact";
   const displayWaveName = normalizedWaveName ?? "profile wave";

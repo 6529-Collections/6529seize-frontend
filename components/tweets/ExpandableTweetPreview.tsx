@@ -42,7 +42,7 @@ const normalizeTweetEntities = (
   ...(Array.isArray(entities?.media) ? { media: entities.media } : {}),
 });
 
-export const normalizeTweetForEnrichment = (tweet: Tweet): Tweet => {
+const normalizeTweetForEnrichment = (tweet: Tweet): Tweet => {
   const normalizedTweet = {
     ...tweet,
     entities: normalizeTweetEntities(tweet.entities),
