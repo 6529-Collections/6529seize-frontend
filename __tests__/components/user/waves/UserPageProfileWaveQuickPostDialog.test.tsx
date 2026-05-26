@@ -8,6 +8,7 @@ import UserPageProfileWaveQuickPostDialog from "@/components/user/waves/UserPage
 import { useAuth } from "@/components/auth/Auth";
 import { addDropToCuration } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
+import { useWave } from "@/hooks/useWave";
 import { useQueryClient } from "@tanstack/react-query";
 
 let waveDropCreateProps: any;
@@ -18,6 +19,10 @@ jest.mock("@/components/auth/Auth", () => ({
 
 jest.mock("@/hooks/drops/useDropCurationMembershipMutation", () => ({
   addDropToCuration: jest.fn(),
+}));
+
+jest.mock("@/hooks/useWave", () => ({
+  useWave: jest.fn(),
 }));
 
 jest.mock("@tanstack/react-query", () => ({
@@ -40,6 +45,7 @@ jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
 const useAuthMock = useAuth as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const addDropToCurationMock = addDropToCuration as jest.Mock;
+const useWaveMock = useWave as jest.Mock;
 
 const wave = { id: "wave-1" } as any;
 const curation = { id: "curation-1", name: "Art" } as any;
@@ -67,8 +73,10 @@ const renderDialog = ({
 
 describe("UserPageProfileWaveQuickPostDialog", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     waveDropCreateProps = undefined;
     useAuthMock.mockReturnValue({ setToast: jest.fn() });
+    useWaveMock.mockReturnValue({ isCurationWave: true });
     useQueryClientMock.mockReturnValue({
       invalidateQueries: jest.fn(() => Promise.resolve()),
     });
@@ -114,6 +122,31 @@ describe("UserPageProfileWaveQuickPostDialog", () => {
       message: "Post added to curation.",
     });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not close when fixed drop mode exits", () => {
+    const { onClose } = renderDialog();
+
+    act(() => {
+      waveDropCreateProps.onExitFixedDropMode();
+    });
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("forces the standard composer for curation waves", () => {
+    renderDialog();
+
+    expect(useWaveMock).toHaveBeenCalledWith(wave);
+    expect(waveDropCreateProps.forceStandardDropComposer).toBe(true);
+  });
+
+  it("does not force the standard composer for non-curation waves", () => {
+    useWaveMock.mockReturnValue({ isCurationWave: false });
+
+    renderDialog();
+
+    expect(waveDropCreateProps.forceStandardDropComposer).toBe(false);
   });
 
   it("shows the partial-success error and does not close when curation add fails", async () => {

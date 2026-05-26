@@ -12,6 +12,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { addDropToCuration } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
+import { useWave } from "@/hooks/useWave";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useContext, useEffect, useRef } from "react";
 
@@ -32,6 +33,7 @@ export default function UserPageProfileWaveQuickPostDialog({
   const queryClient = useQueryClient();
   const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const { isCurationWave } = useWave(wave);
   const hasCurationAddErrorRef = useRef(false);
   const successfulCurationAddsRef = useRef(0);
 
@@ -105,6 +107,8 @@ export default function UserPageProfileWaveQuickPostDialog({
     onClose();
   }, [onClose, refreshDropCaches, setToast]);
 
+  const handleExitFixedDropMode = useCallback(() => undefined, []);
+
   return (
     <MobileWrapperDialog
       title={`Add post to ${curation.name}`}
@@ -123,10 +127,11 @@ export default function UserPageProfileWaveQuickPostDialog({
             onCancel={onClose}
             onSuccess={handleAllDropsAdded}
             onServerDropCreated={handleServerDropCreated}
+            onExitFixedDropMode={handleExitFixedDropMode}
             title="Add post"
             isModalContent={true}
             identityPickerPlacement="inline"
-            forceStandardDropComposer={true}
+            forceStandardDropComposer={isCurationWave}
           />
         </div>
       </div>
