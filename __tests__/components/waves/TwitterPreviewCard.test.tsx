@@ -18,7 +18,9 @@ const mockedFetchTwitterPreview = fetchTwitterPreview as jest.MockedFunction<
 
 describe("TwitterPreviewCard", () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     mockedFetchTwitterPreview.mockReset();
+    jest.spyOn(globalThis.window, "open").mockImplementation(() => null);
     Object.assign(navigator, {
       clipboard: {
         writeText: jest.fn().mockResolvedValue(undefined),
@@ -40,6 +42,9 @@ describe("TwitterPreviewCard", () => {
       createdAtIso: "2026-04-28T19:02:00.000Z",
       favoriteCount: 94626,
       conversationCount: 3951,
+      retweetCount: 2,
+      bookmarkCount: 1,
+      viewCount: 137,
     });
 
     render(
@@ -72,20 +77,25 @@ describe("TwitterPreviewCard", () => {
       screen.getByRole("img", { name: "These jobs won't be here forever." })
     ).toHaveAttribute("src", "https://pbs.twimg.com/media/example.jpg");
     expect(screen.getByText(/· Apr 28, 2026/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /94,626/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Like" })).toHaveAttribute(
       "href",
       "https://x.com/intent/like?tweet_id=2049202644879565155"
     );
-    expect(screen.getByRole("link", { name: /reply/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Reply" })).toHaveAttribute(
       "href",
       "https://x.com/intent/tweet?in_reply_to=2049202644879565155"
     );
-    expect(
-      screen.getByRole("link", { name: "Read 3,951 replies" })
-    ).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Repost" })).toHaveAttribute(
       "href",
-      "https://x.com/Mayudropsphotos/status/2049202644879565155"
+      "https://x.com/intent/retweet?tweet_id=2049202644879565155"
     );
+    expect(screen.getByLabelText("Bookmarks")).toHaveTextContent("1");
+    expect(screen.getByText("94.6K")).toBeInTheDocument();
+    expect(screen.getByText("3.9K")).toBeInTheDocument();
+    expect(screen.getByText("137 Views")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Read 3,951 replies" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders playable video media when available", async () => {
@@ -125,6 +135,134 @@ describe("TwitterPreviewCard", () => {
     );
   });
 
+  it("opens the tweet when clicking the preview card body", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2049202644879565155",
+      url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
+      authorName: "Mayudrops",
+      authorHandle: "Mayudropsphotos",
+      text: "Post text",
+    });
+
+    render(
+      <TwitterPreviewCard
+        href="https://x.com/Mayudropsphotos/status/2049202644879565155"
+        tweetId="2049202644879565155"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+    await userEvent.click(screen.getByText("Post text"));
+
+    expect(globalThis.window.open).toHaveBeenCalledWith(
+      "https://x.com/Mayudropsphotos/status/2049202644879565155",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  });
+
+  it("does not open the tweet when clicking an action", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2049202644879565155",
+      url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
+      authorName: "Mayudrops",
+      authorHandle: "Mayudropsphotos",
+      text: "Post text",
+    });
+
+    render(
+      <TwitterPreviewCard
+        href="https://x.com/Mayudropsphotos/status/2049202644879565155"
+        tweetId="2049202644879565155"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+    await userEvent.click(screen.getByRole("button", { name: /copy/i }));
+
+    expect(globalThis.window.open).not.toHaveBeenCalled();
+  });
+
+  it("renders multiple media items in a gallery grid", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2058813617554723314",
+      url: "https://x.com/Casa_NUA/status/2058813617554723314",
+      authorName: "CasaNUA.6529",
+      authorHandle: "Casa_NUA",
+      text: "Gallery tweet",
+      media: [
+        {
+          type: "image",
+          imageUrl: "https://pbs.twimg.com/media/photo-one.jpg",
+        },
+        {
+          type: "video",
+          videoUrl: "https://video.twimg.com/ext_tw_video/video-one.mp4",
+          posterUrl: "https://pbs.twimg.com/media/video-poster.jpg",
+        },
+        {
+          type: "image",
+          imageUrl: "https://pbs.twimg.com/media/photo-two.jpg",
+        },
+      ],
+    });
+
+    const { container } = render(
+      <TwitterPreviewCard
+        href="https://x.com/Casa_NUA/status/2058813617554723314"
+        tweetId="2058813617554723314"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+
+    expect(screen.getAllByRole("img", { name: "Gallery tweet" })).toHaveLength(
+      2
+    );
+    expect(container.querySelector("video")).toHaveAttribute(
+      "src",
+      "https://video.twimg.com/ext_tw_video/video-one.mp4"
+    );
+  });
+
+  it("renders reply context and clickable mention links", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2058813617554723314",
+      url: "https://x.com/Casa_NUA/status/2058813617554723314",
+      authorName: "CasaNUA.6529",
+      authorHandle: "Casa_NUA",
+      replyToHandle: "Casa_NUA",
+      text: "5/ 6529 Seizing is a close-up of @punk6529.\n\nHere sharing a display with @Viva_La_Vandal and @BillyNFTees.",
+    });
+
+    render(
+      <TwitterPreviewCard
+        href="https://x.com/Casa_NUA/status/2058813617554723314"
+        tweetId="2058813617554723314"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+
+    expect(screen.getByText("Replying to")).toBeInTheDocument();
+    const casaLinks = screen.getAllByRole("link", { name: "@Casa_NUA" });
+    expect(casaLinks).toHaveLength(2);
+    for (const casaLink of casaLinks) {
+      expect(casaLink).toHaveAttribute("href", "https://x.com/Casa_NUA");
+    }
+    expect(screen.getByRole("link", { name: "@punk6529" })).toHaveAttribute(
+      "href",
+      "https://x.com/punk6529"
+    );
+    expect(
+      screen.getByRole("link", { name: "@Viva_La_Vandal" })
+    ).toHaveAttribute("href", "https://x.com/Viva_La_Vandal");
+    expect(screen.getByRole("link", { name: "@BillyNFTees" })).toHaveAttribute(
+      "href",
+      "https://x.com/BillyNFTees"
+    );
+  });
+
   it("copies the original Twitter/X post link", async () => {
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2049202644879565155",
@@ -143,6 +281,9 @@ describe("TwitterPreviewCard", () => {
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(href);
     expect(screen.getByRole("button", { name: /copy/i })).toHaveTextContent(
       "Copied"
+    );
+    expect(screen.getByRole("button", { name: /copy/i })).not.toHaveTextContent(
+      "Copy link"
     );
   });
 
@@ -168,6 +309,9 @@ describe("TwitterPreviewCard", () => {
     expect(screen.getByRole("link", { name: "Open on X" })).toHaveAttribute(
       "href",
       "https://x.com/Mayudropsphotos/status/2057513333985554492"
+    );
+    expect(screen.getByRole("button", { name: /copy/i })).toHaveTextContent(
+      "Copy"
     );
     expect(
       screen.queryByRole("link", { name: /like/i })
