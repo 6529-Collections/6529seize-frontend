@@ -290,7 +290,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 }
                 data-field="description"
                 data-max-length={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
-                className={`tw-form-textarea tw-w-full tw-resize-none tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
+                className={`tw-form-textarea tw-w-full tw-cursor-text tw-resize-none tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
                   isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""
                 } `}
               />

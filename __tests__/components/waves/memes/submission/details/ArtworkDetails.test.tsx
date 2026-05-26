@@ -158,9 +158,7 @@ describe("ArtworkDetails", () => {
       />
     );
 
-    expect(screen.getByText("7,600 / 8,000")).toHaveClass(
-      "tw-text-orange-400"
-    );
+    expect(screen.getByText("7,600 / 8,000")).toHaveClass("tw-text-orange-400");
   });
 
   it("uses neutral required markers and subtle success rings for filled fields", () => {

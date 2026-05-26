@@ -4,7 +4,7 @@ import type { TraitsData } from "../types/TraitsData";
 import { validateStrictAddress } from "./addressValidation";
 import { objectEntries } from "./objectEntries";
 
-export const METADATA_VALUE_DEFAULT_MAX_LENGTH = 5000;
+const METADATA_VALUE_DEFAULT_MAX_LENGTH = 5000;
 export const METADATA_VALUE_TITLE_MAX_LENGTH = 255;
 export const METADATA_VALUE_DESCRIPTION_MAX_LENGTH = 8000;
 const METADATA_VALUE_WARNING_THRESHOLD_RATIO = 0.9;
