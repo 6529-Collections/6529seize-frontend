@@ -11089,6 +11089,11 @@ components:
           format: int64
         profile_wave_id:
           type: string
+        profile_wave_name:
+          type: string
+        profile_wave_pfp:
+          type: string
+          nullable: true
     ApiIdentityOverviewContextProfileContext:
       type: object
       required:
