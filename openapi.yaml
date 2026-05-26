@@ -10039,6 +10039,27 @@ components:
           maxLength: 100
           nullable: true
     ApiDropMetadata:
+      description: >-
+        Drop metadata. data_value maximum length is 255 when data_key is title,
+        8000 when data_key is description, and 5000 for all other metadata keys.
+      oneOf:
+        - $ref: "#/components/schemas/ApiDropMetadataTitle"
+        - $ref: "#/components/schemas/ApiDropMetadataDescription"
+        - $ref: "#/components/schemas/ApiDropMetadataOther"
+    ApiDropMetadataDescription:
+      type: object
+      required:
+        - data_key
+        - data_value
+      properties:
+        data_key:
+          type: string
+          enum:
+            - description
+        data_value:
+          type: string
+          maxLength: 8000
+    ApiDropMetadataOther:
       type: object
       required:
         - data_key
@@ -10047,13 +10068,50 @@ components:
         data_key:
           type: string
           maxLength: 500
+          not:
+            enum:
+              - title
+              - description
         data_value:
-          description: >-
-            Maximum length is 255 when data_key is title, 8000 when data_key is
-            description, and 5000 for all other metadata keys.
           type: string
-          maxLength: 8000
+          maxLength: 5000
     ApiDropMetadataResponse:
+      description: >-
+        Drop metadata response. data_value maximum length is 255 when data_key
+        is title, 8000 when data_key is description, and 5000 for all other
+        metadata keys.
+      oneOf:
+        - $ref: "#/components/schemas/ApiDropMetadataResponseTitle"
+        - $ref: "#/components/schemas/ApiDropMetadataResponseDescription"
+        - $ref: "#/components/schemas/ApiDropMetadataResponseOther"
+    ApiDropMetadataResponseDescription:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropMetadataDescription"
+        - type: object
+          properties:
+            resolved_profile:
+              anyOf:
+                - type: "null"
+                - $ref: "#/components/schemas/ApiDropResolvedIdentityProfile"
+    ApiDropMetadataResponseOther:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropMetadataOther"
+        - type: object
+          properties:
+            resolved_profile:
+              anyOf:
+                - type: "null"
+                - $ref: "#/components/schemas/ApiDropResolvedIdentityProfile"
+    ApiDropMetadataResponseTitle:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropMetadataTitle"
+        - type: object
+          properties:
+            resolved_profile:
+              anyOf:
+                - type: "null"
+                - $ref: "#/components/schemas/ApiDropResolvedIdentityProfile"
+    ApiDropMetadataTitle:
       type: object
       required:
         - data_key
@@ -10061,34 +10119,41 @@ components:
       properties:
         data_key:
           type: string
-          maxLength: 500
+          enum:
+            - title
         data_value:
-          description: >-
-            Maximum length is 255 when data_key is title, 8000 when data_key is
-            description, and 5000 for all other metadata keys.
           type: string
-          maxLength: 8000
-        resolved_profile:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiDropResolvedIdentityProfile"
+          maxLength: 255
     ApiDropMetadataV2:
-      type: object
-      required:
-        - data_key
-        - data_value
-      properties:
-        data_key:
-          type: string
-          maxLength: 500
-        data_value:
-          description: >-
-            Maximum length is 255 when data_key is title, 8000 when data_key is
-            description, and 5000 for all other metadata keys.
-          type: string
-          maxLength: 8000
-        resolved_profile:
-          $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
+      description: >-
+        Drop metadata V2 response. data_value maximum length is 255 when
+        data_key is title, 8000 when data_key is description, and 5000 for all
+        other metadata keys.
+      oneOf:
+        - $ref: "#/components/schemas/ApiDropMetadataV2Title"
+        - $ref: "#/components/schemas/ApiDropMetadataV2Description"
+        - $ref: "#/components/schemas/ApiDropMetadataV2Other"
+    ApiDropMetadataV2Description:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropMetadataDescription"
+        - type: object
+          properties:
+            resolved_profile:
+              $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
+    ApiDropMetadataV2Other:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropMetadataOther"
+        - type: object
+          properties:
+            resolved_profile:
+              $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
+    ApiDropMetadataV2Title:
+      allOf:
+        - $ref: "#/components/schemas/ApiDropMetadataTitle"
+        - type: object
+          properties:
+            resolved_profile:
+              $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
     ApiDropNftLink:
       type: object
       required:

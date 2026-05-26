@@ -11,37 +11,30 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropMetadataDescription } from '../models/ApiDropMetadataDescription';
+import { ApiDropMetadataOther } from '../models/ApiDropMetadataOther';
+import { ApiDropMetadataTitle } from '../models/ApiDropMetadataTitle';
 import { HttpFile } from '../http/http';
 
-export class ApiDropMetadata {
-    'data_key': string;
-    /**
-    * Maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
-    */
-    'data_value': string;
+/**
+* Drop metadata. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+*/
+/**
+ * @type ApiDropMetadata
+ * Type
+ * @export
+ */
+export type ApiDropMetadata = ApiDropMetadataDescription | ApiDropMetadataOther | ApiDropMetadataTitle;
 
+/**
+* @type ApiDropMetadataClass
+    * Drop metadata. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+* @export
+*/
+export class ApiDropMetadataClass {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
-
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "data_key",
-            "baseName": "data_key",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "data_value",
-            "baseName": "data_value",
-            "type": "string",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return ApiDropMetadata.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
 }
+
+

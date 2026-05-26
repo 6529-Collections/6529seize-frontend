@@ -11,45 +11,30 @@
  * Do not edit the class manually.
  */
 
-import { ApiDropResolvedIdentityProfileV2 } from '../models/ApiDropResolvedIdentityProfileV2';
+import { ApiDropMetadataV2Description } from '../models/ApiDropMetadataV2Description';
+import { ApiDropMetadataV2Other } from '../models/ApiDropMetadataV2Other';
+import { ApiDropMetadataV2Title } from '../models/ApiDropMetadataV2Title';
 import { HttpFile } from '../http/http';
 
-export class ApiDropMetadataV2 {
-    'data_key': string;
-    /**
-    * Maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
-    */
-    'data_value': string;
-    'resolved_profile'?: ApiDropResolvedIdentityProfileV2;
+/**
+* Drop metadata V2 response. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+*/
+/**
+ * @type ApiDropMetadataV2
+ * Type
+ * @export
+ */
+export type ApiDropMetadataV2 = ApiDropMetadataV2Description | ApiDropMetadataV2Other | ApiDropMetadataV2Title;
 
+/**
+* @type ApiDropMetadataV2Class
+    * Drop metadata V2 response. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+* @export
+*/
+export class ApiDropMetadataV2Class {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
-
-    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "data_key",
-            "baseName": "data_key",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "data_value",
-            "baseName": "data_value",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "resolved_profile",
-            "baseName": "resolved_profile",
-            "type": "ApiDropResolvedIdentityProfileV2",
-            "format": ""
-        }    ];
-
-    static getAttributeTypeMap() {
-        return ApiDropMetadataV2.attributeTypeMap;
-    }
-
-    public constructor() {
-    }
 }
+
+
