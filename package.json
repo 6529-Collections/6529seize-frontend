@@ -37,6 +37,8 @@
     "lint": "node scripts/require-6529-command.cjs && eslint .",
     "typecheck": "node scripts/require-6529-command.cjs && pnpm run format:uncommitted && tsc --noEmit -p tsconfig.typecheck.json",
     "typecheck:changed": "node scripts/require-6529-command.cjs && node scripts/typecheck-changed.cjs",
+    "check": "node scripts/require-6529-command.cjs && pnpm run typecheck && pnpm run quality",
+    "check:changed": "node scripts/require-6529-command.cjs && pnpm run typecheck:changed && pnpm run quality:changed",
     "lint:csv": "node scripts/require-6529-command.cjs && node scripts/eslint-rule-summary.cjs --output eslint-rule-summary.csv",
     "lint:csv:tight": "node scripts/require-6529-command.cjs && node scripts/eslint-rule-summary.cjs --config eslint.config.tight.mjs --output eslint-rule-summary.csv",
     "lint:changed:csv": "node scripts/require-6529-command.cjs && node scripts/eslint-rule-summary.cjs --changed --output eslint-rule-summary.csv",
