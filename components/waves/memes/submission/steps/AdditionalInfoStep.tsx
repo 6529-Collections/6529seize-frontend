@@ -120,7 +120,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       return undefined;
     }
 
-    return `${status.length}/${status.maxLength} characters exceeds limit`;
+    return `${status.length}/${status.maxLength} characters exceed the limit`;
   };
 
   const aboutArtistError = metadataLengthError(aboutArtistStatus);
