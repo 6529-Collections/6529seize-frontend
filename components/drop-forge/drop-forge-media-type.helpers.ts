@@ -2,7 +2,9 @@ import type { MintingClaim } from "@/generated/models/MintingClaim";
 
 type DropForgeAnimationKind = "video" | "glb" | "html" | "animation";
 
-function normalizeMediaFormat(format: string | null | undefined): string | null {
+function normalizeMediaFormat(
+  format: string | null | undefined
+): string | null {
   return format ? format.toUpperCase() : null;
 }
 
