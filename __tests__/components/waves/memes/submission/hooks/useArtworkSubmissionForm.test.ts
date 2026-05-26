@@ -245,6 +245,50 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.artworkUploaded).toBe(true);
   });
 
+  it("clears stale preview media when replacing a video resubmission with a static image", () => {
+    const existingMedia = {
+      url: "https://example.com/original.mp4",
+      mimeType: "video/mp4",
+    };
+    const draftWithExistingMedia = createDraftWithExistingMedia(existingMedia);
+    const initialDraft = {
+      ...draftWithExistingMedia,
+      operationalData: {
+        ...draftWithExistingMedia.operationalData,
+        additional_media: {
+          artist_profile_media: [],
+          artwork_commentary_media: [],
+          preview_image: "https://example.com/stale-preview.png",
+          promo_video: "https://example.com/stale-promo.mp4",
+        },
+      },
+    };
+    class MockFileReader {
+      onloadend: (() => void) | null = null;
+      result = "data-replacement-image";
+      readAsDataURL() {
+        this.onloadend?.();
+      }
+    }
+    global.FileReader = MockFileReader as any;
+
+    const { result } = renderArtworkSubmissionForm(initialDraft);
+
+    act(() => {
+      result.current.handleFileSelect(
+        new File(["replacement"], "replacement.png", { type: "image/png" })
+      );
+    });
+
+    expect(result.current.artworkUrl).toBe("data-replacement-image");
+    expect(result.current.operationalData.additional_media.preview_image).toBe(
+      ""
+    );
+    expect(result.current.operationalData.additional_media.promo_video).toBe(
+      ""
+    );
+  });
+
   it("preserves existing resubmission media after a replacement read error", () => {
     const existingMedia = {
       url: "https://example.com/original.png",

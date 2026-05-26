@@ -15,7 +15,6 @@ import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import {
   buildSubmissionMetadata,
-  METADATA_VALUE_MAX_LENGTH,
   getSubmissionMetadataLengthValidation,
 } from "../utils/submissionMetadata";
 
@@ -280,11 +279,11 @@ export function useArtworkSubmissionMutation() {
       });
       if (metadataLengthValidation.hasErrors) {
         const fields = metadataLengthValidation.errors
-          .map((item) => `${item.dataKey} (${item.length})`)
+          .map((item) => `${item.dataKey} (${item.length}/${item.maxLength})`)
           .join(", ");
 
         setToast({
-          message: `Metadata exceeds ${METADATA_VALUE_MAX_LENGTH} characters for: ${fields}`,
+          message: `Metadata exceeds character limits for: ${fields}`,
           type: "error",
         });
         return null;
