@@ -29,10 +29,10 @@ const CreateDropStormView = memo(
     const now = Time.currentMillis();
     return (
       <div className="tw-mb-4 tw-flex tw-flex-col">
-        {!!drop?.parts.length &&
+        {drop.parts.length > 0 &&
           drop.parts.map((part, index) => (
             <CreateDropStormViewPart
-              key={index}
+              key={part.clientId ?? part.id}
               profile={profile}
               part={part}
               referencedNfts={drop.referenced_nfts}
