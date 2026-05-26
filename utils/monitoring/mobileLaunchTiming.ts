@@ -312,7 +312,7 @@ const ROUTE_FAMILY_PATTERNS: readonly RouteFamilyPattern[] = [
   },
   {
     template: "/nextgen/[[...view]]",
-    segments: ["nextgen", routeCatchAll(false, STATIC_NEXTGEN_SEGMENTS)],
+    segments: ["nextgen", routeCatchAll(true, STATIC_NEXTGEN_SEGMENTS)],
   },
   {
     template: "/delegation/[...section]",
@@ -320,7 +320,7 @@ const ROUTE_FAMILY_PATTERNS: readonly RouteFamilyPattern[] = [
   },
   {
     template: "/network/nerd/[[...focus]]",
-    segments: ["network", "nerd", routeCatchAll(false)],
+    segments: ["network", "nerd", routeCatchAll(true)],
   },
   {
     template: "/about/[section]",

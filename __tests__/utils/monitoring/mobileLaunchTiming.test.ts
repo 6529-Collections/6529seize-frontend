@@ -322,5 +322,18 @@ describe("mobileLaunchTiming", () => {
     expect(
       timing.sanitizeRouteFamily("/tools/app-wallets/123?jwt=secret")
     ).toBe("/tools/app-wallets/[app-wallet-address]");
+    expect(timing.sanitizeRouteFamily("/nextgen")).toBe("/nextgen/[[...view]]");
+    expect(timing.sanitizeRouteFamily("/nextgen/explore")).toBe(
+      "/nextgen/[[...view]]"
+    );
+    expect(timing.sanitizeRouteFamily("/nextgen/manager")).toBe(
+      "/nextgen/manager"
+    );
+    expect(timing.sanitizeRouteFamily("/network/nerd")).toBe(
+      "/network/nerd/[[...focus]]"
+    );
+    expect(timing.sanitizeRouteFamily("/network/nerd/focus")).toBe(
+      "/network/nerd/[[...focus]]"
+    );
   });
 });
