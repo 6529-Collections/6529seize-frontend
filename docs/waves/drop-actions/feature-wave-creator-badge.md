@@ -2,11 +2,14 @@
 
 ## Overview
 
-The wave creator badge is a compact water-drop button shown beside an author's
-identity when that profile is marked as a wave creator.
+The wave creator badge is shown beside an author's identity when that profile is
+marked as a wave creator. In the chat feed, V2 author badge data can render this
+as a square profile-wave picture badge.
 
-Selecting it opens the shared created-waves viewer (`Waves by {profile}`), so
-users can jump into waves that author created.
+Selecting the compact water-drop button opens the shared created-waves viewer
+(`Waves by {profile}`), so users can jump into waves that author created.
+Selecting the chat-feed profile-wave badge opens that author's profile wave
+directly.
 
 ## Location in the Site
 
@@ -23,17 +26,19 @@ users can jump into waves that author created.
 
 - Find the creator badge beside the author's handle, level badge, and other
   author-status badges.
-- Select the water-drop button.
-- On non-mobile layouts, hover tooltip text is `View created waves`.
+- Select the water-drop button, or the profile-wave badge in the chat feed.
+- On non-mobile layouts, hover tooltip text is `View created waves` for the
+  compact button and `{wave}` for the chat-feed profile-wave badge.
 
 ## User Journey
 
 1. Open a profile header, wave drop, direct-message drop, or supported author
    hover card.
-2. If the author is a wave creator, the water-drop badge appears in the author
-   identity row.
+2. If the author is a wave creator, the water-drop badge or profile-wave badge
+   appears in the author identity row.
 3. Select the badge.
-4. The shared `Waves by {profile}` viewer opens.
+4. The shared `Waves by {profile}` viewer opens, or the profile wave opens
+   directly from the chat-feed badge.
 5. Review created-wave rows, then select a row to open that wave at
    `/waves/{waveId}`.
 
@@ -51,7 +56,10 @@ users can jump into waves that author created.
 
 ## Edge Cases
 
-- If `is_wave_creator` is false or missing, the badge is hidden.
+- If `is_wave_creator` is false or missing and no `profile_wave_id` is present,
+  the badge is hidden.
+- If chat-feed profile-wave picture data is missing or fails to load, the badge
+  falls back to the water-drop icon.
 - Touch/mobile layouts do not rely on hover tooltip copy; tapping the badge
   still opens the viewer.
 - The created-waves viewer excludes direct-message threads from authored-wave
