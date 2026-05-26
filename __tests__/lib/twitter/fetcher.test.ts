@@ -105,6 +105,49 @@ describe("fetchTweetPreview", () => {
     );
 
     expect(preview.mediaImageUrl).toBeUndefined();
+    expect(preview.media).toBeUndefined();
+  });
+
+  it("does not use arbitrary hosts as video poster media", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2057513333985554492",
+        text: "Post text",
+        user: {
+          name: "Mayudrops",
+          screen_name: "Mayudropsphotos",
+        },
+        mediaDetails: [
+          {
+            media_url_https: "https://twimg.com.evil.example/poster.jpg",
+            video_info: {
+              variants: [
+                {
+                  url: "https://video.twimg.com/tweet_video/example.mp4",
+                  content_type: "video/mp4",
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      { fetchImpl }
+    );
+
+    expect(preview.media).toEqual([
+      {
+        type: "video",
+        videoUrl: "https://video.twimg.com/tweet_video/example.mp4",
+      },
+    ]);
   });
 
   it("prefers MP4 video variants when multiple formats are available", async () => {

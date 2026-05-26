@@ -150,6 +150,21 @@ const applyDisplayTextRange = (
 const endsLikeCompleteText = (text: string): boolean =>
   /(?:[.!?…"”’)\]]|https?:\/\/\S+)$/u.test(text);
 
+const trimTrailingPreviewPunctuation = (text: string): string => {
+  let end = text.length;
+  while (end > 0) {
+    const char = text[end - 1];
+    if (!char) {
+      break;
+    }
+    if (char !== "," && !/\s/u.test(char)) {
+      break;
+    }
+    end -= 1;
+  }
+  return text.slice(0, end);
+};
+
 const appendEllipsisIfTruncated = (
   text: string | undefined,
   expanded: boolean
@@ -158,7 +173,7 @@ const appendEllipsisIfTruncated = (
     return text;
   }
 
-  return `${text.replace(/[,\s]+$/u, "")}...`;
+  return `${trimTrailingPreviewPunctuation(text)}...`;
 };
 
 const excerptTweetText = (text: string | undefined): string | undefined => {
@@ -180,7 +195,7 @@ const excerptTweetText = (text: string | undefined): string | undefined => {
     wordBoundaryIndex > TWEET_PREVIEW_TEXT_MAX_CHARS * 0.75
       ? candidate.slice(0, wordBoundaryIndex)
       : candidate;
-  return `${excerpt.replace(/[,\s]+$/u, "")}...`;
+  return `${trimTrailingPreviewPunctuation(excerpt)}...`;
 };
 
 const isImageUrl = (value: string): boolean => {
@@ -194,6 +209,15 @@ const isImageUrl = (value: string): boolean => {
       pathname.endsWith(".png") ||
       pathname.endsWith(".webp")
     );
+  } catch {
+    return false;
+  }
+};
+
+const isTwitterMediaUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    return matchesDomainOrSubdomain(url.hostname, "twimg.com");
   } catch {
     return false;
   }
@@ -333,14 +357,20 @@ const pushUniqueMedia = (
 const createImageMedia = (
   url: string | undefined
 ): TweetPreviewMedia | undefined =>
-  url && isImageUrl(url) ? { type: "image", imageUrl: url } : undefined;
+  url && isImageUrl(url) && isTwitterMediaUrl(url)
+    ? { type: "image", imageUrl: url }
+    : undefined;
 
 const createVideoMedia = (
   videoUrl: string | undefined,
   posterUrl: string | undefined
 ): TweetPreviewMedia | undefined =>
   videoUrl
-    ? { type: "video", videoUrl, ...(posterUrl ? { posterUrl } : {}) }
+    ? {
+        type: "video",
+        videoUrl,
+        ...(posterUrl && isTwitterMediaUrl(posterUrl) ? { posterUrl } : {}),
+      }
     : undefined;
 
 const readMediaDetailImageUrl = (
@@ -595,11 +625,7 @@ function buildSyndicationPreview(
     "bookmarkCount",
     readNumberish(record["bookmark_count"])
   );
-  setPreviewValue(
-    preview,
-    "viewCount",
-    readNumberish(record["view_count"])
-  );
+  setPreviewValue(preview, "viewCount", readNumberish(record["view_count"]));
 
   return preview;
 }
