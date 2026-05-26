@@ -66,4 +66,24 @@ describe("Twitter preview parsing", () => {
 
     expect(preview.mediaLink).toBeUndefined();
   });
+
+  it("detects scheme-less pic.twitter.com media text", () => {
+    const preview = parseTwitterOEmbed(
+      {
+        author_name: "Mayudrops",
+        author_url: "https://twitter.com/Mayudropsphotos",
+        html: `<blockquote class="twitter-tweet">
+          <p>
+            Text with media.
+            <a href="https://t.co/media">pic.twitter.com/not-media</a>
+          </p>
+          <a href="https://twitter.com/Mayudropsphotos/status/2057513333985554492">May 21, 2026</a>
+        </blockquote>`,
+      },
+      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "2057513333985554492"
+    );
+
+    expect(preview.mediaLink).toBe("https://t.co/media");
+  });
 });

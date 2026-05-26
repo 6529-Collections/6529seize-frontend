@@ -2,7 +2,11 @@ import LruTtlCache from "@/lib/cache/lruTtl";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
 import { parseTwitterOEmbed } from "./parser";
-import type { TweetPreview, TwitterOEmbedResponse } from "./types";
+import type {
+  TweetPreview,
+  TweetPreviewMedia,
+  TwitterOEmbedResponse,
+} from "./types";
 import { parseTweetUrl } from "./url";
 
 const TWITTER_OEMBED_ENDPOINT = "https://publish.twitter.com/oembed";
@@ -12,6 +16,7 @@ const TWITTER_PREVIEW_CACHE_TTL_MS = 10 * 60 * 1000;
 const TWITTER_PREVIEW_CACHE_MAX_ITEMS = 500;
 const TWITTER_PREVIEW_FETCH_TIMEOUT_MS = 8000;
 const TWITTER_MEDIA_FETCH_TIMEOUT_MS = 5000;
+const TWEET_PREVIEW_TEXT_MAX_CHARS = 260;
 
 const previewCache = new LruTtlCache<string, Promise<TweetPreview>>({
   max: TWITTER_PREVIEW_CACHE_MAX_ITEMS,
@@ -41,6 +46,27 @@ const readString = (value: unknown): string | undefined => {
 const readNumber = (value: unknown): number | undefined =>
   typeof value === "number" && Number.isFinite(value) ? value : undefined;
 
+const readNumberish = (value: unknown): number | undefined => {
+  if (typeof value === "number") {
+    return readNumber(value);
+  }
+
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const parsed = Number(value.replaceAll(",", ""));
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const readRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+const readArray = (value: unknown): readonly unknown[] =>
+  Array.isArray(value) ? value : [];
+
 const normalizeProfileImageUrl = (
   value: string | undefined
 ): string | undefined => value?.replace("_normal.", "_bigger.");
@@ -64,6 +90,97 @@ const removeTrailingMediaUrl = (
     : text;
   const trimmed = withoutMedia.trim();
   return trimmed.length > 0 ? trimmed : undefined;
+};
+
+type TweetTextResult = {
+  readonly text: string;
+  readonly expanded: boolean;
+};
+
+const readExpandedTweetText = (
+  record: Record<string, unknown>
+): string | undefined => {
+  const noteTweet = readRecord(record["note_tweet"]);
+  const noteTweetResult = readRecord(noteTweet?.["note_tweet_results"]);
+  const noteTweetResultValue = readRecord(noteTweetResult?.["result"]);
+  return (
+    readString(noteTweetResultValue?.["text"]) ??
+    readString(noteTweet?.["text"]) ??
+    readString(readRecord(record["extended_tweet"])?.["full_text"]) ??
+    readString(readRecord(record["legacy"])?.["full_text"]) ??
+    readString(record["full_text"])
+  );
+};
+
+const readTweetText = (
+  record: Record<string, unknown>
+): TweetTextResult | undefined => {
+  const expandedText = readExpandedTweetText(record);
+  if (expandedText) {
+    return { text: expandedText, expanded: true };
+  }
+
+  const text = readString(record["text"]);
+  return text ? { text, expanded: false } : undefined;
+};
+
+const readDisplayTextRange = (
+  record: Record<string, unknown>
+): readonly [number, number] | undefined => {
+  const range = readArray(record["display_text_range"]);
+  const [start, end] = range;
+  return typeof start === "number" && typeof end === "number"
+    ? [start, end]
+    : undefined;
+};
+
+const applyDisplayTextRange = (
+  text: string | undefined,
+  range: readonly [number, number] | undefined
+): string | undefined => {
+  if (!text || !range) {
+    return text;
+  }
+
+  const [start] = range;
+  const sliced = Array.from(text).slice(start).join("").trim();
+  return sliced.length > 0 ? sliced : text;
+};
+
+const endsLikeCompleteText = (text: string): boolean =>
+  /(?:[.!?…"”’)\]]|https?:\/\/\S+)$/u.test(text);
+
+const appendEllipsisIfTruncated = (
+  text: string | undefined,
+  expanded: boolean
+): string | undefined => {
+  if (!text || expanded || text.length < 100 || endsLikeCompleteText(text)) {
+    return text;
+  }
+
+  return `${text.replace(/[,\s]+$/u, "")}...`;
+};
+
+const excerptTweetText = (text: string | undefined): string | undefined => {
+  if (!text) {
+    return undefined;
+  }
+
+  const chars = Array.from(text);
+  if (chars.length <= TWEET_PREVIEW_TEXT_MAX_CHARS) {
+    return text;
+  }
+
+  const candidate = chars.slice(0, TWEET_PREVIEW_TEXT_MAX_CHARS).join("");
+  const wordBoundaryIndex = Math.max(
+    candidate.lastIndexOf(" "),
+    candidate.lastIndexOf("\n")
+  );
+  const excerpt =
+    wordBoundaryIndex > TWEET_PREVIEW_TEXT_MAX_CHARS * 0.75
+      ? candidate.slice(0, wordBoundaryIndex)
+      : candidate;
+  return `${excerpt.replace(/[,\s]+$/u, "")}...`;
 };
 
 const isImageUrl = (value: string): boolean => {
@@ -133,35 +250,56 @@ const findMediaImageUrl = (
   return undefined;
 };
 
-const readRecord = (value: unknown): Record<string, unknown> | undefined =>
-  typeof value === "object" && value !== null
-    ? (value as Record<string, unknown>)
-    : undefined;
+const isMp4VideoVariant = (
+  variant: Record<string, unknown>,
+  url: string
+): boolean => {
+  const contentType = readString(variant["content_type"])?.toLowerCase();
+  return contentType === "video/mp4" || url.toLowerCase().endsWith(".mp4");
+};
 
-const readArray = (value: unknown): readonly unknown[] =>
-  Array.isArray(value) ? value : [];
+const findBestVideoVariantUrl = (
+  variants: readonly unknown[],
+  urlKey: "src" | "url"
+): string | undefined => {
+  let fallbackUrl: string | undefined;
+
+  for (const variant of variants) {
+    const variantRecord = readRecord(variant);
+    const url = readString(variantRecord?.[urlKey]);
+    if (!url) {
+      continue;
+    }
+
+    if (variantRecord && isMp4VideoVariant(variantRecord, url)) {
+      return url;
+    }
+
+    fallbackUrl ??= url;
+  }
+
+  return fallbackUrl;
+};
 
 const findVideoUrl = (record: Record<string, unknown>): string | undefined => {
   const video = readRecord(record["video"]);
-  const videoVariants = readArray(video?.["variants"]);
-  for (const variant of videoVariants) {
-    const variantRecord = readRecord(variant);
-    const src = readString(variantRecord?.["src"]);
-    if (src) {
-      return src;
-    }
+  const videoUrl = findBestVideoVariantUrl(
+    readArray(video?.["variants"]),
+    "src"
+  );
+  if (videoUrl) {
+    return videoUrl;
   }
 
   const mediaDetails = readArray(record["mediaDetails"]);
   for (const mediaDetail of mediaDetails) {
     const videoInfo = readRecord(readRecord(mediaDetail)?.["video_info"]);
-    const variants = readArray(videoInfo?.["variants"]);
-    for (const variant of variants) {
-      const variantRecord = readRecord(variant);
-      const url = readString(variantRecord?.["url"]);
-      if (url) {
-        return url;
-      }
+    const url = findBestVideoVariantUrl(
+      readArray(videoInfo?.["variants"]),
+      "url"
+    );
+    if (url) {
+      return url;
     }
   }
 
@@ -174,6 +312,96 @@ const findVideoPosterUrl = (
   const videoPoster = readString(readRecord(record["video"])?.["poster"]);
   return videoPoster ?? findMediaImageUrl(record);
 };
+
+const getMediaIdentity = (media: TweetPreviewMedia): string | undefined =>
+  media.videoUrl ?? media.imageUrl ?? media.posterUrl;
+
+const pushUniqueMedia = (
+  mediaItems: TweetPreviewMedia[],
+  media: TweetPreviewMedia | undefined
+): void => {
+  const identity = media ? getMediaIdentity(media) : undefined;
+  if (!media || !identity) {
+    return;
+  }
+
+  if (!mediaItems.some((item) => getMediaIdentity(item) === identity)) {
+    mediaItems.push(media);
+  }
+};
+
+const createImageMedia = (
+  url: string | undefined
+): TweetPreviewMedia | undefined =>
+  url && isImageUrl(url) ? { type: "image", imageUrl: url } : undefined;
+
+const createVideoMedia = (
+  videoUrl: string | undefined,
+  posterUrl: string | undefined
+): TweetPreviewMedia | undefined =>
+  videoUrl
+    ? { type: "video", videoUrl, ...(posterUrl ? { posterUrl } : {}) }
+    : undefined;
+
+const readMediaDetailImageUrl = (
+  mediaDetail: Record<string, unknown>
+): string | undefined =>
+  readString(mediaDetail["media_url_https"]) ??
+  readString(mediaDetail["media_url"]) ??
+  readString(mediaDetail["url"]) ??
+  findFirstImageUrl(mediaDetail);
+
+const readMediaDetail = (
+  mediaDetail: Record<string, unknown>
+): TweetPreviewMedia | undefined => {
+  const videoInfo = readRecord(mediaDetail["video_info"]);
+  const videoUrl = findBestVideoVariantUrl(
+    readArray(videoInfo?.["variants"]),
+    "url"
+  );
+  const imageUrl = readMediaDetailImageUrl(mediaDetail);
+  const imageMedia = createImageMedia(imageUrl);
+  return createVideoMedia(videoUrl, imageMedia?.imageUrl) ?? imageMedia;
+};
+
+const findMediaItems = (
+  record: Record<string, unknown>
+): readonly TweetPreviewMedia[] => {
+  const mediaItems: TweetPreviewMedia[] = [];
+  const mediaDetails = readArray(record["mediaDetails"]);
+
+  for (const mediaDetail of mediaDetails) {
+    const mediaDetailRecord = readRecord(mediaDetail);
+    if (mediaDetailRecord) {
+      pushUniqueMedia(mediaItems, readMediaDetail(mediaDetailRecord));
+    }
+  }
+
+  if (mediaDetails.length > 0) {
+    return mediaItems;
+  }
+
+  for (const photo of readArray(record["photos"])) {
+    const photoRecord = readRecord(photo);
+    pushUniqueMedia(
+      mediaItems,
+      createImageMedia(readString(photoRecord?.["url"]))
+    );
+  }
+
+  pushUniqueMedia(
+    mediaItems,
+    createVideoMedia(findVideoUrl(record), findVideoPosterUrl(record))
+  );
+
+  return mediaItems;
+};
+
+const findFirstMedia = (
+  mediaItems: readonly TweetPreviewMedia[],
+  type: TweetPreviewMedia["type"]
+): TweetPreviewMedia | undefined =>
+  mediaItems.find((media) => media.type === type);
 
 const firstRecord = (values: readonly unknown[]): Record<string, unknown> =>
   readRecord(values[0]) ?? {};
@@ -301,7 +529,15 @@ function buildSyndicationPreview(
   const firstMedia = getFirstSyndicationMedia(entities);
   const authorHandle = readString(user["screen_name"]);
   const mediaLink = readString(firstMedia["url"]);
-  const mediaVideoUrl = findVideoUrl(record);
+  const mediaItems = findMediaItems(record);
+  const firstImageMedia = findFirstMedia(mediaItems, "image");
+  const firstVideoMedia = findFirstMedia(mediaItems, "video");
+  const tweetText = readTweetText(record);
+  const displayText = appendEllipsisIfTruncated(
+    applyDisplayTextRange(tweetText?.text, readDisplayTextRange(record)),
+    tweetText?.expanded ?? false
+  );
+  const previewText = excerptTweetText(displayText);
   const preview: MutableTweetPreview = {
     tweetId,
     url: href,
@@ -316,32 +552,53 @@ function buildSyndicationPreview(
   setPreviewValue(preview, "authorHandle", authorHandle);
   setPreviewValue(
     preview,
+    "replyToHandle",
+    readString(record["in_reply_to_screen_name"])
+  );
+  setPreviewValue(
+    preview,
     "authorProfileImageUrl",
     normalizeProfileImageUrl(readString(user["profile_image_url_https"]))
   );
   setPreviewValue(
     preview,
     "text",
-    removeTrailingMediaUrl(readString(record["text"]), mediaLink)
+    removeTrailingMediaUrl(previewText, mediaLink)
   );
   setPreviewValue(preview, "mediaLink", mediaLink);
-  setPreviewValue(preview, "mediaImageUrl", findMediaImageUrl(record));
-  setPreviewValue(preview, "mediaVideoUrl", mediaVideoUrl);
   setPreviewValue(
     preview,
-    "mediaPosterUrl",
-    mediaVideoUrl ? findVideoPosterUrl(record) : undefined
+    "media",
+    mediaItems.length > 0 ? mediaItems : undefined
   );
+  setPreviewValue(preview, "mediaImageUrl", firstImageMedia?.imageUrl);
+  setPreviewValue(preview, "mediaVideoUrl", firstVideoMedia?.videoUrl);
+  setPreviewValue(preview, "mediaPosterUrl", firstVideoMedia?.posterUrl);
   setPreviewValue(preview, "createdAtIso", readString(record["created_at"]));
   setPreviewValue(
     preview,
     "favoriteCount",
-    readNumber(record["favorite_count"])
+    readNumberish(record["favorite_count"])
   );
   setPreviewValue(
     preview,
     "conversationCount",
-    readNumber(record["conversation_count"])
+    readNumberish(record["conversation_count"])
+  );
+  setPreviewValue(
+    preview,
+    "retweetCount",
+    readNumberish(record["retweet_count"])
+  );
+  setPreviewValue(
+    preview,
+    "bookmarkCount",
+    readNumberish(record["bookmark_count"])
+  );
+  setPreviewValue(
+    preview,
+    "viewCount",
+    readNumberish(record["view_count"])
   );
 
   return preview;
@@ -468,6 +725,9 @@ async function fetchTweetPreviewUncached(
   return {
     ...preview,
     ...(mediaImageUrl ? { mediaImageUrl } : {}),
+    ...(mediaImageUrl
+      ? { media: [{ type: "image" as const, imageUrl: mediaImageUrl }] }
+      : {}),
   };
 }
 
@@ -480,7 +740,7 @@ export function fetchTweetPreview(
     return Promise.reject(new Error("Invalid Twitter/X status URL."));
   }
 
-  const cacheKey = `twitter:syndication-v1:${parsed.tweetId}`;
+  const cacheKey = `twitter:syndication-v4:${parsed.tweetId}`;
   const cached = previewCache.get(cacheKey);
   if (cached) {
     return cached;
