@@ -16,6 +16,41 @@ export type AdditionalDetailsMediaRow = {
   readonly downloadName?: string | undefined;
 };
 
+const SAFE_EXTERNAL_PROTOCOLS = new Set([
+  "http:",
+  "https:",
+  "ipfs:",
+  "ar:",
+  "arweave:",
+]);
+const SAFE_DOWNLOAD_PROTOCOLS = new Set(["http:", "https:", "blob:"]);
+
+function getSafeUrl(
+  url: string,
+  allowedProtocols: ReadonlySet<string>
+): string | null {
+  const trimmedUrl = url.trim();
+
+  if (!trimmedUrl) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(trimmedUrl);
+    return allowedProtocols.has(parsedUrl.protocol) ? trimmedUrl : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getSafeExternalUrl(url: string): string | null {
+  return getSafeUrl(url, SAFE_EXTERNAL_PROTOCOLS);
+}
+
+function getSafeDownloadUrl(url: string): string | null {
+  return getSafeUrl(url, SAFE_DOWNLOAD_PROTOCOLS);
+}
+
 export function AdditionalDetailsSection({
   title,
   icon,
@@ -46,6 +81,9 @@ export function ArweaveLinkRow({
 }: {
   readonly row: AdditionalDetailsMediaRow;
 }) {
+  const safeExternalUrl = getSafeExternalUrl(row.url);
+  const safeDownloadUrl = getSafeDownloadUrl(row.url);
+
   return (
     <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3 last:tw-border-b-0 md:tw-grid-cols-[4rem_minmax(10rem,16rem)_minmax(0,1fr)_auto] md:tw-items-center md:tw-gap-6">
       <div className="tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
@@ -54,35 +92,46 @@ export function ArweaveLinkRow({
       <div className="tw-min-w-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 md:tw-truncate">
         {row.title}
       </div>
-      <Link
-        href={row.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={row.url}
-        className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal"
-      >
-        {row.url}
-      </Link>
+      {safeExternalUrl ? (
+        <Link
+          href={safeExternalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={row.url}
+          className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal"
+        >
+          {row.url}
+        </Link>
+      ) : (
+        <span
+          title={row.url}
+          className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500 md:tw-truncate md:tw-break-normal"
+        >
+          {row.url}
+        </span>
+      )}
       <div className="tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-4 md:tw-w-auto md:tw-justify-end">
-        {row.downloadName && (
+        {row.downloadName && safeDownloadUrl && (
           <Download
-            href={row.url}
+            href={safeDownloadUrl}
             name={row.downloadName}
             extension={row.extension ?? ""}
             variant="text"
             alwaysShowText={true}
           />
         )}
-        <Link
-          href={row.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={row.openLabel}
-          className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
-        >
-          Open
-          <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        </Link>
+        {safeExternalUrl && (
+          <Link
+            href={safeExternalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={row.openLabel}
+            className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
+          >
+            Open
+            <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          </Link>
+        )}
       </div>
     </div>
   );

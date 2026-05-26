@@ -2,6 +2,7 @@
 
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
+import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
 import { MemeArtworkDetails } from "@/components/the-memes/MemePageLiveStats";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { addProtocol, numberWithCommas } from "@/helpers/Helpers";
@@ -117,8 +118,9 @@ function MemeLabMarketMetric({
 
 function MemeLabMetadataLink({ url }: { readonly url: unknown }) {
   const metadataUrl = trimToEmpty(url);
+  const safeMetadataUrl = getSafeExternalUrl(metadataUrl);
 
-  if (!metadataUrl) {
+  if (!safeMetadataUrl) {
     return null;
   }
 
@@ -126,7 +128,7 @@ function MemeLabMetadataLink({ url }: { readonly url: unknown }) {
     <div className="tw-min-w-[8.5rem]">
       <div className={MEME_LAB_LABEL_CLASS}>Metadata</div>
       <Link
-        href={metadataUrl}
+        href={safeMetadataUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-no-underline hover:tw-text-iron-300 md:tw-text-lg md:tw-leading-6"
