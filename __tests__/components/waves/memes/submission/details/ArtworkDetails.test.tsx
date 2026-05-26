@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ArtworkDetails from "@/components/waves/memes/submission/details/ArtworkDetails";
 
@@ -70,8 +70,96 @@ describe("ArtworkDetails", () => {
       "255"
     );
     expect(screen.getByLabelText(/Description/)).toHaveAttribute(
-      "maxLength",
+      "data-max-length",
       "8000"
+    );
+    expect(screen.getByLabelText(/Description/)).not.toHaveAttribute(
+      "maxLength"
+    );
+  });
+
+  it("limits description input to 8000 JavaScript characters", () => {
+    const onDescriptionChange = jest.fn();
+
+    render(
+      <ArtworkDetails
+        title=""
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={onDescriptionChange}
+      />
+    );
+
+    const description = screen.getByLabelText(
+      /Description/
+    ) as HTMLTextAreaElement;
+    const text = `${"a".repeat(7999)}\nextra`;
+
+    fireEvent.input(description, { target: { value: text } });
+
+    expect(description.value).toHaveLength(8000);
+    expect(onDescriptionChange).toHaveBeenLastCalledWith(text.slice(0, 8000));
+  });
+
+  it("shows title and description character counts", () => {
+    render(
+      <ArtworkDetails
+        title="abc"
+        description={"line one\nline two"}
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("3 / 255")).toBeInTheDocument();
+    expect(screen.getByText("17 / 8,000")).toBeInTheDocument();
+  });
+
+  it("uses warning, danger, and limit colors for character counts", () => {
+    const { rerender } = render(
+      <ArtworkDetails
+        title={"t".repeat(230)}
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("230 / 255")).toHaveClass("tw-text-amber-400");
+
+    rerender(
+      <ArtworkDetails
+        title={"t".repeat(245)}
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("245 / 255")).toHaveClass("tw-text-orange-400");
+
+    rerender(
+      <ArtworkDetails
+        title={"t".repeat(255)}
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("255 / 255")).toHaveClass("tw-text-red");
+
+    rerender(
+      <ArtworkDetails
+        title=""
+        description={"d".repeat(7600)}
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(screen.getByText("7,600 / 8,000")).toHaveClass(
+      "tw-text-orange-400"
     );
   });
 
@@ -82,6 +170,7 @@ describe("ArtworkDetails", () => {
         description="Filled description"
         onTitleChange={() => {}}
         onDescriptionChange={() => {}}
+        showRequiredMarkers={true}
       />
     );
 
@@ -91,10 +180,10 @@ describe("ArtworkDetails", () => {
     });
 
     expect(screen.getByLabelText(/Artwork Title/)).toHaveClass(
-      "tw-ring-emerald-500/30"
+      "tw-ring-emerald-600/45"
     );
     expect(screen.getByLabelText(/Description/)).toHaveClass(
-      "tw-ring-emerald-500/30"
+      "tw-ring-emerald-600/45"
     );
   });
 });

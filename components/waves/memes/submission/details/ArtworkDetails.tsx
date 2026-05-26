@@ -9,6 +9,9 @@ import {
   METADATA_VALUE_TITLE_MAX_LENGTH,
 } from "../utils/submissionMetadata";
 
+const TITLE_CHARACTER_DANGER_THRESHOLD = 245;
+const DESCRIPTION_CHARACTER_DANGER_THRESHOLD = 7600;
+
 interface ArtworkDetailsProps {
   readonly title: string;
   readonly description: string;
@@ -40,6 +43,41 @@ const getLabelStateClass = (hasError: boolean): string => {
   }
 
   return "group-focus-visible-within:tw-text-primary-400 tw-text-iron-300";
+};
+
+const FieldCharacterCount = ({
+  length,
+  maxLength,
+  dangerThreshold,
+}: {
+  readonly length: number;
+  readonly maxLength: number;
+  readonly dangerThreshold: number;
+}) => {
+  const isAtLimit = length >= maxLength;
+  const isDanger = length >= dangerThreshold;
+  const isNearLimit = length >= Math.floor(maxLength * 0.9);
+  let colorClass = "tw-text-iron-500";
+
+  if (isNearLimit) {
+    colorClass = "tw-text-amber-400";
+  }
+
+  if (isDanger) {
+    colorClass = "tw-text-orange-400";
+  }
+
+  if (isAtLimit) {
+    colorClass = "tw-text-red";
+  }
+
+  return (
+    <div className="tw-mt-1.5 tw-flex tw-justify-end">
+      <span className={`tw-text-xs tw-font-medium ${colorClass}`}>
+        {length.toLocaleString()} / {maxLength.toLocaleString()}
+      </span>
+    </div>
+  );
 };
 
 /**
@@ -115,8 +153,18 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
 
   const handleDescriptionInput = useCallback(
     (event: React.FormEvent<HTMLTextAreaElement>) => {
-      onDescriptionChange(event.currentTarget.value);
-      resizeDescriptionTextarea(event.currentTarget);
+      const textarea = event.currentTarget;
+      const nextDescription = textarea.value.slice(
+        0,
+        METADATA_VALUE_DESCRIPTION_MAX_LENGTH
+      );
+
+      if (textarea.value !== nextDescription) {
+        textarea.value = nextDescription;
+      }
+
+      onDescriptionChange(nextDescription);
+      resizeDescriptionTextarea(textarea);
     },
     [onDescriptionChange, resizeDescriptionTextarea]
   );
@@ -139,6 +187,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   const descriptionLabelStateClass = getLabelStateClass(
     Boolean(descriptionError)
   );
+  const titleLength = title.length;
+  const descriptionLength = description.length;
 
   return (
     <FormSection
@@ -198,6 +248,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 </div>
               )}
             </div>
+            <FieldCharacterCount
+              length={titleLength}
+              maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
+              dangerThreshold={TITLE_CHARACTER_DANGER_THRESHOLD}
+            />
           </div>
 
           <ValidationError error={titleError} id="title-error" />
@@ -229,13 +284,13 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 onInput={handleDescriptionInput}
                 onBlur={handleDescriptionBlur}
                 rows={4}
-                maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
                 aria-invalid={!!descriptionError}
                 aria-describedby={
                   descriptionError ? "description-error" : undefined
                 }
                 data-field="description"
-                className={`tw-form-textarea tw-w-full tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
+                data-max-length={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
+                className={`tw-form-textarea tw-w-full tw-resize-none tw-cursor-text tw-overflow-hidden tw-rounded-lg tw-border-0 tw-bg-iron-900 ${size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5"} tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out placeholder:tw-text-iron-500 sm:tw-text-sm ${descriptionStateClass} ${
                   isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""
                 } `}
               />
@@ -259,6 +314,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 </div>
               )}
             </div>
+            <FieldCharacterCount
+              length={descriptionLength}
+              maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
+              dangerThreshold={DESCRIPTION_CHARACTER_DANGER_THRESHOLD}
+            />
           </div>
 
           <ValidationError error={descriptionError} id="description-error" />

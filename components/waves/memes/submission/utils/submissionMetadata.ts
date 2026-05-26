@@ -19,6 +19,18 @@ export interface MetadataValueLengthStatus {
   readonly isError: boolean;
 }
 
+const getMetadataValueMaxLength = (dataKey: string): number => {
+  if (dataKey === "title") {
+    return METADATA_VALUE_TITLE_MAX_LENGTH;
+  }
+
+  if (dataKey === "description") {
+    return METADATA_VALUE_DESCRIPTION_MAX_LENGTH;
+  }
+
+  return METADATA_VALUE_DEFAULT_MAX_LENGTH;
+};
+
 interface MetadataLengthValidationResult {
   readonly statusesByKey: Partial<Record<string, MetadataValueLengthStatus>>;
   readonly warnings: MetadataValueLengthStatus[];
@@ -103,12 +115,7 @@ export const buildSubmissionMetadata = ({
 const getMetadataValueLengthStatus = (
   metadata: ApiDropMetadata
 ): MetadataValueLengthStatus => {
-  const maxLength =
-    metadata.data_key === "title"
-      ? METADATA_VALUE_TITLE_MAX_LENGTH
-      : metadata.data_key === "description"
-        ? METADATA_VALUE_DESCRIPTION_MAX_LENGTH
-        : METADATA_VALUE_DEFAULT_MAX_LENGTH;
+  const maxLength = getMetadataValueMaxLength(metadata.data_key);
   const warningThreshold = Math.floor(
     maxLength * METADATA_VALUE_WARNING_THRESHOLD_RATIO
   );
