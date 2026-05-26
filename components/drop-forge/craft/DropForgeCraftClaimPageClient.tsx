@@ -24,6 +24,11 @@ import {
   getClaimPrimaryStatus,
   getPrimaryStatusPillClassName,
 } from "@/components/drop-forge/drop-forge-status.helpers";
+import {
+  getDropForgeAnimationMediaTypeLabel,
+  getDropForgeImageMediaTypeLabel,
+  isDropForgeVideoUrl,
+} from "@/components/drop-forge/drop-forge-media-type.helpers";
 import DropForgeAccordionSection from "@/components/drop-forge/DropForgeAccordionSection";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import DropForgeLinkCard from "@/components/drop-forge/DropForgeLinkCard";
@@ -86,62 +91,6 @@ type DistributionSectionKey =
   | "phase2"
   | "public";
 
-function normalizeMediaFormat(
-  format: string | null | undefined
-): string | null {
-  return format ? format.toUpperCase() : null;
-}
-
-function getUrlExtension(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const { pathname } = new URL(url);
-    if (pathname.endsWith("/")) return null;
-    const lastSegment = pathname.split("/").at(-1);
-    if (!lastSegment) return null;
-    const extensionIndex = lastSegment.lastIndexOf(".");
-    if (extensionIndex <= 0 || extensionIndex === lastSegment.length - 1) {
-      return null;
-    }
-    return lastSegment.slice(extensionIndex + 1).toLowerCase();
-  } catch {
-    return null;
-  }
-}
-
-function getImageMediaTypeLabel(claim: MintingClaim): string | null {
-  const fromDetails = normalizeMediaFormat(claim.image_details?.format);
-  if (fromDetails) {
-    return `IMAGE/${fromDetails === "JPG" ? "JPEG" : fromDetails}`;
-  }
-
-  const ext = getUrlExtension(claim.image_url);
-  if (ext === "jpg" || ext === "jpeg") return "IMAGE/JPEG";
-  if (ext === "png") return "IMAGE/PNG";
-  if (ext === "gif") return "IMAGE/GIF";
-  if (ext === "webp") return "IMAGE/WEBP";
-  if (claim.image_url || claim.image_details) return "IMAGE";
-  return null;
-}
-
-function getAnimationMediaTypeLabel(claim: MintingClaim): string | null {
-  if (!claim.animation_url && !claim.animation_details) return null;
-
-  const format = normalizeMediaFormat(
-    (claim.animation_details as { format?: string } | null | undefined)?.format
-  );
-  if (format === "HTML" || format === "GLB") return format;
-  if (format) return `VIDEO/${format}`;
-
-  const ext = getUrlExtension(claim.animation_url);
-  if (ext === "html" || ext === "htm") return "HTML";
-  if (ext === "glb") return "GLB";
-  if (ext === "mp4") return "VIDEO/MP4";
-  if (ext === "webm") return "VIDEO/WEBM";
-  if (isVideoUrl(claim.animation_url)) return "VIDEO";
-  return "ANIMATION";
-}
-
 function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   const hasImageData = Boolean(claim.image_url || claim.image_details);
   const hasAnimationData = Boolean(
@@ -164,19 +113,7 @@ function formatNullableEditionSize(value: number | null | undefined): string {
 }
 
 function isVideoUrl(url: string | null | undefined): boolean {
-  if (!url) return false;
-  const raw = url.trim();
-  if (raw.length === 0) return false;
-  if (raw.toLowerCase().startsWith("data:video/")) return true;
-
-  const hasVideoExtension = (value: string) =>
-    /\.(mp4|webm)(?:$|[?#])/.test(value.toLowerCase());
-
-  try {
-    return hasVideoExtension(new URL(raw).pathname);
-  } catch {
-    return hasVideoExtension(raw);
-  }
+  return isDropForgeVideoUrl(url);
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -571,8 +508,8 @@ export default function DropForgeCraftClaimPageClient({
   const hasPendingPageChanges =
     imageDirty || animationDirty || coreInfoDirty || metadataDirty;
   const hasAnimation = Boolean(claim.animation_url);
-  const imageMediaTypeLabel = getImageMediaTypeLabel(claim);
-  const animationMediaTypeLabel = getAnimationMediaTypeLabel(claim);
+  const imageMediaTypeLabel = getDropForgeImageMediaTypeLabel(claim);
+  const animationMediaTypeLabel = getDropForgeAnimationMediaTypeLabel(claim);
   const coreInformationHeaderPills = (
     <span className="tw-inline-flex tw-items-center tw-gap-2">
       <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
