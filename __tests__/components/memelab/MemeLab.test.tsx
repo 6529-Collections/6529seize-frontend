@@ -39,8 +39,6 @@ jest.mock("@/components/the-memes/TheMemes", () => ({
   printVolumeTypeDropdown: () => <div data-testid="volume" />,
 }));
 
-jest.mock("@/components/memelab/MemeLab.module.scss", () => ({}));
-
 describe("MemeLab utilities", () => {
   it("getInitialRouterValues parses router", () => {
     const { initialSortDir, initialSort } = getInitialRouterValues(

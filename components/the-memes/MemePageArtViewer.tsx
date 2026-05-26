@@ -7,7 +7,7 @@ import { useMediaActions } from "@/components/drops/view/item/content/media/useM
 import { useAuth } from "@/components/auth/Auth";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { getResolvedImageSrc } from "@/components/nft-image/utils/image-source";
-import type { NFT } from "@/entities/INFT";
+import type { BaseNFT } from "@/entities/INFT";
 import { enterArtFullScreen } from "@/helpers/Helpers";
 import {
   getAnimationFileTypeFromMetadata,
@@ -73,7 +73,7 @@ export function MemePageArtViewer({
   nft,
   showBalance = false,
 }: {
-  readonly nft: NFT;
+  readonly nft: BaseNFT;
   readonly showBalance?: boolean;
 }) {
   const { connectedProfile } = useAuth();

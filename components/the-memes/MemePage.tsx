@@ -27,6 +27,11 @@ import { MemePageCollectorsSubMenu } from "./MemePageCollectors";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
 import { MemePageReferencesSubMenu } from "./MemePageReferences";
 import {
+  MemePageNavigationSkeleton,
+  MemePageSkeleton,
+  MemePageTitleSkeleton,
+} from "./MemePageSkeleton";
+import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
@@ -95,92 +100,6 @@ function MemePageTabButton({
     >
       {title}
     </button>
-  );
-}
-
-function MemePageSkeletonBlock({ className }: { readonly className: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`tw-animate-pulse tw-rounded tw-bg-iron-800/50 ${className}`}
-    />
-  );
-}
-
-function MemePageTitleSkeleton() {
-  return (
-    <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
-      <MemePageSkeletonBlock className="tw-h-8 tw-w-72 tw-max-w-full" />
-    </div>
-  );
-}
-
-function MemePageNavigationSkeleton() {
-  return (
-    <div
-      aria-hidden="true"
-      className="tw-flex tw-items-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-2 tw-py-1.5"
-    >
-      <MemePageSkeletonBlock className="tw-size-7 tw-rounded" />
-      <MemePageSkeletonBlock className="tw-h-4 tw-w-16" />
-      <MemePageSkeletonBlock className="tw-size-7 tw-rounded" />
-    </div>
-  );
-}
-
-function MemePageSkeleton() {
-  return (
-    <div aria-hidden="true">
-      <div className="tw-mb-6 tw-grid tw-grid-cols-1 lg:tw-grid-cols-[minmax(0,11fr)_minmax(0,9fr)] lg:tw-gap-x-10 xl:tw-gap-x-16">
-        <div>
-          <div className="tw-relative tw-w-full tw-overflow-hidden">
-            <div className="tw-relative tw-h-96 tw-w-full tw-animate-pulse tw-bg-iron-800/50 sm:tw-h-[520px] lg:tw-h-[650px]" />
-          </div>
-        </div>
-        <div className="tw-pt-6 md:tw-pt-8">
-          <div className="tw-flex tw-flex-col tw-gap-8">
-            <div>
-              <MemePageSkeletonBlock className="tw-mb-2 tw-h-4 tw-w-24" />
-              <div className="tw-flex tw-items-center tw-gap-2.5">
-                <MemePageSkeletonBlock className="tw-size-8 tw-rounded-full" />
-                <MemePageSkeletonBlock className="tw-h-5 tw-w-32" />
-              </div>
-            </div>
-            <div>
-              <MemePageSkeletonBlock className="tw-mb-2 tw-h-4 tw-w-20" />
-              <MemePageSkeletonBlock className="tw-h-5 tw-w-44" />
-            </div>
-            <div>
-              <MemePageSkeletonBlock className="tw-mb-4 tw-h-4 tw-w-28" />
-              <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 tw-gap-y-5 sm:tw-grid-cols-2">
-                {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index}>
-                    <MemePageSkeletonBlock className="tw-mb-1.5 tw-h-4 tw-w-20" />
-                    <MemePageSkeletonBlock className="tw-h-6 tw-w-24" />
-                  </div>
-                ))}
-              </div>
-              <MemePageSkeletonBlock className="tw-mt-6 tw-h-10 tw-w-44 tw-rounded-md" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="tw-mb-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700">
-        <div className="-tw-mb-px tw-flex tw-gap-x-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <MemePageSkeletonBlock
-              key={index}
-              className="tw-my-4 tw-h-4 tw-w-20"
-            />
-          ))}
-        </div>
-      </div>
-      <div className="tw-space-y-3 tw-pb-3">
-        <MemePageSkeletonBlock className="tw-h-4 tw-w-full tw-max-w-3xl" />
-        <MemePageSkeletonBlock className="tw-h-4 tw-w-11/12 tw-max-w-2xl" />
-        <MemePageSkeletonBlock className="tw-h-4 tw-w-3/4 tw-max-w-xl" />
-      </div>
-    </div>
   );
 }
 
