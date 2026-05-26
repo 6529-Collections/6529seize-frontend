@@ -119,29 +119,3 @@ export function getMemeTabTitle(
   }
   return t;
 }
-
-export function TabButton(
-  props: Readonly<{
-    tab: MemeTab;
-    activeTab: MEME_FOCUS | undefined;
-    setActiveTab: (focus: MEME_FOCUS) => void;
-  }>
-) {
-  const isActive = props.activeTab === props.tab.focus;
-
-  return (
-    <button
-      type="button"
-      className={`tw-m-0 tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-no-underline tw-transition-colors tw-duration-200 ${
-        isActive
-          ? "tw-font-semibold tw-text-white"
-          : "tw-text-gray-400 hover:tw-text-white"
-      }`}
-      onClick={() => {
-        props.setActiveTab(props.tab.focus);
-      }}
-    >
-      {props.tab.title}
-    </button>
-  );
-}
