@@ -137,7 +137,9 @@ export default function Auth({
   readonly children: React.ReactNode;
   readonly enableWalletAuthentication?: boolean;
 }) {
-  const { invalidateAll } = useContext(ReactQueryWrapperContext);
+  const { invalidateAll, invalidateAuthSensitiveQueries } = useContext(
+    ReactQueryWrapperContext
+  );
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -835,8 +837,10 @@ export default function Auth({
 
   useEffect(() => {
     const onProfileSwitched = () => {
-      invalidateAll();
-      navigateAfterProfileSwitch();
+      globalThis.setTimeout(() => {
+        invalidateAuthSensitiveQueries();
+        navigateAfterProfileSwitch();
+      }, 0);
     };
 
     if (globalThis.window === undefined) {
@@ -853,7 +857,7 @@ export default function Auth({
         onProfileSwitched
       );
     };
-  }, [invalidateAll, navigateAfterProfileSwitch]);
+  }, [invalidateAuthSensitiveQueries, navigateAfterProfileSwitch]);
 
   useEffect(() => {
     if (!address || isAddressAuthorized) {

@@ -116,6 +116,23 @@ export enum QueryKey {
   CIC_OVERVIEW = "CIC_OVERVIEW",
 }
 
+const AUTH_SENSITIVE_QUERY_KEYS: readonly QueryKey[] = [
+  QueryKey.PROFILE,
+  QueryKey.PROFILE_PROFILE_PROXIES,
+  QueryKey.PROFILE_PROXY,
+  QueryKey.IDENTITY_AVAILABLE_CREDIT,
+  QueryKey.IDENTITY_NOTIFICATIONS,
+  QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
+  QueryKey.WAVES_OVERVIEW,
+  QueryKey.WAVES_V2,
+  QueryKey.WAVES,
+  QueryKey.WAVE,
+  QueryKey.DROPS,
+  QueryKey.DROPS_LEADERBOARD,
+  QueryKey.DROP,
+  QueryKey.FEED_ITEMS,
+];
+
 interface ProfileRatersParams {
   readonly page: number;
   readonly pageSize: number;
@@ -203,6 +220,7 @@ type ReactQueryWrapperContextType = {
     following: boolean;
   }) => void;
   invalidateAll: () => void;
+  invalidateAuthSensitiveQueries: () => void;
   invalidateNotifications: () => void;
   invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
@@ -233,6 +251,7 @@ export const ReactQueryWrapperContext =
     onWaveCreated: () => {},
     onWaveFollowChange: () => {},
     invalidateAll: () => {},
+    invalidateAuthSensitiveQueries: () => {},
     invalidateNotifications: () => {},
     invalidateIdentityTdhStats: () => {},
   });
@@ -986,6 +1005,12 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries();
   };
 
+  const invalidateAuthSensitiveQueries = () => {
+    AUTH_SENSITIVE_QUERY_KEYS.forEach((queryKey) => {
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    });
+  };
+
   const invalidateNotifications = () => {
     queryClient
       .invalidateQueries({
@@ -1028,6 +1053,7 @@ const createReactQueryContextValue = (
     onWaveCreated,
     onWaveFollowChange,
     invalidateAll,
+    invalidateAuthSensitiveQueries,
     onIdentityFollowChange,
     invalidateDrops,
     invalidateNotifications,
