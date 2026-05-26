@@ -93,17 +93,8 @@ export * from '../models/ApiDropMainType';
 export * from '../models/ApiDropMedia';
 export * from '../models/ApiDropMentionedUser';
 export * from '../models/ApiDropMetadata';
-export * from '../models/ApiDropMetadataDescription';
-export * from '../models/ApiDropMetadataOther';
 export * from '../models/ApiDropMetadataResponse';
-export * from '../models/ApiDropMetadataResponseDescription';
-export * from '../models/ApiDropMetadataResponseOther';
-export * from '../models/ApiDropMetadataResponseTitle';
-export * from '../models/ApiDropMetadataTitle';
 export * from '../models/ApiDropMetadataV2';
-export * from '../models/ApiDropMetadataV2Description';
-export * from '../models/ApiDropMetadataV2Other';
-export * from '../models/ApiDropMetadataV2Title';
 export * from '../models/ApiDropNftLink';
 export * from '../models/ApiDropPart';
 export * from '../models/ApiDropPartQuoteV2';
@@ -474,18 +465,9 @@ import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
-import { ApiDropMetadataClass } from '../models/ApiDropMetadata';
-import { ApiDropMetadataDescription, ApiDropMetadataDescriptionDataKeyEnum    } from '../models/ApiDropMetadataDescription';
-import { ApiDropMetadataOther } from '../models/ApiDropMetadataOther';
-import { ApiDropMetadataResponseClass } from '../models/ApiDropMetadataResponse';
-import { ApiDropMetadataResponseDescription, ApiDropMetadataResponseDescriptionDataKeyEnum     } from '../models/ApiDropMetadataResponseDescription';
-import { ApiDropMetadataResponseOther } from '../models/ApiDropMetadataResponseOther';
-import { ApiDropMetadataResponseTitle, ApiDropMetadataResponseTitleDataKeyEnum     } from '../models/ApiDropMetadataResponseTitle';
-import { ApiDropMetadataTitle, ApiDropMetadataTitleDataKeyEnum    } from '../models/ApiDropMetadataTitle';
-import { ApiDropMetadataV2Class } from '../models/ApiDropMetadataV2';
-import { ApiDropMetadataV2Description, ApiDropMetadataV2DescriptionDataKeyEnum     } from '../models/ApiDropMetadataV2Description';
-import { ApiDropMetadataV2Other } from '../models/ApiDropMetadataV2Other';
-import { ApiDropMetadataV2Title, ApiDropMetadataV2TitleDataKeyEnum     } from '../models/ApiDropMetadataV2Title';
+import { ApiDropMetadata } from '../models/ApiDropMetadata';
+import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
+import { ApiDropMetadataV2 } from '../models/ApiDropMetadataV2';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropPartQuoteV2 } from '../models/ApiDropPartQuoteV2';
@@ -783,12 +765,6 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCommunityMembersSortOption",
     "ApiDropGroupMention",
     "ApiDropMainType",
-    "ApiDropMetadataDescriptionDataKeyEnum",
-    "ApiDropMetadataResponseDescriptionDataKeyEnum",
-    "ApiDropMetadataResponseTitleDataKeyEnum",
-    "ApiDropMetadataTitleDataKeyEnum",
-    "ApiDropMetadataV2DescriptionDataKeyEnum",
-    "ApiDropMetadataV2TitleDataKeyEnum",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
@@ -919,18 +895,9 @@ let typeMap: {[index: string]: any} = {
     "ApiDropId": ApiDropId,
     "ApiDropMedia": ApiDropMedia,
     "ApiDropMentionedUser": ApiDropMentionedUser,
-    "ApiDropMetadata": ApiDropMetadataClass,
-    "ApiDropMetadataDescription": ApiDropMetadataDescription,
-    "ApiDropMetadataOther": ApiDropMetadataOther,
-    "ApiDropMetadataResponse": ApiDropMetadataResponseClass,
-    "ApiDropMetadataResponseDescription": ApiDropMetadataResponseDescription,
-    "ApiDropMetadataResponseOther": ApiDropMetadataResponseOther,
-    "ApiDropMetadataResponseTitle": ApiDropMetadataResponseTitle,
-    "ApiDropMetadataTitle": ApiDropMetadataTitle,
-    "ApiDropMetadataV2": ApiDropMetadataV2Class,
-    "ApiDropMetadataV2Description": ApiDropMetadataV2Description,
-    "ApiDropMetadataV2Other": ApiDropMetadataV2Other,
-    "ApiDropMetadataV2Title": ApiDropMetadataV2Title,
+    "ApiDropMetadata": ApiDropMetadata,
+    "ApiDropMetadataResponse": ApiDropMetadataResponse,
+    "ApiDropMetadataV2": ApiDropMetadataV2,
     "ApiDropNftLink": ApiDropNftLink,
     "ApiDropPart": ApiDropPart,
     "ApiDropPartQuoteV2": ApiDropPartQuoteV2,

@@ -11,30 +11,45 @@
  * Do not edit the class manually.
  */
 
-import { ApiDropMetadataResponseDescription } from '../models/ApiDropMetadataResponseDescription';
-import { ApiDropMetadataResponseOther } from '../models/ApiDropMetadataResponseOther';
-import { ApiDropMetadataResponseTitle } from '../models/ApiDropMetadataResponseTitle';
+import { ApiDropResolvedIdentityProfile } from '../models/ApiDropResolvedIdentityProfile';
 import { HttpFile } from '../http/http';
 
 /**
 * Drop metadata response. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
 */
-/**
- * @type ApiDropMetadataResponse
- * Type
- * @export
- */
-export type ApiDropMetadataResponse = ApiDropMetadataResponseDescription | ApiDropMetadataResponseOther | ApiDropMetadataResponseTitle;
+export class ApiDropMetadataResponse {
+    'data_key': string;
+    'data_value': string;
+    'resolved_profile'?: ApiDropResolvedIdentityProfile | null;
 
-/**
-* @type ApiDropMetadataResponseClass
-    * Drop metadata response. data_value maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
-* @export
-*/
-export class ApiDropMetadataResponseClass {
     static readonly discriminator: string | undefined = undefined;
 
     static readonly mapping: {[index: string]: string} | undefined = undefined;
+
+    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "data_key",
+            "baseName": "data_key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "data_value",
+            "baseName": "data_value",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "resolved_profile",
+            "baseName": "resolved_profile",
+            "type": "ApiDropResolvedIdentityProfile",
+            "format": ""
+        }    ];
+
+    static getAttributeTypeMap() {
+        return ApiDropMetadataResponse.attributeTypeMap;
+    }
+
+    public constructor() {
+    }
 }
-
-
