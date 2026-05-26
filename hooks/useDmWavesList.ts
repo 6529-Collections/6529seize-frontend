@@ -11,9 +11,10 @@ import {
 
 const useDmWavesList = () => {
   const { address } = useSeizeConnectContext();
-  const { activeProfileProxy } = useAuth();
+  const { activeProfileProxy, isAuthenticated } = useAuth();
+  const isPendingAuthSwitch = Boolean(address && isAuthenticated === false);
   const viewerIdentityKey = useMemo(() => {
-    if (!address) {
+    if (!address || isAuthenticated === false) {
       return null;
     }
 
@@ -23,7 +24,7 @@ const useDmWavesList = () => {
     }
 
     return `${normalizedAddress}:primary`;
-  }, [address, activeProfileProxy?.id]);
+  }, [address, activeProfileProxy?.id, isAuthenticated]);
 
   const {
     waves: mainWaves,
@@ -38,6 +39,7 @@ const useDmWavesList = () => {
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     directMessage: true,
     viewerIdentityKey,
+    enabled: !isPendingAuthSwitch,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });

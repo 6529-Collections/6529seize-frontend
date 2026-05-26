@@ -94,6 +94,7 @@ class NonceResponseValidationError extends Error {
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
+  readonly isAuthenticated?: boolean;
   readonly fetchingProfile: boolean;
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ApiProfileProxy[];
@@ -114,6 +115,7 @@ type AuthContextType = {
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  isAuthenticated: false,
   fetchingProfile: false,
   receivedProfileProxies: [],
   activeProfileProxy: null,
@@ -853,9 +855,27 @@ export default function Auth({
     };
   }, [invalidateAll, navigateAfterProfileSwitch]);
 
+  useEffect(() => {
+    if (!address || isAddressAuthorized) {
+      return;
+    }
+
+    navigateAfterProfileSwitch();
+  }, [address, isAddressAuthorized, navigateAfterProfileSwitch]);
+
   const showWaves = useMemo(() => {
-    return !!connectedProfile?.handle && !activeProfileProxy && !!address;
-  }, [connectedProfile?.handle, activeProfileProxy, address]);
+    return (
+      !!connectedProfile?.handle &&
+      !activeProfileProxy &&
+      !!address &&
+      isAddressAuthorized
+    );
+  }, [
+    connectedProfile?.handle,
+    activeProfileProxy,
+    address,
+    isAddressAuthorized,
+  ]);
 
   const onCancelSignRequest = useCallback(() => {
     setShowSignModal(false);
@@ -887,6 +907,7 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
+        isAuthenticated: !!connectedProfile?.handle && isAddressAuthorized,
         fetchingProfile,
         receivedProfileProxies,
         activeProfileProxy,

@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { getAuthJwt, WALLET_AUTH_COOKIE } from "../auth/auth.utils";
+import {
+  AUTH_TOKEN_CHANGED_EVENT,
+  getAuthJwt,
+  WALLET_AUTH_COOKIE,
+} from "../auth/auth.utils";
 import { useWebSocket } from "./useWebSocket";
 import { WebSocketStatus } from "./WebSocketTypes";
 
@@ -279,6 +283,24 @@ export function useWebSocketHealth() {
     return () => {
       removeCookieListener?.();
       closeBroadcastChannel?.();
+    };
+  }, [performHealthCheck]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleAuthTokenChanged = () => {
+      performHealthCheck();
+    };
+
+    window.addEventListener(AUTH_TOKEN_CHANGED_EVENT, handleAuthTokenChanged);
+    return () => {
+      window.removeEventListener(
+        AUTH_TOKEN_CHANGED_EVENT,
+        handleAuthTokenChanged
+      );
     };
   }, [performHealthCheck]);
 

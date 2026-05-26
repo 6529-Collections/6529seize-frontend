@@ -1225,7 +1225,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAddConnectedAccount,
       seizeConnectOpen: state.open,
       isConnected: isActiveWalletConnected,
-      isAuthenticated: !!activeAddress,
+      isAuthenticated: Boolean(impersonatedAddress || activeStoredAccount),
       connectionState: walletState.status, // Unified state machine
       walletState, // Expose unified state for advanced consumers
       hasInitializationError,
@@ -1236,6 +1236,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [
       activeAddress,
+      activeStoredAccount,
       isActiveWalletConnected,
       connectedAccounts,
       walletInfo?.name,

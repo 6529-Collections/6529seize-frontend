@@ -6,6 +6,7 @@ import { useContext, useMemo, useState } from "react";
 
 import { useDebounce } from "react-use";
 import { AuthContext } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -36,9 +37,16 @@ export function useWaves({
   enabled = true,
   directMessage,
 }: UseWavesParams) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy, isAuthenticated } =
+    useContext(AuthContext);
+  const { address } = useSeizeConnectContext();
 
-  const usePublicWaves = !connectedProfile?.handle || !!activeProfileProxy;
+  const hasAuthenticatedProfile = isAuthenticated ?? !!connectedProfile?.handle;
+  const isPendingAuthSwitch = Boolean(address && isAuthenticated === false);
+  const usePublicWaves =
+    !connectedProfile?.handle ||
+    !!activeProfileProxy ||
+    !hasAuthenticatedProfile;
 
   const params = useMemo<SearchWavesParams>(
     () => ({
@@ -79,7 +87,7 @@ export function useWaves({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: enabled && !usePublicWaves,
+    enabled: enabled && !usePublicWaves && !isPendingAuthSwitch,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });
@@ -107,7 +115,7 @@ export function useWaves({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    enabled: enabled && usePublicWaves,
+    enabled: enabled && usePublicWaves && !isPendingAuthSwitch,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });

@@ -21,6 +21,7 @@ interface UseWavesV2Props {
   readonly viewerIdentityKey?: string | null | undefined;
   readonly directMessage?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly enabled?: boolean | undefined;
   readonly refetchInterval?: number | undefined;
   readonly refetchIntervalInBackground?: boolean | undefined;
 }
@@ -32,6 +33,7 @@ export const useWavesV2 = ({
   viewerIdentityKey,
   directMessage,
   pinned,
+  enabled = true,
   refetchInterval = Infinity,
   refetchIntervalInBackground = false,
 }: UseWavesV2Props) => {
@@ -75,6 +77,7 @@ export const useWavesV2 = ({
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
+    enabled,
     placeholderData: (previousData, previousQuery) => {
       const previousParams =
         previousQuery === undefined
