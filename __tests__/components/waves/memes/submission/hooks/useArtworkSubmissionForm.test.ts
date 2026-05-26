@@ -220,7 +220,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
     const replacementFile = new File(["replacement"], "replacement.png", {
@@ -270,7 +270,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
 
@@ -305,7 +305,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
 
@@ -368,7 +368,7 @@ describe("useArtworkSubmissionForm", () => {
       }
       result = "url";
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
     act(() => {
       result.current.handleFileSelect(new File(["x"], "a.png"));
     });
@@ -396,7 +396,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm();
     const firstFile = new File(["x"], "first.png", { type: "image/png" });
@@ -437,7 +437,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     const { result } = renderArtworkSubmissionForm();
 
@@ -572,7 +572,7 @@ describe("useArtworkSubmissionForm", () => {
         this.onloadend?.();
       }
     }
-    global.FileReader = MockFileReader as any;
+    globalThis.FileReader = MockFileReader as any;
 
     act(() => {
       result.current.handleFileSelect(new File(["x"], "a.png"));
