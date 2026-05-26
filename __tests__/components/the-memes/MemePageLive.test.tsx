@@ -288,6 +288,26 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.getByText("B")).toBeInTheDocument();
   });
 
+  it("maps ampersand-separated artist names to separate artist handles", () => {
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={createNft({
+          artist: "Zar & dsoeirosanches",
+          artist_seize_handle: "Zar, dsanchesGM",
+        })}
+      />
+    );
+
+    expect(screen.getByRole("link", { name: "Zar" })).toHaveAttribute(
+      "href",
+      "/Zar"
+    );
+    expect(
+      screen.getByRole("link", { name: "dsoeirosanches" })
+    ).toHaveAttribute("href", "/dsanchesGM");
+  });
+
   it("falls back to the artist name when no artist handle exists", () => {
     render(
       <MemePageLiveRightMenu
