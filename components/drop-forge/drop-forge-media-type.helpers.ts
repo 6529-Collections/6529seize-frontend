@@ -5,7 +5,8 @@ type DropForgeAnimationKind = "video" | "glb" | "html" | "animation";
 function normalizeMediaFormat(
   format: string | null | undefined
 ): string | null {
-  return format ? format.toUpperCase() : null;
+  const trimmedFormat = format?.trim();
+  return trimmedFormat ? trimmedFormat.toUpperCase() : null;
 }
 
 export function getDropForgeUrlExtension(
