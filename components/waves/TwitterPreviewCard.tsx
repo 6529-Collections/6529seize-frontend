@@ -134,23 +134,25 @@ function TwitterHandleLink({ handle }: { readonly handle: string }) {
 
 function renderTweetText(text: string): ReactNode[] {
   const parts: ReactNode[] = [];
-  const mentionPattern = /@(\w{1,15})/g;
+  const mentionPattern = /(^|[^\w])@(\w{1,15})(?=\b)/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
   while ((match = mentionPattern.exec(text)) !== null) {
-    const mention = match[0];
-    const handle = match[1];
+    const prefix = match[1] ?? "";
+    const handle = match[2];
     if (!handle) {
       continue;
     }
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
+    const mentionStart = match.index + prefix.length;
+    const mention = `@${handle}`;
+    if (mentionStart > lastIndex) {
+      parts.push(text.slice(lastIndex, mentionStart));
     }
     parts.push(
-      <TwitterHandleLink key={`${handle}-${match.index}`} handle={handle} />
+      <TwitterHandleLink key={`${handle}-${mentionStart}`} handle={handle} />
     );
-    lastIndex = match.index + mention.length;
+    lastIndex = mentionStart + mention.length;
   }
 
   if (lastIndex < text.length) {
@@ -443,11 +445,7 @@ function TweetVideo({
   );
 }
 
-function TweetMediaGridVideo({
-  media,
-}: {
-  readonly media: TweetPreviewMedia;
-}) {
+function TweetMediaGridVideo({ media }: { readonly media: TweetPreviewMedia }) {
   const [playing, setPlaying] = useState(false);
   const posterUrl = media.posterUrl ?? media.imageUrl;
 
@@ -789,15 +787,18 @@ export default function TwitterPreviewCard({
   }
 
   return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer nofollow"
-      onClick={stopCardEvent}
-      className={`${TWITTER_CARD_CLASSES} tw-block tw-cursor-pointer tw-no-underline`}
+    <article
+      className={`${TWITTER_CARD_CLASSES} tw-relative`}
       data-testid="twitter-post-preview"
     >
-      <div className="tw-flex tw-flex-col tw-gap-y-3 tw-p-3">
+      <Link
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        aria-label="Open tweet on X"
+        className="tw-absolute tw-inset-0 tw-z-0 tw-rounded-2xl"
+      />
+      <div className="tw-pointer-events-none tw-relative tw-z-10 tw-flex tw-flex-col tw-gap-y-3 tw-p-3 [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto">
         <TweetHeader
           authorHref={authorHref}
           authorName={authorName}
@@ -844,6 +845,6 @@ export default function TwitterPreviewCard({
           />
         )}
       </div>
-    </Link>
+    </article>
   );
 }

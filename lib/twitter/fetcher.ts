@@ -214,6 +214,15 @@ const isImageUrl = (value: string): boolean => {
   }
 };
 
+const isTwitterMediaUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    return matchesDomainOrSubdomain(url.hostname, "twimg.com");
+  } catch {
+    return false;
+  }
+};
+
 const findFirstImageInArray = (
   values: readonly unknown[]
 ): string | undefined => {
@@ -348,14 +357,20 @@ const pushUniqueMedia = (
 const createImageMedia = (
   url: string | undefined
 ): TweetPreviewMedia | undefined =>
-  url && isImageUrl(url) ? { type: "image", imageUrl: url } : undefined;
+  url && isImageUrl(url) && isTwitterMediaUrl(url)
+    ? { type: "image", imageUrl: url }
+    : undefined;
 
 const createVideoMedia = (
   videoUrl: string | undefined,
   posterUrl: string | undefined
 ): TweetPreviewMedia | undefined =>
   videoUrl
-    ? { type: "video", videoUrl, ...(posterUrl ? { posterUrl } : {}) }
+    ? {
+        type: "video",
+        videoUrl,
+        ...(posterUrl && isTwitterMediaUrl(posterUrl) ? { posterUrl } : {}),
+      }
     : undefined;
 
 const readMediaDetailImageUrl = (
@@ -610,11 +625,7 @@ function buildSyndicationPreview(
     "bookmarkCount",
     readNumberish(record["bookmark_count"])
   );
-  setPreviewValue(
-    preview,
-    "viewCount",
-    readNumberish(record["view_count"])
-  );
+  setPreviewValue(preview, "viewCount", readNumberish(record["view_count"]));
 
   return preview;
 }

@@ -151,7 +151,7 @@ describe("TwitterPreviewCard", () => {
     );
 
     await screen.findByTestId("twitter-post-preview");
-    expect(screen.getByTestId("twitter-post-preview")).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Open tweet on X" })).toHaveAttribute(
       "href",
       "https://x.com/Mayudropsphotos/status/2049202644879565155"
     );
@@ -234,6 +234,32 @@ describe("TwitterPreviewCard", () => {
     expect(screen.getByRole("link", { name: "@BillyNFTees" })).toHaveAttribute(
       "href",
       "https://x.com/BillyNFTees"
+    );
+  });
+
+  it("does not link email or mid-word at signs as Twitter handles", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2058813617554723314",
+      url: "https://x.com/Casa_NUA/status/2058813617554723314",
+      authorName: "CasaNUA.6529",
+      authorHandle: "Casa_NUA",
+      text: "Email art@example.com and mid@word are not handles, but @punk6529 is.",
+    });
+
+    render(
+      <TwitterPreviewCard
+        href="https://x.com/Casa_NUA/status/2058813617554723314"
+        tweetId="2058813617554723314"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+
+    expect(screen.queryByRole("link", { name: "@example" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "@word" })).toBeNull();
+    expect(screen.getByRole("link", { name: "@punk6529" })).toHaveAttribute(
+      "href",
+      "https://x.com/punk6529"
     );
   });
 
