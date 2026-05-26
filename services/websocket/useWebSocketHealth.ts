@@ -197,7 +197,7 @@ export function useWebSocketHealth() {
   }, [performResumeHealthCheck]);
 
   useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
       return;
     }
 
@@ -287,7 +287,7 @@ export function useWebSocketHealth() {
   }, [performHealthCheck]);
 
   useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
+    if (globalThis.window === undefined) {
       return;
     }
 
