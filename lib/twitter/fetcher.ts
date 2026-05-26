@@ -154,6 +154,9 @@ const trimTrailingPreviewPunctuation = (text: string): string => {
   let end = text.length;
   while (end > 0) {
     const char = text[end - 1];
+    if (!char) {
+      break;
+    }
     if (char !== "," && !/\s/u.test(char)) {
       break;
     }
