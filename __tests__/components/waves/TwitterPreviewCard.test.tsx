@@ -151,7 +151,9 @@ describe("TwitterPreviewCard", () => {
     );
 
     await screen.findByTestId("twitter-post-preview");
-    expect(screen.getByRole("link", { name: "Open tweet on X" })).toHaveAttribute(
+    expect(
+      screen.getByRole("link", { name: "Open tweet on X" })
+    ).toHaveAttribute(
       "href",
       "https://x.com/Mayudropsphotos/status/2049202644879565155"
     );
