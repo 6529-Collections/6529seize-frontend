@@ -43,7 +43,7 @@ export function isDropForgeVideoUrl(url: string | null | undefined): boolean {
   );
 }
 
-export function getDropForgeImageFormat(claim: MintingClaim): string | null {
+function getDropForgeImageFormat(claim: MintingClaim): string | null {
   const fromDetails = normalizeMediaFormat(claim.image_details?.format);
   if (fromDetails) return fromDetails === "JPG" ? "JPEG" : fromDetails;
 
