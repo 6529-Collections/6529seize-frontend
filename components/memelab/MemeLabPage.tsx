@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable max-lines -- This legacy page still owns route state, data fetching, and tab orchestration; UI blocks are being extracted in focused passes. */
-
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import CircleLoader, {
