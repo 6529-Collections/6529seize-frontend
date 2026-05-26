@@ -5,7 +5,6 @@ import CreateDropContent from "@/components/waves/CreateDropContent";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { DropSize } from "@/helpers/waves/drop.helpers";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { setEditingDropId } from "@/store/editSlice";
@@ -16,7 +15,10 @@ const mockRequestAuth = jest.fn(async () => ({ success: true }));
 const mockSetToast = jest.fn();
 let mockEditingDropId: string | null = null;
 let mockComposerMarkdown: string | null = null;
-let mockWaveMessages: { drops: unknown[] } | undefined;
+let mockLatestEditableChatDropTarget: {
+  readonly id: string;
+  readonly serialNo: number;
+} | null = null;
 
 jest.mock("next/dynamic", () => () => () => null);
 
@@ -81,7 +83,12 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
-  useMyStreamWaveMessages: jest.fn(() => mockWaveMessages),
+}));
+
+jest.mock("@/components/waves/hooks/useLatestEditableChatDropTarget", () => ({
+  useLatestEditableChatDropTarget: jest.fn(
+    () => mockLatestEditableChatDropTarget
+  ),
 }));
 
 jest.mock("@/components/waves/CreateDropReplyingWrapper", () => () => (
@@ -226,20 +233,6 @@ const wave = {
   },
 } as any;
 
-const latestOwnDrop = {
-  id: "drop-latest",
-  serial_no: 42,
-  type: DropSize.FULL,
-  stableKey: "drop-latest",
-  stableHash: "drop-latest",
-  drop_type: ApiDropType.Chat,
-  wave: { id: "wave-1" },
-  author: { id: "profile-1", handle: "alice" },
-  rank: null,
-  parts: [],
-  metadata: [],
-};
-
 const renderSubject = (
   props: Partial<React.ComponentProps<typeof CreateDropContent>> = {}
 ) =>
@@ -275,7 +268,7 @@ describe("CreateDropContent edit last drop shortcut", () => {
     jest.clearAllMocks();
     mockEditingDropId = null;
     mockComposerMarkdown = null;
-    mockWaveMessages = { drops: [latestOwnDrop] };
+    mockLatestEditableChatDropTarget = { id: "drop-latest", serialNo: 42 };
     (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
       observe: jest.fn(),
       unobserve: jest.fn(),
@@ -373,6 +366,15 @@ describe("CreateDropContent edit last drop shortcut", () => {
 
   it("does not open edit in drop mode", async () => {
     renderSubject({ isDropMode: true });
+
+    await userEvent.click(screen.getByTestId("request-edit-last-drop"));
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it("does not open edit without an editable target", async () => {
+    mockLatestEditableChatDropTarget = null;
+    renderSubject();
 
     await userEvent.click(screen.getByTestId("request-edit-last-drop"));
 

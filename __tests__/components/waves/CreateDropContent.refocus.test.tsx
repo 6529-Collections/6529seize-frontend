@@ -146,7 +146,10 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
-  useMyStreamWaveMessages: jest.fn(() => undefined),
+}));
+
+jest.mock("@/components/waves/hooks/useLatestEditableChatDropTarget", () => ({
+  useLatestEditableChatDropTarget: jest.fn(() => null),
 }));
 
 jest.mock("@/hooks/drops/useDropSignature", () => ({

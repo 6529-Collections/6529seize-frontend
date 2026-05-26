@@ -57,10 +57,7 @@ import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdo
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import {
-  useMyStream,
-  useMyStreamWaveMessages,
-} from "@/contexts/wave/MyStreamContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
@@ -113,7 +110,7 @@ import {
   areHandlesEqual,
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
-import { getLatestEditableChatDrop } from "./utils/getLatestEditableChatDrop";
+import { useLatestEditableChatDropTarget } from "./hooks/useLatestEditableChatDropTarget";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -546,7 +543,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     useAuth();
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
-  const waveMessages = useMyStreamWaveMessages(wave.id);
   const waveChatScroll = useWaveChatScrollOptional();
   const { signDrop } = useDropSignature();
 
@@ -804,16 +800,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const canSubmit =
     getCanSubmit() && !isSlowModeSubmitBlocked && !isLinksSubmitBlocked;
   const canAddPart = getCanAddPart();
-  const latestEditableChatDrop = useMemo(
-    () =>
-      getLatestEditableChatDrop({
-        drops: waveMessages?.drops,
-        waveId: wave.id,
-        connectedProfile,
-        isProxyMode: Boolean(activeProfileProxy),
-      }),
-    [activeProfileProxy, connectedProfile, wave.id, waveMessages?.drops]
-  );
+  const latestEditableChatDropTarget = useLatestEditableChatDropTarget({
+    waveId: wave.id,
+    connectedProfile,
+    isProxyMode: Boolean(activeProfileProxy),
+  });
   const canEditLastDropWithArrow =
     !isDropMode &&
     !isStormModeActive &&
@@ -823,22 +814,22 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     (getMarkdown?.trim().length ?? 0) === 0 &&
     files.length === 0 &&
     (drop?.parts.length ?? 0) === 0 &&
-    latestEditableChatDrop !== null;
+    latestEditableChatDropTarget !== null;
   const handleRequestEditLastDrop = useCallback((): boolean => {
-    if (!canEditLastDropWithArrow || !latestEditableChatDrop) {
+    if (!canEditLastDropWithArrow || !latestEditableChatDropTarget) {
       return false;
     }
 
-    dispatch(setEditingDropId(latestEditableChatDrop.id));
+    dispatch(setEditingDropId(latestEditableChatDropTarget.id));
     waveChatScroll?.requestScrollToSerialNo({
       waveId: wave.id,
-      serialNo: latestEditableChatDrop.serial_no,
+      serialNo: latestEditableChatDropTarget.serialNo,
     });
     return true;
   }, [
     canEditLastDropWithArrow,
     dispatch,
-    latestEditableChatDrop,
+    latestEditableChatDropTarget,
     wave.id,
     waveChatScroll,
   ]);
