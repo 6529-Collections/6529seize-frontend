@@ -48,9 +48,9 @@ export default function NftNavigation(
           aria-label="Previous NFT"
           aria-disabled={isFirst}
           title="Previous Card"
-          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.15] tw-bg-iron-900 tw-text-iron-300 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-all tw-duration-300 hover:tw-border-white/20 hover:tw-bg-iron-700 hover:tw-text-white ${
+          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-all tw-duration-300 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white ${
             isFirst
-              ? "tw-pointer-events-none tw-cursor-default tw-border-white/[0.04] tw-bg-iron-950/60 tw-text-iron-700 tw-opacity-60 tw-shadow-none"
+              ? "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
               : ""
           }`}
         >
@@ -65,9 +65,9 @@ export default function NftNavigation(
           aria-label="Next NFT"
           aria-disabled={isLast}
           title="Next Card"
-          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.15] tw-bg-iron-900 tw-text-iron-300 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-all tw-duration-300 hover:tw-border-white/20 hover:tw-bg-iron-700 hover:tw-text-white ${
+          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-all tw-duration-300 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white ${
             isLast
-              ? "tw-pointer-events-none tw-cursor-default tw-border-white/[0.04] tw-bg-iron-950/60 tw-text-iron-700 tw-opacity-60 tw-shadow-none"
+              ? "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
               : ""
           }`}
         >
