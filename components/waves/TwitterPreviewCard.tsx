@@ -13,7 +13,6 @@ import {
   useEffect,
   useMemo,
   useState,
-  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
   type SyntheticEvent,
@@ -135,12 +134,16 @@ function TwitterHandleLink({ handle }: { readonly handle: string }) {
 
 function renderTweetText(text: string): ReactNode[] {
   const parts: ReactNode[] = [];
-  const mentionPattern = /@([A-Za-z0-9_]{1,15})/g;
+  const mentionPattern = /@(\w{1,15})/g;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
   while ((match = mentionPattern.exec(text)) !== null) {
-    const [mention, handle] = match;
+    const mention = match[0];
+    const handle = match[1];
+    if (!handle) {
+      continue;
+    }
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
     }
@@ -703,11 +706,7 @@ function TweetActions({
         </span>
       </Link>
       {preview.bookmarkCount !== undefined && (
-        <div
-          className={STATIC_ACTION_CLASSES}
-          aria-label="Bookmarks"
-          onClick={stopCardEvent}
-        >
+        <div className={STATIC_ACTION_CLASSES} aria-label="Bookmarks">
           <BookmarkIcon className="tw-h-5 tw-w-5" />
           <span>{formatCount(preview.bookmarkCount)}</span>
         </div>
@@ -718,22 +717,6 @@ function TweetActions({
       </button>
     </div>
   );
-}
-
-function openTweet(href: string): void {
-  globalThis.window.open(href, "_blank", "noopener,noreferrer");
-}
-
-function handleCardKeyDown(
-  event: KeyboardEvent<HTMLElement>,
-  href: string
-): void {
-  if (event.key !== "Enter") {
-    return;
-  }
-
-  event.preventDefault();
-  openTweet(href);
 }
 
 export default function TwitterPreviewCard({
@@ -806,13 +789,13 @@ export default function TwitterPreviewCard({
   }
 
   return (
-    <article
-      className={`${TWITTER_CARD_CLASSES} tw-cursor-pointer`}
+    <Link
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      onClick={stopCardEvent}
+      className={`${TWITTER_CARD_CLASSES} tw-block tw-cursor-pointer tw-no-underline`}
       data-testid="twitter-post-preview"
-      role="link"
-      tabIndex={0}
-      onClick={() => openTweet(href)}
-      onKeyDown={(event) => handleCardKeyDown(event, href)}
     >
       <div className="tw-flex tw-flex-col tw-gap-y-3 tw-p-3">
         <TweetHeader
@@ -861,6 +844,6 @@ export default function TwitterPreviewCard({
           />
         )}
       </div>
-    </article>
+    </Link>
   );
 }

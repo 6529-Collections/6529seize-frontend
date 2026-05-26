@@ -150,6 +150,18 @@ const applyDisplayTextRange = (
 const endsLikeCompleteText = (text: string): boolean =>
   /(?:[.!?…"”’)\]]|https?:\/\/\S+)$/u.test(text);
 
+const trimTrailingPreviewPunctuation = (text: string): string => {
+  let end = text.length;
+  while (end > 0) {
+    const char = text[end - 1];
+    if (char !== "," && !/\s/u.test(char)) {
+      break;
+    }
+    end -= 1;
+  }
+  return text.slice(0, end);
+};
+
 const appendEllipsisIfTruncated = (
   text: string | undefined,
   expanded: boolean
@@ -158,7 +170,7 @@ const appendEllipsisIfTruncated = (
     return text;
   }
 
-  return `${text.replace(/[,\s]+$/u, "")}...`;
+  return `${trimTrailingPreviewPunctuation(text)}...`;
 };
 
 const excerptTweetText = (text: string | undefined): string | undefined => {
@@ -180,7 +192,7 @@ const excerptTweetText = (text: string | undefined): string | undefined => {
     wordBoundaryIndex > TWEET_PREVIEW_TEXT_MAX_CHARS * 0.75
       ? candidate.slice(0, wordBoundaryIndex)
       : candidate;
-  return `${excerpt.replace(/[,\s]+$/u, "")}...`;
+  return `${trimTrailingPreviewPunctuation(excerpt)}...`;
 };
 
 const isImageUrl = (value: string): boolean => {

@@ -20,7 +20,6 @@ describe("TwitterPreviewCard", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     mockedFetchTwitterPreview.mockReset();
-    jest.spyOn(globalThis.window, "open").mockImplementation(() => null);
     Object.assign(navigator, {
       clipboard: {
         writeText: jest.fn().mockResolvedValue(undefined),
@@ -135,7 +134,7 @@ describe("TwitterPreviewCard", () => {
     );
   });
 
-  it("opens the tweet when clicking the preview card body", async () => {
+  it("renders the tweet preview card as a native link", async () => {
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2049202644879565155",
       url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
@@ -152,35 +151,10 @@ describe("TwitterPreviewCard", () => {
     );
 
     await screen.findByTestId("twitter-post-preview");
-    await userEvent.click(screen.getByText("Post text"));
-
-    expect(globalThis.window.open).toHaveBeenCalledWith(
-      "https://x.com/Mayudropsphotos/status/2049202644879565155",
-      "_blank",
-      "noopener,noreferrer"
+    expect(screen.getByTestId("twitter-post-preview")).toHaveAttribute(
+      "href",
+      "https://x.com/Mayudropsphotos/status/2049202644879565155"
     );
-  });
-
-  it("does not open the tweet when clicking an action", async () => {
-    mockedFetchTwitterPreview.mockResolvedValue({
-      tweetId: "2049202644879565155",
-      url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
-      authorName: "Mayudrops",
-      authorHandle: "Mayudropsphotos",
-      text: "Post text",
-    });
-
-    render(
-      <TwitterPreviewCard
-        href="https://x.com/Mayudropsphotos/status/2049202644879565155"
-        tweetId="2049202644879565155"
-      />
-    );
-
-    await screen.findByTestId("twitter-post-preview");
-    await userEvent.click(screen.getByRole("button", { name: /copy/i }));
-
-    expect(globalThis.window.open).not.toHaveBeenCalled();
   });
 
   it("renders multiple media items in a gallery grid", async () => {
