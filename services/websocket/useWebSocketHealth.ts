@@ -197,15 +197,11 @@ export function useWebSocketHealth() {
   }, [performResumeHealthCheck]);
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
-
     const cookieStore = (
-      window as unknown as {
+      globalThis.window as unknown as {
         cookieStore?: CookieStoreWithEvents | undefined;
-      }
-    ).cookieStore;
+      } | undefined
+    )?.cookieStore;
 
     const hasCookieStoreListener = Boolean(
       cookieStore &&
@@ -287,10 +283,6 @@ export function useWebSocketHealth() {
   }, [performHealthCheck]);
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
-
     const handleAuthTokenChanged = () => {
       performHealthCheck();
     };
