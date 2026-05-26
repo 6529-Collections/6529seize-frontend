@@ -10048,8 +10048,11 @@ components:
           type: string
           maxLength: 500
         data_value:
+          description: >-
+            Maximum length is 255 when data_key is title, 8000 when data_key is
+            description, and 5000 for all other metadata keys.
           type: string
-          maxLength: 5000
+          maxLength: 8000
     ApiDropMetadataResponse:
       type: object
       required:
@@ -10060,8 +10063,11 @@ components:
           type: string
           maxLength: 500
         data_value:
+          description: >-
+            Maximum length is 255 when data_key is title, 8000 when data_key is
+            description, and 5000 for all other metadata keys.
           type: string
-          maxLength: 5000
+          maxLength: 8000
         resolved_profile:
           anyOf:
             - type: "null"
@@ -10076,8 +10082,11 @@ components:
           type: string
           maxLength: 500
         data_value:
+          description: >-
+            Maximum length is 255 when data_key is title, 8000 when data_key is
+            description, and 5000 for all other metadata keys.
           type: string
-          maxLength: 5000
+          maxLength: 8000
         resolved_profile:
           $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
     ApiDropNftLink:

@@ -16,6 +16,9 @@ import { HttpFile } from '../http/http';
 
 export class ApiDropMetadataV2 {
     'data_key': string;
+    /**
+    * Maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+    */
     'data_value': string;
     'resolved_profile'?: ApiDropResolvedIdentityProfileV2;
 

@@ -4,6 +4,10 @@ import React, { useRef, useCallback, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import {
+  METADATA_VALUE_DESCRIPTION_MAX_LENGTH,
+  METADATA_VALUE_TITLE_MAX_LENGTH,
+} from "../utils/submissionMetadata";
 
 interface ArtworkDetailsProps {
   readonly title: string;
@@ -165,7 +169,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 id="field-title"
                 name="title"
                 type="text"
-                maxLength={500}
+                maxLength={METADATA_VALUE_TITLE_MAX_LENGTH}
                 defaultValue={title || ""}
                 onInput={handleTitleInput}
                 onBlur={handleTitleBlur}
@@ -225,7 +229,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 onInput={handleDescriptionInput}
                 onBlur={handleDescriptionBlur}
                 rows={4}
-                maxLength={500}
+                maxLength={METADATA_VALUE_DESCRIPTION_MAX_LENGTH}
                 aria-invalid={!!descriptionError}
                 aria-describedby={
                   descriptionError ? "description-error" : undefined

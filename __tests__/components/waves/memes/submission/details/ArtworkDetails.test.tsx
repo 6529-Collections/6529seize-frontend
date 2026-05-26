@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import ArtworkDetails from '@/components/waves/memes/submission/details/ArtworkDetails';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import ArtworkDetails from "@/components/waves/memes/submission/details/ArtworkDetails";
 
-describe('ArtworkDetails', () => {
-  it('calls blur handlers when values change', async () => {
+describe("ArtworkDetails", () => {
+  it("calls blur handlers when values change", async () => {
     const user = userEvent.setup();
     const onTitleChange = jest.fn();
     const onDescriptionChange = jest.fn();
@@ -22,30 +22,60 @@ describe('ArtworkDetails', () => {
     const title = screen.getByLabelText(/Artwork Title/);
     const desc = screen.getByLabelText(/Description/);
     await user.clear(title);
-    await user.type(title, 'new');
+    await user.type(title, "new");
     await user.tab();
-    expect(onTitleChange).toHaveBeenCalledWith('new');
+    expect(onTitleChange).toHaveBeenCalledWith("new");
     expect(onTitleBlur).toHaveBeenCalled();
     await user.clear(desc);
-    await user.type(desc, 'text');
+    await user.type(desc, "text");
     await user.tab();
-    expect(onDescriptionChange).toHaveBeenCalledWith('text');
+    expect(onDescriptionChange).toHaveBeenCalledWith("text");
     expect(onDescriptionBlur).toHaveBeenCalled();
   });
 
-  it('syncs input values when props change', () => {
+  it("syncs input values when props change", () => {
     const { rerender } = render(
-      <ArtworkDetails title="one" description="two" onTitleChange={() => {}} onDescriptionChange={() => {}} />
+      <ArtworkDetails
+        title="one"
+        description="two"
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
     );
     const title = screen.getByLabelText(/Artwork Title/) as HTMLInputElement;
-    expect(title.value).toBe('one');
+    expect(title.value).toBe("one");
     rerender(
-      <ArtworkDetails title="three" description="two" onTitleChange={() => {}} onDescriptionChange={() => {}} />
+      <ArtworkDetails
+        title="three"
+        description="two"
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
     );
-    expect(title.value).toBe('three');
+    expect(title.value).toBe("three");
   });
 
-  it('uses neutral required markers and subtle success rings for filled fields', () => {
+  it("applies metadata-specific title and description length limits", () => {
+    render(
+      <ArtworkDetails
+        title=""
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(screen.getByLabelText(/Artwork Title/)).toHaveAttribute(
+      "maxLength",
+      "255"
+    );
+    expect(screen.getByLabelText(/Description/)).toHaveAttribute(
+      "maxLength",
+      "8000"
+    );
+  });
+
+  it("uses neutral required markers and subtle success rings for filled fields", () => {
     render(
       <ArtworkDetails
         title="Filled title"
@@ -55,16 +85,16 @@ describe('ArtworkDetails', () => {
       />
     );
 
-    const requiredMarkers = screen.getAllByText('*');
+    const requiredMarkers = screen.getAllByText("*");
     requiredMarkers.forEach((marker) => {
-      expect(marker).toHaveClass('tw-text-iron-500');
+      expect(marker).toHaveClass("tw-text-iron-500");
     });
 
     expect(screen.getByLabelText(/Artwork Title/)).toHaveClass(
-      'tw-ring-emerald-500/30'
+      "tw-ring-emerald-500/30"
     );
     expect(screen.getByLabelText(/Description/)).toHaveClass(
-      'tw-ring-emerald-500/30'
+      "tw-ring-emerald-500/30"
     );
   });
 });

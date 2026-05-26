@@ -15,6 +15,9 @@ import { HttpFile } from '../http/http';
 
 export class ApiDropMetadata {
     'data_key': string;
+    /**
+    * Maximum length is 255 when data_key is title, 8000 when data_key is description, and 5000 for all other metadata keys.
+    */
     'data_value': string;
 
     static readonly discriminator: string | undefined = undefined;
