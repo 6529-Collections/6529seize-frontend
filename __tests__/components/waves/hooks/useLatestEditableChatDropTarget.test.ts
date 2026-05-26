@@ -160,6 +160,52 @@ describe("useLatestEditableChatDropTarget", () => {
     expect(result.current).toEqual({ id: "newer-own", serialNo: 20 });
   });
 
+  it("moves to the previous own chat drop when the latest target is removed", () => {
+    const olderOwnDrop = createDrop({ id: "older-own", serial_no: 10 });
+    const latestOwnDrop = createDrop({ id: "latest-own", serial_no: 20 });
+    mockWaveMessagesById["wave-1"] = createWaveMessages([
+      olderOwnDrop,
+      latestOwnDrop,
+    ]);
+
+    const { result } = renderHook(() =>
+      useLatestEditableChatDropTarget({
+        waveId: "wave-1",
+        connectedProfile,
+        isProxyMode: false,
+      })
+    );
+
+    expect(result.current).toEqual({ id: "latest-own", serialNo: 20 });
+
+    act(() => {
+      emitWaveMessages(createWaveMessages([olderOwnDrop]));
+    });
+
+    expect(result.current).toEqual({ id: "older-own", serialNo: 10 });
+  });
+
+  it("returns null when the removed target was the only own chat drop", () => {
+    const latestOwnDrop = createDrop({ id: "latest-own", serial_no: 20 });
+    mockWaveMessagesById["wave-1"] = createWaveMessages([latestOwnDrop]);
+
+    const { result } = renderHook(() =>
+      useLatestEditableChatDropTarget({
+        waveId: "wave-1",
+        connectedProfile,
+        isProxyMode: false,
+      })
+    );
+
+    expect(result.current).toEqual({ id: "latest-own", serialNo: 20 });
+
+    act(() => {
+      emitWaveMessages(createWaveMessages([]));
+    });
+
+    expect(result.current).toBeNull();
+  });
+
   it("returns null in proxy mode or without a connected profile", () => {
     mockWaveMessagesById["wave-1"] = createWaveMessages([
       createDrop({ id: "own-drop", serial_no: 10 }),

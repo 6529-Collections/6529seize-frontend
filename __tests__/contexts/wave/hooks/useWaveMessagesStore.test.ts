@@ -51,7 +51,10 @@ describe("useWaveMessagesStore", () => {
 
     act(() => result.current.removeDrop("wave1", "d1"));
     expect(result.current.getData("wave1")?.drops).toHaveLength(0);
-    expect(listener).not.toHaveBeenCalled();
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenLastCalledWith(
+      expect.objectContaining({ drops: [] })
+    );
 
     const lateListener = jest.fn();
     act(() => result.current.subscribe("wave1", lateListener));
