@@ -13,7 +13,7 @@ rolls back if the request fails.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Desktop hover action bar on full drops
 - Touch drop action menu
 - Reaction chips below full drop content

@@ -15,7 +15,7 @@ Users can:
 
 - App header when an active wave is open on:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Web thread headers in the same routes:
   - desktop wave tab headers
   - mobile right action cluster
@@ -36,7 +36,7 @@ Users can:
 
 ## User Journey
 
-1. Open `/waves/{waveId}` or `/messages?wave={waveId}` for a non-DM wave.
+1. Open `/waves/{waveId}` or `/messages/{waveId}` for a non-DM wave.
 2. Use the wave-link action button:
    - `Share wave` in share mode
    - `Copy wave link` in copy mode

@@ -13,8 +13,7 @@ Wave and direct-message composers support tracked wave mentions.
 
 - Wave thread composer: `/waves/{waveId}` (legacy `/waves?wave={waveId}`
   redirects here first)
-- Direct-message thread composer: `/messages?wave={waveId}` (no
-  `/messages/{waveId}` route)
+- Direct-message thread composer: `/messages/{waveId}` (legacy query links redirect here)
 - Inline `Edit Message` composer in these thread routes
 
 ## Entry Points
@@ -36,7 +35,7 @@ Wave and direct-message composers support tracked wave mentions.
 ## Common Scenarios
 
 - Mention another wave while posting in `/waves/{waveId}`.
-- Mention a wave while chatting in `/messages?wave={waveId}`.
+- Mention a wave while chatting in `/messages/{waveId}`.
 - Add a new wave mention while editing an existing drop.
 - Open a rendered mention link to jump into the mentioned wave.
 

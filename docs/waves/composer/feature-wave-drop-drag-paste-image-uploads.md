@@ -10,7 +10,7 @@ This page covers drag/paste image uploads only.
 ## Location in the Site
 
 - Wave thread composer: `/waves/{waveId}`
-- Direct-message thread composer: `/messages?wave={waveId}`
+- Direct-message thread composer: `/messages/{waveId}`
 - Create-wave `Description` step: `/waves/create`
 - Create-wave modal flows that reuse the same `Description` step
 

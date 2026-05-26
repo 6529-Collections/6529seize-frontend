@@ -25,10 +25,6 @@ import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import {
-  TweetPreviewModeProvider,
-  type TweetPreviewMode,
-} from "@/components/tweets/TweetPreviewModeContext";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
@@ -279,46 +275,42 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     [router, waveId, queueSerialTarget]
   );
 
-  const tweetPreviewMode: TweetPreviewMode = "never";
-
   return (
     <div
       ref={containerRef}
       className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
     >
-      <TweetPreviewModeProvider mode={tweetPreviewMode}>
-        <WaveDropsContent
-          waveMessages={renderedWaveMessagesWithFullWave}
-          dropId={dropId}
-          scrollContainerRef={scrollContainerRef}
-          scrollContainerCallbackRef={scrollContainerCallbackRef}
-          bottomAnchorRef={bottomAnchorRef}
-          bottomAnchorCallbackRef={bottomAnchorCallbackRef}
-          onTopIntersection={handleTopIntersection}
-          onReply={onReply}
-          queueSerialTarget={queueSerialTarget}
-          activeDrop={activeDrop}
-          serialTarget={serialTarget}
-          targetDropRef={targetDropRef}
-          onQuoteClick={handleQuoteClick}
-          isAtBottom={isAtBottom}
-          scrollToBottom={forcePinToBottom}
-          typingMessage={typingMessage}
-          onDropContentClick={onDropContentClick}
-          pendingCount={pendingDropsCount}
-          onRevealPending={revealPendingDrops}
-          bottomPaddingClassName={bottomPaddingClassName}
-          boostedDrops={boostedDrops}
-          onBoostedDropClick={queueSerialTarget}
-          onScrollToUnread={queueSerialTarget}
-          unreadCount={unreadCount}
-          autoCollapseSerials={autoCollapseSerials}
-          suspendLightDropHydration={isScrolling || serialTarget !== null}
-          winningThreshold={winningThreshold}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-        />
-      </TweetPreviewModeProvider>
+      <WaveDropsContent
+        waveMessages={renderedWaveMessagesWithFullWave}
+        dropId={dropId}
+        scrollContainerRef={scrollContainerRef}
+        scrollContainerCallbackRef={scrollContainerCallbackRef}
+        bottomAnchorRef={bottomAnchorRef}
+        bottomAnchorCallbackRef={bottomAnchorCallbackRef}
+        onTopIntersection={handleTopIntersection}
+        onReply={onReply}
+        queueSerialTarget={queueSerialTarget}
+        activeDrop={activeDrop}
+        serialTarget={serialTarget}
+        targetDropRef={targetDropRef}
+        onQuoteClick={handleQuoteClick}
+        isAtBottom={isAtBottom}
+        scrollToBottom={forcePinToBottom}
+        typingMessage={typingMessage}
+        onDropContentClick={onDropContentClick}
+        pendingCount={pendingDropsCount}
+        onRevealPending={revealPendingDrops}
+        bottomPaddingClassName={bottomPaddingClassName}
+        boostedDrops={boostedDrops}
+        onBoostedDropClick={queueSerialTarget}
+        onScrollToUnread={queueSerialTarget}
+        unreadCount={unreadCount}
+        autoCollapseSerials={autoCollapseSerials}
+        suspendLightDropHydration={isScrolling || serialTarget !== null}
+        winningThreshold={winningThreshold}
+        isVotingClosed={isVotingClosed}
+        isVotingControlsLocked={isVotingControlsLocked}
+      />
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>
   );

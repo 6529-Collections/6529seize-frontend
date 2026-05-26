@@ -33,11 +33,11 @@ next route.
 - `Boosted Drops`:
   - Card: `/waves/{waveId}?serialNo={serialNo}`
   - Card for direct-message waves:
-    `/messages?wave={waveId}&serialNo={serialNo}`
+    `/messages/{waveId}?serialNo={serialNo}`
   - Wave pill: `/waves/{waveId}`
 - `Most active waves`:
   - Card: `/waves/{waveId}`
-  - Card for direct-message waves: `/messages?wave={waveId}`
+  - Card for direct-message waves: `/messages/{waveId}`
   - `View all`: `/waves`
 
 ## Entry Points
@@ -88,7 +88,7 @@ next route.
 - If a section is missing, refresh `/` and wait for that section to refetch.
 - If a section link is unavailable, open `/waves` and continue from list views.
 - If latest-drop actions fail, open `/the-memes/mint`, `/the-memes/{id}`, or `/the-memes/{id}/distribution` directly.
-- If a direct-message route fails, open `/messages?wave={waveId}` and continue
+- If a direct-message route fails, open `/messages/{waveId}` and continue
   from the thread.
 
 ## Limitations / Notes

@@ -16,7 +16,7 @@ Users can:
 
 - App header on:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Web thread headers on the same routes:
   - desktop wave tabs header
   - mobile tabs header subtitle row
@@ -46,7 +46,7 @@ Users can:
 
 ## User Journey
 
-1. Open `/waves/{waveId}` or `/messages?wave={waveId}` for a non-DM wave.
+1. Open `/waves/{waveId}` or `/messages/{waveId}` for a non-DM wave.
 2. Read subtitle preview below the wave title (when available).
 3. Select the title/preview trigger to open popover content.
 4. Review the full pinned description drop in the popover.

@@ -12,7 +12,7 @@ The shared spinner pattern shows loading copy and a polite screen-reader status.
 - `/{user}/brain` profile drop feed.
 - `/notifications` feed prerequisites and initial feed load.
 - `Outcome` tabs in wave contexts that expose them, including
-  `/waves/{waveId}` and `/messages?wave={waveId}`.
+  `/waves/{waveId}` and `/messages/{waveId}`.
 
 ## Entry Points
 

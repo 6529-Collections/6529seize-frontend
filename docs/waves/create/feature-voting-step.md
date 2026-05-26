@@ -13,7 +13,7 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
   - `/waves`
   - `/waves/{waveId}`
   - `/messages`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Step label: `Voting`
 - User-reachable in `Rank` and `Approve` creation
 

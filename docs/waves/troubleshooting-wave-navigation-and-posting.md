@@ -9,21 +9,21 @@ is blocked.
 ## Location in the Site
 
 - Wave thread: `/waves/{waveId}`
-- Direct-message thread: `/messages?wave={waveId}`
+- Direct-message thread: `/messages/{waveId}`
 - Legacy wave link: `/waves?wave={waveId}` (redirects to `/waves/{waveId}`)
 - Thread query values: `drop`, `serialNo`, `divider`
 
 ## Entry Points
 
 - Open a saved or shared `/waves/{waveId}` link.
-- Open a saved or shared `/messages?wave={waveId}` link.
+- Open a saved or shared `/messages/{waveId}` link.
 - Open deep links that include `drop`, `serialNo`, or `divider`.
 - Recover from hidden quick-vote, blocked posting/submission, or missing-tab
   states inside a thread.
 
 ## User Journey
 
-1. Confirm route family first: `/waves/{waveId}` or `/messages?wave={waveId}`.
+1. Confirm route family first: `/waves/{waveId}` or `/messages/{waveId}`.
 2. Reopen the thread from the sidebar/list and copy a fresh link.
 3. Remove stale query keys (`drop`, `serialNo`, `divider`) and retry from the
    thread root.
@@ -46,7 +46,7 @@ is blocked.
 
 - Link opens the wrong thread:
   verify whether the target is a wave thread (`/waves/{waveId}`) or a direct
-  message thread (`/messages?wave={waveId}`), then update saved/shared links.
+  message thread (`/messages/{waveId}`), then update saved/shared links.
 - Signed-out direct `/waves/{waveId}` link shows a locked preview instead of the
   full thread:
   expected for resolvable member-only waves. Connect a wallet to continue into
@@ -135,7 +135,7 @@ is blocked.
 - `/waves` shows no thread content on signed-out desktop web:
   `Select a Wave` is the expected placeholder when no wave is selected yet.
 - `/messages` shows no thread content:
-  `Select a Conversation` is expected when no `wave` query is active.
+  `Select a Conversation` is expected when no conversation is selected.
 
 ## Edge Cases
 

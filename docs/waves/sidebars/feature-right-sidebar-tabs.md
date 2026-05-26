@@ -10,7 +10,7 @@ linked section pages.
 
 ## Location in the Site
 
-- `/waves/{waveId}` and `/messages?wave={waveId}`
+- `/waves/{waveId}` and `/messages/{waveId}`
 - Right sidebar open (`inline` on large web layouts, `overlay` on smaller ones)
 - Rank waves only
 - Hidden while full drop overlay is open (`drop={dropId}`)
@@ -41,7 +41,7 @@ linked section pages.
 
 ## User Journey
 
-1. Open a rank-wave thread on `/waves/{waveId}` or `/messages?wave={waveId}`.
+1. Open a rank-wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
 2. Open the right sidebar.
 3. Select a visible tab, or open `More` and pick an overflow tab.
 4. Sidebar content switches in place without route navigation.

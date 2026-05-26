@@ -3,7 +3,6 @@
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
-import { TweetPreviewModeProvider } from "@/components/tweets/TweetPreviewModeContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type {
   Drop as DropType,
@@ -74,7 +73,6 @@ const DropsList = memo(
     unreadDividerSerialNo,
     boostedDrops,
     onBoostedDropClick,
-    autoCollapseSerials,
     suspendLightDropHydration = false,
     winningThreshold,
     isVotingClosed = false,
@@ -257,17 +255,6 @@ const DropsList = memo(
             <MemoizedLightDrop drop={drop} />
           );
 
-        const dropContentWithPreviewMode =
-          drop.type === DropSize.FULL && autoCollapseSerials ? (
-            <TweetPreviewModeProvider
-              mode={autoCollapseSerials.has(drop.serial_no) ? "auto" : "never"}
-            >
-              {dropContent}
-            </TweetPreviewModeProvider>
-          ) : (
-            dropContent
-          );
-
         const dropElement = (
           <HighlightDropWrapper
             key={drop.stableKey}
@@ -293,7 +280,7 @@ const DropsList = memo(
               type={drop.type}
               suspendLightDropHydration={suspendLightDropHydration}
             >
-              {dropContentWithPreviewMode}
+              {dropContent}
             </VirtualScrollWrapper>
           </HighlightDropWrapper>
         );
@@ -306,7 +293,6 @@ const DropsList = memo(
       location,
       renderBoostCard,
       renderUnreadDivider,
-      autoCollapseSerials,
       suspendLightDropHydration,
     ]);
   }
