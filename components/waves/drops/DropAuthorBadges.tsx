@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import {
   getSubmissionCount,
   getTrophyArtworkCount,
@@ -17,6 +18,7 @@ import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { WaveCreatorBadge } from "./WaveCreatorBadge";
 import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
 import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { useRouter } from "next/navigation";
 
 interface DropAuthorBadgesProfile {
   readonly id?: string | null;
@@ -38,11 +40,15 @@ interface DropAuthorBadgesProfile {
   readonly winner_main_stage_drop_ids?: readonly string[] | null;
   readonly artist_of_prevote_cards?: readonly number[] | null;
   readonly profile_wave_id?: string | null;
+  readonly profile_wave_name?: string | null;
+  readonly profile_wave_pfp?: string | null;
   readonly is_wave_creator?: boolean | null;
   readonly badges?: {
     readonly artist_of_main_stage_submissions?: number | null;
     readonly artist_of_memes?: number | null;
     readonly profile_wave_id?: string | null;
+    readonly profile_wave_name?: string | null;
+    readonly profile_wave_pfp?: string | null;
   } | null;
   readonly classification: ApiProfileClassification;
   readonly sub_classification: string | null;
@@ -57,6 +63,7 @@ interface DropAuthorBadgesProps {
   readonly tooltipIdPrefix?: string | undefined;
   readonly className?: string | undefined;
   readonly size?: "default" | "compact" | undefined;
+  readonly showProfileWaveDetails?: boolean | undefined;
   readonly onArtistPreviewOpen?:
     | ((params: {
         readonly user: ApiProfileMin;
@@ -72,6 +79,12 @@ const DEFAULT_CONTAINER_CLASS = "tw-inline-flex tw-items-center tw-gap-x-1.5";
 
 const getProfileWaveId = (profile: DropAuthorBadgesProfile): string | null =>
   profile.profile_wave_id ?? profile.badges?.profile_wave_id ?? null;
+
+const getProfileWaveName = (profile: DropAuthorBadgesProfile): string | null =>
+  profile.profile_wave_name ?? profile.badges?.profile_wave_name ?? null;
+
+const getProfileWavePfp = (profile: DropAuthorBadgesProfile): string | null =>
+  profile.profile_wave_pfp ?? profile.badges?.profile_wave_pfp ?? null;
 
 const toApiProfileMin = (
   profile: DropAuthorBadgesProfile
@@ -125,14 +138,19 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   tooltipIdPrefix = "author-badges",
   className = DEFAULT_CONTAINER_CLASS,
   size = "default",
+  showProfileWaveDetails = false,
   onArtistPreviewOpen,
   onWaveCreatorPreviewOpen,
 }) => {
+  const router = useRouter();
+  const profileWaveId = getProfileWaveId(profile);
   const submissionCount = getSubmissionCount(profile);
   const trophyCount = getTrophyArtworkCount(profile);
   const hasActivityBadge = submissionCount > 0 || trophyCount > 0;
   const isWaveCreator =
-    profile.is_wave_creator === true || getProfileWaveId(profile) !== null;
+    profile.is_wave_creator === true || profileWaveId !== null;
+  const profileWaveName = getProfileWaveName(profile);
+  const profileWavePfp = getProfileWavePfp(profile);
 
   const modalUser = React.useMemo(() => toApiProfileMin(profile), [profile]);
 
@@ -164,12 +182,29 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
 
   const onWaveCreatorBadgeClick = React.useCallback(() => {
     closeAllCustomTooltips();
+    if (showProfileWaveDetails && profileWaveId) {
+      router.push(
+        getWaveRoute({
+          waveId: profileWaveId,
+          isDirectMessage: false,
+          isApp: false,
+        })
+      );
+      return;
+    }
     if (onWaveCreatorPreviewOpen) {
       onWaveCreatorPreviewOpen(modalUser);
       return;
     }
     handleWaveCreatorBadgeClick();
-  }, [handleWaveCreatorBadgeClick, modalUser, onWaveCreatorPreviewOpen]);
+  }, [
+    handleWaveCreatorBadgeClick,
+    modalUser,
+    onWaveCreatorPreviewOpen,
+    profileWaveId,
+    router,
+    showProfileWaveDetails,
+  ]);
 
   if (!hasActivityBadge && !isWaveCreator) {
     return null;
@@ -192,6 +227,9 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
             tooltipId={`${tooltipIdPrefix}-wave-creator`}
             onBadgeClick={onWaveCreatorBadgeClick}
             size={size}
+            showWaveDetails={showProfileWaveDetails && profileWaveId !== null}
+            waveName={profileWaveName}
+            wavePfp={profileWavePfp}
           />
         )}
       </div>
