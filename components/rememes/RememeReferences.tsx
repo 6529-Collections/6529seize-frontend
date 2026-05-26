@@ -3,7 +3,6 @@ import NFTImage from "@/components/nft-image/NFTImage";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import ArtistProfileHandle from "@/components/the-memes/ArtistProfileHandle";
 import type { NFT } from "@/entities/INFT";
-import { Col, Container, Row } from "react-bootstrap";
 
 export function printMemeReferences(
   memes: NFT[],
@@ -12,77 +11,55 @@ export function printMemeReferences(
   hideTitle: boolean = false
 ) {
   return (
-    <Row className="pt-2">
+    <div className="tw-pt-2">
       {!hideTitle && (
-        <Col xs={12} className="pt-2">
+        <div className="tw-pt-2">
           <h1>The Memes References</h1>
-        </Col>
+        </div>
       )}
       {memesLoaded ? (
         <>
           {memes.length > 0 ? (
-            <>
+            <div className="tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 tw-pt-3 sm:tw-grid-cols-3 md:tw-grid-cols-4">
               {memes.map((nft) => {
                 return (
-                  <Col
+                  <a
                     key={`${nft.contract}-${nft.id}`}
-                    className="py-3"
-                    xs={{ span: 6 }}
-                    sm={{ span: 4 }}
-                    md={{ span: 3 }}
-                    lg={{ span: 3 }}
+                    href={`/${routerPath}/${nft.id}`}
+                    className="tw-block tw-min-w-0 tw-text-center tw-text-iron-200 tw-no-underline tw-transition-transform hover:tw-scale-[1.02] hover:tw-text-white"
                   >
-                    <a
-                      href={`/${routerPath}/${nft.id}`}
-                      className="decoration-none scale-hover"
-                    >
-                      <Container fluid className="no-padding">
-                        <Row>
-                          <Col>
-                            <NFTImage
-                              nft={nft}
-                              animation={false}
-                              height={300}
-                              showBalance={false}
-                              showThumbnail={true}
-                            />
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            <b>
-                              #{nft.id} - {nft.name}
-                            </b>
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            Artist Name: {nft.artist}
-                          </Col>
-                        </Row>
-                        <Row>
-                          <Col className="text-center pt-2">
-                            Artist Profile: <ArtistProfileHandle nft={nft} />
-                          </Col>
-                        </Row>
-                      </Container>
-                    </a>
-                  </Col>
+                    <NFTImage
+                      nft={nft}
+                      animation={false}
+                      height={300}
+                      showBalance={false}
+                      showThumbnail={true}
+                    />
+                    <div className="tw-pt-2 tw-text-sm tw-font-semibold tw-leading-5">
+                      #{nft.id} - {nft.name}
+                    </div>
+                    <div className="tw-pt-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
+                      Artist Name: {nft.artist}
+                    </div>
+                    <div className="tw-pt-2 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 [&_a]:tw-text-iron-200 [&_a]:tw-no-underline hover:[&_a]:tw-text-white">
+                      Artist Profile: <ArtistProfileHandle nft={nft} />
+                    </div>
+                  </a>
                 );
               })}
-            </>
+            </div>
           ) : (
-            <Col>
+            <div>
               <NothingHereYetSummer />
-            </Col>
+            </div>
           )}
         </>
       ) : (
-        <Col>
+        <div>
           Fetching references <DotLoader />
-        </Col>
+        </div>
       )}
-    </Row>
+    </div>
   );
 }
 

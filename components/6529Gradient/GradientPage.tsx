@@ -267,7 +267,7 @@ function GradientDetailsPanel({
   return (
     <div className="tw-w-full">
       <section
-        aria-label="Gradient details"
+        aria-label="Card Details"
         className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8"
       >
         <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8">
@@ -304,23 +304,23 @@ function GradientDetailsPanel({
         </h3>
         <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
           <GradientMarketMetric
-            label="Floor price"
+            label="Floor Price"
             value={nft.floor_price}
             unit="ETH"
           />
           <GradientMarketMetric
-            label="Market cap"
+            label="Market Cap"
             value={nft.market_cap}
             decimals={100}
             unit="ETH"
           />
           <GradientMarketMetric
-            label="TDH rate"
+            label="TDH Rate"
             value={nft.hodl_rate}
             decimals={100}
           />
           <GradientMarketMetric
-            label="Highest offer"
+            label="Highest Offer"
             value={nft.highest_offer}
             unit="ETH"
           />
@@ -487,7 +487,8 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
   useEffect(() => {
     const abortController = new AbortController();
     const initialUrlNfts = `${publicEnv.API_ENDPOINT}/api/nfts/gradients?&page_size=101`;
-    void fetchNfts(initialUrlNfts, [], abortController.signal);
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetchNfts(initialUrlNfts, [], abortController.signal);
     return () => abortController.abort();
   }, [fetchNfts]);
 
@@ -520,7 +521,8 @@ export default function GradientPageComponent({ id }: { readonly id: string }) {
       }
     }
 
-    void fetchTransactions();
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    fetchTransactions();
 
     return () => abortController.abort();
   }, [id]);
