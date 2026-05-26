@@ -81,6 +81,87 @@ const STATIC_ACTION_SEGMENTS = new Set([
   "waves",
 ]);
 
+const STATIC_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
+  "6529-gradient",
+  "about",
+  "accept-connection-sharing",
+  "access",
+  "api",
+  "author",
+  "blog",
+  "buidl",
+  "capital",
+  "casabatllo",
+  "category",
+  "cdn-cgi",
+  "city",
+  "consolidation-mapping-tool",
+  "delegation",
+  "delegation-mapping-tool",
+  "discover",
+  "dispute-resolution",
+  "drop-forge",
+  "education",
+  "element_category",
+  "email-signatures",
+  "emma",
+  "error",
+  "feed",
+  "gm-or-die-small-mp4",
+  "meme-accounting",
+  "meme-calendar",
+  "meme-gas",
+  "meme-lab",
+  "messages",
+  "museum",
+  "network",
+  "news",
+  "nextgen",
+  "nft-activity",
+  "notifications",
+  "om",
+  "open-data",
+  "open-mobile",
+  "rememes",
+  "restricted",
+  "sentry-example-page",
+  "slide-page",
+  "the-memes",
+  "tools",
+  "waves",
+  "xtdh",
+]);
+
+const USER_ROUTE_TAB_SEGMENTS = new Set([
+  "brain",
+  "collected",
+  "curations",
+  "followers",
+  "groups",
+  "identity",
+  "proxy",
+  "subscriptions",
+  "waves",
+  "xtdh",
+]);
+
+const STATIC_ABOUT_SECTION_SEGMENTS = new Set([
+  "100m-project",
+  "media",
+  "mission",
+  "open-metaverse",
+  "press",
+  "rules",
+]);
+
+const STATIC_MESSAGES_SEGMENTS = new Set(["create"]);
+const STATIC_WAVES_SEGMENTS = new Set(["create"]);
+const STATIC_APP_WALLETS_SEGMENTS = new Set(["import-wallet"]);
+const STATIC_REMEMES_SEGMENTS = new Set(["add"]);
+const STATIC_THE_MEMES_SEGMENTS = new Set(["mint"]);
+const STATIC_MEME_LAB_SEGMENTS = new Set(["collection"]);
+const STATIC_NEXTGEN_SEGMENTS = new Set(["collection", "manager", "token"]);
+
 type FlushReason = "shell_paint" | "timeout" | "pagehide" | "error" | "manual";
 
 type ApiStatus = number | "aborted" | "network_error" | "unknown";
@@ -99,6 +180,27 @@ type ApiTiming = {
   readonly endpoint_group: string;
 };
 
+type CapturedApiTiming = ApiTiming & {
+  readonly startedAtMs: number;
+};
+
+type RoutePatternSegment =
+  | string
+  | {
+      readonly kind: "param";
+      readonly excludedValues?: ReadonlySet<string>;
+    }
+  | {
+      readonly kind: "catchAll";
+      readonly optional: boolean;
+      readonly excludedValues?: ReadonlySet<string>;
+    };
+
+type RouteFamilyPattern = {
+  readonly template: string;
+  readonly segments: readonly RoutePatternSegment[];
+};
+
 type DeviceInfoAttrs = {
   readonly platform?: string;
   readonly operating_system?: string;
@@ -115,7 +217,7 @@ type LaunchState = {
   readonly platform: string;
   readonly appVersion: string;
   readonly steps: Record<string, StepTiming>;
-  readonly apiCalls: ApiTiming[];
+  readonly apiCalls: CapturedApiTiming[];
   apiTotalCount: number;
   deviceInfo?: DeviceInfoAttrs;
   timeoutId?: ReturnType<typeof setTimeout>;
@@ -129,6 +231,110 @@ type ApiRequestTimingInput = {
   readonly startedAtMs: number;
   readonly durationMs: number;
 };
+
+// Keep route_family aligned with App Router templates instead of raw params.
+const ROUTE_FAMILY_PATTERNS: readonly RouteFamilyPattern[] = [
+  {
+    template: "/messages/[wave]",
+    segments: ["messages", routeParam(STATIC_MESSAGES_SEGMENTS)],
+  },
+  {
+    template: "/waves/[wave]",
+    segments: ["waves", routeParam(STATIC_WAVES_SEGMENTS)],
+  },
+  {
+    template: "/tools/app-wallets/[app-wallet-address]",
+    segments: ["tools", "app-wallets", routeParam(STATIC_APP_WALLETS_SEGMENTS)],
+  },
+  {
+    template: "/drop-forge/craft/[id]",
+    segments: ["drop-forge", "craft", routeParam()],
+  },
+  {
+    template: "/drop-forge/launch/[id]",
+    segments: ["drop-forge", "launch", routeParam()],
+  },
+  {
+    template: "/rememes/[contract]/[id]",
+    segments: ["rememes", routeParam(STATIC_REMEMES_SEGMENTS), routeParam()],
+  },
+  {
+    template: "/the-memes/[id]/distribution",
+    segments: [
+      "the-memes",
+      routeParam(STATIC_THE_MEMES_SEGMENTS),
+      "distribution",
+    ],
+  },
+  {
+    template: "/the-memes/[id]",
+    segments: ["the-memes", routeParam(STATIC_THE_MEMES_SEGMENTS)],
+  },
+  {
+    template: "/meme-lab/collection/[collection]",
+    segments: ["meme-lab", "collection", routeParam()],
+  },
+  {
+    template: "/meme-lab/[id]/distribution",
+    segments: [
+      "meme-lab",
+      routeParam(STATIC_MEME_LAB_SEGMENTS),
+      "distribution",
+    ],
+  },
+  {
+    template: "/meme-lab/[id]",
+    segments: ["meme-lab", routeParam(STATIC_MEME_LAB_SEGMENTS)],
+  },
+  {
+    template: "/nextgen/collection/[collection]/art",
+    segments: ["nextgen", "collection", routeParam(), "art"],
+  },
+  {
+    template: "/nextgen/collection/[collection]/distribution-plan",
+    segments: ["nextgen", "collection", routeParam(), "distribution-plan"],
+  },
+  {
+    template: "/nextgen/collection/[collection]/mint",
+    segments: ["nextgen", "collection", routeParam(), "mint"],
+  },
+  {
+    template: "/nextgen/collection/[collection]/trait-sets",
+    segments: ["nextgen", "collection", routeParam(), "trait-sets"],
+  },
+  {
+    template: "/nextgen/collection/[collection]/[[...view]]",
+    segments: ["nextgen", "collection", routeParam(), routeCatchAll(true)],
+  },
+  {
+    template: "/nextgen/token/[token]/[[...view]]",
+    segments: ["nextgen", "token", routeParam(), routeCatchAll(true)],
+  },
+  {
+    template: "/nextgen/[[...view]]",
+    segments: ["nextgen", routeCatchAll(false, STATIC_NEXTGEN_SEGMENTS)],
+  },
+  {
+    template: "/delegation/[...section]",
+    segments: ["delegation", routeCatchAll(false)],
+  },
+  {
+    template: "/network/nerd/[[...focus]]",
+    segments: ["network", "nerd", routeCatchAll(false)],
+  },
+  {
+    template: "/about/[section]",
+    segments: ["about", routeParam(STATIC_ABOUT_SECTION_SEGMENTS)],
+  },
+  {
+    template: "/6529-gradient/[id]",
+    segments: ["6529-gradient", routeParam()],
+  },
+  {
+    template: "/emma/plans/[id]",
+    segments: ["emma", "plans", routeParam()],
+  },
+];
 
 let launchState: LaunchState | null = null;
 
@@ -213,17 +419,23 @@ export function recordMobileLaunchApiRequest(
   }
 
   state.apiTotalCount += 1;
-  if (state.apiCalls.length >= MAX_API_CALLS) {
+  const apiCall = buildCapturedApiTiming(state, input);
+  const latestCapturedCall = state.apiCalls[state.apiCalls.length - 1];
+
+  if (
+    state.apiCalls.length >= MAX_API_CALLS &&
+    latestCapturedCall !== undefined &&
+    apiCall.startedAtMs >= latestCapturedCall.startedAtMs
+  ) {
     return;
   }
 
-  state.apiCalls.push({
-    method: sanitizeHttpMethod(input.method),
-    status: input.status,
-    duration_ms: roundMs(input.durationMs),
-    start_offset_ms: roundMs(input.startedAtMs - state.startedAtMs),
-    endpoint_group: sanitizeEndpointGroup(input.endpoint),
-  });
+  state.apiCalls.push(apiCall);
+  state.apiCalls.sort((left, right) => left.startedAtMs - right.startedAtMs);
+
+  if (state.apiCalls.length > MAX_API_CALLS) {
+    state.apiCalls.length = MAX_API_CALLS;
+  }
 }
 
 export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
@@ -261,7 +473,7 @@ export function sanitizeEndpointGroup(endpoint: string): string {
 }
 
 export function sanitizeRouteFamily(route: string): string {
-  return sanitizePathLikeValue(route);
+  return getAppRouteFamilyTemplate(route) ?? sanitizePathLikeValue(route);
 }
 
 function getActiveState(): LaunchState | null {
@@ -416,16 +628,48 @@ function buildLaunchAttributes(
 }
 
 function buildApiSummary(state: LaunchState): Record<string, unknown> {
+  const firstCalls = state.apiCalls.map(toApiTiming);
   const slowest = [...state.apiCalls]
     .sort((left, right) => right.duration_ms - left.duration_ms)
-    .slice(0, SLOWEST_API_CALLS);
+    .slice(0, SLOWEST_API_CALLS)
+    .map(toApiTiming);
 
   return {
     total_count: state.apiTotalCount,
     captured_count: state.apiCalls.length,
     dropped_count: Math.max(0, state.apiTotalCount - state.apiCalls.length),
-    first_calls: state.apiCalls,
+    first_calls: firstCalls,
     slowest_calls: slowest,
+  };
+}
+
+function buildCapturedApiTiming(
+  state: LaunchState,
+  input: ApiRequestTimingInput
+): CapturedApiTiming {
+  return {
+    startedAtMs: input.startedAtMs,
+    method: sanitizeHttpMethod(input.method),
+    status: input.status,
+    duration_ms: roundMs(input.durationMs),
+    start_offset_ms: roundMs(input.startedAtMs - state.startedAtMs),
+    endpoint_group: sanitizeEndpointGroup(input.endpoint),
+  };
+}
+
+function toApiTiming({
+  method,
+  status,
+  duration_ms,
+  start_offset_ms,
+  endpoint_group,
+}: CapturedApiTiming): ApiTiming {
+  return {
+    method,
+    status,
+    duration_ms,
+    start_offset_ms,
+    endpoint_group,
   };
 }
 
@@ -462,6 +706,119 @@ function sanitizePathLikeValue(value: string): string {
   );
 
   return `/${safeSegments.join("/")}`;
+}
+
+function getAppRouteFamilyTemplate(route: string): string | undefined {
+  const segments = getRouteSegments(route);
+
+  if (segments.length === 0) {
+    return undefined;
+  }
+
+  const matchingPattern = ROUTE_FAMILY_PATTERNS.find((pattern) =>
+    matchesRouteFamilyPattern(pattern, segments)
+  );
+
+  return matchingPattern?.template ?? getUserRouteTemplate(segments);
+}
+
+function getRouteSegments(route: string): string[] {
+  return extractPathWithoutQuery(route)
+    .split("/")
+    .map((segment) => safeDecodeURIComponent(segment.trim()).toLowerCase())
+    .filter(Boolean);
+}
+
+function getUserRouteTemplate(segments: readonly string[]): string | undefined {
+  if (STATIC_TOP_LEVEL_ROUTE_SEGMENTS.has(segments[0] ?? "")) {
+    return undefined;
+  }
+
+  if (segments.length === 1) {
+    return "/[user]";
+  }
+
+  if (segments.length === 2 && USER_ROUTE_TAB_SEGMENTS.has(segments[1] ?? "")) {
+    return `/[user]/${segments[1]}`;
+  }
+
+  return undefined;
+}
+
+function matchesRouteFamilyPattern(
+  pattern: RouteFamilyPattern,
+  segments: readonly string[]
+): boolean {
+  let segmentIndex = 0;
+
+  for (const patternSegment of pattern.segments) {
+    if (typeof patternSegment === "string") {
+      if (segments[segmentIndex] !== patternSegment) {
+        return false;
+      }
+
+      segmentIndex += 1;
+      continue;
+    }
+
+    if (patternSegment.kind === "param") {
+      const segment = segments[segmentIndex];
+      if (
+        segment === undefined ||
+        patternSegment.excludedValues?.has(segment)
+      ) {
+        return false;
+      }
+
+      segmentIndex += 1;
+      continue;
+    }
+
+    return matchesRouteCatchAll(patternSegment, segments, segmentIndex);
+  }
+
+  return segmentIndex === segments.length;
+}
+
+function matchesRouteCatchAll(
+  patternSegment: Extract<RoutePatternSegment, { readonly kind: "catchAll" }>,
+  segments: readonly string[],
+  segmentIndex: number
+): boolean {
+  const remainingCount = segments.length - segmentIndex;
+
+  if (remainingCount === 0) {
+    return patternSegment.optional;
+  }
+
+  const firstRemainingSegment = segments[segmentIndex];
+  if (
+    firstRemainingSegment !== undefined &&
+    patternSegment.excludedValues?.has(firstRemainingSegment)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function routeParam(excludedValues?: ReadonlySet<string>): RoutePatternSegment {
+  if (excludedValues) {
+    return { kind: "param", excludedValues };
+  }
+
+  return { kind: "param" };
+}
+
+function routeCatchAll(
+  optional: boolean,
+  excludedValues?: ReadonlySet<string>
+): RoutePatternSegment {
+  if (excludedValues) {
+    return { kind: "catchAll", optional, excludedValues };
+  }
+
+  return { kind: "catchAll", optional };
 }
 
 function extractPathWithoutQuery(value: string): string {

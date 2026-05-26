@@ -113,12 +113,28 @@ describe("mobileLaunchTiming", () => {
       "mobile_launch_timing",
       expect.objectContaining({
         total_ms: 3000,
-        route_family: "/waves/:id",
+        route_family: "/waves/[wave]",
         slow: true,
         flush_reason: "shell_paint",
       })
     );
     expect(sentry.logger.info).not.toHaveBeenCalled();
+  });
+
+  it("logs user pages with bracket route templates", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    globalThis.history.pushState({}, "", "/alice?jwt=secret");
+    timing.startMobileLaunchTiming();
+    currentNow = 3000;
+    timing.flushMobileLaunchTiming("shell_paint");
+
+    expect(sentry.logger.warn).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        route_family: "/[user]",
+      })
+    );
   });
 
   it("samples normal launches at five percent", async () => {
@@ -230,6 +246,57 @@ describe("mobileLaunchTiming", () => {
     );
   });
 
+  it("keeps the earliest-started API calls when capped", async () => {
+    const { timing, sentry } = await loadMobileLaunchTiming();
+
+    timing.startMobileLaunchTiming();
+    for (let index = 0; index < 10; index++) {
+      timing.recordMobileLaunchApiRequest({
+        endpoint: `/api/profiles/later-${index}/waves/${index}`,
+        method: "GET",
+        status: 200,
+        startedAtMs: 100 + index * 10,
+        durationMs: 10,
+      });
+    }
+
+    timing.recordMobileLaunchApiRequest({
+      endpoint: "/api/profiles/early-slow/waves/slow?jwt=secret",
+      method: "GET",
+      status: 200,
+      startedAtMs: 50,
+      durationMs: 1000,
+    });
+
+    currentNow = 3500;
+    timing.flushMobileLaunchTiming("shell_paint");
+
+    expect(sentry.logger.warn).toHaveBeenCalledWith(
+      "mobile_launch_timing",
+      expect.objectContaining({
+        api: expect.objectContaining({
+          total_count: 11,
+          captured_count: 10,
+          dropped_count: 1,
+          first_calls: expect.arrayContaining([
+            expect.objectContaining({
+              duration_ms: 1000,
+              start_offset_ms: 50,
+              endpoint_group: "/api/profiles/:id/waves/:id",
+            }),
+          ]),
+          slowest_calls: expect.arrayContaining([
+            expect.objectContaining({
+              duration_ms: 1000,
+              start_offset_ms: 50,
+              endpoint_group: "/api/profiles/:id/waves/:id",
+            }),
+          ]),
+        }),
+      })
+    );
+  });
+
   it("sanitizes endpoints and route families", async () => {
     const { timing } = await loadMobileLaunchTiming({ native: false });
 
@@ -243,8 +310,17 @@ describe("mobileLaunchTiming", () => {
         "/api/waves/0x1234567890123456789012345678901234567890/drops/123?handle=secret"
       )
     ).toBe("/api/waves/:wallet/drops/:id");
+    expect(timing.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
+    expect(timing.sanitizeRouteFamily("/messages/wave-123")).toBe(
+      "/messages/[wave]"
+    );
+    expect(timing.sanitizeRouteFamily("/waves/wave-123")).toBe("/waves/[wave]");
+    expect(timing.sanitizeRouteFamily("/messages/create")).toBe(
+      "/messages/create"
+    );
+    expect(timing.sanitizeRouteFamily("/waves/create")).toBe("/waves/create");
     expect(
       timing.sanitizeRouteFamily("/tools/app-wallets/123?jwt=secret")
-    ).toBe("/tools/app-wallets/:id");
+    ).toBe("/tools/app-wallets/[app-wallet-address]");
   });
 });
