@@ -4,8 +4,10 @@ import type { TraitsData } from "../types/TraitsData";
 import { validateStrictAddress } from "./addressValidation";
 import { objectEntries } from "./objectEntries";
 
-export const METADATA_VALUE_MAX_LENGTH = 5000;
-const METADATA_VALUE_WARNING_THRESHOLD = 4500;
+const METADATA_VALUE_DEFAULT_MAX_LENGTH = 5000;
+export const METADATA_VALUE_TITLE_MAX_LENGTH = 255;
+export const METADATA_VALUE_DESCRIPTION_MAX_LENGTH = 8000;
+const METADATA_VALUE_WARNING_THRESHOLD_RATIO = 0.9;
 
 export interface MetadataValueLengthStatus {
   readonly dataKey: string;
@@ -16,6 +18,18 @@ export interface MetadataValueLengthStatus {
   readonly isWarning: boolean;
   readonly isError: boolean;
 }
+
+const getMetadataValueMaxLength = (dataKey: string): number => {
+  if (dataKey === "title") {
+    return METADATA_VALUE_TITLE_MAX_LENGTH;
+  }
+
+  if (dataKey === "description") {
+    return METADATA_VALUE_DESCRIPTION_MAX_LENGTH;
+  }
+
+  return METADATA_VALUE_DEFAULT_MAX_LENGTH;
+};
 
 interface MetadataLengthValidationResult {
   readonly statusesByKey: Partial<Record<string, MetadataValueLengthStatus>>;
@@ -101,16 +115,20 @@ export const buildSubmissionMetadata = ({
 const getMetadataValueLengthStatus = (
   metadata: ApiDropMetadata
 ): MetadataValueLengthStatus => {
+  const maxLength = getMetadataValueMaxLength(metadata.data_key);
+  const warningThreshold = Math.floor(
+    maxLength * METADATA_VALUE_WARNING_THRESHOLD_RATIO
+  );
   const length = metadata.data_value.length;
-  const remaining = METADATA_VALUE_MAX_LENGTH - length;
-  const isWarning = length >= METADATA_VALUE_WARNING_THRESHOLD;
-  const isError = length > METADATA_VALUE_MAX_LENGTH;
+  const remaining = maxLength - length;
+  const isWarning = length >= warningThreshold;
+  const isError = length > maxLength;
 
   return {
     dataKey: metadata.data_key,
     length,
-    maxLength: METADATA_VALUE_MAX_LENGTH,
-    warningThreshold: METADATA_VALUE_WARNING_THRESHOLD,
+    maxLength,
+    warningThreshold,
     remaining,
     isWarning,
     isError,
