@@ -14,7 +14,7 @@ The standard wave composer supports metadata submissions.
 ## Location in the Site
 
 - Wave thread: `/waves/{waveId}`
-- Direct-message thread: `/messages?wave={waveId}`
+- Direct-message thread: `/messages/{waveId}`
 - Thread footer composer actions row (`Post` / `Drop`)
 
 ## Entry Points

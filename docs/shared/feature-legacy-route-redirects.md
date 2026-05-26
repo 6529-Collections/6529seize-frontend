@@ -31,7 +31,7 @@ Profile-only legacy aliases are documented in
 | Legacy family | Status | Destination type | Query behavior |
 | --- | --- | --- | --- |
 | Middleware exact-path map | `301` | fixed target per mapping | source query preserved unless target defines its own query |
-| Middleware `/my-stream` + `/my-stream/notifications` (desktop OS only) | `301` | computed route (`/`, `/waves`, `/waves/<id>`, `/messages`, `/messages?wave=<id>`, `/notifications`) | reads only `view`, `wave`, `drop`, `serialNo`; ignores all other keys |
+| Middleware `/my-stream` + `/my-stream/notifications` (desktop OS only) | `301` | computed route (`/`, `/waves`, `/waves/<id>`, `/messages`, `/messages/<id>`, `/notifications`) | reads only `view`, `wave`, `drop`, `serialNo`; ignores all other keys |
 | Route-level legacy aliases | `307` | fixed route/asset target | source query not forwarded |
 | `/waves?wave=<id>` | `307` | `/waves/<id>` | keeps all keys except `wave` |
 
@@ -69,7 +69,7 @@ Common outcomes:
 
 - `/my-stream/notifications` -> `/notifications`
 - `/my-stream?view=messages` -> `/messages`
-- `/my-stream?view=messages&wave=<id>` -> `/messages?wave=<id>`
+- `/my-stream?view=messages&wave=<id>` -> `/messages/<id>`
 - `/my-stream?view=messages&wave=<id>&drop=<id>&serialNo=<n>` ->
   `/messages` with `wave`, `drop`, and `serialNo`
 - `/my-stream?view=waves` -> `/waves`

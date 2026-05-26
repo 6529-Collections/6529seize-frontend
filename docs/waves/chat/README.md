@@ -7,7 +7,7 @@ Use this subarea for in-thread behavior in wave and direct-message threads.
 ## Route Coverage
 
 - `/waves/{waveId}`
-- `/messages?wave={waveId}`
+- `/messages/{waveId}`
 
 ## Query Coverage
 

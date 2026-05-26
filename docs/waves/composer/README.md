@@ -16,8 +16,7 @@ Use this area when you need behavior for:
 ## Route Coverage
 
 - Wave thread composer: `/waves/{waveId}`
-- Direct-message thread composer: `/messages?wave={waveId}` (no
-  `/messages/{waveId}` route)
+- Direct-message thread composer: `/messages/{waveId}` (legacy query links redirect here)
 - Legacy `/waves?wave={waveId}` links redirect to `/waves/{waveId}` before the
   composer loads.
 - Composer availability and eligibility states are documented in

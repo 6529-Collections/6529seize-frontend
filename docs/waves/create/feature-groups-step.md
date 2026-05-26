@@ -9,7 +9,7 @@ This step is user-reachable for `Chat`, `Rank`, and `Approve`.
 
 - Full-page create route: `/waves/create`
 - Desktop modal create route mode: `?create=wave` on `/waves`,
-  `/waves/{waveId}`, `/messages`, and `/messages?wave={waveId}`
+  `/waves/{waveId}`, `/messages`, and `/messages/{waveId}`
 - Step label: `Groups`
 
 ## Step Paths

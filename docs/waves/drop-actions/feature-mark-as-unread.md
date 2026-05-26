@@ -8,7 +8,7 @@ jump back to that spot later.
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
-- Direct messages: `/messages?wave={waveId}`
+- Direct messages: `/messages/{waveId}`
 - Single-drop overlay in the current thread route: `?drop={dropId}`
 - Drop action menus on full drop cards
 

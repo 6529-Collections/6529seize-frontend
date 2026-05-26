@@ -10,7 +10,7 @@ Both lists use descending absolute vote totals and load `20` rows per page.
 
 ## Location in the Site
 
-- Rank-wave thread routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Rank-wave thread routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Right-sidebar `Voters` tab for rank waves.
 - Non-chat single-drop overlay details in `?drop={dropId}` context.
 - Collapsible `Top voters` block inside single-drop info details.

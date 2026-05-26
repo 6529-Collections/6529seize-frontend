@@ -8,7 +8,7 @@ type in the current thread.
 ## Location in the Site
 
 - `/waves/{waveId}`
-- `/messages?wave={waveId}`
+- `/messages/{waveId}`
 - Same thread routes when `drop={dropId}` is open
 - Bottom overlay of the chat message list in chat view only (not gallery)
 

@@ -14,7 +14,7 @@ The selected mode is saved per wave on the current device.
 - App header when an active supported wave is open.
 - Desktop web wave header row on:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
 - Hidden on mobile/tablet web headers (`<1024px`).
 
 ## Availability Rules

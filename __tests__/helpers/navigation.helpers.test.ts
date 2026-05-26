@@ -1,8 +1,10 @@
 import {
   getActiveWaveIdFromUrl,
+  getMessageIdFromPathname,
   getWaveHomeRoute,
   getWaveIdFromPathname,
   getWaveRoute,
+  getWaveRouteWithSearchParams,
   mainSegment,
   sameMainPath,
 } from "@/helpers/navigation.helpers";
@@ -43,13 +45,13 @@ describe("navigation.helpers", () => {
       expect(result).toBe("/waves/wave-123");
     });
 
-    it("returns messages route when isDirectMessage is true", () => {
+    it("returns messages wave route when isDirectMessage is true", () => {
       const result = getWaveRoute({
         waveId: "dm-456",
         isDirectMessage: true,
         isApp: false,
       });
-      expect(result).toBe("/messages?wave=dm-456");
+      expect(result).toBe("/messages/dm-456");
     });
 
     it("includes serialNo when provided as number", () => {
@@ -112,6 +114,16 @@ describe("navigation.helpers", () => {
       });
       expect(result).toBe("/waves/wave%26id%3Dspecial?serialNo=5");
     });
+
+    it("keeps serialNo as a query param on direct message wave routes", () => {
+      const result = getWaveRoute({
+        waveId: "dm-456",
+        serialNo: 5,
+        isDirectMessage: true,
+        isApp: false,
+      });
+      expect(result).toBe("/messages/dm-456?serialNo=5");
+    });
   });
 
   describe("getWaveHomeRoute", () => {
@@ -132,6 +144,35 @@ describe("navigation.helpers", () => {
     });
   });
 
+  describe("getWaveRouteWithSearchParams", () => {
+    it("preserves query params when redirecting to canonical waves route", () => {
+      const result = getWaveRouteWithSearchParams({
+        waveId: "wave-123",
+        searchParams: {
+          wave: "legacy-wave",
+          drop: "drop-1",
+          divider: "7",
+        },
+        isDirectMessage: false,
+      });
+
+      expect(result).toBe("/waves/wave-123?drop=drop-1&divider=7");
+    });
+
+    it("preserves repeated query params when redirecting to messages route", () => {
+      const result = getWaveRouteWithSearchParams({
+        waveId: "dm-123",
+        searchParams: {
+          wave: "legacy-wave",
+          tag: ["one", "two"],
+        },
+        isDirectMessage: true,
+      });
+
+      expect(result).toBe("/messages/dm-123?tag=one&tag=two");
+    });
+  });
+
   describe("getWaveIdFromPathname", () => {
     it("returns wave id from canonical waves path", () => {
       expect(getWaveIdFromPathname("/waves/wave-123")).toBe("wave-123");
@@ -139,6 +180,16 @@ describe("navigation.helpers", () => {
 
     it("returns null for waves create route", () => {
       expect(getWaveIdFromPathname("/waves/create")).toBeNull();
+    });
+  });
+
+  describe("getMessageIdFromPathname", () => {
+    it("returns wave id from canonical messages path", () => {
+      expect(getMessageIdFromPathname("/messages/dm-123")).toBe("dm-123");
+    });
+
+    it("returns null for messages create route", () => {
+      expect(getMessageIdFromPathname("/messages/create")).toBeNull();
     });
   });
 
@@ -150,6 +201,15 @@ describe("navigation.helpers", () => {
         searchParams,
       });
       expect(result).toBe("canonical-wave");
+    });
+
+    it("prefers pathname message id over legacy wave query param", () => {
+      const searchParams = new URLSearchParams({ wave: "legacy-wave" });
+      const result = getActiveWaveIdFromUrl({
+        pathname: "/messages/canonical-dm",
+        searchParams,
+      });
+      expect(result).toBe("canonical-dm");
     });
 
     it("falls back to legacy query wave id when pathname is not wave-specific", () => {

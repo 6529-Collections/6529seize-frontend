@@ -13,7 +13,7 @@ Use leaderboard header filters to:
 ## Location in the Site
 
 - `Leaderboard` tab header on `/waves/{waveId}`.
-- `Leaderboard` tab header on `/messages?wave={waveId}`.
+- `Leaderboard` tab header on `/messages/{waveId}`.
 - Legacy wave links (`/waves?wave={waveId}`) redirect to `/waves/{waveId}` and
   keep other query params, including `curated_by_group` (price-query params are
   ignored by leaderboard header state).
@@ -21,7 +21,7 @@ Use leaderboard header filters to:
 ## Entry Points
 
 - Open `/waves/{waveId}` and switch to `Leaderboard`.
-- Open `/messages?wave={waveId}` and switch to `Leaderboard`.
+- Open `/messages/{waveId}` and switch to `Leaderboard`.
 - Change `Sort`.
 - If `Group` is visible, pick one curation group or `All submissions`.
 - Open a deep link with `curated_by_group` to pre-apply group filtering.

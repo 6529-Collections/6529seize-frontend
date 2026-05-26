@@ -6,7 +6,7 @@ Use this area for rank-wave leaderboard tasks: submission entry, ranking views,
 decision timing, winners, and vote management.
 
 This area covers:
-- Thread routes: `/waves/{waveId}` and `/messages?wave={waveId}`.
+- Thread routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - `Leaderboard` before voting ends.
 - `Sales` in curation waves.
 - `Winners` after the first decision time passes.

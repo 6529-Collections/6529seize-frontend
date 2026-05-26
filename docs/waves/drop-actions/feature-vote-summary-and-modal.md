@@ -11,7 +11,7 @@ optional projected total, wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or
 
 - Non-chat single-drop overlays in thread contexts:
   - `/waves/{waveId}`
-  - `/messages?wave={waveId}`
+  - `/messages/{waveId}`
   - focused drop overlay via `?drop={dropId}`
 - Both default and memes single-drop panels reuse the same summary strip.
 - Container variants:

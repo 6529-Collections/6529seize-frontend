@@ -10,16 +10,14 @@ same context.
 
 - Discovery and list surfaces: `/`, `/waves`, and `/messages`
 - Standard wave thread: `/waves/{waveId}`
-- Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
-  route)
+- Direct-message thread: `/messages/{waveId}`
 - App create routes: `/waves/create` and `/messages/create`
 
 ## Routes and URL State
 
 - Discovery and list surfaces: `/`, `/waves`, and `/messages`
 - Standard wave thread: `/waves/{waveId}`
-- Direct-message thread: `/messages?wave={waveId}` (no `/messages/{waveId}`
-  route)
+- Direct-message thread: `/messages/{waveId}`
 - App create routes: `/waves/create` and `/messages/create`
 - Web create mode uses query state on stream routes:
   `create=wave` or `create=dm`
@@ -38,7 +36,7 @@ same context.
 - Open a direct-message thread from `/messages`.
 - Open a shared wave link, for example:
   `/waves/{waveId}?serialNo={serialNo}` or
-  `/messages?wave={waveId}&serialNo={serialNo}`.
+  `/messages/{waveId}?serialNo={serialNo}`.
 - Open a shared single-drop link using `drop={dropId}`.
 - Start create-wave from desktop create controls (`create=wave`) or
   `/waves/create` in app mode.
@@ -49,7 +47,7 @@ same context.
 
 1. Open a wave from a list surface.
 2. The app opens `/waves/{waveId}` (standard wave) or
-   `/messages?wave={waveId}` (direct message).
+   `/messages/{waveId}` (direct message).
 3. If the user is signed out on a direct `/waves/{waveId}` link, the app can
    show a locked public preview instead of the full thread.
 4. The thread renders:
