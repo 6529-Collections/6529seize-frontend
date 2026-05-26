@@ -86,6 +86,51 @@ type DistributionSectionKey =
   | "phase2"
   | "public";
 
+function normalizeMediaFormat(format: string | null | undefined): string | null {
+  return format ? format.toUpperCase() : null;
+}
+
+function getUrlExtension(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const clean = url.split("?")[0]?.split("#")[0] ?? "";
+  const parts = clean.split(".");
+  if (parts.length < 2) return null;
+  return parts.at(-1)?.toLowerCase() ?? null;
+}
+
+function getImageMediaTypeLabel(claim: MintingClaim): string | null {
+  const fromDetails = normalizeMediaFormat(claim.image_details?.format);
+  if (fromDetails) {
+    return `IMAGE/${fromDetails === "JPG" ? "JPEG" : fromDetails}`;
+  }
+
+  const ext = getUrlExtension(claim.image_url);
+  if (ext === "jpg" || ext === "jpeg") return "IMAGE/JPEG";
+  if (ext === "png") return "IMAGE/PNG";
+  if (ext === "gif") return "IMAGE/GIF";
+  if (ext === "webp") return "IMAGE/WEBP";
+  if (claim.image_url || claim.image_details) return "IMAGE";
+  return null;
+}
+
+function getAnimationMediaTypeLabel(claim: MintingClaim): string | null {
+  if (!claim.animation_url && !claim.animation_details) return null;
+
+  const format = normalizeMediaFormat(
+    (claim.animation_details as { format?: string } | null | undefined)?.format
+  );
+  if (format === "HTML" || format === "GLB") return format;
+  if (format) return `VIDEO/${format}`;
+
+  const ext = getUrlExtension(claim.animation_url);
+  if (ext === "html" || ext === "htm") return "HTML";
+  if (ext === "glb") return "GLB";
+  if (ext === "mp4") return "VIDEO/MP4";
+  if (ext === "webm") return "VIDEO/WEBM";
+  if (isVideoUrl(claim.animation_url)) return "VIDEO";
+  return "ANIMATION";
+}
+
 function getClaimMediaType(claim: MintingClaim): ClaimMediaType {
   const hasImageData = Boolean(claim.image_url || claim.image_details);
   const hasAnimationData = Boolean(
@@ -267,20 +312,6 @@ function getAnimationPreviewMimeType({
   }
 
   return null;
-}
-
-function getAnimationPreviewLabel(mimeType: string | null): string {
-  if (mimeType?.startsWith("video/")) {
-    return "Video";
-  }
-  if (mimeType?.startsWith("model/gltf")) {
-    return "GLB";
-  }
-  if (mimeType === "text/html") {
-    return "HTML";
-  }
-
-  return "Animation";
 }
 
 function getAnimationSourceCardProps({
@@ -529,6 +560,8 @@ export default function DropForgeCraftClaimPageClient({
   const hasPendingPageChanges =
     imageDirty || animationDirty || coreInfoDirty || metadataDirty;
   const hasAnimation = Boolean(claim.animation_url);
+  const imageMediaTypeLabel = getImageMediaTypeLabel(claim);
+  const animationMediaTypeLabel = getAnimationMediaTypeLabel(claim);
   const coreInformationHeaderPills = (
     <span className="tw-inline-flex tw-items-center tw-gap-2">
       <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-iron-700/30 tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-500/40">
@@ -557,7 +590,17 @@ export default function DropForgeCraftClaimPageClient({
       />
 
       <div className="tw-flex tw-flex-col tw-gap-5">
-        <DropForgeAccordionSection title="Image" defaultOpen>
+        <DropForgeAccordionSection
+          title="Image"
+          defaultOpen
+          headerRight={
+            imageMediaTypeLabel ? (
+              <DropForgeMediaTypePill label={imageMediaTypeLabel} />
+            ) : null
+          }
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <ImageSection
             claim={claim}
             claimId={claimId}
@@ -566,7 +609,17 @@ export default function DropForgeCraftClaimPageClient({
           />
         </DropForgeAccordionSection>
 
-        <DropForgeAccordionSection title="Animation" defaultOpen={hasAnimation}>
+        <DropForgeAccordionSection
+          title="Animation"
+          defaultOpen={hasAnimation}
+          headerRight={
+            animationMediaTypeLabel ? (
+              <DropForgeMediaTypePill label={animationMediaTypeLabel} />
+            ) : null
+          }
+          showHeaderRightWhenOpen
+          showHeaderRightWhenClosed
+        >
           <AnimationSection
             claim={claim}
             claimId={claimId}
@@ -903,9 +956,6 @@ function AnimationSection({
     animationDisplayUrl,
     mediaType,
   });
-  const animationPreviewLabel = getAnimationPreviewLabel(
-    animationPreviewMimeType
-  );
   const animationSourceCardProps = getAnimationSourceCardProps({
     pendingAnimationFile,
     pendingAnimation,
@@ -1139,9 +1189,8 @@ function AnimationSection({
         )}
         {showAnimationControls && (
           <>
-            <DropForgeMediaTypePill label={animationPreviewLabel} />
             {animationDisplayUrl && animationPreviewMimeType && (
-              <div className="tw-relative tw-aspect-video tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
+              <div className="tw-relative tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
