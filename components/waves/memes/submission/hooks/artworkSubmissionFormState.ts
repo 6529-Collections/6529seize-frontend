@@ -23,6 +23,7 @@ import type {
   ExistingSubmissionMedia,
   MemesSubmissionInitialDraft,
 } from "../utils/submissionDraft";
+import { getResubmissionMediaTypeInfo } from "../utils/resubmissionMediaType";
 
 export type MediaSource = "upload" | "url";
 
@@ -402,15 +403,7 @@ export function formReducer(state: FormState, action: FormAction): FormState {
       return reduceExternalMediaValidation(state, action.payload);
 
     case "SET_UPLOAD_MEDIA":
-      return {
-        ...state,
-        selectedFile: action.payload.file,
-        artworkUrl: action.payload.artworkUrl,
-        uploadArtworkUrl: action.payload.artworkUrl,
-        uploadError: null,
-        artworkUploaded: true,
-        mediaSource: "upload",
-      };
+      return reduceSetUploadMedia(state, action.payload);
 
     case "SET_UPLOAD_ERROR":
       return reduceUploadError(state, action.payload);
@@ -548,6 +541,38 @@ const reduceProfileDefaults = (
       about_artist: shouldApplyAboutArtist
         ? aboutArtist
         : state.operationalData.about_artist,
+    },
+  };
+};
+
+const reduceSetUploadMedia = (
+  state: FormState,
+  payload: Extract<FormAction, { type: "SET_UPLOAD_MEDIA" }>["payload"]
+): FormState => {
+  const mediaTypeInfo = getResubmissionMediaTypeInfo({
+    mimeType: payload.file.type,
+    fileName: payload.file.name,
+  });
+  const additionalMedia =
+    mediaTypeInfo.label === null
+      ? {
+          ...state.operationalData.additional_media,
+          preview_image: "",
+          promo_video: "",
+        }
+      : state.operationalData.additional_media;
+
+  return {
+    ...state,
+    selectedFile: payload.file,
+    artworkUrl: payload.artworkUrl,
+    uploadArtworkUrl: payload.artworkUrl,
+    uploadError: null,
+    artworkUploaded: true,
+    mediaSource: "upload",
+    operationalData: {
+      ...state.operationalData,
+      additional_media: additionalMedia,
     },
   };
 };

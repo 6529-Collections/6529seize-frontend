@@ -376,6 +376,8 @@ function getArtistNames(value: string | undefined) {
       .join(",")
       .split(" and ")
       .join(",")
+      .split(" & ")
+      .join(",")
       .split(",")
       .map((name) => name.trim())
       .filter((name) => name.length > 0) ?? []

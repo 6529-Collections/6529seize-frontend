@@ -18,7 +18,6 @@ import {
 import type { TraitsData } from "../types/TraitsData";
 import { validateStrictAddress } from "../utils/addressValidation";
 import {
-  METADATA_VALUE_MAX_LENGTH,
   getSubmissionMetadataLengthValidation,
   type MetadataValueLengthStatus,
 } from "../utils/submissionMetadata";
@@ -121,7 +120,7 @@ const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
       return undefined;
     }
 
-    return `${status.length}/${METADATA_VALUE_MAX_LENGTH} characters exceeds limit`;
+    return `${status.length}/${status.maxLength} characters exceed the limit`;
   };
 
   const aboutArtistError = metadataLengthError(aboutArtistStatus);
