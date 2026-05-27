@@ -126,8 +126,7 @@ const getMissingCurationConfig = (
   canManageOwnOfficialWave
     ? {
         title: "Nothing curated here yet",
-        message:
-          "Open the wave to create your first curation and choose the drops you want to show here.",
+        message: "Create a curation to start adding profile posts here.",
       }
     : {
         title: "No curations yet",
@@ -142,7 +141,7 @@ const getEmptyDropsConfig = (
     ? `Nothing in ${curationTitle} yet`
     : "No curated drops yet",
   message: canManageOwnOfficialWave
-    ? `Open the wave to add drops to "${curationTitle}".`
+    ? `Add a post to start "${curationTitle}".`
     : "This identity hasn't added any drops to this curation yet.",
 });
 

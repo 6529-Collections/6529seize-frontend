@@ -71,6 +71,7 @@ jest.mock("framer-motion", () => {
 });
 
 jest.mock("react-redux", () => ({
+  useDispatch: jest.fn(() => jest.fn()),
   useSelector: jest.fn(() => null),
 }));
 
@@ -215,6 +216,10 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
+}));
+
+jest.mock("@/components/waves/hooks/useLatestEditableChatDropTarget", () => ({
+  useLatestEditableChatDropTarget: jest.fn(() => null),
 }));
 
 jest.mock("@/hooks/drops/useDropSignature", () => ({

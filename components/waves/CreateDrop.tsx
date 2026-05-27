@@ -45,6 +45,9 @@ interface CreateDropProps {
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
+  readonly onServerDropCreated?:
+    | ((drop: ApiDrop) => Promise<void> | void)
+    | undefined;
   readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
@@ -65,6 +68,7 @@ interface CreateDropProps {
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
+  readonly forceStandardDropComposer?: boolean | undefined;
 }
 
 export interface DropMutationBody {
@@ -97,6 +101,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
   onDropAddedToQueue,
   onAllDropsAdded,
+  onServerDropCreated,
   onExitFixedDropMode,
   wave,
   dropId,
@@ -111,6 +116,7 @@ export default function CreateDrop({
   onExternalAttachmentDropConsumed,
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
+  forceStandardDropComposer = false,
 }: CreateDropProps) {
   const { setToast, connectedProfile } = useAuth();
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -131,12 +137,15 @@ export default function CreateDrop({
     useState<string | null>(null);
   const { processDropRemoved, processIncomingDrop } = useMyStream();
   const { isMemesWave, isCurationWave, isQuorumWave } = useWave(wave);
-  const submissionExperience = resolveWaveSubmissionExperience({
+  const resolvedSubmissionExperience = resolveWaveSubmissionExperience({
     isMemesWave,
     isCurationWave,
     isQuorumWave,
     submissionStrategy: wave.participation.submission_strategy ?? null,
   });
+  const submissionExperience = forceStandardDropComposer
+    ? WaveSubmissionExperience.DEFAULT
+    : resolvedSubmissionExperience;
   const canUseChatComposer =
     wave.chat.authenticated_user_eligible ||
     privileges.chatRestriction === ChatRestriction.SLOW_MODE;
@@ -522,7 +531,24 @@ export default function CreateDrop({
   const queueRef = useRef<QueuedDropMutationBody[]>([]);
   const isProcessingRef = useRef(false);
   const hasBatchErrorsRef = useRef(false);
+  const hasServerDropCreatedCallbackErrorsRef = useRef(false);
   const inFlightProcessNextDropRef = useRef<Promise<void> | null>(null);
+
+  const handleServerDropCreated = useCallback(
+    async (serverDrop: ApiDrop) => {
+      if (!onServerDropCreated) {
+        return;
+      }
+
+      try {
+        await onServerDropCreated(serverDrop);
+      } catch (error) {
+        hasServerDropCreatedCallbackErrorsRef.current = true;
+        console.error("Error handling created server drop:", error);
+      }
+    },
+    [onServerDropCreated]
+  );
 
   const processNextDrop = useCallback(async () => {
     if (isProcessingRef.current || queueRef.current.length === 0) {
@@ -536,7 +562,8 @@ export default function CreateDrop({
         break;
       }
       try {
-        await addDropMutation.mutateAsync(dropRequest);
+        const serverDrop = await addDropMutation.mutateAsync(dropRequest);
+        await handleServerDropCreated(serverDrop);
       } catch (error) {
         hasBatchErrorsRef.current = true;
         console.error("Error processing drop:", error);
@@ -545,13 +572,21 @@ export default function CreateDrop({
 
     isProcessingRef.current = false;
 
-    const shouldNotifyAllDropsAdded = !hasBatchErrorsRef.current;
+    const shouldNotifyAllDropsAdded =
+      !hasBatchErrorsRef.current &&
+      !hasServerDropCreatedCallbackErrorsRef.current;
     hasBatchErrorsRef.current = false;
+    hasServerDropCreatedCallbackErrorsRef.current = false;
     void waitAndInvalidateDrops();
     if (shouldNotifyAllDropsAdded) {
       onAllDropsAdded?.();
     }
-  }, [addDropMutation, onAllDropsAdded, waitAndInvalidateDrops]);
+  }, [
+    addDropMutation,
+    handleServerDropCreated,
+    onAllDropsAdded,
+    waitAndInvalidateDrops,
+  ]);
 
   const submitDrop = useCallback(
     (dropRequest: DropMutationBody): boolean => {

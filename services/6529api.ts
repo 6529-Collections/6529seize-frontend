@@ -1,6 +1,7 @@
 import type { Paginated } from "@/components/pagination/Pagination";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
+import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import Cookies from "js-cookie";
 import { getStagingAuth } from "./auth/auth.utils";
 
@@ -27,13 +28,33 @@ export async function fetchUrl<T = DBResponse>(
   url: string,
   init?: RequestInit
 ): Promise<T> {
+  const method = init?.method ?? "GET";
+  const requestStartedAtMs = getRequestTimingNow();
+  let status: number | "network_error" | "unknown" = "unknown";
+
   const headers = buildAuthHeaders(init?.headers);
-  const res = await fetch(url, {
-    ...init,
-    headers,
-  });
-  handleResponseError(res);
-  return await res.json();
+  try {
+    const res = await fetch(url, {
+      ...init,
+      headers,
+    });
+    status = res.status;
+    handleResponseError(res);
+    return await res.json();
+  } catch (error) {
+    if (status === "unknown") {
+      status = "network_error";
+    }
+    throw error;
+  } finally {
+    recordMobileLaunchApiRequest({
+      endpoint: url,
+      method,
+      status,
+      startedAtMs: requestStartedAtMs,
+      durationMs: getRequestTimingNow() - requestStartedAtMs,
+    });
+  }
 }
 
 export async function fetchAllPages<T>(
@@ -81,35 +102,80 @@ function getNextUrl(currentUrl: string, next?: string | boolean): string {
 }
 
 export async function postData(url: string, body: any, init?: RequestInit) {
+  const requestStartedAtMs = getRequestTimingNow();
+  let status: number | "network_error" | "unknown" = "unknown";
+
   const headers = buildAuthHeaders(init?.headers);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  const res = await fetch(url, {
-    ...init,
-    method: "POST",
-    body: JSON.stringify(body),
-    headers,
-  });
-  handleResponseError(res);
-  const json = await res.json();
-  return {
-    status: res.status,
-    response: json,
-  };
+  try {
+    const res = await fetch(url, {
+      ...init,
+      method: "POST",
+      body: JSON.stringify(body),
+      headers,
+    });
+    status = res.status;
+    handleResponseError(res);
+    const json = await res.json();
+    return {
+      status: res.status,
+      response: json,
+    };
+  } catch (error) {
+    if (status === "unknown") {
+      status = "network_error";
+    }
+    throw error;
+  } finally {
+    recordMobileLaunchApiRequest({
+      endpoint: url,
+      method: "POST",
+      status,
+      startedAtMs: requestStartedAtMs,
+      durationMs: getRequestTimingNow() - requestStartedAtMs,
+    });
+  }
 }
 
 export async function postFormData(url: string, formData: FormData) {
+  const requestStartedAtMs = getRequestTimingNow();
+  let status: number | "network_error" | "unknown" = "unknown";
+
   const headers = buildAuthHeaders();
-  const res = await fetch(url, {
-    method: "POST",
-    body: formData,
-    headers,
-  });
-  handleResponseError(res);
-  const json = await res.json();
-  return {
-    status: res.status,
-    response: json,
-  };
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      body: formData,
+      headers,
+    });
+    status = res.status;
+    handleResponseError(res);
+    const json = await res.json();
+    return {
+      status: res.status,
+      response: json,
+    };
+  } catch (error) {
+    if (status === "unknown") {
+      status = "network_error";
+    }
+    throw error;
+  } finally {
+    recordMobileLaunchApiRequest({
+      endpoint: url,
+      method: "POST",
+      status,
+      startedAtMs: requestStartedAtMs,
+      durationMs: getRequestTimingNow() - requestStartedAtMs,
+    });
+  }
+}
+
+function getRequestTimingNow(): number {
+  if (globalThis.performance?.now) {
+    return globalThis.performance.now();
+  }
+  return Date.now();
 }

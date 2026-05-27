@@ -1,4 +1,5 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
@@ -21,6 +22,9 @@ interface PrivilegedDropCreatorProps {
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: (() => void) | undefined;
+  readonly onServerDropCreated?:
+    | ((drop: ApiDrop) => Promise<void> | void)
+    | undefined;
   readonly onExitFixedDropMode?: (() => void) | undefined;
   readonly wave: ApiWave;
   readonly dropId: string | null;
@@ -40,6 +44,7 @@ interface PrivilegedDropCreatorProps {
   readonly onExternalAttachmentDropConsumed?: (() => void) | undefined;
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
+  readonly forceStandardDropComposer?: boolean | undefined;
 }
 
 export default function PrivilegedDropCreator({
@@ -49,6 +54,7 @@ export default function PrivilegedDropCreator({
   dropId,
   fixedDropMode,
   onAllDropsAdded,
+  onServerDropCreated,
   onExitFixedDropMode,
   onDropAddedToQueue,
   curationComposerVariant = "default",
@@ -60,6 +66,7 @@ export default function PrivilegedDropCreator({
   onExternalAttachmentDropConsumed,
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
+  forceStandardDropComposer = false,
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -129,6 +136,7 @@ export default function PrivilegedDropCreator({
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
       onAllDropsAdded={onAllDropsAdded}
+      onServerDropCreated={onServerDropCreated}
       onExitFixedDropMode={onExitFixedDropMode}
       wave={wave}
       dropId={dropId}
@@ -147,6 +155,7 @@ export default function PrivilegedDropCreator({
       onExternalAttachmentDropConsumed={onExternalAttachmentDropConsumed}
       termsSignatureFlowEnabled={termsSignatureFlowEnabled}
       identityPickerPlacement={identityPickerPlacement}
+      forceStandardDropComposer={forceStandardDropComposer}
     />
   );
 }

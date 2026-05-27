@@ -19,7 +19,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { selectEditingDropId } from "@/store/editSlice";
+import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
@@ -35,7 +35,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../auth/Auth";
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
@@ -58,6 +58,7 @@ import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMar
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
@@ -109,6 +110,7 @@ import {
   areHandlesEqual,
   isChatLinkRestrictionApplicable,
 } from "@/helpers/waves/chat-link-restriction.helpers";
+import { useLatestEditableChatDropTarget } from "./hooks/useLatestEditableChatDropTarget";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -535,10 +537,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const hasUserToggledOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
+  const dispatch = useDispatch();
   const editingDropId = useSelector(selectEditingDropId);
-  const { requestAuth, setToast, connectedProfile } = useAuth();
+  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
+    useAuth();
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
+  const waveChatScroll = useWaveChatScrollOptional();
   const { signDrop } = useDropSignature();
 
   const [submitting, setSubmitting] = useState(false);
@@ -795,6 +800,39 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const canSubmit =
     getCanSubmit() && !isSlowModeSubmitBlocked && !isLinksSubmitBlocked;
   const canAddPart = getCanAddPart();
+  const latestEditableChatDropTarget = useLatestEditableChatDropTarget({
+    waveId: wave.id,
+    connectedProfile,
+    isProxyMode: Boolean(activeProfileProxy),
+  });
+  const canEditLastDropWithArrow =
+    !isDropMode &&
+    !isStormModeActive &&
+    !submitting &&
+    editingDropId === null &&
+    activeDrop === null &&
+    (getMarkdown?.trim().length ?? 0) === 0 &&
+    files.length === 0 &&
+    (drop?.parts.length ?? 0) === 0 &&
+    latestEditableChatDropTarget !== null;
+  const handleRequestEditLastDrop = useCallback((): boolean => {
+    if (!canEditLastDropWithArrow || !latestEditableChatDropTarget) {
+      return false;
+    }
+
+    dispatch(setEditingDropId(latestEditableChatDropTarget.id));
+    waveChatScroll?.requestScrollToSerialNo({
+      waveId: wave.id,
+      serialNo: latestEditableChatDropTarget.serialNo,
+    });
+    return true;
+  }, [
+    canEditLastDropWithArrow,
+    dispatch,
+    latestEditableChatDropTarget,
+    wave.id,
+    waveChatScroll,
+  ]);
   const normalizedCurationDropUrl = useMemo(() => {
     if (!isCurationSubmissionExperience || isDropMode) {
       return null;
@@ -1958,6 +1996,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   onMentionedUser={onMentionedUser}
                   onMentionedWave={onMentionedWave}
                   onAttachmentFiles={handleFileChange}
+                  canEditLastDropWithArrow={canEditLastDropWithArrow}
+                  onRequestEditLastDrop={handleRequestEditLastDrop}
                   onDrop={onDrop}
                 />
                 {showCurationDropModeWarning && (
