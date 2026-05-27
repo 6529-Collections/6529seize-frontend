@@ -41,6 +41,7 @@ const REDUNDANT_LINK_HOSTS = new Set([
 ]);
 const TILE_BASE_CLASS_NAME =
   "tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-align-top tw-[contain:content] tw-[content-visibility:auto]";
+const TRAILING_URL_PUNCTUATION = "),.;!?";
 
 interface PreviewNftLink {
   readonly url_in_text: string;
@@ -123,8 +124,19 @@ const getTrimmedText = (value?: string | null): string | null => {
   return trimmed === undefined || trimmed.length === 0 ? null : trimmed;
 };
 
-const normalizeUrl = (url: string): string =>
-  url.replace(/[),.;!?]+$/g, "").trim();
+const normalizeUrl = (url: string): string => {
+  const trimmed = url.trim();
+  let end = trimmed.length;
+
+  while (
+    end > 0 &&
+    TRAILING_URL_PUNCTUATION.includes(trimmed.charAt(end - 1))
+  ) {
+    end -= 1;
+  }
+
+  return trimmed.slice(0, end);
+};
 
 const extractUrls = (...values: readonly (string | null | undefined)[]) => {
   const urls = new Set<string>();

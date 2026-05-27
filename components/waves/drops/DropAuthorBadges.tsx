@@ -62,6 +62,7 @@ interface DropAuthorBadgesProps {
   readonly tooltipIdPrefix?: string | undefined;
   readonly className?: string | undefined;
   readonly size?: "default" | "compact" | undefined;
+  readonly showProfileWaveBadge?: boolean | undefined;
   readonly onArtistPreviewOpen?:
     | ((params: {
         readonly user: ApiProfileMin;
@@ -138,6 +139,7 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   tooltipIdPrefix = "author-badges",
   className = DEFAULT_CONTAINER_CLASS,
   size = "default",
+  showProfileWaveBadge = true,
   onArtistPreviewOpen,
 }) => {
   const router = useRouter();
@@ -147,7 +149,7 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   const hasActivityBadge = submissionCount > 0 || trophyCount > 0;
   const profileWaveName = getProfileWaveName(profile);
   const profileWavePfp = getProfileWavePfp(profile);
-  const hasProfileWaveBadge = profileWaveId !== null;
+  const hasProfileWaveBadge = showProfileWaveBadge && profileWaveId !== null;
   const profileWaveIdentity = getProfileWaveIdentity(profile);
 
   const modalUser = React.useMemo(() => toApiProfileMin(profile), [profile]);
