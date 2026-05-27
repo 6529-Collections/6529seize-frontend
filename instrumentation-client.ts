@@ -7,6 +7,7 @@ import {
   INDEXEDDB_ERROR_MESSAGE,
   isIndexedDBError,
 } from "@/utils/error-sanitizer";
+import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
@@ -24,6 +25,12 @@ import {
   type SentryTransactionSpan,
 } from "@/utils/sentry-client-filters";
 import * as Sentry from "@sentry/nextjs";
+
+try {
+  startMobileLaunchTiming();
+} catch {
+  // Monitoring must not affect app startup.
+}
 
 const sentryEnabled = !!publicEnv.SENTRY_DSN;
 const isProduction = publicEnv.NODE_ENV === "production";

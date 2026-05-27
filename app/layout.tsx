@@ -16,6 +16,7 @@ import "@/styles/globals.scss";
 
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
+import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import Providers from "@/components/providers/Providers";
 import StoreSetup from "@/components/providers/StoreSetup";
@@ -51,6 +52,7 @@ export default function RootLayout({
         )}
       </head>
       <body>
+        <MobileLaunchTimingReporter />
         <AwsRumProvider>
           <StoreSetup>
             <Providers>
