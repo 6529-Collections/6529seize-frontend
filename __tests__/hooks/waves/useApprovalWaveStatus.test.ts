@@ -22,6 +22,7 @@ const createWave = ({
   type = ApiWaveType.Approve,
   votingEnd = null,
   winningThreshold = 8,
+  winningThresholdMinDurationMs = 0,
 }: {
   readonly maxWinners?: number | null | undefined;
   readonly noOfDecisionsDone?: number | null | undefined;
@@ -29,6 +30,7 @@ const createWave = ({
   readonly type?: ApiWaveType | undefined;
   readonly votingEnd?: number | null | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
 } = {}): ApiWave =>
   ({
     id: "wave-1",
@@ -37,6 +39,7 @@ const createWave = ({
     wave: {
       type,
       winning_threshold: winningThreshold,
+      winning_threshold_min_duration_ms: winningThresholdMinDurationMs,
       max_winners: maxWinners,
       no_of_decisions_done: noOfDecisionsDone,
       no_of_decisions_left: noOfDecisionsLeft,
@@ -84,6 +87,7 @@ describe("useApprovalWaveStatus", () => {
     expect(result.current.isApprovalStatusLoading).toBe(false);
     expect(result.current.isApprovalStatusError).toBe(false);
     expect(result.current.winningThreshold).toBe(8);
+    expect(result.current.winningThresholdMinDurationMs).toBe(0);
 
     act(() => {
       jest.setSystemTime(new Date(2000));
@@ -387,17 +391,31 @@ describe("useApprovalWaveStatus", () => {
     const wave = createWave({
       type: ApiWaveType.Rank,
       winningThreshold: 8,
+      winningThresholdMinDurationMs: 120_000,
       votingEnd: 500,
     });
 
     const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
 
     expect(result.current.winningThreshold).toBeNull();
+    expect(result.current.winningThresholdMinDurationMs).toBeNull();
     expect(result.current.approvedCount).toBe(0);
     expect(result.current.closeStatus).toBeNull();
     expect(result.current.isApprovalStatusLoading).toBe(false);
     expect(result.current.isApprovalStatusError).toBe(false);
     expect(result.current.isVotingClosed).toBe(false);
     expect(result.current.isVotingControlsLocked).toBe(false);
+  });
+
+  it("returns the approval min threshold duration for approve waves", () => {
+    const wave = createWave({
+      winningThreshold: 8,
+      winningThresholdMinDurationMs: 120_000,
+    });
+
+    const { result } = renderHook(() => useApprovalWaveStatus({ wave }));
+
+    expect(result.current.winningThreshold).toBe(8);
+    expect(result.current.winningThresholdMinDurationMs).toBe(120_000);
   });
 });

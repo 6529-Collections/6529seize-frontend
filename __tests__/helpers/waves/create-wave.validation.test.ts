@@ -401,6 +401,142 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("allows blank approve threshold hold time", () => {
+    const startDate = 1_000;
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      approval: { threshold: 1, thresholdTimeMs: null, maxWinners: null },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows positive whole approve threshold hold time", () => {
+    const startDate = 1_000;
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS,
+        maxWinners: null,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("rejects invalid approve threshold hold time", () => {
+    for (const thresholdTimeMs of [0, -60_000, 1.5, HOUR_IN_MS + 1]) {
+      const approveConfig = {
+        ...baseConfig,
+        overview: { type: ApiWaveType.Approve, name: "n", image: null },
+        approval: {
+          threshold: 1,
+          thresholdTimeMs,
+          maxWinners: null,
+        },
+      };
+
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.VOTING,
+        config: approveConfig,
+      });
+
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID
+      );
+    }
+  });
+
+  it("rejects approve threshold hold time longer than the wave duration", () => {
+    const startDate = 1_000;
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: startDate,
+        votingStartDate: startDate,
+        endDate: startDate + HOUR_IN_MS,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS * 2,
+        maxWinners: null,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
+  it("allows approve threshold hold time without an end date", () => {
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 1_000,
+        votingStartDate: 1_000,
+        endDate: null,
+      },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS * 48,
+        maxWinners: null,
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    );
+  });
+
   it("detects duplicate required metadata", () => {
     const drops = {
       ...baseConfig.drops,

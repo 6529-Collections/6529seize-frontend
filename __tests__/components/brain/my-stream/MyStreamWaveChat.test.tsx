@@ -223,6 +223,7 @@ describe("MyStreamWaveChat", () => {
     mockApprovalStatus.mockReset();
     mockApprovalStatus.mockReturnValue({
       winningThreshold: null,
+      winningThresholdMinDurationMs: null,
       isVotingClosed: false,
       isVotingControlsLocked: false,
     });
@@ -649,6 +650,7 @@ describe("MyStreamWaveChat", () => {
     mockIsMemesWave = true;
     mockApprovalStatus.mockReturnValue({
       winningThreshold: 12,
+      winningThresholdMinDurationMs: 120_000,
       isVotingClosed: false,
       isVotingControlsLocked: true,
     });
@@ -665,6 +667,9 @@ describe("MyStreamWaveChat", () => {
     });
 
     expect(capturedPropsHolder.current.winningThreshold).toBe(12);
+    expect(capturedPropsHolder.current.winningThresholdMinDurationMs).toBe(
+      120_000
+    );
     expect(capturedPropsHolder.current.isVotingClosed).toBe(false);
     expect(capturedPropsHolder.current.isVotingControlsLocked).toBe(true);
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");

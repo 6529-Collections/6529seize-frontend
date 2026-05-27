@@ -32,6 +32,39 @@ const formatTimeLeft = (targetTime: number, currentMillis: number): string => {
   return `${timeLeft.minutes}m left`;
 };
 
+const MINUTE_IN_MS = 60 * 1000;
+const MINUTES_IN_HOUR = 60;
+
+const formatWinningThresholdMinDuration = (
+  durationMs: number | null | undefined
+): string => {
+  if (
+    typeof durationMs !== "number" ||
+    !Number.isFinite(durationMs) ||
+    durationMs <= 0
+  ) {
+    return "Immediate";
+  }
+
+  const totalMinutes = Math.floor(durationMs / MINUTE_IN_MS);
+  if (totalMinutes <= 0) {
+    return "<1m";
+  }
+
+  const hours = Math.floor(totalMinutes / MINUTES_IN_HOUR);
+  const minutes = totalMinutes % MINUTES_IN_HOUR;
+
+  if (hours > 0 && minutes > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  if (hours > 0) {
+    return `${hours}h`;
+  }
+
+  return `${minutes}m`;
+};
+
 const getCurrentMillisForStatusRender = (
   _clockTick: number,
   _endTime: number | null,
@@ -71,6 +104,8 @@ export default function WaveApprovalStatusBar({
   wave,
 }: WaveApprovalStatusBarProps) {
   const winningThreshold = wave.wave.winning_threshold;
+  const winningThresholdMinDuration =
+    wave.wave.winning_threshold_min_duration_ms;
   const maxWinners = wave.wave.max_winners;
   const endTime = getApprovalWindowEndTime(wave);
   const [clockTick, setClockTick] = useState(0);
@@ -98,6 +133,9 @@ export default function WaveApprovalStatusBar({
     typeof winningThreshold === "number" && Number.isFinite(winningThreshold)
       ? formatNumberWithCommas(winningThreshold)
       : "Not set";
+  const thresholdMinDurationLabel = formatWinningThresholdMinDuration(
+    winningThresholdMinDuration
+  );
   const approvedLabel = (() => {
     if (isApprovalStatusError || isCountOnlyError) {
       return "Unavailable";
@@ -162,6 +200,10 @@ export default function WaveApprovalStatusBar({
     <div className="tw-mt-2 tw-flex-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 md:tw-mt-3">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-8 tw-gap-y-1">
         <ApprovalStatusItem label="Threshold" value={thresholdLabel} />
+        <ApprovalStatusItem
+          label="Min time"
+          value={thresholdMinDurationLabel}
+        />
         <ApprovalStatusItem label="Approved" value={approvedLabel} />
         <ApprovalStatusItem
           label="Status"

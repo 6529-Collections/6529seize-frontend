@@ -12,6 +12,7 @@ interface ParticipationDropFooterProps {
   readonly voteAction?: ReactNode;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -21,6 +22,7 @@ export default function ParticipationDropFooter({
   voteAction,
   showInteractions = true,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }: ParticipationDropFooterProps) {
@@ -60,6 +62,9 @@ export default function ParticipationDropFooter({
                   drop={drop}
                   rank={drop.rank}
                   winningThreshold={winningThreshold}
+                  winningThresholdMinDurationMs={
+                    winningThresholdMinDurationMs
+                  }
                   isVotingClosed={isVotingClosed}
                 />
               </div>
@@ -87,6 +92,7 @@ export default function ParticipationDropFooter({
             drop={drop}
             rank={drop.rank}
             winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
             isVotingClosed={isVotingClosed}
           />
         </div>

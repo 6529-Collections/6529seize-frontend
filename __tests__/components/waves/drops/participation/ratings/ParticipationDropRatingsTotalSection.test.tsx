@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import ParticipationDropRatingsTotalSection from "@/components/waves/drops/participation/ratings/ParticipationDropRatingsTotalSection";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
@@ -88,6 +88,52 @@ describe("ParticipationDropRatingsTotalSection", () => {
     expect(screen.queryByText("Approved")).not.toBeInTheDocument();
   });
 
+  it("shows and updates the approval countdown while the min time is running", () => {
+    jest.useFakeTimers().setSystemTime(new Date(1_000_000));
+    const { unmount } = render(
+      <ParticipationDropRatingsTotalSection
+        drop={{
+          ...drop,
+          rating: 8,
+          over_threshold_since_ms: 1_000_000,
+        }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 8 }}
+        rank={1}
+        winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
+      />
+    );
+
+    try {
+      expect(screen.getByText("Approving in 8m")).toBeInTheDocument();
+
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(screen.getByText("Approving in 7m")).toBeInTheDocument();
+    } finally {
+      unmount();
+      jest.useRealTimers();
+    }
+  });
+
+  it("keeps the fallback reached label when countdown timing is missing", () => {
+    render(
+      <ParticipationDropRatingsTotalSection
+        drop={{ ...drop, rating: 8 }}
+        theme={theme}
+        ratingsData={{ ...ratingsData, currentRating: 8 }}
+        rank={1}
+        winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
+      />
+    );
+
+    expect(screen.getByText("Reached threshold")).toBeInTheDocument();
+  });
+
   it("shows Closed only when voting is really closed", () => {
     const { rerender } = render(
       <ParticipationDropRatingsTotalSection
@@ -157,10 +203,12 @@ describe("ParticipationDropRatingsTotalSection", () => {
         ratingsData={{ ...ratingsData, currentRating: 8 }}
         rank={1}
         winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
       />
     );
 
     expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.queryByText(/Approving in/)).not.toBeInTheDocument();
     expect(screen.queryByText("Reached threshold")).not.toBeInTheDocument();
   });
 

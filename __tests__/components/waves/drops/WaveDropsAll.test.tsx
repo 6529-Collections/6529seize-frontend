@@ -348,6 +348,7 @@ interface RenderOptions {
   unreadCount?: number | undefined;
   onDropContentClick?: jest.Mock | undefined;
   winningThreshold?: number | null | undefined;
+  winningThresholdMinDurationMs?: number | null | undefined;
   isVotingClosed?: boolean | undefined;
   isVotingControlsLocked?: boolean | undefined;
 }
@@ -478,6 +479,7 @@ describe("WaveDropsAll", () => {
         activeDrop: mockActiveDrop,
         initialDrop: 5,
         winningThreshold: 11,
+        winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
       });
@@ -491,6 +493,7 @@ describe("WaveDropsAll", () => {
         onReply: props.onReply,
         onQuoteClick: expect.any(Function),
         winningThreshold: 11,
+        winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
       });

@@ -132,12 +132,14 @@ it("passes approve wave state to participation drop", () => {
       onDropContentClick={onDropContentClick}
       showReplyAndQuote={false}
       winningThreshold={15}
+      winningThresholdMinDurationMs={120_000}
       isVotingClosed={true}
       isVotingControlsLocked={true}
     />
   );
   expect(screen.getByTestId("participation")).toBeInTheDocument();
   expect(participationProps.winningThreshold).toBe(15);
+  expect(participationProps.winningThresholdMinDurationMs).toBe(120_000);
   expect(participationProps.isVotingClosed).toBe(true);
   expect(participationProps.isVotingControlsLocked).toBe(true);
   expect(participationProps.onDropContentClick).toBe(onDropContentClick);

@@ -259,6 +259,48 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(result.drops[0]?.raters_count).toBe(7);
   });
 
+  it("preserves the over-threshold timestamp on hydrated legacy drops", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        createEnrichableDrop({
+          submission_context: {
+            ...createEnrichableDrop().submission_context,
+            over_threshold_since_ms: 123_456,
+          },
+        } as Partial<ApiDropV2>),
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]).toEqual(
+      expect.objectContaining({
+        over_threshold_since_ms: 123_456,
+      })
+    );
+  });
+
+  it("leaves missing over-threshold timestamps unset on hydrated drops", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [createEnrichableDrop()],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(
+      (result.drops[0] as { readonly over_threshold_since_ms?: number })
+        ?.over_threshold_since_ms
+    ).toBeUndefined();
+  });
+
   it("maps V2 priority metadata into leaderboard legacy drops", () => {
     const priorityMetadata = [
       {
@@ -283,6 +325,29 @@ describe("fetchWaveDropsFeedV2", () => {
     });
 
     expect(drop.metadata).toEqual(priorityMetadata);
+  });
+
+  it("preserves the over-threshold timestamp on leaderboard drops", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: createEnrichableDrop({
+        submission_context: {
+          ...createEnrichableDrop().submission_context,
+          over_threshold_since_ms: 123_456,
+        },
+      }) as unknown as ApiDropV2,
+      wave: {
+        id: "wave-1",
+        name: "Wave 1",
+        picture: null,
+        voting_credit_type: "TDH",
+      } as unknown as ApiWaveMin,
+    });
+
+    expect(drop).toEqual(
+      expect.objectContaining({
+        over_threshold_since_ms: 123_456,
+      })
+    );
   });
 
   it("fetches only additional parts for multi-part drops", async () => {

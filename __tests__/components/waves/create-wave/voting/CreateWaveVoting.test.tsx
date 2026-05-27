@@ -88,6 +88,7 @@ describe("CreateWaveVoting", () => {
     allowNegativeVotes: true,
     maxVotesPerIdentityPerDrop: null,
     approvalThreshold: null,
+    approvalThresholdTimeMs: null,
     errors: [],
     onTypeChange: jest.fn(),
     setCategory: jest.fn(),
@@ -96,6 +97,7 @@ describe("CreateWaveVoting", () => {
     onAllowNegativeVotesChange: jest.fn(),
     setMaxVotesPerIdentityPerDrop: jest.fn(),
     setApprovalThreshold: jest.fn(),
+    setApprovalThresholdTimeMs: jest.fn(),
     timeWeighted: {
       enabled: false,
       averagingInterval: 0,
@@ -124,6 +126,7 @@ describe("CreateWaveVoting", () => {
     expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
     expect(screen.getByLabelText("Vote cap per identity")).toBeInTheDocument();
     expect(screen.queryByLabelText("Approval threshold")).toBeNull();
+    expect(screen.queryByLabelText("Minimum time above threshold")).toBeNull();
     expect(settingsGrid).toHaveClass("tw-grid-cols-1");
     expect(settingsGrid).not.toHaveClass("sm:tw-grid-cols-2");
     expect(
@@ -225,6 +228,7 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByLabelText("Vote cap per identity")).toBeNull();
     expect(screen.queryByTestId("time-weighted")).toBeNull();
     expect(screen.queryByLabelText("Approval threshold")).toBeNull();
+    expect(screen.queryByLabelText("Minimum time above threshold")).toBeNull();
     expect(screen.queryByTestId("create-wave-voting-settings-grid")).toBeNull();
   });
 
@@ -233,11 +237,15 @@ describe("CreateWaveVoting", () => {
     const settingsGrid = screen.getByTestId("create-wave-voting-settings-grid");
     const voteCapInput = screen.getByLabelText("Vote cap per identity");
     const thresholdInput = screen.getByLabelText("Approval threshold");
+    const thresholdTimeInput = screen.getByLabelText(
+      "Minimum time above threshold"
+    );
 
     expect(settingsGrid).toHaveClass("tw-grid-cols-1");
     expect(settingsGrid).not.toHaveClass("sm:tw-grid-cols-2");
     expect(settingsGrid).toContainElement(voteCapInput);
     expect(settingsGrid).toContainElement(thresholdInput);
+    expect(settingsGrid).toContainElement(thresholdTimeInput);
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
     ).toHaveClass(
@@ -256,6 +264,10 @@ describe("CreateWaveVoting", () => {
     );
     expect(
       voteCapInput.compareDocumentPosition(thresholdInput) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      thresholdInput.compareDocumentPosition(thresholdTimeInput) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
@@ -309,5 +321,50 @@ describe("CreateWaveVoting", () => {
     });
 
     expect(setApprovalThreshold).toHaveBeenCalledWith(50);
+  });
+
+  it("updates approval threshold time for approve waves", () => {
+    const setApprovalThresholdTimeMs = jest.fn();
+
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        setApprovalThresholdTimeMs={setApprovalThresholdTimeMs}
+      />
+    );
+
+    fireEvent.change(
+      screen.getByLabelText("Minimum time above threshold unit"),
+      {
+        target: { value: "hours" },
+      }
+    );
+    fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
+      target: { value: "2" },
+    });
+
+    expect(setApprovalThresholdTimeMs).toHaveBeenLastCalledWith(7_200_000);
+  });
+
+  it("shows approval threshold time errors near the field", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID,
+        ]}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "Enter a whole number greater than 0, or leave blank for immediate approval."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Minimum time above threshold")
+    ).toHaveAttribute("aria-invalid", "true");
   });
 });
