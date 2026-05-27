@@ -60,6 +60,7 @@ describe("github-preview API route", () => {
         title: "Remove tab",
         state: "open",
         state_reason: null,
+        assignees: [{ login: "alice" }, { login: "bob" }],
       })
     );
 
@@ -73,6 +74,28 @@ describe("github-preview API route", () => {
       type: "github.issue",
       state: "open",
       number: 2308,
+      assignees: ["alice", "bob"],
+    });
+  });
+
+  it("maps unassigned GitHub issues", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        html_url: "https://github.com/o/r/issues/6",
+        title: "Needs owner",
+        state: "open",
+        state_reason: null,
+        assignees: [],
+      })
+    );
+
+    const response = await GET(requestFor("https://github.com/o/r/issues/6"));
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.issue",
+      state: "open",
+      number: 6,
+      assignees: [],
     });
   });
 

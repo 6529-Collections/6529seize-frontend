@@ -66,6 +66,22 @@ const shouldGroupWithDrop = (
   return bothNotReplies || repliesInSameThread;
 };
 
+const shouldGroupCurrentDrop = ({
+  isDrop,
+  drop,
+  otherDrop,
+}: {
+  readonly isDrop: boolean;
+  readonly drop: ExtendedDrop;
+  readonly otherDrop: ExtendedDrop | null;
+}): boolean => {
+  if (isDrop) {
+    return false;
+  }
+
+  return shouldGroupWithDrop(drop, otherDrop);
+};
+
 const RANK_STYLES = {
   1: `tw-ring-1 tw-ring-inset tw-ring-iron-700/35 ${getRankHoverRingClass(1)}`,
   2: `tw-ring-1 tw-ring-inset tw-ring-iron-700/35 ${getRankHoverRingClass(2)}`,
@@ -171,6 +187,86 @@ const shouldShowAuthorInfo = ({
 }): boolean =>
   identityMode !== "hidden" &&
   (!shouldGroupWithPreviousDrop || isProfileView || identityMode === "minimal");
+
+const shouldShowTouchActionsButton = ({
+  showInteractions,
+  hasTouch,
+  showReplyAndQuote,
+  isEditing,
+  identityMode,
+}: {
+  readonly showInteractions: boolean;
+  readonly hasTouch: boolean;
+  readonly showReplyAndQuote: boolean;
+  readonly isEditing: boolean;
+  readonly identityMode: DropIdentityMode;
+}): boolean =>
+  showInteractions &&
+  hasTouch &&
+  showReplyAndQuote &&
+  !isEditing &&
+  identityMode === "default";
+
+const shouldDisplayReplyHeader = ({
+  replyTo,
+  dropViewDropId,
+  shouldGroupWithPreviousDrop,
+  previousDrop,
+}: {
+  readonly replyTo: ExtendedDrop["reply_to"];
+  readonly dropViewDropId: string | null;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly previousDrop: ExtendedDrop | null;
+}): boolean => {
+  if (!replyTo || replyTo.drop_id === dropViewDropId) {
+    return false;
+  }
+
+  return !(
+    shouldGroupWithPreviousDrop &&
+    replyTo.drop_id === previousDrop?.reply_to?.drop_id
+  );
+};
+
+const shouldOffsetFooterRow = ({
+  inlineAuthorOnDesktop,
+  showAuthorInfo,
+  shouldGroupWithPreviousDrop,
+  isProfileView,
+}: {
+  readonly inlineAuthorOnDesktop: boolean;
+  readonly showAuthorInfo: boolean;
+  readonly shouldGroupWithPreviousDrop: boolean;
+  readonly isProfileView: boolean;
+}): boolean => {
+  if (inlineAuthorOnDesktop) {
+    return false;
+  }
+
+  return showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
+};
+
+const getWaveDropOuterClass = ({
+  isDrop,
+  location,
+  isProfileView,
+}: {
+  readonly isDrop: boolean;
+  readonly location: DropLocation;
+  readonly isProfileView: boolean;
+}): string => {
+  const classes = ["tw-w-full"];
+
+  if (isDrop && location === DropLocation.WAVE) {
+    classes.push("tw-px-4 tw-py-0.5");
+  }
+
+  if (isProfileView) {
+    classes.push("tw-mb-3");
+  }
+
+  return classes.join(" ");
+};
 
 const getGroupingClass = ({
   isProfileView,
@@ -313,6 +409,26 @@ const getAuthorHeader = ({
   );
 };
 
+const getDesktopAuthorHeader = ({
+  showAuthorInfo,
+  inlineAuthorOnDesktop,
+  authorHeader,
+}: {
+  readonly showAuthorInfo: boolean;
+  readonly inlineAuthorOnDesktop: boolean;
+  readonly authorHeader: React.ReactNode;
+}): React.ReactNode => {
+  if (showAuthorInfo && !inlineAuthorOnDesktop) {
+    return <div className="tw-hidden md:tw-block">{authorHeader}</div>;
+  }
+
+  if (showAuthorInfo) {
+    return null;
+  }
+
+  return authorHeader;
+};
+
 const getContentBlock = ({
   shouldShowReplyHeader,
   onReplyClick,
@@ -431,11 +547,11 @@ const getContentBlock = ({
             : ""
         }`}
       >
-        {showAuthorInfo && !inlineAuthorOnDesktop ? (
-          <div className="tw-hidden md:tw-block">{authorHeader}</div>
-        ) : !showAuthorInfo ? (
-          authorHeader
-        ) : null}
+        {getDesktopAuthorHeader({
+          showAuthorInfo,
+          inlineAuthorOnDesktop,
+          authorHeader,
+        })}
         <div
           className={getDropContentClass({
             showAuthorInfo,
@@ -556,11 +672,17 @@ const WaveDrop = ({
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
 
-  const shouldGroupWithPreviousDrop =
-    !isDrop && shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithPreviousDrop = shouldGroupCurrentDrop({
+    isDrop,
+    drop,
+    otherDrop: previousDrop,
+  });
 
-  const shouldGroupWithNextDrop =
-    !isDrop && shouldGroupWithDrop(drop, nextDrop);
+  const shouldGroupWithNextDrop = shouldGroupCurrentDrop({
+    isDrop,
+    drop,
+    otherDrop: nextDrop,
+  });
 
   const isMobile = useIsMobileDevice();
   const hasTouch = useHasTouchInput() || isMobile;
@@ -576,12 +698,13 @@ const WaveDrop = ({
     shouldGroupWithPreviousDrop,
     isProfileView,
   });
-  const showActionsButton =
-    showInteractions &&
-    hasTouch &&
-    showReplyAndQuote &&
-    !isEditing &&
-    identityMode === "default";
+  const showActionsButton = shouldShowTouchActionsButton({
+    showInteractions,
+    hasTouch,
+    showReplyAndQuote,
+    isEditing,
+    identityMode,
+  });
   const groupingClass = getGroupingClass({
     isProfileView,
     shouldGroupWithPreviousDrop,
@@ -589,14 +712,12 @@ const WaveDrop = ({
   });
   const replyTo = drop.reply_to;
 
-  const isGroupedReplyWithPrevious =
-    shouldGroupWithPreviousDrop &&
-    replyTo?.drop_id === previousDrop?.reply_to?.drop_id;
-
-  const shouldShowReplyHeader =
-    !!replyTo &&
-    replyTo.drop_id !== dropViewDropId &&
-    !isGroupedReplyWithPrevious;
+  const shouldShowReplyHeader = shouldDisplayReplyHeader({
+    replyTo,
+    dropViewDropId,
+    shouldGroupWithPreviousDrop,
+    previousDrop,
+  });
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
@@ -859,20 +980,24 @@ const WaveDrop = ({
       {showInteractions && <WaveDropReactions drop={drop} />}
     </div>
   );
-  const shouldOffsetFooter =
-    !inlineAuthorOnDesktop &&
-    (showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView));
+  const shouldOffsetFooter = shouldOffsetFooterRow({
+    inlineAuthorOnDesktop,
+    showAuthorInfo,
+    shouldGroupWithPreviousDrop,
+    isProfileView,
+  });
   const footerOffsetClass = shouldOffsetFooter ? contentOffsetClass : "";
   const footerRow = hasDropFooter(footer) && (
     <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
   );
+  const outerClass = getWaveDropOuterClass({
+    isDrop,
+    location,
+    isProfileView,
+  });
 
   return (
-    <div
-      className={`${
-        isDrop && location === DropLocation.WAVE ? "tw-px-4 tw-py-0.5" : ""
-      } ${isProfileView ? "tw-mb-3" : ""} tw-w-full`}
-    >
+    <div className={outerClass}>
       <div
         ref={dropRef}
         className={dropClasses}

@@ -116,6 +116,7 @@ describe("GithubPreviewStatusBadge", () => {
         number: 2308,
         title: "Remove tab",
         state: "closed_completed",
+        assignees: ["alice"],
         url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
       }),
     });
@@ -125,10 +126,14 @@ describe("GithubPreviewStatusBadge", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("github-preview-status-badge")
-      ).toHaveTextContent("Completed");
+      expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+        "aria-label",
+        "Completed · @alice"
+      );
     });
+    expect(
+      screen.getByTestId("github-preview-assignee-label")
+    ).toHaveTextContent("@alice");
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/github-preview?url=https%3A%2F%2Fgithub.com%2F6529-Collections%2F6529seize-frontend%2Fissues%2F2308",
       expect.objectContaining({
@@ -137,7 +142,113 @@ describe("GithubPreviewStatusBadge", () => {
     );
   });
 
+  it("renders unassigned for issue previews without an assignee", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/issues/2308"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2308,
+          title: "Remove tab",
+          state: "open",
+          assignees: [],
+          url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+      "aria-label",
+      "Open · Unassigned"
+    );
+    expect(
+      screen.getByTestId("github-preview-assignee-label")
+    ).toHaveTextContent("Unassigned");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("renders one mobile assignee and both desktop assignees for two assignees", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/issues/2314"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2314,
+          title: "Multi owner",
+          state: "open",
+          assignees: ["alice", "bob"],
+          url: "https://github.com/6529-Collections/6529seize-frontend/issues/2314",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByTestId("github-preview-assignee-mobile-label")
+    ).toHaveTextContent("@alice +1");
+    expect(
+      screen.getByTestId("github-preview-assignee-desktop-label")
+    ).toHaveTextContent("@alice, @bob");
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveAttribute(
+      "aria-label",
+      "Open · @alice, @bob"
+    );
+  });
+
+  it("renders a compact count for issue previews with more than two assignees", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/issues/2315"
+        initialPreview={{
+          type: "github.issue",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2315,
+          title: "Multi owner",
+          state: "open",
+          assignees: ["alice", "bob", "carol"],
+          url: "https://github.com/6529-Collections/6529seize-frontend/issues/2315",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByTestId("github-preview-assignee-label")
+    ).toHaveTextContent("@alice +2");
+  });
+
+  it("does not render an assignee badge for pull request previews", () => {
+    render(
+      <GithubPreviewStatusBadge
+        href="https://github.com/6529-Collections/6529seize-frontend/pull/2309"
+        initialPreview={{
+          type: "github.pull_request",
+          owner: "6529-Collections",
+          repo: "6529seize-frontend",
+          number: 2309,
+          title: "Fix tab",
+          state: "open",
+          reviewState: "none",
+          mergeableState: "clean",
+          merged: false,
+          draft: false,
+          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("github-preview-status-badge")).toHaveTextContent(
+      "Open"
+    );
+    expect(screen.queryByTestId("github-preview-assignee-label")).toBeNull();
+  });
+
   it("does not fetch status until the badge enters the viewport", async () => {
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/issues/2312";
     let triggerIntersection = (_isIntersecting: boolean) => {};
     class TestIntersectionObserver implements IntersectionObserver {
       readonly root = null;
@@ -162,16 +273,15 @@ describe("GithubPreviewStatusBadge", () => {
         type: "github.issue",
         owner: "6529-Collections",
         repo: "6529seize-frontend",
-        number: 2308,
+        number: 2312,
         title: "Remove tab",
         state: "closed_completed",
-        url: "https://github.com/6529-Collections/6529seize-frontend/issues/2308",
+        assignees: [],
+        url: href,
       }),
     });
 
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/issues/2308" />
-    );
+    render(<GithubPreviewStatusBadge href={href} />);
 
     expect(fetchMock).not.toHaveBeenCalled();
 
@@ -188,26 +298,26 @@ describe("GithubPreviewStatusBadge", () => {
   });
 
   it("renders pull request state details", async () => {
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2312";
     fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         type: "github.pull_request",
         owner: "6529-Collections",
         repo: "6529seize-frontend",
-        number: 2309,
+        number: 2312,
         title: "Fix tab",
         state: "open",
         reviewState: "none",
         mergeableState: "blocked",
         merged: false,
         draft: false,
-        url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+        url: href,
       }),
     });
 
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/pull/2309" />
-    );
+    render(<GithubPreviewStatusBadge href={href} />);
 
     await waitFor(() => {
       const badge = screen.getByTestId("github-preview-status-badge");
@@ -218,6 +328,8 @@ describe("GithubPreviewStatusBadge", () => {
 
   it("refreshes visible badges every minute without client or server cache", async () => {
     jest.useFakeTimers();
+    const href =
+      "https://github.com/6529-Collections/6529seize-frontend/pull/2313";
     fetchMock
       .mockResolvedValueOnce({
         ok: true,
@@ -225,14 +337,14 @@ describe("GithubPreviewStatusBadge", () => {
           type: "github.pull_request",
           owner: "6529-Collections",
           repo: "6529seize-frontend",
-          number: 2309,
+          number: 2313,
           title: "Fix tab",
           state: "open",
           reviewState: "none",
           mergeableState: "clean",
           merged: false,
           draft: false,
-          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+          url: href,
         }),
       })
       .mockResolvedValueOnce({
@@ -241,20 +353,18 @@ describe("GithubPreviewStatusBadge", () => {
           type: "github.pull_request",
           owner: "6529-Collections",
           repo: "6529seize-frontend",
-          number: 2309,
+          number: 2313,
           title: "Fix tab",
           state: "open",
           reviewState: "approved",
           mergeableState: "clean",
           merged: false,
           draft: false,
-          url: "https://github.com/6529-Collections/6529seize-frontend/pull/2309",
+          url: href,
         }),
       });
 
-    render(
-      <GithubPreviewStatusBadge href="https://github.com/6529-Collections/6529seize-frontend/pull/2309" />
-    );
+    render(<GithubPreviewStatusBadge href={href} />);
 
     await waitFor(() => {
       expect(
@@ -323,9 +433,9 @@ describe("GithubPreviewStatusBadge", () => {
       "aria-label",
       "Status unavailable"
     );
-    expect(screen.getByTestId("github-preview-status-badge")).not.toHaveAttribute(
-      "title"
-    );
+    expect(
+      screen.getByTestId("github-preview-status-badge")
+    ).not.toHaveAttribute("title");
     expect(screen.getByTestId("custom-tooltip")).toHaveAttribute(
       "data-content",
       "Status unavailable"
