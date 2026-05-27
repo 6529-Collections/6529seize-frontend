@@ -188,6 +188,17 @@ describe("ReactQueryWrapper context", () => {
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       predicate: expect.any(Function),
     });
+    const [{ predicate }] = (client.invalidateQueries as jest.Mock).mock
+      .calls[0] as [
+      {
+        readonly predicate: (query: {
+          readonly queryKey: readonly unknown[];
+        }) => boolean;
+      },
+    ];
+
+    expect(predicate({ queryKey: [QueryKey.PROFILE] })).toBe(true);
+    expect(predicate({ queryKey: [QueryKey.GROUPS] })).toBe(false);
   });
 });
 
