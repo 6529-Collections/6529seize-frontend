@@ -27,6 +27,7 @@ describe("6529api service", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith("/foo", expect.any(Object));
     expect(getHeaders().get("x-6529-auth")).toBe("token");
+    expect(getHeaders().get("x-6529-launch-id")).toBeNull();
     expect(Cookies.remove).toHaveBeenCalledWith(API_AUTH_COOKIE);
     expect(result).toEqual({ ok: true });
   });
@@ -77,6 +78,7 @@ describe("6529api service", () => {
     expect(globalThis.fetch).toHaveBeenCalledWith("/bar", expect.any(Object));
     expect(getHeaders().get("Content-Type")).toBe("application/json");
     expect(getHeaders().get("x-6529-auth")).toBeNull();
+    expect(getHeaders().get("x-6529-launch-id")).toBeNull();
     expect(result).toEqual({ status: 201, response: { done: true } });
   });
 
