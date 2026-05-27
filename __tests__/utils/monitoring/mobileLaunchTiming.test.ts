@@ -308,6 +308,11 @@ describe("mobileLaunchTiming", () => {
     ).toBe("/api/profiles/:id/proxies");
     expect(
       sanitizers.sanitizeEndpointGroup(
+        "https://api.test.6529.io/api/%70rofiles/private-handle/proxies"
+      )
+    ).toBe("/api/profiles/:id/proxies");
+    expect(
+      sanitizers.sanitizeEndpointGroup(
         "/api/waves/0x1234567890123456789012345678901234567890/drops/123?handle=secret"
       )
     ).toBe("/api/waves/:wallet/drops/:id");

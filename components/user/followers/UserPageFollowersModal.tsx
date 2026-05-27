@@ -32,7 +32,7 @@ export default function UserPageFollowersModal({
           followers={followers}
           loading={isFetching}
           onBottomIntersection={onBottomIntersection}
-          showUserFollowActions
+          showFollowButtons
         />
       </div>
     </MobileWrapperDialog>

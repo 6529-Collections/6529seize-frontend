@@ -444,13 +444,12 @@ function sanitizePathSegment({
 }): string {
   const decoded = safeDecodeURIComponent(segment);
   const lower = decoded.toLowerCase();
-  const previousLower = previousSegment?.toLowerCase();
 
   if (looksLikeSensitiveIdentifier(decoded)) {
     return getIdentifierPlaceholder(decoded);
   }
 
-  if (shouldRedactAfterParent(previousLower, lower)) {
+  if (shouldRedactAfterParent(previousSegment, lower)) {
     return ":id";
   }
 
@@ -461,9 +460,14 @@ function shouldRedactAfterParent(
   previousSegment: string | undefined,
   currentSegment: string
 ): boolean {
+  if (previousSegment === undefined) {
+    return false;
+  }
+
+  const previousLower = safeDecodeURIComponent(previousSegment).toLowerCase();
+
   return (
-    previousSegment !== undefined &&
-    IDENTIFIER_PARENT_SEGMENTS.has(previousSegment) &&
+    IDENTIFIER_PARENT_SEGMENTS.has(previousLower) &&
     !STATIC_ACTION_SEGMENTS.has(currentSegment)
   );
 }

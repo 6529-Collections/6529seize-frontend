@@ -9,18 +9,18 @@ export default function FollowersListWrapper({
   followers,
   loading,
   onBottomIntersection,
-  showUserFollowActions = false,
+  showFollowButtons = false,
 }: {
   readonly followers: ApiIdentityAndSubscriptionActions[];
   readonly loading: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
-  readonly showUserFollowActions?: boolean | undefined;
+  readonly showFollowButtons?: boolean | undefined;
 }) {
   return (
     <div className="tw-h-full tw-overflow-hidden">
       <FollowersList
         followers={followers}
-        showUserFollowActions={showUserFollowActions}
+        showFollowButtons={showFollowButtons}
       />
       {loading && (
         <div className="tw-mt-8 tw-w-full tw-text-center">

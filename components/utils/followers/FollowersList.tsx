@@ -3,10 +3,10 @@ import Follower from "./Follower";
 
 export default function FollowersList({
   followers,
-  showUserFollowActions,
+  showFollowButtons = false,
 }: {
   readonly followers: ApiIdentityAndSubscriptionActions[];
-  readonly showUserFollowActions: boolean;
+  readonly showFollowButtons?: boolean | undefined;
 }) {
   return (
     <div className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
@@ -14,7 +14,7 @@ export default function FollowersList({
         <Follower
           key={follower.identity.id}
           follower={follower}
-          showUserFollowAction={showUserFollowActions}
+          showFollowButton={showFollowButtons}
           mutedBackground={index % 2 === 1}
         />
       ))}

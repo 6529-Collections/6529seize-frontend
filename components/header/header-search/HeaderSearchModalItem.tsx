@@ -101,6 +101,7 @@ export default function HeaderSearchModalItem({
   const isPage = () => (content as PageSearchResult).type === "PAGE";
   const isProfile = () => Object.hasOwn(content, "handle");
   const isNft = () => Object.hasOwn(content, "contract");
+  const isWave = () => !isProfile() && !isNft() && !isPage();
   const getWave = () => content as ApiWave;
 
   const getProfile = () => content as CommunityMemberMinimal;
@@ -219,7 +220,8 @@ export default function HeaderSearchModalItem({
       return page.href;
     } else {
       const wave = getWave();
-      return `by ${wave.author.handle ?? wave.author.primary_address}`;
+      const author = wave.author?.handle ?? wave.author?.primary_address;
+      return author ? `by ${author}` : `Wave #${wave.serial_no}`;
     }
   };
 
@@ -227,7 +229,7 @@ export default function HeaderSearchModalItem({
     const baseClassName =
       "tw-mb-0 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap";
 
-    if (!isProfile() && !isNft() && !isPage()) {
+    if (isWave()) {
       return `${baseClassName} tw-text-xs tw-text-iron-500`;
     }
 
@@ -237,7 +239,7 @@ export default function HeaderSearchModalItem({
   const primaryText = getPrimaryText();
   const secondaryText = getSecondaryText();
   const primaryTextClassName = `tw-min-w-0 tw-flex-1 tw-font-semibold tw-text-white ${
-    !isProfile() && !isNft() && !isPage() ? "tw-text-base" : "tw-text-sm"
+    isWave() ? "tw-text-base" : "tw-text-sm"
   }`;
 
   return (

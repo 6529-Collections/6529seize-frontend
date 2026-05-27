@@ -13,12 +13,12 @@ const FOLLOW_STATUS_PREFETCH_MARGIN = "360px";
 
 export default function Follower({
   follower,
-  showUserFollowAction,
-  mutedBackground,
+  showFollowButton = false,
+  mutedBackground = false,
 }: {
   readonly follower: ApiIdentityAndSubscriptionActions;
-  readonly showUserFollowAction: boolean;
-  readonly mutedBackground: boolean;
+  readonly showFollowButton?: boolean | undefined;
+  readonly mutedBackground?: boolean | undefined;
 }) {
   const rowRef = useRef<HTMLDivElement>(null);
   const [shouldLoadFollowButton, setShouldLoadFollowButton] = useState(false);
@@ -27,8 +27,8 @@ export default function Follower({
   const normalizedFollowerHandle = followerHandle?.toLowerCase() ?? null;
   const normalizedConnectedHandle =
     connectedProfile?.handle?.toLowerCase() ?? null;
-  const showFollowButton = Boolean(
-    showUserFollowAction &&
+  const shouldShowFollowButton = Boolean(
+    showFollowButton &&
     normalizedConnectedHandle &&
     normalizedFollowerHandle &&
     normalizedFollowerHandle !== normalizedConnectedHandle
@@ -36,7 +36,7 @@ export default function Follower({
   const backgroundClass = mutedBackground ? "tw-bg-white/[0.01]" : "";
 
   useEffect(() => {
-    if (!showFollowButton || shouldLoadFollowButton) {
+    if (!shouldShowFollowButton || shouldLoadFollowButton) {
       return;
     }
 
@@ -60,7 +60,7 @@ export default function Follower({
 
     observer.observe(row);
     return () => observer.disconnect();
-  }, [showFollowButton, shouldLoadFollowButton]);
+  }, [shouldShowFollowButton, shouldLoadFollowButton]);
 
   return (
     <div ref={rowRef} className={`${backgroundClass} tw-py-3`}>
@@ -102,7 +102,7 @@ export default function Follower({
             </div>
           </div>
         </div>
-        {showFollowButton && followerHandle && (
+        {shouldShowFollowButton && followerHandle && (
           <div className="tw-flex-shrink-0">
             {shouldLoadFollowButton ? (
               <UserFollowBtn
