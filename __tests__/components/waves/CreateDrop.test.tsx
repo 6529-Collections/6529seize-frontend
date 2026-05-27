@@ -1,5 +1,11 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { DropMutationBody } from "@/components/waves/CreateDrop";
 import CreateDrop from "@/components/waves/CreateDrop";
@@ -184,6 +190,52 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("waits for onServerDropCreated before reporting all drops added", async () => {
+    const waitAndInvalidateDrops = jest.fn();
+    const onAllDropsAdded = jest.fn();
+    let resolveServerDropCreated: (() => void) | null = null;
+    const onServerDropCreated = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveServerDropCreated = resolve;
+        })
+    );
+
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider value={{ waitAndInvalidateDrops }}>
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            onAllDropsAdded={onAllDropsAdded}
+            onServerDropCreated={onServerDropCreated}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"BOTH" as any}
+            privileges={{} as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() =>
+      expect(onServerDropCreated).toHaveBeenCalledWith({
+        id: "server-drop",
+        wave_id: "1",
+      })
+    );
+    expect(onAllDropsAdded).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveServerDropCreated?.();
+    });
+
+    await waitFor(() => expect(onAllDropsAdded).toHaveBeenCalledTimes(1));
   });
 
   it("does not blur when a chat drop is queued", async () => {
@@ -842,6 +894,38 @@ describe("CreateDrop", () => {
       message: "Drop submitted successfully",
       type: "success",
     });
+  });
+
+  it("can force the standard composer for curation waves", () => {
+    useWaveMock.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+    } as any);
+
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={"PARTICIPATION" as any}
+            privileges={{} as any}
+            forceStandardDropComposer={true}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("submit current mode")).toBeInTheDocument();
+    expect(screen.queryByText("submit curation")).not.toBeInTheDocument();
+    expect(screen.getByTestId("submission-experience")).toHaveTextContent(
+      "DEFAULT"
+    );
   });
 
   it("switches to curation mode with a prefilled url seed", async () => {
