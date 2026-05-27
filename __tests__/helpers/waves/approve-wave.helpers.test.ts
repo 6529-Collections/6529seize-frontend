@@ -165,6 +165,28 @@ describe("approve-wave.helpers", () => {
       });
     });
 
+    it("shows reached threshold when voting is closed and hold time is still running", () => {
+      expect(
+        getApprovalDropStatus({
+          drop: {
+            rating: 8,
+            rank: null,
+            over_threshold_since_ms: 1_000,
+          },
+          isClosed: true,
+          nowMs: 121_000,
+          winningThreshold: 8,
+          winningThresholdMinDurationMs: 600_000,
+        })
+      ).toMatchObject({
+        kind: "reached_threshold",
+        current: 8,
+        threshold: 8,
+        remaining: 0,
+        countdownMs: null,
+      });
+    });
+
     it("falls back to reached threshold when countdown timing is missing", () => {
       expect(
         getApprovalDropStatus({

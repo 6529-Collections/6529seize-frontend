@@ -143,7 +143,7 @@ export const getApprovalDropStatus = ({
       overThresholdSinceMs: drop.over_threshold_since_ms,
     });
 
-    if (countdownMs !== null) {
+    if (!isClosed && countdownMs !== null) {
       return {
         kind: "approving",
         current,
