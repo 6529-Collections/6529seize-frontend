@@ -72,7 +72,7 @@
   -webkit-user-select: none;
   
   // Links inside tooltips
-  a {
+  a:not([class]) {
     color: #4a9eff; // Brighter blue for dark background
     text-decoration: none;
     font-weight: 500;
@@ -81,6 +81,10 @@
       text-decoration: underline;
       text-underline-offset: 2px;
     }
+  }
+
+  :global(.tailwind-scope) :global(.tw-font-bold) {
+    font-weight: 700;
   }
 }
 

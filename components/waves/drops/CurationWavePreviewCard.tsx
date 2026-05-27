@@ -32,7 +32,14 @@ interface CurationWavePreviewCardProps {
 const PREVIEW_DROPS_FETCH_LIMIT = 4;
 const PREVIEW_ITEM_LIMIT = 4;
 const URL_PATTERN = /https?:\/\/[^\s<>"')\]]+/gi;
-const DIRECT_IMAGE_URL_PATTERN = /\.(?:avif|gif|jpe?g|png|webp)(?:[?#]|$)/i;
+const DIRECT_IMAGE_FORMATS = new Set([
+  "avif",
+  "gif",
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+]);
 const REDUNDANT_LINK_HOSTS = new Set([
   "mobile.twitter.com",
   "t.co",
@@ -40,7 +47,7 @@ const REDUNDANT_LINK_HOSTS = new Set([
   "x.com",
 ]);
 const TILE_BASE_CLASS_NAME =
-  "tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-align-top tw-[contain:content] tw-[content-visibility:auto]";
+  "tw-group tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-align-top tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out tw-[contain:content] tw-[content-visibility:auto]";
 const TRAILING_URL_PUNCTUATION = "),.;!?";
 
 interface PreviewNftLink {
@@ -188,16 +195,16 @@ const isTrivialLinkText = (textWithoutUrls: string | null): boolean =>
 const isEmojiOnlyText = (text: string): boolean =>
   /^[\p{Extended_Pictographic}\uFE0F\u200D\s]+$/u.test(text);
 
+const getPlainText = (value?: string | null): string | null =>
+  getTrimmedText(markdownToPlainText(value ?? ""));
+
 const getDropDisplayText = (drop: PreviewDropContent): string | null => {
   const title = getTrimmedText(drop.title);
-  const contentPart =
-    drop.parts.find(
-      (part) => getTrimmedText(markdownToPlainText(part.content ?? "")) !== null
-    ) ?? null;
   const content =
-    contentPart !== null
-      ? getTrimmedText(markdownToPlainText(contentPart.content ?? ""))
-      : null;
+    drop.parts.flatMap((part) => {
+      const plainText = getPlainText(part.content);
+      return plainText ? [plainText] : [];
+    })[0] ?? null;
 
   if (title !== null && content !== null && title !== content) {
     return `${title}: ${content}`;
@@ -219,12 +226,47 @@ const getAttachmentFallbackText = (drop: PreviewDropContent): string | null => {
 const getQuotedDrop = (drop: PreviewDropContent): PreviewDropContent =>
   drop.parts.find((part) => part.quoted_drop?.drop)?.quoted_drop?.drop ?? drop;
 
+const getImageFormat = (format: string | null | undefined): string | null => {
+  const normalized = format?.trim().toLowerCase();
+  return normalized && DIRECT_IMAGE_FORMATS.has(normalized)
+    ? normalized
+    : null;
+};
+
+const getPathImageFormat = (pathname: string): string | null => {
+  const dotIndex = pathname.lastIndexOf(".");
+  if (dotIndex === -1) {
+    return null;
+  }
+
+  return getImageFormat(pathname.slice(dotIndex + 1));
+};
+
+const getUrlPathEndIndex = (url: string): number => {
+  const indexes = [url.indexOf("?"), url.indexOf("#")].filter(
+    (index) => index >= 0
+  );
+  return indexes.length > 0 ? Math.min(...indexes) : url.length;
+};
+
+const getDirectImageFormat = (url: string): string | null => {
+  try {
+    const parsed = new URL(url);
+    return (
+      getPathImageFormat(parsed.pathname) ??
+      getImageFormat(parsed.searchParams.get("format"))
+    );
+  } catch {
+    return getPathImageFormat(url.slice(0, getUrlPathEndIndex(url)));
+  }
+};
+
 const inferImageMimeType = (url: string): string | null =>
-  DIRECT_IMAGE_URL_PATTERN.test(url) ? "image/*" : null;
+  getDirectImageFormat(url) !== null ? "image/*" : null;
 
 const isImageLikeMedia = (url: string, mimeType: string | null): boolean =>
   mimeType?.toLowerCase().startsWith("image/") === true ||
-  DIRECT_IMAGE_URL_PATTERN.test(url);
+  getDirectImageFormat(url) !== null;
 
 const getMediaAspectRatio = (
   media: PreviewMedia,
@@ -274,11 +316,8 @@ const getDropMedia = (
         return [];
       }
 
-      if (
-        preview?.status !== undefined &&
-        preview.status !== null &&
-        preview.status !== "READY"
-      ) {
+      const previewStatus = preview?.status ?? null;
+      if (previewStatus !== null && previewStatus !== "READY") {
         return [];
       }
 
@@ -287,25 +326,25 @@ const getDropMedia = (
         inferImageMimeType(previewUrl) ??
         "";
 
-      if (
-        preview?.status !== "READY" &&
-        !isImageLikeMedia(previewUrl, mimeType)
-      ) {
-        return [];
+      const canUsePreviewMedia =
+        previewStatus === "READY" || isImageLikeMedia(previewUrl, mimeType);
+
+      if (canUsePreviewMedia) {
+        return [
+          {
+            url: previewUrl,
+            width: preview?.width ?? null,
+            height: preview?.height ?? null,
+            isVideo: preview?.kind?.toLowerCase() === "video",
+          },
+        ];
       }
 
-      return [
-        {
-          url: previewUrl,
-          width: preview?.width ?? null,
-          height: preview?.height ?? null,
-          isVideo: preview?.kind?.toLowerCase() === "video",
-        },
-      ];
+      return [];
     }) ?? [];
 
   const directMedia = urls
-    .filter((url) => DIRECT_IMAGE_URL_PATTERN.test(url))
+    .filter((url) => getDirectImageFormat(url) !== null)
     .map((url): PreviewMedia => {
       return {
         url,
@@ -317,9 +356,11 @@ const getDropMedia = (
 
   const uniqueMedia = new Map<string, PreviewMedia>();
   for (const media of [...attachedMedia, ...linkPreviewMedia, ...directMedia]) {
-    if (!uniqueMedia.has(media.url)) {
-      uniqueMedia.set(media.url, media);
+    if (uniqueMedia.has(media.url)) {
+      continue;
     }
+
+    uniqueMedia.set(media.url, media);
   }
 
   return [...uniqueMedia.values()];
@@ -432,11 +473,11 @@ const PreviewMediaTile: React.FC<{
 
   return (
     <div
-      className={`${TILE_BASE_CLASS_NAME} tw-bg-iron-900`}
+      className={`${TILE_BASE_CLASS_NAME} tw-bg-[#1A1A20] desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028]`}
       aria-label={item.text ?? "Curated media"}
     >
       <div
-        className="tw-relative tw-w-full tw-bg-iron-950"
+        className="tw-relative tw-w-full tw-bg-[#0E0E11]"
         style={{ aspectRatio: getMediaAspectRatio(item.media, hasText) }}
       >
         <FallbackImage
@@ -465,7 +506,7 @@ const PreviewMediaTile: React.FC<{
         <div className="tw-flex tw-items-start tw-gap-1.5 tw-px-3 tw-py-2">
           <p
             dir="auto"
-            className="tw-mb-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-break-words tw-text-[13px] tw-font-semibold tw-leading-snug tw-text-iron-300 tw-[overflow-wrap:anywhere]"
+            className="tw-mb-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-break-words tw-text-[13px] tw-font-medium tw-leading-snug tw-text-zinc-300 tw-transition-colors tw-duration-300 tw-[overflow-wrap:anywhere] desktop-hover:group-hover:tw-text-white"
           >
             {item.text}
           </p>
@@ -488,7 +529,7 @@ const PreviewLinkTile: React.FC<{
     href={item.url}
     target="_blank"
     rel="noreferrer"
-    className={`${TILE_BASE_CLASS_NAME} tw-bg-primary-950/20 tw-p-3 tw-text-primary-100 tw-no-underline desktop-hover:hover:tw-bg-primary-950/35 desktop-hover:hover:tw-text-primary-50`}
+    className={`${TILE_BASE_CLASS_NAME} tw-bg-primary-500/5 tw-p-3 tw-text-primary-100 tw-no-underline desktop-hover:hover:tw-border-primary-400/25 desktop-hover:hover:tw-bg-primary-500/10 desktop-hover:hover:tw-text-primary-50`}
   >
     <span className="tw-mb-2 tw-flex tw-items-center tw-gap-1.5 tw-text-[11px] tw-font-bold tw-leading-none tw-text-primary-300">
       <LinkIcon className="tw-h-3.5 tw-w-3.5" aria-hidden="true" />
@@ -506,15 +547,19 @@ const PreviewLinkTile: React.FC<{
 const PreviewTextTile: React.FC<{
   readonly item: Extract<PreviewItem, { readonly kind: "text" }>;
 }> = ({ item }) => {
-  const toneClassName = item.isEmojiOnly
-    ? "tw-flex tw-min-h-20 tw-items-center tw-justify-center tw-p-3 tw-text-center tw-text-2xl tw-leading-none"
-    : item.isShortText
-      ? "tw-flex tw-min-h-16 tw-items-center tw-justify-center tw-p-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-snug"
-      : "tw-p-3 tw-text-[13px] tw-font-semibold tw-leading-snug";
+  let toneClassName = "tw-p-3 tw-text-[13px] tw-font-semibold tw-leading-snug";
+
+  if (item.isEmojiOnly) {
+    toneClassName =
+      "tw-flex tw-min-h-20 tw-items-center tw-justify-center tw-p-3 tw-text-center tw-text-2xl tw-leading-none";
+  } else if (item.isShortText) {
+    toneClassName =
+      "tw-flex tw-min-h-16 tw-items-center tw-justify-center tw-p-3 tw-text-center tw-text-sm tw-font-semibold tw-leading-snug";
+  }
 
   return (
     <div
-      className={`${TILE_BASE_CLASS_NAME} tw-bg-iron-900/85 tw-text-iron-200 ${toneClassName}`}
+      className={`${TILE_BASE_CLASS_NAME} tw-bg-[#1A1A20] tw-text-zinc-300 desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028] desktop-hover:hover:tw-text-white ${toneClassName}`}
     >
       <p
         dir="auto"
@@ -627,12 +672,36 @@ export const CurationWavePreviewCard: React.FC<
   const description = getWaveDescriptionPreviewText(wave);
   const previewItems = getPreviewItems(drops);
   const waveHref = getWaveHref({ waveId, wave, curationId });
+  let previewContent: React.ReactNode = (
+    <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-semibold tw-text-iron-400">
+      No curated drops yet.
+    </p>
+  );
+
+  if (previewItems.length > 0) {
+    previewContent = (
+      <div className="tw-mt-3 tw-columns-2 tw-gap-2">
+        {previewItems.map((item) => (
+          <PreviewTile key={item.key} item={item} />
+        ))}
+      </div>
+    );
+  } else if (isFetching) {
+    previewContent = (
+      <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-px-3 tw-py-2.5">
+        <span className="tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-primary-400" />
+        <span className="tw-text-xs tw-font-semibold tw-text-zinc-400">
+          Loading curated drops
+        </span>
+      </div>
+    );
+  }
 
   return (
-    <div className="-tw-mx-4 -tw-my-3 tw-max-h-[calc(100vh-32px)] tw-w-[300px] tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-text-iron-50">
+    <div className="tailwind-scope -tw-mx-4 -tw-my-3 tw-max-h-[calc(100vh-32px)] tw-w-[300px] tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#131316] tw-text-iron-50 tw-shadow-[0_24px_48px_rgba(0,0,0,0.65)] tw-ring-1 tw-ring-white/[0.03]">
       <div className="tw-px-4 tw-pb-4 tw-pt-4">
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900">
+        <div className="tw-flex tw-items-start tw-gap-3">
+          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-shadow-sm">
             {wavePicture ? (
               <FallbackImage
                 primarySrc={getScaledImageUri(
@@ -656,49 +725,30 @@ export const CurationWavePreviewCard: React.FC<
             )}
           </div>
           <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-tight tw-text-white">
+            <div className="tw-line-clamp-2 tw-text-[16px] tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
               {waveName}
             </div>
             {author && (
-              <div className="tw-mt-0.5 tw-truncate tw-text-xs tw-font-semibold tw-text-iron-300">
+              <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
                 @{author}
               </div>
             )}
           </div>
         </div>
         {description && (
-          <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-text-xs tw-text-iron-300">
+          <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-text-zinc-300">
             {description}
           </p>
         )}
 
-        {previewItems.length > 0 ? (
-          <div className="tw-mt-3 tw-columns-2 tw-gap-2">
-            {previewItems.map((item) => (
-              <PreviewTile key={item.key} item={item} />
-            ))}
-          </div>
-        ) : isFetching ? (
-          <div className="tw-mt-3 tw-grid tw-grid-cols-2 tw-gap-2">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="tw-h-16 tw-animate-pulse tw-rounded-md tw-bg-iron-900"
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-semibold tw-text-iron-400">
-            No curated drops yet.
-          </p>
-        )}
+        {previewContent}
       </div>
 
-      <div className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3">
+      <div className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
         <Link
           href={waveHref}
           prefetch={false}
-          className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-bold tw-text-primary-300 tw-no-underline"
+          className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-bold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
         >
           Open wave
           <ArrowRightIcon className="tw-h-3.5 tw-w-3.5" aria-hidden="true" />
