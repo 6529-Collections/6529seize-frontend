@@ -263,6 +263,7 @@ describe("WagmiSetup Security Tests", () => {
         wallets: [],
         adapterManager: expect.any(Object),
         isCapacitor: false,
+        chains: expect.any(Array),
       });
     });
   });
@@ -1085,6 +1086,7 @@ describe("WagmiSetup Security Tests", () => {
         wallets: [],
         adapterManager: expect.any(Object),
         isCapacitor: false,
+        chains: expect.any(Array),
       });
     });
 
