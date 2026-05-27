@@ -49,6 +49,8 @@ export interface CreateDropRequestPart {
 }
 
 export interface CreateDropPart extends Omit<CreateDropRequestPart, "media"> {
+  readonly clientId?: string;
+  readonly id?: string | number;
   readonly media: Array<File>;
   readonly mentioned_groups?: Array<ApiDropGroupMention>;
 }

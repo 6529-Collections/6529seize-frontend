@@ -36,15 +36,11 @@ interface UserProfileTooltipProps {
         readonly initialTab: ArtistPreviewTab;
       }) => void)
     | undefined;
-  readonly onWaveCreatorPreviewOpen?:
-    | ((user: ApiProfileMin) => void)
-    | undefined;
 }
 
 export default function UserProfileTooltip({
   user,
   onArtistPreviewOpen,
-  onWaveCreatorPreviewOpen,
 }: UserProfileTooltipProps) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -186,7 +182,6 @@ export default function UserProfileTooltip({
                   profile={profile}
                   tooltipIdPrefix={badgesTooltipIdPrefix}
                   onArtistPreviewOpen={onArtistPreviewOpen}
-                  onWaveCreatorPreviewOpen={onWaveCreatorPreviewOpen}
                 />
               )}
             </div>

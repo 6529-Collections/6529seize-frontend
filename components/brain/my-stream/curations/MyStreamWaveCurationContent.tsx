@@ -35,6 +35,7 @@ function MyStreamWaveCurationDropItem({
   canManageActiveCuration,
   onDropClick,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed,
   isVotingControlsLocked,
 }: {
@@ -45,6 +46,7 @@ function MyStreamWaveCurationDropItem({
   readonly canManageActiveCuration: boolean;
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }) {
@@ -102,6 +104,7 @@ function MyStreamWaveCurationDropItem({
         onQuoteClick={() => {}}
         onDropContentClick={onDropClick}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
       />
@@ -157,8 +160,12 @@ export default function MyStreamWaveCurationContent({
   });
 
   const isInitialLoading = isFetching && drops.length === 0;
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({ wave });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({ wave });
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -185,6 +192,7 @@ export default function MyStreamWaveCurationContent({
           canManageActiveCuration={canManageActiveCuration}
           onDropClick={onDropClick}
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
         />
@@ -197,6 +205,7 @@ export default function MyStreamWaveCurationContent({
       isVotingControlsLocked,
       onDropClick,
       winningThreshold,
+      winningThresholdMinDurationMs,
     ]
   );
 

@@ -24,6 +24,10 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   const { LeaderboardDrop } = useWaveLeaderboardRendererSet(wave.id);
   const winningThreshold =
     wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
+  const winningThresholdMinDurationMs =
+    wave.wave.type === ApiWaveType.Approve
+      ? wave.wave.winning_threshold_min_duration_ms
+      : null;
 
   return (
     <LeaderboardDrop
@@ -34,6 +38,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
       winningThreshold={winningThreshold}
+      winningThresholdMinDurationMs={winningThresholdMinDurationMs}
     />
   );
 };

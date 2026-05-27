@@ -8,12 +8,9 @@ import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 const mockCloseAllCustomTooltips = jest.fn();
 const mockArtistHandleBadgeClick = jest.fn();
 const mockArtistHandleModalClose = jest.fn();
-const mockWaveCreatorHandleBadgeClick = jest.fn();
-const mockWaveCreatorHandleModalClose = jest.fn();
 const mockRouterPush = jest.fn();
 
 const mockUseArtistPreviewModal = jest.fn();
-const mockUseWaveCreatorPreviewModal = jest.fn();
 
 type ArtistActivityBadgeProps = {
   readonly submissionCount: number;
@@ -22,10 +19,10 @@ type ArtistActivityBadgeProps = {
   readonly tooltipId?: string;
 };
 
-type WaveCreatorBadgeProps = {
+type CurationWaveBadgeProps = {
+  readonly waveId: string;
   readonly tooltipId?: string;
   readonly onBadgeClick?: () => void;
-  readonly showWaveDetails?: boolean;
   readonly waveName?: string | null;
   readonly wavePfp?: string | null;
 };
@@ -38,18 +35,8 @@ type ArtistPreviewModalProps = {
   readonly onTabChange: (tab: ArtistPreviewTab) => void;
 };
 
-type WaveCreatorPreviewModalProps = {
-  readonly isOpen: boolean;
-  readonly onClose: () => void;
-  readonly user: ApiProfileMin;
-};
-
 jest.mock("@/hooks/useArtistPreviewModal", () => ({
   useArtistPreviewModal: () => mockUseArtistPreviewModal(),
-}));
-
-jest.mock("@/hooks/useWaveCreatorPreviewModal", () => ({
-  useWaveCreatorPreviewModal: () => mockUseWaveCreatorPreviewModal(),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -83,24 +70,24 @@ jest.mock("@/components/waves/drops/ArtistActivityBadge", () => ({
   ),
 }));
 
-jest.mock("@/components/waves/drops/WaveCreatorBadge", () => ({
-  WaveCreatorBadge: ({
+jest.mock("@/components/waves/drops/CurationWaveBadge", () => ({
+  CurationWaveBadge: ({
+    waveId,
     tooltipId,
     onBadgeClick,
-    showWaveDetails,
     waveName,
     wavePfp,
-  }: WaveCreatorBadgeProps) => (
+  }: CurationWaveBadgeProps) => (
     <button
       type="button"
-      data-testid="wave-creator-badge"
+      data-testid="profile-wave-badge"
+      data-wave-id={waveId}
       data-tooltip-id={tooltipId}
-      data-show-wave-details={String(showWaveDetails)}
       data-wave-name={waveName ?? ""}
       data-wave-pfp={wavePfp ?? ""}
       onClick={onBadgeClick}
     >
-      Wave Creator
+      Profile Wave
     </button>
   ),
 }));
@@ -116,16 +103,6 @@ jest.mock("@/components/waves/drops/ArtistPreviewModal", () => ({
       data-open={String(isOpen)}
       data-user-primary-address={user.primary_address}
       data-active-tab={activeTab}
-    />
-  ),
-}));
-
-jest.mock("@/components/waves/drops/WaveCreatorPreviewModal", () => ({
-  WaveCreatorPreviewModal: ({ isOpen, user }: WaveCreatorPreviewModalProps) => (
-    <div
-      data-testid="wave-creator-preview-modal"
-      data-open={String(isOpen)}
-      data-user-primary-address={user.primary_address}
     />
   ),
 }));
@@ -152,18 +129,13 @@ describe("DropAuthorBadges", () => {
       handleTabChange: jest.fn(),
       handleModalClose: mockArtistHandleModalClose,
     });
-    mockUseWaveCreatorPreviewModal.mockReturnValue({
-      isModalOpen: false,
-      handleBadgeClick: mockWaveCreatorHandleBadgeClick,
-      handleModalClose: mockWaveCreatorHandleModalClose,
-    });
   });
 
-  it("returns null when profile has no activity and is not wave creator", () => {
+  it("returns null when profile has no activity and no profile wave", () => {
     const { container } = render(<DropAuthorBadges profile={baseProfile} />);
     expect(container.firstChild).toBeNull();
     expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
-    expect(screen.queryByTestId("wave-creator-badge")).toBeNull();
+    expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
   });
 
   it("renders activity badge and derives submission/trophy counts from profile", () => {
@@ -181,10 +153,10 @@ describe("DropAuthorBadges", () => {
     const badge = screen.getByTestId("artist-activity-badge");
     expect(badge).toHaveAttribute("data-submission-count", "2");
     expect(badge).toHaveAttribute("data-trophy-count", "2");
-    expect(screen.queryByTestId("wave-creator-badge")).toBeNull();
+    expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
   });
 
-  it("renders activity and wave creator badges from V2 count-only badges", () => {
+  it("renders activity and profile wave badges from V2 count-only badges", () => {
     const onArtistPreviewOpen = jest.fn();
 
     render(
@@ -206,7 +178,10 @@ describe("DropAuthorBadges", () => {
     const badge = screen.getByTestId("artist-activity-badge");
     expect(badge).toHaveAttribute("data-submission-count", "1");
     expect(badge).toHaveAttribute("data-trophy-count", "1");
-    expect(screen.getByTestId("wave-creator-badge")).toBeInTheDocument();
+    expect(screen.getByTestId("profile-wave-badge")).toHaveAttribute(
+      "data-wave-id",
+      "profile-wave-1"
+    );
 
     fireEvent.click(badge);
 
@@ -221,14 +196,14 @@ describe("DropAuthorBadges", () => {
           profile_wave_name: "Profile Wave",
           profile_wave_pfp: "https://example.com/wave.png",
         },
-        is_wave_creator: true,
+        is_wave_creator: false,
         profile_wave_id: "profile-wave-1",
       }),
       initialTab: "active",
     });
   });
 
-  it("renders wave creator badge when profile is wave creator", () => {
+  it("does not render a wave badge when profile is a wave creator without a profile wave", () => {
     render(
       <DropAuthorBadges
         profile={{
@@ -238,11 +213,11 @@ describe("DropAuthorBadges", () => {
       />
     );
 
-    expect(screen.getByTestId("wave-creator-badge")).toBeInTheDocument();
+    expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
     expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
   });
 
-  it("passes profile wave details to the chat feed badge and opens the wave", () => {
+  it("passes profile wave details to the badge and opens the wave", () => {
     render(
       <DropAuthorBadges
         profile={{
@@ -255,12 +230,11 @@ describe("DropAuthorBadges", () => {
             profile_wave_pfp: "https://example.com/wave.png",
           },
         }}
-        showProfileWaveDetails
       />
     );
 
-    const badge = screen.getByTestId("wave-creator-badge");
-    expect(badge).toHaveAttribute("data-show-wave-details", "true");
+    const badge = screen.getByTestId("profile-wave-badge");
+    expect(badge).toHaveAttribute("data-wave-id", "profile-wave-1");
     expect(badge).toHaveAttribute("data-wave-name", "Profile Wave");
     expect(badge).toHaveAttribute(
       "data-wave-pfp",
@@ -271,7 +245,6 @@ describe("DropAuthorBadges", () => {
 
     expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(1);
     expect(mockRouterPush).toHaveBeenCalledWith("/waves/profile-wave-1");
-    expect(mockWaveCreatorHandleBadgeClick).not.toHaveBeenCalled();
   });
 
   it("renders both badges and forwards tooltip id prefix", () => {
@@ -280,7 +253,7 @@ describe("DropAuthorBadges", () => {
         profile={{
           ...baseProfile,
           active_main_stage_submission_ids: ["s1"],
-          is_wave_creator: true,
+          profile_wave_id: "profile-wave-1",
         }}
         tooltipIdPrefix="custom-badges"
       />
@@ -290,53 +263,49 @@ describe("DropAuthorBadges", () => {
       "data-tooltip-id",
       "custom-badges-activity"
     );
-    expect(screen.getByTestId("wave-creator-badge")).toHaveAttribute(
+    expect(screen.getByTestId("profile-wave-badge")).toHaveAttribute(
       "data-tooltip-id",
-      "custom-badges-wave-creator"
+      "custom-badges-profile-wave"
     );
   });
 
-  it("wires badge click handlers to modal hooks", () => {
+  it("wires activity to the modal hook and profile wave to navigation", () => {
     render(
       <DropAuthorBadges
         profile={{
           ...baseProfile,
           active_main_stage_submission_ids: ["s1"],
-          is_wave_creator: true,
+          profile_wave_id: "profile-wave-1",
         }}
       />
     );
 
     fireEvent.click(screen.getByTestId("artist-activity-badge"));
-    fireEvent.click(screen.getByTestId("wave-creator-badge"));
+    fireEvent.click(screen.getByTestId("profile-wave-badge"));
 
     expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(2);
     expect(mockArtistHandleBadgeClick).toHaveBeenCalledWith("active");
-    expect(mockWaveCreatorHandleBadgeClick).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith("/waves/profile-wave-1");
   });
 
-  it("delegates preview opening to external handlers when provided", () => {
+  it("delegates artist preview opening to external handlers when provided", () => {
     const onArtistPreviewOpen = jest.fn();
-    const onWaveCreatorPreviewOpen = jest.fn();
 
     render(
       <DropAuthorBadges
         profile={{
           ...baseProfile,
           active_main_stage_submission_ids: ["s1"],
-          is_wave_creator: true,
+          profile_wave_id: "profile-wave-1",
         }}
         onArtistPreviewOpen={onArtistPreviewOpen}
-        onWaveCreatorPreviewOpen={onWaveCreatorPreviewOpen}
       />
     );
 
     fireEvent.click(screen.getByTestId("artist-activity-badge"));
-    fireEvent.click(screen.getByTestId("wave-creator-badge"));
 
-    expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(2);
+    expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(1);
     expect(mockArtistHandleBadgeClick).not.toHaveBeenCalled();
-    expect(mockWaveCreatorHandleBadgeClick).not.toHaveBeenCalled();
     expect(onArtistPreviewOpen).toHaveBeenCalledWith({
       user: expect.objectContaining({
         id: "profile-1",
@@ -345,15 +314,7 @@ describe("DropAuthorBadges", () => {
       }),
       initialTab: "active",
     });
-    expect(onWaveCreatorPreviewOpen).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: "profile-1",
-        handle: "artist",
-        primary_address: "0xabc",
-      })
-    );
     expect(screen.queryByTestId("artist-preview-modal")).toBeNull();
-    expect(screen.queryByTestId("wave-creator-preview-modal")).toBeNull();
   });
 
   it("normalizes ApiIdentity-like primary_wallet for modal user profile", () => {
@@ -366,16 +327,11 @@ describe("DropAuthorBadges", () => {
           active_main_stage_submission_ids: ["submission-1"],
           winner_main_stage_drop_ids: [],
           artist_of_prevote_cards: [],
-          is_wave_creator: true,
         }}
       />
     );
 
     expect(screen.getByTestId("artist-preview-modal")).toHaveAttribute(
-      "data-user-primary-address",
-      "0xwallet"
-    );
-    expect(screen.getByTestId("wave-creator-preview-modal")).toHaveAttribute(
       "data-user-primary-address",
       "0xwallet"
     );

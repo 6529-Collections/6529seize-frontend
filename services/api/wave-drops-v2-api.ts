@@ -39,6 +39,10 @@ import {
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
 
+type DropApprovalTiming = {
+  readonly over_threshold_since_ms?: number | null;
+};
+
 const DEFAULT_RETRY_OPTIONS = {
   maxRetries: 2,
   initialDelayMs: 300,
@@ -311,6 +315,14 @@ const getWinningContext = (drop: ApiDropV2) => {
   };
 };
 
+const getDropApprovalTiming = (drop: ApiDropV2): DropApprovalTiming => {
+  const overThresholdSinceMs = drop.submission_context?.over_threshold_since_ms;
+
+  return typeof overThresholdSinceMs === "number"
+    ? { over_threshold_since_ms: overThresholdSinceMs }
+    : {};
+};
+
 const hydrateDropV2 = async ({
   drop,
   wave,
@@ -340,6 +352,7 @@ const hydrateDropV2 = async ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    ...getDropApprovalTiming(drop),
     wave,
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),
@@ -386,6 +399,7 @@ export const mapLeaderboardDropV2 = ({
     drop_type: dropType,
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
+    ...getDropApprovalTiming(drop),
     ...(replyTo ? { reply_to: replyTo } : {}),
     author: mapIdentityOverviewToProfileMin(drop.author),
     created_at: drop.created_at,
