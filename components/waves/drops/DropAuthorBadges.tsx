@@ -16,6 +16,7 @@ import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
 import { CurationWaveBadge } from "./CurationWaveBadge";
 import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
 import { useRouter } from "next/navigation";
 
 interface DropAuthorBadgesProfile {
@@ -147,6 +148,7 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   const profileWaveName = getProfileWaveName(profile);
   const profileWavePfp = getProfileWavePfp(profile);
   const hasProfileWaveBadge = profileWaveId !== null;
+  const profileWaveIdentity = getProfileWaveIdentity(profile);
 
   const modalUser = React.useMemo(() => toApiProfileMin(profile), [profile]);
 
@@ -206,6 +208,7 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
             tooltipId={`${tooltipIdPrefix}-profile-wave`}
             onBadgeClick={onProfileWaveBadgeClick}
             size={size}
+            profileIdentity={profileWaveIdentity}
             waveName={profileWaveName}
             wavePfp={profileWavePfp}
           />
