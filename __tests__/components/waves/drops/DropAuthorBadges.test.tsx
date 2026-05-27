@@ -217,20 +217,6 @@ describe("DropAuthorBadges", () => {
     expect(screen.queryByTestId("artist-activity-badge")).toBeNull();
   });
 
-  it("can suppress the profile wave badge for surfaces with their own created-waves entry point", () => {
-    render(
-      <DropAuthorBadges
-        profile={{
-          ...baseProfile,
-          profile_wave_id: "profile-wave-1",
-        }}
-        showProfileWaveBadge={false}
-      />
-    );
-
-    expect(screen.queryByTestId("profile-wave-badge")).toBeNull();
-  });
-
   it("passes profile wave details to the badge and opens the wave", () => {
     render(
       <DropAuthorBadges

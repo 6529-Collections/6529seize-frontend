@@ -12,6 +12,7 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -99,6 +100,10 @@ export const WaveLeaderboardDropAuthor: React.FC<
         <UserCICAndLevel
           level={drop.author.level}
           size={UserCICAndLevelSize.SMALL}
+        />
+        <DropAuthorBadges
+          profile={drop.author}
+          tooltipIdPrefix={`leaderboard-author-badges-${drop.id}`}
         />
         {authorStatusBadge}
         <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>

@@ -38,7 +38,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   const isMobile = useIsMobileDevice();
   const id = useId();
   const uniqueTooltipId = `${tooltipId}-${id}`;
-  const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   const showTooltip = isMobile === false;
   const dataTooltipId = showTooltip ? uniqueTooltipId : undefined;
@@ -53,41 +53,12 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
     : "Open featured wave";
   const buttonSizeClassName =
     size === "compact" ? "tw-h-[18px] tw-w-[18px]" : "tw-h-5 tw-w-5";
-  const iconSizeClassName =
-    size === "compact" ? "tw-h-[9px] tw-w-[9px]" : "tw-h-2.5 tw-w-2.5";
+  const fallbackIconClassName =
+    size === "compact" ? "tw-h-2 tw-w-2" : "tw-h-2.5 tw-w-2.5";
   const buttonClassName = `tw-inline-flex ${buttonSizeClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`;
-  const badgeContent = (() => {
-    const imageSrc = waveImageSrc;
-
-    if (!imageSrc || failedImageSrc === imageSrc) {
-      return (
-        <FontAwesomeIcon
-          icon={faWater}
-          className={`${iconSizeClassName} tw-flex-shrink-0 tw-text-current`}
-          aria-hidden="true"
-        />
-      );
-    }
-
-    const imageSize = size === "compact" ? 18 : 20;
-
-    return (
-      <Image
-        src={imageSrc}
-        alt=""
-        width={imageSize}
-        height={imageSize}
-        unoptimized
-        className="tw-block tw-object-cover"
-        style={{
-          width: `${imageSize}px`,
-          height: `${imageSize}px`,
-          objectFit: "cover",
-        }}
-        onError={() => setFailedImageSrc(imageSrc)}
-      />
-    );
-  })();
+  const showImage = waveImageSrc !== null && failedImageSrc !== waveImageSrc;
+  const imageSrc = showImage ? waveImageSrc : null;
+  const imageSize = size === "compact" ? 18 : 20;
 
   return (
     <>
@@ -106,7 +77,28 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
         data-wave-id={waveId}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
-        {badgeContent}
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt=""
+            width={imageSize}
+            height={imageSize}
+            unoptimized
+            className="tw-block tw-object-cover"
+            style={{
+              width: `${imageSize}px`,
+              height: `${imageSize}px`,
+              objectFit: "cover",
+            }}
+            onError={() => setFailedImageSrc(imageSrc)}
+          />
+        ) : (
+          <FontAwesomeIcon
+            icon={faWater}
+            className={`${fallbackIconClassName} tw-flex-shrink-0 tw-text-current`}
+            aria-hidden="true"
+          />
+        )}
       </button>
       {showTooltip && (
         <Tooltip

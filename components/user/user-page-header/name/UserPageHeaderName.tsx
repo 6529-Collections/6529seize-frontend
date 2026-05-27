@@ -6,9 +6,8 @@ import UserCICTypeIconWrapper from "@/components/user/utils/user-cic-type/UserCI
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
-import CreatedWavesBadge from "./CreatedWavesBadge";
+import ProfileCurationBadge from "./ProfileCurationBadge";
 import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
 export default function UserPageHeaderName({
@@ -70,19 +69,7 @@ export default function UserPageHeaderName({
             </div>
           )}
           <UserCICAndLevel level={level} size={UserCICAndLevelSize.SMALL} />
-          <DropAuthorBadges
-            profile={profile}
-            tooltipIdPrefix="profile-author-badges"
-            showProfileWaveBadge={false}
-          />
-          {profile.is_wave_creator && (
-            <CreatedWavesBadge
-              user={{
-                handle: profile.handle,
-                primary_address: profile.primary_wallet || mainAddress,
-              }}
-            />
-          )}
+          <ProfileCurationBadge profile={profile} />
         </div>
       )}
 

@@ -22,6 +22,10 @@ jest.mock("next/image", () => ({
   ),
 }));
 
+jest.mock("@fortawesome/react-fontawesome", () => ({
+  FontAwesomeIcon: () => <span data-testid="wave-fallback-icon" />,
+}));
+
 jest.mock("react-tooltip", () => ({
   Tooltip: ({ children, id, isOpen }: any) => (
     <div data-testid="tooltip" id={id} data-open={String(isOpen)}>
@@ -58,8 +62,8 @@ describe("CurationWaveBadge", () => {
     expect(onBadgeClick).toHaveBeenCalledTimes(1);
   });
 
-  it("falls back to the featured wave label and wave icon without an image", () => {
-    const { container } = render(<CurationWaveBadge waveId="wave-1" />);
+  it("falls back to featured wave copy and a wave icon without an image", () => {
+    render(<CurationWaveBadge waveId="wave-1" />);
 
     expect(screen.getByRole("button")).toHaveAttribute(
       "aria-label",
@@ -67,13 +71,11 @@ describe("CurationWaveBadge", () => {
     );
     expect(screen.getByTestId("tooltip")).toHaveTextContent("Featured wave");
     expect(screen.queryByTestId("wave-image")).toBeNull();
-    expect(
-      container.querySelector('svg[data-icon="water"]')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
   });
 
-  it("falls back to the wave icon when the image fails to load", () => {
-    const { container } = render(
+  it("falls back to a wave icon when the image fails to load", () => {
+    render(
       <CurationWaveBadge
         waveId="wave-1"
         waveName="Profile Wave"
@@ -84,8 +86,7 @@ describe("CurationWaveBadge", () => {
     fireEvent.error(screen.getByTestId("wave-image"));
 
     expect(screen.queryByTestId("wave-image")).toBeNull();
-    expect(
-      container.querySelector('svg[data-icon="water"]')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("wave-fallback-icon")).toBeInTheDocument();
+    expect(screen.getByTestId("tooltip")).toHaveTextContent("Profile Wave");
   });
 });
