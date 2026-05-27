@@ -11,12 +11,10 @@ import {
   useArtistPreviewModal,
   type ArtistPreviewTab,
 } from "@/hooks/useArtistPreviewModal";
-import { useWaveCreatorPreviewModal } from "@/hooks/useWaveCreatorPreviewModal";
 import { closeAllCustomTooltips } from "@/helpers/tooltip.helpers";
 import { ArtistActivityBadge } from "./ArtistActivityBadge";
 import { ArtistPreviewModal } from "./ArtistPreviewModal";
-import { WaveCreatorBadge } from "./WaveCreatorBadge";
-import { WaveCreatorPreviewModal } from "./WaveCreatorPreviewModal";
+import { CurationWaveBadge } from "./CurationWaveBadge";
 import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { useRouter } from "next/navigation";
 
@@ -63,28 +61,37 @@ interface DropAuthorBadgesProps {
   readonly tooltipIdPrefix?: string | undefined;
   readonly className?: string | undefined;
   readonly size?: "default" | "compact" | undefined;
-  readonly showProfileWaveDetails?: boolean | undefined;
+  readonly showProfileWaveBadge?: boolean | undefined;
   readonly onArtistPreviewOpen?:
     | ((params: {
         readonly user: ApiProfileMin;
         readonly initialTab: ArtistPreviewTab;
       }) => void)
     | undefined;
-  readonly onWaveCreatorPreviewOpen?:
-    | ((user: ApiProfileMin) => void)
-    | undefined;
 }
 
 const DEFAULT_CONTAINER_CLASS = "tw-inline-flex tw-items-center tw-gap-x-1.5";
 
+const getTrimmedText = (value?: string | null): string | null => {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed;
+};
+
 const getProfileWaveId = (profile: DropAuthorBadgesProfile): string | null =>
-  profile.profile_wave_id ?? profile.badges?.profile_wave_id ?? null;
+  getTrimmedText(profile.profile_wave_id) ??
+  getTrimmedText(profile.badges?.profile_wave_id);
 
 const getProfileWaveName = (profile: DropAuthorBadgesProfile): string | null =>
-  profile.profile_wave_name ?? profile.badges?.profile_wave_name ?? null;
+  getTrimmedText(profile.profile_wave_name) ??
+  getTrimmedText(profile.badges?.profile_wave_name);
 
 const getProfileWavePfp = (profile: DropAuthorBadgesProfile): string | null =>
-  profile.profile_wave_pfp ?? profile.badges?.profile_wave_pfp ?? null;
+  getTrimmedText(profile.profile_wave_pfp) ??
+  getTrimmedText(profile.badges?.profile_wave_pfp);
 
 const toApiProfileMin = (
   profile: DropAuthorBadgesProfile
@@ -126,7 +133,7 @@ const toApiProfileMin = (
         ? [...profile.artist_of_prevote_cards]
         : [],
     profile_wave_id: profileWaveId,
-    is_wave_creator: profile.is_wave_creator === true || profileWaveId !== null,
+    is_wave_creator: profile.is_wave_creator === true,
     classification: profile.classification,
     sub_classification: profile.sub_classification,
     badges: profile.badges,
@@ -138,17 +145,15 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   tooltipIdPrefix = "author-badges",
   className = DEFAULT_CONTAINER_CLASS,
   size = "default",
-  showProfileWaveDetails = false,
+  showProfileWaveBadge = true,
   onArtistPreviewOpen,
-  onWaveCreatorPreviewOpen,
 }) => {
   const router = useRouter();
   const profileWaveId = getProfileWaveId(profile);
   const submissionCount = getSubmissionCount(profile);
   const trophyCount = getTrophyArtworkCount(profile);
   const hasActivityBadge = submissionCount > 0 || trophyCount > 0;
-  const isWaveCreator =
-    profile.is_wave_creator === true || profileWaveId !== null;
+  const hasProfileWaveBadge = showProfileWaveBadge && profileWaveId !== null;
   const profileWaveName = getProfileWaveName(profile);
   const profileWavePfp = getProfileWavePfp(profile);
 
@@ -162,12 +167,6 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
     handleModalClose: handleArtistModalClose,
   } = useArtistPreviewModal();
 
-  const {
-    isModalOpen: isWaveCreatorPreviewOpen,
-    handleBadgeClick: handleWaveCreatorBadgeClick,
-    handleModalClose: handleWaveCreatorModalClose,
-  } = useWaveCreatorPreviewModal();
-
   const onArtistBadgeClick = React.useCallback(
     (tab: ArtistPreviewTab) => {
       closeAllCustomTooltips();
@@ -180,33 +179,21 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
     [handleArtistBadgeClick, modalUser, onArtistPreviewOpen]
   );
 
-  const onWaveCreatorBadgeClick = React.useCallback(() => {
+  const onProfileWaveBadgeClick = React.useCallback(() => {
     closeAllCustomTooltips();
-    if (showProfileWaveDetails && profileWaveId) {
-      router.push(
-        getWaveRoute({
-          waveId: profileWaveId,
-          isDirectMessage: false,
-          isApp: false,
-        })
-      );
+    if (!profileWaveId) {
       return;
     }
-    if (onWaveCreatorPreviewOpen) {
-      onWaveCreatorPreviewOpen(modalUser);
-      return;
-    }
-    handleWaveCreatorBadgeClick();
-  }, [
-    handleWaveCreatorBadgeClick,
-    modalUser,
-    onWaveCreatorPreviewOpen,
-    profileWaveId,
-    router,
-    showProfileWaveDetails,
-  ]);
+    router.push(
+      getWaveRoute({
+        waveId: profileWaveId,
+        isDirectMessage: false,
+        isApp: false,
+      })
+    );
+  }, [profileWaveId, router]);
 
-  if (!hasActivityBadge && !isWaveCreator) {
+  if (!hasActivityBadge && !hasProfileWaveBadge) {
     return null;
   }
 
@@ -222,12 +209,12 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
             size={size}
           />
         )}
-        {isWaveCreator && (
-          <WaveCreatorBadge
-            tooltipId={`${tooltipIdPrefix}-wave-creator`}
-            onBadgeClick={onWaveCreatorBadgeClick}
+        {hasProfileWaveBadge && (
+          <CurationWaveBadge
+            waveId={profileWaveId}
+            tooltipId={`${tooltipIdPrefix}-profile-wave`}
+            onBadgeClick={onProfileWaveBadgeClick}
             size={size}
-            showWaveDetails={showProfileWaveDetails && profileWaveId !== null}
             waveName={profileWaveName}
             wavePfp={profileWavePfp}
           />
@@ -241,13 +228,6 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
           user={modalUser}
           activeTab={activeTab}
           onTabChange={handleArtistTabChange}
-        />
-      )}
-      {isWaveCreator && !onWaveCreatorPreviewOpen && (
-        <WaveCreatorPreviewModal
-          isOpen={isWaveCreatorPreviewOpen}
-          onClose={handleWaveCreatorModalClose}
-          user={modalUser}
         />
       )}
     </>

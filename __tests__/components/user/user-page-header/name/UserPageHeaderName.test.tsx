@@ -32,6 +32,26 @@ jest.mock(
   })
 );
 
+jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
+  DropAuthorBadges: (props: any) => (
+    <div
+      data-testid="drop-author-badges"
+      data-show-profile-wave-badge={String(props.showProfileWaveBadge)}
+    />
+  ),
+}));
+
+jest.mock("@/components/user/user-page-header/name/CreatedWavesBadge", () => ({
+  __esModule: true,
+  default: (props: any) => (
+    <div
+      data-testid="created-waves-badge"
+      data-user-handle={props.user.handle ?? ""}
+      data-user-primary-address={props.user.primary_address}
+    />
+  ),
+}));
+
 const baseProfile: ApiIdentity = {
   id: "1",
   handle: null,
@@ -48,6 +68,11 @@ const baseProfile: ApiIdentity = {
   banner2: null,
   classification: ApiProfileClassification.Pseudonym,
   sub_classification: null,
+  active_main_stage_submission_ids: [],
+  winner_main_stage_drop_ids: [],
+  artist_of_prevote_cards: [],
+  profile_wave_id: null,
+  is_wave_creator: false,
 };
 
 function renderComponent(profile: Partial<ApiIdentity>, mainAddress = "0xabc") {
@@ -103,5 +128,34 @@ describe("UserPageHeaderName", () => {
     });
 
     expect(screen.queryByText("🤖")).not.toBeInTheDocument();
+  });
+
+  it("keeps author badges from rendering the profile wave badge in the profile header", () => {
+    renderComponent({
+      handle: "Alice",
+      profile_wave_id: "featured-wave",
+    });
+
+    expect(screen.getByTestId("drop-author-badges")).toHaveAttribute(
+      "data-show-profile-wave-badge",
+      "false"
+    );
+  });
+
+  it("shows the created-waves badge for wave creators in the profile header", () => {
+    renderComponent({
+      handle: "Alice",
+      primary_wallet: "0xalice",
+      is_wave_creator: true,
+    });
+
+    expect(screen.getByTestId("created-waves-badge")).toHaveAttribute(
+      "data-user-handle",
+      "Alice"
+    );
+    expect(screen.getByTestId("created-waves-badge")).toHaveAttribute(
+      "data-user-primary-address",
+      "0xalice"
+    );
   });
 });

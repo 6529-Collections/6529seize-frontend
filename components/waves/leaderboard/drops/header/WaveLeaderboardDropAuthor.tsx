@@ -101,7 +101,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
           size={UserCICAndLevelSize.SMALL}
         />
         {authorStatusBadge}
-        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-900"></div>
+        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
         <WaveDropTime timestamp={drop.created_at} />
       </div>
     </div>

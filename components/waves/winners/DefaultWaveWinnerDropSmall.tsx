@@ -1,18 +1,18 @@
 "use client";
 
-import { memo, useCallback } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import Link from "next/link";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { DropContentSmall } from "./drops/DropContentSmall";
-import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
-import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import { Time } from "@/helpers/time";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import Link from "next/link";
+import { memo, useCallback } from "react";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnerIdentity } from "./identity/WaveWinnerIdentity";
-import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
+import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
 interface DefaultWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -147,7 +147,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                   </span>
                 </Link>
               </UserProfileTooltipWrapper>
-              <span className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></span>
+              <span className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></span>
               <span className="tw-flex-shrink-0 tw-text-xs tw-text-iron-400">
                 {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
               </span>

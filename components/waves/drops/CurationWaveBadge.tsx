@@ -9,13 +9,13 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
-interface WaveCreatorBadgeProps {
+interface CurationWaveBadgeProps {
+  readonly waveId: string;
   readonly tooltipId?: string | undefined;
   readonly onBadgeClick?: (() => void) | undefined;
   readonly size?: "default" | "compact" | undefined;
   readonly waveName?: string | null | undefined;
   readonly wavePfp?: string | null | undefined;
-  readonly showWaveDetails?: boolean | undefined;
 }
 
 const getTrimmedText = (value?: string | null): string | null => {
@@ -27,13 +27,13 @@ const getTrimmedText = (value?: string | null): string | null => {
   return trimmed;
 };
 
-export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
+export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
+  waveId,
   tooltipId = "wave-creator-badge",
   onBadgeClick,
   size = "default",
   waveName,
   wavePfp,
-  showWaveDetails = false,
 }) => {
   const isMobile = useIsMobileDevice();
   const id = useId();
@@ -47,31 +47,16 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
   const waveImageSrc = normalizedWavePfp
     ? getScaledImageUri(normalizedWavePfp, ImageScale.W_AUTO_H_50)
     : null;
-  const shouldShowWaveDetails = showWaveDetails && size !== "compact";
-  const displayWaveName = normalizedWaveName ?? "profile wave";
-  const tooltipContent = shouldShowWaveDetails
-    ? displayWaveName
-    : "View created waves";
-  const ariaLabel = shouldShowWaveDetails
-    ? `Open ${displayWaveName}`
-    : "View created waves";
+  const tooltipContent = normalizedWaveName ?? "Featured wave";
+  const ariaLabel = normalizedWaveName
+    ? `Open ${normalizedWaveName}`
+    : "Open featured wave";
   const buttonSizeClassName =
     size === "compact" ? "tw-h-[18px] tw-w-[18px]" : "tw-h-5 tw-w-5";
   const iconSizeClassName =
     size === "compact" ? "tw-h-[9px] tw-w-[9px]" : "tw-h-2.5 tw-w-2.5";
-  const buttonClassName = shouldShowWaveDetails
-    ? `tw-inline-flex ${buttonSizeClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`
-    : `tw-inline-flex ${buttonSizeClassName} tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-white/60 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white/70`;
+  const buttonClassName = `tw-inline-flex ${buttonSizeClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`;
   const badgeContent = (() => {
-    if (!shouldShowWaveDetails) {
-      return (
-        <FontAwesomeIcon
-          icon={faWater}
-          className={`${iconSizeClassName} tw-flex-shrink-0 tw-text-current`}
-        />
-      );
-    }
-
     const imageSrc = waveImageSrc;
 
     if (!imageSrc || failedImageSrc === imageSrc) {
@@ -84,14 +69,21 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
       );
     }
 
+    const imageSize = size === "compact" ? 18 : 20;
+
     return (
       <Image
         src={imageSrc}
         alt=""
-        width={20}
-        height={20}
+        width={imageSize}
+        height={imageSize}
         unoptimized
         className="tw-block tw-object-cover"
+        style={{
+          width: `${imageSize}px`,
+          height: `${imageSize}px`,
+          objectFit: "cover",
+        }}
         onError={() => setFailedImageSrc(imageSrc)}
       />
     );
@@ -111,6 +103,7 @@ export const WaveCreatorBadge: React.FC<WaveCreatorBadgeProps> = ({
         onMouseLeave={() => setIsTooltipOpen(false)}
         className={buttonClassName}
         aria-label={ariaLabel}
+        data-wave-id={waveId}
         {...(dataTooltipId && { "data-tooltip-id": dataTooltipId })}
       >
         {badgeContent}
