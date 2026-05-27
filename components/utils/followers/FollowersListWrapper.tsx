@@ -17,13 +17,13 @@ export default function FollowersListWrapper({
   readonly showUserFollowActions?: boolean | undefined;
 }) {
   return (
-    <div className="tw-overflow-hidden tw-h-full">
+    <div className="tw-h-full tw-overflow-hidden">
       <FollowersList
         followers={followers}
         showUserFollowActions={showUserFollowActions}
       />
       {loading && (
-        <div className="tw-w-full tw-text-center tw-mt-8">
+        <div className="tw-mt-8 tw-w-full tw-text-center">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
         </div>
       )}

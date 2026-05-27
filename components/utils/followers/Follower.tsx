@@ -29,9 +29,9 @@ export default function Follower({
     connectedProfile?.handle?.toLowerCase() ?? null;
   const showFollowButton = Boolean(
     showUserFollowAction &&
-      normalizedConnectedHandle &&
-      normalizedFollowerHandle &&
-      normalizedFollowerHandle !== normalizedConnectedHandle
+    normalizedConnectedHandle &&
+    normalizedFollowerHandle &&
+    normalizedFollowerHandle !== normalizedConnectedHandle
   );
   const backgroundClass = mutedBackground ? "tw-bg-white/[0.01]" : "";
 
@@ -63,24 +63,21 @@ export default function Follower({
   }, [showFollowButton, shouldLoadFollowButton]);
 
   return (
-    <div
-      ref={rowRef}
-      className={`${backgroundClass} tw-py-3`}
-    >
+    <div ref={rowRef} className={`${backgroundClass} tw-py-3`}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 sm:tw-px-6">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
-          <div className="tw-h-10 tw-w-10 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-lg">
-            <div className="tw-rounded-lg tw-h-full tw-w-full">
-              <div className="tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-800">
-                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
+          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800">
+            <div className="tw-h-full tw-w-full tw-rounded-lg">
+              <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5">
+                <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
                   {follower.identity.pfp ? (
                     <img
                       src={follower.identity.pfp}
                       alt={`${follower.identity.handle}'s profile`}
-                      className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                      className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
                     />
                   ) : (
-                    <div className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain" />
+                    <div className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain" />
                   )}
                 </div>
               </div>
@@ -88,8 +85,8 @@ export default function Follower({
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col">
             <div className="tw-flex tw-items-center tw-gap-x-1">
-              <div className="tw-items-center tw-flex tw-min-w-0 tw-gap-x-2">
-                <p className="tw-text-md tw-mb-0 tw-min-w-0 tw-leading-none tw-font-semibold tw-text-iron-50">
+              <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
+                <p className="tw-mb-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50">
                   <Link
                     href={`/${follower.identity.handle}`}
                     className="tw-block tw-truncate tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 hover:tw-underline"
