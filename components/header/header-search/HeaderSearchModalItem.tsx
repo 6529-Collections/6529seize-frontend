@@ -255,10 +255,7 @@ export default function HeaderSearchModalItem({
         {getMedia()}
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-            <span
-              className={primaryTextClassName}
-              title={primaryText}
-            >
+            <span className={primaryTextClassName} title={primaryText}>
               <span className="tw-block tw-min-w-0 tw-truncate">
                 {primaryText}
               </span>

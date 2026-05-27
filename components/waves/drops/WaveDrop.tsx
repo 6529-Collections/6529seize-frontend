@@ -862,9 +862,7 @@ const WaveDrop = ({
   const shouldOffsetFooter =
     !inlineAuthorOnDesktop &&
     (showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView));
-  const footerOffsetClass = shouldOffsetFooter
-    ? contentOffsetClass
-    : "";
+  const footerOffsetClass = shouldOffsetFooter ? contentOffsetClass : "";
   const footerRow = hasDropFooter(footer) && (
     <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
   );
