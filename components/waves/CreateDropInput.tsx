@@ -95,7 +95,7 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
   return null;
 }
 
-export function EditLastDropArrowUpPlugin({
+function EditLastDropArrowUpPlugin({
   canEditLastDropWithArrow,
   onRequestEditLastDrop,
   canUseArrowUpShortcut,

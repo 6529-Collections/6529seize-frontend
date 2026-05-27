@@ -468,11 +468,11 @@ export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   Sentry.logger.info("mobile_launch_timing", attrs);
 }
 
-export function sanitizeEndpointGroup(endpoint: string): string {
+function sanitizeEndpointGroup(endpoint: string): string {
   return sanitizePathLikeValue(endpoint);
 }
 
-export function sanitizeRouteFamily(route: string): string {
+function sanitizeRouteFamily(route: string): string {
   return getAppRouteFamilyTemplate(route) ?? sanitizePathLikeValue(route);
 }
 

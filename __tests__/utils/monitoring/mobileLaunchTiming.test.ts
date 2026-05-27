@@ -297,43 +297,4 @@ describe("mobileLaunchTiming", () => {
     );
   });
 
-  it("sanitizes endpoints and route families", async () => {
-    const { timing } = await loadMobileLaunchTiming({ native: false });
-
-    expect(
-      timing.sanitizeEndpointGroup(
-        "https://api.test.6529.io/api/profiles/private-handle/proxies/?wallet=0x123"
-      )
-    ).toBe("/api/profiles/:id/proxies");
-    expect(
-      timing.sanitizeEndpointGroup(
-        "/api/waves/0x1234567890123456789012345678901234567890/drops/123?handle=secret"
-      )
-    ).toBe("/api/waves/:wallet/drops/:id");
-    expect(timing.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
-    expect(timing.sanitizeRouteFamily("/messages/wave-123")).toBe(
-      "/messages/[wave]"
-    );
-    expect(timing.sanitizeRouteFamily("/waves/wave-123")).toBe("/waves/[wave]");
-    expect(timing.sanitizeRouteFamily("/messages/create")).toBe(
-      "/messages/create"
-    );
-    expect(timing.sanitizeRouteFamily("/waves/create")).toBe("/waves/create");
-    expect(
-      timing.sanitizeRouteFamily("/tools/app-wallets/123?jwt=secret")
-    ).toBe("/tools/app-wallets/[app-wallet-address]");
-    expect(timing.sanitizeRouteFamily("/nextgen")).toBe("/nextgen/[[...view]]");
-    expect(timing.sanitizeRouteFamily("/nextgen/explore")).toBe(
-      "/nextgen/[[...view]]"
-    );
-    expect(timing.sanitizeRouteFamily("/nextgen/manager")).toBe(
-      "/nextgen/manager"
-    );
-    expect(timing.sanitizeRouteFamily("/network/nerd")).toBe(
-      "/network/nerd/[[...focus]]"
-    );
-    expect(timing.sanitizeRouteFamily("/network/nerd/focus")).toBe(
-      "/network/nerd/[[...focus]]"
-    );
-  });
 });

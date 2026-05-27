@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";
@@ -306,6 +306,78 @@ describe("Auth component", () => {
       );
       await user.click(screen.getByTestId("req"));
       expect(toast).toHaveBeenCalled();
+    });
+
+    it("defers profile switch invalidation until switched address and profile settle", async () => {
+      const invalidateAuthSensitiveQueries = jest.fn();
+      const getWalletAddress = require("@/services/auth/auth.utils")
+        .getWalletAddress as jest.MockedFunction<() => string | null>;
+      const oldAddress = "0x1111111111111111111111111111111111111111";
+      const newAddress = "0x2222222222222222222222222222222222222222";
+      walletAddress = oldAddress;
+      connectedAccountsOverride = [
+        {
+          address: oldAddress,
+          role: null,
+          isActive: false,
+          isConnected: false,
+        },
+        {
+          address: newAddress,
+          role: null,
+          isActive: true,
+          isConnected: false,
+        },
+      ];
+      getWalletAddress.mockReturnValue(newAddress);
+      mockUseIdentity.mockReturnValue({
+        profile: { id: "1", handle: "user", query: "user" },
+        isLoading: false,
+      });
+
+      const wrapperValue = {
+        invalidateAll: jest.fn(),
+        invalidateAuthSensitiveQueries,
+      } as unknown as React.ContextType<typeof ReactQueryWrapperContext>;
+
+      const renderTree = () => (
+        <ReactQueryWrapperContext.Provider value={wrapperValue}>
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+      const { rerender } = render(renderTree());
+
+      act(() => {
+        globalThis.dispatchEvent(new CustomEvent("6529-profile-switched"));
+      });
+
+      await waitFor(() => expect(getWalletAddress).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(invalidateAuthSensitiveQueries).not.toHaveBeenCalled()
+      );
+
+      walletAddress = newAddress;
+      mockUseIdentity.mockReturnValue({
+        profile: null,
+        isLoading: true,
+      });
+      rerender(renderTree());
+
+      await waitFor(() =>
+        expect(invalidateAuthSensitiveQueries).not.toHaveBeenCalled()
+      );
+
+      mockUseIdentity.mockReturnValue({
+        profile: { id: "2", handle: "next-user", query: "next-user" },
+        isLoading: false,
+      });
+      rerender(renderTree());
+
+      await waitFor(() =>
+        expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(1)
+      );
     });
   });
 
