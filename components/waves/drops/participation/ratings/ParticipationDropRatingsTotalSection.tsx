@@ -8,11 +8,13 @@ import {
   WAVE_VOTE_STATS_LABELS,
   WAVE_VOTING_LABELS,
 } from "@/helpers/waves/waves.constants";
-import { getApprovalDropStatus } from "@/helpers/waves/approve-wave.helpers";
+import { formatApprovalCountdownTime } from "@/helpers/waves/approve-wave.helpers";
+import { useApprovalDropStatus } from "@/hooks/waves/useApprovalDropStatus";
 
 interface ParticipationDropRatingsTotalSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
 }
 
@@ -20,6 +22,7 @@ export default function ParticipationDropRatingsTotalSection({
   drop,
   ratingsData,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
 }: ParticipationDropRatingsTotalSectionProps) {
   const { currentRating } = ratingsData;
@@ -31,19 +34,18 @@ export default function ParticipationDropRatingsTotalSection({
       ? winningThreshold
       : null;
   const hasWinningThreshold = displayWinningThreshold !== null;
-  const approvalStatus =
-    displayWinningThreshold !== null
-      ? getApprovalDropStatus({
-          drop,
-          isClosed: isVotingClosed,
-          winningThreshold: displayWinningThreshold,
-        })
-      : null;
-  const approvalStatusKind = approvalStatus?.kind;
+  const approvalStatus = useApprovalDropStatus({
+    drop,
+    isClosed: isVotingClosed,
+    winningThreshold: displayWinningThreshold,
+    winningThresholdMinDurationMs,
+  });
+  const approvalStatusKind = approvalStatus.kind;
   let approvalStatusClass: string | undefined;
 
   if (
     approvalStatusKind === "approved" ||
+    approvalStatusKind === "approving" ||
     approvalStatusKind === "reached_threshold"
   ) {
     approvalStatusClass = "tw-text-emerald-400";
@@ -51,12 +53,18 @@ export default function ParticipationDropRatingsTotalSection({
     approvalStatusClass = "tw-text-amber-300";
   }
   const approvalStatusLabel = (() => {
-    if (approvalStatus === null) {
+    if (!hasWinningThreshold) {
       return null;
     }
 
     if (approvalStatus.kind === "approved") {
       return "Approved";
+    }
+
+    if (approvalStatus.kind === "approving") {
+      return `Approving in ${formatApprovalCountdownTime(
+        approvalStatus.countdownMs ?? 0
+      )}`;
     }
 
     if (approvalStatus.kind === "reached_threshold") {

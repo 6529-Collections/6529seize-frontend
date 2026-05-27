@@ -42,6 +42,7 @@ describe("SingleWaveDropWrapper", () => {
         wave={wave}
         onClose={jest.fn()}
         winningThreshold={25}
+        winningThresholdMinDurationMs={120_000}
         isVotingClosed={true}
         isVotingControlsLocked={true}
       >
@@ -55,6 +56,7 @@ describe("SingleWaveDropWrapper", () => {
         drop,
         wave,
         winningThreshold: 25,
+        winningThresholdMinDurationMs: 120_000,
         isVotingClosed: true,
         isVotingControlsLocked: true,
       }),

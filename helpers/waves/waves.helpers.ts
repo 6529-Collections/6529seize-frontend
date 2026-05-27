@@ -42,6 +42,16 @@ const getSlowModeUpdate = (
   return { slow_mode_cooldown_ms: slowModeCooldownMs };
 };
 
+const getWinningThresholdMinDurationUpdate = (
+  minDurationMs: number | null | undefined
+): Partial<{ readonly winning_threshold_min_duration_ms: number | null }> => {
+  if (minDurationMs === undefined) {
+    return {};
+  }
+
+  return { winning_threshold_min_duration_ms: minDurationMs };
+};
+
 const getCreditNftsUpdate = (
   wave: ApiWave
 ): Partial<{ readonly credit_nfts: ApiWave["voting"]["credit_nfts"] }> => {
@@ -98,6 +108,9 @@ export const convertWaveToUpdateWave = (
     admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
     type: wave.wave.type,
     winning_threshold: wave.wave.winning_threshold,
+    ...getWinningThresholdMinDurationUpdate(
+      wave.wave.winning_threshold_min_duration_ms
+    ),
     max_winners: wave.wave.max_winners,
     max_votes_per_identity_to_drop: wave.wave.max_votes_per_identity_to_drop,
     time_lock_ms: wave.wave.time_lock_ms,

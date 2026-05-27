@@ -48,6 +48,7 @@ interface DropsListProps {
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -75,6 +76,7 @@ const DropsList = memo(
     onBoostedDropClick,
     suspendLightDropHydration = false,
     winningThreshold,
+    winningThresholdMinDurationMs,
     isVotingClosed = false,
     isVotingControlsLocked = false,
   }: DropsListProps) => {
@@ -112,6 +114,7 @@ const DropsList = memo(
         onDropContentClick,
         scrollContainerRef,
         winningThreshold,
+        winningThresholdMinDurationMs,
         isVotingClosed,
         isVotingControlsLocked,
       };
@@ -129,6 +132,7 @@ const DropsList = memo(
       onDropContentClick,
       scrollContainerRef,
       winningThreshold,
+      winningThresholdMinDurationMs,
       isVotingClosed,
       isVotingControlsLocked,
     ]);
@@ -248,6 +252,9 @@ const DropsList = memo(
               parentContainerRef={getItemData.parentContainerRef}
               onDropContentClick={getItemData.onDropContentClick}
               winningThreshold={getItemData.winningThreshold}
+              winningThresholdMinDurationMs={
+                getItemData.winningThresholdMinDurationMs
+              }
               isVotingClosed={getItemData.isVotingClosed}
               isVotingControlsLocked={getItemData.isVotingControlsLocked}
             />
