@@ -219,7 +219,7 @@ export default function HeaderSearchModalItem({
       return page.href;
     } else {
       const wave = getWave();
-      return wave.id;
+      return `by ${wave.author.handle ?? wave.author.primary_address}`;
     }
   };
 
@@ -236,6 +236,9 @@ export default function HeaderSearchModalItem({
 
   const primaryText = getPrimaryText();
   const secondaryText = getSecondaryText();
+  const primaryTextClassName = `tw-min-w-0 tw-flex-1 tw-font-semibold tw-text-white ${
+    !isProfile() && !isNft() && !isPage() ? "tw-text-base" : "tw-text-sm"
+  }`;
 
   return (
     <div
@@ -253,7 +256,7 @@ export default function HeaderSearchModalItem({
         <div className="tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
             <span
-              className="tw-min-w-0 tw-flex-1 tw-text-sm tw-font-semibold tw-text-white"
+              className={primaryTextClassName}
               title={primaryText}
             >
               <span className="tw-block tw-min-w-0 tw-truncate">
@@ -261,12 +264,11 @@ export default function HeaderSearchModalItem({
               </span>
             </span>
           </div>
-          <p
-            className={getSecondaryTextClassName()}
-            title={secondaryText || undefined}
-          >
-            {secondaryText}
-          </p>
+          {secondaryText && (
+            <p className={getSecondaryTextClassName()} title={secondaryText}>
+              {secondaryText}
+            </p>
+          )}
         </div>
       </Link>
     </div>
