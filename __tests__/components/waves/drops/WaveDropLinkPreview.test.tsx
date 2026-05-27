@@ -184,6 +184,7 @@ describe("WaveDropLinkPreview", () => {
     } as any);
     useApprovalWaveStatusMock.mockReturnValue({
       winningThreshold: 12,
+      winningThresholdMinDurationMs: 120_000,
       approvedCount: 3,
       closeStatus: null,
       isApprovalStatusLoading: false,
@@ -270,6 +271,7 @@ describe("WaveDropLinkPreview", () => {
       expect(mockDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           winningThreshold: 12,
+          winningThresholdMinDurationMs: 120_000,
           isVotingClosed: true,
           isVotingControlsLocked: true,
           embedPath: ["parent-drop"],

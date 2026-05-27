@@ -29,6 +29,8 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
   DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY = "DROPS_REQUIRED_METADATA_RESERVED_IDENTITY_KEY",
   APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
+  APPROVAL_THRESHOLD_TIME_INVALID = "APPROVAL_THRESHOLD_TIME_INVALID",
+  APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION",
   OUTCOMES_REQUIRED = "OUTCOMES_REQUIRED",
   CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT = "CHAT_WAVE_CANNOT_HAVE_APPLICATIONS_PER_PARTICIPANT",
   CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES = "CHAT_WAVE_CANNOT_HAVE_REQUIRED_TYPES",
@@ -305,6 +307,24 @@ const getVotingValidationErrors = ({
       approval.threshold <= 0)
   ) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
+  }
+
+  if (waveType === ApiWaveType.Approve && approval.thresholdTimeMs !== null) {
+    if (
+      !Number.isInteger(approval.thresholdTimeMs) ||
+      approval.thresholdTimeMs <= 0 ||
+      approval.thresholdTimeMs % MINUTE_IN_MS !== 0
+    ) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID);
+    } else if (dates.endDate !== null) {
+      const waveDurationMs = dates.endDate - dates.submissionStartDate;
+
+      if (waveDurationMs >= 0 && approval.thresholdTimeMs > waveDurationMs) {
+        errors.push(
+          CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+        );
+      }
+    }
   }
 
   // For Rank and Approve waves

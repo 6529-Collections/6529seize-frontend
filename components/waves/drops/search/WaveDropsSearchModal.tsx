@@ -50,8 +50,12 @@ export default function WaveDropsSearchModal({
   );
 
   const meetsMinLength = normalizedQuery.length >= MIN_QUERY_LENGTH;
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({ wave });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({ wave });
 
   const {
     drops: results,
@@ -242,6 +246,9 @@ export default function WaveDropsSearchModal({
                                   onReplyClick={() => {}}
                                   onQuoteClick={() => {}}
                                   winningThreshold={winningThreshold}
+                                  winningThresholdMinDurationMs={
+                                    winningThresholdMinDurationMs
+                                  }
                                   isVotingClosed={isVotingClosed}
                                   isVotingControlsLocked={
                                     isVotingControlsLocked

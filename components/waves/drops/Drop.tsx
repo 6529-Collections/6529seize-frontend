@@ -47,6 +47,7 @@ interface DropProps {
   readonly fullWidthMedia?: boolean | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
@@ -79,6 +80,7 @@ export default function Drop({
   fullWidthMedia,
   fullWidthLinkPreviews,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   embedPath,
@@ -107,6 +109,7 @@ export default function Drop({
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
         embedPath={embedPath}

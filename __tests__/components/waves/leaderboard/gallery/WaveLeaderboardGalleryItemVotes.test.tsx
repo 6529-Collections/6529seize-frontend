@@ -54,16 +54,45 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
     expect(screen.getByText("Reached threshold")).toBeInTheDocument();
   });
 
+  it("shows the approval countdown label", () => {
+    jest.useFakeTimers().setSystemTime(new Date(1_000_000));
+    const drop: any = {
+      rating: 8,
+      rating_prediction: 8,
+      over_threshold_since_ms: 1_000_000,
+    };
+    const { unmount } = render(
+      <WaveLeaderboardGalleryItemVotes
+        drop={drop}
+        winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
+      />
+    );
+
+    try {
+      expect(screen.getByText("Approving in 8m")).toBeInTheDocument();
+    } finally {
+      unmount();
+      jest.useRealTimers();
+    }
+  });
+
   it("shows approved when the drop has winning context", () => {
     const drop: any = {
       rating: 6,
       rating_prediction: 6,
       winning_context: { decision_time: 123, place: 1 },
+      over_threshold_since_ms: 1_000_000,
     };
     render(
-      <WaveLeaderboardGalleryItemVotes drop={drop} winningThreshold={8} />
+      <WaveLeaderboardGalleryItemVotes
+        drop={drop}
+        winningThreshold={8}
+        winningThresholdMinDurationMs={480_000}
+      />
     );
     expect(screen.getByText("Approved")).toBeInTheDocument();
+    expect(screen.queryByText(/Approving in/)).not.toBeInTheDocument();
   });
 
   it("shows closed when approval voting is closed and the drop is not approved", () => {

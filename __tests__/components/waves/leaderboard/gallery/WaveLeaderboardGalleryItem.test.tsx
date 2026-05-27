@@ -15,6 +15,9 @@ jest.mock(
       data-testid="votes"
       data-variant={props.variant}
       data-winning-threshold={props.winningThreshold ?? ""}
+      data-winning-threshold-min-duration={
+        props.winningThresholdMinDurationMs ?? ""
+      }
       data-is-voting-closed={String(props.isVotingClosed)}
     />
   )
@@ -164,6 +167,7 @@ describe("WaveLeaderboardGalleryItem", () => {
         drop={drop}
         onDropClick={jest.fn()}
         winningThreshold={10}
+        winningThresholdMinDurationMs={120_000}
         isVotingClosed={true}
       />
     );
@@ -171,6 +175,10 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("votes")).toHaveAttribute(
       "data-winning-threshold",
       "10"
+    );
+    expect(screen.getByTestId("votes")).toHaveAttribute(
+      "data-winning-threshold-min-duration",
+      "120000"
     );
     expect(screen.getByTestId("votes")).toHaveAttribute(
       "data-is-voting-closed",

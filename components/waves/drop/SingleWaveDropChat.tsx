@@ -21,6 +21,7 @@ interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
   readonly drop: ApiDrop;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -29,6 +30,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   wave,
   drop,
   winningThreshold = null,
+  winningThresholdMinDurationMs = null,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
@@ -117,6 +119,9 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
                     dropId={drop.id}
                     isMuted={wave.metrics.muted}
                     winningThreshold={winningThreshold}
+                    winningThresholdMinDurationMs={
+                      winningThresholdMinDurationMs
+                    }
                     isVotingClosed={isVotingClosed}
                     isVotingControlsLocked={isVotingControlsLocked}
                   />

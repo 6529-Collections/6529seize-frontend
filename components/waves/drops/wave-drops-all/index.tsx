@@ -52,6 +52,7 @@ interface WaveDropsAllProps {
   readonly bottomPaddingClassName?: string | undefined;
   readonly isMuted?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -69,6 +70,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   bottomPaddingClassName,
   isMuted = false,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
@@ -308,6 +310,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         autoCollapseSerials={autoCollapseSerials}
         suspendLightDropHydration={isScrolling || serialTarget !== null}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
       />
@@ -332,6 +335,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
   bottomPaddingClassName,
   isMuted = false,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
@@ -354,6 +358,7 @@ const WaveDropsAll: React.FC<WaveDropsAllProps> = ({
         bottomPaddingClassName={bottomPaddingClassName}
         isMuted={isMuted}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
       />

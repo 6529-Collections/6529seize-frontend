@@ -125,6 +125,7 @@ describe("DropsList", () => {
         onDropContentClick={jest.fn()}
         dropViewDropId={null}
         winningThreshold={42}
+        winningThresholdMinDurationMs={120_000}
         isVotingClosed={true}
         isVotingControlsLocked={true}
       />
@@ -132,6 +133,7 @@ describe("DropsList", () => {
 
     expect(dropProps).toHaveLength(1);
     expect(dropProps[0].winningThreshold).toBe(42);
+    expect(dropProps[0].winningThresholdMinDurationMs).toBe(120_000);
     expect(dropProps[0].isVotingClosed).toBe(true);
     expect(dropProps[0].isVotingControlsLocked).toBe(true);
   });

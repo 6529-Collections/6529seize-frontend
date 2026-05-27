@@ -138,6 +138,39 @@ describe("waves.helpers", () => {
       });
     });
 
+    it("preserves approve threshold hold time", () => {
+      const wave = makeWave();
+      wave.wave.winning_threshold_min_duration_ms = 120_000;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.wave).toMatchObject({
+        winning_threshold_min_duration_ms: 120_000,
+      });
+    });
+
+    it("preserves null approve threshold hold time", () => {
+      const wave = makeWave();
+      wave.wave.winning_threshold_min_duration_ms = null;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.wave).toHaveProperty(
+        "winning_threshold_min_duration_ms",
+        null
+      );
+    });
+
+    it("omits approve threshold hold time when the source is missing", () => {
+      const wave = makeWave();
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.wave).not.toHaveProperty(
+        "winning_threshold_min_duration_ms"
+      );
+    });
+
     it("preserves existing slow mode cooldown", () => {
       const wave = makeWave();
       wave.chat.slow_mode_cooldown_ms = 30_000;

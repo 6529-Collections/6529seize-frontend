@@ -1,12 +1,14 @@
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { getApprovalDropStatus } from "@/helpers/waves/approve-wave.helpers";
+import { formatApprovalCountdownTime } from "@/helpers/waves/approve-wave.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useApprovalDropStatus } from "@/hooks/waves/useApprovalDropStatus";
 
 interface WaveLeaderboardGalleryItemVotesProps {
   readonly drop: ExtendedDrop;
   readonly variant?: "default" | "subtle" | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
 }
 
@@ -14,6 +16,7 @@ export default function WaveLeaderboardGalleryItemVotes({
   drop,
   variant = "default",
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
 }: WaveLeaderboardGalleryItemVotesProps) {
   const displayWinningThreshold =
@@ -22,15 +25,13 @@ export default function WaveLeaderboardGalleryItemVotes({
     winningThreshold > 0
       ? winningThreshold
       : null;
-  const approvalStatus =
-    displayWinningThreshold !== null
-      ? getApprovalDropStatus({
-          drop,
-          isClosed: isVotingClosed,
-          winningThreshold: displayWinningThreshold,
-        })
-      : null;
-  const current = approvalStatus?.current ?? drop.rating;
+  const approvalStatus = useApprovalDropStatus({
+    drop,
+    isClosed: isVotingClosed,
+    winningThreshold: displayWinningThreshold,
+    winningThresholdMinDurationMs,
+  });
+  const current = approvalStatus.current;
   const isPositive = current >= 0;
 
   const getColorClass = () => {
@@ -41,12 +42,18 @@ export default function WaveLeaderboardGalleryItemVotes({
   };
 
   const approvalStatusLabel = (() => {
-    if (approvalStatus === null) {
+    if (displayWinningThreshold === null) {
       return null;
     }
 
     if (approvalStatus.kind === "approved") {
       return "Approved";
+    }
+
+    if (approvalStatus.kind === "approving") {
+      return `Approving in ${formatApprovalCountdownTime(
+        approvalStatus.countdownMs ?? 0
+      )}`;
     }
 
     if (approvalStatus.kind === "reached_threshold") {
@@ -62,13 +69,14 @@ export default function WaveLeaderboardGalleryItemVotes({
 
   const approvalStatusClass = (() => {
     if (
-      approvalStatus?.kind === "approved" ||
-      approvalStatus?.kind === "reached_threshold"
+      approvalStatus.kind === "approved" ||
+      approvalStatus.kind === "approving" ||
+      approvalStatus.kind === "reached_threshold"
     ) {
       return "tw-text-emerald-400";
     }
 
-    if (approvalStatus?.kind === "closed") {
+    if (approvalStatus.kind === "closed") {
       return "tw-text-amber-300";
     }
 

@@ -9563,6 +9563,15 @@ components:
           format: int64
           minimum: 1
           nullable: true
+        winning_threshold_min_duration_ms:
+          description: >-
+            Milliseconds a drop must continuously stay at or above
+            winning_threshold before winning an APPROVE wave. Defaults to 0,
+            which declares a winner as soon as the threshold is reached.
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
         max_winners:
           description: >-
             Total number of APPROVE decisions this wave may produce. Null means
@@ -12965,6 +12974,14 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropVoting"
         has_metadata:
           type: boolean
+        over_threshold_since_ms:
+          description: >-
+            Unix timestamp in milliseconds when this active APPROVE submission
+            most recently started continuously meeting the winning threshold.
+            Omitted unless the drop is currently over threshold and has not yet
+            won.
+          type: integer
+          format: int64
     ApiSubmissionDropStatus:
       type: string
       enum:
@@ -13539,6 +13556,7 @@ components:
         - type
         - time_lock_ms
         - winning_threshold
+        - winning_threshold_min_duration_ms
         - max_winners
         - max_votes_per_identity_to_drop
         - admin_group
@@ -13559,6 +13577,15 @@ components:
           type: integer
           format: int64
           minimum: 1
+          nullable: true
+        winning_threshold_min_duration_ms:
+          description: >-
+            Milliseconds a drop must continuously stay at or above
+            winning_threshold before winning an APPROVE wave. Null for
+            non-APPROVE waves.
+          type: integer
+          format: int64
+          minimum: 0
           nullable: true
         max_winners:
           description: >-
