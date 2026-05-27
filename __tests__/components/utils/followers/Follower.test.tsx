@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
 import Follower from "@/components/utils/followers/Follower";
 import { AuthContext } from "@/components/auth/Auth";
@@ -25,7 +26,7 @@ const baseFollower: any = {
   identity: { handle: "alice", level: 5, cic: 0, pfp: "pic.png" },
 };
 
-const renderWithAuth = (ui: React.ReactElement, connectedProfile: any = null) =>
+const renderWithAuth = (ui: ReactElement, connectedProfile: any = null) =>
   render(
     <AuthContext.Provider
       value={{
