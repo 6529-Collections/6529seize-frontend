@@ -51,4 +51,29 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(screen.getByText("Needs 2")).toBeInTheDocument();
   });
+
+  it("renders the approval countdown label", () => {
+    jest.useFakeTimers().setSystemTime(new Date(1_000_000));
+    const { unmount } = render(
+      <WaveLeaderboardDropRaters
+        drop={
+          {
+            ...drop,
+            rating: 12,
+            rank: null,
+            over_threshold_since_ms: 1_000_000,
+          } as ExtendedDrop
+        }
+        winningThreshold={12}
+        winningThresholdMinDurationMs={480_000}
+      />
+    );
+
+    try {
+      expect(screen.getByText("Approving in 8m")).toBeInTheDocument();
+    } finally {
+      unmount();
+      jest.useRealTimers();
+    }
+  });
 });

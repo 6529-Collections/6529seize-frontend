@@ -519,6 +519,45 @@ describe("create-wave.helpers", () => {
       expect(res.wave.max_winners).toBe(3);
     });
 
+    it("maps approve threshold hold time to the wave config", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.thresholdTimeMs = 120_000;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBe(120_000);
+    });
+
+    it("sends immediate approve threshold hold time when blank", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.thresholdTimeMs = null;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBe(0);
+    });
+
+    it("sends null threshold hold time for non-approve waves", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.approval.thresholdTimeMs = 120_000;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.wave.winning_threshold_min_duration_ms).toBeNull();
+    });
+
     it("filters rank outcomes with missing or non-positive total amounts", () => {
       const config = createBaseConfig(ApiWaveType.Rank);
       config.approval.maxWinners = 4;

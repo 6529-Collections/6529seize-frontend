@@ -47,6 +47,7 @@ describe("WaveLeaderboardDrop", () => {
       isVotingClosed: false,
       isVotingControlsLocked: false,
       winningThreshold: null,
+      winningThresholdMinDurationMs: null,
     });
     expect(screen.getByTestId("resolved-renderer")).toHaveTextContent("d1");
   });
@@ -69,7 +70,11 @@ describe("WaveLeaderboardDrop", () => {
   it("passes approve threshold to the resolved renderer", () => {
     const approveWave = {
       id: "w2",
-      wave: { type: ApiWaveType.Approve, winning_threshold: 7 },
+      wave: {
+        type: ApiWaveType.Approve,
+        winning_threshold: 7,
+        winning_threshold_min_duration_ms: 120_000,
+      },
     } as any;
 
     render(
@@ -81,6 +86,7 @@ describe("WaveLeaderboardDrop", () => {
     );
 
     expect(rendererProps.winningThreshold).toBe(7);
+    expect(rendererProps.winningThresholdMinDurationMs).toBe(120_000);
   });
 
   it("passes closed voting state to the resolved renderer", () => {

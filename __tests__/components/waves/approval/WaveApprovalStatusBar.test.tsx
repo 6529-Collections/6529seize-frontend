@@ -3,15 +3,17 @@ import React from "react";
 import WaveApprovalStatusBar from "@/components/waves/approval/WaveApprovalStatusBar";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-const wave = {
-  participation: { period: {} },
-  voting: { period: {} },
-  wave: {
-    type: ApiWaveType.Approve,
-    winning_threshold: 10,
-    max_winners: 2,
-  },
-} as any;
+const makeWave = (waveConfig: Record<string, unknown> = {}) =>
+  ({
+    participation: { period: {} },
+    voting: { period: {} },
+    wave: {
+      type: ApiWaveType.Approve,
+      winning_threshold: 10,
+      max_winners: 2,
+      ...waveConfig,
+    },
+  }) as any;
 
 describe("WaveApprovalStatusBar", () => {
   it("shows checking when the approved count is unknown", () => {
@@ -19,7 +21,7 @@ describe("WaveApprovalStatusBar", () => {
       <WaveApprovalStatusBar
         approvedCount={null}
         closeStatus={null}
-        wave={wave}
+        wave={makeWave()}
       />
     );
 
@@ -40,7 +42,7 @@ describe("WaveApprovalStatusBar", () => {
         closeStatus={null}
         isApprovalStatusError={true}
         retryApprovalStatus={retryApprovalStatus}
-        wave={wave}
+        wave={makeWave()}
       />
     );
 
@@ -64,7 +66,7 @@ describe("WaveApprovalStatusBar", () => {
         closeStatus={null}
         isApprovalCountError={true}
         retryApprovalCount={retryApprovalCount}
-        wave={wave}
+        wave={makeWave()}
       />
     );
 
@@ -81,5 +83,60 @@ describe("WaveApprovalStatusBar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(retryApprovalCount).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows immediate approval hold time when the value is missing", () => {
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave()}
+      />
+    );
+
+    expect(screen.getByText("Min time")).toBeInTheDocument();
+    expect(screen.getByText("Immediate")).toBeInTheDocument();
+  });
+
+  it.each([
+    ["null", null, "Immediate"],
+    ["zero", 0, "Immediate"],
+    ["invalid", Number.NaN, "Immediate"],
+    ["two minutes", 120_000, "2m"],
+    ["two hours", 7_200_000, "2h"],
+    ["one hour and thirty minutes", 5_400_000, "1h 30m"],
+  ])("shows %s approval hold time", (_label, durationMs, expected) => {
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          winning_threshold_min_duration_ms: durationMs,
+        })}
+      />
+    );
+
+    expect(screen.getByText("Min time")).toBeInTheDocument();
+    expect(screen.getByText(expected)).toBeInTheDocument();
+  });
+
+  it("orders approval status items", () => {
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          winning_threshold_min_duration_ms: 0,
+        })}
+      />
+    );
+
+    const statusItems = screen.getByText("Threshold").parentElement
+      ?.parentElement;
+    const labels = Array.from(statusItems?.children ?? []).map(
+      (item) => item.firstElementChild?.textContent
+    );
+
+    expect(labels).toEqual(["Threshold", "Min time", "Approved", "Status"]);
   });
 });

@@ -23,6 +23,10 @@ export class ApiWaveConfig {
     */
     'winning_threshold': number | null;
     /**
+    * Milliseconds a drop must continuously stay at or above winning_threshold before winning an APPROVE wave. Null for non-APPROVE waves.
+    */
+    'winning_threshold_min_duration_ms': number | null;
+    /**
     * Total number of APPROVE decisions this wave may produce. Null means unlimited. Null for non-APPROVE waves
     */
     'max_winners': number | null;
@@ -57,6 +61,12 @@ export class ApiWaveConfig {
         {
             "name": "winning_threshold",
             "baseName": "winning_threshold",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "winning_threshold_min_duration_ms",
+            "baseName": "winning_threshold_min_duration_ms",
             "type": "number",
             "format": "int64"
         },

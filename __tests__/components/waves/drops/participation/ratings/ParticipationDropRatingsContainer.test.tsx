@@ -51,6 +51,7 @@ describe("ParticipationDropRatingsContainer", () => {
         drop={drop}
         rank={2}
         winningThreshold={9}
+        winningThresholdMinDurationMs={120_000}
       />
     );
     expect(getThemeColors).toHaveBeenCalled();
@@ -59,5 +60,6 @@ describe("ParticipationDropRatingsContainer", () => {
     expect(userProps.drop).toBe(drop);
     expect(totalProps.ratingsData.currentRating).toBe(5);
     expect(totalProps.winningThreshold).toBe(9);
+    expect(totalProps.winningThresholdMinDurationMs).toBe(120_000);
   });
 });
