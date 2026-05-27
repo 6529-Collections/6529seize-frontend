@@ -71,6 +71,7 @@ export default function UserFollowBtn({
           endpoint: `/identities/${handle}/subscriptions`,
         }),
     });
+  const isInitialStatusLoading = isFetching && subscriptions === undefined;
 
   const getFollowing = () => !!subscriptions?.actions.length;
   const getLabel = () => (getFollowing() ? "Following" : "Follow");
@@ -175,6 +176,15 @@ export default function UserFollowBtn({
     }
   };
 
+  let followButtonStateClass =
+    "tw-bg-iron-200 tw-text-iron-950 tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300";
+  if (isInitialStatusLoading) {
+    followButtonStateClass = "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800";
+  } else if (following) {
+    followButtonStateClass =
+      "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700";
+  }
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
       {onDirectMessage && (
@@ -209,16 +219,12 @@ export default function UserFollowBtn({
       )}
       <button
         onClick={onFollow}
-        disabled={mutating || isFetching}
+        disabled={mutating || isInitialStatusLoading}
         type="button"
         aria-label={following ? "Unfollow" : "Follow"}
-        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
-          following
-            ? "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-            : "tw-bg-iron-200 tw-text-iron-950 tw-ring-white hover:tw-bg-iron-300 hover:tw-ring-iron-300"
-        } tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
+        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${followButtonStateClass} tw-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-0 tw-font-semibold tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
       >
-        {mutating || isFetching ? (
+        {mutating || isInitialStatusLoading ? (
           <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
         ) : following ? (
           <svg

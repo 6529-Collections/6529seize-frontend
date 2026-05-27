@@ -15,6 +15,7 @@ import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 
 export const createLinkHandlers = (options?: {
   readonly linkPreviewVariant?: LinkPreviewVariant;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
 }): LinkHandler[] => [
   createYoutubeHandler(),
   createTikTokHandler(),
@@ -22,7 +23,9 @@ export const createLinkHandlers = (options?: {
   createNftMarketplacesHandler(),
   createEnsHandler(),
   createCompoundHandler(),
-  createTwitterHandler(),
+  createTwitterHandler({
+    fullWidth: options?.fullWidthLinkPreviews === true,
+  }),
   createWikimediaHandler(),
   createGifHandler(options),
   createArtBlocksHandler(),

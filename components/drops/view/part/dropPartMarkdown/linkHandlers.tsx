@@ -43,6 +43,7 @@ interface LinkRendererConfig {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly inlineShowControl?: LinkPreviewInlineShowControl | undefined;
 }
 
@@ -118,6 +119,7 @@ export const createLinkRenderer = ({
   quotePath,
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
+  fullWidthLinkPreviews = false,
   inlineShowControl,
 }: LinkRendererConfig): LinkRenderer => {
   const seizeHandlers = createSeizeHandlers({
@@ -132,6 +134,7 @@ export const createLinkRenderer = ({
   });
   const handlers = createLinkHandlers({
     linkPreviewVariant: "chat",
+    fullWidthLinkPreviews,
   });
   let inlineShowControlRendered = false;
 
