@@ -447,7 +447,7 @@ export function flushMobileLaunchTiming(reason: FlushReason = "manual"): void {
   state.flushed = true;
   if (state.timeoutId !== undefined) {
     clearTimeout(state.timeoutId);
-    state.timeoutId = undefined;
+    delete state.timeoutId;
   }
 
   const totalMs = roundMs(elapsedSinceStart(state));
