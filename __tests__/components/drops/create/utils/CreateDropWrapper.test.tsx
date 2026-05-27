@@ -472,13 +472,13 @@ describe("CreateDropWrapper Authentication Validation", () => {
       const result = component.current?.getDropSnapshot();
 
       expect(setDrop).not.toHaveBeenCalled();
-      expect(result.parts).toEqual([
-        {
-          content: "draft text @[alice] #[Wave One] $[Token One]",
-          quoted_drop: null,
-          media: [],
-        },
-      ]);
+      expect(result.parts).toHaveLength(1);
+      expect(result.parts[0]).toMatchObject({
+        content: "draft text @[alice] #[Wave One] $[Token One]",
+        quoted_drop: null,
+        media: [],
+      });
+      expect(result.parts[0].clientId).toEqual(expect.any(String));
       expect(result).toMatchObject({
         title: "Draft title",
         metadata: [metadata],
@@ -500,6 +500,7 @@ describe("CreateDropWrapper Authentication Validation", () => {
       });
 
       const existingPart = {
+        clientId: "existing-part",
         content: "first part",
         quoted_drop: null,
         media: [],
@@ -538,6 +539,8 @@ describe("CreateDropWrapper Authentication Validation", () => {
         "first part",
         "second part",
       ]);
+      expect(firstSnapshot.parts[0].clientId).toBe("existing-part");
+      expect(firstSnapshot.parts[1].clientId).toEqual(expect.any(String));
       expect(secondSnapshot.parts.map((part: any) => part.content)).toEqual([
         "first part",
         "second part",

@@ -9,6 +9,7 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import DropPart from "@/components/drops/view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import { useObjectUrls } from "@/hooks/useObjectUrl";
 
 interface CreateDropStormViewPartWaveProps {
   name: string;
@@ -46,10 +47,19 @@ const CreateDropStormViewPart = memo(
     disabled = false,
     removePart,
   }: CreateDropStormViewPartProps) => {
-    const partMedias = part.media.map((media) => ({
-      mimeType: media.type,
-      mediaSrc: URL.createObjectURL(media),
-    }));
+    const mediaUrls = useObjectUrls(part.media);
+    const partMedias = part.media.flatMap((media, index) => {
+      const mediaSrc = mediaUrls[index];
+
+      return mediaSrc
+        ? [
+            {
+              mimeType: media.type,
+              mediaSrc,
+            },
+          ]
+        : [];
+    });
 
     const quotedDrop = part.quoted_drop;
 
