@@ -33,6 +33,7 @@ type ContextType = {
   onGroupChanged: (params: { groupId: string }) => void;
   onIdentityBulkRate: () => void;
   invalidateNotifications: () => void;
+  invalidateAuthSensitiveQueries: () => void;
 };
 
 const createTestSetup = () => {
@@ -176,6 +177,16 @@ describe("ReactQueryWrapper context", () => {
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
+    });
+  });
+
+  it("invalidates auth-sensitive queries in a single cache scan", () => {
+    const { client, ctx } = createTestSetup();
+    act(() => ctx.invalidateAuthSensitiveQueries());
+
+    expect(client.invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
     });
   });
 });

@@ -66,7 +66,13 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
 
   let content: ReactNode = null;
 
-  if (contentState === "ready" || contentState === "not-authenticated") {
+  const shouldRenderWavesContent =
+    contentState === "ready" ||
+    contentState === "not-authenticated" ||
+    contentState === "loading" ||
+    contentState === "measuring";
+
+  if (shouldRenderWavesContent) {
     content = getWavesContent({
       children,
       containerClassName,

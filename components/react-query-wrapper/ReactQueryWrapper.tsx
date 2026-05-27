@@ -132,6 +132,9 @@ const AUTH_SENSITIVE_QUERY_KEYS: readonly QueryKey[] = [
   QueryKey.DROP,
   QueryKey.FEED_ITEMS,
 ];
+const AUTH_SENSITIVE_QUERY_KEY_SET = new Set<QueryKey>(
+  AUTH_SENSITIVE_QUERY_KEYS
+);
 
 interface ProfileRatersParams {
   readonly page: number;
@@ -1006,8 +1009,14 @@ const createReactQueryContextValue = (
   };
 
   const invalidateAuthSensitiveQueries = () => {
-    AUTH_SENSITIVE_QUERY_KEYS.forEach((queryKey) => {
-      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    queryClient.invalidateQueries({
+      predicate: (query) => {
+        const [queryKey] = query.queryKey;
+        return (
+          typeof queryKey === "string" &&
+          AUTH_SENSITIVE_QUERY_KEY_SET.has(queryKey as QueryKey)
+        );
+      },
     });
   };
 
