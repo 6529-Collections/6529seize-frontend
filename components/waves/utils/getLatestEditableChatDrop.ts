@@ -3,6 +3,11 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
+const normalizeHandle = (handle: string | null | undefined): string | null => {
+  const normalizedHandle = handle?.trim().replace(/^@/, "").toLowerCase();
+  return normalizedHandle ? normalizedHandle : null;
+};
+
 export function getLatestEditableChatDrop({
   drops,
   waveId,
@@ -22,7 +27,7 @@ export function getLatestEditableChatDrop({
   }
 
   const connectedProfileId = connectedProfile.id;
-  const connectedProfileHandle = connectedProfile.handle;
+  const connectedProfileHandle = normalizeHandle(connectedProfile.handle);
 
   if (!connectedProfileId && !connectedProfileHandle) {
     return null;
@@ -43,7 +48,7 @@ export function getLatestEditableChatDrop({
     const isAuthor =
       (!!connectedProfileId && drop.author.id === connectedProfileId) ||
       (!!connectedProfileHandle &&
-        drop.author.handle === connectedProfileHandle);
+        normalizeHandle(drop.author.handle) === connectedProfileHandle);
 
     if (!isAuthor) {
       continue;

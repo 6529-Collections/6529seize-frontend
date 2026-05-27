@@ -59,6 +59,25 @@ describe("getLatestEditableChatDrop", () => {
     ).toBe(ownDrop);
   });
 
+  it("matches own drops by normalized handle when ids do not match", () => {
+    const ownDrop = createDrop({
+      id: "own",
+      author: { id: "profile-2", handle: "Alice" } as ExtendedDrop["author"],
+    });
+
+    expect(
+      getLatestEditableChatDrop({
+        drops: [ownDrop],
+        waveId: "wave-1",
+        connectedProfile: {
+          id: "profile-1",
+          handle: " @alice ",
+        },
+        isProxyMode: false,
+      })
+    ).toBe(ownDrop);
+  });
+
   it("ignores temp drops", () => {
     const tempDrop = createDrop({ id: "temp-drop", serial_no: 20 });
     const savedDrop = createDrop({ id: "saved", serial_no: 10 });
