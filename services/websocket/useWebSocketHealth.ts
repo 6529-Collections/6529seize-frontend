@@ -198,9 +198,11 @@ export function useWebSocketHealth() {
 
   useEffect(() => {
     const cookieStore = (
-      globalThis.window as unknown as {
-        cookieStore?: CookieStoreWithEvents | undefined;
-      } | undefined
+      globalThis.window as unknown as
+        | {
+            cookieStore?: CookieStoreWithEvents | undefined;
+          }
+        | undefined
     )?.cookieStore;
 
     const hasCookieStoreListener = Boolean(
