@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 type ApiErrorMode = "legacy-string" | "structured";
@@ -183,6 +184,9 @@ const executeApiRequest = async <T>(
   parseJson: boolean = true,
   errorMode: ApiErrorMode = "legacy-string"
 ): Promise<T> => {
+  const requestStartedAtMs = getRequestTimingNow();
+  let status: number | "aborted" | "network_error" | "unknown" = "unknown";
+
   try {
     const res = await fetch(url, {
       method,
@@ -190,6 +194,7 @@ const executeApiRequest = async <T>(
       ...(body !== undefined ? { body: body } : {}),
       ...(signal !== undefined ? { signal: signal } : {}),
     });
+    status = res.status;
 
     if (!res.ok) {
       return handleApiError(res, errorMode);
@@ -210,10 +215,16 @@ const executeApiRequest = async <T>(
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
+      if (status === "unknown") {
+        status = "aborted";
+      }
       throw error;
     }
 
     if (error instanceof TypeError) {
+      if (status === "unknown") {
+        status = "network_error";
+      }
       const errorMessage = error.message.toLowerCase();
       if (
         errorMessage.includes("load failed") ||
@@ -229,8 +240,23 @@ const executeApiRequest = async <T>(
     }
 
     throw error;
+  } finally {
+    recordMobileLaunchApiRequest({
+      endpoint: url,
+      method,
+      status,
+      startedAtMs: requestStartedAtMs,
+      durationMs: getRequestTimingNow() - requestStartedAtMs,
+    });
   }
 };
+
+function getRequestTimingNow(): number {
+  if (globalThis.performance?.now) {
+    return globalThis.performance.now();
+  }
+  return Date.now();
+}
 
 export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;

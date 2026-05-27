@@ -12,6 +12,7 @@ import { ethers } from "ethers";
 import { encryptData } from "./app-wallet-helpers";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
+import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
 
 export interface AppWallet {
   name: string;
@@ -76,7 +77,10 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       let supported = false;
       if (isCapacitor) {
         try {
-          await SecureStoragePlugin.keys();
+          await measureMobileLaunchAsync(
+            "app_wallets_secure_storage_support_check",
+            () => SecureStoragePlugin.keys()
+          );
           supported = true;
         } catch (error) {
           console.error("SecureStoragePlugin is not available:", error);
@@ -96,7 +100,10 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       setFetchingAppWallets(true);
-      const wallets = await getAllWallets();
+      const wallets = await measureMobileLaunchAsync(
+        "app_wallets_load",
+        getAllWallets
+      );
 
       if (cancelled) {
         return;
