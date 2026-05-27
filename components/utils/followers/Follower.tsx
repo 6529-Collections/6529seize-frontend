@@ -29,9 +29,9 @@ export default function Follower({
     connectedProfile?.handle?.toLowerCase() ?? null;
   const shouldShowFollowButton = Boolean(
     showFollowButton &&
-    normalizedConnectedHandle &&
     normalizedFollowerHandle &&
-    normalizedFollowerHandle !== normalizedConnectedHandle
+    (!normalizedConnectedHandle ||
+      normalizedFollowerHandle !== normalizedConnectedHandle)
   );
   const backgroundClass = mutedBackground ? "tw-bg-white/[0.01]" : "";
 
