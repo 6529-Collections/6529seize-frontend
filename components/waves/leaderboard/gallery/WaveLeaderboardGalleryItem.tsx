@@ -39,6 +39,7 @@ interface WaveLeaderboardGalleryItemProps {
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
 }
 
 const getVoteStyle = (
@@ -92,6 +93,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     isVotingClosed = false,
     isVotingControlsLocked = false,
     winningThreshold,
+    winningThresholdMinDurationMs,
   }) => {
     const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
     const {
@@ -261,6 +263,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 drop={drop}
                 variant={artFocused ? "subtle" : "default"}
                 winningThreshold={winningThreshold}
+                winningThresholdMinDurationMs={winningThresholdMinDurationMs}
                 isVotingClosed={isVotingClosed}
               />
             </div>

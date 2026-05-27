@@ -28,6 +28,7 @@ interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly mediaContainerHeightClassName?: string | undefined;
@@ -46,6 +47,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   drop,
   onDropClick,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   mediaContainerHeightClassName,
@@ -169,6 +171,9 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 <WaveLeaderboardDropRaters
                   drop={drop}
                   winningThreshold={winningThreshold}
+                  winningThresholdMinDurationMs={
+                    winningThresholdMinDurationMs
+                  }
                   isVotingClosed={isVotingClosed}
                 />
               </div>

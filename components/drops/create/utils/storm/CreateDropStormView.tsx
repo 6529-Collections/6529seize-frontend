@@ -1,6 +1,5 @@
 import { memo } from "react";
 import type { CreateDropConfig } from "@/entities/IDrop";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import CreateDropStormViewPart from "./CreateDropStormViewPart";
 import { Time } from "@/helpers/time";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
@@ -30,10 +29,10 @@ const CreateDropStormView = memo(
     const now = Time.currentMillis();
     return (
       <div className="tw-mb-4 tw-flex tw-flex-col">
-        {!!drop?.parts.length &&
+        {drop.parts.length > 0 &&
           drop.parts.map((part, index) => (
             <CreateDropStormViewPart
-              key={getRandomObjectId()}
+              key={part.clientId ?? part.id}
               profile={profile}
               part={part}
               referencedNfts={drop.referenced_nfts}

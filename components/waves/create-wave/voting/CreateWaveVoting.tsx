@@ -8,6 +8,7 @@ import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 import CreateWaveVotingThreshold from "./CreateWaveVotingThreshold";
+import CreateWaveVotingThresholdTime from "./CreateWaveVotingThresholdTime";
 import MemeCardSetPicker from "./MemeCardSetPicker";
 import MaxVotesPerIdentityInput from "./MaxVotesPerIdentityInput";
 import NegativeVotingToggle from "./NegativeVotingToggle";
@@ -24,6 +25,10 @@ const VOTING_TYPES_ORDER: Record<ApiWaveCreditType, number | undefined> = {
 
 const TIME_WEIGHTED_DURATION_ERROR =
   "This interval is longer than the wave duration. Choose a shorter interval, extend the wave end date, or clear the end date.";
+const APPROVAL_THRESHOLD_TIME_INVALID_ERROR =
+  "Enter a whole number greater than 0, or leave blank for immediate approval.";
+const APPROVAL_THRESHOLD_TIME_DURATION_ERROR =
+  "This time is longer than the wave duration. Choose a shorter time, extend the wave end date, or clear the end date.";
 
 const VOTING_SETTINGS_GRID_CLASSES =
   "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
@@ -38,6 +43,26 @@ const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
   return WAVE_VOTING_LABELS[votingType];
 };
 
+const getApprovalThresholdTimeErrorMessage = (
+  errors: CREATE_WAVE_VALIDATION_ERROR[]
+): string | undefined => {
+  if (
+    errors.includes(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_EXCEEDS_WAVE_DURATION
+    )
+  ) {
+    return APPROVAL_THRESHOLD_TIME_DURATION_ERROR;
+  }
+
+  if (
+    errors.includes(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID)
+  ) {
+    return APPROVAL_THRESHOLD_TIME_INVALID_ERROR;
+  }
+
+  return undefined;
+};
+
 export default function CreateWaveVoting({
   waveType,
   selectedType,
@@ -50,6 +75,7 @@ export default function CreateWaveVoting({
   allowNegativeVotes,
   maxVotesPerIdentityPerDrop,
   approvalThreshold,
+  approvalThresholdTimeMs,
   errors,
   onTypeChange,
   setCategory,
@@ -58,6 +84,7 @@ export default function CreateWaveVoting({
   onAllowNegativeVotesChange,
   setMaxVotesPerIdentityPerDrop,
   setApprovalThreshold,
+  setApprovalThresholdTimeMs,
   timeWeighted,
   onTimeWeightedChange,
 }: {
@@ -72,6 +99,7 @@ export default function CreateWaveVoting({
   readonly allowNegativeVotes: boolean;
   readonly maxVotesPerIdentityPerDrop: number | null;
   readonly approvalThreshold: number | null;
+  readonly approvalThresholdTimeMs: number | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
@@ -80,6 +108,7 @@ export default function CreateWaveVoting({
   readonly onAllowNegativeVotesChange: (allowNegativeVotes: boolean) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
   readonly setApprovalThreshold: (value: number | null) => void;
+  readonly setApprovalThresholdTimeMs: (value: number | null) => void;
   readonly timeWeighted: TimeWeightedVotingConfig;
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
@@ -101,6 +130,8 @@ export default function CreateWaveVoting({
   const approvalThresholdError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
   );
+  const approvalThresholdTimeErrorMessage =
+    getApprovalThresholdTimeErrorMessage(errors);
   const showVotingSettings = waveType !== ApiWaveType.Chat;
 
   return (
@@ -166,11 +197,18 @@ export default function CreateWaveVoting({
           />
 
           {waveType === ApiWaveType.Approve && (
-            <CreateWaveVotingThreshold
-              threshold={approvalThreshold}
-              error={approvalThresholdError}
-              setThreshold={setApprovalThreshold}
-            />
+            <>
+              <CreateWaveVotingThreshold
+                threshold={approvalThreshold}
+                error={approvalThresholdError}
+                setThreshold={setApprovalThreshold}
+              />
+              <CreateWaveVotingThresholdTime
+                thresholdTimeMs={approvalThresholdTimeMs}
+                errorMessage={approvalThresholdTimeErrorMessage}
+                setThresholdTimeMs={setApprovalThresholdTimeMs}
+              />
+            </>
           )}
         </div>
       )}

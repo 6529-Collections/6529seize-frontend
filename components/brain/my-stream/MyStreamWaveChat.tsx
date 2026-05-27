@@ -242,10 +242,14 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = () => {
     setActiveDropForWave(null);
   };
-  const { winningThreshold, isVotingClosed, isVotingControlsLocked } =
-    useApprovalWaveStatus({
-      wave,
-    });
+  const {
+    winningThreshold,
+    winningThresholdMinDurationMs,
+    isVotingClosed,
+    isVotingControlsLocked,
+  } = useApprovalWaveStatus({
+    wave,
+  });
   const fixedDropMode = DropMode.CHAT;
   const activeChatSubmitDropExperience =
     chatSubmitDrop?.submissionExperience ?? null;
@@ -461,6 +465,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           onDropContentClick={onDropClick}
           isMuted={wave.metrics.muted}
           winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
           isVotingClosed={isVotingClosed}
           isVotingControlsLocked={isVotingControlsLocked}
         />

@@ -9563,6 +9563,15 @@ components:
           format: int64
           minimum: 1
           nullable: true
+        winning_threshold_min_duration_ms:
+          description: >-
+            Milliseconds a drop must continuously stay at or above
+            winning_threshold before winning an APPROVE wave. Defaults to 0,
+            which declares a winner as soon as the threshold is reached.
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
         max_winners:
           description: >-
             Total number of APPROVE decisions this wave may produce. Null means
@@ -10043,25 +10052,32 @@ components:
       required:
         - data_key
         - data_value
+      description: >-
+        Drop metadata. data_value maximum length is 255 when data_key is title,
+        8000 when data_key is description, and 5000 for all other metadata keys.
       properties:
         data_key:
           type: string
           maxLength: 500
         data_value:
           type: string
-          maxLength: 5000
+          maxLength: 8000
     ApiDropMetadataResponse:
       type: object
       required:
         - data_key
         - data_value
+      description: >-
+        Drop metadata response. data_value maximum length is 255 when data_key
+        is title, 8000 when data_key is description, and 5000 for all other
+        metadata keys.
       properties:
         data_key:
           type: string
           maxLength: 500
         data_value:
           type: string
-          maxLength: 5000
+          maxLength: 8000
         resolved_profile:
           anyOf:
             - type: "null"
@@ -10071,13 +10087,17 @@ components:
       required:
         - data_key
         - data_value
+      description: >-
+        Drop metadata V2 response. data_value maximum length is 255 when
+        data_key is title, 8000 when data_key is description, and 5000 for all
+        other metadata keys.
       properties:
         data_key:
           type: string
           maxLength: 500
         data_value:
           type: string
-          maxLength: 5000
+          maxLength: 8000
         resolved_profile:
           $ref: "#/components/schemas/ApiDropResolvedIdentityProfileV2"
     ApiDropNftLink:
@@ -12954,6 +12974,14 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropVoting"
         has_metadata:
           type: boolean
+        over_threshold_since_ms:
+          description: >-
+            Unix timestamp in milliseconds when this active APPROVE submission
+            most recently started continuously meeting the winning threshold.
+            Omitted unless the drop is currently over threshold and has not yet
+            won.
+          type: integer
+          format: int64
     ApiSubmissionDropStatus:
       type: string
       enum:
@@ -13528,6 +13556,7 @@ components:
         - type
         - time_lock_ms
         - winning_threshold
+        - winning_threshold_min_duration_ms
         - max_winners
         - max_votes_per_identity_to_drop
         - admin_group
@@ -13548,6 +13577,15 @@ components:
           type: integer
           format: int64
           minimum: 1
+          nullable: true
+        winning_threshold_min_duration_ms:
+          description: >-
+            Milliseconds a drop must continuously stay at or above
+            winning_threshold before winning an APPROVE wave. Null for
+            non-APPROVE waves.
+          type: integer
+          format: int64
+          minimum: 0
           nullable: true
         max_winners:
           description: >-

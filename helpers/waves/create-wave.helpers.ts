@@ -467,6 +467,10 @@ export const getCreateNewWaveBody = ({
         config.overview.type === ApiWaveType.Approve
           ? config.approval.threshold
           : null,
+      winning_threshold_min_duration_ms:
+        config.overview.type === ApiWaveType.Approve
+          ? (config.approval.thresholdTimeMs ?? 0)
+          : null,
       // TODO - should be in outcomes
       max_winners: getApproveMaxWinners({ config }),
       max_votes_per_identity_to_drop:

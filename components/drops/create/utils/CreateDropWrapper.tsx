@@ -98,6 +98,24 @@ interface CreateDropWrapperProps {
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
+let fallbackDropPartClientId = 0;
+
+const createDropPartClientId = (): string => {
+  if (
+    typeof globalThis.crypto !== "undefined" &&
+    typeof globalThis.crypto.randomUUID === "function"
+  ) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  fallbackDropPartClientId += 1;
+  return `drop-part-${Date.now()}-${fallbackDropPartClientId}`;
+};
+
+const getDropPartClientId = (part: CreateDropPart): string =>
+  part.clientId ??
+  (part.id !== undefined ? `${part.id}` : createDropPartClientId());
+
 const CreateDropWrapper = forwardRef<
   CreateDropWrapperHandles,
   CreateDropWrapperProps
@@ -436,6 +454,7 @@ const CreateDropWrapper = forwardRef<
 
         return {
           ...part,
+          clientId: getDropPartClientId(part),
           media: media !== undefined ? [...media] : [],
           ...(part.attachments !== undefined && {
             attachments: [...part.attachments],
@@ -460,6 +479,7 @@ const CreateDropWrapper = forwardRef<
       }
 
       return {
+        clientId: createDropPartClientId(),
         content: hasMarkdown ? markdown : null,
         quoted_drop:
           quotedDrop && existingPartsCount === 0

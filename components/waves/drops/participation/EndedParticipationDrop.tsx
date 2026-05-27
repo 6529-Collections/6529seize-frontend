@@ -49,6 +49,7 @@ interface EndedParticipationDropProps {
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;

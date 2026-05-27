@@ -36,6 +36,9 @@ describe("commonApiFetch", () => {
         }),
       })
     );
+    expect(fetchMock.mock.calls[0][1].headers["x-6529-launch-id"]).toBe(
+      undefined
+    );
     expect(result).toEqual({ result: 1 });
   });
 
@@ -87,6 +90,9 @@ describe("commonApiPost", () => {
         }),
         body: JSON.stringify({ v: 1 }),
       })
+    );
+    expect(fetchMock.mock.calls[0][1].headers["x-6529-launch-id"]).toBe(
+      undefined
     );
     expect(result).toEqual({ res: 1 });
   });

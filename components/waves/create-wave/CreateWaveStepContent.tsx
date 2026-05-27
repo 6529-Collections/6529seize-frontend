@@ -57,6 +57,7 @@ export default function CreateWaveStepContent({
     onAllowNegativeVotesChange,
     onTimeWeightedVotingChange,
     onThresholdChange,
+    onThresholdTimeChange,
     onApprovalMaxWinnersChange,
     onChatEnabledChange,
   } = controller;
@@ -117,6 +118,7 @@ export default function CreateWaveStepContent({
           allowNegativeVotes={config.voting.allowNegativeVotes}
           maxVotesPerIdentityPerDrop={config.voting.maxVotesPerIdentityPerDrop}
           approvalThreshold={config.approval.threshold}
+          approvalThresholdTimeMs={config.approval.thresholdTimeMs}
           errors={errors}
           onTypeChange={onVotingTypeChange}
           setCategory={onCategoryChange}
@@ -125,6 +127,7 @@ export default function CreateWaveStepContent({
           onAllowNegativeVotesChange={onAllowNegativeVotesChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
           setApprovalThreshold={onThresholdChange}
+          setApprovalThresholdTimeMs={onThresholdTimeChange}
           timeWeighted={config.voting.timeWeighted}
           onTimeWeightedChange={onTimeWeightedVotingChange}
         />

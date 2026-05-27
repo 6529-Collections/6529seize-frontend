@@ -25,6 +25,7 @@ export interface ParticipationDropProps {
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;

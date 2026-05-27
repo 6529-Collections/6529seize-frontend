@@ -12,6 +12,10 @@ import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import {
+  flushMobileLaunchTiming,
+  markMobileLaunchStep,
+} from "@/utils/monitoring/mobileLaunchTiming";
 import type { ComponentType, ReactNode } from "react";
 
 export default function LayoutWrapper({
@@ -69,6 +73,25 @@ export default function LayoutWrapper({
 
   const isAccessOrRestricted =
     pathname?.startsWith("/access") || pathname?.startsWith("/restricted");
+
+  useEffect(() => {
+    const flushAfterPaint = () => {
+      markMobileLaunchStep("first_useful_app_shell");
+      flushMobileLaunchTiming("shell_paint");
+    };
+
+    if (typeof globalThis.requestAnimationFrame === "function") {
+      const frameId = globalThis.requestAnimationFrame(flushAfterPaint);
+      return () => {
+        globalThis.cancelAnimationFrame(frameId);
+      };
+    }
+
+    const timeoutId = globalThis.setTimeout(flushAfterPaint, 0);
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [pathname]);
 
   let LayoutComponent: ComponentType<{ readonly children: ReactNode }> =
     WebLayout;

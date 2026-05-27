@@ -11,7 +11,13 @@ import {
   useRef,
 } from "react";
 import type { EditorState } from "lexical";
-import { RootNode, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import {
+  RootNode,
+  COMMAND_PRIORITY_CRITICAL,
+  COMMAND_PRIORITY_HIGH,
+  KEY_ARROW_UP_COMMAND,
+  createCommand,
+} from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -89,6 +95,70 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
   return null;
 }
 
+export function EditLastDropArrowUpPlugin({
+  canEditLastDropWithArrow,
+  onRequestEditLastDrop,
+  canUseArrowUpShortcut,
+}: {
+  readonly canEditLastDropWithArrow: boolean;
+  readonly onRequestEditLastDrop?: (() => boolean) | undefined;
+  readonly canUseArrowUpShortcut: () => boolean;
+}) {
+  const [editor] = useLexicalComposerContext();
+  const canEditLastDropWithArrowRef = useRef(canEditLastDropWithArrow);
+  const onRequestEditLastDropRef = useRef(onRequestEditLastDrop);
+  const canUseArrowUpShortcutRef = useRef(canUseArrowUpShortcut);
+
+  useEffect(() => {
+    canEditLastDropWithArrowRef.current = canEditLastDropWithArrow;
+  }, [canEditLastDropWithArrow]);
+
+  useEffect(() => {
+    onRequestEditLastDropRef.current = onRequestEditLastDrop;
+  }, [onRequestEditLastDrop]);
+
+  useEffect(() => {
+    canUseArrowUpShortcutRef.current = canUseArrowUpShortcut;
+  }, [canUseArrowUpShortcut]);
+
+  useEffect(
+    () =>
+      editor.registerCommand(
+        KEY_ARROW_UP_COMMAND,
+        (event: KeyboardEvent) => {
+          if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.altKey ||
+            event.shiftKey
+          ) {
+            return false;
+          }
+
+          if (
+            !canEditLastDropWithArrowRef.current ||
+            !onRequestEditLastDropRef.current ||
+            !canUseArrowUpShortcutRef.current()
+          ) {
+            return false;
+          }
+
+          const handled = onRequestEditLastDropRef.current();
+          if (!handled) {
+            return false;
+          }
+
+          event.preventDefault();
+          return true;
+        },
+        COMMAND_PRIORITY_HIGH
+      ),
+    [editor]
+  );
+
+  return null;
+}
+
 const CreateDropInput = forwardRef<
   CreateDropInputHandles,
   {
@@ -111,6 +181,8 @@ const CreateDropInput = forwardRef<
     readonly onAttachmentFiles?: ((files: File[]) => void) | undefined;
     readonly hasValidationError?: boolean | undefined;
     readonly validationHelperText?: string | null | undefined;
+    readonly canEditLastDropWithArrow?: boolean | undefined;
+    readonly onRequestEditLastDrop?: (() => boolean) | undefined;
   }
 >(
   (
@@ -131,6 +203,8 @@ const CreateDropInput = forwardRef<
       onAttachmentFiles,
       hasValidationError = false,
       validationHelperText = null,
+      canEditLastDropWithArrow = false,
+      onRequestEditLastDrop,
       onDrop,
     },
     ref
@@ -221,19 +295,19 @@ const CreateDropInput = forwardRef<
     }));
 
     const mentionsPluginRef = useRef<NewMentionsPluginHandles | null>(null);
-    const isMentionsOpen = () => !!mentionsPluginRef.current?.isMentionsOpen();
-
     const hashtagPluginRef = useRef<NewHastagsPluginHandles | null>(null);
-    const isHashtagsOpen = () => !!hashtagPluginRef.current?.isHashtagsOpen();
-
     const waveMentionsPluginRef = useRef<NewWaveMentionsPluginHandles | null>(
       null
     );
-    const isWaveMentionsOpen = () =>
-      !!waveMentionsPluginRef.current?.isWaveMentionsOpen();
+    const canUseShortcutKeys = useCallback(
+      () =>
+        !mentionsPluginRef.current?.isMentionsOpen() &&
+        !hashtagPluginRef.current?.isHashtagsOpen() &&
+        !waveMentionsPluginRef.current?.isWaveMentionsOpen(),
+      []
+    );
 
-    const canSubmitWithEnter = () =>
-      !isMentionsOpen() && !isHashtagsOpen() && !isWaveMentionsOpen();
+    const canSubmitWithEnter = canUseShortcutKeys;
 
     const canSubmitRef = useRef(canSubmit);
     const onDropRef = useRef(onDrop);
@@ -333,6 +407,11 @@ const CreateDropInput = forwardRef<
                 handleSubmit={handleSubmit}
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={submitting}
+              />
+              <EditLastDropArrowUpPlugin
+                canEditLastDropWithArrow={canEditLastDropWithArrow}
+                onRequestEditLastDrop={onRequestEditLastDrop}
+                canUseArrowUpShortcut={canUseShortcutKeys}
               />
               <EmojiPlugin />
             </div>

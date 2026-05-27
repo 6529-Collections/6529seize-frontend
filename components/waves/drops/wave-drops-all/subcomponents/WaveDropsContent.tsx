@@ -49,6 +49,7 @@ interface WaveDropsContentProps {
   readonly autoCollapseSerials?: ReadonlySet<number> | undefined;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
 }
@@ -81,6 +82,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   autoCollapseSerials,
   suspendLightDropHydration = false,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
 }) => {
@@ -141,6 +143,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         autoCollapseSerials={autoCollapseSerials}
         suspendLightDropHydration={suspendLightDropHydration}
         winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
       />

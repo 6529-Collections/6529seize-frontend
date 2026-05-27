@@ -49,6 +49,7 @@ interface OngoingParticipationDropProps {
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
+  readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
@@ -72,6 +73,7 @@ export default function OngoingParticipationDrop({
   timestampLayout = "inline",
   showInteractions = true,
   winningThreshold,
+  winningThresholdMinDurationMs,
   isVotingClosed = false,
   isVotingControlsLocked = false,
   contentPresentation = "default",
@@ -208,6 +210,7 @@ export default function OngoingParticipationDrop({
             voteAction={voteAction}
             showInteractions={showInteractions}
             winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
             isVotingClosed={isVotingClosed}
             isVotingControlsLocked={isVotingControlsLocked}
           />
