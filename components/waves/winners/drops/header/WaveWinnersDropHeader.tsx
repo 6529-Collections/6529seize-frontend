@@ -1,12 +1,12 @@
+import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
+import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
+import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
 import React from "react";
+import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
 import WaveWinnersDropHeaderTotalVotes from "./WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./WaveWinnersDropHeaderVoters";
-import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
-import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
-import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
-import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
-import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
-import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 
 interface WaveWinnersDropHeaderProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -40,7 +40,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
             decisionTime={winner.drop.winning_context?.decision_time ?? null}
           />
         )}
-        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
         <WaveDropTime timestamp={winner.drop.created_at} />
       </div>
 

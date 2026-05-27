@@ -56,7 +56,7 @@ export default function MemeWinnerArtistInfo({
             )}
           </p>
 
-          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+          <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
           <p className="tw-mb-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
             {getTimeAgoShort(drop.created_at)}
           </p>
