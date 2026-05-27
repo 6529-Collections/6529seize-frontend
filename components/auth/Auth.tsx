@@ -185,6 +185,9 @@ export default function Auth({
   const [authLoadingState, setAuthLoadingState] = useState<
     "idle" | "validating" | "signing"
   >("idle");
+  const [pendingProfileSwitch, setPendingProfileSwitch] = useState<{
+    readonly targetAddress: string | null;
+  } | null>(null);
 
   // Centralized abort mechanism for cancelling in-flight operations
   const abortCurrentAuthOperation = useCallback(() => {
@@ -844,27 +847,53 @@ export default function Auth({
 
   useEffect(() => {
     const onProfileSwitched = () => {
-      globalThis.setTimeout(() => {
-        invalidateAuthSensitiveQueries();
-        navigateAfterProfileSwitch();
-      }, 0);
+      const targetAddress = getWalletAddress()?.toLowerCase() ?? null;
+      setPendingProfileSwitch({
+        targetAddress,
+      });
     };
 
     if (globalThis.window === undefined) {
       return;
     }
 
-    globalThis.window.addEventListener(
-      PROFILE_SWITCHED_EVENT,
-      onProfileSwitched
-    );
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, onProfileSwitched);
     return () => {
-      globalThis.window.removeEventListener(
-        PROFILE_SWITCHED_EVENT,
-        onProfileSwitched
-      );
+      globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, onProfileSwitched);
     };
-  }, [invalidateAuthSensitiveQueries, navigateAfterProfileSwitch]);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingProfileSwitch) {
+      return;
+    }
+
+    const targetAddress = pendingProfileSwitch.targetAddress;
+    const currentAddress = address?.toLowerCase() ?? null;
+    if (targetAddress && targetAddress !== currentAddress) {
+      return;
+    }
+
+    if (fetchingProfile) {
+      return;
+    }
+
+    const timeoutId = globalThis.setTimeout(() => {
+      invalidateAuthSensitiveQueries();
+      navigateAfterProfileSwitch();
+      setPendingProfileSwitch(null);
+    }, 0);
+
+    return () => {
+      globalThis.clearTimeout(timeoutId);
+    };
+  }, [
+    address,
+    fetchingProfile,
+    invalidateAuthSensitiveQueries,
+    navigateAfterProfileSwitch,
+    pendingProfileSwitch,
+  ]);
 
   useEffect(() => {
     if (!address || isAddressAuthorized) {

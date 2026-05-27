@@ -6,6 +6,9 @@ import EditLastDropArrowUpPlugin from "@/components/waves/EditLastDropArrowUpPlu
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 
 const mockRegisterCommand = jest.fn(() => jest.fn());
+let mockMentionsOpen = false;
+let mockHashtagsOpen = false;
+let mockWaveMentionsOpen = false;
 
 // Mock all lexical plugins and context
 jest.mock("@lexical/react/LexicalComposer", () => ({
@@ -69,21 +72,36 @@ jest.mock(
   "@/components/drops/create/lexical/plugins/mentions/MentionsPlugin",
   () => ({
     __esModule: true,
-    default: React.forwardRef<any, any>(() => <div />),
+    default: React.forwardRef<any, any>((_, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        isMentionsOpen: () => mockMentionsOpen,
+      }));
+      return <div />;
+    }),
   })
 );
 jest.mock(
   "@/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin",
   () => ({
     __esModule: true,
-    default: React.forwardRef<any, any>(() => <div />),
+    default: React.forwardRef<any, any>((_, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        isHashtagsOpen: () => mockHashtagsOpen,
+      }));
+      return <div />;
+    }),
   })
 );
 jest.mock(
   "@/components/drops/create/lexical/plugins/waves/WaveMentionsPlugin",
   () => ({
     __esModule: true,
-    default: React.forwardRef<any, any>(() => <div />),
+    default: React.forwardRef<any, any>((_, ref) => {
+      React.useImperativeHandle(ref, () => ({
+        isWaveMentionsOpen: () => mockWaveMentionsOpen,
+      }));
+      return <div />;
+    }),
   })
 );
 jest.mock("@/components/drops/create/lexical/plugins/MaxLengthPlugin", () => ({
@@ -122,8 +140,31 @@ const createKeyboardEvent = (
     ...overrides,
   }) as unknown as KeyboardEvent;
 
+const renderInput = (
+  props: Partial<React.ComponentProps<typeof CreateDropInput>> = {}
+) =>
+  render(
+    <CreateDropInput
+      waveId="w"
+      editorState={null}
+      type={null}
+      canSubmit={false}
+      isStormMode={false}
+      isDropMode={false}
+      submitting={false}
+      onEditorState={jest.fn()}
+      onReferencedNft={jest.fn()}
+      onMentionedUser={jest.fn()}
+      onMentionedWave={jest.fn()}
+      {...props}
+    />
+  );
+
 beforeEach(() => {
   mockRegisterCommand.mockClear();
+  mockMentionsOpen = false;
+  mockHashtagsOpen = false;
+  mockWaveMentionsOpen = false;
 });
 
 it("shows storm placeholder", () => {
@@ -215,13 +256,7 @@ it("renders validation helper text when provided", () => {
 describe("EditLastDropArrowUpPlugin", () => {
   it("triggers the callback and prevents default when enabled", () => {
     const onRequestEditLastDrop = jest.fn(() => true);
-    render(
-      <EditLastDropArrowUpPlugin
-        canEditLastDropWithArrow={true}
-        onRequestEditLastDrop={onRequestEditLastDrop}
-        canUseArrowUpShortcut={() => true}
-      />
-    );
+    renderInput({ canEditLastDropWithArrow: true, onRequestEditLastDrop });
 
     const event = createKeyboardEvent();
     const handled = getArrowUpHandler()?.(event);
@@ -233,13 +268,7 @@ describe("EditLastDropArrowUpPlugin", () => {
 
   it("does nothing when disabled", () => {
     const onRequestEditLastDrop = jest.fn(() => true);
-    render(
-      <EditLastDropArrowUpPlugin
-        canEditLastDropWithArrow={false}
-        onRequestEditLastDrop={onRequestEditLastDrop}
-        canUseArrowUpShortcut={() => true}
-      />
-    );
+    renderInput({ canEditLastDropWithArrow: false, onRequestEditLastDrop });
 
     const event = createKeyboardEvent();
     const handled = getArrowUpHandler()?.(event);
@@ -260,13 +289,7 @@ describe("EditLastDropArrowUpPlugin", () => {
     for (const modifier of modifiers) {
       mockRegisterCommand.mockClear();
       const onRequestEditLastDrop = jest.fn(() => true);
-      render(
-        <EditLastDropArrowUpPlugin
-          canEditLastDropWithArrow={true}
-          onRequestEditLastDrop={onRequestEditLastDrop}
-          canUseArrowUpShortcut={() => true}
-        />
-      );
+      renderInput({ canEditLastDropWithArrow: true, onRequestEditLastDrop });
 
       const event = createKeyboardEvent({ [modifier]: true });
       const handled = getArrowUpHandler()?.(event);
@@ -279,13 +302,11 @@ describe("EditLastDropArrowUpPlugin", () => {
 
   it("does nothing while a suggestion menu is open", () => {
     const onRequestEditLastDrop = jest.fn(() => true);
-    render(
-      <EditLastDropArrowUpPlugin
-        canEditLastDropWithArrow={true}
-        onRequestEditLastDrop={onRequestEditLastDrop}
-        canUseArrowUpShortcut={() => false}
-      />
-    );
+    mockMentionsOpen = true;
+    renderInput({
+      canEditLastDropWithArrow: true,
+      onRequestEditLastDrop,
+    });
 
     const event = createKeyboardEvent();
     const handled = getArrowUpHandler()?.(event);
@@ -297,13 +318,7 @@ describe("EditLastDropArrowUpPlugin", () => {
 
   it("does not prevent default when the callback returns false", () => {
     const onRequestEditLastDrop = jest.fn(() => false);
-    render(
-      <EditLastDropArrowUpPlugin
-        canEditLastDropWithArrow={true}
-        onRequestEditLastDrop={onRequestEditLastDrop}
-        canUseArrowUpShortcut={() => true}
-      />
-    );
+    renderInput({ canEditLastDropWithArrow: true, onRequestEditLastDrop });
 
     const event = createKeyboardEvent();
     const handled = getArrowUpHandler()?.(event);
