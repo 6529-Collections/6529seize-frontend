@@ -1,4 +1,10 @@
-import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import Auth, { AuthContext, useAuth } from "@/components/auth/Auth";

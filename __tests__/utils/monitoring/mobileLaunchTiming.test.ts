@@ -296,5 +296,4 @@ describe("mobileLaunchTiming", () => {
       })
     );
   });
-
 });
