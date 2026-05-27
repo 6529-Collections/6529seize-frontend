@@ -1,15 +1,15 @@
-import type { ReactNode } from "react";
-import Link from "next/link";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
-import WinnerDropBadge from "../winner/WinnerDropBadge";
-import WaveDropTime from "../time/WaveDropTime";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import type { DropTimestampLayout } from "../drop.types";
+import WaveDropTime from "../time/WaveDropTime";
+import WinnerDropBadge from "../winner/WinnerDropBadge";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
@@ -74,7 +74,7 @@ export default function ParticipationDropHeader({
           />
           {statusBadge}
           {!isStackedTimestamp && (
-            <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+            <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
           )}
           {!isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
         </div>

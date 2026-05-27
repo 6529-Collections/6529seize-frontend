@@ -1,17 +1,17 @@
 "use client";
 
-import { memo, useCallback } from "react";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import Link from "next/link";
+import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { DropContentSmall } from "./drops/DropContentSmall";
-import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
-import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
-import WaveDropTime from "../drops/time/WaveDropTime";
-import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import Link from "next/link";
+import { memo, useCallback } from "react";
+import WaveDropTime from "../drops/time/WaveDropTime";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnerIdentity } from "./identity/WaveWinnerIdentity";
+import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -145,7 +145,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                   </span>
                 </Link>
               </UserProfileTooltipWrapper>
-              <span className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></span>
+              <span className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></span>
               <WaveDropTime timestamp={drop.created_at} />
             </div>
           </div>

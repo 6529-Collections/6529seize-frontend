@@ -5,7 +5,6 @@ import HoverCard from "./HoverCard";
 import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { ArtistPreviewModal } from "@/components/waves/drops/ArtistPreviewModal";
-import { WaveCreatorPreviewModal } from "@/components/waves/drops/WaveCreatorPreviewModal";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 
@@ -29,16 +28,12 @@ export default function UserProfileTooltipWrapper({
     readonly user: ApiProfileMin;
     readonly activeTab: ArtistPreviewTab;
   } | null>(null);
-  const [waveCreatorUser, setWaveCreatorUser] = useState<ApiProfileMin | null>(
-    null
-  );
 
   const handleArtistPreviewOpen = useCallback(
     (params: {
       readonly user: ApiProfileMin;
       readonly initialTab: ArtistPreviewTab;
     }) => {
-      setWaveCreatorUser(null);
       setArtistPreview({
         user: params.user,
         activeTab: params.initialTab,
@@ -64,18 +59,6 @@ export default function UserProfileTooltipWrapper({
     setArtistPreview(null);
   }, []);
 
-  const handleWaveCreatorPreviewOpen = useCallback(
-    (modalUser: ApiProfileMin) => {
-      setArtistPreview(null);
-      setWaveCreatorUser(modalUser);
-    },
-    []
-  );
-
-  const handleWaveCreatorPreviewClose = useCallback(() => {
-    setWaveCreatorUser(null);
-  }, []);
-
   // If it's a touch device, just render the children without the tooltip
   if (hasTouchScreen) {
     return <>{children}</>;
@@ -88,7 +71,6 @@ export default function UserProfileTooltipWrapper({
           <UserProfileTooltip
             user={user}
             onArtistPreviewOpen={handleArtistPreviewOpen}
-            onWaveCreatorPreviewOpen={handleWaveCreatorPreviewOpen}
           />
         }
         ariaLabel={ariaLabel}
@@ -105,13 +87,6 @@ export default function UserProfileTooltipWrapper({
           user={artistPreview.user}
           activeTab={artistPreview.activeTab}
           onTabChange={handleArtistPreviewTabChange}
-        />
-      )}
-      {waveCreatorUser && (
-        <WaveCreatorPreviewModal
-          isOpen
-          onClose={handleWaveCreatorPreviewClose}
-          user={waveCreatorUser}
         />
       )}
     </>

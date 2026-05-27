@@ -22,18 +22,18 @@ import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropReactions from "../WaveDropReactions";
-import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
-import {
-  getParticipationIdentityProfile,
-  getParticipationVisibleMetadata,
-} from "./participationIdentityProfile.helpers";
-import type { DropContentPresentation } from "../dropContentPresentation";
 import type {
   DropIdentityMode,
   DropInteractionParams,
   DropTimestampLayout,
 } from "../drop.types";
 import { DropLocation, hasDropFooter } from "../drop.types";
+import type { DropContentPresentation } from "../dropContentPresentation";
+import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
+import {
+  getParticipationIdentityProfile,
+  getParticipationVisibleMetadata,
+} from "./participationIdentityProfile.helpers";
 
 interface EndedParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -189,7 +189,7 @@ export default function EndedParticipationDrop({
                       </p>
 
                       {!isStackedTimestamp && (
-                        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-600"></div>
+                        <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
                       )}
 
                       {!isStackedTimestamp && (
