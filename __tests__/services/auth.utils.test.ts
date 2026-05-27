@@ -1,6 +1,7 @@
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import {
   canStoreAnotherWalletAccount,
+  AUTH_TOKEN_CHANGED_EVENT,
   clearAllWalletAuth,
   getConnectedWalletAccounts,
   getAuthJwt,
@@ -8,6 +9,7 @@ import {
   getStagingAuth,
   getWalletAddress,
   isAuthAddressAuthorized,
+  PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
   setActiveWalletAccount,
   setAuthJwt,
@@ -83,6 +85,18 @@ describe("auth.utils", () => {
       "auth-role-addr",
       "role"
     );
+  });
+
+  it("emits an auth token changed event when the wallet auth cookie changes", () => {
+    const listener = jest.fn();
+    globalThis.addEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("addr", "jwt", "refresh", "role");
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    globalThis.removeEventListener(AUTH_TOKEN_CHANGED_EVENT, listener);
   });
 
   it("setAuthJwt clears role storage when role is missing", () => {
@@ -244,6 +258,22 @@ describe("auth.utils", () => {
     expect(
       getConnectedWalletAccounts().map((account) => account.address)
     ).toEqual(["0xAaA", "0xBbB"]);
+  });
+
+  it("emits profile switched when a new login changes the active account", () => {
+    setupStorageMocks();
+    const listener = jest.fn();
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, listener);
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0xAaA", "jwt-a", "refresh-a", "role-a");
+    expect(listener).not.toHaveBeenCalled();
+
+    setAuthJwt("0xBbB", "jwt-b", "refresh-b", "role-b");
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, listener);
   });
 
   it("removeAuthJwt promotes next connected account", () => {

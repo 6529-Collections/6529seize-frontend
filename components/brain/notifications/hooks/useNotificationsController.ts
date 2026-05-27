@@ -66,6 +66,7 @@ export const useNotificationsController =
   (): UseNotificationsControllerResult => {
     const {
       connectedProfile,
+      isAuthenticated: isAuthContextAuthenticated,
       activeProfileProxy,
       fetchingProfile,
       requestAuth,
@@ -85,13 +86,16 @@ export const useNotificationsController =
     const timeoutToastShownRef = useRef(false);
     const lastErrorMessageRef = useRef<string | null>(null);
 
-    const [activeFilter, setActiveFilter] =
-      useState<NotificationFilter | null>(null);
+    const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
+      null
+    );
     const [hasTimedOut, setHasTimedOut] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const reload = searchParams?.get("reload") ?? undefined;
-    const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
+    const isAuthenticated =
+      (isAuthContextAuthenticated ?? !!connectedProfile?.handle) &&
+      !activeProfileProxy;
     const isLoadingProfile = fetchingProfile && !connectedProfile;
     const hasConnectedProfile = !!connectedProfile;
     const hasProfileHandle = !!connectedProfile?.handle;
@@ -365,7 +369,7 @@ export const useNotificationsController =
     const showProxyDisabledState = !!activeProfileProxy;
     const resolvedErrorMessage = hasTimedOut
       ? LOAD_TIMEOUT_MESSAGE
-      : errorMessage ?? DEFAULT_ERROR_MESSAGE;
+      : (errorMessage ?? DEFAULT_ERROR_MESSAGE);
 
     const contentState = useMemo<NotificationsContentState>(
       () => ({

@@ -95,6 +95,7 @@ class NonceResponseValidationError extends Error {
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
+  readonly isAuthenticated?: boolean;
   readonly fetchingProfile: boolean;
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ApiProfileProxy[];
@@ -115,6 +116,7 @@ type AuthContextType = {
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
+  isAuthenticated: false,
   fetchingProfile: false,
   receivedProfileProxies: [],
   activeProfileProxy: null,
@@ -136,7 +138,9 @@ export default function Auth({
   readonly children: React.ReactNode;
   readonly enableWalletAuthentication?: boolean;
 }) {
-  const { invalidateAll } = useContext(ReactQueryWrapperContext);
+  const { invalidateAll, invalidateAuthSensitiveQueries } = useContext(
+    ReactQueryWrapperContext
+  );
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -840,8 +844,10 @@ export default function Auth({
 
   useEffect(() => {
     const onProfileSwitched = () => {
-      invalidateAll();
-      navigateAfterProfileSwitch();
+      globalThis.setTimeout(() => {
+        invalidateAuthSensitiveQueries();
+        navigateAfterProfileSwitch();
+      }, 0);
     };
 
     if (globalThis.window === undefined) {
@@ -858,11 +864,29 @@ export default function Auth({
         onProfileSwitched
       );
     };
-  }, [invalidateAll, navigateAfterProfileSwitch]);
+  }, [invalidateAuthSensitiveQueries, navigateAfterProfileSwitch]);
+
+  useEffect(() => {
+    if (!address || isAddressAuthorized) {
+      return;
+    }
+
+    navigateAfterProfileSwitch();
+  }, [address, isAddressAuthorized, navigateAfterProfileSwitch]);
 
   const showWaves = useMemo(() => {
-    return !!connectedProfile?.handle && !activeProfileProxy && !!address;
-  }, [connectedProfile?.handle, activeProfileProxy, address]);
+    return (
+      !!connectedProfile?.handle &&
+      !activeProfileProxy &&
+      !!address &&
+      isAddressAuthorized
+    );
+  }, [
+    connectedProfile?.handle,
+    activeProfileProxy,
+    address,
+    isAddressAuthorized,
+  ]);
 
   const onCancelSignRequest = useCallback(() => {
     setShowSignModal(false);
@@ -894,6 +918,7 @@ export default function Auth({
         requestAuth,
         setToast,
         connectedProfile: connectedProfile ?? null,
+        isAuthenticated: !!connectedProfile?.handle && isAddressAuthorized,
         fetchingProfile,
         receivedProfileProxies,
         activeProfileProxy,
