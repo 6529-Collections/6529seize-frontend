@@ -298,9 +298,8 @@ describe("mobileLaunchTiming", () => {
   });
 
   it("sanitizes endpoints and route families", async () => {
-    const sanitizers = await import(
-      "@/utils/monitoring/mobileLaunchTimingSanitizers"
-    );
+    const sanitizers =
+      await import("@/utils/monitoring/mobileLaunchTimingSanitizers");
 
     expect(
       sanitizers.sanitizeEndpointGroup(
@@ -312,9 +311,7 @@ describe("mobileLaunchTiming", () => {
         "/api/waves/0x1234567890123456789012345678901234567890/drops/123?handle=secret"
       )
     ).toBe("/api/waves/:wallet/drops/:id");
-    expect(sanitizers.sanitizeRouteFamily("/alice?jwt=secret")).toBe(
-      "/[user]"
-    );
+    expect(sanitizers.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
     expect(sanitizers.sanitizeRouteFamily("/messages/wave-123")).toBe(
       "/messages/[wave]"
     );
