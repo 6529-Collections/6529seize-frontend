@@ -219,8 +219,19 @@ export default function HeaderSearchModalItem({
       return page.href;
     } else {
       const wave = getWave();
-      return `Wave #${wave.serial_no}`;
+      return wave.id;
     }
+  };
+
+  const getSecondaryTextClassName = () => {
+    const baseClassName =
+      "tw-mb-0 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap";
+
+    if (!isProfile() && !isNft() && !isPage()) {
+      return `${baseClassName} tw-text-xs tw-text-iron-500`;
+    }
+
+    return `${baseClassName} tw-text-sm tw-text-iron-400`;
   };
 
   const primaryText = getPrimaryText();
@@ -251,7 +262,7 @@ export default function HeaderSearchModalItem({
             </span>
           </div>
           <p
-            className="tw-mb-0 tw-min-w-0 tw-overflow-hidden tw-text-ellipsis tw-whitespace-nowrap tw-text-sm tw-text-iron-400"
+            className={getSecondaryTextClassName()}
             title={secondaryText || undefined}
           >
             {secondaryText}

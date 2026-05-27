@@ -16,11 +16,25 @@ interface SeizeQuoteRenderOptions {
   readonly maxEmbedDepth?: number | undefined;
 }
 
-const renderTweetEmbed = (href: string) => {
+const renderTweetEmbed = (
+  href: string,
+  options?: { readonly fullWidth?: boolean | undefined }
+) => {
   const { tweetId, href: normalizedHref } = ensureTwitterLink(href);
+  const fullWidth = options?.fullWidth === true;
   return (
-    <LinkHandlerFrame href={normalizedHref} hideLink overlayAnchor="content">
-      <div className="tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]">
+    <LinkHandlerFrame
+      href={normalizedHref}
+      hideLink
+      overlayAnchor={fullWidth ? "frame" : "content"}
+    >
+      <div
+        className={
+          fullWidth
+            ? "tw-w-full tw-min-w-0"
+            : "tw-w-full tw-min-w-0 tw-flex-1 lg:tw-max-w-[480px]"
+        }
+      >
         <TwitterPreviewCard href={normalizedHref} tweetId={tweetId} />
       </div>
     </LinkHandlerFrame>

@@ -53,6 +53,7 @@ function areEqual(
     "quotePath",
     "embedDepth",
     "maxEmbedDepth",
+    "fullWidthLinkPreviews",
     "onLinkCardActionsActiveChange",
   ];
 

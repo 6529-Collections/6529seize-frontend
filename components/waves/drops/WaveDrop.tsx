@@ -8,6 +8,7 @@ import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUs
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropRequest";
+import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -339,6 +340,10 @@ const getContentBlock = ({
   handleOnReply,
   handleOnEdit,
   hasActiveLinkCardActions,
+  inlineAuthorOnDesktop,
+  mediaImageScale,
+  fullWidthMedia,
+  fullWidthLinkPreviews,
   embedPath,
   quotePath,
   embedDepth,
@@ -378,6 +383,10 @@ const getContentBlock = ({
   readonly handleOnReply: () => void;
   readonly handleOnEdit: () => void;
   readonly hasActiveLinkCardActions: boolean;
+  readonly inlineAuthorOnDesktop: boolean;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia: boolean;
+  readonly fullWidthLinkPreviews: boolean;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -392,25 +401,41 @@ const getContentBlock = ({
         maybeDrop={replyTo.drop ? { ...replyTo.drop, wave: drop.wave } : null}
       />
     )}
-    <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left md:tw-flex-row md:tw-gap-x-3">
+    <div
+      className={`tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-border-0 tw-bg-transparent tw-text-left ${
+        inlineAuthorOnDesktop ? "" : "md:tw-flex-row md:tw-gap-x-3"
+      }`}
+    >
       {showAuthorInfo && (
-        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 md:tw-block md:tw-w-auto md:tw-flex-shrink-0">
+        <div
+          className={`tw-flex tw-w-full tw-items-center tw-gap-x-2 ${
+            inlineAuthorOnDesktop
+              ? ""
+              : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
+          }`}
+        >
           <WaveDropAuthorPfp drop={drop} />
-          <div className="tw-min-w-0 tw-flex-1 md:tw-hidden">
+          <div
+            className={`tw-min-w-0 tw-flex-1 ${
+              inlineAuthorOnDesktop ? "" : "md:tw-hidden"
+            }`}
+          >
             {authorHeader}
           </div>
         </div>
       )}
       <div
         className={`tw-flex tw-w-full tw-flex-col ${
-          showAuthorInfo ? "md:tw-max-w-[calc(100%-3.5rem)]" : ""
+          showAuthorInfo && !inlineAuthorOnDesktop
+            ? "md:tw-max-w-[calc(100%-3.5rem)]"
+            : ""
         }`}
       >
-        {showAuthorInfo ? (
+        {showAuthorInfo && !inlineAuthorOnDesktop ? (
           <div className="tw-hidden md:tw-block">{authorHeader}</div>
-        ) : (
+        ) : !showAuthorInfo ? (
           authorHeader
-        )}
+        ) : null}
         <div
           className={getDropContentClass({
             showAuthorInfo,
@@ -432,6 +457,9 @@ const getContentBlock = ({
             onCancel={handleEditCancel}
             hasTouch={allowLongPress}
             onLinkCardActionsActiveChange={handleLinkCardActionsActiveChange}
+            mediaImageScale={mediaImageScale}
+            fullWidthMedia={fullWidthMedia}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
             embedPath={embedPath}
             quotePath={quotePath}
             embedDepth={embedDepth}
@@ -472,6 +500,10 @@ interface WaveDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -496,6 +528,10 @@ const WaveDrop = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  inlineAuthorOnDesktop = false,
+  mediaImageScale,
+  fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   embedPath,
   quotePath,
   embedDepth,
@@ -797,15 +833,22 @@ const WaveDrop = ({
     handleOnReply,
     handleOnEdit,
     hasActiveLinkCardActions,
+    inlineAuthorOnDesktop,
+    mediaImageScale,
+    fullWidthMedia,
+    fullWidthLinkPreviews,
     embedPath,
     quotePath,
     embedDepth,
     maxEmbedDepth,
   });
 
+  const contentOffsetClass = inlineAuthorOnDesktop
+    ? ""
+    : getContentOffsetClass(compact);
   const reactionsRow = (drop.metadata.length > 0 || showInteractions) && (
     <div
-      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${getContentOffsetClass(compact)}`}
+      className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-mx-2 ${contentOffsetClass}`}
     >
       {drop.metadata.length > 0 && (
         <WaveDropMetadata metadata={drop.metadata} />
@@ -817,9 +860,10 @@ const WaveDrop = ({
     </div>
   );
   const shouldOffsetFooter =
-    showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView);
+    !inlineAuthorOnDesktop &&
+    (showAuthorInfo || (shouldGroupWithPreviousDrop && !isProfileView));
   const footerOffsetClass = shouldOffsetFooter
-    ? getContentOffsetClass(compact)
+    ? contentOffsetClass
     : "";
   const footerRow = hasDropFooter(footer) && (
     <div className={`tw-mt-2 md:tw-mx-2 ${footerOffsetClass}`}>{footer}</div>
