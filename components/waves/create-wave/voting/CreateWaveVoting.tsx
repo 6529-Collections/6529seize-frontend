@@ -6,6 +6,10 @@ import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
+import CreateWaveApprovalTiming, {
+  CreateWaveApprovalTimingMode,
+  getCreateWaveApprovalTimingMode,
+} from "./CreateWaveApprovalTiming";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 import CreateWaveVotingThreshold from "./CreateWaveVotingThreshold";
 import CreateWaveVotingThresholdTime from "./CreateWaveVotingThresholdTime";
@@ -29,6 +33,9 @@ const APPROVAL_THRESHOLD_TIME_INVALID_ERROR =
   "Enter a whole number greater than 0, or leave blank for immediate approval.";
 const APPROVAL_THRESHOLD_TIME_DURATION_ERROR =
   "This time is longer than the wave duration. Choose a shorter time, extend the wave end date, or clear the end date.";
+const APPROVAL_TIMING_CONFLICT_ERROR =
+  "Choose either minimum time above threshold or time-weighted voting.";
+const DEFAULT_APPROVAL_THRESHOLD_TIME_MS = 60 * 1000;
 
 const VOTING_SETTINGS_GRID_CLASSES =
   "tw-mt-6 tw-grid tw-grid-cols-1 tw-gap-3 tw-border-t tw-border-iron-700 tw-pt-6";
@@ -132,7 +139,44 @@ export default function CreateWaveVoting({
   );
   const approvalThresholdTimeErrorMessage =
     getApprovalThresholdTimeErrorMessage(errors);
+  const approvalTimingErrorMessage = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE
+  )
+    ? APPROVAL_TIMING_CONFLICT_ERROR
+    : undefined;
   const showVotingSettings = waveType !== ApiWaveType.Chat;
+  const approvalTimingMode = getCreateWaveApprovalTimingMode({
+    thresholdTimeMs: approvalThresholdTimeMs,
+    timeWeighted,
+  });
+  const timeWeightedConfig =
+    approvalTimingMode === CreateWaveApprovalTimingMode.TIME_WEIGHTED
+      ? { ...timeWeighted, enabled: true }
+      : timeWeighted;
+  const onApprovalTimingModeChange = (
+    mode: CreateWaveApprovalTimingMode
+  ): void => {
+    switch (mode) {
+      case CreateWaveApprovalTimingMode.IMMEDIATE:
+        setApprovalThresholdTimeMs(null);
+        onTimeWeightedChange({ ...timeWeighted, enabled: false });
+        break;
+      case CreateWaveApprovalTimingMode.THRESHOLD_TIME:
+        setApprovalThresholdTimeMs(
+          approvalThresholdTimeMs !== null &&
+            Number.isFinite(approvalThresholdTimeMs) &&
+            approvalThresholdTimeMs > 0
+            ? approvalThresholdTimeMs
+            : DEFAULT_APPROVAL_THRESHOLD_TIME_MS
+        );
+        onTimeWeightedChange({ ...timeWeighted, enabled: false });
+        break;
+      case CreateWaveApprovalTimingMode.TIME_WEIGHTED:
+        setApprovalThresholdTimeMs(null);
+        onTimeWeightedChange({ ...timeWeighted, enabled: true });
+        break;
+    }
+  };
 
   return (
     <div>
@@ -197,20 +241,44 @@ export default function CreateWaveVoting({
           />
 
           {waveType === ApiWaveType.Approve && (
-            <>
-              <CreateWaveVotingThreshold
-                threshold={approvalThreshold}
-                error={approvalThresholdError}
-                setThreshold={setApprovalThreshold}
-              />
+            <CreateWaveVotingThreshold
+              threshold={approvalThreshold}
+              error={approvalThresholdError}
+              setThreshold={setApprovalThreshold}
+            />
+          )}
+        </div>
+      )}
+
+      {waveType === ApiWaveType.Approve && (
+        <>
+          <CreateWaveApprovalTiming
+            selectedMode={approvalTimingMode}
+            errorMessage={approvalTimingErrorMessage}
+            onModeChange={onApprovalTimingModeChange}
+          />
+
+          {approvalTimingMode === CreateWaveApprovalTimingMode.THRESHOLD_TIME && (
+            <div className="tw-mt-3" data-testid="approval-timing-detail">
               <CreateWaveVotingThresholdTime
                 thresholdTimeMs={approvalThresholdTimeMs}
                 errorMessage={approvalThresholdTimeErrorMessage}
                 setThresholdTimeMs={setApprovalThresholdTimeMs}
               />
-            </>
+            </div>
           )}
-        </div>
+
+          {approvalTimingMode === CreateWaveApprovalTimingMode.TIME_WEIGHTED && (
+            <div className="tw-mt-3" data-testid="approval-timing-detail">
+              <TimeWeightedVoting
+                config={timeWeightedConfig}
+                errorMessage={timeWeightedErrorMessage}
+                onChange={onTimeWeightedChange}
+                showToggle={false}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* Negative Voting Toggle - show for Rank and Approve waves */}
@@ -222,8 +290,8 @@ export default function CreateWaveVoting({
         />
       )}
 
-      {/* Show Time-Weighted Voting for Rank and Approve waves */}
-      {waveType !== ApiWaveType.Chat && (
+      {/* Show Time-Weighted Voting for Rank waves */}
+      {waveType === ApiWaveType.Rank && (
         <TimeWeightedVoting
           config={timeWeighted}
           errorMessage={timeWeightedErrorMessage}

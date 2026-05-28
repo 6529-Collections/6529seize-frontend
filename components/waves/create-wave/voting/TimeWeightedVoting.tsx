@@ -19,6 +19,8 @@ interface TimeWeightedVotingProps {
   readonly errorMessage?: string | undefined;
   /** Handler called when configuration changes */
   readonly onChange: (config: TimeWeightedVotingConfig) => void;
+  /** Whether to show the enable/disable toggle */
+  readonly showToggle?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export default function TimeWeightedVoting({
   config,
   errorMessage,
   onChange,
+  showToggle = true,
 }: TimeWeightedVotingProps) {
   // State for validation errors
   const [validationErrors, setValidationErrors] = useState<{
@@ -168,24 +171,27 @@ export default function TimeWeightedVoting({
   );
 
   const intervalErrorMessage = errorMessage ?? validationErrors.interval;
+  const sectionClassName = showToggle
+    ? "tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6"
+    : undefined;
 
   return (
     <section
-      className="tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6"
+      className={sectionClassName}
       data-testid="time-weighted-voting"
     >
-      <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
+      {showToggle && (
+        <TimeWeightedToggle enabled={config.enabled} onToggle={handleToggle} />
+      )}
 
-      {config.enabled && (
-        <div className="tw-grid tw-gap-6 md:tw-grid-cols-2">
-          <AveragingIntervalInput
-            value={inputValue}
-            unit={config.averagingIntervalUnit}
-            onIntervalChange={handleIntervalChange}
-            onUnitChange={handleUnitChange}
-            validationError={intervalErrorMessage}
-          />
-        </div>
+      {(config.enabled || !showToggle) && (
+        <AveragingIntervalInput
+          value={inputValue}
+          unit={config.averagingIntervalUnit}
+          onIntervalChange={handleIntervalChange}
+          onUnitChange={handleUnitChange}
+          validationError={intervalErrorMessage}
+        />
       )}
     </section>
   );
