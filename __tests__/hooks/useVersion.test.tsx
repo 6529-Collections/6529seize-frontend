@@ -4,6 +4,11 @@ describe("useIsVersionStale", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     (global as any).fetch = jest.fn();
+    window.history.replaceState(null, "", "/");
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   function TestComponent({ interval }: { interval?: number | undefined }) {
@@ -36,5 +41,12 @@ describe("useIsVersionStale", () => {
       jest.runOnlyPendingTimers();
     });
     expect(await findByText("stale")).toBeInTheDocument();
+  });
+
+  it("shows stale when forced by query param", async () => {
+    window.history.replaceState(null, "", "/?showNewVersionToast=true");
+    const { findByText } = render(<TestComponent interval={1000} />);
+    expect(await findByText("stale")).toBeInTheDocument();
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });
