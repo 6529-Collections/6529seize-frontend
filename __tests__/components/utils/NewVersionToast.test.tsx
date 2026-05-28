@@ -19,7 +19,7 @@ const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 describe("NewVersionToast", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    window.history.replaceState(
+    globalThis.history.replaceState(
       { test: true },
       "",
       "/waves?wave=abc&showNewVersionToast=true"
@@ -49,11 +49,11 @@ describe("NewVersionToast", () => {
     expect(globalThis.location.search).toBe("?wave=abc");
   });
 
-  it("uses bottom-6 class when not in app", () => {
+  it("uses bottom-4 class when not in app", () => {
     mockedUseIsVersionStale.mockReturnValue(true);
     mockedUseDeviceInfo.mockReturnValue({ isApp: false });
 
     const { container } = render(<NewVersionToast />);
-    expect(container.firstChild).toHaveClass("tw-bottom-6");
+    expect(container.firstChild).toHaveClass("tw-bottom-4");
   });
 });
