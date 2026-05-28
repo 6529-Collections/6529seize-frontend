@@ -3,8 +3,8 @@ import { act, render } from "@testing-library/react";
 describe("useIsVersionStale", () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    (global as any).fetch = jest.fn();
-    window.history.replaceState(null, "", "/");
+    globalThis.fetch = jest.fn();
+    globalThis.history.replaceState(null, "", "/");
   });
 
   afterEach(() => {
@@ -20,7 +20,7 @@ describe("useIsVersionStale", () => {
   it("shows fresh when versions match", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.VERSION = "1.0.0";
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({ version: "1.0.0" }),
     });
     const { findByText } = render(<TestComponent interval={1000} />);
@@ -33,7 +33,7 @@ describe("useIsVersionStale", () => {
   it("shows stale when versions differ", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.VERSION = "1.0.0";
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({ version: "2.0.0" }),
     });
     const { findByText } = render(<TestComponent interval={1000} />);
@@ -44,9 +44,9 @@ describe("useIsVersionStale", () => {
   });
 
   it("shows stale when forced by query param", async () => {
-    window.history.replaceState(null, "", "/?showNewVersionToast=true");
+    globalThis.history.replaceState(null, "", "/?showNewVersionToast=true");
     const { findByText } = render(<TestComponent interval={1000} />);
     expect(await findByText("stale")).toBeInTheDocument();
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 });
