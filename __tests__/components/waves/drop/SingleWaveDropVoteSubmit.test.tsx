@@ -285,6 +285,12 @@ describe("SingleWaveDropVoteSubmit", () => {
     expect(invalidateQueriesSpy).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_DECISIONS, { waveId: mockDrop.wave.id }],
     });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: mockDrop.wave.id }],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
+    });
   });
 
   it("handles authentication failure", async () => {

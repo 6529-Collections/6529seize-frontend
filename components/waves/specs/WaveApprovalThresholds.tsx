@@ -2,8 +2,10 @@
 
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
+import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 import { parsePositiveWholeNumberInput } from "../create-wave/utils/positiveWholeNumberInput";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import WaveApprovalThresholdsEditorForm, {
   type ApprovalThresholdTimeUnit,
@@ -105,6 +107,7 @@ export default function WaveApprovalThresholds({
 }: WaveApprovalThresholdsProps) {
   const { canEdit, mutating, saveWaveConfigUpdate, setToast } =
     useWaveSettingUpdater(wave);
+  const queryClient = useQueryClient();
   const threshold = getValidThreshold(wave.wave.winning_threshold);
   const minDurationMs = wave.wave.winning_threshold_min_duration_ms;
   const initialThresholdValue = threshold === null ? "" : String(threshold);
@@ -165,11 +168,15 @@ export default function WaveApprovalThresholds({
       return;
     }
 
-    saveWaveConfigUpdate(closeEditor, (waveConfig) => ({
-      ...waveConfig,
-      winning_threshold: parsedThreshold,
-      winning_threshold_min_duration_ms: nextMinDurationMs,
-    }));
+    saveWaveConfigUpdate(
+      closeEditor,
+      (waveConfig) => ({
+        ...waveConfig,
+        winning_threshold: parsedThreshold,
+        winning_threshold_min_duration_ms: nextMinDurationMs,
+      }),
+      () => invalidateWaveApprovalStatusQueries(queryClient, wave.id)
+    );
   };
 
   const valueLabel =

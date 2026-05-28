@@ -22,7 +22,11 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
   const canEdit = canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   const updateWave = useCallback(
-    async (body: ApiUpdateWaveRequest, closeEditor: () => void) => {
+    async (
+      body: ApiUpdateWaveRequest,
+      closeEditor: () => void,
+      onSuccess?: () => void
+    ) => {
       setMutating(true);
 
       try {
@@ -39,6 +43,7 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
           endpoint: `waves/${wave.id}`,
           body,
         });
+        onSuccess?.();
         onWaveCreated();
         closeEditor();
       } catch (error) {
@@ -77,7 +82,8 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
   const saveWaveConfigUpdate = useCallback(
     (
       closeEditor: () => void,
-      getWaveConfigUpdate: (waveConfig: WaveConfigUpdate) => WaveConfigUpdate
+      getWaveConfigUpdate: (waveConfig: WaveConfigUpdate) => WaveConfigUpdate,
+      onSuccess?: () => void
     ) => {
       if (mutating) {
         return;
@@ -89,7 +95,8 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
           ...body,
           wave: getWaveConfigUpdate(body.wave),
         },
-        closeEditor
+        closeEditor,
+        onSuccess
       );
     },
     [mutating, updateWave, wave]
