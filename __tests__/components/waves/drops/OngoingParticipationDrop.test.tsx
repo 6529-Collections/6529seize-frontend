@@ -89,7 +89,12 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/drops/participation/ParticipationDropContainer",
-  () => (props: any) => <div>{props.children}</div>
+  () => (props: any) => (
+    <div>
+      {props.floatingActions}
+      {props.children}
+    </div>
+  )
 );
 jest.mock("@/components/waves/drops/WaveDropAuthorPfp", () => () => <div />);
 const ParticipationIdentityProfileCardMock = jest.fn(({ profile }: any) => (
