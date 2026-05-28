@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { TimeWeightedVotingConfig, TimeUnit } from "./types";
 import {
   convertToMinutes,
   convertFromMinutes,
   ensureValueInBounds,
+  parseWholeNumberInput,
 } from "./utils";
 import { TimeWeightedToggle, AveragingIntervalInput } from "./components";
 
@@ -23,6 +24,29 @@ interface TimeWeightedVotingProps {
   readonly showToggle?: boolean;
 }
 
+const getIntervalValidationError = (
+  config: TimeWeightedVotingConfig
+): string | undefined => {
+  if (!config.enabled) {
+    return undefined;
+  }
+
+  const valueInMinutes = convertToMinutes(
+    config.averagingInterval,
+    config.averagingIntervalUnit
+  );
+
+  if (valueInMinutes < 5) {
+    return "Must be at least 5 minutes";
+  }
+
+  if (valueInMinutes > 24 * 60) {
+    return "Must not exceed 24 hours";
+  }
+
+  return undefined;
+};
+
 /**
  * TimeWeightedVoting Component
  * Main component that manages the state and orchestrates child components
@@ -34,51 +58,10 @@ export default function TimeWeightedVoting({
   onChange,
   showToggle = true,
 }: TimeWeightedVotingProps) {
-  // State for validation errors
-  const [validationErrors, setValidationErrors] = useState<{
-    interval?: string | undefined;
-  }>({});
-
   // State for tracking input value during editing
   const [inputValue, setInputValue] = useState<string>(() =>
     config.averagingInterval.toString()
   );
-
-  // Update input value when config changes externally
-  useEffect(() => {
-    setInputValue(config.averagingInterval.toString());
-  }, [config.averagingInterval]);
-
-  // Validate the configuration whenever it changes
-  useEffect(() => {
-    // Skip validation if feature is disabled
-    if (!config.enabled) {
-      setValidationErrors({});
-      return;
-    }
-
-    const errors: {
-      interval?: string | undefined;
-    } = {};
-
-    // Use the utility function for conversion
-    const valueInMinutes = convertToMinutes(
-      config.averagingInterval,
-      config.averagingIntervalUnit
-    );
-
-    // Validate minimum
-    if (valueInMinutes < 5) {
-      errors.interval = `Must be at least 5 minutes`;
-    }
-
-    // Validate maximum
-    if (valueInMinutes > 24 * 60) {
-      errors.interval = `Must not exceed 24 hours`;
-    }
-
-    setValidationErrors(errors);
-  }, [config]);
 
   /**
    * Handles the toggle switch for enabling/disabling time-weighted voting
@@ -97,19 +80,17 @@ export default function TimeWeightedVoting({
    */
   const handleIntervalChange = useCallback(
     (value: string) => {
-      // Always allow empty string for editing flexibility
-      setInputValue(value);
-
-      // Don't update the config for empty string or invalid input
       if (value === "") {
+        setInputValue(value);
         return;
       }
 
-      // Parse input to number with validation
-      const numValue = parseInt(value, 10);
-      if (isNaN(numValue)) {
+      const numValue = parseWholeNumberInput(value);
+      if (numValue === null) {
         return;
       }
+
+      setInputValue(value);
 
       // Get maximum value for current unit
       const maxValueForUnit =
@@ -170,7 +151,8 @@ export default function TimeWeightedVoting({
     [config, onChange]
   );
 
-  const intervalErrorMessage = errorMessage ?? validationErrors.interval;
+  const intervalErrorMessage =
+    errorMessage ?? getIntervalValidationError(config);
   const sectionClassName = showToggle
     ? "tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6"
     : undefined;

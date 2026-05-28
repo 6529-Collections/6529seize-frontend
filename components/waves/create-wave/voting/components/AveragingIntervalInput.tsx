@@ -4,6 +4,7 @@ import { memo, useCallback } from "react";
 import type { KeyboardEvent } from "react";
 import type { TimeUnit } from "../types";
 import { MAX_HOURS, MIN_MINUTES } from "../types";
+import { parseWholeNumberInput } from "../utils";
 import VotingSettingBox, {
   getVotingSettingInputClasses,
 } from "../VotingSettingBox";
@@ -46,10 +47,9 @@ const AveragingIntervalInput = memo(
      * Applies minimum constraints when the user finishes editing
      */
     const handleBlur = useCallback(() => {
-      // Parse and validate the input
-      const numValue = parseInt(value, 10);
+      const numValue = parseWholeNumberInput(value);
       const isInvalid =
-        value === "" || isNaN(numValue) || numValue < minForCurrentUnit;
+        value === "" || numValue === null || numValue < minForCurrentUnit;
 
       if (isInvalid) {
         // If invalid or below minimum, set to the minimum value for this unit

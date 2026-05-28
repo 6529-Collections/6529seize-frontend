@@ -248,9 +248,13 @@ describe("CreateWaveVoting", () => {
     expect(settingsGrid).toContainElement(voteCapInput);
     expect(settingsGrid).toContainElement(thresholdInput);
     expect(screen.getByText("Approval timing")).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Immediate/)).toBeChecked();
-    expect(screen.getByLabelText(/^Minimum time/)).not.toBeChecked();
-    expect(screen.getByLabelText(/^Time-weighted/)).not.toBeChecked();
+    expect(screen.getByRole("radio", { name: /^Immediate/ })).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Minimum time/ })
+    ).not.toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Time-weighted/ })
+    ).not.toBeChecked();
     expect(
       screen.queryByLabelText("Minimum time above threshold")
     ).toBeNull();
@@ -287,7 +291,9 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    expect(screen.getByLabelText(/^Minimum time/)).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Minimum time/ })
+    ).toBeChecked();
     expect(
       screen.getByLabelText("Minimum time above threshold")
     ).toBeInTheDocument();
@@ -310,7 +316,9 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    expect(screen.getByLabelText(/^Time-weighted/)).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Time-weighted/ })
+    ).toBeChecked();
     expect(screen.getByTestId("time-weighted")).toHaveAttribute(
       "data-show-toggle",
       "false"
@@ -341,7 +349,7 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(screen.getByLabelText(/^Minimum time/));
+    fireEvent.click(screen.getByRole("radio", { name: /^Minimum time/ }));
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(60_000);
     expect(onTimeWeightedChange).toHaveBeenCalledWith({
@@ -365,7 +373,7 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(screen.getByLabelText(/^Time-weighted/));
+    fireEvent.click(screen.getByRole("radio", { name: /^Time-weighted/ }));
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
     expect(onTimeWeightedChange).toHaveBeenCalledWith({
@@ -383,6 +391,7 @@ describe("CreateWaveVoting", () => {
       <CreateWaveVoting
         {...baseProps}
         waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={120_000}
         timeWeighted={{
           enabled: true,
           averagingInterval: 1,
@@ -393,7 +402,7 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(screen.getByLabelText(/^Immediate/));
+    fireEvent.click(screen.getByRole("radio", { name: /^Immediate/ }));
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
     expect(onTimeWeightedChange).toHaveBeenCalledWith({

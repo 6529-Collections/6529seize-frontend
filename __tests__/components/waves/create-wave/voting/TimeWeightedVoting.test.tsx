@@ -100,6 +100,63 @@ describe("TimeWeightedVoting", () => {
     });
   });
 
+  it("accepts valid whole-number interval values", async () => {
+    const onChange = jest.fn();
+    renderComponent(baseConfig, onChange);
+
+    const input = screen.getByTestId(
+      "averaging-interval-input"
+    ) as HTMLInputElement;
+    await userEvent.clear(input);
+    await userEvent.type(input, "10");
+
+    expect(input.value).toBe("10");
+    expect(onChange).toHaveBeenLastCalledWith({
+      enabled: true,
+      averagingInterval: 10,
+      averagingIntervalUnit: "minutes",
+    });
+  });
+
+  it("rejects pasted interval text that is not only digits", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    renderComponent(baseConfig, onChange);
+
+    const input = screen.getByTestId(
+      "averaging-interval-input"
+    ) as HTMLInputElement;
+    await user.clear(input);
+    onChange.mockClear();
+    await user.paste("10abc");
+
+    expect(input.value).toBe("");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("keeps empty interval input editable and restores the minimum on blur", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+    renderComponent(baseConfig, onChange);
+
+    const input = screen.getByTestId(
+      "averaging-interval-input"
+    ) as HTMLInputElement;
+    await user.clear(input);
+
+    expect(input.value).toBe("");
+    expect(onChange).not.toHaveBeenCalled();
+
+    await user.tab();
+
+    expect(input.value).toBe("5");
+    expect(onChange).toHaveBeenCalledWith({
+      enabled: true,
+      averagingInterval: 5,
+      averagingIntervalUnit: "minutes",
+    });
+  });
+
   it("changes unit and converts value", async () => {
     const onChange = jest.fn();
     renderComponent(baseConfig, onChange);
