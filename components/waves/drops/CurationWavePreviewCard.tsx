@@ -10,7 +10,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import { useWaveById } from "@/hooks/useWaveById";
-import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useWaveCurationPreviewDrops } from "@/hooks/useWaveCurationPreviewDrops";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { CurationPreviewShell } from "./curation-preview/CurationPreviewShell";
 import { PreviewTile } from "./curation-preview/CurationPreviewTiles";
@@ -131,7 +131,7 @@ export const CurationWavePreviewCard: React.FC<
     ? (curations.at(0)?.id ?? null)
     : null;
   const curationId = selectedProfileCurationId ?? fallbackCurationId;
-  const { drops, isFetching: areDropsFetching } = useWaveCurationDrops({
+  const { drops, isFetching: areDropsFetching } = useWaveCurationPreviewDrops({
     wave: wave ?? null,
     curationId,
     pageSize: PREVIEW_DROPS_FETCH_LIMIT,
