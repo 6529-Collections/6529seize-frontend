@@ -2,11 +2,16 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import EndedParticipationDrop from "@/components/waves/drops/participation/EndedParticipationDrop";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import { DropLocation } from "@/components/waves/drops/drop.types";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({ push: jest.fn() })),
 }));
-jest.mock("@/hooks/isMobileDevice", () => jest.fn(() => true));
+const mockUseIsMobileDevice = jest.fn(() => true);
+jest.mock("@/hooks/isMobileDevice", () => ({
+  __esModule: true,
+  default: (...args: any[]) => mockUseIsMobileDevice(...args),
+}));
 
 const WaveDropContentMock = jest.fn(() => null);
 const WaveDropMobileMenuMock = jest.fn(() => null);
@@ -24,6 +29,11 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
   WaveDropMobileMenuMock(props);
   return <div data-testid="menu" />;
 });
+jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
+  <button data-testid="actions" onClick={props.onReply} type="button">
+    Actions
+  </button>
+));
 jest.mock("@/components/waves/drops/WaveDropMetadata", () => (props: any) => {
   WaveDropMetadataMock(props);
   return <div data-testid="metadata" />;
@@ -51,6 +61,9 @@ const drop: any = {
 
 describe("EndedParticipationDrop", () => {
   beforeEach(() => {
+    mockUseIsMobileDevice.mockReturnValue(true);
+    WaveDropContentMock.mockClear();
+    WaveDropMobileMenuMock.mockClear();
     WaveDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
   });
@@ -91,6 +104,33 @@ describe("EndedParticipationDrop", () => {
 
     // After long press, menu should be open
     expect(WaveDropMobileMenuMock.mock.calls[1][0]?.isOpen).toBe(true);
+  });
+
+  it("renders desktop actions outside the clipped card", () => {
+    mockUseIsMobileDevice.mockReturnValue(false);
+
+    render(
+      <EndedParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const actions = screen.getByTestId("actions");
+    const shell = actions.parentElement;
+    const clippedCard = shell?.querySelector(".tw-overflow-hidden");
+
+    expect(shell?.className).toContain("tw-group");
+    expect(shell?.className).toContain("tw-relative");
+    expect(shell?.className).not.toContain("tw-overflow-hidden");
+    expect(clippedCard).not.toBeNull();
+    expect(clippedCard?.className).toContain("tw-rounded-xl");
+    expect(clippedCard?.contains(actions)).toBe(false);
   });
 
   it("renders the identity profile card and filters identity metadata", () => {
