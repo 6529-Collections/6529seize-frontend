@@ -1,9 +1,11 @@
 import { AuthContext } from "@/components/auth/Auth";
 import Drops from "@/components/drops/view/Drops";
+import { useWaveById } from "@/hooks/useWaveById";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useParams, useRouter } from "next/navigation";
+import type { ComponentProps } from "react";
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -14,6 +16,10 @@ jest.mock("@tanstack/react-query", () => {
   const original = jest.requireActual("@tanstack/react-query");
   return { ...original, useInfiniteQuery: jest.fn() };
 });
+
+jest.mock("@/hooks/useWaveById", () => ({
+  useWaveById: jest.fn(),
+}));
 
 const dropsListSpy = jest.fn();
 jest.mock("@/components/drops/view/DropsList", () => (props: any) => {
@@ -28,8 +34,20 @@ jest.mock("@/components/drops/view/DropsList", () => (props: any) => {
 
 describe("Drops", () => {
   const observerInstances: any[] = [];
+  const useWaveByIdMock = useWaveById as jest.MockedFunction<
+    typeof useWaveById
+  >;
+
   beforeEach(() => {
     dropsListSpy.mockClear();
+    useWaveByIdMock.mockReturnValue({
+      wave: undefined,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useParams as jest.Mock).mockReturnValue({
       get: jest.fn((key: string) => (key === "user" ? "alice" : null)),
@@ -54,11 +72,11 @@ describe("Drops", () => {
     };
   });
 
-  function renderWithAuth() {
+  function renderWithAuth(props?: ComponentProps<typeof Drops>) {
     const auth = { connectedProfile: null } as any;
     return render(
       <AuthContext.Provider value={auth}>
-        <Drops />
+        <Drops {...props} />
       </AuthContext.Provider>
     );
   }
@@ -104,5 +122,55 @@ describe("Drops", () => {
     expect(dropsListSpy).toHaveBeenCalledWith(
       expect.objectContaining({ drops: expect.any(Array) })
     );
+  });
+
+  it("fills profile wave badge details from the profile wave prop", async () => {
+    const drops = [
+      {
+        id: "drop-1",
+        serial_no: 1,
+        wave: { id: "wave-1" },
+        author: {
+          profile_wave_id: "profile-wave-1",
+          badges: {
+            profile_wave_id: "profile-wave-1",
+          },
+        },
+      },
+    ];
+    (useInfiniteQuery as jest.Mock).mockReturnValue({
+      data: { pages: [drops] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      status: "success",
+    });
+
+    useWaveByIdMock.mockReturnValue({
+      wave: {
+        id: "profile-wave-1",
+        name: "Profile Wave",
+        picture: "https://example.com/wave.png",
+      } as ReturnType<typeof useWaveById>["wave"],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+      isFetching: false,
+    });
+
+    renderWithAuth({
+      profileWaveId: "profile-wave-1",
+    });
+
+    await screen.findByTestId("drops-list");
+
+    const renderedDrop = dropsListSpy.mock.calls.at(-1)?.[0].drops[0];
+    expect(renderedDrop.author.badges).toMatchObject({
+      profile_wave_id: "profile-wave-1",
+      profile_wave_name: "Profile Wave",
+      profile_wave_pfp: "https://example.com/wave.png",
+    });
   });
 });

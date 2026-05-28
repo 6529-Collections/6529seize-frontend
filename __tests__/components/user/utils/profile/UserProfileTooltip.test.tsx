@@ -244,6 +244,9 @@ describe("UserProfileTooltip", () => {
     renderTooltip();
 
     expect(screen.getByTestId("pfp")).toBeInTheDocument();
+    expect(screen.getByTestId("pfp").closest(".tailwind-scope")).toHaveClass(
+      "tw-rounded-xl"
+    );
     expect(screen.getByText("bob")).toBeInTheDocument();
     expect(screen.getByTestId("level")).toHaveTextContent("2");
     expect(screen.getByTestId("top-rep")).toBeInTheDocument();
