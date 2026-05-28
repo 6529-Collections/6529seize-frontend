@@ -2,7 +2,6 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { KEY_ARROW_UP_COMMAND } from "lexical";
 import CreateDropInput from "@/components/waves/CreateDropInput";
-import EditLastDropArrowUpPlugin from "@/components/waves/EditLastDropArrowUpPlugin";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 
 const mockRegisterCommand = jest.fn(() => jest.fn());

@@ -296,6 +296,7 @@ describe("mobileLaunchTiming", () => {
       })
     );
   });
+
   it("sanitizes endpoints and route families", async () => {
     const sanitizers =
       await import("@/utils/monitoring/mobileLaunchTimingSanitizers");
