@@ -33,6 +33,7 @@ interface WaveDropPartProps {
   readonly mediaImageScale?: ImageScale | undefined;
   readonly mediaContainerHeightClassName?: string | undefined;
   readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly hasTouch?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -64,6 +65,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     mediaImageScale = ImageScale.AUTOx450,
     mediaContainerHeightClassName,
     fullWidthMedia = false,
+    fullWidthLinkPreviews = false,
     hasTouch = false,
     onLinkCardActionsActiveChange,
     contentPresentation = "default",
@@ -186,6 +188,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             mediaImageScale={mediaImageScale}
             mediaContainerHeightClassName={mediaContainerHeightClassName}
             fullWidthMedia={fullWidthMedia}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
             contentPresentation={contentPresentation}
             embedPath={embedPath}
