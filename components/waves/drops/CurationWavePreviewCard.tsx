@@ -54,7 +54,7 @@ const WavePreviewPicture: React.FC<{
   >
     {picture ? (
       <FallbackImage
-        primarySrc={getScaledImageUri(picture, ImageScale.W_200_H_200)}
+        primarySrc={getScaledImageUri(picture, ImageScale.W_AUTO_H_50)}
         fallbackSrc={picture}
         alt=""
         fill

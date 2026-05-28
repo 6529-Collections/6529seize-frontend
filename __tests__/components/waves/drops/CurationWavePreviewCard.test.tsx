@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CurationWavePreviewCard } from "@/components/waves/drops/CurationWavePreviewCard";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveCurationPreviewDrops } from "@/hooks/useWaveCurationPreviewDrops";
@@ -38,9 +39,10 @@ jest.mock("@/components/common/FallbackImage", () => ({
 
 jest.mock("@/helpers/image.helpers", () => ({
   ImageScale: {
+    W_AUTO_H_50: "W_AUTO_H_50",
     W_200_H_200: "W_200_H_200",
   },
-  getScaledImageUri: (url: string) => `scaled:${url}`,
+  getScaledImageUri: jest.fn((url: string) => `scaled:${url}`),
 }));
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
@@ -77,12 +79,13 @@ const useWaveByIdMock = useWaveById as jest.Mock;
 const useWaveCurationPreviewDropsMock =
   useWaveCurationPreviewDrops as jest.Mock;
 const useWaveCurationsMock = useWaveCurations as jest.Mock;
+const getScaledImageUriMock = getScaledImageUri as jest.Mock;
 
 const createWave = (): ApiWave =>
   ({
     id: "wave-1",
     name: "Profile Wave",
-    picture: null,
+    picture: "https://example.com/wave.png",
     author: {
       banner1_color: null,
       banner2_color: null,
@@ -171,6 +174,10 @@ describe("CurationWavePreviewCard", () => {
 
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByText("No curated drops yet.")).not.toBeInTheDocument();
+    expect(getScaledImageUriMock).toHaveBeenCalledWith(
+      "https://example.com/wave.png",
+      ImageScale.W_AUTO_H_50
+    );
     expect(screen.getByRole("link", { name: /open wave/i })).toBeVisible();
   });
 });
