@@ -5,6 +5,7 @@ import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
+import type { ImageScale } from "@/helpers/image.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useCallback, useState } from "react";
@@ -48,6 +49,10 @@ interface OngoingParticipationDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
   readonly isVotingClosed?: boolean | undefined;
@@ -72,6 +77,10 @@ export default function OngoingParticipationDrop({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  inlineAuthorOnDesktop = false,
+  mediaImageScale,
+  fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   winningThreshold,
   winningThresholdMinDurationMs,
   isVotingClosed = false,
@@ -136,6 +145,27 @@ export default function OngoingParticipationDrop({
     canShowVote && showInteractions && !isVotingActionLocked ? (
       <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
     ) : null;
+  const content = (
+    <ParticipationDropContent
+      drop={drop}
+      activePartIndex={activePartIndex}
+      setActivePartIndex={setActivePartIndex}
+      onLongPress={handleLongPress}
+      onDropContentClick={onDropContentClick}
+      onQuoteClick={onQuoteClick}
+      setLongPressTriggered={setLongPressTriggered}
+      isCompetitionDrop={true}
+      mediaImageScale={mediaImageScale}
+      fullWidthMedia={fullWidthMedia}
+      fullWidthLinkPreviews={fullWidthLinkPreviews}
+      contentPresentation={contentPresentation}
+      embedPath={embedPath}
+      quotePath={quotePath}
+      embedDepth={embedDepth}
+      maxEmbedDepth={maxEmbedDepth}
+    />
+  );
+  const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
 
   return (
     <ParticipationDropContainer
@@ -145,53 +175,75 @@ export default function OngoingParticipationDrop({
       useRankStyles={
         !(typeof winningThreshold === "number" && winningThreshold > 0)
       }
-    >
-      {!isMobile && showInteractions && showReplyAndQuote && (
-        <WaveDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          showVoting={false}
-          onReply={handleOnReply}
-        />
-      )}
-      <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left">
-        {showIdentity && <WaveDropAuthorPfp drop={drop} />}
-        <div className="tw-flex tw-w-full tw-flex-col">
-          {showIdentity &&
-            (identityMode === "minimal" ? (
-              <DropMinimalIdentityRow
-                drop={drop}
-                timestampLayout={timestampLayout}
-              />
-            ) : (
-              <ParticipationDropHeader
-                drop={drop}
-                showWaveInfo={showWaveInfo}
-                winningThreshold={winningThreshold}
-                timestampLayout={timestampLayout}
-              />
-            ))}
-          <ParticipationDropContent
+      floatingActions={
+        !isMobile && showInteractions && showReplyAndQuote ? (
+          <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
-            setActivePartIndex={setActivePartIndex}
-            onLongPress={handleLongPress}
-            onDropContentClick={onDropContentClick}
-            onQuoteClick={onQuoteClick}
-            setLongPressTriggered={setLongPressTriggered}
-            isCompetitionDrop={true}
-            contentPresentation={contentPresentation}
-            embedPath={embedPath}
-            quotePath={quotePath}
-            embedDepth={embedDepth}
-            maxEmbedDepth={maxEmbedDepth}
+            showVoting={false}
+            onReply={handleOnReply}
           />
-        </div>
+        ) : null
+      }
+    >
+      <div
+        className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left ${
+          inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
+        }`}
+      >
+        {inlineAuthorOnDesktop ? (
+          <>
+            {showIdentity && (
+              <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+                <WaveDropAuthorPfp drop={drop} />
+                <div className="tw-min-w-0 tw-flex-1">
+                  {identityMode === "minimal" ? (
+                    <DropMinimalIdentityRow
+                      drop={drop}
+                      timestampLayout={timestampLayout}
+                    />
+                  ) : (
+                    <ParticipationDropHeader
+                      drop={drop}
+                      showWaveInfo={showWaveInfo}
+                      winningThreshold={winningThreshold}
+                      timestampLayout={timestampLayout}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+            {content}
+          </>
+        ) : (
+          <>
+            {showIdentity && <WaveDropAuthorPfp drop={drop} />}
+            <div className="tw-flex tw-w-full tw-flex-col">
+              {showIdentity &&
+                (identityMode === "minimal" ? (
+                  <DropMinimalIdentityRow
+                    drop={drop}
+                    timestampLayout={timestampLayout}
+                  />
+                ) : (
+                  <ParticipationDropHeader
+                    drop={drop}
+                    showWaveInfo={showWaveInfo}
+                    winningThreshold={winningThreshold}
+                    timestampLayout={timestampLayout}
+                  />
+                ))}
+              {content}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="tw-flex tw-w-full tw-flex-col">
         {identityProfile && (
-          <div className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-px-4`}>
+          <div
+            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-px-4`}
+          >
             <ParticipationIdentityProfileCard
               profile={identityProfile}
               contextId={drop.id}
@@ -217,7 +269,7 @@ export default function OngoingParticipationDrop({
         )}
         {hasDropFooter(footer) && (
           <div
-            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-px-4 tw-pb-4 tw-pt-2`}
+            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-px-4 tw-pb-4 tw-pt-2`}
           >
             {footer}
           </div>

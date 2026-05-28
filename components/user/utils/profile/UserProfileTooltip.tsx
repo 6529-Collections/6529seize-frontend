@@ -181,6 +181,7 @@ export default function UserProfileTooltip({
                 <DropAuthorBadges
                   profile={profile}
                   tooltipIdPrefix={badgesTooltipIdPrefix}
+                  showProfileWaveBadge={false}
                   onArtistPreviewOpen={onArtistPreviewOpen}
                 />
               )}

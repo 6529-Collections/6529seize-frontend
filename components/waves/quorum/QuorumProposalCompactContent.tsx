@@ -25,6 +25,7 @@ type CompactMarkdownProps = Pick<
   | "maxEmbedDepth"
   | "linkPreviewToggleControl"
   | "onLinkCardActionsActiveChange"
+  | "fullWidthLinkPreviews"
 >;
 
 interface QuorumProposalCompactContentProps extends CompactMarkdownProps {

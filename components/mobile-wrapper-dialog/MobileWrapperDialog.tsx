@@ -22,7 +22,7 @@ function DialogCloseButton({
       title="Close panel"
       aria-label="Close panel"
       className={clsx(
-        "-tw-mr-2 -tw-mt-2.5 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
+        "-tw-mr-2 tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-2.5 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.04] hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-white/20",
         className
       )}
       onClick={onClick}

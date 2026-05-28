@@ -9,16 +9,21 @@ export default function FollowersListWrapper({
   followers,
   loading,
   onBottomIntersection,
+  showFollowButtons = false,
 }: {
   readonly followers: ApiIdentityAndSubscriptionActions[];
   readonly loading: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
+  readonly showFollowButtons?: boolean | undefined;
 }) {
   return (
-    <div className="tw-overflow-hidden tw-h-full">
-      <FollowersList followers={followers} />
+    <div className="tw-h-full tw-overflow-hidden">
+      <FollowersList
+        followers={followers}
+        showFollowButtons={showFollowButtons}
+      />
       {loading && (
-        <div className="tw-w-full tw-text-center tw-mt-8">
+        <div className="tw-mt-8 tw-w-full tw-text-center">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
         </div>
       )}
