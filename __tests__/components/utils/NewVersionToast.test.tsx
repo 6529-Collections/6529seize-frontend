@@ -1,9 +1,7 @@
-import NewVersionToast, {
-  removeNewVersionToastOverrideFromCurrentPath,
-} from "@/components/utils/NewVersionToast";
+import NewVersionToast from "@/components/utils/NewVersionToast";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/hooks/useIsVersionStale", () => ({
   useIsVersionStale: jest.fn(),
@@ -43,10 +41,17 @@ describe("NewVersionToast", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("removes the forced toast query param from the current path", () => {
-    removeNewVersionToastOverrideFromCurrentPath();
+  it("removes the forced toast query param from the current path on refresh", () => {
+    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseDeviceInfo.mockReturnValue({ isApp: false });
+    jest.spyOn(globalThis.location, "reload").mockImplementation();
+
+    render(<NewVersionToast />);
+    fireEvent.click(screen.getByRole("button"));
+
     expect(globalThis.location.pathname).toBe("/waves");
     expect(globalThis.location.search).toBe("?wave=abc");
+    expect(globalThis.location.reload).toHaveBeenCalled();
   });
 
   it("uses bottom-4 class when not in app", () => {
