@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
@@ -47,6 +47,10 @@ const getTrimmedText = (value?: string | null): string | null => {
   return trimmed === undefined || trimmed.length === 0 ? null : trimmed;
 };
 
+const subscribeToClientRender = () => () => {};
+const getClientRenderSnapshot = () => true;
+const getServerRenderSnapshot = () => false;
+
 export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   waveId,
   tooltipId = "wave-creator-badge",
@@ -57,6 +61,11 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   wavePfp,
 }) => {
   const { hasTouchScreen } = useDeviceInfo();
+  const isClientHydrated = useSyncExternalStore(
+    subscribeToClientRender,
+    getClientRenderSnapshot,
+    getServerRenderSnapshot
+  );
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
   const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
   const normalizedWaveName = getTrimmedText(waveName);
@@ -72,13 +81,15 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   const buttonClassName = `tw-inline-flex ${sizeStyles.buttonClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`;
   const showImage = waveImageSrc !== null && failedImageSrc !== waveImageSrc;
   const imageSrc = showImage ? waveImageSrc : null;
+  const usesSheetPreview = isClientHydrated && hasTouchScreen;
+
   const previewCard = (
     <CurationWavePreviewCard
       waveId={waveId}
       profileIdentity={profileIdentity}
       fallbackName={normalizedWaveName}
       fallbackPfp={normalizedWavePfp}
-      variant={hasTouchScreen ? "sheet" : "hovercard"}
+      variant={usesSheetPreview ? "sheet" : "hovercard"}
     />
   );
 
@@ -88,7 +99,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (hasTouchScreen) {
+        if (usesSheetPreview) {
           setIsMobilePreviewOpen(true);
           return;
         }
@@ -97,8 +108,8 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
       }}
       className={buttonClassName}
       aria-label={ariaLabel}
-      aria-haspopup={hasTouchScreen ? "dialog" : undefined}
-      aria-expanded={hasTouchScreen ? isMobilePreviewOpen : undefined}
+      aria-haspopup={usesSheetPreview ? "dialog" : undefined}
+      aria-expanded={usesSheetPreview ? isMobilePreviewOpen : undefined}
       data-wave-id={waveId}
       data-tooltip-id={tooltipId}
     >
@@ -127,7 +138,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
     </button>
   );
 
-  if (hasTouchScreen) {
+  if (usesSheetPreview) {
     return (
       <>
         {button}
