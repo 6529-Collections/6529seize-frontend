@@ -12,6 +12,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useContext, useState } from "react";
 
 type WaveChatUpdate = ApiUpdateWaveRequest["chat"];
+type WaveConfigUpdate = ApiUpdateWaveRequest["wave"];
 
 export const useWaveSettingUpdater = (wave: ApiWave) => {
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -73,10 +74,32 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
     [mutating, updateWave, wave]
   );
 
+  const saveWaveConfigUpdate = useCallback(
+    (
+      closeEditor: () => void,
+      getWaveConfigUpdate: (waveConfig: WaveConfigUpdate) => WaveConfigUpdate
+    ) => {
+      if (mutating) {
+        return;
+      }
+
+      const body = convertWaveToUpdateWave(wave);
+      void updateWave(
+        {
+          ...body,
+          wave: getWaveConfigUpdate(body.wave),
+        },
+        closeEditor
+      );
+    },
+    [mutating, updateWave, wave]
+  );
+
   return {
     canEdit,
     mutating,
     saveChatUpdate,
+    saveWaveConfigUpdate,
     setToast,
   };
 };

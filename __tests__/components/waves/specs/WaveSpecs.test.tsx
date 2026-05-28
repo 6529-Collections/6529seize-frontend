@@ -29,6 +29,8 @@ const makeWave = (
     readonly chatEnabled?: boolean | undefined;
     readonly linksDisabled?: boolean | undefined;
     readonly waveType?: ApiWaveType | undefined;
+    readonly winningThreshold?: number | null | undefined;
+    readonly winningThresholdMinDurationMs?: number | null | undefined;
   } = {}
 ): any => ({
   id: "wave-1",
@@ -65,7 +67,9 @@ const makeWave = (
   wave: {
     admin_drop_deletion_enabled: false,
     type: overrides.waveType ?? ApiWaveType.Chat,
-    winning_threshold: null,
+    winning_threshold: overrides.winningThreshold ?? null,
+    winning_threshold_min_duration_ms:
+      overrides.winningThresholdMinDurationMs ?? null,
     max_winners: null,
     max_votes_per_identity_to_drop: null,
     time_lock_ms: null,
@@ -134,6 +138,32 @@ describe("WaveSpecs", () => {
     expect(screen.getByTestId("wave-rating")).toBeInTheDocument();
   });
 
+  it("shows approval threshold settings for approve waves", () => {
+    renderWaveSpecs({
+      wave: makeWave({
+        waveType: ApiWaveType.Approve,
+        winningThreshold: 12,
+        winningThresholdMinDurationMs: 120_000,
+      }),
+    });
+
+    expect(screen.getByText("Approval threshold")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("Min time: 2m")).toBeInTheDocument();
+  });
+
+  it.each([ApiWaveType.Chat, ApiWaveType.Rank])(
+    "hides approval threshold settings for %s waves",
+    (waveType) => {
+      renderWaveSpecs({ wave: makeWave({ waveType }) });
+
+      expect(screen.queryByText("Approval threshold")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Edit approval threshold" })
+      ).not.toBeInTheDocument();
+    }
+  );
+
   it("shows slow mode on with interval", () => {
     renderWaveSpecs({ wave: makeWave({ slowModeCooldownMs: 300_000 }) });
 
@@ -192,6 +222,49 @@ describe("WaveSpecs", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Edit disable links" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows approval threshold edit icon only when user can edit wave", () => {
+    const { rerender } = renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+        winningThreshold: 10,
+      }),
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Edit approval threshold" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "viewer" },
+            activeProfileProxy: null,
+            requestAuth: jest.fn(async () => ({ success: true })),
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ onWaveCreated: jest.fn() } as any}
+        >
+          <WaveSpecs
+            wave={makeWave({
+              canAdmin: false,
+              waveType: ApiWaveType.Approve,
+              winningThreshold: 10,
+            })}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Edit approval threshold" })
     ).not.toBeInTheDocument();
   });
 
@@ -310,5 +383,78 @@ describe("WaveSpecs", () => {
     expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
       links_disabled: true,
     });
+  });
+
+  it("saves approval threshold settings", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+        winningThreshold: 10,
+        winningThresholdMinDurationMs: 0,
+      }),
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Edit approval threshold" })
+    );
+    await user.clear(screen.getByLabelText("Approval threshold value"));
+    await user.type(screen.getByLabelText("Approval threshold value"), "25");
+    await user.selectOptions(
+      screen.getByLabelText("Minimum time above threshold unit"),
+      "hours"
+    );
+    await user.type(screen.getByLabelText("Minimum time above threshold"), "2");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(commonApiPostMock.mock.calls[0][0].body.wave).toMatchObject({
+      winning_threshold: 25,
+      winning_threshold_min_duration_ms: 7_200_000,
+    });
+  });
+
+  it("saves blank approval threshold min time as immediate", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+        winningThreshold: 10,
+        winningThresholdMinDurationMs: 120_000,
+      }),
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Edit approval threshold" })
+    );
+    await user.clear(screen.getByLabelText("Minimum time above threshold"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+    expect(commonApiPostMock.mock.calls[0][0].body.wave).toMatchObject({
+      winning_threshold: 10,
+      winning_threshold_min_duration_ms: 0,
+    });
+  });
+
+  it("does not submit invalid approval threshold settings", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+        winningThreshold: 10,
+      }),
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Edit approval threshold" })
+    );
+    await user.clear(screen.getByLabelText("Approval threshold value"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(commonApiPostMock).not.toHaveBeenCalled();
   });
 });
