@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { CurationWavePreviewCard } from "./CurationWavePreviewCard";
 
@@ -57,6 +58,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
 }) => {
   const { hasTouchScreen } = useDeviceInfo();
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+  const [isMobilePreviewOpen, setIsMobilePreviewOpen] = useState(false);
   const normalizedWaveName = getTrimmedText(waveName);
   const normalizedWavePfp = getTrimmedText(wavePfp);
   const waveImageSrc = normalizedWavePfp
@@ -70,6 +72,15 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   const buttonClassName = `tw-inline-flex ${sizeStyles.buttonClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`;
   const showImage = waveImageSrc !== null && failedImageSrc !== waveImageSrc;
   const imageSrc = showImage ? waveImageSrc : null;
+  const previewCard = (
+    <CurationWavePreviewCard
+      waveId={waveId}
+      profileIdentity={profileIdentity}
+      fallbackName={normalizedWaveName}
+      fallbackPfp={normalizedWavePfp}
+      variant={hasTouchScreen ? "sheet" : "hovercard"}
+    />
+  );
 
   const button = (
     <button
@@ -77,10 +88,17 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (hasTouchScreen) {
+          setIsMobilePreviewOpen(true);
+          return;
+        }
+
         onBadgeClick?.();
       }}
       className={buttonClassName}
       aria-label={ariaLabel}
+      aria-haspopup={hasTouchScreen ? "dialog" : undefined}
+      aria-expanded={hasTouchScreen ? isMobilePreviewOpen : undefined}
       data-wave-id={waveId}
       data-tooltip-id={tooltipId}
     >
@@ -110,19 +128,25 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
   );
 
   if (hasTouchScreen) {
-    return button;
+    return (
+      <>
+        {button}
+        <MobileWrapperDialog
+          isOpen={isMobilePreviewOpen}
+          onClose={() => setIsMobilePreviewOpen(false)}
+          noPadding
+          showScrollbar
+          zIndexClassName="tw-z-[1200]"
+        >
+          {previewCard}
+        </MobileWrapperDialog>
+      </>
+    );
   }
 
   return (
     <HoverCard
-      content={
-        <CurationWavePreviewCard
-          waveId={waveId}
-          profileIdentity={profileIdentity}
-          fallbackName={normalizedWaveName}
-          fallbackPfp={normalizedWavePfp}
-        />
-      }
+      content={previewCard}
       ariaLabel={`Wave details for ${waveLabel}`}
       placement="auto"
       delayShow={500}
