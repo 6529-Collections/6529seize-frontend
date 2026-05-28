@@ -540,6 +540,42 @@ describe("DropPartMarkdown", () => {
     );
   });
 
+  it("opens angle-bracket image URLs from the full body gallery", () => {
+    const angleBracketSrc = "https://cdn.example.com/angle.jpg";
+    const markdownSrc = "https://cdn.example.com/second.jpg";
+    const partContent = `<${angleBracketSrc}>\n![second](${markdownSrc})`;
+    const galleryItems = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    render(
+      <DropImageGalleryProvider items={galleryItems}>
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={partContent}
+          onQuoteClick={jest.fn()}
+        />
+      </DropImageGalleryProvider>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `Open image ${angleBracketSrc}`,
+      })
+    );
+
+    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+      "src",
+      angleBracketSrc
+    );
+    expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
+      "1 / 2"
+    );
+  });
+
   it("keeps named image URL markdown links as links", () => {
     render(
       <DropPartMarkdown

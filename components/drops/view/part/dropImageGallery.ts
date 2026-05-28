@@ -60,6 +60,25 @@ const stripDestinationWrappers = (destination: string): string => {
 const trimBareUrl = (url: string): string =>
   url.replace(/[),.;!?]+$/u, "");
 
+const getBareUrlMatchKey = (
+  content: string,
+  matchStart: number,
+  rawUrl: string
+): number => {
+  const wrapperStart = matchStart - 1;
+  const wrapperEnd = matchStart + rawUrl.length;
+
+  if (
+    wrapperStart >= 0 &&
+    content[wrapperStart] === "<" &&
+    content[wrapperEnd] === ">"
+  ) {
+    return wrapperStart;
+  }
+
+  return matchStart;
+};
+
 const isInsideRange = (
   index: number,
   ranges: readonly MarkdownRange[]
@@ -159,7 +178,10 @@ const getBodyImageSources = (
       !isInsideMarkdownLink(match.index, markdownMatches) &&
       isDirectImageUrl(src, parseUrl(src))
     ) {
-      bareImageSources.push({ key: match.index, src });
+      bareImageSources.push({
+        key: getBareUrlMatchKey(content, match.index, rawUrl),
+        src,
+      });
     }
 
     match = BARE_URL_REGEX.exec(content);

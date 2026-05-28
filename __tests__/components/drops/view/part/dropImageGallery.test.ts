@@ -40,6 +40,26 @@ describe("buildDropImageGalleryItems", () => {
     ]);
   });
 
+  it("uses the wrapper start for angle-bracket bare image URL ids", () => {
+    const partContent = "<https://cdn.example.com/image.jpg>";
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        id: getDropImageGalleryItemId(
+          "body",
+          partContent.indexOf("<"),
+          "https://cdn.example.com/image.jpg"
+        ),
+        src: "https://cdn.example.com/image.jpg",
+        source: "body",
+      }),
+    ]);
+  });
+
   it("excludes normal named image links", () => {
     const items = buildDropImageGalleryItems({
       partContent: "[open image](https://cdn.example.com/image.jpg)",
