@@ -15,13 +15,83 @@ import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { CurationPreviewShell } from "./curation-preview/CurationPreviewShell";
 import { PreviewTile } from "./curation-preview/CurationPreviewTiles";
 import { getPreviewItems } from "./curation-preview/dropClassification";
-import type { CurationWavePreviewCardProps } from "./curation-preview/types";
+import type {
+  CurationWavePreviewCardProps,
+  CurationWavePreviewCardVariant,
+} from "./curation-preview/types";
 import {
   getTrimmedText,
   getWaveAuthor,
   getWaveHref,
   PREVIEW_DROPS_FETCH_LIMIT,
 } from "./curation-preview/utils";
+
+const getBannerBackground = ({
+  banner1,
+  banner2,
+}: {
+  readonly banner1?: string | null | undefined;
+  readonly banner2?: string | null | undefined;
+}): string | null => {
+  const firstColor = getTrimmedText(banner1);
+  const secondColor = getTrimmedText(banner2);
+
+  if (firstColor && secondColor) {
+    return `linear-gradient(60deg, ${firstColor} 0%, ${secondColor} 100%)`;
+  }
+
+  return null;
+};
+
+const WavePreviewPicture: React.FC<{
+  readonly picture: string | null | undefined;
+  readonly sizeClassName: string;
+  readonly iconClassName: string;
+  readonly imageSize: string;
+}> = ({ picture, sizeClassName, iconClassName, imageSize }) => (
+  <div
+    className={`${sizeClassName} tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-[#1A1A20] tw-shadow-sm tw-ring-1 tw-ring-white/[0.05]`}
+  >
+    {picture ? (
+      <FallbackImage
+        primarySrc={getScaledImageUri(picture, ImageScale.W_200_H_200)}
+        fallbackSrc={picture}
+        alt=""
+        fill
+        sizes={imageSize}
+        className="tw-object-cover"
+      />
+    ) : (
+      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
+        <FontAwesomeIcon
+          icon={faWater}
+          className={`${iconClassName} tw-text-white/30`}
+          aria-hidden="true"
+        />
+      </div>
+    )}
+  </div>
+);
+
+const CurationPreviewBody: React.FC<{
+  readonly hasBannerCover: boolean;
+  readonly variant: CurationWavePreviewCardVariant;
+  readonly children: React.ReactNode;
+}> = ({ hasBannerCover, variant, children }) => {
+  if (hasBannerCover) {
+    return (
+      <div className="tw-relative tw-z-10 -tw-mt-3 tw-px-5 tw-pb-4">
+        {children}
+      </div>
+    );
+  }
+
+  if (variant === "sheet") {
+    return <div className="tw-px-4 tw-pb-4 tw-pt-6">{children}</div>;
+  }
+
+  return <div className="tw-px-4 tw-pb-4 tw-pt-4">{children}</div>;
+};
 
 export const CurationWavePreviewCard: React.FC<
   CurationWavePreviewCardProps
@@ -84,53 +154,70 @@ export const CurationWavePreviewCard: React.FC<
   const description = getWaveDescriptionPreviewText(wave);
   const previewItems = getPreviewItems(drops);
   const waveHref = getWaveHref({ waveId, wave, curationId });
-  const contentClassName =
-    variant === "sheet"
-      ? "tw-px-4 tw-pb-4 tw-pt-6"
-      : "tw-px-4 tw-pb-4 tw-pt-4";
-  const footerClassName =
-    variant === "sheet"
-      ? "tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3"
-      : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3";
+  const bannerBackground = getBannerBackground({
+    banner1: wave?.author.banner1_color,
+    banner2: wave?.author.banner2_color,
+  });
+  const hasBannerCover = bannerBackground !== null;
 
   return (
     <CurationPreviewShell variant={variant}>
-      <div className={contentClassName}>
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-[#1A1A20] tw-shadow-sm tw-ring-1 tw-ring-white/[0.05]">
-            {wavePicture ? (
-              <FallbackImage
-                primarySrc={getScaledImageUri(
-                  wavePicture,
-                  ImageScale.W_200_H_200
-                )}
-                fallbackSrc={wavePicture}
-                alt=""
-                fill
-                sizes="40px"
-                className="tw-object-cover"
-              />
-            ) : (
-              <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
-                <FontAwesomeIcon
-                  icon={faWater}
-                  className="tw-h-4 tw-w-4 tw-text-white/30"
-                  aria-hidden="true"
-                />
-              </div>
-            )}
-          </div>
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-line-clamp-2 tw-text-[16px] tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
-              {waveName}
-            </div>
-            {author && (
-              <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
-                @{author}
-              </div>
-            )}
-          </div>
+      {hasBannerCover && (
+        <div
+          className={
+            variant === "sheet"
+              ? "tw-relative tw-h-[68px] tw-w-full tw-overflow-hidden"
+              : "tw-relative tw-h-14 tw-w-full tw-overflow-hidden"
+          }
+          aria-hidden="true"
+        >
+          <div
+            className="tw-absolute tw-inset-0 tw-opacity-85"
+            style={{ background: bannerBackground }}
+          />
+          <div className="tw-absolute tw-inset-0 tw-bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.18),transparent_34%),linear-gradient(to_top,#131316_0%,rgba(19,19,22,0.42)_48%,rgba(19,19,22,0.08)_100%)]" />
         </div>
+      )}
+      <CurationPreviewBody hasBannerCover={hasBannerCover} variant={variant}>
+        {hasBannerCover ? (
+          <div className="tw-mb-3 tw-flex tw-items-center tw-gap-2.5">
+            <WavePreviewPicture
+              picture={wavePicture}
+              sizeClassName="tw-h-10 tw-w-10"
+              iconClassName="tw-h-4 tw-w-4"
+              imageSize="40px"
+            />
+            <div className="tw-min-w-0 tw-flex-1">
+              <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
+                {waveName}
+              </div>
+              {author && (
+                <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
+                  @{author}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="tw-flex tw-items-center tw-gap-3">
+            <WavePreviewPicture
+              picture={wavePicture}
+              sizeClassName="tw-h-10 tw-w-10"
+              iconClassName="tw-h-4 tw-w-4"
+              imageSize="40px"
+            />
+            <div className="tw-min-w-0 tw-flex-1">
+              <div className="tw-line-clamp-2 tw-text-base tw-font-bold tw-leading-[1.15] tw-text-zinc-100">
+                {waveName}
+              </div>
+              {author && (
+                <div className="tw-mt-1 tw-truncate tw-text-xs tw-font-medium tw-text-zinc-400">
+                  @{author}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {description && (
           <p className="tw-mb-0 tw-mt-3 tw-line-clamp-2 tw-pr-1 tw-text-xs tw-font-medium tw-leading-[1.45] tw-text-zinc-300">
             {description}
@@ -138,9 +225,9 @@ export const CurationWavePreviewCard: React.FC<
         )}
 
         <PreviewContent isFetching={isFetching} previewItems={previewItems} />
-      </div>
+      </CurationPreviewBody>
 
-      <div className={footerClassName}>
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
         <Link
           href={waveHref}
           prefetch={false}
