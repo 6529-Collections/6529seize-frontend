@@ -9,14 +9,11 @@ import { useRouter } from "next/navigation";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: () => ({
-    isApp: false,
-    isMobileDevice: false,
-    hasTouchScreen: false,
-  }),
+  default: jest.fn(),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -35,6 +32,7 @@ const push = jest.fn();
 const useRouterMock = useRouter as jest.Mock;
 const useMyStreamOptionalMock = useMyStreamOptional as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
+const useDeviceInfoMock = useDeviceInfo as jest.Mock;
 let activeWaveId: string | null = null;
 let capturedContext: ViewContextValue | null = null;
 const waveTypes = new Map<string, boolean>();
@@ -99,6 +97,18 @@ const makeWave = (id: string, isDirectMessage: boolean): ApiWave =>
     },
   }) as ApiWave;
 
+const setDeviceInfo = ({
+  isApp = false,
+  isMobileDevice = false,
+  hasTouchScreen = false,
+} = {}) => {
+  useDeviceInfoMock.mockReturnValue({
+    isApp,
+    isMobileDevice,
+    hasTouchScreen,
+  });
+};
+
 const renderCapturedProvider = () =>
   render(
     <ViewProvider>
@@ -138,6 +148,7 @@ beforeEach(() => {
   activeWaveId = null;
   capturedContext = null;
   waveTypes.clear();
+  setDeviceInfo();
   useRouterMock.mockReturnValue({
     push,
   });
@@ -233,6 +244,25 @@ describe("ViewContext", () => {
     expect(push).toHaveBeenCalledWith("/waves/normal-wave");
   });
 
+  it("in app mode, Waves opens the shell view instead of restoring the last normal wave", async () => {
+    setDeviceInfo({ isApp: true, isMobileDevice: true, hasTouchScreen: true });
+    const { rerender } = renderCapturedProvider();
+
+    waveTypes.set("normal-wave", false);
+    await setActiveWave(rerender, "normal-wave");
+    waveTypes.set("dm-wave", true);
+    await setActiveWave(rerender, "dm-wave");
+
+    push.mockClear();
+    act(() => {
+      getCapturedContext().handleNavClick(wavesItem);
+    });
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith("/?view=waves", { scroll: false });
+    expect(push).not.toHaveBeenCalledWith("/waves/normal-wave");
+  });
+
   it("from a normal wave, clicking Messages restores the last DM", async () => {
     const { rerender } = renderCapturedProvider();
 
@@ -247,6 +277,25 @@ describe("ViewContext", () => {
     });
 
     expect(push).toHaveBeenCalledWith("/messages/dm-wave");
+  });
+
+  it("in app mode, Messages opens the shell view instead of restoring the last DM", async () => {
+    setDeviceInfo({ isApp: true, isMobileDevice: true, hasTouchScreen: true });
+    const { rerender } = renderCapturedProvider();
+
+    waveTypes.set("dm-wave", true);
+    await setActiveWave(rerender, "dm-wave");
+    waveTypes.set("normal-wave", false);
+    await setActiveWave(rerender, "normal-wave");
+
+    push.mockClear();
+    act(() => {
+      getCapturedContext().handleNavClick(messagesItem);
+    });
+
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith("/?view=messages", { scroll: false });
+    expect(push).not.toHaveBeenCalledWith("/messages/dm-wave");
   });
 
   it("from a normal wave, clicking Waves clears the normal wave", async () => {

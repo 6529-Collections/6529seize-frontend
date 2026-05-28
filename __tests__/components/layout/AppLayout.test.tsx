@@ -162,6 +162,26 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("messages")).toBeInTheDocument();
   });
 
+  it("uses root view params for app shell content instead of route children", () => {
+    usePathname.mockReturnValue("/");
+    getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
+
+    const { rerender } = renderWithProvider(<AppLayout>child</AppLayout>);
+
+    expect(screen.getByTestId("waves")).toBeInTheDocument();
+    expect(screen.queryByText("child")).not.toBeInTheDocument();
+
+    getSearchParams.mockReturnValue(new URLSearchParams("view=messages"));
+    rerender(
+      <Provider store={store}>
+        <AppLayout>child</AppLayout>
+      </Provider>
+    );
+
+    expect(screen.getByTestId("messages")).toBeInTheDocument();
+    expect(screen.queryByText("child")).not.toBeInTheDocument();
+  });
+
   it("owns a persistent quick-vote dialog for the waves view", () => {
     getSearchParams.mockReturnValue(new URLSearchParams("view=waves"));
 

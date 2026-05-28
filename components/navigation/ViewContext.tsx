@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
+  getAppShellViewRoute,
   getHomeRoute,
   getMessagesBaseRoute,
   getWaveRoute,
@@ -100,6 +101,11 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   const handleNavClick = useCallback(
     (item: NavItem) => {
+      if (isApp && item.kind === "view") {
+        router.push(getAppShellViewRoute(item.viewKey), { scroll: false });
+        return;
+      }
+
       if (item.kind === "route") {
         if (item.name === "Home") {
           router.push(getHomeRoute());
