@@ -5,7 +5,6 @@ import SpinnerLoader from "@/components/common/SpinnerLoader";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { DropLocation } from "@/components/waves/drops/Drop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -13,70 +12,12 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useWaveById } from "@/hooks/useWaveById";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import DropsList from "./DropsList";
 
 const REQUEST_SIZE = 10;
 
-type DropAuthorWithBadges = ApiDrop["author"] & {
-  readonly badges?: {
-    readonly profile_wave_id?: string | null;
-    readonly profile_wave_name?: string | null;
-    readonly profile_wave_pfp?: string | null;
-  } | null;
-};
-
-type ProfileWaveBadgeFallback = Pick<ApiWaveMin, "id" | "name" | "picture">;
-
-const getTrimmedText = (value?: string | null): string | null => {
-  const trimmed = value?.trim();
-  return trimmed !== undefined && trimmed.length > 0 ? trimmed : null;
-};
-
-const getAuthorProfileWaveId = (author: DropAuthorWithBadges): string | null =>
-  getTrimmedText(author.profile_wave_id) ??
-  getTrimmedText(author.badges?.profile_wave_id);
-
-const withProfileWaveBadgeFallback = (
-  drop: ApiDrop,
-  profileWave: ProfileWaveBadgeFallback | null
-): ApiDrop => {
-  if (profileWave === null) {
-    return drop;
-  }
-
-  const author = drop.author as DropAuthorWithBadges;
-  const authorProfileWaveId = getAuthorProfileWaveId(author);
-
-  if (authorProfileWaveId !== profileWave.id) {
-    return drop;
-  }
-
-  const badges = author.badges ?? {};
-
-  return {
-    ...drop,
-    author: {
-      ...drop.author,
-      badges: {
-        ...badges,
-        profile_wave_id:
-          getTrimmedText(badges.profile_wave_id) ?? profileWave.id,
-        profile_wave_name:
-          getTrimmedText(badges.profile_wave_name) ?? profileWave.name,
-        profile_wave_pfp:
-          getTrimmedText(badges.profile_wave_pfp) ?? profileWave.picture,
-      },
-    } as ApiDrop["author"],
-  };
-};
-
-export default function Drops({
-  profileWaveId = null,
-}: {
-  readonly profileWaveId?: string | null | undefined;
-}) {
+export default function Drops() {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
   const params = useParams();
@@ -84,10 +25,6 @@ export default function Drops({
   const { connectedProfile } = useContext(AuthContext);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const { wave } = useWaveById(profileWaveId, {
-    enabled: Boolean(profileWaveId),
-  });
-  const profileWave = wave?.id === profileWaveId ? wave : null;
 
   const {
     data,
@@ -132,13 +69,13 @@ export default function Drops({
     () =>
       setDrops(
         data?.pages.flat().map((drop) => ({
-          ...withProfileWaveBadgeFallback(drop, profileWave),
+          ...drop,
           type: DropSize.FULL,
           stableKey: drop.id,
           stableHash: drop.id,
         })) ?? []
       ),
-    [data, profileWave]
+    [data]
   );
 
   const onBottomIntersection = useCallback(() => {
