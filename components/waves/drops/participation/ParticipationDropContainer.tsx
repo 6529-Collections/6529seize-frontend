@@ -9,6 +9,7 @@ interface ParticipationDropContainerProps {
   readonly location: DropLocation;
   readonly children: React.ReactNode;
   readonly useRankStyles?: boolean | undefined;
+  readonly floatingActions?: React.ReactNode | undefined;
 }
 
 const ACTIVE_DROP_STYLES =
@@ -65,6 +66,7 @@ export default function ParticipationDropContainer({
   location,
   children,
   useRankStyles = true,
+  floatingActions,
 }: ParticipationDropContainerProps) {
   const isDrop = drop.drop_type === ApiDropType.Participatory;
   const dropStyles = getDropStyles({
@@ -78,10 +80,13 @@ export default function ParticipationDropContainer({
     <div
       className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} tw-w-full`}
     >
-      <div
-        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl ${backgroundClass} ${dropStyles} tw-border-solid tw-transition-[box-shadow,background-color,border-color] tw-duration-200 tw-ease-out`}
-      >
-        {children}
+      <div className="tw-group tw-relative tw-w-full">
+        {floatingActions}
+        <div
+          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl ${backgroundClass} ${dropStyles} tw-border-solid tw-transition-[box-shadow,background-color,border-color] tw-duration-200 tw-ease-out`}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

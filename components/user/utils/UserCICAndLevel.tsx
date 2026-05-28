@@ -60,7 +60,7 @@ export default function UserCICAndLevel({
   return (
     <div className="tw-inline-flex">
       <div
-        className={`${LEVEL_SIZE_CLASSES[size]} tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-font-bold tw-leading-none ${colorClasses}`}
+        className={`${LEVEL_SIZE_CLASSES[size]} tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-border-[0.5px] tw-border-solid tw-font-bold tw-leading-none ${colorClasses}`}
       >
         <span className="tw-absolute tw-left-1/2 tw-top-1/2 tw-inline-flex -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-leading-none">
           {level}

@@ -437,7 +437,14 @@ export default function HoverCard({
               onFocus={handleCardFocus}
               onBlur={handleCardBlur}
             >
-              <div className={styles["tooltipContent"]}>{content}</div>
+              <div
+                className={joinTooltipClassNames(
+                  styles["tooltipContent"],
+                  "tw-overflow-hidden tw-rounded-xl"
+                )}
+              >
+                {content}
+              </div>
               <div
                 className={joinTooltipClassNames(
                   styles["tooltipArrow"],
