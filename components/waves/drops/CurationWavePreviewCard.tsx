@@ -46,6 +46,9 @@ const REDUNDANT_LINK_HOSTS = new Set([
   "twitter.com",
   "x.com",
 ]);
+const TWITTER_MEDIA_HOST = "pbs.twimg.com";
+const TWITTER_MEDIA_PATH_PREFIX = "/media/";
+const TWITTER_PREVIEW_IMAGE_SIZE = "small";
 const TILE_BASE_CLASS_NAME =
   "tw-group tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-align-top tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out tw-[contain:content] tw-[content-visibility:auto]";
 const TRAILING_URL_PUNCTUATION = "),.;!?";
@@ -249,6 +252,24 @@ const getUrlPathEndIndex = (url: string): number => {
   return indexes.length > 0 ? Math.min(...indexes) : url.length;
 };
 
+const getPreviewImageUrl = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    const isTwitterMediaUrl =
+      parsed.hostname.toLowerCase() === TWITTER_MEDIA_HOST &&
+      parsed.pathname.startsWith(TWITTER_MEDIA_PATH_PREFIX);
+
+    if (isTwitterMediaUrl) {
+      parsed.searchParams.set("name", TWITTER_PREVIEW_IMAGE_SIZE);
+      return parsed.toString();
+    }
+  } catch {
+    // Keep the original URL for non-standard values.
+  }
+
+  return url;
+};
+
 const getDirectImageFormat = (url: string): string | null => {
   try {
     const parsed = new URL(url);
@@ -376,7 +397,7 @@ const getLinkHintUrl = (
       return false;
     }
 
-    return rawText === null || !rawText.includes(url);
+    return rawText?.includes(url) !== true;
   }) ?? null;
 
 const getPrimaryLink = (
@@ -412,7 +433,7 @@ const classifyDrop = (inputDrop: PreviewDrop): PreviewItem | null => {
     ...(drop.nft_links?.map((link) => link.url_in_text) ?? [])
   );
   const textWithoutUrls =
-    rawText !== null ? stripUrls(rawText) : getAttachmentFallbackText(drop);
+    rawText === null ? getAttachmentFallbackText(drop) : stripUrls(rawText);
   const media = getDropMedia(drop, urls);
   const primaryMedia = media[0] ?? null;
   const hasMeaningfulText = textWithoutUrls !== null;
@@ -444,7 +465,7 @@ const classifyDrop = (inputDrop: PreviewDrop): PreviewItem | null => {
 
   if (textWithoutUrls !== null) {
     const inlineUrl = urls[0] ?? null;
-    const linkHost = inlineUrl !== null ? getUrlHost(inlineUrl) : null;
+    const linkHost = inlineUrl === null ? null : getUrlHost(inlineUrl);
 
     return {
       kind: "text",
@@ -470,6 +491,7 @@ const PreviewMediaTile: React.FC<{
   readonly item: Extract<PreviewItem, { readonly kind: "media" }>;
 }> = ({ item }) => {
   const hasText = item.text !== null;
+  const mediaUrl = getPreviewImageUrl(item.media.url);
 
   return (
     <div
@@ -481,8 +503,8 @@ const PreviewMediaTile: React.FC<{
         style={{ aspectRatio: getMediaAspectRatio(item.media, hasText) }}
       >
         <FallbackImage
-          primarySrc={getScaledImageUri(item.media.url, ImageScale.W_200_H_200)}
-          fallbackSrc={item.media.url}
+          primarySrc={getScaledImageUri(mediaUrl, ImageScale.W_200_H_200)}
+          fallbackSrc={mediaUrl}
           alt=""
           fill
           sizes="156px"
