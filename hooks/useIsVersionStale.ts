@@ -7,7 +7,7 @@ const CURRENT = publicEnv.VERSION!; // baked into the bundle
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
 
 const shouldForceShowNewVersionToast = () =>
-  typeof globalThis.window !== "undefined" &&
+  globalThis.window !== undefined &&
   new URLSearchParams(globalThis.location.search).get(
     SHOW_NEW_VERSION_TOAST_PARAM
   ) === "true";
