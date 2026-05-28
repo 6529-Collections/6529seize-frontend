@@ -103,12 +103,9 @@ export const CurationWavePreviewCard: React.FC<
   variant = "hovercard",
 }) => {
   const normalizedProfileIdentity = getTrimmedText(profileIdentity);
-  const { wave } = useWaveById(waveId);
-  const {
-    data: profileWave,
-    isError: isProfileWaveError,
-    isFetching: isProfileWaveFetching,
-  } = useProfileWave({
+  const { wave, isError: isWaveError } = useWaveById(waveId);
+  const resolvedWave = wave?.id === waveId ? wave : undefined;
+  const { data: profileWave, isError: isProfileWaveError } = useProfileWave({
     identity: normalizedProfileIdentity,
     enabled: normalizedProfileIdentity !== null,
   });
@@ -122,41 +119,63 @@ export const CurationWavePreviewCard: React.FC<
       : null;
   const shouldLoadFallbackCurations =
     hasResolvedProfileWave && selectedProfileCurationId === null;
-  const { data: curations = [], isFetching: areCurationsFetching } =
-    useWaveCurations({
-      waveId,
-      enabled: shouldLoadFallbackCurations,
-    });
+  const {
+    data: curations = [],
+    isError: isCurationsError,
+    isFetched: areCurationsFetched,
+  } = useWaveCurations({
+    waveId,
+    enabled: shouldLoadFallbackCurations,
+  });
   const fallbackCurationId = shouldLoadFallbackCurations
     ? (curations.at(0)?.id ?? null)
     : null;
   const curationId = selectedProfileCurationId ?? fallbackCurationId;
-  const { drops, isFetching: areDropsFetching } = useWaveCurationPreviewDrops({
-    wave: wave ?? null,
+  const canFetchPreviewDrops =
+    hasResolvedProfileWave && curationId !== null && resolvedWave !== undefined;
+  const {
+    drops,
+    isError: isDropsError,
+    isFetched: areDropsFetched,
+  } = useWaveCurationPreviewDrops({
+    wave: resolvedWave ?? null,
     curationId,
     pageSize: PREVIEW_DROPS_FETCH_LIMIT,
-    enabled: hasResolvedProfileWave && curationId !== null,
+    enabled: canFetchPreviewDrops,
   });
 
-  const isFetching =
-    isProfileWaveFetching || areCurationsFetching || areDropsFetching;
+  const isProfileWaveUnresolved =
+    normalizedProfileIdentity !== null &&
+    profileWave === undefined &&
+    !isProfileWaveError;
+  const areFallbackCurationsUnresolved =
+    shouldLoadFallbackCurations && !areCurationsFetched && !isCurationsError;
+  const areWaveDetailsUnresolved =
+    curationId !== null && resolvedWave === undefined && !isWaveError;
+  const arePreviewDropsUnresolved =
+    canFetchPreviewDrops && !areDropsFetched && !isDropsError;
+  const isPreviewPending =
+    isProfileWaveUnresolved ||
+    areFallbackCurationsUnresolved ||
+    areWaveDetailsUnresolved ||
+    arePreviewDropsUnresolved;
   const firstDropWave = drops.at(0)?.wave;
   const waveName =
-    getTrimmedText(wave?.name) ??
+    getTrimmedText(resolvedWave?.name) ??
     getTrimmedText(fallbackName) ??
     getTrimmedText(firstDropWave?.name) ??
     "Featured wave";
   const wavePicture =
-    getTrimmedText(wave?.picture) ??
+    getTrimmedText(resolvedWave?.picture) ??
     getTrimmedText(fallbackPfp) ??
     getTrimmedText(firstDropWave?.picture);
-  const author = getWaveAuthor(wave);
-  const description = getWaveDescriptionPreviewText(wave);
+  const author = getWaveAuthor(resolvedWave);
+  const description = getWaveDescriptionPreviewText(resolvedWave);
   const previewItems = getPreviewItems(drops);
-  const waveHref = getWaveHref({ waveId, wave, curationId });
+  const waveHref = getWaveHref({ waveId, wave: resolvedWave, curationId });
   const bannerBackground = getBannerBackground({
-    banner1: wave?.author.banner1_color,
-    banner2: wave?.author.banner2_color,
+    banner1: resolvedWave?.author.banner1_color,
+    banner2: resolvedWave?.author.banner2_color,
   });
   const hasBannerCover = bannerBackground !== null;
 
@@ -224,10 +243,13 @@ export const CurationWavePreviewCard: React.FC<
           </p>
         )}
 
-        <PreviewContent isFetching={isFetching} previewItems={previewItems} />
+        <PreviewContent
+          isPending={isPreviewPending}
+          previewItems={previewItems}
+        />
       </CurationPreviewBody>
 
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-5 tw-py-3">
         <Link
           href={waveHref}
           prefetch={false}
@@ -245,9 +267,9 @@ export const CurationWavePreviewCard: React.FC<
 };
 
 const PreviewContent: React.FC<{
-  readonly isFetching: boolean;
+  readonly isPending: boolean;
   readonly previewItems: ReturnType<typeof getPreviewItems>;
-}> = ({ isFetching, previewItems }) => {
+}> = ({ isPending, previewItems }) => {
   if (previewItems.length > 0) {
     return (
       <div className="tw-mt-4 tw-columns-2 tw-gap-2">
@@ -258,7 +280,7 @@ const PreviewContent: React.FC<{
     );
   }
 
-  if (isFetching) {
+  if (isPending) {
     return (
       <div
         className="tw-mt-4 tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-2 tw-py-1.5 tw-text-left tw-text-xs tw-text-iron-400"
@@ -286,14 +308,10 @@ const PreviewContent: React.FC<{
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-        <span>Loading curated drops...</span>
+        <span>Loading...</span>
       </div>
     );
   }
 
-  return (
-    <p className="tw-mb-0 tw-mt-4 tw-text-xs tw-font-semibold tw-text-iron-400">
-      No curated drops yet.
-    </p>
-  );
+  return null;
 };
