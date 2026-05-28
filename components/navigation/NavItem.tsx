@@ -212,16 +212,43 @@ const NavItemContent = ({
   const href = getNavHref(resolvedItem);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (item.kind === "route" && item.name === "Profile") {
-      if (!address) {
-        event.preventDefault();
-        seizeConnect();
-        return;
-      }
+    if (item.kind === "route" && item.name === "Profile" && !address) {
+      event.preventDefault();
+      seizeConnect();
+      return;
     }
 
     recordNavClick(resolvedItem);
   };
+
+  const linkContent = (
+    <NavItemLinkContent
+      hasUnreadMessages={hasUnreadMessages}
+      haveUnreadNotifications={haveUnreadNotifications}
+      icon={icon}
+      iconSizeClass={iconSizeClass}
+      isActive={isActive}
+      item={item}
+    />
+  );
+
+  const linkClassName =
+    "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none";
+
+  if (fullPrefetch) {
+    return (
+      <Link
+        href={href}
+        aria-label={name}
+        aria-current={isActive ? "page" : undefined}
+        onClick={handleClick}
+        prefetch={true}
+        className={linkClassName}
+      >
+        {linkContent}
+      </Link>
+    );
+  }
 
   return (
     <Link
@@ -229,17 +256,9 @@ const NavItemContent = ({
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
-      prefetch={fullPrefetch ? true : undefined}
-      className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      className={linkClassName}
     >
-      <NavItemLinkContent
-        hasUnreadMessages={hasUnreadMessages}
-        haveUnreadNotifications={haveUnreadNotifications}
-        icon={icon}
-        iconSizeClass={iconSizeClass}
-        isActive={isActive}
-        item={item}
-      />
+      {linkContent}
     </Link>
   );
 };
