@@ -39,8 +39,10 @@ const getDirectImageFormat = (url: string): string | null => {
   }
 };
 
-const inferImageMimeType = (url: string): string | null =>
-  getDirectImageFormat(url) !== null ? "image/*" : null;
+const inferImageMimeType = (url: string): string | null => {
+  const hasDirectImageFormat = Boolean(getDirectImageFormat(url));
+  return hasDirectImageFormat ? "image/*" : null;
+};
 
 const isImageLikeMedia = (url: string, mimeType: string | null): boolean =>
   mimeType?.toLowerCase().startsWith("image/") === true ||
