@@ -9,11 +9,6 @@ export const sameMainPath = (a: string, b: string): boolean =>
 
 export const getHomeRoute = (): string => "/";
 
-export type AppShellViewKey = "waves" | "messages";
-
-export const getAppShellViewRoute = (view: AppShellViewKey): string =>
-  `/?view=${view}`;
-
 export const getWavesBaseRoute = (_isApp: boolean): string => "/waves";
 
 export const getMessagesBaseRoute = (_isApp: boolean): string => "/messages";

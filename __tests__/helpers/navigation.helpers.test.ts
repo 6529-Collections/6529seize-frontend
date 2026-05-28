@@ -1,6 +1,5 @@
 import {
   getActiveWaveIdFromUrl,
-  getAppShellViewRoute,
   getMessageIdFromPathname,
   getWaveHomeRoute,
   getWaveIdFromPathname,
@@ -33,16 +32,6 @@ describe("navigation.helpers", () => {
 
     it("detects different segments", () => {
       expect(sameMainPath("/one", "/two")).toBe(false);
-    });
-  });
-
-  describe("getAppShellViewRoute", () => {
-    it("returns the app shell waves view route", () => {
-      expect(getAppShellViewRoute("waves")).toBe("/?view=waves");
-    });
-
-    it("returns the app shell messages view route", () => {
-      expect(getAppShellViewRoute("messages")).toBe("/?view=messages");
     });
   });
 

@@ -12,6 +12,35 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { useWave } from "@/hooks/useWave";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
+const mockUseLinkStatus = jest.fn(() => ({ pending: false }));
+
+jest.mock("next/link", () => {
+  const MockLink = ({
+    children,
+    href,
+    prefetch,
+    ...props
+  }: {
+    readonly children: any;
+    readonly href: string;
+    readonly prefetch?: boolean | undefined;
+  }) => (
+    <a
+      href={href}
+      data-prefetch={prefetch === undefined ? undefined : `${prefetch}`}
+      {...props}
+    >
+      {children}
+    </a>
+  );
+
+  return {
+    __esModule: true,
+    default: MockLink,
+    useLinkStatus: () => mockUseLinkStatus(),
+  };
+});
+
 jest.mock("@/components/navigation/ViewContext", () => ({
   getActiveViewFromUrl: ({
     activeWaveId,
@@ -54,14 +83,25 @@ jest.mock("next/navigation", () => ({
 
 describe("NavItem notifications", () => {
   const handleNavClick = jest.fn();
+  const getNavHref = jest.fn();
+  const recordNavClick = jest.fn();
   const seizeConnect = jest.fn();
   const removeAllDeliveredNotifications = jest.fn();
   const setTitle = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseLinkStatus.mockReturnValue({ pending: false });
+    getNavHref.mockImplementation((item) => {
+      if (item.kind === "view") {
+        return `/${item.viewKey}`;
+      }
+      return item.href;
+    });
     (useViewContext as jest.Mock).mockReturnValue({
       handleNavClick,
+      getNavHref,
+      recordNavClick,
     });
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
@@ -98,7 +138,12 @@ describe("NavItem notifications", () => {
       notifications: { unread_count: 3 },
       haveUnreadNotifications: true,
     });
-    const item = { name: "Notifications", icon: "/n" } as any;
+    const item = {
+      kind: "route",
+      name: "Notifications",
+      href: "/notifications",
+      icon: "/n",
+    } as any;
 
     const { container } = render(<NavItem item={item} />);
 
@@ -112,7 +157,12 @@ describe("NavItem notifications", () => {
       notifications: { unread_count: 0 },
       haveUnreadNotifications: false,
     });
-    const item = { name: "Notifications", icon: "/n" } as any;
+    const item = {
+      kind: "route",
+      name: "Notifications",
+      href: "/notifications",
+      icon: "/n",
+    } as any;
 
     const { container } = render(<NavItem item={item} />);
 
@@ -134,13 +184,14 @@ describe("NavItem notifications", () => {
     } as any;
 
     const { getByRole } = render(<NavItem item={item} />);
-    fireEvent.click(getByRole("button", { name: "Profile" }));
+    fireEvent.click(getByRole("link", { name: "Profile" }));
 
     expect(seizeConnect).toHaveBeenCalledTimes(1);
     expect(handleNavClick).not.toHaveBeenCalled();
+    expect(recordNavClick).not.toHaveBeenCalled();
   });
 
-  it("navigates to connected user profile when profile item is clicked", () => {
+  it("records connected user profile link clicks with the resolved profile route", () => {
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "User", normalised_handle: "my-handle" },
     });
@@ -152,15 +203,16 @@ describe("NavItem notifications", () => {
     } as any;
 
     const { getByRole } = render(<NavItem item={item} />);
-    fireEvent.click(getByRole("button", { name: "Profile" }));
+    fireEvent.click(getByRole("link", { name: "Profile" }));
 
-    expect(handleNavClick).toHaveBeenCalledWith(
+    expect(recordNavClick).toHaveBeenCalledWith(
       expect.objectContaining({
         kind: "route",
         name: "Profile",
         href: "/my-handle",
       })
     );
+    expect(handleNavClick).not.toHaveBeenCalled();
     expect(seizeConnect).not.toHaveBeenCalled();
   });
 
@@ -177,17 +229,46 @@ describe("NavItem notifications", () => {
     } as any;
 
     const { getByRole, rerender } = render(<NavItem item={item} />);
-    expect(getByRole("button", { name: "Profile" })).toHaveAttribute(
+    expect(getByRole("link", { name: "Profile" })).toHaveAttribute(
       "aria-current",
       "page"
     );
 
     (usePathname as jest.Mock).mockReturnValue("/other-user");
     rerender(<NavItem item={item} />);
-    expect(getByRole("button", { name: "Profile" })).not.toHaveAttribute(
+    expect(getByRole("link", { name: "Profile" })).not.toHaveAttribute(
       "aria-current",
       "page"
     );
+  });
+
+  it("uses full prefetch for app view tab links", () => {
+    const item = {
+      kind: "view",
+      name: "Waves",
+      viewKey: "waves",
+      icon: "waves",
+    } as any;
+
+    const { getByRole } = render(<NavItem item={item} fullPrefetch />);
+
+    const link = getByRole("link", { name: "Waves" });
+    expect(link).toHaveAttribute("href", "/waves");
+    expect(link).toHaveAttribute("data-prefetch", "true");
+  });
+
+  it("shows immediate pending feedback while a link navigation is pending", () => {
+    mockUseLinkStatus.mockReturnValue({ pending: true });
+    const item = {
+      kind: "view",
+      name: "Messages",
+      viewKey: "messages",
+      icon: "messages",
+    } as any;
+
+    const { getByTestId } = render(<NavItem item={item} />);
+
+    expect(getByTestId("nav-item-pending-indicator")).toBeInTheDocument();
   });
 
   it("renders disabled item when disabled flag set", () => {

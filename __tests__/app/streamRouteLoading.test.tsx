@@ -10,6 +10,7 @@ describe("stream route loading fallbacks", () => {
     expect(
       screen.getByRole("status", { name: "Loading waves" })
     ).toBeInTheDocument();
+    expect(screen.getByTestId("stream-route-loading-shell")).toBeInTheDocument();
   });
 
   it("renders an accessible messages loading state", () => {
@@ -18,5 +19,6 @@ describe("stream route loading fallbacks", () => {
     expect(
       screen.getByRole("status", { name: "Loading messages" })
     ).toBeInTheDocument();
+    expect(screen.getByTestId("stream-route-loading-shell")).toBeInTheDocument();
   });
 });
