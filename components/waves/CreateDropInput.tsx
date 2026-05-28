@@ -11,13 +11,7 @@ import {
   useRef,
 } from "react";
 import type { EditorState } from "lexical";
-import {
-  RootNode,
-  COMMAND_PRIORITY_CRITICAL,
-  COMMAND_PRIORITY_HIGH,
-  KEY_ARROW_UP_COMMAND,
-  createCommand,
-} from "lexical";
+import { RootNode, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -66,6 +60,7 @@ import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
 import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
+import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -91,70 +86,6 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
     }
     return () => {};
   }, [editor, disabled]);
-
-  return null;
-}
-
-function EditLastDropArrowUpPlugin({
-  canEditLastDropWithArrow,
-  onRequestEditLastDrop,
-  canUseArrowUpShortcut,
-}: {
-  readonly canEditLastDropWithArrow: boolean;
-  readonly onRequestEditLastDrop?: (() => boolean) | undefined;
-  readonly canUseArrowUpShortcut: () => boolean;
-}) {
-  const [editor] = useLexicalComposerContext();
-  const canEditLastDropWithArrowRef = useRef(canEditLastDropWithArrow);
-  const onRequestEditLastDropRef = useRef(onRequestEditLastDrop);
-  const canUseArrowUpShortcutRef = useRef(canUseArrowUpShortcut);
-
-  useEffect(() => {
-    canEditLastDropWithArrowRef.current = canEditLastDropWithArrow;
-  }, [canEditLastDropWithArrow]);
-
-  useEffect(() => {
-    onRequestEditLastDropRef.current = onRequestEditLastDrop;
-  }, [onRequestEditLastDrop]);
-
-  useEffect(() => {
-    canUseArrowUpShortcutRef.current = canUseArrowUpShortcut;
-  }, [canUseArrowUpShortcut]);
-
-  useEffect(
-    () =>
-      editor.registerCommand(
-        KEY_ARROW_UP_COMMAND,
-        (event: KeyboardEvent) => {
-          if (
-            event.ctrlKey ||
-            event.metaKey ||
-            event.altKey ||
-            event.shiftKey
-          ) {
-            return false;
-          }
-
-          if (
-            !canEditLastDropWithArrowRef.current ||
-            !onRequestEditLastDropRef.current ||
-            !canUseArrowUpShortcutRef.current()
-          ) {
-            return false;
-          }
-
-          const handled = onRequestEditLastDropRef.current();
-          if (!handled) {
-            return false;
-          }
-
-          event.preventDefault();
-          return true;
-        },
-        COMMAND_PRIORITY_HIGH
-      ),
-    [editor]
-  );
 
   return null;
 }

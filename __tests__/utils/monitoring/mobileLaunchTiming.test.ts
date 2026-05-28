@@ -296,4 +296,56 @@ describe("mobileLaunchTiming", () => {
       })
     );
   });
+
+  it("sanitizes endpoints and route families", async () => {
+    const sanitizers =
+      await import("@/utils/monitoring/mobileLaunchTimingSanitizers");
+
+    expect(
+      sanitizers.sanitizeEndpointGroup(
+        "https://api.test.6529.io/api/profiles/private-handle/proxies/?wallet=0x123"
+      )
+    ).toBe("/api/profiles/:id/proxies");
+    expect(
+      sanitizers.sanitizeEndpointGroup(
+        "https://api.test.6529.io/api/%70rofiles/private-handle/proxies"
+      )
+    ).toBe("/api/profiles/:id/proxies");
+    expect(
+      sanitizers.sanitizeEndpointGroup(
+        "/api/waves/0x1234567890123456789012345678901234567890/drops/123?handle=secret"
+      )
+    ).toBe("/api/waves/:wallet/drops/:id");
+    expect(sanitizers.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
+    expect(sanitizers.sanitizeRouteFamily("/messages/wave-123")).toBe(
+      "/messages/[wave]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/waves/wave-123")).toBe(
+      "/waves/[wave]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/messages/create")).toBe(
+      "/messages/create"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/waves/create")).toBe(
+      "/waves/create"
+    );
+    expect(
+      sanitizers.sanitizeRouteFamily("/tools/app-wallets/123?jwt=secret")
+    ).toBe("/tools/app-wallets/[app-wallet-address]");
+    expect(sanitizers.sanitizeRouteFamily("/nextgen")).toBe(
+      "/nextgen/[[...view]]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/nextgen/explore")).toBe(
+      "/nextgen/[[...view]]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/nextgen/manager")).toBe(
+      "/nextgen/manager"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/network/nerd")).toBe(
+      "/network/nerd/[[...focus]]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/network/nerd/focus")).toBe(
+      "/network/nerd/[[...focus]]"
+    );
+  });
 });

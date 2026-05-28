@@ -168,6 +168,55 @@ const getBadgeTitle = (
   return viewModel.label;
 };
 
+interface IssueAssigneeLabels {
+  readonly mobile: string;
+  readonly desktop: string;
+}
+
+const getIssueAssigneeLabels = (
+  preview: GithubPreviewResponse
+): IssueAssigneeLabels | null => {
+  if (preview.type !== "github.issue") {
+    return null;
+  }
+
+  const legacyAssignee =
+    "assignee" in preview && typeof preview.assignee === "string"
+      ? preview.assignee
+      : null;
+  const previewAssignees = Array.isArray(preview.assignees)
+    ? preview.assignees
+    : [];
+  let assignees: readonly string[] = [];
+  if (previewAssignees.length > 0) {
+    assignees = previewAssignees;
+  } else if (legacyAssignee) {
+    assignees = [legacyAssignee];
+  }
+
+  const [firstAssignee, ...additionalAssignees] = assignees;
+  if (!firstAssignee) {
+    return { mobile: "Unassigned", desktop: "Unassigned" };
+  }
+
+  if (additionalAssignees.length === 1) {
+    return {
+      mobile: `@${firstAssignee} +1`,
+      desktop: `@${firstAssignee}, @${additionalAssignees[0]}`,
+    };
+  }
+
+  if (additionalAssignees.length > 0) {
+    const compactLabel = `@${firstAssignee} +${additionalAssignees.length}`;
+    return {
+      mobile: compactLabel,
+      desktop: compactLabel,
+    };
+  }
+
+  return { mobile: `@${firstAssignee}`, desktop: `@${firstAssignee}` };
+};
+
 export default function GithubPreviewStatusBadge({
   href,
   initialPreview,
@@ -287,7 +336,13 @@ export default function GithubPreviewStatusBadge({
 
   const viewModel = getStatusViewModel(status);
   const detail = compact ? undefined : viewModel.detail;
-  const title = getBadgeTitle(status, viewModel, detail);
+  const issueAssigneeLabels =
+    status.type === "success" ? getIssueAssigneeLabels(status.preview) : null;
+  const title = getBadgeTitle(
+    status,
+    viewModel,
+    issueAssigneeLabels?.desktop ?? detail
+  );
   const badge = (
     <span
       ref={badgeRef}
@@ -310,6 +365,34 @@ export default function GithubPreviewStatusBadge({
       {detail && (
         <span className="tw-hidden tw-font-medium tw-normal-case tw-opacity-70 sm:tw-inline">
           {detail}
+        </span>
+      )}
+      {issueAssigneeLabels && (
+        <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-1 tw-font-medium tw-normal-case tw-opacity-80">
+          <span aria-hidden="true">·</span>
+          {issueAssigneeLabels.mobile === issueAssigneeLabels.desktop ? (
+            <span
+              className="tw-line-clamp-1"
+              data-testid="github-preview-assignee-label"
+            >
+              {issueAssigneeLabels.desktop}
+            </span>
+          ) : (
+            <>
+              <span
+                className="tw-line-clamp-1 sm:tw-hidden"
+                data-testid="github-preview-assignee-mobile-label"
+              >
+                {issueAssigneeLabels.mobile}
+              </span>
+              <span
+                className="tw-line-clamp-1 tw-hidden sm:tw-inline"
+                data-testid="github-preview-assignee-desktop-label"
+              >
+                {issueAssigneeLabels.desktop}
+              </span>
+            </>
+          )}
         </span>
       )}
     </span>

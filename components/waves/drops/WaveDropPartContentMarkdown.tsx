@@ -50,6 +50,7 @@ interface WaveDropPartContentMarkdownProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
 }
 
 const WaveDropPartContentMarkdown: React.FC<
@@ -73,6 +74,7 @@ const WaveDropPartContentMarkdown: React.FC<
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  fullWidthLinkPreviews = false,
 }) => {
   const { connectedProfile } = useAuth();
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
@@ -167,6 +169,7 @@ const WaveDropPartContentMarkdown: React.FC<
             quotePath={currentQuotePath}
             embedDepth={embedDepth}
             maxEmbedDepth={maxEmbedDepth}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
             linkPreviewToggleControl={linkPreviewToggleControl}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />
@@ -185,6 +188,7 @@ const WaveDropPartContentMarkdown: React.FC<
             quotePath={currentQuotePath}
             embedDepth={embedDepth}
             maxEmbedDepth={maxEmbedDepth}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
             linkPreviewToggleControl={linkPreviewToggleControl}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
           />

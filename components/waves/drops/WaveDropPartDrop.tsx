@@ -33,6 +33,7 @@ interface WaveDropPartDropProps {
   mediaImageScale?: ImageScale | undefined;
   mediaContainerHeightClassName?: string | undefined;
   fullWidthMedia?: boolean | undefined;
+  fullWidthLinkPreviews?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
@@ -60,6 +61,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   mediaImageScale = ImageScale.AUTOx450,
   mediaContainerHeightClassName,
   fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
   embedPath,
@@ -96,6 +98,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
             mediaImageScale={mediaImageScale}
             mediaContainerHeightClassName={mediaContainerHeightClassName}
             fullWidthMedia={fullWidthMedia}
+            fullWidthLinkPreviews={fullWidthLinkPreviews}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
             contentPresentation={contentPresentation}
             embedPath={embedPath}
