@@ -7,7 +7,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useCallback, useEffect, useState } from "react";
 import { getLatestEditableChatDrop } from "../utils/getLatestEditableChatDrop";
 
-export type LatestEditableChatDropTarget = {
+type LatestEditableChatDropTarget = {
   readonly id: string;
   readonly serialNo: number;
 };

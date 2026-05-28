@@ -27,11 +27,12 @@ export default function UserPageFollowersModal({
       maxWidthClass="md:tw-max-w-md"
       showScrollbar
     >
-      <div className="tw-px-4 sm:tw-px-6">
+      <div>
         <FollowersListWrapper
           followers={followers}
           loading={isFetching}
           onBottomIntersection={onBottomIntersection}
+          showFollowButtons
         />
       </div>
     </MobileWrapperDialog>

@@ -298,41 +298,53 @@ describe("mobileLaunchTiming", () => {
   });
 
   it("sanitizes endpoints and route families", async () => {
-    const { timing } = await loadMobileLaunchTiming({ native: false });
+    const sanitizers =
+      await import("@/utils/monitoring/mobileLaunchTimingSanitizers");
 
     expect(
-      timing.sanitizeEndpointGroup(
+      sanitizers.sanitizeEndpointGroup(
         "https://api.test.6529.io/api/profiles/private-handle/proxies/?wallet=0x123"
       )
     ).toBe("/api/profiles/:id/proxies");
     expect(
-      timing.sanitizeEndpointGroup(
+      sanitizers.sanitizeEndpointGroup(
+        "https://api.test.6529.io/api/%70rofiles/private-handle/proxies"
+      )
+    ).toBe("/api/profiles/:id/proxies");
+    expect(
+      sanitizers.sanitizeEndpointGroup(
         "/api/waves/0x1234567890123456789012345678901234567890/drops/123?handle=secret"
       )
     ).toBe("/api/waves/:wallet/drops/:id");
-    expect(timing.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
-    expect(timing.sanitizeRouteFamily("/messages/wave-123")).toBe(
+    expect(sanitizers.sanitizeRouteFamily("/alice?jwt=secret")).toBe("/[user]");
+    expect(sanitizers.sanitizeRouteFamily("/messages/wave-123")).toBe(
       "/messages/[wave]"
     );
-    expect(timing.sanitizeRouteFamily("/waves/wave-123")).toBe("/waves/[wave]");
-    expect(timing.sanitizeRouteFamily("/messages/create")).toBe(
+    expect(sanitizers.sanitizeRouteFamily("/waves/wave-123")).toBe(
+      "/waves/[wave]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/messages/create")).toBe(
       "/messages/create"
     );
-    expect(timing.sanitizeRouteFamily("/waves/create")).toBe("/waves/create");
+    expect(sanitizers.sanitizeRouteFamily("/waves/create")).toBe(
+      "/waves/create"
+    );
     expect(
-      timing.sanitizeRouteFamily("/tools/app-wallets/123?jwt=secret")
+      sanitizers.sanitizeRouteFamily("/tools/app-wallets/123?jwt=secret")
     ).toBe("/tools/app-wallets/[app-wallet-address]");
-    expect(timing.sanitizeRouteFamily("/nextgen")).toBe("/nextgen/[[...view]]");
-    expect(timing.sanitizeRouteFamily("/nextgen/explore")).toBe(
+    expect(sanitizers.sanitizeRouteFamily("/nextgen")).toBe(
       "/nextgen/[[...view]]"
     );
-    expect(timing.sanitizeRouteFamily("/nextgen/manager")).toBe(
+    expect(sanitizers.sanitizeRouteFamily("/nextgen/explore")).toBe(
+      "/nextgen/[[...view]]"
+    );
+    expect(sanitizers.sanitizeRouteFamily("/nextgen/manager")).toBe(
       "/nextgen/manager"
     );
-    expect(timing.sanitizeRouteFamily("/network/nerd")).toBe(
+    expect(sanitizers.sanitizeRouteFamily("/network/nerd")).toBe(
       "/network/nerd/[[...focus]]"
     );
-    expect(timing.sanitizeRouteFamily("/network/nerd/focus")).toBe(
+    expect(sanitizers.sanitizeRouteFamily("/network/nerd/focus")).toBe(
       "/network/nerd/[[...focus]]"
     );
   });
