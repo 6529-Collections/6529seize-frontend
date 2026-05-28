@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -63,6 +64,10 @@ interface DefautWinnerDropProps {
   readonly identityMode?: DropIdentityMode | undefined;
   readonly timestampLayout?: DropTimestampLayout | undefined;
   readonly showInteractions?: boolean | undefined;
+  readonly inlineAuthorOnDesktop?: boolean | undefined;
+  readonly mediaImageScale?: ImageScale | undefined;
+  readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -84,6 +89,10 @@ const DefaultWinnerDrop = ({
   identityMode = "default",
   timestampLayout = "inline",
   showInteractions = true,
+  inlineAuthorOnDesktop = false,
+  mediaImageScale,
+  fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   embedPath,
   quotePath,
   embedDepth,
@@ -102,6 +111,7 @@ const DefaultWinnerDrop = ({
 
   const decisionTime = drop.winning_context?.decision_time;
   const showIdentity = identityMode !== "hidden";
+  const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
 
   const visibleMetadata = getWinnerVisibleMetadata({
     wave: drop.wave,
@@ -128,6 +138,25 @@ const DefaultWinnerDrop = ({
   const handleOnAddReaction = useCallback(() => {
     setIsSlideUp(false);
   }, []);
+  const identityHeader =
+    identityMode === "minimal" ? (
+      <DropMinimalIdentityRow drop={drop} timestampLayout={timestampLayout} />
+    ) : (
+      <WaveDropHeader
+        drop={drop}
+        showWaveInfo={false}
+        isStorm={isStorm}
+        currentPartIndex={activePartIndex}
+        partsCount={drop.parts.length}
+        badge={
+          <WinnerDropBadge
+            rank={effectiveRank}
+            decisionTime={decisionTime ?? null}
+          />
+        }
+        timestampLayout={timestampLayout}
+      />
+    );
 
   return (
     <div
@@ -157,32 +186,22 @@ const DefaultWinnerDrop = ({
           />
         )}
 
-        <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-gap-x-3 tw-border-0 tw-bg-transparent tw-text-left">
-          {showIdentity && <WaveDropAuthorPfp drop={drop} />}
+        <div
+          className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
+            inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
+          }`}
+        >
+          {inlineAuthorOnDesktop
+            ? showIdentity && (
+                <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+                  <WaveDropAuthorPfp drop={drop} />
+                  <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
+                </div>
+              )
+            : showIdentity && <WaveDropAuthorPfp drop={drop} />}
           <div className="tw-flex tw-w-full tw-flex-col">
             <div className="tw-flex tw-flex-col tw-items-start">
-              {showIdentity &&
-                (identityMode === "minimal" ? (
-                  <DropMinimalIdentityRow
-                    drop={drop}
-                    timestampLayout={timestampLayout}
-                  />
-                ) : (
-                  <WaveDropHeader
-                    drop={drop}
-                    showWaveInfo={false}
-                    isStorm={isStorm}
-                    currentPartIndex={activePartIndex}
-                    partsCount={drop.parts.length}
-                    badge={
-                      <WinnerDropBadge
-                        rank={effectiveRank}
-                        decisionTime={decisionTime ?? null}
-                      />
-                    }
-                    timestampLayout={timestampLayout}
-                  />
-                ))}
+              {showIdentity && !inlineAuthorOnDesktop && identityHeader}
               {identityMode === "default" &&
                 showWaveInfo &&
                 (() => {
@@ -229,6 +248,9 @@ const DefaultWinnerDrop = ({
                 onLongPress={handleLongPress}
                 setLongPressTriggered={setLongPressTriggered}
                 isCompetitionDrop={true}
+                mediaImageScale={mediaImageScale}
+                fullWidthMedia={fullWidthMedia}
+                fullWidthLinkPreviews={fullWidthLinkPreviews}
                 hasTouch={hasTouch}
                 embedPath={embedPath}
                 quotePath={quotePath}
@@ -248,7 +270,7 @@ const DefaultWinnerDrop = ({
           </div>
         )}
         <div
-          className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
+          className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
         >
           <WaveWinnerIdentity drop={drop} variant="full" cardVariant="chat" />
           {visibleMetadata.length > 0 && (
@@ -263,7 +285,7 @@ const DefaultWinnerDrop = ({
         </div>
         {hasDropFooter(footer) && (
           <div
-            className={`${showIdentity ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
           >
             {footer}
           </div>

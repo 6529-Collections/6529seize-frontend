@@ -108,6 +108,10 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        inlineAuthorOnDesktop={inlineAuthorOnDesktop}
+        mediaImageScale={mediaImageScale}
+        fullWidthMedia={fullWidthMedia}
+        fullWidthLinkPreviews={fullWidthLinkPreviews}
         winningThreshold={winningThreshold}
         winningThresholdMinDurationMs={winningThresholdMinDurationMs}
         isVotingClosed={isVotingClosed}
@@ -137,6 +141,10 @@ export default function Drop({
         identityMode={identityMode}
         timestampLayout={timestampLayout}
         showInteractions={showInteractions}
+        inlineAuthorOnDesktop={inlineAuthorOnDesktop}
+        mediaImageScale={mediaImageScale}
+        fullWidthMedia={fullWidthMedia}
+        fullWidthLinkPreviews={fullWidthLinkPreviews}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}
