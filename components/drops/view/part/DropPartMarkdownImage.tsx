@@ -25,6 +25,7 @@ export default function DropPartMarkdownImage({
         src={src}
         loadStrategy="eager"
         intrinsicHeight
+        gallerySource="body"
       />
     </div>
   );

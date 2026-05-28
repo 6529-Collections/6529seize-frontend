@@ -13,6 +13,8 @@ import WaveDropPartContentMarkdown from "./WaveDropPartContentMarkdown";
 import WaveDropPartContentAttachments from "./WaveDropPartContentAttachments";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { DropContentPresentation } from "./dropContentPresentation";
+import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
+import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
 
 interface WaveDropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
@@ -83,6 +85,17 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   maxEmbedDepth,
 }) => {
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const galleryItems = useMemo(
+    () =>
+      buildDropImageGalleryItems({
+        partContent: activePart.content,
+        partMedias: activePart.media.map((media) => ({
+          mimeType: media.mime_type,
+          mediaSrc: media.url,
+        })),
+      }),
+    [activePart.content, activePart.media]
+  );
 
   const memoizedMentionedUsers = useMemo(
     () => mentionedUsers,
@@ -160,42 +173,44 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
           </div>
         )}
 
-        <div className="tw-h-full tw-w-full" ref={contentRef}>
-          <div>
-            <WaveDropPartContentMarkdown
-              mentionedUsers={memoizedMentionedUsers}
-              mentionedGroups={memoizedMentionedGroups}
-              mentionedWaves={memoizedMentionedWaves}
-              referencedNfts={memoizedReferencedNfts}
-              part={activePart}
-              wave={wave}
-              onQuoteClick={onQuoteClick}
-              isEditing={isEditing}
-              isSaving={isSaving}
-              onSave={onSave}
-              onCancel={onCancel}
-              drop={drop}
-              onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
-              contentPresentation={contentPresentation}
-              embedPath={embedPath}
-              quotePath={quotePath}
-              embedDepth={embedDepth}
-              maxEmbedDepth={maxEmbedDepth}
+        <DropImageGalleryProvider items={galleryItems}>
+          <div className="tw-h-full tw-w-full" ref={contentRef}>
+            <div>
+              <WaveDropPartContentMarkdown
+                mentionedUsers={memoizedMentionedUsers}
+                mentionedGroups={memoizedMentionedGroups}
+                mentionedWaves={memoizedMentionedWaves}
+                referencedNfts={memoizedReferencedNfts}
+                part={activePart}
+                wave={wave}
+                onQuoteClick={onQuoteClick}
+                isEditing={isEditing}
+                isSaving={isSaving}
+                onSave={onSave}
+                onCancel={onCancel}
+                drop={drop}
+                onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+                contentPresentation={contentPresentation}
+                embedPath={embedPath}
+                quotePath={quotePath}
+                embedDepth={embedDepth}
+                maxEmbedDepth={maxEmbedDepth}
+              />
+            </div>
+            {!!activePart.media.length && (
+              <WaveDropPartContentMedias
+                activePart={activePart}
+                isCompetitionDrop={isCompetitionDrop}
+                imageScale={mediaImageScale}
+                mediaContainerHeightClassName={mediaContainerHeightClassName}
+                fullWidthMedia={fullWidthMedia}
+              />
+            )}
+            <WaveDropPartContentAttachments
+              attachments={activePart.attachments ?? []}
             />
           </div>
-          {!!activePart.media.length && (
-            <WaveDropPartContentMedias
-              activePart={activePart}
-              isCompetitionDrop={isCompetitionDrop}
-              imageScale={mediaImageScale}
-              mediaContainerHeightClassName={mediaContainerHeightClassName}
-              fullWidthMedia={fullWidthMedia}
-            />
-          )}
-          <WaveDropPartContentAttachments
-            attachments={activePart.attachments ?? []}
-          />
-        </div>
+        </DropImageGalleryProvider>
 
         {isStorm && (
           <div className="tw-hidden md:tw-block">

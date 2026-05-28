@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 import { ImageScale } from "@/helpers/image.helpers";
+import type { DropImageGallerySource } from "@/components/drops/view/part/dropImageGallery";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
 import DropListItemContentMediaImage from "./DropListItemContentMediaImage";
@@ -39,6 +40,7 @@ export default function DropListItemContentMedia({
   htmlIframeContainerClassName,
   htmlPreviewImageUrl,
   loadStrategy = "in-view",
+  gallerySource = "media",
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -51,6 +53,7 @@ export default function DropListItemContentMedia({
   readonly htmlIframeContainerClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
+  readonly gallerySource?: DropImageGallerySource | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -88,6 +91,7 @@ export default function DropListItemContentMedia({
           imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
           loadStrategy={loadStrategy}
+          gallerySource={gallerySource}
         />
       );
     case MediaType.VIDEO:
