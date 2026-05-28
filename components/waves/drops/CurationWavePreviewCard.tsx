@@ -688,11 +688,33 @@ export const CurationWavePreviewCard: React.FC<
     );
   } else if (isFetching) {
     previewContent = (
-      <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-px-3 tw-py-2.5">
-        <span className="tw-h-1.5 tw-w-1.5 tw-flex-shrink-0 tw-animate-pulse tw-rounded-full tw-bg-primary-400" />
-        <span className="tw-text-xs tw-font-semibold tw-text-zinc-400">
-          Loading curated drops
-        </span>
+      <div
+        className="tw-mt-3 tw-flex tw-w-full tw-items-center tw-justify-start tw-gap-2 tw-py-1.5 tw-text-left tw-text-xs tw-text-iron-400"
+        role="status"
+        aria-live="polite"
+      >
+        <svg
+          className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-animate-spin tw-text-iron-500"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="tw-opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="tw-opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+        <span>Loading curated drops...</span>
       </div>
     );
   }
