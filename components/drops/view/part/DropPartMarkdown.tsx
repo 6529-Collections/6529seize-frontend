@@ -263,6 +263,7 @@ export interface DropPartMarkdownProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -284,6 +285,7 @@ function DropPartMarkdown({
   quotePath,
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
+  fullWidthLinkPreviews = false,
   linkPreviewToggleControl,
   onLinkCardActionsActiveChange,
 }: DropPartMarkdownProps) {
@@ -336,6 +338,7 @@ function DropPartMarkdown({
         quotePath: normalizedQuotePath,
         embedDepth,
         maxEmbedDepth,
+        fullWidthLinkPreviews,
       }),
     [
       onQuoteClick,
@@ -347,6 +350,7 @@ function DropPartMarkdown({
       normalizedQuotePath,
       embedDepth,
       maxEmbedDepth,
+      fullWidthLinkPreviews,
     ]
   );
 

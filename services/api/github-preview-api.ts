@@ -13,6 +13,7 @@ export interface GithubIssuePreviewResponse {
   readonly number: number;
   readonly title: string | null;
   readonly state: GithubPreviewIssueState;
+  readonly assignees: readonly string[];
   readonly url: string;
 }
 

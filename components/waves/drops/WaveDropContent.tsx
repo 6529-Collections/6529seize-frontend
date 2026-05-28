@@ -32,6 +32,7 @@ interface WaveDropContentProps {
   readonly mediaImageScale?: ImageScale | undefined;
   readonly mediaContainerHeightClassName?: string | undefined;
   readonly fullWidthMedia?: boolean | undefined;
+  readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly hasTouch?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -59,6 +60,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   mediaImageScale = ImageScale.AUTOx450,
   mediaContainerHeightClassName,
   fullWidthMedia = false,
+  fullWidthLinkPreviews = false,
   hasTouch,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
@@ -87,6 +89,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
       mediaImageScale={mediaImageScale}
       mediaContainerHeightClassName={mediaContainerHeightClassName}
       fullWidthMedia={fullWidthMedia}
+      fullWidthLinkPreviews={fullWidthLinkPreviews}
       hasTouch={effectiveHasTouch}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
       contentPresentation={contentPresentation}

@@ -30,6 +30,11 @@ interface GithubIssueApiResponse {
   readonly title?: string | null;
   readonly state?: string | null;
   readonly state_reason?: string | null;
+  readonly assignee?: { readonly login?: string | null } | null;
+  readonly assignees?:
+    | readonly { readonly login?: string | null }[]
+    | null
+    | undefined;
   readonly pull_request?: unknown;
 }
 
@@ -182,6 +187,22 @@ const getIssueState = (
   }
 
   return "closed";
+};
+
+const getIssueAssignees = (
+  issue: GithubIssueApiResponse
+): readonly string[] => {
+  const assignees =
+    issue.assignees
+      ?.map((assignee) => assignee.login)
+      .filter((login): login is string => Boolean(login)) ?? [];
+
+  if (assignees.length > 0) {
+    return assignees;
+  }
+
+  const legacyAssignee = issue.assignee?.login;
+  return legacyAssignee ? [legacyAssignee] : [];
 };
 
 const getPullRequestState = (
@@ -366,6 +387,7 @@ const resolveIssuePreview = async (
     number: resource.number,
     title: issue.title ?? null,
     state: getIssueState(issue),
+    assignees: getIssueAssignees(issue),
     url:
       issue.html_url ??
       `https://github.com/${resource.owner}/${resource.repo}/issues/${resource.number}`,
