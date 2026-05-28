@@ -84,10 +84,18 @@ export const CurationWavePreviewCard: React.FC<
   const description = getWaveDescriptionPreviewText(wave);
   const previewItems = getPreviewItems(drops);
   const waveHref = getWaveHref({ waveId, wave, curationId });
+  const contentClassName =
+    variant === "sheet"
+      ? "tw-px-4 tw-pb-4 tw-pt-6"
+      : "tw-px-4 tw-pb-4 tw-pt-4";
+  const footerClassName =
+    variant === "sheet"
+      ? "tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3"
+      : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3";
 
   return (
     <CurationPreviewShell variant={variant}>
-      <div className="tw-px-4 tw-pb-4 tw-pt-4">
+      <div className={contentClassName}>
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-[#1A1A20] tw-shadow-sm tw-ring-1 tw-ring-white/[0.05]">
             {wavePicture ? (
@@ -132,7 +140,7 @@ export const CurationWavePreviewCard: React.FC<
         <PreviewContent isFetching={isFetching} previewItems={previewItems} />
       </div>
 
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3">
+      <div className={footerClassName}>
         <Link
           href={waveHref}
           prefetch={false}
