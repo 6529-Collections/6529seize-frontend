@@ -17,6 +17,7 @@ import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPrevie
 import DropPartMarkdownImage, {
   type DropPartMarkdownImageLayout,
 } from "../DropPartMarkdownImage";
+import { getDropImageGalleryItemId } from "../dropImageGallery";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
@@ -108,6 +109,35 @@ const getImageLayout = (
   return props.layout === "grouped" ? "grouped" : undefined;
 };
 
+const getMarkdownNodeStartOffset = (node: unknown): number | null => {
+  if (typeof node !== "object" || node === null || !("position" in node)) {
+    return null;
+  }
+
+  const position = (
+    node as {
+      readonly position?: {
+        readonly start?: { readonly offset?: unknown } | undefined;
+      };
+    }
+  ).position;
+  const offset = position?.start?.offset;
+
+  return typeof offset === "number" && offset >= 0 ? offset : null;
+};
+
+const getBodyGalleryItemId = (
+  src: string,
+  node: unknown
+): string | undefined => {
+  const startOffset = getMarkdownNodeStartOffset(node);
+  if (startOffset === null) {
+    return undefined;
+  }
+
+  return getDropImageGalleryItemId("body", startOffset, src);
+};
+
 export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
@@ -144,7 +174,13 @@ export const createLinkRenderer = ({
       return null;
     }
 
-    return <DropPartMarkdownImage src={src} layout={getImageLayout(props)} />;
+    return (
+      <DropPartMarkdownImage
+        src={src}
+        layout={getImageLayout(props)}
+        galleryItemId={getBodyGalleryItemId(src, props.node)}
+      />
+    );
   };
 
   const renderAnchor: LinkRenderer["renderAnchor"] = (props) => {
@@ -169,6 +205,7 @@ export const createLinkRenderer = ({
         <DropPartMarkdownImage
           src={stableHref}
           layout={getImageLayout(props)}
+          galleryItemId={getBodyGalleryItemId(stableHref, props.node)}
         />
       );
     }

@@ -17,16 +17,10 @@ import {
 } from "@/components/drops/view/item/content/media/ImageMediaModal";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
 import useCapacitor from "@/hooks/useCapacitor";
-import type {
-  DropImageGalleryItem,
-  DropImageGallerySource,
-} from "./dropImageGallery";
+import type { DropImageGalleryItem } from "./dropImageGallery";
 
 interface DropImageGalleryContextValue {
-  readonly openImage: (
-    src: string,
-    source: DropImageGallerySource
-  ) => boolean;
+  readonly openImage: (galleryItemId: string) => boolean;
 }
 
 const DropImageGalleryContext =
@@ -34,19 +28,6 @@ const DropImageGalleryContext =
 
 export const useDropImageGallery = (): DropImageGalleryContextValue | null =>
   useContext(DropImageGalleryContext);
-
-const findGalleryItem = ({
-  items,
-  source,
-  src,
-}: {
-  readonly items: readonly DropImageGalleryItem[];
-  readonly source: DropImageGallerySource;
-  readonly src: string;
-}): DropImageGalleryItem | null =>
-  items.find((item) => item.source === source && item.src === src) ??
-  items.find((item) => item.src === src) ??
-  null;
 
 export function DropImageGalleryProvider({
   children,
@@ -86,8 +67,10 @@ export function DropImageGalleryProvider({
   }, [activeItemId, items]);
 
   const openImage = useCallback(
-    (src: string, source: DropImageGallerySource) => {
-      const item = findGalleryItem({ items, source, src });
+    (galleryItemId: string) => {
+      const item = items.find(
+        (galleryItem) => galleryItem.id === galleryItemId
+      );
       if (!item) {
         return false;
       }

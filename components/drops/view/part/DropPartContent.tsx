@@ -8,7 +8,10 @@ import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention
 import type { MentionedWave } from "@/entities/IDrop";
 import type { ApiDropReferencedNFT } from "@/generated/models/ApiDropReferencedNFT";
 import { DropImageGalleryProvider } from "./DropImageGalleryProvider";
-import { buildDropImageGalleryItems } from "./dropImageGallery";
+import {
+  buildDropImageGalleryItems,
+  getDropImageGalleryItemId,
+} from "./dropImageGallery";
 
 interface DropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
@@ -71,7 +74,11 @@ const DropPartContent: React.FC<DropPartContentProps> = ({
                 <DropListItemContentMedia
                   media_mime_type={media.mimeType}
                   media_url={media.mediaSrc}
-                  gallerySource="media"
+                  galleryItemId={
+                    media.mimeType.toLowerCase().includes("image")
+                      ? getDropImageGalleryItemId("media", i, media.mediaSrc)
+                      : undefined
+                  }
                 />
               </div>
             ))}

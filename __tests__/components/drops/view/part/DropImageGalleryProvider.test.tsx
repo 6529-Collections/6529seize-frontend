@@ -46,31 +46,39 @@ const galleryItems: DropImageGalleryItem[] = [
   },
 ];
 
-function GalleryTrigger() {
+function GalleryTrigger({
+  bodyImageId = "body-1",
+  uploadImageId = "media-1",
+}: {
+  readonly bodyImageId?: string | undefined;
+  readonly uploadImageId?: string | undefined;
+}) {
   const gallery = useDropImageGallery();
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => gallery?.openImage("body.png", "body")}
-      >
+      <button type="button" onClick={() => gallery?.openImage(bodyImageId)}>
         Open body
       </button>
-      <button
-        type="button"
-        onClick={() => gallery?.openImage("upload.png", "media")}
-      >
+      <button type="button" onClick={() => gallery?.openImage(uploadImageId)}>
         Open upload
       </button>
     </>
   );
 }
 
-function renderGallery(items: DropImageGalleryItem[] = galleryItems) {
+function renderGallery({
+  bodyImageId,
+  items = galleryItems,
+  uploadImageId,
+}: {
+  readonly bodyImageId?: string | undefined;
+  readonly items?: DropImageGalleryItem[] | undefined;
+  readonly uploadImageId?: string | undefined;
+} = {}) {
   return render(
     <DropImageGalleryProvider items={items}>
-      <GalleryTrigger />
+      <GalleryTrigger bodyImageId={bodyImageId} uploadImageId={uploadImageId} />
     </DropImageGalleryProvider>
   );
 }
@@ -140,7 +148,7 @@ describe("DropImageGalleryProvider", () => {
   });
 
   it("hides gallery controls for one image", () => {
-    renderGallery([galleryItems[0]!]);
+    renderGallery({ items: [galleryItems[0]!] });
 
     fireEvent.click(screen.getByRole("button", { name: "Open body" }));
 
@@ -183,5 +191,35 @@ describe("DropImageGalleryProvider", () => {
     expect(
       screen.queryByRole("button", { name: "Full screen" })
     ).not.toBeInTheDocument();
+  });
+
+  it("opens duplicate image URLs by the clicked item id", () => {
+    const duplicateItems: DropImageGalleryItem[] = [
+      {
+        id: "duplicate-1",
+        src: "duplicate.png",
+        source: "media",
+      },
+      {
+        id: "duplicate-2",
+        src: "duplicate.png",
+        source: "media",
+      },
+    ];
+
+    renderGallery({
+      bodyImageId: "duplicate-2",
+      items: duplicateItems,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Open body" }));
+
+    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+      "src",
+      "duplicate.png"
+    );
+    expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
+      "2 / 2"
+    );
   });
 });

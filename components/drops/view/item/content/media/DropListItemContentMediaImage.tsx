@@ -2,7 +2,6 @@
 
 import { FallbackImage } from "@/components/common/FallbackImage";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
-import type { DropImageGallerySource } from "@/components/drops/view/part/dropImageGallery";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -171,7 +170,7 @@ function DropListItemContentMediaImage({
   imageScale = ImageScale.AUTOx450,
   loadStrategy = "in-view",
   intrinsicHeight = false,
-  gallerySource = "media",
+  galleryItemId,
 }: {
   readonly src: string;
   readonly maxRetries?: number | undefined;
@@ -181,7 +180,7 @@ function DropListItemContentMediaImage({
   readonly imageScale?: ImageScale | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
   readonly intrinsicHeight?: boolean | undefined;
-  readonly gallerySource?: DropImageGallerySource | undefined;
+  readonly galleryItemId?: string | undefined;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -226,12 +225,12 @@ function DropListItemContentMediaImage({
       return;
     }
 
-    if (imageGallery?.openImage(src, gallerySource)) {
+    if (galleryItemId && imageGallery?.openImage(galleryItemId)) {
       return;
     }
 
     setIsModalOpen(true);
-  }, [disableModal, gallerySource, imageGallery, src]);
+  }, [disableModal, galleryItemId, imageGallery]);
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {

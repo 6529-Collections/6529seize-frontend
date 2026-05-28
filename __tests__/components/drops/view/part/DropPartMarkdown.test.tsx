@@ -6,10 +6,12 @@ import {
   fetchYoutubePreview,
   type YoutubeOEmbedResponse,
 } from "@/services/api/youtube";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
+import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 class MockIntersectionObserver {
@@ -22,6 +24,26 @@ Object.defineProperty(globalThis, "IntersectionObserver", {
   writable: true,
   value: MockIntersectionObserver,
 });
+
+type MockNextImageProps = React.ComponentProps<"img"> & {
+  readonly fill?: boolean | undefined;
+  readonly unoptimized?: boolean | undefined;
+};
+
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: React.forwardRef<HTMLImageElement, MockNextImageProps>(
+    // eslint-disable-next-line react/display-name
+    ({ fill: _fill, unoptimized: _unoptimized, alt, ...rest }, ref) => (
+      <img ref={ref} alt={alt ?? ""} {...rest} />
+    )
+  ),
+}));
+
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ isCapacitor: false })),
+}));
 
 const setQueryDataMock = jest.fn();
 
@@ -65,13 +87,36 @@ jest.mock(
     let mountId = 0;
 
     function MockDropListItemContentMediaImage({
+      galleryItemId,
       src,
     }: {
+      readonly galleryItemId?: string | undefined;
       readonly src: string;
     }) {
       const [currentMountId] = React.useState(() => String(++mountId));
+      const { useDropImageGallery } = jest.requireActual(
+        "@/components/drops/view/part/DropImageGalleryProvider"
+      );
+      const gallery = useDropImageGallery();
 
-      return <img alt="Drop media" src={src} data-mount-id={currentMountId} />;
+      return (
+        <button
+          type="button"
+          aria-label={`Open image ${src}`}
+          data-gallery-item-id={galleryItemId}
+          onClick={() => {
+            if (galleryItemId) {
+              gallery?.openImage(galleryItemId);
+            }
+          }}
+        >
+          <img
+            alt="Drop media"
+            src={src}
+            data-mount-id={currentMountId}
+          />
+        </button>
+      );
     }
 
     return {
@@ -458,6 +503,41 @@ describe("DropPartMarkdown", () => {
     expect(group).not.toBeNull();
     expect(group?.querySelectorAll("img")).toHaveLength(2);
     expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("opens duplicate body markdown image URLs at the clicked item", () => {
+    const duplicateSrc = "https://cdn.example.com/same.jpg";
+    const partContent = `![first](${duplicateSrc})\n![second](${duplicateSrc})`;
+    const galleryItems = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    render(
+      <DropImageGalleryProvider items={galleryItems}>
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={partContent}
+          onQuoteClick={jest.fn()}
+        />
+      </DropImageGalleryProvider>
+    );
+
+    const openButtons = screen.getAllByRole("button", {
+      name: `Open image ${duplicateSrc}`,
+    });
+
+    fireEvent.click(openButtons[1]!);
+
+    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+      "src",
+      duplicateSrc
+    );
+    expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
+      "2 / 2"
+    );
   });
 
   it("keeps named image URL markdown links as links", () => {

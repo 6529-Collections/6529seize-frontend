@@ -1,14 +1,23 @@
-import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
+import {
+  buildDropImageGalleryItems,
+  getDropImageGalleryItemId,
+} from "@/components/drops/view/part/dropImageGallery";
 
 describe("buildDropImageGalleryItems", () => {
   it("includes markdown images", () => {
+    const partContent = "hello ![drop](/image.png)";
     const items = buildDropImageGalleryItems({
-      partContent: "hello ![drop](/image.png)",
+      partContent,
       partMedias: [],
     });
 
     expect(items).toEqual([
       expect.objectContaining({
+        id: getDropImageGalleryItemId(
+          "body",
+          partContent.indexOf("![drop]"),
+          "/image.png"
+        ),
         src: "/image.png",
         source: "body",
       }),
@@ -16,13 +25,15 @@ describe("buildDropImageGalleryItems", () => {
   });
 
   it("includes bare direct image URLs", () => {
+    const partContent = "https://cdn.example.com/image.gif?cache=1";
     const items = buildDropImageGalleryItems({
-      partContent: "https://cdn.example.com/image.gif?cache=1",
+      partContent,
       partMedias: [],
     });
 
     expect(items).toEqual([
       expect.objectContaining({
+        id: getDropImageGalleryItemId("body", 0, partContent),
         src: "https://cdn.example.com/image.gif?cache=1",
         source: "body",
       }),
@@ -72,6 +83,7 @@ describe("buildDropImageGalleryItems", () => {
 
     expect(items).toEqual([
       expect.objectContaining({
+        id: getDropImageGalleryItemId("media", 0, "upload.png"),
         src: "upload.png",
         source: "media",
       }),
@@ -101,6 +113,45 @@ describe("buildDropImageGalleryItems", () => {
     expect(items.map((item) => item.src)).toEqual([
       "/body.png",
       "upload.png",
+    ]);
+  });
+
+  it("uses unique body image ids for duplicate URLs", () => {
+    const partContent =
+      "![first](https://cdn.example.com/same.jpg) ![second](https://cdn.example.com/same.jpg)";
+
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      getDropImageGalleryItemId(
+        "body",
+        partContent.indexOf("![first]"),
+        "https://cdn.example.com/same.jpg"
+      ),
+      getDropImageGalleryItemId(
+        "body",
+        partContent.indexOf("![second]"),
+        "https://cdn.example.com/same.jpg"
+      ),
+    ]);
+  });
+
+  it("uses raw media indexes for uploaded image ids", () => {
+    const items = buildDropImageGalleryItems({
+      partContent: null,
+      partMedias: [
+        { mimeType: "image/png", mediaSrc: "duplicate.png" },
+        { mimeType: "video/mp4", mediaSrc: "video.mp4" },
+        { mimeType: "image/png", mediaSrc: "duplicate.png" },
+      ],
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      getDropImageGalleryItemId("media", 0, "duplicate.png"),
+      getDropImageGalleryItemId("media", 2, "duplicate.png"),
     ]);
   });
 });

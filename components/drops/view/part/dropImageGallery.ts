@@ -3,6 +3,7 @@ import {
   isSafeMarkdownImageSrc,
   parseUrl,
 } from "./dropPartMarkdown/linkUtils";
+import { normalizeDropMarkdownContent } from "./dropPartMarkdown/normalizeContent";
 
 export type DropImageGallerySource = "body" | "media";
 
@@ -20,6 +21,11 @@ interface DropImageGalleryMediaInput {
 interface BuildDropImageGalleryItemsParams {
   readonly partContent: string | null;
   readonly partMedias: readonly DropImageGalleryMediaInput[];
+}
+
+interface DropImageGalleryBodyImage {
+  readonly key: number;
+  readonly src: string;
 }
 
 interface MarkdownLinkMatch {
@@ -124,14 +130,22 @@ const isInsideMarkdownLink = (
 ): boolean =>
   matches.some((match) => index >= match.start && index < match.end);
 
-const getBodyImageSources = (content: string | null): string[] => {
+export const getDropImageGalleryItemId = (
+  source: DropImageGallerySource,
+  key: number | string,
+  src: string
+): string => `drop-image-gallery:${source}:${String(key)}:${src}`;
+
+const getBodyImageSources = (
+  content: string | null
+): DropImageGalleryBodyImage[] => {
   if (!content) {
     return [];
   }
 
   const ignoredRanges = getIgnoredMarkdownRanges(content);
   const markdownMatches = getMarkdownLinkMatches(content, ignoredRanges);
-  const bareImageSources: Array<{ index: number; src: string }> = [];
+  const bareImageSources: DropImageGalleryBodyImage[] = [];
 
   BARE_URL_REGEX.lastIndex = 0;
   let match = BARE_URL_REGEX.exec(content);
@@ -145,7 +159,7 @@ const getBodyImageSources = (content: string | null): string[] => {
       !isInsideMarkdownLink(match.index, markdownMatches) &&
       isDirectImageUrl(src, parseUrl(src))
     ) {
-      bareImageSources.push({ index: match.index, src });
+      bareImageSources.push({ key: match.index, src });
     }
 
     match = BARE_URL_REGEX.exec(content);
@@ -153,19 +167,18 @@ const getBodyImageSources = (content: string | null): string[] => {
 
   const markdownImageSources = markdownMatches
     .filter((match) => match.image && isSafeMarkdownImageSrc(match.destination))
-    .map((match) => ({ index: match.start, src: match.destination }));
+    .map((match) => ({ key: match.start, src: match.destination }));
 
   return [...markdownImageSources, ...bareImageSources]
-    .sort((left, right) => left.index - right.index)
-    .map((item) => item.src);
+    .sort((left, right) => left.key - right.key);
 };
 
 const createGalleryItem = (
   source: DropImageGallerySource,
-  index: number,
+  key: number,
   src: string
 ): DropImageGalleryItem => ({
-  id: `drop-image-gallery:${source}:${index}:${src}`,
+  id: getDropImageGalleryItemId(source, key, src),
   src,
   source,
 });
@@ -177,12 +190,17 @@ export const buildDropImageGalleryItems = ({
   partContent,
   partMedias,
 }: BuildDropImageGalleryItemsParams): DropImageGalleryItem[] => {
-  const bodyImages = getBodyImageSources(partContent).map((src, index) =>
-    createGalleryItem("body", index, src)
+  const normalizedPartContent = normalizeDropMarkdownContent(partContent);
+  const bodyImages = getBodyImageSources(normalizedPartContent).map((image) =>
+    createGalleryItem("body", image.key, image.src)
   );
   const mediaImages = partMedias
-    .filter(isDropImageGalleryMedia)
-    .map((media, index) => createGalleryItem("media", index, media.mediaSrc));
+    .map((media, index) =>
+      isDropImageGalleryMedia(media)
+        ? createGalleryItem("media", index, media.mediaSrc)
+        : null
+    )
+    .filter((item): item is DropImageGalleryItem => item !== null);
 
   return [...bodyImages, ...mediaImages];
 };
