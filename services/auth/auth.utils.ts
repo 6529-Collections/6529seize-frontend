@@ -436,8 +436,12 @@ export const getWalletRole = () => {
 };
 
 export const clearAllWalletAuth = (): void => {
+  const previousActiveAddress = getWalletAddress();
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
+  if (previousActiveAddress) {
+    emitProfileSwitched();
+  }
 };
 
 export const removeAuthJwt = () => {
@@ -451,6 +455,9 @@ export const removeAuthJwt = () => {
     }
     persistAccountsWithActive([], null);
     emitWalletAccountsUpdated();
+    if (legacyAddress) {
+      emitProfileSwitched();
+    }
     return;
   }
 
@@ -465,6 +472,13 @@ export const removeAuthJwt = () => {
   const nextActiveAddress = remainingAccounts[0]?.address ?? null;
   persistAccountsWithActive(remainingAccounts, nextActiveAddress);
   emitWalletAccountsUpdated();
+  if (
+    !nextActiveAddress ||
+    normalizeAddress(activeAccount.address) !==
+      normalizeAddress(nextActiveAddress)
+  ) {
+    emitProfileSwitched();
+  }
 };
 
 /**

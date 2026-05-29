@@ -74,7 +74,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
 
   if (shouldRenderWavesContent) {
     content = getWavesContent({
-      children,
+      children: contentState === "loading" ? null : children,
       containerClassName,
       isApp,
     });

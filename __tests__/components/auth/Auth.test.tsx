@@ -59,8 +59,17 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 // Using jwt-validation.utils instead of direct jwt-decode
 
+const mockQueryClientGetQueryData = jest.fn();
+const mockRouterReplace = jest.fn();
+const mockRouterPush = jest.fn();
+let mockPathname = "/";
+let mockSearchParams = new URLSearchParams();
+
 jest.mock("@tanstack/react-query", () => ({
   useQuery: jest.fn(() => ({ data: undefined })),
+  useQueryClient: jest.fn(() => ({
+    getQueryData: mockQueryClientGetQueryData,
+  })),
 }));
 
 jest.mock("@reown/appkit/react", () => ({
@@ -105,12 +114,12 @@ jest.mock("@/services/auth/jwt-validation.utils", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  usePathname: jest.fn(() => "/"),
+  usePathname: jest.fn(() => mockPathname),
   useRouter: jest.fn(() => ({
-    replace: jest.fn(),
-    push: jest.fn(),
+    replace: mockRouterReplace,
+    push: mockRouterPush,
   })),
-  useSearchParams: jest.fn(() => new URLSearchParams()),
+  useSearchParams: jest.fn(() => mockSearchParams),
 }));
 
 jest.mock("@/services/auth/immediate-validation.utils", () => ({
@@ -204,10 +213,15 @@ describe("Auth component", () => {
     walletAddress = "0x1";
     connectionState = "connected";
     connectedAccountsOverride = null;
+    mockPathname = "/";
+    mockSearchParams = new URLSearchParams();
     jest.clearAllMocks();
 
     const mockIsAuthAddressAuthorized = require("@/services/auth/auth.utils")
       .isAuthAddressAuthorized as jest.MockedFunction<any>;
+    const mockGetWalletAddress = require("@/services/auth/auth.utils")
+      .getWalletAddress as jest.MockedFunction<any>;
+    mockGetWalletAddress.mockReturnValue(null);
     mockIsAuthAddressAuthorized.mockImplementation(
       ({
         address,
@@ -297,6 +311,32 @@ describe("Auth component", () => {
       );
     });
 
+    it("does not expose a stale profile for a different active wallet", async () => {
+      mockUseIdentity.mockReturnValue({
+        profile: {
+          id: "1",
+          handle: "account-one",
+          query: "account-one",
+          primary_wallet: "0x2",
+        },
+        isLoading: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <ShowWaves />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await waitFor(() =>
+        expect(screen.getByTestId("waves")).toHaveTextContent("false")
+      );
+    });
+
     it("requestAuth shows error without wallet", async () => {
       walletAddress = null;
       const toast = require("react-toastify").toast;
@@ -312,6 +352,80 @@ describe("Auth component", () => {
       );
       await user.click(screen.getByTestId("req"));
       expect(toast).toHaveBeenCalled();
+    });
+
+    it("keeps the selected wave after profile switch when the wave is public", async () => {
+      const invalidateAuthSensitiveQueries = jest.fn();
+      mockPathname = "/waves/public-wave";
+      mockQueryClientGetQueryData.mockReturnValue({
+        id: "public-wave",
+        visibility: { scope: { group: null } },
+      });
+      mockUseIdentity.mockReturnValue({
+        profile: { id: "1", handle: "user", query: "user" },
+        isLoading: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={
+            {
+              invalidateAll: jest.fn(),
+              invalidateAuthSensitiveQueries,
+            } as any
+          }
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      act(() => {
+        globalThis.dispatchEvent(new CustomEvent("6529-profile-switched"));
+      });
+
+      await waitFor(() =>
+        expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(1)
+      );
+      expect(mockRouterReplace).not.toHaveBeenCalled();
+    });
+
+    it("unselects the selected wave after profile switch when the wave is private", async () => {
+      const invalidateAuthSensitiveQueries = jest.fn();
+      mockPathname = "/waves/private-wave";
+      mockQueryClientGetQueryData.mockReturnValue({
+        id: "private-wave",
+        visibility: { scope: { group: { id: "group-1" } } },
+      });
+      mockUseIdentity.mockReturnValue({
+        profile: { id: "1", handle: "user", query: "user" },
+        isLoading: false,
+      });
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={
+            {
+              invalidateAll: jest.fn(),
+              invalidateAuthSensitiveQueries,
+            } as any
+          }
+        >
+          <Auth>
+            <div data-testid="auth-component">Auth Component</div>
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      act(() => {
+        globalThis.dispatchEvent(new CustomEvent("6529-profile-switched"));
+      });
+
+      await waitFor(() =>
+        expect(invalidateAuthSensitiveQueries).toHaveBeenCalledTimes(1)
+      );
+      expect(mockRouterReplace).toHaveBeenCalledWith("/waves");
     });
 
     it("defers profile switch invalidation until switched address and profile settle", async () => {
@@ -337,7 +451,12 @@ describe("Auth component", () => {
       ];
       getWalletAddress.mockReturnValue(newAddress);
       mockUseIdentity.mockReturnValue({
-        profile: { id: "1", handle: "user", query: "user" },
+        profile: {
+          id: "1",
+          handle: "user",
+          query: "user",
+          primary_wallet: oldAddress,
+        },
         isLoading: false,
       });
 
@@ -376,7 +495,12 @@ describe("Auth component", () => {
       );
 
       mockUseIdentity.mockReturnValue({
-        profile: { id: "2", handle: "next-user", query: "next-user" },
+        profile: {
+          id: "2",
+          handle: "next-user",
+          query: "next-user",
+          primary_wallet: newAddress,
+        },
         isLoading: false,
       });
       rerender(renderTree());
