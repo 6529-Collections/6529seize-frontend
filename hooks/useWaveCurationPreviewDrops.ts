@@ -41,7 +41,7 @@ export function useWaveCurationPreviewDrops({
     [normalizedCurationId, pageSize, waveId]
   );
 
-  const { data, error, isError, isFetching } = useQuery({
+  const { data, error, isError, isFetched, isFetching } = useQuery({
     queryKey,
     queryFn: async ({ signal }) => {
       if (!wave || !normalizedCurationId) {
@@ -88,6 +88,7 @@ export function useWaveCurationPreviewDrops({
     drops,
     error,
     isError,
+    isFetched,
     isFetching,
   };
 }
