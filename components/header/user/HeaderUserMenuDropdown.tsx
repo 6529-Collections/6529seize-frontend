@@ -10,7 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AnimatePresence, motion } from "framer-motion";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
@@ -82,6 +82,7 @@ export default function HeaderUserMenuDropdown({
 
   const [label, setLabel] = useState(getLabel());
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const isSwitchingConnectedAccountRef = useRef(false);
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
   const runMenuAction = async ({
@@ -114,11 +115,28 @@ export default function HeaderUserMenuDropdown({
       onClose();
       return;
     }
-    void runMenuAction({
-      action: () => seizeSwitchConnectedAccount(nextAddress),
-      pendingKey: `switch-connected-account-${nextAddress.toLowerCase()}`,
-      errorMessage: "Failed to switch connected account. Please try again.",
-    });
+    if (isSwitchingConnectedAccountRef.current) {
+      return;
+    }
+
+    isSwitchingConnectedAccountRef.current = true;
+    onClose();
+    globalThis.setTimeout(() => {
+      try {
+        seizeSwitchConnectedAccount(nextAddress);
+      } catch (error) {
+        console.error(
+          "Failed to switch connected account. Please try again.",
+          error
+        );
+        setToast({
+          message: "Failed to switch connected account. Please try again.",
+          type: "error",
+        });
+      } finally {
+        isSwitchingConnectedAccountRef.current = false;
+      }
+    }, 0);
   };
 
   const onSwitchChain = () => {

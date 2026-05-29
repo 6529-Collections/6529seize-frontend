@@ -203,4 +203,35 @@ describe("HeaderUserMenuDropdown", () => {
       expect(onClose).toHaveBeenCalled();
     });
   });
+
+  it("closes before switching connected accounts", async () => {
+    const calls: string[] = [];
+    const seizeSwitchConnectedAccount = jest.fn().mockImplementation(() => {
+      calls.push("switch");
+    });
+
+    const { onClose } = renderDropdown({
+      profile: profileBase,
+      address: "0xabc",
+      isConnected: true,
+      connectedAccounts: [
+        { address: "0xabc", role: null, isActive: true, isConnected: true },
+        { address: "0xdef", role: null, isActive: false, isConnected: true },
+      ],
+      seizeSwitchConnectedAccount,
+    });
+    onClose.mockImplementation(() => {
+      calls.push("close");
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Switch" }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(seizeSwitchConnectedAccount).not.toHaveBeenCalled();
+
+    await waitFor(() =>
+      expect(seizeSwitchConnectedAccount).toHaveBeenCalledWith("0xdef")
+    );
+    expect(calls).toEqual(["close", "switch"]);
+  });
 });
