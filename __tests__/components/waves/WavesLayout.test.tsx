@@ -87,7 +87,7 @@ describe("WavesLayout", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 
-  it("keeps wave content visible while authentication is loading", () => {
+  it("keeps the waves shell visible while authentication is loading", () => {
     mockUseAuthenticatedContent.mockReturnValue({
       contentState: "loading",
     });
@@ -98,7 +98,7 @@ describe("WavesLayout", () => {
       </WavesLayout>
     );
 
-    expect(screen.getByTestId("wave-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-content")).not.toBeInTheDocument();
     expect(screen.getByTestId("waves-desktop")).toBeInTheDocument();
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });

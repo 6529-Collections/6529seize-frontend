@@ -280,9 +280,12 @@ describe("auth.utils", () => {
     const storage = setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
+    const listener = jest.fn();
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, listener);
 
     setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
     setAuthJwt("0x222", "jwt-2", "refresh-2", "role-2");
+    listener.mockClear();
 
     removeAuthJwt();
 
@@ -292,17 +295,22 @@ describe("auth.utils", () => {
     const remainingAccounts = getConnectedWalletAccounts();
     expect(remainingAccounts).toHaveLength(1);
     expect(remainingAccounts[0]?.address).toBe("0x111");
+    expect(listener).toHaveBeenCalledTimes(1);
+    globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, listener);
   });
 
   it("clearAllWalletAuth clears all accounts and cookie", () => {
     const storage = setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
+    const listener = jest.fn();
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, listener);
 
     setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
     setAuthJwt("0x222", "jwt-2", "refresh-2", "role-2");
     expect(getConnectedWalletAccounts()).toHaveLength(2);
     expect(getWalletAddress()).toBe("0x222");
+    listener.mockClear();
 
     clearAllWalletAuth();
 
@@ -315,6 +323,8 @@ describe("auth.utils", () => {
     });
     expect(storage.get("6529-wallet-accounts")).toBeUndefined();
     expect(storage.get("6529-wallet-active-address")).toBeUndefined();
+    expect(listener).toHaveBeenCalledTimes(1);
+    globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, listener);
   });
 
   it("enforces max connected profiles when adding new addresses", () => {

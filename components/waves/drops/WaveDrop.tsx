@@ -158,10 +158,12 @@ const getDropContentClass = ({
   showAuthorInfo,
   shouldGroupWithPreviousDrop,
   isProfileView,
+  isTemporaryDrop,
 }: {
   readonly showAuthorInfo: boolean;
   readonly shouldGroupWithPreviousDrop: boolean;
   readonly isProfileView: boolean;
+  readonly isTemporaryDrop: boolean;
 }): string => {
   const classes = ["tw-w-full"];
 
@@ -171,6 +173,10 @@ const getDropContentClass = ({
 
   if (shouldGroupWithPreviousDrop && !isProfileView) {
     classes.push("md:tw-pl-[3.25rem]");
+  }
+
+  if (isTemporaryDrop) {
+    classes.push("tw-opacity-75");
   }
 
   return classes.join(" ");
@@ -464,6 +470,7 @@ const getContentBlock = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  isTemporaryDrop,
 }: {
   readonly shouldShowReplyHeader: boolean;
   readonly onReplyClick: (serialNo: number) => void;
@@ -507,6 +514,7 @@ const getContentBlock = ({
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly isTemporaryDrop: boolean;
 }): React.ReactNode => (
   <>
     {shouldShowReplyHeader && replyTo && (
@@ -557,6 +565,7 @@ const getContentBlock = ({
             showAuthorInfo,
             shouldGroupWithPreviousDrop,
             isProfileView,
+            isTemporaryDrop,
           })}
         >
           <WaveDropContent
@@ -671,6 +680,7 @@ const WaveDrop = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isDrop = drop.drop_type === ApiDropType.Participatory;
+  const isTemporaryDrop = drop.id.startsWith("temp-");
 
   const shouldGroupWithPreviousDrop = shouldGroupCurrentDrop({
     isDrop,
@@ -962,6 +972,7 @@ const WaveDrop = ({
     quotePath,
     embedDepth,
     maxEmbedDepth,
+    isTemporaryDrop,
   });
 
   const contentOffsetClass = inlineAuthorOnDesktop

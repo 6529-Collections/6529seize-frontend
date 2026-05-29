@@ -1,7 +1,7 @@
 "use client";
 
 import "react-toastify/dist/ReactToastify.css";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   createContext,
@@ -25,6 +25,7 @@ import type { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
 import type { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
 import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
@@ -93,6 +94,41 @@ class NonceResponseValidationError extends Error {
   }
 }
 
+const normalizeWalletAddress = (walletAddress: string): string =>
+  walletAddress.toLowerCase();
+
+const isProfileForAddress = ({
+  profile,
+  address,
+}: {
+  readonly profile: ApiIdentity | null;
+  readonly address: string | null | undefined;
+}): boolean => {
+  if (!profile || !address) {
+    return false;
+  }
+
+  const profileAddresses = [
+    profile.primary_wallet,
+    ...(profile.wallets?.map((wallet) => wallet.wallet) ?? []),
+  ].filter(
+    (profileAddress): profileAddress is string =>
+      typeof profileAddress === "string" && profileAddress.length > 0
+  );
+
+  if (profileAddresses.length === 0) {
+    return true;
+  }
+
+  const normalizedAddress = normalizeWalletAddress(address);
+  return profileAddresses.some(
+    (profileAddress) =>
+      normalizeWalletAddress(profileAddress) === normalizedAddress
+  );
+};
+
+const isPublicWave = (wave: ApiWave): boolean => !wave.visibility?.scope?.group;
+
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
   readonly isAuthenticated?: boolean;
@@ -141,6 +177,7 @@ export default function Auth({
   const { invalidateAll, invalidateAuthSensitiveQueries } = useContext(
     ReactQueryWrapperContext
   );
+  const queryClient = useQueryClient();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -171,12 +208,20 @@ export default function Auth({
   });
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const { profile: connectedProfile, isLoading: fetchingProfile } = useIdentity(
-    {
-      handleOrWallet: address,
-      initialProfile: null,
-    }
+  const { profile: loadedProfile, isLoading: fetchingProfile } = useIdentity({
+    handleOrWallet: address,
+    initialProfile: null,
+  });
+  const isConnectedProfileForAddress = isProfileForAddress({
+    profile: loadedProfile,
+    address,
+  });
+  const connectedProfile = isConnectedProfileForAddress ? loadedProfile : null;
+  const isProfileAddressMismatch = Boolean(
+    address && loadedProfile && !isConnectedProfileForAddress
   );
+  const isFetchingConnectedProfile =
+    fetchingProfile || isProfileAddressMismatch;
 
   // Race condition prevention: AbortController and operation tracking
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -841,9 +886,17 @@ export default function Auth({
     const isWavesRoute =
       pathname === "/waves" || pathname.startsWith("/waves/");
     if (isWavesRoute || pathname === "/") {
+      const activeWave = queryClient.getQueryData<ApiWave>([
+        QueryKey.WAVE,
+        { wave_id: activeWaveId },
+      ]);
+      if (!activeWave || isPublicWave(activeWave)) {
+        return;
+      }
+
       router.replace("/waves");
     }
-  }, [pathname, router, searchParams]);
+  }, [pathname, queryClient, router, searchParams]);
 
   useEffect(() => {
     const onProfileSwitched = () => {
@@ -874,7 +927,7 @@ export default function Auth({
       return;
     }
 
-    if (fetchingProfile) {
+    if (isFetchingConnectedProfile) {
       return;
     }
 
@@ -889,7 +942,7 @@ export default function Auth({
     };
   }, [
     address,
-    fetchingProfile,
+    isFetchingConnectedProfile,
     invalidateAuthSensitiveQueries,
     navigateAfterProfileSwitch,
     pendingProfileSwitch,
@@ -948,7 +1001,7 @@ export default function Auth({
         setToast,
         connectedProfile: connectedProfile ?? null,
         isAuthenticated: !!connectedProfile?.handle && isAddressAuthorized,
-        fetchingProfile,
+        fetchingProfile: isFetchingConnectedProfile,
         receivedProfileProxies,
         activeProfileProxy,
         showWaves,
