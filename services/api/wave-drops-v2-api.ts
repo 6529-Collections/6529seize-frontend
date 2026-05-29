@@ -70,6 +70,15 @@ interface FetchBoostedDropsV2Props {
   readonly countOnlyBoostsAfter?: number | undefined;
 }
 
+interface FetchGlobalBoostedDropsV2Props {
+  readonly limit: number;
+  readonly sortDirection?: string | undefined;
+  readonly sort?: string | undefined;
+  readonly countOnlyBoostsAfter?: number | undefined;
+  readonly minBoosts?: number | undefined;
+  readonly signal?: AbortSignal | undefined;
+}
+
 interface FetchDropRepliesV2Props {
   readonly parentDropId: string;
   readonly page: number;
@@ -729,5 +738,40 @@ export async function fetchBoostedDropsV2({
   return hydrateDropsV2({
     drops: response.data,
     wave: normalizeWaveMin(wave),
+  });
+}
+
+export async function fetchGlobalBoostedDropsV2({
+  limit,
+  sortDirection = "DESC",
+  sort = "boosts",
+  countOnlyBoostsAfter,
+  minBoosts,
+  signal,
+}: FetchGlobalBoostedDropsV2Props): Promise<ApiDrop[]> {
+  const params: Record<string, string> = {
+    sort,
+    sort_direction: sortDirection,
+    page_size: limit.toString(),
+  };
+
+  if (countOnlyBoostsAfter !== undefined) {
+    params["count_only_boosts_after"] = countOnlyBoostsAfter.toString();
+  }
+
+  if (minBoosts !== undefined) {
+    params["min_boosts"] = minBoosts.toString();
+  }
+
+  const response = await commonApiFetch<ApiDropV2Page>({
+    endpoint: "v2/boosted-drops",
+    params,
+    signal,
+  });
+  console.log(response)
+
+  return hydrateDropsWithEmbeddedWavesV2({
+    drops: response.data,
+    signal,
   });
 }
