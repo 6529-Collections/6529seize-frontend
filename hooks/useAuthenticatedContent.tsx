@@ -28,18 +28,17 @@ export function useAuthenticatedContent() {
       return "not-authenticated";
     }
 
-    if (!hasConnectedAccount || !hasAuthenticatedProfile) {
-      return "loading";
-    }
-
-    // Only check fetching if we're authenticated
     if (fetchingProfile) {
       return "loading";
     }
 
     // Authenticated but no profile
     if (!connectedProfile?.handle) {
-      return "needs-profile";
+      return hasConnectedAccount ? "needs-profile" : "loading";
+    }
+
+    if (!hasAuthenticatedProfile) {
+      return "loading";
     }
 
     // Profile exists but waves not enabled (proxy or other reason)
