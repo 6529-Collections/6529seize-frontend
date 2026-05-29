@@ -768,7 +768,6 @@ export async function fetchGlobalBoostedDropsV2({
     params,
     signal,
   });
-  console.log(response)
 
   return hydrateDropsWithEmbeddedWavesV2({
     drops: response.data,
