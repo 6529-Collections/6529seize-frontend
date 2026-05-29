@@ -1142,6 +1142,7 @@ function AnimationSection({
                 <MediaDisplay
                   media_mime_type={animationPreviewMimeType}
                   media_url={animationDisplayUrl}
+                  fillVideoContainer
                 />
               </div>
             )}
