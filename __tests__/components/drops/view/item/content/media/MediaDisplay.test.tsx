@@ -17,6 +17,7 @@ jest.mock(
       data-src={props.src}
       data-controls={String(props.showControls)}
       data-disable={String(props.disableClickHandler)}
+      data-fill-container={String(props.fillContainer)}
     />
   )
 );
@@ -113,6 +114,22 @@ describe("MediaDisplay", () => {
     const node = screen.getByTestId("video");
     expect(node).toHaveAttribute("data-src", "vid.mp4");
     expect(node).toHaveAttribute("data-controls", "true");
+    expect(node).toHaveAttribute("data-fill-container", "false");
+  });
+
+  it("passes fill container sizing to videos", () => {
+    render(
+      <MediaDisplay
+        media_mime_type="video/mp4"
+        media_url="vid.mp4"
+        fillVideoContainer
+      />
+    );
+
+    expect(screen.getByTestId("video")).toHaveAttribute(
+      "data-fill-container",
+      "true"
+    );
   });
 
   it("renders audio", () => {

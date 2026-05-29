@@ -58,6 +58,17 @@ describe("MediaDisplayVideo", () => {
     expect(video.autoplay).toBe(false); // Component uses useEffect for controlled playback
   });
 
+  it("can fill its parent preview container", () => {
+    const { container } = render(
+      <MediaDisplayVideo src="foo.mp4" fillContainer />
+    );
+    const wrapper = container.firstElementChild;
+    const video = container.querySelector("video") as HTMLVideoElement;
+
+    expect(wrapper).toHaveClass("tw-h-full");
+    expect(video).toHaveClass("tw-h-full");
+  });
+
   it("keeps preferring HLS renditions when native controls are shown", () => {
     render(<MediaDisplayVideo src="foo.mp4" showControls />);
     expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
