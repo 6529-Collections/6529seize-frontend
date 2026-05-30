@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { OfficialWaveSummary } from "@/components/user/waves/UserPageProfileWaveShared";
 
 const renderSummary = (
@@ -31,6 +31,31 @@ describe("OfficialWaveSummary", () => {
     expect(onAddPost).toHaveBeenCalledTimes(1);
     expect(
       screen.getByRole("button", { name: "Switch wave" })
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Add post" })).toHaveLength(
+      1
+    );
+  });
+
+  it("keeps switch curation controls in one controls group", () => {
+    renderSummary({
+      onAddPost: jest.fn(),
+      onOpenChangeCuration: jest.fn(),
+      showChangeCuration: true,
+    });
+
+    const controls = screen.getByRole("group", {
+      name: "Profile wave switch controls",
+    });
+
+    expect(
+      within(controls).getByRole("button", { name: "Switch wave" })
+    ).toBeInTheDocument();
+    expect(
+      within(controls).getByRole("button", { name: "Switch curation" })
+    ).toBeInTheDocument();
+    expect(
+      within(controls).getByRole("button", { name: "Unset featured wave" })
     ).toBeInTheDocument();
   });
 
