@@ -29,6 +29,8 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
+import SeekingNominationInfoPopover from "./SeekingNominationInfoPopover";
+import { MEMES_SEEKING_NOMINATION_WAVE_ID } from "./memesNomination.constants";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
 interface MyStreamWaveTabsDefaultProps {
@@ -65,6 +67,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const showShareAction = !isDirectMessage;
   const previewText = getWaveDescriptionPreviewText(wave);
   const showDescriptionPreview = showShareAction && !!previewText;
+  const isSeekingNominationWave =
+    wave.id.trim().toLowerCase() === MEMES_SEEKING_NOMINATION_WAVE_ID;
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -182,6 +186,11 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
               {wave.name}
             </h1>
+          )}
+          {isSeekingNominationWave && (
+            <div className="tw-hidden tw-flex-shrink-0 md:tw-flex">
+              <SeekingNominationInfoPopover />
+            </div>
           )}
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">

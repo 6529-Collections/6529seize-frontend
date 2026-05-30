@@ -8,6 +8,7 @@ import ClockIcon from "@/components/utils/icons/ClockIcon";
 import CalendarClosedIcon from "@/components/utils/icons/CalendarClosedIcon";
 import LimitIcon from "@/components/utils/icons/LimitIcon";
 import PermissionIcon from "@/components/utils/icons/PermissionIcon";
+import MainStageNominationPopover from "./MainStageNominationPopover";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -20,6 +21,7 @@ interface MyStreamWaveTabsMemeSubmitProps {
 const HEADER_ACTION_BUTTON_CLASS =
   "tw-max-w-[11.5rem] tw-whitespace-nowrap lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
 const HEADER_ACTION_BUTTON_TEXT_CLASS = "tw-min-w-0 tw-truncate";
+const NOT_ELIGIBLE_BUTTON_CLASS = `tw-flex tw-w-auto tw-gap-x-1.5 tw-items-center tw-justify-center tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out tw-bg-iron-800 tw-text-iron-400 tw-border tw-border-solid tw-border-iron-700 tw-cursor-not-allowed tw-opacity-50 ${HEADER_ACTION_BUTTON_CLASS}`;
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
 const getActiveLabels = ({
@@ -166,22 +168,24 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
   // Not eligible state - user doesn't have permission to submit
   if (waveInfo.participation.isEligible === false) {
-    const tooltipText = "You don't have permission to submit to this wave";
-
     return (
-      <InfoButton
-        disabled={true}
-        title={tooltipText}
-        variant="muted"
-        fullWidth={false}
-        className={HEADER_ACTION_BUTTON_CLASS}
-      >
-        <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-          <span className="xl:tw-hidden">Not Eligible</span>
-          <span className="tw-hidden xl:tw-inline">Not Eligible to Submit</span>
-        </span>
-      </InfoButton>
+      <MainStageNominationPopover>
+        <button
+          type="button"
+          aria-disabled="true"
+          aria-haspopup="dialog"
+          onClick={(event) => event.preventDefault()}
+          className={NOT_ELIGIBLE_BUTTON_CLASS}
+        >
+          <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
+            <span className="xl:tw-hidden">Not Eligible</span>
+            <span className="tw-hidden xl:tw-inline">
+              Not Eligible to Submit
+            </span>
+          </span>
+        </button>
+      </MainStageNominationPopover>
     );
   }
 
