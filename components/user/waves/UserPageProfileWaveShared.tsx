@@ -3,6 +3,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import {
   ArrowTopRightOnSquareIcon,
   ChevronDownIcon,
+  PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode, RefObject } from "react";
@@ -145,6 +146,7 @@ export function OfficialWaveSummary({
   isChangingCuration = false,
   showChangeCuration = false,
   onOpenWave,
+  onAddPost,
   onOpenChangeWave,
   onOpenChangeCuration,
   onRemoveWave,
@@ -165,6 +167,7 @@ export function OfficialWaveSummary({
   readonly isChangingCuration?: boolean | undefined;
   readonly showChangeCuration?: boolean | undefined;
   readonly onOpenWave: () => void;
+  readonly onAddPost?: (() => void) | undefined;
   readonly onOpenChangeWave: () => void;
   readonly onOpenChangeCuration?: (() => void) | undefined;
   readonly onRemoveWave: () => void;
@@ -177,7 +180,7 @@ export function OfficialWaveSummary({
       : "change-curation-dropdown";
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
+    <div className="tw-flex tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
       <div className="tw-min-w-0 tw-max-w-2xl tw-flex-1">
         <div className="tw-flex tw-items-center">
           <h2 className="tw-mb-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
@@ -212,7 +215,17 @@ export function OfficialWaveSummary({
       </div>
 
       {canManageOwnOfficialWave && (
-        <div className="tw-flex tw-w-full tw-items-center md:tw-w-auto md:tw-justify-end">
+        <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 sm:tw-w-auto sm:tw-flex-row sm:tw-items-center lg:tw-justify-end">
+          {onAddPost !== undefined && (
+            <button
+              type="button"
+              onClick={onAddPost}
+              className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100 sm:tw-w-auto sm:tw-flex-shrink-0 sm:tw-py-1.5"
+            >
+              <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              <span className="tw-text-xs sm:tw-text-sm">Add post</span>
+            </button>
+          )}
           <div className="tw-flex tw-w-full tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)] sm:tw-w-auto md:tw-w-auto">
             <div
               ref={changeWaveDropdownRef}
@@ -225,7 +238,7 @@ export function OfficialWaveSummary({
                 aria-expanded={isChangeWaveOpen}
                 aria-haspopup="menu"
                 aria-controls={changeWaveDropdownId}
-                className={`tw-inline-flex tw-whitespace-nowrap tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
+                className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
                   isChangeWaveOpen
                     ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
                     : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
@@ -264,7 +277,7 @@ export function OfficialWaveSummary({
                     aria-expanded={isChangeCurationOpen}
                     aria-haspopup="menu"
                     aria-controls={changeCurationDropdownId}
-                    className={`tw-inline-flex tw-whitespace-nowrap tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
+                    className={`tw-inline-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
                       isChangeCurationOpen
                         ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
                         : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
