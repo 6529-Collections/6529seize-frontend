@@ -227,11 +227,8 @@ export function OfficialWaveSummary({
               <span className="tw-text-xs sm:tw-text-sm">Add post</span>
             </button>
           )}
-          <div
-            role="group"
-            aria-label="Profile wave switch controls"
-            className="horizontal-menu-hide-scrollbar tw-col-span-full tw-row-start-3 tw-mt-2 tw-w-full tw-overflow-x-auto lg:tw-mt-0 lg:tw-w-auto lg:tw-overflow-visible"
-          >
+          <fieldset className="horizontal-menu-hide-scrollbar tw-col-span-full tw-row-start-3 tw-mt-2 tw-w-full tw-overflow-x-auto lg:tw-mt-0 lg:tw-w-auto lg:tw-overflow-visible">
+            <legend className="tw-sr-only">Profile wave switch controls</legend>
             <div className="tw-flex tw-w-max tw-items-center tw-gap-2 lg:tw-w-auto lg:tw-justify-end">
               <div className="tw-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
                 <div
@@ -332,7 +329,7 @@ export function OfficialWaveSummary({
                 </button>
               </div>
             </div>
-          </div>
+          </fieldset>
         </div>
       )}
     </div>
