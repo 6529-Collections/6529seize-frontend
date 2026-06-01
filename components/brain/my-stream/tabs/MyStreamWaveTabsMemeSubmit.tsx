@@ -276,9 +276,8 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       loading={false}
       disabled={!canSubmit}
       onClicked={handleMemesSubmit}
-      padding="tw-px-2.5 tw-py-2"
+      size="sm"
       title={tooltipText}
-      className="tw-text-xs"
     >
       {isEndingVerySoon && canSubmit ? (
         <ClockIcon className="tw-text-red-500 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-pulse" />

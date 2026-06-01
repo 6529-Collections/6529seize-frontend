@@ -18,8 +18,14 @@ jest.mock("@/hooks/useCountdown", () => ({
 
 jest.mock("@/components/utils/button/PrimaryButton", () => ({
   __esModule: true,
-  default: ({ children, ...props }: any) => (
-    <button data-testid="primary" {...props}>
+  default: ({ children, loading, onClicked, size, ...props }: any) => (
+    <button
+      data-testid="primary"
+      data-loading={String(loading)}
+      data-size={size ?? ""}
+      onClick={onClicked}
+      {...props}
+    >
       {children}
     </button>
   ),
@@ -206,6 +212,7 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
       "title",
       expect.stringContaining("You have")
     );
+    expect(button).toHaveAttribute("data-size", "sm");
     expect(button).not.toBeDisabled();
     expect(screen.getByText("Submit Meme")).toBeInTheDocument();
     expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");

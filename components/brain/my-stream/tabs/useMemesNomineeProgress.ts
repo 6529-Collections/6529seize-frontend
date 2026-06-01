@@ -79,13 +79,14 @@ const getNominationProgress = (
 export function useMemesNomineeProgress(): UseMemesNomineeProgressResult {
   const { connectedProfile, fetchingProfile } = useAuth();
   const profileIdentity = getProfileIdentity(connectedProfile);
+  const profileIdentityQueryKey = profileIdentity?.toLowerCase() ?? null;
   const hasProfile = !!profileIdentity;
 
   const { data, isError, isFetching } = useQuery<ApiRepRating>({
     queryKey: [
       QueryKey.PROFILE_REP_RATINGS,
       {
-        handleOrWallet: profileIdentity,
+        handleOrWallet: profileIdentityQueryKey,
         category: MEMES_NOMINEE_CATEGORY,
       },
     ],
