@@ -84,10 +84,25 @@ function renderGallery({
 }
 
 beforeEach(() => {
+  (useCapacitor as jest.Mock).mockClear();
   (useCapacitor as jest.Mock).mockReturnValue({ isCapacitor: false });
 });
 
 describe("DropImageGalleryProvider", () => {
+  it("does not call useCapacitor before an image opens", () => {
+    renderGallery();
+
+    expect(useCapacitor).not.toHaveBeenCalled();
+  });
+
+  it("calls useCapacitor after an image opens", () => {
+    renderGallery();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open body" }));
+
+    expect(useCapacitor).toHaveBeenCalled();
+  });
+
   it("switches images with next and previous buttons", () => {
     renderGallery();
 

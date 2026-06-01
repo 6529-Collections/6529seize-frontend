@@ -37,24 +37,13 @@ export function DropImageGalleryProvider({
   readonly items: readonly DropImageGalleryItem[];
 }) {
   const [activeItemId, setActiveItemId] = useState<string | null>(null);
-  const modalImageRef = useRef<HTMLImageElement>(null);
-  const { isCapacitor } = useCapacitor();
 
   const activeIndex = activeItemId
     ? items.findIndex((item) => item.id === activeItemId)
     : -1;
   const activeItem = activeIndex >= 0 ? items[activeIndex] : undefined;
-  const activeSrc = activeItem?.src ?? "";
   const canGoPrevious = activeIndex > 0;
   const canGoNext = activeIndex >= 0 && activeIndex + 1 < items.length;
-
-  const { downloadMedia, isDownloading, openLabel, openMedia } =
-    useMediaActions({
-      url: activeSrc,
-      fallbackFileName: "image",
-      dialogTitle: "Save image",
-      mimeType: "image",
-    });
 
   useEffect(() => {
     if (!activeItemId) {
@@ -107,13 +96,6 @@ export function DropImageGalleryProvider({
     setActiveItemId(null);
   }, []);
 
-  const handleFullScreen = useCallback(() => {
-    const fullscreenTarget = modalImageRef.current;
-    if (fullscreenTarget) {
-      requestCenteredImageFullscreen(fullscreenTarget);
-    }
-  }, []);
-
   const value = useMemo(
     () => ({
       openImage,
@@ -125,26 +107,76 @@ export function DropImageGalleryProvider({
     <DropImageGalleryContext.Provider value={value}>
       {children}
       {activeItem && (
-        <ImageMediaModal
-          src={activeItem.src}
-          imageRef={modalImageRef}
+        <DropImageGalleryModal
+          activeIndex={activeIndex}
+          activeItem={activeItem}
+          canGoNext={canGoNext}
+          canGoPrevious={canGoPrevious}
           onClose={handleClose}
-          onOpen={openMedia}
-          openLabel={openLabel}
-          onDownload={downloadMedia}
-          isDownloading={isDownloading}
-          onFullscreen={handleFullScreen}
-          fullscreenTargetAvailable={!isCapacitor}
-          gallery={{
-            canGoNext,
-            canGoPrevious,
-            currentIndex: activeIndex,
-            onNext: goToNext,
-            onPrevious: goToPrevious,
-            total: items.length,
-          }}
+          onNext={goToNext}
+          onPrevious={goToPrevious}
+          total={items.length}
         />
       )}
     </DropImageGalleryContext.Provider>
+  );
+}
+
+function DropImageGalleryModal({
+  activeIndex,
+  activeItem,
+  canGoNext,
+  canGoPrevious,
+  onClose,
+  onNext,
+  onPrevious,
+  total,
+}: {
+  readonly activeIndex: number;
+  readonly activeItem: DropImageGalleryItem;
+  readonly canGoNext: boolean;
+  readonly canGoPrevious: boolean;
+  readonly onClose: () => void;
+  readonly onNext: () => void;
+  readonly onPrevious: () => void;
+  readonly total: number;
+}) {
+  const modalImageRef = useRef<HTMLImageElement>(null);
+  const { isCapacitor } = useCapacitor();
+  const { downloadMedia, isDownloading, openLabel, openMedia } =
+    useMediaActions({
+      url: activeItem.src,
+      fallbackFileName: "image",
+      dialogTitle: "Save image",
+      mimeType: "image",
+    });
+
+  const handleFullScreen = useCallback(() => {
+    const fullscreenTarget = modalImageRef.current;
+    if (fullscreenTarget) {
+      requestCenteredImageFullscreen(fullscreenTarget);
+    }
+  }, []);
+
+  return (
+    <ImageMediaModal
+      src={activeItem.src}
+      imageRef={modalImageRef}
+      onClose={onClose}
+      onOpen={openMedia}
+      openLabel={openLabel}
+      onDownload={downloadMedia}
+      isDownloading={isDownloading}
+      onFullscreen={handleFullScreen}
+      fullscreenTargetAvailable={!isCapacitor}
+      gallery={{
+        canGoNext,
+        canGoPrevious,
+        currentIndex: activeIndex,
+        onNext,
+        onPrevious,
+        total,
+      }}
+    />
   );
 }
