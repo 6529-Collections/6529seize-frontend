@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import UserFollowBtn from "@/components/user/utils/UserFollowBtn";
+import UserFollowBtn, {
+  UserFollowBtnSize,
+} from "@/components/user/utils/UserFollowBtn";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -20,11 +22,13 @@ describe("UserFollowBtn", () => {
     requestSuccess = true,
     onDirectMessage,
     directMessageLoading,
+    size,
   }: {
     readonly following: boolean;
     readonly requestSuccess?: boolean | undefined;
     readonly onDirectMessage?: jest.Mock | undefined;
     readonly directMessageLoading?: boolean | undefined;
+    readonly size?: UserFollowBtnSize | undefined;
   }) {
     useQueryMock.mockReturnValue({
       data: following ? { actions: [1] } : { actions: [] },
@@ -45,6 +49,7 @@ describe("UserFollowBtn", () => {
         >
           <UserFollowBtn
             handle="bob"
+            size={size}
             onDirectMessage={onDirectMessage}
             directMessageLoading={directMessageLoading}
           />
@@ -57,6 +62,7 @@ describe("UserFollowBtn", () => {
   it("follows when not following", async () => {
     const user = userEvent.setup();
     const { mutateFollow, requestAuth } = setup({ following: false });
+    expect(screen.getByText("Follow")).toHaveClass("tw-font-semibold");
     await user.click(screen.getByRole("button"));
     expect(requestAuth).toHaveBeenCalled();
     expect(mutateFollow).toHaveBeenCalled();
@@ -74,6 +80,52 @@ describe("UserFollowBtn", () => {
     expect(
       screen.getByRole("button", { name: "Send direct message" })
     ).toBeInTheDocument();
+  });
+
+  it("matches the small follow button height with a square small DM button", () => {
+    setup({
+      following: false,
+      onDirectMessage: jest.fn(),
+      size: UserFollowBtnSize.SMALL,
+    });
+
+    const dmButton = screen.getByRole("button", {
+      name: "Send direct message",
+    });
+
+    expect(dmButton).toHaveClass(
+      "tw-size-8",
+      "tw-bg-iron-800",
+      "tw-ring-iron-700"
+    );
+    expect(dmButton).not.toHaveClass("tw-min-w-[4rem]");
+    expect(dmButton.querySelector("svg")).toHaveClass("tw-size-3");
+    expect(dmButton).toHaveAttribute("data-tooltip-id", "dm-bob");
+    expect(dmButton).not.toHaveAttribute("data-tooltip-content");
+  });
+
+  it("matches the medium follow button height with a square medium DM button", () => {
+    setup({
+      following: false,
+      onDirectMessage: jest.fn(),
+      size: UserFollowBtnSize.MEDIUM,
+    });
+
+    const dmButton = screen.getByRole("button", {
+      name: "Send direct message",
+    });
+
+    expect(dmButton).toHaveClass(
+      "tw-size-9",
+      "md:tw-size-10",
+      "tw-bg-iron-800",
+      "tw-ring-iron-700"
+    );
+    expect(dmButton).not.toHaveClass("tw-min-w-[4.75rem]");
+    expect(dmButton.querySelector("svg")).toHaveClass(
+      "tw-size-3.5",
+      "md:tw-size-4"
+    );
   });
 
   it("disables the DM button while loading", () => {

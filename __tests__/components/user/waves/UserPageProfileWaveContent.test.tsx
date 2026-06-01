@@ -32,7 +32,6 @@ const renderContent = (
     <UserPageProfileWaveContent
       canManageOwnOfficialWave={true}
       containerWidth={600}
-      onAddPost={jest.fn()}
       onCreateCuration={jest.fn()}
       profileIdentity={{ id: "profile-1", handle: "alice" }}
       areCurationsError={false}
@@ -61,14 +60,12 @@ describe("UserPageProfileWaveContent", () => {
     });
   });
 
-  it("shows Add post for the owner when a selected curation has drops", () => {
-    const onAddPost = jest.fn();
+  it("does not render Add post inside the curation content", () => {
+    renderContent();
 
-    renderContent({ onAddPost });
-
-    fireEvent.click(screen.getByRole("button", { name: "Add post" }));
-
-    expect(onAddPost).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Add post" })
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("profile-curation-masonry")).toHaveTextContent(
       "curation-1"
     );
@@ -82,8 +79,7 @@ describe("UserPageProfileWaveContent", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows Add post in the empty selected curation state", () => {
-    const onAddPost = jest.fn();
+  it("does not show Add post in the empty selected curation state", () => {
     useWaveCurationDropsMock.mockReturnValue({
       dataUpdatedAt: 1,
       drops: [],
@@ -96,11 +92,11 @@ describe("UserPageProfileWaveContent", () => {
       refetch: jest.fn(),
     });
 
-    renderContent({ onAddPost });
+    renderContent();
 
-    fireEvent.click(screen.getByRole("button", { name: "Add post" }));
-
-    expect(onAddPost).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole("button", { name: "Add post" })
+    ).not.toBeInTheDocument();
   });
 
   it("shows Create curation when the owner has no selected curation", () => {

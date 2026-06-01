@@ -3,6 +3,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import {
   ArrowTopRightOnSquareIcon,
   ChevronDownIcon,
+  PlusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode, RefObject } from "react";
@@ -145,6 +146,7 @@ export function OfficialWaveSummary({
   isChangingCuration = false,
   showChangeCuration = false,
   onOpenWave,
+  onAddPost,
   onOpenChangeWave,
   onOpenChangeCuration,
   onRemoveWave,
@@ -165,6 +167,7 @@ export function OfficialWaveSummary({
   readonly isChangingCuration?: boolean | undefined;
   readonly showChangeCuration?: boolean | undefined;
   readonly onOpenWave: () => void;
+  readonly onAddPost?: (() => void) | undefined;
   readonly onOpenChangeWave: () => void;
   readonly onOpenChangeCuration?: (() => void) | undefined;
   readonly onRemoveWave: () => void;
@@ -177,10 +180,10 @@ export function OfficialWaveSummary({
       : "change-curation-dropdown";
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
-      <div className="tw-min-w-0 tw-max-w-2xl tw-flex-1">
+    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-3 tw-gap-y-2 lg:tw-gap-y-0">
+      <div className="tw-col-start-1 tw-row-start-1 tw-min-w-0 tw-max-w-2xl">
         <div className="tw-flex tw-items-center">
-          <h2 className="tw-mb-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-xl tw-font-semibold tw-text-iron-100">
+          <h2 className="tw-mb-0 tw-min-w-0 tw-max-w-full tw-text-xl tw-font-semibold tw-text-iron-100">
             {waveName}
           </h2>
           <button
@@ -193,122 +196,140 @@ export function OfficialWaveSummary({
             <ArrowTopRightOnSquareIcon className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0" />
           </button>
         </div>
-        <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-leading-6">
-          <span className="tw-text-iron-400">{metadataLabel}</span>
-          {profileCurationLabel && (
-            <>
-              <span className="tw-text-iron-600">•</span>
-              <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300">
-                <span className="tw-flex-shrink-0 tw-text-iron-500">
-                  Curation:
-                </span>
-                <span className="tw-min-w-0 tw-truncate tw-text-iron-200">
-                  {profileCurationLabel}
-                </span>
+      </div>
+
+      <div className="tw-col-span-full tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-leading-6 lg:tw-col-start-1 lg:tw-col-end-2 lg:tw-mt-2">
+        <span className="tw-text-iron-400">{metadataLabel}</span>
+        {profileCurationLabel && (
+          <>
+            <span className="tw-text-iron-600">•</span>
+            <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-300">
+              <span className="tw-flex-shrink-0 tw-text-iron-500">
+                Curation:
               </span>
-            </>
-          )}
-        </div>
+              <span className="tw-min-w-0 tw-truncate tw-text-iron-200">
+                {profileCurationLabel}
+              </span>
+            </span>
+          </>
+        )}
       </div>
 
       {canManageOwnOfficialWave && (
-        <div className="tw-flex tw-w-full tw-items-center md:tw-w-auto md:tw-justify-end">
-          <div className="tw-flex tw-w-full tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)] sm:tw-w-auto md:tw-w-auto">
-            <div
-              ref={changeWaveDropdownRef}
-              className="tw-relative tw-min-w-0 tw-flex-1 md:tw-flex-none"
+        <div className="tw-contents lg:tw-col-start-2 lg:tw-row-span-2 lg:tw-row-start-1 lg:tw-flex lg:tw-items-start lg:tw-justify-end lg:tw-gap-2">
+          {onAddPost !== undefined && (
+            <button
+              type="button"
+              onClick={onAddPost}
+              className="tw-col-start-2 tw-row-start-1 tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-3.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-950 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-white desktop-hover:hover:tw-border-iron-200 desktop-hover:hover:tw-bg-iron-100 sm:tw-py-1.5 tw-self-center"
             >
-              <button
-                ref={changeWaveButtonRef}
-                type="button"
-                onClick={onOpenChangeWave}
-                aria-expanded={isChangeWaveOpen}
-                aria-haspopup="menu"
-                aria-controls={changeWaveDropdownId}
-                className={`tw-inline-flex tw-whitespace-nowrap tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
-                  isChangeWaveOpen
-                    ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
-                    : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
-                }`}
-              >
-                <span className="tw-text-xs lg:tw-text-sm">Switch wave</span>
-                <ChevronDownIcon
-                  aria-hidden="true"
-                  className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
-                    isChangeWaveOpen ? "tw-rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {changeWaveDropdownId && (
+              <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
+              <span className="tw-text-xs sm:tw-text-sm">Add post</span>
+            </button>
+          )}
+          <fieldset className="horizontal-menu-hide-scrollbar tw-col-span-full tw-row-start-3 tw-mt-2 tw-w-full tw-overflow-x-auto lg:tw-mt-0 lg:tw-w-auto lg:tw-overflow-visible">
+            <legend className="tw-sr-only">Profile wave switch controls</legend>
+            <div className="tw-flex tw-w-max tw-items-center tw-gap-2 lg:tw-w-auto lg:tw-justify-end">
+              <div className="tw-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/5 tw-p-0.5 tw-shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
                 <div
-                  id={changeWaveDropdownId}
-                  className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
-                >
-                  {changeWaveDropdown}
-                </div>
-              )}
-            </div>
-            {showChangeCuration && onOpenChangeCuration !== undefined && (
-              <>
-                <div className="tw-mx-1 tw-h-3.5 tw-w-px tw-flex-shrink-0 tw-bg-white/10" />
-                <div
-                  ref={changeCurationDropdownRef}
-                  className="tw-relative tw-min-w-0 tw-flex-1 md:tw-flex-none"
+                  ref={changeWaveDropdownRef}
+                  className="tw-relative tw-flex-none"
                 >
                   <button
-                    ref={changeCurationButtonRef}
+                    ref={changeWaveButtonRef}
                     type="button"
-                    onClick={onOpenChangeCuration}
-                    disabled={isChangingCuration}
-                    aria-expanded={isChangeCurationOpen}
+                    onClick={onOpenChangeWave}
+                    aria-expanded={isChangeWaveOpen}
                     aria-haspopup="menu"
-                    aria-controls={changeCurationDropdownId}
-                    className={`tw-inline-flex tw-whitespace-nowrap tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-w-auto md:tw-justify-center md:tw-py-1.5 ${
-                      isChangeCurationOpen
+                    aria-controls={changeWaveDropdownId}
+                    className={`tw-inline-flex tw-w-auto tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 sm:tw-px-3.5 sm:tw-py-2 md:tw-py-1.5 ${
+                      isChangeWaveOpen
                         ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
                         : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
                     }`}
                   >
                     <span className="tw-text-xs lg:tw-text-sm">
-                      Switch curation
+                      Switch wave
                     </span>
                     <ChevronDownIcon
                       aria-hidden="true"
                       className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
-                        isChangeCurationOpen ? "tw-rotate-180" : ""
+                        isChangeWaveOpen ? "tw-rotate-180" : ""
                       }`}
                     />
                   </button>
 
-                  {changeCurationDropdownId && (
+                  {changeWaveDropdownId && (
                     <div
-                      id={changeCurationDropdownId}
+                      id={changeWaveDropdownId}
                       className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
                     >
-                      {changeCurationDropdown}
+                      {changeWaveDropdown}
                     </div>
                   )}
                 </div>
-              </>
-            )}
-            <div className="tw-mx-1 tw-h-3.5 tw-w-px tw-flex-shrink-0 tw-bg-white/10" />
-            <button
-              type="button"
-              onClick={onRemoveWave}
-              disabled={isRemoving}
-              aria-label="Unset featured wave"
-              title="Unset featured wave"
-              className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-[10px] tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 sm:tw-px-3.5 sm:tw-py-1.5"
-            >
-              {isRemoving ? (
-                <CircleLoader />
-              ) : (
-                <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              )}
-              <span className="tw-text-xs lg:tw-text-sm">Unset</span>
-            </button>
-          </div>
+                {showChangeCuration && onOpenChangeCuration !== undefined && (
+                  <>
+                    <div className="tw-mx-1 tw-h-3.5 tw-w-px tw-flex-shrink-0 tw-bg-white/10" />
+                    <div
+                      ref={changeCurationDropdownRef}
+                      className="tw-relative tw-flex-none"
+                    >
+                      <button
+                        ref={changeCurationButtonRef}
+                        type="button"
+                        onClick={onOpenChangeCuration}
+                        disabled={isChangingCuration}
+                        aria-expanded={isChangeCurationOpen}
+                        aria-haspopup="menu"
+                        aria-controls={changeCurationDropdownId}
+                        className={`tw-inline-flex tw-w-auto tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-1.5 tw-text-sm tw-font-semibold tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 sm:tw-px-3.5 sm:tw-py-2 md:tw-py-1.5 ${
+                          isChangeCurationOpen
+                            ? "tw-border-white/10 tw-bg-iron-800 tw-text-iron-50 tw-shadow-inner"
+                            : "tw-border-transparent tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-50"
+                        }`}
+                      >
+                        <span className="tw-text-xs lg:tw-text-sm">
+                          Switch curation
+                        </span>
+                        <ChevronDownIcon
+                          aria-hidden="true"
+                          className={`-tw-mr-1.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition tw-duration-200 ${
+                            isChangeCurationOpen ? "tw-rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {changeCurationDropdownId && (
+                        <div
+                          id={changeCurationDropdownId}
+                          className="tw-absolute tw-right-0 tw-top-full tw-z-20 tw-mt-1 tw-hidden tw-w-72 lg:tw-block"
+                        >
+                          {changeCurationDropdown}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+                <div className="tw-mx-1 tw-h-3.5 tw-w-px tw-flex-shrink-0 tw-bg-white/10" />
+                <button
+                  type="button"
+                  onClick={onRemoveWave}
+                  disabled={isRemoving}
+                  aria-label="Unset featured wave"
+                  title="Unset featured wave"
+                  className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-[10px] tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-zinc-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-rose-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-600 desktop-hover:hover:tw-border-rose-500/20 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-400 sm:tw-px-3.5 sm:tw-py-1.5"
+                >
+                  {isRemoving ? (
+                    <CircleLoader />
+                  ) : (
+                    <XMarkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+                  )}
+                  <span className="tw-text-xs lg:tw-text-sm">Unset</span>
+                </button>
+              </div>
+            </div>
+          </fieldset>
         </div>
       )}
     </div>
