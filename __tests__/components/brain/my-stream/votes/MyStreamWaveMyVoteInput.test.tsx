@@ -274,13 +274,16 @@ describe("MyStreamWaveMyVoteInput", () => {
     expectMaxVotes("10");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
     expect(invalidateQueries).toHaveBeenCalledWith({
-      queryKey: [QueryKey.DROPS_LEADERBOARD],
-    });
-    expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
     });
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.WAVE_DECISIONS, { waveId: "wave-1" }],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: "wave-1" }],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
     });
   });
 

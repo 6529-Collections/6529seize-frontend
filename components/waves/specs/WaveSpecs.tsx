@@ -5,6 +5,7 @@ import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
 import WaveSlowMode from "./WaveSlowMode";
 import WaveDisableLinks from "./WaveDisableLinks";
+import WaveApprovalThresholds from "./WaveApprovalThresholds";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
@@ -16,6 +17,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
+  const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const showSlowMode = wave.chat.enabled;
 
   return (
@@ -45,6 +47,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
               </div>
             </div>
           )}
+
+          {isApproveWave && <WaveApprovalThresholds wave={wave} />}
 
           <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
             <span className="tw-font-medium tw-text-iron-400">Creator</span>
