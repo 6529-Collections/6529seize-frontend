@@ -123,35 +123,34 @@ const createPreviewDrop = ({
   readonly mediaPreviewUrl: string;
   readonly mediaUri?: string | null;
   readonly mimeType: string;
-}): PreviewDrop =>
-  ({
-    id: `drop-${kind}-${mediaPreviewUrl}`,
-    title: null,
-    parts: [
-      {
-        content: null,
-        media: [],
-      },
-    ],
-    nft_links: [
-      {
-        url_in_text: "https://transient.xyz/nfts/ethereum/0xabc/1",
-        data: {
-          media_uri: mediaUri,
-          media_preview: {
-            status: "READY",
-            kind,
-            card_url: mediaPreviewUrl,
-            small_url: null,
-            thumb_url: null,
-            width: 640,
-            height: 360,
-            mime_type: mimeType,
-          },
+}): PreviewDrop => ({
+  id: `drop-${kind}-${mediaPreviewUrl}`,
+  title: null,
+  parts: [
+    {
+      content: null,
+      media: [],
+    },
+  ],
+  nft_links: [
+    {
+      url_in_text: "https://transient.xyz/nfts/ethereum/0xabc/1",
+      data: {
+        media_uri: mediaUri,
+        media_preview: {
+          status: "READY",
+          kind,
+          card_url: mediaPreviewUrl,
+          small_url: null,
+          thumb_url: null,
+          width: 640,
+          height: 360,
+          mime_type: mimeType,
         },
       },
-    ],
-  }) as PreviewDrop;
+    },
+  ],
+});
 
 const mockResolvedProfileCurationDrops = (drops: readonly PreviewDrop[]) => {
   useProfileWaveMock.mockReturnValue({
@@ -171,7 +170,7 @@ const mockResolvedProfileCurationDrops = (drops: readonly PreviewDrop[]) => {
 const getFallbackImagesForSrc = (src: string): HTMLElement[] =>
   screen
     .queryAllByTestId("fallback-image")
-    .filter((image) => image.getAttribute("data-fallback-src") === src);
+    .filter((image) => image.dataset.fallbackSrc === src);
 
 describe("CurationWavePreviewCard", () => {
   beforeEach(() => {
