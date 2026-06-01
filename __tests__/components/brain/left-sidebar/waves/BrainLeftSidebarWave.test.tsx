@@ -102,6 +102,18 @@ describe("BrainLeftSidebarWave", () => {
     expect(screen.getByRole("link")).toHaveAttribute("href", "/waves");
   });
 
+  it("uses canonical message routes for direct message waves", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        isDirectMessage
+      />
+    );
+
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/messages/1");
+  });
+
   it("pushes shallow route on click", async () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
     const link = screen.getByRole("link");
