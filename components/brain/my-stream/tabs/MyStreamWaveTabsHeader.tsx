@@ -140,12 +140,12 @@ export default function MyStreamWaveTabsHeader({
 
   useLayoutEffect(() => {
     if (!showDescriptionPreview) {
-      const frameId = window.requestAnimationFrame(() => {
+      const frameId = globalThis.requestAnimationFrame(() => {
         setIsDescriptionPreviewTruncated(false);
       });
 
       return () => {
-        window.cancelAnimationFrame(frameId);
+        globalThis.cancelAnimationFrame(frameId);
       };
     }
 
@@ -161,13 +161,13 @@ export default function MyStreamWaveTabsHeader({
       );
     };
 
-    const frameId = window.requestAnimationFrame(updateTruncationState);
+    const frameId = globalThis.requestAnimationFrame(updateTruncationState);
 
     if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateTruncationState);
+      globalThis.addEventListener("resize", updateTruncationState);
       return () => {
-        window.cancelAnimationFrame(frameId);
-        window.removeEventListener("resize", updateTruncationState);
+        globalThis.cancelAnimationFrame(frameId);
+        globalThis.removeEventListener("resize", updateTruncationState);
       };
     }
 
@@ -178,7 +178,7 @@ export default function MyStreamWaveTabsHeader({
     }
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      globalThis.cancelAnimationFrame(frameId);
       observer.disconnect();
     };
   }, [previewText, showDescriptionPreview]);
@@ -189,6 +189,7 @@ export default function MyStreamWaveTabsHeader({
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-3">
           {showBackButton && (
             <button
+              type="button"
               onClick={handleMobileBack}
               className="-tw-ml-2.5 tw-mr-1.5 tw-flex tw-h-full tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-px-2.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50"
               aria-label="Go back"

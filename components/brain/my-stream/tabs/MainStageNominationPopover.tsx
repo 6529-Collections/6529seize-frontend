@@ -67,24 +67,26 @@ function AnimatedProgressBar({
   const [animatedPercent, setAnimatedPercent] = useState(0);
 
   useEffect(() => {
-    const frameId = requestAnimationFrame(() => {
+    const frameId = globalThis.requestAnimationFrame(() => {
       setAnimatedPercent(percent);
     });
 
-    return () => cancelAnimationFrame(frameId);
+    return () => globalThis.cancelAnimationFrame(frameId);
   }, [percent]);
 
   return (
-    <div
-      className="tw-relative tw-z-10 tw-h-1 tw-w-full tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.85)]"
-      role="progressbar"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={valueMax}
-      aria-valuenow={valueNow}
-      aria-valuetext={valueText}
-    >
+    <div className="tw-relative tw-z-10 tw-h-1 tw-w-full tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950 tw-shadow-[inset_0_1px_2px_rgba(0,0,0,0.85)]">
+      <progress
+        className="tw-sr-only"
+        max={valueMax}
+        value={valueNow}
+        aria-label={label}
+        aria-valuetext={valueText}
+      >
+        {valueText}
+      </progress>
       <div
+        aria-hidden="true"
         className="tw-relative tw-h-full tw-w-full tw-origin-left tw-transform-gpu tw-overflow-hidden tw-rounded-full tw-bg-gradient-to-r tw-from-primary-600 tw-via-primary-500 tw-to-primary-300 tw-shadow-[0_0_14px_rgba(64,106,254,0.58)] tw-transition-transform tw-duration-1000 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none"
         style={{ transform: `scaleX(${animatedPercent / 100})` }}
       >
