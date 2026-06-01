@@ -20,7 +20,7 @@ export interface NominationProgress {
   readonly percent: number;
 }
 
-export interface UseMemesNomineeProgressResult {
+interface UseMemesNomineeProgressResult {
   readonly hasProfile: boolean;
   readonly isError: boolean;
   readonly isLoading: boolean;
@@ -56,7 +56,7 @@ const getProfileIdentity = (profile: ApiIdentity | null): string | null => {
   return null;
 };
 
-export const getNominationProgress = (
+const getNominationProgress = (
   currentRep: number | null | undefined,
   requiredRep = MEMES_NOMINEE_REQUIRED_REP
 ): NominationProgress => {

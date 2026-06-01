@@ -152,12 +152,14 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
         endTime: 0,
       },
     });
-    expect(screen.getByTestId("info")).toHaveAttribute(
-      "title",
-      expect.stringContaining("don't have permission")
-    );
-    expect(screen.getByText("Not Eligible")).toBeInTheDocument();
-    expect(screen.getByText("Not Eligible to Submit")).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: "How to Submit" });
+    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+    expect(button).not.toBeDisabled();
+    expect(screen.getByTestId("permission")).toBeInTheDocument();
+    expect(screen.queryByTestId("info")).not.toBeInTheDocument();
+    expect(screen.queryByText("Not Eligible")).not.toBeInTheDocument();
+    expect(screen.queryByText("Not Eligible to Submit")).not.toBeInTheDocument();
+    expect(screen.getByText("How to Submit")).toBeInTheDocument();
   });
 
   it("renders limit reached state", () => {
