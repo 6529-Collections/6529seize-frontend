@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { CurationWavePreviewCard } from "@/components/waves/drops/CurationWavePreviewCard";
+import type { PreviewDrop } from "@/components/waves/drops/curation-preview/types";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useProfileWave } from "@/hooks/useProfileWave";
@@ -34,7 +35,15 @@ jest.mock("@/components/common/FallbackImage", () => ({
     readonly alt: string;
     readonly fallbackSrc: string;
     readonly primarySrc: string;
-  }) => <img alt={alt} src={primarySrc || fallbackSrc} />,
+  }) => (
+    <img
+      alt={alt}
+      src={primarySrc || fallbackSrc}
+      data-testid="fallback-image"
+      data-fallback-src={fallbackSrc}
+      data-primary-src={primarySrc}
+    />
+  ),
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
@@ -52,7 +61,7 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 jest.mock("@heroicons/react/24/outline", () => ({
   ArrowRightIcon: () => <span aria-hidden="true" />,
   LinkIcon: () => <span aria-hidden="true" />,
-  PlayIcon: () => <span aria-hidden="true" />,
+  PlayIcon: () => <span aria-hidden="true" data-testid="video-play-icon" />,
 }));
 
 jest.mock("next/link", () => ({
@@ -103,6 +112,65 @@ const createWave = (): ApiWave =>
       parts: [],
     },
   }) as ApiWave;
+
+const createPreviewDrop = ({
+  kind,
+  mediaPreviewUrl,
+  mediaUri = null,
+  mimeType,
+}: {
+  readonly kind: "image" | "video";
+  readonly mediaPreviewUrl: string;
+  readonly mediaUri?: string | null;
+  readonly mimeType: string;
+}): PreviewDrop => ({
+  id: `drop-${kind}-${mediaPreviewUrl}`,
+  title: null,
+  parts: [
+    {
+      content: null,
+      media: [],
+    },
+  ],
+  nft_links: [
+    {
+      url_in_text: "https://transient.xyz/nfts/ethereum/0xabc/1",
+      data: {
+        media_uri: mediaUri,
+        media_preview: {
+          status: "READY",
+          kind,
+          card_url: mediaPreviewUrl,
+          small_url: null,
+          thumb_url: null,
+          width: 640,
+          height: 360,
+          mime_type: mimeType,
+        },
+      },
+    },
+  ],
+});
+
+const mockResolvedProfileCurationDrops = (drops: readonly PreviewDrop[]) => {
+  useProfileWaveMock.mockReturnValue({
+    data: {
+      profile_curation_id: "curation-1",
+      profile_wave_id: "wave-1",
+    },
+    isError: false,
+  });
+  useWaveCurationPreviewDropsMock.mockReturnValue({
+    drops,
+    isError: false,
+    isFetched: true,
+  });
+};
+
+const getFallbackImagesForSrc = (src: string): HTMLElement[] =>
+  screen
+    .queryAllByTestId("fallback-image")
+    .filter((image) => image.dataset.fallbackSrc === src);
 
 describe("CurationWavePreviewCard", () => {
   beforeEach(() => {
@@ -179,5 +247,55 @@ describe("CurationWavePreviewCard", () => {
       ImageScale.W_AUTO_H_50
     );
     expect(screen.getByRole("link", { name: /open wave/i })).toBeVisible();
+  });
+
+  it("renders image preview media as an image tile", () => {
+    const imageUrl = "https://cdn.example.com/artwork.webp";
+    mockResolvedProfileCurationDrops([
+      createPreviewDrop({
+        kind: "image",
+        mediaPreviewUrl: imageUrl,
+        mimeType: "image/webp",
+      }),
+    ]);
+
+    render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
+
+    expect(getFallbackImagesForSrc(imageUrl)).toHaveLength(1);
+    expect(screen.queryByTestId("video-play-icon")).not.toBeInTheDocument();
+  });
+
+  it("renders video preview thumbnails with a play indicator", () => {
+    const thumbnailUrl = "https://cdn.example.com/video-thumbnail.webp";
+    mockResolvedProfileCurationDrops([
+      createPreviewDrop({
+        kind: "video",
+        mediaPreviewUrl: thumbnailUrl,
+        mediaUri: "https://cdn.example.com/video.mp4",
+        mimeType: "video/mp4",
+      }),
+    ]);
+
+    render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
+
+    expect(getFallbackImagesForSrc(thumbnailUrl)).toHaveLength(1);
+    expect(screen.getByTestId("video-play-icon")).toBeInTheDocument();
+  });
+
+  it("renders a video placeholder for direct video preview urls", () => {
+    const videoUrl = "https://cdn.example.com/video.mp4";
+    mockResolvedProfileCurationDrops([
+      createPreviewDrop({
+        kind: "video",
+        mediaPreviewUrl: videoUrl,
+        mimeType: "image/webp",
+      }),
+    ]);
+
+    render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
+
+    expect(getFallbackImagesForSrc(videoUrl)).toHaveLength(0);
+    expect(screen.getByLabelText("Curated video")).toBeInTheDocument();
+    expect(screen.getByTestId("video-play-icon")).toBeInTheDocument();
   });
 });
