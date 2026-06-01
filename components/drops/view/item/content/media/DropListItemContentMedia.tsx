@@ -39,6 +39,7 @@ export default function DropListItemContentMedia({
   htmlIframeContainerClassName,
   htmlPreviewImageUrl,
   loadStrategy = "in-view",
+  galleryItemId,
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
@@ -51,6 +52,7 @@ export default function DropListItemContentMedia({
   readonly htmlIframeContainerClassName?: string | undefined;
   readonly htmlPreviewImageUrl?: string | undefined;
   readonly loadStrategy?: MediaLoadStrategy | undefined;
+  readonly galleryItemId?: string | undefined;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -88,6 +90,7 @@ export default function DropListItemContentMedia({
           imageObjectPosition={imageObjectPosition}
           imageScale={imageScale}
           loadStrategy={loadStrategy}
+          galleryItemId={galleryItemId}
         />
       );
     case MediaType.VIDEO:

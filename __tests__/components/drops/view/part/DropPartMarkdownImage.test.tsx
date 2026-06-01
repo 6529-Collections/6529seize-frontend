@@ -11,12 +11,14 @@ jest.mock(
       src: string;
       loadStrategy: string;
       intrinsicHeight?: boolean;
+      galleryItemId?: string;
     }) => (
       <div
         data-testid="standard-image-media"
         data-src={props.src}
         data-load-strategy={props.loadStrategy}
         data-intrinsic-height={String(props.intrinsicHeight)}
+        data-gallery-item-id={props.galleryItemId}
       />
     ),
   })
@@ -37,6 +39,20 @@ describe("DropPartMarkdownImage", () => {
     expect(screen.getByTestId("standard-image-media")).toHaveAttribute(
       "data-intrinsic-height",
       "true"
+    );
+  });
+
+  it("passes the gallery item id to the standard image media component", () => {
+    render(
+      <DropPartMarkdownImage
+        src="/img.png"
+        galleryItemId="drop-image-gallery:body:0:/img.png"
+      />
+    );
+
+    expect(screen.getByTestId("standard-image-media")).toHaveAttribute(
+      "data-gallery-item-id",
+      "drop-image-gallery:body:0:/img.png"
     );
   });
 

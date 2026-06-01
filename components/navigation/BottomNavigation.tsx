@@ -151,7 +151,11 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
                 key={item.name}
                 className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
               >
-                <NavItem item={item} isCurrentWaveDm={isCurrentWaveDm} />
+                <NavItem
+                  item={item}
+                  isCurrentWaveDm={isCurrentWaveDm}
+                  fullPrefetch={isApp && item.kind === "view"}
+                />
               </li>
             ))}
           </LayoutGroup>

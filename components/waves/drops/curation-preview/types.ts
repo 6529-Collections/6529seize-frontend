@@ -53,12 +53,21 @@ export interface PreviewDrop extends PreviewDropContent {
   };
 }
 
-export interface PreviewMedia {
-  readonly url: string;
+interface PreviewMediaBase {
+  readonly sourceUrl: string;
   readonly width: number | null;
   readonly height: number | null;
-  readonly isVideo: boolean;
 }
+
+export type PreviewMedia =
+  | (PreviewMediaBase & {
+      readonly kind: "image";
+      readonly imageUrl: string;
+    })
+  | (PreviewMediaBase & {
+      readonly kind: "video";
+      readonly imageUrl: string | null;
+    });
 
 export type PreviewItem =
   | {

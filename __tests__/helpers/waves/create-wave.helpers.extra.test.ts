@@ -409,7 +409,7 @@ it("sets time lock for approve waves when time weighted voting is enabled", () =
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
+    approval: { threshold: 3, thresholdTimeMs: null, maxWinners: null },
   };
   const drop: any = {
     parts: [],
@@ -460,7 +460,7 @@ it("allows approve time lock equal to the wave duration", () => {
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
+    approval: { threshold: 3, thresholdTimeMs: null, maxWinners: null },
   };
   const drop: any = {
     parts: [],
@@ -511,7 +511,7 @@ it("throws when approve time lock exceeds approve wave duration", () => {
       },
     },
     outcomes: [],
-    approval: { threshold: 3, thresholdTimeMs: 60000, maxWinners: null },
+    approval: { threshold: 3, thresholdTimeMs: null, maxWinners: null },
   };
   const drop: any = {
     parts: [],

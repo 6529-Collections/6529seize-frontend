@@ -27,7 +27,7 @@ const MobileMemesArtSubmissionBtnContent: React.FC<
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="lg:tw-hidden">
+    <div className="md:tw-hidden">
       <button
         onClick={() => {
           if (isSubmissionDisabled) return;

@@ -31,3 +31,12 @@ export const ensureValueInBounds = (value: number, unit: TimeUnit): number => {
   }
   return Math.max(1, Math.min(MAX_HOURS, value));
 };
+
+export const parseWholeNumberInput = (value: string): number | null => {
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+  return Number.isSafeInteger(parsedValue) ? parsedValue : null;
+};
