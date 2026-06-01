@@ -23,6 +23,7 @@ interface WaveDropCreateProps {
   readonly termsSignatureFlowEnabled?: boolean | undefined;
   readonly identityPickerPlacement?: IdentityPickerPlacement | undefined;
   readonly forceStandardDropComposer?: boolean | undefined;
+  readonly fixedDropMode?: DropMode | undefined;
 }
 
 export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
@@ -38,6 +39,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   termsSignatureFlowEnabled = true,
   identityPickerPlacement = "modal",
   forceStandardDropComposer = false,
+  fixedDropMode = DropMode.PARTICIPATION,
 }) => {
   const curationComposerVariant: CurationComposerVariant = isCurationLeaderboard
     ? "leaderboard"
@@ -94,7 +96,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
         onExitFixedDropMode={onExitFixedDropMode}
         dropId={null}
         activeDrop={null}
-        fixedDropMode={DropMode.PARTICIPATION}
+        fixedDropMode={fixedDropMode}
         curationComposerVariant={curationComposerVariant}
         initialCurationUrl={initialCurationUrl}
         termsSignatureFlowEnabled={termsSignatureFlowEnabled}

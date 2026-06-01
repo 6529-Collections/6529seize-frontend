@@ -175,15 +175,17 @@ export default function OngoingParticipationDrop({
       useRankStyles={
         !(typeof winningThreshold === "number" && winningThreshold > 0)
       }
+      floatingActions={
+        !isMobile && showInteractions && showReplyAndQuote ? (
+          <WaveDropActions
+            drop={drop}
+            activePartIndex={activePartIndex}
+            showVoting={false}
+            onReply={handleOnReply}
+          />
+        ) : null
+      }
     >
-      {!isMobile && showInteractions && showReplyAndQuote && (
-        <WaveDropActions
-          drop={drop}
-          activePartIndex={activePartIndex}
-          showVoting={false}
-          onReply={handleOnReply}
-        />
-      )}
       <div
         className={`tw-relative tw-z-10 tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-pt-4 tw-text-left ${
           inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
