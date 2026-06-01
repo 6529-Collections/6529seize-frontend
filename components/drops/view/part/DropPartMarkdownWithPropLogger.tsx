@@ -54,6 +54,7 @@ function areEqual(
     "embedDepth",
     "maxEmbedDepth",
     "fullWidthLinkPreviews",
+    "bodyGalleryKeyPrefix",
     "onLinkCardActionsActiveChange",
   ];
 

@@ -7,6 +7,7 @@ import {
 } from "@/components/drops/view/item/content/media/ImageMediaModal";
 import { InlineMediaActions } from "@/components/drops/view/item/content/media/MediaActionToolbar";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
+import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import React, { useCallback, useRef, useState } from "react";
@@ -71,16 +72,19 @@ export default function WaveDropPartContentMediaImage({
   src,
   imageScale = ImageScale.AUTOx450,
   imageObjectPosition = "center",
+  galleryItemId,
 }: {
   readonly src: string;
   readonly imageScale?: ImageScale | undefined;
   readonly imageObjectPosition?: string | undefined;
+  readonly galleryItemId?: string | undefined;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errorCount, setErrorCount] = useState(0);
   const [retryTick, setRetryTick] = useState(0);
   const { isCapacitor } = useCapacitor();
+  const imageGallery = useDropImageGallery();
   const imgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -108,9 +112,13 @@ export default function WaveDropPartContentMediaImage({
   const handleOpenModal = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.stopPropagation();
+      if (galleryItemId && imageGallery?.openImage(galleryItemId)) {
+        return;
+      }
+
       setIsModalOpen(true);
     },
-    []
+    [galleryItemId, imageGallery]
   );
 
   const handleCloseModal = useCallback(() => {

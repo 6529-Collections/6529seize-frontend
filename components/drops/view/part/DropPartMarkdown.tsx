@@ -264,6 +264,7 @@ export interface DropPartMarkdownProps {
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly bodyGalleryKeyPrefix?: string | undefined;
   readonly linkPreviewToggleControl?: LinkPreviewToggleControl | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
@@ -286,6 +287,7 @@ function DropPartMarkdown({
   embedDepth = 0,
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
   fullWidthLinkPreviews = false,
+  bodyGalleryKeyPrefix,
   linkPreviewToggleControl,
   onLinkCardActionsActiveChange,
 }: DropPartMarkdownProps) {
@@ -339,6 +341,7 @@ function DropPartMarkdown({
         embedDepth,
         maxEmbedDepth,
         fullWidthLinkPreviews,
+        bodyGalleryKeyPrefix,
       }),
     [
       onQuoteClick,
@@ -351,6 +354,7 @@ function DropPartMarkdown({
       embedDepth,
       maxEmbedDepth,
       fullWidthLinkPreviews,
+      bodyGalleryKeyPrefix,
     ]
   );
 
