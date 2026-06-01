@@ -19,6 +19,7 @@ import {
   CreateWaveOutcomeType,
   CreateWaveStep,
 } from "@/types/waves.types";
+import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 const createBaseConfig = (waveType: ApiWaveType) =>
   ({
@@ -543,6 +544,26 @@ describe("create-wave.helpers", () => {
       });
 
       expect(res.wave.winning_threshold_min_duration_ms).toBe(0);
+    });
+
+    it("throws when approve threshold hold time and time weighted voting are both set", () => {
+      const config = createBaseConfig(ApiWaveType.Approve);
+      config.approval.thresholdTimeMs = 120_000;
+      config.voting.timeWeighted = {
+        enabled: true,
+        averagingInterval: 5,
+        averagingIntervalUnit: "minutes",
+      };
+
+      expect(() =>
+        getCreateNewWaveBody({
+          drop: createDrop(),
+          picture: null,
+          config,
+        })
+      ).toThrow(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE
+      );
     });
 
     it("sends null threshold hold time for non-approve waves", () => {

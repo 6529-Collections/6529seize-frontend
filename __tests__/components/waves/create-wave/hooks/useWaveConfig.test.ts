@@ -555,6 +555,62 @@ describe("useWaveConfig", () => {
       expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
     });
 
+    it("should clear threshold time when approve time weighted voting is enabled", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve",
+          image: null,
+        });
+        result.current.onThresholdTimeChange(60000);
+      });
+
+      act(() => {
+        result.current.onTimeWeightedVotingChange({
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        });
+      });
+
+      expect(result.current.config.approval.thresholdTimeMs).toBeNull();
+      expect(result.current.config.voting.timeWeighted).toEqual({
+        enabled: true,
+        averagingInterval: 1,
+        averagingIntervalUnit: "hours",
+      });
+    });
+
+    it("should disable approve time weighted voting when threshold time is set", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve",
+          image: null,
+        });
+        result.current.onTimeWeightedVotingChange({
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        });
+      });
+
+      act(() => {
+        result.current.onThresholdTimeChange(60000);
+      });
+
+      expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
+      expect(result.current.config.voting.timeWeighted).toEqual({
+        enabled: false,
+        averagingInterval: 1,
+        averagingIntervalUnit: "hours",
+      });
+    });
+
     it("should update approval max winners", () => {
       const { result } = renderHook(() => useWaveConfig());
 

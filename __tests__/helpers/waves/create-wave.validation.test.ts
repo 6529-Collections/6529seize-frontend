@@ -459,6 +459,35 @@ describe("create-wave.validation", () => {
     );
   });
 
+  it("rejects approve waves with threshold hold time and time weighted voting enabled", () => {
+    const approveConfig = {
+      ...baseConfig,
+      overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      approval: {
+        threshold: 1,
+        thresholdTimeMs: HOUR_IN_MS,
+        maxWinners: null,
+      },
+      voting: {
+        ...baseConfig.voting,
+        timeWeighted: {
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.VOTING,
+      config: approveConfig,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE
+    );
+  });
+
   it("rejects invalid approve threshold hold time", () => {
     for (const thresholdTimeMs of [0, -60_000, 1.5, HOUR_IN_MS + 1]) {
       const approveConfig = {
