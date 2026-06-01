@@ -69,10 +69,41 @@ describe("buildDropImageGalleryItems", () => {
     expect(items).toEqual([]);
   });
 
+  it("includes bare direct image markdown links", () => {
+    const imageSrc = "https://cdn.example.com/image.jpg";
+    const partContent = `prefix [${imageSrc}](${imageSrc})`;
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        id: getDropImageGalleryItemId(
+          "body",
+          partContent.indexOf(`[${imageSrc}]`),
+          imageSrc
+        ),
+        src: imageSrc,
+        source: "body",
+      }),
+    ]);
+  });
+
   it("excludes image URLs used as markdown link labels", () => {
     const items = buildDropImageGalleryItems({
       partContent:
         "[https://cdn.example.com/image.jpg](https://example.com/page)",
+      partMedias: [],
+    });
+
+    expect(items).toEqual([]);
+  });
+
+  it("excludes bare markdown links to non-image pages", () => {
+    const pageUrl = "https://cdn.example.com/gallery";
+    const items = buildDropImageGalleryItems({
+      partContent: `[${pageUrl}](${pageUrl})`,
       partMedias: [],
     });
 

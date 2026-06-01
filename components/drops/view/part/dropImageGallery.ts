@@ -31,6 +31,7 @@ interface DropImageGalleryBodyImage {
 interface MarkdownLinkMatch {
   readonly start: number;
   readonly end: number;
+  readonly label: string;
   readonly destination: string;
   readonly image: boolean;
 }
@@ -41,7 +42,7 @@ interface MarkdownRange {
 }
 
 const MARKDOWN_LINK_REGEX =
-  /!?\[[^\]]*]\(\s*(<[^>\n]+>|[^\s)\n]+)(?:\s+(?:"[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?\s*\)/g;
+  /!?\[([^\]]*)]\(\s*(<[^>\n]+>|[^\s)\n]+)(?:\s+(?:"[^"\n]*"|'[^'\n]*'|\([^)\n]*\)))?\s*\)/g;
 const BARE_URL_REGEX = /https?:\/\/[^\s<>"']+/g;
 const FENCED_CODE_REGEX =
   /(^|\n)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\2(?=\n|$)|$)/g;
@@ -121,7 +122,8 @@ const getMarkdownLinkMatches = (
 
   let match = MARKDOWN_LINK_REGEX.exec(content);
   while (match) {
-    const rawDestination = match[1] ?? "";
+    const rawLabel = match[1] ?? "";
+    const rawDestination = match[2] ?? "";
     const matchText = match[0];
     const matchStart = match.index;
 
@@ -133,6 +135,7 @@ const getMarkdownLinkMatches = (
     matches.push({
       start: matchStart,
       end: matchStart + matchText.length,
+      label: rawLabel,
       destination: stripDestinationWrappers(rawDestination),
       image: matchText.startsWith("!"),
     });
@@ -148,6 +151,14 @@ const isInsideMarkdownLink = (
   matches: readonly MarkdownLinkMatch[]
 ): boolean =>
   matches.some((match) => index >= match.start && index < match.end);
+
+const isBareDirectImageMarkdownLink = (match: MarkdownLinkMatch): boolean => {
+  if (match.image || match.label.trim() !== match.destination.trim()) {
+    return false;
+  }
+
+  return isDirectImageUrl(match.destination, parseUrl(match.destination));
+};
 
 export const getDropImageGalleryItemId = (
   source: DropImageGallerySource,
@@ -188,7 +199,11 @@ const getBodyImageSources = (
   }
 
   const markdownImageSources = markdownMatches
-    .filter((match) => match.image && isSafeMarkdownImageSrc(match.destination))
+    .filter(
+      (match) =>
+        (match.image && isSafeMarkdownImageSrc(match.destination)) ||
+        isBareDirectImageMarkdownLink(match)
+    )
     .map((match) => ({ key: match.start, src: match.destination }));
 
   return [...markdownImageSources, ...bareImageSources]
