@@ -126,6 +126,7 @@ const AppLayout = require("@/components/layout/AppLayout").default;
 
 describe("AppLayout", () => {
   let store: any;
+  const loadingReserveProperty = "--stream-route-loading-bottom-reserve";
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -146,6 +147,27 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByText("child")).toBeInTheDocument();
     expect(screen.getByTestId("bottom-nav")).toBeInTheDocument();
+  });
+
+  it("sets stream loading reserve when bottom nav is visible", () => {
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(loadingReserveProperty)).toBe(
+      "85px"
+    );
+  });
+
+  it("clears stream loading reserve when a drop hides bottom nav", () => {
+    getSearchParams.mockReturnValue(new URLSearchParams("drop=drop-1"));
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(screen.queryByTestId("bottom-nav")).not.toBeInTheDocument();
+    expect(appWrapper.style.getPropertyValue(loadingReserveProperty)).toBe(
+      "0px"
+    );
   });
 
   it("renders waves or messages view based on the view query param", () => {

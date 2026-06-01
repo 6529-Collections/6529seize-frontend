@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
@@ -31,6 +31,21 @@ interface Props {
   readonly children: ReactNode;
 }
 
+const STREAM_ROUTE_LOADING_BOTTOM_RESERVE =
+  "--stream-route-loading-bottom-reserve";
+
+type StreamRouteLoadingReserveStyle = CSSProperties & {
+  readonly [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "0px" | "85px";
+};
+
+const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
+  [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "85px",
+};
+
+const streamRouteLoadingReserveHiddenStyle: StreamRouteLoadingReserveStyle = {
+  [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "0px",
+};
+
 function WavesQuickVoteView() {
   const quickVote = useMemesQuickVoteDialogController();
 
@@ -47,7 +62,9 @@ function WavesQuickVoteView() {
 
 function AppLayoutFallback({ children }: Props) {
   return (
-    <div className="tw-overflow-auto">
+    <div
+      className="tw-overflow-auto"
+      style={streamRouteLoadingReserveVisibleStyle}>
       <HeaderPlaceholder />
       <main>{children}</main>
       <div className="tw-h-[85px] tw-w-full" />
@@ -117,7 +134,13 @@ function AppLayoutContent({ children }: Props) {
   }
 
   return (
-    <div className={`${safeAreaClass} ${"tw-overflow-auto"}`}>
+    <div
+      className={`${safeAreaClass} ${"tw-overflow-auto"}`}
+      style={
+        isNavVisible
+          ? streamRouteLoadingReserveVisibleStyle
+          : streamRouteLoadingReserveHiddenStyle
+      }>
       <PullToRefresh triggerZoneRef={headerRef} />
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />

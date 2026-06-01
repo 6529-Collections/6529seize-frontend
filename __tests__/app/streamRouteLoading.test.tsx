@@ -4,21 +4,40 @@ import MessagesLoading from "@/app/messages/loading";
 import WavesLoading from "@/app/waves/loading";
 
 describe("stream route loading fallbacks", () => {
+  const expectedMinHeight =
+    "calc(100dvh - var(--stream-route-loading-bottom-reserve, 0px))";
+
   it("renders an accessible waves loading state", () => {
     render(<WavesLoading />);
+
+    const shell = screen.getByTestId("stream-route-loading-shell");
 
     expect(
       screen.getByRole("status", { name: "Loading waves" })
     ).toBeInTheDocument();
-    expect(screen.getByTestId("stream-route-loading-shell")).toBeInTheDocument();
+    expect(shell).toBeInTheDocument();
   });
 
   it("renders an accessible messages loading state", () => {
     render(<MessagesLoading />);
 
+    const shell = screen.getByTestId("stream-route-loading-shell");
+
     expect(
       screen.getByRole("status", { name: "Loading messages" })
     ).toBeInTheDocument();
-    expect(screen.getByTestId("stream-route-loading-shell")).toBeInTheDocument();
+    expect(shell).toBeInTheDocument();
+  });
+
+  it("uses layout-owned bottom reserve spacing for route loading height", () => {
+    render(<WavesLoading />);
+
+    const shell = screen.getByTestId("stream-route-loading-shell");
+    const shellBody = shell.firstElementChild?.nextElementSibling;
+
+    expect(shell).not.toHaveClass("tw-min-h-[calc(100dvh-85px)]");
+    expect(shell).toHaveStyle({ minHeight: expectedMinHeight });
+    expect(shellBody).not.toHaveClass("tw-min-h-[calc(100dvh-85px)]");
+    expect(shellBody).toHaveStyle({ minHeight: expectedMinHeight });
   });
 });

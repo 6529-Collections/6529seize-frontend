@@ -8,6 +8,11 @@ interface StreamRouteLoadingShellProps {
 const sidebarRows = [68, 54, 74, 62, 48, 70] as const;
 const contentRows = [82, 58, 74, 64] as const;
 
+const routeLoadingMinHeightStyle: CSSProperties = {
+  minHeight:
+    "calc(100dvh - var(--stream-route-loading-bottom-reserve, 0px))",
+};
+
 const SkeletonBlock = ({
   className,
   style,
@@ -31,13 +36,16 @@ export default function StreamRouteLoadingShell({
 
   return (
     <div
-      className="tailwind-scope tw-min-h-[calc(100dvh-85px)] tw-bg-black tw-text-iron-50"
+      className="tailwind-scope tw-bg-black tw-text-iron-50"
+      style={routeLoadingMinHeightStyle}
       role="status"
       aria-live="polite"
       aria-label={ariaLabel}
       data-testid="stream-route-loading-shell">
       <span className="tw-sr-only">{ariaLabel}</span>
-      <div className="tw-flex tw-min-h-[calc(100dvh-85px)] tw-overflow-hidden">
+      <div
+        className="tw-flex tw-overflow-hidden"
+        style={routeLoadingMinHeightStyle}>
         <aside className="tw-hidden tw-w-80 tw-shrink-0 tw-border-r tw-border-iron-900 tw-bg-iron-950 md:tw-flex md:tw-flex-col">
           <div className="tw-border-b tw-border-iron-900 tw-px-4 tw-py-4">
             <SkeletonBlock className="tw-h-5" style={{ width: primaryWidth }} />
