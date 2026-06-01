@@ -19,9 +19,9 @@ interface MyStreamWaveTabsMemeSubmitProps {
 }
 
 const HEADER_ACTION_BUTTON_CLASS =
-  "tw-max-w-[11.5rem] tw-whitespace-nowrap lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
+  "tw-max-w-[11.5rem] tw-whitespace-nowrap tw-text-xs lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
 const HEADER_ACTION_BUTTON_TEXT_CLASS = "tw-min-w-0 tw-truncate";
-const NOT_ELIGIBLE_BUTTON_CLASS = `tw-flex tw-w-auto tw-gap-x-1.5 tw-items-center tw-justify-center tw-rounded-lg tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-transition tw-duration-200 tw-ease-out tw-bg-iron-800 tw-text-iron-400 tw-border tw-border-solid tw-border-iron-700 tw-cursor-not-allowed tw-opacity-50 ${HEADER_ACTION_BUTTON_CLASS}`;
+const NOT_ELIGIBLE_BUTTON_CLASS = `tw-flex tw-w-auto tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-500/35 hover:tw-bg-primary-500/10 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 ${HEADER_ACTION_BUTTON_CLASS}`;
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
 const getActiveLabels = ({
@@ -76,7 +76,7 @@ const getActiveLabels = ({
  *   - With submission count indicator when limited submissions remaining
  *   - With urgency indicator when submission period is ending soon
  * - Maximum submissions reached (blue info button, disabled)
- * - Not eligible (blue info button, disabled, with permission icon)
+ * - Not eligible (interactive nomination progress popover)
  * - Closed (gray disabled button)
  *
  * Uses useWave hook to determine submission status, eligibility,
@@ -172,17 +172,12 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <MainStageNominationPopover>
         <button
           type="button"
-          aria-disabled="true"
           aria-haspopup="dialog"
-          onClick={(event) => event.preventDefault()}
           className={NOT_ELIGIBLE_BUTTON_CLASS}
         >
           <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
           <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-            <span className="xl:tw-hidden">Not Eligible</span>
-            <span className="tw-hidden xl:tw-inline">
-              Not Eligible to Submit
-            </span>
+            How to Submit
           </span>
         </button>
       </MainStageNominationPopover>
@@ -283,6 +278,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       onClicked={handleMemesSubmit}
       padding="tw-px-2.5 tw-py-2"
       title={tooltipText}
+      className="tw-text-xs"
     >
       {isEndingVerySoon && canSubmit ? (
         <ClockIcon className="tw-text-red-500 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-pulse" />

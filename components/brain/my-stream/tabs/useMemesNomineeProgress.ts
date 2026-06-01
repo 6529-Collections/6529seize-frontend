@@ -5,16 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
-import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
+import type { ApiRepRating } from "@/generated/models/ApiRepRating";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   MEMES_NOMINEE_CATEGORY,
   MEMES_NOMINEE_REQUIRED_REP,
 } from "./memesNomination.constants";
 
-const REP_CATEGORIES_PAGE_SIZE = 100;
-const REP_CATEGORIES_STALE_TIME_MS = 5 * 60 * 1000;
+const REP_RATING_STALE_TIME_MS = 30_000;
 
 export interface NominationProgress {
   readonly currentRep: number;
@@ -22,11 +20,15 @@ export interface NominationProgress {
   readonly percent: number;
 }
 
+export interface UseMemesNomineeProgressResult {
+  readonly hasProfile: boolean;
+  readonly isError: boolean;
+  readonly isLoading: boolean;
+  readonly progress: NominationProgress | null;
+}
+
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
-
-const normalizeCategoryName = (category: string): string =>
-  category.trim().toLowerCase();
 
 const getProfileIdentity = (profile: ApiIdentity | null): string | null => {
   if (!profile) {
@@ -54,23 +56,14 @@ const getProfileIdentity = (profile: ApiIdentity | null): string | null => {
   return null;
 };
 
-export const getMemesNomineeRep = (
-  categories: readonly ApiRepCategory[] | null | undefined
-): number => {
-  const nomineeCategory = (categories ?? []).find(
-    (category) =>
-      normalizeCategoryName(category.category) ===
-      normalizeCategoryName(MEMES_NOMINEE_CATEGORY)
-  );
-
-  return nomineeCategory?.total_rep ?? 0;
-};
-
 export const getNominationProgress = (
-  currentRep: number,
+  currentRep: number | null | undefined,
   requiredRep = MEMES_NOMINEE_REQUIRED_REP
 ): NominationProgress => {
-  const finiteCurrentRep = Number.isFinite(currentRep) ? currentRep : 0;
+  const finiteCurrentRep =
+    typeof currentRep === "number" && Number.isFinite(currentRep)
+      ? currentRep
+      : 0;
   const finiteRequiredRep =
     Number.isFinite(requiredRep) && requiredRep > 0
       ? requiredRep
@@ -83,42 +76,42 @@ export const getNominationProgress = (
   };
 };
 
-export function useMemesNomineeProgress() {
-  const { connectedProfile } = useAuth();
+export function useMemesNomineeProgress(): UseMemesNomineeProgressResult {
+  const { connectedProfile, fetchingProfile } = useAuth();
   const profileIdentity = getProfileIdentity(connectedProfile);
+  const hasProfile = !!profileIdentity;
 
-  const { data, isFetching } = useQuery<ApiRepCategoriesPage>({
+  const { data, isError, isFetching } = useQuery<ApiRepRating>({
     queryKey: [
-      QueryKey.REP_CATEGORIES,
+      QueryKey.PROFILE_REP_RATINGS,
       {
         handleOrWallet: profileIdentity,
         category: MEMES_NOMINEE_CATEGORY,
-        direction: "incoming",
       },
     ],
     queryFn: async () =>
-      await commonApiFetch<ApiRepCategoriesPage>({
-        endpoint: `profiles/${encodeURIComponent(profileIdentity!)}/rep/categories`,
+      await commonApiFetch<ApiRepRating>({
+        endpoint: `profiles/${encodeURIComponent(profileIdentity!)}/rep/rating`,
         params: {
-          page: "1",
-          page_size: REP_CATEGORIES_PAGE_SIZE.toString(),
-          top_contributors_limit: "1",
+          category: MEMES_NOMINEE_CATEGORY,
         },
       }),
-    enabled: !!profileIdentity,
-    staleTime: REP_CATEGORIES_STALE_TIME_MS,
+    enabled: hasProfile,
+    staleTime: REP_RATING_STALE_TIME_MS,
   });
 
   const progress = useMemo(() => {
-    if (!profileIdentity || !data) {
+    if (!hasProfile || !data) {
       return null;
     }
 
-    return getNominationProgress(getMemesNomineeRep(data.data));
-  }, [data, profileIdentity]);
+    return getNominationProgress(data.rating);
+  }, [data, hasProfile]);
 
   return {
-    isLoading: !!profileIdentity && isFetching && !data,
+    hasProfile,
+    isError,
+    isLoading: fetchingProfile || (hasProfile && isFetching && !data),
     progress,
   };
 }

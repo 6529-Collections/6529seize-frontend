@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "@/components/brain/ContentTabContext";
@@ -12,6 +12,7 @@ import {
   ShareIcon,
   LinkIcon,
   CheckIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import WavePicture from "../../../waves/WavePicture";
@@ -29,10 +30,10 @@ import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPr
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
-import SeekingNominationInfoPopover from "./SeekingNominationInfoPopover";
-import { MEMES_SEEKING_NOMINATION_WAVE_ID } from "./memesNomination.constants";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
+const TRUNCATION_EPSILON_PX = 1;
+
 interface MyStreamWaveTabsDefaultProps {
   readonly wave: ApiWave;
   readonly viewMode: WaveViewMode;
@@ -62,13 +63,14 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const breakpoint = useBreakpoint();
   const showBackButton = breakpoint !== "LG";
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
+  const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
+    useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const showShareAction = !isDirectMessage;
   const previewText = getWaveDescriptionPreviewText(wave);
   const showDescriptionPreview = showShareAction && !!previewText;
-  const isSeekingNominationWave =
-    wave.id.trim().toLowerCase() === MEMES_SEEKING_NOMINATION_WAVE_ID;
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -145,6 +147,50 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     return <LinkIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />;
   };
 
+  useLayoutEffect(() => {
+    if (!showDescriptionPreview) {
+      const frameId = window.requestAnimationFrame(() => {
+        setIsDescriptionPreviewTruncated(false);
+      });
+
+      return () => {
+        window.cancelAnimationFrame(frameId);
+      };
+    }
+
+    const previewElement = descriptionPreviewRef.current;
+    if (!previewElement) {
+      return;
+    }
+
+    const updateTruncationState = () => {
+      setIsDescriptionPreviewTruncated(
+        previewElement.scrollWidth >
+          previewElement.clientWidth + TRUNCATION_EPSILON_PX
+      );
+    };
+
+    const frameId = window.requestAnimationFrame(updateTruncationState);
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateTruncationState);
+      return () => {
+        window.cancelAnimationFrame(frameId);
+        window.removeEventListener("resize", updateTruncationState);
+      };
+    }
+
+    const observer = new ResizeObserver(updateTruncationState);
+    observer.observe(previewElement);
+    if (previewElement.parentElement) {
+      observer.observe(previewElement.parentElement);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
+  }, [previewText, showDescriptionPreview]);
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-bg-iron-950">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-px-4">
@@ -173,24 +219,30 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               wave={wave}
               align="left"
               ariaLabel="Show wave description"
-              triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+              triggerClassName="tw-group tw-flex tw-min-w-0 tw-cursor-pointer tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
             >
               <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
                 {wave.name}
               </h1>
-              <span className="tw-mt-0.5 tw-block tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
-                {previewText}
+              <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-max-w-xl tw-items-center tw-gap-x-1.5">
+                <span
+                  ref={descriptionPreviewRef}
+                  className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
+                >
+                  {previewText}
+                </span>
+                {isDescriptionPreviewTruncated && (
+                  <ChevronDownIcon
+                    aria-hidden="true"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
+                  />
+                )}
               </span>
             </WaveDescriptionPopover>
           ) : (
             <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
               {wave.name}
             </h1>
-          )}
-          {isSeekingNominationWave && (
-            <div className="tw-hidden tw-flex-shrink-0 md:tw-flex">
-              <SeekingNominationInfoPopover />
-            </div>
           )}
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch">

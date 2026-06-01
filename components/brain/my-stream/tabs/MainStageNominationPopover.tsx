@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactElement } from "react";
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
@@ -25,9 +25,13 @@ interface MainStageNominationPopoverProps {
 }
 
 function RepProgressSection({
+  hasProfile,
+  isError,
   isLoading,
   progress,
 }: {
+  readonly hasProfile: boolean;
+  readonly isError: boolean;
   readonly isLoading: boolean;
   readonly progress: NominationProgress | null;
 }) {
@@ -35,17 +39,30 @@ function RepProgressSection({
     return (
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-p-4">
         <p className="tw-mb-0 tw-text-[12.5px] tw-font-medium tw-text-zinc-400">
-          Loading MemesNominee Rep...
+          Loading MemesNominee REP...
         </p>
       </div>
     );
   }
 
-  if (!progress) {
+  if (isError) {
     return (
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-p-4">
         <p className="tw-mb-0 tw-text-[10.5px] tw-font-semibold tw-tracking-wider tw-text-zinc-400">
-          MemesNominee Rep
+          MemesNominee REP
+        </p>
+        <p className="tw-mb-0 tw-mt-2 tw-text-[12.5px] tw-font-medium tw-leading-5 tw-text-zinc-500">
+          Could not load MemesNominee REP right now.
+        </p>
+      </div>
+    );
+  }
+
+  if (!hasProfile || !progress) {
+    return (
+      <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-p-4">
+        <p className="tw-mb-0 tw-text-[10.5px] tw-font-semibold tw-tracking-wider tw-text-zinc-400">
+          MemesNominee REP
         </p>
         <p className="tw-mb-0 tw-mt-2 tw-text-[12.5px] tw-font-medium tw-leading-5 tw-text-zinc-500">
           Connect a profile to see your progress toward eligibility.
@@ -56,27 +73,38 @@ function RepProgressSection({
 
   const currentRep = Math.floor(progress.currentRep);
   const requiredRep = MEMES_NOMINEE_REQUIRED_REP;
+  const cappedCurrentRep = Math.min(Math.max(currentRep, 0), requiredRep);
+  const formattedCurrentRep = formatNumberWithCommas(currentRep);
+  const formattedRequiredRep = formatNumberWithCommas(requiredRep);
   const progressLabel =
     progress.remainingRep > 0
-      ? `${formatNumberWithCommas(Math.ceil(progress.remainingRep))} rep to go`
-      : "Goal reached!";
+      ? `${formatNumberWithCommas(Math.ceil(progress.remainingRep))} REP to go`
+      : "REP requirement met";
 
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-p-4">
       <div className="tw-pointer-events-none tw-absolute -tw-right-6 -tw-top-6 tw-h-24 tw-w-24 tw-rounded-full tw-bg-primary-500/10 tw-blur-[20px]" />
       <div className="tw-relative tw-z-10 tw-mb-3 tw-flex tw-items-end tw-justify-between tw-gap-4">
         <span className="tw-text-[10.5px] tw-font-semibold tw-tracking-wider tw-text-zinc-400">
-          MemesNominee Rep
+          MemesNominee REP
         </span>
         <span className="tw-whitespace-nowrap tw-text-[13px] tw-font-semibold tw-text-zinc-200">
-          {formatNumberWithCommas(currentRep)}
+          {formattedCurrentRep}
           <span className="tw-text-[11px] tw-font-medium tw-text-zinc-600">
             {" / "}
-            {requiredRep / 1000}k
+            {formattedRequiredRep}
           </span>
         </span>
       </div>
-      <div className="tw-relative tw-z-10 tw-h-1 tw-w-full tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.03] tw-bg-[#050505]">
+      <div
+        className="tw-relative tw-z-10 tw-h-1 tw-w-full tw-overflow-hidden tw-rounded-full tw-border tw-border-solid tw-border-white/[0.03] tw-bg-[#050505]"
+        role="progressbar"
+        aria-label="MemesNominee REP progress"
+        aria-valuemin={0}
+        aria-valuemax={requiredRep}
+        aria-valuenow={cappedCurrentRep}
+        aria-valuetext={`${formattedCurrentRep} of ${formattedRequiredRep} MemesNominee REP`}
+      >
         <div
           className="tw-h-full tw-rounded-full tw-bg-primary-500 tw-transition-all tw-duration-700 tw-ease-out"
           style={{ width: `${progress.percent}%` }}
@@ -89,31 +117,33 @@ function RepProgressSection({
   );
 }
 
-function MainStageNominationPopoverContent({
-  isLoading,
-  progress,
-}: {
-  readonly isLoading: boolean;
-  readonly progress: NominationProgress | null;
-}) {
+function MainStageNominationPopoverContent() {
+  const { hasProfile, isError, isLoading, progress } =
+    useMemesNomineeProgress();
+
   return (
     <div className="tw-w-[min(88vw,20rem)]">
       <div className="tw-mb-5 tw-flex tw-flex-col tw-items-start">
         <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2">
           <PermissionIcon className="tw-h-[15px] tw-w-[15px] tw-flex-shrink-0 tw-text-zinc-400" />
           <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-zinc-100">
-            You&apos;re not eligible to submit yet
+            Unlock submissions
           </p>
         </div>
         <div className="tw-min-w-0">
           <p className="tw-mb-0 tw-text-[12.5px] tw-font-medium tw-leading-relaxed tw-text-zinc-400">
-            Submissions open to nominated artists.
+            Reach 50,000 MemesNominee REP to become eligible to submit work.
           </p>
         </div>
       </div>
 
       <div className="tw-mb-5">
-        <RepProgressSection isLoading={isLoading} progress={progress} />
+        <RepProgressSection
+          hasProfile={hasProfile}
+          isError={isError}
+          isLoading={isLoading}
+          progress={progress}
+        />
       </div>
 
       <Link
@@ -130,21 +160,15 @@ function MainStageNominationPopoverContent({
 export default function MainStageNominationPopover({
   children,
 }: MainStageNominationPopoverProps) {
-  const { isLoading, progress } = useMemesNomineeProgress();
-
   return (
     <HoverCard
-      content={
-        <MainStageNominationPopoverContent
-          isLoading={isLoading}
-          progress={progress}
-        />
-      }
-      ariaLabel="Main Stage nomination progress"
+      content={<MainStageNominationPopoverContent />}
+      ariaLabel="Main Stage submission eligibility"
       placement="bottom"
       delayShow={150}
       delayHide={0}
       offset={12}
+      openOnClick={true}
     >
       {children}
     </HoverCard>
