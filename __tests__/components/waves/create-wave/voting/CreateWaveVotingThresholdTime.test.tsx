@@ -68,7 +68,7 @@ describe("CreateWaveVotingThresholdTime", () => {
     expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
       ""
     );
-    expect(setThresholdTimeMs).not.toHaveBeenCalled();
+    expect(setThresholdTimeMs).toHaveBeenCalledWith(null);
   });
 
   it("stores a replacement value after the input is cleared", () => {
@@ -89,11 +89,11 @@ describe("CreateWaveVotingThresholdTime", () => {
       target: { value: "3" },
     });
 
-    expect(setThresholdTimeMs).toHaveBeenCalledTimes(1);
-    expect(setThresholdTimeMs).toHaveBeenCalledWith(180_000);
+    expect(setThresholdTimeMs).toHaveBeenNthCalledWith(1, null);
+    expect(setThresholdTimeMs).toHaveBeenLastCalledWith(180_000);
   });
 
-  it("does not change the stored duration for invalid input", () => {
+  it("stores an invalid draft value for invalid input", () => {
     const setThresholdTimeMs = jest.fn();
 
     render(
@@ -111,7 +111,7 @@ describe("CreateWaveVotingThresholdTime", () => {
     expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
       "1.5"
     );
-    expect(setThresholdTimeMs).not.toHaveBeenCalled();
+    expect(setThresholdTimeMs).toHaveBeenCalledWith(0);
   });
 
   it("shows the provided error message", () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
@@ -124,6 +125,8 @@ export default function CreateWaveVoting({
     [ApiWaveType.Rank]: "How Drops are Voted",
     [ApiWaveType.Approve]: "How Drops are Voted",
   };
+  const [approvalTimingModeOverride, setApprovalTimingModeOverride] =
+    useState<CreateWaveApprovalTimingMode | null>(null);
 
   if (selectedType === null) {
     return null;
@@ -145,10 +148,12 @@ export default function CreateWaveVoting({
     ? APPROVAL_TIMING_CONFLICT_ERROR
     : undefined;
   const showVotingSettings = waveType !== ApiWaveType.Chat;
-  const approvalTimingMode = getCreateWaveApprovalTimingMode({
+  const inferredApprovalTimingMode = getCreateWaveApprovalTimingMode({
     thresholdTimeMs: approvalThresholdTimeMs,
     timeWeighted,
   });
+  const approvalTimingMode =
+    approvalTimingModeOverride ?? inferredApprovalTimingMode;
   const timeWeightedConfig =
     approvalTimingMode === CreateWaveApprovalTimingMode.TIME_WEIGHTED
       ? { ...timeWeighted, enabled: true }
@@ -156,6 +161,8 @@ export default function CreateWaveVoting({
   const onApprovalTimingModeChange = (
     mode: CreateWaveApprovalTimingMode
   ): void => {
+    setApprovalTimingModeOverride(mode);
+
     switch (mode) {
       case CreateWaveApprovalTimingMode.IMMEDIATE:
         setApprovalThresholdTimeMs(null);
@@ -176,6 +183,10 @@ export default function CreateWaveVoting({
         onTimeWeightedChange({ ...timeWeighted, enabled: true });
         break;
     }
+  };
+  const onApprovalThresholdTimeChange = (value: number | null): void => {
+    setApprovalTimingModeOverride(CreateWaveApprovalTimingMode.THRESHOLD_TIME);
+    setApprovalThresholdTimeMs(value);
   };
 
   return (
@@ -263,7 +274,7 @@ export default function CreateWaveVoting({
               <CreateWaveVotingThresholdTime
                 thresholdTimeMs={approvalThresholdTimeMs}
                 errorMessage={approvalThresholdTimeErrorMessage}
-                setThresholdTimeMs={setApprovalThresholdTimeMs}
+                setThresholdTimeMs={onApprovalThresholdTimeChange}
               />
             </div>
           )}

@@ -67,6 +67,9 @@ export default function CreateWaveVotingThresholdTime({
     })
   );
   const previousThresholdTimeMsRef = useRef(thresholdTimeMs);
+  const pendingThresholdTimeMsRef = useRef<number | null | undefined>(
+    undefined
+  );
   const hasError = errorMessage !== undefined;
   const hasThresholdTime = inputValue !== "";
   const inputId = "approval-threshold-time";
@@ -79,29 +82,42 @@ export default function CreateWaveVotingThresholdTime({
     }
 
     previousThresholdTimeMsRef.current = thresholdTimeMs;
+
+    if (pendingThresholdTimeMsRef.current === thresholdTimeMs) {
+      pendingThresholdTimeMsRef.current = undefined;
+      return;
+    }
+
+    pendingThresholdTimeMsRef.current = undefined;
     setInputValue(getDisplayValue({ thresholdTimeMs, unit }));
   }, [thresholdTimeMs, unit]);
 
+  const updateThresholdTimeMs = (value: string, nextUnit: ThresholdTimeUnit) => {
+    const parsedValue = parsePositiveWholeNumberInput(value);
+    const nextThresholdTimeMs =
+      value.trim() === ""
+        ? null
+        : parsedValue !== null
+          ? parsedValue * getUnitMs(nextUnit)
+          : 0;
+
+    pendingThresholdTimeMsRef.current =
+      nextThresholdTimeMs === thresholdTimeMs ? undefined : nextThresholdTimeMs;
+    setThresholdTimeMs(nextThresholdTimeMs);
+  };
+
   const onThresholdTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
     const nextValue = e.target.value;
-    const parsedValue = parsePositiveWholeNumberInput(nextValue);
 
     setInputValue(nextValue);
-
-    if (parsedValue !== null) {
-      setThresholdTimeMs(parsedValue * getUnitMs(unit));
-    }
+    updateThresholdTimeMs(nextValue, unit);
   };
 
   const onUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const nextUnit = e.target.value as ThresholdTimeUnit;
-    const parsedValue = parsePositiveWholeNumberInput(inputValue);
 
     setUnit(nextUnit);
-
-    if (parsedValue !== null) {
-      setThresholdTimeMs(parsedValue * getUnitMs(nextUnit));
-    }
+    updateThresholdTimeMs(inputValue, nextUnit);
   };
 
   return (

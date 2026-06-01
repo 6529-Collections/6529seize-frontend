@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveVoting from "@/components/waves/create-wave/voting/CreateWaveVoting";
@@ -303,6 +304,23 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByTestId("time-weighted")).toBeNull();
   });
 
+  it("renders approve threshold time when the stored duration is invalid", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={0}
+      />
+    );
+
+    expect(
+      screen.getByRole("radio", { name: /^Minimum time/ })
+    ).toBeChecked();
+    expect(
+      screen.getByLabelText("Minimum time above threshold")
+    ).toBeInTheDocument();
+  });
+
   it("renders approve time weighted settings without the extra toggle", () => {
     render(
       <CreateWaveVoting
@@ -490,6 +508,52 @@ describe("CreateWaveVoting", () => {
     });
 
     expect(setApprovalThresholdTimeMs).toHaveBeenLastCalledWith(7_200_000);
+  });
+
+  it("keeps minimum timing visible after clearing or entering an invalid duration", () => {
+    const thresholdTimeChanges = jest.fn();
+
+    function StatefulVoting() {
+      const [approvalThresholdTimeMs, setApprovalThresholdTimeMs] =
+        useState<number | null>(120_000);
+      const [timeWeighted, setTimeWeighted] = useState(baseProps.timeWeighted);
+
+      return (
+        <CreateWaveVoting
+          {...baseProps}
+          waveType={ApiWaveType.Approve}
+          approvalThresholdTimeMs={approvalThresholdTimeMs}
+          setApprovalThresholdTimeMs={(value) => {
+            thresholdTimeChanges(value);
+            setApprovalThresholdTimeMs(value);
+          }}
+          timeWeighted={timeWeighted}
+          onTimeWeightedChange={setTimeWeighted}
+        />
+      );
+    }
+
+    render(<StatefulVoting />);
+
+    fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
+      target: { value: "" },
+    });
+
+    expect(thresholdTimeChanges).toHaveBeenLastCalledWith(null);
+    expect(screen.getByRole("radio", { name: /^Minimum time/ })).toBeChecked();
+    expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
+      ""
+    );
+
+    fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
+      target: { value: "1.5" },
+    });
+
+    expect(thresholdTimeChanges).toHaveBeenLastCalledWith(0);
+    expect(screen.getByRole("radio", { name: /^Minimum time/ })).toBeChecked();
+    expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
+      "1.5"
+    );
   });
 
   it("shows approval threshold time errors near the field", () => {

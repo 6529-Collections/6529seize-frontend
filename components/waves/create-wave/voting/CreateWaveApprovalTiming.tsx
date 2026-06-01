@@ -39,11 +39,7 @@ export const getCreateWaveApprovalTimingMode = ({
     return CreateWaveApprovalTimingMode.TIME_WEIGHTED;
   }
 
-  if (
-    thresholdTimeMs !== null &&
-    Number.isFinite(thresholdTimeMs) &&
-    thresholdTimeMs > 0
-  ) {
+  if (thresholdTimeMs !== null && Number.isFinite(thresholdTimeMs)) {
     return CreateWaveApprovalTimingMode.THRESHOLD_TIME;
   }
 
