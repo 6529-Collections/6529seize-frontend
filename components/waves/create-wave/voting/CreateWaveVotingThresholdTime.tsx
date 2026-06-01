@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parsePositiveWholeNumberInput } from "../utils/positiveWholeNumberInput";
 import VotingSettingBox, {
   getVotingSettingInputClasses,
@@ -60,31 +60,64 @@ export default function CreateWaveVotingThresholdTime({
   const [unit, setUnit] = useState<ThresholdTimeUnit>(() =>
     getPreferredUnit(thresholdTimeMs)
   );
+  const [inputValue, setInputValue] = useState<string>(() =>
+    getDisplayValue({
+      thresholdTimeMs,
+      unit: getPreferredUnit(thresholdTimeMs),
+    })
+  );
+  const previousThresholdTimeMsRef = useRef(thresholdTimeMs);
+  const pendingThresholdTimeMsRef = useRef<number | null | undefined>(
+    undefined
+  );
   const hasError = errorMessage !== undefined;
-  const hasThresholdTime =
-    thresholdTimeMs !== null &&
-    Number.isFinite(thresholdTimeMs) &&
-    thresholdTimeMs > 0;
+  const hasThresholdTime = inputValue !== "";
   const inputId = "approval-threshold-time";
   const errorId = "approval-threshold-time-error";
   const helpId = "approval-threshold-time-help";
-  const value = getDisplayValue({ thresholdTimeMs, unit });
+
+  useEffect(() => {
+    if (previousThresholdTimeMsRef.current === thresholdTimeMs) {
+      return;
+    }
+
+    previousThresholdTimeMsRef.current = thresholdTimeMs;
+
+    if (pendingThresholdTimeMsRef.current === thresholdTimeMs) {
+      pendingThresholdTimeMsRef.current = undefined;
+      return;
+    }
+
+    pendingThresholdTimeMsRef.current = undefined;
+    setInputValue(getDisplayValue({ thresholdTimeMs, unit }));
+  }, [thresholdTimeMs, unit]);
+
+  const updateThresholdTimeMs = (value: string, nextUnit: ThresholdTimeUnit) => {
+    const parsedValue = parsePositiveWholeNumberInput(value);
+    const nextThresholdTimeMs =
+      value.trim() === ""
+        ? null
+        : parsedValue !== null
+          ? parsedValue * getUnitMs(nextUnit)
+          : 0;
+
+    pendingThresholdTimeMsRef.current =
+      nextThresholdTimeMs === thresholdTimeMs ? undefined : nextThresholdTimeMs;
+    setThresholdTimeMs(nextThresholdTimeMs);
+  };
 
   const onThresholdTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const parsedValue = parsePositiveWholeNumberInput(e.target.value);
-    setThresholdTimeMs(
-      parsedValue === null ? null : parsedValue * getUnitMs(unit)
-    );
+    const nextValue = e.target.value;
+
+    setInputValue(nextValue);
+    updateThresholdTimeMs(nextValue, unit);
   };
 
   const onUnitChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const nextUnit = e.target.value as ThresholdTimeUnit;
-    const parsedValue = parsePositiveWholeNumberInput(value);
 
     setUnit(nextUnit);
-    setThresholdTimeMs(
-      parsedValue === null ? null : parsedValue * getUnitMs(nextUnit)
-    );
+    updateThresholdTimeMs(inputValue, nextUnit);
   };
 
   return (
@@ -107,7 +140,7 @@ export default function CreateWaveVotingThresholdTime({
           type="text"
           inputMode="numeric"
           autoComplete="off"
-          value={value}
+          value={inputValue}
           onChange={onThresholdTimeChange}
           id={inputId}
           className={getVotingSettingInputClasses({

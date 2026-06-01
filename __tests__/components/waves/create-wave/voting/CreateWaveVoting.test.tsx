@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveVoting from "@/components/waves/create-wave/voting/CreateWaveVoting";
@@ -5,9 +6,13 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
-const mockTimeWeightedVoting = jest.fn((props: { errorMessage?: string }) => (
-  <div data-testid="time-weighted">{props.errorMessage}</div>
-));
+const mockTimeWeightedVoting = jest.fn(
+  (props: { errorMessage?: string; showToggle?: boolean }) => (
+    <div data-testid="time-weighted" data-show-toggle={props.showToggle}>
+      {props.errorMessage}
+    </div>
+  )
+);
 const mockNegativeVotingToggle = jest.fn(
   (props: {
     allowNegativeVotes: boolean;
@@ -72,7 +77,8 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/create-wave/voting/TimeWeightedVoting",
-  () => (props: { errorMessage?: string }) => mockTimeWeightedVoting(props)
+  () => (props: { errorMessage?: string; showToggle?: boolean }) =>
+    mockTimeWeightedVoting(props)
 );
 
 describe("CreateWaveVoting", () => {
@@ -232,20 +238,29 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByTestId("create-wave-voting-settings-grid")).toBeNull();
   });
 
-  it("renders approve voting settings in separate rows", () => {
+  it("renders approve voting settings with immediate timing by default", () => {
     render(<CreateWaveVoting {...baseProps} waveType={ApiWaveType.Approve} />);
     const settingsGrid = screen.getByTestId("create-wave-voting-settings-grid");
     const voteCapInput = screen.getByLabelText("Vote cap per identity");
     const thresholdInput = screen.getByLabelText("Approval threshold");
-    const thresholdTimeInput = screen.getByLabelText(
-      "Minimum time above threshold"
-    );
 
     expect(settingsGrid).toHaveClass("tw-grid-cols-1");
     expect(settingsGrid).not.toHaveClass("sm:tw-grid-cols-2");
     expect(settingsGrid).toContainElement(voteCapInput);
     expect(settingsGrid).toContainElement(thresholdInput);
-    expect(settingsGrid).toContainElement(thresholdTimeInput);
+    expect(screen.getByText("Approval timing")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Immediate/ })).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Minimum time/ })
+    ).not.toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Time-weighted/ })
+    ).not.toBeChecked();
+    expect(
+      screen.queryByLabelText("Minimum time above threshold")
+    ).toBeNull();
+    expect(screen.queryByTestId("time-weighted")).toBeNull();
+    expect(screen.queryByTestId("approval-timing-detail")).toBeNull();
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
     ).toHaveClass(
@@ -266,11 +281,153 @@ describe("CreateWaveVoting", () => {
       voteCapInput.compareDocumentPosition(thresholdInput) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+  });
+
+  it("renders approve threshold time when minimum timing is selected", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={60_000}
+      />
+    );
+
     expect(
-      thresholdInput.compareDocumentPosition(thresholdTimeInput) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
+      screen.getByRole("radio", { name: /^Minimum time/ })
+    ).toBeChecked();
+    expect(
+      screen.getByLabelText("Minimum time above threshold")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("approval-timing-detail")).toHaveClass(
+      "tw-mt-3"
+    );
+    expect(screen.queryByTestId("time-weighted")).toBeNull();
+  });
+
+  it("renders approve threshold time when the stored duration is invalid", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={0}
+      />
+    );
+
+    expect(
+      screen.getByRole("radio", { name: /^Minimum time/ })
+    ).toBeChecked();
+    expect(
+      screen.getByLabelText("Minimum time above threshold")
+    ).toBeInTheDocument();
+  });
+
+  it("renders approve time weighted settings without the extra toggle", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        timeWeighted={{
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        }}
+      />
+    );
+
+    expect(
+      screen.getByRole("radio", { name: /^Time-weighted/ })
+    ).toBeChecked();
+    expect(screen.getByTestId("time-weighted")).toHaveAttribute(
+      "data-show-toggle",
+      "false"
+    );
+    expect(screen.getByTestId("approval-timing-detail")).toHaveClass(
+      "tw-mt-3"
+    );
+    expect(
+      screen.queryByLabelText("Minimum time above threshold")
+    ).toBeNull();
+  });
+
+  it("selecting minimum timing disables approve time weighted voting", () => {
+    const setApprovalThresholdTimeMs = jest.fn();
+    const onTimeWeightedChange = jest.fn();
+
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        setApprovalThresholdTimeMs={setApprovalThresholdTimeMs}
+        onTimeWeightedChange={onTimeWeightedChange}
+        timeWeighted={{
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /^Minimum time/ }));
+
+    expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(60_000);
+    expect(onTimeWeightedChange).toHaveBeenCalledWith({
+      enabled: false,
+      averagingInterval: 1,
+      averagingIntervalUnit: "hours",
+    });
+  });
+
+  it("selecting time weighted timing clears approve threshold time", () => {
+    const setApprovalThresholdTimeMs = jest.fn();
+    const onTimeWeightedChange = jest.fn();
+
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={120_000}
+        setApprovalThresholdTimeMs={setApprovalThresholdTimeMs}
+        onTimeWeightedChange={onTimeWeightedChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /^Time-weighted/ }));
+
+    expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
+    expect(onTimeWeightedChange).toHaveBeenCalledWith({
+      enabled: true,
+      averagingInterval: 0,
+      averagingIntervalUnit: "minutes",
+    });
+  });
+
+  it("selecting immediate timing clears both approve timing options", () => {
+    const setApprovalThresholdTimeMs = jest.fn();
+    const onTimeWeightedChange = jest.fn();
+
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={120_000}
+        timeWeighted={{
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        }}
+        setApprovalThresholdTimeMs={setApprovalThresholdTimeMs}
+        onTimeWeightedChange={onTimeWeightedChange}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("radio", { name: /^Immediate/ }));
+
+    expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
+    expect(onTimeWeightedChange).toHaveBeenCalledWith({
+      enabled: false,
+      averagingInterval: 1,
+      averagingIntervalUnit: "hours",
+    });
   });
 
   it("passes approve time lock duration errors to time weighted voting", () => {
@@ -278,6 +435,11 @@ describe("CreateWaveVoting", () => {
       <CreateWaveVoting
         {...baseProps}
         waveType={ApiWaveType.Approve}
+        timeWeighted={{
+          enabled: true,
+          averagingInterval: 2,
+          averagingIntervalUnit: "hours",
+        }}
         errors={[
           CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_EXCEEDS_WAVE_DURATION,
         ]}
@@ -330,6 +492,7 @@ describe("CreateWaveVoting", () => {
       <CreateWaveVoting
         {...baseProps}
         waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={60_000}
         setApprovalThresholdTimeMs={setApprovalThresholdTimeMs}
       />
     );
@@ -347,11 +510,58 @@ describe("CreateWaveVoting", () => {
     expect(setApprovalThresholdTimeMs).toHaveBeenLastCalledWith(7_200_000);
   });
 
+  it("keeps minimum timing visible after clearing or entering an invalid duration", () => {
+    const thresholdTimeChanges = jest.fn();
+
+    function StatefulVoting() {
+      const [approvalThresholdTimeMs, setApprovalThresholdTimeMs] =
+        useState<number | null>(120_000);
+      const [timeWeighted, setTimeWeighted] = useState(baseProps.timeWeighted);
+
+      return (
+        <CreateWaveVoting
+          {...baseProps}
+          waveType={ApiWaveType.Approve}
+          approvalThresholdTimeMs={approvalThresholdTimeMs}
+          setApprovalThresholdTimeMs={(value) => {
+            thresholdTimeChanges(value);
+            setApprovalThresholdTimeMs(value);
+          }}
+          timeWeighted={timeWeighted}
+          onTimeWeightedChange={setTimeWeighted}
+        />
+      );
+    }
+
+    render(<StatefulVoting />);
+
+    fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
+      target: { value: "" },
+    });
+
+    expect(thresholdTimeChanges).toHaveBeenLastCalledWith(null);
+    expect(screen.getByRole("radio", { name: /^Minimum time/ })).toBeChecked();
+    expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
+      ""
+    );
+
+    fireEvent.change(screen.getByLabelText("Minimum time above threshold"), {
+      target: { value: "1.5" },
+    });
+
+    expect(thresholdTimeChanges).toHaveBeenLastCalledWith(0);
+    expect(screen.getByRole("radio", { name: /^Minimum time/ })).toBeChecked();
+    expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
+      "1.5"
+    );
+  });
+
   it("shows approval threshold time errors near the field", () => {
     render(
       <CreateWaveVoting
         {...baseProps}
         waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={60_000}
         errors={[
           CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_INVALID,
         ]}
@@ -366,5 +576,29 @@ describe("CreateWaveVoting", () => {
     expect(
       screen.getByLabelText("Minimum time above threshold")
     ).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("shows approve timing conflict errors near timing options", () => {
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        waveType={ApiWaveType.Approve}
+        approvalThresholdTimeMs={60_000}
+        timeWeighted={{
+          enabled: true,
+          averagingInterval: 1,
+          averagingIntervalUnit: "hours",
+        }}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE,
+        ]}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "Choose either minimum time above threshold or time-weighted voting."
+      )
+    ).toBeInTheDocument();
   });
 });
