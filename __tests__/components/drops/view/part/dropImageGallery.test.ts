@@ -126,6 +126,141 @@ describe("buildDropImageGalleryItems", () => {
     expect(items).toEqual([]);
   });
 
+  it("excludes image URLs from markdown reference definitions", () => {
+    const items = buildDropImageGalleryItems({
+      partContent: "[img]: https://cdn.example.com/hidden.jpg",
+      partMedias: [],
+    });
+
+    expect(items).toEqual([]);
+  });
+
+  it("uses reference image definitions at the rendered image use site", () => {
+    const imageSrc = "https://cdn.example.com/referenced.jpg";
+    const partContent = [
+      "prefix ![Referenced][img]",
+      "",
+      `[img]: ${imageSrc}`,
+    ].join("\n");
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        id: getDropImageGalleryItemId(
+          "body",
+          partContent.indexOf("![Referenced][img]"),
+          imageSrc
+        ),
+        src: imageSrc,
+        source: "body",
+      }),
+    ]);
+  });
+
+  it("uses unique body image ids for duplicate reference images", () => {
+    const imageSrc = "https://cdn.example.com/same-reference.jpg";
+    const partContent = [
+      "![first][img]",
+      "![second][img]",
+      "",
+      `[img]: ${imageSrc}`,
+    ].join("\n");
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      getDropImageGalleryItemId(
+        "body",
+        partContent.indexOf("![first][img]"),
+        imageSrc
+      ),
+      getDropImageGalleryItemId(
+        "body",
+        partContent.indexOf("![second][img]"),
+        imageSrc
+      ),
+    ]);
+  });
+
+  it("includes shortcut reference images", () => {
+    const imageSrc = "https://cdn.example.com/shortcut.jpg";
+    const partContent = ["![Shortcut]", "", `[Shortcut]: ${imageSrc}`].join(
+      "\n"
+    );
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      getDropImageGalleryItemId(
+        "body",
+        partContent.indexOf("![Shortcut]"),
+        imageSrc
+      ),
+    ]);
+  });
+
+  it("includes bare direct image reference links", () => {
+    const imageSrc = "https://cdn.example.com/reference-link.jpg";
+    const partContent = [`[${imageSrc}][img]`, "", `[img]: ${imageSrc}`].join(
+      "\n"
+    );
+    const items = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      getDropImageGalleryItemId("body", 0, imageSrc),
+    ]);
+  });
+
+  it("excludes named reference links to direct images", () => {
+    const imageSrc = "https://cdn.example.com/reference-link.jpg";
+    const items = buildDropImageGalleryItems({
+      partContent: ["[open image][img]", "", `[img]: ${imageSrc}`].join("\n"),
+      partMedias: [],
+    });
+
+    expect(items).toEqual([]);
+  });
+
+  it("prefixes body image ids when rendered markdown is split into blocks", () => {
+    const items = buildDropImageGalleryItems({
+      partContent: "![hidden](https://cdn.example.com/hidden.jpg)",
+      bodyMarkdowns: [
+        {
+          content: "![summary](https://cdn.example.com/summary.jpg)",
+          bodyGalleryKeyPrefix: "summary",
+        },
+        {
+          content: "![section](https://cdn.example.com/section.jpg)",
+          bodyGalleryKeyPrefix: "section:0",
+        },
+      ],
+      partMedias: [],
+    });
+
+    expect(items.map((item) => item.id)).toEqual([
+      getDropImageGalleryItemId(
+        "body",
+        "summary:0",
+        "https://cdn.example.com/summary.jpg"
+      ),
+      getDropImageGalleryItemId(
+        "body",
+        "section:0:0",
+        "https://cdn.example.com/section.jpg"
+      ),
+    ]);
+  });
+
   it("includes uploaded images", () => {
     const items = buildDropImageGalleryItems({
       partContent: null,

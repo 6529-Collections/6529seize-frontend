@@ -612,6 +612,47 @@ describe("DropPartMarkdown", () => {
     );
   });
 
+  it("opens reference-style markdown images from the full body gallery", () => {
+    const referenceSrc = "https://cdn.example.com/reference.jpg";
+    const markdownSrc = "https://cdn.example.com/second.jpg";
+    const partContent = [
+      `![reference][img]`,
+      `![second](${markdownSrc})`,
+      "",
+      `[img]: ${referenceSrc}`,
+    ].join("\n");
+    const galleryItems = buildDropImageGalleryItems({
+      partContent,
+      partMedias: [],
+    });
+
+    render(
+      <DropImageGalleryProvider items={galleryItems}>
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={partContent}
+          onQuoteClick={jest.fn()}
+        />
+      </DropImageGalleryProvider>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: `Open image ${referenceSrc}`,
+      })
+    );
+
+    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+      "src",
+      referenceSrc
+    );
+    expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
+      "1 / 2"
+    );
+  });
+
   it("keeps named image URL markdown links as links", () => {
     render(
       <DropPartMarkdown
