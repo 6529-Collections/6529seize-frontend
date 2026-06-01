@@ -161,7 +161,7 @@ const classifyDrop = (inputDrop: PreviewDrop): PreviewItem | null => {
   if (primaryMedia !== null) {
     return {
       kind: "media",
-      key: `${drop.id}-${primaryMedia.url}`,
+      key: `${drop.id}-${primaryMedia.sourceUrl}`,
       media: primaryMedia,
       mediaCount: media.length,
       showLinkHint: hasMeaningfulText && getLinkHintUrl(urls, rawText) !== null,
