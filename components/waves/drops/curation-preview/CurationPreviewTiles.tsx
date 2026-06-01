@@ -9,33 +9,48 @@ const PreviewMediaTile: React.FC<{
   readonly item: Extract<PreviewItem, { readonly kind: "media" }>;
 }> = ({ item }) => {
   const hasText = item.text !== null;
-  const mediaUrl = getPreviewImageUrl(item.media.url);
+  const imageUrl =
+    item.media.imageUrl === null
+      ? null
+      : getPreviewImageUrl(item.media.imageUrl);
+  const isVideo = item.media.kind === "video";
 
   return (
     <div
       className="tw-[contain:content] tw-[content-visibility:auto] tw-group tw-mb-2 tw-inline-block tw-w-full tw-break-inside-avoid tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-[#1A1A20] tw-align-top tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-[#202028]"
-      aria-label={item.text ?? "Curated media"}
+      aria-label={item.text ?? (isVideo ? "Curated video" : "Curated media")}
     >
       <div
         className="tw-relative tw-w-full tw-bg-[#101014]"
         style={{ aspectRatio: getMediaAspectRatio(item.media, hasText) }}
       >
-        <FallbackImage
-          primarySrc={getScaledImageUri(mediaUrl, ImageScale.W_200_H_200)}
-          fallbackSrc={mediaUrl}
-          alt=""
-          fill
-          sizes="156px"
-          loading="lazy"
-          decoding="async"
-          className="tw-object-cover"
-        />
+        {imageUrl === null ? (
+          <div
+            className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-[#101014]"
+            aria-hidden="true"
+          >
+            <span className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-bg-white/10 tw-text-white/70 tw-ring-1 tw-ring-white/15">
+              <PlayIcon className="tw-ml-0.5 tw-h-5 tw-w-5" />
+            </span>
+          </div>
+        ) : (
+          <FallbackImage
+            primarySrc={getScaledImageUri(imageUrl, ImageScale.W_200_H_200)}
+            fallbackSrc={imageUrl}
+            alt=""
+            fill
+            sizes="156px"
+            loading="lazy"
+            decoding="async"
+            className="tw-object-cover"
+          />
+        )}
         {item.mediaCount > 1 && (
           <span className="tw-absolute tw-bottom-1.5 tw-left-1.5 tw-rounded tw-bg-black/55 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-bold tw-leading-none tw-text-white/90">
             +{item.mediaCount - 1}
           </span>
         )}
-        {item.media.isVideo && (
+        {isVideo && imageUrl !== null && (
           <PlayIcon
             className="tw-absolute tw-bottom-1.5 tw-right-1.5 tw-h-4 tw-w-4 tw-text-white/60"
             aria-hidden="true"
