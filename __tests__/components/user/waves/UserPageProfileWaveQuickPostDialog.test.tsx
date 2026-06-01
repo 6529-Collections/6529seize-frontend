@@ -106,6 +106,7 @@ describe("UserPageProfileWaveQuickPostDialog", () => {
       },
     });
     expect(waveDropCreateProps.forceStandardDropComposer).toBe(true);
+    expect(waveDropCreateProps.fixedDropMode).toBe("CHAT");
     expect(waveDropCreateProps.identityPickerPlacement).toBe("inline");
     expect(invalidateDrops).toHaveBeenCalledTimes(1);
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({

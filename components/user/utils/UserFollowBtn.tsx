@@ -17,6 +17,7 @@ import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdent
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
@@ -29,12 +30,12 @@ export enum UserFollowBtnSize {
 export const FOLLOW_BTN_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
   [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-3 tw-py-2 tw-text-xs",
   [UserFollowBtnSize.MEDIUM]:
-    "tw-gap-x-2 tw-px-3 md:tw-px-3.5 tw-py-2 md:tw-py-2.5 tw-text-sm",
+    "tw-gap-x-1 tw-px-3 md:tw-px-3.5 tw-py-2 md:tw-py-2.5 tw-text-sm",
 };
 
 export const FOLLOW_BTN_SVG_CLASSES: Record<UserFollowBtnSize, string> = {
-  [UserFollowBtnSize.SMALL]: "tw-h-3 tw-w-3 md:tw-h-4 md:tw-w-4",
-  [UserFollowBtnSize.MEDIUM]: "tw-h-4 tw-w-4 md:tw-h-5 md:tw-w-5",
+  [UserFollowBtnSize.SMALL]: "tw-h-3 tw-w-3 md:tw-h-4 md:tw-w-4 -tw-ml-1",
+  [UserFollowBtnSize.MEDIUM]: "tw-h-4 tw-w-4 md:tw-h-5 md:tw-w-5 -tw-ml-1",
 };
 
 export const FOLLOW_BTN_LOADER_SIZES: Record<
@@ -43,6 +44,16 @@ export const FOLLOW_BTN_LOADER_SIZES: Record<
 > = {
   [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
   [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
+};
+
+const DIRECT_MESSAGE_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
+  [UserFollowBtnSize.SMALL]: "tw-size-8",
+  [UserFollowBtnSize.MEDIUM]: "tw-size-9 md:tw-size-10",
+};
+
+const DIRECT_MESSAGE_ICON_CLASSES: Record<UserFollowBtnSize, string> = {
+  [UserFollowBtnSize.SMALL]: "tw-size-3",
+  [UserFollowBtnSize.MEDIUM]: "tw-size-3.5 md:tw-size-4",
 };
 
 export default function UserFollowBtn({
@@ -185,6 +196,8 @@ export default function UserFollowBtn({
       "tw-bg-iron-800 tw-text-iron-300 tw-ring-iron-800 hover:tw-bg-iron-700 hover:tw-ring-iron-700";
   }
 
+  const directMessageTooltipId = `dm-${handle}`;
+
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
       {onDirectMessage && (
@@ -194,26 +207,28 @@ export default function UserFollowBtn({
             disabled={isDirectMessagePending}
             type="button"
             aria-label="Send direct message"
-            className="tw-flex tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-3 tw-py-3 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-700 disabled:tw-cursor-default disabled:tw-opacity-70"
-            data-tooltip-id={`dm-${handle}`}
+            className={`${DIRECT_MESSAGE_BUTTON_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-700 enabled:hover:tw-ring-iron-600 disabled:tw-cursor-default disabled:tw-opacity-70`}
+            data-tooltip-id={directMessageTooltipId}
           >
             {isDirectMessagePending ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />
             ) : (
-              <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4" />
+              <FontAwesomeIcon
+                icon={faPaperPlane}
+                className={DIRECT_MESSAGE_ICON_CLASSES[size]}
+              />
             )}
           </button>
           <Tooltip
-            id={`dm-${handle}`}
-            place="left"
+            id={directMessageTooltipId}
+            place="top"
+            offset={8}
             delayShow={250}
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
+            opacity={1}
+            positionStrategy="fixed"
+            style={TOOLTIP_STYLES}
           >
-            Direct Message
+            <span className="tw-text-xs">Direct Message</span>
           </Tooltip>
         </>
       )}
@@ -260,7 +275,7 @@ export default function UserFollowBtn({
             />
           </svg>
         )}
-        <span>{label}</span>
+        <span className="tw-font-semibold">{label}</span>
       </button>
     </div>
   );

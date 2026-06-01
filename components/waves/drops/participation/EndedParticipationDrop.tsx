@@ -222,9 +222,7 @@ export default function EndedParticipationDrop({
         location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
       } tw-w-full`}
     >
-      <div
-        className={`tw-group tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
-      >
+      <div className="tw-group tw-relative tw-w-full">
         {!isMobile && showInteractions && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
@@ -235,107 +233,115 @@ export default function EndedParticipationDrop({
         )}
 
         <div
-          className={`tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
-            inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
-          }`}
+          className={`tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 tw-ease-linear ${dropBackgroundClass}`}
         >
-          {inlineAuthorOnDesktop
-            ? showIdentity && (
-                <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
-                  <WaveDropAuthorPfp drop={drop} />
-                  <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
-                </div>
-              )
-            : showIdentity && <WaveDropAuthorPfp drop={drop} />}
-
-          <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
-            {showIdentity && !inlineAuthorOnDesktop && identityHeader}
-            {identityMode === "default" &&
-              showWaveInfo &&
-              (() => {
-                const waveMeta = (
-                  drop.wave as unknown as {
-                    chat?:
-                      | {
-                          scope?:
-                            | {
-                                group?:
-                                  | { is_direct_message?: boolean | undefined }
-                                  | undefined;
-                              }
-                            | undefined;
-                        }
-                      | undefined;
-                  }
-                ).chat;
-                const isDirectMessage =
-                  waveMeta?.scope?.group?.is_direct_message ?? false;
-                const waveHref = getWaveRoute({
-                  waveId: drop.wave.id,
-                  isDirectMessage,
-                  isApp: false,
-                });
-                return (
-                  <Link
-                    href={waveHref}
-                    onClick={(e) => handleNavigation(e, waveHref)}
-                    className="tw-leading-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
-                  >
-                    {drop.wave.name}
-                  </Link>
-                );
-              })()}
-
-            {content}
-          </div>
-        </div>
-
-        {identityProfile && (
-          <div className={shouldOffsetRows ? "tw-ml-[3.25rem]" : ""}>
-            <ParticipationIdentityProfileCard
-              profile={identityProfile}
-              contextId={drop.id}
-              variant="chat"
-              showIdentityHeader={!isSelfNominee}
-            />
-          </div>
-        )}
-
-        {visibleMetadata.length > 0 && (
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <WaveDropMetadata metadata={visibleMetadata} />
-          </div>
-        )}
-        {showInteractions && (
-          <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <DropCurationButton
-              dropId={drop.id}
-              waveId={drop.wave.id}
-              isCuratable={drop.context_profile_context?.curatable ?? false}
-              isCurated={drop.context_profile_context?.curated ?? false}
-            />
-            <WaveDropReactions drop={drop} />
-          </div>
-        )}
-        {hasDropFooter(footer) && (
           <div
-            className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+            className={`tw-flex tw-w-full tw-border-0 tw-bg-transparent tw-text-left ${
+              inlineAuthorOnDesktop ? "tw-flex-col tw-gap-y-2" : "tw-gap-x-3"
+            }`}
           >
-            {footer}
-          </div>
-        )}
+            {inlineAuthorOnDesktop
+              ? showIdentity && (
+                  <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
+                    <WaveDropAuthorPfp drop={drop} />
+                    <div className="tw-min-w-0 tw-flex-1">
+                      {identityHeader}
+                    </div>
+                  </div>
+                )
+              : showIdentity && <WaveDropAuthorPfp drop={drop} />}
 
-        {showInteractions && (
-          <WaveDropMobileMenu
-            drop={drop}
-            isOpen={isSlideUp}
-            longPressTriggered={longPressTriggered}
-            showReplyAndQuote={showReplyAndQuote}
-            setOpen={setIsSlideUp}
-            onReply={handleOnReply}
-            onAddReaction={handleOnAddReaction}
-          />
-        )}
+            <div className="tw-flex tw-w-full tw-flex-col tw-gap-y-2">
+              {showIdentity && !inlineAuthorOnDesktop && identityHeader}
+              {identityMode === "default" &&
+                showWaveInfo &&
+                (() => {
+                  const waveMeta = (
+                    drop.wave as unknown as {
+                      chat?:
+                        | {
+                            scope?:
+                              | {
+                                  group?:
+                                    | {
+                                        is_direct_message?: boolean | undefined;
+                                      }
+                                    | undefined;
+                                }
+                              | undefined;
+                          }
+                        | undefined;
+                    }
+                  ).chat;
+                  const isDirectMessage =
+                    waveMeta?.scope?.group?.is_direct_message ?? false;
+                  const waveHref = getWaveRoute({
+                    waveId: drop.wave.id,
+                    isDirectMessage,
+                    isApp: false,
+                  });
+                  return (
+                    <Link
+                      href={waveHref}
+                      onClick={(e) => handleNavigation(e, waveHref)}
+                      className="tw-leading-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-300"
+                    >
+                      {drop.wave.name}
+                    </Link>
+                  );
+                })()}
+
+              {content}
+            </div>
+          </div>
+
+          {identityProfile && (
+            <div className={shouldOffsetRows ? "tw-ml-[3.25rem]" : ""}>
+              <ParticipationIdentityProfileCard
+                profile={identityProfile}
+                contextId={drop.id}
+                variant="chat"
+                showIdentityHeader={!isSelfNominee}
+              />
+            </div>
+          )}
+
+          {visibleMetadata.length > 0 && (
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              <WaveDropMetadata metadata={visibleMetadata} />
+            </div>
+          )}
+          {showInteractions && (
+            <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+              <DropCurationButton
+                dropId={drop.id}
+                waveId={drop.wave.id}
+                isCuratable={drop.context_profile_context?.curatable ?? false}
+                isCurated={drop.context_profile_context?.curated ?? false}
+              />
+              <WaveDropReactions drop={drop} />
+            </div>
+          )}
+          {hasDropFooter(footer) && (
+            <div
+              className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-pb-1 tw-pt-2`}
+            >
+              {footer}
+            </div>
+          )}
+
+          {showInteractions && (
+            <WaveDropMobileMenu
+              drop={drop}
+              isOpen={isSlideUp}
+              longPressTriggered={longPressTriggered}
+              showReplyAndQuote={showReplyAndQuote}
+              setOpen={setIsSlideUp}
+              onReply={handleOnReply}
+              onAddReaction={handleOnAddReaction}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

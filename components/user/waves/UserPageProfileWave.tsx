@@ -232,6 +232,15 @@ const shouldRenderMobileCurationPicker = ({
   readonly isDesktopChangeWaveMenu: boolean;
 }): boolean => canSwitchOfficialCuration && !isDesktopChangeWaveMenu;
 
+const getProfileCurationAddPostHandler = ({
+  profileCuration,
+  onAddPost,
+}: {
+  readonly profileCuration: ApiWaveCuration | null;
+  readonly onAddPost: () => void;
+}): (() => void) | undefined =>
+  profileCuration === null ? undefined : onAddPost;
+
 export default function UserPageProfileWave({
   profile: initialProfile,
 }: {
@@ -322,6 +331,11 @@ export default function UserPageProfileWave({
   const showMobileCurationPicker = shouldRenderMobileCurationPicker({
     canSwitchOfficialCuration,
     isDesktopChangeWaveMenu,
+  });
+  const openQuickPost = () => setIsQuickPostOpen(true);
+  const addPostHandler = getProfileCurationAddPostHandler({
+    profileCuration,
+    onAddPost: openQuickPost,
   });
 
   useClickAway(changeWaveDropdownRef, () => {
@@ -509,6 +523,7 @@ export default function UserPageProfileWave({
           isChangingCuration={submittingCurationId !== null}
           showChangeCuration={canSwitchOfficialCuration}
           onOpenWave={openWave}
+          onAddPost={addPostHandler}
           onOpenChangeWave={() => {
             setIsChangeCurationOpen(false);
             setIsChangeWaveOpen((open) => !open);
@@ -575,7 +590,6 @@ export default function UserPageProfileWave({
         <UserPageProfileWaveContent
           canManageOwnOfficialWave={canManageOwnOfficialWave}
           containerWidth={containerWidth}
-          onAddPost={() => setIsQuickPostOpen(true)}
           onCreateCuration={() => setIsCreateCurationOpen(true)}
           profileIdentity={profileIdentityForMasonry}
           areCurationsError={areCurationsError}
