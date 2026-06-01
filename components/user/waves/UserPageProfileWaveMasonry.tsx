@@ -287,7 +287,7 @@ function UserPageProfileWaveMasonryCard({
     <article className={CURATION_CARD_CLASS_NAME}>
       {removeButton}
 
-      <div className="tw-overflow-hidden tw-rounded-xl tw-bg-black/70 tw-ring-1 tw-ring-inset tw-ring-white/10">
+      <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
         {layout.shouldUseInlineMinimalLayout ? (
           <div className="tw-flex tw-items-start tw-gap-x-3 tw-px-4 tw-pb-4 tw-pt-4">
             <WaveDropAuthorPfp drop={drop} />

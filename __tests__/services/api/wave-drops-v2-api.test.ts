@@ -10,6 +10,7 @@ import {
   fetchDropRepliesV2,
   fetchDropsV2ByIds,
   fetchDropV2ById,
+  fetchGlobalBoostedDropsV2,
   fetchWaveDropsFeedV2,
   mapLeaderboardDropV2,
 } from "@/services/api/wave-drops-v2-api";
@@ -464,6 +465,48 @@ describe("fetchBoostedDropsV2", () => {
     expectNoListEnrichmentCalls();
     expect(result[0]?.metadata).toEqual(priorityMetadata);
     expect(result[0]?.top_raters).toEqual([]);
+  });
+});
+
+describe("fetchGlobalBoostedDropsV2", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("fetches global boosted drops through v2 with the minimum boosts filter", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [createEnrichableDrop({ wave })],
+      count: 1,
+      page: 1,
+      next: false,
+    });
+
+    const result = await fetchGlobalBoostedDropsV2({
+      limit: 50,
+      countOnlyBoostsAfter: 123,
+      minBoosts: 3,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(commonApiFetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "v2/boosted-drops",
+        params: expect.objectContaining({
+          sort: "boosts",
+          sort_direction: "DESC",
+          page_size: "50",
+          count_only_boosts_after: "123",
+          min_boosts: "3",
+        }),
+      })
+    );
+    expectNoListEnrichmentCalls();
+    expect(result[0]?.wave).toEqual(
+      expect.objectContaining({
+        id: "wave-1",
+        name: "Wave 1",
+      })
+    );
   });
 });
 
