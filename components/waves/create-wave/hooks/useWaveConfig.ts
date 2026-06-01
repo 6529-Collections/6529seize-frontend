@@ -305,6 +305,13 @@ export function useWaveConfig() {
   ) => {
     setConfig((prev) => ({
       ...prev,
+      approval:
+        prev.overview.type === ApiWaveType.Approve && timeWeighted.enabled
+          ? {
+              ...prev.approval,
+              thresholdTimeMs: null,
+            }
+          : prev.approval,
       voting: {
         ...prev.voting,
         timeWeighted,
@@ -396,6 +403,16 @@ export function useWaveConfig() {
   const onThresholdTimeChange = (thresholdTimeMs: number | null) => {
     setConfig((prev) => ({
       ...prev,
+      voting: {
+        ...prev.voting,
+        timeWeighted:
+          prev.overview.type === ApiWaveType.Approve && thresholdTimeMs !== null
+            ? {
+                ...prev.voting.timeWeighted,
+                enabled: false,
+              }
+            : prev.voting.timeWeighted,
+      },
       approval: {
         ...prev.approval,
         thresholdTimeMs,

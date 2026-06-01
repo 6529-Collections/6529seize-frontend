@@ -1,7 +1,6 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
@@ -151,9 +150,6 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
       setToast({
         message: "Vote updated",
         type: "success",
-      });
-      void queryClient.invalidateQueries({
-        queryKey: [QueryKey.DROPS_LEADERBOARD],
       });
       invalidateWaveApprovalStatusQueries(queryClient, drop.wave.id);
     },

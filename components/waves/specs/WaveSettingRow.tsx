@@ -244,28 +244,35 @@ export default function WaveSettingRow({
   const editorSurface = isEditorOpen
     ? createPortal(selectedEditorSurface, globalThis.document.body)
     : null;
+  const rowGridClasses = canEdit
+    ? "tw-grid-cols-[minmax(6.5rem,0.85fr)_minmax(0,1fr)_1.5rem]"
+    : "tw-grid-cols-[minmax(6.5rem,0.85fr)_minmax(0,1fr)]";
 
   return (
-    <div className="tw-group tw-flex tw-min-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
-      <span className="tw-font-medium tw-text-iron-400">{label}</span>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <span className="tw-font-medium tw-text-iron-200">{valueLabel}</span>
-        {canEdit && (
-          <button
-            ref={editButtonRef}
-            type="button"
-            aria-label={editLabel}
-            aria-controls={editorId}
-            aria-expanded={isEditorOpen}
-            aria-haspopup="dialog"
-            title={editLabel}
-            onClick={toggleEditor}
-            className="tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
-          >
-            <PencilIcon size={PencilIconSize.SMALL} />
-          </button>
-        )}
-      </div>
+    <div
+      className={`tw-group tw-grid tw-min-h-6 tw-w-full ${rowGridClasses} tw-items-start tw-gap-x-2 tw-gap-y-1 tw-text-sm`}
+    >
+      <span className="tw-min-w-0 tw-font-medium tw-leading-6 tw-text-iron-400">
+        {label}
+      </span>
+      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-6 tw-text-iron-200">
+        {valueLabel}
+      </span>
+      {canEdit && (
+        <button
+          ref={editButtonRef}
+          type="button"
+          aria-label={editLabel}
+          aria-controls={editorId}
+          aria-expanded={isEditorOpen}
+          aria-haspopup="dialog"
+          title={editLabel}
+          onClick={toggleEditor}
+          className="tw-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
+        >
+          <PencilIcon size={PencilIconSize.SMALL} />
+        </button>
+      )}
 
       {editorSurface}
     </div>

@@ -1,7 +1,11 @@
 "use client";
 
 import { FallbackImage } from "@/components/common/FallbackImage";
-import React, { useState } from "react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -40,6 +44,7 @@ export function ImageMediaModal({
   isDownloading,
   onFullscreen,
   fullscreenTargetAvailable = true,
+  gallery,
 }: {
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
@@ -50,10 +55,39 @@ export function ImageMediaModal({
   readonly isDownloading: boolean;
   readonly onFullscreen: () => void;
   readonly fullscreenTargetAvailable?: boolean | undefined;
+  readonly gallery?:
+    | {
+        readonly canGoNext: boolean;
+        readonly canGoPrevious: boolean;
+        readonly currentIndex: number;
+        readonly onNext: () => void;
+        readonly onPrevious: () => void;
+        readonly total: number;
+      }
+    | undefined;
 }) {
   const [isZoomed, setIsZoomed] = useState(false);
+  const showGalleryControls = Boolean(gallery && gallery.total > 1);
+
+  useEffect(() => {
+    setIsZoomed(false);
+  }, [src]);
+
+  const goToPrevious = useCallback(() => {
+    if (gallery?.canGoPrevious) {
+      gallery.onPrevious();
+    }
+  }, [gallery]);
+
+  const goToNext = useCallback(() => {
+    if (gallery?.canGoNext) {
+      gallery.onNext();
+    }
+  }, [gallery]);
 
   useKeyPressEvent("Escape", onClose);
+  useKeyPressEvent("ArrowLeft", goToPrevious);
+  useKeyPressEvent("ArrowRight", goToNext);
 
   const isPointInsideRenderedImage = (
     image: HTMLImageElement,
@@ -105,13 +139,7 @@ export function ImageMediaModal({
       return;
     }
 
-    if (
-      !isPointInsideRenderedImage(
-        image,
-        event.clientX,
-        event.clientY
-      )
-    ) {
+    if (!isPointInsideRenderedImage(image, event.clientX, event.clientY)) {
       onClose();
     }
   };
@@ -131,6 +159,7 @@ export function ImageMediaModal({
         className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
       />
       <TransformWrapper
+        key={src}
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
         smooth
@@ -174,6 +203,43 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
+      {showGalleryControls && gallery && (
+        <>
+          <button
+            type="button"
+            aria-label="Previous image"
+            title="Previous image"
+            disabled={!gallery.canGoPrevious}
+            onClick={(event) => {
+              event.stopPropagation();
+              goToPrevious();
+            }}
+            className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-40 sm:tw-left-4 sm:tw-size-12"
+          >
+            <ChevronLeftIcon className="tw-size-6" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next image"
+            title="Next image"
+            disabled={!gallery.canGoNext}
+            onClick={(event) => {
+              event.stopPropagation();
+              goToNext();
+            }}
+            className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-40 sm:tw-right-4 sm:tw-size-12"
+          >
+            <ChevronRightIcon className="tw-size-6" aria-hidden="true" />
+          </button>
+          <div
+            className="tw-fixed tw-left-1/2 tw-z-[1101] -tw-translate-x-1/2 tw-rounded-lg tw-bg-iron-900/95 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur"
+            data-testid="image-gallery-counter"
+            style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+          >
+            {gallery.currentIndex + 1} / {gallery.total}
+          </div>
+        </>
+      )}
       <ExpandedMediaToolbar
         onOpen={onOpen}
         openLabel={openLabel}

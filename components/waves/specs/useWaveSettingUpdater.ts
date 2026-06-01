@@ -12,6 +12,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useContext, useState } from "react";
 
 type WaveChatUpdate = ApiUpdateWaveRequest["chat"];
+type WaveConfigUpdate = ApiUpdateWaveRequest["wave"];
 
 export const useWaveSettingUpdater = (wave: ApiWave) => {
   const { connectedProfile, activeProfileProxy, requestAuth, setToast } =
@@ -21,7 +22,11 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
   const canEdit = canEditWave({ connectedProfile, activeProfileProxy, wave });
 
   const updateWave = useCallback(
-    async (body: ApiUpdateWaveRequest, closeEditor: () => void) => {
+    async (
+      body: ApiUpdateWaveRequest,
+      closeEditor: () => void,
+      onSuccess?: () => void
+    ) => {
       setMutating(true);
 
       try {
@@ -38,6 +43,7 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
           endpoint: `waves/${wave.id}`,
           body,
         });
+        onSuccess?.();
         onWaveCreated();
         closeEditor();
       } catch (error) {
@@ -73,10 +79,34 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
     [mutating, updateWave, wave]
   );
 
+  const saveWaveConfigUpdate = useCallback(
+    (
+      closeEditor: () => void,
+      getWaveConfigUpdate: (waveConfig: WaveConfigUpdate) => WaveConfigUpdate,
+      onSuccess?: () => void
+    ) => {
+      if (mutating) {
+        return;
+      }
+
+      const body = convertWaveToUpdateWave(wave);
+      void updateWave(
+        {
+          ...body,
+          wave: getWaveConfigUpdate(body.wave),
+        },
+        closeEditor,
+        onSuccess
+      );
+    },
+    [mutating, updateWave, wave]
+  );
+
   return {
     canEdit,
     mutating,
     saveChatUpdate,
+    saveWaveConfigUpdate,
     setToast,
   };
 };

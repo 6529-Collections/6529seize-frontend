@@ -17,6 +17,10 @@ import type { LinkPreviewInlineShowControl } from "@/components/waves/LinkPrevie
 import DropPartMarkdownImage, {
   type DropPartMarkdownImageLayout,
 } from "../DropPartMarkdownImage";
+import {
+  getDropImageGalleryBodyItemKey,
+  getDropImageGalleryItemId,
+} from "../dropImageGallery";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
 import type { LinkHandler } from "./linkTypes";
@@ -45,6 +49,7 @@ interface LinkRendererConfig {
   readonly maxEmbedDepth?: number | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly inlineShowControl?: LinkPreviewInlineShowControl | undefined;
+  readonly bodyGalleryKeyPrefix?: string | undefined;
 }
 
 interface LinkRenderer {
@@ -109,6 +114,40 @@ const getImageLayout = (
   return props.layout === "grouped" ? "grouped" : undefined;
 };
 
+const getMarkdownNodeStartOffset = (node: unknown): number | null => {
+  if (typeof node !== "object" || node === null || !("position" in node)) {
+    return null;
+  }
+
+  const position = (
+    node as {
+      readonly position?: {
+        readonly start?: { readonly offset?: unknown } | undefined;
+      };
+    }
+  ).position;
+  const offset = position?.start?.offset;
+
+  return typeof offset === "number" && offset >= 0 ? offset : null;
+};
+
+const getBodyGalleryItemId = (
+  src: string,
+  node: unknown,
+  bodyGalleryKeyPrefix?: string | undefined
+): string | undefined => {
+  const startOffset = getMarkdownNodeStartOffset(node);
+  if (startOffset === null) {
+    return undefined;
+  }
+
+  return getDropImageGalleryItemId(
+    "body",
+    getDropImageGalleryBodyItemKey(startOffset, bodyGalleryKeyPrefix),
+    src
+  );
+};
+
 export const createLinkRenderer = ({
   onQuoteClick,
   currentDropId,
@@ -121,6 +160,7 @@ export const createLinkRenderer = ({
   maxEmbedDepth = DEFAULT_MAX_EMBED_DEPTH,
   fullWidthLinkPreviews = false,
   inlineShowControl,
+  bodyGalleryKeyPrefix,
 }: LinkRendererConfig): LinkRenderer => {
   const seizeHandlers = createSeizeHandlers({
     onQuoteClick,
@@ -147,7 +187,17 @@ export const createLinkRenderer = ({
       return null;
     }
 
-    return <DropPartMarkdownImage src={src} layout={getImageLayout(props)} />;
+    return (
+      <DropPartMarkdownImage
+        src={src}
+        layout={getImageLayout(props)}
+        galleryItemId={getBodyGalleryItemId(
+          src,
+          props.node,
+          bodyGalleryKeyPrefix
+        )}
+      />
+    );
   };
 
   const renderAnchor: LinkRenderer["renderAnchor"] = (props) => {
@@ -172,6 +222,11 @@ export const createLinkRenderer = ({
         <DropPartMarkdownImage
           src={stableHref}
           layout={getImageLayout(props)}
+          galleryItemId={getBodyGalleryItemId(
+            stableHref,
+            props.node,
+            bodyGalleryKeyPrefix
+          )}
         />
       );
     }

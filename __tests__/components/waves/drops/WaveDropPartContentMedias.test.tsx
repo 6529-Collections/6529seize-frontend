@@ -11,14 +11,26 @@ jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => ({
     __esModule: true,
-    default: () => <div data-testid="drop-media" />,
+    default: (props: { readonly galleryItemId?: string | undefined }) => (
+      <div data-testid="drop-media" data-gallery-item-id={props.galleryItemId} />
+    ),
   })
 );
 
 jest.mock("@/components/waves/drops/WaveDropPartContentMediaImage", () => ({
   __esModule: true,
-  default: ({ src }: { readonly src: string }) => (
-    <div data-testid="wave-image-media" data-src={src} />
+  default: ({
+    galleryItemId,
+    src,
+  }: {
+    readonly galleryItemId?: string | undefined;
+    readonly src: string;
+  }) => (
+    <div
+      data-testid="wave-image-media"
+      data-src={src}
+      data-gallery-item-id={galleryItemId}
+    />
   ),
 }));
 
@@ -44,6 +56,10 @@ describe("WaveDropPartContentMedias", () => {
     );
 
     expect(screen.getByTestId("wave-image-media")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-image-media")).toHaveAttribute(
+      "data-gallery-item-id",
+      "drop-image-gallery:media:0:u1"
+    );
     expect(screen.getByTestId("drop-media")).toBeInTheDocument();
     expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
   });
@@ -70,6 +86,14 @@ describe("WaveDropPartContentMedias", () => {
       "sm:tw-grid-cols-[repeat(auto-fit,minmax(min(12rem,100%),16rem))]"
     );
     expect(screen.getAllByTestId("wave-image-media")).toHaveLength(2);
+    expect(
+      screen
+        .getAllByTestId("wave-image-media")
+        .map((image) => image.getAttribute("data-gallery-item-id"))
+    ).toEqual([
+      "drop-image-gallery:media:0:u1",
+      "drop-image-gallery:media:1:u2",
+    ]);
   });
 
   it("uses MediaDisplay when disabled", () => {
