@@ -9,6 +9,16 @@ const setHeaderRef = jest.fn();
 const usePathname = jest.fn();
 const getSearchParams = jest.fn();
 let mockDialogMountCount = 0;
+let mockLayoutSpaces = {
+  headerSpace: 0,
+  pinnedSpace: 0,
+  tabsSpace: 0,
+  spacerSpace: 0,
+  mobileTabsSpace: 0,
+  mobileNavSpace: 0,
+  contentSpace: 0,
+  measurementsComplete: false,
+};
 
 jest.mock("next/dynamic", () => () => {
   const MockDynamicComponent = () => <div data-testid="header" />;
@@ -47,7 +57,7 @@ jest.mock(
     }
 );
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
-  useLayout: () => ({ registerRef }),
+  useLayout: () => ({ registerRef, spaces: mockLayoutSpaces }),
 }));
 jest.mock("@/contexts/HeaderContext", () => ({
   useHeaderContext: () => ({ setHeaderRef }),
@@ -126,7 +136,8 @@ const AppLayout = require("@/components/layout/AppLayout").default;
 
 describe("AppLayout", () => {
   let store: any;
-  const loadingReserveProperty = "--stream-route-loading-bottom-reserve";
+  const bottomReserveProperty = "--stream-route-loading-bottom-reserve";
+  const headerReserveProperty = "--stream-route-loading-header-reserve";
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -136,6 +147,16 @@ describe("AppLayout", () => {
     usePathname.mockReturnValue("/");
     getSearchParams.mockReturnValue(new URLSearchParams());
     mockDialogMountCount = 0;
+    mockLayoutSpaces = {
+      headerSpace: 0,
+      pinnedSpace: 0,
+      tabsSpace: 0,
+      spacerSpace: 0,
+      mobileTabsSpace: 0,
+      mobileNavSpace: 0,
+      contentSpace: 0,
+      measurementsComplete: false,
+    };
   });
 
   const renderWithProvider = (children: React.ReactElement) => {
@@ -153,7 +174,7 @@ describe("AppLayout", () => {
     const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
     const appWrapper = container.firstElementChild as HTMLElement;
 
-    expect(appWrapper.style.getPropertyValue(loadingReserveProperty)).toBe(
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
       "85px"
     );
   });
@@ -165,8 +186,38 @@ describe("AppLayout", () => {
     const appWrapper = container.firstElementChild as HTMLElement;
 
     expect(screen.queryByTestId("bottom-nav")).not.toBeInTheDocument();
-    expect(appWrapper.style.getPropertyValue(loadingReserveProperty)).toBe(
+    expect(appWrapper.style.getPropertyValue(bottomReserveProperty)).toBe(
       "0px"
+    );
+  });
+
+  it("uses measured header space for stream loading reserve", () => {
+    mockLayoutSpaces = {
+      ...mockLayoutSpaces,
+      headerSpace: 72,
+      measurementsComplete: true,
+    };
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(headerReserveProperty)).toBe(
+      "72px"
+    );
+  });
+
+  it("uses header fallback reserve before layout measurement completes", () => {
+    mockLayoutSpaces = {
+      ...mockLayoutSpaces,
+      headerSpace: 72,
+      measurementsComplete: false,
+    };
+
+    const { container } = renderWithProvider(<AppLayout>child</AppLayout>);
+    const appWrapper = container.firstElementChild as HTMLElement;
+
+    expect(appWrapper.style.getPropertyValue(headerReserveProperty)).toBe(
+      "100px"
     );
   });
 

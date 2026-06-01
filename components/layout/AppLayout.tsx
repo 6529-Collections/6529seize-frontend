@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
-import { Suspense, useCallback, useRef } from "react";
+import { Suspense, useCallback, useMemo, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
@@ -33,17 +33,20 @@ interface Props {
 
 const STREAM_ROUTE_LOADING_BOTTOM_RESERVE =
   "--stream-route-loading-bottom-reserve";
+const STREAM_ROUTE_LOADING_HEADER_RESERVE =
+  "--stream-route-loading-header-reserve";
+// Matches HeaderPlaceholder's default shell before LayoutContext measures it.
+const STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE = "100px";
 
 type StreamRouteLoadingReserveStyle = CSSProperties & {
   readonly [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "0px" | "85px";
+  readonly [STREAM_ROUTE_LOADING_HEADER_RESERVE]: string;
 };
 
 const streamRouteLoadingReserveVisibleStyle: StreamRouteLoadingReserveStyle = {
   [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "85px",
-};
-
-const streamRouteLoadingReserveHiddenStyle: StreamRouteLoadingReserveStyle = {
-  [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: "0px",
+  [STREAM_ROUTE_LOADING_HEADER_RESERVE]:
+    STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE,
 };
 
 function WavesQuickVoteView() {
@@ -74,7 +77,7 @@ function AppLayoutFallback({ children }: Props) {
 
 function AppLayoutContent({ children }: Props) {
   useDeepLinkNavigation();
-  const { registerRef } = useLayout();
+  const { registerRef, spaces } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const headerRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
@@ -119,6 +122,16 @@ function AppLayoutContent({ children }: Props) {
 
   const isNavVisible =
     !isSingleDropOpen && !isEditingOnMobile && !shouldHideBottomNav;
+  const routeLoadingHeaderReserve = spaces.measurementsComplete
+    ? `${spaces.headerSpace}px`
+    : STREAM_ROUTE_LOADING_HEADER_FALLBACK_RESERVE;
+  const streamRouteLoadingReserveStyle = useMemo<StreamRouteLoadingReserveStyle>(
+    () => ({
+      [STREAM_ROUTE_LOADING_BOTTOM_RESERVE]: isNavVisible ? "85px" : "0px",
+      [STREAM_ROUTE_LOADING_HEADER_RESERVE]: routeLoadingHeaderReserve,
+    }),
+    [isNavVisible, routeLoadingHeaderReserve]
+  );
   const safeAreaClass =
     !isNavVisible && !isKeyboardVisible
       ? "tw-pb-[env(safe-area-inset-bottom,0px)]"
@@ -136,11 +149,7 @@ function AppLayoutContent({ children }: Props) {
   return (
     <div
       className={`${safeAreaClass} ${"tw-overflow-auto"}`}
-      style={
-        isNavVisible
-          ? streamRouteLoadingReserveVisibleStyle
-          : streamRouteLoadingReserveHiddenStyle
-      }>
+      style={streamRouteLoadingReserveStyle}>
       <PullToRefresh triggerZoneRef={headerRef} />
       <div ref={headerWrapperRef}>
         <TouchDeviceHeader />

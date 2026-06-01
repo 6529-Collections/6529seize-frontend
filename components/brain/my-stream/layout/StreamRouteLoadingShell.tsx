@@ -10,7 +10,7 @@ const contentRows = [82, 58, 74, 64] as const;
 
 const routeLoadingMinHeightStyle: CSSProperties = {
   minHeight:
-    "calc(100dvh - var(--stream-route-loading-bottom-reserve, 0px))",
+    "calc(100dvh - var(--stream-route-loading-header-reserve, 0px) - var(--stream-route-loading-bottom-reserve, 0px))",
 };
 
 const SkeletonBlock = ({

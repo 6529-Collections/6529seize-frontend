@@ -5,7 +5,7 @@ import WavesLoading from "@/app/waves/loading";
 
 describe("stream route loading fallbacks", () => {
   const expectedMinHeight =
-    "calc(100dvh - var(--stream-route-loading-bottom-reserve, 0px))";
+    "calc(100dvh - var(--stream-route-loading-header-reserve, 0px) - var(--stream-route-loading-bottom-reserve, 0px))";
 
   it("renders an accessible waves loading state", () => {
     render(<WavesLoading />);
@@ -29,7 +29,7 @@ describe("stream route loading fallbacks", () => {
     expect(shell).toBeInTheDocument();
   });
 
-  it("uses layout-owned bottom reserve spacing for route loading height", () => {
+  it("uses layout-owned header and bottom reserves for route loading height", () => {
     render(<WavesLoading />);
 
     const shell = screen.getByTestId("stream-route-loading-shell");
