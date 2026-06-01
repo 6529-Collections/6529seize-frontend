@@ -5,6 +5,9 @@ import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import PermissionIcon from "@/components/utils/icons/PermissionIcon";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import {
@@ -32,7 +35,7 @@ function RepStatusCard({
   readonly title?: string;
 }) {
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-p-4">
+    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/5 tw-p-4">
       {title && (
         <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-tracking-wider tw-text-iron-400">
           {title}
@@ -110,7 +113,14 @@ function RepProgressSection({
   readonly progress: NominationProgress | null;
 }) {
   if (isLoading) {
-    return <RepStatusCard>Loading MemesNominee REP...</RepStatusCard>;
+    return (
+      <RepStatusCard>
+        <span className="tw-flex tw-items-center tw-gap-2">
+          <CircleLoader size={CircleLoaderSize.SMALL} />
+          <span>Loading...</span>
+        </span>
+      </RepStatusCard>
+    );
   }
 
   if (isError) {
@@ -183,7 +193,8 @@ function MainStageNominationPopoverContent() {
         </div>
         <div className="tw-min-w-0">
           <p className="tw-mb-0 tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-400">
-            Reach 50,000 MemesNominee REP to become eligible to submit work.
+            Reach {formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP)}{" "}
+            MemesNominee REP to become eligible to submit work.
           </p>
         </div>
       </div>

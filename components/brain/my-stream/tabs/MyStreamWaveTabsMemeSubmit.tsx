@@ -21,7 +21,7 @@ interface MyStreamWaveTabsMemeSubmitProps {
 const HEADER_ACTION_BUTTON_CLASS =
   "tw-max-w-[11.5rem] tw-whitespace-nowrap tw-text-xs lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
 const HEADER_ACTION_BUTTON_TEXT_CLASS = "tw-min-w-0 tw-truncate";
-const NOT_ELIGIBLE_BUTTON_CLASS = `tw-flex tw-w-auto tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-500/35 hover:tw-bg-primary-500/10 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 ${HEADER_ACTION_BUTTON_CLASS}`;
+const NOT_ELIGIBLE_BUTTON_CLASS = `tw-group tw-flex tw-w-auto tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-[#2a2c32] tw-bg-[#181a1d] tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-[#d6d8dd] tw-transition-colors tw-duration-[180ms] tw-ease-out hover:tw-border-[#3a3d45] hover:tw-bg-[#202329] hover:tw-text-[#f2f3f5] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 ${HEADER_ACTION_BUTTON_CLASS}`;
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
 const getActiveLabels = ({
@@ -175,7 +175,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           aria-haspopup="dialog"
           className={NOT_ELIGIBLE_BUTTON_CLASS}
         >
-          <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+          <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-opacity-70 tw-transition-opacity tw-duration-[180ms] tw-ease-out group-hover:tw-opacity-100" />
           <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
             How to Submit
           </span>
