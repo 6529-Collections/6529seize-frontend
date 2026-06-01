@@ -6,6 +6,7 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -132,6 +133,7 @@ export default function UserPageProfileWaveQuickPostDialog({
             isModalContent={true}
             identityPickerPlacement="inline"
             forceStandardDropComposer={isCurationWave}
+            fixedDropMode={DropMode.CHAT}
           />
         </div>
       </div>

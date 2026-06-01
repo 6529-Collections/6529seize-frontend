@@ -18,7 +18,6 @@ import {
 export default function UserPageProfileWaveContent({
   canManageOwnOfficialWave,
   containerWidth,
-  onAddPost,
   onCreateCuration,
   profileIdentity,
   areCurationsError,
@@ -31,7 +30,6 @@ export default function UserPageProfileWaveContent({
 }: {
   readonly canManageOwnOfficialWave: boolean;
   readonly containerWidth: number;
-  readonly onAddPost: () => void;
   readonly onCreateCuration: () => void;
   readonly profileIdentity: ProfileIdentitySummary;
   readonly areCurationsError: boolean;
@@ -75,9 +73,6 @@ export default function UserPageProfileWaveContent({
   const retryDropsLoad = async () => {
     await refetchDrops();
   };
-  const addPostAction = canManageOwnOfficialWave ? (
-    <ProfileCurationActionButton label="Add post" onClick={onAddPost} />
-  ) : undefined;
   const createCurationAction = canManageOwnOfficialWave ? (
     <ProfileCurationActionButton
       label="Create curation"
@@ -114,7 +109,6 @@ export default function UserPageProfileWaveContent({
         <CurationEmptyPanel
           title={state.emptyState.title}
           message={state.emptyState.message}
-          primaryAction={addPostAction}
         />
       );
     case "drops_error":
@@ -134,25 +128,18 @@ export default function UserPageProfileWaveContent({
       return <LoadingPanel label="Loading curation..." />;
     case "ready":
       return (
-        <div>
-          {addPostAction !== undefined && (
-            <div className="tw-mb-4 tw-flex tw-justify-end">
-              {addPostAction}
-            </div>
-          )}
-          <div className="tw-overflow-hidden tw-rounded-2xl">
-            <UserPageProfileWaveMasonry
-              curationId={state.curation.id}
-              curationName={state.curation.name}
-              containerWidth={containerWidth}
-              drops={state.drops}
-              fetchNextPage={state.fetchNextPage}
-              hasNextPage={state.hasNextPage}
-              isFetchingNextPage={state.isFetchingNextPage}
-              showIdentity={false}
-              profileIdentity={profileIdentity}
-            />
-          </div>
+        <div className="tw-overflow-hidden tw-rounded-2xl">
+          <UserPageProfileWaveMasonry
+            curationId={state.curation.id}
+            curationName={state.curation.name}
+            containerWidth={containerWidth}
+            drops={state.drops}
+            fetchNextPage={state.fetchNextPage}
+            hasNextPage={state.hasNextPage}
+            isFetchingNextPage={state.isFetchingNextPage}
+            showIdentity={false}
+            profileIdentity={profileIdentity}
+          />
         </div>
       );
   }
