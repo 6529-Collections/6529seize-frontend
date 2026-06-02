@@ -1,18 +1,32 @@
 "use client";
 
 import type { CicStatement } from "@/entities/IProfile";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+
+const PROFILE_ABOUT_HASH = "#profile-about";
 
 enum AboutStatementView {
   STATEMENT = "STATEMENT",
   EDIT = "EDIT",
 }
 
-export default function UserPageHeaderAbout({
+const getInitialView = (canEdit: boolean): AboutStatementView => {
+  if (
+    typeof window !== "undefined" &&
+    canEdit &&
+    window.location.hash === PROFILE_ABOUT_HASH
+  ) {
+    return AboutStatementView.EDIT;
+  }
+
+  return AboutStatementView.STATEMENT;
+};
+
+function UserPageHeaderAboutContent({
   profile,
   statement,
   canEdit,
@@ -21,13 +35,29 @@ export default function UserPageHeaderAbout({
   readonly statement: CicStatement | null;
   readonly canEdit: boolean;
 }) {
-  const [view, setView] = useState<AboutStatementView>(
-    AboutStatementView.STATEMENT
+  const [view, setView] = useState<AboutStatementView>(() =>
+    getInitialView(canEdit)
   );
 
+  const openEditorFromHash = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!canEdit || window.location.hash !== PROFILE_ABOUT_HASH) {
+      return;
+    }
+
+    setView(AboutStatementView.EDIT);
+  }, [canEdit]);
+
   useEffect(() => {
-    setView(AboutStatementView.STATEMENT);
-  }, [profile, statement, canEdit]);
+    window.addEventListener("hashchange", openEditorFromHash);
+
+    return () => {
+      window.removeEventListener("hashchange", openEditorFromHash);
+    };
+  }, [openEditorFromHash, profile.id, profile.handle]);
 
   const toggleView = () => {
     if (view === AboutStatementView.STATEMENT) {
@@ -44,13 +74,16 @@ export default function UserPageHeaderAbout({
   };
 
   return (
-    <div>
+    <>
       {view === AboutStatementView.STATEMENT && (
         <div className="tw-max-w-3xl">
           <div
-            className={`tw-inline-flex tw-items-start tw-gap-2${
-              canEdit ? " tw-group" : ""
-            }`}
+            className={[
+              "tw-inline-flex tw-items-start tw-gap-2",
+              canEdit ? "tw-group" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
           >
             {canEdit ? (
               <button
@@ -91,6 +124,38 @@ export default function UserPageHeaderAbout({
           />
         </div>
       )}
+    </>
+  );
+}
+
+export default function UserPageHeaderAbout({
+  profile,
+  statement,
+  canEdit,
+}: {
+  readonly profile: ApiIdentity;
+  readonly statement: CicStatement | null;
+  readonly canEdit: boolean;
+}) {
+  const resetKey = [
+    profile.id,
+    profile.handle,
+    profile.query,
+    statement?.id,
+    statement?.statement_value,
+    canEdit ? "editable" : "readonly",
+  ]
+    .map((value) => `${value ?? ""}`)
+    .join(":");
+
+  return (
+    <div id="profile-about" className="tw-scroll-mt-24">
+      <UserPageHeaderAboutContent
+        key={resetKey}
+        profile={profile}
+        statement={statement}
+        canEdit={canEdit}
+      />
     </div>
   );
 }

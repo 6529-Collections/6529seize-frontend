@@ -29,6 +29,10 @@ import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
+import {
+  getWaveTabFromParam,
+  WAVE_TAB_QUERY_PARAM,
+} from "@/helpers/waves/wave-tabs.helpers";
 import { useAuth } from "@/components/auth/Auth";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
@@ -419,6 +423,11 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isUpcoming,
     isCompleted,
   });
+  const requestedTab = getWaveTabFromParam(
+    searchParams.get(WAVE_TAB_QUERY_PARAM)
+  );
+  const requestedTransientTab =
+    requestedTab === MyStreamWaveTab.FAQ ? requestedTab : null;
 
   useEffect(() => {
     const hasSerialTarget = searchParams.get("serialNo") !== null;
@@ -431,7 +440,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isApproveWave,
       votingState,
       hasFirstDecisionPassed: firstDecisionDone,
-      transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
+      transientPreferredTab: hasSerialTarget
+        ? MyStreamWaveTab.CHAT
+        : requestedTransientTab,
     });
   }, [
     wave,
@@ -443,6 +454,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     votingState,
     firstDecisionDone,
     searchParams,
+    requestedTransientTab,
     updateAvailableTabs,
   ]);
 

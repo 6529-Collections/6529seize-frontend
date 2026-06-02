@@ -22,6 +22,7 @@ import {
   useRef,
   useState,
 } from "react";
+import IdentityGettingStartedCard from "../identity/getting-started/IdentityGettingStartedCard";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
@@ -315,6 +316,10 @@ export default function UserPageRep({
       <div className="tw-hidden lg:tw-block">
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           <div className="tw-min-w-0">
+            <IdentityGettingStartedCard
+              profile={profile}
+              className="tw-mb-6 lg:tw-mb-8"
+            />
             <UserPageRepHeader
               overview={activeOverview}
               categories={activeCategories}

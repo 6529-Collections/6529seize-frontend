@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState, type ReactNode } from "react";
 import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
 import { AuthContext } from "@/components/auth/Auth";
@@ -11,10 +11,19 @@ import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
+
+function FieldHelper({ children }: { readonly children: ReactNode }) {
+  return (
+    <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500">
+      {children}
+    </p>
+  );
+}
+
 export default function UserPageSetUpProfile({
   profile,
 }: {
@@ -28,31 +37,28 @@ export default function UserPageSetUpProfile({
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
   const [classification, setClassification] =
-    useState<ApiProfileClassification>(
-      profile.classification ?? ApiProfileClassification.Pseudonym
-    );
+    useState<ApiProfileClassification>(profile.classification);
 
   const getHighestTdhWalletOrNone = () => {
-    const tdhWallets =
-      profile.wallets?.toSorted((a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)) ?? [];
-    return tdhWallets.length > 0 ? tdhWallets[0]?.wallet : "";
+    const tdhWallets = (profile.wallets ?? []).toSorted(
+      (a, b) => b.tdh - a.tdh
+    );
+    const topWallet = tdhWallets[0];
+    return topWallet !== undefined ? topWallet.wallet : "";
   };
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
-    profile.primary_wallet ?? getHighestTdhWalletOrNone()
+    profile.primary_wallet.length > 0
+      ? profile.primary_wallet
+      : getHighestTdhWalletOrNone()
   );
 
-  const haveConsolidations =
-    profile.wallets?.length && profile.wallets.length > 1;
+  const haveConsolidations = (profile.wallets?.length ?? 0) > 1;
 
-  const [haveChanges, setHaveChanges] = useState<boolean>(false);
-  useEffect(() => {
-    setHaveChanges(
-      userName?.toLowerCase() !== profile.handle?.toLowerCase() ||
-        primaryWallet !== profile.primary_wallet ||
-        classification !== profile.classification
-    );
-  }, [profile, userName, primaryWallet, classification]);
+  const haveChanges =
+    userName.toLowerCase() !== (profile.handle ?? "").toLowerCase() ||
+    primaryWallet !== profile.primary_wallet ||
+    classification !== profile.classification;
 
   const [mutating, setMutating] = useState<boolean>(false);
 
@@ -64,19 +70,20 @@ export default function UserPageSetUpProfile({
         body,
       });
     },
-    onSuccess: async (updatedProfile) => {
+    onSuccess: (updatedProfile) => {
       setToast({
         message: "Profile updated.",
         type: "success",
       });
 
       const newPath = (() => {
-        const parts = pathname?.split("/") ?? [];
+        const updatedHandle = (updatedProfile.handle ?? "").toLowerCase();
+        const parts = pathname.split("/");
         if (parts.length > 1) {
-          parts[1] = (updatedProfile?.handle ?? "").toLowerCase();
+          parts[1] = updatedHandle;
           return parts.join("/");
         }
-        return `/` + (updatedProfile?.handle ?? "").toLowerCase();
+        return `/${updatedHandle}`;
       })();
       router.replace(newPath, { scroll: false });
       onProfileEdit({
@@ -110,7 +117,7 @@ export default function UserPageSetUpProfile({
       classification,
     };
 
-    if (profile?.pfp) {
+    if (profile.pfp !== null) {
       body.pfp_url = profile.pfp;
     }
 
@@ -122,38 +129,52 @@ export default function UserPageSetUpProfile({
 
   return (
     <div className="tailwind-scope">
-      <UserPageSetUpProfileHeader />
-      <div className="lg:tw-max-w-lg tw-pt-6">
-        <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
-          <UserSettingsUsername
-            userName={userName}
-            originalUsername={profile.handle ?? ""}
-            setUserName={setUserName}
-            setIsAvailable={setUserNameAvailable}
-            setIsLoading={setCheckingUsername}
-          />
+      <section className="tw-mx-auto tw-w-full tw-max-w-xl">
+        <div className="tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#08090b] tw-p-5 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:tw-p-6 lg:tw-p-7">
+          <UserPageSetUpProfileHeader />
 
-          <UserSettingsClassification
-            selected={classification}
-            onSelect={setClassification}
-          />
-
-          {haveConsolidations && (
-            <UserSettingsPrimaryWallet
-              wallets={profile.wallets ?? []}
-              selected={primaryWallet}
-              onSelect={setPrimaryWallet}
+          <form onSubmit={onSubmit} className="tw-mt-6 tw-flex tw-flex-col">
+            <UserSettingsUsername
+              userName={userName}
+              originalUsername={profile.handle ?? ""}
+              setUserName={setUserName}
+              setIsAvailable={setUserNameAvailable}
+              setIsLoading={setCheckingUsername}
             />
-          )}
+            <FieldHelper>You can change this later.</FieldHelper>
 
-          <div className="tw-mt-7">
-            <UserSettingsSave
-              loading={mutating}
-              disabled={!haveChanges || !userNameAvailable || checkingUsername}
-            />
-          </div>
-        </form>
-      </div>
+            <div className="tw-mt-6">
+              <UserSettingsClassification
+                selected={classification}
+                onSelect={setClassification}
+              />
+            </div>
+
+            {haveConsolidations && (
+              <div className="tw-mt-6">
+                <UserSettingsPrimaryWallet
+                  wallets={profile.wallets ?? []}
+                  selected={primaryWallet}
+                  onSelect={setPrimaryWallet}
+                />
+                <FieldHelper>
+                  This wallet is shown as your main profile wallet and can be
+                  changed later.
+                </FieldHelper>
+              </div>
+            )}
+
+            <div className="tw-mt-7">
+              <UserSettingsSave
+                loading={mutating}
+                disabled={
+                  !haveChanges || !userNameAvailable || checkingUsername
+                }
+              />
+            </div>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }

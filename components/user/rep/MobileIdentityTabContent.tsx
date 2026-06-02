@@ -38,7 +38,8 @@ export default function MobileIdentityTabContent({
               onClick={onRateNic}
               className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-500/5 tw-px-4 tw-py-2.5 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-emerald-500/10"
             >
-              {cicOverview !== null && cicOverview.authenticated_user_contribution !== null &&
+              {cicOverview !== null &&
+              cicOverview.authenticated_user_contribution !== null &&
               cicOverview.authenticated_user_contribution !== 0 ? (
                 <span className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-500">
                   <FingerprintIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-emerald-400" />
