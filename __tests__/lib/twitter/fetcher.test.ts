@@ -226,6 +226,55 @@ describe("fetchTweetPreview", () => {
     );
   });
 
+  it("preserves metadata for a single MP4 variant when HLS is also available", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2057513333985554497",
+        text: "Post text",
+        user: {
+          name: "Mayudrops",
+          screen_name: "Mayudropsphotos",
+        },
+        video: {
+          variants: [
+            {
+              src: "https://video.twimg.com/tweet_video/playlist.m3u8",
+              content_type: "application/x-mpegURL",
+            },
+            {
+              src: "https://video.twimg.com/tweet_video/720x900/clip.mp4",
+              content_type: "video/mp4",
+              bitrate: 2176000,
+            },
+          ],
+        },
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554497",
+      { fetchImpl }
+    );
+
+    expect(preview.mediaVideoVariants).toEqual([
+      {
+        url: "https://video.twimg.com/tweet_video/720x900/clip.mp4",
+        bitrate: 2176000,
+        width: 720,
+        height: 900,
+        quality: 720,
+      },
+    ]);
+    expect(preview.media?.[0]).toMatchObject({
+      type: "video",
+      videoVariants: preview.mediaVideoVariants,
+    });
+  });
+
   it("defaults video previews to the best MP4 up to 1080 while preserving higher variants", async () => {
     const response = {
       ok: true,

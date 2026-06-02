@@ -288,9 +288,13 @@ async function setupHlsSource(
   videoElement: HTMLVideoElement,
   src: string,
   hlsRef: { current: HlsType | null },
-  onAutoQualityChange: (quality: number | undefined) => void
+  onAutoQualityChange: (quality: number | undefined) => void,
+  isCancelled: () => boolean
 ): Promise<boolean> {
   if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
+    if (isCancelled()) {
+      return false;
+    }
     videoElement.src = src;
     videoElement.load();
     onAutoQualityChange(undefined);
@@ -298,12 +302,20 @@ async function setupHlsSource(
   }
 
   const mod = await import("hls.js");
+  if (isCancelled()) {
+    return false;
+  }
+
   const HlsConstructor = mod.default;
   if (HlsConstructor.isSupported()) {
     const hls = new HlsConstructor({
       startLevel: -1,
       enableWorker: true,
     });
+    if (isCancelled()) {
+      hls.destroy();
+      return false;
+    }
     hlsRef.current = hls;
     const handleQualityEvent = (_event: unknown, data: unknown) => {
       updateAutoQualityFromHlsEvent(hls, data, onAutoQualityChange);
@@ -709,7 +721,7 @@ function VideoQualityMenu({
   return (
     <dialog
       open
-      className="tw-absolute tw-right-3 tw-top-11 tw-z-30 tw-m-0 tw-w-fit tw-min-w-40 tw-max-w-[calc(100%-1.5rem)] tw-overflow-hidden tw-rounded-xl tw-border-0 tw-bg-[#171717] tw-px-1.5 tw-pb-1.5 tw-pt-0 tw-text-white tw-shadow-xl"
+      className="tw-absolute tw-left-auto tw-right-3 tw-top-11 tw-z-30 tw-m-0 tw-w-fit tw-min-w-40 tw-max-w-[calc(100%-1.5rem)] tw-overflow-hidden tw-rounded-xl tw-border-0 tw-bg-[#171717] tw-px-1.5 tw-pb-1.5 tw-pt-0 tw-text-white tw-shadow-xl"
       aria-label="Video quality"
     >
       <span
@@ -799,6 +811,10 @@ function TwitterVideoPlayer({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<HlsType | null>(null);
+  const fallbackPlaybackSnapshotRef = useRef<{
+    readonly currentTime: number;
+    readonly wasPlaying: boolean;
+  } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentAutoQuality, setCurrentAutoQuality] = useState<
     number | undefined
@@ -823,24 +839,31 @@ function TwitterVideoPlayer({
     }
 
     let cancelled = false;
-    const playbackSnapshot = snapshotVideoPlayback(videoElement);
+    const playbackSnapshot =
+      fallbackPlaybackSnapshotRef.current ??
+      snapshotVideoPlayback(videoElement);
+    fallbackPlaybackSnapshotRef.current = null;
     const destroyHls = () => {
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
     const loadFallbackSource = () => {
+      fallbackPlaybackSnapshotRef.current = playbackSnapshot;
       setSelection({ type: "variant", url: videoUrl });
       setCurrentAutoQuality(undefined);
-      videoElement.src = videoUrl;
-      videoElement.load();
-      restoreVideoPlayback(videoElement, playbackSnapshot, () => cancelled);
     };
 
     destroyHls();
     const src = getVideoSource(selection, hlsUrl, videoUrl);
 
     if (isHlsSource(selection) && hlsUrl) {
-      setupHlsSource(videoElement, hlsUrl, hlsRef, setCurrentAutoQuality)
+      setupHlsSource(
+        videoElement,
+        hlsUrl,
+        hlsRef,
+        setCurrentAutoQuality,
+        () => cancelled
+      )
         .then((loaded) => {
           if (cancelled) {
             destroyHls();

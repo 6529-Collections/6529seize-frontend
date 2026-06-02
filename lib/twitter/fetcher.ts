@@ -458,6 +458,19 @@ const findVideoVariants = (
   return sortVideoVariantsForDisplay(videoVariants);
 };
 
+const hasVideoVariantMetadata = (
+  variant: TweetPreviewVideoVariant
+): boolean =>
+  variant.quality !== undefined ||
+  variant.width !== undefined ||
+  variant.height !== undefined ||
+  variant.bitrate !== undefined;
+
+const shouldExposeVideoVariants = (
+  variants: readonly TweetPreviewVideoVariant[]
+): boolean =>
+  variants.length > 1 || variants.some((variant) => hasVideoVariantMetadata(variant));
+
 const findFallbackVideoVariantUrl = (
   variants: readonly unknown[],
   urlKey: "src" | "url"
@@ -510,7 +523,7 @@ const createVideoResult = (
     return {
       videoUrl: selectedVariant.url,
       ...(videoHlsUrl ? { videoHlsUrl } : {}),
-      ...(videoVariants.length > 1 ? { videoVariants } : {}),
+      ...(shouldExposeVideoVariants(videoVariants) ? { videoVariants } : {}),
     };
   }
 
