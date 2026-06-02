@@ -276,8 +276,12 @@ function updateAutoQualityFromHlsEvent(
   onAutoQualityChange: (quality: number | undefined) => void
 ) {
   const levelIndex = readHlsEventLevelIndex(data);
-  const level = levelIndex !== undefined ? hls.levels[levelIndex] : undefined;
-  onAutoQualityChange(readHlsLevelQuality(level));
+  if (levelIndex === undefined) {
+    onAutoQualityChange(undefined);
+    return;
+  }
+
+  onAutoQualityChange(readHlsLevelQuality(hls.levels[levelIndex]));
 }
 
 async function setupHlsSource(
@@ -706,8 +710,6 @@ function VideoQualityMenu({
     <dialog
       open
       className="tw-absolute tw-right-3 tw-top-11 tw-z-30 tw-m-0 tw-w-fit tw-min-w-40 tw-max-w-[calc(100%-1.5rem)] tw-overflow-hidden tw-rounded-xl tw-border-0 tw-bg-[#171717] tw-px-1.5 tw-pb-1.5 tw-pt-0 tw-text-white tw-shadow-xl"
-      onClick={stopMediaEvent}
-      onMouseDown={stopMediaEvent}
       aria-label="Video quality"
     >
       <span
