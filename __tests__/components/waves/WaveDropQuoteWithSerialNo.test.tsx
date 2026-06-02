@@ -1,9 +1,11 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 
-jest.mock("@/components/waves/drops/WaveDropQuote", () => (props: any) => (
-  <div data-testid="quote">{props.drop ? props.drop.id : "none"}</div>
-));
+let capturedQuoteProps: any;
+jest.mock("@/components/waves/drops/WaveDropQuote", () => (props: any) => {
+  capturedQuoteProps = props;
+  return <div data-testid="quote">{props.drop ? props.drop.id : "none"}</div>;
+});
 
 const useQueryMock = jest.fn();
 jest.mock("@tanstack/react-query", () => ({
@@ -14,9 +16,14 @@ import WaveDropQuoteWithSerialNo from "@/components/waves/drops/WaveDropQuoteWit
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 describe("WaveDropQuoteWithSerialNo", () => {
+  beforeEach(() => {
+    capturedQuoteProps = undefined;
+    useQueryMock.mockReset();
+  });
+
   it("fetches drop by serial number and renders quote", async () => {
     useQueryMock.mockReturnValue({
-      data: { id: "d1", serial_no: 5 },
+      data: { id: "d1", serial_no: 5, hide_link_preview: true },
     });
 
     render(
@@ -42,5 +49,6 @@ describe("WaveDropQuoteWithSerialNo", () => {
     await waitFor(() => {
       expect(screen.getByTestId("quote")).toHaveTextContent("d1");
     });
+    expect(capturedQuoteProps.hideLinkPreviews).toBeTruthy();
   });
 });

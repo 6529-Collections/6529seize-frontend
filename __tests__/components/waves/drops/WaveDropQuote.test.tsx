@@ -208,6 +208,30 @@ test("passes explicit link-card suppression callback into nested markdown", () =
   );
 });
 
+test("passes hidden link preview setting into nested markdown", () => {
+  const drop = {
+    id: "d1",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 5, content: "https://example.com" }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+  } as any;
+
+  render(
+    <WaveDropQuote
+      drop={drop}
+      partId={5}
+      onQuoteClick={jest.fn()}
+      hideLinkPreviews={true}
+    />
+  );
+
+  expect(markdownProps.hideLinkPreviews).toBeTruthy();
+});
+
 test("falls back to link preview context for nested markdown suppression", () => {
   const drop = {
     id: "d1",

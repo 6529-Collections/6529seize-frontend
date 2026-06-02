@@ -315,6 +315,37 @@ describe("WaveDropLinkPreview", () => {
     expect(mockDrop).not.toHaveBeenCalled();
   });
 
+  it("passes hidden link preview setting from fetched chat drops into WaveDropQuote", async () => {
+    fetchDropByIdBatchedMock.mockResolvedValue(
+      buildDrop({
+        drop_type: ApiDropType.Chat,
+        hide_link_preview: true,
+      })
+    );
+
+    renderWithQueryClient(
+      <WaveDropLinkPreview
+        href="https://site.com/waves/wave-1?drop=drop-1"
+        waveId="wave-1"
+        dropId="drop-1"
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockWaveDropQuote).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          drop: expect.objectContaining({
+            drop_type: ApiDropType.Chat,
+            hide_link_preview: true,
+          }),
+          hideLinkPreviews: true,
+        })
+      );
+    });
+    expect(mockDrop).not.toHaveBeenCalled();
+  });
+
   it("falls back to a not-found quote when the drop is missing", async () => {
     commonApiFetchMock.mockResolvedValue({
       data: [],
