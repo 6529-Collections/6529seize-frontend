@@ -93,7 +93,7 @@ test("returns null when voting is closed", () => {
   expect(container.firstChild).toBeNull();
 });
 
-test("shows available votes when provided", () => {
+test("shows wave available votes when provided", () => {
   render(
     <AuthContext.Provider value={auth}>
       <ReactQueryWrapperContext.Provider value={rqContext}>
@@ -111,7 +111,7 @@ test("shows available votes when provided", () => {
     </AuthContext.Provider>
   );
 
-  expect(screen.getByText(/Available/)).toBeInTheDocument();
+  expect(screen.getByText(/Available in wave/)).toBeInTheDocument();
   expect(screen.getByText("10,463")).toBeInTheDocument();
 });
 

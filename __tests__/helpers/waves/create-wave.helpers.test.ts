@@ -11,6 +11,7 @@ import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generat
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -51,6 +52,7 @@ const createBaseConfig = (waveType: ApiWaveType) =>
     chat: { enabled: true },
     voting: {
       type: null,
+      creditScope: ApiWaveCreditScope.Wave,
       category: null,
       profileId: null,
       allowNegativeVotes: true,
@@ -192,6 +194,7 @@ describe("create-wave.helpers", () => {
       expect(res.participation.required_metadata).toEqual([
         { name: "m", type: ApiWaveMetadataType.String },
       ]);
+      expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Wave);
       expect(res.voting.period.max).toBe(2 + 3 + 5);
       expect(res.voting.forbid_negative_votes).toBe(false);
       expect(res.wave.admin_drop_deletion_enabled).toBe(true);
@@ -222,6 +225,19 @@ describe("create-wave.helpers", () => {
       });
 
       expect(res.voting.forbid_negative_votes).toBe(true);
+    });
+
+    it("maps configured voting credit scope", () => {
+      const config = createBaseConfig(ApiWaveType.Rank);
+      config.voting.creditScope = ApiWaveCreditScope.Drop;
+
+      const res = getCreateNewWaveBody({
+        drop: createDrop(),
+        picture: null,
+        config,
+      });
+
+      expect(res.voting.credit_scope).toBe(ApiWaveCreditScope.Drop);
     });
 
     it("defaults omitted negative vote config to allowed", () => {
