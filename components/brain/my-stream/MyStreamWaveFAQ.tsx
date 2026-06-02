@@ -117,11 +117,12 @@ const NOT_GOALS: readonly IconListItem[] = [
     type: "check",
     content: (
       <>
-        Our decisions should stand the test of time – &quot;{" "}
+        Our decisions should stand the test of time –{" "}
         <span className="tw-italic">
-          can you imagine someone wanting to own the card 30 years from now?
+          &quot;can you imagine someone wanting to own the card 30 years from
+          now?&quot;
         </span>{" "}
-        &quot; is a pretty good test.
+        is a pretty good test.
       </>
     ),
   },
@@ -258,7 +259,7 @@ function QaPair({
       <h4 className="tw-mb-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50">
         {question}
       </h4>
-      <div className="tw-text-sm tw-leading-6 tw-text-iron-300">{children}</div>
+      <div className="tw-text-sm tw-leading-6 tw-text-iron-400">{children}</div>
     </div>
   );
 }
@@ -649,7 +650,7 @@ function FaqAccordionItem({
           id={buttonId}
           type="button"
           aria-expanded={isOpen}
-          aria-controls={panelId}
+          aria-controls={isOpen ? panelId : undefined}
           onClick={onToggle}
           className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 sm:tw-px-5 sm:tw-py-4 md:tw-py-3.5"
         >
@@ -721,7 +722,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
       return;
     }
 
-    const timeoutId = window.setTimeout(() => {
+    const timeoutId = globalThis.setTimeout(() => {
       const scrollContainer = scrollContainerRef.current;
       const targetSection = sectionRefs.current[pendingScrollSectionId];
 
@@ -738,7 +739,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
       setPendingScrollSectionId(null);
     }, FAQ_SCROLL_ALIGNMENT_DELAY_MS);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => globalThis.clearTimeout(timeoutId);
   }, [openSectionId, pendingScrollSectionId]);
 
   const handleSectionToggle = (sectionId: FaqSectionId) => {

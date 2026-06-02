@@ -63,11 +63,11 @@ describe("MyStreamWaveFAQ", () => {
     });
     fireEvent.click(goalsButton);
 
-    expect(screen.getByRole("button", { name: "Intro" })).toHaveAttribute(
-      "aria-expanded",
-      "false"
-    );
+    const introButton = screen.getByRole("button", { name: "Intro" });
+    expect(introButton).toHaveAttribute("aria-expanded", "false");
+    expect(introButton).not.toHaveAttribute("aria-controls");
     expect(goalsButton).toHaveAttribute("aria-expanded", "true");
+    expect(goalsButton).toHaveAttribute("aria-controls");
     expect(screen.getByText("Artistic excellence")).toBeInTheDocument();
     const artistBriefLink = screen.getByRole("link", {
       name: /Read Artist Brief.*opens in a new tab/i,
