@@ -59,7 +59,7 @@ beforeEach(() => {
 });
 
 test("hydrates the page from query params and updates the url on page change", async () => {
-  search.set("page", "2");
+  search.set("distribution-page", "2");
 
   render(
     <UserPageStatsActivityDistributions
@@ -72,7 +72,7 @@ test("hydrates the page from query params and updates the url on page change", a
 
   await userEvent.click(screen.getByTestId("set-page"));
 
-  expect(replace).toHaveBeenCalledWith("/profile?page=3", {
+  expect(replace).toHaveBeenCalledWith("/profile?distribution-page=3", {
     scroll: false,
   });
 });

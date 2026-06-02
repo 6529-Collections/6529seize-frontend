@@ -1,9 +1,19 @@
+export interface TweetPreviewVideoVariant {
+  readonly url: string;
+  readonly bitrate?: number;
+  readonly width?: number;
+  readonly height?: number;
+  readonly quality?: number;
+}
+
 export interface TweetPreviewMedia {
   readonly type: "image" | "video";
   readonly imageUrl?: string;
   readonly videoUrl?: string;
   readonly posterUrl?: string;
   readonly captionsUrl?: string;
+  readonly videoHlsUrl?: string;
+  readonly videoVariants?: readonly TweetPreviewVideoVariant[];
 }
 
 export interface TweetPreview {
@@ -18,8 +28,10 @@ export interface TweetPreview {
   readonly mediaLink?: string;
   readonly mediaImageUrl?: string;
   readonly mediaVideoUrl?: string;
+  readonly mediaVideoHlsUrl?: string;
   readonly mediaPosterUrl?: string;
   readonly mediaCaptionsUrl?: string;
+  readonly mediaVideoVariants?: readonly TweetPreviewVideoVariant[];
   readonly media?: readonly TweetPreviewMedia[];
   readonly createdAtText?: string;
   readonly createdAtIso?: string;

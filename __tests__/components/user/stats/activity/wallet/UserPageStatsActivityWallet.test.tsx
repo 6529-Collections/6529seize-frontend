@@ -80,7 +80,7 @@ beforeEach(() => {
 describe("UserPageStatsActivityWallet", () => {
   it("hydrates filter and page state from the query string", async () => {
     search.set("wallet-activity", "mints");
-    search.set("page", "2");
+    search.set("wallet-activity-page", "2");
 
     render(
       <UserPageStatsActivityWallet
@@ -109,13 +109,21 @@ describe("UserPageStatsActivityWallet", () => {
     );
 
     await user.click(screen.getByTestId("set-filter"));
-    expect(replace).toHaveBeenCalledWith("/path?wallet-activity=mints&page=1", {
-      scroll: false,
-    });
+    expect(replace).toHaveBeenCalledWith(
+      "/path?activity=wallet-activity&wallet-activity=mints&wallet-activity-page=1",
+      {
+        scroll: false,
+      }
+    );
 
     replace.mockClear();
 
     await user.click(screen.getByTestId("set-page"));
-    expect(replace).toHaveBeenCalledWith("/path?page=3", { scroll: false });
+    expect(replace).toHaveBeenCalledWith(
+      "/path?activity=wallet-activity&wallet-activity-page=3",
+      {
+        scroll: false,
+      }
+    );
   });
 });

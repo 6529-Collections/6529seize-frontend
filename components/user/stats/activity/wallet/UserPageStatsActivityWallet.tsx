@@ -14,6 +14,7 @@ import {
   ACTIVITY_PAGE_SIZE,
   getActivityPaginationState,
   getActivityWalletsParam,
+  SEARCH_PARAM_ACTIVITY,
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
 } from "../activity.helpers";
@@ -92,6 +93,7 @@ export default function UserPageStatsActivityWallet({
         : filter;
     router.replace(
       `${pathname}?${createQueryString([
+        { name: SEARCH_PARAM_ACTIVITY, value: "wallet-activity" },
         { name: WALLET_ACTIVITY_FILTER_PARAM, value: enumToPath(targetFilter) },
         { name: WALLET_ACTIVITY_PAGE_PARAM, value: "1" },
       ])}`,
@@ -103,6 +105,7 @@ export default function UserPageStatsActivityWallet({
     (nextPage: number) => {
       router.replace(
         `${pathname}?${createQueryString([
+          { name: SEARCH_PARAM_ACTIVITY, value: "wallet-activity" },
           { name: WALLET_ACTIVITY_PAGE_PARAM, value: `${nextPage}` },
         ])}`,
         { scroll: false }

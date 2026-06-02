@@ -1,9 +1,12 @@
 "use client";
 
 import {
+  ArrowLeftIcon,
   ArrowPathRoundedSquareIcon,
   BookmarkIcon,
   ChatBubbleOvalLeftIcon,
+  CheckIcon,
+  Cog6ToothIcon,
   HeartIcon,
   LinkIcon,
   PlayIcon,
@@ -12,14 +15,20 @@ import Link from "next/link";
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
   type MouseEvent,
   type ReactNode,
   type SyntheticEvent,
 } from "react";
+import type HlsType from "hls.js";
 
 import XIcon from "@/components/user/utils/icons/XIcon";
-import type { TweetPreview, TweetPreviewMedia } from "@/lib/twitter";
+import type {
+  TweetPreview,
+  TweetPreviewMedia,
+  TweetPreviewVideoVariant,
+} from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
 
@@ -38,6 +47,16 @@ type PreviewState =
       readonly fallback: true;
     };
 
+type VideoQualitySelection =
+  | { readonly type: "auto" }
+  | { readonly type: "variant"; readonly url: string };
+
+interface VideoQualityOption {
+  readonly id: string;
+  readonly label: string;
+  readonly selection: VideoQualitySelection;
+}
+
 interface TwitterPreviewCardProps {
   readonly href: string;
   readonly tweetId: string;
@@ -53,6 +72,11 @@ const STATIC_ACTION_CLASSES =
   "tw-inline-flex tw-items-center tw-gap-x-2 tw-px-2 tw-py-1 tw-text-sm tw-font-semibold tw-text-[#8b98a5]";
 
 function stopCardEvent(event: MouseEvent<HTMLElement>) {
+  event.stopPropagation();
+  event.nativeEvent.stopImmediatePropagation();
+}
+
+function stopMediaEvent(event: SyntheticEvent<HTMLElement>) {
   event.stopPropagation();
   event.nativeEvent.stopImmediatePropagation();
 }
@@ -116,6 +140,227 @@ function formatCount(value: number): string {
 
 function formatViews(value: number): string {
   return `${formatCount(value)} ${value === 1 ? "View" : "Views"}`;
+}
+
+function formatBitrate(value: number): string {
+  if (value >= 1_000_000) {
+    const mbps = value / 1_000_000;
+    return `${Number.isInteger(mbps) ? mbps.toFixed(0) : mbps.toFixed(1)} Mbps`;
+  }
+
+  return `${Math.round(value / 1000)} Kbps`;
+}
+
+function getVideoVariantLabel(
+  variant: TweetPreviewVideoVariant,
+  variants: readonly TweetPreviewVideoVariant[],
+  index: number
+): string {
+  if (variant.quality) {
+    const hasDuplicateQuality =
+      variants.filter((candidate) => candidate.quality === variant.quality)
+        .length > 1;
+    return hasDuplicateQuality && variant.bitrate
+      ? `${variant.quality}p ${formatBitrate(variant.bitrate)}`
+      : `${variant.quality}p`;
+  }
+
+  if (variant.width && variant.height) {
+    return `${variant.width}x${variant.height}`;
+  }
+
+  if (variant.bitrate) {
+    return formatBitrate(variant.bitrate);
+  }
+
+  return `Option ${index + 1}`;
+}
+
+function buildVideoVariantOptions(
+  videoUrl: string,
+  variants: readonly TweetPreviewVideoVariant[] | undefined
+): readonly TweetPreviewVideoVariant[] {
+  if (!variants || variants.length === 0) {
+    return [{ url: videoUrl }];
+  }
+
+  return variants.some((variant) => variant.url === videoUrl)
+    ? variants
+    : [{ url: videoUrl }, ...variants];
+}
+
+function buildVideoQualityOptions({
+  hlsUrl,
+  variants,
+  videoUrl,
+}: {
+  readonly hlsUrl: string | undefined;
+  readonly variants: readonly TweetPreviewVideoVariant[] | undefined;
+  readonly videoUrl: string;
+}): readonly VideoQualityOption[] {
+  const manualOptions = buildVideoVariantOptions(videoUrl, variants).map(
+    (variant, index, allVariants) => ({
+      id: variant.url,
+      label: getVideoVariantLabel(variant, allVariants, index),
+      selection: { type: "variant" as const, url: variant.url },
+    })
+  );
+
+  return hlsUrl
+    ? [
+        { id: "auto", label: "Auto", selection: { type: "auto" } },
+        ...manualOptions,
+      ]
+    : manualOptions;
+}
+
+function getDefaultQualitySelection(
+  hlsUrl: string | undefined,
+  videoUrl: string
+): VideoQualitySelection {
+  return hlsUrl ? { type: "auto" } : { type: "variant", url: videoUrl };
+}
+
+function getQualitySelectionId(selection: VideoQualitySelection): string {
+  return selection.type === "auto" ? "auto" : selection.url;
+}
+
+function isHlsSource(selection: VideoQualitySelection): boolean {
+  return selection.type === "auto";
+}
+
+function getVideoSource(
+  selection: VideoQualitySelection,
+  hlsUrl: string | undefined,
+  fallbackUrl: string
+): string {
+  if (selection.type === "auto") {
+    return hlsUrl ?? fallbackUrl;
+  }
+
+  return selection.url;
+}
+
+async function setupHlsSource(
+  videoElement: HTMLVideoElement,
+  src: string,
+  hlsRef: { current: HlsType | null },
+  onAutoQualityChange: (quality: number | undefined) => void
+): Promise<boolean> {
+  if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
+    videoElement.src = src;
+    videoElement.load();
+    onAutoQualityChange(undefined);
+    return true;
+  }
+
+  const mod = await import("hls.js");
+  const HlsConstructor = mod.default;
+  if (!HlsConstructor.isSupported()) {
+    return false;
+  }
+
+  const hls = new HlsConstructor({
+    startLevel: -1,
+    enableWorker: true,
+  });
+  hlsRef.current = hls;
+  hls.on(
+    HlsConstructor.Events.LEVEL_SWITCHED,
+    (_event: unknown, data: unknown) => {
+      const levelIndex = readHlsEventLevelIndex(data);
+      const level =
+        levelIndex !== undefined ? hls.levels[levelIndex] : undefined;
+      onAutoQualityChange(readHlsLevelQuality(level));
+    }
+  );
+  hls.on(
+    HlsConstructor.Events.FRAG_CHANGED,
+    (_event: unknown, data: unknown) => {
+      const levelIndex = readHlsEventLevelIndex(data);
+      const level =
+        levelIndex !== undefined ? hls.levels[levelIndex] : undefined;
+      onAutoQualityChange(readHlsLevelQuality(level));
+    }
+  );
+  hls.loadSource(src);
+  hls.attachMedia(videoElement);
+  return true;
+}
+
+function readHlsEventLevelIndex(value: unknown): number | undefined {
+  if (typeof value !== "object" || value === null) {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  const level = record["level"];
+  if (typeof level === "number" && Number.isFinite(level)) {
+    return level;
+  }
+
+  const frag = record["frag"];
+  if (typeof frag !== "object" || frag === null) {
+    return undefined;
+  }
+
+  const fragLevel = (frag as Record<string, unknown>)["level"];
+  return typeof fragLevel === "number" && Number.isFinite(fragLevel)
+    ? fragLevel
+    : undefined;
+}
+
+function readHlsLevelQuality(level: unknown): number | undefined {
+  if (typeof level !== "object" || level === null) {
+    return undefined;
+  }
+
+  const record = level as Record<string, unknown>;
+  const width =
+    typeof record["width"] === "number" ? record["width"] : undefined;
+  const height =
+    typeof record["height"] === "number" ? record["height"] : undefined;
+  return width && height ? Math.min(width, height) : undefined;
+}
+
+function snapshotVideoPlayback(videoElement: HTMLVideoElement): {
+  readonly currentTime: number;
+  readonly wasPlaying: boolean;
+} {
+  return {
+    currentTime: videoElement.currentTime,
+    wasPlaying: !videoElement.paused && !videoElement.ended,
+  };
+}
+
+function restoreVideoPlayback(
+  videoElement: HTMLVideoElement,
+  snapshot: { readonly currentTime: number; readonly wasPlaying: boolean },
+  isCancelled: () => boolean
+): void {
+  const restore = () => {
+    if (isCancelled()) {
+      return;
+    }
+
+    if (Number.isFinite(snapshot.currentTime) && snapshot.currentTime > 0) {
+      videoElement.currentTime = Math.min(
+        snapshot.currentTime,
+        videoElement.duration || snapshot.currentTime
+      );
+    }
+
+    if (snapshot.wasPlaying) {
+      void videoElement.play();
+    }
+  };
+
+  if (videoElement.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    restore();
+    return;
+  }
+
+  videoElement.addEventListener("loadedmetadata", restore, { once: true });
 }
 
 function TwitterHandleLink({ handle }: { readonly handle: string }) {
@@ -413,25 +658,242 @@ function TweetBodyText({
   );
 }
 
-function TweetVideo({
+function VideoQualityMenu({
+  autoQuality,
+  isOpen,
+  onClose,
+  onSelect,
+  options,
+  selection,
+}: {
+  readonly autoQuality: number | undefined;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onSelect: (selection: VideoQualitySelection) => void;
+  readonly options: readonly VideoQualityOption[];
+  readonly selection: VideoQualitySelection;
+}) {
+  if (!isOpen) {
+    return null;
+  }
+
+  const selectedId = getQualitySelectionId(selection);
+  return (
+    <div
+      className="tw-absolute tw-right-3 tw-top-11 tw-z-30 tw-w-fit tw-min-w-40 tw-max-w-[calc(100%-1.5rem)] tw-overflow-hidden tw-rounded-xl tw-bg-[#171717] tw-px-1.5 tw-pb-1.5 tw-pt-0 tw-text-white tw-shadow-xl"
+      onClick={stopMediaEvent}
+      onMouseDown={stopMediaEvent}
+      role="dialog"
+      aria-label="Video quality"
+    >
+      <span
+        aria-hidden="true"
+        className="tw-absolute tw-right-8 tw-top-[-7px] tw-h-0 tw-w-0 tw-border-x-8 tw-border-b-8 tw-border-x-transparent tw-border-b-[#171717]"
+      />
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-py-2">
+        <button
+          type="button"
+          aria-label="Close video quality"
+          onClick={(event) => {
+            stopMediaEvent(event);
+            onClose();
+          }}
+          className="tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white hover:tw-bg-white/10 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+        >
+          <ArrowLeftIcon className="tw-h-4 tw-w-4" />
+        </button>
+        <span className="tw-text-xs tw-font-semibold tw-leading-6 tw-text-white">
+          Video quality
+        </span>
+      </div>
+      <div
+        className="tw-rounded-lg tw-bg-black tw-px-2.5 tw-py-2"
+        role="radiogroup"
+        aria-label="Video quality"
+      >
+        {options.map((option) => {
+          const isSelected = option.id === selectedId;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              onClick={(event) => {
+                stopMediaEvent(event);
+                onSelect(option.selection);
+                onClose();
+              }}
+              className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-5 tw-border-0 tw-bg-transparent tw-px-1 tw-py-1.5 tw-text-left tw-text-[13px] tw-font-semibold tw-text-white hover:tw-bg-white/10"
+            >
+              <span>
+                {option.label}
+                {option.id === "auto" && autoQuality && (
+                  <span className="tw-ml-1 tw-text-[#8b98a5]">
+                    ({autoQuality}p)
+                  </span>
+                )}
+              </span>
+              <span
+                aria-hidden="true"
+                className={`tw-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid ${
+                  isSelected
+                    ? "tw-border-[#1d9bf0] tw-bg-[#1d9bf0]"
+                    : "tw-border-[#8b98a5]"
+                }`}
+              >
+                {isSelected && <CheckIcon className="tw-h-3.5 tw-w-3.5" />}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TwitterVideoPlayer({
+  allowQualitySelection = true,
+  autoPlay,
   captionsUrl,
+  className,
+  hlsUrl,
   posterUrl,
+  variants,
   videoUrl,
 }: {
+  readonly allowQualitySelection?: boolean;
+  readonly autoPlay?: boolean;
   readonly captionsUrl: string | undefined;
+  readonly className: string;
+  readonly hlsUrl: string | undefined;
   readonly posterUrl: string | undefined;
+  readonly variants: readonly TweetPreviewVideoVariant[] | undefined;
   readonly videoUrl: string;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<HlsType | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentAutoQuality, setCurrentAutoQuality] = useState<
+    number | undefined
+  >(undefined);
+  const [selection, setSelection] = useState<VideoQualitySelection>(() =>
+    getDefaultQualitySelection(hlsUrl, videoUrl)
+  );
+  const qualityOptions = useMemo(
+    () => buildVideoQualityOptions({ hlsUrl, variants, videoUrl }),
+    [hlsUrl, variants, videoUrl]
+  );
+
+  useEffect(() => {
+    setSelection(getDefaultQualitySelection(hlsUrl, videoUrl));
+    setIsMenuOpen(false);
+  }, [hlsUrl, videoUrl]);
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) {
+      return;
+    }
+
+    let cancelled = false;
+    const playbackSnapshot = snapshotVideoPlayback(videoElement);
+    const destroyHls = () => {
+      hlsRef.current?.destroy();
+      hlsRef.current = null;
+    };
+    const loadFallbackSource = () => {
+      setCurrentAutoQuality(undefined);
+      videoElement.src = videoUrl;
+      videoElement.load();
+      restoreVideoPlayback(videoElement, playbackSnapshot, () => cancelled);
+    };
+
+    destroyHls();
+    const src = getVideoSource(selection, hlsUrl, videoUrl);
+
+    if (isHlsSource(selection) && hlsUrl) {
+      setupHlsSource(videoElement, hlsUrl, hlsRef, setCurrentAutoQuality)
+        .then((loaded) => {
+          if (cancelled) {
+            destroyHls();
+            return;
+          }
+          if (!loaded) {
+            loadFallbackSource();
+            return;
+          }
+          restoreVideoPlayback(videoElement, playbackSnapshot, () => cancelled);
+        })
+        .catch(() => {
+          if (!cancelled) {
+            loadFallbackSource();
+          }
+        });
+    } else {
+      setCurrentAutoQuality(undefined);
+      videoElement.src = src;
+      videoElement.load();
+      restoreVideoPlayback(videoElement, playbackSnapshot, () => cancelled);
+    }
+
+    return () => {
+      cancelled = true;
+      destroyHls();
+    };
+  }, [hlsUrl, selection, videoUrl]);
+
   return (
-    <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#42566b] tw-bg-black">
+    <div className="tw-relative tw-h-full tw-w-full">
+      {allowQualitySelection && qualityOptions.length > 1 && (
+        <>
+          {isMenuOpen && (
+            <button
+              type="button"
+              aria-label="Close video quality menu"
+              onClick={(event) => {
+                stopMediaEvent(event);
+                setIsMenuOpen(false);
+              }}
+              className="tw-absolute tw-inset-0 tw-z-10 tw-border-0 tw-bg-transparent tw-p-0"
+            />
+          )}
+          <button
+            type="button"
+            aria-label="Video quality"
+            aria-expanded={isMenuOpen}
+            onClick={(event) => {
+              stopMediaEvent(event);
+              setIsMenuOpen((value) => !value);
+            }}
+            className="tw-absolute tw-right-2.5 tw-top-2.5 tw-z-20 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-black/45 tw-p-0 tw-text-white/65 tw-backdrop-blur-sm tw-transition hover:tw-bg-black/75 hover:tw-text-white focus:tw-outline-none focus-visible:tw-bg-black/75 focus-visible:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            <Cog6ToothIcon className="tw-h-4 tw-w-4" />
+          </button>
+          <VideoQualityMenu
+            autoQuality={currentAutoQuality}
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            onSelect={setSelection}
+            options={qualityOptions}
+            selection={selection}
+          />
+        </>
+      )}
       <video
-        src={videoUrl}
+        ref={videoRef}
         poster={posterUrl}
-        className="tw-block tw-h-auto tw-max-h-[24rem] tw-w-full tw-object-contain"
+        className={className}
         controls
         playsInline
         preload="metadata"
-        onClick={stopCardEvent}
+        autoPlay={autoPlay}
+        onClick={(event) => {
+          if (isMenuOpen) {
+            setIsMenuOpen(false);
+          }
+          stopMediaEvent(event);
+        }}
       >
         <track
           kind="captions"
@@ -445,6 +907,33 @@ function TweetVideo({
   );
 }
 
+function TweetVideo({
+  captionsUrl,
+  hlsUrl,
+  posterUrl,
+  variants,
+  videoUrl,
+}: {
+  readonly captionsUrl: string | undefined;
+  readonly hlsUrl: string | undefined;
+  readonly posterUrl: string | undefined;
+  readonly variants: readonly TweetPreviewVideoVariant[] | undefined;
+  readonly videoUrl: string;
+}) {
+  return (
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-[#42566b] tw-bg-black">
+      <TwitterVideoPlayer
+        captionsUrl={captionsUrl}
+        className="tw-block tw-h-auto tw-max-h-[24rem] tw-w-full tw-object-contain"
+        hlsUrl={hlsUrl}
+        posterUrl={posterUrl}
+        variants={variants}
+        videoUrl={videoUrl}
+      />
+    </div>
+  );
+}
+
 function TweetMediaGridVideo({ media }: { readonly media: TweetPreviewMedia }) {
   const [playing, setPlaying] = useState(false);
   const posterUrl = media.posterUrl ?? media.imageUrl;
@@ -452,11 +941,6 @@ function TweetMediaGridVideo({ media }: { readonly media: TweetPreviewMedia }) {
   const playVideo = (event: MouseEvent<HTMLButtonElement>) => {
     stopCardEvent(event);
     setPlaying(true);
-  };
-
-  const stopVideoEvent = (event: SyntheticEvent<HTMLVideoElement>) => {
-    event.stopPropagation();
-    event.nativeEvent.stopImmediatePropagation();
   };
 
   if (posterUrl && !playing) {
@@ -479,26 +963,18 @@ function TweetMediaGridVideo({ media }: { readonly media: TweetPreviewMedia }) {
     );
   }
 
-  return (
-    <video
-      src={media.videoUrl}
-      poster={posterUrl}
-      className="tw-h-full tw-w-full tw-object-contain"
-      controls
-      playsInline
-      preload="metadata"
+  return media.videoUrl ? (
+    <TwitterVideoPlayer
+      allowQualitySelection={false}
       autoPlay={playing}
-      onClick={stopVideoEvent}
-    >
-      <track
-        kind="captions"
-        src={media.captionsUrl ?? "data:text/vtt,WEBVTT"}
-        srcLang="en"
-        label="Captions"
-        default
-      />
-    </video>
-  );
+      captionsUrl={media.captionsUrl}
+      className="tw-h-full tw-w-full tw-object-contain"
+      hlsUrl={media.videoHlsUrl}
+      posterUrl={posterUrl}
+      variants={media.videoVariants}
+      videoUrl={media.videoUrl}
+    />
+  ) : null;
 }
 
 function TweetMediaGridItem({
@@ -624,7 +1100,9 @@ function TweetMedia({
     return (
       <TweetVideo
         captionsUrl={preview.mediaCaptionsUrl}
+        hlsUrl={preview.mediaVideoHlsUrl}
         posterUrl={preview.mediaPosterUrl ?? preview.mediaImageUrl}
+        variants={preview.mediaVideoVariants}
         videoUrl={preview.mediaVideoUrl}
       />
     );
@@ -648,18 +1126,14 @@ function TweetMedia({
 }
 
 function TweetActions({
-  copied,
-  onCopy,
   preview,
   tweetId,
 }: {
-  readonly copied: boolean;
-  readonly onCopy: (event: MouseEvent<HTMLButtonElement>) => void;
   readonly preview: TweetPreview;
   readonly tweetId: string;
 }) {
   return (
-    <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2">
+    <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2 tw-px-10">
       <Link
         href={`https://x.com/intent/tweet?in_reply_to=${tweetId}`}
         target="_blank"
@@ -709,10 +1183,6 @@ function TweetActions({
           <span>{formatCount(preview.bookmarkCount)}</span>
         </div>
       )}
-      <button type="button" onClick={onCopy} className={ACTION_CLASSES}>
-        <LinkIcon className="tw-h-5 tw-w-5" />
-        <span>{copied ? "Copied" : "Copy"}</span>
-      </button>
     </div>
   );
 }
@@ -822,7 +1292,7 @@ export default function TwitterPreviewCard({
             target="_blank"
             rel="noopener noreferrer nofollow"
             onClick={stopCardEvent}
-            className="tw-min-w-0 tw-truncate tw-text-[#8b98a5] tw-no-underline hover:tw-text-[#f7f9f9]"
+            className="tw-min-w-0 tw-truncate tw-text-[#8b98a5] tw-no-underline hover:tw-text-[#8b98a5] focus:tw-text-[#8b98a5]"
           >
             {timestamp ?? `x.com${xPostPath}`}
           </Link>
@@ -836,14 +1306,7 @@ export default function TwitterPreviewCard({
           )}
         </div>
 
-        {!hideActions && (
-          <TweetActions
-            copied={copied}
-            onCopy={copyLink}
-            preview={preview}
-            tweetId={tweetId}
-          />
-        )}
+        {!hideActions && <TweetActions preview={preview} tweetId={tweetId} />}
       </div>
     </article>
   );

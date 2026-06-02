@@ -3,8 +3,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 export const ACTIVITY_PAGE_SIZE = 10;
 export const SEARCH_PARAM_ACTIVITY = "activity";
 export const WALLET_ACTIVITY_FILTER_PARAM = "wallet-activity";
-export const WALLET_ACTIVITY_PAGE_PARAM = "page";
-export const WALLET_DISTRIBUTION_PAGE_PARAM = "page";
+export const WALLET_ACTIVITY_PAGE_PARAM = "wallet-activity-page";
+export const WALLET_DISTRIBUTION_PAGE_PARAM = "distribution-page";
 
 const getTotalPages = (count: number | undefined, pageSize: number) =>
   typeof count === "number" && count > 0

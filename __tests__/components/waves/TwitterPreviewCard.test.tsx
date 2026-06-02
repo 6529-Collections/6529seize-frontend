@@ -105,8 +105,32 @@ describe("TwitterPreviewCard", () => {
       authorHandle: "elonmusk",
       text: "Humans using Mythos as seen by Mythos",
       mediaImageUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
-      mediaVideoUrl: "https://video.twimg.com/tweet_video/example.mp4",
+      mediaVideoUrl: "https://video.twimg.com/tweet_video/1080x1350.mp4",
+      mediaVideoHlsUrl: "https://video.twimg.com/tweet_video/playlist.m3u8",
       mediaPosterUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
+      mediaVideoVariants: [
+        {
+          url: "https://video.twimg.com/tweet_video/2160x2700.mp4",
+          width: 2160,
+          height: 2700,
+          quality: 2160,
+          bitrate: 25000000,
+        },
+        {
+          url: "https://video.twimg.com/tweet_video/1080x1350.mp4",
+          width: 1080,
+          height: 1350,
+          quality: 1080,
+          bitrate: 10368000,
+        },
+        {
+          url: "https://video.twimg.com/tweet_video/720x900.mp4",
+          width: 720,
+          height: 900,
+          quality: 720,
+          bitrate: 2176000,
+        },
+      ],
     });
 
     const { container } = render(
@@ -119,9 +143,11 @@ describe("TwitterPreviewCard", () => {
     await screen.findByTestId("twitter-post-preview");
     const video = container.querySelector("video");
 
-    expect(video).toHaveAttribute(
-      "src",
-      "https://video.twimg.com/tweet_video/example.mp4"
+    await waitFor(() =>
+      expect(video).toHaveAttribute(
+        "src",
+        "https://video.twimg.com/tweet_video/1080x1350.mp4"
+      )
     );
     expect(video).toHaveAttribute(
       "poster",
@@ -132,6 +158,54 @@ describe("TwitterPreviewCard", () => {
       "kind",
       "captions"
     );
+
+    expect(screen.queryByText("1080p")).not.toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Video quality" })
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Video quality" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Video quality")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Auto/ })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    );
+    expect(screen.queryByText("(1080p)")).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "2160p" })).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Close video quality menu" })
+    );
+    expect(
+      screen.queryByRole("dialog", { name: "Video quality" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Video quality" })
+    );
+    if (video) {
+      Object.defineProperty(video, "currentTime", {
+        configurable: true,
+        writable: true,
+        value: 12,
+      });
+      Object.defineProperty(video, "duration", {
+        configurable: true,
+        value: 30,
+      });
+      Object.defineProperty(video, "readyState", {
+        configurable: true,
+        value: HTMLMediaElement.HAVE_METADATA,
+      });
+    }
+    await userEvent.click(screen.getByRole("radio", { name: "720p" }));
+    await waitFor(() =>
+      expect(container.querySelector("video")).toHaveAttribute(
+        "src",
+        "https://video.twimg.com/tweet_video/720x900.mp4"
+      )
+    );
+    expect(container.querySelector("video")?.currentTime).toBe(12);
   });
 
   it("renders the tweet preview card as a native link", async () => {
@@ -174,7 +248,18 @@ describe("TwitterPreviewCard", () => {
         {
           type: "video",
           videoUrl: "https://video.twimg.com/ext_tw_video/video-one.mp4",
+          videoHlsUrl: "https://video.twimg.com/ext_tw_video/video-one.m3u8",
           posterUrl: "https://pbs.twimg.com/media/video-poster.jpg",
+          videoVariants: [
+            {
+              url: "https://video.twimg.com/ext_tw_video/video-one-1080.mp4",
+              quality: 1080,
+            },
+            {
+              url: "https://video.twimg.com/ext_tw_video/video-one.mp4",
+              quality: 720,
+            },
+          ],
         },
         {
           type: "image",
@@ -195,10 +280,14 @@ describe("TwitterPreviewCard", () => {
     expect(screen.getAllByRole("img", { name: "Gallery tweet" })).toHaveLength(
       2
     );
+    await userEvent.click(screen.getByRole("button", { name: "Tweet video" }));
     expect(container.querySelector("video")).toHaveAttribute(
       "src",
       "https://video.twimg.com/ext_tw_video/video-one.mp4"
     );
+    expect(
+      screen.queryByRole("button", { name: "Video quality" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders reply context and clickable mention links", async () => {
@@ -265,7 +354,7 @@ describe("TwitterPreviewCard", () => {
     );
   });
 
-  it("copies the original Twitter/X post link", async () => {
+  it("does not show a copy action in the tweet action row", async () => {
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2049202644879565155",
       url: "https://x.com/Mayudropsphotos/status/2049202644879565155",
@@ -278,15 +367,7 @@ describe("TwitterPreviewCard", () => {
     render(<TwitterPreviewCard href={href} tweetId="2049202644879565155" />);
 
     await screen.findByTestId("twitter-post-preview");
-    await userEvent.click(screen.getByRole("button", { name: /copy/i }));
-
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(href);
-    expect(screen.getByRole("button", { name: /copy/i })).toHaveTextContent(
-      "Copied"
-    );
-    expect(screen.getByRole("button", { name: /copy/i })).not.toHaveTextContent(
-      "Copy link"
-    );
+    expect(screen.queryByRole("button", { name: /copy/i })).toBeNull();
   });
 
   it("shows a native fallback card when metadata cannot be fetched", async () => {
