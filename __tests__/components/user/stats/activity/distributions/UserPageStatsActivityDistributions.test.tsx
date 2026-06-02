@@ -77,7 +77,7 @@ test("hydrates the page from query params and updates the url on page change", a
   });
 });
 
-test("falls back to the legacy page query param for distribution deep links", async () => {
+test("preserves collected page query param without using it for distributions", async () => {
   search.set("activity", "distributions");
   search.set("page", "4");
 
@@ -91,11 +91,11 @@ test("falls back to the legacy page query param for distribution deep links", as
   const distributionsQuery = mockUseQuery.mock.calls
     .map((call) => call[0] as { queryKey: unknown[] })
     .find((config) => config.queryKey[0] === QueryKey.PROFILE_DISTRIBUTIONS);
-  expect(distributionsQuery?.queryKey[1]).toMatchObject({ page: "4" });
+  expect(distributionsQuery?.queryKey[1]).toMatchObject({ page: "1" });
 
   await userEvent.click(screen.getByTestId("set-page"));
   expect(replace).toHaveBeenCalledWith(
-    "/profile?activity=distributions&distribution-page=3",
+    "/profile?activity=distributions&page=4&distribution-page=3",
     {
       scroll: false,
     }

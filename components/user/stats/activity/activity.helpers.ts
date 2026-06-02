@@ -5,7 +5,6 @@ export const SEARCH_PARAM_ACTIVITY = "activity";
 export const WALLET_ACTIVITY_FILTER_PARAM = "wallet-activity";
 export const WALLET_ACTIVITY_PAGE_PARAM = "wallet-activity-page";
 export const WALLET_DISTRIBUTION_PAGE_PARAM = "distribution-page";
-export const LEGACY_DETAILS_PAGE_PARAM = "page";
 
 type SearchParamsReader = {
   readonly get: (name: string) => string | null;
@@ -20,23 +19,13 @@ const parsePageFilter = (page: string | null): number =>
   page && !Number.isNaN(+page) ? +page : 1;
 
 export const getActivityDetailsPageFilter = ({
-  activity,
   pageParam,
   searchParams,
 }: {
-  readonly activity: "wallet-activity" | "distributions";
   readonly pageParam: string;
   readonly searchParams: SearchParamsReader;
 }): number => {
-  const page = searchParams.get(pageParam);
-  if (page) {
-    return parsePageFilter(page);
-  }
-
-  const activeActivity = searchParams.get(SEARCH_PARAM_ACTIVITY);
-  return activeActivity === activity
-    ? parsePageFilter(searchParams.get(LEGACY_DETAILS_PAGE_PARAM))
-    : 1;
+  return parsePageFilter(searchParams.get(pageParam));
 };
 
 export const getActivityWalletsParam = ({

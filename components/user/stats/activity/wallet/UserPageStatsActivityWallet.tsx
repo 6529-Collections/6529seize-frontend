@@ -15,7 +15,6 @@ import {
   getActivityDetailsPageFilter,
   getActivityPaginationState,
   getActivityWalletsParam,
-  LEGACY_DETAILS_PAGE_PARAM,
   SEARCH_PARAM_ACTIVITY,
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
@@ -70,7 +69,6 @@ export default function UserPageStatsActivityWallet({
   const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
   const activeFilter = pathToEnum(activity ?? "");
   const pageFilter = getActivityDetailsPageFilter({
-    activity: "wallet-activity",
     pageParam: WALLET_ACTIVITY_PAGE_PARAM,
     searchParams,
   });
@@ -86,7 +84,6 @@ export default function UserPageStatsActivityWallet({
       for (const { name, value } of config) {
         params.set(name, value);
       }
-      params.delete(LEGACY_DETAILS_PAGE_PARAM);
       return params.toString();
     },
     [searchParams]
