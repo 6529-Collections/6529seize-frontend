@@ -81,9 +81,7 @@ function stopMediaEvent(event: SyntheticEvent<HTMLElement>) {
   event.nativeEvent.stopImmediatePropagation();
 }
 
-function readObjectRecord(
-  value: unknown
-): Record<string, unknown> | undefined {
+function readObjectRecord(value: unknown): Record<string, unknown> | undefined {
   if (typeof value !== "object" || value === null) {
     return undefined;
   }
@@ -191,9 +189,13 @@ function getVideoVariantLabel(
 
 function buildVideoVariantOptions(
   videoUrl: string,
-  variants: readonly TweetPreviewVideoVariant[] | undefined
+  variants: readonly TweetPreviewVideoVariant[] | undefined,
+  hlsUrl: string | undefined
 ): readonly TweetPreviewVideoVariant[] {
   if (!variants || variants.length === 0) {
+    if (videoUrl === hlsUrl) {
+      return [];
+    }
     return [{ url: videoUrl }];
   }
 
@@ -213,13 +215,15 @@ function buildVideoQualityOptions({
   readonly variants: readonly TweetPreviewVideoVariant[] | undefined;
   readonly videoUrl: string;
 }): readonly VideoQualityOption[] {
-  const manualOptions = buildVideoVariantOptions(videoUrl, variants).map(
-    (variant, index, allVariants) => ({
-      id: variant.url,
-      label: getVideoVariantLabel(variant, allVariants, index),
-      selection: { type: "variant" as const, url: variant.url },
-    })
-  );
+  const manualOptions = buildVideoVariantOptions(
+    videoUrl,
+    variants,
+    hlsUrl
+  ).map((variant, index, allVariants) => ({
+    id: variant.url,
+    label: getVideoVariantLabel(variant, allVariants, index),
+    selection: { type: "variant" as const, url: variant.url },
+  }));
 
   if (hlsUrl) {
     return [

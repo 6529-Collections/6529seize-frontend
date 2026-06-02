@@ -217,6 +217,31 @@ describe("TwitterPreviewCard", () => {
     expect(container.querySelector("video")?.currentTime).toBe(12);
   });
 
+  it("does not render a duplicate manual quality option for HLS-only video", async () => {
+    mockedFetchTwitterPreview.mockResolvedValue({
+      tweetId: "2057727911914844378",
+      url: "https://x.com/elonmusk/status/2057727911914844378",
+      authorName: "Elon Musk",
+      authorHandle: "elonmusk",
+      text: "HLS only",
+      mediaVideoUrl: "https://video.twimg.com/tweet_video/playlist.m3u8",
+      mediaVideoHlsUrl: "https://video.twimg.com/tweet_video/playlist.m3u8",
+    });
+
+    render(
+      <TwitterPreviewCard
+        href="https://x.com/elonmusk/status/2057727911914844378"
+        tweetId="2057727911914844378"
+      />
+    );
+
+    await screen.findByTestId("twitter-post-preview");
+
+    expect(
+      screen.queryByRole("button", { name: "Video quality" })
+    ).not.toBeInTheDocument();
+  });
+
   it("renders the tweet preview card as a native link", async () => {
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2049202644879565155",
