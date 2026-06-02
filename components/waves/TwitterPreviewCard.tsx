@@ -844,6 +844,7 @@ function TwitterVideoPlayer({
     readonly currentTime: number;
     readonly wasPlaying: boolean;
   } | null>(null);
+  const previousSourceRef = useRef({ hlsUrl, videoUrl });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentAutoQuality, setCurrentAutoQuality] = useState<
     number | undefined
@@ -857,6 +858,15 @@ function TwitterVideoPlayer({
   );
 
   useEffect(() => {
+    const previousSource = previousSourceRef.current;
+    if (
+      previousSource.hlsUrl === hlsUrl &&
+      previousSource.videoUrl === videoUrl
+    ) {
+      return;
+    }
+
+    previousSourceRef.current = { hlsUrl, videoUrl };
     setSelection(getDefaultQualitySelection(hlsUrl, videoUrl));
     setIsMenuOpen(false);
   }, [hlsUrl, videoUrl]);
