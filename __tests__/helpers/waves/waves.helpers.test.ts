@@ -4,6 +4,7 @@ import {
   convertWaveToUpdateWave,
   getCreateWaveStepStatus,
 } from "@/helpers/waves/waves.helpers";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CreateWaveStepStatus } from "@/types/waves.types";
 
@@ -64,6 +65,7 @@ describe("waves.helpers", () => {
         voting: {
           scope: { group: { id: "vgroup" } },
           credit_type: "credit",
+          credit_scope: ApiWaveCreditScope.Wave,
           credit_category: "cat",
           creditor: { id: "cred1" },
           signature_required: false,
@@ -104,6 +106,7 @@ describe("waves.helpers", () => {
         voting: {
           scope: { group_id: "vgroup" },
           credit_type: "credit",
+          credit_scope: ApiWaveCreditScope.Wave,
           credit_category: "cat",
           creditor_id: "cred1",
           signature_required: false,
@@ -229,6 +232,17 @@ describe("waves.helpers", () => {
       const result = convertWaveToUpdateWave(wave);
 
       expect(result.voting).not.toHaveProperty("credit_nfts");
+    });
+
+    it("preserves voting credit scope", () => {
+      const wave = makeWave();
+      wave.voting.credit_scope = ApiWaveCreditScope.Drop;
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.voting).toMatchObject({
+        credit_scope: ApiWaveCreditScope.Drop,
+      });
     });
 
     it.each([

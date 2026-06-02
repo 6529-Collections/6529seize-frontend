@@ -56,6 +56,7 @@ export const getOptimisticDrop = (
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
       voting_credit_type: wave.voting.credit_type,
+      voting_credit_scope: wave.voting.credit_scope,
       voting_period_start: wave.voting.period?.min ?? null,
       voting_period_end: wave.voting.period?.max ?? null,
       visibility_group_id: null,

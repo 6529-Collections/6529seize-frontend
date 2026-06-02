@@ -107,7 +107,7 @@ export const mapApiWaveOverviewToApiWaveMin = (
   pinned: wave.context_profile_context?.pinned ?? false,
   identity_wave: false,
   links_disabled: wave.links_disabled,
-  voting_credit_scope: ApiWaveCreditScope.Drop,
+  voting_credit_scope: ApiWaveCreditScope.Wave,
 });
 
 export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
