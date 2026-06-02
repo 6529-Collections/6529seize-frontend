@@ -76,12 +76,18 @@ const LINKS = {
 const CONTAINER_CLASS_NAME =
   "tw-w-full tw-flex tw-flex-col tw-pt-4 lg:tw-pr-2 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-full";
 
+const FAQ_PANEL_ANIMATION_SECONDS = 0.32;
+
 const FAQ_PANEL_TRANSITION = {
-  duration: 0.24,
-  ease: [0.16, 1, 0.3, 1],
+  height: {
+    duration: FAQ_PANEL_ANIMATION_SECONDS,
+    ease: [0.22, 1, 0.36, 1],
+  },
+  opacity: { duration: 0.18, ease: "easeOut" },
+  y: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
 } as const;
 
-const FAQ_SCROLL_ALIGNMENT_DELAY_MS = FAQ_PANEL_TRANSITION.duration * 1000 + 40;
+const FAQ_SCROLL_ALIGNMENT_DELAY_MS = FAQ_PANEL_ANIMATION_SECONDS * 1000 + 40;
 
 const INTRO_QA: readonly QaItem[] = [
   {
@@ -684,9 +690,9 @@ function FaqAccordionItem({
             id={panelId}
             role="region"
             aria-labelledby={buttonId}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0, y: -4 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -2 }}
             transition={FAQ_PANEL_TRANSITION}
             className="tw-overflow-hidden"
           >
