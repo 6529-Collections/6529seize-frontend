@@ -10,6 +10,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
+  getActivityDetailsPageFilter,
   getActivityPaginationState,
   getActivityWalletsParam,
   WALLET_DISTRIBUTION_PAGE_PARAM,
@@ -26,8 +27,10 @@ export default function UserPageStatsActivityDistributions({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const page = searchParams.get(WALLET_DISTRIBUTION_PAGE_PARAM);
-  const pageFilter = page && !Number.isNaN(+page) ? +page : 1;
+  const pageFilter = getActivityDetailsPageFilter({
+    pageParam: WALLET_DISTRIBUTION_PAGE_PARAM,
+    searchParams,
+  });
 
   const createQueryString = useCallback(
     (

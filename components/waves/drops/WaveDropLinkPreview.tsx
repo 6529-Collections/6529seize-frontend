@@ -202,6 +202,7 @@ export default function WaveDropLinkPreview({
           quotePath={quotePath}
           embedDepth={embedDepth}
           maxEmbedDepth={maxEmbedDepth}
+          hideLinkPreviews={drop?.hide_link_preview === true}
         />
       )}
     </LinkHandlerFrame>

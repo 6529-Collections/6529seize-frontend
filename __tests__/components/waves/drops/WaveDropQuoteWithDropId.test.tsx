@@ -72,7 +72,11 @@ describe("WaveDropQuoteWithDropId", () => {
   });
 
   it("uses maybeDrop without fetching fresh data", () => {
-    const maybeDrop = { id: "d1", wave: { id: "old-wave" } };
+    const maybeDrop = {
+      id: "d1",
+      wave: { id: "old-wave" },
+      hide_link_preview: true,
+    };
     useQuery.mockImplementation((opts: any) => {
       return { data: opts.initialData };
     });
@@ -87,6 +91,7 @@ describe("WaveDropQuoteWithDropId", () => {
     );
 
     expect(capturedProps.drop).toBe(maybeDrop);
+    expect(capturedProps.hideLinkPreviews).toBeTruthy();
     expect(capturedProps.isNotFound).toBe(false);
     const call = useQuery.mock.calls[0][0];
     expect(call.queryKey).toEqual([QueryKey.DROP, { drop_id: "d1" }]);

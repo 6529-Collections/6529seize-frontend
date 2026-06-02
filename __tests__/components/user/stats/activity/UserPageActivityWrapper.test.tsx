@@ -53,6 +53,8 @@ test("hydrates the active tab from query params and updates the url on change", 
 
   search.set("activity", "tdh-history");
   search.set("wallet-activity", "airdrops");
+  search.set("wallet-activity-page", "2");
+  search.set("distribution-page", "3");
   search.set("page", "2");
 
   render(<UserPageActivityWrapper profile={profile} activeAddress={null} />);
@@ -61,7 +63,10 @@ test("hydrates the active tab from query params and updates the url on change", 
 
   await user.click(screen.getByTestId("tab"));
 
-  expect(replace).toHaveBeenCalledWith("/profile?activity=distributions", {
-    scroll: false,
-  });
+  expect(replace).toHaveBeenCalledWith(
+    "/profile?activity=distributions&page=2",
+    {
+      scroll: false,
+    }
+  );
 });

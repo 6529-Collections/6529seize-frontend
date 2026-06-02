@@ -3,6 +3,7 @@ import clsx from "clsx";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import { getDropImageGalleryItemId } from "@/components/drops/view/part/dropImageGallery";
 import { ImageScale } from "@/helpers/image.helpers";
 import WaveDropPartContentMediaImage from "./WaveDropPartContentMediaImage";
 
@@ -92,6 +93,9 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       fullWidthMedia && media.mime_type.includes("image");
     const useImageIntrinsicHeight =
       !fullWidthMedia && media.mime_type.includes("image");
+    const galleryItemId = media.mime_type.includes("image")
+      ? getDropImageGalleryItemId("media", i, media.url)
+      : undefined;
     const useVideoIntrinsicHeight = media.mime_type.includes("video");
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
     const mediaContainerClassName = getMediaContainerClassName({
@@ -119,6 +123,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           src={media.url}
           imageScale={imageScale}
           imageObjectPosition={useImageIntrinsicHeight ? "left top" : "center"}
+          galleryItemId={galleryItemId}
         />
       );
     } else {
@@ -128,6 +133,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
           media_url={media.url}
           isCompetitionDrop={isCompetitionDrop}
           imageScale={imageScale}
+          galleryItemId={galleryItemId}
         />
       );
     }

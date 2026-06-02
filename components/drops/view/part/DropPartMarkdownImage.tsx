@@ -8,11 +8,13 @@ export type DropPartMarkdownImageLayout = "standalone" | "grouped";
 interface DropPartMarkdownImageProps {
   readonly src: string;
   readonly layout?: DropPartMarkdownImageLayout | undefined;
+  readonly galleryItemId?: string | undefined;
 }
 
 export default function DropPartMarkdownImage({
   src,
   layout = "standalone",
+  galleryItemId,
 }: DropPartMarkdownImageProps) {
   const wrapperClassName =
     layout === "grouped"
@@ -25,6 +27,7 @@ export default function DropPartMarkdownImage({
         src={src}
         loadStrategy="eager"
         intrinsicHeight
+        galleryItemId={galleryItemId}
       />
     </div>
   );

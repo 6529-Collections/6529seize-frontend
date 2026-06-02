@@ -157,9 +157,10 @@ Scope:
 
 - Hidden-tab fallback keeps the current query string.
 - Clicking a profile tab keeps only `address` and drops other query keys.
-- On `/{user}/collected`, `activity`, `wallet-activity`, and `page` can be used
-  inside `Details`; switching profile tabs drops those keys because tab
-  navigation keeps only `address`.
+- On `/{user}/collected`, `activity`, `wallet-activity`,
+  `wallet-activity-page`, and `distribution-page` can be used inside `Details`;
+  switching profile tabs drops those keys because tab navigation keeps only
+  `address`.
 - Canonical-handle redirects can normalize repeated query keys to one
   comma-separated value.
 - On mobile Identity, `Rep` opens first; switch to `NIC` for NIC actions and

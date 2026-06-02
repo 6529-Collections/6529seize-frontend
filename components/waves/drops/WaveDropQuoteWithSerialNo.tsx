@@ -56,6 +56,7 @@ const WaveDropQuoteWithSerialNo: React.FC<WaveDropQuoteWithSerialNoProps> = ({
       quotePath={quotePath}
       embedDepth={embedDepth}
       maxEmbedDepth={maxEmbedDepth}
+      hideLinkPreviews={drop?.hide_link_preview === true}
       onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
     />
   );

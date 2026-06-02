@@ -51,6 +51,14 @@ interface WaveDropPartContentMarkdownProps {
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly quorumCompactDetailsVisible?: boolean | undefined;
+  readonly onQuorumCompactDetailsVisibleChange?:
+    | ((areDetailsVisible: boolean) => void)
+    | undefined;
+  readonly quorumCompactOpenSectionKeys?: readonly string[] | undefined;
+  readonly onQuorumCompactSectionOpenChange?:
+    | ((sectionKey: string, isOpen: boolean) => void)
+    | undefined;
 }
 
 const WaveDropPartContentMarkdown: React.FC<
@@ -75,6 +83,10 @@ const WaveDropPartContentMarkdown: React.FC<
   embedDepth,
   maxEmbedDepth,
   fullWidthLinkPreviews = false,
+  quorumCompactDetailsVisible,
+  onQuorumCompactDetailsVisibleChange,
+  quorumCompactOpenSectionKeys,
+  onQuorumCompactSectionOpenChange,
 }) => {
   const { connectedProfile } = useAuth();
   const linkPreviewToggleControl = useDropLinkPreviewToggleControl(drop);
@@ -172,6 +184,10 @@ const WaveDropPartContentMarkdown: React.FC<
             fullWidthLinkPreviews={fullWidthLinkPreviews}
             linkPreviewToggleControl={linkPreviewToggleControl}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
+            areDetailsVisible={quorumCompactDetailsVisible}
+            onDetailsVisibleChange={onQuorumCompactDetailsVisibleChange}
+            openSectionKeys={quorumCompactOpenSectionKeys}
+            onSectionOpenChange={onQuorumCompactSectionOpenChange}
           />
         ) : (
           <DropPartMarkdownWithPropLogger
