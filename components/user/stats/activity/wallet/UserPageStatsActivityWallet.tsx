@@ -12,8 +12,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import {
   ACTIVITY_PAGE_SIZE,
+  getActivityDetailsPageFilter,
   getActivityPaginationState,
   getActivityWalletsParam,
+  LEGACY_DETAILS_PAGE_PARAM,
+  SEARCH_PARAM_ACTIVITY,
   WALLET_ACTIVITY_FILTER_PARAM,
   WALLET_ACTIVITY_PAGE_PARAM,
 } from "../activity.helpers";
@@ -65,9 +68,12 @@ export default function UserPageStatsActivityWallet({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
-  const page = searchParams.get(WALLET_ACTIVITY_PAGE_PARAM);
   const activeFilter = pathToEnum(activity ?? "");
-  const pageFilter = page && !Number.isNaN(+page) ? +page : 1;
+  const pageFilter = getActivityDetailsPageFilter({
+    activity: "wallet-activity",
+    pageParam: WALLET_ACTIVITY_PAGE_PARAM,
+    searchParams,
+  });
 
   const createQueryString = useCallback(
     (
@@ -80,6 +86,7 @@ export default function UserPageStatsActivityWallet({
       for (const { name, value } of config) {
         params.set(name, value);
       }
+      params.delete(LEGACY_DETAILS_PAGE_PARAM);
       return params.toString();
     },
     [searchParams]
@@ -92,6 +99,7 @@ export default function UserPageStatsActivityWallet({
         : filter;
     router.replace(
       `${pathname}?${createQueryString([
+        { name: SEARCH_PARAM_ACTIVITY, value: "wallet-activity" },
         { name: WALLET_ACTIVITY_FILTER_PARAM, value: enumToPath(targetFilter) },
         { name: WALLET_ACTIVITY_PAGE_PARAM, value: "1" },
       ])}`,
@@ -103,6 +111,7 @@ export default function UserPageStatsActivityWallet({
     (nextPage: number) => {
       router.replace(
         `${pathname}?${createQueryString([
+          { name: SEARCH_PARAM_ACTIVITY, value: "wallet-activity" },
           { name: WALLET_ACTIVITY_PAGE_PARAM, value: `${nextPage}` },
         ])}`,
         { scroll: false }

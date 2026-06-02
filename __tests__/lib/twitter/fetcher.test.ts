@@ -88,7 +88,7 @@ describe("fetchTweetPreview", () => {
       status: 200,
       json: async () => ({
         __typename: "Tweet",
-        id_str: "2057513333985554492",
+        id_str: "2057513333985554493",
         text: "Post text",
         user: {
           name: "Mayudrops",
@@ -100,7 +100,7 @@ describe("fetchTweetPreview", () => {
     const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
-      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "https://x.com/Mayudropsphotos/status/2057513333985554493",
       { fetchImpl }
     );
 
@@ -114,7 +114,7 @@ describe("fetchTweetPreview", () => {
       status: 200,
       json: async () => ({
         __typename: "Tweet",
-        id_str: "2057513333985554492",
+        id_str: "2057513333985554494",
         text: "Post text",
         user: {
           name: "Mayudrops",
@@ -138,7 +138,7 @@ describe("fetchTweetPreview", () => {
     const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
-      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "https://x.com/Mayudropsphotos/status/2057513333985554494",
       { fetchImpl }
     );
 
@@ -150,13 +150,51 @@ describe("fetchTweetPreview", () => {
     ]);
   });
 
+  it("does not use arbitrary hosts as video variants", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2057513333985554496",
+        text: "Post text",
+        user: {
+          name: "Mayudrops",
+          screen_name: "Mayudropsphotos",
+        },
+        video: {
+          variants: [
+            {
+              src: "https://twimg.com.evil.example/tweet_video/example.m3u8",
+              content_type: "application/x-mpegURL",
+            },
+            {
+              src: "https://twimg.com.evil.example/tweet_video/example.mp4",
+              content_type: "video/mp4",
+            },
+          ],
+        },
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554496",
+      { fetchImpl }
+    );
+
+    expect(preview.mediaVideoUrl).toBeUndefined();
+    expect(preview.mediaVideoHlsUrl).toBeUndefined();
+    expect(preview.media).toBeUndefined();
+  });
+
   it("prefers MP4 video variants when multiple formats are available", async () => {
     const response = {
       ok: true,
       status: 200,
       json: async () => ({
         __typename: "Tweet",
-        id_str: "2057513333985554492",
+        id_str: "2057513333985554495",
         text: "Post text",
         user: {
           name: "Mayudrops",
@@ -179,7 +217,7 @@ describe("fetchTweetPreview", () => {
     const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
-      "https://x.com/Mayudropsphotos/status/2057513333985554492",
+      "https://x.com/Mayudropsphotos/status/2057513333985554495",
       { fetchImpl }
     );
 
@@ -188,13 +226,103 @@ describe("fetchTweetPreview", () => {
     );
   });
 
+  it("defaults video previews to the best MP4 up to 1080 while preserving higher variants", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2061452420199358850",
+        text: "Northern Exposure Three. Coming soon ...",
+        user: {
+          name: "Intrepid",
+          screen_name: "intrepid_p",
+        },
+        mediaDetails: [
+          {
+            media_url_https:
+              "https://pbs.twimg.com/amplify_video_thumb/2061451977297633280/img/poster.jpg",
+            video_info: {
+              variants: [
+                {
+                  url: "https://video.twimg.com/amplify_video/2061451977297633280/pl/playlist.m3u8",
+                  content_type: "application/x-mpegURL",
+                },
+                {
+                  bitrate: 632000,
+                  content_type: "video/mp4",
+                  url: "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/320x400/low.mp4",
+                },
+                {
+                  bitrate: 950000,
+                  content_type: "video/mp4",
+                  url: "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/480x600/medium.mp4",
+                },
+                {
+                  bitrate: 2176000,
+                  content_type: "video/mp4",
+                  url: "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/720x900/high.mp4",
+                },
+                {
+                  bitrate: 10368000,
+                  content_type: "video/mp4",
+                  url: "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/1080x1350/full-hd.mp4",
+                },
+                {
+                  bitrate: 25000000,
+                  content_type: "video/mp4",
+                  url: "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/2160x2700/uhd.mp4",
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/intrepid_p/status/2061452420199358850",
+      { fetchImpl }
+    );
+
+    expect(preview.mediaVideoUrl).toBe(
+      "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/1080x1350/full-hd.mp4"
+    );
+    expect(preview.mediaVideoHlsUrl).toBe(
+      "https://video.twimg.com/amplify_video/2061451977297633280/pl/playlist.m3u8"
+    );
+    expect(
+      preview.mediaVideoVariants?.map((variant) => variant.quality)
+    ).toEqual([2160, 1080, 720, 480, 320]);
+    expect(preview.mediaVideoVariants?.[0]).toMatchObject({
+      url: "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/2160x2700/uhd.mp4",
+      bitrate: 25000000,
+      width: 2160,
+      height: 2700,
+      quality: 2160,
+    });
+    expect(preview.media).toEqual([
+      {
+        type: "video",
+        videoUrl:
+          "https://video.twimg.com/amplify_video/2061451977297633280/vid/avc1/1080x1350/full-hd.mp4",
+        videoHlsUrl:
+          "https://video.twimg.com/amplify_video/2061451977297633280/pl/playlist.m3u8",
+        posterUrl:
+          "https://pbs.twimg.com/amplify_video_thumb/2061451977297633280/img/poster.jpg",
+        videoVariants: preview.mediaVideoVariants,
+      },
+    ]);
+  });
+
   it("collects multiple syndication media items for gallery tweets", async () => {
     const response = {
       ok: true,
       status: 200,
       json: async () => ({
         __typename: "Tweet",
-        id_str: "2058813617554723314",
+        id_str: "2058813617554723315",
         text: "Gallery tweet",
         user: {
           name: "CasaNUA.6529",
@@ -224,7 +352,7 @@ describe("fetchTweetPreview", () => {
     const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
-      "https://x.com/Casa_NUA/status/2058813617554723314",
+      "https://x.com/Casa_NUA/status/2058813617554723315",
       { fetchImpl }
     );
 
@@ -253,7 +381,7 @@ describe("fetchTweetPreview", () => {
       status: 200,
       json: async () => ({
         __typename: "Tweet",
-        id_str: "2058813617554723314",
+        id_str: "2058813617554723316",
         full_text: fullText,
         display_text_range: [hiddenPrefix.length, fullText.length - 32],
         in_reply_to_screen_name: "Casa_NUA",
@@ -266,7 +394,7 @@ describe("fetchTweetPreview", () => {
     const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
-      "https://x.com/Casa_NUA/status/2058813617554723314",
+      "https://x.com/Casa_NUA/status/2058813617554723316",
       { fetchImpl }
     );
 
@@ -283,7 +411,7 @@ describe("fetchTweetPreview", () => {
       status: 200,
       json: async () => ({
         __typename: "Tweet",
-        id_str: "2058813617554723314",
+        id_str: "2058813617554723317",
         text: `${hiddenPrefix}Here sharing a display with @Viva_La_Vandal's Meme Enjoyoor and @BillyNFTees' The Sacrifice of the Memes, two`,
         display_text_range: [hiddenPrefix.length, 126],
         user: {
@@ -295,7 +423,7 @@ describe("fetchTweetPreview", () => {
     const fetchImpl = jest.fn().mockResolvedValueOnce(response);
 
     const preview = await fetchTweetPreview(
-      "https://x.com/Casa_NUA/status/2058813617554723314",
+      "https://x.com/Casa_NUA/status/2058813617554723317",
       { fetchImpl }
     );
 

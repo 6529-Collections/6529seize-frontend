@@ -5,6 +5,7 @@ import { parseTwitterOEmbed } from "./parser";
 import type {
   TweetPreview,
   TweetPreviewMedia,
+  TweetPreviewVideoVariant,
   TwitterOEmbedResponse,
 } from "./types";
 import { parseTweetUrl } from "./url";
@@ -17,6 +18,7 @@ const TWITTER_PREVIEW_CACHE_MAX_ITEMS = 500;
 const TWITTER_PREVIEW_FETCH_TIMEOUT_MS = 8000;
 const TWITTER_MEDIA_FETCH_TIMEOUT_MS = 5000;
 const TWEET_PREVIEW_TEXT_MAX_CHARS = 260;
+const DEFAULT_MAX_VIDEO_QUALITY = 1080;
 
 const previewCache = new LruTtlCache<string, Promise<TweetPreview>>({
   max: TWITTER_PREVIEW_CACHE_MAX_ITEMS,
@@ -29,6 +31,10 @@ type FetchTweetPreviewOptions = {
 
 type MutableTweetPreview = {
   -readonly [Key in keyof TweetPreview]: TweetPreview[Key];
+};
+
+type MutableTweetPreviewMedia = {
+  -readonly [Key in keyof TweetPreviewMedia]: TweetPreviewMedia[Key];
 };
 
 const getSyndicationToken = (tweetId: string): string =>
@@ -278,52 +284,263 @@ const isMp4VideoVariant = (
   variant: Record<string, unknown>,
   url: string
 ): boolean => {
-  const contentType = readString(variant["content_type"])?.toLowerCase();
+  const contentType = (
+    readString(variant["content_type"]) ?? readString(variant["type"])
+  )?.toLowerCase();
   return contentType === "video/mp4" || url.toLowerCase().endsWith(".mp4");
 };
 
-const findBestVideoVariantUrl = (
+const isHlsVideoVariant = (
+  variant: Record<string, unknown>,
+  url: string
+): boolean => {
+  const contentType = (
+    readString(variant["content_type"]) ?? readString(variant["type"])
+  )?.toLowerCase();
+  return (
+    contentType === "application/x-mpegurl" ||
+    contentType === "application/vnd.apple.mpegurl" ||
+    url.toLowerCase().includes(".m3u8")
+  );
+};
+
+const readVideoDimensionsFromUrl = (
+  value: string
+): { readonly width: number; readonly height: number } | undefined => {
+  const match = /\/(\d{2,5})x(\d{2,5})\//u.exec(value);
+  const width = match?.[1] ? Number(match[1]) : undefined;
+  const height = match?.[2] ? Number(match[2]) : undefined;
+  return width && height ? { width, height } : undefined;
+};
+
+const readVideoVariantDimensions = (
+  variant: Record<string, unknown>,
+  url: string
+): { readonly width?: number; readonly height?: number } => {
+  const urlDimensions = readVideoDimensionsFromUrl(url);
+  const width = readNumberish(variant["width"]) ?? urlDimensions?.width;
+  const height = readNumberish(variant["height"]) ?? urlDimensions?.height;
+  return {
+    ...(width ? { width } : {}),
+    ...(height ? { height } : {}),
+  };
+};
+
+const getVariantQuality = (dimensions: {
+  readonly width?: number;
+  readonly height?: number;
+}): number | undefined =>
+  dimensions.width && dimensions.height
+    ? Math.min(dimensions.width, dimensions.height)
+    : undefined;
+
+const readVideoVariant = (
+  variant: Record<string, unknown>,
+  url: string
+): TweetPreviewVideoVariant | undefined => {
+  if (!isMp4VideoVariant(variant, url)) {
+    return undefined;
+  }
+
+  const dimensions = readVideoVariantDimensions(variant, url);
+  const quality = getVariantQuality(dimensions);
+  const bitrate = readNumberish(variant["bitrate"]);
+  return {
+    url,
+    ...dimensions,
+    ...(quality ? { quality } : {}),
+    ...(bitrate ? { bitrate } : {}),
+  };
+};
+
+const compareVideoVariants = (
+  left: TweetPreviewVideoVariant,
+  right: TweetPreviewVideoVariant
+): number => {
+  const qualityDelta = (left.quality ?? 0) - (right.quality ?? 0);
+  if (qualityDelta !== 0) {
+    return qualityDelta;
+  }
+
+  const bitrateDelta = (left.bitrate ?? 0) - (right.bitrate ?? 0);
+  if (bitrateDelta !== 0) {
+    return bitrateDelta;
+  }
+
+  const leftPixels = (left.width ?? 0) * (left.height ?? 0);
+  const rightPixels = (right.width ?? 0) * (right.height ?? 0);
+  return leftPixels - rightPixels;
+};
+
+const preferHigherQualityVariant = (
+  best: TweetPreviewVideoVariant | undefined,
+  variant: TweetPreviewVideoVariant
+): TweetPreviewVideoVariant => {
+  if (best) {
+    return compareVideoVariants(variant, best) > 0 ? variant : best;
+  }
+
+  return variant;
+};
+
+const preferLowerQualityVariant = (
+  lowest: TweetPreviewVideoVariant | undefined,
+  variant: TweetPreviewVideoVariant
+): TweetPreviewVideoVariant => {
+  if (lowest) {
+    return compareVideoVariants(variant, lowest) < 0 ? variant : lowest;
+  }
+
+  return variant;
+};
+
+const getBestVideoVariant = (
+  variants: readonly TweetPreviewVideoVariant[]
+): TweetPreviewVideoVariant | undefined =>
+  variants.reduce<TweetPreviewVideoVariant | undefined>(
+    (best, variant) => preferHigherQualityVariant(best, variant),
+    undefined
+  );
+
+const findDefaultVideoVariant = (
+  variants: readonly TweetPreviewVideoVariant[]
+): TweetPreviewVideoVariant | undefined => {
+  const cappedVariants = variants.filter(
+    (variant) =>
+      variant.quality !== undefined &&
+      variant.quality <= DEFAULT_MAX_VIDEO_QUALITY
+  );
+
+  if (cappedVariants.length > 0) {
+    return getBestVideoVariant(cappedVariants);
+  }
+
+  const qualityVariants = variants.filter(
+    (variant) => variant.quality !== undefined
+  );
+  if (qualityVariants.length > 0) {
+    return qualityVariants.reduce<TweetPreviewVideoVariant | undefined>(
+      (lowest, variant) => preferLowerQualityVariant(lowest, variant),
+      undefined
+    );
+  }
+
+  return getBestVideoVariant(variants);
+};
+
+const sortVideoVariantsForDisplay = (
+  variants: readonly TweetPreviewVideoVariant[]
+): readonly TweetPreviewVideoVariant[] =>
+  [...variants].sort((first, second) => compareVideoVariants(second, first));
+
+const findVideoVariants = (
   variants: readonly unknown[],
   urlKey: "src" | "url"
-): string | undefined => {
-  let fallbackUrl: string | undefined;
+): readonly TweetPreviewVideoVariant[] => {
+  const videoVariants: TweetPreviewVideoVariant[] = [];
 
   for (const variant of variants) {
     const variantRecord = readRecord(variant);
     const url = readString(variantRecord?.[urlKey]);
-    if (!url) {
+    if (!variantRecord || !url || !isTwitterMediaUrl(url)) {
       continue;
     }
 
-    if (variantRecord && isMp4VideoVariant(variantRecord, url)) {
-      return url;
+    const videoVariant = readVideoVariant(variantRecord, url);
+    if (
+      videoVariant &&
+      !videoVariants.some((candidate) => candidate.url === videoVariant.url)
+    ) {
+      videoVariants.push(videoVariant);
     }
-
-    fallbackUrl ??= url;
   }
 
-  return fallbackUrl;
+  return sortVideoVariantsForDisplay(videoVariants);
 };
 
-const findVideoUrl = (record: Record<string, unknown>): string | undefined => {
+const findFallbackVideoVariantUrl = (
+  variants: readonly unknown[],
+  urlKey: "src" | "url"
+): string | undefined => {
+  for (const variant of variants) {
+    const variantRecord = readRecord(variant);
+    const url = readString(variantRecord?.[urlKey]);
+    if (url && isTwitterMediaUrl(url)) {
+      return url;
+    }
+  }
+
+  return undefined;
+};
+
+const findHlsVideoVariantUrl = (
+  variants: readonly unknown[],
+  urlKey: "src" | "url"
+): string | undefined => {
+  for (const variant of variants) {
+    const variantRecord = readRecord(variant);
+    const url = readString(variantRecord?.[urlKey]);
+    if (
+      variantRecord &&
+      url &&
+      isTwitterMediaUrl(url) &&
+      isHlsVideoVariant(variantRecord, url)
+    ) {
+      return url;
+    }
+  }
+
+  return undefined;
+};
+
+type TweetVideoResult = {
+  readonly videoUrl: string;
+  readonly videoHlsUrl?: string;
+  readonly videoVariants?: readonly TweetPreviewVideoVariant[];
+};
+
+const createVideoResult = (
+  variants: readonly unknown[],
+  urlKey: "src" | "url"
+): TweetVideoResult | undefined => {
+  const videoHlsUrl = findHlsVideoVariantUrl(variants, urlKey);
+  const videoVariants = findVideoVariants(variants, urlKey);
+  const selectedVariant = findDefaultVideoVariant(videoVariants);
+  if (selectedVariant) {
+    return {
+      videoUrl: selectedVariant.url,
+      ...(videoHlsUrl ? { videoHlsUrl } : {}),
+      ...(videoVariants.length > 1 ? { videoVariants } : {}),
+    };
+  }
+
+  const fallbackUrl = findFallbackVideoVariantUrl(variants, urlKey);
+  if (!fallbackUrl) {
+    return undefined;
+  }
+
+  if (videoHlsUrl) {
+    return { videoUrl: fallbackUrl, videoHlsUrl };
+  }
+
+  return { videoUrl: fallbackUrl };
+};
+
+const findVideoResult = (
+  record: Record<string, unknown>
+): TweetVideoResult | undefined => {
   const video = readRecord(record["video"]);
-  const videoUrl = findBestVideoVariantUrl(
-    readArray(video?.["variants"]),
-    "src"
-  );
-  if (videoUrl) {
-    return videoUrl;
+  const videoResult = createVideoResult(readArray(video?.["variants"]), "src");
+  if (videoResult) {
+    return videoResult;
   }
 
   const mediaDetails = readArray(record["mediaDetails"]);
   for (const mediaDetail of mediaDetails) {
     const videoInfo = readRecord(readRecord(mediaDetail)?.["video_info"]);
-    const url = findBestVideoVariantUrl(
-      readArray(videoInfo?.["variants"]),
-      "url"
-    );
-    if (url) {
-      return url;
+    const result = createVideoResult(readArray(videoInfo?.["variants"]), "url");
+    if (result) {
+      return result;
     }
   }
 
@@ -362,16 +579,29 @@ const createImageMedia = (
     : undefined;
 
 const createVideoMedia = (
-  videoUrl: string | undefined,
+  videoResult: TweetVideoResult | undefined,
   posterUrl: string | undefined
-): TweetPreviewMedia | undefined =>
-  videoUrl
-    ? {
-        type: "video",
-        videoUrl,
-        ...(posterUrl && isTwitterMediaUrl(posterUrl) ? { posterUrl } : {}),
-      }
-    : undefined;
+): TweetPreviewMedia | undefined => {
+  if (!videoResult) {
+    return undefined;
+  }
+
+  const media: MutableTweetPreviewMedia = {
+    type: "video",
+    videoUrl: videoResult.videoUrl,
+  };
+  if (posterUrl && isTwitterMediaUrl(posterUrl)) {
+    media.posterUrl = posterUrl;
+  }
+  if (videoResult.videoHlsUrl) {
+    media.videoHlsUrl = videoResult.videoHlsUrl;
+  }
+  if (videoResult.videoVariants) {
+    media.videoVariants = videoResult.videoVariants;
+  }
+
+  return media;
+};
 
 const readMediaDetailImageUrl = (
   mediaDetail: Record<string, unknown>
@@ -385,13 +615,13 @@ const readMediaDetail = (
   mediaDetail: Record<string, unknown>
 ): TweetPreviewMedia | undefined => {
   const videoInfo = readRecord(mediaDetail["video_info"]);
-  const videoUrl = findBestVideoVariantUrl(
+  const videoResult = createVideoResult(
     readArray(videoInfo?.["variants"]),
     "url"
   );
   const imageUrl = readMediaDetailImageUrl(mediaDetail);
   const imageMedia = createImageMedia(imageUrl);
-  return createVideoMedia(videoUrl, imageMedia?.imageUrl) ?? imageMedia;
+  return createVideoMedia(videoResult, imageMedia?.imageUrl) ?? imageMedia;
 };
 
 const findMediaItems = (
@@ -421,7 +651,7 @@ const findMediaItems = (
 
   pushUniqueMedia(
     mediaItems,
-    createVideoMedia(findVideoUrl(record), findVideoPosterUrl(record))
+    createVideoMedia(findVideoResult(record), findVideoPosterUrl(record))
   );
 
   return mediaItems;
@@ -603,7 +833,13 @@ function buildSyndicationPreview(
   );
   setPreviewValue(preview, "mediaImageUrl", firstImageMedia?.imageUrl);
   setPreviewValue(preview, "mediaVideoUrl", firstVideoMedia?.videoUrl);
+  setPreviewValue(preview, "mediaVideoHlsUrl", firstVideoMedia?.videoHlsUrl);
   setPreviewValue(preview, "mediaPosterUrl", firstVideoMedia?.posterUrl);
+  setPreviewValue(
+    preview,
+    "mediaVideoVariants",
+    firstVideoMedia?.videoVariants
+  );
   setPreviewValue(preview, "createdAtIso", readString(record["created_at"]));
   setPreviewValue(
     preview,

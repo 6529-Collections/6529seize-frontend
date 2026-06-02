@@ -59,7 +59,7 @@ beforeEach(() => {
 });
 
 test("hydrates the page from query params and updates the url on page change", async () => {
-  search.set("page", "2");
+  search.set("distribution-page", "2");
 
   render(
     <UserPageStatsActivityDistributions
@@ -72,7 +72,32 @@ test("hydrates the page from query params and updates the url on page change", a
 
   await userEvent.click(screen.getByTestId("set-page"));
 
-  expect(replace).toHaveBeenCalledWith("/profile?page=3", {
+  expect(replace).toHaveBeenCalledWith("/profile?distribution-page=3", {
     scroll: false,
   });
+});
+
+test("falls back to the legacy page query param for distribution deep links", async () => {
+  search.set("activity", "distributions");
+  search.set("page", "4");
+
+  render(
+    <UserPageStatsActivityDistributions
+      profile={{ wallets: [] } as any}
+      activeAddress={null}
+    />
+  );
+
+  const distributionsQuery = mockUseQuery.mock.calls
+    .map((call) => call[0] as { queryKey: unknown[] })
+    .find((config) => config.queryKey[0] === QueryKey.PROFILE_DISTRIBUTIONS);
+  expect(distributionsQuery?.queryKey[1]).toMatchObject({ page: "4" });
+
+  await userEvent.click(screen.getByTestId("set-page"));
+  expect(replace).toHaveBeenCalledWith(
+    "/profile?activity=distributions&distribution-page=3",
+    {
+      scroll: false,
+    }
+  );
 });

@@ -3,13 +3,41 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 export const ACTIVITY_PAGE_SIZE = 10;
 export const SEARCH_PARAM_ACTIVITY = "activity";
 export const WALLET_ACTIVITY_FILTER_PARAM = "wallet-activity";
-export const WALLET_ACTIVITY_PAGE_PARAM = "page";
-export const WALLET_DISTRIBUTION_PAGE_PARAM = "page";
+export const WALLET_ACTIVITY_PAGE_PARAM = "wallet-activity-page";
+export const WALLET_DISTRIBUTION_PAGE_PARAM = "distribution-page";
+export const LEGACY_DETAILS_PAGE_PARAM = "page";
+
+type SearchParamsReader = {
+  readonly get: (name: string) => string | null;
+};
 
 const getTotalPages = (count: number | undefined, pageSize: number) =>
   typeof count === "number" && count > 0
     ? Math.max(1, Math.ceil(count / pageSize))
     : 1;
+
+const parsePageFilter = (page: string | null): number =>
+  page && !Number.isNaN(+page) ? +page : 1;
+
+export const getActivityDetailsPageFilter = ({
+  activity,
+  pageParam,
+  searchParams,
+}: {
+  readonly activity: "wallet-activity" | "distributions";
+  readonly pageParam: string;
+  readonly searchParams: SearchParamsReader;
+}): number => {
+  const page = searchParams.get(pageParam);
+  if (page) {
+    return parsePageFilter(page);
+  }
+
+  const activeActivity = searchParams.get(SEARCH_PARAM_ACTIVITY);
+  return activeActivity === activity
+    ? parsePageFilter(searchParams.get(LEGACY_DETAILS_PAGE_PARAM))
+    : 1;
+};
 
 export const getActivityWalletsParam = ({
   activeAddress,

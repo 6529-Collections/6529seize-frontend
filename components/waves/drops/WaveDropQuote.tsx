@@ -29,6 +29,7 @@ interface WaveDropQuoteProps {
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
+  readonly hideLinkPreviews?: boolean | undefined;
   readonly onLinkCardActionsActiveChange?:
     | ((href: string, active: boolean) => void)
     | undefined;
@@ -144,6 +145,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  hideLinkPreviews = false,
   onLinkCardActionsActiveChange,
 }) => {
   const { onCardActionsActiveChange } = useLinkPreviewContext();
@@ -260,6 +262,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
         quotePath={effectiveQuotePath}
         embedDepth={embedDepth}
         maxEmbedDepth={maxEmbedDepth}
+        hideLinkPreviews={hideLinkPreviews}
         onLinkCardActionsActiveChange={resolvedOnLinkCardActionsActiveChange}
       />
     </WaveDropQuoteDisplayProvider>
