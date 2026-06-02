@@ -284,11 +284,17 @@ function updateAutoQualityFromHlsEvent(
   onAutoQualityChange(readHlsLevelQuality(hls.levels[levelIndex]));
 }
 
+function isFatalHlsError(data: unknown): boolean {
+  const record = readObjectRecord(data);
+  return record?.["fatal"] === true;
+}
+
 async function setupHlsSource(
   videoElement: HTMLVideoElement,
   src: string,
   hlsRef: { current: HlsType | null },
   onAutoQualityChange: (quality: number | undefined) => void,
+  onFatalError: () => void,
   isCancelled: () => boolean
 ): Promise<boolean> {
   if (videoElement.canPlayType("application/vnd.apple.mpegurl")) {
@@ -320,8 +326,31 @@ async function setupHlsSource(
     const handleQualityEvent = (_event: unknown, data: unknown) => {
       updateAutoQualityFromHlsEvent(hls, data, onAutoQualityChange);
     };
+    const cleanupHls = () => {
+      hls.off(HlsConstructor.Events.LEVEL_SWITCHED, handleQualityEvent);
+      hls.off(HlsConstructor.Events.FRAG_CHANGED, handleQualityEvent);
+      hls.off(HlsConstructor.Events.ERROR, handleErrorEvent);
+      hls.destroy();
+      if (hlsRef.current === hls) {
+        hlsRef.current = null;
+      }
+    };
+    const handleErrorEvent = (_event: unknown, data: unknown) => {
+      if (!isFatalHlsError(data) || isCancelled()) {
+        return;
+      }
+
+      cleanupHls();
+      if (isCancelled()) {
+        return;
+      }
+
+      onAutoQualityChange(undefined);
+      onFatalError();
+    };
     hls.on(HlsConstructor.Events.LEVEL_SWITCHED, handleQualityEvent);
     hls.on(HlsConstructor.Events.FRAG_CHANGED, handleQualityEvent);
+    hls.on(HlsConstructor.Events.ERROR, handleErrorEvent);
     hls.loadSource(src);
     hls.attachMedia(videoElement);
     return true;
@@ -862,6 +891,7 @@ function TwitterVideoPlayer({
         hlsUrl,
         hlsRef,
         setCurrentAutoQuality,
+        loadFallbackSource,
         () => cancelled
       )
         .then((loaded) => {
