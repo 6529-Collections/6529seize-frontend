@@ -13,7 +13,6 @@ import {
   getActivityDetailsPageFilter,
   getActivityPaginationState,
   getActivityWalletsParam,
-  LEGACY_DETAILS_PAGE_PARAM,
   WALLET_DISTRIBUTION_PAGE_PARAM,
 } from "../activity.helpers";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
@@ -29,7 +28,6 @@ export default function UserPageStatsActivityDistributions({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const pageFilter = getActivityDetailsPageFilter({
-    activity: "distributions",
     pageParam: WALLET_DISTRIBUTION_PAGE_PARAM,
     searchParams,
   });
@@ -45,7 +43,6 @@ export default function UserPageStatsActivityDistributions({
       for (const { name, value } of config) {
         params.set(name, value);
       }
-      params.delete(LEGACY_DETAILS_PAGE_PARAM);
       return params.toString();
     },
     [searchParams]
