@@ -3,11 +3,13 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
+  ArrowUpTrayIcon,
   ArrowTopRightOnSquareIcon,
   ArrowTrendingUpIcon,
-  BoltIcon,
+  ChartBarIcon,
   CheckIcon,
   ChevronDownIcon,
+  FlagIcon,
   InformationCircleIcon,
   NoSymbolIcon,
   SparklesIcon,
@@ -15,7 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import type { ComponentType, ReactNode, SVGProps } from "react";
 import { useContentTab } from "../ContentTabContext";
 import { useLayout } from "./layout/LayoutContext";
@@ -78,6 +80,8 @@ const FAQ_PANEL_TRANSITION = {
   duration: 0.24,
   ease: [0.16, 1, 0.3, 1],
 } as const;
+
+const FAQ_SCROLL_ALIGNMENT_DELAY_MS = FAQ_PANEL_TRANSITION.duration * 1000 + 40;
 
 const INTRO_QA: readonly QaItem[] = [
   {
@@ -229,7 +233,7 @@ function FaqLink({
       rel="noopener noreferrer"
       aria-label={`${children} (opens in a new tab)`}
       className={cx(
-        "desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+        "tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-sm tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400",
         className
       )}
     >
@@ -580,7 +584,7 @@ const FAQ_SECTIONS: readonly FaqSection[] = [
   {
     id: "goals",
     title: "What are the goals of the voting?",
-    Icon: BoltIcon,
+    Icon: FlagIcon,
     Content: GoalsContent,
   },
   {
@@ -592,13 +596,13 @@ const FAQ_SECTIONS: readonly FaqSection[] = [
   {
     id: "voting",
     title: "How Does Voting Work?",
-    Icon: CheckIcon,
+    Icon: ChartBarIcon,
     Content: VotingContent,
   },
   {
     id: "submission",
     title: "How Does Submission Work?",
-    Icon: ArrowTopRightOnSquareIcon,
+    Icon: ArrowUpTrayIcon,
     Content: SubmissionContent,
   },
   {
@@ -617,10 +621,12 @@ const FAQ_SECTIONS: readonly FaqSection[] = [
 
 function FaqAccordionItem({
   section,
+  sectionRef,
   isOpen,
   onToggle,
 }: Readonly<{
   section: FaqSection;
+  sectionRef: (element: HTMLElement | null) => void;
   isOpen: boolean;
   onToggle: () => void;
 }>) {
@@ -630,10 +636,11 @@ function FaqAccordionItem({
 
   return (
     <section
+      ref={sectionRef}
       className={cx(
-        "tw-group tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-backdrop-blur-xl tw-transition-all tw-duration-300 tw-ease-out",
+        "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-backdrop-blur-xl tw-transition-all tw-duration-300 tw-ease-out",
         isOpen
-          ? "tw-border-primary-500/50 tw-bg-iron-900 tw-shadow-[0_12px_30px_-10px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.05)]"
+          ? "tw-border-primary-500/50 tw-bg-[#171b24] tw-shadow-[0_12px_30px_-10px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.05)]"
           : "tw-border-iron-700/70 tw-bg-iron-900/75 tw-shadow-[0_4px_20px_-5px_rgba(0,0,0,0.42)] desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-border-iron-600/80 desktop-hover:hover:tw-bg-iron-800/70 desktop-hover:hover:tw-shadow-[0_8px_25px_-5px_rgba(0,0,0,0.6)]"
       )}
     >
@@ -644,20 +651,20 @@ function FaqAccordionItem({
           aria-expanded={isOpen}
           aria-controls={panelId}
           onClick={onToggle}
-          className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-5 tw-py-[18px] tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 sm:tw-px-6 sm:tw-py-[22px]"
+          className="tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-transparent tw-px-4 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/80 sm:tw-px-5 sm:tw-py-4 md:tw-py-3.5"
         >
           <span className="tw-flex tw-min-w-0 tw-items-center">
             <span
               className={cx(
-                "tw-mr-4 tw-hidden tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors tw-duration-200 sm:tw-flex",
+                "tw-mr-3 tw-hidden tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors tw-duration-200 sm:tw-flex",
                 isOpen
                   ? "tw-text-primary-300"
                   : "desktop-hover:group-hover:tw-text-iron-50"
               )}
             >
-              <Icon className="tw-size-5" aria-hidden="true" />
+              <Icon className="tw-size-4" aria-hidden="true" />
             </span>
-            <span className="tw-min-w-0 tw-text-[1.05rem] tw-font-medium tw-leading-6 tw-text-iron-50">
+            <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-50 md:tw-text-base">
               {section.title}
             </span>
           </span>
@@ -682,7 +689,7 @@ function FaqAccordionItem({
             transition={FAQ_PANEL_TRANSITION}
             className="tw-overflow-hidden"
           >
-            <div className="tw-px-5 tw-pb-6 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-6 sm:tw-pb-7 md:tw-pl-[72px]">
+            <div className="tw-px-4 tw-pb-5 tw-text-sm tw-leading-6 tw-text-iron-300 sm:tw-px-5 sm:tw-pb-6 md:tw-pl-14">
               <Content />
             </div>
           </motion.div>
@@ -695,33 +702,69 @@ function FaqAccordionItem({
 const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave: _wave }) => {
   const { setActiveContentTab } = useContentTab();
   const { faqViewStyle } = useLayout();
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const sectionRefs = useRef<Partial<Record<FaqSectionId, HTMLElement | null>>>(
+    {}
+  );
   const [openSectionId, setOpenSectionId] = useState<FaqSectionId | null>(
     DEFAULT_OPEN_SECTION_ID
   );
+  const [pendingScrollSectionId, setPendingScrollSectionId] =
+    useState<FaqSectionId | null>(null);
 
   useEffect(() => {
     setActiveContentTab(MyStreamWaveTab.FAQ);
   }, [setActiveContentTab]);
 
+  useEffect(() => {
+    if (!pendingScrollSectionId || pendingScrollSectionId !== openSectionId) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const scrollContainer = scrollContainerRef.current;
+      const targetSection = sectionRefs.current[pendingScrollSectionId];
+
+      if (scrollContainer && targetSection) {
+        const containerTop = scrollContainer.getBoundingClientRect().top;
+        const sectionTop = targetSection.getBoundingClientRect().top;
+
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollTop + sectionTop - containerTop,
+          behavior: "smooth",
+        });
+      }
+
+      setPendingScrollSectionId(null);
+    }, FAQ_SCROLL_ALIGNMENT_DELAY_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [openSectionId, pendingScrollSectionId]);
+
+  const handleSectionToggle = (sectionId: FaqSectionId) => {
+    const nextOpenSectionId = openSectionId === sectionId ? null : sectionId;
+
+    setOpenSectionId(nextOpenSectionId);
+    setPendingScrollSectionId(nextOpenSectionId);
+  };
+
   return (
-    <div className={CONTAINER_CLASS_NAME} style={faqViewStyle}>
+    <div
+      ref={scrollContainerRef}
+      className={CONTAINER_CLASS_NAME}
+      style={faqViewStyle}
+    >
       <div className="tw-w-full tw-px-2 tw-pb-4 sm:tw-px-4">
-        <div className="tw-mb-4 tw-text-left">
-          <h2 className="tw-mb-0 tw-text-xl tw-font-medium tw-leading-tight tw-text-iron-50 sm:tw-text-2xl">
-            The Memes - Main Stage FAQ
-          </h2>
-        </div>
         <div className="tw-flex tw-flex-col tw-gap-3">
           {FAQ_SECTIONS.map((section) => (
             <FaqAccordionItem
               key={section.id}
               section={section}
+              sectionRef={(element) => {
+                sectionRefs.current[section.id] = element;
+              }}
               isOpen={openSectionId === section.id}
-              onToggle={() =>
-                setOpenSectionId((current) =>
-                  current === section.id ? null : section.id
-                )
-              }
+              onToggle={() => handleSectionToggle(section.id)}
             />
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 
@@ -27,12 +27,6 @@ describe("MyStreamWaveFAQ", () => {
     expect(setActiveContentTab).toHaveBeenCalledWith(MyStreamWaveTab.FAQ);
     const rootDiv = container.firstChild as HTMLElement;
     expect(rootDiv).toHaveAttribute("style", "height: 21px;");
-    expect(
-      screen.getByRole("heading", {
-        level: 2,
-        name: "The Memes - Main Stage FAQ",
-      })
-    ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 3, name: "Intro" })
     ).toBeInTheDocument();
@@ -115,5 +109,35 @@ describe("MyStreamWaveFAQ", () => {
     );
     expect(faqWaveLink).toHaveAttribute("target", "_blank");
     expect(faqWaveLink).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("scrolls an opened accordion section to the top of the FAQ container", async () => {
+    const { container } = render(<MyStreamWaveFAQ wave={{} as any} />);
+    const rootDiv = container.firstChild as HTMLElement;
+    const scrollTo = jest.fn();
+
+    rootDiv.scrollTop = 40;
+    rootDiv.scrollTo = scrollTo;
+    rootDiv.getBoundingClientRect = () => ({ top: 10 }) as DOMRect;
+
+    const submissionButton = screen.getByRole("button", {
+      name: "How Does Submission Work?",
+    });
+    const submissionSection = submissionButton.closest("section");
+
+    expect(submissionSection).not.toBeNull();
+    (submissionSection as HTMLElement).getBoundingClientRect = () =>
+      ({ top: 210 }) as DOMRect;
+
+    fireEvent.click(submissionButton);
+
+    await waitFor(
+      () =>
+        expect(scrollTo).toHaveBeenCalledWith({
+          top: 240,
+          behavior: "smooth",
+        }),
+      { timeout: 1000 }
+    );
   });
 });
