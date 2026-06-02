@@ -98,6 +98,34 @@ describe("UserPageStatsActivityWallet", () => {
     expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
   });
 
+  it("falls back to the legacy page query param for wallet activity deep links", async () => {
+    const user = userEvent.setup();
+    search.set("activity", "wallet-activity");
+    search.set("page", "4");
+
+    render(
+      <UserPageStatsActivityWallet
+        profile={{ wallets: [] } as any}
+        activeAddress={null}
+      />
+    );
+
+    await waitFor(() => {
+      const transactionsQuery = mockUseQuery.mock.calls
+        .map((call) => call[0] as { queryKey: unknown[] })
+        .find((config) => config.queryKey[0] === QueryKey.PROFILE_TRANSACTIONS);
+      expect(transactionsQuery?.queryKey[1]).toMatchObject({ page: "4" });
+    });
+
+    await user.click(screen.getByTestId("set-page"));
+    expect(replace).toHaveBeenCalledWith(
+      "/path?activity=wallet-activity&wallet-activity-page=3",
+      {
+        scroll: false,
+      }
+    );
+  });
+
   it("updates the url when the filter or page changes", async () => {
     const user = userEvent.setup();
 

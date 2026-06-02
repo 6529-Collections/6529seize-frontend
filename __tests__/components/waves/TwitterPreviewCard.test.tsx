@@ -19,6 +19,9 @@ const mockedFetchTwitterPreview = fetchTwitterPreview as jest.MockedFunction<
 describe("TwitterPreviewCard", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
+    jest
+      .spyOn(HTMLMediaElement.prototype, "load")
+      .mockImplementation(() => undefined);
     mockedFetchTwitterPreview.mockReset();
     Object.assign(navigator, {
       clipboard: {
@@ -167,9 +170,15 @@ describe("TwitterPreviewCard", () => {
       screen.getByRole("dialog", { name: "Video quality" })
     ).toBeInTheDocument();
     expect(screen.getByText("Video quality")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("radio", { name: "1080p" })).toHaveAttribute(
+        "aria-checked",
+        "true"
+      )
+    );
     expect(screen.getByRole("radio", { name: /Auto/ })).toHaveAttribute(
       "aria-checked",
-      "true"
+      "false"
     );
     expect(screen.queryByText("(1080p)")).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "2160p" })).toBeInTheDocument();

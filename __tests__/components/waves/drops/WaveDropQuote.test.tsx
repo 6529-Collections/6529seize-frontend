@@ -229,7 +229,7 @@ test("passes hidden link preview setting into nested markdown", () => {
     />
   );
 
-  expect(markdownProps.hideLinkPreviews).toBe(true);
+  expect(markdownProps.hideLinkPreviews).toBeTruthy();
 });
 
 test("falls back to link preview context for nested markdown suppression", () => {

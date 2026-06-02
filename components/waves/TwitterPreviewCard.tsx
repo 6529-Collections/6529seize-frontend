@@ -81,6 +81,16 @@ function stopMediaEvent(event: SyntheticEvent<HTMLElement>) {
   event.nativeEvent.stopImmediatePropagation();
 }
 
+function readObjectRecord(
+  value: unknown
+): Record<string, unknown> | undefined {
+  if (typeof value !== "object" || value === null) {
+    return undefined;
+  }
+
+  return value as Record<string, unknown>;
+}
+
 function fallbackPreview(href: string, tweetId: string): TweetPreview {
   const parsed = parseTweetUrl(href);
   return {
@@ -157,12 +167,15 @@ function getVideoVariantLabel(
   index: number
 ): string {
   if (variant.quality) {
+    const qualityLabel = `${variant.quality}p`;
     const hasDuplicateQuality =
       variants.filter((candidate) => candidate.quality === variant.quality)
         .length > 1;
-    return hasDuplicateQuality && variant.bitrate
-      ? `${variant.quality}p ${formatBitrate(variant.bitrate)}`
-      : `${variant.quality}p`;
+    if (hasDuplicateQuality && variant.bitrate) {
+      return `${qualityLabel} ${formatBitrate(variant.bitrate)}`;
+    }
+
+    return qualityLabel;
   }
 
   if (variant.width && variant.height) {
@@ -184,9 +197,11 @@ function buildVideoVariantOptions(
     return [{ url: videoUrl }];
   }
 
-  return variants.some((variant) => variant.url === videoUrl)
-    ? variants
-    : [{ url: videoUrl }, ...variants];
+  if (variants.some((variant) => variant.url === videoUrl)) {
+    return variants;
+  }
+
+  return [{ url: videoUrl }, ...variants];
 }
 
 function buildVideoQualityOptions({
@@ -206,23 +221,33 @@ function buildVideoQualityOptions({
     })
   );
 
-  return hlsUrl
-    ? [
-        { id: "auto", label: "Auto", selection: { type: "auto" } },
-        ...manualOptions,
-      ]
-    : manualOptions;
+  if (hlsUrl) {
+    return [
+      { id: "auto", label: "Auto", selection: { type: "auto" } },
+      ...manualOptions,
+    ];
+  }
+
+  return manualOptions;
 }
 
 function getDefaultQualitySelection(
   hlsUrl: string | undefined,
   videoUrl: string
 ): VideoQualitySelection {
-  return hlsUrl ? { type: "auto" } : { type: "variant", url: videoUrl };
+  if (hlsUrl) {
+    return { type: "auto" };
+  }
+
+  return { type: "variant", url: videoUrl };
 }
 
 function getQualitySelectionId(selection: VideoQualitySelection): string {
-  return selection.type === "auto" ? "auto" : selection.url;
+  if (selection.type === "auto") {
+    return "auto";
+  }
+
+  return selection.url;
 }
 
 function isHlsSource(selection: VideoQualitySelection): boolean {
@@ -241,6 +266,16 @@ function getVideoSource(
   return selection.url;
 }
 
+function updateAutoQualityFromHlsEvent(
+  hls: HlsType,
+  data: unknown,
+  onAutoQualityChange: (quality: number | undefined) => void
+) {
+  const levelIndex = readHlsEventLevelIndex(data);
+  const level = levelIndex !== undefined ? hls.levels[levelIndex] : undefined;
+  onAutoQualityChange(readHlsLevelQuality(level));
+}
+
 async function setupHlsSource(
   videoElement: HTMLVideoElement,
   src: string,
@@ -256,71 +291,56 @@ async function setupHlsSource(
 
   const mod = await import("hls.js");
   const HlsConstructor = mod.default;
-  if (!HlsConstructor.isSupported()) {
-    return false;
+  if (HlsConstructor.isSupported()) {
+    const hls = new HlsConstructor({
+      startLevel: -1,
+      enableWorker: true,
+    });
+    hlsRef.current = hls;
+    const handleQualityEvent = (_event: unknown, data: unknown) => {
+      updateAutoQualityFromHlsEvent(hls, data, onAutoQualityChange);
+    };
+    hls.on(HlsConstructor.Events.LEVEL_SWITCHED, handleQualityEvent);
+    hls.on(HlsConstructor.Events.FRAG_CHANGED, handleQualityEvent);
+    hls.loadSource(src);
+    hls.attachMedia(videoElement);
+    return true;
   }
 
-  const hls = new HlsConstructor({
-    startLevel: -1,
-    enableWorker: true,
-  });
-  hlsRef.current = hls;
-  hls.on(
-    HlsConstructor.Events.LEVEL_SWITCHED,
-    (_event: unknown, data: unknown) => {
-      const levelIndex = readHlsEventLevelIndex(data);
-      const level =
-        levelIndex !== undefined ? hls.levels[levelIndex] : undefined;
-      onAutoQualityChange(readHlsLevelQuality(level));
-    }
-  );
-  hls.on(
-    HlsConstructor.Events.FRAG_CHANGED,
-    (_event: unknown, data: unknown) => {
-      const levelIndex = readHlsEventLevelIndex(data);
-      const level =
-        levelIndex !== undefined ? hls.levels[levelIndex] : undefined;
-      onAutoQualityChange(readHlsLevelQuality(level));
-    }
-  );
-  hls.loadSource(src);
-  hls.attachMedia(videoElement);
-  return true;
+  return false;
 }
 
 function readHlsEventLevelIndex(value: unknown): number | undefined {
-  if (typeof value !== "object" || value === null) {
-    return undefined;
+  const record = readObjectRecord(value);
+  if (record) {
+    const level = record["level"];
+    if (typeof level === "number" && Number.isFinite(level)) {
+      return level;
+    }
+
+    const frag = readObjectRecord(record["frag"]);
+    if (frag) {
+      const fragLevel = frag["level"];
+      if (typeof fragLevel === "number" && Number.isFinite(fragLevel)) {
+        return fragLevel;
+      }
+    }
   }
 
-  const record = value as Record<string, unknown>;
-  const level = record["level"];
-  if (typeof level === "number" && Number.isFinite(level)) {
-    return level;
-  }
-
-  const frag = record["frag"];
-  if (typeof frag !== "object" || frag === null) {
-    return undefined;
-  }
-
-  const fragLevel = (frag as Record<string, unknown>)["level"];
-  return typeof fragLevel === "number" && Number.isFinite(fragLevel)
-    ? fragLevel
-    : undefined;
+  return undefined;
 }
 
 function readHlsLevelQuality(level: unknown): number | undefined {
-  if (typeof level !== "object" || level === null) {
-    return undefined;
+  const record = readObjectRecord(level);
+  if (record) {
+    const width =
+      typeof record["width"] === "number" ? record["width"] : undefined;
+    const height =
+      typeof record["height"] === "number" ? record["height"] : undefined;
+    return width && height ? Math.min(width, height) : undefined;
   }
 
-  const record = level as Record<string, unknown>;
-  const width =
-    typeof record["width"] === "number" ? record["width"] : undefined;
-  const height =
-    typeof record["height"] === "number" ? record["height"] : undefined;
-  return width && height ? Math.min(width, height) : undefined;
+  return undefined;
 }
 
 function snapshotVideoPlayback(videoElement: HTMLVideoElement): {
@@ -679,11 +699,11 @@ function VideoQualityMenu({
 
   const selectedId = getQualitySelectionId(selection);
   return (
-    <div
-      className="tw-absolute tw-right-3 tw-top-11 tw-z-30 tw-w-fit tw-min-w-40 tw-max-w-[calc(100%-1.5rem)] tw-overflow-hidden tw-rounded-xl tw-bg-[#171717] tw-px-1.5 tw-pb-1.5 tw-pt-0 tw-text-white tw-shadow-xl"
+    <dialog
+      open
+      className="tw-absolute tw-right-3 tw-top-11 tw-z-30 tw-m-0 tw-w-fit tw-min-w-40 tw-max-w-[calc(100%-1.5rem)] tw-overflow-hidden tw-rounded-xl tw-border-0 tw-bg-[#171717] tw-px-1.5 tw-pb-1.5 tw-pt-0 tw-text-white tw-shadow-xl"
       onClick={stopMediaEvent}
       onMouseDown={stopMediaEvent}
-      role="dialog"
       aria-label="Video quality"
     >
       <span
@@ -748,7 +768,7 @@ function VideoQualityMenu({
           );
         })}
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -803,6 +823,7 @@ function TwitterVideoPlayer({
       hlsRef.current = null;
     };
     const loadFallbackSource = () => {
+      setSelection({ type: "variant", url: videoUrl });
       setCurrentAutoQuality(undefined);
       videoElement.src = videoUrl;
       videoElement.load();

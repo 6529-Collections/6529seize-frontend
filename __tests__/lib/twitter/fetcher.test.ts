@@ -150,6 +150,44 @@ describe("fetchTweetPreview", () => {
     ]);
   });
 
+  it("does not use arbitrary hosts as video variants", async () => {
+    const response = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        __typename: "Tweet",
+        id_str: "2057513333985554496",
+        text: "Post text",
+        user: {
+          name: "Mayudrops",
+          screen_name: "Mayudropsphotos",
+        },
+        video: {
+          variants: [
+            {
+              src: "https://twimg.com.evil.example/tweet_video/example.m3u8",
+              content_type: "application/x-mpegURL",
+            },
+            {
+              src: "https://twimg.com.evil.example/tweet_video/example.mp4",
+              content_type: "video/mp4",
+            },
+          ],
+        },
+      }),
+    };
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response);
+
+    const preview = await fetchTweetPreview(
+      "https://x.com/Mayudropsphotos/status/2057513333985554496",
+      { fetchImpl }
+    );
+
+    expect(preview.mediaVideoUrl).toBeUndefined();
+    expect(preview.mediaVideoHlsUrl).toBeUndefined();
+    expect(preview.media).toBeUndefined();
+  });
+
   it("prefers MP4 video variants when multiple formats are available", async () => {
     const response = {
       ok: true,

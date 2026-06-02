@@ -33,6 +33,10 @@ type MutableTweetPreview = {
   -readonly [Key in keyof TweetPreview]: TweetPreview[Key];
 };
 
+type MutableTweetPreviewMedia = {
+  -readonly [Key in keyof TweetPreviewMedia]: TweetPreviewMedia[Key];
+};
+
 const getSyndicationToken = (tweetId: string): string =>
   ((Number(tweetId) / 1e15) * Math.PI).toString(36).replaceAll(/(0+|\.)/g, "");
 
@@ -368,12 +372,33 @@ const compareVideoVariants = (
   return leftPixels - rightPixels;
 };
 
+const preferHigherQualityVariant = (
+  best: TweetPreviewVideoVariant | undefined,
+  variant: TweetPreviewVideoVariant
+): TweetPreviewVideoVariant => {
+  if (best) {
+    return compareVideoVariants(variant, best) > 0 ? variant : best;
+  }
+
+  return variant;
+};
+
+const preferLowerQualityVariant = (
+  lowest: TweetPreviewVideoVariant | undefined,
+  variant: TweetPreviewVideoVariant
+): TweetPreviewVideoVariant => {
+  if (lowest) {
+    return compareVideoVariants(variant, lowest) < 0 ? variant : lowest;
+  }
+
+  return variant;
+};
+
 const getBestVideoVariant = (
   variants: readonly TweetPreviewVideoVariant[]
 ): TweetPreviewVideoVariant | undefined =>
   variants.reduce<TweetPreviewVideoVariant | undefined>(
-    (best, variant) =>
-      !best || compareVideoVariants(variant, best) > 0 ? variant : best,
+    (best, variant) => preferHigherQualityVariant(best, variant),
     undefined
   );
 
@@ -395,8 +420,7 @@ const findDefaultVideoVariant = (
   );
   if (qualityVariants.length > 0) {
     return qualityVariants.reduce<TweetPreviewVideoVariant | undefined>(
-      (lowest, variant) =>
-        !lowest || compareVideoVariants(variant, lowest) < 0 ? variant : lowest,
+      (lowest, variant) => preferLowerQualityVariant(lowest, variant),
       undefined
     );
   }
@@ -407,7 +431,7 @@ const findDefaultVideoVariant = (
 const sortVideoVariantsForDisplay = (
   variants: readonly TweetPreviewVideoVariant[]
 ): readonly TweetPreviewVideoVariant[] =>
-  [...variants].sort((left, right) => compareVideoVariants(right, left));
+  [...variants].sort((first, second) => compareVideoVariants(second, first));
 
 const findVideoVariants = (
   variants: readonly unknown[],
@@ -418,7 +442,7 @@ const findVideoVariants = (
   for (const variant of variants) {
     const variantRecord = readRecord(variant);
     const url = readString(variantRecord?.[urlKey]);
-    if (!variantRecord || !url) {
+    if (!variantRecord || !url || !isTwitterMediaUrl(url)) {
       continue;
     }
 
@@ -441,7 +465,7 @@ const findFallbackVideoVariantUrl = (
   for (const variant of variants) {
     const variantRecord = readRecord(variant);
     const url = readString(variantRecord?.[urlKey]);
-    if (url) {
+    if (url && isTwitterMediaUrl(url)) {
       return url;
     }
   }
@@ -456,7 +480,12 @@ const findHlsVideoVariantUrl = (
   for (const variant of variants) {
     const variantRecord = readRecord(variant);
     const url = readString(variantRecord?.[urlKey]);
-    if (variantRecord && url && isHlsVideoVariant(variantRecord, url)) {
+    if (
+      variantRecord &&
+      url &&
+      isTwitterMediaUrl(url) &&
+      isHlsVideoVariant(variantRecord, url)
+    ) {
       return url;
     }
   }
@@ -486,9 +515,15 @@ const createVideoResult = (
   }
 
   const fallbackUrl = findFallbackVideoVariantUrl(variants, urlKey);
-  return fallbackUrl
-    ? { videoUrl: fallbackUrl, ...(videoHlsUrl ? { videoHlsUrl } : {}) }
-    : undefined;
+  if (!fallbackUrl) {
+    return undefined;
+  }
+
+  if (videoHlsUrl) {
+    return { videoUrl: fallbackUrl, videoHlsUrl };
+  }
+
+  return { videoUrl: fallbackUrl };
 };
 
 const findVideoResult = (
@@ -546,20 +581,27 @@ const createImageMedia = (
 const createVideoMedia = (
   videoResult: TweetVideoResult | undefined,
   posterUrl: string | undefined
-): TweetPreviewMedia | undefined =>
-  videoResult
-    ? {
-        type: "video",
-        videoUrl: videoResult.videoUrl,
-        ...(posterUrl && isTwitterMediaUrl(posterUrl) ? { posterUrl } : {}),
-        ...(videoResult.videoHlsUrl
-          ? { videoHlsUrl: videoResult.videoHlsUrl }
-          : {}),
-        ...(videoResult.videoVariants
-          ? { videoVariants: videoResult.videoVariants }
-          : {}),
-      }
-    : undefined;
+): TweetPreviewMedia | undefined => {
+  if (!videoResult) {
+    return undefined;
+  }
+
+  const media: MutableTweetPreviewMedia = {
+    type: "video",
+    videoUrl: videoResult.videoUrl,
+  };
+  if (posterUrl && isTwitterMediaUrl(posterUrl)) {
+    media.posterUrl = posterUrl;
+  }
+  if (videoResult.videoHlsUrl) {
+    media.videoHlsUrl = videoResult.videoHlsUrl;
+  }
+  if (videoResult.videoVariants) {
+    media.videoVariants = videoResult.videoVariants;
+  }
+
+  return media;
+};
 
 const readMediaDetailImageUrl = (
   mediaDetail: Record<string, unknown>
