@@ -844,6 +844,10 @@ function TwitterVideoPlayer({
     readonly currentTime: number;
     readonly wasPlaying: boolean;
   } | null>(null);
+  const qualitySwitchSnapshotRef = useRef<{
+    readonly currentTime: number;
+    readonly wasPlaying: boolean;
+  } | null>(null);
   const previousSourceRef = useRef({ hlsUrl, videoUrl });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentAutoQuality, setCurrentAutoQuality] = useState<
@@ -879,8 +883,10 @@ function TwitterVideoPlayer({
 
     let cancelled = false;
     const playbackSnapshot =
+      qualitySwitchSnapshotRef.current ??
       fallbackPlaybackSnapshotRef.current ??
       snapshotVideoPlayback(videoElement);
+    qualitySwitchSnapshotRef.current = null;
     fallbackPlaybackSnapshotRef.current = null;
     const destroyHls = () => {
       hlsRef.current?.destroy();
@@ -964,7 +970,14 @@ function TwitterVideoPlayer({
             autoQuality={currentAutoQuality}
             isOpen={isMenuOpen}
             onClose={() => setIsMenuOpen(false)}
-            onSelect={setSelection}
+            onSelect={(opt) => {
+              if (videoRef.current) {
+                qualitySwitchSnapshotRef.current = snapshotVideoPlayback(
+                  videoRef.current
+                );
+              }
+              setSelection(opt);
+            }}
             options={qualityOptions}
             selection={selection}
           />
