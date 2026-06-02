@@ -3,6 +3,7 @@
 import type { FC } from "react";
 import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import type { SingleWaveDropVoteSubmitHandles } from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSubmit from "./SingleWaveDropVoteSubmit";
@@ -42,6 +43,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   const voteLabel =
     WAVE_VOTING_LABELS[displayDrop.wave.voting_credit_type] || "votes";
+  const creditScope =
+    (displayDrop.wave as Partial<typeof displayDrop.wave>)
+      .voting_credit_scope ?? ApiWaveCreditScope.Wave;
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
 
@@ -116,6 +120,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             currentRating={displayDrop.context_profile_context?.rating ?? 0}
             maxRating={maxRating}
             label={voteLabel}
+            creditScope={creditScope}
           />
         </div>
       </div>
@@ -164,6 +169,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           currentRating={displayDrop.context_profile_context?.rating ?? 0}
           maxRating={maxRating}
           label={voteLabel}
+          creditScope={creditScope}
         />
         <button
           onClick={() => setIsSliderMode(!isSliderMode)}

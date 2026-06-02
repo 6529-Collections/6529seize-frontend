@@ -4,6 +4,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import WaveSpecs from "@/components/waves/specs/WaveSpecs";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -33,6 +34,7 @@ const makeWave = (
     readonly chatEnabled?: boolean | undefined;
     readonly linksDisabled?: boolean | undefined;
     readonly waveType?: ApiWaveType | undefined;
+    readonly creditScope?: ApiWaveCreditScope | undefined;
     readonly winningThreshold?: number | null | undefined;
     readonly winningThresholdMinDurationMs?: number | null | undefined;
   } = {}
@@ -46,6 +48,7 @@ const makeWave = (
     credit_type: "REP",
     credit_category: null,
     creditor: null,
+    credit_scope: overrides.creditScope ?? ApiWaveCreditScope.Wave,
     signature_required: false,
     period: null,
     forbid_negative_votes: false,
@@ -185,6 +188,7 @@ describe("WaveSpecs", () => {
     renderWaveSpecs({ wave: makeWave({ waveType: ApiWaveType.Chat }) });
 
     expect(screen.queryByText("Voting")).not.toBeInTheDocument();
+    expect(screen.queryByText("Voting power")).not.toBeInTheDocument();
     expect(screen.queryByTestId("wave-rating")).not.toBeInTheDocument();
   });
 
@@ -193,6 +197,20 @@ describe("WaveSpecs", () => {
 
     expect(screen.getByText("Voting")).toBeInTheDocument();
     expect(screen.getByTestId("wave-rating")).toBeInTheDocument();
+    expect(screen.getByText("Voting power")).toBeInTheDocument();
+    expect(screen.getByText("Whole wave")).toBeInTheDocument();
+  });
+
+  it("shows each-drop voting power scope", () => {
+    renderWaveSpecs({
+      wave: makeWave({
+        waveType: ApiWaveType.Rank,
+        creditScope: ApiWaveCreditScope.Drop,
+      }),
+    });
+
+    expect(screen.getByText("Voting power")).toBeInTheDocument();
+    expect(screen.getByText("Each drop")).toBeInTheDocument();
   });
 
   it("shows approval threshold settings for approve waves", () => {

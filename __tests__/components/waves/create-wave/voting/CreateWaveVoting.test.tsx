@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateWaveVoting from "@/components/waves/create-wave/voting/CreateWaveVoting";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
@@ -88,6 +89,7 @@ describe("CreateWaveVoting", () => {
     category: null,
     profileId: null,
     creditNfts: [],
+    creditScope: ApiWaveCreditScope.Wave,
     memeCount: null,
     isMemeCountLoading: false,
     isMemeCountError: false,
@@ -100,6 +102,7 @@ describe("CreateWaveVoting", () => {
     setCategory: jest.fn(),
     setProfileId: jest.fn(),
     setCreditNfts: jest.fn(),
+    onCreditScopeChange: jest.fn(),
     onAllowNegativeVotesChange: jest.fn(),
     setMaxVotesPerIdentityPerDrop: jest.fn(),
     setApprovalThreshold: jest.fn(),
@@ -121,6 +124,7 @@ describe("CreateWaveVoting", () => {
       <CreateWaveVoting {...baseProps} selectedType={null} />
     );
     expect(container.firstChild).toBeNull();
+    expect(screen.queryByText("Voting power scope")).toBeNull();
   });
 
   it("renders only vote cap settings for rank waves", () => {
@@ -128,6 +132,7 @@ describe("CreateWaveVoting", () => {
     const settingsGrid = screen.getByTestId("create-wave-voting-settings-grid");
 
     expect(screen.getByTestId("rep")).toBeInTheDocument();
+    expect(screen.getByText("Voting power scope")).toBeInTheDocument();
     expect(screen.getByTestId("negative")).toBeInTheDocument();
     expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
     expect(screen.getByLabelText("Vote cap per identity")).toBeInTheDocument();
@@ -139,6 +144,33 @@ describe("CreateWaveVoting", () => {
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
     ).toHaveClass("tw-rounded-xl", "tw-border-white/5", "tw-bg-iron-900");
     expect(screen.queryByTestId("approval-threshold-setting")).toBeNull();
+  });
+
+  it("renders voting power scope from props", () => {
+    render(<CreateWaveVoting {...baseProps} />);
+
+    expect(
+      screen.getByRole("radio", { name: /^Whole wave/ })
+    ).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Each drop/ })
+    ).not.toBeChecked();
+  });
+
+  it("updates voting power scope", async () => {
+    const user = userEvent.setup();
+    const onCreditScopeChange = jest.fn();
+
+    render(
+      <CreateWaveVoting
+        {...baseProps}
+        onCreditScopeChange={onCreditScopeChange}
+      />
+    );
+
+    await user.click(screen.getByRole("radio", { name: /^Each drop/ }));
+
+    expect(onCreditScopeChange).toHaveBeenCalledWith(ApiWaveCreditScope.Drop);
   });
 
   it("passes enabled negative voting props from config", async () => {

@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SingleWaveDropVoteContent } from "@/components/waves/drop/SingleWaveDropVoteContent";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
@@ -95,6 +96,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteStats", () => ({
       <span data-testid="current-rating">{props.currentRating}</span>
       <span data-testid="max-rating">{props.maxRating}</span>
       <span data-testid="stats-credit-type">{props.label}</span>
+      <span data-testid="stats-credit-scope">{props.creditScope}</span>
     </div>
   ),
 }));
@@ -147,9 +149,49 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("vote-submit")).toBeInTheDocument();
     expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
     expect(screen.getByTestId("vote-stats")).toBeInTheDocument();
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Wave
+    );
     expect(
       screen.getByRole("button", { name: /numeric/i })
     ).toBeInTheDocument();
+  });
+
+  it("passes drop-scoped voting power to stats in normal and mini modes", () => {
+    const drop = createMockDrop({
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        voting_credit_scope: ApiWaveCreditScope.Drop,
+      } as any,
+    });
+
+    const { unmount } = render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Drop
+    );
+
+    unmount();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.MINI}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Drop
+    );
   });
 
   it("initializes with current vote value from drop context", () => {

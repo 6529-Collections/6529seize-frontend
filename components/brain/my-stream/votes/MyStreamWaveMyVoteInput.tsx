@@ -9,7 +9,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { commonApiPost } from "@/services/api/common-api";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
-import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import {
+  getWaveVoteScopeMaxLabel,
+  WAVE_VOTING_LABELS,
+} from "@/helpers/waves/waves.constants";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
@@ -73,6 +76,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   const isEditing =
     hasValidVoteValue && parsedVoteValue !== liveCurrentVoteValue;
   const voteLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
+  const maxRatingLabel = getWaveVoteScopeMaxLabel(
+    drop.wave.voting_credit_scope
+  );
 
   const setVoteDraftValue = (nextValue: string) => {
     setVoteDraftState({
@@ -216,7 +222,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-1.5">
       <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
-        Max{" "}
+        {maxRatingLabel}{" "}
         <span className="tw-tabular-nums tw-text-iron-300">
           {formatNumberWithCommas(liveMaxRating)}
         </span>

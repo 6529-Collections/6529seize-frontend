@@ -2,6 +2,7 @@ import { renderHook, act } from "@testing-library/react";
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
 import { useMemeCardCount } from "@/components/waves/create-wave/hooks/useMemeCardCount";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   CreateWaveStep,
@@ -68,6 +69,9 @@ describe("useWaveConfig", () => {
 
       expect(result.current.config.voting.type).toBe(
         ApiWaveCreditType.TdhPlusXtdh
+      );
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Wave
       );
       expect(result.current.config.voting.category).toBeNull();
       expect(result.current.config.voting.profileId).toBeNull();
@@ -369,12 +373,16 @@ describe("useWaveConfig", () => {
         result.current.onCategoryChange("test-category");
         result.current.onProfileIdChange("test-profile");
         result.current.onCreditNftsChange([{ contract: "0xabc", token_id: 1 }]);
+        result.current.onCreditScopeChange(ApiWaveCreditScope.Drop);
         result.current.onAllowNegativeVotesChange(false);
         result.current.onMaxVotesPerIdentityPerDropChange(1);
       });
 
       expect(result.current.config.voting.category).toBe("test-category");
       expect(result.current.config.voting.profileId).toBe("test-profile");
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Drop
+      );
       expect(result.current.config.voting.allowNegativeVotes).toBe(false);
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
 
@@ -388,6 +396,9 @@ describe("useWaveConfig", () => {
       expect(result.current.config.voting.profileId).toBeNull();
       expect(result.current.config.voting.creditNfts).toEqual([]);
       expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Drop
+      );
       expect(result.current.config.voting.allowNegativeVotes).toBe(false);
       expect(result.current.config.voting.maxVotesPerIdentityPerDrop).toBe(1);
       expect(result.current.config.voting.winningThreshold).toBeNull();
@@ -428,6 +439,18 @@ describe("useWaveConfig", () => {
 
       expect(result.current.config.voting.creditNfts).toEqual(creditNfts);
       expect(result.current.config.voting.creditNftMemeCount).toBeNull();
+    });
+
+    it("should update credit scope", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.onCreditScopeChange(ApiWaveCreditScope.Drop);
+      });
+
+      expect(result.current.config.voting.creditScope).toBe(
+        ApiWaveCreditScope.Drop
+      );
     });
 
     it("should derive card-set TDH Meme count from the count query", () => {

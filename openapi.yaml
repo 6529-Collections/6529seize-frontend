@@ -13663,11 +13663,9 @@ components:
           format: int64
           minimum: 0
     ApiWaveCreditScope:
-      description: |
-        The scope of the credit. 
-        * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
+        - DROP
     ApiWaveCreditType:
       type: string
       description: |
@@ -14000,6 +13998,7 @@ components:
         - voting_period_start
         - voting_period_end
         - voting_credit_type
+        - voting_credit_scope
         - voting_credit_nfts
         - visibility_group_id
         - participation_group_id
@@ -14061,6 +14060,8 @@ components:
           nullable: true
         voting_credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
+        voting_credit_scope:
+          $ref: "#/components/schemas/ApiWaveCreditScope"
         voting_credit_nfts:
           anyOf:
             - type: "null"
@@ -14480,6 +14481,7 @@ components:
       required:
         - scope
         - credit_type
+        - credit_scope
         - credit_category
         - credit_nfts
         - signature_required
@@ -14491,6 +14493,8 @@ components:
           $ref: "#/components/schemas/ApiWaveScope"
         credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
+        credit_scope:
+          $ref: "#/components/schemas/ApiWaveCreditScope"
         credit_category:
           description: >-
             Only relevant when credit_type=REP. The REP category which is usable

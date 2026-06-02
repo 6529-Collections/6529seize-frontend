@@ -134,6 +134,7 @@ export const buildPreviewDrop = ({
       identity_wave: wave.identity_wave,
       submission_type: wave.participation.submission_strategy?.type ?? null,
       voting_credit_nfts: wave.voting.credit_nfts,
+      voting_credit_scope: wave.voting.credit_scope,
     },
     author: {
       id: connectedProfile?.id ?? "preview-user",
