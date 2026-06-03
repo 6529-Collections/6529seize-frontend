@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
@@ -43,6 +44,23 @@ const VOTING_SETTINGS_GRID_CLASSES =
 const VOTING_OPTIONS_GRID_CLASSES =
   "tw-mt-3 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4 [&>div]:tw-gap-x-2 [&>div]:tw-px-3 [&>div]:tw-py-3";
 
+const CREDIT_SCOPE_OPTIONS: readonly {
+  readonly scope: ApiWaveCreditScope;
+  readonly label: string;
+  readonly description: string;
+}[] = [
+  {
+    scope: ApiWaveCreditScope.Wave,
+    label: "Whole wave",
+    description: "Each identity has one voting budget across the wave.",
+  },
+  {
+    scope: ApiWaveCreditScope.Drop,
+    label: "Each drop",
+    description: "Voting power applies separately to every drop.",
+  },
+];
+
 const getCreateWaveVotingLabel = (votingType: ApiWaveCreditType): string => {
   if (votingType === ApiWaveCreditType.CardSetTdh) {
     return "Memes TDH";
@@ -71,12 +89,65 @@ const getApprovalThresholdTimeErrorMessage = (
   return undefined;
 };
 
+function CreateWaveCreditScopeSelect({
+  creditScope,
+  onCreditScopeChange,
+}: {
+  readonly creditScope: ApiWaveCreditScope;
+  readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
+}) {
+  return (
+    <fieldset className="tw-mt-6 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-0 tw-pb-0 tw-pt-6">
+      <legend className="tw-mb-3 tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+        Voting power scope
+      </legend>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2">
+        {CREDIT_SCOPE_OPTIONS.map((option) => {
+          const selected = creditScope === option.scope;
+          return (
+            <label
+              key={option.scope}
+              className={`tw-flex tw-cursor-pointer tw-gap-x-3 tw-rounded-xl tw-border tw-border-solid tw-p-4 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out ${
+                selected
+                  ? "tw-border-primary-400 tw-bg-primary-500/5 tw-ring-primary-500/30"
+                  : "tw-border-white/5 tw-bg-iron-900 tw-ring-white/5 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-ring-white/10"
+              }`}
+            >
+              <input
+                type="radio"
+                name="create-wave-credit-scope"
+                value={option.scope}
+                checked={selected}
+                onChange={() => onCreditScopeChange(option.scope)}
+                className="tw-mt-1 tw-form-radio tw-h-4 tw-w-4 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 tw-ring-offset-iron-800 tw-transition tw-duration-300 tw-ease-out focus:tw-ring-2 focus:tw-ring-primary-400"
+              />
+              <span className="tw-min-w-0">
+                <span
+                  className={`tw-block tw-text-sm tw-font-semibold ${
+                    selected ? "tw-text-primary-400" : "tw-text-iron-200"
+                  }`}
+                >
+                  {option.label}
+                </span>
+                <span className="tw-mt-1 tw-block tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+                  {option.description}
+                </span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 export default function CreateWaveVoting({
   waveType,
   selectedType,
   category,
   profileId,
   creditNfts,
+  creditScope,
   memeCount,
   isMemeCountLoading,
   isMemeCountError,
@@ -89,6 +160,7 @@ export default function CreateWaveVoting({
   setCategory,
   setProfileId,
   setCreditNfts,
+  onCreditScopeChange,
   onAllowNegativeVotesChange,
   setMaxVotesPerIdentityPerDrop,
   setApprovalThreshold,
@@ -101,6 +173,7 @@ export default function CreateWaveVoting({
   readonly category: string | null;
   readonly profileId: string | null;
   readonly creditNfts: ApiWaveCreditNft[];
+  readonly creditScope: ApiWaveCreditScope;
   readonly memeCount: number | null;
   readonly isMemeCountLoading: boolean;
   readonly isMemeCountError: boolean;
@@ -113,6 +186,7 @@ export default function CreateWaveVoting({
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
   readonly setCreditNfts: (creditNfts: ApiWaveCreditNft[]) => void;
+  readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
   readonly onAllowNegativeVotesChange: (allowNegativeVotes: boolean) => void;
   readonly setMaxVotesPerIdentityPerDrop: (value: number | null) => void;
   readonly setApprovalThreshold: (value: number | null) => void;
@@ -239,6 +313,11 @@ export default function CreateWaveVoting({
           />
         )}
       </div>
+
+      <CreateWaveCreditScopeSelect
+        creditScope={creditScope}
+        onCreditScopeChange={onCreditScopeChange}
+      />
 
       {showVotingSettings && (
         <div

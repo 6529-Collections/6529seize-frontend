@@ -124,7 +124,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
         </div>
         {typeof availableVotes === "number" && (
           <p className="tw-mb-0 tw-text-xs tw-text-iron-500">
-            Available{" "}
+            Available in wave{" "}
             <span className="tw-tabular-nums tw-text-iron-300">
               {formatNumberWithCommas(availableVotes)}
             </span>

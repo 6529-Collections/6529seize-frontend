@@ -27,14 +27,20 @@ describe('WaveWinnersPodium', () => {
     expect(screen.getByTestId('empty')).toBeInTheDocument();
   });
 
-  it('passes winners to content', () => {
+  it('passes winners and default vote details flag to content', () => {
     const onClick = jest.fn();
-    render(<WaveWinnersPodium onDropClick={onClick} winners={winners} isLoading={false} />);
+    render(
+      <WaveWinnersPodium
+        onDropClick={onClick}
+        winners={winners}
+        isLoading={false}
+      />
+    );
     expect(screen.getByTestId('content')).toBeInTheDocument();
     expect(contentProps.firstPlaceWinner).toBe(winners[0]);
     expect(contentProps.secondPlaceWinner).toBe(winners[1]);
     expect(contentProps.thirdPlaceWinner).toBe(winners[2]);
     expect(contentProps.onDropClick).toBe(onClick);
+    expect(contentProps.showVoteDetails).toBe(true);
   });
 });
-

@@ -79,8 +79,32 @@ describe("WaveWinners", () => {
       isLoadingAllPages: false,
     });
     render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
-    expect(Podium).toHaveBeenCalled();
+    expect(Podium).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        showVoteDetails: expect.anything(),
+      })
+    );
     expect(Drops).toHaveBeenCalled();
+  });
+
+  it("does not gate podium vote details by memes waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: false },
+      isMemesWave: true,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [{ winners: [] }],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
+
+    expect(Podium).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        showVoteDetails: expect.anything(),
+      })
+    );
   });
 
   it("renders approved drops for approve waves", () => {

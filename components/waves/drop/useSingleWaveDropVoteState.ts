@@ -30,6 +30,7 @@ interface UseSingleWaveDropVoteStateResult {
   readonly submitBlockReason: string | null;
   readonly handleSliderValueAccepted: (acceptedValue: number) => void;
   readonly handleVoteApplied: (updatedDrop: ApiDrop) => void;
+  readonly handleBackgroundVoteApplied: () => void;
 }
 
 const getEffectiveMinRating = (drop: ApiDrop): number => {
@@ -169,6 +170,10 @@ export const useSingleWaveDropVoteState = ({
     [baseRating, drop.id, invalidateDrops]
   );
 
+  const handleBackgroundVoteApplied = useCallback(() => {
+    invalidateDrops();
+  }, [invalidateDrops]);
+
   return {
     displayDrop,
     minRating,
@@ -179,5 +184,6 @@ export const useSingleWaveDropVoteState = ({
     submitBlockReason,
     handleSliderValueAccepted,
     handleVoteApplied,
+    handleBackgroundVoteApplied,
   };
 };

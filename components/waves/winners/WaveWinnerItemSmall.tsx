@@ -15,7 +15,13 @@ interface WaveWinnerItemSmallProps {
 }
 
 export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
-  ({ drop, onDropClick, wave, rank, contentPresentation = "default" }) => {
+  ({
+    drop,
+    onDropClick,
+    wave,
+    rank,
+    contentPresentation = "default",
+  }) => {
     const { isMemesWave } = useWave(wave);
 
     if (isMemesWave) {

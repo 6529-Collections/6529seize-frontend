@@ -16,6 +16,14 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
   __esModule: true,
   default: () => <span data-testid="progress" />,
 }));
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => false,
+}));
 
 describe("WaveLeaderboardDropRaters", () => {
   const drop: ExtendedDrop = {
@@ -36,6 +44,16 @@ describe("WaveLeaderboardDropRaters", () => {
     render(<WaveLeaderboardDropRaters drop={drop} />);
     expect(screen.getByText("10")).toBeInTheDocument();
     expect(screen.getByText("TDH Total")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    ).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40"
+    );
     expect(screen.getByText("Your votes:")).toBeInTheDocument();
   });
 
@@ -50,6 +68,16 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(screen.getByText("/")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(screen.getByText("Needs 2")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    ).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40"
+    );
   });
 
   it("renders the approval countdown label", () => {

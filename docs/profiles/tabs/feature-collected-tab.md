@@ -33,8 +33,10 @@ Transfer mode is part of the Native collected view (not a separate route).
     unknown values default to `wallet-activity`.
   - `wallet-activity=all|airdrops|mints|sales|purchases|transfers|burns`:
     Wallet Activity filter. Missing or unknown values default to `all`.
-  - `page=<n>`: current page for the active paginated section on this route.
-    Canonical links omit `page=1`.
+  - `page=<n>`: current page for the main collected list. Canonical links omit
+    `page=1`.
+  - `wallet-activity-page=<n>`: Wallet Activity details page. Defaults to `1`.
+  - `distribution-page=<n>`: Distributions details page. Defaults to `1`.
 
 ## Entry Points
 
@@ -118,10 +120,11 @@ Transfer mode is part of the Native collected view (not a separate route).
 - On desktop, the started-season row can collapse behind `+N more`; on
   touch/mobile, seasons stay horizontally scrollable. When a season filter is
   active, the collapsed desktop row keeps that season visible.
-- `page` is reused by the main collected list and the paginated details tables
-  on this route.
+- `page` is reserved for the main collected list. Details tables use their own
+  page params so they do not reset collected pagination state.
 - Clicking another profile tab keeps only `address` and drops collected-specific
-  filters plus `activity`, `wallet-activity`, and `page`.
+  filters including `page`, plus `activity`, `wallet-activity`,
+  `wallet-activity-page`, and `distribution-page`.
 - Clicking an active collection metric clears that collection filter back to the
   combined Native view.
 - Clicking a season tile switches to `The Memes`, applies the selected season,

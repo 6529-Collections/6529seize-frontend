@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Tooltip } from "react-tooltip";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -116,12 +117,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
             })()
           )}
         </div>
-        <span className="tw-font-medium tw-text-iron-50">
-          {formatNumberWithCommas(drop.raters_count)}{" "}
-          <span className="tw-font-normal tw-text-iron-400">
-            {drop.raters_count === 1 ? "voter" : "voters"}
-          </span>
-        </span>
+        <ParticipationDropVoteDetailsTrigger drop={drop} />
       </div>
 
       {hasUserVoted && (

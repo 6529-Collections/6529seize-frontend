@@ -13,8 +13,8 @@ import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileM
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { MemesArtResubmitAction } from "@/components/waves/memes/submission/MemesArtResubmitAction";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
@@ -197,14 +197,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <MemeDropTraits drop={drop} />
 
                 <div className="tw-flex tw-flex-col tw-justify-between tw-gap-4 @[700px]:tw-flex-row @[700px]:tw-items-center">
-                  <MemesLeaderboardDropVoteSummary
-                    current={drop.rating}
-                    projected={drop.rating_prediction}
-                    creditType={drop.wave.voting_credit_type}
-                    ratersCount={drop.raters_count}
-                    topVoters={firstThreeVoters}
-                    userContext={drop.context_profile_context}
-                  />
+                  <MemesLeaderboardDropVoteSummary drop={drop} />
 
                   <div
                     className="tw-flex tw-w-full tw-flex-shrink-0 tw-items-center tw-justify-between tw-gap-4 @[700px]:tw-w-auto @[700px]:tw-justify-end"
@@ -234,12 +227,10 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                           </Link>
                         ))}
                       </div>
-                      <span className="tw-text-xs tw-font-bold tw-text-white">
-                        {formatNumberWithCommas(drop.raters_count)}{" "}
-                        <span className="tw-font-normal tw-text-iron-500">
-                          {drop.raters_count === 1 ? "voter" : "voters"}
-                        </span>
-                      </span>
+                      <ParticipationDropVoteDetailsTrigger
+                        drop={drop}
+                        density="compact"
+                      />
                     </div>
                     <VotingModalButton
                       drop={drop}

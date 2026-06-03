@@ -8,7 +8,12 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/winners/drops/header/WaveWinnersDropHeaderVoters",
-  () => () => <div data-testid="voters" />
+  () => (props: any) => (
+    <div
+      data-testid="voters"
+      data-is-approval-wave={props.isApprovalWave ? "true" : undefined}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/winners/drops/header/WaveWinnersDropHeaderAuthorHandle",
@@ -68,5 +73,8 @@ describe("WaveWinnersDropHeader", () => {
 
     expect(getByTestId("approval-badge")).toBeInTheDocument();
     expect(queryByTestId("badge")).toBeNull();
+    expect(getByTestId("voters")).not.toHaveAttribute(
+      "data-is-approval-wave"
+    );
   });
 });

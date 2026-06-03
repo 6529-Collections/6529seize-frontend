@@ -2,8 +2,10 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SingleWaveDropVoteContent } from "@/components/waves/drop/SingleWaveDropVoteContent";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { SingleWaveDropVoteSubmissionMode } from "@/components/waves/drop/SingleWaveDropVote.types";
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: ({ flip }: any) => (
@@ -14,7 +16,13 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
     return (
-      <div data-testid="vote-submit">
+      <div
+        data-testid="vote-submit"
+        data-has-request-started={String(
+          typeof props.onVoteRequestStarted === "function"
+        )}
+        data-submission-mode={props.submissionMode}
+      >
         <button
           onClick={() => {
             if (props.submitBlockReason) {
@@ -95,6 +103,7 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteStats", () => ({
       <span data-testid="current-rating">{props.currentRating}</span>
       <span data-testid="max-rating">{props.maxRating}</span>
       <span data-testid="stats-credit-type">{props.label}</span>
+      <span data-testid="stats-credit-scope">{props.creditScope}</span>
     </div>
   ),
 }));
@@ -147,9 +156,93 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("vote-submit")).toBeInTheDocument();
     expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
     expect(screen.getByTestId("vote-stats")).toBeInTheDocument();
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Wave
+    );
     expect(
       screen.getByRole("button", { name: /numeric/i })
     ).toBeInTheDocument();
+  });
+
+  it("uses confirmed submission mode by default", () => {
+    const drop = createMockDrop();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submission-mode",
+      SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION
+    );
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-has-request-started",
+      "false"
+    );
+  });
+
+  it("passes background submission mode and request-start callback", () => {
+    const drop = createMockDrop();
+    const onVoteRequestStarted = jest.fn();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteRequestStarted={onVoteRequestStarted}
+        submissionMode={SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH}
+      />
+    );
+
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submission-mode",
+      SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+    );
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-has-request-started",
+      "true"
+    );
+  });
+
+  it("passes drop-scoped voting power to stats in normal and mini modes", () => {
+    const drop = createMockDrop({
+      wave: {
+        id: "wave-123",
+        name: "Test Wave",
+        voting_credit_type: ApiWaveCreditType.Tdh,
+        voting_credit_scope: ApiWaveCreditScope.Drop,
+      } as any,
+    });
+
+    const { unmount } = render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Drop
+    );
+
+    unmount();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.MINI}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("stats-credit-scope")).toHaveTextContent(
+      ApiWaveCreditScope.Drop
+    );
   });
 
   it("initializes with current vote value from drop context", () => {

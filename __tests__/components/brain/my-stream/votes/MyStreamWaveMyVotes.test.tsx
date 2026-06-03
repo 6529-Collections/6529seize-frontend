@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotes from "@/components/brain/my-stream/votes/MyStreamWaveMyVotes";
 import { AuthContext } from "@/components/auth/Auth";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveDropsLeaderboard } from "@/hooks/useWaveDropsLeaderboard";
 
@@ -120,6 +121,36 @@ describe("MyStreamWaveMyVotes", () => {
     expect(resetProps?.availableVotes).toBe(8);
     intersectionCb();
     expect(fetchNextPage).toHaveBeenCalled();
+  });
+
+  it("does not pass a shared available value for drop-scoped waves", () => {
+    useWaveDropsLeaderboardMock.mockReturnValue({
+      drops: [
+        {
+          id: "a",
+          context_profile_context: { rating: 2, max_rating: 10 },
+        },
+      ],
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+    });
+
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotes
+          wave={{
+            ...wave,
+            voting: { credit_scope: ApiWaveCreditScope.Drop },
+          }}
+          onDropClick={onDropClick}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByTestId("reset")).toBeInTheDocument();
+    expect(resetProps?.availableVotes).toBeNull();
   });
 
   it("shows loading bar when fetching next page", () => {

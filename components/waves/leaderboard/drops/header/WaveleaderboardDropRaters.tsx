@@ -2,6 +2,7 @@ import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import {
   WAVE_VOTING_LABELS,
   WAVE_VOTE_STATS_LABELS,
@@ -24,7 +25,6 @@ export const WaveLeaderboardDropRaters: React.FC<
   winningThresholdMinDurationMs,
   isVotingClosed = false,
 }) => {
-  const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
@@ -112,9 +112,7 @@ export const WaveLeaderboardDropRaters: React.FC<
       </div>
 
       <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap tw-text-sm tw-leading-5">
-        <span className="tw-text-iron-400">
-          {formatNumberWithCommas(drop.raters_count)} {votersCountLabel}
-        </span>
+        <ParticipationDropVoteDetailsTrigger drop={drop} />
       </div>
 
       {hasUserVoted && (

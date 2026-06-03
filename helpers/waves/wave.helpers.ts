@@ -98,6 +98,7 @@ export const toApiWaveMin = (wave: ApiWave): ApiWaveMin => {
     voting_credit_nfts: wave.voting.credit_nfts,
     links_disabled: wave.chat.links_disabled,
     wave_author_handle: wave.author.handle ?? null,
+    voting_credit_scope: wave.voting.credit_scope,
   };
 
   return waveMin;
