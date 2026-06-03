@@ -94,6 +94,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const [isProcessing, setIsProcessing] = useState(false);
     const animationTimelineRef = useRef<VoteAnimationTimeline | null>(null);
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+    const isMountedRef = useRef(true);
+    const backgroundCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const backgroundSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const backgroundCloseFiredRef = useRef(false);
     const randomID = useId().replace(/[^a-zA-Z0-9_-]/g, "");
     const tlDuration = VOTE_BUTTON_TRANSITION_MS;
     const particlesDuration = 800;
@@ -232,9 +236,14 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
     // Cleanup timeouts on unmount
     useEffect(() => {
+      isMountedRef.current = true;
+
       return () => {
+        isMountedRef.current = false;
         timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
         timeoutsRef.current = [];
+        backgroundCloseTimeoutRef.current = null;
+        backgroundSuccessTimeoutRef.current = null;
       };
     }, []);
 
@@ -265,9 +274,31 @@ const SingleWaveDropVoteSubmit = forwardRef<
         timeoutsRef.current.push(resetTimeout);
       }, totalParticlesTime);
       timeoutsRef.current.push(exitTimeout);
+      return exitTimeout;
+    };
+
+    const resetFastFailedBackgroundVote = () => {
+      if (!isMountedRef.current || backgroundCloseFiredRef.current) {
+        return;
+      }
+
+      if (backgroundCloseTimeoutRef.current) {
+        clearTimeout(backgroundCloseTimeoutRef.current);
+        backgroundCloseTimeoutRef.current = null;
+      }
+
+      if (backgroundSuccessTimeoutRef.current) {
+        clearTimeout(backgroundSuccessTimeoutRef.current);
+        backgroundSuccessTimeoutRef.current = null;
+      }
+
+      setShowSuccess(false);
+      resetLoadingState();
     };
 
     const submitVoteInBackground = () => {
+      backgroundCloseFiredRef.current = false;
+
       void rateChangeMutation
         .mutateAsync({
           rate: newRating,
@@ -275,16 +306,21 @@ const SingleWaveDropVoteSubmit = forwardRef<
         .then((updatedDrop) => {
           onVoteApplied?.(updatedDrop);
         })
-        .catch(() => undefined);
+        .catch(() => {
+          resetFastFailedBackgroundVote();
+        });
 
       showSuccessfulVote();
 
       const closeTimeout = setTimeout(() => {
+        backgroundCloseFiredRef.current = true;
+        backgroundCloseTimeoutRef.current = null;
         onVoteRequestStarted?.();
       }, BACKGROUND_MODAL_CLOSE_DELAY_MS);
+      backgroundCloseTimeoutRef.current = closeTimeout;
       timeoutsRef.current.push(closeTimeout);
 
-      finishSuccessState();
+      backgroundSuccessTimeoutRef.current = finishSuccessState();
     };
 
     const submitVoteWithConfirmation = async () => {

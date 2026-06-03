@@ -350,6 +350,53 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   });
 
+  it("keeps background submissions open when the API fails before close", async () => {
+    const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
+    const onVoteRequestStarted = jest.fn();
+    const onVoteApplied = jest.fn();
+    let rejectVote!: (error: string) => void;
+    mockCommonApiPost.mockReturnValue(
+      new Promise<ApiDrop>((_resolve, reject) => {
+        rejectVote = reject;
+      })
+    );
+
+    renderComponent({
+      onVoteApplied,
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(mockCommonApiPost).toHaveBeenCalled();
+    });
+    expect(screen.getByText("Voted")).toBeInTheDocument();
+
+    await act(async () => {
+      rejectVote("Vote failed");
+      await flushMicrotasks();
+    });
+
+    await waitFor(() => {
+      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: "Vote failed",
+        type: "error",
+      });
+    });
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
+    expect(onVoteApplied).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText("Vote")).toBeInTheDocument();
+    });
+
+    await advanceTimers(300);
+
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
+  });
+
   it("keeps background success invalidation after the close callback", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
     const onVoteRequestStarted = jest.fn();
