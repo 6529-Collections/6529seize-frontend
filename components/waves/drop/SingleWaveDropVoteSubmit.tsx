@@ -94,6 +94,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const [isProcessing, setIsProcessing] = useState(false);
     const animationTimelineRef = useRef<VoteAnimationTimeline | null>(null);
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+    const delayCancelersRef = useRef<(() => void)[]>([]);
     const isMountedRef = useRef(true);
     const backgroundCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const backgroundSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -244,12 +245,56 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
       return () => {
         isMountedRef.current = false;
+        const delayCancelers = delayCancelersRef.current;
+        delayCancelersRef.current = [];
+        delayCancelers.forEach((cancelDelay) => cancelDelay());
         timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
         timeoutsRef.current = [];
         backgroundCloseTimeoutRef.current = null;
         backgroundSuccessTimeoutRef.current = null;
       };
     }, []);
+
+    const removeTrackedTimeout = (timeout: NodeJS.Timeout) => {
+      timeoutsRef.current = timeoutsRef.current.filter(
+        (trackedTimeout) => trackedTimeout !== timeout
+      );
+    };
+
+    const removeDelayCanceler = (delayCanceler: () => void) => {
+      delayCancelersRef.current = delayCancelersRef.current.filter(
+        (trackedDelayCanceler) => trackedDelayCanceler !== delayCanceler
+      );
+    };
+
+    const delayWhileMounted = (delayMs: number) =>
+      new Promise<boolean>((resolve) => {
+        let settled = false;
+        let timeout: NodeJS.Timeout;
+        let cancelDelay: () => void;
+
+        const settle = (mounted: boolean) => {
+          if (settled) {
+            return;
+          }
+
+          settled = true;
+          clearTimeout(timeout);
+          removeTrackedTimeout(timeout);
+          removeDelayCanceler(cancelDelay);
+          resolve(mounted);
+        };
+
+        cancelDelay = () => {
+          settle(false);
+        };
+
+        timeout = setTimeout(() => {
+          settle(isMountedRef.current);
+        }, delayMs);
+        timeoutsRef.current.push(timeout);
+        delayCancelersRef.current.push(cancelDelay);
+      });
 
     const resetLoadingState = () => {
       setLoading(false);
@@ -339,9 +384,12 @@ const SingleWaveDropVoteSubmit = forwardRef<
       }
 
       setIsSpinnerExiting(true);
-      await new Promise((resolve) =>
-        setTimeout(resolve, VOTE_BUTTON_TRANSITION_MS)
+      const spinnerExitFinished = await delayWhileMounted(
+        VOTE_BUTTON_TRANSITION_MS
       );
+      if (!spinnerExitFinished) {
+        return;
+      }
 
       showSuccessfulVote();
 
@@ -350,16 +398,21 @@ const SingleWaveDropVoteSubmit = forwardRef<
       }, 1000);
       timeoutsRef.current.push(successTimeout);
 
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, totalParticlesTime);
-        timeoutsRef.current.push(timeout);
-      });
+      const successDisplayFinished = await delayWhileMounted(
+        totalParticlesTime
+      );
+      if (!successDisplayFinished) {
+        return;
+      }
 
       setIsTextExiting(true);
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, VOTE_BUTTON_TRANSITION_MS);
-        timeoutsRef.current.push(timeout);
-      });
+      const textExitFinished = await delayWhileMounted(
+        VOTE_BUTTON_TRANSITION_MS
+      );
+      if (!textExitFinished) {
+        return;
+      }
+
       setShowSuccess(false);
       setIsTextExiting(false);
       setIsProcessing(false);
@@ -383,9 +436,12 @@ const SingleWaveDropVoteSubmit = forwardRef<
       setIsTextExiting(true);
       setLoading(true);
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, VOTE_BUTTON_TRANSITION_MS)
+      const textExitFinished = await delayWhileMounted(
+        VOTE_BUTTON_TRANSITION_MS
       );
+      if (!textExitFinished) {
+        return;
+      }
       setIsTextExiting(false);
 
       let success = false;

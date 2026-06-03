@@ -311,6 +311,47 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   });
 
+  it("stops the click flow when unmounted during the opening transition", async () => {
+    const onVoteRequestStarted = jest.fn();
+    const { unmount } = renderComponent({
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    unmount();
+
+    await advanceTimers(300);
+
+    expect(mockAuthContext.requestAuth).not.toHaveBeenCalled();
+    expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
+  });
+
+  it("does not call success callback after unmounting during confirmation transition", async () => {
+    const onVoteApplied = jest.fn();
+    const onVoteSuccess = jest.fn();
+    const { unmount } = renderComponent({
+      onVoteApplied,
+      onVoteSuccess,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(commonApi.commonApiPost).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(onVoteApplied).toHaveBeenCalledWith(mockDrop);
+    });
+
+    unmount();
+    await advanceTimers(1300);
+
+    expect(onVoteSuccess).not.toHaveBeenCalled();
+  });
+
   it("closes background submissions before the API resolves", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
     const onVoteRequestStarted = jest.fn();
