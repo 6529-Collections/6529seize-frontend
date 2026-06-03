@@ -1,8 +1,10 @@
+import { getToastAutoClose } from "@/helpers/toast.helpers";
 import { Slide, toast } from "react-toastify";
+
 export const makeErrorToast = (message: string) =>
   toast(message, {
     position: "top-right",
-    autoClose: 3000,
+    autoClose: getToastAutoClose("error"),
     hideProgressBar: false,
     draggable: false,
     closeOnClick: true,

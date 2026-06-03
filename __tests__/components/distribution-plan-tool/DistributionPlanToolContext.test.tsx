@@ -37,6 +37,7 @@ function ContextReader() {
       <button data-testid="set-null" onClick={() => context.setState(null)} />
       <button data-testid="set-plan" onClick={() => context.setState(plan)} />
       <button data-testid="toast" onClick={() => context.setToasts({ messages: ['a', 'b'], type: 'info' as TypeOptions })} />
+      <button data-testid="error-toast" onClick={() => context.setToasts({ messages: ['error'], type: 'error' as TypeOptions })} />
     </>
   );
 }
@@ -89,5 +90,24 @@ describe('DistributionPlanToolContext', () => {
     setup();
     screen.getByTestId('toast').click();
     expect(toast).toHaveBeenCalledTimes(2);
+    expect(toast).toHaveBeenCalledWith(
+      'a',
+      expect.objectContaining({
+        type: 'info',
+        autoClose: 3000,
+      })
+    );
+  });
+
+  it('keeps error toasts visible longer', () => {
+    setup();
+    screen.getByTestId('error-toast').click();
+    expect(toast).toHaveBeenCalledWith(
+      'error',
+      expect.objectContaining({
+        type: 'error',
+        autoClose: 8000,
+      })
+    );
   });
 });
