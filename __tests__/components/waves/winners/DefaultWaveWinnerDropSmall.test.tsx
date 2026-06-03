@@ -18,8 +18,17 @@ jest.mock("@/components/waves/drops/winner/WinnerDropBadge", () => ({
 jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => false,
+}));
 
 const baseDrop = {
+  id: "drop-1",
   rating: 5,
   raters_count: 1,
   author: { handle: "alice", pfp: null },
@@ -61,6 +70,28 @@ describe("DefaultWaveWinnerDropSmall", () => {
       expect.objectContaining({
         contentPresentation: "quorumCompact",
       })
+    );
+  });
+
+  it("shows compact vote details trigger for normal winners", () => {
+    render(
+      <DefaultWaveWinnerDropSmall
+        drop={{ ...baseDrop, raters_count: 2 }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    ).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40",
+      "tw-px-1.5",
+      "tw-py-0.5"
     );
   });
 });

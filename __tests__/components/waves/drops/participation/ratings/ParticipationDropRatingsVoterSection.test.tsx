@@ -24,6 +24,11 @@ describe('ParticipationDropRatingsVoterSection', () => {
     expect(screen.getAllByAltText(/avatar/)).toHaveLength(5);
     expect(screen.getByText('+1')).toBeInTheDocument();
     expect(screen.getByText('6')).toBeInTheDocument();
-    expect(screen.getByText('Voters')).toBeInTheDocument();
+    expect(screen.getByText('voters')).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 6 voters",
+      })
+    ).toBeInTheDocument();
   });
 });

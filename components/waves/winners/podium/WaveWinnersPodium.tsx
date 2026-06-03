@@ -9,12 +9,14 @@ interface WaveWinnersPodiumProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly winners: ApiWaveDecisionWinner[];
   readonly isLoading: boolean;
+  readonly showVoteDetails?: boolean | undefined;
 }
 
 export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   onDropClick,
   winners,
   isLoading,
+  showVoteDetails = true,
 }) => {
   // Extract winners for the podium (or undefined if not available)
   const firstPlaceWinner = winners[0];
@@ -35,6 +37,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
       firstPlaceWinner={firstPlaceWinner}
       secondPlaceWinner={secondPlaceWinner}
       thirdPlaceWinner={thirdPlaceWinner}
+      showVoteDetails={showVoteDetails}
     />
   );
 };

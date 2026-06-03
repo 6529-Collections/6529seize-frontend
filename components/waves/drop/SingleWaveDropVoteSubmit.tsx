@@ -16,7 +16,10 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "@/components/auth/Auth";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import {
+  SingleWaveDropVoteSize,
+  SingleWaveDropVoteSubmissionMode,
+} from "./SingleWaveDropVote.types";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 type ThemeColors = {
@@ -50,13 +53,17 @@ const rankingThemes: { [key: number]: ThemeColors } = {
 };
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
+const VOTE_BUTTON_TRANSITION_MS = 300;
+const BACKGROUND_MODAL_CLOSE_BUFFER_MS = 150;
 
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
   readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
+  readonly onVoteRequestStarted?: (() => void) | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
+  readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
   readonly submitBlockReason?: string | null | undefined;
 }
 
@@ -70,7 +77,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
       newRating,
       onVoteApplied,
       onVoteSuccess,
+      onVoteRequestStarted,
       size = SingleWaveDropVoteSize.NORMAL,
+      submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
       submitBlockReason = null,
     }: Props,
     ref
@@ -85,11 +94,20 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const [isProcessing, setIsProcessing] = useState(false);
     const animationTimelineRef = useRef<VoteAnimationTimeline | null>(null);
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
+    const delayCancelersRef = useRef<(() => void)[]>([]);
+    const isMountedRef = useRef(true);
+    const backgroundCloseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const backgroundSuccessTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const backgroundCloseFiredRef = useRef(false);
     const randomID = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-    const tlDuration = 300;
+    const tlDuration = VOTE_BUTTON_TRANSITION_MS;
     const particlesDuration = 800;
     const particlesDelay = 50;
     const particleCount = 12;
+    const backgroundModalCloseDelay =
+      particlesDuration +
+      particlesDelay * (particleCount - 1) +
+      BACKGROUND_MODAL_CLOSE_BUFFER_MS;
     const totalParticlesTime =
       particlesDuration + particlesDelay * particleCount + 2500;
 
@@ -223,14 +241,187 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
     // Cleanup timeouts on unmount
     useEffect(() => {
+      isMountedRef.current = true;
+
       return () => {
+        isMountedRef.current = false;
+        const delayCancelers = delayCancelersRef.current;
+        delayCancelersRef.current = [];
+        delayCancelers.forEach((cancelDelay) => cancelDelay());
         timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
         timeoutsRef.current = [];
+        backgroundCloseTimeoutRef.current = null;
+        backgroundSuccessTimeoutRef.current = null;
       };
     }, []);
 
+    const removeTrackedTimeout = (timeout: NodeJS.Timeout) => {
+      timeoutsRef.current = timeoutsRef.current.filter(
+        (trackedTimeout) => trackedTimeout !== timeout
+      );
+    };
+
+    const removeDelayCanceler = (delayCanceler: () => void) => {
+      delayCancelersRef.current = delayCancelersRef.current.filter(
+        (trackedDelayCanceler) => trackedDelayCanceler !== delayCanceler
+      );
+    };
+
+    const delayWhileMounted = (delayMs: number) =>
+      new Promise<boolean>((resolve) => {
+        let settled = false;
+        let timeout: NodeJS.Timeout;
+        let cancelDelay: () => void;
+
+        const settle = (mounted: boolean) => {
+          if (settled) {
+            return;
+          }
+
+          settled = true;
+          clearTimeout(timeout);
+          removeTrackedTimeout(timeout);
+          removeDelayCanceler(cancelDelay);
+          resolve(mounted);
+        };
+
+        cancelDelay = () => {
+          settle(false);
+        };
+
+        timeout = setTimeout(() => {
+          settle(isMountedRef.current);
+        }, delayMs);
+        timeoutsRef.current.push(timeout);
+        delayCancelersRef.current.push(cancelDelay);
+      });
+
+    const resetLoadingState = () => {
+      setLoading(false);
+      setIsSpinnerExiting(false);
+      setIsTextExiting(false);
+      setIsProcessing(false);
+    };
+
+    const showSuccessfulVote = () => {
+      setLoading(false);
+      setIsSpinnerExiting(false);
+      setIsTextExiting(false);
+      setShowSuccess(true);
+      animationTimelineRef.current?.replay();
+    };
+
+    const finishSuccessState = () => {
+      const exitTimeout = setTimeout(() => {
+        setIsTextExiting(true);
+
+        const resetTimeout = setTimeout(() => {
+          setShowSuccess(false);
+          setIsTextExiting(false);
+          setIsProcessing(false);
+        }, VOTE_BUTTON_TRANSITION_MS);
+        timeoutsRef.current.push(resetTimeout);
+      }, totalParticlesTime);
+      timeoutsRef.current.push(exitTimeout);
+      return exitTimeout;
+    };
+
+    const resetFastFailedBackgroundVote = () => {
+      if (!isMountedRef.current || backgroundCloseFiredRef.current) {
+        return;
+      }
+
+      if (backgroundCloseTimeoutRef.current) {
+        clearTimeout(backgroundCloseTimeoutRef.current);
+        backgroundCloseTimeoutRef.current = null;
+      }
+
+      if (backgroundSuccessTimeoutRef.current) {
+        clearTimeout(backgroundSuccessTimeoutRef.current);
+        backgroundSuccessTimeoutRef.current = null;
+      }
+
+      setShowSuccess(false);
+      resetLoadingState();
+    };
+
+    const submitVoteInBackground = () => {
+      backgroundCloseFiredRef.current = false;
+
+      void rateChangeMutation
+        .mutateAsync({
+          rate: newRating,
+        })
+        .then((updatedDrop) => {
+          onVoteApplied?.(updatedDrop);
+        })
+        .catch(() => {
+          resetFastFailedBackgroundVote();
+        });
+
+      showSuccessfulVote();
+
+      const closeTimeout = setTimeout(() => {
+        backgroundCloseFiredRef.current = true;
+        backgroundCloseTimeoutRef.current = null;
+        onVoteRequestStarted?.();
+      }, backgroundModalCloseDelay);
+      backgroundCloseTimeoutRef.current = closeTimeout;
+      timeoutsRef.current.push(closeTimeout);
+
+      backgroundSuccessTimeoutRef.current = finishSuccessState();
+    };
+
+    const submitVoteWithConfirmation = async () => {
+      try {
+        const updatedDrop = await rateChangeMutation.mutateAsync({
+          rate: newRating,
+        });
+        onVoteApplied?.(updatedDrop);
+      } catch {
+        resetLoadingState();
+        return;
+      }
+
+      setIsSpinnerExiting(true);
+      const spinnerExitFinished = await delayWhileMounted(
+        VOTE_BUTTON_TRANSITION_MS
+      );
+      if (!spinnerExitFinished) {
+        return;
+      }
+
+      showSuccessfulVote();
+
+      const successTimeout = setTimeout(() => {
+        onVoteSuccess?.();
+      }, 1000);
+      timeoutsRef.current.push(successTimeout);
+
+      const successDisplayFinished = await delayWhileMounted(
+        totalParticlesTime
+      );
+      if (!successDisplayFinished) {
+        return;
+      }
+
+      setIsTextExiting(true);
+      const textExitFinished = await delayWhileMounted(
+        VOTE_BUTTON_TRANSITION_MS
+      );
+      if (!textExitFinished) {
+        return;
+      }
+
+      setShowSuccess(false);
+      setIsTextExiting(false);
+      setIsProcessing(false);
+    };
+
     const handleClick = async () => {
-      if (isProcessing || loading || isSpinnerExiting || isTextExiting) return;
+      if (isProcessing || loading || isSpinnerExiting || isTextExiting) {
+        return;
+      }
 
       const voteError = getVoteError();
       if (voteError) {
@@ -245,58 +436,36 @@ const SingleWaveDropVoteSubmit = forwardRef<
       setIsTextExiting(true);
       setLoading(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const textExitFinished = await delayWhileMounted(
+        VOTE_BUTTON_TRANSITION_MS
+      );
+      if (!textExitFinished) {
+        return;
+      }
       setIsTextExiting(false);
 
+      let success = false;
       try {
-        const { success } = await requestAuth();
-        if (!success) {
-          setLoading(false);
-          setIsTextExiting(false);
-          setIsProcessing(false);
-          return;
-        }
-        const updatedDrop = await rateChangeMutation.mutateAsync({
-          rate: newRating,
-        });
-        onVoteApplied?.(updatedDrop);
+        ({ success } = await requestAuth());
       } catch {
-        setLoading(false);
-        setIsTextExiting(false);
-        setIsProcessing(false);
+        resetLoadingState();
         return;
       }
 
-      setIsSpinnerExiting(true);
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (!success) {
+        resetLoadingState();
+        return;
+      }
 
-      setLoading(false);
-      setIsSpinnerExiting(false);
-      setShowSuccess(true);
+      if (
+        submissionMode ===
+        SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+      ) {
+        submitVoteInBackground();
+        return;
+      }
 
-      animationTimelineRef.current?.replay();
-
-      // Allow animation to show before closing modal
-      const successTimeout = setTimeout(() => {
-        if (onVoteSuccess) {
-          onVoteSuccess();
-        }
-      }, 1000); // Shorter time than totalParticlesTime to allow user to see the "Voted!" message
-      timeoutsRef.current.push(successTimeout);
-
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, totalParticlesTime);
-        timeoutsRef.current.push(timeout);
-      });
-
-      setIsTextExiting(true);
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, 300);
-        timeoutsRef.current.push(timeout);
-      });
-      setShowSuccess(false);
-      setIsTextExiting(false);
-      setIsProcessing(false);
+      await submitVoteWithConfirmation();
     };
 
     useImperativeHandle(ref, () => ({

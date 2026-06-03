@@ -10,10 +10,19 @@ jest.mock(
     };
   }
 );
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => false,
+}));
 
 const baseWinner = {
   place: 1,
   drop: {
+    id: "drop-1",
     top_raters: [{ profile: { handle: "bob" }, rating: 2 }],
     raters_count: 3,
     wave: { voting_credit_type: "REP" },
@@ -23,10 +32,28 @@ const baseWinner = {
 
 test("shows user vote when available", () => {
   render(<WaveWinnersDropHeaderVoters winner={baseWinner as any} />);
-  expect(screen.getByText("3")).toBeInTheDocument();
-  expect(screen.getByText(/voters/)).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: "View voters and vote log for 3 voters",
+    })
+  ).toBeInTheDocument();
   expect(screen.getByText(/Your votes/)).toBeInTheDocument();
   expect(screen.getByText("5 Rep")).toBeInTheDocument();
+});
+
+test("shows vote details trigger for normal winners", () => {
+  render(<WaveWinnersDropHeaderVoters winner={baseWinner as any} />);
+
+  expect(
+    screen.getByRole("button", {
+      name: "View voters and vote log for 3 voters",
+    })
+  ).toHaveClass(
+    "tw-rounded-lg",
+    "tw-border",
+    "tw-border-iron-700",
+    "tw-bg-iron-900/40"
+  );
 });
 
 test("hides user vote when not voted", () => {

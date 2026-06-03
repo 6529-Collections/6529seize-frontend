@@ -9,6 +9,7 @@ interface DropVoteProgressingProps {
   readonly projected: number | null | undefined;
   readonly subtle?: boolean | undefined;
   readonly compact?: boolean | undefined;
+  readonly tooltipLabel?: string | undefined;
 }
 
 export default function DropVoteProgressing({
@@ -16,6 +17,7 @@ export default function DropVoteProgressing({
   projected,
   subtle = false,
   compact = false,
+  tooltipLabel = "Projected vote count at decision time",
 }: DropVoteProgressingProps): ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
@@ -91,8 +93,7 @@ export default function DropVoteProgressing({
           pointerEvents: "none",
         }}
       >
-        Projected vote count at decision time:{" "}
-        {formatNumberWithCommas(projected)}
+        {tooltipLabel}: {formatNumberWithCommas(projected)}
       </Tooltip>
     </>
   );

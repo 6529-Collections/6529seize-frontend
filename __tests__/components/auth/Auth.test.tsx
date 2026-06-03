@@ -988,7 +988,10 @@ describe("Auth component", () => {
 
       expect(toast).toHaveBeenCalledWith(
         "Test error message",
-        expect.objectContaining({ type: "error" })
+        expect.objectContaining({
+          type: "error",
+          autoClose: 8000,
+        })
       );
     });
 
@@ -1030,7 +1033,10 @@ describe("Auth component", () => {
 
       expect(toast).toHaveBeenCalledWith(
         "Test success message",
-        expect.objectContaining({ type: "success" })
+        expect.objectContaining({
+          type: "success",
+          autoClose: 3000,
+        })
       );
     });
   });

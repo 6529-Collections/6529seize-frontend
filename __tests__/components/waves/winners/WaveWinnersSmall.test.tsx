@@ -173,6 +173,9 @@ describe("WaveWinnersSmall", () => {
       "newer",
       "older",
     ]);
+    expect(
+      ItemMock.mock.calls.every(([props]) => !("isApprovalWave" in props))
+    ).toBe(true);
     expect(SelectorMock).not.toHaveBeenCalled();
     expect(useWaveDecisions).toHaveBeenCalledWith({
       waveId: "w",

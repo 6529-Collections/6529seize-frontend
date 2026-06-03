@@ -32,6 +32,11 @@ describe("invalidateWaveApprovalStatusQueries", () => {
       QueryKey.DROPS,
       { waveId: "wave-1", limit: 20 },
     ] as const;
+    const dropVotersKey = [QueryKey.DROP_VOTERS, { dropId: "drop-1" }] as const;
+    const dropVoteLogsKey = [
+      QueryKey.DROP_VOTE_LOGS,
+      { dropId: "drop-1" },
+    ] as const;
     const otherWaveKey = [QueryKey.WAVE, { wave_id: "wave-2" }] as const;
     const otherDecisionsKey = [
       QueryKey.WAVE_DECISIONS,
@@ -49,6 +54,8 @@ describe("invalidateWaveApprovalStatusQueries", () => {
     queryClient.setQueryData(decisionsKey, { pages: [], pageParams: [] });
     queryClient.setQueryData(dropsLeaderboardKey, { pages: [] });
     queryClient.setQueryData(dropsKey, { pages: [] });
+    queryClient.setQueryData(dropVotersKey, { pages: [] });
+    queryClient.setQueryData(dropVoteLogsKey, { pages: [] });
     queryClient.setQueryData(otherWaveKey, { id: "wave-2" });
     queryClient.setQueryData(otherDecisionsKey, { pages: [], pageParams: [] });
     queryClient.setQueryData(otherDropsLeaderboardKey, { pages: [] });
@@ -62,6 +69,10 @@ describe("invalidateWaveApprovalStatusQueries", () => {
       true
     );
     expect(queryClient.getQueryState(dropsKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(dropVotersKey)?.isInvalidated).toBe(true);
+    expect(queryClient.getQueryState(dropVoteLogsKey)?.isInvalidated).toBe(
+      true
+    );
     expect(queryClient.getQueryState(otherWaveKey)?.isInvalidated).toBe(false);
     expect(queryClient.getQueryState(otherDecisionsKey)?.isInvalidated).toBe(
       false

@@ -5,6 +5,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { SingleWaveDropVoteSubmissionMode } from "@/components/waves/drop/SingleWaveDropVote.types";
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: ({ flip }: any) => (
@@ -15,7 +16,13 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSubmit", () => {
   return React.forwardRef(function MockSubmit(props: any, ref: any) {
     React.useImperativeHandle(ref, () => ({ handleClick: jest.fn() }));
     return (
-      <div data-testid="vote-submit">
+      <div
+        data-testid="vote-submit"
+        data-has-request-started={String(
+          typeof props.onVoteRequestStarted === "function"
+        )}
+        data-submission-mode={props.submissionMode}
+      >
         <button
           onClick={() => {
             if (props.submitBlockReason) {
@@ -155,6 +162,50 @@ describe("SingleWaveDropVoteContent", () => {
     expect(
       screen.getByRole("button", { name: /numeric/i })
     ).toBeInTheDocument();
+  });
+
+  it("uses confirmed submission mode by default", () => {
+    const drop = createMockDrop();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
+    );
+
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submission-mode",
+      SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION
+    );
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-has-request-started",
+      "false"
+    );
+  });
+
+  it("passes background submission mode and request-start callback", () => {
+    const drop = createMockDrop();
+    const onVoteRequestStarted = jest.fn();
+
+    render(
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteRequestStarted={onVoteRequestStarted}
+        submissionMode={SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH}
+      />
+    );
+
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-submission-mode",
+      SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+    );
+    expect(screen.getByTestId("vote-submit")).toHaveAttribute(
+      "data-has-request-started",
+      "true"
+    );
   });
 
   it("passes drop-scoped voting power to stats in normal and mini modes", () => {

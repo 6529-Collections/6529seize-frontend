@@ -35,6 +35,7 @@ interface WinnerDropProps {
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;

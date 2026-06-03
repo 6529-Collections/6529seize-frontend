@@ -4,7 +4,10 @@ import type { FC } from "react";
 import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import {
+  SingleWaveDropVoteSize,
+  SingleWaveDropVoteSubmissionMode,
+} from "./SingleWaveDropVote.types";
 import type { SingleWaveDropVoteSubmitHandles } from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSubmit from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
@@ -19,12 +22,16 @@ interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
   readonly size: SingleWaveDropVoteSize;
   readonly onVoteSuccess?: (() => void) | undefined;
+  readonly onVoteRequestStarted?: (() => void) | undefined;
+  readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
 }
 
 export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   drop,
   size,
   onVoteSuccess,
+  onVoteRequestStarted,
+  submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
 }) => {
   const {
     displayDrop,
@@ -36,6 +43,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     submitBlockReason,
     handleSliderValueAccepted,
     handleVoteApplied,
+    handleBackgroundVoteApplied,
   } = useSingleWaveDropVoteState({ drop });
   const [isSliderMode, setIsSliderMode] = useState(
     size !== SingleWaveDropVoteSize.MINI
@@ -48,6 +56,16 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
       .voting_credit_scope ?? ApiWaveCreditScope.Wave;
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
+  const isBackgroundSubmission =
+    submissionMode === SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH;
+  const handleSubmitVoteApplied = (updatedDrop: ApiDrop) => {
+    if (isBackgroundSubmission) {
+      handleBackgroundVoteApplied();
+      return;
+    }
+
+    handleVoteApplied(updatedDrop);
+  };
 
   const handleSubmit = () => {
     void submitRef.current?.handleClick();
@@ -107,8 +125,10 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               drop={displayDrop}
               newRating={submitVoteValue}
               ref={submitRef}
-              onVoteApplied={handleVoteApplied}
+              onVoteApplied={handleSubmitVoteApplied}
               onVoteSuccess={onVoteSuccess}
+              onVoteRequestStarted={onVoteRequestStarted}
+              submissionMode={submissionMode}
               size={size}
               submitBlockReason={submitBlockReason}
             />
@@ -157,8 +177,10 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             drop={displayDrop}
             newRating={submitVoteValue}
             ref={submitRef}
-            onVoteApplied={handleVoteApplied}
+            onVoteApplied={handleSubmitVoteApplied}
             onVoteSuccess={onVoteSuccess}
+            onVoteRequestStarted={onVoteRequestStarted}
+            submissionMode={submissionMode}
             submitBlockReason={submitBlockReason}
           />
         </div>

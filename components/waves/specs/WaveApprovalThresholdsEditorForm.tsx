@@ -61,7 +61,7 @@ export default function WaveApprovalThresholdsEditorForm({
       </label>
 
       <div className="tw-flex tw-flex-col tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-100">
-        <span>Min time</span>
+        <span>Hold time</span>
         <div className="tw-flex tw-gap-2">
           <input
             aria-label="Minimum time above threshold"
@@ -95,7 +95,7 @@ export default function WaveApprovalThresholdsEditorForm({
       </div>
 
       <p className="tw-mb-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-        Leave min time blank for immediate approval.
+        Leave hold time blank for immediate approval.
       </p>
 
       <WaveSettingEditorActions disabled={disabled} onCancel={onCancel} />
