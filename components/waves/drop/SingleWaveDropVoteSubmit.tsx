@@ -16,7 +16,10 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { AuthContext } from "@/components/auth/Auth";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import {
+  SingleWaveDropVoteSize,
+  SingleWaveDropVoteSubmissionMode,
+} from "./SingleWaveDropVote.types";
 import { invalidateWaveApprovalStatusQueries } from "@/hooks/waves/invalidateWaveApprovalStatusQueries";
 
 type ThemeColors = {
@@ -50,13 +53,17 @@ const rankingThemes: { [key: number]: ThemeColors } = {
 };
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
+const VOTE_BUTTON_TRANSITION_MS = 300;
+const BACKGROUND_MODAL_CLOSE_DELAY_MS = 300;
 
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
   readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
+  readonly onVoteRequestStarted?: (() => void) | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
+  readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
   readonly submitBlockReason?: string | null | undefined;
 }
 
@@ -70,7 +77,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
       newRating,
       onVoteApplied,
       onVoteSuccess,
+      onVoteRequestStarted,
       size = SingleWaveDropVoteSize.NORMAL,
+      submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
       submitBlockReason = null,
     }: Props,
     ref
@@ -86,7 +95,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const animationTimelineRef = useRef<VoteAnimationTimeline | null>(null);
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
     const randomID = useId().replace(/[^a-zA-Z0-9_-]/g, "");
-    const tlDuration = 300;
+    const tlDuration = VOTE_BUTTON_TRANSITION_MS;
     const particlesDuration = 800;
     const particlesDelay = 50;
     const particleCount = 12;
@@ -229,8 +238,97 @@ const SingleWaveDropVoteSubmit = forwardRef<
       };
     }, []);
 
+    const resetLoadingState = () => {
+      setLoading(false);
+      setIsSpinnerExiting(false);
+      setIsTextExiting(false);
+      setIsProcessing(false);
+    };
+
+    const showSuccessfulVote = () => {
+      setLoading(false);
+      setIsSpinnerExiting(false);
+      setIsTextExiting(false);
+      setShowSuccess(true);
+      animationTimelineRef.current?.replay();
+    };
+
+    const finishSuccessState = () => {
+      const exitTimeout = setTimeout(() => {
+        setIsTextExiting(true);
+
+        const resetTimeout = setTimeout(() => {
+          setShowSuccess(false);
+          setIsTextExiting(false);
+          setIsProcessing(false);
+        }, VOTE_BUTTON_TRANSITION_MS);
+        timeoutsRef.current.push(resetTimeout);
+      }, totalParticlesTime);
+      timeoutsRef.current.push(exitTimeout);
+    };
+
+    const submitVoteInBackground = () => {
+      void rateChangeMutation
+        .mutateAsync({
+          rate: newRating,
+        })
+        .then((updatedDrop) => {
+          onVoteApplied?.(updatedDrop);
+        })
+        .catch(() => undefined);
+
+      showSuccessfulVote();
+
+      const closeTimeout = setTimeout(() => {
+        onVoteRequestStarted?.();
+      }, BACKGROUND_MODAL_CLOSE_DELAY_MS);
+      timeoutsRef.current.push(closeTimeout);
+
+      finishSuccessState();
+    };
+
+    const submitVoteWithConfirmation = async () => {
+      try {
+        const updatedDrop = await rateChangeMutation.mutateAsync({
+          rate: newRating,
+        });
+        onVoteApplied?.(updatedDrop);
+      } catch {
+        resetLoadingState();
+        return;
+      }
+
+      setIsSpinnerExiting(true);
+      await new Promise((resolve) =>
+        setTimeout(resolve, VOTE_BUTTON_TRANSITION_MS)
+      );
+
+      showSuccessfulVote();
+
+      const successTimeout = setTimeout(() => {
+        onVoteSuccess?.();
+      }, 1000);
+      timeoutsRef.current.push(successTimeout);
+
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, totalParticlesTime);
+        timeoutsRef.current.push(timeout);
+      });
+
+      setIsTextExiting(true);
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, VOTE_BUTTON_TRANSITION_MS);
+        timeoutsRef.current.push(timeout);
+      });
+      setShowSuccess(false);
+      setIsTextExiting(false);
+      setIsProcessing(false);
+    };
+
     const handleClick = async () => {
-      if (isProcessing || loading || isSpinnerExiting || isTextExiting) return;
+      if (isProcessing || loading || isSpinnerExiting || isTextExiting) {
+        return;
+      }
 
       const voteError = getVoteError();
       if (voteError) {
@@ -245,58 +343,33 @@ const SingleWaveDropVoteSubmit = forwardRef<
       setIsTextExiting(true);
       setLoading(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) =>
+        setTimeout(resolve, VOTE_BUTTON_TRANSITION_MS)
+      );
       setIsTextExiting(false);
 
+      let success = false;
       try {
-        const { success } = await requestAuth();
-        if (!success) {
-          setLoading(false);
-          setIsTextExiting(false);
-          setIsProcessing(false);
-          return;
-        }
-        const updatedDrop = await rateChangeMutation.mutateAsync({
-          rate: newRating,
-        });
-        onVoteApplied?.(updatedDrop);
+        ({ success } = await requestAuth());
       } catch {
-        setLoading(false);
-        setIsTextExiting(false);
-        setIsProcessing(false);
+        resetLoadingState();
         return;
       }
 
-      setIsSpinnerExiting(true);
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (!success) {
+        resetLoadingState();
+        return;
+      }
 
-      setLoading(false);
-      setIsSpinnerExiting(false);
-      setShowSuccess(true);
+      if (
+        submissionMode ===
+        SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+      ) {
+        submitVoteInBackground();
+        return;
+      }
 
-      animationTimelineRef.current?.replay();
-
-      // Allow animation to show before closing modal
-      const successTimeout = setTimeout(() => {
-        if (onVoteSuccess) {
-          onVoteSuccess();
-        }
-      }, 1000); // Shorter time than totalParticlesTime to allow user to see the "Voted!" message
-      timeoutsRef.current.push(successTimeout);
-
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, totalParticlesTime);
-        timeoutsRef.current.push(timeout);
-      });
-
-      setIsTextExiting(true);
-      await new Promise((resolve) => {
-        const timeout = setTimeout(resolve, 300);
-        timeoutsRef.current.push(timeout);
-      });
-      setShowSuccess(false);
-      setIsTextExiting(false);
-      setIsProcessing(false);
+      await submitVoteWithConfirmation();
     };
 
     useImperativeHandle(ref, () => ({

@@ -1,13 +1,18 @@
 import dynamic from "next/dynamic";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import {
+  SingleWaveDropVoteSize,
+  SingleWaveDropVoteSubmissionMode,
+} from "./SingleWaveDropVote.types";
 
-export { SingleWaveDropVoteSize };
+export { SingleWaveDropVoteSize, SingleWaveDropVoteSubmissionMode };
 
 interface SingleWaveDropVoteProps {
   readonly drop: ApiDrop;
   readonly size?: SingleWaveDropVoteSize | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
+  readonly onVoteRequestStarted?: (() => void) | undefined;
+  readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
 }
 
 const SingleWaveDropVoteContent = dynamic(
@@ -22,12 +27,16 @@ export const SingleWaveDropVote: React.FC<SingleWaveDropVoteProps> = ({
   drop,
   size = SingleWaveDropVoteSize.NORMAL,
   onVoteSuccess,
+  onVoteRequestStarted,
+  submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
 }) => {
   return (
     <SingleWaveDropVoteContent
       drop={drop}
       size={size}
       onVoteSuccess={onVoteSuccess}
+      onVoteRequestStarted={onVoteRequestStarted}
+      submissionMode={submissionMode}
     />
   );
 };

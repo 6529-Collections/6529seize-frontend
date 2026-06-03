@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { SingleWaveDropVoteSubmitHandles } from "@/components/waves/drop/SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSubmit from "@/components/waves/drop/SingleWaveDropVoteSubmit";
@@ -10,6 +10,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import * as commonApi from "@/services/api/common-api";
+import { SingleWaveDropVoteSubmissionMode } from "@/components/waves/drop/SingleWaveDropVote.types";
 
 // Mock dependencies
 jest.mock("@mojs/core", () => ({
@@ -111,6 +112,19 @@ describe("SingleWaveDropVoteSubmit", () => {
 
   let queryClient: QueryClient;
 
+  const flushMicrotasks = async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+  };
+
+  const advanceTimers = async (ms: number) => {
+    await act(async () => {
+      jest.advanceTimersByTime(ms);
+      await flushMicrotasks();
+    });
+  };
+
   const renderComponent = (props: any = {}) => {
     queryClient = new QueryClient({
       defaultOptions: {
@@ -144,8 +158,11 @@ describe("SingleWaveDropVoteSubmit", () => {
     jest.useFakeTimers();
   });
 
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
+  afterEach(async () => {
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+      await flushMicrotasks();
+    });
     jest.useRealTimers();
   });
 
@@ -188,7 +205,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     fireEvent.click(button);
 
     // Advance timers to trigger auth request
-    jest.advanceTimersByTime(300);
+    await advanceTimers(300);
 
     await waitFor(() => {
       expect(mockAuthContext.requestAuth).toHaveBeenCalled();
@@ -205,7 +222,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     fireEvent.click(button);
 
     // Advance timers to trigger API call
-    jest.advanceTimersByTime(300);
+    await advanceTimers(300);
 
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalledWith({
@@ -274,7 +291,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     const button = screen.getByRole("button");
     fireEvent.click(button);
 
-    jest.advanceTimersByTime(300);
+    await advanceTimers(300);
 
     await waitFor(() => {
       expect(onVoteApplied).toHaveBeenCalledWith(updatedDrop);
@@ -293,18 +310,151 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   });
 
+  it("closes background submissions before the API resolves", async () => {
+    const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
+    const onVoteRequestStarted = jest.fn();
+    const onVoteApplied = jest.fn();
+    let resolveVote!: (drop: ApiDrop) => void;
+    mockCommonApiPost.mockReturnValue(
+      new Promise<ApiDrop>((resolve) => {
+        resolveVote = resolve;
+      })
+    );
+
+    renderComponent({
+      onVoteApplied,
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(mockCommonApiPost).toHaveBeenCalled();
+    });
+    expect(onVoteApplied).not.toHaveBeenCalled();
+
+    await advanceTimers(300);
+
+    expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
+    expect(onVoteApplied).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveVote(mockDrop);
+      await flushMicrotasks();
+    });
+
+    await waitFor(() => {
+      expect(onVoteApplied).toHaveBeenCalledWith(mockDrop);
+    });
+  });
+
+  it("keeps background success invalidation after the close callback", async () => {
+    const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
+    const onVoteRequestStarted = jest.fn();
+    let resolveVote!: (drop: ApiDrop) => void;
+    mockCommonApiPost.mockReturnValue(
+      new Promise<ApiDrop>((resolve) => {
+        resolveVote = resolve;
+      })
+    );
+
+    renderComponent({
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+    const invalidateQueriesSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(mockCommonApiPost).toHaveBeenCalled();
+    });
+
+    await advanceTimers(300);
+    expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveVote(mockDrop);
+      await flushMicrotasks();
+    });
+
+    await waitFor(() => {
+      expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+        queryKey: [QueryKey.WAVE, { wave_id: mockDrop.wave.id }],
+      });
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_DECISIONS, { waveId: mockDrop.wave.id }],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId: mockDrop.wave.id }],
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROPS, { waveId: mockDrop.wave.id }],
+    });
+  });
+
+  it("shows a toast when a background submission fails after close", async () => {
+    const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
+    const onVoteRequestStarted = jest.fn();
+    const onVoteApplied = jest.fn();
+    let rejectVote!: (error: string) => void;
+    mockCommonApiPost.mockReturnValue(
+      new Promise<ApiDrop>((_resolve, reject) => {
+        rejectVote = reject;
+      })
+    );
+
+    renderComponent({
+      onVoteApplied,
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
+
+    fireEvent.click(screen.getByRole("button"));
+    await advanceTimers(300);
+
+    await waitFor(() => {
+      expect(mockCommonApiPost).toHaveBeenCalled();
+    });
+
+    await advanceTimers(300);
+    expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      rejectVote("Vote failed");
+      await flushMicrotasks();
+    });
+
+    await waitFor(() => {
+      expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+        message: "Vote failed",
+        type: "error",
+      });
+    });
+    expect(onVoteApplied).not.toHaveBeenCalled();
+  });
+
   it("handles authentication failure", async () => {
     mockAuthContext.requestAuth.mockResolvedValue({ success: false });
     const onVoteApplied = jest.fn();
+    const onVoteRequestStarted = jest.fn();
 
-    renderComponent({ onVoteApplied });
+    renderComponent({
+      onVoteApplied,
+      onVoteRequestStarted,
+      submissionMode: SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH,
+    });
     const invalidateQueriesSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     const button = screen.getByRole("button");
     fireEvent.click(button);
 
     // Advance timers
-    jest.advanceTimersByTime(300);
+    await advanceTimers(300);
 
     await waitFor(() => {
       expect(mockAuthContext.requestAuth).toHaveBeenCalled();
@@ -313,6 +463,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     // Should not make API call if auth fails
     expect(commonApi.commonApiPost).not.toHaveBeenCalled();
     expect(onVoteApplied).not.toHaveBeenCalled();
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
 
@@ -328,7 +479,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     const button = screen.getByRole("button");
     fireEvent.click(button);
 
-    jest.advanceTimersByTime(300);
+    await advanceTimers(300);
 
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalled();
@@ -394,11 +545,11 @@ describe("SingleWaveDropVoteSubmit", () => {
     renderComponent({ ref });
 
     // Call the exposed method
-    if (ref.current) {
-      void ref.current.handleClick();
-    }
+    act(() => {
+      void ref.current?.handleClick();
+    });
 
-    jest.advanceTimersByTime(300);
+    await advanceTimers(300);
 
     await waitFor(() => {
       expect(mockAuthContext.requestAuth).toHaveBeenCalled();
