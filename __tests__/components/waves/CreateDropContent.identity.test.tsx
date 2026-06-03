@@ -87,6 +87,7 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
   <div
     data-testid="actions"
     data-show-options={props.showOptions ? "true" : "false"}
+    data-animate-options={props.animateOptions ? "true" : "false"}
   >
     <button type="button" onClick={() => props.setShowOptions(true)}>
       open options
@@ -110,9 +111,47 @@ jest.mock("@/components/waves/CreateDropActions", () => (props: any) => (
     </button>
   </div>
 ));
-jest.mock("@/components/waves/CreateDropInput", () => () => (
-  <div data-testid="input" />
-));
+jest.mock("@/components/waves/CreateDropInput", () => {
+  const ReactLib = require("react");
+
+  return {
+    __esModule: true,
+    default: ReactLib.forwardRef((props: any, ref: any) => {
+      ReactLib.useImperativeHandle(ref, () => ({
+        clearEditorState: () => undefined,
+        focus: () => undefined,
+      }));
+
+      return (
+        <div data-testid="input">
+          <button
+            type="button"
+            onClick={() => props.onEditorState({ __markdown: "typed content" })}
+          >
+            type content
+          </button>
+          <button
+            type="button"
+            onClick={() => props.onEditorState({ __markdown: "" })}
+          >
+            emit empty content
+          </button>
+        </div>
+      );
+    }),
+  };
+});
+jest.mock("@/components/waves/drops/normalizeDropMarkdown", () => ({
+  exportDropMarkdown: jest.fn((editorState: { __markdown?: string } | null) =>
+    editorState?.__markdown ?? ""
+  ),
+}));
+jest.mock(
+  "@/components/drops/create/lexical/utils/groupMentionDetection",
+  () => ({
+    getMentionedGroupsFromEditorState: jest.fn(() => []),
+  })
+);
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));
@@ -319,6 +358,19 @@ describe("CreateDropContent identity picker flow", () => {
       metadata: [],
       signature: null,
     }) as any;
+
+  const mockComposerWidth = (width: number) =>
+    jest.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width,
+      height: 0,
+      top: 0,
+      right: width,
+      bottom: 0,
+      left: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
 
   const renderSubject = ({
     isDropMode = true,
@@ -530,19 +582,7 @@ describe("CreateDropContent identity picker flow", () => {
   });
 
   it("measures the action width after the inline picker closes", async () => {
-    const rectSpy = jest
-      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
-      .mockReturnValue({
-        x: 0,
-        y: 0,
-        width: 501,
-        height: 0,
-        top: 0,
-        right: 501,
-        bottom: 0,
-        left: 0,
-        toJSON: () => ({}),
-      } as DOMRect);
+    const rectSpy = mockComposerWidth(501);
 
     try {
       renderSubject({ identityPickerPlacement: "inline" });
@@ -557,6 +597,149 @@ describe("CreateDropContent identity picker flow", () => {
       expect(screen.getByTestId("actions")).toHaveAttribute(
         "data-show-options",
         "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "false"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("shows options by default in a wide composer", () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "false"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("collapses wide composer options when content is typed", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-animate-options",
+          "true"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("reopens wide composer options and collapses them on the next content change", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "true"
+      );
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("returns to wide composer defaults when the wave changes", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      const { rerender } = renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      rerender(
+        <ReactQueryWrapperContext.Provider
+          value={{ addOptimisticDrop: jest.fn() } as any}
+        >
+          <CreateDropContent
+            activeDrop={null}
+            onCancelReplyQuote={jest.fn()}
+            wave={createWave({ id: "wave-2" })}
+            drop={null}
+            isStormMode={false}
+            isDropMode={true}
+            dropId={null}
+            setDrop={jest.fn()}
+            setIsStormMode={jest.fn()}
+            onDropModeChange={jest.fn()}
+            onSwitchToDropModeWithUrl={jest.fn()}
+            submitDrop={jest.fn()}
+            dropModeToggleExitLabel={null}
+            canExitDropMode={true}
+            isChatBlockedBySlowMode={false}
+            submissionExperience={WaveSubmissionExperience.IDENTITY}
+          />
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-animate-options",
+        "false"
       );
     } finally {
       rectSpy.mockRestore();

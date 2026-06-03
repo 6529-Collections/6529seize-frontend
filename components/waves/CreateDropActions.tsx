@@ -97,133 +97,153 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       return () => window.removeEventListener("focus", resetUploadPicker);
     }, [isUploadPickerOpen]);
 
-    const expandMotionProps = animateOptions
+    const optionMotionTransition = {
+      duration: 0.22,
+      ease: [0.22, 1, 0.36, 1],
+    };
+
+    const shellMotionProps = animateOptions
       ? {
-          initial: { width: "32px" },
-          animate: { width: "auto" },
-          exit: { width: "32px" },
-          transition: { duration: 0.3, ease: "easeInOut" },
+          initial: false,
+          animate: { width: showOptions ? "auto" : "32px" },
+          transition: optionMotionTransition,
         }
       : {
           initial: false,
-          animate: { width: "auto" },
+          animate: { width: showOptions ? "auto" : "32px" },
           transition: { duration: 0 },
         };
 
-    const fadeMotionProps = animateOptions
+    const actionGroupMotionProps = animateOptions
       ? {
-          initial: { opacity: 0 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-          transition: { duration: 0.2, delay: 0.1 },
+          initial: { opacity: 0, x: -4 },
+          animate: { opacity: 1, x: 0 },
+          exit: { opacity: 0, x: -4 },
+          transition: optionMotionTransition,
         }
       : {
           initial: false,
-          animate: { opacity: 1 },
+          animate: { opacity: 1, x: 0 },
+          transition: { duration: 0 },
+        };
+
+    const chevronMotionProps = animateOptions
+      ? {
+          initial: { opacity: 0, scale: 0.92 },
+          animate: { opacity: 1, scale: 1 },
+          exit: { opacity: 0, scale: 0.92 },
+          transition: optionMotionTransition,
+        }
+      : {
+          initial: false,
+          animate: { opacity: 1, scale: 1 },
           transition: { duration: 0 },
         };
 
     return (
       <LayoutGroup>
         <div className="tw-relative">
-          <AnimatePresence mode="wait" initial={false}>
-            {showOptions ? (
-              <motion.div
-                key="default-buttons"
-                {...expandMotionProps}
-                className="tw-flex tw-items-center tw-gap-x-2 tw-overflow-hidden"
-              >
-                {isDropMode && (
-                  <>
-                    <button
-                      aria-label="Add metadata"
-                      onClick={onAddMetadataClick}
-                      className={`tw-flex-shrink-0 ${
-                        isRequiredMetadataMissing
-                          ? "tw-text-[#FEDF89]"
-                          : "tw-text-iron-300"
-                      } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
-                      data-tooltip-id="add-metadata-tooltip"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
-                        />
-                      </svg>
-                    </button>
-                    {!isMobile && (
-                      <Tooltip
-                        id="add-metadata-tooltip"
-                        place="top"
-                        offset={8}
-                        opacity={1}
-                        positionStrategy="fixed"
-                        style={TOOLTIP_STYLES}
-                      >
-                        <span className="tw-text-xs">Add metadata</span>
-                      </Tooltip>
-                    )}
-                  </>
-                )}
+          <motion.div
+            data-testid="drop-actions-motion-shell"
+            {...shellMotionProps}
+            className="tw-relative tw-flex tw-h-8 tw-items-center tw-overflow-hidden"
+          >
+            <AnimatePresence mode="sync" initial={false}>
+              {showOptions ? (
                 <motion.div
-                  {...fadeMotionProps}
-                  className="tw-flex tw-items-center tw-gap-x-2"
+                  key="default-buttons"
+                  data-testid="drop-actions-expanded-motion"
+                  {...actionGroupMotionProps}
+                  className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-overflow-hidden"
                 >
-                  <>
-                    <button
-                      type="button"
-                      aria-label={
-                        isUploadPickerOpen
-                          ? "Close upload picker"
-                          : "Upload a file"
-                      }
-                      onClick={onUploadClick}
-                      className={`tw-flex-shrink-0 ${
-                        isRequiredMediaMissing
-                          ? "tw-text-[#FEDF89]"
-                          : "tw-text-iron-300"
-                      } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
-                      data-tooltip-id="upload-file-tooltip"
-                    >
-                      <FontAwesomeIcon
-                        icon={faPlus}
-                        aria-hidden="true"
-                        className={`tw-size-5 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out lg:tw-size-4 ${
-                          isUploadPickerOpen ? "tw-rotate-45" : "tw-rotate-0"
-                        }`}
-                      />
-                    </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="tw-hidden"
-                      accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
-                      multiple
-                      onChange={onFiles}
-                    />
-                    {!isMobile && (
-                      <Tooltip
-                        id="upload-file-tooltip"
-                        place="top-start"
-                        offset={8}
-                        opacity={1}
-                        positionStrategy="fixed"
-                        style={TOOLTIP_STYLES}
+                  {isDropMode && (
+                    <>
+                      <button
+                        aria-label="Add metadata"
+                        onClick={onAddMetadataClick}
+                        className={`tw-flex-shrink-0 ${
+                          isRequiredMetadataMissing
+                            ? "tw-text-[#FEDF89]"
+                            : "tw-text-iron-300"
+                        } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
+                        data-tooltip-id="add-metadata-tooltip"
                       >
-                        <span className="tw-text-xs">Upload a file</span>
-                      </Tooltip>
-                    )}
-                  </>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth="1.5"
+                          stroke="currentColor"
+                          className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                          />
+                        </svg>
+                      </button>
+                      {!isMobile && (
+                        <Tooltip
+                          id="add-metadata-tooltip"
+                          place="top"
+                          offset={8}
+                          opacity={1}
+                          positionStrategy="fixed"
+                          style={TOOLTIP_STYLES}
+                        >
+                          <span className="tw-text-xs">Add metadata</span>
+                        </Tooltip>
+                      )}
+                    </>
+                  )}
+                  <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2">
+                    <>
+                      <button
+                        type="button"
+                        aria-label={
+                          isUploadPickerOpen
+                            ? "Close upload picker"
+                            : "Upload a file"
+                        }
+                        onClick={onUploadClick}
+                        className={`tw-flex-shrink-0 ${
+                          isRequiredMediaMissing
+                            ? "tw-text-[#FEDF89]"
+                            : "tw-text-iron-300"
+                        } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
+                        data-tooltip-id="upload-file-tooltip"
+                      >
+                        <FontAwesomeIcon
+                          icon={faPlus}
+                          aria-hidden="true"
+                          className={`tw-size-5 tw-flex-shrink-0 tw-transform tw-transition-transform tw-duration-300 tw-ease-out lg:tw-size-4 ${
+                            isUploadPickerOpen ? "tw-rotate-45" : "tw-rotate-0"
+                          }`}
+                        />
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="tw-hidden"
+                        accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
+                        multiple
+                        onChange={onFiles}
+                      />
+                      {!isMobile && (
+                        <Tooltip
+                          id="upload-file-tooltip"
+                          place="top-start"
+                          offset={8}
+                          opacity={1}
+                          positionStrategy="fixed"
+                          style={TOOLTIP_STYLES}
+                        >
+                          <span className="tw-text-xs">Upload a file</span>
+                        </Tooltip>
+                      )}
+                    </>
                   {gifPickerEnabled && (
                     <>
                       <button
@@ -283,37 +303,40 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     submitting={submitting}
                     breakIntoStorm={breakIntoStorm}
                   />
+                </div>
                 </motion.div>
-              </motion.div>
-            ) : (
-              <motion.button
-                key="chevron-button"
-                onClick={onSetShowIconsClick}
-                className={`tw-flex-shrink-0 ${
-                  (isDropMode && isRequiredMetadataMissing) ||
-                  isRequiredMediaMissing
-                    ? "tw-text-[#FEDF89]"
-                    : "tw-text-iron-400"
-                } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                  className="tw-size-4 tw-flex-shrink-0"
+              ) : (
+                <motion.button
+                  key="chevron-button"
+                  data-testid="drop-actions-chevron-motion"
+                  {...chevronMotionProps}
+                  onClick={onSetShowIconsClick}
+                  className={`tw-absolute tw-inset-y-0 tw-left-0 tw-my-auto tw-flex-shrink-0 ${
+                    (isDropMode && isRequiredMetadataMissing) ||
+                    isRequiredMediaMissing
+                      ? "tw-text-[#FEDF89]"
+                      : "tw-text-iron-400"
+                  } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                  />
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                    />
+                  </svg>
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
         {gifPickerEnabled && (
           <CreateDropGifPicker

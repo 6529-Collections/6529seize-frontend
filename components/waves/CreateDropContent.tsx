@@ -534,7 +534,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const actionsContainerRef = useRef<HTMLDivElement>(null);
   const [actionsContainerElement, setActionsContainerElement] =
     useState<HTMLDivElement | null>(null);
-  const hasUserToggledOptionsRef = useRef(false);
+  const shouldAnimateOptionsRef = useRef(false);
   const prevWaveIdRef = useRef(wave.id);
   const [isWideContainer, setIsWideContainer] = useState(false);
   const dispatch = useDispatch();
@@ -570,13 +570,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const isWaveChanged = prevWaveIdRef.current !== wave.id;
   if (isWaveChanged) {
     prevWaveIdRef.current = wave.id;
-    hasUserToggledOptionsRef.current = false;
+    shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const showOptions =
-    isWideContainer ||
-    (showOptionsState?.scopeKey === wave.id ? showOptionsState.value : false);
+    showOptionsState?.scopeKey === wave.id
+      ? showOptionsState.value
+      : isWideContainer;
 
   const setActionsContainerRef = useCallback((node: HTMLDivElement | null) => {
     actionsContainerRef.current = node;
@@ -1146,6 +1147,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setIdentityPickerOpenState(null);
     setIdentityPickerErrorMessageState(null);
     setShowOptionsState(null);
+    shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
   };
@@ -1547,6 +1549,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
 
     if (!isWideContainer) {
+      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     }
@@ -1574,26 +1577,40 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const handleSetShowOptions = useCallback(
     (next: boolean) => {
-      hasUserToggledOptionsRef.current = true;
+      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
-      if (isWideContainer) {
-        closeOnNextInputRef.current = false;
-        return;
-      }
       closeOnNextInputRef.current = next;
     },
-    [isWideContainer, wave.id]
+    [wave.id]
   );
 
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
-      if (!isWideContainer && closeOnNextInputRef.current) {
-        setShowOptionsState({ scopeKey: wave.id, value: false });
+      const markdown = exportDropMarkdown(newEditorState, [
+        ...SAFE_MARKDOWN_TRANSFORMERS,
+        MENTION_TRANSFORMER,
+        ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+        HASHTAG_TRANSFORMER,
+        WAVE_MENTION_TRANSFORMER,
+        IMAGE_TRANSFORMER,
+        EMOJI_TRANSFORMER,
+      ]);
+      const shouldCollapseOptions =
+        markdown.trim().length > 0 ||
+        (!isWideContainer && closeOnNextInputRef.current);
+
+      if (shouldCollapseOptions) {
+        shouldAnimateOptionsRef.current = true;
+        setShowOptionsState((current) =>
+          current?.scopeKey === wave.id && current.value === false
+            ? current
+            : { scopeKey: wave.id, value: false }
+        );
         closeOnNextInputRef.current = false;
       }
     },
-    [isWideContainer, wave.id]
+    [canMentionAll, isWideContainer, wave.id]
   );
 
   const handleEditorBlur = useCallback(
@@ -1605,6 +1622,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       if (nextTarget && actionsContainerRef.current?.contains(nextTarget)) {
         return;
       }
+      shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: false });
       closeOnNextInputRef.current = false;
     },
@@ -1957,7 +1975,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   </p>
                 )}
               </div>
-              <div className="tw-col-start-1 tw-row-start-2 tw-self-center">
+              <div className="tw-col-start-1 tw-row-start-2 tw-mb-1 tw-self-end">
                 <CreateDropActions
                   isStormMode={isStormModeActive}
                   isDropMode={isDropMode}
@@ -1965,7 +1983,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   submitting={submitting}
                   showOptions={showOptions}
                   animateOptions={
-                    !isWideContainer && hasUserToggledOptionsRef.current
+                    shouldAnimateOptionsRef.current &&
+                    showOptionsState?.scopeKey === wave.id
                   }
                   isRequiredMetadataMissing={
                     !!missingRequirements.metadata.length
