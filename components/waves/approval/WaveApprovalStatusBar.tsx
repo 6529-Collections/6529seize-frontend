@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   type FC,
   useEffect,
+  useId,
   useMemo,
   useState,
   useSyncExternalStore,
@@ -190,12 +191,25 @@ const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
   </div>
 );
 
-const ApprovalRulesButton: FC<{
+interface ApprovalRulesButtonProps {
+  readonly "aria-controls"?: string | undefined;
+  readonly "aria-expanded"?: boolean | undefined;
+  readonly "aria-haspopup"?: "dialog" | undefined;
   readonly onClick?: (() => void) | undefined;
-}> = ({ onClick }) => (
+}
+
+const ApprovalRulesButton: FC<ApprovalRulesButtonProps> = ({
+  "aria-controls": ariaControls,
+  "aria-expanded": ariaExpanded,
+  "aria-haspopup": ariaHasPopup,
+  onClick,
+}) => (
   <button
     type="button"
     aria-label={APPROVAL_RULES_TITLE}
+    aria-controls={ariaControls}
+    aria-expanded={ariaExpanded}
+    aria-haspopup={ariaHasPopup}
     onClick={onClick}
     className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-200"
   >
@@ -219,6 +233,7 @@ export default function WaveApprovalStatusBar({
     getServerRenderSnapshot
   );
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const approvalRulesHelpId = useId();
   const winningThreshold = wave.wave.winning_threshold;
   const winningThresholdMinDuration =
     wave.wave.winning_threshold_min_duration_ms;
@@ -336,7 +351,12 @@ export default function WaveApprovalStatusBar({
   );
   const useMobileHelp = isClientHydrated && hasTouchScreen;
   const approvalRulesButton = useMobileHelp ? (
-    <ApprovalRulesButton onClick={() => setIsHelpOpen(true)} />
+    <ApprovalRulesButton
+      aria-controls={isHelpOpen ? approvalRulesHelpId : undefined}
+      aria-expanded={isHelpOpen}
+      aria-haspopup="dialog"
+      onClick={() => setIsHelpOpen(true)}
+    />
   ) : (
     <HoverCard
       content={approvalRulesHelp}
@@ -346,7 +366,7 @@ export default function WaveApprovalStatusBar({
       delayHide={0}
       offset={8}
     >
-      <ApprovalRulesButton />
+      <ApprovalRulesButton aria-haspopup="dialog" />
     </HoverCard>
   );
 
@@ -399,7 +419,10 @@ export default function WaveApprovalStatusBar({
           onClose={() => setIsHelpOpen(false)}
           title={APPROVAL_RULES_TITLE}
         >
-          <div className="tw-px-4 tw-pb-2 tw-pt-3">
+          <div
+            id={approvalRulesHelpId}
+            className="tw-px-4 tw-pb-2 tw-pt-3"
+          >
             {approvalRulesHelp}
           </div>
         </MobileWrapperDialog>

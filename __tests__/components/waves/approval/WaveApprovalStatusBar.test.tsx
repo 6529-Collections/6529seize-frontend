@@ -208,9 +208,13 @@ describe("WaveApprovalStatusBar", () => {
     expect(
       within(statusGroup).queryByRole("button", { name: "Approval rules" })
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Approval rules" })
-    ).toBeInTheDocument();
+    const approvalRulesButton = screen.getByRole("button", {
+      name: "Approval rules",
+    });
+    expect(approvalRulesButton).toBeInTheDocument();
+    expect(approvalRulesButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-expanded");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
 
   it("uses the wave credit label in approval rules", () => {
@@ -293,20 +297,35 @@ describe("WaveApprovalStatusBar", () => {
       />
     );
 
+    const approvalRulesButton = screen.getByRole("button", {
+      name: "Approval rules",
+    });
+    expect(approvalRulesButton).toHaveAttribute("aria-haspopup", "dialog");
+    expect(approvalRulesButton).toHaveAttribute("aria-expanded", "false");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
     expect(
       screen.queryByRole("dialog", { name: "Approval rules" })
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Approval rules" }));
+    fireEvent.click(approvalRulesButton);
 
-    expect(
-      screen.getByRole("dialog", { name: "Approval rules" })
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Approval rules" });
+    expect(dialog).toBeInTheDocument();
+    expect(approvalRulesButton).toHaveAttribute("aria-expanded", "true");
+    const controlsId = approvalRulesButton.getAttribute("aria-controls");
+    expect(controlsId).toBeTruthy();
+    const controlledContent = controlsId
+      ? document.getElementById(controlsId)
+      : null;
+    expect(controlledContent).toBeInTheDocument();
+    expect(dialog).toContainElement(controlledContent);
 
     fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
 
     expect(
       screen.queryByRole("dialog", { name: "Approval rules" })
     ).not.toBeInTheDocument();
+    expect(approvalRulesButton).toHaveAttribute("aria-expanded", "false");
+    expect(approvalRulesButton).not.toHaveAttribute("aria-controls");
   });
 });
