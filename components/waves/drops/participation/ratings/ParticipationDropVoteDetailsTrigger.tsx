@@ -19,9 +19,11 @@ import { createPortal } from "react-dom";
 import { ParticipationDropVoteDetailsContent } from "./ParticipationDropVoteDetailsContent";
 
 type VoteDetailsTab = "voters" | "logs";
+type VoteDetailsTriggerDensity = "default" | "compact";
 
 interface ParticipationDropVoteDetailsTriggerProps {
   readonly drop: ApiDrop;
+  readonly density?: VoteDetailsTriggerDensity | undefined;
 }
 
 const VIEWPORT_PADDING_PX = 16;
@@ -41,6 +43,7 @@ const isInsideElement = (
 
 export default function ParticipationDropVoteDetailsTrigger({
   drop,
+  density = "default",
 }: ParticipationDropVoteDetailsTriggerProps) {
   const isMobileScreen = useIsMobileScreen();
   const isTouchDevice = useIsTouchDevice();
@@ -287,6 +290,15 @@ export default function ParticipationDropVoteDetailsTrigger({
           globalThis.document.body
         )
       : null;
+  const isCompact = density === "compact";
+  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 ${
+    isCompact
+      ? "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-xs tw-leading-4"
+      : "tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm tw-leading-5"
+  }`;
+  const chevronClassName = `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
+    isCompact ? "tw-size-3" : "tw-size-3.5"
+  } ${isOpen ? "tw-rotate-180" : ""}`;
 
   return (
     <>
@@ -299,7 +311,7 @@ export default function ParticipationDropVoteDetailsTrigger({
           drop.raters_count
         )} ${drop.raters_count === 1 ? "voter" : "voters"}`}
         onClick={toggleDetails}
-        className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-px-2 tw-py-1 tw-text-sm tw-leading-5 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
+        className={triggerClassName}
       >
         <span className="tw-font-medium tw-text-iron-50">
           {formatNumberWithCommas(drop.raters_count)}
@@ -307,12 +319,7 @@ export default function ParticipationDropVoteDetailsTrigger({
         <span className="tw-font-normal tw-text-iron-400">
           {drop.raters_count === 1 ? "voter" : "voters"}
         </span>
-        <ChevronDownIcon
-          aria-hidden="true"
-          className={`tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
-            isOpen ? "tw-rotate-180" : ""
-          }`}
-        />
+        <ChevronDownIcon aria-hidden="true" className={chevronClassName} />
       </button>
       {mobileSurface}
       {desktopSurface}

@@ -89,6 +89,39 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => () => (
 jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useDropVoters", () => ({
+  useDropVoters: () => ({
+    voters: [],
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+}));
+jest.mock("@/hooks/useDropVoteLogs", () => ({
+  useDropVoteLogs: () => ({
+    logs: [],
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+}));
+jest.mock("@/hooks/useIntersectionObserver", () => ({
+  useIntersectionObserver: () => ({ current: null }),
+}));
 
 const winner: ApiWaveDecisionWinner = {
   drop: {
@@ -109,6 +142,7 @@ const winner: ApiWaveDecisionWinner = {
     context_profile_context: { rating: 1 },
     author: { handle: "bob", level: 1, cic: 1 },
     created_at: 0,
+    wave: { voting_credit_type: "votes" },
   },
 } as any;
 const wave: ApiWave = { voting: { credit_type: "votes" } } as any;
@@ -186,6 +220,51 @@ describe("MemesWaveWinnersDrop", () => {
     expect(screen.getByText("Part description")).toBeInTheDocument();
     expect(screen.queryByText("T")).not.toBeInTheDocument();
     expect(screen.queryByText("D")).not.toBeInTheDocument();
+  });
+
+  it("shows vote details trigger for memes winners", () => {
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    ).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40"
+    );
+  });
+
+  it("opens vote details without opening the winner card", async () => {
+    const user = userEvent.setup();
+    const onDropClick = jest.fn();
+
+    render(
+      <MemesWaveWinnersDrop
+        winner={winner}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    );
+
+    expect(onDropClick).not.toHaveBeenCalled();
+    expect(
+      await screen.findByRole("dialog", { name: "Votes" })
+    ).toBeInTheDocument();
   });
 
   it("suppresses the click that follows a long press", async () => {

@@ -89,7 +89,17 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/leaderboard/drops/header/WaveleaderboardDropRaters",
-  () => ({ WaveLeaderboardDropRaters: () => <div data-testid="raters" /> })
+  () => ({
+    WaveLeaderboardDropRaters: () => (
+      <button
+        type="button"
+        data-testid="vote-details-trigger"
+        onClick={(event) => event.stopPropagation()}
+      >
+        vote details
+      </button>
+    ),
+  })
 );
 
 const useRules = require("@/hooks/drops/useDropInteractionRules")
@@ -203,6 +213,20 @@ test("opens drop on normal card click", () => {
     isMobile: true,
   });
   expect(onDropClick).toHaveBeenCalledWith(drop);
+});
+
+test("does not open drop when vote details trigger is clicked", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+  const onDropClick = jest.fn();
+
+  render(<DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />);
+
+  fireEvent.click(screen.getByTestId("vote-details-trigger"));
+
+  expect(startDropOpen).not.toHaveBeenCalled();
+  expect(onDropClick).not.toHaveBeenCalled();
 });
 
 test("does not open drop from synthetic click after long press", () => {

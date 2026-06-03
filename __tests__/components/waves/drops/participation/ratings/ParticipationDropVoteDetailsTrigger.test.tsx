@@ -154,6 +154,27 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     expect(trigger).toHaveAttribute("aria-expanded", "true");
   });
 
+  it("renders compact density with tighter spacing", () => {
+    render(
+      <ParticipationDropVoteDetailsTrigger drop={drop} density="compact" />
+    );
+
+    const trigger = screen.getByRole("button", {
+      name: triggerButtonName,
+    });
+
+    expect(trigger).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40",
+      "tw-px-1.5",
+      "tw-py-0.5",
+      "tw-text-xs"
+    );
+    expect(trigger.querySelector("svg")).toHaveClass("tw-size-3");
+  });
+
   it("opens a desktop popover and stops parent click propagation", async () => {
     const user = userEvent.setup();
     const parentClick = jest.fn();

@@ -1,29 +1,21 @@
 import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
-import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface MemeDropVoteStatsProps {
-  readonly current: number | null | undefined;
-  readonly projected: number | null | undefined;
-  readonly votingCreditType: string;
-  readonly ratersCount: number | null | undefined;
-  readonly topVoters: ApiDropRater[];
-  readonly userContext?: ApiDropContextProfileContext | null | undefined;
+  readonly drop: ExtendedDrop;
 }
 
-export default function MemeDropVoteStats({
-  current,
-  projected,
-  votingCreditType,
-  ratersCount,
-  topVoters,
-  userContext,
-}: MemeDropVoteStatsProps) {
+export default function MemeDropVoteStats({ drop }: MemeDropVoteStatsProps) {
+  const current = drop.rating;
+  const projected = drop.rating_prediction;
+  const votingCreditType = drop.wave.voting_credit_type;
+  const userContext = drop.context_profile_context;
   const isPositive = (current ?? 0) >= 0;
-  const firstThreeVoters = topVoters?.slice(0, 3) ?? [];
+  const firstThreeVoters = drop.top_raters.slice(0, 3);
 
   // Check if user has voted
   const hasUserVoted =
@@ -85,12 +77,7 @@ export default function MemeDropVoteStats({
             </div>
           ))}
         </div>
-        <span className="tw-text-white tw-font-semibold tw-text-sm">
-          {formatNumberWithCommas(ratersCount ?? 0)}{" "}
-          <span className="tw-text-iron-500 tw-font-normal">
-            {ratersCount === 1 ? "voter" : "voters"}
-          </span>
-        </span>
+        <ParticipationDropVoteDetailsTrigger drop={drop} />
       </div>
 
       {/* User's vote */}
