@@ -1,6 +1,7 @@
 "use client";
 
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -90,14 +91,10 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                     {votingLabel}
                   </span>
                 </div>
-                <div className="tw-flex tw-items-center tw-gap-x-1.5">
-                  <span className="tw-text-sm tw-text-iron-200">
-                    {formatNumberWithCommas(drop.raters_count)}
-                  </span>
-                  <span className="tw-text-sm tw-text-iron-400">
-                    {drop.raters_count === 1 ? "voter" : "voters"}
-                  </span>
-                </div>
+                <ParticipationDropVoteDetailsTrigger
+                  drop={drop}
+                  density="compact"
+                />
 
                 {hasUserVoted && (
                   <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap">

@@ -26,7 +26,12 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/winners/drops/header/WaveWinnersDropHeaderVoters",
-  () => () => <div data-testid="voters" />
+  () => (props: any) => (
+    <div
+      data-testid="voters"
+      data-is-approval-wave={props.isApprovalWave ? "true" : undefined}
+    />
+  )
 );
 jest.mock(
   "@/components/waves/winners/drops/header/WaveWinnersDropOutcome",
@@ -118,6 +123,20 @@ describe("DefaultWaveWinnerDrop", () => {
       expect.objectContaining({
         contentPresentation: "quorumCompact",
       })
+    );
+  });
+
+  it("does not pass approval wave state to the lower voter row", () => {
+    render(
+      <DefaultWaveWinnersDrop
+        winner={winner}
+        onDropClick={jest.fn()}
+        isApprovalWave={true}
+      />
+    );
+
+    expect(screen.getByTestId("voters")).not.toHaveAttribute(
+      "data-is-approval-wave"
     );
   });
 

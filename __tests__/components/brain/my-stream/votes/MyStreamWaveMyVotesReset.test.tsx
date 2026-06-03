@@ -164,7 +164,7 @@ test("resets votes for selected drops", async () => {
   expect(onResettingChange).toHaveBeenNthCalledWith(1, true);
   expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledTimes(2);
-  expect(invalidateQueries).toHaveBeenCalledTimes(4);
+  expect(invalidateQueries).toHaveBeenCalledTimes(6);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });
@@ -176,6 +176,12 @@ test("resets votes for selected drops", async () => {
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
+  });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROP_VOTERS],
+  });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROP_VOTE_LOGS],
   });
   // onDropRateChange is handled by React Query elsewhere, not directly by this component
 });
@@ -232,7 +238,7 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   expect(onResettingChange).toHaveBeenCalledTimes(2);
   expect(removeSelected).toHaveBeenCalledWith("a");
   expect(removeSelected).not.toHaveBeenCalledWith("b");
-  expect(invalidateQueries).toHaveBeenCalledTimes(4);
+  expect(invalidateQueries).toHaveBeenCalledTimes(6);
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.WAVE, { wave_id: "wave-1" }],
   });
@@ -244,6 +250,12 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   });
   expect(invalidateQueries).toHaveBeenCalledWith({
     queryKey: [QueryKey.DROPS, { waveId: "wave-1" }],
+  });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROP_VOTERS],
+  });
+  expect(invalidateQueries).toHaveBeenCalledWith({
+    queryKey: [QueryKey.DROP_VOTE_LOGS],
   });
   expect(screen.getByTestId("progress")).toHaveAttribute(
     "data-is-resetting",

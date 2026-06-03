@@ -17,6 +17,7 @@ import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
 import MemeDropTraits from "./MemeDropTraits";
+import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "@/components/waves/drops/DropContext";
@@ -139,6 +140,9 @@ export default function MemeWinnerDrop({
           ) : (
             content
           )}
+          <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-px-4 tw-py-4">
+            <MemeDropVoteStats drop={drop} />
+          </div>
           {hasDropFooter(footer) && (
             <div className="tw-px-4 tw-pb-4 tw-pt-2">{footer}</div>
           )}

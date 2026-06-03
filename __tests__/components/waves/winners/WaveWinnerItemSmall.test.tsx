@@ -22,6 +22,8 @@ const wave = { id: "w" } as any;
 describe("WaveWinnerItemSmall", () => {
   beforeEach(() => {
     mockDefaultWaveWinnerDropSmall.mockClear();
+    const { useWave } = require("@/hooks/useWave");
+    (useWave as jest.Mock).mockReturnValue({ isMemesWave: true });
   });
 
   it("renders memes component when memes wave", () => {
