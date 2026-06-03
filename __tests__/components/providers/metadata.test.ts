@@ -91,5 +91,23 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       ]);
       expect(metadata.twitter?.card).toBe("summary_large_image");
     });
+
+    it("emits Open Graph image dimensions when provided", () => {
+      const metadata = getAppMetadata({
+        title: "Profile",
+        ogImage: "https://custom.com/profile.png",
+        ogImageHeight: 630,
+        ogImageWidth: 1200,
+        twitterCard: "summary_large_image",
+      });
+
+      expect(metadata.openGraph?.images).toEqual([
+        {
+          url: "https://custom.com/profile.png",
+          width: 1200,
+          height: 630,
+        },
+      ]);
+    });
   });
 });
