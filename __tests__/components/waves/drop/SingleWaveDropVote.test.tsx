@@ -3,8 +3,8 @@ import React from 'react';
 import {
   SingleWaveDropVote,
   SingleWaveDropVoteSize,
-  SingleWaveDropVoteSubmissionMode,
 } from '@/components/waves/drop/SingleWaveDropVote';
+import { SingleWaveDropVoteSubmissionMode } from '@/components/waves/drop/SingleWaveDropVote.types';
 
 let capturedProps: any;
 

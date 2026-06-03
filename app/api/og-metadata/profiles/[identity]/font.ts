@@ -45,9 +45,7 @@ const MONTSERRAT_FONT_SOURCES: readonly MontserratFontSource[] = [
   },
 ] as const;
 
-let montserratFontsPromise:
-  | Promise<MontserratFontDefinition[]>
-  | undefined;
+let montserratFontsPromise: Promise<MontserratFontDefinition[]> | undefined;
 
 const fetchFontData = async (url: URL): Promise<ArrayBuffer> => {
   const controller = new AbortController();

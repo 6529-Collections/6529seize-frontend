@@ -137,7 +137,10 @@ const readImageResponseBuffer = async (response: Response): Promise<Buffer> => {
 
       const chunk = Buffer.from(value);
       totalBytes += chunk.byteLength;
-      ensureAllowedImageSize(totalBytes);
+      if (totalBytes > MAX_IMAGE_BYTES) {
+        await reader.cancel("Image response exceeded maximum size.");
+        ensureAllowedImageSize(totalBytes);
+      }
       chunks.push(chunk);
     }
   } finally {
@@ -177,7 +180,7 @@ const normalizeImageToPng = async ({
   readonly buffer: Buffer;
   readonly width: number;
 }): Promise<Buffer> => {
-  const detectedContentType = await detectContentType(buffer);
+  const detectedContentType = await detectContentType(buffer, false);
   if (!detectedContentType?.startsWith("image/")) {
     throw new Error("Upstream response is not an image.");
   }
