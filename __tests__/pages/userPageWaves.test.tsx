@@ -50,7 +50,6 @@ function DummyWavesTab({ profile }: { readonly profile: any }) {
 const buildFactory = () =>
   createUserTabPage({
     subroute: "waves",
-    metaLabel: "Waves",
     Tab: DummyWavesTab,
   });
 

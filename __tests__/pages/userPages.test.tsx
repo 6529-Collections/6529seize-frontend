@@ -59,13 +59,11 @@ function DummyProxyTab({ profile }: { readonly profile: any }) {
 const buildHomeFactory = () =>
   createUserTabPage({
     subroute: null as any,
-    metaLabel: "Home",
     Tab: DummyHomeTab,
   });
 const buildProxyFactory = () =>
   createUserTabPage({
     subroute: "proxy",
-    metaLabel: "Proxy",
     Tab: DummyProxyTab,
   });
 

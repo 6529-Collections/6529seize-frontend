@@ -5,6 +5,15 @@ type MontserratFontSource = {
   readonly weight: MontserratFontWeight;
 };
 
+type MontserratFontDefinition = {
+  readonly name: "Montserrat";
+  readonly data: ArrayBuffer;
+  readonly weight: MontserratFontWeight;
+  readonly style: "normal";
+};
+
+const FONT_FETCH_TIMEOUT_MS = 3000;
+
 const MONTSERRAT_FONT_SOURCES: readonly MontserratFontSource[] = [
   {
     url: new URL(
@@ -37,25 +46,40 @@ const MONTSERRAT_FONT_SOURCES: readonly MontserratFontSource[] = [
 ] as const;
 
 let montserratFontsPromise:
-  | Promise<
-      {
-        readonly name: "Montserrat";
-        readonly data: ArrayBuffer;
-        readonly weight: MontserratFontWeight;
-        readonly style: "normal";
-      }[]
-    >
+  | Promise<MontserratFontDefinition[]>
   | undefined;
 
-export const loadMontserratFonts = () => {
-  montserratFontsPromise ??= Promise.all(
+const fetchFontData = async (url: URL): Promise<ArrayBuffer> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FONT_FETCH_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`Font request failed: ${response.status}`);
+    }
+    return response.arrayBuffer();
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const fetchMontserratFonts = (): Promise<MontserratFontDefinition[]> =>
+  Promise.all(
     MONTSERRAT_FONT_SOURCES.map(async ({ url, weight }) => ({
       name: "Montserrat" as const,
-      data: await fetch(url).then((response) => response.arrayBuffer()),
+      data: await fetchFontData(url),
       weight,
       style: "normal" as const,
     }))
   );
+
+export const loadMontserratFonts = () => {
+  montserratFontsPromise ??= fetchMontserratFonts().catch((error: unknown) => {
+    montserratFontsPromise = undefined;
+    console.error("Unable to load Montserrat OG fonts.", error);
+    return [];
+  });
 
   return montserratFontsPromise;
 };

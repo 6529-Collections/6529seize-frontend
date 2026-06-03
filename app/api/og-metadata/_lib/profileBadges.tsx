@@ -1,8 +1,8 @@
 import { CICType } from "@/entities/IProfile";
 
-export type ActivityBadgeType = "active" | "winning";
+type ActivityBadgeType = "active" | "winning";
 
-export type ProfileActivity = {
+type ProfileActivity = {
   readonly has_active_submissions?: boolean | null;
   readonly has_winning_submissions?: boolean | null;
 };

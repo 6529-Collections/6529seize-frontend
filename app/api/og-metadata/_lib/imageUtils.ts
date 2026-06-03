@@ -80,10 +80,7 @@ export const pluralize = (
 export const truncateText = (value: string, maxLength: number): string =>
   value.length > maxLength ? `${value.slice(0, maxLength - 1)}...` : value;
 
-export const getEstimatedTextWidth = (
-  value: string,
-  fontSize: number
-): number =>
+const getEstimatedTextWidth = (value: string, fontSize: number): number =>
   [...value].reduce(
     (width, character) => width + getCharacterWidthFactor(character) * fontSize,
     0

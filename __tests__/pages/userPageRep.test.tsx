@@ -52,7 +52,7 @@ function DummyRepTab({ profile }: { readonly profile: any }) {
 }
 
 const buildFactory = () =>
-  createUserTabPage({ subroute: "", metaLabel: "Identity", Tab: DummyRepTab });
+  createUserTabPage({ subroute: "", Tab: DummyRepTab });
 
 describe("rep page via createUserTabPage", () => {
   beforeEach(() => {

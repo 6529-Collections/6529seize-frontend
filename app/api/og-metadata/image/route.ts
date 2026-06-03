@@ -82,6 +82,22 @@ const ensureDefaultHttpsPort = (url: URL): void => {
 const jsonError = (error: string, status: number): NextResponse =>
   NextResponse.json({ error }, { status });
 
+const getContentLength = (response: Response): number | null => {
+  const contentLength = response.headers.get("content-length");
+  if (!contentLength) {
+    return null;
+  }
+
+  const parsed = Number.parseInt(contentLength, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+};
+
+const ensureAllowedImageSize = (byteLength: number): void => {
+  if (byteLength > MAX_IMAGE_BYTES) {
+    throw new Error("Image response exceeded maximum size.");
+  }
+};
+
 const mapErrorToResponse = (error: unknown): NextResponse => {
   if (error instanceof UrlGuardError) {
     switch (error.kind) {
@@ -103,6 +119,34 @@ const mapErrorToResponse = (error: unknown): NextResponse => {
   return jsonError("Failed to normalize image", 502);
 };
 
+const readImageResponseBuffer = async (response: Response): Promise<Buffer> => {
+  if (!response.body) {
+    throw new Error("Image response did not include a readable body.");
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Buffer[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      const chunk = Buffer.from(value);
+      totalBytes += chunk.byteLength;
+      ensureAllowedImageSize(totalBytes);
+      chunks.push(chunk);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  return Buffer.concat(chunks, totalBytes);
+};
+
 const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
   const response = await fetchPublicUrl(
     url,
@@ -118,12 +162,12 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
     throw new Error(`Image request failed: ${response.status}`);
   }
 
-  const buffer = Buffer.from(await response.arrayBuffer());
-  if (buffer.byteLength > MAX_IMAGE_BYTES) {
-    throw new Error("Image response exceeded maximum size.");
+  const contentLength = getContentLength(response);
+  if (contentLength !== null) {
+    ensureAllowedImageSize(contentLength);
   }
 
-  return buffer;
+  return readImageResponseBuffer(response);
 };
 
 const normalizeImageToPng = async ({
@@ -133,7 +177,7 @@ const normalizeImageToPng = async ({
   readonly buffer: Buffer;
   readonly width: number;
 }): Promise<Buffer> => {
-  const detectedContentType = await detectContentType(buffer, false);
+  const detectedContentType = await detectContentType(buffer);
   if (!detectedContentType?.startsWith("image/")) {
     throw new Error("Upstream response is not an image.");
   }

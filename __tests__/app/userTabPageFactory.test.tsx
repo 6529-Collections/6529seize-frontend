@@ -48,7 +48,6 @@ function DummyCollectedTab({ profile }: { readonly profile: any }) {
 const buildFactory = () =>
   createUserTabPage({
     subroute: "collected",
-    metaLabel: "Collected",
     Tab: DummyCollectedTab,
   });
 
@@ -93,7 +92,6 @@ describe("user tab page via createUserTabPage", () => {
 
     const { Page } = createUserTabPage({
       subroute: "collected",
-      metaLabel: "Collected",
       Tab: clientTab,
     });
 
@@ -127,7 +125,6 @@ describe("user tab page via createUserTabPage", () => {
     }
     const { Page } = createUserTabPage({
       subroute: "test",
-      metaLabel: "Test",
       Tab: TabWithExtra,
       getTabProps: async ({ profile }) => ({
         extra: `hello-${profile.handle}`,
