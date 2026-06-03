@@ -5,6 +5,7 @@ import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { markIdentityGettingStartedSession } from "@/components/user/identity/getting-started/identityGettingStartedSession";
 import UserSettingsClassification from "@/components/user/settings/UserSettingsClassification";
 import UserSettingsPrimaryWallet from "@/components/user/settings/UserSettingsPrimaryWallet";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
@@ -71,6 +72,10 @@ export default function UserPageSetUpProfile({
       });
     },
     onSuccess: (updatedProfile) => {
+      if (!profile.handle?.trim() && updatedProfile.handle?.trim()) {
+        markIdentityGettingStartedSession(updatedProfile.handle);
+      }
+
       setToast({
         message: "Profile updated.",
         type: "success",
@@ -141,13 +146,13 @@ export default function UserPageSetUpProfile({
               setIsAvailable={setUserNameAvailable}
               setIsLoading={setCheckingUsername}
             />
-            <FieldHelper>You can change this later.</FieldHelper>
 
             <div className="tw-mt-6">
               <UserSettingsClassification
                 selected={classification}
                 onSelect={setClassification}
               />
+              <FieldHelper>You can change this later.</FieldHelper>
             </div>
 
             {haveConsolidations && (

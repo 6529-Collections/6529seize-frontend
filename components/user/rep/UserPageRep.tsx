@@ -314,12 +314,12 @@ export default function UserPageRep({
         />
       </div>
       <div className="tw-hidden lg:tw-block">
+        <IdentityGettingStartedCard
+          profile={profile}
+          className="tw-mb-6 lg:tw-mb-8"
+        />
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           <div className="tw-min-w-0">
-            <IdentityGettingStartedCard
-              profile={profile}
-              className="tw-mb-6 lg:tw-mb-8"
-            />
             <UserPageRepHeader
               overview={activeOverview}
               categories={activeCategories}

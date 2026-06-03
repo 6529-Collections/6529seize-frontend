@@ -1,30 +1,16 @@
 "use client";
 
 import type { CicStatement } from "@/entities/IProfile";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const PROFILE_ABOUT_HASH = "#profile-about";
-
 enum AboutStatementView {
   STATEMENT = "STATEMENT",
   EDIT = "EDIT",
 }
-
-const getInitialView = (canEdit: boolean): AboutStatementView => {
-  if (
-    typeof window !== "undefined" &&
-    canEdit &&
-    window.location.hash === PROFILE_ABOUT_HASH
-  ) {
-    return AboutStatementView.EDIT;
-  }
-
-  return AboutStatementView.STATEMENT;
-};
 
 function UserPageHeaderAboutContent({
   profile,
@@ -35,29 +21,9 @@ function UserPageHeaderAboutContent({
   readonly statement: CicStatement | null;
   readonly canEdit: boolean;
 }) {
-  const [view, setView] = useState<AboutStatementView>(() =>
-    getInitialView(canEdit)
+  const [view, setView] = useState<AboutStatementView>(
+    AboutStatementView.STATEMENT
   );
-
-  const openEditorFromHash = useCallback(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    if (!canEdit || window.location.hash !== PROFILE_ABOUT_HASH) {
-      return;
-    }
-
-    setView(AboutStatementView.EDIT);
-  }, [canEdit]);
-
-  useEffect(() => {
-    window.addEventListener("hashchange", openEditorFromHash);
-
-    return () => {
-      window.removeEventListener("hashchange", openEditorFromHash);
-    };
-  }, [openEditorFromHash, profile.id, profile.handle]);
 
   const toggleView = () => {
     if (view === AboutStatementView.STATEMENT) {
