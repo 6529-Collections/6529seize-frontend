@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVoteInput from "@/components/brain/my-stream/votes/MyStreamWaveMyVoteInput";
 import { AuthContext } from "@/components/auth/Auth";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
   QueryKey,
@@ -38,11 +39,11 @@ const drop: any = {
   context_profile_context: { rating: 0, min_rating: 0, max_rating: 10 },
 };
 
-const expectMaxVotes = (value: string) => {
+const expectMaxVotes = (value: string, label = "Max for wave") => {
   const maxLabel = screen.getByText((_, element) => {
     return (
       element?.tagName.toLowerCase() === "p" &&
-      element.textContent?.replace(/\s+/g, " ").trim() === `Max ${value}`
+      element.textContent?.replace(/\s+/g, " ").trim() === `${label} ${value}`
     );
   });
 
@@ -70,7 +71,7 @@ describe("MyStreamWaveMyVoteInput", () => {
     }));
   });
 
-  it("shows max votes from context", () => {
+  it("shows max votes from context with default wave scope", () => {
     const dropWithRating = {
       ...drop,
       context_profile_context: { rating: 2, min_rating: 0, max_rating: 10 },
@@ -78,6 +79,24 @@ describe("MyStreamWaveMyVoteInput", () => {
     render(<MyStreamWaveMyVoteInput drop={dropWithRating} />, { wrapper });
     expectMaxVotes("10");
     expect(screen.queryByText(/^Available/)).not.toBeInTheDocument();
+  });
+
+  it("shows max per drop for drop-scoped voting", () => {
+    render(
+      <MyStreamWaveMyVoteInput
+        drop={{
+          ...drop,
+          wave: {
+            ...drop.wave,
+            voting_credit_scope: ApiWaveCreditScope.Drop,
+          },
+        }}
+      />,
+      { wrapper }
+    );
+
+    expectMaxVotes("10", "Max per drop");
+    expect(screen.queryByText("Max for wave 10")).not.toBeInTheDocument();
   });
 
   it("uses the wave voting credit label in the input", () => {

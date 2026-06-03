@@ -166,7 +166,14 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                 </span>
                 <DropVoteProgressing
                   current={drop.rating}
-                  projected={drop.rating_prediction}
+                  projected={
+                    isApproveWave
+                      ? drop.realtime_rating
+                      : drop.rating_prediction
+                  }
+                  tooltipLabel={
+                    isApproveWave ? "Realtime votes given" : undefined
+                  }
                 />
               </div>
               <div className="tw-mt-3">

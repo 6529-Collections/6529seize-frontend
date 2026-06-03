@@ -3,6 +3,9 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveLeaderboardGalleryItem } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import { useDropVoteLogs } from "@/hooks/useDropVoteLogs";
+import { useDropVoters } from "@/hooks/useDropVoters";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplay",
@@ -46,13 +49,29 @@ jest.mock("@/components/voting/VotingModalButton", () => (props: any) => (
   <button data-testid="vote-btn" onClick={props.onClick} />
 ));
 jest.mock("@/hooks/isMobileScreen", () => () => false);
+jest.mock("@/hooks/useIsTouchDevice");
+jest.mock("@/hooks/useDropVoters");
+jest.mock("@/hooks/useDropVoteLogs");
+jest.mock("@/hooks/useIntersectionObserver", () => ({
+  useIntersectionObserver: () => ({ current: null }),
+}));
+jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
+  __esModule: true,
+  default: ({ children }: { readonly children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}));
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: () => ({ canShowVote: true }),
 }));
 jest.mock("@/helpers/image.helpers", () => ({
   getScaledImageUri: (u: string) => `scaled:${u}`,
-  ImageScale: { AUTOx450: "x" },
+  ImageScale: { AUTOx450: "x", AUTOx1080: "y" },
 }));
+
+const mockUseDropVoters = useDropVoters as jest.Mock;
+const mockUseDropVoteLogs = useDropVoteLogs as jest.Mock;
+const mockUseIsTouchDevice = useIsTouchDevice as jest.Mock;
 
 describe("WaveLeaderboardGalleryItem", () => {
   const drop: any = {
@@ -65,6 +84,29 @@ describe("WaveLeaderboardGalleryItem", () => {
     context_profile_context: { rating: 1 },
     author: { handle: "alice" },
   };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseIsTouchDevice.mockReturnValue(false);
+    mockUseDropVoters.mockReturnValue({
+      voters: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    mockUseDropVoteLogs.mockReturnValue({
+      logs: [],
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+  });
 
   it("handles click and keyboard events", async () => {
     const onDropClick = jest.fn();
@@ -85,6 +127,39 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "false");
     await userEvent.click(screen.getByTestId("vote-btn"));
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
+  });
+
+  it("renders the compact vote-details chip in the gallery footer", () => {
+    render(<WaveLeaderboardGalleryItem drop={drop} onDropClick={jest.fn()} />);
+
+    const trigger = screen.getByRole("button", {
+      name: "View voters and vote log for 3 voters",
+    });
+
+    expect(trigger).toHaveTextContent(/3\s*voters/);
+    expect(trigger).toHaveClass(
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40",
+      "tw-px-1.5",
+      "tw-py-0.5"
+    );
+    expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("does not open the drop when the vote-details chip is clicked", async () => {
+    const onDropClick = jest.fn();
+
+    render(
+      <WaveLeaderboardGalleryItem drop={drop} onDropClick={onDropClick} />
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 3 voters",
+      })
+    );
+
+    expect(onDropClick).not.toHaveBeenCalled();
   });
 
   it("closes voting modal when voting closes", async () => {

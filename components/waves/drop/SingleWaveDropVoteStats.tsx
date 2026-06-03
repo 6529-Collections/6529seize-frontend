@@ -1,18 +1,26 @@
 import type { FC } from "react";
+import type { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
-import { WAVE_VOTE_STATS_LABELS } from "@/helpers/waves/waves.constants";
+import {
+  getWaveVoteScopeMaxLabel,
+  WAVE_VOTE_STATS_LABELS,
+} from "@/helpers/waves/waves.constants";
 
 interface SingleWaveDropVoteStatsProps {
   readonly currentRating: number;
   readonly maxRating: number;
   readonly label: string;
+  readonly creditScope?: ApiWaveCreditScope | null | undefined;
 }
 
 export const SingleWaveDropVoteStats: FC<SingleWaveDropVoteStatsProps> = ({
   currentRating,
   maxRating,
   label,
+  creditScope,
 }) => {
+  const maxLabel = getWaveVoteScopeMaxLabel(creditScope);
+
   return (
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-text-xs tw-text-iron-500">
       <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
@@ -23,7 +31,7 @@ export const SingleWaveDropVoteStats: FC<SingleWaveDropVoteStatsProps> = ({
         <span className="tw-text-iron-500">{label}</span>
       </div>
       <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
-        <span>{WAVE_VOTE_STATS_LABELS.TOTAL}: </span>
+        <span>{maxLabel}: </span>
         <div className="tw-flex tw-items-center">
           <div className="tw-flex tw-flex-col tw-items-center tw-mr-1 tw-leading-[0.15rem] -tw-space-y-2.5 tw-mt-0.5">
             <span className="tw-text-xs tw-font-medium tw-text-emerald-400">

@@ -53,6 +53,7 @@ export default function CreateWaveStepContent({
     onCategoryChange,
     onProfileIdChange,
     onCreditNftsChange,
+    onCreditScopeChange,
     onMaxVotesPerIdentityPerDropChange,
     onAllowNegativeVotesChange,
     onTimeWeightedVotingChange,
@@ -112,6 +113,7 @@ export default function CreateWaveStepContent({
           category={config.voting.category}
           profileId={config.voting.profileId}
           creditNfts={config.voting.creditNfts}
+          creditScope={config.voting.creditScope}
           memeCount={config.voting.creditNftMemeCount}
           isMemeCountLoading={isMemeCountLoading}
           isMemeCountError={isMemeCountError}
@@ -124,6 +126,7 @@ export default function CreateWaveStepContent({
           setCategory={onCategoryChange}
           setProfileId={onProfileIdChange}
           setCreditNfts={onCreditNftsChange}
+          onCreditScopeChange={onCreditScopeChange}
           onAllowNegativeVotesChange={onAllowNegativeVotesChange}
           setMaxVotesPerIdentityPerDrop={onMaxVotesPerIdentityPerDropChange}
           setApprovalThreshold={onThresholdChange}

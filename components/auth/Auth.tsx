@@ -29,6 +29,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
+import { getToastAutoClose } from "@/helpers/toast.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import {
   ConnectionMismatchError,
@@ -536,7 +537,7 @@ export default function Auth({
   }) => {
     toast(message, {
       position: "top-right",
-      autoClose: 3000,
+      autoClose: getToastAutoClose(type),
       hideProgressBar: false,
       draggable: false,
       closeOnClick: true,

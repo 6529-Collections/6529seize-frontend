@@ -1,5 +1,6 @@
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import WaveWinnersDropHeaderVoter from "./WaveWinnersDropHeaderVoter";
 import {
   WAVE_VOTING_LABELS,
@@ -34,12 +35,7 @@ export default function WaveWinnersDropHeaderVoters({
             ))}
           </div>
         )}
-        <span className="tw-font-medium tw-text-iron-50">
-          {formatNumberWithCommas(winner.drop.raters_count)}{" "}
-          <span className="tw-font-normal tw-text-iron-400">
-            {winner.drop.raters_count === 1 ? "voter" : "voters"}
-          </span>
-        </span>
+        <ParticipationDropVoteDetailsTrigger drop={winner.drop} />
       </div>
 
       {hasUserVoted && (

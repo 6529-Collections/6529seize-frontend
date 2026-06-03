@@ -95,7 +95,12 @@ export default function ParticipationDropRatingsTotalSection({
         )}
         <DropVoteProgressing
           current={currentRating}
-          projected={drop.rating_prediction}
+          projected={
+            hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
+          }
+          tooltipLabel={
+            hasWinningThreshold ? "Realtime votes given" : undefined
+          }
           compact
         />
       </div>

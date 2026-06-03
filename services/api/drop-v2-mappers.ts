@@ -22,6 +22,7 @@ import {
   toApiWaveMin,
   type ApiWaveMinWithChatLinkSettings,
 } from "@/helpers/waves/wave.helpers";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 
 type ApiProfileMinWithBadges = ApiProfileMin & {
   readonly badges?: ApiIdentityOverviewBadges;
@@ -106,6 +107,7 @@ export const mapApiWaveOverviewToApiWaveMin = (
   pinned: wave.context_profile_context?.pinned ?? false,
   identity_wave: false,
   links_disabled: wave.links_disabled,
+  voting_credit_scope: ApiWaveCreditScope.Wave,
 });
 
 export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
@@ -132,6 +134,7 @@ export const createFallbackWaveMin = (waveId: string): ApiWaveMin => ({
   forbid_negative_votes: false,
   pinned: false,
   identity_wave: false,
+  voting_credit_scope: ApiWaveCreditScope.Wave,
 });
 
 export const normalizeWaveMin = (wave: ApiWave | ApiWaveMin): ApiWaveMin =>
@@ -249,6 +252,7 @@ const mapReplyToDropPreview = (
   is_signed: false,
   reactions: [],
   boosts: 0,
+  is_additional_action_promised: false,
   hide_link_preview: false,
   nft_links: [],
 });

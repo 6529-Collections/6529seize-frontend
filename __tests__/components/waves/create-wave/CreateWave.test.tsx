@@ -11,6 +11,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { CreateWaveStep } from "@/types/waves.types";
 
 jest.mock("@/components/waves/create-wave/CreateWaveFlow", () => {
@@ -204,6 +205,7 @@ describe("CreateWave", () => {
       },
       voting: {
         type: "TDH",
+        creditScope: ApiWaveCreditScope.Wave,
         category: null,
         profileId: null,
         creditNfts: [],
@@ -243,6 +245,7 @@ describe("CreateWave", () => {
     onCategoryChange: jest.fn(),
     onProfileIdChange: jest.fn(),
     onCreditNftsChange: jest.fn(),
+    onCreditScopeChange: jest.fn(),
     onMaxVotesPerIdentityPerDropChange: jest.fn(),
     onAllowNegativeVotesChange: jest.fn(),
     onTimeWeightedVotingChange: jest.fn(),

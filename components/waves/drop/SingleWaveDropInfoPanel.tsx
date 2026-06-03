@@ -16,12 +16,14 @@ interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 export const SingleWaveDropInfoPanel = ({
   drop,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  winningThreshold,
 }: SingleWaveDropInfoPanelProps) => {
   const { canDelete, canShowVote, isVotingEnded, isWinner } =
     useDropInteractionRules(drop);
@@ -52,6 +54,7 @@ export const SingleWaveDropInfoPanel = ({
                   isVotingEnded={shouldShowVotingEndedSummary}
                   canShowVote={canShowVotingAction}
                   onVoteClick={openVoting}
+                  winningThreshold={winningThreshold}
                 />
               </div>
             )}

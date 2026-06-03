@@ -1,15 +1,31 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import VotingModal from '@/components/voting/VotingModal';
+import { SingleWaveDropVoteSubmissionMode } from '@/components/waves/drop/SingleWaveDropVote.types';
 
 jest.mock('@/components/waves/drop/SingleWaveDropVote', () => {
-  const MockSingleWaveDropVote = (props: any) => <button data-testid="vote" onClick={props.onVoteSuccess} />;
+  const MockSingleWaveDropVote = (props: any) => (
+    <button
+      data-testid="vote"
+      data-has-request-started={String(
+        typeof props.onVoteRequestStarted === 'function'
+      )}
+      data-has-success={String(typeof props.onVoteSuccess === 'function')}
+      data-submission-mode={props.submissionMode}
+      onClick={props.onVoteRequestStarted}
+    />
+  );
   MockSingleWaveDropVote.displayName = 'MockSingleWaveDropVote';
   return { SingleWaveDropVote: MockSingleWaveDropVote };
 });
 
 jest.mock('@/components/waves/memes/submission/layout/ModalLayout', () => {
-  const MockModalLayout = (props: any) => <div data-testid="layout">{props.children}</div>;
+  const MockModalLayout = (props: any) => (
+    <div data-testid="layout">
+      <button onClick={props.onCancel}>Cancel</button>
+      {props.children}
+    </div>
+  );
   MockModalLayout.displayName = 'MockModalLayout';
   return MockModalLayout;
 });
@@ -37,7 +53,24 @@ describe('VotingModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('closes when vote succeeds', () => {
+  it('passes background submission mode to vote content', () => {
+    render(<VotingModal drop={drop} isOpen={true} onClose={jest.fn()} />);
+
+    expect(screen.getByTestId('vote')).toHaveAttribute(
+      'data-submission-mode',
+      SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+    );
+    expect(screen.getByTestId('vote')).toHaveAttribute(
+      'data-has-request-started',
+      'true'
+    );
+    expect(screen.getByTestId('vote')).toHaveAttribute(
+      'data-has-success',
+      'false'
+    );
+  });
+
+  it('closes when vote request starts', () => {
     const onClose = jest.fn();
     render(<VotingModal drop={drop} isOpen={true} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('vote'));
