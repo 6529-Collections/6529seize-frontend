@@ -144,8 +144,9 @@ jest.mock("@/components/waves/CreateDropInput", () => {
   };
 });
 jest.mock("@/components/waves/drops/normalizeDropMarkdown", () => ({
-  exportDropMarkdown: jest.fn((editorState: { __markdown?: string } | null) =>
-    editorState?.__markdown ?? ""
+  exportDropMarkdown: jest.fn(
+    (editorState: { __markdown?: string } | null) =>
+      editorState?.__markdown ?? ""
   ),
 }));
 const mockExportDropMarkdown = exportDropMarkdown as jest.MockedFunction<

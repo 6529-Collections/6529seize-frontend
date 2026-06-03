@@ -230,12 +230,14 @@ describe("CreateDropActions", () => {
       />
     );
 
-    expect(
-      screen.getByTestId("drop-actions-animate-presence")
-    ).toHaveAttribute("data-mode", "sync");
-    expect(
-      screen.getByTestId("drop-actions-animate-presence")
-    ).toHaveAttribute("data-initial", "false");
+    expect(screen.getByTestId("drop-actions-animate-presence")).toHaveAttribute(
+      "data-mode",
+      "sync"
+    );
+    expect(screen.getByTestId("drop-actions-animate-presence")).toHaveAttribute(
+      "data-initial",
+      "false"
+    );
     expect(screen.getByTestId("drop-actions-chevron-motion")).toHaveAttribute(
       "data-motion-initial",
       motionValue({ opacity: 0, scale: 0.92 })

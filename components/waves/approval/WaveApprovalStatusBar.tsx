@@ -108,7 +108,9 @@ const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
     <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
       {label}
     </span>
-    <span className={`tw-min-w-0 tw-text-sm tw-font-semibold ${valueClassName}`}>
+    <span
+      className={`tw-min-w-0 tw-text-sm tw-font-semibold ${valueClassName}`}
+    >
       {value}
     </span>
   </div>
@@ -419,10 +421,7 @@ export default function WaveApprovalStatusBar({
           onClose={() => setIsHelpOpen(false)}
           title={APPROVAL_RULES_TITLE}
         >
-          <div
-            id={approvalRulesHelpId}
-            className="tw-px-4 tw-pb-2 tw-pt-3"
-          >
+          <div id={approvalRulesHelpId} className="tw-px-4 tw-pb-2 tw-pt-3">
             {approvalRulesHelp}
           </div>
         </MobileWrapperDialog>

@@ -137,10 +137,7 @@ const seedApprovalQueries = (queryClient: QueryClient) => {
     QueryKey.DROPS_LEADERBOARD,
     { waveId: "wave-1", page_size: 20 },
   ] as const;
-  const dropsKey = [
-    QueryKey.DROPS,
-    { waveId: "wave-1", limit: 20 },
-  ] as const;
+  const dropsKey = [QueryKey.DROPS, { waveId: "wave-1", limit: 20 }] as const;
   queryClient.setQueryData(waveKey, { id: "wave-1" });
   queryClient.setQueryData(decisionsKey, { pages: [], pageParams: [] });
   queryClient.setQueryData(dropsLeaderboardKey, { pages: [] });

@@ -1,6 +1,7 @@
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
+import { SingleWaveDropVoteSubmissionMode } from "../waves/drop/SingleWaveDropVote.types";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 
 interface MobileVotingModalProps {
@@ -29,7 +30,13 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
       title="Vote for this artwork"
     >
       <div className="tw-pt-2 tw-pb-2 tw-px-4">
-        <SingleWaveDropVote drop={drop} onVoteSuccess={onClose} />
+        <SingleWaveDropVote
+          drop={drop}
+          onVoteRequestStarted={onClose}
+          submissionMode={
+            SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+          }
+        />
       </div>
     </MobileWrapperDialog>
   );

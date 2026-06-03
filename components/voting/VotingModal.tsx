@@ -5,6 +5,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
+import { SingleWaveDropVoteSubmissionMode } from "../waves/drop/SingleWaveDropVote.types";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 
 interface VotingModalProps {
@@ -74,8 +75,18 @@ const VotingModal: React.FC<VotingModalProps> = ({
         className="tw-w-full tw-max-w-xl tw-z-10 tw-px-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <ModalLayout title="Vote for this artwork" onCancel={onClose} titleId={titleId}>
-          <SingleWaveDropVote drop={drop} onVoteSuccess={onClose} />
+        <ModalLayout
+          title="Vote for this artwork"
+          onCancel={onClose}
+          titleId={titleId}
+        >
+          <SingleWaveDropVote
+            drop={drop}
+            onVoteRequestStarted={onClose}
+            submissionMode={
+              SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
+            }
+          />
         </ModalLayout>
       </div>
     </div>

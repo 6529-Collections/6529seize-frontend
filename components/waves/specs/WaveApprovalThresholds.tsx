@@ -128,7 +128,10 @@ export default function WaveApprovalThresholds({
     setThresholdValue(nextThreshold === null ? "" : String(nextThreshold));
     setMinTimeValue(nextTimeInput.value);
     setUnit(nextTimeInput.unit);
-  }, [wave.wave.winning_threshold, wave.wave.winning_threshold_min_duration_ms]);
+  }, [
+    wave.wave.winning_threshold,
+    wave.wave.winning_threshold_min_duration_ms,
+  ]);
 
   const handleSave = (closeEditor: () => void) => {
     const parsedThreshold = parsePositiveWholeNumberInput(thresholdValue);
