@@ -224,7 +224,7 @@ describe("WaveSpecs", () => {
 
     expect(screen.getByText("Approval threshold")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
-    expect(screen.getByText("Min time: 2m")).toBeInTheDocument();
+    expect(screen.getByText("Hold time: 2m")).toBeInTheDocument();
   });
 
   it.each([ApiWaveType.Chat, ApiWaveType.Rank])(
