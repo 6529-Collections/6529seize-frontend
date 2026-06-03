@@ -14,7 +14,14 @@ jest.mock("@/helpers/image.helpers", () => ({
 }));
 jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
   __esModule: true,
-  default: () => <span data-testid="progress" />,
+  default: (props: any) => (
+    <span
+      data-testid="progress"
+      data-current={props.current}
+      data-projected={props.projected}
+      data-tooltip-label={props.tooltipLabel}
+    />
+  ),
 }));
 jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
@@ -29,6 +36,7 @@ describe("WaveLeaderboardDropRaters", () => {
   const drop: ExtendedDrop = {
     id: "1",
     rating: 10,
+    realtime_rating: 13,
     rating_prediction: 12,
     raters_count: 2,
     rank: 1,
@@ -68,6 +76,13 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(screen.getByText("/")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(screen.getByText("Needs 2")).toBeInTheDocument();
+    const progress = screen.getByTestId("progress");
+    expect(progress).toHaveAttribute("data-current", "10");
+    expect(progress).toHaveAttribute("data-projected", "13");
+    expect(progress).toHaveAttribute(
+      "data-tooltip-label",
+      "Realtime votes given"
+    );
     expect(
       screen.getByRole("button", {
         name: "View voters and vote log for 2 voters",
@@ -103,5 +118,54 @@ describe("WaveLeaderboardDropRaters", () => {
       unmount();
       jest.useRealTimers();
     }
+  });
+
+  it("keeps approve status on current vote while showing green realtime movement", () => {
+    render(
+      <WaveLeaderboardDropRaters
+        drop={
+          {
+            ...drop,
+            rating: 38_936_088,
+            realtime_rating: 80_273_465,
+            rating_prediction: 38_936_088,
+            rank: null,
+          } as ExtendedDrop
+        }
+        winningThreshold={42_000_000}
+      />
+    );
+
+    expect(screen.getByText("38,936,088")).toBeInTheDocument();
+    expect(screen.getByText("42,000,000")).toBeInTheDocument();
+    expect(screen.getByText("Needs 3,063,912")).toBeInTheDocument();
+    const progress = screen.getByTestId("progress");
+    expect(progress).toHaveAttribute("data-current", "38936088");
+    expect(progress).toHaveAttribute("data-projected", "80273465");
+    expect(progress).toHaveAttribute(
+      "data-tooltip-label",
+      "Realtime votes given"
+    );
+  });
+
+  it("passes lower approve realtime votes to the progress badge", () => {
+    render(
+      <WaveLeaderboardDropRaters
+        drop={
+          {
+            ...drop,
+            rating: 100,
+            realtime_rating: 80,
+            rating_prediction: 100,
+            rank: null,
+          } as ExtendedDrop
+        }
+        winningThreshold={120}
+      />
+    );
+
+    const progress = screen.getByTestId("progress");
+    expect(progress).toHaveAttribute("data-current", "100");
+    expect(progress).toHaveAttribute("data-projected", "80");
   });
 });

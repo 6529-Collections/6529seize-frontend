@@ -102,7 +102,14 @@ export default function WaveLeaderboardGalleryItemVotes({
       ) : null}
       <DropVoteProgressing
         current={current}
-        projected={drop.rating_prediction}
+        projected={
+          displayWinningThreshold !== null
+            ? drop.realtime_rating
+            : drop.rating_prediction
+        }
+        tooltipLabel={
+          displayWinningThreshold !== null ? "Realtime votes given" : undefined
+        }
         subtle={variant === "subtle"}
       />
       {approvalStatusLabel !== null ? (

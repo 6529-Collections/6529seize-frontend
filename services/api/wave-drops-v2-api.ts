@@ -376,7 +376,8 @@ const hydrateDropV2 = async ({
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata,
     rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: topRaters,
     raters_count: voting?.voters_count ?? 0,
@@ -385,6 +386,8 @@ const hydrateDropV2 = async ({
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    is_additional_action_promised:
+      drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
     nft_links: drop.nft_links ?? [],
   };
@@ -422,7 +425,8 @@ export const mapLeaderboardDropV2 = ({
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
     rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,
@@ -431,6 +435,8 @@ export const mapLeaderboardDropV2 = ({
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    is_additional_action_promised:
+      drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
     nft_links: drop.nft_links ?? [],
   };

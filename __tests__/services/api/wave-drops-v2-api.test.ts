@@ -105,7 +105,7 @@ const createEnrichableDrop = (overrides: Partial<ApiDropV2> = {}) => ({
     has_metadata: true,
     voting: {
       is_open: true,
-      total_votes_given: 0,
+      total_votes_given: 14,
       current_calculated_vote: 10,
       predicted_final_vote: 12,
       voters_count: 7,
@@ -258,6 +258,13 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(result.drops[0]?.metadata).toEqual(priorityMetadata);
     expect(result.drops[0]?.top_raters).toEqual([]);
     expect(result.drops[0]?.raters_count).toBe(7);
+    expect(result.drops[0]).toEqual(
+      expect.objectContaining({
+        rating: 10,
+        realtime_rating: 14,
+        rating_prediction: 12,
+      })
+    );
   });
 
   it("preserves the over-threshold timestamp on hydrated legacy drops", async () => {
@@ -347,6 +354,26 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(drop).toEqual(
       expect.objectContaining({
         over_threshold_since_ms: 123_456,
+      })
+    );
+  });
+
+  it("maps V2 submission voting totals into leaderboard legacy vote fields", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: createEnrichableDrop() as unknown as ApiDropV2,
+      wave: {
+        id: "wave-1",
+        name: "Wave 1",
+        picture: null,
+        voting_credit_type: "TDH",
+      } as unknown as ApiWaveMin,
+    });
+
+    expect(drop).toEqual(
+      expect.objectContaining({
+        rating: 10,
+        realtime_rating: 14,
+        rating_prediction: 12,
       })
     );
   });

@@ -190,6 +190,7 @@ export const buildPreviewDrop = ({
     is_signed: false,
     reactions: [],
     boosts: 0,
+    is_additional_action_promised: false,
     hide_link_preview: false,
     mentioned_groups: [],
   };

@@ -10,6 +10,7 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
       data-current={props.current}
       data-projected={props.projected}
       data-subtle={props.subtle}
+      data-tooltip-label={props.tooltipLabel}
     />
   ),
 }));
@@ -36,7 +37,7 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("shows the needed amount below the approve threshold", () => {
-    const drop: any = { rating: 5, rating_prediction: 6 };
+    const drop: any = { rating: 5, realtime_rating: 9, rating_prediction: 6 };
     render(
       <WaveLeaderboardGalleryItemVotes drop={drop} winningThreshold={8} />
     );
@@ -44,6 +45,23 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
     expect(screen.getByText("/")).toBeInTheDocument();
     expect(screen.getByText("8")).toBeInTheDocument();
     expect(screen.getByText("Needs 3")).toBeInTheDocument();
+    const progress = screen.getByTestId("progress");
+    expect(progress.getAttribute("data-current")).toBe("5");
+    expect(progress.getAttribute("data-projected")).toBe("9");
+    expect(progress.getAttribute("data-tooltip-label")).toBe(
+      "Realtime votes given"
+    );
+  });
+
+  it("uses lower realtime votes for approve movement", () => {
+    const drop: any = { rating: 5, realtime_rating: 3, rating_prediction: 6 };
+    render(
+      <WaveLeaderboardGalleryItemVotes drop={drop} winningThreshold={8} />
+    );
+
+    const progress = screen.getByTestId("progress");
+    expect(progress.getAttribute("data-current")).toBe("5");
+    expect(progress.getAttribute("data-projected")).toBe("3");
   });
 
   it("shows when the approve threshold is reached", () => {

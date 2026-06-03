@@ -423,6 +423,44 @@ describe("MyStreamWaveLeaderboard", () => {
     expect(setSort).toHaveBeenCalledWith(WaveDropsLeaderboardSort.RANK);
   });
 
+  it("uses realtime vote for saved approve projected vote sort", () => {
+    const setSort = jest.fn();
+    useWave.mockReturnValue({
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      participation: {
+        isEligible: true,
+        canSubmitNow: true,
+        hasReachedLimit: false,
+      },
+    });
+    useLocalPreference.mockReturnValueOnce(["list", jest.fn()]);
+    useLocalPreference.mockReturnValueOnce([
+      WaveDropsLeaderboardSort.RATING_PREDICTION,
+      setSort,
+    ]);
+
+    renderLeaderboard({
+      ...makeOpenApproveWave(),
+      wave: {
+        ...makeOpenApproveWave().wave,
+        time_lock_ms: 300_000,
+      },
+    } as ApiWave);
+
+    expect(headerProps.sort).toBe(WaveDropsLeaderboardSort.REALTIME_VOTE);
+    expect(dropsProps.sort).toBe(WaveDropsLeaderboardSort.REALTIME_VOTE);
+
+    act(() => {
+      headerProps.onSortChange(WaveDropsLeaderboardSort.REALTIME_VOTE);
+    });
+
+    expect(setSort).toHaveBeenCalledWith(
+      WaveDropsLeaderboardSort.REALTIME_VOTE
+    );
+  });
+
   it("uses grid view for memes wave and opens meme modal", async () => {
     const user = userEvent.setup();
     useWave.mockReturnValue({

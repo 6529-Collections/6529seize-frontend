@@ -35,6 +35,7 @@ jest.mock(
       data-testid="vote"
       data-is-checked={String(p.isChecked)}
       data-is-voting-closed={String(p.isVotingClosed)}
+      data-winning-threshold={p.winningThreshold ?? ""}
       onClick={() => p.onToggleCheck(p.drop.id)}
     >
       {p.drop.id}
@@ -196,6 +197,12 @@ describe("MyStreamWaveMyVotes", () => {
       isFetching: false,
       isFetchingNextPage: false,
     });
+    mockApprovalStatus.mockReturnValue({
+      isApprovalStatusLoading: false,
+      isVotingClosed: false,
+      isVotingControlsLocked: false,
+      winningThreshold: 42,
+    });
 
     render(
       <AuthContext.Provider value={auth}>
@@ -204,6 +211,10 @@ describe("MyStreamWaveMyVotes", () => {
     );
 
     expect(mockApprovalStatus).toHaveBeenCalledWith({ wave: approveWave });
+    expect(screen.getByTestId("vote")).toHaveAttribute(
+      "data-winning-threshold",
+      "42"
+    );
   });
 
   it("does not pass decision points when approve decision counts exist", () => {

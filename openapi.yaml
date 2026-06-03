@@ -5973,6 +5973,14 @@ paths:
             minimum: 1
             maximum: 2000
             default: 100
+        - name: is_additional_action_promised
+          in: query
+          description: >-
+            Optional filter for winner drops by whether an additional action was
+            promised
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -6729,6 +6737,14 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: is_additional_action_promised
+          in: query
+          description: >-
+            Optional filter for participatory drops by whether an additional
+            action was promised
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -7328,6 +7344,14 @@ paths:
             minimum: 1
             maximum: 2000
             default: 100
+        - name: is_additional_action_promised
+          in: query
+          description: >-
+            Optional filter for winner drops by whether an additional action was
+            promised
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -7437,6 +7461,14 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: is_additional_action_promised
+          in: query
+          description: >-
+            Optional filter for participatory drops by whether an additional
+            action was promised
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -9137,6 +9169,8 @@ components:
           $ref: "#/components/schemas/ApiReplyToDrop"
         drop_type:
           $ref: "#/components/schemas/ApiDropType"
+        is_additional_action_promised:
+          type: boolean
         mentioned_groups:
           type: array
           items:
@@ -9567,7 +9601,9 @@ components:
           description: >-
             Milliseconds a drop must continuously stay at or above
             winning_threshold before winning an APPROVE wave. Defaults to 0,
-            which declares a winner as soon as the threshold is reached.
+            which declares a winner as soon as the threshold is reached. When
+            time_lock_ms is set, this duration is measured against the
+            time-scaled weighted vote.
           type: integer
           format: int64
           minimum: 0
@@ -9591,9 +9627,9 @@ components:
         time_lock_ms:
           nullable: true
           description: >-
-            Vote of a voter is considered eligible after this amount of time
-            after casting it. If not set then votes are eligible immediately
-            after casting.
+            When set, vote totals use a trailing time-scaled weighted average
+            over this duration, so new vote changes gradually gain or lose
+            influence. If not set, votes are counted immediately.
           type: integer
           format: int64
           minimum: 1
@@ -9770,6 +9806,7 @@ components:
         - is_signed
         - reactions
         - boosts
+        - is_additional_action_promised
         - hide_link_preview
       properties:
         id:
@@ -9870,6 +9907,9 @@ components:
         boosts:
           type: number
           format: int64
+        is_additional_action_promised:
+          type: boolean
+          nullable: true
         hide_link_preview:
           type: boolean
         nft_links:
@@ -10587,6 +10627,7 @@ components:
         - is_signed
         - reactions
         - boosts
+        - is_additional_action_promised
         - hide_link_preview
       properties:
         id:
@@ -10685,6 +10726,9 @@ components:
         boosts:
           type: number
           format: int64
+        is_additional_action_promised:
+          type: boolean
+          nullable: true
         hide_link_preview:
           type: boolean
         nft_links:
@@ -12974,6 +13018,8 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropVoting"
         has_metadata:
           type: boolean
+        is_additional_action_promised:
+          type: boolean
         over_threshold_since_ms:
           description: >-
             Unix timestamp in milliseconds when this active APPROVE submission
@@ -13582,7 +13628,8 @@ components:
           description: >-
             Milliseconds a drop must continuously stay at or above
             winning_threshold before winning an APPROVE wave. Null for
-            non-APPROVE waves.
+            non-APPROVE waves. When time_lock_ms is set, this duration is
+            measured against the time-scaled weighted vote.
           type: integer
           format: int64
           minimum: 0
@@ -13606,9 +13653,9 @@ components:
         time_lock_ms:
           nullable: true
           description: >-
-            Vote of a voter is considered eligible after this amount of time
-            after casting it. If not set then votes are eligible immediately
-            after casting.
+            When set, vote totals use a trailing time-scaled weighted average
+            over this duration, so new vote changes gradually gain or lose
+            influence. If not set, votes are counted immediately.
           type: integer
           format: int64
           minimum: 1

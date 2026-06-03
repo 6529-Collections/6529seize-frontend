@@ -68,6 +68,7 @@ interface DefautWinnerDropProps {
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia?: boolean | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
+  readonly winningThreshold?: number | null | undefined;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -93,6 +94,7 @@ const DefaultWinnerDrop = ({
   mediaImageScale,
   fullWidthMedia = false,
   fullWidthLinkPreviews = false,
+  winningThreshold,
   embedPath,
   quotePath,
   embedDepth,
@@ -278,7 +280,12 @@ const DefaultWinnerDrop = ({
           )}
           {showInteractions && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-              {!!drop.raters_count && <WaveDropRatings drop={drop} />}
+              {!!drop.raters_count && (
+                <WaveDropRatings
+                  drop={drop}
+                  winningThreshold={winningThreshold}
+                />
+              )}
               <WaveDropReactions drop={drop} />
             </div>
           )}
