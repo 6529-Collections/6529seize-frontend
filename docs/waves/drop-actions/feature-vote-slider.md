@@ -75,8 +75,9 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 - Submit always runs an auth check first; canceling auth keeps controls open.
 - If vote submission fails, users stay in place, see an error toast, and can
   retry with the same value.
-- In modal/sheet flows, successful submit closes the modal/sheet after the
-  success state.
+- In modal/sheet flows, submit validates and completes auth first, then starts
+  the vote request, briefly shows the success state, and closes. If the request
+  later fails, users see an error toast and can reopen voting to retry.
 - In mini active-submission cards, successful submit refreshes submission/drop
   queries and keeps users in the same list.
 
