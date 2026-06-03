@@ -94,7 +94,6 @@ export function createUserTabPage<
   TExtra extends Record<string, unknown> = Record<string, never>,
 >({
   subroute,
-  metaLabel,
   Tab,
   enableTransfer,
   getTabProps,
@@ -191,7 +190,7 @@ export function createUserTabPage<
       }
       throw error;
     });
-    return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
+    return getAppMetadata(getMetadataForUserPage(profile, subroute));
   }
 
   return { Page, generateMetadata };

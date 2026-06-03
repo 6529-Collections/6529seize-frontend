@@ -400,5 +400,7 @@ export interface PageSSRMetadata {
   title: string;
   description?: string | undefined;
   ogImage: string;
+  ogImageHeight?: number | undefined;
+  ogImageWidth?: number | undefined;
   twitterCard: "summary" | "summary_large_image";
 }

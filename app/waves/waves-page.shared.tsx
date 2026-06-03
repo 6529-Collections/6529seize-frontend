@@ -17,12 +17,12 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
 import { formatAddress } from "@/helpers/Helpers";
-import { formatCount } from "@/helpers/format.helpers";
 import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
 import {
   getWaveRouteWithSearchParams,
   type RouteSearchParams,
 } from "@/helpers/navigation.helpers";
+import { publicEnv } from "@/config/env";
 
 export type WavesSearchParams = RouteSearchParams;
 
@@ -196,35 +196,17 @@ export async function buildWavesMetadata(
 
   const authorHandle =
     wave.author.handle && wave.author.handle.trim().length > 0
-      ? `@${wave.author.handle}`
+      ? `@${wave.author.handle.replace(/^@/, "")}`
       : formatAddress(wave.author.primary_address);
 
-  const subscribersCount = wave.metrics.subscribers_count;
-  const dropsCount = wave.metrics.drops_count;
-  const subscribers = formatCount(subscribersCount);
-  const drops = formatCount(dropsCount);
-  const descriptionParts = [
-    authorHandle && `Created by ${authorHandle}`,
-    subscribers &&
-      `${subscribers} ${subscribersCount === 1 ? "subscriber" : "subscribers"}`,
-    drops && `${drops} ${dropsCount === 1 ? "drop" : "drops"} shared`,
-  ].filter((part): part is string => typeof part === "string");
-
-  const metadata: Parameters<typeof getAppMetadata>[0] = {
-    title: `${waveName} | Waves`,
-    description:
-      descriptionParts.length > 0
-        ? `${waveName} — ${descriptionParts.join(" • ")}`
-        : "Browse and explore waves",
-  };
-
-  return getAppMetadata(
-    wave.picture
-      ? {
-          ...metadata,
-          ogImage: wave.picture,
-          twitterCard: "summary_large_image",
-        }
-      : metadata
-  );
+  return getAppMetadata({
+    title: `${waveName} by ${authorHandle}`,
+    description: "Waves",
+    ogImage: `${
+      publicEnv.BASE_ENDPOINT
+    }/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
+    ogImageHeight: 630,
+    ogImageWidth: 1200,
+    twitterCard: "summary_large_image",
+  });
 }

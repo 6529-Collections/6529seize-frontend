@@ -153,7 +153,7 @@ describe("user tab page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "Collected"
+      "collected"
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(
