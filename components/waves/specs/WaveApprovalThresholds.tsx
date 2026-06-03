@@ -189,7 +189,7 @@ export default function WaveApprovalThresholds({
               <span>{formatNumberWithCommas(threshold)}</span>
               <span aria-hidden="true">·</span>
               <span className="tw-whitespace-nowrap">
-                Min time: {minDurationLabel}
+                Hold time: {minDurationLabel}
               </span>
             </span>
           );
