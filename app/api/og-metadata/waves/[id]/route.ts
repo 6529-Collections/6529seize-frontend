@@ -36,7 +36,7 @@ const fetchWaveMetadata = async (id: string): Promise<ApiOgMetadata> => {
 };
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { readonly params: Promise<{ readonly id?: string }> }
 ) {
   const { id } = await params;
@@ -58,7 +58,7 @@ export async function GET(
         wave: metadata.wave,
         author: metadata.author,
         id: normalizedId,
-        origin: new URL(request.url).origin,
+        origin: publicEnv.BASE_ENDPOINT,
       }),
       {
         ...OG_IMAGE_SIZE,
