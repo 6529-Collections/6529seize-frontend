@@ -145,6 +145,64 @@ const truncateWordToLine = ({
   return appendEllipsis({ value: truncated, fontSize, wrapWidth });
 };
 
+const hasReachedMaxLines = (
+  lines: readonly string[],
+  maxLines: number | undefined
+): boolean => maxLines !== undefined && lines.length === maxLines;
+
+const addOverflowingWord = ({
+  lines,
+  currentLine,
+  word,
+  fontSize,
+  wrapWidth,
+  ellipsize,
+}: {
+  readonly lines: string[];
+  readonly currentLine: string;
+  readonly word: string;
+  readonly fontSize: number;
+  readonly wrapWidth: number;
+  readonly ellipsize: boolean;
+}): string => {
+  if (currentLine) {
+    lines.push(currentLine);
+    return word;
+  }
+
+  if (!ellipsize) {
+    return word;
+  }
+
+  lines.push(truncateWordToLine({ word, fontSize, wrapWidth }));
+  return "";
+};
+
+const addTrailingEllipsis = ({
+  lines,
+  fontSize,
+  wrapWidth,
+}: {
+  readonly lines: string[];
+  readonly fontSize: number;
+  readonly wrapWidth: number;
+}): void => {
+  const lastLine = lines.at(-1);
+  if (!lastLine) {
+    return;
+  }
+
+  lines.splice(
+    lines.length - 1,
+    1,
+    appendEllipsis({
+      value: lastLine,
+      fontSize,
+      wrapWidth,
+    })
+  );
+};
+
 export const getWrappedTextLines = ({
   value,
   fontSize,
@@ -173,17 +231,18 @@ export const getWrappedTextLines = ({
       continue;
     }
 
-    if (currentLine) {
-      lines.push(currentLine);
-    } else if (ellipsize) {
-      lines.push(truncateWordToLine({ word, fontSize, wrapWidth }));
-    }
+    currentLine = addOverflowingWord({
+      lines,
+      currentLine,
+      word,
+      fontSize,
+      wrapWidth,
+      ellipsize,
+    });
 
-    if (maxLines !== undefined && lines.length === maxLines) {
+    if (hasReachedMaxLines(lines, maxLines)) {
       break;
     }
-
-    currentLine = word;
   }
 
   if (currentLine && (maxLines === undefined || lines.length < maxLines)) {
@@ -192,19 +251,7 @@ export const getWrappedTextLines = ({
 
   const shouldTruncate = lines.join(" ").length < normalized.length;
   if (ellipsize && shouldTruncate && lines.length > 0) {
-    const lastLine = lines.at(-1);
-    if (lastLine) {
-      const lastLineIndex = lines.length - 1;
-      lines.splice(
-        lastLineIndex,
-        1,
-        appendEllipsis({
-          value: lastLine,
-          fontSize,
-          wrapWidth,
-        })
-      );
-    }
+    addTrailingEllipsis({ lines, fontSize, wrapWidth });
   }
 
   return lines.length > 0 ? lines : [normalized];

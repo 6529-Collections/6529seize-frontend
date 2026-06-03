@@ -38,7 +38,7 @@ const fetchProfileMetadata = async (
 };
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { readonly params: Promise<{ readonly identity?: string }> }
 ) {
   const { identity } = await params;
@@ -59,7 +59,7 @@ export async function GET(
       renderProfileOgImage({
         profile: metadata.profile,
         identity: normalizedIdentity,
-        origin: new URL(request.url).origin,
+        origin: publicEnv.BASE_ENDPOINT,
       }),
       {
         ...OG_IMAGE_SIZE,
