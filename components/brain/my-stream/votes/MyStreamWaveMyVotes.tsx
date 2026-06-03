@@ -31,7 +31,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       enabled: !isResettingVotes,
     });
-  const { isVotingControlsLocked } = useApprovalWaveStatus({
+  const { isVotingControlsLocked, winningThreshold } = useApprovalWaveStatus({
     wave,
   });
 
@@ -150,6 +150,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 isChecked={!isVotingControlsLocked && checkedDrops.has(drop.id)}
                 isResetting={isResettingVotes}
                 isVotingClosed={isVotingControlsLocked}
+                winningThreshold={winningThreshold}
                 onToggleCheck={handleToggleCheck}
               />
             ))}

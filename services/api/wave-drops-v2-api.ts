@@ -376,7 +376,8 @@ const hydrateDropV2 = async ({
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata,
     rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: topRaters,
     raters_count: voting?.voters_count ?? 0,
@@ -422,7 +423,8 @@ export const mapLeaderboardDropV2 = ({
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
     rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,

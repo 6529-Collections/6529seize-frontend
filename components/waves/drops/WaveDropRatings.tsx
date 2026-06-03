@@ -15,6 +15,7 @@ import {
 
 interface WaveDropRatingsProps {
   readonly drop: ApiDrop;
+  readonly winningThreshold?: number | null | undefined;
 }
 
 const getFallbackAvatarLabel = (label: string) => {
@@ -23,7 +24,10 @@ const getFallbackAvatarLabel = (label: string) => {
   return source.slice(0, 2).toUpperCase();
 };
 
-const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
+const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({
+  drop,
+  winningThreshold,
+}) => {
   const [activeRaterId, setActiveRaterId] = React.useState<string | null>(null);
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
@@ -31,6 +35,8 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const totalVoteClass = totalVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
   const userVoteClass = userVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" && winningThreshold > 0;
 
   return (
     <div className="tw-mt-1 tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5">
@@ -41,7 +47,14 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
           </span>
           <DropVoteProgressing
             current={drop.rating}
-            projected={drop.rating_prediction}
+            projected={
+              hasWinningThreshold
+                ? drop.realtime_rating
+                : drop.rating_prediction
+            }
+            tooltipLabel={
+              hasWinningThreshold ? "Realtime votes given" : undefined
+            }
             compact
           />
         </div>

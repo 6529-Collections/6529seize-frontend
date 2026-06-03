@@ -25,6 +25,7 @@ export class ApiCreateDropRequest {
     'wave_id': string;
     'reply_to'?: ApiReplyToDrop;
     'drop_type'?: ApiDropType;
+    'is_additional_action_promised'?: boolean;
     'mentioned_groups'?: Array<ApiDropGroupMention>;
     'title'?: string | null;
     'parts': Array<ApiCreateDropPart>;
@@ -60,6 +61,12 @@ export class ApiCreateDropRequest {
             "name": "drop_type",
             "baseName": "drop_type",
             "type": "ApiDropType",
+            "format": ""
+        },
+        {
+            "name": "is_additional_action_promised",
+            "baseName": "is_additional_action_promised",
+            "type": "boolean",
             "format": ""
         },
         {

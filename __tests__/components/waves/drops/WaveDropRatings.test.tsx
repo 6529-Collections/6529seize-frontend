@@ -46,6 +46,7 @@ jest.mock(
 const drop = {
   id: "drop-1",
   rating: 12,
+  realtime_rating: 25,
   rating_prediction: 15,
   raters_count: 2,
   top_raters: [
@@ -81,12 +82,14 @@ describe("WaveDropRatings", () => {
         name: "View voters and vote log for 2 voters",
       })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "alice • 3 Rep" })
-    ).toHaveAttribute("href", "/alice");
-    expect(
-      screen.getByRole("link", { name: "bob • 2 Rep" })
-    ).toHaveAttribute("href", "/bob");
+    expect(screen.getByRole("link", { name: "alice • 3 Rep" })).toHaveAttribute(
+      "href",
+      "/alice"
+    );
+    expect(screen.getByRole("link", { name: "bob • 2 Rep" })).toHaveAttribute(
+      "href",
+      "/bob"
+    );
   });
 
   it("does not bubble vote details clicks to the parent row", () => {
@@ -105,5 +108,12 @@ describe("WaveDropRatings", () => {
     );
 
     expect(parentClick).not.toHaveBeenCalled();
+  });
+
+  it("uses realtime vote progress for approve winner totals", () => {
+    render(<WaveDropRatings drop={drop} winningThreshold={42_000_000} />);
+
+    expect(screen.getByText("25")).toBeInTheDocument();
+    expect(screen.getByText("Realtime votes given: 25")).toBeInTheDocument();
   });
 });

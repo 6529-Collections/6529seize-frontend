@@ -96,7 +96,14 @@ export const WaveLeaderboardDropRaters: React.FC<
           )}
           <DropVoteProgressing
             current={drop.rating}
-            projected={drop.rating_prediction}
+            projected={
+              hasWinningThreshold
+                ? drop.realtime_rating
+                : drop.rating_prediction
+            }
+            tooltipLabel={
+              hasWinningThreshold ? "Realtime votes given" : undefined
+            }
             compact
           />
         </div>

@@ -17,6 +17,7 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
       data-testid="progress"
       data-current={props.current}
       data-projected={props.projected}
+      data-tooltip-label={props.tooltipLabel}
     />
   ),
 }));
@@ -26,6 +27,7 @@ describe("ParticipationDropRatingsTotalSection", () => {
     id: "d1",
     wave: { voting_credit_type: ApiWaveCreditType.Tdh },
     rating: 5,
+    realtime_rating: 15,
     rating_prediction: 10,
   };
   const theme = { text: "t", ring: "r", indicator: "i" };
@@ -49,6 +51,7 @@ describe("ParticipationDropRatingsTotalSection", () => {
     const repDrop = {
       ...drop,
       rating: 42,
+      realtime_rating: 80,
       wave: { voting_credit_type: ApiWaveCreditType.Rep },
     };
     const repRatingsData = {
@@ -71,6 +74,13 @@ describe("ParticipationDropRatingsTotalSection", () => {
     expect(screen.getByText("/")).toBeInTheDocument();
     expect(screen.getByText("100")).toBeInTheDocument();
     expect(screen.getByText("Needs 58")).toBeInTheDocument();
+    const progress = screen.getByTestId("progress");
+    expect(progress).toHaveAttribute("data-current", "42");
+    expect(progress).toHaveAttribute("data-projected", "80");
+    expect(progress).toHaveAttribute(
+      "data-tooltip-label",
+      "Realtime votes given"
+    );
   });
 
   it("shows Reached threshold before the winner state refreshes", () => {

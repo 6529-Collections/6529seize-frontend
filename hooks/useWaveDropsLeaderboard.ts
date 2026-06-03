@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo } from "react";
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
   PRICE = "PRICE",
+  REALTIME_VOTE = "REALTIME_VOTE",
   RATING_PREDICTION = "RATING_PREDICTION",
   TREND = "TREND",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
@@ -39,6 +40,7 @@ const SORT_DIRECTION_MAP: Record<
 > = {
   [WaveDropsLeaderboardSort.RANK]: undefined,
   [WaveDropsLeaderboardSort.PRICE]: undefined,
+  [WaveDropsLeaderboardSort.REALTIME_VOTE]: "DESC",
   [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
   [WaveDropsLeaderboardSort.TREND]: "DESC",
   [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,

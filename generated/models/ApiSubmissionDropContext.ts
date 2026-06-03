@@ -19,6 +19,7 @@ export class ApiSubmissionDropContext {
     'status': ApiSubmissionDropStatus;
     'voting': ApiSubmissionDropVoting;
     'has_metadata': boolean;
+    'is_additional_action_promised'?: boolean;
     /**
     * Unix timestamp in milliseconds when this active APPROVE submission most recently started continuously meeting the winning threshold. Omitted unless the drop is currently over threshold and has not yet won.
     */
@@ -44,6 +45,12 @@ export class ApiSubmissionDropContext {
         {
             "name": "has_metadata",
             "baseName": "has_metadata",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "is_additional_action_promised",
+            "baseName": "is_additional_action_promised",
             "type": "boolean",
             "format": ""
         },
