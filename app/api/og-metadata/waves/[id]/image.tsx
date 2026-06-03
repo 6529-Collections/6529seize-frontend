@@ -69,10 +69,7 @@ const getInitials = (displayName: string): string =>
 const formatNumber = (value: number | null | undefined): string =>
   formatInteger(value) ?? "0";
 
-const getTitleLines = (
-  value: string,
-  wrapWidth: number
-): readonly string[] =>
+const getTitleLines = (value: string, wrapWidth: number): readonly string[] =>
   getWrappedTextLines({
     value,
     fontSize: TITLE_FONT_SIZE,
@@ -102,7 +99,9 @@ const getDescriptionTop = ({
   const titleBottom =
     TITLE_TOP + titleLineCount * TITLE_FONT_SIZE * TITLE_LINE_HEIGHT;
   const descriptionHeight =
-    descriptionLineCount * WAVE_DESCRIPTION_FONT_SIZE * WAVE_DESCRIPTION_LINE_HEIGHT;
+    descriptionLineCount *
+    WAVE_DESCRIPTION_FONT_SIZE *
+    WAVE_DESCRIPTION_LINE_HEIGHT;
   const availableSpace = CREATOR_ROW_TOP - titleBottom;
 
   return titleBottom + Math.max(0, (availableSpace - descriptionHeight) / 2);
@@ -124,7 +123,8 @@ const WaveStatIcon = ({ type }: { readonly type: "drops" | "subscribers" }) => (
       width: 28,
     }}
     viewBox="0 0 24 24"
-    width={28}>
+    width={28}
+  >
     <path
       d={HEROICON_PATHS[type]}
       fill="none"
@@ -185,7 +185,8 @@ export const renderWaveOgImage = ({
         overflow: "hidden",
         position: "relative",
         width: CANVAS_WIDTH,
-      }}>
+      }}
+    >
       {waveMediaUrl ? (
         <div
           style={{
@@ -199,7 +200,8 @@ export const renderWaveOgImage = ({
             position: "absolute",
             top: 0,
             width: LEFT_MEDIA_WIDTH,
-          }}>
+          }}
+        >
           <img
             alt=""
             height={LEFT_MEDIA_CONTENT_HEIGHT}
@@ -221,7 +223,8 @@ export const renderWaveOgImage = ({
           position: "absolute",
           right: HORIZONTAL_MARGIN,
           width: LOGO_SIZE,
-        }}>
+        }}
+      >
         <img
           alt=""
           height={LOGO_SIZE}
@@ -249,14 +252,16 @@ export const renderWaveOgImage = ({
           overflow: "hidden",
           position: "absolute",
           top: TITLE_TOP,
-        }}>
+        }}
+      >
         {titleLines.map((line) => (
           <div
             key={line}
             style={{
               display: "flex",
               whiteSpace: "nowrap",
-            }}>
+            }}
+          >
             {line}
           </div>
         ))}
@@ -277,7 +282,8 @@ export const renderWaveOgImage = ({
             descriptionLineCount: descriptionLines.length,
           }),
           width: contentWidth,
-        }}>
+        }}
+      >
         {descriptionLines.map((line) => (
           <div
             key={line}
@@ -286,7 +292,8 @@ export const renderWaveOgImage = ({
               overflow: "hidden",
               whiteSpace: "nowrap",
               width: contentWidth,
-            }}>
+            }}
+          >
             {line}
           </div>
         ))}
@@ -300,7 +307,8 @@ export const renderWaveOgImage = ({
           position: "absolute",
           top: CREATOR_ROW_TOP,
           width: contentWidth,
-        }}>
+        }}
+      >
         <div
           style={{
             color: "#93939F",
@@ -308,7 +316,8 @@ export const renderWaveOgImage = ({
             fontSize: 28,
             fontWeight: 500,
             lineHeight: 1,
-          }}>
+          }}
+        >
           by
         </div>
         <div
@@ -323,7 +332,8 @@ export const renderWaveOgImage = ({
             overflow: "hidden",
             padding: 3,
             width: CREATOR_AVATAR_SIZE,
-          }}>
+          }}
+        >
           {authorAvatarUrl ? (
             <img
               alt=""
@@ -349,7 +359,8 @@ export const renderWaveOgImage = ({
                 height: CREATOR_AVATAR_INNER_SIZE,
                 justifyContent: "center",
                 width: CREATOR_AVATAR_INNER_SIZE,
-              }}>
+              }}
+            >
               {getInitials(authorName)}
             </div>
           )}
@@ -363,7 +374,8 @@ export const renderWaveOgImage = ({
             lineHeight: 1.15,
             maxWidth: 250,
             overflow: "hidden",
-        }}>
+          }}
+        >
           {truncateText(authorName, 16)}
         </div>
         <div
@@ -371,7 +383,8 @@ export const renderWaveOgImage = ({
             alignItems: "center",
             display: "flex",
             gap: 10,
-          }}>
+          }}
+        >
           <CicBadge
             cic={author?.cic ?? 0}
             fontSize={27}
@@ -403,7 +416,8 @@ export const renderWaveOgImage = ({
           left: contentLeft,
           position: "absolute",
           top: STATS_ROW_TOP,
-        }}>
+        }}
+      >
         <div
           style={{
             alignItems: "center",
@@ -412,7 +426,8 @@ export const renderWaveOgImage = ({
             fontSize: 30,
             fontWeight: 500,
             gap: 12,
-          }}>
+          }}
+        >
           <WaveStatIcon type="drops" />
           <span>{formatNumber(dropsCount)}</span>
           <span style={{ color: "#93939F" }}>
@@ -427,7 +442,8 @@ export const renderWaveOgImage = ({
             fontSize: 30,
             fontWeight: 500,
             gap: 12,
-          }}>
+          }}
+        >
           <WaveStatIcon type="subscribers" />
           <span>{formatNumber(subscribersCount)}</span>
           <span style={{ color: "#93939F" }}>

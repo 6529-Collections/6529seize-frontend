@@ -85,8 +85,7 @@ export const getEstimatedTextWidth = (
   fontSize: number
 ): number =>
   [...value].reduce(
-    (width, character) =>
-      width + getCharacterWidthFactor(character) * fontSize,
+    (width, character) => width + getCharacterWidthFactor(character) * fontSize,
     0
   );
 
@@ -180,9 +179,7 @@ export const getWrappedTextLines = ({
     if (currentLine) {
       lines.push(currentLine);
     } else if (ellipsize) {
-      lines.push(
-        truncateWordToLine({ word, fontSize, wrapWidth })
-      );
+      lines.push(truncateWordToLine({ word, fontSize, wrapWidth }));
     }
 
     if (maxLines !== undefined && lines.length === maxLines) {

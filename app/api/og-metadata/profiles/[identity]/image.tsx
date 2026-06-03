@@ -62,9 +62,7 @@ type ProfileWithOptionalRates = ApiOgMetadataProfile & {
 
 const getSafeColor = (value: string | null | undefined): string | null => {
   const normalized = getUsableText(value);
-  return normalized && HEX_COLOR_PATTERN.test(normalized)
-    ? normalized
-    : null;
+  return normalized && HEX_COLOR_PATTERN.test(normalized) ? normalized : null;
 };
 
 const formatSignedNumber = (
@@ -201,8 +199,7 @@ export const renderProfileOgImage = ({
   });
   const primaryColor = getSafeColor(profile?.banner?.primary);
   const secondaryColor = getSafeColor(profile?.banner?.secondary);
-  const hasBothBannerColors =
-    primaryColor !== null && secondaryColor !== null;
+  const hasBothBannerColors = primaryColor !== null && secondaryColor !== null;
   const resolvedPrimaryColor =
     primaryColor ?? secondaryColor ?? FALLBACK_PRIMARY_COLOR;
   const resolvedSecondaryColor =
@@ -236,7 +233,8 @@ export const renderProfileOgImage = ({
         overflow: "hidden",
         position: "relative",
         width: CANVAS_WIDTH,
-      }}>
+      }}
+    >
       <div
         style={{
           background: bannerBackground,
@@ -247,7 +245,8 @@ export const renderProfileOgImage = ({
           position: "absolute",
           top: 0,
           width: CANVAS_WIDTH,
-        }}>
+        }}
+      >
         {bannerImageUrl ? (
           <img
             alt=""
@@ -270,7 +269,8 @@ export const renderProfileOgImage = ({
           right: HORIZONTAL_MARGIN,
           top: HORIZONTAL_MARGIN,
           width: LOGO_SIZE,
-        }}>
+        }}
+      >
         <img
           alt=""
           height={LOGO_SIZE}
@@ -309,7 +309,8 @@ export const renderProfileOgImage = ({
             position: "absolute",
             top: PFP_TOP,
             width: PFP_SIZE,
-          }}>
+          }}
+        >
           <img
             alt=""
             height={PFP_INNER_SIZE}
@@ -335,14 +336,16 @@ export const renderProfileOgImage = ({
           position: "absolute",
           top: 196,
           width: profileTextWidth,
-        }}>
+        }}
+      >
         <div
           style={{
             alignItems: "center",
             display: "flex",
             gap: 18,
             width: profileTextWidth,
-          }}>
+          }}
+        >
           <div
             style={{
               color: "#ffffff",
@@ -352,7 +355,8 @@ export const renderProfileOgImage = ({
               lineHeight: 1.15,
               maxWidth: profileTextWidth - 210,
               overflow: "hidden",
-            }}>
+            }}
+          >
             {truncateText(displayName, 18)}
           </div>
           <CicBadge
@@ -385,7 +389,8 @@ export const renderProfileOgImage = ({
             overflow: "hidden",
             whiteSpace: "nowrap",
             width: profileTextWidth,
-          }}>
+          }}
+        >
           <span>{classificationLabel}</span>
           {profileEnabledLabel ? <span>·</span> : null}
           {profileEnabledLabel ? (
@@ -406,7 +411,8 @@ export const renderProfileOgImage = ({
           position: "absolute",
           top: descriptionTop,
           width: CANVAS_WIDTH - HORIZONTAL_MARGIN * 2,
-        }}>
+        }}
+      >
         {descriptionLines.map((line) => (
           <div
             key={line}
@@ -415,7 +421,8 @@ export const renderProfileOgImage = ({
               overflow: "hidden",
               whiteSpace: "nowrap",
               width: CANVAS_WIDTH - HORIZONTAL_MARGIN * 2,
-            }}>
+            }}
+          >
             {line}
           </div>
         ))}
@@ -429,7 +436,8 @@ export const renderProfileOgImage = ({
           position: "absolute",
           top: STATS_TOP,
           width: CANVAS_WIDTH - HORIZONTAL_MARGIN * 2,
-        }}>
+        }}
+      >
         {stats.map((stat) => (
           <div
             key={stat.label}
@@ -437,14 +445,16 @@ export const renderProfileOgImage = ({
               alignItems: "baseline",
               display: "flex",
               gap: 8,
-            }}>
+            }}
+          >
             <span
               style={{
                 color: "#CECFD4",
                 fontSize: 38,
                 fontWeight: 600,
                 letterSpacing: 0,
-              }}>
+              }}
+            >
               {stat.value}
             </span>
             <span
@@ -453,7 +463,8 @@ export const renderProfileOgImage = ({
                 fontSize: 38,
                 fontWeight: 500,
                 letterSpacing: 0,
-              }}>
+              }}
+            >
               {stat.label}
             </span>
             {stat.rate ? (
@@ -463,7 +474,8 @@ export const renderProfileOgImage = ({
                   fontSize: 28,
                   fontWeight: 600,
                   letterSpacing: 0,
-                }}>
+                }}
+              >
                 {stat.rate}
               </span>
             ) : null}

@@ -160,7 +160,8 @@ export const CicBadge = ({
         justifyContent: "center",
         lineHeight: 1,
         width: size,
-      }}>
+      }}
+    >
       {showGlasses ? (
         <svg
           height={glassesSize}
@@ -170,7 +171,8 @@ export const CicBadge = ({
             width: glassesSize,
           }}
           viewBox="0 0 183 183"
-          width={glassesSize}>
+          width={glassesSize}
+        >
           <path d={CIC_GLASSES_FRAME_PATH} fill={badge.color} />
           <path d={CIC_GLASSES_LEFT_EYE_PATH} fill={badge.background} />
           <path d={CIC_GLASSES_RIGHT_EYE_PATH} fill={badge.background} />
@@ -208,7 +210,8 @@ export const LevelBadge = ({
         justifyContent: "center",
         lineHeight: 1,
         width: size,
-      }}>
+      }}
+    >
       {level}
     </div>
   );
@@ -240,7 +243,8 @@ export const ArtistActivityBadge = ({
         height: size,
         justifyContent: "center",
         width: size,
-      }}>
+      }}
+    >
       <svg
         height={iconSize}
         style={{
@@ -249,7 +253,8 @@ export const ArtistActivityBadge = ({
           width: iconSize,
         }}
         viewBox={config.viewBox}
-        width={iconSize}>
+        width={iconSize}
+      >
         <path d={config.iconPath} fill={config.color} />
       </svg>
     </div>
