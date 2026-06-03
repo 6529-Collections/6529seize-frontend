@@ -14,6 +14,7 @@ import type {
   AllowlistTransferPool,
 } from "../allowlist-tool/allowlist-tool.types";
 import RunOperations from "./run-operations/RunOperations";
+import { getToastAutoClose } from "@/helpers/toast.helpers";
 import {
   distributionPlanApiFetch,
   distributionPlanApiPost,
@@ -66,7 +67,7 @@ const setToast = ({
 }) => {
   toast(message, {
     position: "top-right",
-    autoClose: 3000,
+    autoClose: getToastAutoClose(type),
     hideProgressBar: false,
     draggable: false,
     closeOnClick: true,
