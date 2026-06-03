@@ -271,9 +271,10 @@ describe("WaveApprovalStatusBar", () => {
 
     expect(
       screen.getByText(
-        "No hold time is required once the credit needed is reached."
+        "This wave uses TDH + XTDH credit. A drop is approved as soon as it reaches 10 TDH + XTDH credit."
       )
     ).toBeInTheDocument();
+    expect(screen.queryByText(/for Immediate/)).not.toBeInTheDocument();
   });
 
   it("opens and closes approval rules in a mobile bottom sheet", () => {

@@ -2,7 +2,13 @@
 
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { type FC, useEffect, useMemo, useState } from "react";
+import {
+  type FC,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -82,6 +88,9 @@ const approvalStatusErrorMessage =
 const approvalCountErrorMessage = "Unable to load approved count.";
 const APPROVAL_RULES_TITLE = "Approval rules";
 const FALLBACK_CREDIT_LABEL = "credit";
+const subscribeToClientRender = () => () => {};
+const getClientRenderSnapshot = () => true;
+const getServerRenderSnapshot = () => false;
 
 interface ApprovalStatusItemProps {
   readonly label: string;
@@ -107,6 +116,7 @@ const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
 interface ApprovalRulesHelpProps {
   readonly creditNoun: string;
   readonly holdTimeLabel: string;
+  readonly requiresHoldTime: boolean;
   readonly thresholdIsSet: boolean;
   readonly thresholdLabel: string;
 }
@@ -114,6 +124,7 @@ interface ApprovalRulesHelpProps {
 const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
   creditNoun,
   holdTimeLabel,
+  requiresHoldTime,
   thresholdIsSet,
   thresholdLabel,
 }) => (
@@ -121,17 +132,21 @@ const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
     <div className="tw-space-y-2">
       {thresholdIsSet ? (
         <p className="tw-mb-0">
-          This wave uses {creditNoun}. A drop is approved when it reaches{" "}
-          {thresholdLabel} {creditNoun} and keeps at least that much credit for{" "}
-          {holdTimeLabel}.
+          This wave uses {creditNoun}.{" "}
+          {requiresHoldTime ? (
+            <>
+              A drop is approved when it reaches {thresholdLabel} {creditNoun}{" "}
+              and keeps at least that much credit for {holdTimeLabel}.
+            </>
+          ) : (
+            <>
+              A drop is approved as soon as it reaches {thresholdLabel}{" "}
+              {creditNoun}.
+            </>
+          )}
         </p>
       ) : (
         <p className="tw-mb-0">This wave has no credit threshold set yet.</p>
-      )}
-      {thresholdIsSet && holdTimeLabel === "Immediate" && (
-        <p className="tw-mb-0">
-          No hold time is required once the credit needed is reached.
-        </p>
       )}
     </div>
 
@@ -198,6 +213,11 @@ export default function WaveApprovalStatusBar({
   wave,
 }: WaveApprovalStatusBarProps) {
   const { hasTouchScreen } = useDeviceInfo();
+  const isClientHydrated = useSyncExternalStore(
+    subscribeToClientRender,
+    getClientRenderSnapshot,
+    getServerRenderSnapshot
+  );
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const winningThreshold = wave.wave.winning_threshold;
   const winningThresholdMinDuration =
@@ -233,6 +253,10 @@ export default function WaveApprovalStatusBar({
   const thresholdMinDurationLabel = formatWinningThresholdMinDuration(
     winningThresholdMinDuration
   );
+  const requiresHoldTime =
+    typeof winningThresholdMinDuration === "number" &&
+    Number.isFinite(winningThresholdMinDuration) &&
+    winningThresholdMinDuration > 0;
   const creditLabel =
     WAVE_VOTING_LABELS[wave.voting.credit_type] ?? FALLBACK_CREDIT_LABEL;
   const creditNoun =
@@ -305,11 +329,13 @@ export default function WaveApprovalStatusBar({
     <ApprovalRulesHelp
       creditNoun={creditNoun}
       holdTimeLabel={thresholdMinDurationLabel}
+      requiresHoldTime={requiresHoldTime}
       thresholdIsSet={thresholdIsSet}
       thresholdLabel={thresholdLabel}
     />
   );
-  const approvalRulesButton = hasTouchScreen ? (
+  const useMobileHelp = isClientHydrated && hasTouchScreen;
+  const approvalRulesButton = useMobileHelp ? (
     <ApprovalRulesButton onClick={() => setIsHelpOpen(true)} />
   ) : (
     <HoverCard
@@ -367,7 +393,7 @@ export default function WaveApprovalStatusBar({
       <div className="tw-flex tw-shrink-0 tw-items-center">
         {approvalRulesButton}
       </div>
-      {hasTouchScreen && (
+      {useMobileHelp && (
         <MobileWrapperDialog
           isOpen={isHelpOpen}
           onClose={() => setIsHelpOpen(false)}
