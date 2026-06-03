@@ -1,11 +1,12 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropContent from "@/components/waves/CreateDropContent";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 
 const mockViewerSelection = {
   value: "0xviewer",
@@ -27,6 +28,7 @@ const mockRequestAuth = jest.fn(async () => ({ success: true }));
 const mockUploadFile = new File(["upload"], "duplicate.pdf", {
   type: "application/pdf",
 });
+let resizeObserverCallback: ResizeObserverCallback | null = null;
 
 jest.mock("next/dynamic", () => () => () => null);
 
@@ -146,6 +148,9 @@ jest.mock("@/components/waves/drops/normalizeDropMarkdown", () => ({
     editorState?.__markdown ?? ""
   ),
 }));
+const mockExportDropMarkdown = exportDropMarkdown as jest.MockedFunction<
+  typeof exportDropMarkdown
+>;
 jest.mock(
   "@/components/drops/create/lexical/utils/groupMentionDetection",
   () => ({
@@ -285,11 +290,17 @@ describe("CreateDropContent identity picker flow", () => {
     jest.clearAllMocks();
     mockSetToast.mockClear();
     mockRequestAuth.mockClear();
-    (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: jest.fn(),
-    }));
+    resizeObserverCallback = null;
+    (global as any).ResizeObserver = jest
+      .fn()
+      .mockImplementation((callback: ResizeObserverCallback) => {
+        resizeObserverCallback = callback;
+        return {
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        };
+      });
   });
 
   it("skips duplicate file uploads", async () => {
@@ -371,6 +382,23 @@ describe("CreateDropContent identity picker flow", () => {
       left: 0,
       toJSON: () => ({}),
     } as DOMRect);
+
+  const emitComposerResize = (width: number) => {
+    if (!resizeObserverCallback) {
+      throw new Error("ResizeObserver callback was not registered.");
+    }
+
+    act(() => {
+      resizeObserverCallback?.(
+        [
+          {
+            contentRect: { width } as DOMRectReadOnly,
+          } as ResizeObserverEntry,
+        ],
+        {} as ResizeObserver
+      );
+    });
+  };
 
   const renderSubject = ({
     isDropMode = true,
@@ -636,6 +664,7 @@ describe("CreateDropContent identity picker flow", () => {
         "data-show-options",
         "true"
       );
+      expect(mockExportDropMarkdown).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByText("type content"));
 
@@ -649,6 +678,7 @@ describe("CreateDropContent identity picker flow", () => {
           "true"
         );
       });
+      expect(mockExportDropMarkdown).toHaveBeenCalledTimes(1);
     } finally {
       rectSpy.mockRestore();
     }
@@ -681,6 +711,109 @@ describe("CreateDropContent identity picker flow", () => {
       );
 
       await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("keeps reopened wide options open after resizing narrow on empty editor changes", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      emitComposerResize(499);
+
+      await userEvent.click(screen.getByText("emit empty content"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("collapses reopened wide options after resizing narrow on content changes", async () => {
+    const rectSpy = mockComposerWidth(501);
+
+    try {
+      renderSubject();
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      emitComposerResize(499);
+
+      await userEvent.click(screen.getByText("type content"));
+
+      await waitFor(() => {
+        expect(screen.getByTestId("actions")).toHaveAttribute(
+          "data-show-options",
+          "false"
+        );
+      });
+    } finally {
+      rectSpy.mockRestore();
+    }
+  });
+
+  it("collapses narrow composer options on empty editor changes after opening options", async () => {
+    const rectSpy = mockComposerWidth(499);
+
+    try {
+      renderSubject();
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "false"
+      );
+
+      await userEvent.click(screen.getByText("open options"));
+
+      expect(screen.getByTestId("actions")).toHaveAttribute(
+        "data-show-options",
+        "true"
+      );
+
+      await userEvent.click(screen.getByText("emit empty content"));
 
       await waitFor(() => {
         expect(screen.getByTestId("actions")).toHaveAttribute(

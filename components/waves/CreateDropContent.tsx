@@ -565,6 +565,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [identityPickerErrorMessageState, setIdentityPickerErrorMessageState] =
     useState<ScopedValueState<string | null> | null>(null);
   const closeOnNextInputRef = useRef(false);
+  const shouldCollapseOptionsAfterMarkdownSyncRef = useRef(false);
   const prevIsDropModeRef = useRef(isDropMode);
   const [dropModeSessionEpoch, setDropModeSessionEpoch] = useState(0);
   const isWaveChanged = prevWaveIdRef.current !== wave.id;
@@ -572,6 +573,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     prevWaveIdRef.current = wave.id;
     shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
   }
   const dropModeSessionScopeKey = `${wave.id}:drop-mode:${dropModeSessionEpoch}`;
   const showOptions =
@@ -718,6 +720,28 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         : null,
     [canMentionAll, editorState]
   );
+  const collapseOptions = useCallback(() => {
+    shouldAnimateOptionsRef.current = true;
+    setShowOptionsState((current) =>
+      current?.scopeKey === wave.id && current.value === false
+        ? current
+        : { scopeKey: wave.id, value: false }
+    );
+    closeOnNextInputRef.current = false;
+  }, [wave.id]);
+  useLayoutEffect(() => {
+    if (!shouldCollapseOptionsAfterMarkdownSyncRef.current) {
+      return;
+    }
+
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
+
+    if ((getMarkdown?.trim().length ?? 0) === 0) {
+      return;
+    }
+
+    collapseOptions();
+  }, [collapseOptions, getMarkdown]);
   const currentPartMentionedGroups = useMemo(
     () =>
       editorState
@@ -1088,6 +1112,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const updateDropStateAndClearInput = (newDrop: CreateDropConfig) => {
     setDrop(newDrop);
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     createDropInputRef.current?.clearEditorState();
     setFiles([]);
   };
@@ -1149,6 +1174,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setShowOptionsState(null);
     shouldAnimateOptionsRef.current = false;
     closeOnNextInputRef.current = false;
+    shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
@@ -1331,7 +1357,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           0
         );
       }
-      !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
+      if (getMarkdown?.length) {
+        shouldCollapseOptionsAfterMarkdownSyncRef.current = false;
+        createDropInputRef.current?.clearEditorState();
+      }
       if (shouldKeepChatFocused) {
         shouldRefocusAfterChatSubmitRef.current = true;
       } else if (document.activeElement instanceof HTMLElement) {
@@ -1579,38 +1608,29 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     (next: boolean) => {
       shouldAnimateOptionsRef.current = true;
       setShowOptionsState({ scopeKey: wave.id, value: next });
+      if (isWideContainer) {
+        closeOnNextInputRef.current = false;
+        return;
+      }
       closeOnNextInputRef.current = next;
     },
-    [wave.id]
+    [isWideContainer, wave.id]
   );
 
   const handleEditorStateChange = useCallback(
     (newEditorState: EditorState) => {
       setEditorState(newEditorState);
-      const markdown = exportDropMarkdown(newEditorState, [
-        ...SAFE_MARKDOWN_TRANSFORMERS,
-        MENTION_TRANSFORMER,
-        ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-        HASHTAG_TRANSFORMER,
-        WAVE_MENTION_TRANSFORMER,
-        IMAGE_TRANSFORMER,
-        EMOJI_TRANSFORMER,
-      ]);
-      const shouldCollapseOptions =
-        markdown.trim().length > 0 ||
-        (!isWideContainer && closeOnNextInputRef.current);
+      shouldCollapseOptionsAfterMarkdownSyncRef.current = true;
 
-      if (shouldCollapseOptions) {
-        shouldAnimateOptionsRef.current = true;
-        setShowOptionsState((current) =>
-          current?.scopeKey === wave.id && current.value === false
-            ? current
-            : { scopeKey: wave.id, value: false }
-        );
-        closeOnNextInputRef.current = false;
+      if (isWideContainer) {
+        return;
+      }
+
+      if (closeOnNextInputRef.current) {
+        collapseOptions();
       }
     },
-    [canMentionAll, isWideContainer, wave.id]
+    [collapseOptions, isWideContainer]
   );
 
   const handleEditorBlur = useCallback(
