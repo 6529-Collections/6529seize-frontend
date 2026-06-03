@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import {
-  normalizeDropVoteLogTimestampMs,
   ParticipationDropVoteDetailsLogRow,
   ParticipationDropVoteDetailsVoterRow,
 } from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsRows";
@@ -75,12 +74,5 @@ describe("ParticipationDropVoteDetailsRows", () => {
 
     expect(screen.getByText("voted")).toBeInTheDocument();
     expect(screen.getByText("+10 TDH")).toBeInTheDocument();
-  });
-
-  it("normalizes epoch seconds and milliseconds", () => {
-    expect(normalizeDropVoteLogTimestampMs(1_000)).toBe(1_000_000);
-    expect(normalizeDropVoteLogTimestampMs(1_700_000_000_000)).toBe(
-      1_700_000_000_000
-    );
   });
 });

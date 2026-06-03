@@ -93,9 +93,7 @@ describe("Helpers utility functions", () => {
       ogImageWidth: 1200,
       twitterCard: "summary_large_image",
     });
-    expect(metadata.ogImage).toContain(
-      "/api/og-metadata/profiles/phoebeum"
-    );
+    expect(metadata.ogImage).toContain("/api/og-metadata/profiles/phoebeum");
   });
 
   test("getMetadataForUserPage appends formatted path to title", () => {

@@ -54,7 +54,6 @@ function DummySubscriptionsTab({ profile }: { readonly profile: any }) {
 const buildFactory = () =>
   createUserTabPage({
     subroute: "subscriptions",
-    metaLabel: "Subscriptions",
     Tab: DummySubscriptionsTab,
   });
 

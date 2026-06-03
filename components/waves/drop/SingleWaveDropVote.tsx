@@ -5,7 +5,7 @@ import {
   SingleWaveDropVoteSubmissionMode,
 } from "./SingleWaveDropVote.types";
 
-export { SingleWaveDropVoteSize, SingleWaveDropVoteSubmissionMode };
+export { SingleWaveDropVoteSize };
 
 interface SingleWaveDropVoteProps {
   readonly drop: ApiDrop;

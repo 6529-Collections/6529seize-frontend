@@ -99,7 +99,6 @@ export function createUserTabPage<
   getTabProps,
 }: {
   subroute: string;
-  metaLabel: string;
   Tab: (props: Readonly<TabProps & TExtra>) => React.JSX.Element;
   enableTransfer?: boolean | undefined;
   getTabProps?: (ctx: {
