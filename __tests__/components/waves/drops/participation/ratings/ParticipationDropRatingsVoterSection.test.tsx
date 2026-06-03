@@ -26,7 +26,9 @@ describe('ParticipationDropRatingsVoterSection', () => {
     expect(screen.getByText('6')).toBeInTheDocument();
     expect(screen.getByText('voters')).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Open votes from 6 voters" })
+      screen.getByRole("button", {
+        name: "View voters and vote log for 6 voters",
+      })
     ).toBeInTheDocument();
   });
 });

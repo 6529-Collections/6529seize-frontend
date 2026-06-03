@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -294,11 +295,11 @@ export default function ParticipationDropVoteDetailsTrigger({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        aria-label={`Open votes from ${formatNumberWithCommas(
+        aria-label={`View voters and vote log for ${formatNumberWithCommas(
           drop.raters_count
         )} ${drop.raters_count === 1 ? "voter" : "voters"}`}
         onClick={toggleDetails}
-        className="tw-inline-flex tw-items-center tw-gap-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-leading-5 tw-transition-colors tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-200"
+        className="tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-px-2 tw-py-1 tw-text-sm tw-leading-5 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100"
       >
         <span className="tw-font-medium tw-text-iron-50">
           {formatNumberWithCommas(drop.raters_count)}
@@ -306,6 +307,12 @@ export default function ParticipationDropVoteDetailsTrigger({
         <span className="tw-font-normal tw-text-iron-400">
           {drop.raters_count === 1 ? "voter" : "voters"}
         </span>
+        <ChevronDownIcon
+          aria-hidden="true"
+          className={`tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
+            isOpen ? "tw-rotate-180" : ""
+          }`}
+        />
       </button>
       {mobileSurface}
       {desktopSurface}

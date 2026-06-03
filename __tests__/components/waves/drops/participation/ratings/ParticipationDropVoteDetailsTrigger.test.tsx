@@ -96,6 +96,8 @@ const voter = {
   vote: 100,
 };
 
+const triggerButtonName = "View voters and vote log for 21 voters";
+
 describe("ParticipationDropVoteDetailsTrigger", () => {
   let restoreResizeObserver: (() => void) | null = null;
 
@@ -128,6 +130,30 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     restoreResizeObserver = null;
   });
 
+  it("renders the vote details trigger as an openable chip", async () => {
+    const user = userEvent.setup();
+
+    render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
+
+    const trigger = screen.getByRole("button", {
+      name: triggerButtonName,
+    });
+
+    expect(trigger).toHaveTextContent("21 voters");
+    expect(trigger).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40"
+    );
+    expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(trigger);
+
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("opens a desktop popover and stops parent click propagation", async () => {
     const user = userEvent.setup();
     const parentClick = jest.fn();
@@ -139,7 +165,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     );
 
     await user.click(
-      screen.getByRole("button", { name: "Open votes from 21 voters" })
+      screen.getByRole("button", { name: triggerButtonName })
     );
 
     expect(parentClick).not.toHaveBeenCalled();
@@ -163,7 +189,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     const trigger = screen.getByRole("button", {
-      name: "Open votes from 21 voters",
+      name: triggerButtonName,
     });
     trigger.focus();
     await user.click(trigger);
@@ -179,7 +205,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     await user.click(
-      screen.getByRole("button", { name: "Open votes from 21 voters" })
+      screen.getByRole("button", { name: triggerButtonName })
     );
     const dialog = await screen.findByRole("dialog", { name: "Votes" });
     await waitFor(() => expect(dialog).toHaveFocus());
@@ -198,7 +224,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     const trigger = screen.getByRole("button", {
-      name: "Open votes from 21 voters",
+      name: triggerButtonName,
     });
     trigger.focus();
     await user.click(trigger);
@@ -223,7 +249,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     const trigger = screen.getByRole("button", {
-      name: "Open votes from 21 voters",
+      name: triggerButtonName,
     });
     trigger.getBoundingClientRect = jest.fn(() => ({
       bottom: 500,
@@ -267,7 +293,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     await user.click(
-      screen.getByRole("button", { name: "Open votes from 21 voters" })
+      screen.getByRole("button", { name: triggerButtonName })
     );
 
     expect(screen.getByTestId("mobile-sheet")).toBeInTheDocument();
@@ -280,7 +306,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     await user.click(
-      screen.getByRole("button", { name: "Open votes from 21 voters" })
+      screen.getByRole("button", { name: triggerButtonName })
     );
     expect(mockUseDropVoteLogs).toHaveBeenLastCalledWith({
       dropId: "drop-1",
@@ -311,7 +337,7 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
     render(<ParticipationDropVoteDetailsTrigger drop={drop} />);
 
     await user.click(
-      screen.getByRole("button", { name: "Open votes from 21 voters" })
+      screen.getByRole("button", { name: triggerButtonName })
     );
 
     expect(screen.getByText("Could not load voters.")).toBeInTheDocument();
