@@ -897,7 +897,7 @@ export const removeBaseEndpoint = (link: string) => {
 
 const formatUserPageMetadataPath = (path: string): string | null => {
   const words = path
-    .split(/[\/_-]+/)
+    .split(/[/_-]+/)
     .map((word) => word.trim())
     .filter(Boolean);
 

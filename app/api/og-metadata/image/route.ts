@@ -65,13 +65,22 @@ const parseWidth = (value: string | null): number => {
 
 const ensureDefaultHttpsPort = (url: URL): void => {
   if (url.protocol !== "https:") {
-    throw new UrlGuardError("Only HTTPS image URLs are supported.", "unsupported-protocol");
+    throw new UrlGuardError(
+      "Only HTTPS image URLs are supported.",
+      "unsupported-protocol"
+    );
   }
 
   if (url.port && url.port !== "443") {
-    throw new UrlGuardError("Only default HTTPS image ports are supported.", "host-not-allowed");
+    throw new UrlGuardError(
+      "Only default HTTPS image ports are supported.",
+      "host-not-allowed"
+    );
   }
 };
+
+const jsonError = (error: string, status: number): NextResponse =>
+  NextResponse.json({ error }, { status });
 
 const mapErrorToResponse = (error: unknown): NextResponse => {
   if (error instanceof UrlGuardError) {
@@ -79,19 +88,19 @@ const mapErrorToResponse = (error: unknown): NextResponse => {
       case "missing-url":
       case "invalid-url":
       case "unsupported-protocol":
-        return NextResponse.json({ error: "Invalid image url" }, { status: 400 });
+        return jsonError("Invalid image url", 400);
       case "host-not-allowed":
       case "dns-lookup-failed":
       case "ip-not-allowed":
-        return NextResponse.json({ error: "Unsupported image host" }, { status: 400 });
+        return jsonError("Unsupported image host", 400);
       case "timeout":
-        return NextResponse.json({ error: "Upstream timeout" }, { status: 504 });
+        return jsonError("Upstream timeout", 504);
       default:
-        return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
+        return jsonError("Failed to fetch image", 502);
     }
   }
 
-  return NextResponse.json({ error: "Failed to normalize image" }, { status: 502 });
+  return jsonError("Failed to normalize image", 502);
 };
 
 const fetchImageBuffer = async (url: URL): Promise<Buffer> => {

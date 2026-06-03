@@ -63,7 +63,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
       status: init?.status ?? 200,
       json: async () => body,
     }));
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
   });
 
   it("fetches profile metadata from the backend and returns an image response", async () => {
@@ -88,7 +88,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
         },
       },
     };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => metadata,
     });
@@ -102,7 +102,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
       }
     );
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test/api/og-metadata/profiles/alice%206529",
       { next: { revalidate: 86400 } }
     );
@@ -128,7 +128,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
       }
     );
 
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(mockImageResponse).not.toHaveBeenCalled();
     expect(mockNextResponseJson).toHaveBeenCalledWith(
       { error: "Invalid identity. Use /api/og-metadata/profiles/<identity>." },
@@ -138,7 +138,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
   });
 
   it("returns 502 when backend metadata is unavailable", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 404,
     });

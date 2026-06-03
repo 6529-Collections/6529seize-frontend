@@ -45,7 +45,7 @@ describe("/api/og-metadata/waves/[id]", () => {
       status: init?.status ?? 200,
       json: async () => body,
     }));
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
   });
 
   it("fetches wave metadata from the backend and returns an image response", async () => {
@@ -59,7 +59,7 @@ describe("/api/og-metadata/waves/[id]", () => {
         description: "Memes chat is the main chat for the Memes Maxis",
       },
     };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
       json: async () => metadata,
     });
@@ -71,7 +71,7 @@ describe("/api/og-metadata/waves/[id]", () => {
       }
     );
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test/api/og-metadata/waves/wave%201",
       { next: { revalidate: 86400 } }
     );
@@ -97,7 +97,7 @@ describe("/api/og-metadata/waves/[id]", () => {
       }
     );
 
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(mockImageResponse).not.toHaveBeenCalled();
     expect(mockNextResponseJson).toHaveBeenCalledWith(
       { error: "Invalid wave id. Use /api/og-metadata/waves/<id>." },
@@ -107,7 +107,7 @@ describe("/api/og-metadata/waves/[id]", () => {
   });
 
   it("returns 502 when backend metadata is unavailable", async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 404,
     });
