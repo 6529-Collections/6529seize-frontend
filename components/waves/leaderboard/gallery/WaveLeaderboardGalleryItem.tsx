@@ -6,6 +6,7 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
+import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -267,25 +268,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 isVotingClosed={isVotingClosed}
               />
             </div>
-            <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-iron-500">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-                className="tw-size-3 tw-flex-shrink-0"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-                />
-              </svg>
-              <span className="tw-font-medium">
-                {formatNumberWithCommas(drop.raters_count)}
-              </span>
+            <div className="tw-ml-auto tw-flex tw-flex-shrink-0">
+              <ParticipationDropVoteDetailsTrigger
+                drop={drop}
+                density="compact"
+              />
             </div>
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">

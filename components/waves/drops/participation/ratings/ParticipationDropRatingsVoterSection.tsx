@@ -5,6 +5,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import type { RatingsSectionProps, RatingsData } from "./types";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import ParticipationDropVoteDetailsTrigger from "./ParticipationDropVoteDetailsTrigger";
 
 interface ParticipationDropRatingsVoterSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
@@ -70,14 +71,7 @@ export default function ParticipationDropRatingsVoterSection({
         </div>
       )}
 
-      <span>
-        <span className="tw-font-medium tw-text-iron-50">
-          {drop.raters_count}
-        </span>{" "}
-        <span className="tw-font-normal tw-text-iron-400">
-          {drop.raters_count === 1 ? "voter" : "voters"}
-        </span>
-      </span>
+      <ParticipationDropVoteDetailsTrigger drop={drop} />
     </div>
   );
 }

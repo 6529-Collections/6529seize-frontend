@@ -35,10 +35,44 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => ({
 jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
+jest.mock("@/hooks/isMobileScreen", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => false,
+}));
+jest.mock("@/hooks/useDropVoters", () => ({
+  useDropVoters: () => ({
+    voters: [],
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+}));
+jest.mock("@/hooks/useDropVoteLogs", () => ({
+  useDropVoteLogs: () => ({
+    logs: [],
+    isFetchingNextPage: false,
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+}));
+jest.mock("@/hooks/useIntersectionObserver", () => ({
+  useIntersectionObserver: () => ({ current: null }),
+}));
 
 describe("MemesWaveWinnerDropSmall", () => {
   const wave = { voting_credit_type: "REP" } as any;
   const baseDrop = {
+    id: "drop-1",
     rank: 1,
     rating: -5,
     raters_count: 2,
@@ -66,5 +100,52 @@ describe("MemesWaveWinnerDropSmall", () => {
     expect(screen.getByText("-5").className).toContain("rose");
     expect(screen.getByText("-1 REP").className).toContain("rose");
     expect(screen.getByTestId("identity")).toBeInTheDocument();
+  });
+
+  it("shows compact vote details trigger for memes winners", () => {
+    render(
+      <MemesWaveWinnerDropSmall
+        drop={baseDrop}
+        wave={wave}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    ).toHaveClass(
+      "tw-rounded-lg",
+      "tw-border",
+      "tw-border-iron-700",
+      "tw-bg-iron-900/40",
+      "tw-px-1.5",
+      "tw-py-0.5"
+    );
+  });
+
+  it("opens vote details without triggering the card click", async () => {
+    const onClick = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <MemesWaveWinnerDropSmall
+        drop={baseDrop}
+        wave={wave}
+        onDropClick={onClick}
+      />
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 2 voters",
+      })
+    );
+
+    expect(onClick).not.toHaveBeenCalled();
+    expect(
+      await screen.findByRole("dialog", { name: "Votes" })
+    ).toBeInTheDocument();
   });
 });

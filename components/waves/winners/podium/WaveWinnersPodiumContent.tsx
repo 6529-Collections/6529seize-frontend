@@ -8,13 +8,15 @@ interface WaveWinnersPodiumContentProps {
   readonly firstPlaceWinner?: ApiWaveDecisionWinner | undefined;
   readonly secondPlaceWinner?: ApiWaveDecisionWinner | undefined;
   readonly thirdPlaceWinner?: ApiWaveDecisionWinner | undefined;
+  readonly showVoteDetails?: boolean | undefined;
 }
 
 export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> = ({
   onDropClick,
   firstPlaceWinner,
   secondPlaceWinner,
-  thirdPlaceWinner
+  thirdPlaceWinner,
+  showVoteDetails = true,
 }) => {
   return (
     <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 lg:tw-px-4 tw-bg-iron-950/60">
@@ -26,6 +28,7 @@ export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> =
               onDropClick={onDropClick}
               position="second"
               customAnimationIndex={1}
+              showVoteDetails={showVoteDetails}
             />
           </div>
           <div>
@@ -34,6 +37,7 @@ export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> =
               onDropClick={onDropClick}
               position="first"
               customAnimationIndex={0}
+              showVoteDetails={showVoteDetails}
             />
           </div>
           <div>
@@ -42,6 +46,7 @@ export const WaveWinnersPodiumContent: React.FC<WaveWinnersPodiumContentProps> =
               onDropClick={onDropClick}
               position="third"
               customAnimationIndex={2}
+              showVoteDetails={showVoteDetails}
             />
           </div>
         </div>
