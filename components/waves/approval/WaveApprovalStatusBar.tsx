@@ -1,12 +1,18 @@
 "use client";
 
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type FC, useEffect, useMemo, useState } from "react";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import HoverCard from "@/components/utils/tooltip/HoverCard";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { calculateTimeLeft } from "@/helpers/waves/time.utils";
 import type { ApprovalWaveCloseStatus } from "@/helpers/waves/approve-wave.helpers";
 import { getApprovalWindowEndTime } from "@/helpers/waves/approve-wave.helpers";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 interface WaveApprovalStatusBarProps {
   readonly approvedCount: number | null;
@@ -74,6 +80,8 @@ const approvalStatusErrorMessage =
   "Unable to check approval status. " +
   "Voting and create controls are paused until the check succeeds.";
 const approvalCountErrorMessage = "Unable to load approved count.";
+const APPROVAL_RULES_TITLE = "Approval rules";
+const FALLBACK_CREDIT_LABEL = "credit";
 
 interface ApprovalStatusItemProps {
   readonly label: string;
@@ -86,12 +94,98 @@ const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
   value,
   valueClassName = "tw-text-iron-100",
 }) => (
-  <div className="tw-inline-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap tw-leading-5">
-    <span className="tw-text-xs tw-font-medium tw-text-iron-500">{label}</span>
-    <span className={`tw-text-sm tw-font-semibold ${valueClassName}`}>
+  <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-1 tw-text-center tw-leading-5">
+    <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
+      {label}
+    </span>
+    <span className={`tw-min-w-0 tw-text-sm tw-font-semibold ${valueClassName}`}>
       {value}
     </span>
   </div>
+);
+
+interface ApprovalRulesHelpProps {
+  readonly creditNoun: string;
+  readonly holdTimeLabel: string;
+  readonly thresholdIsSet: boolean;
+  readonly thresholdLabel: string;
+}
+
+const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
+  creditNoun,
+  holdTimeLabel,
+  thresholdIsSet,
+  thresholdLabel,
+}) => (
+  <div className="tw-w-80 tw-max-w-[calc(100vw-2rem)] tw-text-sm tw-leading-5 tw-text-iron-200">
+    <div className="tw-space-y-2">
+      {thresholdIsSet ? (
+        <p className="tw-mb-0">
+          This wave uses {creditNoun}. A drop is approved when it reaches{" "}
+          {thresholdLabel} {creditNoun} and keeps at least that much credit for{" "}
+          {holdTimeLabel}.
+        </p>
+      ) : (
+        <p className="tw-mb-0">This wave has no credit threshold set yet.</p>
+      )}
+      {thresholdIsSet && holdTimeLabel === "Immediate" && (
+        <p className="tw-mb-0">
+          No hold time is required once the credit needed is reached.
+        </p>
+      )}
+    </div>
+
+    <dl className="tw-mb-0 tw-mt-4 tw-space-y-3">
+      <div>
+        <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          Credit needed
+        </dt>
+        <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
+          How much {creditNoun} a drop must reach before it can be approved.
+        </dd>
+      </div>
+      <div>
+        <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          Hold time
+        </dt>
+        <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
+          How long a drop must stay at or above the credit needed. If it falls
+          below, the timer starts again.
+        </dd>
+      </div>
+      <div>
+        <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          Approved drops
+        </dt>
+        <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
+          How many drops are already approved. If there is a cap, this shows
+          approved / max.
+        </dd>
+      </div>
+      <div>
+        <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          Approval window
+        </dt>
+        <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
+          Open means drops can still be approved. It closes when the end time
+          passes or the max approvals are reached.
+        </dd>
+      </div>
+    </dl>
+  </div>
+);
+
+const ApprovalRulesButton: FC<{
+  readonly onClick?: (() => void) | undefined;
+}> = ({ onClick }) => (
+  <button
+    type="button"
+    aria-label={APPROVAL_RULES_TITLE}
+    onClick={onClick}
+    className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-200"
+  >
+    <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3.5" />
+  </button>
 );
 
 export default function WaveApprovalStatusBar({
@@ -103,6 +197,8 @@ export default function WaveApprovalStatusBar({
   retryApprovalStatus = null,
   wave,
 }: WaveApprovalStatusBarProps) {
+  const { hasTouchScreen } = useDeviceInfo();
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const winningThreshold = wave.wave.winning_threshold;
   const winningThresholdMinDuration =
     wave.wave.winning_threshold_min_duration_ms;
@@ -133,9 +229,19 @@ export default function WaveApprovalStatusBar({
     typeof winningThreshold === "number" && Number.isFinite(winningThreshold)
       ? formatNumberWithCommas(winningThreshold)
       : "Not set";
+  const thresholdIsSet = thresholdLabel !== "Not set";
   const thresholdMinDurationLabel = formatWinningThresholdMinDuration(
     winningThresholdMinDuration
   );
+  const creditLabel =
+    WAVE_VOTING_LABELS[wave.voting.credit_type] ?? FALLBACK_CREDIT_LABEL;
+  const creditNoun =
+    creditLabel === FALLBACK_CREDIT_LABEL
+      ? FALLBACK_CREDIT_LABEL
+      : `${creditLabel} credit`;
+  const thresholdValueLabel = thresholdIsSet
+    ? `${thresholdLabel} ${creditLabel}`
+    : thresholdLabel;
   const approvedLabel = (() => {
     if (isApprovalStatusError || isCountOnlyError) {
       return "Unavailable";
@@ -195,37 +301,82 @@ export default function WaveApprovalStatusBar({
 
     return null;
   })();
+  const approvalRulesHelp = (
+    <ApprovalRulesHelp
+      creditNoun={creditNoun}
+      holdTimeLabel={thresholdMinDurationLabel}
+      thresholdIsSet={thresholdIsSet}
+      thresholdLabel={thresholdLabel}
+    />
+  );
+  const approvalRulesButton = hasTouchScreen ? (
+    <ApprovalRulesButton onClick={() => setIsHelpOpen(true)} />
+  ) : (
+    <HoverCard
+      content={approvalRulesHelp}
+      ariaLabel={APPROVAL_RULES_TITLE}
+      placement="auto"
+      delayShow={300}
+      delayHide={0}
+      offset={8}
+    >
+      <ApprovalRulesButton />
+    </HoverCard>
+  );
 
   return (
-    <div className="tw-mt-2 tw-flex-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 md:tw-mt-3">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-8 tw-gap-y-1">
-        <ApprovalStatusItem label="Threshold" value={thresholdLabel} />
-        <ApprovalStatusItem
-          label="Min time"
-          value={thresholdMinDurationLabel}
-        />
-        <ApprovalStatusItem label="Approved" value={approvedLabel} />
-        <ApprovalStatusItem
-          label="Status"
-          value={statusLabel}
-          valueClassName={statusTextClassName}
-        />
-      </div>
-      {errorMessage && (
-        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
-          <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
-            {errorMessage}
-          </p>
-          {retryError && (
-            <button
-              type="button"
-              onClick={retryError}
-              className="tw-inline-flex tw-w-fit tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-400 desktop-hover:hover:tw-bg-iron-800"
-            >
-              Try again
-            </button>
-          )}
+    <div className="tw-mt-2 tw-flex tw-flex-none tw-items-stretch tw-gap-2 md:tw-mt-3">
+      <div
+        role="group"
+        aria-label="Approval status"
+        className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
+      >
+        <div className="tw-grid tw-grid-cols-2 tw-items-center tw-gap-x-4 tw-gap-y-1 md:tw-grid-cols-4">
+          <ApprovalStatusItem
+            label="Credit needed"
+            value={thresholdValueLabel}
+          />
+          <ApprovalStatusItem
+            label="Hold time"
+            value={thresholdMinDurationLabel}
+          />
+          <ApprovalStatusItem label="Approved drops" value={approvedLabel} />
+          <ApprovalStatusItem
+            label="Approval window"
+            value={statusLabel}
+            valueClassName={statusTextClassName}
+          />
         </div>
+        {errorMessage && (
+          <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+            <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
+              {errorMessage}
+            </p>
+            {retryError && (
+              <button
+                type="button"
+                onClick={retryError}
+                className="tw-inline-flex tw-w-fit tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-400 desktop-hover:hover:tw-bg-iron-800"
+              >
+                Try again
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      <div className="tw-flex tw-shrink-0 tw-items-center">
+        {approvalRulesButton}
+      </div>
+      {hasTouchScreen && (
+        <MobileWrapperDialog
+          isOpen={isHelpOpen}
+          onClose={() => setIsHelpOpen(false)}
+          title={APPROVAL_RULES_TITLE}
+        >
+          <div className="tw-px-4 tw-pb-2 tw-pt-3">
+            {approvalRulesHelp}
+          </div>
+        </MobileWrapperDialog>
       )}
     </div>
   );
