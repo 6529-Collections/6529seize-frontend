@@ -124,6 +124,7 @@ describe("SingleWaveDropVoteSubmit", () => {
       await flushMicrotasks();
     });
   };
+  const backgroundModalCloseDelayMs = 1500;
 
   const renderComponent = (props: any = {}) => {
     queryClient = new QueryClient({
@@ -333,9 +334,10 @@ describe("SingleWaveDropVoteSubmit", () => {
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalled();
     });
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
     expect(onVoteApplied).not.toHaveBeenCalled();
 
-    await advanceTimers(300);
+    await advanceTimers(backgroundModalCloseDelayMs);
 
     expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
     expect(onVoteApplied).not.toHaveBeenCalled();
@@ -392,7 +394,7 @@ describe("SingleWaveDropVoteSubmit", () => {
       expect(screen.getByText("Vote")).toBeInTheDocument();
     });
 
-    await advanceTimers(300);
+    await advanceTimers(backgroundModalCloseDelayMs);
 
     expect(onVoteRequestStarted).not.toHaveBeenCalled();
   });
@@ -419,8 +421,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalled();
     });
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
 
-    await advanceTimers(300);
+    await advanceTimers(backgroundModalCloseDelayMs);
     expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
 
     await act(async () => {
@@ -467,8 +470,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     await waitFor(() => {
       expect(mockCommonApiPost).toHaveBeenCalled();
     });
+    expect(onVoteRequestStarted).not.toHaveBeenCalled();
 
-    await advanceTimers(300);
+    await advanceTimers(backgroundModalCloseDelayMs);
     expect(onVoteRequestStarted).toHaveBeenCalledTimes(1);
 
     await act(async () => {

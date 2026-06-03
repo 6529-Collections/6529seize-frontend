@@ -54,7 +54,7 @@ const rankingThemes: { [key: number]: ThemeColors } = {
 
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const VOTE_BUTTON_TRANSITION_MS = 300;
-const BACKGROUND_MODAL_CLOSE_DELAY_MS = 300;
+const BACKGROUND_MODAL_CLOSE_BUFFER_MS = 150;
 
 interface Props {
   readonly drop: ApiDrop;
@@ -103,6 +103,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const particlesDuration = 800;
     const particlesDelay = 50;
     const particleCount = 12;
+    const backgroundModalCloseDelay =
+      particlesDuration +
+      particlesDelay * (particleCount - 1) +
+      BACKGROUND_MODAL_CLOSE_BUFFER_MS;
     const totalParticlesTime =
       particlesDuration + particlesDelay * particleCount + 2500;
 
@@ -316,7 +320,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         backgroundCloseFiredRef.current = true;
         backgroundCloseTimeoutRef.current = null;
         onVoteRequestStarted?.();
-      }, BACKGROUND_MODAL_CLOSE_DELAY_MS);
+      }, backgroundModalCloseDelay);
       backgroundCloseTimeoutRef.current = closeTimeout;
       timeoutsRef.current.push(closeTimeout);
 
