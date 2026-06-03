@@ -23,24 +23,64 @@ afterEach(() => {
 
 jest.mock("framer-motion", () => {
   const React = require("react");
+  const serializeMotionProp = (value: unknown) =>
+    value === undefined ? undefined : JSON.stringify(value);
+  const createMotionComponent = (tag: "div" | "button") =>
+    React.forwardRef(function MotionComponent(
+      {
+        children,
+        initial,
+        animate,
+        exit,
+        transition,
+        ...props
+      }: {
+        readonly children: React.ReactNode;
+        readonly initial?: unknown;
+        readonly animate?: unknown;
+        readonly exit?: unknown;
+        readonly transition?: unknown;
+      },
+      ref: React.Ref<HTMLElement>
+    ) {
+      return React.createElement(
+        tag,
+        {
+          ...props,
+          ref,
+          "data-motion-initial": serializeMotionProp(initial),
+          "data-motion-animate": serializeMotionProp(animate),
+          "data-motion-exit": serializeMotionProp(exit),
+          "data-motion-transition": serializeMotionProp(transition),
+        },
+        children
+      );
+    });
+
   return {
     __esModule: true,
     motion: {
-      div: React.forwardRef(function Div(
-        { children, ...props }: { children: React.ReactNode },
-        ref: React.Ref<HTMLDivElement>
-      ) {
-        return React.createElement("div", { ...props, ref }, children);
-      }),
-      button: React.forwardRef(function Btn(
-        { children, ...props }: { children: React.ReactNode },
-        ref: React.Ref<HTMLButtonElement>
-      ) {
-        return React.createElement("button", { ...props, ref }, children);
-      }),
+      div: createMotionComponent("div"),
+      button: createMotionComponent("button"),
     },
-    AnimatePresence: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
+    AnimatePresence: ({
+      children,
+      mode,
+      initial,
+    }: {
+      readonly children: React.ReactNode;
+      readonly mode?: string;
+      readonly initial?: boolean;
+    }) =>
+      React.createElement(
+        "div",
+        {
+          "data-testid": "drop-actions-animate-presence",
+          "data-mode": mode,
+          "data-initial": String(initial),
+        },
+        children
+      ),
     LayoutGroup: ({ children }: { children: React.ReactNode }) =>
       React.createElement(React.Fragment, null, children),
   };
@@ -89,6 +129,12 @@ jest.mock("@/hooks/isMobileScreen", () => ({
 }));
 
 describe("CreateDropActions", () => {
+  const motionValue = (value: unknown) => JSON.stringify(value);
+  const smoothTransition = motionValue({
+    duration: 0.22,
+    ease: [0.22, 1, 0.36, 1],
+  });
+
   const getFileInput = (): HTMLInputElement => {
     const fileInput = document.querySelector(
       'input[type="file"]'
@@ -111,6 +157,7 @@ describe("CreateDropActions", () => {
     breakIntoStorm: jest.fn(),
     onGifDrop: jest.fn(),
     showOptions: true,
+    animateOptions: false,
     setShowOptions: jest.fn(),
   };
 
@@ -136,6 +183,94 @@ describe("CreateDropActions", () => {
       await userEvent.click(chevronButton);
       expect(defaultProps.setShowOptions).toHaveBeenCalledWith(true);
     }
+  });
+
+  it("animates the stable shell width on first collapse", () => {
+    const { rerender } = render(
+      <CreateDropActions
+        {...defaultProps}
+        showOptions={true}
+        animateOptions={false}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-motion-shell")).toHaveAttribute(
+      "data-motion-animate",
+      motionValue({ width: "auto" })
+    );
+    expect(screen.getByTestId("drop-actions-motion-shell")).toHaveAttribute(
+      "data-motion-transition",
+      motionValue({ duration: 0 })
+    );
+
+    rerender(
+      <CreateDropActions
+        {...defaultProps}
+        showOptions={false}
+        animateOptions={true}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-motion-shell")).toHaveAttribute(
+      "data-motion-animate",
+      motionValue({ width: "32px" })
+    );
+    expect(screen.getByTestId("drop-actions-motion-shell")).toHaveAttribute(
+      "data-motion-transition",
+      smoothTransition
+    );
+  });
+
+  it("crossfades the action group and chevron with sync presence", () => {
+    const { rerender } = render(
+      <CreateDropActions
+        {...defaultProps}
+        showOptions={false}
+        animateOptions={true}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-animate-presence")).toHaveAttribute(
+      "data-mode",
+      "sync"
+    );
+    expect(screen.getByTestId("drop-actions-animate-presence")).toHaveAttribute(
+      "data-initial",
+      "false"
+    );
+    expect(screen.getByTestId("drop-actions-chevron-motion")).toHaveAttribute(
+      "data-motion-initial",
+      motionValue({ opacity: 0, scale: 0.92 })
+    );
+    expect(screen.getByTestId("drop-actions-chevron-motion")).toHaveAttribute(
+      "data-motion-animate",
+      motionValue({ opacity: 1, scale: 1 })
+    );
+    expect(screen.getByTestId("drop-actions-chevron-motion")).toHaveAttribute(
+      "data-motion-exit",
+      motionValue({ opacity: 0, scale: 0.92 })
+    );
+
+    rerender(
+      <CreateDropActions
+        {...defaultProps}
+        showOptions={true}
+        animateOptions={true}
+      />
+    );
+
+    expect(screen.getByTestId("drop-actions-expanded-motion")).toHaveAttribute(
+      "data-motion-initial",
+      motionValue({ opacity: 0, x: -4 })
+    );
+    expect(screen.getByTestId("drop-actions-expanded-motion")).toHaveAttribute(
+      "data-motion-animate",
+      motionValue({ opacity: 1, x: 0 })
+    );
+    expect(screen.getByTestId("drop-actions-expanded-motion")).toHaveAttribute(
+      "data-motion-exit",
+      motionValue({ opacity: 0, x: -4 })
+    );
   });
 
   it("renders all action buttons", () => {
