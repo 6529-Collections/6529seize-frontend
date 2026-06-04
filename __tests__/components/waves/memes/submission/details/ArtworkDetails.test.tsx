@@ -185,7 +185,24 @@ describe("ArtworkDetails", () => {
     );
   });
 
-  it("renders and toggles the additional action promise checkbox", async () => {
+  it("hides the additional action promise checkbox by default", () => {
+    render(
+      <ArtworkDetails
+        title=""
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(
+      screen.queryByRole("checkbox", {
+        name: /this submission promises an additional action/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders and toggles the additional action promise checkbox when enabled", async () => {
     const user = userEvent.setup();
     const onAdditionalActionPromisedChange = jest.fn();
 
@@ -195,6 +212,7 @@ describe("ArtworkDetails", () => {
         description=""
         onTitleChange={() => {}}
         onDescriptionChange={() => {}}
+        showAdditionalActionPromised={true}
         isAdditionalActionPromised={false}
         onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
       />

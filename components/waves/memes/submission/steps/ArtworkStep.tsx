@@ -344,6 +344,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       onDescriptionBlur={() => handleFieldBlur("description")}
       showRequiredMarkers={true}
       size="sm"
+      showAdditionalActionPromised={true}
       isAdditionalActionPromised={isAdditionalActionPromised}
       onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
     />
