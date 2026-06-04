@@ -249,6 +249,28 @@ test("uses v2 part one title and content before metadata fallbacks", () => {
   expect(screen.getByTestId("desc")).toHaveTextContent("Part description");
 });
 
+test("shows additional action badge only when promised", () => {
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+
+  const { rerender } = render(
+    <MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />
+  );
+
+  expect(
+    screen.queryByText("Additional action promised")
+  ).not.toBeInTheDocument();
+
+  rerender(
+    <MemesLeaderboardDrop
+      drop={{ ...drop, is_additional_action_promised: true }}
+      onDropClick={jest.fn()}
+    />
+  );
+
+  expect(screen.getByText("Additional action promised")).toBeInTheDocument();
+});
+
 test("opens mobile resubmit modal after the touch menu leaves", async () => {
   const setIsActive = jest.fn();
   useDeviceInfo.mockReturnValue({ hasTouchScreen: true });

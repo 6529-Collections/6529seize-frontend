@@ -37,6 +37,7 @@ interface ArtworkSubmissionData {
     | undefined;
   traits: TraitsData;
   operationalData?: OperationalData;
+  isAdditionalActionPromised: boolean;
   waveId: string;
   termsOfService: string | null;
 }
@@ -44,10 +45,11 @@ interface ArtworkSubmissionData {
 /**
  * Function to transform form data into API request format
  */
-const transformToApiRequest = (data: {
+export const transformToApiRequest = (data: {
   waveId: string;
   traits: TraitsData;
   operationalData?: OperationalData | undefined;
+  isAdditionalActionPromised?: boolean | undefined;
   mediaUrl: string;
   mimeType: string;
   signerAddress: string;
@@ -57,6 +59,7 @@ const transformToApiRequest = (data: {
     waveId,
     traits,
     operationalData,
+    isAdditionalActionPromised = false,
     mediaUrl,
     mimeType,
     signerAddress,
@@ -72,6 +75,7 @@ const transformToApiRequest = (data: {
   const request: ApiCreateDropRequest = {
     wave_id: waveId,
     drop_type: ApiDropType.Participatory,
+    is_additional_action_promised: isAdditionalActionPromised,
     title: traits.title,
     parts: [
       {
@@ -319,6 +323,7 @@ export function useArtworkSubmissionMutation() {
         waveId: data.waveId,
         traits: data.traits,
         operationalData: data.operationalData,
+        isAdditionalActionPromised: data.isAdditionalActionPromised,
         mediaUrl: media.url,
         mimeType: media.mime_type,
         signerAddress,

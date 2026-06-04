@@ -49,7 +49,7 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
     expect(progress.getAttribute("data-current")).toBe("5");
     expect(progress.getAttribute("data-projected")).toBe("9");
     expect(progress.getAttribute("data-tooltip-label")).toBe(
-      "Realtime votes given"
+      "Votes given now"
     );
   });
 

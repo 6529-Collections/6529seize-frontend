@@ -50,12 +50,12 @@ describe("DropVoteProgressing", () => {
       <DropVoteProgressing
         current={1}
         projected={2}
-        tooltipLabel="Realtime votes given"
+        tooltipLabel="Votes given now"
       />
     );
 
     expect(screen.getByRole("tooltip")).toHaveTextContent(
-      "Realtime votes given: 2"
+      "Votes given now: 2"
     );
   });
 });

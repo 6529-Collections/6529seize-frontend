@@ -43,7 +43,7 @@ export const WaveDropVoteSummary = ({
     ? drop.realtime_rating
     : drop.rating_prediction;
   const progressTooltipLabel = isApproveVoteSummary
-    ? "Realtime votes given"
+    ? "Votes given now"
     : "Projected vote count at decision time";
 
   return (

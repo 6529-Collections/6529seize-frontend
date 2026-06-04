@@ -48,6 +48,7 @@ export interface ProfileDefaults {
 export type FormAction =
   | { type: "SET_STEP"; payload: SubmissionStep }
   | { type: "SET_AGREEMENTS"; payload: boolean }
+  | { type: "SET_ADDITIONAL_ACTION_PROMISED"; payload: boolean }
   | { type: "APPLY_PROFILE_DEFAULTS"; payload: ProfileDefaults }
   | {
       type: "SET_TRAIT_FIELD";
@@ -90,6 +91,7 @@ export interface FormState {
   existingMedia: ExistingSubmissionMedia | null;
   externalMedia: ExternalMediaState;
   operationalData: OperationalData;
+  isAdditionalActionPromised: boolean;
 }
 
 const sanitizeInteractiveHash = (
@@ -355,6 +357,8 @@ export const createInitialState = ({
     externalMedia: buildEmptyExternalMediaState(),
     operationalData:
       initialDraft?.operationalData ?? getDefaultOperationalData(),
+    isAdditionalActionPromised:
+      initialDraft?.isAdditionalActionPromised ?? false,
   };
 
   if (initialDraft) {
@@ -371,6 +375,9 @@ export function formReducer(state: FormState, action: FormAction): FormState {
 
     case "SET_AGREEMENTS":
       return { ...state, agreements: action.payload };
+
+    case "SET_ADDITIONAL_ACTION_PROMISED":
+      return { ...state, isAdditionalActionPromised: action.payload };
 
     case "APPLY_PROFILE_DEFAULTS":
       return reduceProfileDefaults(state, action.payload);

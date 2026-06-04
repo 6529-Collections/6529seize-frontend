@@ -114,6 +114,6 @@ describe("WaveDropRatings", () => {
     render(<WaveDropRatings drop={drop} winningThreshold={42_000_000} />);
 
     expect(screen.getByText("25")).toBeInTheDocument();
-    expect(screen.getByText("Realtime votes given: 25")).toBeInTheDocument();
+    expect(screen.getByText("Votes given now: 25")).toBeInTheDocument();
   });
 });
