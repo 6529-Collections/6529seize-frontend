@@ -272,6 +272,7 @@ export default function UserPageProfileWave({
   const resolvedProfile = profile ?? initialProfile;
   const profileIdentityKey =
     getProfileIdentityKey(resolvedProfile) ?? handleOrWallet;
+  const hasCreatedProfile = Boolean(resolvedProfile.handle?.trim());
   const initialProfileWave = useMemo<ApiProfileWaveResponse>(
     () => ({
       profile_wave_id: resolvedProfile.profile_wave_id,
@@ -420,6 +421,7 @@ export default function UserPageProfileWave({
         title="Choose your featured wave"
         identity={profileIdentityKey}
         isOwnProfile={isOwnProfile}
+        hasCreatedProfile={hasCreatedProfile}
         hasActiveProfileProxy={Boolean(activeProfileProxy)}
         selectedWaveId={null}
         submittingWaveId={submittingWaveId}
@@ -489,6 +491,7 @@ export default function UserPageProfileWave({
               <UserPageProfileWavePicker
                 identity={profileIdentityKey}
                 isOwnProfile={true}
+                hasCreatedProfile={hasCreatedProfile}
                 hasActiveProfileProxy={false}
                 selectedWaveId={profileWaveId}
                 submittingWaveId={submittingWaveId}
@@ -545,6 +548,7 @@ export default function UserPageProfileWave({
           <UserPageProfileWavePicker
             identity={profileIdentityKey}
             isOwnProfile={true}
+            hasCreatedProfile={hasCreatedProfile}
             hasActiveProfileProxy={false}
             selectedWaveId={profileWaveId}
             submittingWaveId={submittingWaveId}

@@ -8,10 +8,31 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 
 const mockTimeWeightedVoting = jest.fn(
-  (props: { errorMessage?: string; showToggle?: boolean }) => (
-    <div data-testid="time-weighted" data-show-toggle={props.showToggle}>
+  (props: {
+    config: {
+      enabled: boolean;
+      averagingInterval: number;
+      averagingIntervalUnit: "minutes" | "hours";
+    };
+    errorMessage?: string;
+    showToggle?: boolean;
+    onChange: (config: {
+      enabled: boolean;
+      averagingInterval: number;
+      averagingIntervalUnit: "minutes" | "hours";
+    }) => void;
+  }) => (
+    <button
+      type="button"
+      data-testid="time-weighted"
+      data-enabled={String(props.config.enabled)}
+      data-show-toggle={
+        props.showToggle === undefined ? "" : String(props.showToggle)
+      }
+      onClick={() => props.onChange({ ...props.config, enabled: true })}
+    >
       {props.errorMessage}
-    </div>
+    </button>
   )
 );
 const mockNegativeVotingToggle = jest.fn(
@@ -78,7 +99,20 @@ jest.mock(
 );
 jest.mock(
   "@/components/waves/create-wave/voting/TimeWeightedVoting",
-  () => (props: { errorMessage?: string; showToggle?: boolean }) =>
+  () => (props: {
+    config: {
+      enabled: boolean;
+      averagingInterval: number;
+      averagingIntervalUnit: "minutes" | "hours";
+    };
+    errorMessage?: string;
+    showToggle?: boolean;
+    onChange: (config: {
+      enabled: boolean;
+      averagingInterval: number;
+      averagingIntervalUnit: "minutes" | "hours";
+    }) => void;
+  }) =>
     mockTimeWeightedVoting(props)
 );
 
@@ -270,7 +304,7 @@ describe("CreateWaveVoting", () => {
     expect(screen.queryByTestId("create-wave-voting-settings-grid")).toBeNull();
   });
 
-  it("renders approve voting settings with immediate timing by default", () => {
+  it("renders approve voting settings with independent timing controls by default", () => {
     render(<CreateWaveVoting {...baseProps} waveType={ApiWaveType.Approve} />);
     const settingsGrid = screen.getByTestId("create-wave-voting-settings-grid");
     const voteCapInput = screen.getByLabelText("Vote cap per identity");
@@ -280,19 +314,19 @@ describe("CreateWaveVoting", () => {
     expect(settingsGrid).not.toHaveClass("sm:tw-grid-cols-2");
     expect(settingsGrid).toContainElement(voteCapInput);
     expect(settingsGrid).toContainElement(thresholdInput);
-    expect(screen.getByText("Approval timing")).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /^Immediate/ })).toBeChecked();
+    expect(screen.getByTestId("time-weighted")).toHaveAttribute(
+      "data-enabled",
+      "false"
+    );
+    expect(screen.getByText("Approval hold")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^No hold/ })).toBeChecked();
     expect(
-      screen.getByRole("radio", { name: /^Minimum time/ })
-    ).not.toBeChecked();
-    expect(
-      screen.getByRole("radio", { name: /^Time-weighted/ })
+      screen.getByRole("radio", { name: /^Require hold time/ })
     ).not.toBeChecked();
     expect(
       screen.queryByLabelText("Minimum time above threshold")
     ).toBeNull();
-    expect(screen.queryByTestId("time-weighted")).toBeNull();
-    expect(screen.queryByTestId("approval-timing-detail")).toBeNull();
+    expect(screen.queryByTestId("approval-hold-detail")).toBeNull();
     expect(
       screen.getByTestId("max-votes-per-identity-per-drop-setting")
     ).toHaveClass(
@@ -315,7 +349,7 @@ describe("CreateWaveVoting", () => {
     ).toBeTruthy();
   });
 
-  it("renders approve threshold time when minimum timing is selected", () => {
+  it("renders approve threshold time when hold is set", () => {
     render(
       <CreateWaveVoting
         {...baseProps}
@@ -325,15 +359,15 @@ describe("CreateWaveVoting", () => {
     );
 
     expect(
-      screen.getByRole("radio", { name: /^Minimum time/ })
+      screen.getByRole("radio", { name: /^Require hold time/ })
     ).toBeChecked();
     expect(
       screen.getByLabelText("Minimum time above threshold")
     ).toBeInTheDocument();
-    expect(screen.getByTestId("approval-timing-detail")).toHaveClass(
+    expect(screen.getByTestId("approval-hold-detail")).toHaveClass(
       "tw-mt-3"
     );
-    expect(screen.queryByTestId("time-weighted")).toBeNull();
+    expect(screen.getByTestId("time-weighted")).toBeInTheDocument();
   });
 
   it("renders approve threshold time when the stored duration is invalid", () => {
@@ -346,14 +380,14 @@ describe("CreateWaveVoting", () => {
     );
 
     expect(
-      screen.getByRole("radio", { name: /^Minimum time/ })
+      screen.getByRole("radio", { name: /^Require hold time/ })
     ).toBeChecked();
     expect(
       screen.getByLabelText("Minimum time above threshold")
     ).toBeInTheDocument();
   });
 
-  it("renders approve time weighted settings without the extra toggle", () => {
+  it("renders approve time weighted settings separately from approval hold", () => {
     render(
       <CreateWaveVoting
         {...baseProps}
@@ -366,22 +400,17 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    expect(
-      screen.getByRole("radio", { name: /^Time-weighted/ })
-    ).toBeChecked();
     expect(screen.getByTestId("time-weighted")).toHaveAttribute(
-      "data-show-toggle",
-      "false"
+      "data-enabled",
+      "true"
     );
-    expect(screen.getByTestId("approval-timing-detail")).toHaveClass(
-      "tw-mt-3"
-    );
+    expect(screen.getByRole("radio", { name: /^No hold/ })).toBeChecked();
     expect(
       screen.queryByLabelText("Minimum time above threshold")
     ).toBeNull();
   });
 
-  it("selecting minimum timing disables approve time weighted voting", () => {
+  it("selecting hold preserves approve time weighted voting", () => {
     const setApprovalThresholdTimeMs = jest.fn();
     const onTimeWeightedChange = jest.fn();
 
@@ -399,17 +428,15 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("radio", { name: /^Minimum time/ }));
+    fireEvent.click(
+      screen.getByRole("radio", { name: /^Require hold time/ })
+    );
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(60_000);
-    expect(onTimeWeightedChange).toHaveBeenCalledWith({
-      enabled: false,
-      averagingInterval: 1,
-      averagingIntervalUnit: "hours",
-    });
+    expect(onTimeWeightedChange).not.toHaveBeenCalled();
   });
 
-  it("selecting time weighted timing clears approve threshold time", () => {
+  it("selecting time weighted preserves approve threshold time", () => {
     const setApprovalThresholdTimeMs = jest.fn();
     const onTimeWeightedChange = jest.fn();
 
@@ -423,9 +450,9 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("radio", { name: /^Time-weighted/ }));
+    fireEvent.click(screen.getByTestId("time-weighted"));
 
-    expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
+    expect(setApprovalThresholdTimeMs).not.toHaveBeenCalled();
     expect(onTimeWeightedChange).toHaveBeenCalledWith({
       enabled: true,
       averagingInterval: 0,
@@ -433,7 +460,7 @@ describe("CreateWaveVoting", () => {
     });
   });
 
-  it("selecting immediate timing clears both approve timing options", () => {
+  it("selecting no hold clears only approve threshold time", () => {
     const setApprovalThresholdTimeMs = jest.fn();
     const onTimeWeightedChange = jest.fn();
 
@@ -452,14 +479,10 @@ describe("CreateWaveVoting", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("radio", { name: /^Immediate/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /^No hold/ }));
 
     expect(setApprovalThresholdTimeMs).toHaveBeenCalledWith(null);
-    expect(onTimeWeightedChange).toHaveBeenCalledWith({
-      enabled: false,
-      averagingInterval: 1,
-      averagingIntervalUnit: "hours",
-    });
+    expect(onTimeWeightedChange).not.toHaveBeenCalled();
   });
 
   it("passes approve time lock duration errors to time weighted voting", () => {
@@ -542,7 +565,7 @@ describe("CreateWaveVoting", () => {
     expect(setApprovalThresholdTimeMs).toHaveBeenLastCalledWith(7_200_000);
   });
 
-  it("keeps minimum timing visible after clearing or entering an invalid duration", () => {
+  it("keeps hold timing visible after clearing or entering an invalid duration", () => {
     const thresholdTimeChanges = jest.fn();
 
     function StatefulVoting() {
@@ -572,7 +595,9 @@ describe("CreateWaveVoting", () => {
     });
 
     expect(thresholdTimeChanges).toHaveBeenLastCalledWith(null);
-    expect(screen.getByRole("radio", { name: /^Minimum time/ })).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Require hold time/ })
+    ).toBeChecked();
     expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
       ""
     );
@@ -582,7 +607,9 @@ describe("CreateWaveVoting", () => {
     });
 
     expect(thresholdTimeChanges).toHaveBeenLastCalledWith(0);
-    expect(screen.getByRole("radio", { name: /^Minimum time/ })).toBeChecked();
+    expect(
+      screen.getByRole("radio", { name: /^Require hold time/ })
+    ).toBeChecked();
     expect(screen.getByLabelText("Minimum time above threshold")).toHaveValue(
       "1.5"
     );
@@ -610,7 +637,7 @@ describe("CreateWaveVoting", () => {
     ).toHaveAttribute("aria-invalid", "true");
   });
 
-  it("shows approve timing conflict errors near timing options", () => {
+  it("explains that hold checks the time-weighted score when both are enabled", () => {
     render(
       <CreateWaveVoting
         {...baseProps}
@@ -621,16 +648,11 @@ describe("CreateWaveVoting", () => {
           averagingInterval: 1,
           averagingIntervalUnit: "hours",
         }}
-        errors={[
-          CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE,
-        ]}
       />
     );
 
     expect(
-      screen.getByText(
-        "Choose either minimum time above threshold or time-weighted voting."
-      )
+      screen.getByText(/This hold checks the time-weighted score./)
     ).toBeInTheDocument();
   });
 });

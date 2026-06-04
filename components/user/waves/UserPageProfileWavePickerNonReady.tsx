@@ -65,6 +65,38 @@ function renderProxyMode(variant: WavePickerVariant) {
   return <InfoPanel title="Switch out of proxy mode" message={message} />;
 }
 
+function renderMissingProfileState(variant: WavePickerVariant) {
+  const title = "Create your profile first";
+  const message =
+    "Set up your profile on the Identity tab before choosing a featured curation wave.";
+
+  if (variant === "panel") {
+    return <CurationEmptyPanel title={title} message={message} />;
+  }
+
+  if (variant === DROPDOWN_VARIANT) {
+    return (
+      <section className="tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-py-2 tw-shadow-2xl">
+        <div className="tw-space-y-2 tw-px-4 tw-py-4">
+          <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+            {title}
+          </p>
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <div className="tw-space-y-2 tw-px-4 sm:tw-px-6">
+      <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+        {title}
+      </p>
+      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">{message}</p>
+    </div>
+  );
+}
+
 function renderLoadingState(variant: WavePickerVariant) {
   if (variant === DROPDOWN_VARIANT) {
     return (
@@ -198,6 +230,8 @@ export default function UserPageProfileWavePickerNonReady({
       return renderNotOwnProfileState(variant);
     case "proxy_mode":
       return renderProxyMode(variant);
+    case "missing_profile":
+      return renderMissingProfileState(variant);
     case "loading":
       return renderLoadingState(variant);
     case "error":

@@ -363,7 +363,7 @@ export default function WaveApprovalStatusBar({
     <HoverCard
       content={approvalRulesHelp}
       ariaLabel={APPROVAL_RULES_TITLE}
-      placement="auto"
+      placement="left"
       delayShow={300}
       delayHide={0}
       offset={8}

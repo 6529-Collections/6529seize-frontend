@@ -51,10 +51,12 @@ const getDisplayValue = ({
 export default function CreateWaveVotingThresholdTime({
   thresholdTimeMs,
   errorMessage,
+  usesTimeWeightedScore = false,
   setThresholdTimeMs,
 }: {
   readonly thresholdTimeMs: number | null;
   readonly errorMessage?: string | undefined;
+  readonly usesTimeWeightedScore?: boolean | undefined;
   readonly setThresholdTimeMs: (thresholdTimeMs: number | null) => void;
 }) {
   const [unit, setUnit] = useState<ThresholdTimeUnit>(() =>
@@ -129,7 +131,10 @@ export default function CreateWaveVotingThresholdTime({
       helpText={
         <>
           Optional. Leave blank to approve as soon as the threshold is reached.
-          Set a time to require the score to stay above the threshold.
+          Set a time to require the score to stay at or above the threshold.
+          {usesTimeWeightedScore
+            ? " This hold checks the time-weighted score."
+            : null}
         </>
       }
       inputId={inputId}
