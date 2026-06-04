@@ -204,7 +204,7 @@ describe("WaveSmallLeaderboardDefaultDrop", () => {
     expect(progress).toHaveAttribute("data-projected", "3");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Realtime votes given"
+      "Votes given now"
     );
   });
 });

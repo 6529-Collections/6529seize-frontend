@@ -132,7 +132,7 @@ describe("WaveleaderboardSort", () => {
 
     expect(items.map((i) => i.label)).toEqual([
       "Closest to approval",
-      "Realtime Vote",
+      "Votes Given Now",
       "Hot",
       "Newest",
     ]);

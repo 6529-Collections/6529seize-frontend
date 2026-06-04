@@ -245,7 +245,7 @@ it("uses approval sort labels for approve waves", async () => {
             value: WaveDropsLeaderboardSort.RANK,
           }),
           expect.objectContaining({
-            label: "Realtime Vote",
+            label: "Votes Given Now",
             value: WaveDropsLeaderboardSort.REALTIME_VOTE,
           }),
         ]),
