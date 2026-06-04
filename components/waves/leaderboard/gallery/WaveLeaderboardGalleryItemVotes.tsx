@@ -108,7 +108,7 @@ export default function WaveLeaderboardGalleryItemVotes({
             : drop.rating_prediction
         }
         tooltipLabel={
-          displayWinningThreshold !== null ? "Realtime votes given" : undefined
+          displayWinningThreshold !== null ? "Votes given now" : undefined
         }
         subtle={variant === "subtle"}
       />
