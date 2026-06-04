@@ -10,6 +10,7 @@ export default function UserPageProfileWavePicker({
   title,
   identity,
   isOwnProfile,
+  hasCreatedProfile,
   hasActiveProfileProxy,
   selectedWaveId,
   submittingWaveId,
@@ -19,6 +20,7 @@ export default function UserPageProfileWavePicker({
   readonly title?: string;
   readonly identity: string;
   readonly isOwnProfile: boolean;
+  readonly hasCreatedProfile: boolean;
   readonly hasActiveProfileProxy: boolean;
   readonly selectedWaveId: string | null;
   readonly submittingWaveId: string | null;
@@ -37,10 +39,15 @@ export default function UserPageProfileWavePicker({
     waveName: null,
     limit: 20,
     directMessage: false,
-    enabled: isOwnProfile && !hasActiveProfileProxy && identity.length > 0,
+    enabled:
+      isOwnProfile &&
+      hasCreatedProfile &&
+      !hasActiveProfileProxy &&
+      identity.length > 0,
   });
   const state = resolveWavePickerViewState({
     createdWaves,
+    hasCreatedProfile,
     hasActiveProfileProxy,
     isOwnProfile,
     status,
