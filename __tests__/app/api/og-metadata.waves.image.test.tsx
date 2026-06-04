@@ -12,6 +12,10 @@ const collectImageSrcs = (node: React.ReactNode): string[] => {
     return [];
   }
 
+  if (typeof node.type === "function") {
+    return collectImageSrcs(node.type(node.props));
+  }
+
   const props = node.props as {
     readonly src?: string | undefined;
     readonly children?: React.ReactNode;
@@ -31,6 +35,10 @@ const collectTextNodes = (node: React.ReactNode): string[] => {
 
   if (!React.isValidElement(node)) {
     return [];
+  }
+
+  if (typeof node.type === "function") {
+    return collectTextNodes(node.type(node.props));
   }
 
   const props = node.props as {

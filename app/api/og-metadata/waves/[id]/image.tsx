@@ -8,15 +8,13 @@ import {
   getUsableText,
   getWrappedTextLines,
   pluralize,
-  shortenAddress,
   truncateText,
 } from "../../_lib/imageUtils";
 import {
-  ArtistActivityBadge,
-  CicBadge,
-  getActivityBadgeType,
-  LevelBadge,
-} from "../../_lib/profileBadges";
+  getProfileDisplayName,
+  ProfileAvatar,
+  ProfileBadgeRow,
+} from "../../_lib/profileSummary";
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 630;
@@ -40,31 +38,7 @@ const CREATOR_ROW_TOP = 405;
 const STATS_ROW_TOP = 510;
 const CREATOR_AVATAR_SIZE = 62;
 const CREATOR_AVATAR_INNER_SIZE = 56;
-const CREATOR_BADGE_SIZE = 42;
-
-type AuthorWithOptionalBadges = ApiOgMetadataProfile & {
-  readonly has_active_submissions?: boolean | null;
-  readonly has_winning_submissions?: boolean | null;
-};
-
-const getAuthorDisplayName = (
-  author: ApiOgMetadataProfile | undefined
-): string => {
-  const handle = getUsableText(author?.handle);
-  if (handle) {
-    return handle.replace(/^@/, "");
-  }
-
-  const primaryAddress = getUsableText(author?.primary_address);
-  if (primaryAddress) {
-    return shortenAddress(primaryAddress);
-  }
-
-  return "6529";
-};
-
-const getInitials = (displayName: string): string =>
-  (displayName.replace(/^@/, "").trim().at(0) || "6").toUpperCase();
+const CREATOR_BADGE_SIZE = 38;
 
 const formatNumber = (value: number | null | undefined): string =>
   formatInteger(value) ?? "0";
@@ -147,9 +121,8 @@ export const renderWaveOgImage = ({
   readonly id: string;
   readonly origin?: string;
 }) => {
-  const authorWithBadges = author as AuthorWithOptionalBadges | undefined;
   const waveName = getUsableText(wave?.name) ?? id;
-  const authorName = getAuthorDisplayName(author);
+  const authorName = getProfileDisplayName(author);
   const authorAvatarUrl = getMediaProxyUrl({
     sourceUrl: getFirstMediaUrl(author?.media),
     origin,
@@ -170,7 +143,6 @@ export const renderWaveOgImage = ({
     wave?.description,
     contentWidth - 30
   );
-  const activityBadgeType = getActivityBadgeType(authorWithBadges);
   const dropsCount = wave?.drops_count ?? 0;
   const subscribersCount = wave?.subscribers_count ?? 0;
 
@@ -320,51 +292,15 @@ export const renderWaveOgImage = ({
         >
           by
         </div>
-        <div
-          style={{
-            alignItems: "center",
-            background: "rgba(255,255,255,0.1)",
-            border: "1px solid rgba(255,255,255,0.16)",
-            borderRadius: 13,
-            display: "flex",
-            height: CREATOR_AVATAR_SIZE,
-            justifyContent: "center",
-            overflow: "hidden",
-            padding: 3,
-            width: CREATOR_AVATAR_SIZE,
-          }}
-        >
-          {authorAvatarUrl ? (
-            <img
-              alt=""
-              height={CREATOR_AVATAR_INNER_SIZE}
-              src={authorAvatarUrl}
-              style={{
-                borderRadius: 10,
-                height: CREATOR_AVATAR_INNER_SIZE,
-                objectFit: "cover",
-                width: CREATOR_AVATAR_INNER_SIZE,
-              }}
-              width={CREATOR_AVATAR_INNER_SIZE}
-            />
-          ) : (
-            <div
-              style={{
-                alignItems: "center",
-                background: "#111827",
-                borderRadius: 10,
-                display: "flex",
-                fontSize: 24,
-                fontWeight: 700,
-                height: CREATOR_AVATAR_INNER_SIZE,
-                justifyContent: "center",
-                width: CREATOR_AVATAR_INNER_SIZE,
-              }}
-            >
-              {getInitials(authorName)}
-            </div>
-          )}
-        </div>
+        <ProfileAvatar
+          avatarUrl={authorAvatarUrl}
+          borderRadius={13}
+          displayName={authorName}
+          fontSize={24}
+          innerBorderRadius={10}
+          innerSize={CREATOR_AVATAR_INNER_SIZE}
+          size={CREATOR_AVATAR_SIZE}
+        />
         <div
           style={{
             color: "#ffffff",
@@ -378,35 +314,15 @@ export const renderWaveOgImage = ({
         >
           {truncateText(authorName, 16)}
         </div>
-        <div
-          style={{
-            alignItems: "center",
-            display: "flex",
-            gap: 10,
-          }}
-        >
-          <CicBadge
-            cic={author?.cic ?? 0}
-            fontSize={27}
-            glassesSize={32}
-            size={CREATOR_BADGE_SIZE}
-          />
-          {author?.level !== null && author?.level !== undefined ? (
-            <LevelBadge
-              fontSize={16}
-              level={author.level}
-              size={CREATOR_BADGE_SIZE}
-            />
-          ) : null}
-          {activityBadgeType ? (
-            <ArtistActivityBadge
-              borderRadius={10}
-              iconSize={20}
-              size={CREATOR_BADGE_SIZE}
-              type={activityBadgeType}
-            />
-          ) : null}
-        </div>
+        <ProfileBadgeRow
+          activityBorderRadius={10}
+          activityIconSize={18}
+          badgeSize={CREATOR_BADGE_SIZE}
+          cicFontSize={24}
+          glassesSize={29}
+          levelFontSize={15}
+          profile={author}
+        />
       </div>
       <div
         style={{

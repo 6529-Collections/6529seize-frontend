@@ -6518,6 +6518,61 @@ paths:
           description: Invalid request
         "404":
           description: Drop not found
+  /waves/{id}/subwaves:
+    get:
+      tags:
+        - Waves
+      summary: Get wave subwaves.
+      description: Returns direct subwaves of a wave.
+      operationId: listWaveSubwaves
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleListWaveSubwaves
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: Number of subwaves to return
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          description: Sort subwaves by name or creation time
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiSubwavesSort"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveOverviewPage"
+        "400":
+          description: Invalid request
+        "404":
+          description: Wave not found
   /waves/{id}/drops:
     get:
       tags:
@@ -7162,6 +7217,27 @@ paths:
                 $ref: "#/components/schemas/ApiWaveSubscriptionActions"
         "404":
           description: Wave not found
+  /v2/official-waves:
+    get:
+      tags:
+        - WavesV2
+      summary: Get official waves
+      operationId: getOfficialWaves
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetOfficialWaves
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveOverview"
   /v2/waves:
     get:
       tags:
@@ -9480,6 +9556,10 @@ components:
           description: The picture of the wave
           type: string
           example: https://example.com/picture.jpg
+          nullable: true
+        parent_wave_id:
+          description: Optional top-level parent wave id when creating a subwave.
+          type: string
           nullable: true
         description_drop:
           $ref: "#/components/schemas/ApiCreateWaveDropRequest"
@@ -12253,6 +12333,16 @@ components:
           format: int64
         drop_type:
           $ref: "#/components/schemas/ApiDropMainType"
+        submission_status:
+          $ref: "#/components/schemas/ApiSubmissionDropStatus"
+        submitted_at:
+          type: integer
+          format: int64
+          nullable: true
+        won_at:
+          type: integer
+          format: int64
+          nullable: true
         title:
           type: string
           nullable: true
@@ -12268,6 +12358,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiOgMediaAsset"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAttachment"
     ApiOgMetadataEntityType:
       type: string
       enum:
@@ -13293,6 +13387,12 @@ components:
             won.
           type: integer
           format: int64
+        won_at:
+          description: >-
+            Unix timestamp in milliseconds when this submission won. Omitted
+            unless the submission has won.
+          type: integer
+          format: int64
     ApiSubmissionDropStatus:
       type: string
       enum:
@@ -13346,6 +13446,11 @@ components:
         current:
           type: integer
           format: int64
+    ApiSubwavesSort:
+      type: string
+      enum:
+        - NAME
+        - CREATED_AT
     ApiTargetAndSubscriptionActions:
       type: object
       required:
@@ -13837,6 +13942,10 @@ components:
         pinned:
           type: boolean
         identity_wave:
+          type: boolean
+        parent_wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
+        has_subwaves:
           type: boolean
     ApiWaveChatConfig:
       type: object
@@ -14524,6 +14633,10 @@ components:
             $ref: "#/components/schemas/ApiWaveOverviewContributor"
         context_profile_context:
           $ref: "#/components/schemas/ApiWaveOverviewContextProfileContext"
+        parent_wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
+        has_subwaves:
+          type: boolean
     ApiWaveOverviewContextProfileContext:
       type: object
       required:

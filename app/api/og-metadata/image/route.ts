@@ -1,14 +1,10 @@
-import { ARWEAVE_FALLBACK_HOSTS } from "@/lib/media/arweave-gateways";
 import {
   fetchPublicUrl,
   parsePublicUrl,
   UrlGuardError,
   type FetchPublicUrlOptions,
 } from "@/lib/security/urlGuard";
-import {
-  detectContentType,
-  optimizeImage,
-} from "next/dist/server/image-optimizer";
+import { optimizeImage } from "next/dist/server/image-optimizer";
 import { NextResponse, type NextRequest } from "next/server";
 
 export const runtime = "nodejs";
@@ -24,28 +20,46 @@ const IMAGE_ACCEPT_HEADER =
   "image/png,image/jpeg,image/gif,image/webp,image/svg+xml,*/*;q=0.5";
 const USER_AGENT =
   "Mozilla/5.0 (compatible; 6529-og-image/1.0; +https://6529.io)";
-const ALLOWED_HOST_SUFFIXES = [
-  "6529.io",
-  "staging.6529.io",
-  "media.generator.seize.io",
-  "d3lqz0a4bldqgf.cloudfront.net",
-  "dnclu2fna0b2b.cloudfront.net",
-  "img.youtube.com",
-  "i.seadn.io",
-  "i2.seadn.io",
-  "i2c.seadn.io",
-  "i.ytimg.com",
-  "res.cloudinary.com",
-  "ipfs.6529.io",
-  "ipfs.io",
-  "ar.io",
-  ...ARWEAVE_FALLBACK_HOSTS,
-] as const;
-
-const FETCH_OPTIONS: FetchPublicUrlOptions = {
-  policy: {
-    allowedHostSuffixes: ALLOWED_HOST_SUFFIXES,
+const IMAGE_TYPE_SIGNATURES = [
+  {
+    contentType: "image/jpeg",
+    matches: (buffer: Buffer): boolean =>
+      buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff,
   },
+  {
+    contentType: "image/png",
+    matches: (buffer: Buffer): boolean =>
+      buffer[0] === 0x89 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x4e &&
+      buffer[3] === 0x47 &&
+      buffer[4] === 0x0d &&
+      buffer[5] === 0x0a &&
+      buffer[6] === 0x1a &&
+      buffer[7] === 0x0a,
+  },
+  {
+    contentType: "image/gif",
+    matches: (buffer: Buffer): boolean =>
+      buffer[0] === 0x47 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x38,
+  },
+  {
+    contentType: "image/webp",
+    matches: (buffer: Buffer): boolean =>
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46 &&
+      buffer[8] === 0x57 &&
+      buffer[9] === 0x45 &&
+      buffer[10] === 0x42 &&
+      buffer[11] === 0x50,
+  },
+] as const;
+const FETCH_OPTIONS: FetchPublicUrlOptions = {
   timeoutMs: 7000,
   userAgent: USER_AGENT,
 };
@@ -173,6 +187,22 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
   return readImageResponseBuffer(response);
 };
 
+const detectContentType = (buffer: Buffer): string | null => {
+  const signature = IMAGE_TYPE_SIGNATURES.find(({ matches }) =>
+    matches(buffer)
+  );
+  if (signature) {
+    return signature.contentType;
+  }
+
+  const prefix = buffer.subarray(0, 256).toString("utf8").trimStart();
+  if (prefix.startsWith("<svg") || prefix.startsWith("<?xml")) {
+    return "image/svg+xml";
+  }
+
+  return null;
+};
+
 const normalizeImageToPng = async ({
   buffer,
   width,
@@ -180,7 +210,7 @@ const normalizeImageToPng = async ({
   readonly buffer: Buffer;
   readonly width: number;
 }): Promise<Buffer> => {
-  const detectedContentType = await detectContentType(buffer, false);
+  const detectedContentType = detectContentType(buffer);
   if (!detectedContentType?.startsWith("image/")) {
     throw new Error("Upstream response is not an image.");
   }

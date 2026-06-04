@@ -15,6 +15,9 @@ import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { prefetchWavesOverview } from "@/helpers/stream.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
+import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfile";
+import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { Time } from "@/helpers/time";
 import { formatAddress } from "@/helpers/Helpers";
 import { DROP_CLOSE_COOKIE_NAME } from "@/helpers/drop-close-navigation.helpers";
@@ -67,6 +70,31 @@ const fetchWaveCached = cache(
       });
     } catch (error) {
       console.warn("Failed to fetch wave", { waveId, error });
+      return null;
+    }
+  }
+);
+
+const fetchDropOgMetadataCached = cache(
+  async (
+    dropId: string,
+    headersKey: string
+  ): Promise<ApiOgMetadata | null> => {
+    let headers: Record<string, string> = {};
+    try {
+      headers = headersKey
+        ? (JSON.parse(headersKey) as Record<string, string>)
+        : {};
+    } catch {
+      headers = {};
+    }
+    try {
+      return await commonApiFetch<ApiOgMetadata>({
+        endpoint: `og-metadata/drops/${dropId}`,
+        headers,
+      });
+    } catch (error) {
+      console.warn("Failed to fetch drop OG metadata", { dropId, error });
       return null;
     }
   }
@@ -167,7 +195,8 @@ export async function renderWavesPageContent({
 }
 
 export async function buildWavesMetadata(
-  waveId: string | null
+  waveId: string | null,
+  searchParams: WavesSearchParams = {}
 ): Promise<Metadata> {
   if (waveId === null) {
     return getAppMetadata({
@@ -199,6 +228,23 @@ export async function buildWavesMetadata(
       ? `@${wave.author.handle.replace(/^@/, "")}`
       : formatAddress(wave.author.primary_address);
 
+  const dropSerialNo = getFirstSearchParamValue(searchParams, "serialNo");
+  if (dropSerialNo) {
+    const dropMetadata = await fetchDropOgMetadataCached(
+      dropSerialNo,
+      metadataHeadersKey
+    );
+    const dropPageMetadata = buildDropPageMetadata({
+      dropId: dropSerialNo,
+      metadata: dropMetadata,
+      waveName,
+    });
+
+    if (dropPageMetadata) {
+      return getAppMetadata(dropPageMetadata);
+    }
+  }
+
   return getAppMetadata({
     title: `${waveName} by ${authorHandle}`,
     description: "Waves",
@@ -210,3 +256,69 @@ export async function buildWavesMetadata(
     twitterCard: "summary_large_image",
   });
 }
+
+const getDropAuthorDisplay = (
+  author: ApiOgMetadataProfile | undefined
+): string => {
+  const handle = author?.handle?.trim();
+  if (handle) {
+    return `@${handle.replace(/^@/, "")}`;
+  }
+
+  const address = author?.primary_address?.trim();
+  return address ? formatAddress(address) : "Unknown";
+};
+
+const getDropTitle = (
+  value: string | null | undefined,
+  fallback: string
+): string => {
+  const normalized = value?.trim();
+  return normalized && normalized.length > 0 ? normalized : fallback;
+};
+
+const buildDropPageMetadata = ({
+  dropId,
+  metadata,
+  waveName,
+}: {
+  readonly dropId: string;
+  readonly metadata: ApiOgMetadata | null;
+  readonly waveName: string;
+}) => {
+  const drop = metadata?.drop;
+  const author = getDropAuthorDisplay(metadata?.author);
+
+  if (!drop) {
+    return null;
+  }
+
+  const ogImage = `${
+    publicEnv.BASE_ENDPOINT
+  }/api/og-metadata/drops/${encodeURIComponent(dropId)}`;
+
+  if (drop.drop_type === ApiDropMainType.Submission) {
+    const title = getDropTitle(drop.title, `Drop #${drop.serial_no}`);
+    return {
+      title: `${title} by ${author}`,
+      description: `${waveName} | Waves`,
+      ogImage,
+      ogImageHeight: 630,
+      ogImageWidth: 1200,
+      twitterCard: "summary_large_image" as const,
+    };
+  }
+
+  if (drop.drop_type === ApiDropMainType.Chat) {
+    return {
+      title: `${author} in ${waveName}`,
+      description: "Waves",
+      ogImage,
+      ogImageHeight: 630,
+      ogImageWidth: 1200,
+      twitterCard: "summary_large_image" as const,
+    };
+  }
+
+  return null;
+};

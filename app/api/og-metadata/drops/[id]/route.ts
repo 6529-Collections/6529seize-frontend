@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 import { getOgImageRequestOrigin } from "../../_lib/requestOrigin";
 import { loadMontserratFonts } from "../../profiles/[identity]/font";
-import { renderWaveOgImage } from "./image";
+import { renderDropOgImage } from "./image";
 
 export const runtime = "edge";
 export const revalidate = 86400;
@@ -21,8 +21,8 @@ const getUsableText = (value: string | null | undefined): string | null => {
   return normalized && normalized.length > 0 ? normalized : null;
 };
 
-const fetchWaveMetadata = async (id: string): Promise<ApiOgMetadata> => {
-  const url = `${publicEnv.API_ENDPOINT}/api/og-metadata/waves/${encodeURIComponent(
+const fetchDropMetadata = async (id: string): Promise<ApiOgMetadata> => {
+  const url = `${publicEnv.API_ENDPOINT}/api/og-metadata/drops/${encodeURIComponent(
     id
   )}`;
   const response = await fetch(url, {
@@ -30,7 +30,7 @@ const fetchWaveMetadata = async (id: string): Promise<ApiOgMetadata> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Wave OG metadata request failed: ${response.status}`);
+    throw new Error(`Drop OG metadata request failed: ${response.status}`);
   }
 
   return response.json();
@@ -45,21 +45,22 @@ export async function GET(
 
   if (!normalizedId) {
     return NextResponse.json(
-      { error: "Invalid wave id. Use /api/og-metadata/waves/<id>." },
+      { error: "Invalid drop id. Use /api/og-metadata/drops/<id>." },
       { status: 400 }
     );
   }
 
   try {
-    const metadata = await fetchWaveMetadata(normalizedId);
+    const metadata = await fetchDropMetadata(normalizedId);
     const montserratFonts = await loadMontserratFonts();
 
     return new ImageResponse(
-      renderWaveOgImage({
-        wave: metadata.wave,
+      renderDropOgImage({
         author: metadata.author,
+        drop: metadata.drop,
         id: normalizedId,
         origin: getOgImageRequestOrigin(request),
+        wave: metadata.wave,
       }),
       {
         ...OG_IMAGE_SIZE,
@@ -70,9 +71,9 @@ export async function GET(
       }
     );
   } catch (error) {
-    console.error("Unable to generate wave OG metadata image.", error);
+    console.error("Unable to generate drop OG metadata image.", error);
     return NextResponse.json(
-      { error: "Unable to generate wave OG metadata image." },
+      { error: "Unable to generate drop OG metadata image." },
       { status: 502 }
     );
   }

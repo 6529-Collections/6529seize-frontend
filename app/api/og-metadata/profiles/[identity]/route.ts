@@ -2,6 +2,7 @@ import { publicEnv } from "@/config/env";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
+import { getOgImageRequestOrigin } from "../../_lib/requestOrigin";
 import { loadMontserratFonts } from "./font";
 import { renderProfileOgImage } from "./image";
 
@@ -38,7 +39,7 @@ const fetchProfileMetadata = async (
 };
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { readonly params: Promise<{ readonly identity?: string }> }
 ) {
   const { identity } = await params;
@@ -59,7 +60,7 @@ export async function GET(
       renderProfileOgImage({
         profile: metadata.profile,
         identity: normalizedIdentity,
-        origin: publicEnv.BASE_ENDPOINT,
+        origin: getOgImageRequestOrigin(request),
       }),
       {
         ...OG_IMAGE_SIZE,
