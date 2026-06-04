@@ -295,8 +295,6 @@ export const renderWaveOgImage = ({
         <ProfileAvatar
           avatarUrl={authorAvatarUrl}
           borderRadius={13}
-          displayName={authorName}
-          fontSize={24}
           innerBorderRadius={10}
           innerSize={CREATOR_AVATAR_INNER_SIZE}
           size={CREATOR_AVATAR_SIZE}

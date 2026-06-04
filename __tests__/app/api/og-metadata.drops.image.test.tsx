@@ -296,9 +296,10 @@ describe("renderDropOgImage", () => {
   });
 
   it("does not render media when chat text fills the preview", () => {
-    const longText = Array.from({ length: 80 }, (_, index) => `word${index}`).join(
-      " "
-    );
+    const longText = Array.from(
+      { length: 80 },
+      (_, index) => `word${index}`
+    ).join(" ");
     const element = renderDropOgImage({
       id: "6411",
       origin: "http://localhost:3001",
@@ -307,7 +308,12 @@ describe("renderDropOgImage", () => {
         serial_no: 6411,
         drop_type: "CHAT" as any,
         content: longText,
-        media: [{ url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png", mime_type: "image/png" }],
+        media: [
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png",
+            mime_type: "image/png",
+          },
+        ],
       },
     });
 
@@ -534,11 +540,26 @@ describe("renderDropOgImage", () => {
         drop_type: "CHAT" as any,
         content: "multiple images",
         media: [
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/one.png", mime_type: "image/png" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/two.png", mime_type: "image/png" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/three.png", mime_type: "image/png" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/four.png", mime_type: "image/png" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/five.png", mime_type: "image/png" },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/one.png",
+            mime_type: "image/png",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/two.png",
+            mime_type: "image/png",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/three.png",
+            mime_type: "image/png",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/four.png",
+            mime_type: "image/png",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/five.png",
+            mime_type: "image/png",
+          },
         ],
       },
     });
@@ -582,7 +603,12 @@ describe("renderDropOgImage", () => {
         serial_no: 6411,
         drop_type: "CHAT" as any,
         content: null,
-        media: [{ url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png", mime_type: "image/png" }],
+        media: [
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png",
+            mime_type: "image/png",
+          },
+        ],
       },
     });
 
@@ -600,7 +626,12 @@ describe("renderDropOgImage", () => {
         serial_no: 6411,
         drop_type: "CHAT" as any,
         content: "Video drop",
-        media: [{ url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.mp4", mime_type: null }],
+        media: [
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.mp4",
+            mime_type: null,
+          },
+        ],
       },
     });
 
@@ -610,7 +641,9 @@ describe("renderDropOgImage", () => {
     const styles = collectStyles(element);
     const textNodes = collectTextNodes(element);
 
-    expect(textNodes).toEqual(expect.arrayContaining(["Video drop", "drop.mp4"]));
+    expect(textNodes).toEqual(
+      expect.arrayContaining(["Video drop", "drop.mp4"])
+    );
     expect(textNodes).not.toContain("Video");
     expect(styles).toContainEqual(
       expect.objectContaining({
@@ -640,10 +673,22 @@ describe("renderDropOgImage", () => {
         drop_type: "CHAT" as any,
         content: null,
         media: [
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/one.mp4", mime_type: "video/mp4" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/two.mp4", mime_type: "video/mp4" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/three.mp4", mime_type: "video/mp4" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/four.mp4", mime_type: "video/mp4" },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/one.mp4",
+            mime_type: "video/mp4",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/two.mp4",
+            mime_type: "video/mp4",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/three.mp4",
+            mime_type: "video/mp4",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/four.mp4",
+            mime_type: "video/mp4",
+          },
         ],
       },
     });
@@ -683,11 +728,26 @@ describe("renderDropOgImage", () => {
         drop_type: "CHAT" as any,
         content: "mixed media",
         media: [
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/one.png", mime_type: "image/png" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/one.mp4", mime_type: "video/mp4" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/two.png", mime_type: "image/png" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/two.mp4", mime_type: "video/mp4" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/three.mp4", mime_type: "video/mp4" },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/one.png",
+            mime_type: "image/png",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/one.mp4",
+            mime_type: "video/mp4",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/two.png",
+            mime_type: "image/png",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/two.mp4",
+            mime_type: "video/mp4",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/three.mp4",
+            mime_type: "video/mp4",
+          },
         ],
       },
     });
@@ -705,12 +765,7 @@ describe("renderDropOgImage", () => {
       "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Fd3lqz0a4bldqgf.cloudfront.net%2Fone.mp4&w=548"
     );
     expect(textNodes).toEqual(
-      expect.arrayContaining([
-        "mixed media",
-        "one.mp4",
-        "two.mp4",
-        "+1 videos",
-      ])
+      expect.arrayContaining(["mixed media", "one.mp4", "two.mp4", "+1 videos"])
     );
     expect(textNodes).not.toContain("three.mp4");
   });
@@ -813,8 +868,14 @@ describe("renderDropOgImage", () => {
           },
         ],
         media: [
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.mp4", mime_type: "video/mp4" },
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png", mime_type: "image/png" },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.mp4",
+            mime_type: "video/mp4",
+          },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png",
+            mime_type: "image/png",
+          },
         ],
       },
     });
@@ -842,7 +903,10 @@ describe("renderDropOgImage", () => {
         drop_type: "CHAT" as any,
         content: null,
         media: [
-          { url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.mp4", mime_type: "video/mp4" },
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.mp4",
+            mime_type: "video/mp4",
+          },
           {
             url: "https://d3lqz0a4bldqgf.cloudfront.net/drop.png",
             mime_type: "image/png",

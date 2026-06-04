@@ -76,10 +76,7 @@ const fetchWaveCached = cache(
 );
 
 const fetchDropOgMetadataCached = cache(
-  async (
-    dropId: string,
-    headersKey: string
-  ): Promise<ApiOgMetadata | null> => {
+  async (dropId: string, headersKey: string): Promise<ApiOgMetadata | null> => {
     let headers: Record<string, string> = {};
     try {
       headers = headersKey

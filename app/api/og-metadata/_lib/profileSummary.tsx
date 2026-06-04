@@ -29,41 +29,38 @@ export const getProfileDisplayName = (
   return fallback;
 };
 
-export const getProfileInitials = (displayName: string): string =>
-  (displayName.replace(/^@/, "").trim().at(0) || "6").toUpperCase();
-
 export const ProfileAvatar = ({
   avatarUrl,
-  displayName,
   size,
   innerSize,
   borderRadius,
   innerBorderRadius,
-  fontSize,
 }: {
   readonly avatarUrl: string | null;
-  readonly displayName: string;
   readonly size: number;
   readonly innerSize: number;
   readonly borderRadius: number;
   readonly innerBorderRadius: number;
-  readonly fontSize: number;
-}) => (
-  <div
-    style={{
-      alignItems: "center",
-      background: "rgba(255,255,255,0.1)",
-      border: "1px solid rgba(255,255,255,0.16)",
-      borderRadius,
-      display: "flex",
-      height: size,
-      justifyContent: "center",
-      overflow: "hidden",
-      padding: 3,
-      width: size,
-    }}
-  >
-    {avatarUrl ? (
+}) => {
+  if (!avatarUrl) {
+    return null;
+  }
+
+  return (
+    <div
+      style={{
+        alignItems: "center",
+        background: "rgba(255,255,255,0.1)",
+        border: "1px solid rgba(255,255,255,0.16)",
+        borderRadius,
+        display: "flex",
+        height: size,
+        justifyContent: "center",
+        overflow: "hidden",
+        padding: 3,
+        width: size,
+      }}
+    >
       <img
         alt=""
         height={innerSize}
@@ -76,25 +73,9 @@ export const ProfileAvatar = ({
         }}
         width={innerSize}
       />
-    ) : (
-      <div
-        style={{
-          alignItems: "center",
-          background: "#111827",
-          borderRadius: innerBorderRadius,
-          display: "flex",
-          fontSize,
-          fontWeight: 700,
-          height: innerSize,
-          justifyContent: "center",
-          width: innerSize,
-        }}
-      >
-        {getProfileInitials(displayName)}
-      </div>
-    )}
-  </div>
-);
+    </div>
+  );
+};
 
 export const ProfileBadgeRow = ({
   profile,

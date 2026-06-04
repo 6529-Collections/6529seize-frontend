@@ -218,10 +218,7 @@ const appendContentEllipsis = (value: string): string => {
   }
 
   let truncated = value.trimEnd();
-  while (
-    truncated.length > 0 &&
-    !fitsContentLine(`${truncated}${suffix}`)
-  ) {
+  while (truncated.length > 0 && !fitsContentLine(`${truncated}${suffix}`)) {
     truncated = truncated.slice(0, -1).trimEnd();
   }
 
@@ -312,29 +309,17 @@ const getMimeTypeFromUrl = (url: string | null): string | undefined => {
   }
 
   if (IMAGE_URL_PATTERN.test(url)) {
-    const extension = url
-      .split(/[?#]/)[0]
-      ?.split(".")
-      .pop()
-      ?.toLowerCase();
+    const extension = url.split(/[?#]/)[0]?.split(".").pop()?.toLowerCase();
     return extension === "jpg" ? "image/jpeg" : `image/${extension}`;
   }
 
   if (VIDEO_URL_PATTERN.test(url)) {
-    const extension = url
-      .split(/[?#]/)[0]
-      ?.split(".")
-      .pop()
-      ?.toLowerCase();
+    const extension = url.split(/[?#]/)[0]?.split(".").pop()?.toLowerCase();
     return extension === "mov" ? "video/quicktime" : `video/${extension}`;
   }
 
   if (INTERACTIVE_URL_PATTERN.test(url)) {
-    const extension = url
-      .split(/[?#]/)[0]
-      ?.split(".")
-      .pop()
-      ?.toLowerCase();
+    const extension = url.split(/[?#]/)[0]?.split(".").pop()?.toLowerCase();
     return extension === "html" || extension === "htm"
       ? "text/html"
       : `model/${extension}`;
@@ -424,13 +409,12 @@ const getVideoLines = (
 const getFileLines = (
   files: readonly ApiAttachment[] | null | undefined
 ): readonly DropContentLine[] =>
-  files
-    ?.map((file) => ({
-      kind: "file" as const,
-      text:
-        getUsableText(file.file_name) ??
-        getFilenameFromUrl(getUsableText(file.url) ?? "", "file"),
-    })) ?? [];
+  files?.map((file) => ({
+    kind: "file" as const,
+    text:
+      getUsableText(file.file_name) ??
+      getFilenameFromUrl(getUsableText(file.url) ?? "", "file"),
+  })) ?? [];
 
 const summarizeHiddenAttachmentLines = (
   hiddenLines: readonly DropContentLine[]
@@ -667,7 +651,9 @@ const centerMediaLeft = (width: number): number =>
 
 const roundLayoutValue = (value: number): number => Math.round(value);
 
-const getUnknownDimensionMediaLayout = (textLineCount: number): DropMediaLayout => {
+const getUnknownDimensionMediaLayout = (
+  textLineCount: number
+): DropMediaLayout => {
   const frameTop = getMediaTop(textLineCount);
   const frameHeight = getAvailableMediaHeight(frameTop);
 
@@ -736,7 +722,10 @@ const getSingleMediaLayout = (
   const naturalWidth = mediaAsset.width;
   const naturalHeight = mediaAsset.height;
 
-  if (!isPositiveDimension(naturalWidth) || !isPositiveDimension(naturalHeight)) {
+  if (
+    !isPositiveDimension(naturalWidth) ||
+    !isPositiveDimension(naturalHeight)
+  ) {
     return getUnknownDimensionMediaLayout(textLineCount);
   }
 
@@ -755,7 +744,10 @@ const getTileObjectFit = (
   const naturalWidth = asset.width;
   const naturalHeight = asset.height;
 
-  if (!isPositiveDimension(naturalWidth) || !isPositiveDimension(naturalHeight)) {
+  if (
+    !isPositiveDimension(naturalWidth) ||
+    !isPositiveDimension(naturalHeight)
+  ) {
     return "contain";
   }
 
@@ -953,12 +945,7 @@ const VideoContentIcon = () => (
       width: 38,
     }}
   >
-    <svg
-      fill="currentColor"
-      height={18}
-      viewBox="0 0 576 512"
-      width={22}
-    >
+    <svg fill="currentColor" height={18} viewBox="0 0 576 512" width={22}>
       <path d="M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 336l0-48 0-64 0-48 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z" />
     </svg>
   </div>
@@ -1092,8 +1079,6 @@ const DropAuthorRow = ({
     <ProfileAvatar
       avatarUrl={authorAvatarUrl}
       borderRadius={14}
-      displayName={authorName}
-      fontSize={25}
       innerBorderRadius={11}
       innerSize={AUTHOR_AVATAR_INNER_SIZE}
       size={AUTHOR_AVATAR_SIZE}
@@ -1160,11 +1145,7 @@ const getSubmissionTitle = (
   `Drop #${drop?.serial_no ?? id}`;
 
 const getSubmissionTitleWidth = (): number => {
-  return (
-    CONTENT_WIDTH -
-    SUBMISSION_TITLE_ICON_SIZE -
-    SUBMISSION_TITLE_GAP
-  );
+  return CONTENT_WIDTH - SUBMISSION_TITLE_ICON_SIZE - SUBMISSION_TITLE_GAP;
 };
 
 const getSubmissionVisualImage = (
@@ -1679,8 +1660,7 @@ export const renderDropOgImage = ({
             <div
               style={{
                 alignItems: "center",
-                background:
-                  "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
+                background: "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
                 color: MUTED_TEXT,
                 display: "flex",
                 fontSize: 30,
