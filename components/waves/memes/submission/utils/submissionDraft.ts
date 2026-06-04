@@ -23,6 +23,7 @@ export interface MemesSubmissionInitialDraft {
   readonly traits: TraitsData;
   readonly operationalData: OperationalData;
   readonly existingMedia: ExistingSubmissionMedia | null;
+  readonly isAdditionalActionPromised: boolean;
 }
 
 const getDefaultOperationalData = (): OperationalData => ({
@@ -225,4 +226,5 @@ export const buildMemesSubmissionDraftFromDrop = (
   traits: buildTraitsDraft(drop),
   operationalData: buildOperationalDataDraft(drop),
   existingMedia: buildExistingMediaDraft(drop),
+  isAdditionalActionPromised: drop.is_additional_action_promised === true,
 });

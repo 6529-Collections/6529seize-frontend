@@ -24,6 +24,7 @@ describe("buildPreviewDrop", () => {
         description: "Preview Description",
       } as any,
       operationalData: undefined,
+      isAdditionalActionPromised: false,
       mediaSelection: {
         mediaSource: "url",
         selectedFile: null,
@@ -39,5 +40,43 @@ describe("buildPreviewDrop", () => {
     expect(previewDrop.realtime_rating).toBe(6529420);
     expect(previewDrop.rating_prediction).toBe(69420);
     expect(previewDrop.raters_count).toBe(69);
+  });
+
+  it("copies the additional action promise flag into the preview drop", () => {
+    const previewDrop = buildPreviewDrop({
+      wave: {
+        id: "wave-1",
+        name: "Preview Wave",
+        picture: null,
+        description_drop: { id: "drop-description-1" },
+        voting: {
+          authenticated_user_eligible: true,
+          period: { min: 1, max: 2 },
+          credit_type: "NIC",
+          forbid_negative_votes: false,
+        },
+        participation: { authenticated_user_eligible: true },
+        chat: { authenticated_user_eligible: true },
+        wave: { admin_drop_deletion_enabled: false },
+        pinned: false,
+      } as any,
+      traits: {
+        title: "Preview Title",
+        description: "Preview Description",
+      } as any,
+      operationalData: undefined,
+      isAdditionalActionPromised: true,
+      mediaSelection: {
+        mediaSource: "url",
+        selectedFile: null,
+        externalUrl: "https://example.com/art.png",
+        externalMimeType: "image/png",
+        isExternalValid: true,
+      },
+      uploadArtworkUrl: "",
+      connectedProfile: null,
+    });
+
+    expect(previewDrop.is_additional_action_promised).toBe(true);
   });
 });

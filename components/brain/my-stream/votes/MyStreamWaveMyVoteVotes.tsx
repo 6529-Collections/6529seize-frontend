@@ -30,7 +30,7 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         projected={
           hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
         }
-        tooltipLabel={hasWinningThreshold ? "Realtime votes given" : undefined}
+        tooltipLabel={hasWinningThreshold ? "Votes given now" : undefined}
       />
     </div>
   );

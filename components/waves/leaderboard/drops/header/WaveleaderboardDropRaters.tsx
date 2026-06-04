@@ -102,7 +102,7 @@ export const WaveLeaderboardDropRaters: React.FC<
                 : drop.rating_prediction
             }
             tooltipLabel={
-              hasWinningThreshold ? "Realtime votes given" : undefined
+              hasWinningThreshold ? "Votes given now" : undefined
             }
             compact
           />

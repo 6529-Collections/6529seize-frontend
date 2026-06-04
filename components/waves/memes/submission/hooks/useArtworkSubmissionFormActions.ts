@@ -61,6 +61,13 @@ export function useArtworkSubmissionFormActions({
     [dispatch]
   );
 
+  const setAdditionalActionPromised = useCallback(
+    (value: boolean) => {
+      dispatch({ type: "SET_ADDITIONAL_ACTION_PROMISED", payload: value });
+    },
+    [dispatch]
+  );
+
   const updateTraitField = useCallback(
     <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => {
       dispatch({
@@ -121,7 +128,12 @@ export function useArtworkSubmissionFormActions({
   );
 
   const getSubmissionData = useCallback(() => {
-    const { artworkUrl, operationalData, traits } = state;
+    const {
+      artworkUrl,
+      isAdditionalActionPromised,
+      operationalData,
+      traits,
+    } = state;
     return {
       imageUrl: artworkUrl,
       traits: {
@@ -130,6 +142,7 @@ export function useArtworkSubmissionFormActions({
         description: traits.description,
       },
       operationalData,
+      isAdditionalActionPromised,
     };
   }, [state]);
 
@@ -155,6 +168,7 @@ export function useArtworkSubmissionFormActions({
     handleContinueFromArtwork,
     handleContinueFromTerms,
     setAboutArtist,
+    setAdditionalActionPromised,
     setAdditionalMedia,
     setAgreements,
     setAirdropConfig,

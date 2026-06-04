@@ -5,6 +5,7 @@ import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import { getRankHoverBorderClass } from "@/components/waves/drops/dropRankStyles";
 import WaveDropReactions from "@/components/waves/drops/WaveDropReactions";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
@@ -124,6 +125,15 @@ export default function MemeParticipationDrop({
   const isContentInteractive =
     !drop.id.startsWith("temp-") && !!onDropContentClick;
 
+  const headerContent = (
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <MemeDropHeader title={title} />
+      {drop.is_additional_action_promised === true && (
+        <AdditionalActionPromiseBadge />
+      )}
+    </div>
+  );
+
   const handleContentClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       const selection = globalThis.getSelection?.() ?? null;
@@ -151,12 +161,12 @@ export default function MemeParticipationDrop({
             onClick={handleContentClick}
             type="button"
           >
-            <MemeDropHeader title={title} />
+            {headerContent}
             <MemeDropDescription description={description} />
           </button>
         ) : (
           <div className="tw-mt-2 tw-flex tw-flex-col sm:tw-ml-[3.25rem] sm:tw-mt-1.5">
-            <MemeDropHeader title={title} />
+            {headerContent}
             <MemeDropDescription description={description} />
           </div>
         )}
