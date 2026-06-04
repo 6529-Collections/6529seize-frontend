@@ -6,6 +6,7 @@ import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown
 import { MobileVotingModal, VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { DropLocation } from "@/components/waves/drops/Drop";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import WaveDropActionsOptions from "@/components/waves/drops/WaveDropActionsOptions";
 import WaveDropMobileMenuDelete from "@/components/waves/drops/WaveDropMobileMenuDelete";
@@ -163,13 +164,16 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               {/* Title and Description */}
               <div className="tw-px-4 tw-pb-4 tw-pt-4">
                 <div className="tw-space-y-1">
-                  <div className="tw-flex tw-items-center tw-gap-2">
+                  <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                     <MediaTypeBadge
                       mimeType={artworkMedia?.mime_type}
                       dropId={drop.id}
                       size="sm"
                     />
                     <MemesLeaderboardDropHeader title={title} />
+                    {drop.is_additional_action_promised === true && (
+                      <AdditionalActionPromiseBadge />
+                    )}
                   </div>
                   <MemesLeaderboardDropDescription description={description} />
                 </div>

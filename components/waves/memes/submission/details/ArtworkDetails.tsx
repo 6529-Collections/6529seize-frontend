@@ -12,6 +12,8 @@ import {
 const TITLE_CHARACTER_DANGER_THRESHOLD = 245;
 const DESCRIPTION_CHARACTER_DANGER_THRESHOLD = 7600;
 
+const noopAdditionalActionPromisedChange = () => undefined;
+
 interface ArtworkDetailsProps {
   readonly title: string;
   readonly description: string;
@@ -23,6 +25,10 @@ interface ArtworkDetailsProps {
   readonly onDescriptionBlur?: (() => void) | undefined;
   readonly showRequiredMarkers?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
+  readonly isAdditionalActionPromised?: boolean | undefined;
+  readonly onAdditionalActionPromisedChange?:
+    | ((value: boolean) => void)
+    | undefined;
 }
 
 const getFieldStateClass = (hasError: boolean, isFilled: boolean): string => {
@@ -96,6 +102,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   onDescriptionBlur,
   showRequiredMarkers = false,
   size = "default",
+  isAdditionalActionPromised = false,
+  onAdditionalActionPromisedChange = noopAdditionalActionPromisedChange,
 }) => {
   // Refs to track input elements directly
   const titleRef = useRef<HTMLInputElement>(null);
@@ -167,6 +175,13 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
       resizeDescriptionTextarea(textarea);
     },
     [onDescriptionChange, resizeDescriptionTextarea]
+  );
+
+  const handleAdditionalActionPromisedChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onAdditionalActionPromisedChange(event.currentTarget.checked);
+    },
+    [onAdditionalActionPromisedChange]
   );
 
   // Check if fields are filled
@@ -322,6 +337,30 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
           </div>
 
           <ValidationError error={descriptionError} id="description-error" />
+
+          <label
+            htmlFor="field-additional-action-promised"
+            className="tw-mt-4 tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-bg-iron-900/70 tw-px-3 tw-py-3 tw-ring-1 tw-ring-iron-800 tw-transition-colors desktop-hover:hover:tw-ring-iron-700"
+          >
+            <input
+              id="field-additional-action-promised"
+              name="isAdditionalActionPromised"
+              type="checkbox"
+              checked={isAdditionalActionPromised}
+              onChange={handleAdditionalActionPromisedChange}
+              className="tw-mt-0.5 tw-h-4 tw-w-4 tw-rounded tw-border-iron-700 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-500"
+            />
+            <span className="tw-flex tw-flex-col tw-gap-1">
+              <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+                This submission promises an additional action
+              </span>
+              <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
+                Check this if the description includes a real-world or follow-up
+                promise, such as an event, donation, physical item, airdrop, or
+                later deliverable.
+              </span>
+            </span>
+          </label>
         </div>
       </div>
     </FormSection>

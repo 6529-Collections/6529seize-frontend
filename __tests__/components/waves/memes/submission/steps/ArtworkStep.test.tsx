@@ -111,6 +111,8 @@ const createProps = (
   onSubmit: () => {},
   updateTraitField: () => {},
   setTraits: () => {},
+  isAdditionalActionPromised: false,
+  onAdditionalActionPromisedChange: () => {},
   ...override,
 });
 

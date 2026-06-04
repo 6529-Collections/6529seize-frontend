@@ -30,6 +30,7 @@ import { WaveLeaderboardIdentity } from "../identity/WaveLeaderboardIdentity";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -225,16 +226,19 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
         <div className="tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
           <div className="tw-mb-3 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
             <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-              <div className="tw-flex tw-items-center tw-gap-1.5">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
                 <MediaTypeBadge
                   mimeType={primaryMedia?.mime_type}
                   dropId={drop.id}
                   size="sm"
                 />
                 {drop.title && (
-                  <h3 className="tw-mb-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+                  <h3 className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
                     {drop.title}
                   </h3>
+                )}
+                {drop.is_additional_action_promised === true && (
+                  <AdditionalActionPromiseBadge />
                 )}
               </div>
               {drop.author?.handle && (
