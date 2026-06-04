@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveLeaderboardGalleryItem } from "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItem";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
@@ -46,7 +46,9 @@ jest.mock("@/components/voting", () => ({
   ),
 }));
 jest.mock("@/components/voting/VotingModalButton", () => (props: any) => (
-  <button data-testid="vote-btn" onClick={props.onClick} />
+  <button data-testid="vote-btn" onClick={props.onClick}>
+    {props.children ?? "Vote"}
+  </button>
 ));
 jest.mock("@/hooks/isMobileScreen", () => () => false);
 jest.mock("@/hooks/useIsTouchDevice");
@@ -118,7 +120,8 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(mainButton).not.toHaveClass("tw-touch-none");
     await userEvent.click(mainButton);
     expect(onDropClick).toHaveBeenCalledWith(drop);
-    fireEvent.keyDown(mainButton, { key: "Enter" });
+    mainButton.focus();
+    await userEvent.keyboard("{Enter}");
     expect(onDropClick).toHaveBeenCalledTimes(2);
   });
 
@@ -135,6 +138,7 @@ describe("WaveLeaderboardGalleryItem", () => {
     const trigger = screen.getByRole("button", {
       name: "View voters and vote log for 3 voters",
     });
+    const voteButton = screen.getByTestId("vote-btn");
 
     expect(trigger).toHaveTextContent(/3\s*voters/);
     expect(trigger).toHaveClass(
@@ -144,6 +148,26 @@ describe("WaveLeaderboardGalleryItem", () => {
       "tw-py-0.5"
     );
     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(voteButton).toHaveTextContent("You: 1 NIC");
+    expect(
+      trigger.compareDocumentPosition(voteButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("keeps the vote button label when the user has not voted", () => {
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{
+          ...drop,
+          context_profile_context: { rating: 0 },
+        }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("vote-btn")).toHaveTextContent("Vote");
+    expect(screen.queryByText(/Your votes:/)).not.toBeInTheDocument();
   });
 
   it("does not open the drop when the vote-details chip is clicked", async () => {
