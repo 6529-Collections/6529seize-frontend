@@ -161,6 +161,7 @@ describe("WaveApprovalStatusBar", () => {
     ["null", null, "Immediate"],
     ["zero", 0, "Immediate"],
     ["invalid", Number.NaN, "Immediate"],
+    ["under one minute", 30_000, "<1m"],
     ["two minutes", 120_000, "2m"],
     ["two hours", 7_200_000, "2h"],
     ["one hour and thirty minutes", 5_400_000, "1h 30m"],
@@ -214,6 +215,24 @@ describe("WaveApprovalStatusBar", () => {
     expect(
       screen.getByText(
         "Time-weighted scoring is on: approval uses a 24h average, not the raw votes-given-now total."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("shows sub-minute time-weighted scoring when the wave has a short time lock", () => {
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          time_lock_ms: 30_000,
+        })}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "Time-weighted scoring is on: approval uses a <1m average, not the raw votes-given-now total."
       )
     ).toBeInTheDocument();
   });

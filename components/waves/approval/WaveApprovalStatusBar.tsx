@@ -48,37 +48,7 @@ const formatTimeLeft = (targetTime: number, currentMillis: number): string => {
 const MINUTE_IN_MS = 60 * 1000;
 const MINUTES_IN_HOUR = 60;
 
-const formatWinningThresholdMinDuration = (
-  durationMs: number | null | undefined
-): string => {
-  if (
-    typeof durationMs !== "number" ||
-    !Number.isFinite(durationMs) ||
-    durationMs <= 0
-  ) {
-    return "Immediate";
-  }
-
-  const totalMinutes = Math.floor(durationMs / MINUTE_IN_MS);
-  if (totalMinutes <= 0) {
-    return "<1m";
-  }
-
-  const hours = Math.floor(totalMinutes / MINUTES_IN_HOUR);
-  const minutes = totalMinutes % MINUTES_IN_HOUR;
-
-  if (hours > 0 && minutes > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-
-  if (hours > 0) {
-    return `${hours}h`;
-  }
-
-  return `${minutes}m`;
-};
-
-const formatTimeWeightedDuration = (
+const formatDurationCore = (
   durationMs: number | null | undefined
 ): string | null => {
   if (
@@ -107,6 +77,14 @@ const formatTimeWeightedDuration = (
 
   return `${minutes}m`;
 };
+
+const formatWinningThresholdMinDuration = (
+  durationMs: number | null | undefined
+): string => formatDurationCore(durationMs) ?? "Immediate";
+
+const formatTimeWeightedDuration = (
+  durationMs: number | null | undefined
+): string | null => formatDurationCore(durationMs);
 
 const getCurrentMillisForStatusRender = (
   _clockTick: number,
