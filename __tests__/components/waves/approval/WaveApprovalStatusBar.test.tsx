@@ -179,6 +179,45 @@ describe("WaveApprovalStatusBar", () => {
     expect(screen.getByText(expected)).toBeInTheDocument();
   });
 
+  it.each([
+    ["missing", undefined],
+    ["null", null],
+    ["zero", 0],
+    ["invalid", Number.NaN],
+  ])("does not show time-weighted scoring when time lock is %s", (_label, timeLockMs) => {
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          ...(timeLockMs !== undefined ? { time_lock_ms: timeLockMs } : {}),
+        })}
+      />
+    );
+
+    expect(
+      screen.queryByText(/Time-weighted scoring is on/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows time-weighted scoring when the wave has a time lock", () => {
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          time_lock_ms: 24 * 60 * 60 * 1000,
+        })}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "Time-weighted scoring is on: approval uses a 24h average, not the raw votes-given-now total."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("orders approval status items", () => {
     render(
       <WaveApprovalStatusBar
@@ -251,6 +290,45 @@ describe("WaveApprovalStatusBar", () => {
         "How much Rep credit a drop must reach before it can be approved."
       )
     ).toBeInTheDocument();
+    expect(within(dialog).getByText("Vote scoring")).toBeInTheDocument();
+    expect(
+      screen.getByText("Votes count immediately in the approval score.")
+    ).toBeInTheDocument();
+  });
+
+  it("explains weighted approval with hold time", () => {
+    useDeviceInfoMock.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: false,
+      isMobileDevice: true,
+    });
+
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          creditType: ApiWaveCreditType.Rep,
+          time_lock_ms: 24 * 60 * 60 * 1000,
+          winning_threshold_min_duration_ms: 120_000,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Approval rules" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Approval rules" });
+    expect(
+      within(dialog).getByText(
+        "This wave uses Rep credit. A drop is approved when its time-weighted score reaches 10 Rep credit and keeps at least that much credit for 2m."
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(
+        "Approval uses a 24h average. New votes gain influence gradually, so votes given now can be higher than the approval score."
+      )
+    ).toBeInTheDocument();
   });
 
   it("explains immediate approval hold time", () => {
@@ -276,6 +354,36 @@ describe("WaveApprovalStatusBar", () => {
     expect(
       screen.getByText(
         "This wave uses TDH + XTDH credit. A drop is approved as soon as it reaches 10 TDH + XTDH credit."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/for Immediate/)).not.toBeInTheDocument();
+  });
+
+  it("explains weighted approval without hold time", () => {
+    useDeviceInfoMock.mockReturnValue({
+      hasTouchScreen: true,
+      isApp: false,
+      isAppleMobile: false,
+      isMobileDevice: true,
+    });
+
+    render(
+      <WaveApprovalStatusBar
+        approvedCount={1}
+        closeStatus={null}
+        wave={makeWave({
+          time_lock_ms: 60 * 60 * 1000,
+          winning_threshold_min_duration_ms: 0,
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Approval rules" }));
+
+    const dialog = screen.getByRole("dialog", { name: "Approval rules" });
+    expect(
+      within(dialog).getByText(
+        "This wave uses TDH + XTDH credit. A drop is approved when its time-weighted score reaches 10 TDH + XTDH credit."
       )
     ).toBeInTheDocument();
     expect(screen.queryByText(/for Immediate/)).not.toBeInTheDocument();

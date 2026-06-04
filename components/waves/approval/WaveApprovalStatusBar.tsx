@@ -78,6 +78,36 @@ const formatWinningThresholdMinDuration = (
   return `${minutes}m`;
 };
 
+const formatTimeWeightedDuration = (
+  durationMs: number | null | undefined
+): string | null => {
+  if (
+    typeof durationMs !== "number" ||
+    !Number.isFinite(durationMs) ||
+    durationMs <= 0
+  ) {
+    return null;
+  }
+
+  const totalMinutes = Math.floor(durationMs / MINUTE_IN_MS);
+  if (totalMinutes <= 0) {
+    return "<1m";
+  }
+
+  const hours = Math.floor(totalMinutes / MINUTES_IN_HOUR);
+  const minutes = totalMinutes % MINUTES_IN_HOUR;
+
+  if (hours > 0 && minutes > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  if (hours > 0) {
+    return `${hours}h`;
+  }
+
+  return `${minutes}m`;
+};
+
 const getCurrentMillisForStatusRender = (
   _clockTick: number,
   _endTime: number | null,
@@ -119,6 +149,8 @@ const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
 interface ApprovalRulesHelpProps {
   readonly creditNoun: string;
   readonly holdTimeLabel: string;
+  readonly isTimeWeighted: boolean;
+  readonly scoringDurationLabel: string | null;
   readonly requiresHoldTime: boolean;
   readonly thresholdIsSet: boolean;
   readonly thresholdLabel: string;
@@ -127,6 +159,8 @@ interface ApprovalRulesHelpProps {
 const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
   creditNoun,
   holdTimeLabel,
+  isTimeWeighted,
+  scoringDurationLabel,
   requiresHoldTime,
   thresholdIsSet,
   thresholdLabel,
@@ -136,7 +170,18 @@ const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
       {thresholdIsSet ? (
         <p className="tw-mb-0">
           This wave uses {creditNoun}.{" "}
-          {requiresHoldTime ? (
+          {isTimeWeighted && requiresHoldTime ? (
+            <>
+              A drop is approved when its time-weighted score reaches{" "}
+              {thresholdLabel} {creditNoun} and keeps at least that much credit
+              {" "}for {holdTimeLabel}.
+            </>
+          ) : isTimeWeighted ? (
+            <>
+              A drop is approved when its time-weighted score reaches{" "}
+              {thresholdLabel} {creditNoun}.
+            </>
+          ) : requiresHoldTime ? (
             <>
               A drop is approved when it reaches {thresholdLabel} {creditNoun}{" "}
               and keeps at least that much credit for {holdTimeLabel}.
@@ -160,6 +205,22 @@ const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
         </dt>
         <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
           How much {creditNoun} a drop must reach before it can be approved.
+        </dd>
+      </div>
+      <div>
+        <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-500">
+          Vote scoring
+        </dt>
+        <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
+          {isTimeWeighted && scoringDurationLabel !== null ? (
+            <>
+              Approval uses a {scoringDurationLabel} average. New votes gain
+              {" "}influence gradually, so votes given now can be higher than
+              the approval score.
+            </>
+          ) : (
+            <>Votes count immediately in the approval score.</>
+          )}
         </dd>
       </div>
       <div>
@@ -239,6 +300,10 @@ export default function WaveApprovalStatusBar({
   const winningThreshold = wave.wave.winning_threshold;
   const winningThresholdMinDuration =
     wave.wave.winning_threshold_min_duration_ms;
+  const timeWeightedDurationLabel = formatTimeWeightedDuration(
+    wave.wave.time_lock_ms
+  );
+  const isTimeWeighted = timeWeightedDurationLabel !== null;
   const maxWinners = wave.wave.max_winners;
   const endTime = getApprovalWindowEndTime(wave);
   const [clockTick, setClockTick] = useState(0);
@@ -346,6 +411,8 @@ export default function WaveApprovalStatusBar({
     <ApprovalRulesHelp
       creditNoun={creditNoun}
       holdTimeLabel={thresholdMinDurationLabel}
+      isTimeWeighted={isTimeWeighted}
+      scoringDurationLabel={timeWeightedDurationLabel}
       requiresHoldTime={requiresHoldTime}
       thresholdIsSet={thresholdIsSet}
       thresholdLabel={thresholdLabel}
@@ -395,6 +462,13 @@ export default function WaveApprovalStatusBar({
             valueClassName={statusTextClassName}
           />
         </div>
+        {timeWeightedDurationLabel !== null && (
+          <p className="tw-mb-0 tw-mt-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
+            Time-weighted scoring is on: approval uses a{" "}
+            {timeWeightedDurationLabel} average, not the raw votes-given-now
+            {" "}total.
+          </p>
+        )}
         {errorMessage && (
           <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
             <p className="tw-mb-0 tw-text-xs tw-font-medium tw-text-iron-400">
