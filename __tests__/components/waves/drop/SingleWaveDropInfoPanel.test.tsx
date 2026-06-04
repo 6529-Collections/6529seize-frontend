@@ -130,6 +130,6 @@ describe("SingleWaveDropInfoPanel", () => {
     );
 
     expect(screen.getByText("25")).toBeInTheDocument();
-    expect(screen.getByText("Realtime votes given: 25")).toBeInTheDocument();
+    expect(screen.getByText("Votes given now: 25")).toBeInTheDocument();
   });
 });

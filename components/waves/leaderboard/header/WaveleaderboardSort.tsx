@@ -49,7 +49,7 @@ const WAVE_LEADERBOARD_APPROVE_SORT_ITEMS: readonly CommonSelectItem<WaveDropsLe
     },
     {
       key: WaveDropsLeaderboardSort.REALTIME_VOTE,
-      label: "Realtime Vote",
+      label: "Votes Given Now",
       value: WaveDropsLeaderboardSort.REALTIME_VOTE,
     },
     {
