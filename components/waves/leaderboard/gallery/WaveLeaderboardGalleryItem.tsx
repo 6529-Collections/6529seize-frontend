@@ -14,10 +14,7 @@ import {
   ExtendedDrop,
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
-import {
-  WAVE_VOTE_STATS_LABELS,
-  WAVE_VOTING_LABELS,
-} from "@/helpers/waves/waves.constants";
+import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -148,11 +145,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
     const votingCreditType = drop.wave.voting_credit_type;
     const votingCreditLabel =
       WAVE_VOTING_LABELS[votingCreditType] ?? votingCreditType;
-    const voteButtonLabel = hasUserVoted
-      ? `You: ${isNegativeVote ? "-" : ""}${formatNumberWithCommas(
-          Math.abs(userVote)
-        )} ${votingCreditLabel}`
-      : undefined;
+    const votePrefix = isNegativeVote ? "-" : "";
+    let voteButtonLabel: string | undefined;
+    if (hasUserVoted) {
+      voteButtonLabel = `You: ${votePrefix}${formatNumberWithCommas(
+        Math.abs(userVote)
+      )} ${votingCreditLabel}`;
+    }
     const isApproveDrop =
       typeof winningThreshold === "number" && winningThreshold > 0;
 
