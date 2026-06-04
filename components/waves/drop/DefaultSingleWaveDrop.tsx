@@ -47,6 +47,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
         drop={extendedDrop}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
+        winningThreshold={winningThreshold}
       />
     </SingleWaveDropWrapper>
   );

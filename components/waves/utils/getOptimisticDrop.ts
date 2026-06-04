@@ -135,6 +135,8 @@ export const getOptimisticDrop = (
     rating_prediction: 0,
     reactions: [],
     boosts: 0,
+    is_additional_action_promised:
+      dropRequest.is_additional_action_promised ?? false,
     hide_link_preview: false,
     mentioned_groups: dropRequest.mentioned_groups ?? [],
   };

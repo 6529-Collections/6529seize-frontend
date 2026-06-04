@@ -145,6 +145,7 @@ export default function Drop({
         mediaImageScale={mediaImageScale}
         fullWidthMedia={fullWidthMedia}
         fullWidthLinkPreviews={fullWidthLinkPreviews}
+        winningThreshold={winningThreshold}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}
