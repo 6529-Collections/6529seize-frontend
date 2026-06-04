@@ -79,11 +79,6 @@ const getCreateWaveTimeLockMs = ({
   return timeLockMs;
 };
 
-const hasApproveTimingConflict = (config: CreateWaveConfig): boolean =>
-  config.overview.type === ApiWaveType.Approve &&
-  config.approval.thresholdTimeMs !== null &&
-  config.voting.timeWeighted.enabled;
-
 const isPositiveFiniteNumber = (
   value: number | null | undefined
 ): value is number =>
@@ -400,12 +395,6 @@ export const getCreateNewWaveBody = ({
     config.overview.type === ApiWaveType.Approve
       ? config.dates.endDate
       : calculateEndDate(config.dates);
-
-  if (hasApproveTimingConflict(config)) {
-    throw new Error(
-      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE
-    );
-  }
 
   return {
     name: config.overview.name,
