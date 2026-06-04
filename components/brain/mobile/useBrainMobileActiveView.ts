@@ -3,11 +3,6 @@
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import {
-  getWaveTabFromParam,
-  WAVE_TAB_QUERY_PARAM,
-} from "@/helpers/waves/wave-tabs.helpers";
-import { MyStreamWaveTab } from "@/types/waves.types";
 import { BrainView } from "./brainMobileViews";
 
 const GLOBAL_VIEWS = new Set([
@@ -236,7 +231,6 @@ export function useBrainMobileActiveView({
   const [selection, setSelection] = useState<ActiveViewSelection | null>(null);
   const hasWave = Boolean(waveId);
   const viewParam = searchParams.get("view");
-  const tabParam = getWaveTabFromParam(searchParams.get(WAVE_TAB_QUERY_PARAM));
   const createParam = searchParams.get("create");
   const routeDefaultView = getRouteDefaultView({
     createParam,
@@ -246,9 +240,7 @@ export function useBrainMobileActiveView({
     waveId,
   });
   const shellContextKey = `shell:${pathname}:${viewParam ?? ""}`;
-  const currentContextKey = waveId
-    ? `wave:${waveId}:${tabParam ?? ""}`
-    : shellContextKey;
+  const currentContextKey = waveId ? `wave:${waveId}` : shellContextKey;
   const currentContextToken = useMemo(
     () => Symbol(currentContextKey),
     [currentContextKey]
@@ -260,10 +252,8 @@ export function useBrainMobileActiveView({
     isCompleted,
     isRankWave,
   });
-  const waveRouteDefaultView =
-    tabParam === MyStreamWaveTab.FAQ ? BrainView.FAQ : null;
   const baseView = hasWave
-    ? (waveRouteDefaultView ?? waveDefaultView)
+    ? waveDefaultView
     : (routeDefaultView ?? BrainView.DEFAULT);
   const candidateView =
     selection?.contextToken === currentContextToken ? selection.view : baseView;

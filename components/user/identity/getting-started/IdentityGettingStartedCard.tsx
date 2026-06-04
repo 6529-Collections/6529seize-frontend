@@ -7,8 +7,6 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
 import { getWavePathRoute, getWaveRoute } from "@/helpers/navigation.helpers";
 import { MEMES_SEEKING_NOMINATION_WAVE_ID } from "@/helpers/waves/memes-nomination";
-import { WAVE_TAB_QUERY_PARAM } from "@/helpers/waves/wave-tabs.helpers";
-import { MyStreamWaveTab } from "@/types/waves.types";
 import {
   ArrowRightIcon,
   ArrowUpTrayIcon,
@@ -123,9 +121,6 @@ function IdentityGettingStartedCardContent({
             waveId: mainStageWaveId,
             isDirectMessage: false,
             isApp: false,
-            extraParams: {
-              [WAVE_TAB_QUERY_PARAM]: MyStreamWaveTab.LEADERBOARD,
-            },
           })
         : null,
     [mainStageWaveId]
@@ -195,9 +190,7 @@ function IdentityGettingStartedCardContent({
               into the network.
             </p>
 
-            <IdentityGettingStartedPrimaryAction
-              href={mainStageHref}
-            />
+            <IdentityGettingStartedPrimaryAction href={mainStageHref} />
           </div>
         </div>
 

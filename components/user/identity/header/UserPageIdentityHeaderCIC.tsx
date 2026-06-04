@@ -57,7 +57,7 @@ export default function UserPageIdentityHeaderCIC({
             {formatNumberWithCommas(cicRating)}
           </div>
           <div className="tw-mt-2 tw-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-semibold tw-uppercase">
-            <span className="-tw-mt-2 tw-h-4 tw-w-4 tw-flex-shrink-0">
+            <span className="-tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0">
               <UserCICTypeIconWrapper profile={profile} />
             </span>
             <UserCICStatus cic={cicRating} />

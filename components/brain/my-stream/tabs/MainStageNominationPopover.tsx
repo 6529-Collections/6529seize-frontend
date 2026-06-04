@@ -17,7 +17,7 @@ import {
 import {
   useMemesNomineeProgress,
   type NominationProgress,
-} from "@/hooks/useMemesNomineeProgress";
+} from "./useMemesNomineeProgress";
 
 const SEEKING_NOMINATION_ROUTE = getWavePathRoute(
   MEMES_SEEKING_NOMINATION_WAVE_ID

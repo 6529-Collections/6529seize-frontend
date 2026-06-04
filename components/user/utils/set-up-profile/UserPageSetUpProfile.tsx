@@ -12,7 +12,7 @@ import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
@@ -38,18 +38,20 @@ export default function UserPageSetUpProfile({
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
   const [classification, setClassification] =
-    useState<ApiProfileClassification>(profile.classification);
+    useState<ApiProfileClassification>(
+      profile.classification ?? ApiProfileClassification.Pseudonym
+    );
 
   const getHighestTdhWalletOrNone = () => {
     const tdhWallets = (profile.wallets ?? []).toSorted(
-      (a, b) => b.tdh - a.tdh
+      (a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)
     );
     const topWallet = tdhWallets[0];
     return topWallet !== undefined ? topWallet.wallet : "";
   };
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
-    profile.primary_wallet.length > 0
+    profile.primary_wallet && profile.primary_wallet.length > 0
       ? profile.primary_wallet
       : getHighestTdhWalletOrNone()
   );
