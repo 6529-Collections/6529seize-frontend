@@ -25,6 +25,15 @@ function FieldHelper({ children }: { readonly children: ReactNode }) {
   );
 }
 
+const getInitialClassification = (
+  profile: ApiIdentity
+): ApiProfileClassification =>
+  (
+    profile as {
+      readonly classification?: ApiProfileClassification | null | undefined;
+    }
+  ).classification ?? ApiProfileClassification.Pseudonym;
+
 export default function UserPageSetUpProfile({
   profile,
 }: {
@@ -38,13 +47,11 @@ export default function UserPageSetUpProfile({
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
   const [classification, setClassification] =
-    useState<ApiProfileClassification>(
-      profile.classification ?? ApiProfileClassification.Pseudonym
-    );
+    useState<ApiProfileClassification>(getInitialClassification(profile));
 
   const getHighestTdhWalletOrNone = () => {
     const tdhWallets = (profile.wallets ?? []).toSorted(
-      (a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)
+      (a, b) => b.tdh - a.tdh
     );
     const topWallet = tdhWallets[0];
     return topWallet !== undefined ? topWallet.wallet : "";
@@ -124,7 +131,7 @@ export default function UserPageSetUpProfile({
       classification,
     };
 
-    if (profile.pfp !== null) {
+    if (profile.pfp) {
       body.pfp_url = profile.pfp;
     }
 
