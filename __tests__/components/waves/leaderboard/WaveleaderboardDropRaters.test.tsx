@@ -19,6 +19,7 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
       data-testid="progress"
       data-current={props.current}
       data-projected={props.projected}
+      data-projected-label={props.projectedLabel ?? ""}
       data-tooltip-label={props.tooltipLabel}
     />
   ),
@@ -136,12 +137,16 @@ describe("WaveLeaderboardDropRaters", () => {
       />
     );
 
-    expect(screen.getByText("38,936,088")).toBeInTheDocument();
-    expect(screen.getByText("42,000,000")).toBeInTheDocument();
+    expect(
+      screen.getByTitle("38,936,088 / 42,000,000 TDH")
+    ).toBeInTheDocument();
+    expect(screen.getByText("38.9M")).toBeInTheDocument();
+    expect(screen.getByText("42M")).toBeInTheDocument();
     expect(screen.getByText("Needs 3,063,912")).toBeInTheDocument();
     const progress = screen.getByTestId("progress");
     expect(progress).toHaveAttribute("data-current", "38936088");
     expect(progress).toHaveAttribute("data-projected", "80273465");
+    expect(progress).toHaveAttribute("data-projected-label", "80.3M");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
       "Realtime votes given"

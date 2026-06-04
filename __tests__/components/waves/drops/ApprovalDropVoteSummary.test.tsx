@@ -9,6 +9,7 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
       data-testid="progress"
       data-current={props.current}
       data-projected={props.projected}
+      data-projected-label={props.projectedLabel ?? ""}
       data-tooltip-label={props.tooltipLabel}
       data-compact={String(props.compact)}
       data-subtle={String(props.subtle)}
@@ -107,6 +108,45 @@ describe("ApprovalDropVoteSummary", () => {
     }
   });
 
+  it("uses compact approval footer labels for chat summaries", () => {
+    render(
+      <ApprovalDropVoteSummary
+        drop={createDrop({
+          rating: 70_022_534,
+          realtime_rating: 77_694_101,
+          raters_count: 22,
+          wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+          context_profile_context: { rating: 100 },
+        })}
+        winningThreshold={42_000_000}
+        variant="chat"
+      />
+    );
+
+    expect(
+      screen.getByTitle("70,022,534 / 42,000,000 TDH")
+    ).toBeInTheDocument();
+    expect(screen.getByText("70M")).toBeInTheDocument();
+    expect(screen.getByText("42M")).toBeInTheDocument();
+    expect(screen.getByText("TDH")).toBeInTheDocument();
+    expect(screen.getByText("+100 TDH")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: "View voters and vote log for 22 voters",
+      })
+    ).toBeInTheDocument();
+
+    const progress = screen.getByTestId("progress");
+    expect(progress).toHaveAttribute("data-current", "70022534");
+    expect(progress).toHaveAttribute("data-projected", "77694101");
+    expect(progress).toHaveAttribute("data-projected-label", "77.7M");
+    expect(progress).toHaveAttribute(
+      "data-tooltip-label",
+      "Realtime votes given"
+    );
+    expect(progress).toHaveAttribute("data-compact", "true");
+  });
+
   it("uses winning context as the official approved state", () => {
     render(
       <ApprovalDropVoteSummary
@@ -160,5 +200,49 @@ describe("ApprovalDropVoteSummary", () => {
 
     expect(screen.getByText("Your votes:")).toBeInTheDocument();
     expect(screen.getByText("-4 Rep")).toBeInTheDocument();
+  });
+
+  it("uses compact approval labels for leaderboard summaries", () => {
+    render(
+      <ApprovalDropVoteSummary
+        drop={createDrop({
+          rating: 70_022_534,
+          realtime_rating: 77_694_101,
+          wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+        })}
+        winningThreshold={42_000_000}
+        variant="leaderboard"
+      />
+    );
+
+    expect(
+      screen.getByTitle("70,022,534 / 42,000,000 TDH")
+    ).toBeInTheDocument();
+    expect(screen.getByText("70M")).toBeInTheDocument();
+    expect(screen.getByText("42M")).toBeInTheDocument();
+    expect(screen.queryByText("70,022,534")).not.toBeInTheDocument();
+    expect(screen.queryByText("42,000,000")).not.toBeInTheDocument();
+    expect(screen.getByTestId("progress")).toHaveAttribute(
+      "data-projected-label",
+      "77.7M"
+    );
+  });
+
+  it("keeps final summaries on full comma formatting", () => {
+    render(
+      <ApprovalDropVoteSummary
+        drop={createDrop({
+          rating: 70_022_534,
+          realtime_rating: 77_694_101,
+          wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+        })}
+        winningThreshold={42_000_000}
+        variant="final"
+      />
+    );
+
+    expect(screen.getByText("70,022,534")).toBeInTheDocument();
+    expect(screen.getByText("42,000,000")).toBeInTheDocument();
+    expect(screen.queryByText("70M")).not.toBeInTheDocument();
   });
 });

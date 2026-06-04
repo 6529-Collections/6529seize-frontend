@@ -2,7 +2,7 @@
 
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatLargeNumber, formatNumberWithCommas } from "@/helpers/Helpers";
 import {
   formatApprovalCountdownTime,
   type ApprovalDropStatus,
@@ -89,6 +89,15 @@ const getCurrentValueClass = ({
   return current < 0 ? "tw-text-rose-500" : "tw-text-emerald-500";
 };
 
+const formatSignedVote = (vote: number): string => {
+  if (vote === 0) {
+    return "0";
+  }
+
+  const sign = vote > 0 ? "+" : "-";
+  return `${sign}${formatNumberWithCommas(Math.abs(vote))}`;
+};
+
 export default function ApprovalDropVoteSummary({
   drop,
   winningThreshold,
@@ -114,6 +123,8 @@ export default function ApprovalDropVoteSummary({
   const userVote = drop.context_profile_context?.rating ?? 0;
   const hasUserVoted = userVote !== 0;
   const userVoteClass = userVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
+  const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
+  const totalVoteClass = current < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   if (variant === "compact") {
     return (
@@ -152,14 +163,92 @@ export default function ApprovalDropVoteSummary({
     );
   }
 
+  if (variant === "chat" || variant === "leaderboard") {
+    const scoreLabel = `${formatNumberWithCommas(
+      current
+    )} / ${formatNumberWithCommas(winningThreshold)} ${votingLabel}`;
+    const wrapperClassName =
+      variant === "chat"
+        ? "tw-flex tw-min-w-0 tw-w-full tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5"
+        : "tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5 sm:tw-justify-end";
+
+    return (
+      <div className={wrapperClassName}>
+        <div
+          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1"
+          title={scoreLabel}
+        >
+          <span className="tw-sr-only">{scoreLabel}</span>
+          <span
+            aria-hidden="true"
+            className={`tw-font-medium tw-tabular-nums ${totalVoteClass}`}
+          >
+            {formatLargeNumber(current)}
+          </span>
+          <span
+            aria-hidden="true"
+            className="tw-font-medium tw-text-iron-500"
+          >
+            /
+          </span>
+          <span
+            aria-hidden="true"
+            className="tw-font-medium tw-tabular-nums tw-text-iron-50"
+          >
+            {formatLargeNumber(winningThreshold)}
+          </span>
+          <span
+            aria-hidden="true"
+            className="tw-font-medium tw-text-iron-400"
+          >
+            {votingLabel}
+          </span>
+          <DropVoteProgressing
+            current={current}
+            projected={drop.realtime_rating}
+            projectedLabel={
+              typeof drop.realtime_rating === "number"
+                ? formatLargeNumber(drop.realtime_rating)
+                : undefined
+            }
+            tooltipLabel="Realtime votes given"
+            compact
+          />
+          <span className={`tw-font-normal ${statusClass}`}>
+            {statusLabel}
+          </span>
+        </div>
+
+        {showVoters && (
+          <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap">
+            <ParticipationDropVoteDetailsTrigger drop={drop} />
+          </div>
+        )}
+
+        {showUserVote && hasUserVoted && (
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
+            <span className="tw-min-w-0">
+              <span className="tw-font-normal tw-text-iron-400">
+                {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
+              </span>
+              <span
+                className={`tw-whitespace-nowrap tw-font-medium ${userVoteClass}`}
+              >
+                {formatSignedVote(userVote)} {votingLabel}
+              </span>
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   const wrapperClassName =
     variant === "leaderboard"
       ? "tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 sm:tw-justify-end"
       : variant === "final"
         ? "tw-mt-1 tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5"
         : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2";
-
-  const totalVoteClass = current < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
 
   return (
     <div className={wrapperClassName}>
