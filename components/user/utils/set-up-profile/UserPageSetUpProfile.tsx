@@ -54,7 +54,7 @@ export default function UserPageSetUpProfile({
       (a, b) => b.tdh - a.tdh
     );
     const topWallet = tdhWallets[0];
-    return topWallet !== undefined ? topWallet.wallet : "";
+    return topWallet === undefined ? "" : topWallet.wallet;
   };
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
