@@ -103,6 +103,46 @@ describe("buildWavesMetadata", () => {
     expect(metadata.twitter).toEqual({ card: "summary_large_image" });
   });
 
+  it("uses drop metadata when a drop id query param is shared", async () => {
+    (commonApiFetch as jest.Mock)
+      .mockResolvedValueOnce({
+        id: "wave-chat",
+        name: "Memes-Chat",
+        author: {
+          handle: "punk6529",
+          primary_address: "0xfd22004806a6846ea67ad883356be810f0428793",
+        },
+      })
+      .mockResolvedValueOnce({
+        author: {
+          handle: "phoebeum",
+          primary_address: "0xfe49a85e98941f1a115acd4beb98521023a25802",
+        },
+        drop: {
+          serial_no: 6511,
+          drop_type: "CHAT",
+        },
+      });
+
+    const metadata = await buildWavesMetadata("wave-chat", {
+      drop: "c6151fb2-3358-40d7-9ce5-8613467f800f",
+    });
+
+    expect(commonApiFetch).toHaveBeenLastCalledWith({
+      endpoint: "og-metadata/drops/c6151fb2-3358-40d7-9ce5-8613467f800f",
+      headers: { "x-test": "1" },
+    });
+    expect(metadata.openGraph).toMatchObject({
+      images: [
+        {
+          url: "https://6529.io/api/og-metadata/drops/c6151fb2-3358-40d7-9ce5-8613467f800f",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    });
+  });
+
   it("uses submission drop metadata when a serial number is shared", async () => {
     (commonApiFetch as jest.Mock)
       .mockResolvedValueOnce({
