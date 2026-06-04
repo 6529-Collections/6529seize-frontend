@@ -5,6 +5,7 @@ import { Tooltip } from "react-tooltip";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
+import ApprovalDropVoteSummary from "./ApprovalDropVoteSummary";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -29,14 +30,27 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({
   winningThreshold,
 }) => {
   const [activeRaterId, setActiveRaterId] = React.useState<string | null>(null);
+  const hasWinningThreshold =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0;
+
+  if (hasWinningThreshold) {
+    return (
+      <ApprovalDropVoteSummary
+        drop={drop}
+        winningThreshold={winningThreshold}
+        variant="final"
+      />
+    );
+  }
+
   const totalVote = drop.rating;
   const userVote = drop.context_profile_context?.rating ?? 0;
   const hasUserVoted = userVote !== 0;
   const votingLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const totalVoteClass = totalVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
   const userVoteClass = userVote < 0 ? "tw-text-rose-400" : "tw-text-iron-50";
-  const hasWinningThreshold =
-    typeof winningThreshold === "number" && winningThreshold > 0;
 
   return (
     <div className="tw-mt-1 tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5">
@@ -47,14 +61,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({
           </span>
           <DropVoteProgressing
             current={drop.rating}
-            projected={
-              hasWinningThreshold
-                ? drop.realtime_rating
-                : drop.rating_prediction
-            }
-            tooltipLabel={
-              hasWinningThreshold ? "Realtime votes given" : undefined
-            }
+            projected={drop.rating_prediction}
             compact
           />
         </div>
