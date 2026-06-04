@@ -35,6 +35,10 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   const isCurrentlyProcessing = isOperationInProgress(waveId);
   const isPinned = pinnedIds.includes(waveId);
+  const isOfficialWave = useMemo(
+    () => waves.list.some((wave) => wave.id === waveId && wave.isOfficial),
+    [waves.list, waveId]
+  );
   const canPinCurrentWave = useMemo(
     () => canPinWave(waveId),
     [canPinWave, waveId]
@@ -97,7 +101,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     return null;
   }
 
-  if (isAnnouncementsWave(waveId) && !isPinned) {
+  if ((isAnnouncementsWave(waveId) || isOfficialWave) && !isPinned) {
     return null;
   }
 

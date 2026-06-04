@@ -57,6 +57,7 @@ const sentinel = document.createElement("div");
 
 const baseWaves = [
   createMockMinimalWave({ id: "a1" }),
+  createMockMinimalWave({ id: "o1", isOfficial: true }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
@@ -77,7 +78,7 @@ beforeEach(() => {
   });
 });
 
-it("renders announcement, pinned, and regular sections without double rendering", () => {
+it("renders announcement, official, pinned, and regular sections without double rendering", () => {
   const ref = React.createRef<WebUnifiedWavesListWavesHandle>();
 
   render(
@@ -92,11 +93,34 @@ it("renders announcement, pinned, and regular sections without double rendering"
   expect(screen.getByTestId("header-Waves")).toBeInTheDocument();
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
+  expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
+  expect(
+    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
+  ).toEqual(["wave-a1", "wave-o1", "wave-p1", "wave-r1"]);
   expect(ref.current?.sentinelRef.current).toBe(sentinel);
+});
+
+it("passes pin controls through for pinned official waves", () => {
+  render(
+    <WebUnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "o1",
+          isOfficial: true,
+          isPinned: true,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });
 
 it("passes pin controls through for pinned announcement waves", () => {

@@ -39,6 +39,11 @@ export default function WaveMute({
           queryKey: [QueryKey.WAVES_V2],
         })
         .catch(() => undefined);
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.OFFICIAL_WAVES],
+        })
+        .catch(() => undefined);
       onSuccess?.();
     } catch (error) {
       const defaultMessage = isMuted
@@ -60,7 +65,7 @@ export default function WaveMute({
       disabled={loading}
       onClick={(e) => {
         e.stopPropagation();
-        handleToggleMute();
+        void handleToggleMute();
       }}
       className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-border-none tw-bg-transparent tw-px-3 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
       role="menuitem"

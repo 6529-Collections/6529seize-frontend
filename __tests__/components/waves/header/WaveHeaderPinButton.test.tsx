@@ -8,11 +8,13 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 // Create mocks that we can access
 const mockAddPinnedWave = jest.fn();
 const mockRemovePinnedWave = jest.fn();
+let mockWavesList: any[] = [];
 
 // Mock the MyStreamContext
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({
     waves: {
+      list: mockWavesList,
       addPinnedWave: mockAddPinnedWave,
       removePinnedWave: mockRemovePinnedWave,
     },
@@ -62,6 +64,7 @@ const mockUseSeizeSettings = useSeizeSettings as jest.Mock;
 describe("WaveHeaderPinButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockWavesList = [];
     mockUseSeizeSettings.mockReturnValue({
       isAnnouncementsWave: () => false,
       isLoaded: true,
@@ -120,6 +123,26 @@ describe("WaveHeaderPinButton", () => {
         isAnnouncementsWave: (waveId: string) => waveId === "wave-123",
         isLoaded: false,
       });
+      mockUsePinnedWavesServer.mockReturnValue({
+        pinnedIds: ["wave-123"],
+        isOperationInProgress: mockIsOperationInProgress,
+        canPinWave: mockCanPinWave,
+      });
+      renderComponent();
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "aria-label",
+        "Unpin wave"
+      );
+    });
+
+    it("does not render for an unpinned official wave", () => {
+      mockWavesList = [{ id: "wave-123", isOfficial: true }];
+      const { container } = renderComponent();
+      expect(container.firstChild).toBeNull();
+    });
+
+    it("renders unpin control for a pinned official wave", () => {
+      mockWavesList = [{ id: "wave-123", isOfficial: true }];
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,

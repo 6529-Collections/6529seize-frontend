@@ -31,6 +31,10 @@ jest.mock("@/hooks/useShowFollowingWaves", () => ({
   useShowFollowingWaves: jest.fn(() => [false]),
 }));
 
+jest.mock("@/hooks/useOfficialWaves", () => ({
+  useOfficialWaves: jest.fn(),
+}));
+
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
@@ -44,6 +48,8 @@ const useSeizeConnectContextMock =
 const useSeizeSettingsMock = require("@/contexts/SeizeSettingsContext")
   .useSeizeSettings as jest.Mock;
 const useWaveByIdMock = useWaveById as jest.Mock;
+const useOfficialWavesMock =
+  require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider
@@ -122,12 +128,22 @@ const announcementWave = createSidebarWave({
   id: "4",
   latestDropTimestamp: 300,
 });
+const officialWave = createSidebarWave({
+  id: "5",
+  latestDropTimestamp: 250,
+});
+const pinnedOfficialWave = createSidebarWave({
+  id: "6",
+  latestDropTimestamp: 350,
+});
 const legacyAnnouncementWave = createLegacyApiWave("4", 300);
 let announcementRefetchMock: jest.Mock;
+let officialWavesRefetchMock: jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
   announcementRefetchMock = jest.fn();
+  officialWavesRefetchMock = jest.fn();
   useSeizeConnectContextMock.mockReturnValue({ address: "0xABC" });
   useWavesV2Mock.mockReturnValue({
     waves: [dmWave, mainWave],
@@ -146,6 +162,12 @@ beforeEach(() => {
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
+  });
+  useOfficialWavesMock.mockReturnValue({
+    waves: [],
+    isFetching: false,
+    status: "success",
+    refetch: officialWavesRefetchMock,
   });
   useSeizeSettingsMock.mockReturnValue({
     seizeSettings: {
@@ -178,6 +200,96 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
       refetchIntervalInBackground: false,
     })
   );
+  expect(useOfficialWavesMock).toHaveBeenCalledWith(
+    expect.objectContaining({
+      viewerIdentityKey: "0xabc:primary",
+      refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+      refetchIntervalInBackground: false,
+    })
+  );
+});
+
+test("places official waves below announcements and removes official duplicates from pinned metadata", () => {
+  useWavesV2Mock.mockReturnValue({
+    waves: [announcementWave, officialWave, mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["2", "3", "5", "6"],
+    pinnedWaves: [pinnedExtra, officialWave, pinnedOfficialWave],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+  useOfficialWavesMock.mockReturnValue({
+    waves: [officialWave, pinnedOfficialWave],
+    isFetching: false,
+    status: "success",
+    refetch: officialWavesRefetchMock,
+  });
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: {
+      announcements_wave_id: "4",
+    },
+    isAnnouncementsWave: (waveId: string | null | undefined) => waveId === "4",
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "4",
+    "6",
+    "5",
+    "3",
+    "2",
+  ]);
+  expect(
+    result.current.waves
+      .filter((wave: any) => wave.isOfficial)
+      .map((wave: any) => ({ id: wave.id, isPinned: wave.isPinned }))
+  ).toEqual([
+    { id: "6", isPinned: true },
+    { id: "5", isPinned: true },
+  ]);
+  expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
+});
+
+test("refetches official waves when refetching all waves", () => {
+  const mainWavesRefetch = jest.fn();
+  const pinnedRefetch = jest.fn();
+  useWavesV2Mock.mockReturnValue({
+    waves: [mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: mainWavesRefetch,
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: pinnedRefetch,
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  result.current.refetchAllWaves();
+
+  expect(mainWavesRefetch).toHaveBeenCalled();
+  expect(officialWavesRefetchMock).toHaveBeenCalled();
+  expect(pinnedRefetch).toHaveBeenCalled();
 });
 
 test("injects the announcement wave once and excludes it from pinned metadata", () => {

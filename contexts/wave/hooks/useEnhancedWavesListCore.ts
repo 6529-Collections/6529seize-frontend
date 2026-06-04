@@ -16,13 +16,17 @@ export interface MinimalWave {
   picture: string | null;
   contributors: readonly SidebarWaveContributor[];
   isPinned: boolean;
+  isOfficial: boolean;
   isMuted: boolean;
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
 }
 
-type EnhancedSidebarWave = SidebarWave & { readonly isPinned?: boolean };
+type EnhancedSidebarWave = SidebarWave & {
+  readonly isPinned?: boolean;
+  readonly isOfficial?: boolean;
+};
 
 interface WavesDataSource {
   waves: EnhancedSidebarWave[];
@@ -164,6 +168,7 @@ function useEnhancedWavesListCore(
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)
           : false,
+        isOfficial: wave.isOfficial ?? false,
         isMuted: wave.muted,
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,

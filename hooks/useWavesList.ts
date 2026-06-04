@@ -13,10 +13,14 @@ import {
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
+import { useOfficialWaves } from "./useOfficialWaves";
 import type { SidebarWave } from "@/types/waves.types";
 
 // Enhanced wave interface with isPinned field and newDropsCount
-type EnhancedWave = SidebarWave & { readonly isPinned: boolean };
+type EnhancedWave = SidebarWave & {
+  readonly isPinned: boolean;
+  readonly isOfficial?: boolean;
+};
 
 /**
  * Hook for managing and fetching waves list including pinned waves
@@ -75,13 +79,34 @@ const useWavesList = () => {
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });
+  const {
+    waves: officialWaves,
+    isFetching: isOfficialWavesFetching,
+    refetch: officialWavesRefetch,
+  } = useOfficialWaves({
+    viewerIdentityKey,
+    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchIntervalInBackground: false,
+  });
+  const officialWaveIds = useMemo(
+    () => new Set(officialWaves.map((wave) => wave.id)),
+    [officialWaves]
+  );
+  const visibleOfficialWaves = useMemo(
+    () =>
+      officialWaves.filter(
+        (wave) => !wave.isDirectMessage && !isAnnouncementsWave(wave.id)
+      ),
+    [officialWaves, isAnnouncementsWave]
+  );
 
   const trackedAnnouncementWave = useMemo(
     () =>
       mainWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
+      officialWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
       serverPinnedWaves.find((wave) => isAnnouncementsWave(wave.id)) ??
       null,
-    [mainWaves, serverPinnedWaves, isAnnouncementsWave]
+    [mainWaves, officialWaves, serverPinnedWaves, isAnnouncementsWave]
   );
   const shouldFetchAnnouncementWave = Boolean(
     announcementsWaveId && !trackedAnnouncementWave
@@ -119,12 +144,12 @@ const useWavesList = () => {
   const mainWavesMap = useMemo(() => {
     const map = new Map<string, SidebarWave>();
     mainWaves.forEach((wave) => {
-      if (!isAnnouncementsWave(wave.id)) {
+      if (!isAnnouncementsWave(wave.id) && !officialWaveIds.has(wave.id)) {
         map.set(wave.id, wave);
       }
     });
     return map;
-  }, [mainWaves, isAnnouncementsWave]);
+  }, [mainWaves, isAnnouncementsWave, officialWaveIds]);
 
   // Set of wave IDs in the main list for quick checking
   const mainWaveIds = useMemo(() => {
@@ -137,13 +162,16 @@ const useWavesList = () => {
   const refetchAllWaves = useCallback(() => {
     // Refetch main waves overview
     mainWavesRefetch();
+    // Refetch official waves
+    officialWavesRefetch();
     // Refetch server-side pinned waves
-    refetchPinnedWaves();
+    void refetchPinnedWaves();
     if (shouldFetchAnnouncementWave) {
       void announcementRefetch();
     }
   }, [
     mainWavesRefetch,
+    officialWavesRefetch,
     refetchPinnedWaves,
     announcementRefetch,
     shouldFetchAnnouncementWave,
@@ -153,9 +181,12 @@ const useWavesList = () => {
   const separatelyFetchedPinnedWaves = useMemo(() => {
     // Filter out pinned waves that are already in mainWaves to avoid duplicates
     return serverPinnedWaves.filter(
-      (wave) => !mainWaveIds.has(wave.id) && !isAnnouncementsWave(wave.id)
+      (wave) =>
+        !mainWaveIds.has(wave.id) &&
+        !isAnnouncementsWave(wave.id) &&
+        !officialWaveIds.has(wave.id)
     );
-  }, [serverPinnedWaves, mainWaveIds, isAnnouncementsWave]);
+  }, [serverPinnedWaves, mainWaveIds, isAnnouncementsWave, officialWaveIds]);
 
   // Collect ALL pinned waves (both from mainWaves and server-provided)
   const allPinnedWaves = useMemo(() => {
@@ -163,13 +194,17 @@ const useWavesList = () => {
 
     // Add all server-provided pinned waves, filtering out DMs
     serverPinnedWaves.forEach((wave) => {
-      if (!wave.isDirectMessage && !isAnnouncementsWave(wave.id)) {
+      if (
+        !wave.isDirectMessage &&
+        !isAnnouncementsWave(wave.id) &&
+        !officialWaveIds.has(wave.id)
+      ) {
         result.push({ ...wave, isPinned: true });
       }
     });
 
     return result;
-  }, [serverPinnedWaves, isAnnouncementsWave]);
+  }, [serverPinnedWaves, isAnnouncementsWave, officialWaveIds]);
 
   // New drops counts are now managed externally
 
@@ -181,7 +216,11 @@ const useWavesList = () => {
     const allWavesArray: EnhancedWave[] = [];
 
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
-      if (wave.isDirectMessage || isAnnouncementsWave(wave.id)) {
+      if (
+        wave.isDirectMessage ||
+        isAnnouncementsWave(wave.id) ||
+        officialWaveIds.has(wave.id)
+      ) {
         return;
       }
 
@@ -190,6 +229,16 @@ const useWavesList = () => {
         isPinned: pinnedWavesSet.has(wave.id),
       });
     });
+
+    const sortedOfficialWaves = visibleOfficialWaves
+      .map((wave) => ({
+        ...wave,
+        isPinned: pinnedWavesSet.has(wave.id) || wave.pinned,
+        isOfficial: true,
+      }))
+      .sort(
+        (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
+      );
 
     const sortedNonAnnouncementWaves = [...allWavesMap.values()].sort(
       (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
@@ -202,15 +251,18 @@ const useWavesList = () => {
       });
     }
 
+    allWavesArray.push(...sortedOfficialWaves);
     allWavesArray.push(...sortedNonAnnouncementWaves);
 
     return allWavesArray;
   }, [
     mainWaves,
     separatelyFetchedPinnedWaves,
+    visibleOfficialWaves,
     pinnedIds,
     announcementWave,
     isAnnouncementsWave,
+    officialWaveIds,
   ]);
 
   // Derived data should come directly from memoized inputs
@@ -235,7 +287,7 @@ const useWavesList = () => {
       waves: allWaves,
 
       // Original waves pagination and loading
-      isFetching,
+      isFetching: isFetching || isOfficialWavesFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPage: fetchNextPageStable,
@@ -265,6 +317,7 @@ const useWavesList = () => {
     [
       allWaves,
       isFetching,
+      isOfficialWavesFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPageStable,
