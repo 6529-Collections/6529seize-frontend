@@ -4,7 +4,8 @@
 
 Use `Voting` in `Rank` and `Approve` wave creation to define how votes are
 counted.
-Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
+Pick the vote mode, optional `Rep` scope, optional time-weighted averaging, and
+approve-wave threshold behavior.
 
 ## Location in the Site
 
@@ -43,7 +44,11 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 3. Set `Allow Negative Votes`.
 4. Optional: enable `Time-Weighted Voting`.
 5. If enabled, set `Averaging Interval` in `Minutes` or `Hours`.
-6. Click `Next` to continue to `Outcomes`.
+6. For `Approve` waves, set `Approval threshold`.
+7. For `Approve` waves, choose `No hold` or `Require hold time`.
+8. If hold time is required, set `Minimum time above threshold` in `Minutes` or
+   `Hours`.
+9. Click `Next` to continue to `Outcomes`.
 
 ## Validation and State Rules
 
@@ -57,6 +62,14 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
   selected-unit minimum (`5` minutes or `1` hour).
 - If interval is above maximum, it is capped (`1440` minutes or `24` hours).
 - Switching between `Minutes` and `Hours` converts and clamps the interval.
+- `Approve` wave approval threshold must be a whole number greater than `0`.
+- `No hold` approves a drop as soon as the score reaches the threshold.
+- `Require hold time` requires the score to stay at or above the threshold for
+  the configured time.
+- Hold time must be a whole positive minute value and cannot be longer than a
+  finite approve-wave duration.
+- Time-weighted voting and hold time can be enabled together. In that case, the
+  hold checks the time-weighted score.
 - `Allow Negative Votes` defaults on, so existing behavior still allows
   negative votes.
 - Wave create payload sends the inverse backend flag:
@@ -67,6 +80,8 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
 - If `Rep` validation blocks progress, fill either `Rep Category` or
   `Profile`, then click `Next` again.
 - If time-weighted interval validation appears, set a value in range and retry.
+- If hold-time validation appears, set a whole positive minute/hour value,
+  choose `No hold`, or extend the approve-wave end date.
 - If submit fails later in `Description`, keep voting settings and retry submit.
 
 ## Limitations / Notes
@@ -75,6 +90,7 @@ Pick the vote mode, optional `Rep` scope, and optional time-weighted averaging.
   `Memes TDH`.
 - `Allow Negative Votes` is interactive for `Rank` and `Approve` waves.
 - Time-weighted voting is available for `Rank` and `Approve` waves.
+- Approval threshold and hold time are available for `Approve` waves.
 - `Approve` is available in the create-wave type picker.
 
 ## Related Pages
