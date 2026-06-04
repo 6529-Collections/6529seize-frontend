@@ -459,10 +459,16 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("rejects approve waves with threshold hold time and time weighted voting enabled", () => {
+  it("allows approve waves with threshold hold time and time weighted voting enabled", () => {
     const approveConfig = {
       ...baseConfig,
       overview: { type: ApiWaveType.Approve, name: "n", image: null },
+      dates: {
+        ...baseConfig.dates,
+        submissionStartDate: 1_000,
+        votingStartDate: 1_000,
+        endDate: 1_000 + HOUR_IN_MS,
+      },
       approval: {
         threshold: 1,
         thresholdTimeMs: HOUR_IN_MS,
@@ -483,9 +489,7 @@ describe("create-wave.validation", () => {
       config: approveConfig,
     });
 
-    expect(errors).toContain(
-      CREATE_WAVE_VALIDATION_ERROR.APPROVAL_TIMING_OPTIONS_MUTUALLY_EXCLUSIVE
-    );
+    expect(errors).toEqual([]);
   });
 
   it("rejects invalid approve threshold hold time", () => {

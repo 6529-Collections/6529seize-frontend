@@ -578,7 +578,7 @@ describe("useWaveConfig", () => {
       expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
     });
 
-    it("should clear threshold time when approve time weighted voting is enabled", () => {
+    it("should preserve threshold time when approve time weighted voting is enabled", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -598,7 +598,7 @@ describe("useWaveConfig", () => {
         });
       });
 
-      expect(result.current.config.approval.thresholdTimeMs).toBeNull();
+      expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
       expect(result.current.config.voting.timeWeighted).toEqual({
         enabled: true,
         averagingInterval: 1,
@@ -606,7 +606,7 @@ describe("useWaveConfig", () => {
       });
     });
 
-    it("should disable approve time weighted voting when threshold time is set", () => {
+    it("should preserve approve time weighted voting when threshold time is set", () => {
       const { result } = renderHook(() => useWaveConfig());
 
       act(() => {
@@ -628,7 +628,7 @@ describe("useWaveConfig", () => {
 
       expect(result.current.config.approval.thresholdTimeMs).toBe(60000);
       expect(result.current.config.voting.timeWeighted).toEqual({
-        enabled: false,
+        enabled: true,
         averagingInterval: 1,
         averagingIntervalUnit: "hours",
       });
