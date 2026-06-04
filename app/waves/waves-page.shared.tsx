@@ -49,6 +49,10 @@ export const getFirstSearchParamValue = (
   return typeof value === "string" ? value : null;
 };
 
+const getDropMetadataId = (searchParams: WavesSearchParams): string | null =>
+  getFirstSearchParamValue(searchParams, "serialNo") ||
+  getFirstSearchParamValue(searchParams, "drop");
+
 const fetchWaveCached = cache(
   async (
     waveId: string | null,
@@ -225,14 +229,14 @@ export async function buildWavesMetadata(
       ? `@${wave.author.handle.replace(/^@/, "")}`
       : formatAddress(wave.author.primary_address);
 
-  const dropSerialNo = getFirstSearchParamValue(searchParams, "serialNo");
-  if (dropSerialNo) {
+  const dropMetadataId = getDropMetadataId(searchParams);
+  if (dropMetadataId) {
     const dropMetadata = await fetchDropOgMetadataCached(
-      dropSerialNo,
+      dropMetadataId,
       metadataHeadersKey
     );
     const dropPageMetadata = buildDropPageMetadata({
-      dropId: dropSerialNo,
+      dropId: dropMetadataId,
       metadata: dropMetadata,
       waveName,
     });
