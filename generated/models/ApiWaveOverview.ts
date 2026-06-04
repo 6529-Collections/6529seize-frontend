@@ -31,6 +31,8 @@ export class ApiWaveOverview {
     'is_private': boolean;
     'contributors'?: Array<ApiWaveOverviewContributor>;
     'context_profile_context'?: ApiWaveOverviewContextProfileContext;
+    'parent_wave'?: ApiWaveOverview;
+    'has_subwaves'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -119,6 +121,18 @@ export class ApiWaveOverview {
             "name": "context_profile_context",
             "baseName": "context_profile_context",
             "type": "ApiWaveOverviewContextProfileContext",
+            "format": ""
+        },
+        {
+            "name": "parent_wave",
+            "baseName": "parent_wave",
+            "type": "ApiWaveOverview",
+            "format": ""
+        },
+        {
+            "name": "has_subwaves",
+            "baseName": "has_subwaves",
+            "type": "boolean",
             "format": ""
         }    ];
 

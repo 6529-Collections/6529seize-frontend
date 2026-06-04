@@ -24,6 +24,10 @@ export class ApiSubmissionDropContext {
     * Unix timestamp in milliseconds when this active APPROVE submission most recently started continuously meeting the winning threshold. Omitted unless the drop is currently over threshold and has not yet won.
     */
     'over_threshold_since_ms'?: number;
+    /**
+    * Unix timestamp in milliseconds when this submission won. Omitted unless the submission has won.
+    */
+    'won_at'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -57,6 +61,12 @@ export class ApiSubmissionDropContext {
         {
             "name": "over_threshold_since_ms",
             "baseName": "over_threshold_since_ms",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "won_at",
+            "baseName": "won_at",
             "type": "number",
             "format": "int64"
         }    ];

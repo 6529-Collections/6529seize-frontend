@@ -47,8 +47,7 @@ const getDescriptionTop = (lineCount: number): number =>
           Math.max(lineCount, 1)) /
         2
   );
-const FALLBACK_PRIMARY_COLOR = "#111827";
-const FALLBACK_SECONDARY_COLOR = "#2563eb";
+const PROFILE_MAIN_BACKGROUND = "#131316";
 const LOGO_URL = `${publicEnv.BASE_ENDPOINT}/6529.svg`;
 const LOGO_SIZE = 42;
 const HEX_COLOR_PATTERN = /^#[\da-f]{3}(?:[\da-f]{3})?$/i;
@@ -63,6 +62,35 @@ type ProfileWithOptionalRates = ApiOgMetadataProfile & {
 const getSafeColor = (value: string | null | undefined): string | null => {
   const normalized = getUsableText(value);
   return normalized && HEX_COLOR_PATTERN.test(normalized) ? normalized : null;
+};
+
+const getSeededNumber = (value: string): number => {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index++) {
+    hash = Math.imul(hash ^ value.charCodeAt(index), 16777619);
+  }
+
+  return hash >>> 0;
+};
+
+const getFallbackBannerColors = (
+  profile: ApiOgMetadataProfile | undefined,
+  identity: string
+): { readonly primary: string; readonly secondary: string } => {
+  const seed =
+    getUsableText(profile?.id) ??
+    getUsableText(profile?.handle) ??
+    getUsableText(profile?.primary_address) ??
+    identity;
+  const primaryHue = getSeededNumber(seed) % 360;
+  const secondaryHue =
+    (primaryHue + 45 + (getSeededNumber(`${seed}:2`) % 90)) % 360;
+
+  return {
+    primary: `hsl(${primaryHue}, 48%, 58%)`,
+    secondary: `hsl(${secondaryHue}, 48%, 50%)`,
+  };
 };
 
 const formatSignedNumber = (
@@ -199,11 +227,14 @@ export const renderProfileOgImage = ({
   });
   const primaryColor = getSafeColor(profile?.banner?.primary);
   const secondaryColor = getSafeColor(profile?.banner?.secondary);
+  const fallbackBannerColors = getFallbackBannerColors(profile, identity);
   const hasBothBannerColors = primaryColor !== null && secondaryColor !== null;
   const resolvedPrimaryColor =
-    primaryColor ?? secondaryColor ?? FALLBACK_PRIMARY_COLOR;
+    primaryColor ?? secondaryColor ?? fallbackBannerColors.primary;
   const resolvedSecondaryColor =
-    secondaryColor ?? primaryColor ?? FALLBACK_SECONDARY_COLOR;
+    secondaryColor ?? primaryColor ?? fallbackBannerColors.secondary;
+  const shouldUseBannerGradient =
+    hasBothBannerColors || (primaryColor === null && secondaryColor === null);
   const profileEnabledLabel = formatProfileEnabledAt(
     profile?.profile_enabled_at
   );
@@ -219,13 +250,13 @@ export const renderProfileOgImage = ({
   const bannerBackground = getBannerBackground({
     primaryColor: resolvedPrimaryColor,
     secondaryColor: resolvedSecondaryColor,
-    hasSecondaryColor: hasBothBannerColors,
+    hasSecondaryColor: shouldUseBannerGradient,
   });
 
   return (
     <div
       style={{
-        background: "#000000",
+        background: PROFILE_MAIN_BACKGROUND,
         color: "#ffffff",
         display: "flex",
         fontFamily: "Montserrat, sans-serif",
@@ -286,7 +317,7 @@ export const renderProfileOgImage = ({
       </div>
       <div
         style={{
-          background: "#000000",
+          background: PROFILE_MAIN_BACKGROUND,
           display: "flex",
           height: CANVAS_HEIGHT - BANNER_HEIGHT,
           left: 0,

@@ -61,4 +61,89 @@ describe("buildWavesMetadata", () => {
     });
     expect(metadata.twitter).toEqual({ card: "summary_large_image" });
   });
+
+  it("uses chat drop metadata when a serial number is shared", async () => {
+    (commonApiFetch as jest.Mock)
+      .mockResolvedValueOnce({
+        id: "wave-chat",
+        name: "Memes-Chat",
+        author: {
+          handle: "punk6529",
+          primary_address: "0xfd22004806a6846ea67ad883356be810f0428793",
+        },
+      })
+      .mockResolvedValueOnce({
+        author: {
+          handle: "phoebeum",
+          primary_address: "0xfe49a85e98941f1a115acd4beb98521023a25802",
+        },
+        drop: {
+          serial_no: 6411,
+          drop_type: "CHAT",
+        },
+      });
+
+    const metadata = await buildWavesMetadata("wave-chat", {
+      serialNo: "6411",
+    });
+
+    expect(metadata.title).toBe("@phoebeum in Memes-Chat");
+    expect(metadata.description).toBe("Waves | 6529.io");
+    expect(metadata.openGraph).toMatchObject({
+      title: "@phoebeum in Memes-Chat",
+      description: "Waves | 6529.io",
+      images: [
+        {
+          url: "https://6529.io/api/og-metadata/drops/6411",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    });
+    expect(metadata.twitter).toEqual({ card: "summary_large_image" });
+  });
+
+  it("uses submission drop metadata when a serial number is shared", async () => {
+    (commonApiFetch as jest.Mock)
+      .mockResolvedValueOnce({
+        id: "wave-submission",
+        name: "The Memes - Main Stage",
+        author: {
+          handle: "punk6529",
+          primary_address: "0xfd22004806a6846ea67ad883356be810f0428793",
+        },
+      })
+      .mockResolvedValueOnce({
+        author: {
+          handle: "prxt0",
+          primary_address: "0x7f3774eadae4beb01919dec7f32a72e417ab5de3",
+        },
+        drop: {
+          serial_no: 6408,
+          drop_type: "SUBMISSION",
+          title: "Test resubmission preview",
+        },
+      });
+
+    const metadata = await buildWavesMetadata("wave-submission", {
+      serialNo: "6408",
+    });
+
+    expect(metadata.title).toBe("Test resubmission preview by @prxt0");
+    expect(metadata.description).toBe(
+      "The Memes - Main Stage | Waves | 6529.io"
+    );
+    expect(metadata.openGraph).toMatchObject({
+      title: "Test resubmission preview by @prxt0",
+      description: "The Memes - Main Stage | Waves | 6529.io",
+      images: [
+        {
+          url: "https://6529.io/api/og-metadata/drops/6408",
+          width: 1200,
+          height: 630,
+        },
+      ],
+    });
+    expect(metadata.twitter).toEqual({ card: "summary_large_image" });
+  });
 });

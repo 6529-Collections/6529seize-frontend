@@ -61,10 +61,13 @@ describe("Waves page", () => {
     (buildWavesMetadata as jest.Mock).mockResolvedValue(metadata);
 
     const result = await generateMetadata({
-      searchParams: Promise.resolve({ wave: "w-1" }),
+      searchParams: Promise.resolve({ wave: "w-1", serialNo: "42" }),
     } as any);
 
-    expect(buildWavesMetadata).toHaveBeenCalledWith("w-1");
+    expect(buildWavesMetadata).toHaveBeenCalledWith("w-1", {
+      wave: "w-1",
+      serialNo: "42",
+    });
     expect(result).toEqual(metadata);
   });
 });
