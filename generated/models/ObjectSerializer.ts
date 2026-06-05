@@ -230,6 +230,7 @@ export * from '../models/ApiSubmissionDropContext';
 export * from '../models/ApiSubmissionDropStatus';
 export * from '../models/ApiSubmissionDropVoting';
 export * from '../models/ApiSubmissionDropVotingContextProfileContext';
+export * from '../models/ApiSubwavesSort';
 export * from '../models/ApiTargetAndSubscriptionActions';
 export * from '../models/ApiTdhEdition';
 export * from '../models/ApiTdhEditionsPage';
@@ -603,6 +604,7 @@ import { ApiSubmissionDropContext      } from '../models/ApiSubmissionDropContex
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
+import { ApiSubwavesSort } from '../models/ApiSubwavesSort';
 import { ApiTargetAndSubscriptionActions } from '../models/ApiTargetAndSubscriptionActions';
 import { ApiTdhEdition } from '../models/ApiTdhEdition';
 import { ApiTdhEditionsPage } from '../models/ApiTdhEditionsPage';
@@ -784,6 +786,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiRateMatter",
     "ApiRepDirection",
     "ApiSubmissionDropStatus",
+    "ApiSubwavesSort",
     "ApiUpcomingMemeSubscriptionStatusSourceEnum",
     "ApiWaveCreditScope",
     "ApiWaveCreditType",

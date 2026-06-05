@@ -212,27 +212,32 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const showCreateWaveButton = !isApp && !!connectedProfile;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
 
-  const { announcementWaves, pinnedWaves, regularWaves } = useMemo(() => {
-    const announcements: MinimalWave[] = [];
-    const pinned: MinimalWave[] = [];
-    const regular: MinimalWave[] = [];
+  const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =
+    useMemo(() => {
+      const announcements: MinimalWave[] = [];
+      const official: MinimalWave[] = [];
+      const pinned: MinimalWave[] = [];
+      const regular: MinimalWave[] = [];
 
-    for (const wave of waves) {
-      if (seizeSettings?.isAnnouncementsWave(wave.id)) {
-        announcements.push(wave);
-      } else if (wave.isPinned) {
-        pinned.push(wave);
-      } else {
-        regular.push(wave);
+      for (const wave of waves) {
+        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
+          announcements.push(wave);
+        } else if (wave.isOfficial) {
+          official.push(wave);
+        } else if (wave.isPinned) {
+          pinned.push(wave);
+        } else {
+          regular.push(wave);
+        }
       }
-    }
 
-    return {
-      announcementWaves: announcements,
-      pinnedWaves: pinned,
-      regularWaves: regular,
-    };
-  }, [waves, seizeSettings]);
+      return {
+        announcementWaves: announcements,
+        officialWaves: official,
+        pinnedWaves: pinned,
+        regularWaves: regular,
+      };
+    }, [waves, seizeSettings]);
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED
@@ -339,6 +344,41 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             </section>
           )}
           {announcementWaves.length > 0 &&
+            !hideHeaders &&
+            (officialWaves.length > 0 ||
+              pinnedWaves.length > 0 ||
+              regularWaves.length > 0) && (
+              <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            )}
+          {officialWaves.length > 0 && (
+            <section
+              className={`tw-flex tw-flex-col ${
+                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
+              }`}
+              aria-label="Official waves"
+            >
+              {officialWaves
+                .filter((wave): wave is MinimalWave => {
+                  if (!isValidWave(wave)) {
+                    console.warn("Invalid official wave object", wave);
+                    return false;
+                  }
+                  return true;
+                })
+                .map((wave) => (
+                  <div key={wave.id} className="tw-w-full">
+                    <WebBrainLeftSidebarWave
+                      wave={wave}
+                      onHover={onHover}
+                      showPin={false}
+                      basePath={basePath}
+                      collapsed={isCollapsed}
+                    />
+                  </div>
+                ))}
+            </section>
+          )}
+          {officialWaves.length > 0 &&
             !hideHeaders &&
             (pinnedWaves.length > 0 || regularWaves.length > 0) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />

@@ -240,4 +240,24 @@ export const increaseWavesOverviewDropsCount = async (
       }
     );
   }
+
+  const officialQueries = queryClient.getQueriesData<WavesV2CacheData>({
+    queryKey: [QueryKey.OFFICIAL_WAVES],
+  });
+
+  for (const [queryKey, data] of officialQueries) {
+    if (!hasSidebarWaveInCacheData(data, waveId)) {
+      continue;
+    }
+
+    await queryClient.cancelQueries({ queryKey });
+
+    queryClient.setQueryData<WavesV2CacheData | undefined>(
+      queryKey,
+      (oldData) => updateWavesV2CacheData(oldData, waveId, timestamp),
+      {
+        updatedAt: timestamp,
+      }
+    );
+  }
 };

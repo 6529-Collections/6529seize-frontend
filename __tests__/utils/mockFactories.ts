@@ -21,6 +21,7 @@ export function createMockMinimalWave(
     picture: null,
     contributors: [],
     isPinned: false,
+    isOfficial: false,
     unreadDropsCount: 0,
     latestReadTimestamp: 0,
     firstUnreadDropSerialNo: null,

@@ -35,6 +35,10 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   const isCurrentlyProcessing = isOperationInProgress(waveId);
   const isPinned = pinnedIds.includes(waveId);
+  const isOfficialWave = useMemo(
+    () => waves.list.some((wave) => wave.id === waveId && wave.isOfficial),
+    [waves.list, waveId]
+  );
   const canPinCurrentWave = useMemo(
     () => canPinWave(waveId),
     [canPinWave, waveId]
@@ -90,6 +94,10 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   // Don't render if user is not authenticated or using proxy
   if (!connectedProfile?.handle || activeProfileProxy) {
+    return null;
+  }
+
+  if (isOfficialWave) {
     return null;
   }
 
