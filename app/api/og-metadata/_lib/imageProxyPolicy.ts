@@ -1,3 +1,5 @@
+export const OG_IMAGE_PROXY_MAX_BYTES = 50 * 1024 * 1024;
+
 const normalizeHostname = (hostname: string): string => {
   let normalized = hostname.trim().toLowerCase();
   while (normalized.endsWith(".")) {
