@@ -14,7 +14,7 @@ import {
 import { useApprovalDropStatus } from "@/hooks/waves/useApprovalDropStatus";
 import ParticipationDropVoteDetailsTrigger from "./participation/ratings/ParticipationDropVoteDetailsTrigger";
 
-export type ApprovalDropVoteSummaryVariant =
+type ApprovalDropVoteSummaryVariant =
   | "chat"
   | "leaderboard"
   | "compact"
