@@ -52,7 +52,7 @@ function DummyRepTab({ profile }: { readonly profile: any }) {
 }
 
 const buildFactory = () =>
-  createUserTabPage({ subroute: "", metaLabel: "Identity", Tab: DummyRepTab });
+  createUserTabPage({ subroute: "", Tab: DummyRepTab });
 
 describe("rep page via createUserTabPage", () => {
   beforeEach(() => {
@@ -109,7 +109,7 @@ describe("rep page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "Identity"
+      ""
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(

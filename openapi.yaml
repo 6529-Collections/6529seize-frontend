@@ -3754,6 +3754,101 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiNotificationsResponseV2"
+  /og-metadata/profiles/{identity}:
+    get:
+      tags:
+        - OG Metadata
+      summary: Get OG metadata for a profile
+      operationId: getOgMetadataProfile
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache:
+          ttlSeconds: 300
+        handler:
+          import: "@/api/og-metadata/og-metadata.handlers"
+          name: handleGetOgMetadataProfile
+      parameters:
+        - name: identity
+          in: path
+          required: true
+          description: Profile id, handle, wallet address, or ENS name
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiOgMetadata"
+        "404":
+          description: Profile not found
+  /og-metadata/waves/{id}:
+    get:
+      tags:
+        - OG Metadata
+      summary: Get OG metadata for a wave
+      operationId: getOgMetadataWave
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache:
+          ttlSeconds: 300
+        handler:
+          import: "@/api/og-metadata/og-metadata.handlers"
+          name: handleGetOgMetadataWave
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Wave id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiOgMetadata"
+        "404":
+          description: Wave not found
+  /og-metadata/drops/{drop}:
+    get:
+      tags:
+        - OG Metadata
+      summary: Get OG metadata for a drop by id or serial number
+      operationId: getOgMetadataDrop
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache:
+          ttlSeconds: 300
+        handler:
+          import: "@/api/og-metadata/og-metadata.handlers"
+          name: handleGetOgMetadataDrop
+      parameters:
+        - name: drop
+          in: path
+          required: true
+          description: Drop UUID or numeric drop serial number
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiOgMetadata"
+        "400":
+          description: Invalid drop identifier
+        "404":
+          description: Drop not found
   /blocks:
     get:
       tags:
@@ -12186,6 +12281,193 @@ components:
           $ref: "#/components/schemas/ApiWaveOverview"
         additional_context:
           $ref: "#/components/schemas/ApiNotificationAdditionalContextV2"
+    ApiOgMediaAsset:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          maxLength: 2000
+        mime_type:
+          type: string
+          maxLength: 100
+          nullable: true
+        width:
+          type: integer
+          format: int64
+          nullable: true
+        height:
+          type: integer
+          format: int64
+          nullable: true
+    ApiOgMetadata:
+      type: object
+      required:
+        - entity_type
+        - entity_id
+      properties:
+        entity_type:
+          $ref: "#/components/schemas/ApiOgMetadataEntityType"
+        entity_id:
+          type: string
+        author:
+          $ref: "#/components/schemas/ApiOgMetadataProfile"
+        profile:
+          $ref: "#/components/schemas/ApiOgMetadataProfile"
+        wave:
+          $ref: "#/components/schemas/ApiOgMetadataWave"
+        drop:
+          $ref: "#/components/schemas/ApiOgMetadataDrop"
+    ApiOgMetadataDrop:
+      type: object
+      required:
+        - id
+        - serial_no
+        - drop_type
+      properties:
+        id:
+          type: string
+        serial_no:
+          type: integer
+          format: int64
+        drop_type:
+          $ref: "#/components/schemas/ApiDropMainType"
+        submission_status:
+          $ref: "#/components/schemas/ApiSubmissionDropStatus"
+        submitted_at:
+          type: integer
+          format: int64
+          nullable: true
+        won_at:
+          type: integer
+          format: int64
+          nullable: true
+        is_additional_action_promised:
+          type: boolean
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        content:
+          type: string
+          nullable: true
+        votes:
+          $ref: "#/components/schemas/ApiSubmissionDropVoting"
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiOgMediaAsset"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiAttachment"
+    ApiOgMetadataEntityType:
+      type: string
+      enum:
+        - PROFILE
+        - WAVE
+        - DROP
+    ApiOgMetadataProfile:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+          nullable: true
+        primary_address:
+          type: string
+          nullable: true
+        profile_enabled_at:
+          type: integer
+          format: int64
+          nullable: true
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        sub_classification:
+          type: string
+          nullable: true
+        followers_count:
+          type: integer
+          format: int64
+        has_active_submissions:
+          type: boolean
+        has_winning_submissions:
+          type: boolean
+        cic:
+          type: integer
+          format: int64
+          nullable: true
+        rep:
+          type: integer
+          format: int64
+          nullable: true
+        level:
+          type: integer
+          format: int64
+          nullable: true
+        tdh:
+          type: number
+          format: double
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        twitter_handle:
+          type: string
+          nullable: true
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiOgMediaAsset"
+        banner:
+          $ref: "#/components/schemas/ApiOgMetadataProfileBanner"
+    ApiOgMetadataProfileBanner:
+      type: object
+      required:
+        - primary
+        - secondary
+        - media
+      properties:
+        primary:
+          type: string
+          nullable: true
+        secondary:
+          type: string
+          nullable: true
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiOgMediaAsset"
+    ApiOgMetadataWave:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        subscribers_count:
+          type: integer
+          format: int64
+        drops_count:
+          type: integer
+          format: int64
+        media:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiOgMediaAsset"
     ApiOutgoingIdentitySubscriptionsPage:
       type: object
       required:
@@ -13106,6 +13388,12 @@ components:
             most recently started continuously meeting the winning threshold.
             Omitted unless the drop is currently over threshold and has not yet
             won.
+          type: integer
+          format: int64
+        won_at:
+          description: >-
+            Unix timestamp in milliseconds when this submission won. Omitted
+            unless the submission has won.
           type: integer
           format: int64
     ApiSubmissionDropStatus:

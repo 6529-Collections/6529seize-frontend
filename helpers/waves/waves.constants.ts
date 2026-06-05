@@ -14,7 +14,7 @@ export const WAVE_VOTE_STATS_LABELS = {
   TOTAL: "Total",
 };
 
-export const WAVE_VOTE_SCOPE_MAX_LABELS: Record<ApiWaveCreditScope, string> = {
+const WAVE_VOTE_SCOPE_MAX_LABELS: Record<ApiWaveCreditScope, string> = {
   [ApiWaveCreditScope.Wave]: "Max for wave",
   [ApiWaveCreditScope.Drop]: "Max per drop",
 };

@@ -119,8 +119,18 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
       expect(parseSeizeWaveLink(`/waves/${uuid}`)).toBe(uuid);
     });
 
+    it("parses canonical wave path when only divider query is present", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}?divider=1009562`)).toBe(uuid);
+    });
+
     it("parses legacy wave query path", () => {
       expect(parseSeizeWaveLink(`/waves?wave=${uuid}`)).toBe(uuid);
+    });
+
+    it("parses legacy wave query path when divider query is present", () => {
+      expect(parseSeizeWaveLink(`/waves?wave=${uuid}&divider=1009562`)).toBe(
+        uuid
+      );
     });
 
     it("returns null when wave links include drop query", () => {
@@ -129,6 +139,10 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
 
     it("returns null when wave links include serial query", () => {
       expect(parseSeizeWaveLink(`/waves/${uuid}?serialNo=1`)).toBeNull();
+    });
+
+    it("returns null when wave links include unrelated query", () => {
+      expect(parseSeizeWaveLink(`/waves/${uuid}?foo=1`)).toBeNull();
     });
   });
 

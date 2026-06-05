@@ -895,17 +895,43 @@ export const removeBaseEndpoint = (link: string) => {
   return link.replaceAll(baseEndpoint, "");
 };
 
+const formatUserPageMetadataPath = (path: string): string | null => {
+  const words = path
+    .split(/[/_-]+/)
+    .map((word) => word.trim())
+    .filter(Boolean);
+
+  if (words.length === 0) {
+    return null;
+  }
+
+  return words
+    .map((word) => {
+      const normalized = word.toLowerCase();
+      return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
+    })
+    .join(" ");
+};
+
 export const getMetadataForUserPage = (
   profile: ApiIdentity,
   path?: string
 ): PageSSRMetadata => {
   const display = profile.handle ?? formatAddress(profile.display);
+  const pathTitle = path ? formatUserPageMetadataPath(path) : null;
+  const imageIdentity =
+    profile.normalised_handle ??
+    profile.handle ??
+    profile.primary_wallet ??
+    profile.display;
   return {
-    title: display + (path ? ` | ${path}` : ""),
-    ogImage: profile.pfp ?? "",
-    description: `Level ${
-      profile.level
-    } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
+    title: pathTitle ? `${display} - ${pathTitle}` : display,
+    ogImage: `${publicEnv.BASE_ENDPOINT}/api/og-metadata/profiles/${encodeURIComponent(
+      imageIdentity
+    )}`,
+    ogImageHeight: 630,
+    ogImageWidth: 1200,
+    description: "Identity",
     twitterCard: "summary_large_image",
   };
 };
