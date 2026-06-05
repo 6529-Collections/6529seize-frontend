@@ -11,6 +11,7 @@ export function sharedConfig(
     assetPrefix,
     reactCompiler: true,
     reactStrictMode: false,
+    htmlLimitedBots: /.*/,
     compress: true,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
