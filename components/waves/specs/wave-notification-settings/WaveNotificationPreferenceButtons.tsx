@@ -5,6 +5,7 @@ import type { WaveNotificationSettingsState } from "./useWaveNotificationSetting
 interface WaveNotificationPreferenceButtonsProps {
   readonly waveId: string;
   readonly settings: WaveNotificationSettingsState;
+  readonly compact?: boolean | undefined;
 }
 
 const getButtonStyle = (active: boolean) => {
@@ -42,11 +43,18 @@ function AllDropsIcon({ className }: { readonly className: string }) {
 export default function WaveNotificationPreferenceButtons({
   waveId,
   settings,
+  compact = false,
 }: WaveNotificationPreferenceButtonsProps) {
   const allDropsSelectionDisabled =
     settings.disableAllDropsSelection && !settings.allDropsEnabled;
   const allDropsTooltipId = `all-drops-tooltip-${waveId}`;
   const allDropsDisabledDescriptionId = `${allDropsTooltipId}-disabled-description`;
+  const allDropsButtonSizeClass = compact
+    ? "tw-size-8 tw-p-0"
+    : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
+  const allGroupButtonSizeClass = compact
+    ? "tw-h-8 tw-px-2.5"
+    : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
   const allDropsButton = (
     <button
       type="button"
@@ -60,7 +68,7 @@ export default function WaveNotificationPreferenceButtons({
           ? undefined
           : settings.onAllDropsNotificationsClick
       }
-      className={`tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9 ${getAllDropsButtonStyle(settings)}`}
+      className={`tw-flex ${allDropsButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${getAllDropsButtonStyle(settings)}`}
       aria-label="Receive all drop notifications"
     >
       {settings.loadingTarget === "all-drops" ? (
@@ -77,7 +85,13 @@ export default function WaveNotificationPreferenceButtons({
   );
 
   return (
-    <div className="tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs">
+    <div
+      className={
+        compact
+          ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs"
+          : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs"
+      }
+    >
       <OverlayTrigger
         overlay={
           <Tooltip id={`all-group-tooltip-${waveId}`} placement="top">
@@ -88,7 +102,7 @@ export default function WaveNotificationPreferenceButtons({
         <button
           disabled={settings.loading}
           onClick={settings.onAllGroupNotificationsClick}
-          className={`tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-px-2.5 tw-py-2 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9 ${getButtonStyle(settings.allGroupNotificationsEnabled)}`}
+          className={`tw-flex ${allGroupButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${getButtonStyle(settings.allGroupNotificationsEnabled)}`}
           aria-label="Receive ALL mention notifications"
         >
           {settings.loadingTarget === "all-group" ? (

@@ -15,7 +15,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 
-enum WaveFollowBtnSize {
+export enum WaveFollowBtnSize {
   SMALL = "SMALL",
   MEDIUM = "MEDIUM",
 }

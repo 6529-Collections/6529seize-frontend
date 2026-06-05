@@ -5,6 +5,9 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import WaveSpecs from "@/components/waves/specs/WaveSpecs";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
+import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -37,6 +40,7 @@ const makeWave = (
     readonly creditScope?: ApiWaveCreditScope | undefined;
     readonly winningThreshold?: number | null | undefined;
     readonly winningThresholdMinDurationMs?: number | null | undefined;
+    readonly submissionStrategy?: any;
   } = {}
 ): any => ({
   id: "wave-1",
@@ -70,6 +74,7 @@ const makeWave = (
     signature_required: false,
     period: null,
     terms: null,
+    submission_strategy: overrides.submissionStrategy ?? null,
   },
   wave: {
     admin_drop_deletion_enabled: false,
@@ -174,11 +179,11 @@ describe("WaveSpecs", () => {
     jest.clearAllMocks();
   });
 
-  it("shows slow mode off", () => {
+  it("renders the about heading", () => {
     renderWaveSpecs({ wave: makeWave() });
 
-    expect(screen.getByText("Slow mode")).toBeInTheDocument();
-    expect(screen.getAllByText("Off").length).toBeGreaterThan(0);
+    expect(screen.getByText("Overview")).toBeInTheDocument();
+    expect(screen.queryByText("General")).not.toBeInTheDocument();
   });
 
   it("hides voting for chat waves", () => {
@@ -236,48 +241,27 @@ describe("WaveSpecs", () => {
     }
   );
 
-  it("shows slow mode on with interval", () => {
-    renderWaveSpecs({ wave: makeWave({ slowModeCooldownMs: 300_000 }) });
-
-    expect(screen.getByText("On · 5m")).toBeInTheDocument();
-  });
-
-  it.each([ApiWaveType.Rank, ApiWaveType.Approve])(
-    "shows slow mode for %s waves when chat is enabled",
-    (waveType) => {
-      renderWaveSpecs({ wave: makeWave({ waveType }) });
-
-      expect(screen.getByText("Slow mode")).toBeInTheDocument();
-    }
-  );
-
-  it("hides slow mode when chat is disabled", () => {
-    renderWaveSpecs({ wave: makeWave({ chatEnabled: false }) });
-
-    expect(screen.queryByText("Slow mode")).not.toBeInTheDocument();
-    expect(screen.queryByText("Disable links")).not.toBeInTheDocument();
-  });
-
-  it("shows edit icon only when user can edit wave", () => {
-    const { rerender } = renderWaveSpecs({
-      wave: makeWave({ canAdmin: true }),
+  it("shows identity submission summaries in the about block when configured", () => {
+    renderWaveSpecs({
+      wave: makeWave({
+        submissionStrategy: {
+          type: ApiWaveParticipationSubmissionStrategyType.Identity,
+          config: {
+            who_can_be_submitted:
+              ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted.OnlyOthers,
+            duplicates:
+              ApiWaveParticipationIdentitySubmissionAllowDuplicates.AllowAfterWin,
+          },
+        },
+      }),
     });
 
-    expect(
-      screen.getByRole("button", { name: "Edit slow mode" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Edit disable links" })
-    ).toBeInTheDocument();
-
-    rerender(<WaveSpecs wave={makeWave({ canAdmin: false })} />);
-
-    expect(
-      screen.queryByRole("button", { name: "Edit slow mode" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Edit disable links" })
-    ).not.toBeInTheDocument();
+    expect(screen.getByText("Overview")).toBeInTheDocument();
+    expect(screen.getByText("Eligible identities")).toBeInTheDocument();
+    expect(screen.getByText("Others only")).toBeInTheDocument();
+    expect(screen.getByText("Repeat submissions")).toBeInTheDocument();
+    expect(screen.getByText("After it wins")).toBeInTheDocument();
+    expect(screen.queryByText("Identity submissions")).not.toBeInTheDocument();
   });
 
   it("shows approval threshold edit icon only when user can edit wave", () => {
@@ -306,123 +290,6 @@ describe("WaveSpecs", () => {
     expect(
       screen.queryByRole("button", { name: "Edit approval threshold" })
     ).not.toBeInTheDocument();
-  });
-
-  it("opens slow mode editor in a portal outside the specs scroll container", async () => {
-    const user = userEvent.setup();
-    const { container } = renderWaveSpecs({
-      wave: makeWave({ canAdmin: true }),
-    });
-
-    const editButton = screen.getByRole("button", {
-      name: "Edit slow mode",
-    });
-    expect(editButton).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(editButton);
-
-    const editorId = editButton.getAttribute("aria-controls");
-    expect(editorId).toBeTruthy();
-    const editor = globalThis.document.getElementById(editorId as string);
-    const scrollContainer = container.firstElementChild;
-
-    expect(editButton).toHaveAttribute("aria-expanded", "true");
-    expect(editor).toBeInTheDocument();
-    expect(globalThis.document.body).toContainElement(editor);
-    expect(scrollContainer).not.toContainElement(editor);
-    expect(screen.getByLabelText("Slow mode value")).toHaveFocus();
-  });
-
-  it("closes slow mode editor on Escape", async () => {
-    const user = userEvent.setup();
-    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
-
-    await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
-    expect(screen.getByLabelText("Slow mode value")).toBeInTheDocument();
-
-    await user.keyboard("{Escape}");
-
-    await waitFor(() =>
-      expect(screen.queryByLabelText("Slow mode value")).not.toBeInTheDocument()
-    );
-    expect(
-      screen.getByRole("button", { name: "Edit slow mode" })
-    ).toHaveAttribute("aria-expanded", "false");
-  });
-
-  it("closes slow mode editor on outside click", async () => {
-    const user = userEvent.setup();
-    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
-
-    await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
-    expect(screen.getByLabelText("Slow mode value")).toBeInTheDocument();
-
-    await user.click(screen.getByText("General"));
-
-    await waitFor(() =>
-      expect(screen.queryByLabelText("Slow mode value")).not.toBeInTheDocument()
-    );
-  });
-
-  it("saves slow mode as milliseconds", async () => {
-    const user = userEvent.setup();
-    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
-
-    await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
-    await user.clear(screen.getByLabelText("Slow mode value"));
-    await user.type(screen.getByLabelText("Slow mode value"), "5");
-    await user.selectOptions(
-      screen.getByLabelText("Slow mode unit"),
-      "minutes"
-    );
-    await user.click(screen.getByRole("button", { name: "Save" }));
-
-    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
-    expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
-      links_disabled: false,
-      slow_mode_cooldown_ms: 300_000,
-    });
-  });
-
-  it("disables slow mode by omitting it from chat body", async () => {
-    const user = userEvent.setup();
-    renderWaveSpecs({
-      wave: makeWave({ canAdmin: true, slowModeCooldownMs: 60_000 }),
-    });
-
-    await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
-    await user.click(screen.getByRole("button", { name: "Disable" }));
-
-    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
-    expect(commonApiPostMock.mock.calls[0][0].body.chat).not.toHaveProperty(
-      "slow_mode_cooldown_ms"
-    );
-    expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
-      links_disabled: false,
-    });
-  });
-
-  it("shows disable links state", () => {
-    renderWaveSpecs({ wave: makeWave({ linksDisabled: true }) });
-
-    expect(screen.getByText("Disable links")).toBeInTheDocument();
-    expect(screen.getByText("On")).toBeInTheDocument();
-  });
-
-  it("saves disable links setting", async () => {
-    const user = userEvent.setup();
-    renderWaveSpecs({ wave: makeWave({ canAdmin: true }) });
-
-    await user.click(
-      screen.getByRole("button", { name: "Edit disable links" })
-    );
-    await user.click(screen.getByLabelText("Disable links"));
-    await user.click(screen.getByRole("button", { name: "Save" }));
-
-    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
-    expect(commonApiPostMock.mock.calls[0][0].body.chat).toMatchObject({
-      links_disabled: true,
-    });
   });
 
   it("saves approval threshold settings", async () => {

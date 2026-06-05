@@ -1,7 +1,6 @@
 import React from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import WaveSpecs from "@/components/waves/specs/WaveSpecs";
-import WaveIdentitySubmissionSpecs from "@/components/waves/specs/WaveIdentitySubmissionSpecs";
 import WaveGroups from "@/components/waves/groups/WaveGroups";
 import { WaveLeaderboardRightSidebarBoostedDrops } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarBoostedDrops";
 
@@ -18,7 +17,6 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
         <WaveLeaderboardRightSidebarBoostedDrops wave={wave} />
       </div>
       <WaveSpecs wave={wave} useRing={false} />
-      <WaveIdentitySubmissionSpecs wave={wave} useRing={false} />
       <WaveGroups wave={wave} useRing={false} />
     </div>
   );

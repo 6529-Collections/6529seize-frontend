@@ -4,9 +4,8 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
-import WaveSlowMode from "./WaveSlowMode";
-import WaveDisableLinks from "./WaveDisableLinks";
 import WaveApprovalThresholds from "./WaveApprovalThresholds";
+import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
 
 const CREDIT_SCOPE_LABELS: Record<ApiWaveCreditScope, string> = {
   [ApiWaveCreditScope.Wave]: "Whole wave",
@@ -24,11 +23,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
-  const showSlowMode = wave.chat.enabled;
-  const creditScope = wave.voting.credit_scope ?? ApiWaveCreditScope.Wave;
-  const creditScopeLabel =
-    CREDIT_SCOPE_LABELS[creditScope] ??
-    CREDIT_SCOPE_LABELS[ApiWaveCreditScope.Wave];
+  const creditScopeLabel = CREDIT_SCOPE_LABELS[wave.voting.credit_scope];
 
   return (
     <div
@@ -37,7 +32,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
       <div className="tw-pb-4">
         <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-3">
           <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
-            General
+            Overview
           </p>
         </div>
 
@@ -78,12 +73,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
             </div>
           </div>
 
-          {showSlowMode && (
-            <>
-              <WaveSlowMode wave={wave} />
-              <WaveDisableLinks wave={wave} />
-            </>
-          )}
+          <WaveIdentitySubmissionSpecsRows wave={wave} />
         </div>
       </div>
     </div>

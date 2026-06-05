@@ -26,6 +26,39 @@ function WaveIdentitySubmissionSpecsRow({
   );
 }
 
+export function WaveIdentitySubmissionSpecsRows({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
+  const submissionStrategy = wave.participation.submission_strategy;
+
+  if (!submissionStrategy) {
+    return null;
+  }
+
+  return (
+    <>
+      <WaveIdentitySubmissionSpecsRow
+        label="Eligible identities"
+        value={
+          WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY[
+            submissionStrategy.config.who_can_be_submitted
+          ].summary
+        }
+      />
+      <WaveIdentitySubmissionSpecsRow
+        label="Repeat submissions"
+        value={
+          WAVE_IDENTITY_DUPLICATES_COPY[
+            submissionStrategy.config.duplicates
+          ].summary
+        }
+      />
+    </>
+  );
+}
+
 export default function WaveIdentitySubmissionSpecs({
   wave,
   useRing = true,
@@ -56,22 +89,7 @@ export default function WaveIdentitySubmissionSpecs({
           </div>
 
           <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-2 tw-px-4">
-            <WaveIdentitySubmissionSpecsRow
-              label="Eligible identities"
-              value={
-                WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY[
-                  submissionStrategy.config.who_can_be_submitted
-                ].summary
-              }
-            />
-            <WaveIdentitySubmissionSpecsRow
-              label="Repeat submissions"
-              value={
-                WAVE_IDENTITY_DUPLICATES_COPY[
-                  submissionStrategy.config.duplicates
-                ].summary
-              }
-            />
+            <WaveIdentitySubmissionSpecsRows wave={wave} />
           </div>
         </div>
       </div>
