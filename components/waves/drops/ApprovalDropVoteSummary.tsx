@@ -244,11 +244,7 @@ export default function ApprovalDropVoteSummary({
   }
 
   const wrapperClassName =
-    variant === "leaderboard"
-      ? "tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 sm:tw-justify-end"
-      : variant === "final"
-        ? "tw-mt-1 tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5"
-        : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2";
+    "tw-mt-1 tw-inline-flex tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 tw-text-sm tw-leading-5";
 
   return (
     <div className={wrapperClassName}>
@@ -287,9 +283,7 @@ export default function ApprovalDropVoteSummary({
               {WAVE_VOTE_STATS_LABELS.YOUR_VOTES}:{" "}
             </span>
             <span className={`tw-font-medium ${userVoteClass}`}>
-              {userVote < 0 && "-"}
-              {formatNumberWithCommas(Math.abs(userVote))}{" "}
-              {WAVE_VOTING_LABELS[drop.wave.voting_credit_type]}
+              {formatSignedVote(userVote)} {votingLabel}
             </span>
           </span>
         </div>

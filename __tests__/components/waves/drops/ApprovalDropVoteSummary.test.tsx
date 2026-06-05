@@ -235,6 +235,7 @@ describe("ApprovalDropVoteSummary", () => {
           rating: 70_022_534,
           realtime_rating: 77_694_101,
           wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+          context_profile_context: { rating: 1_234 },
         })}
         winningThreshold={42_000_000}
         variant="final"
@@ -243,6 +244,7 @@ describe("ApprovalDropVoteSummary", () => {
 
     expect(screen.getByText("70,022,534")).toBeInTheDocument();
     expect(screen.getByText("42,000,000")).toBeInTheDocument();
+    expect(screen.getByText("+1,234 TDH")).toBeInTheDocument();
     expect(screen.queryByText("70M")).not.toBeInTheDocument();
   });
 });
