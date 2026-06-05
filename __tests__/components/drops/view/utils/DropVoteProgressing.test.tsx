@@ -58,4 +58,20 @@ describe("DropVoteProgressing", () => {
       "Votes given now: 2"
     );
   });
+
+  it("uses a compact display label while keeping exact tooltip value", () => {
+    render(
+      <DropVoteProgressing
+        current={1}
+        projected={2000}
+        projectedLabel="2K"
+        tooltipLabel="Realtime votes given"
+      />
+    );
+
+    expect(screen.getByText("2K")).toBeInTheDocument();
+    expect(screen.getByRole("tooltip")).toHaveTextContent(
+      "Realtime votes given: 2000"
+    );
+  });
 });

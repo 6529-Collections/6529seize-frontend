@@ -7,6 +7,7 @@ import { Tooltip } from "react-tooltip";
 interface DropVoteProgressingProps {
   readonly current: number | null | undefined;
   readonly projected: number | null | undefined;
+  readonly projectedLabel?: string | undefined;
   readonly subtle?: boolean | undefined;
   readonly compact?: boolean | undefined;
   readonly tooltipLabel?: string | undefined;
@@ -15,6 +16,7 @@ interface DropVoteProgressingProps {
 export default function DropVoteProgressing({
   current,
   projected,
+  projectedLabel,
   subtle = false,
   compact = false,
   tooltipLabel = "Projected vote count at decision time",
@@ -73,7 +75,7 @@ export default function DropVoteProgressing({
           className={`tw-flex-shrink-0 ${compact ? "tw-size-2" : "tw-size-2.5"} ${arrowColor}`}
         />
         <span className={`${valueClasses} ${color}`}>
-          {formatNumberWithCommas(projected)}
+          {projectedLabel ?? formatNumberWithCommas(projected)}
         </span>
       </span>
       <Tooltip

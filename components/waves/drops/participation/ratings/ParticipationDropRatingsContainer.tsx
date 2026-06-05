@@ -1,4 +1,5 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import ApprovalDropVoteSummary from "@/components/waves/drops/ApprovalDropVoteSummary";
 import { getThemeColors } from "./ParticipationDropRatingsTheme";
 import type { RatingsData } from "./types";
 import ParticipationDropRatingsTotalSection from "./ParticipationDropRatingsTotalSection";
@@ -20,12 +21,28 @@ export default function ParticipationDropRatingsContainer({
   winningThresholdMinDurationMs,
   isVotingClosed = false,
 }: ParticipationDropRatingsContainerProps) {
+  const isApprovalSummary =
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold) &&
+    winningThreshold > 0;
+
+  if (isApprovalSummary) {
+    return (
+      <ApprovalDropVoteSummary
+        drop={drop}
+        winningThreshold={winningThreshold}
+        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+        isVotingClosed={isVotingClosed}
+        variant="chat"
+      />
+    );
+  }
+
   const ratingsData: RatingsData = {
     hasRaters: drop.top_raters.length > 0,
     userRating: drop.context_profile_context?.rating ?? 0,
     currentRating: drop.rating,
   };
-
   const theme = getThemeColors(rank, ratingsData.currentRating < 0);
 
   return (
