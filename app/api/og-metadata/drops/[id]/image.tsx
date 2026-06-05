@@ -1224,9 +1224,12 @@ const DropAuthorRow = ({
   const context = getDropContext({ wave });
   const contextRowWidth =
     CONTENT_WIDTH - LOGO_SIZE - 42 - AUTHOR_AVATAR_SIZE - 16;
+  const promiseTextGap =
+    showAdditionalActionText && context
+      ? ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP
+      : 0;
   const promiseTextWidth = showAdditionalActionText
-    ? ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH +
-      (context ? ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP : 0)
+    ? ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH + promiseTextGap
     : 0;
   const contextText = context
     ? truncateToWidth({
