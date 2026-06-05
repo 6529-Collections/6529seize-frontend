@@ -11,8 +11,8 @@ Selecting the avatar pencil opens `Update wave picture`.
   - `/waves/{waveId}`
   - `/messages/{waveId}`
 - Mobile `About` uses the same header component.
-- The pencil overlay is hover-only (`@media (any-hover: hover)`), so touch-only
-  web layouts do not show this action.
+- Desktop hover layouts show the pencil overlay when hovering the avatar.
+- Touch-only layouts show a small pencil badge on the avatar.
 
 ## Availability Rules
 
@@ -26,7 +26,7 @@ Selecting the avatar pencil opens `Update wave picture`.
 ## Entry Points
 
 1. Open an active non-DM wave and switch to `About`.
-2. Hover the avatar.
+2. On desktop, hover the avatar. On touch mobile, use the visible pencil badge.
 3. Select `Edit wave picture`.
 
 ## User Journey
@@ -51,8 +51,7 @@ Selecting the avatar pencil opens `Update wave picture`.
 
 ## Errors and Recovery
 
-- No permission, direct-message wave, or touch-only web layout: pencil is not
-  shown.
+- No permission or direct-message wave: pencil is not shown.
 - Unsupported file: `Invalid file type`.
 - Oversized file: `File size must be less than 10MB`.
 - Auth failure: `Failed to authenticate`.
