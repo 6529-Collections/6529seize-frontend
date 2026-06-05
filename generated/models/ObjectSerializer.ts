@@ -566,7 +566,7 @@ import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadata       } from '../models/ApiOgMetadata';
-import { ApiOgMetadataDrop             } from '../models/ApiOgMetadataDrop';
+import { ApiOgMetadataDrop              } from '../models/ApiOgMetadataDrop';
 import { ApiOgMetadataEntityType } from '../models/ApiOgMetadataEntityType';
 import { ApiOgMetadataProfile                  } from '../models/ApiOgMetadataProfile';
 import { ApiOgMetadataProfileBanner } from '../models/ApiOgMetadataProfileBanner';

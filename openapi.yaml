@@ -12343,6 +12343,9 @@ components:
           type: integer
           format: int64
           nullable: true
+        is_additional_action_promised:
+          type: boolean
+          nullable: true
         title:
           type: string
           nullable: true

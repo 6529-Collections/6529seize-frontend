@@ -25,6 +25,7 @@ export class ApiOgMetadataDrop {
     'submission_status'?: ApiSubmissionDropStatus;
     'submitted_at'?: number | null;
     'won_at'?: number | null;
+    'is_additional_action_promised'?: boolean | null;
     'title'?: string | null;
     'description'?: string | null;
     'content'?: string | null;
@@ -72,6 +73,12 @@ export class ApiOgMetadataDrop {
             "baseName": "won_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "is_additional_action_promised",
+            "baseName": "is_additional_action_promised",
+            "type": "boolean",
+            "format": ""
         },
         {
             "name": "title",

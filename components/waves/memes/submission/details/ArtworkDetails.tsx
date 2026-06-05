@@ -124,12 +124,12 @@ const AdditionalActionPromiseCheckbox = ({
       />
       <span className="tw-flex tw-flex-col tw-gap-1">
         <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-          This submission promises an additional action
+          Additional Action
         </span>
         <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
-          Check this if the description includes a real-world or follow-up
-          promise, such as an event, donation, physical item, airdrop, or later
-          deliverable.
+          Check this if the submission includes a commitment beyond the
+          proposal itself, such as an event, donation, physical item, airdrop,
+          or other future deliverable.
         </span>
       </span>
     </label>

@@ -258,7 +258,7 @@ test("shows additional action badge only when promised", () => {
   );
 
   expect(
-    screen.queryByText("Additional action promised")
+    screen.queryByText("Additional Action")
   ).not.toBeInTheDocument();
 
   rerender(
@@ -268,7 +268,7 @@ test("shows additional action badge only when promised", () => {
     />
   );
 
-  expect(screen.getByText("Additional action promised")).toBeInTheDocument();
+  expect(screen.getByText("Additional Action")).toBeInTheDocument();
 });
 
 test("opens mobile resubmit modal after the touch menu leaves", async () => {
