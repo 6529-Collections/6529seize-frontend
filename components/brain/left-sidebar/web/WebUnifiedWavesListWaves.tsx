@@ -335,7 +335,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     <WebBrainLeftSidebarWave
                       wave={wave}
                       onHover={onHover}
-                      showPin={false}
+                      showPin={!hidePin && !isCollapsed && wave.isPinned}
                       basePath={basePath}
                       collapsed={isCollapsed}
                     />
@@ -370,7 +370,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     <WebBrainLeftSidebarWave
                       wave={wave}
                       onHover={onHover}
-                      showPin={!hidePin && !isCollapsed && wave.isPinned}
+                      showPin={false}
                       basePath={basePath}
                       collapsed={isCollapsed}
                     />
