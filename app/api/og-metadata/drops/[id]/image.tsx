@@ -15,13 +15,13 @@ import {
   getUsableText,
   pluralize,
   truncateText,
-} from "../../_lib/imageUtils";
+} from "@/app/api/og-metadata/_lib/imageUtils";
 import {
   getProfileDisplayName,
   ProfileAvatar,
   ProfileBadgeRow,
-} from "../../_lib/profileSummary";
-import { isAllowedOgImageSourceUrl } from "../../_lib/imageProxyPolicy";
+} from "@/app/api/og-metadata/_lib/profileSummary";
+import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 630;
@@ -77,7 +77,6 @@ const SUBMISSION_STATS_TOP = 566;
 const SUBMISSION_STATS_FONT_SIZE = 24;
 const SUBMISSION_STATS_GROUP_GAP = 24;
 const SUBMISSION_STATS_VALUE_GAP = 8;
-const SUBMISSION_PLACEHOLDER_BORDER = "rgba(147, 147, 159, 0.2)";
 const CHAT_CONTENT_BACKGROUND_TOP = CONTENT_TOP - 20;
 const SUBMISSION_STATS_TROPHY_ICON_SIZE = 22;
 const TROPHY_COLOR = "#FBBF24";
@@ -91,6 +90,21 @@ const URL_TOKEN_PATTERN = /^(?:https?:\/\/|www\.)\S+$/i;
 const IMAGE_URL_PATTERN = /\.(?:avif|gif|jpe?g|png|webp)(?:$|[?#])/i;
 const INTERACTIVE_URL_PATTERN = /\.(?:glb|gltf|html?)(?:$|[?#])/i;
 const VIDEO_URL_PATTERN = /\.(?:m4v|mov|mp4|webm)(?:$|[?#])/i;
+const UUID_FILENAME_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const HEX_FILENAME_PATTERN = /^[0-9a-f]{24,}$/i;
+const NUMERIC_FILENAME_PATTERN = /^\d{10,}$/;
+const GENERIC_FILENAME_TOKENS = new Set([
+  "asset",
+  "file",
+  "image",
+  "img",
+  "media",
+  "upload",
+  "untitled",
+  "vid",
+  "video",
+]);
 
 type DropMediaKind = "image" | "video";
 type SubmissionPreviewMediaCategory = SubmissionMediaCategory | "unknown";
@@ -110,6 +124,7 @@ type DropMediaItem = {
 };
 type SubmissionPreviewMedia = {
   readonly category: SubmissionPreviewMediaCategory;
+  readonly label: string;
   readonly mimeType: string | undefined;
 };
 type SubmissionMediaStyles = {
@@ -328,6 +343,58 @@ const getMimeTypeFromUrl = (url: string | null): string | undefined => {
   return undefined;
 };
 
+const getFilenameStem = (filename: string): string =>
+  filename.replace(/\.[^.]+$/, "");
+
+const hasHumanReadableToken = (stem: string): boolean =>
+  stem
+    .split(/[^a-z0-9]+/i)
+    .some(
+      (token) =>
+        /[a-z]{4,}/i.test(token) &&
+        !/^[a-f0-9]{8,}$/i.test(token) &&
+        !GENERIC_FILENAME_TOKENS.has(token.toLowerCase())
+    );
+
+const getMeaningfulFilename = (
+  value: string | null | undefined
+): string | null => {
+  const filename = getUsableText(value);
+  if (!filename) {
+    return null;
+  }
+
+  const stem = getFilenameStem(filename);
+  if (
+    UUID_FILENAME_PATTERN.test(stem) ||
+    HEX_FILENAME_PATTERN.test(stem) ||
+    NUMERIC_FILENAME_PATTERN.test(stem)
+  ) {
+    return null;
+  }
+
+  return hasHumanReadableToken(stem) ? filename : null;
+};
+
+const getFilenameFromUrl = (url: string, fallback: string): string => {
+  try {
+    const pathname = new URL(url).pathname;
+    const filename = decodeURIComponent(pathname.split("/").pop() ?? "");
+    return getMeaningfulFilename(filename) ?? fallback;
+  } catch {
+    return (
+      getMeaningfulFilename(url.split("?")[0]?.split("/").pop()) ?? fallback
+    );
+  }
+};
+
+const getSubmissionMediaLabel = (
+  category: SubmissionPreviewMediaCategory
+): string =>
+  category === "unknown"
+    ? "Media"
+    : `${category[0]?.toUpperCase() ?? ""}${category.slice(1)}`;
+
 const getSubmissionMediaCategory = (
   mimeType: string | undefined
 ): SubmissionPreviewMediaCategory => {
@@ -348,11 +415,14 @@ const getSubmissionPreviewMedia = (
 ): SubmissionPreviewMedia => {
   const mediaTypes =
     media?.map((asset) => {
+      const url = getUsableText(asset.url);
       const mimeType =
         getUsableText(asset.mime_type)?.toLowerCase() ??
-        getMimeTypeFromUrl(getUsableText(asset.url));
+        getMimeTypeFromUrl(url);
+      const category = getSubmissionMediaCategory(mimeType);
       return {
-        category: getSubmissionMediaCategory(mimeType),
+        category,
+        label: getFilenameFromUrl(url ?? "", getSubmissionMediaLabel(category)),
         mimeType,
       };
     }) ?? [];
@@ -361,7 +431,11 @@ const getSubmissionPreviewMedia = (
     mediaTypes.find((item) => item.category === "interactive") ??
     mediaTypes.find((item) => item.category === "video") ??
     mediaTypes.find((item) => item.category === "image") ??
-    mediaTypes[0] ?? { category: "unknown", mimeType: undefined }
+    mediaTypes[0] ?? {
+      category: "unknown",
+      label: getSubmissionMediaLabel("unknown"),
+      mimeType: undefined,
+    }
   );
 };
 
@@ -382,16 +456,6 @@ const getImageMediaAssets = (
         getMediaKind(asset) === "image"
     )
     .slice(0, MEDIA_GALLERY_MAX_ITEMS) ?? [];
-
-const getFilenameFromUrl = (url: string, fallback: string): string => {
-  try {
-    const pathname = new URL(url).pathname;
-    const filename = decodeURIComponent(pathname.split("/").pop() ?? "");
-    return getUsableText(filename) ?? fallback;
-  } catch {
-    return getUsableText(url.split("?")[0]?.split("/").pop()) ?? fallback;
-  }
-};
 
 const getVideoLines = (
   media: readonly ApiOgMediaAsset[] | null | undefined
@@ -755,7 +819,7 @@ const getTileObjectFit = (
     return "contain";
   }
 
-  return "contain";
+  return "cover";
 };
 
 const withTileFit = (
@@ -1026,6 +1090,8 @@ const SubmissionMediaIcon = ({
   const iconSize = Math.round(
     size * (media.category === "interactive" ? 0.5 : 0.55)
   );
+  const iconHeight =
+    media.category === "video" ? Math.round((iconSize * 512) / 576) : iconSize;
   const styles = getSubmissionMediaStyles(media);
 
   return (
@@ -1044,7 +1110,7 @@ const SubmissionMediaIcon = ({
     >
       <svg
         fill="currentColor"
-        height={iconSize}
+        height={iconHeight}
         viewBox={icon.viewBox}
         width={iconSize}
       >
@@ -1180,40 +1246,36 @@ const SubmissionMediaPlaceholder = ({
   media,
 }: {
   readonly media: SubmissionPreviewMedia;
-}) => {
-  const mediaLabel =
-    media.category === "unknown"
-      ? "Media"
-      : `${media.category[0]?.toUpperCase() ?? ""}${media.category.slice(1)}`;
-
-  return (
+}) => (
+  <div
+    style={{
+      alignItems: "center",
+      borderRadius: 28,
+      display: "flex",
+      flexDirection: "column",
+      gap: 16,
+      height: SUBMISSION_MEDIA_HEIGHT,
+      justifyContent: "center",
+      width: CONTENT_WIDTH,
+    }}
+  >
+    <SubmissionMediaIcon media={media} size={78} />
     <div
       style={{
-        alignItems: "center",
-        border: `1px solid ${SUBMISSION_PLACEHOLDER_BORDER}`,
-        borderRadius: 28,
+        color: MUTED_TEXT,
         display: "flex",
-        flexDirection: "column",
-        gap: 18,
-        height: SUBMISSION_MEDIA_HEIGHT,
-        justifyContent: "center",
-        width: CONTENT_WIDTH,
+        fontSize: 28,
+        fontWeight: 600,
+        maxWidth: CONTENT_WIDTH - 160,
+        overflow: "hidden",
+        textAlign: "center",
+        whiteSpace: "nowrap",
       }}
     >
-      <SubmissionMediaIcon media={media} size={86} />
-      <div
-        style={{
-          color: MUTED_TEXT,
-          display: "flex",
-          fontSize: 30,
-          fontWeight: 600,
-        }}
-      >
-        {mediaLabel}
-      </div>
+      {truncateText(media.label, 42)}
     </div>
-  );
-};
+  </div>
+);
 
 const renderSubmissionDropOgImage = ({
   author,

@@ -1,11 +1,14 @@
 import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfile";
-import { getUsableText, shortenAddress } from "./imageUtils";
+import {
+  getUsableText,
+  shortenAddress,
+} from "@/app/api/og-metadata/_lib/imageUtils";
 import {
   ArtistActivityBadge,
   CicBadge,
   getActivityBadgeType,
   LevelBadge,
-} from "./profileBadges";
+} from "@/app/api/og-metadata/_lib/profileBadges";
 
 type ProfileWithOptionalBadges = ApiOgMetadataProfile & {
   readonly has_active_submissions?: boolean | null;

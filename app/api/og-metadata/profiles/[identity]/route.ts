@@ -1,10 +1,10 @@
 import { publicEnv } from "@/config/env";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
+import { getOgImageRequestOrigin } from "@/app/api/og-metadata/_lib/requestOrigin";
+import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
+import { renderProfileOgImage } from "@/app/api/og-metadata/profiles/[identity]/image";
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
-import { getOgImageRequestOrigin } from "../../_lib/requestOrigin";
-import { loadMontserratFonts } from "./font";
-import { renderProfileOgImage } from "./image";
 
 export const runtime = "edge";
 export const revalidate = 86400;

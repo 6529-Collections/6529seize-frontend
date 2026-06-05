@@ -1,6 +1,6 @@
 import { publicEnv } from "@/config/env";
 
-const LOCAL_REQUEST_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+const LOCAL_REQUEST_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
 export const getOgImageRequestOrigin = (request: Request): string => {
   try {
