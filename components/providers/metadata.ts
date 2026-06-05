@@ -29,12 +29,15 @@ export function getAppMetadata(
       icon: "/favicon.ico",
     },
     openGraph: {
+      type: "website",
+      siteName: "6529.io",
       images: openGraphImages,
       title,
       description: description ? `${description} | ${domain}` : domain,
     },
     twitter: {
       card: twitterCard,
+      site: "@6529Collections",
     },
     other: {
       version: publicEnv.VERSION ?? "",
