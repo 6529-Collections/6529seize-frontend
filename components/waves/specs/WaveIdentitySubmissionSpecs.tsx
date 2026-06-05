@@ -4,11 +4,6 @@ import {
   WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY,
 } from "@/helpers/waves/wave-submission-strategy.helpers";
 
-interface WaveIdentitySubmissionSpecsProps {
-  readonly wave: ApiWave;
-  readonly useRing?: boolean | undefined;
-}
-
 function WaveIdentitySubmissionSpecsRow({
   label,
   value,
@@ -55,43 +50,5 @@ export function WaveIdentitySubmissionSpecsRows({
         }
       />
     </>
-  );
-}
-
-export default function WaveIdentitySubmissionSpecs({
-  wave,
-  useRing = true,
-}: WaveIdentitySubmissionSpecsProps) {
-  const submissionStrategy = wave.participation.submission_strategy;
-
-  if (!submissionStrategy) {
-    return null;
-  }
-
-  const ringClasses = useRing
-    ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
-    : "";
-  const borderClasses = useRing
-    ? ""
-    : "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800";
-
-  return (
-    <div className={borderClasses}>
-      <div
-        className={`tw-relative tw-overflow-auto tw-bg-iron-950 ${ringClasses}`}
-      >
-        <div className="tw-pb-4">
-          <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-3">
-            <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
-              Identity submissions
-            </p>
-          </div>
-
-          <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-2 tw-px-4">
-            <WaveIdentitySubmissionSpecsRows wave={wave} />
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }

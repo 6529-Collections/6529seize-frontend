@@ -13,7 +13,7 @@ import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 import { Mode } from "./BrainRightSidebarTypes";
 import type { SidebarTab } from "./BrainRightSidebarTypes";
 
-export { Mode, SidebarTab } from "./BrainRightSidebarTypes";
+export { SidebarTab } from "./BrainRightSidebarTypes";
 
 interface BrainRightSidebarProps {
   readonly waveId: string | null | undefined;

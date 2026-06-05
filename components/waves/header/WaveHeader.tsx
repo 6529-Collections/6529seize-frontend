@@ -16,11 +16,6 @@ import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 
-export enum WaveHeaderPinnedSide {
-  LEFT = "LEFT",
-  RIGHT = "RIGHT",
-}
-
 interface WaveHeaderProps {
   readonly wave: ApiWave;
   readonly onFollowersClick: () => void;
