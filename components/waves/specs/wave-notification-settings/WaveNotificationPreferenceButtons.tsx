@@ -56,6 +56,18 @@ export default function WaveNotificationPreferenceButtons({
   const allGroupButtonSizeClass = compact
     ? "tw-h-9 tw-min-w-9 tw-gap-0 tw-px-2"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
+
+  let allDropsButtonContent = (
+    <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
+  );
+  if (settings.loadingTarget === "all-drops") {
+    allDropsButtonContent = <Spinner dimension={12} />;
+  } else if (allDropsSelectionDisabled) {
+    allDropsButtonContent = (
+      <BellSlashIcon className="tw-size-4 tw-flex-shrink-0" />
+    );
+  }
+
   const allDropsButton = (
     <button
       type="button"
@@ -74,13 +86,7 @@ export default function WaveNotificationPreferenceButtons({
       className={`tw-flex ${allDropsButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${getAllDropsButtonStyle(settings)}`}
       aria-label="Receive all drop notifications"
     >
-      {settings.loadingTarget === "all-drops" ? (
-        <Spinner dimension={12} />
-      ) : allDropsSelectionDisabled ? (
-        <BellSlashIcon className="tw-size-4 tw-flex-shrink-0" />
-      ) : (
-        <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
-      )}
+      {allDropsButtonContent}
       {allDropsSelectionDisabled && (
         <span id={allDropsDisabledDescriptionId} className="tw-sr-only">
           {settings.allDropsTooltip}
