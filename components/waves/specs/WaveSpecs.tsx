@@ -39,7 +39,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
           </p>
         </div>
 
-        <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-1 tw-px-2">
+        <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
           <div className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm">
             <span className="tw-font-normal tw-text-iron-500">Type</span>
             <div className="tw-flex tw-items-center tw-gap-x-1">

@@ -28,7 +28,7 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
                 Settings & access
               </p>
             </div>
-            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-1 tw-px-2">
+            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
               {showChatSettings && (
                 <>
                   <WaveSlowMode wave={wave} />
