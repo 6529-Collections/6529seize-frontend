@@ -3,6 +3,9 @@ import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 
+const HTML_LIMITED_METADATA_BOTS =
+  /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
+
 export function sharedConfig(
   publicEnv: PublicEnv,
   assetPrefix: string
@@ -11,7 +14,7 @@ export function sharedConfig(
     assetPrefix,
     reactCompiler: true,
     reactStrictMode: false,
-    htmlLimitedBots: /.*/,
+    htmlLimitedBots: HTML_LIMITED_METADATA_BOTS,
     compress: true,
     productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
