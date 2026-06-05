@@ -30,6 +30,9 @@ export function useWaveMuteSettings(wave: ApiWave) {
         queryClient.invalidateQueries({
           queryKey: [QueryKey.WAVES_V2],
         }),
+        queryClient.invalidateQueries({
+          queryKey: [QueryKey.OFFICIAL_WAVES],
+        }),
       ]);
     } catch (error) {
       const defaultMessage = isMuted

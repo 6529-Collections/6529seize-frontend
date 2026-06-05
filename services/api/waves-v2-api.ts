@@ -195,3 +195,11 @@ export async function fetchWavesV2Page({
     next: response.next,
   };
 }
+
+export async function fetchOfficialWaves(): Promise<SidebarWave[]> {
+  const response = await commonApiFetch<ApiWaveOverview[]>({
+    endpoint: "v2/official-waves",
+  });
+
+  return response.map(mapApiWaveOverviewToSidebarWave);
+}
