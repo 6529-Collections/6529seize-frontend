@@ -24,17 +24,22 @@ class MockNextResponse {
   }
 
   static json(body: unknown, init?: ResponseInit): MockNextResponse {
+    const headers = init?.headers
+      ? { ...init.headers, "Content-Type": "application/json" }
+      : { "Content-Type": "application/json" };
+
     return new MockNextResponse(JSON.stringify(body), {
       ...init,
-      headers: {
-        "Content-Type": "application/json",
-        ...(init?.headers ?? {}),
-      },
+      headers,
     });
   }
 
   async json(): Promise<unknown> {
-    return JSON.parse(`${this.body}`);
+    if (typeof this.body !== "string") {
+      throw new Error("Mock JSON response body must be a string.");
+    }
+
+    return JSON.parse(this.body);
   }
 }
 
