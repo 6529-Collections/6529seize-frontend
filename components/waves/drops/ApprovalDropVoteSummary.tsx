@@ -148,7 +148,7 @@ export default function ApprovalDropVoteSummary({
         <DropVoteProgressing
           current={current}
           projected={drop.realtime_rating}
-          tooltipLabel="Realtime votes given"
+          tooltipLabel="Votes given now"
           subtle={subtle}
         />
         <span
@@ -211,7 +211,7 @@ export default function ApprovalDropVoteSummary({
                 ? formatLargeNumber(drop.realtime_rating)
                 : undefined
             }
-            tooltipLabel="Realtime votes given"
+            tooltipLabel="Votes given now"
             compact
           />
           <span className={`tw-font-normal ${statusClass}`}>
@@ -265,7 +265,7 @@ export default function ApprovalDropVoteSummary({
           <DropVoteProgressing
             current={current}
             projected={drop.realtime_rating}
-            tooltipLabel="Realtime votes given"
+            tooltipLabel="Votes given now"
             compact
           />
         </div>

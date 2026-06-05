@@ -12,16 +12,12 @@
   pointer-events: none;
 }
 
-.editor-mention {
-  color: rgb(29, 155, 240);
-}
-
-.editor-wave-mention {
-  color: rgb(29, 155, 240);
-}
-
+.editor-mention,
+.editor-wave-mention,
 .editor-group-mention {
   color: rgb(29, 155, 240);
+  line-height: inherit;
+  vertical-align: baseline;
 }
 
 .editor-hashtag {
@@ -29,8 +25,7 @@
 }
 
 .editor-paragraph {
-  margin-right: 0;
-  margin-bottom: 8px;
+  margin: 0 0 8px;
   position: relative;
 }
 

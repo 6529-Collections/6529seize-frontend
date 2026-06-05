@@ -82,7 +82,7 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(progress).toHaveAttribute("data-projected", "13");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Realtime votes given"
+      "Votes given now"
     );
     expect(
       screen.getByRole("button", {
@@ -149,7 +149,7 @@ describe("WaveLeaderboardDropRaters", () => {
     expect(progress).toHaveAttribute("data-projected-label", "80.3M");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Realtime votes given"
+      "Votes given now"
     );
   });
 

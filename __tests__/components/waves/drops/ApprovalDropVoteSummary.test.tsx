@@ -74,7 +74,7 @@ describe("ApprovalDropVoteSummary", () => {
     expect(progress).toHaveAttribute("data-projected", "9");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Realtime votes given"
+      "Votes given now"
     );
     expect(progress).toHaveAttribute("data-compact", "true");
   });
@@ -142,7 +142,7 @@ describe("ApprovalDropVoteSummary", () => {
     expect(progress).toHaveAttribute("data-projected-label", "77.7M");
     expect(progress).toHaveAttribute(
       "data-tooltip-label",
-      "Realtime votes given"
+      "Votes given now"
     );
     expect(progress).toHaveAttribute("data-compact", "true");
   });
