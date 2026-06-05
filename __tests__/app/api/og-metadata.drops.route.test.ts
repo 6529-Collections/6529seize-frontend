@@ -75,19 +75,20 @@ describe("/api/og-metadata/drops/[id]", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test/api/og-metadata/drops/6411",
-      { next: { revalidate: 86400 } }
+      { next: { revalidate: 300 } }
     );
     expect(mockLoadMontserratFonts).toHaveBeenCalledTimes(1);
     expect(mockImageResponse).toHaveBeenCalledTimes(1);
-    expect(mockImageResponse.mock.calls[0]?.[1]).toEqual({
+    const imageResponseInit = mockImageResponse.mock.calls[0]?.[1];
+    expect(imageResponseInit).toMatchObject({
       width: 1200,
       height: 630,
-      fonts: mockFonts,
       headers: {
         "Cache-Control":
-          "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000",
+          "public, max-age=300, s-maxage=300, stale-while-revalidate=600",
       },
     });
+    expect(imageResponseInit?.fonts).toBe(mockFonts);
     expect(response).toBe(mockImageResponse.mock.results[0]?.value);
   });
 

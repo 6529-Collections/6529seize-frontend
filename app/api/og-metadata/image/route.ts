@@ -4,6 +4,7 @@ import {
   UrlGuardError,
   type FetchPublicUrlOptions,
 } from "@/lib/security/urlGuard";
+import { OG_IMAGE_PROXY_MAX_BYTES } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { NextResponse, type NextRequest } from "next/server";
 import sharp from "sharp";
 
@@ -12,7 +13,6 @@ export const revalidate = 604800;
 
 const DEFAULT_WIDTH = 1200;
 const MAX_WIDTH = 1200;
-const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
 const CACHE_CONTROL =
   "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=2592000";
@@ -107,7 +107,7 @@ const getContentLength = (response: Response): number | null => {
 };
 
 const ensureAllowedImageSize = (byteLength: number): void => {
-  if (byteLength > MAX_IMAGE_BYTES) {
+  if (byteLength > OG_IMAGE_PROXY_MAX_BYTES) {
     throw new Error("Image response exceeded maximum size.");
   }
 };
@@ -151,7 +151,7 @@ const readImageResponseBuffer = async (response: Response): Promise<Buffer> => {
 
       const chunk = Buffer.from(value);
       totalBytes += chunk.byteLength;
-      if (totalBytes > MAX_IMAGE_BYTES) {
+      if (totalBytes > OG_IMAGE_PROXY_MAX_BYTES) {
         await reader.cancel("Image response exceeded maximum size.");
         ensureAllowedImageSize(totalBytes);
       }
@@ -217,6 +217,7 @@ const normalizeImageToPng = async ({
 
   return sharp(buffer, {
     limitInputPixels: false,
+    pages: 1,
     sequentialRead: true,
   })
     .timeout({ seconds: 7 })
