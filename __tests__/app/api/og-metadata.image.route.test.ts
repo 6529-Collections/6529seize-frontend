@@ -88,19 +88,17 @@ const createHeaders = (values: Record<string, string>) => ({
 });
 
 const mockImageResponse = (contentLength: number): void => {
-  mockFetchPublicUrl.mockResolvedValue(
-    {
-      body: createReadableBody(PNG_1X1),
-      headers: {
-        get: createHeaders({
-          "content-length": `${contentLength}`,
-          "content-type": "image/png",
-        }).get,
-      },
-      ok: true,
-      status: 200,
-    }
-  );
+  mockFetchPublicUrl.mockResolvedValue({
+    body: createReadableBody(PNG_1X1),
+    headers: {
+      get: createHeaders({
+        "content-length": `${contentLength}`,
+        "content-type": "image/png",
+      }).get,
+    },
+    ok: true,
+    status: 200,
+  });
 };
 
 describe("/api/og-metadata/image", () => {
