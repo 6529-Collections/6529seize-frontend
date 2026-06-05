@@ -129,6 +129,7 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.currentStep).toBe("agreement");
     expect(result.current.traits.artist).toBe("alice");
     expect(result.current.traits.seizeArtistProfile).toBe("alice");
+    expect(result.current.isAdditionalActionPromised).toBe(false);
     expect(result.current.operationalData.payment_info.payment_address).toBe(
       "0xalice"
     );
@@ -143,6 +144,10 @@ describe("useArtworkSubmissionForm", () => {
       result.current.updateTraitField("description", "d");
     });
     expect(result.current.traits.description).toBe("d");
+    act(() => {
+      result.current.setAdditionalActionPromised(true);
+    });
+    expect(result.current.isAdditionalActionPromised).toBe(true);
   });
 
   it("initializes from a draft without profile defaults or bio fetch", () => {
@@ -175,6 +180,7 @@ describe("useArtworkSubmissionForm", () => {
         url: "https://example.com/art.png",
         mimeType: "image/png",
       },
+      isAdditionalActionPromised: true,
     } as MemesSubmissionInitialDraft;
 
     const { result } = renderArtworkSubmissionForm(initialDraft);
@@ -185,6 +191,7 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.traits.artist).toBe("draft-artist");
     expect(result.current.traits.seizeArtistProfile).toBe("draft-profile");
     expect(result.current.operationalData).toBe(operationalData);
+    expect(result.current.isAdditionalActionPromised).toBe(true);
     expect(commonApiFetch).not.toHaveBeenCalled();
   });
 

@@ -52,6 +52,7 @@ const sentinel = document.createElement("div");
 
 const baseWaves = [
   createMockMinimalWave({ id: "a1" }),
+  createMockMinimalWave({ id: "o1", isOfficial: true }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
@@ -90,7 +91,7 @@ it("renders structure even when no waves", () => {
   expect(screen.getByTestId("switch")).toBeInTheDocument();
 });
 
-it("renders pinned and regular waves with headers and switch", () => {
+it("renders announcement, official, pinned, and regular waves with headers and switch", () => {
   const ref = React.createRef<UnifiedWavesListWavesHandle>();
   render(
     <UnifiedWavesListWaves
@@ -103,12 +104,35 @@ it("renders pinned and regular waves with headers and switch", () => {
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
   expect(screen.getByTestId("switch")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
+  expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
+  expect(
+    screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
+  ).toEqual(["wave-a1", "wave-o1", "wave-p1", "wave-r1"]);
   expect(ref.current?.containerRef.current).toBe(container);
   expect(ref.current?.sentinelRef.current).toBeInstanceOf(HTMLElement);
+});
+
+it("hides pin controls for pinned official waves", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "o1",
+          isOfficial: true,
+          isPinned: true,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
 });
 
 it("passes pin controls through for pinned announcement waves", () => {
@@ -147,6 +171,7 @@ it("respects hide options and does not render toggle when not connected", () => 
   expect(screen.queryByTestId("header-All Waves")).toBeNull();
   expect(screen.queryByTestId("switch")).toBeNull();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
   expect(screen.queryByTestId("wave-p1")).toBeNull();
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "false");
 });

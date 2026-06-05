@@ -184,4 +184,48 @@ describe("ArtworkDetails", () => {
       "tw-ring-emerald-600/45"
     );
   });
+
+  it("hides the additional action promise checkbox by default", () => {
+    render(
+      <ArtworkDetails
+        title=""
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+      />
+    );
+
+    expect(
+      screen.queryByRole("checkbox", {
+        name: /this submission promises an additional action/i,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders and toggles the additional action promise checkbox when enabled", async () => {
+    const user = userEvent.setup();
+    const onAdditionalActionPromisedChange = jest.fn();
+
+    render(
+      <ArtworkDetails
+        title=""
+        description=""
+        onTitleChange={() => {}}
+        onDescriptionChange={() => {}}
+        showAdditionalActionPromised={true}
+        isAdditionalActionPromised={false}
+        onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
+      />
+    );
+
+    const checkbox = screen.getByRole("checkbox", {
+      name: /this submission promises an additional action/i,
+    });
+
+    expect(checkbox).not.toBeChecked();
+
+    await user.click(checkbox);
+
+    expect(onAdditionalActionPromisedChange).toHaveBeenCalledWith(true);
+  });
 });

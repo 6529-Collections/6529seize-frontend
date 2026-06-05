@@ -30,6 +30,7 @@ interface BuildPreviewDropInput {
   readonly wave: ApiWave;
   readonly traits: TraitsData;
   readonly operationalData?: OperationalData | undefined;
+  readonly isAdditionalActionPromised: boolean;
   readonly mediaSelection: PreviewMediaSelection;
   readonly uploadArtworkUrl: string;
   readonly connectedProfile: ApiIdentity | null;
@@ -84,6 +85,7 @@ export const buildPreviewDrop = ({
   wave,
   traits,
   operationalData,
+  isAdditionalActionPromised,
   mediaSelection,
   uploadArtworkUrl,
   connectedProfile,
@@ -190,7 +192,7 @@ export const buildPreviewDrop = ({
     is_signed: false,
     reactions: [],
     boosts: 0,
-    is_additional_action_promised: false,
+    is_additional_action_promised: isAdditionalActionPromised,
     hide_link_preview: false,
     mentioned_groups: [],
   };

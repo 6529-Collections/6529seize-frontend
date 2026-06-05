@@ -142,6 +142,10 @@ describe("increaseWavesOverviewDropsCount", () => {
       QueryKey.WAVES_V2,
       { pinned: ApiWavesPinFilter.Pinned, viewer_identity: "0xabc:primary" },
     ];
+    const officialKey = [
+      QueryKey.OFFICIAL_WAVES,
+      { viewer_identity: "0xabc:primary" },
+    ];
 
     client.setQueryData(overviewKey, {
       pages: [
@@ -151,11 +155,13 @@ describe("increaseWavesOverviewDropsCount", () => {
       pageParams: [1, 2],
     });
     client.setQueryData(pinnedKey, [waveOne]);
+    client.setQueryData(officialKey, [waveOne]);
 
     await increaseWavesOverviewDropsCount(client, "w1");
 
     const overviewResult: any = client.getQueryData(overviewKey);
     const pinnedResult: any = client.getQueryData(pinnedKey);
+    const officialResult: any = client.getQueryData(officialKey);
 
     expect(overviewResult.pages[0].waves[0].totalDropsCount).toBe(1);
     expect(overviewResult.pages[0].waves[0].latestDropTimestamp).toBe(4321);
@@ -163,6 +169,8 @@ describe("increaseWavesOverviewDropsCount", () => {
     expect(overviewResult.pageParams).toEqual([1, 2]);
     expect(pinnedResult[0].totalDropsCount).toBe(1);
     expect(pinnedResult[0].latestDropTimestamp).toBe(4321);
+    expect(officialResult[0].totalDropsCount).toBe(1);
+    expect(officialResult[0].latestDropTimestamp).toBe(4321);
   });
 
   it("leaves unrelated overview caches untouched", async () => {

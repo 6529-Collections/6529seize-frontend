@@ -6,6 +6,7 @@ import {
   getRankHoverBorderClass,
   getRankStaticBorderClass,
 } from "@/components/waves/drops/dropRankStyles";
+import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import type { DropInteractionParams } from "@/components/waves/drops/drop.types";
 import {
   DropLocation,
@@ -72,6 +73,14 @@ export default function MemeWinnerDrop({
 
   // Get artwork media URL if available
   const artworkMedia = drop.parts.at(0)?.media.at(0);
+  const headerContent = (
+    <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      <MemeWinnerHeader title={title} />
+      {drop.is_additional_action_promised === true && (
+        <AdditionalActionPromiseBadge />
+      )}
+    </div>
+  );
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0]?.part_id! });
@@ -86,7 +95,7 @@ export default function MemeWinnerDrop({
 
       <div className="tw-px-4 tw-pb-4 tw-pt-4">
         <div className="tw-space-y-1">
-          <MemeWinnerHeader title={title} />
+          {headerContent}
           <MemeWinnerDescription description={description} />
         </div>
       </div>

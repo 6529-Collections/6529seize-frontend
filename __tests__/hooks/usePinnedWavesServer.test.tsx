@@ -23,11 +23,17 @@ jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettingsOptional: jest.fn(),
 }));
 
+jest.mock("@/hooks/useOfficialWaves", () => ({
+  useOfficialWaves: jest.fn(),
+}));
+
 const useMutationMock = useMutation as jest.Mock;
 const useQueryMock = useQuery as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const useSeizeConnectContextMock = useSeizeConnectContext as jest.Mock;
 const useSeizeSettingsOptionalMock = useSeizeSettingsOptional as jest.Mock;
+const useOfficialWavesMock =
+  require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
 
 const queryClientMock = {
   cancelQueries: jest.fn().mockResolvedValue(undefined),
@@ -83,6 +89,12 @@ beforeEach(() => {
     isAnnouncementsWave: (waveId: string | null | undefined) =>
       waveId === "announcement-wave",
   });
+  useOfficialWavesMock.mockReturnValue({
+    waves: [],
+    isFetching: false,
+    status: "success",
+    refetch: jest.fn(),
+  });
 });
 
 test("keeps raw pinned ids but ignores a legacy announcement pin for budget checks", async () => {
@@ -103,6 +115,37 @@ test("keeps raw pinned ids but ignores a legacy announcement pin for budget chec
   const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
 
   expect(result.current.pinnedIds).toContain("announcement-wave");
+  expect(result.current.canPinWave("new-wave")).toBe(true);
+
+  await result.current.pinWave("new-wave");
+
+  expect(pinMutateAsync).toHaveBeenCalledWith("new-wave");
+});
+
+test("keeps raw pinned ids but ignores official pins for budget checks", async () => {
+  const pinnedWaves = [
+    createWave("official-wave"),
+    ...Array.from({ length: MAX_PINNED_WAVES - 1 }, (_, index) =>
+      createWave(`wave-${index}`)
+    ),
+  ];
+  useQueryMock.mockReturnValue({
+    data: pinnedWaves,
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: jest.fn(),
+  });
+  useOfficialWavesMock.mockReturnValue({
+    waves: [createWave("official-wave")],
+    isFetching: false,
+    status: "success",
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => usePinnedWavesServer(), { wrapper });
+
+  expect(result.current.pinnedIds).toContain("official-wave");
   expect(result.current.canPinWave("new-wave")).toBe(true);
 
   await result.current.pinWave("new-wave");
