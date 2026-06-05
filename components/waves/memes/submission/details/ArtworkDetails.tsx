@@ -127,9 +127,9 @@ const AdditionalActionPromiseCheckbox = ({
           Additional Action
         </span>
         <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
-          Check this if the submission includes a commitment beyond the
-          proposal itself, such as an event, donation, physical item, airdrop,
-          or other future deliverable.
+          Check this if the submission includes a commitment beyond the proposal
+          itself, such as an event, donation, physical item, airdrop, or other
+          future deliverable.
         </span>
       </span>
     </label>

@@ -1317,9 +1317,7 @@ const DropAuthorRow = ({
               {contextText}
             </span>
           ) : null}
-          {showAdditionalActionText ? (
-            <AdditionalActionPromiseBadge />
-          ) : null}
+          {showAdditionalActionText ? <AdditionalActionPromiseBadge /> : null}
         </div>
       </div>
     </div>

@@ -257,9 +257,7 @@ test("shows additional action badge only when promised", () => {
     <MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />
   );
 
-  expect(
-    screen.queryByText("Additional Action")
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Additional Action")).not.toBeInTheDocument();
 
   rerender(
     <MemesLeaderboardDrop
