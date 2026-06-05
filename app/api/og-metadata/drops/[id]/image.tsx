@@ -545,6 +545,10 @@ const getVisibleAttachmentLines = ({
   ];
 };
 
+const getNonBlankContentLineCount = (
+  contentLines: readonly DropContentLine[]
+): number => contentLines.filter((line) => line.text !== "").length;
+
 const getContentLineColor = (kind: DropContentLineKind): string => {
   if (kind === "link") {
     return LINK_TEXT;
@@ -714,27 +718,43 @@ const appendTextContentLine = ({
   appendLongContentWord({ context, index, word, words });
 };
 
-const getContentLines = ({
-  value,
-  maxLines,
+const getNormalizedContentParagraph = (value: string): string =>
+  value.replace(/[^\S\r\n]+/g, " ").trim();
+
+const getContentParagraphs = (value: string): readonly string[] =>
+  value.split(/\r\n|\n|\r/);
+
+const hasRemainingContentParagraph = ({
+  paragraphs,
+  paragraphIndex,
 }: {
-  readonly value: string;
-  readonly maxLines: number;
-}): readonly DropContentLine[] => {
-  const normalized = getUsableText(value)?.replace(/\s+/g, " ");
-  if (!normalized) {
-    return [];
+  readonly paragraphs: readonly string[];
+  readonly paragraphIndex: number;
+}): boolean =>
+  paragraphs
+    .slice(paragraphIndex + 1)
+    .some((paragraph) => getNormalizedContentParagraph(paragraph).length > 0);
+
+const addBlankContentLine = (context: ContentLineBuildContext): void => {
+  flushCurrentContentLine(context);
+  if (context.lines.length >= context.maxLines || context.lines.length === 0) {
+    return;
   }
 
-  const words = normalized.split(" ");
-  const context: ContentLineBuildContext = {
-    lines: [],
-    currentLine: "",
-    maxLines,
-  };
+  context.lines.push({ kind: "text", text: "" });
+};
+
+const appendContentParagraph = ({
+  context,
+  paragraph,
+}: {
+  readonly context: ContentLineBuildContext;
+  readonly paragraph: string;
+}): void => {
+  const words = paragraph.split(" ");
 
   for (const [index, word] of words.entries()) {
-    if (context.lines.length === maxLines) {
+    if (context.lines.length === context.maxLines) {
       addTrailingContentEllipsis(context.lines);
       break;
     }
@@ -745,6 +765,62 @@ const getContentLines = ({
     }
 
     appendTextContentLine({ context, index, word, words });
+  }
+};
+
+const getContentLines = ({
+  value,
+  maxLines,
+}: {
+  readonly value: string;
+  readonly maxLines: number;
+}): readonly DropContentLine[] => {
+  const content = getUsableText(value);
+  if (!content) {
+    return [];
+  }
+
+  const context: ContentLineBuildContext = {
+    lines: [],
+    currentLine: "",
+    maxLines,
+  };
+
+  const paragraphs = getContentParagraphs(content);
+  for (const [paragraphIndex, paragraph] of paragraphs.entries()) {
+    if (context.lines.length === maxLines) {
+      addTrailingContentEllipsis(context.lines);
+      break;
+    }
+
+    const normalizedParagraph = getNormalizedContentParagraph(paragraph);
+    if (!normalizedParagraph) {
+      const hasRemainingContent = hasRemainingContentParagraph({
+        paragraphs,
+        paragraphIndex,
+      });
+      if (context.lines.length === maxLines - 1 && hasRemainingContent) {
+        addTrailingContentEllipsis(context.lines);
+        break;
+      }
+
+      addBlankContentLine(context);
+      continue;
+    }
+
+    appendContentParagraph({
+      context,
+      paragraph: normalizedParagraph,
+    });
+    flushCurrentContentLine(context);
+
+    if (
+      context.lines.length === maxLines &&
+      hasRemainingContentParagraph({ paragraphs, paragraphIndex })
+    ) {
+      addTrailingContentEllipsis(context.lines);
+      break;
+    }
   }
 
   flushCurrentContentLine(context);
@@ -1224,9 +1300,12 @@ const DropAuthorRow = ({
   const context = getDropContext({ wave });
   const contextRowWidth =
     CONTENT_WIDTH - LOGO_SIZE - 42 - AUTHOR_AVATAR_SIZE - 16;
+  const promiseTextGap =
+    showAdditionalActionText && context
+      ? ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP
+      : 0;
   const promiseTextWidth = showAdditionalActionText
-    ? ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH +
-      (context ? ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP : 0)
+    ? ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH + promiseTextGap
     : 0;
   const contextText = context
     ? truncateToWidth({
@@ -1722,6 +1801,8 @@ const DropContentLines = ({
               ? ATTACHMENT_ROW_BOTTOM_MARGIN
               : 0,
             marginTop: getAttachmentLineTopMargin(line, previousLine),
+            minHeight:
+              line.text === "" ? CONTENT_FONT_SIZE * CONTENT_LINE_HEIGHT : 0,
             overflow: "hidden",
             whiteSpace: "nowrap",
             width: shouldCenterContent ? "auto" : CONTENT_WIDTH,
@@ -1948,7 +2029,9 @@ const getChatDropOgImageModel = ({
   ];
   const hasAttachments = contentLines.some(isAttachmentLine);
   const shouldCenterContent =
-    !showMedia && !hasAttachments && contentLines.length <= 4;
+    !showMedia &&
+    !hasAttachments &&
+    getNonBlankContentLineCount(contentLines) <= 4;
   const mediaPresentation = showMedia
     ? getMediaPresentation({
         mediaAssets,
