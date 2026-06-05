@@ -48,6 +48,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
       waveId: "wave-1",
       traits: mockTraits,
       operationalData: mockOperationalData,
+      isAdditionalActionPromised: true,
       mediaUrl: "https://example.com/image.jpg",
       mimeType: "image/jpeg",
       signerAddress: "0xsigner",
@@ -60,6 +61,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
 
     // Check basic traits
     expect(metadataMap.get("title")).toBe("Test Artwork");
+    expect(result.is_additional_action_promised).toBe(true);
 
     // Check operational data
     expect(
@@ -103,6 +105,7 @@ describe("useArtworkSubmissionMutation - transformToApiRequest", () => {
     expect(
       metadataMap.has(MemesSubmissionAdditionalInfoKey.AIRDROP_CONFIG)
     ).toBe(false);
+    expect(result.is_additional_action_promised).toBe(false);
     expect(metadataMap.has(MemesSubmissionAdditionalInfoKey.PAYMENT_INFO)).toBe(
       false
     );

@@ -122,6 +122,10 @@ export function MemesArtSubmissionStepContent({
           onCancel={onClose}
           updateTraitField={form.updateTraitField}
           setTraits={form.setTraits}
+          isAdditionalActionPromised={form.isAdditionalActionPromised}
+          onAdditionalActionPromisedChange={
+            form.setAdditionalActionPromised
+          }
           isSubmitting={isSubmitting}
           submissionPhase={submissionPhase}
           uploadProgress={uploadProgress}
