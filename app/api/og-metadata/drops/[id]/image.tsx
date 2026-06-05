@@ -688,7 +688,9 @@ const appendTextContentLine = ({
   readonly word: string;
   readonly words: readonly string[];
 }): void => {
-  const nextLine = context.currentLine ? `${context.currentLine} ${word}` : word;
+  const nextLine = context.currentLine
+    ? `${context.currentLine} ${word}`
+    : word;
   if (fitsContentLine(nextLine)) {
     context.currentLine = nextLine;
     return;
