@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import WaveLeaderboardGalleryItemVotes from "@/components/waves/leaderboard/gallery/WaveLeaderboardGalleryItemVotes";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
   __esModule: true,
@@ -14,6 +15,11 @@ jest.mock("@/components/drops/view/utils/DropVoteProgressing", () => ({
     />
   ),
 }));
+
+const createApprovalDrop = (overrides: Record<string, unknown>): any => ({
+  wave: { voting_credit_type: ApiWaveCreditType.Tdh },
+  ...overrides,
+});
 
 describe("WaveLeaderboardGalleryItemVotes", () => {
   it("uses bright colors for default variant", () => {
@@ -37,7 +43,11 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("shows the needed amount below the approve threshold", () => {
-    const drop: any = { rating: 5, realtime_rating: 9, rating_prediction: 6 };
+    const drop = createApprovalDrop({
+      rating: 5,
+      realtime_rating: 9,
+      rating_prediction: 6,
+    });
     render(
       <WaveLeaderboardGalleryItemVotes drop={drop} winningThreshold={8} />
     );
@@ -54,7 +64,11 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("uses lower realtime votes for approve movement", () => {
-    const drop: any = { rating: 5, realtime_rating: 3, rating_prediction: 6 };
+    const drop = createApprovalDrop({
+      rating: 5,
+      realtime_rating: 3,
+      rating_prediction: 6,
+    });
     render(
       <WaveLeaderboardGalleryItemVotes drop={drop} winningThreshold={8} />
     );
@@ -65,7 +79,7 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("shows when the approve threshold is reached", () => {
-    const drop: any = { rating: 8, rating_prediction: 8 };
+    const drop = createApprovalDrop({ rating: 8, rating_prediction: 8 });
     render(
       <WaveLeaderboardGalleryItemVotes drop={drop} winningThreshold={8} />
     );
@@ -74,11 +88,11 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
 
   it("shows the approval countdown label", () => {
     jest.useFakeTimers().setSystemTime(new Date(1_000_000));
-    const drop: any = {
+    const drop = createApprovalDrop({
       rating: 8,
       rating_prediction: 8,
       over_threshold_since_ms: 1_000_000,
-    };
+    });
     const { unmount } = render(
       <WaveLeaderboardGalleryItemVotes
         drop={drop}
@@ -96,12 +110,12 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("shows approved when the drop has winning context", () => {
-    const drop: any = {
+    const drop = createApprovalDrop({
       rating: 6,
       rating_prediction: 6,
       winning_context: { decision_time: 123, place: 1 },
       over_threshold_since_ms: 1_000_000,
-    };
+    });
     render(
       <WaveLeaderboardGalleryItemVotes
         drop={drop}
@@ -114,7 +128,7 @@ describe("WaveLeaderboardGalleryItemVotes", () => {
   });
 
   it("shows closed when approval voting is closed and the drop is not approved", () => {
-    const drop: any = { rating: 6, rating_prediction: 6 };
+    const drop = createApprovalDrop({ rating: 6, rating_prediction: 6 });
     render(
       <WaveLeaderboardGalleryItemVotes
         drop={drop}
