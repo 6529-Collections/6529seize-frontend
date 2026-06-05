@@ -250,12 +250,12 @@ export default function WaveSettingRow({
 
   return (
     <div
-      className={`tw-group tw-grid tw-min-h-6 tw-w-full ${rowGridClasses} tw-items-start tw-gap-x-2 tw-gap-y-1 tw-text-sm`}
+      className={`tw-group tw-grid tw-w-full ${rowGridClasses} tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1 tw-text-sm`}
     >
-      <span className="tw-min-w-0 tw-font-medium tw-leading-6 tw-text-iron-400">
+      <span className="tw-min-w-0 tw-font-normal tw-text-iron-500">
         {label}
       </span>
-      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-leading-6 tw-text-iron-200">
+      <span className="tw-min-w-0 tw-break-words tw-text-right tw-font-medium tw-text-iron-50">
         {valueLabel}
       </span>
       {canEdit && (
@@ -268,7 +268,7 @@ export default function WaveSettingRow({
           aria-haspopup="dialog"
           title={editLabel}
           onClick={toggleEditor}
-          className="tw-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-400"
+          className="tw-flex tw-h-6 tw-w-6 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
         >
           <PencilIcon size={PencilIconSize.SMALL} />
         </button>

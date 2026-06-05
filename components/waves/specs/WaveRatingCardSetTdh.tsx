@@ -25,15 +25,15 @@ export default function WaveRatingCardSetTdh({
   return (
     <>
       <div className="tw-flex tw-w-full tw-flex-col tw-items-end tw-gap-1 tw-text-right tw-text-sm">
-        <span className="tw-font-medium tw-text-iron-200">Card Set TDH</span>
+        <span className="tw-font-medium tw-text-iron-50">Card Set TDH</span>
         <span className="tw-flex tw-flex-nowrap tw-items-center tw-justify-end tw-gap-x-1.5 tw-whitespace-nowrap">
-          <span className="tw-text-iron-300">{countLabel}</span>
+          <span className="tw-font-medium tw-text-iron-50">{countLabel}</span>
           <span className="tw-text-iron-500" aria-hidden="true">
             ·
           </span>
           <button
             type="button"
-            className="tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-font-medium tw-text-primary-300 tw-transition-colors hover:tw-text-primary-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40"
+            className="hover:tw-text-primary-200 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-font-medium tw-text-primary-300 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40"
             onClick={() => setIsDialogOpen(true)}
           >
             View set

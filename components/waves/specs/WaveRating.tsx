@@ -24,7 +24,7 @@ export default function WaveRating({ wave }: WaveRatingProps) {
 
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-items-end tw-gap-2 tw-text-sm">
-      <span className="tw-self-end tw-font-medium tw-text-iron-200">
+      <span className="tw-self-end tw-font-medium tw-text-iron-50">
         {CREDIT_TYPE_LABELS[creditType]}
       </span>
       {creditType === ApiWaveCreditType.Rep && <WaveRatingRep wave={wave} />}

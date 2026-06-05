@@ -123,10 +123,10 @@ const WaveHeaderDescription: React.FC<WaveHeaderDescriptionProps> = ({
         aria-label="Show wave description"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-inset desktop-hover:hover:tw-ring-iron-700"
+        className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-400 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-inset desktop-hover:hover:tw-ring-iron-700"
       >
         <svg
-          className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+          className="tw-size-4 tw-flex-shrink-0"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth={2}

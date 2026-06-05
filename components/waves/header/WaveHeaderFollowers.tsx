@@ -11,13 +11,13 @@ export default function WaveHeaderFollowers({
   return (
     <button
       onClick={onFollowersClick}
-      className="tw-p-0 tw-bg-transparent tw-border-none tw-text-sm tw-flex tw-items-center tw-gap-x-2 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
+      className="tw-flex tw-items-center tw-gap-x-2 tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-underline"
     >
       <span>
-        <span className="tw-font-medium tw-text-iron-50">
+        <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
           {numberWithCommas(wave.metrics.subscribers_count)}
         </span>{" "}
-        <span className="tw-text-iron-400">
+        <span className="tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
           Joined
         </span>
       </span>

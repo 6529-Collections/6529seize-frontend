@@ -4,9 +4,7 @@ import React, { type JSX } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
-import WaveHeader, {
-  WaveHeaderPinnedSide,
-} from "@/components/waves/header/WaveHeader";
+import WaveHeader from "@/components/waves/header/WaveHeader";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
@@ -53,7 +51,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           onFollowersClick={onFollowersClick}
           useRing={false}
           useRounded={false}
-          pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
           <BrainRightSidebarContent wave={wave} />
@@ -85,7 +82,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           onFollowersClick={onFollowersClick}
           useRing={false}
           useRounded={false}
-          pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
           <BrainRightSidebarContent wave={wave} />
@@ -106,7 +102,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           options={options}
           activeKey={activeTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
-          maxVisibleTabs={3} // Show 3 tabs before overflow
+          maxVisibleTabs={3}
         />
       </div>
       <div>{competitionWaveComponents[activeTab]}</div>

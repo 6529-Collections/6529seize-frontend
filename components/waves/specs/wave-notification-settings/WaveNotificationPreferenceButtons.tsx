@@ -1,5 +1,6 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
+import { AtSymbolIcon, BellSlashIcon } from "@heroicons/react/24/outline";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 
 interface WaveNotificationPreferenceButtonsProps {
@@ -10,8 +11,8 @@ interface WaveNotificationPreferenceButtonsProps {
 
 const getButtonStyle = (active: boolean) => {
   return active
-    ? "tw-bg-iron-800 tw-text-primary-400 tw-font-medium"
-    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent";
+    ? "tw-bg-primary-400/10 tw-border-primary-400/30 tw-text-primary-400 desktop-hover:tw-hover:tw-bg-primary-400/20"
+    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent tw-border-iron-700";
 };
 
 function getAllDropsButtonStyle(settings: WaveNotificationSettingsState) {
@@ -47,13 +48,13 @@ export default function WaveNotificationPreferenceButtons({
 }: WaveNotificationPreferenceButtonsProps) {
   const allDropsSelectionDisabled =
     settings.disableAllDropsSelection && !settings.allDropsEnabled;
-  const allDropsTooltipId = `all-drops-tooltip-${waveId}`;
-  const allDropsDisabledDescriptionId = `${allDropsTooltipId}-disabled-description`;
+  const tooltipId = `wave-notification-actions-${waveId}`;
+  const allDropsDisabledDescriptionId = `${tooltipId}-all-drops-disabled-description`;
   const allDropsButtonSizeClass = compact
-    ? "tw-size-8 tw-p-0"
+    ? "tw-size-9 tw-p-0"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
   const allGroupButtonSizeClass = compact
-    ? "tw-h-8 tw-px-2.5"
+    ? "tw-h-9 tw-min-w-9 tw-gap-0 tw-px-2"
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
   const allDropsButton = (
     <button
@@ -63,6 +64,8 @@ export default function WaveNotificationPreferenceButtons({
       aria-describedby={
         allDropsSelectionDisabled ? allDropsDisabledDescriptionId : undefined
       }
+      data-tooltip-id={tooltipId}
+      data-tooltip-content={settings.allDropsTooltip}
       onClick={
         allDropsSelectionDisabled
           ? undefined
@@ -73,6 +76,8 @@ export default function WaveNotificationPreferenceButtons({
     >
       {settings.loadingTarget === "all-drops" ? (
         <Spinner dimension={12} />
+      ) : allDropsSelectionDisabled ? (
+        <BellSlashIcon className="tw-size-4 tw-flex-shrink-0" />
       ) : (
         <AllDropsIcon className="tw-size-4 tw-flex-shrink-0" />
       )}
@@ -92,36 +97,26 @@ export default function WaveNotificationPreferenceButtons({
           : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs"
       }
     >
-      <OverlayTrigger
-        overlay={
-          <Tooltip id={`all-group-tooltip-${waveId}`} placement="top">
-            {settings.allGroupTooltip}
-          </Tooltip>
-        }
+      <button
+        disabled={settings.loading}
+        onClick={settings.onAllGroupNotificationsClick}
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={settings.allGroupTooltip}
+        className={`tw-flex ${allGroupButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-300 tw-ease-out ${getButtonStyle(settings.allGroupNotificationsEnabled)}`}
+        aria-label="Receive ALL mention notifications"
       >
-        <button
-          disabled={settings.loading}
-          onClick={settings.onAllGroupNotificationsClick}
-          className={`tw-flex ${allGroupButtonSizeClass} tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out ${getButtonStyle(settings.allGroupNotificationsEnabled)}`}
-          aria-label="Receive ALL mention notifications"
-        >
-          {settings.loadingTarget === "all-group" ? (
-            <Spinner dimension={12} />
-          ) : (
-            <span>@ALL</span>
-          )}
-        </button>
-      </OverlayTrigger>
+        {settings.loadingTarget === "all-group" ? (
+          <Spinner dimension={12} />
+        ) : (
+          <>
+            <AtSymbolIcon className="tw-size-4 tw-flex-shrink-0" />
+            <span className="-tw-ml-0.5">ALL</span>
+          </>
+        )}
+      </button>
 
-      <OverlayTrigger
-        overlay={
-          <Tooltip id={allDropsTooltipId} placement="top">
-            {settings.allDropsTooltip}
-          </Tooltip>
-        }
-      >
-        {allDropsButton}
-      </OverlayTrigger>
+      {allDropsButton}
+      <MyStreamActionTooltip id={tooltipId} />
     </div>
   );
 }

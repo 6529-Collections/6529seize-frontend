@@ -8,8 +8,6 @@ import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
 import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
-// eslint-disable-next-line import/no-cycle -- WaveHeaderDescription uses this file's pinned-side enum.
-import WaveHeaderDescription from "./WaveHeaderDescription";
 import WaveHeaderPinButton from "./WaveHeaderPinButton";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
@@ -28,7 +26,6 @@ interface WaveHeaderProps {
   readonly onFollowersClick: () => void;
   readonly useRing?: boolean | undefined;
   readonly useRounded?: boolean | undefined;
-  readonly pinnedSide?: WaveHeaderPinnedSide | undefined;
 }
 
 export default function WaveHeader({
@@ -36,7 +33,6 @@ export default function WaveHeader({
   onFollowersClick,
   useRing = true,
   useRounded = true,
-  pinnedSide = WaveHeaderPinnedSide.RIGHT,
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeAgo(wave.created_at);
@@ -77,20 +73,19 @@ export default function WaveHeader({
         } tw-overflow-hidden tw-bg-iron-950`}
       >
         <div
-          className="tw-relative tw-h-20 tw-w-full tw-object-cover"
+          className="tw-relative tw-h-16 tw-w-full tw-object-cover"
           style={{
             background: `linear-gradient(135deg, ${wave.author.banner1_color ?? "#1f2937"} 0%, ${wave.author.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
-            boxShadow: "inset 0 -28px 42px rgba(0,0,0,0.42)",
+            boxShadow: "inset 0 -22px 34px rgba(0,0,0,0.42)",
           }}
         >
-          <div className="tw-absolute tw-inset-0 tw-bg-[linear-gradient(180deg,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.02)_32%,rgba(0,0,0,0.44)_100%)]" />
           <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-white/10" />
         </div>
       </div>
 
-      <div className="-tw-mt-8 tw-px-4 tw-pb-4">
+      <div className="-tw-mt-6 tw-px-4 tw-pb-6">
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
-          <div className="tw-group tw-relative tw-size-16 tw-shrink-0">
+          <div className="tw-group tw-relative tw-h-16 tw-w-16 tw-shrink-0">
             <div
               className={`tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-shadow-[0_18px_36px_rgba(0,0,0,0.35)] ${
                 isDropWave ? "tw-ring-2 tw-ring-white/15" : ""
@@ -130,41 +125,40 @@ export default function WaveHeader({
 
           {canUseWaveActions && (
             <div className="tw-mt-8 tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-justify-end tw-gap-1.5">
-              <div>
-                <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
-              </div>
               {showNotificationSettings && (
                 <div className="tw-shrink-0">
                   <WaveNotificationSettings wave={wave} compact />
                 </div>
               )}
-              <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-x-2">
-                <WaveHeaderPinButton waveId={wave.id} />
-                {showOwnerOptions && <WaveHeaderOptions wave={wave} />}
+              {showOwnerOptions && (
+                <div className="tw-flex tw-shrink-0 tw-items-center">
+                  <WaveHeaderOptions wave={wave} />
+                </div>
+              )}
+              <div className="tw-shrink-0">
+                <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
             </div>
           )}
         </div>
 
-        <div className="tw-mt-3 tw-min-w-0">
-          <div className="tw-flex-1">
+        <div className="tw-mt-5 tw-flex tw-min-w-0 tw-items-start tw-gap-x-3">
+          <div className="tw-min-w-0 tw-flex-1">
             <WaveHeaderName wave={wave} />
           </div>
-        </div>
-
-        <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-flex-1 tw-text-sm">
-            <span className="tw-font-normal tw-text-iron-400">
-              Created {created} ·{" "}
-              {Time.millis(wave.created_at).toDate().toLocaleDateString()}
-            </span>
-          </div>
           <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-end">
-            <WaveHeaderDescription wave={wave} side={pinnedSide} />
+            <WaveHeaderPinButton waveId={wave.id} />
           </div>
         </div>
 
-        <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-3">
+        <div className="tw-text-sm">
+          <span className="tw-font-normal tw-text-iron-500">
+            Created {created} ·{" "}
+            {Time.millis(wave.created_at).toDate().toLocaleDateString()}
+          </span>
+        </div>
+
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
             <div className="tw-flex tw-items-center tw-gap-x-4">
               <WaveHeaderFollowers
@@ -173,10 +167,10 @@ export default function WaveHeader({
               />
               {!!firstXContributors.length && (
                 <div className="tw-flex tw-items-center">
-                  <span className="tw-ml-2.5 tw-text-sm tw-font-normal tw-text-iron-400">
-                    <span className="tw-pr-0.5 tw-font-medium tw-text-iron-50">
+                  <span className="tw-ml-2.5 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
+                    <span className="tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
                       {numberWithCommas(wave.metrics.drops_count)}
-                    </span>
+                    </span>{" "}
                     {wave.metrics.drops_count === 1 ? "Post" : "Posts"}
                   </span>
                 </div>

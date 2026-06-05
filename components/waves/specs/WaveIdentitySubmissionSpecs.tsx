@@ -17,9 +17,9 @@ function WaveIdentitySubmissionSpecsRow({
   readonly value: string;
 }) {
   return (
-    <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-text-sm">
-      <span className="tw-font-medium tw-text-iron-400">{label}</span>
-      <span className="tw-flex-1 tw-text-right tw-font-medium tw-text-iron-200">
+    <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-px-2 tw-py-1 tw-text-sm">
+      <span className="tw-font-normal tw-text-iron-500">{label}</span>
+      <span className="tw-flex-1 tw-text-right tw-font-medium tw-text-iron-50">
         {value}
       </span>
     </div>
@@ -50,9 +50,8 @@ export function WaveIdentitySubmissionSpecsRows({
       <WaveIdentitySubmissionSpecsRow
         label="Repeat submissions"
         value={
-          WAVE_IDENTITY_DUPLICATES_COPY[
-            submissionStrategy.config.duplicates
-          ].summary
+          WAVE_IDENTITY_DUPLICATES_COPY[submissionStrategy.config.duplicates]
+            .summary
         }
       />
     </>

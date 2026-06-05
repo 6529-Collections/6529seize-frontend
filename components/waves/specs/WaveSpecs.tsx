@@ -30,15 +30,15 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
       className={`tw-relative tw-overflow-auto tw-bg-iron-950 ${ringClasses}`}
     >
       <div className="tw-pb-4">
-        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-3">
-          <p className="tw-mb-0 tw-text-base tw-font-semibold tw-tracking-tight tw-text-iron-200">
+        <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-pt-6">
+          <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
             Overview
           </p>
         </div>
 
-        <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-2 tw-px-4">
-          <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-400">Type</span>
+        <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-1 tw-px-2">
+          <div className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm">
+            <span className="tw-font-normal tw-text-iron-500">Type</span>
             <div className="tw-flex tw-items-center tw-gap-x-1">
               <WaveTypeIcon waveType={wave.wave.type} />
             </div>
@@ -46,18 +46,18 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
 
           {!isChatWave && (
             <>
-              <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-text-sm">
-                <span className="tw-font-medium tw-text-iron-400">Voting</span>
+              <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-px-2 tw-py-1 tw-text-sm">
+                <span className="tw-font-normal tw-text-iron-500">Voting</span>
                 <div className="tw-flex tw-flex-1 tw-justify-end">
                   <WaveRating wave={wave} />
                 </div>
               </div>
 
-              <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
-                <span className="tw-font-medium tw-text-iron-400">
+              <div className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm">
+                <span className="tw-font-normal tw-text-iron-500">
                   Voting power
                 </span>
-                <span className="tw-self-end tw-font-medium tw-text-iron-200">
+                <span className="tw-self-end tw-font-medium tw-text-iron-50">
                   {creditScopeLabel}
                 </span>
               </div>
@@ -66,8 +66,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
 
           {isApproveWave && <WaveApprovalThresholds wave={wave} />}
 
-          <div className="tw-group tw-flex tw-h-6 tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-text-sm">
-            <span className="tw-font-medium tw-text-iron-400">Creator</span>
+          <div className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm">
+            <span className="tw-font-normal tw-text-iron-500">Creator</span>
             <div className="tw-flex tw-items-center tw-gap-x-1">
               <WaveAuthor wave={wave} />
             </div>
