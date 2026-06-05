@@ -68,7 +68,7 @@ const getSeededNumber = (value: string): number => {
   let hash = 2166136261;
 
   for (let index = 0; index < value.length; index++) {
-    hash = Math.imul(hash ^ value.charCodeAt(index), 16777619);
+    hash = Math.imul(hash ^ (value.codePointAt(index) ?? 0), 16777619);
   }
 
   return hash >>> 0;

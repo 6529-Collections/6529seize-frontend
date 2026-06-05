@@ -1,20 +1,20 @@
 import { publicEnv } from "@/config/env";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
+import { getOgImageRequestOrigin } from "@/app/api/og-metadata/_lib/requestOrigin";
+import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
+import { renderWaveOgImage } from "@/app/api/og-metadata/waves/[id]/image";
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
-import { getOgImageRequestOrigin } from "../../_lib/requestOrigin";
-import { loadMontserratFonts } from "../../profiles/[identity]/font";
-import { renderWaveOgImage } from "./image";
 
 export const runtime = "edge";
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 const OG_IMAGE_SIZE = {
   width: 1200,
   height: 630,
 } as const;
 const OG_CACHE_CONTROL =
-  "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000";
+  "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400";
 
 const getUsableText = (value: string | null | undefined): string | null => {
   const normalized = value?.trim();

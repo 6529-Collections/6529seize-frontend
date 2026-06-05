@@ -4,8 +4,8 @@ import {
   UrlGuardError,
   type FetchPublicUrlOptions,
 } from "@/lib/security/urlGuard";
-import { optimizeImage } from "next/dist/server/image-optimizer";
 import { NextResponse, type NextRequest } from "next/server";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 export const revalidate = 604800;
@@ -215,12 +215,15 @@ const normalizeImageToPng = async ({
     throw new Error("Upstream response is not an image.");
   }
 
-  return optimizeImage({
-    buffer,
-    contentType: PNG_CONTENT_TYPE,
-    quality: 100,
-    width,
-  });
+  return sharp(buffer, {
+    limitInputPixels: false,
+    sequentialRead: true,
+  })
+    .timeout({ seconds: 7 })
+    .rotate()
+    .resize(width, undefined, { withoutEnlargement: true })
+    .png({ quality: 100 })
+    .toBuffer();
 };
 
 const parseImageUrl = (value: string | null): URL => {

@@ -193,7 +193,7 @@ const addTrailingEllipsis = ({
   }
 
   lines.splice(
-    lines.length - 1,
+    -1,
     1,
     appendEllipsis({
       value: lastLine,

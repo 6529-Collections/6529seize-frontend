@@ -81,6 +81,8 @@ const fetchWaveCached = cache(
 
 const fetchDropOgMetadataCached = cache(
   async (dropId: string, headersKey: string): Promise<ApiOgMetadata | null> => {
+    const normalizedDropId = dropId.trim();
+    const encodedDropId = encodeURIComponent(normalizedDropId);
     let headers: Record<string, string> = {};
     try {
       headers = headersKey
@@ -91,11 +93,14 @@ const fetchDropOgMetadataCached = cache(
     }
     try {
       return await commonApiFetch<ApiOgMetadata>({
-        endpoint: `og-metadata/drops/${dropId}`,
+        endpoint: `og-metadata/drops/${encodedDropId}`,
         headers,
       });
     } catch (error) {
-      console.warn("Failed to fetch drop OG metadata", { dropId, error });
+      console.warn("Failed to fetch drop OG metadata", {
+        dropId: normalizedDropId,
+        error,
+      });
       return null;
     }
   }
@@ -229,7 +234,7 @@ export async function buildWavesMetadata(
       ? `@${wave.author.handle.replace(/^@/, "")}`
       : formatAddress(wave.author.primary_address);
 
-  const dropMetadataId = getDropMetadataId(searchParams);
+  const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   if (dropMetadataId) {
     const dropMetadata = await fetchDropOgMetadataCached(
       dropMetadataId,

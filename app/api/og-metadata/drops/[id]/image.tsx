@@ -15,13 +15,13 @@ import {
   getUsableText,
   pluralize,
   truncateText,
-} from "../../_lib/imageUtils";
+} from "@/app/api/og-metadata/_lib/imageUtils";
 import {
   getProfileDisplayName,
   ProfileAvatar,
   ProfileBadgeRow,
-} from "../../_lib/profileSummary";
-import { isAllowedOgImageSourceUrl } from "../../_lib/imageProxyPolicy";
+} from "@/app/api/og-metadata/_lib/profileSummary";
+import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 630;
@@ -77,7 +77,6 @@ const SUBMISSION_STATS_TOP = 566;
 const SUBMISSION_STATS_FONT_SIZE = 24;
 const SUBMISSION_STATS_GROUP_GAP = 24;
 const SUBMISSION_STATS_VALUE_GAP = 8;
-const SUBMISSION_PLACEHOLDER_BORDER = "rgba(147, 147, 159, 0.2)";
 const CHAT_CONTENT_BACKGROUND_TOP = CONTENT_TOP - 20;
 const SUBMISSION_STATS_TROPHY_ICON_SIZE = 22;
 const TROPHY_COLOR = "#FBBF24";
@@ -91,6 +90,21 @@ const URL_TOKEN_PATTERN = /^(?:https?:\/\/|www\.)\S+$/i;
 const IMAGE_URL_PATTERN = /\.(?:avif|gif|jpe?g|png|webp)(?:$|[?#])/i;
 const INTERACTIVE_URL_PATTERN = /\.(?:glb|gltf|html?)(?:$|[?#])/i;
 const VIDEO_URL_PATTERN = /\.(?:m4v|mov|mp4|webm)(?:$|[?#])/i;
+const UUID_FILENAME_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const HEX_FILENAME_PATTERN = /^[0-9a-f]{24,}$/i;
+const NUMERIC_FILENAME_PATTERN = /^\d{10,}$/;
+const GENERIC_FILENAME_TOKENS = new Set([
+  "asset",
+  "file",
+  "image",
+  "img",
+  "media",
+  "upload",
+  "untitled",
+  "vid",
+  "video",
+]);
 
 type DropMediaKind = "image" | "video";
 type SubmissionPreviewMediaCategory = SubmissionMediaCategory | "unknown";
@@ -110,6 +124,7 @@ type DropMediaItem = {
 };
 type SubmissionPreviewMedia = {
   readonly category: SubmissionPreviewMediaCategory;
+  readonly label: string;
   readonly mimeType: string | undefined;
 };
 type SubmissionMediaStyles = {
@@ -157,6 +172,19 @@ type DropMediaPresentation =
       readonly kind: "gallery";
       readonly tiles: readonly DropMediaTile[];
     };
+type SingleDropMediaPresentation = Extract<
+  DropMediaPresentation,
+  { readonly kind: "single" }
+>;
+type GalleryDropMediaPresentation = Extract<
+  DropMediaPresentation,
+  { readonly kind: "gallery" }
+>;
+type KeyedContentLineRow = {
+  readonly key: string;
+  readonly line: DropContentLine;
+  readonly previousLine: DropContentLine | undefined;
+};
 const getCharacterWidthFactor = (character: string): number => {
   if (character === " ") {
     return 0.34;
@@ -271,7 +299,7 @@ const addTrailingContentEllipsis = (lines: DropContentLine[]): void => {
     return;
   }
 
-  lines.splice(lines.length - 1, 1, {
+  lines.splice(-1, 1, {
     ...lastLine,
     text: appendContentEllipsis(lastLine.text),
   });
@@ -328,6 +356,58 @@ const getMimeTypeFromUrl = (url: string | null): string | undefined => {
   return undefined;
 };
 
+const getFilenameStem = (filename: string): string =>
+  filename.replace(/\.[^.]+$/, "");
+
+const hasHumanReadableToken = (stem: string): boolean =>
+  stem
+    .split(/[^a-z0-9]+/i)
+    .some(
+      (token) =>
+        /[a-z]{4,}/i.test(token) &&
+        !/^[a-f0-9]{8,}$/i.test(token) &&
+        !GENERIC_FILENAME_TOKENS.has(token.toLowerCase())
+    );
+
+const getMeaningfulFilename = (
+  value: string | null | undefined
+): string | null => {
+  const filename = getUsableText(value);
+  if (!filename) {
+    return null;
+  }
+
+  const stem = getFilenameStem(filename);
+  if (
+    UUID_FILENAME_PATTERN.test(stem) ||
+    HEX_FILENAME_PATTERN.test(stem) ||
+    NUMERIC_FILENAME_PATTERN.test(stem)
+  ) {
+    return null;
+  }
+
+  return hasHumanReadableToken(stem) ? filename : null;
+};
+
+const getFilenameFromUrl = (url: string, fallback: string): string => {
+  try {
+    const pathname = new URL(url).pathname;
+    const filename = decodeURIComponent(pathname.split("/").pop() ?? "");
+    return getMeaningfulFilename(filename) ?? fallback;
+  } catch {
+    return (
+      getMeaningfulFilename(url.split("?")[0]?.split("/").pop()) ?? fallback
+    );
+  }
+};
+
+const getSubmissionMediaLabel = (
+  category: SubmissionPreviewMediaCategory
+): string =>
+  category === "unknown"
+    ? "Media"
+    : `${category[0]?.toUpperCase() ?? ""}${category.slice(1)}`;
+
 const getSubmissionMediaCategory = (
   mimeType: string | undefined
 ): SubmissionPreviewMediaCategory => {
@@ -348,11 +428,14 @@ const getSubmissionPreviewMedia = (
 ): SubmissionPreviewMedia => {
   const mediaTypes =
     media?.map((asset) => {
+      const url = getUsableText(asset.url);
       const mimeType =
         getUsableText(asset.mime_type)?.toLowerCase() ??
-        getMimeTypeFromUrl(getUsableText(asset.url));
+        getMimeTypeFromUrl(url);
+      const category = getSubmissionMediaCategory(mimeType);
       return {
-        category: getSubmissionMediaCategory(mimeType),
+        category,
+        label: getFilenameFromUrl(url ?? "", getSubmissionMediaLabel(category)),
         mimeType,
       };
     }) ?? [];
@@ -361,7 +444,11 @@ const getSubmissionPreviewMedia = (
     mediaTypes.find((item) => item.category === "interactive") ??
     mediaTypes.find((item) => item.category === "video") ??
     mediaTypes.find((item) => item.category === "image") ??
-    mediaTypes[0] ?? { category: "unknown", mimeType: undefined }
+    mediaTypes[0] ?? {
+      category: "unknown",
+      label: getSubmissionMediaLabel("unknown"),
+      mimeType: undefined,
+    }
   );
 };
 
@@ -382,16 +469,6 @@ const getImageMediaAssets = (
         getMediaKind(asset) === "image"
     )
     .slice(0, MEDIA_GALLERY_MAX_ITEMS) ?? [];
-
-const getFilenameFromUrl = (url: string, fallback: string): string => {
-  try {
-    const pathname = new URL(url).pathname;
-    const filename = decodeURIComponent(pathname.split("/").pop() ?? "");
-    return getUsableText(filename) ?? fallback;
-  } catch {
-    return getUsableText(url.split("?")[0]?.split("/").pop()) ?? fallback;
-  }
-};
 
 const getVideoLines = (
   media: readonly ApiOgMediaAsset[] | null | undefined
@@ -527,6 +604,107 @@ const getDropText = (
   );
 };
 
+type ContentLineBuildContext = {
+  lines: DropContentLine[];
+  currentLine: string;
+  readonly maxLines: number;
+};
+
+const flushCurrentContentLine = (context: ContentLineBuildContext): void => {
+  if (!context.currentLine || context.lines.length >= context.maxLines) {
+    return;
+  }
+
+  context.lines.push({ kind: "text", text: context.currentLine });
+  context.currentLine = "";
+};
+
+const addEllipsisIfMoreWordsRemain = ({
+  context,
+  index,
+  words,
+}: {
+  readonly context: ContentLineBuildContext;
+  readonly index: number;
+  readonly words: readonly string[];
+}): void => {
+  if (context.lines.length === context.maxLines && index < words.length - 1) {
+    addTrailingContentEllipsis(context.lines);
+  }
+};
+
+const appendUrlContentLine = ({
+  context,
+  index,
+  word,
+  words,
+}: {
+  readonly context: ContentLineBuildContext;
+  readonly index: number;
+  readonly word: string;
+  readonly words: readonly string[];
+}): void => {
+  flushCurrentContentLine(context);
+  addHardWrappedTokenLines({
+    lines: context.lines,
+    token: getDisplayLinkText(word),
+    kind: "link",
+    maxLines: Math.min(
+      context.maxLines,
+      context.lines.length + LINK_DISPLAY_MAX_LINES
+    ),
+  });
+  addEllipsisIfMoreWordsRemain({ context, index, words });
+};
+
+const appendLongContentWord = ({
+  context,
+  index,
+  word,
+  words,
+}: {
+  readonly context: ContentLineBuildContext;
+  readonly index: number;
+  readonly word: string;
+  readonly words: readonly string[];
+}): void => {
+  addHardWrappedTokenLines({
+    lines: context.lines,
+    token: word,
+    kind: "text",
+    maxLines: context.maxLines,
+  });
+  addEllipsisIfMoreWordsRemain({ context, index, words });
+};
+
+const appendTextContentLine = ({
+  context,
+  index,
+  word,
+  words,
+}: {
+  readonly context: ContentLineBuildContext;
+  readonly index: number;
+  readonly word: string;
+  readonly words: readonly string[];
+}): void => {
+  const nextLine = context.currentLine
+    ? `${context.currentLine} ${word}`
+    : word;
+  if (fitsContentLine(nextLine)) {
+    context.currentLine = nextLine;
+    return;
+  }
+
+  flushCurrentContentLine(context);
+  if (fitsContentLine(word)) {
+    context.currentLine = word;
+    return;
+  }
+
+  appendLongContentWord({ context, index, word, words });
+};
+
 const getContentLines = ({
   value,
   maxLines,
@@ -540,63 +718,28 @@ const getContentLines = ({
   }
 
   const words = normalized.split(" ");
-  const lines: DropContentLine[] = [];
-  let currentLine = "";
-
-  const flushCurrentLine = (): void => {
-    if (currentLine && lines.length < maxLines) {
-      lines.push({ kind: "text", text: currentLine });
-      currentLine = "";
-    }
+  const context: ContentLineBuildContext = {
+    lines: [],
+    currentLine: "",
+    maxLines,
   };
 
   for (const [index, word] of words.entries()) {
-    if (lines.length === maxLines) {
-      addTrailingContentEllipsis(lines);
+    if (context.lines.length === maxLines) {
+      addTrailingContentEllipsis(context.lines);
       break;
     }
 
     if (isUrlToken(word)) {
-      flushCurrentLine();
-      addHardWrappedTokenLines({
-        lines,
-        token: getDisplayLinkText(word),
-        kind: "link",
-        maxLines: Math.min(maxLines, lines.length + LINK_DISPLAY_MAX_LINES),
-      });
-
-      if (lines.length === maxLines && index < words.length - 1) {
-        addTrailingContentEllipsis(lines);
-      }
+      appendUrlContentLine({ context, index, word, words });
       continue;
     }
 
-    const nextLine = currentLine ? `${currentLine} ${word}` : word;
-    if (fitsContentLine(nextLine)) {
-      currentLine = nextLine;
-      continue;
-    }
-
-    flushCurrentLine();
-    if (fitsContentLine(word)) {
-      currentLine = word;
-      continue;
-    }
-
-    addHardWrappedTokenLines({
-      lines,
-      token: word,
-      kind: "text",
-      maxLines,
-    });
-
-    if (lines.length === maxLines && index < words.length - 1) {
-      addTrailingContentEllipsis(lines);
-    }
+    appendTextContentLine({ context, index, word, words });
   }
 
-  flushCurrentLine();
-  return lines;
+  flushCurrentContentLine(context);
+  return context.lines;
 };
 
 const getContentTop = ({
@@ -755,7 +898,7 @@ const getTileObjectFit = (
     return "contain";
   }
 
-  return "contain";
+  return "cover";
 };
 
 const withTileFit = (
@@ -1026,6 +1169,8 @@ const SubmissionMediaIcon = ({
   const iconSize = Math.round(
     size * (media.category === "interactive" ? 0.5 : 0.55)
   );
+  const iconHeight =
+    media.category === "video" ? Math.round((iconSize * 512) / 576) : iconSize;
   const styles = getSubmissionMediaStyles(media);
 
   return (
@@ -1044,7 +1189,7 @@ const SubmissionMediaIcon = ({
     >
       <svg
         fill="currentColor"
-        height={iconSize}
+        height={iconHeight}
         viewBox={icon.viewBox}
         width={iconSize}
       >
@@ -1176,44 +1321,58 @@ const formatSubmissionDate = (
   return SUBMISSION_DATE_FORMATTER.format(new Date(timestamp));
 };
 
+const getSubmissionStatDate = ({
+  submittedAt,
+  wonAt,
+}: {
+  readonly submittedAt: string | null;
+  readonly wonAt: string | null;
+}): { readonly label: string; readonly value: string } | null => {
+  if (wonAt) {
+    return { label: "Winner", value: wonAt };
+  }
+
+  if (submittedAt) {
+    return { label: "Submitted", value: submittedAt };
+  }
+
+  return null;
+};
+
 const SubmissionMediaPlaceholder = ({
   media,
 }: {
   readonly media: SubmissionPreviewMedia;
-}) => {
-  const mediaLabel =
-    media.category === "unknown"
-      ? "Media"
-      : `${media.category[0]?.toUpperCase() ?? ""}${media.category.slice(1)}`;
-
-  return (
+}) => (
+  <div
+    style={{
+      alignItems: "center",
+      borderRadius: 28,
+      display: "flex",
+      flexDirection: "column",
+      gap: 16,
+      height: SUBMISSION_MEDIA_HEIGHT,
+      justifyContent: "center",
+      width: CONTENT_WIDTH,
+    }}
+  >
+    <SubmissionMediaIcon media={media} size={78} />
     <div
       style={{
-        alignItems: "center",
-        border: `1px solid ${SUBMISSION_PLACEHOLDER_BORDER}`,
-        borderRadius: 28,
+        color: MUTED_TEXT,
         display: "flex",
-        flexDirection: "column",
-        gap: 18,
-        height: SUBMISSION_MEDIA_HEIGHT,
-        justifyContent: "center",
-        width: CONTENT_WIDTH,
+        fontSize: 28,
+        fontWeight: 600,
+        maxWidth: CONTENT_WIDTH - 160,
+        overflow: "hidden",
+        textAlign: "center",
+        whiteSpace: "nowrap",
       }}
     >
-      <SubmissionMediaIcon media={media} size={86} />
-      <div
-        style={{
-          color: MUTED_TEXT,
-          display: "flex",
-          fontSize: 30,
-          fontWeight: 600,
-        }}
-      >
-        {mediaLabel}
-      </div>
+      {truncateText(media.label, 42)}
     </div>
-  );
-};
+  </div>
+);
 
 const renderSubmissionDropOgImage = ({
   author,
@@ -1247,11 +1406,7 @@ const renderSubmissionDropOgImage = ({
   const votes = getSubmissionVotes(drop);
   const submittedAt = formatSubmissionDate(drop?.submitted_at);
   const wonAt = formatSubmissionDate(drop?.won_at);
-  const statDate = wonAt
-    ? { label: "Winner", value: wonAt }
-    : submittedAt
-      ? { label: "Submitted", value: submittedAt }
-      : null;
+  const statDate = getSubmissionStatDate({ submittedAt, wonAt });
 
   return (
     <div
@@ -1433,38 +1588,252 @@ const renderSubmissionDropOgImage = ({
   );
 };
 
-export const renderDropOgImage = ({
-  author,
-  drop,
-  id,
-  origin = publicEnv.BASE_ENDPOINT,
-  wave,
-}: {
-  readonly author: ApiOgMetadataProfile | undefined;
-  readonly drop: ApiOgMetadataDrop | undefined;
-  readonly id: string;
-  readonly origin?: string;
-  readonly wave: ApiOgMetadataWave | undefined;
-}) => {
-  const authorName = getProfileDisplayName(author);
-  const authorAvatarUrl = getMediaProxyUrl({
-    sourceUrl: getFirstMediaUrl(author?.media),
-    origin,
-    width: AUTHOR_AVATAR_INNER_SIZE,
-  });
+const getContentLineRows = (
+  contentLines: readonly DropContentLine[]
+): readonly KeyedContentLineRow[] => {
+  const countsByBaseKey = new Map<string, number>();
+  return contentLines.map((line, lineIndex) => {
+    const baseKey = `${line.kind}-${line.text}`;
+    const count = (countsByBaseKey.get(baseKey) ?? 0) + 1;
+    countsByBaseKey.set(baseKey, count);
 
-  if (drop?.drop_type === "SUBMISSION") {
-    return renderSubmissionDropOgImage({
-      author,
-      authorAvatarUrl,
-      authorName,
-      drop,
-      id,
-      origin,
-      wave,
-    });
+    return {
+      key: `${baseKey}-${count}`,
+      line,
+      previousLine: contentLines[lineIndex - 1],
+    };
+  });
+};
+
+const DropContentLines = ({
+  contentLines,
+  contentTop,
+  shouldCenterContent,
+}: {
+  readonly contentLines: readonly DropContentLine[];
+  readonly contentTop: number;
+  readonly shouldCenterContent: boolean;
+}) => {
+  if (contentLines.length === 0) {
+    return null;
   }
 
+  return (
+    <div
+      style={{
+        color: "#ffffff",
+        alignItems: shouldCenterContent ? "center" : "flex-start",
+        display: "flex",
+        flexDirection: "column",
+        fontSize: CONTENT_FONT_SIZE,
+        fontWeight: 500,
+        left: HORIZONTAL_MARGIN,
+        letterSpacing: 0,
+        lineHeight: CONTENT_LINE_HEIGHT,
+        position: "absolute",
+        top: contentTop,
+        width: CONTENT_WIDTH,
+      }}
+    >
+      {getContentLineRows(contentLines).map(({ key, line, previousLine }) => (
+        <div
+          key={key}
+          style={{
+            alignItems: "center",
+            color: getContentLineColor(line.kind),
+            display: "flex",
+            lineHeight: CONTENT_LINE_HEIGHT,
+            marginBottom: isAttachmentLine(line)
+              ? ATTACHMENT_ROW_BOTTOM_MARGIN
+              : 0,
+            marginTop: getAttachmentLineTopMargin(line, previousLine),
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            width: shouldCenterContent ? "auto" : CONTENT_WIDTH,
+          }}
+        >
+          {line.kind === "video" ? <VideoContentIcon /> : null}
+          {line.kind === "file" ? <FileContentIcon /> : null}
+          {line.text}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const SingleDropMedia = ({
+  mediaPresentation,
+  singleMediaUrl,
+}: {
+  readonly mediaPresentation: DropMediaPresentation | null;
+  readonly singleMediaUrl: string | null;
+}) => {
+  if (mediaPresentation?.kind !== "single") {
+    return null;
+  }
+
+  const presentation: SingleDropMediaPresentation = mediaPresentation;
+
+  return (
+    <div
+      style={{
+        alignItems: "center",
+        background: "transparent",
+        borderBottomLeftRadius: presentation.layout.crop ? 0 : 28,
+        borderBottomRightRadius: presentation.layout.crop ? 0 : 28,
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        display: "flex",
+        height: presentation.layout.frameHeight,
+        justifyContent: "center",
+        left: presentation.layout.frameLeft,
+        overflow: "hidden",
+        position: "absolute",
+        top: presentation.layout.frameTop,
+        width: presentation.layout.frameWidth,
+      }}
+    >
+      {singleMediaUrl ? (
+        <img
+          alt=""
+          height={presentation.layout.imageHeight}
+          src={singleMediaUrl}
+          style={{
+            height: presentation.layout.imageHeight,
+            objectFit: presentation.layout.crop ? "cover" : "contain",
+            objectPosition: "top center",
+            width: presentation.layout.imageWidth,
+          }}
+          width={presentation.layout.imageWidth}
+        />
+      ) : (
+        <div
+          style={{
+            alignItems: "center",
+            background: "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
+            color: MUTED_TEXT,
+            display: "flex",
+            fontSize: 30,
+            fontWeight: 600,
+            height: presentation.layout.frameHeight,
+            justifyContent: "center",
+            width: presentation.layout.frameWidth,
+          }}
+        >
+          Video
+        </div>
+      )}
+    </div>
+  );
+};
+
+const getMediaTileKey = (tile: DropMediaTile): string =>
+  tile.item.sourceUrl ??
+  `${tile.layout.frameLeft}-${tile.layout.frameTop}-${tile.layout.frameWidth}-${tile.layout.frameHeight}`;
+
+const DropMediaGallery = ({
+  mediaPresentation,
+  origin,
+}: {
+  readonly mediaPresentation: DropMediaPresentation | null;
+  readonly origin: string;
+}) => {
+  if (mediaPresentation?.kind !== "gallery") {
+    return null;
+  }
+
+  const presentation: GalleryDropMediaPresentation = mediaPresentation;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        height: presentation.frameHeight,
+        left: presentation.frameLeft,
+        position: "absolute",
+        top: presentation.frameTop,
+        width: presentation.frameWidth,
+      }}
+    >
+      {presentation.tiles.map((tile) => {
+        const tileMediaUrl = tile.item.sourceUrl
+          ? getMediaProxyUrl({
+              sourceUrl: tile.item.sourceUrl,
+              origin,
+              width: tile.layout.proxyWidth,
+            })
+          : null;
+
+        return (
+          <div
+            key={getMediaTileKey(tile)}
+            style={{
+              alignItems: "center",
+              background: "transparent",
+              borderBottomLeftRadius: tile.layout.borderBottomLeftRadius,
+              borderBottomRightRadius: tile.layout.borderBottomRightRadius,
+              borderTopLeftRadius: tile.layout.borderTopLeftRadius,
+              borderTopRightRadius: tile.layout.borderTopRightRadius,
+              display: "flex",
+              height: tile.layout.frameHeight,
+              justifyContent: "center",
+              left: tile.layout.frameLeft,
+              overflow: "hidden",
+              position: "absolute",
+              top: tile.layout.frameTop,
+              width: tile.layout.frameWidth,
+            }}
+          >
+            {tileMediaUrl ? (
+              <img
+                alt=""
+                height={tile.layout.frameHeight}
+                src={tileMediaUrl}
+                style={{
+                  height: tile.layout.frameHeight,
+                  objectFit: tile.layout.objectFit,
+                  objectPosition:
+                    tile.layout.objectFit === "cover"
+                      ? "top center"
+                      : "center center",
+                  width: tile.layout.frameWidth,
+                }}
+                width={tile.layout.frameWidth}
+              />
+            ) : (
+              <div
+                style={{
+                  alignItems: "center",
+                  background:
+                    "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
+                  color: MUTED_TEXT,
+                  display: "flex",
+                  fontSize: 24,
+                  fontWeight: 600,
+                  height: tile.layout.frameHeight,
+                  justifyContent: "center",
+                  width: tile.layout.frameWidth,
+                }}
+              >
+                Video
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const getChatDropOgImageModel = ({
+  drop,
+  id,
+  origin,
+}: {
+  readonly drop: ApiOgMetadataDrop | undefined;
+  readonly id: string;
+  readonly origin: string;
+}) => {
   const dropText = getDropText(drop, id);
   const hasText =
     getUsableText(drop?.content ?? drop?.description ?? drop?.title) !== null;
@@ -1505,10 +1874,6 @@ export const renderDropOgImage = ({
   const hasAttachments = contentLines.some(isAttachmentLine);
   const shouldCenterContent =
     !showMedia && !hasAttachments && contentLines.length <= 4;
-  const contentTop = getContentTop({
-    lineCount: contentLines.length,
-    showMedia,
-  });
   const mediaPresentation = showMedia
     ? getMediaPresentation({
         mediaAssets,
@@ -1523,6 +1888,52 @@ export const renderDropOgImage = ({
           width: mediaPresentation.layout.proxyWidth,
         })
       : null;
+
+  return {
+    contentLines,
+    contentTop: getContentTop({
+      lineCount: contentLines.length,
+      showMedia,
+    }),
+    mediaPresentation,
+    shouldCenterContent,
+    singleMediaUrl,
+  };
+};
+
+export const renderDropOgImage = ({
+  author,
+  drop,
+  id,
+  origin = publicEnv.BASE_ENDPOINT,
+  wave,
+}: {
+  readonly author: ApiOgMetadataProfile | undefined;
+  readonly drop: ApiOgMetadataDrop | undefined;
+  readonly id: string;
+  readonly origin?: string;
+  readonly wave: ApiOgMetadataWave | undefined;
+}) => {
+  const authorName = getProfileDisplayName(author);
+  const authorAvatarUrl = getMediaProxyUrl({
+    sourceUrl: getFirstMediaUrl(author?.media),
+    origin,
+    width: AUTHOR_AVATAR_INNER_SIZE,
+  });
+
+  if (drop?.drop_type === "SUBMISSION") {
+    return renderSubmissionDropOgImage({
+      author,
+      authorAvatarUrl,
+      authorName,
+      drop,
+      id,
+      origin,
+      wave,
+    });
+  }
+
+  const model = getChatDropOgImageModel({ drop, id, origin });
 
   return (
     <div
@@ -1579,182 +1990,19 @@ export const renderDropOgImage = ({
         wave={wave}
       />
 
-      {contentLines.length > 0 ? (
-        <div
-          style={{
-            color: "#ffffff",
-            alignItems: shouldCenterContent ? "center" : "flex-start",
-            display: "flex",
-            flexDirection: "column",
-            fontSize: CONTENT_FONT_SIZE,
-            fontWeight: 500,
-            left: HORIZONTAL_MARGIN,
-            letterSpacing: 0,
-            lineHeight: CONTENT_LINE_HEIGHT,
-            position: "absolute",
-            top: contentTop,
-            width: CONTENT_WIDTH,
-          }}
-        >
-          {contentLines.map((line, index) => (
-            <div
-              key={`content-${index}`}
-              style={{
-                alignItems: "center",
-                color: getContentLineColor(line.kind),
-                display: "flex",
-                lineHeight: CONTENT_LINE_HEIGHT,
-                marginBottom: isAttachmentLine(line)
-                  ? ATTACHMENT_ROW_BOTTOM_MARGIN
-                  : 0,
-                marginTop: getAttachmentLineTopMargin(
-                  line,
-                  contentLines[index - 1]
-                ),
-                overflow: "hidden",
-                whiteSpace: "nowrap",
-                width: shouldCenterContent ? "auto" : CONTENT_WIDTH,
-              }}
-            >
-              {line.kind === "video" ? <VideoContentIcon /> : null}
-              {line.kind === "file" ? <FileContentIcon /> : null}
-              {line.text}
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      {mediaPresentation?.kind === "single" ? (
-        <div
-          style={{
-            alignItems: "center",
-            background: "transparent",
-            borderBottomLeftRadius: mediaPresentation.layout.crop ? 0 : 28,
-            borderBottomRightRadius: mediaPresentation.layout.crop ? 0 : 28,
-            borderTopLeftRadius: 28,
-            borderTopRightRadius: 28,
-            display: "flex",
-            height: mediaPresentation.layout.frameHeight,
-            justifyContent: "center",
-            left: mediaPresentation.layout.frameLeft,
-            overflow: "hidden",
-            position: "absolute",
-            top: mediaPresentation.layout.frameTop,
-            width: mediaPresentation.layout.frameWidth,
-          }}
-        >
-          {singleMediaUrl ? (
-            <img
-              alt=""
-              height={mediaPresentation.layout.imageHeight}
-              src={singleMediaUrl}
-              style={{
-                height: mediaPresentation.layout.imageHeight,
-                objectFit: mediaPresentation.layout.crop ? "cover" : "contain",
-                objectPosition: "top center",
-                width: mediaPresentation.layout.imageWidth,
-              }}
-              width={mediaPresentation.layout.imageWidth}
-            />
-          ) : (
-            <div
-              style={{
-                alignItems: "center",
-                background: "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
-                color: MUTED_TEXT,
-                display: "flex",
-                fontSize: 30,
-                fontWeight: 600,
-                height: mediaPresentation.layout.frameHeight,
-                justifyContent: "center",
-                width: mediaPresentation.layout.frameWidth,
-              }}
-            >
-              Video
-            </div>
-          )}
-        </div>
-      ) : null}
-
-      {mediaPresentation?.kind === "gallery" ? (
-        <div
-          style={{
-            display: "flex",
-            height: mediaPresentation.frameHeight,
-            left: mediaPresentation.frameLeft,
-            position: "absolute",
-            top: mediaPresentation.frameTop,
-            width: mediaPresentation.frameWidth,
-          }}
-        >
-          {mediaPresentation.tiles.map((tile, index) => {
-            const tileMediaUrl = tile.item.sourceUrl
-              ? getMediaProxyUrl({
-                  sourceUrl: tile.item.sourceUrl,
-                  origin,
-                  width: tile.layout.proxyWidth,
-                })
-              : null;
-
-            return (
-              <div
-                key={`media-tile-${index}`}
-                style={{
-                  alignItems: "center",
-                  background: "transparent",
-                  borderBottomLeftRadius: tile.layout.borderBottomLeftRadius,
-                  borderBottomRightRadius: tile.layout.borderBottomRightRadius,
-                  borderTopLeftRadius: tile.layout.borderTopLeftRadius,
-                  borderTopRightRadius: tile.layout.borderTopRightRadius,
-                  display: "flex",
-                  height: tile.layout.frameHeight,
-                  justifyContent: "center",
-                  left: tile.layout.frameLeft,
-                  overflow: "hidden",
-                  position: "absolute",
-                  top: tile.layout.frameTop,
-                  width: tile.layout.frameWidth,
-                }}
-              >
-                {tileMediaUrl ? (
-                  <img
-                    alt=""
-                    height={tile.layout.frameHeight}
-                    src={tileMediaUrl}
-                    style={{
-                      height: tile.layout.frameHeight,
-                      objectFit: tile.layout.objectFit,
-                      objectPosition:
-                        tile.layout.objectFit === "cover"
-                          ? "top center"
-                          : "center center",
-                      width: tile.layout.frameWidth,
-                    }}
-                    width={tile.layout.frameWidth}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      alignItems: "center",
-                      background:
-                        "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
-                      color: MUTED_TEXT,
-                      display: "flex",
-                      fontSize: 24,
-                      fontWeight: 600,
-                      height: tile.layout.frameHeight,
-                      justifyContent: "center",
-                      width: tile.layout.frameWidth,
-                    }}
-                  >
-                    Video
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : null}
+      <DropContentLines
+        contentLines={model.contentLines}
+        contentTop={model.contentTop}
+        shouldCenterContent={model.shouldCenterContent}
+      />
+      <SingleDropMedia
+        mediaPresentation={model.mediaPresentation}
+        singleMediaUrl={model.singleMediaUrl}
+      />
+      <DropMediaGallery
+        mediaPresentation={model.mediaPresentation}
+        origin={origin}
+      />
     </div>
   );
 };
