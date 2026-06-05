@@ -19,11 +19,13 @@ const mockedUseNewDropCounter = useNewDropCounter as jest.Mock;
 const createWavesData = ({
   mainWavesRefetch,
   refetchAllWaves,
+  waves = [],
 }: {
   readonly mainWavesRefetch: jest.Mock;
   readonly refetchAllWaves: jest.Mock;
+  readonly waves?: any[];
 }) => ({
-  waves: [],
+  waves,
   isFetching: false,
   isFetchingNextPage: false,
   hasNextPage: false,
@@ -33,6 +35,22 @@ const createWavesData = ({
   addPinnedWave: jest.fn(),
   removePinnedWave: jest.fn(),
 });
+
+const createSidebarWave = (overrides: Record<string, unknown> = {}) =>
+  ({
+    id: "wave-1",
+    name: "Wave 1",
+    type: "CHAT",
+    picture: null,
+    contributors: [],
+    latestDropTimestamp: 100,
+    firstUnreadDropSerialNo: null,
+    unreadDropsCount: 0,
+    latestReadTimestamp: 0,
+    pinned: false,
+    muted: false,
+    ...overrides,
+  }) as any;
 
 describe("useEnhancedWavesListCore", () => {
   beforeEach(() => {
@@ -65,5 +83,21 @@ describe("useEnhancedWavesListCore", () => {
       mainWavesRefetch,
       expect.anything()
     );
+  });
+
+  it("preserves official marker while mapping sidebar waves", () => {
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [createSidebarWave({ isOfficial: true })],
+    });
+
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+
+    expect(result.current.waves[0]?.isOfficial).toBe(true);
   });
 });

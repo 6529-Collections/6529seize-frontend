@@ -22,6 +22,7 @@ import {
   type WavesV2OverviewQueryKeyParams,
 } from "@/services/api/waves-v2-api";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
+import { useOfficialWaves } from "./useOfficialWaves";
 
 export const MAX_PINNED_WAVES = 20;
 
@@ -111,7 +112,8 @@ function usePinnedWavesQuery(
 
 function usePinnedWavesBudget(
   pinnedWaves: SidebarWave[],
-  ongoingOperations: RefObject<Set<string>>
+  ongoingOperations: RefObject<Set<string>>,
+  officialWaveIds: ReadonlySet<string>
 ) {
   const seizeSettings = useSeizeSettingsOptional();
   const pinnedIds = useMemo(
@@ -119,8 +121,10 @@ function usePinnedWavesBudget(
     [pinnedWaves]
   );
   const countsTowardPinBudget = useCallback(
-    (waveId: string) => !seizeSettings?.isAnnouncementsWave(waveId),
-    [seizeSettings]
+    (waveId: string) =>
+      !seizeSettings?.isAnnouncementsWave(waveId) &&
+      !officialWaveIds.has(waveId),
+    [seizeSettings, officialWaveIds]
   );
   const pinnedBudgetCount = useMemo(
     () => pinnedIds.filter(countsTowardPinBudget).length,
@@ -194,6 +198,9 @@ function useInvalidateWavesQueries(
   return useCallback(() => {
     void queryClient.invalidateQueries({
       queryKey: pinnedWavesQueryKey,
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.OFFICIAL_WAVES],
     });
     void queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVES_V2],
@@ -376,6 +383,11 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     return `${normalizedAddress}:primary`;
   }, [address, activeProfileProxyId]);
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
+  const { waves: officialWaves } = useOfficialWaves({ viewerIdentityKey });
+  const officialWaveIds = useMemo(
+    () => new Set(officialWaves.map((wave) => wave.id)),
+    [officialWaves]
+  );
   const { data, isLoading, isError, error, refetch } = usePinnedWavesQuery(
     queryClient,
     pinnedWavesQueryKey,
@@ -384,7 +396,8 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const pinnedWaves = data ?? [];
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(
     pinnedWaves,
-    ongoingOperations
+    ongoingOperations,
+    officialWaveIds
   );
   const { pinMutation, unpinMutation } = usePinnedWaveMutations(
     queryClient,
