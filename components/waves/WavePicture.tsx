@@ -13,6 +13,7 @@ interface WavePictureProps {
     readonly pfp: string;
     readonly identity?: string | null;
   }>;
+  readonly roundedClassName?: string | undefined;
 }
 
 interface IdentitySource {
@@ -133,6 +134,7 @@ export default function WavePicture({
   name,
   picture,
   contributors,
+  roundedClassName = "tw-rounded-full",
 }: WavePictureProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
 
@@ -147,7 +149,9 @@ export default function WavePicture({
 
   if (picture) {
     return (
-      <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-full">
+      <div
+        className={`tw-relative tw-h-full tw-w-full tw-overflow-hidden ${roundedClassName}`}
+      >
         <FallbackImage
           primarySrc={picture}
           fallbackSrc={picture}
@@ -182,7 +186,9 @@ export default function WavePicture({
   // 3) If no PFPS, show the default wave icon fallback
   if (pfps.length === 0) {
     return (
-      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-white/10">
+      <div
+        className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white/10 ${roundedClassName}`}
+      >
         <FontAwesomeIcon
           icon={faWater}
           className="tw-size-[54%] tw-text-white/60"
@@ -202,7 +208,9 @@ export default function WavePicture({
   const polygons = polygonsByCount[sliceCount];
 
   return (
-    <div className="tw-relative tw-h-full tw-w-full">
+    <div
+      className={`tw-relative tw-h-full tw-w-full tw-overflow-hidden ${roundedClassName}`}
+    >
       {pfps.slice(0, sliceCount).map((pfp, i) => {
         const clip = polygons?.[i];
         return (
@@ -217,7 +225,7 @@ export default function WavePicture({
               alt={`Contributor-${i}`}
               fill
               sizes="64px"
-              className="tw-block tw-rounded-full tw-object-cover"
+              className="tw-block tw-object-cover"
             />
           </div>
         );
