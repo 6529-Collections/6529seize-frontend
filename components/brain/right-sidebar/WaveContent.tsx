@@ -73,6 +73,9 @@ export const WaveContent: React.FC<WaveContentProps> = ({
       </div>
     ),
   };
+  const activeCompetitionTab = competitionWaveComponents[activeTab]
+    ? activeTab
+    : SidebarTab.ABOUT;
 
   if (!isCompetitionWave) {
     return (
@@ -105,7 +108,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           maxVisibleTabs={3}
         />
       </div>
-      <div>{competitionWaveComponents[activeTab]}</div>
+      <div>{competitionWaveComponents[activeCompetitionTab]}</div>
     </>
   );
 };

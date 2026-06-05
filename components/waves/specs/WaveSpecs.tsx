@@ -23,7 +23,10 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
-  const creditScopeLabel = CREDIT_SCOPE_LABELS[wave.voting.credit_scope];
+  const creditScope = wave.voting.credit_scope ?? ApiWaveCreditScope.Wave;
+  const creditScopeLabel =
+    CREDIT_SCOPE_LABELS[creditScope] ??
+    CREDIT_SCOPE_LABELS[ApiWaveCreditScope.Wave];
 
   return (
     <div

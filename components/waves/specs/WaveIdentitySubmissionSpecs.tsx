@@ -1,4 +1,5 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import {
   WAVE_IDENTITY_DUPLICATES_COPY,
   WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY,
@@ -32,22 +33,33 @@ export function WaveIdentitySubmissionSpecsRows({
     return null;
   }
 
+  if (
+    submissionStrategy.type !==
+    ApiWaveParticipationSubmissionStrategyType.Identity
+  ) {
+    return null;
+  }
+
+  const eligibleIdentities =
+    WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY[
+      submissionStrategy.config.who_can_be_submitted
+    ];
+  const repeatSubmissions =
+    WAVE_IDENTITY_DUPLICATES_COPY[submissionStrategy.config.duplicates];
+
+  if (!eligibleIdentities || !repeatSubmissions) {
+    return null;
+  }
+
   return (
     <>
       <WaveIdentitySubmissionSpecsRow
         label="Eligible identities"
-        value={
-          WAVE_IDENTITY_WHO_CAN_BE_SUBMITTED_COPY[
-            submissionStrategy.config.who_can_be_submitted
-          ].summary
-        }
+        value={eligibleIdentities.summary}
       />
       <WaveIdentitySubmissionSpecsRow
         label="Repeat submissions"
-        value={
-          WAVE_IDENTITY_DUPLICATES_COPY[submissionStrategy.config.duplicates]
-            .summary
-        }
+        value={repeatSubmissions.summary}
       />
     </>
   );
