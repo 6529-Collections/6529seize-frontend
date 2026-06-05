@@ -6,6 +6,7 @@ import {
   formatAddress,
   formatNumberWithCommasOrDash,
   getDateFilters,
+  getMetadataForUserPage,
   getRandomColorWithSeed,
   numberWithCommas,
   numberWithCommasFromString,
@@ -75,6 +76,44 @@ describe("Helpers utility functions", () => {
     const addr = "0x1234567890abcdef1234567890abcdef12345678";
     expect(formatAddress(addr)).toBe("0x1234...5678");
     expect(formatAddress("example.eth")).toBe("example.eth");
+  });
+
+  test("getMetadataForUserPage uses profile OG image metadata", () => {
+    const metadata = getMetadataForUserPage({
+      handle: "phoebeum",
+      normalised_handle: "phoebeum",
+      display: "phoebeum",
+      primary_wallet: "0x1234567890abcdef1234567890abcdef12345678",
+    } as any);
+
+    expect(metadata).toMatchObject({
+      title: "phoebeum",
+      description: "Identity",
+      ogImageHeight: 630,
+      ogImageWidth: 1200,
+      twitterCard: "summary_large_image",
+    });
+    expect(metadata.ogImage).toContain("/api/og-metadata/profiles/phoebeum");
+  });
+
+  test("getMetadataForUserPage appends formatted path to title", () => {
+    const profile = {
+      handle: "phoebeum",
+      normalised_handle: "phoebeum",
+      display: "phoebeum",
+      primary_wallet: "0x1234567890abcdef1234567890abcdef12345678",
+    } as any;
+
+    expect(getMetadataForUserPage(profile).title).toBe("phoebeum");
+    expect(getMetadataForUserPage(profile, "brain").title).toBe(
+      "phoebeum - Brain"
+    );
+    expect(getMetadataForUserPage(profile, "curations").title).toBe(
+      "phoebeum - Curations"
+    );
+    expect(getMetadataForUserPage(profile, "foo-bar_baz").title).toBe(
+      "phoebeum - Foo Bar Baz"
+    );
   });
 
   test("areEqualURLS compares URLs safely", () => {

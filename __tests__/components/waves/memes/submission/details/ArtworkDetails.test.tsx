@@ -197,7 +197,7 @@ describe("ArtworkDetails", () => {
 
     expect(
       screen.queryByRole("checkbox", {
-        name: /this submission promises an additional action/i,
+        name: /additional action/i,
       })
     ).not.toBeInTheDocument();
   });
@@ -219,7 +219,7 @@ describe("ArtworkDetails", () => {
     );
 
     const checkbox = screen.getByRole("checkbox", {
-      name: /this submission promises an additional action/i,
+      name: /additional action/i,
     });
 
     expect(checkbox).not.toBeChecked();

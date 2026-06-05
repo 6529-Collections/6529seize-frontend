@@ -54,6 +54,8 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       const metadata = getAppMetadata();
 
       expect(metadata.openGraph).toBeDefined();
+      expect(metadata.openGraph?.type).toBe("website");
+      expect(metadata.openGraph?.siteName).toBe("6529.io");
       expect(metadata.openGraph?.images).toBeInstanceOf(Array);
       expect(metadata.openGraph?.images.length).toBeGreaterThan(0);
       expect(metadata.openGraph?.title).toBeDefined();
@@ -65,6 +67,7 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
 
       expect(metadata.twitter).toEqual({
         card: "summary",
+        site: "@6529Collections",
       });
     });
 
@@ -89,7 +92,30 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       expect(metadata.openGraph?.images).toEqual([
         "https://custom.com/image.png",
       ]);
-      expect(metadata.twitter?.card).toBe("summary_large_image");
+      expect(metadata.openGraph?.type).toBe("website");
+      expect(metadata.openGraph?.siteName).toBe("6529.io");
+      expect(metadata.twitter).toEqual({
+        card: "summary_large_image",
+        site: "@6529Collections",
+      });
+    });
+
+    it("emits Open Graph image dimensions when provided", () => {
+      const metadata = getAppMetadata({
+        title: "Profile",
+        ogImage: "https://custom.com/profile.png",
+        ogImageHeight: 630,
+        ogImageWidth: 1200,
+        twitterCard: "summary_large_image",
+      });
+
+      expect(metadata.openGraph?.images).toEqual([
+        {
+          url: "https://custom.com/profile.png",
+          width: 1200,
+          height: 630,
+        },
+      ]);
     });
   });
 });

@@ -94,13 +94,11 @@ export function createUserTabPage<
   TExtra extends Record<string, unknown> = Record<string, never>,
 >({
   subroute,
-  metaLabel,
   Tab,
   enableTransfer,
   getTabProps,
 }: {
   subroute: string;
-  metaLabel: string;
   Tab: (props: Readonly<TabProps & TExtra>) => React.JSX.Element;
   enableTransfer?: boolean | undefined;
   getTabProps?: (ctx: {
@@ -191,7 +189,7 @@ export function createUserTabPage<
       }
       throw error;
     });
-    return getAppMetadata(getMetadataForUserPage(profile, metaLabel));
+    return getAppMetadata(getMetadataForUserPage(profile, subroute));
   }
 
   return { Page, generateMetadata };

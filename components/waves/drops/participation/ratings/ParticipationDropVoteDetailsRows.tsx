@@ -53,7 +53,7 @@ const formatSignedVote = (vote: number): string => {
   return `${sign}${formatNumberWithCommas(Math.abs(vote))}`;
 };
 
-export const normalizeDropVoteLogTimestampMs = (
+const normalizeDropVoteLogTimestampMs = (
   createdAt: number | string | Date
 ): number => {
   if (createdAt instanceof Date) {

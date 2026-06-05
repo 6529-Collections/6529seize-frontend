@@ -183,6 +183,13 @@ export * from '../models/ApiNotificationDropReactedReactor';
 export * from '../models/ApiNotificationV2';
 export * from '../models/ApiNotificationsResponse';
 export * from '../models/ApiNotificationsResponseV2';
+export * from '../models/ApiOgMediaAsset';
+export * from '../models/ApiOgMetadata';
+export * from '../models/ApiOgMetadataDrop';
+export * from '../models/ApiOgMetadataEntityType';
+export * from '../models/ApiOgMetadataProfile';
+export * from '../models/ApiOgMetadataProfileBanner';
+export * from '../models/ApiOgMetadataWave';
 export * from '../models/ApiOutgoingIdentitySubscriptionsPage';
 export * from '../models/ApiOwnerBalance';
 export * from '../models/ApiOwnerBalanceMemes';
@@ -557,6 +564,13 @@ import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDrop
 import { ApiNotificationV2         } from '../models/ApiNotificationV2';
 import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
+import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
+import { ApiOgMetadata       } from '../models/ApiOgMetadata';
+import { ApiOgMetadataDrop              } from '../models/ApiOgMetadataDrop';
+import { ApiOgMetadataEntityType } from '../models/ApiOgMetadataEntityType';
+import { ApiOgMetadataProfile                  } from '../models/ApiOgMetadataProfile';
+import { ApiOgMetadataProfileBanner } from '../models/ApiOgMetadataProfileBanner';
+import { ApiOgMetadataWave } from '../models/ApiOgMetadataWave';
 import { ApiOutgoingIdentitySubscriptionsPage } from '../models/ApiOutgoingIdentitySubscriptionsPage';
 import { ApiOwnerBalance } from '../models/ApiOwnerBalance';
 import { ApiOwnerBalanceMemes } from '../models/ApiOwnerBalanceMemes';
@@ -600,7 +614,7 @@ import { ApiSeizeSettings } from '../models/ApiSeizeSettings';
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
 import { ApiStartMultipartMediaUploadResponse } from '../models/ApiStartMultipartMediaUploadResponse';
-import { ApiSubmissionDropContext      } from '../models/ApiSubmissionDropContext';
+import { ApiSubmissionDropContext       } from '../models/ApiSubmissionDropContext';
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
@@ -780,6 +794,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiNftTokenTypeEnum",
     "ApiNftLinkMediaPreviewStatusEnum",
     "ApiNotificationCause",
+    "ApiOgMetadataEntityType",
     "ApiPageSortDirection",
     "ApiProfileClassification",
     "ApiProfileProxyActionType",
@@ -979,6 +994,12 @@ let typeMap: {[index: string]: any} = {
     "ApiNotificationV2": ApiNotificationV2,
     "ApiNotificationsResponse": ApiNotificationsResponse,
     "ApiNotificationsResponseV2": ApiNotificationsResponseV2,
+    "ApiOgMediaAsset": ApiOgMediaAsset,
+    "ApiOgMetadata": ApiOgMetadata,
+    "ApiOgMetadataDrop": ApiOgMetadataDrop,
+    "ApiOgMetadataProfile": ApiOgMetadataProfile,
+    "ApiOgMetadataProfileBanner": ApiOgMetadataProfileBanner,
+    "ApiOgMetadataWave": ApiOgMetadataWave,
     "ApiOutgoingIdentitySubscriptionsPage": ApiOutgoingIdentitySubscriptionsPage,
     "ApiOwnerBalance": ApiOwnerBalance,
     "ApiOwnerBalanceMemes": ApiOwnerBalanceMemes,

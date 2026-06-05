@@ -12,7 +12,13 @@ export function getAppMetadata(
     customMetadata?.title ?? (isStaging ? "6529 Staging" : "6529.io");
   const description = customMetadata?.description ?? "";
   const ogImage = customMetadata?.ogImage ?? `${baseEndpoint}/6529io.png`;
+  const ogImageHeight = customMetadata?.ogImageHeight;
+  const ogImageWidth = customMetadata?.ogImageWidth;
   const twitterCard = customMetadata?.twitterCard ?? "summary";
+  const openGraphImages =
+    ogImageHeight && ogImageWidth
+      ? [{ url: ogImage, width: ogImageWidth, height: ogImageHeight }]
+      : [ogImage];
 
   const domain = isStaging ? "staging.6529.io" : "6529.io";
 
@@ -23,12 +29,15 @@ export function getAppMetadata(
       icon: "/favicon.ico",
     },
     openGraph: {
-      images: [ogImage],
+      type: "website",
+      siteName: "6529.io",
+      images: openGraphImages,
       title,
       description: description ? `${description} | ${domain}` : domain,
     },
     twitter: {
       card: twitterCard,
+      site: "@6529Collections",
     },
     other: {
       version: publicEnv.VERSION ?? "",

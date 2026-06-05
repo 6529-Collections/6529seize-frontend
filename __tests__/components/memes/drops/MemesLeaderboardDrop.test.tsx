@@ -257,9 +257,7 @@ test("shows additional action badge only when promised", () => {
     <MemesLeaderboardDrop drop={drop} onDropClick={jest.fn()} />
   );
 
-  expect(
-    screen.queryByText("Additional action promised")
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Additional Action")).not.toBeInTheDocument();
 
   rerender(
     <MemesLeaderboardDrop
@@ -268,7 +266,7 @@ test("shows additional action badge only when promised", () => {
     />
   );
 
-  expect(screen.getByText("Additional action promised")).toBeInTheDocument();
+  expect(screen.getByText("Additional Action")).toBeInTheDocument();
 });
 
 test("opens mobile resubmit modal after the touch menu leaves", async () => {
