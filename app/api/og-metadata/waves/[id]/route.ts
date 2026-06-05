@@ -7,14 +7,14 @@ import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
-export const revalidate = 86400;
+export const revalidate = 3600;
 
 const OG_IMAGE_SIZE = {
   width: 1200,
   height: 630,
 } as const;
 const OG_CACHE_CONTROL =
-  "public, max-age=86400, s-maxage=604800, stale-while-revalidate=2592000";
+  "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400";
 
 const getUsableText = (value: string | null | undefined): string | null => {
   const normalized = value?.trim();
