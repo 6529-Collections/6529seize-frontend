@@ -226,9 +226,9 @@ export const renderWaveOgImage = ({
           top: TITLE_TOP,
         }}
       >
-        {titleLines.map((line, index) => (
+        {titleLines.map((line) => (
           <div
-            key={`title-${index}`}
+            key={`title-${line}`}
             style={{
               display: "flex",
               whiteSpace: "nowrap",
@@ -256,9 +256,9 @@ export const renderWaveOgImage = ({
           width: contentWidth,
         }}
       >
-        {descriptionLines.map((line, index) => (
+        {descriptionLines.map((line) => (
           <div
-            key={`description-${index}`}
+            key={`description-${line}`}
             style={{
               display: "flex",
               overflow: "hidden",
