@@ -68,6 +68,12 @@ const SUBMISSION_TITLE_FONT_SIZE = 40;
 const SUBMISSION_TITLE_ICON_SIZE = 40;
 const SUBMISSION_TROPHY_ICON_SIZE = 30;
 const SUBMISSION_TITLE_GAP = 12;
+const ADDITIONAL_ACTION_PROMISE_LABEL = "Additional Action";
+const ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH = 156;
+const ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_HEIGHT = 24;
+const ADDITIONAL_ACTION_PROMISE_TITLE_FONT_SIZE = 12;
+const ADDITIONAL_ACTION_PROMISE_CONTEXT_FONT_SIZE = 22;
+const ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP = 12;
 const SUBMISSION_MEDIA_TOP = 206;
 const SUBMISSION_MEDIA_HEIGHT = 344;
 const SUBMISSION_MEDIA_VERTICAL_PADDING = 18;
@@ -79,6 +85,9 @@ const SUBMISSION_STATS_GROUP_GAP = 24;
 const SUBMISSION_STATS_VALUE_GAP = 8;
 const CHAT_CONTENT_BACKGROUND_TOP = CONTENT_TOP - 20;
 const SUBMISSION_STATS_TROPHY_ICON_SIZE = 22;
+const ADDITIONAL_ACTION_PROMISE_TEXT = "#FCD34D";
+const ADDITIONAL_ACTION_PROMISE_BACKGROUND = "rgba(251, 191, 36, 0.1)";
+const ADDITIONAL_ACTION_PROMISE_BORDER = "rgba(252, 211, 77, 0.25)";
 const TROPHY_COLOR = "#FBBF24";
 const SUBMISSION_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
@@ -1203,82 +1212,117 @@ const DropAuthorRow = ({
   author,
   authorAvatarUrl,
   authorName,
+  showAdditionalActionText = false,
   wave,
 }: {
   readonly author: ApiOgMetadataProfile | undefined;
   readonly authorAvatarUrl: string | null;
   readonly authorName: string;
+  readonly showAdditionalActionText?: boolean;
   readonly wave: ApiOgMetadataWave | undefined;
-}) => (
-  <div
-    style={{
-      alignItems: "center",
-      display: "flex",
-      gap: 16,
-      left: HORIZONTAL_MARGIN,
-      position: "absolute",
-      top: AUTHOR_ROW_TOP,
-      width: CONTENT_WIDTH - LOGO_SIZE - 42,
-    }}
-  >
-    <ProfileAvatar
-      avatarUrl={authorAvatarUrl}
-      borderRadius={14}
-      innerBorderRadius={11}
-      innerSize={AUTHOR_AVATAR_INNER_SIZE}
-      size={AUTHOR_AVATAR_SIZE}
-    />
+}) => {
+  const context = getDropContext({ wave });
+  const contextRowWidth =
+    CONTENT_WIDTH - LOGO_SIZE - 42 - AUTHOR_AVATAR_SIZE - 16;
+  const promiseTextWidth = showAdditionalActionText
+    ? ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH +
+      (context ? ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP : 0)
+    : 0;
+  const contextText = context
+    ? truncateToWidth({
+        fontSize: ADDITIONAL_ACTION_PROMISE_CONTEXT_FONT_SIZE,
+        value: context,
+        width: Math.max(0, contextRowWidth - promiseTextWidth),
+      })
+    : null;
+
+  return (
     <div
       style={{
+        alignItems: "center",
         display: "flex",
-        flexDirection: "column",
-        gap: 3,
+        gap: 16,
+        left: HORIZONTAL_MARGIN,
+        position: "absolute",
+        top: AUTHOR_ROW_TOP,
+        width: CONTENT_WIDTH - LOGO_SIZE - 42,
       }}
     >
+      <ProfileAvatar
+        avatarUrl={authorAvatarUrl}
+        borderRadius={14}
+        innerBorderRadius={11}
+        innerSize={AUTHOR_AVATAR_INNER_SIZE}
+        size={AUTHOR_AVATAR_SIZE}
+      />
       <div
         style={{
-          alignItems: "center",
           display: "flex",
-          gap: 10,
+          flexDirection: "column",
+          gap: 3,
         }}
       >
         <div
           style={{
-            color: "#ffffff",
+            alignItems: "center",
             display: "flex",
-            fontSize: 34,
-            fontWeight: 700,
-            lineHeight: 1.15,
-            maxWidth: 320,
-            overflow: "hidden",
+            gap: 10,
           }}
         >
-          {truncateText(authorName, 18)}
+          <div
+            style={{
+              color: "#ffffff",
+              display: "flex",
+              fontSize: 34,
+              fontWeight: 700,
+              lineHeight: 1.15,
+              maxWidth: 320,
+              overflow: "hidden",
+            }}
+          >
+            {truncateText(authorName, 18)}
+          </div>
+          <ProfileBadgeRow
+            activityBorderRadius={10}
+            activityIconSize={18}
+            badgeSize={AUTHOR_BADGE_SIZE}
+            cicFontSize={24}
+            glassesSize={29}
+            levelFontSize={15}
+            profile={author}
+          />
         </div>
-        <ProfileBadgeRow
-          activityBorderRadius={10}
-          activityIconSize={18}
-          badgeSize={AUTHOR_BADGE_SIZE}
-          cicFontSize={24}
-          glassesSize={29}
-          levelFontSize={15}
-          profile={author}
-        />
-      </div>
-      <div
-        style={{
-          color: MUTED_TEXT,
-          display: "flex",
-          fontSize: 22,
-          fontWeight: 500,
-          lineHeight: 1.25,
-        }}
-      >
-        {getDropContext({ wave })}
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            fontSize: ADDITIONAL_ACTION_PROMISE_CONTEXT_FONT_SIZE,
+            fontWeight: 500,
+            gap: ADDITIONAL_ACTION_PROMISE_CONTEXT_GAP,
+            lineHeight: 1.25,
+            maxWidth: contextRowWidth,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {contextText ? (
+            <span
+              style={{
+                color: MUTED_TEXT,
+                display: "flex",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {contextText}
+            </span>
+          ) : null}
+          {showAdditionalActionText ? <AdditionalActionPromiseBadge /> : null}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const getSubmissionTitle = (
   drop: ApiOgMetadataDrop | undefined,
@@ -1289,9 +1333,8 @@ const getSubmissionTitle = (
   getUsableText(drop?.description) ??
   `Drop #${drop?.serial_no ?? id}`;
 
-const getSubmissionTitleWidth = (): number => {
-  return CONTENT_WIDTH - SUBMISSION_TITLE_ICON_SIZE - SUBMISSION_TITLE_GAP;
-};
+const getSubmissionTitleWidth = (): number =>
+  CONTENT_WIDTH - SUBMISSION_TITLE_ICON_SIZE - SUBMISSION_TITLE_GAP;
 
 const getSubmissionVisualImage = (
   media: readonly ApiOgMediaAsset[] | null | undefined
@@ -1374,6 +1417,33 @@ const SubmissionMediaPlaceholder = ({
   </div>
 );
 
+function AdditionalActionPromiseBadge() {
+  return (
+    <div
+      style={{
+        alignItems: "center",
+        alignSelf: "center",
+        background: ADDITIONAL_ACTION_PROMISE_BACKGROUND,
+        border: `1px solid ${ADDITIONAL_ACTION_PROMISE_BORDER}`,
+        borderRadius: 999,
+        color: ADDITIONAL_ACTION_PROMISE_TEXT,
+        display: "flex",
+        flexShrink: 0,
+        fontSize: ADDITIONAL_ACTION_PROMISE_TITLE_FONT_SIZE,
+        fontWeight: 600,
+        height: ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_HEIGHT,
+        justifyContent: "center",
+        lineHeight: 1,
+        padding: "0 12px",
+        whiteSpace: "nowrap",
+        width: ADDITIONAL_ACTION_PROMISE_TITLE_BADGE_WIDTH,
+      }}
+    >
+      {ADDITIONAL_ACTION_PROMISE_LABEL}
+    </div>
+  );
+}
+
 const renderSubmissionDropOgImage = ({
   author,
   authorAvatarUrl,
@@ -1398,15 +1468,18 @@ const renderSubmissionDropOgImage = ({
     origin,
     width: CONTENT_WIDTH,
   });
-  const title = truncateToWidth({
-    fontSize: SUBMISSION_TITLE_FONT_SIZE,
-    value: getSubmissionTitle(drop, id),
-    width: getSubmissionTitleWidth(),
-  });
+  const rawTitle = getSubmissionTitle(drop, id);
   const votes = getSubmissionVotes(drop);
   const submittedAt = formatSubmissionDate(drop?.submitted_at);
   const wonAt = formatSubmissionDate(drop?.won_at);
   const statDate = getSubmissionStatDate({ submittedAt, wonAt });
+  const isAdditionalActionPromised =
+    drop?.is_additional_action_promised === true;
+  const title = truncateToWidth({
+    fontSize: SUBMISSION_TITLE_FONT_SIZE,
+    value: rawTitle,
+    width: getSubmissionTitleWidth(),
+  });
 
   return (
     <div
@@ -1460,6 +1533,7 @@ const renderSubmissionDropOgImage = ({
         author={author}
         authorAvatarUrl={authorAvatarUrl}
         authorName={authorName}
+        showAdditionalActionText={isAdditionalActionPromised}
         wave={wave}
       />
 
@@ -1483,6 +1557,7 @@ const renderSubmissionDropOgImage = ({
             fontSize: SUBMISSION_TITLE_FONT_SIZE,
             fontWeight: 700,
             lineHeight: 1.15,
+            maxWidth: getSubmissionTitleWidth(),
             overflow: "hidden",
             whiteSpace: "nowrap",
           }}
