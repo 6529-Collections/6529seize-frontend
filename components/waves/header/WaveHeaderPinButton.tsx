@@ -144,7 +144,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-transition-all tw-duration-200 ${buttonStyles} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-transition-all tw-duration-200 ${buttonStyles} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={ariaLabel}
         data-tooltip-id={`wave-header-pin-${waveId}`}
         data-tooltip-content={tooltipContent}
