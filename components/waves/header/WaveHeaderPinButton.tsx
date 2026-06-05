@@ -97,11 +97,15 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     return null;
   }
 
+  if (isOfficialWave) {
+    return null;
+  }
+
   if (!isPinned && !isSettingsLoaded) {
     return null;
   }
 
-  if ((isAnnouncementsWave(waveId) || isOfficialWave) && !isPinned) {
+  if (isAnnouncementsWave(waveId) && !isPinned) {
     return null;
   }
 

@@ -66,11 +66,13 @@ const createSidebarWave = ({
   latestDropTimestamp,
   isDirectMessage = false,
   type = ApiWaveType.Rank,
+  pinned = false,
 }: {
   readonly id: string;
   readonly latestDropTimestamp: number;
   readonly isDirectMessage?: boolean;
   readonly type?: ApiWaveType;
+  readonly pinned?: boolean;
 }) => ({
   id,
   name: id,
@@ -89,7 +91,7 @@ const createSidebarWave = ({
   firstUnreadDropSerialNo: null,
   unreadDropsCount: 0,
   latestReadTimestamp: 0,
-  pinned: false,
+  pinned,
   muted: false,
   subscribed: false,
 });
@@ -135,6 +137,11 @@ const officialWave = createSidebarWave({
 const pinnedOfficialWave = createSidebarWave({
   id: "6",
   latestDropTimestamp: 350,
+});
+const stalePinnedOfficialWave = createSidebarWave({
+  id: "7",
+  latestDropTimestamp: 275,
+  pinned: true,
 });
 const legacyAnnouncementWave = createLegacyApiWave("4", 300);
 let announcementRefetchMock: jest.Mock;
@@ -209,9 +216,9 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   );
 });
 
-test("places official waves below announcements and removes official duplicates from pinned metadata", () => {
+test("places official waves below announcements and ignores stale official pinned flags", () => {
   useWavesV2Mock.mockReturnValue({
-    waves: [announcementWave, officialWave, mainWave],
+    waves: [announcementWave, stalePinnedOfficialWave, officialWave, mainWave],
     isFetching: false,
     isFetchingNextPage: false,
     hasNextPage: false,
@@ -229,7 +236,7 @@ test("places official waves below announcements and removes official duplicates 
     refetch: jest.fn(),
   });
   useOfficialWavesMock.mockReturnValue({
-    waves: [officialWave, pinnedOfficialWave],
+    waves: [officialWave, pinnedOfficialWave, stalePinnedOfficialWave],
     isFetching: false,
     status: "success",
     refetch: officialWavesRefetchMock,
@@ -246,6 +253,7 @@ test("places official waves below announcements and removes official duplicates 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "4",
     "6",
+    "7",
     "5",
     "3",
     "2",
@@ -256,6 +264,7 @@ test("places official waves below announcements and removes official duplicates 
       .map((wave: any) => ({ id: wave.id, isPinned: wave.isPinned }))
   ).toEqual([
     { id: "6", isPinned: true },
+    { id: "7", isPinned: false },
     { id: "5", isPinned: true },
   ]);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);

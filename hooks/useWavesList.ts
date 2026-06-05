@@ -233,7 +233,7 @@ const useWavesList = () => {
     const sortedOfficialWaves = visibleOfficialWaves
       .map((wave) => ({
         ...wave,
-        isPinned: pinnedWavesSet.has(wave.id) || wave.pinned,
+        isPinned: pinnedWavesSet.has(wave.id),
         isOfficial: true,
       }))
       .sort(

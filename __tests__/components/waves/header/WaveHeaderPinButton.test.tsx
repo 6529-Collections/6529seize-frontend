@@ -141,18 +141,16 @@ describe("WaveHeaderPinButton", () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it("renders unpin control for a pinned official wave", () => {
+    it("does not render for a pinned official wave", () => {
       mockWavesList = [{ id: "wave-123", isOfficial: true }];
       mockUsePinnedWavesServer.mockReturnValue({
         pinnedIds: ["wave-123"],
         isOperationInProgress: mockIsOperationInProgress,
         canPinWave: mockCanPinWave,
       });
-      renderComponent();
-      expect(screen.getByRole("button")).toHaveAttribute(
-        "aria-label",
-        "Unpin wave"
-      );
+      const { container } = renderComponent();
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
     });
 
     it("renders when user is authenticated without proxy", () => {

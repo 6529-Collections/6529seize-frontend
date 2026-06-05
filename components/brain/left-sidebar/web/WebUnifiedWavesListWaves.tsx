@@ -335,7 +335,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     <WebBrainLeftSidebarWave
                       wave={wave}
                       onHover={onHover}
-                      showPin={!hidePin && !isCollapsed && wave.isPinned}
+                      showPin={false}
                       basePath={basePath}
                       collapsed={isCollapsed}
                     />

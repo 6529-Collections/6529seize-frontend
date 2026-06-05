@@ -105,7 +105,7 @@ it("renders announcement, official, pinned, and regular sections without double 
   expect(ref.current?.sentinelRef.current).toBe(sentinel);
 });
 
-it("passes pin controls through for pinned official waves", () => {
+it("hides pin controls for pinned official waves", () => {
   render(
     <WebUnifiedWavesListWaves
       waves={[
@@ -120,7 +120,7 @@ it("passes pin controls through for pinned official waves", () => {
     />
   );
 
-  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
 });
 
 it("passes pin controls through for pinned announcement waves", () => {

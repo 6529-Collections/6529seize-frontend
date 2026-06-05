@@ -188,7 +188,7 @@ const UnifiedWavesListWaves = forwardRef<
                   <BrainLeftSidebarWave
                     wave={wave}
                     onHover={onHover}
-                    showPin={!hidePin && wave.isPinned}
+                    showPin={false}
                     isDirectMessage={isDirectMessage}
                   />
                 </div>
