@@ -36,7 +36,7 @@ class MockNextResponse {
 
   async json(): Promise<unknown> {
     if (typeof this.body !== "string") {
-      throw new Error("Mock JSON response body must be a string.");
+      throw new TypeError("Mock JSON response body must be a string.");
     }
 
     return JSON.parse(this.body);
