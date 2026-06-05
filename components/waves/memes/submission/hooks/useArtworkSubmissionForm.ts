@@ -114,6 +114,8 @@ export function useArtworkSubmissionForm(
     traits: state.traits,
     setTraits: formActions.setTraits,
     updateTraitField: formActions.updateTraitField,
+    isAdditionalActionPromised: state.isAdditionalActionPromised,
+    setAdditionalActionPromised: formActions.setAdditionalActionPromised,
 
     operationalData: state.operationalData,
     setAirdropConfig: formActions.setAirdropConfig,

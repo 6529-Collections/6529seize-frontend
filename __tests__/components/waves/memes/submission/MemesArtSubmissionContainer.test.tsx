@@ -99,6 +99,10 @@ describe("MemesArtSubmissionContainer", () => {
       traits: { title: "t", description: "d" },
       setTraits: jest.fn(),
       updateTraitField: jest.fn(),
+      isAdditionalActionPromised: false,
+      setAdditionalActionPromised: jest.fn((value: boolean) => {
+        formState.isAdditionalActionPromised = value;
+      }),
       artworkUploaded: false,
       artworkUrl: "",
       selectedFile: null,
@@ -197,7 +201,12 @@ describe("MemesArtSubmissionContainer", () => {
       formState.externalMediaError = null;
     });
 
-    formState.getSubmissionData = () => ({ traits: { title: "t" } });
+    formState.getSubmissionData = () => ({
+      imageUrl: formState.artworkUrl,
+      traits: { title: "t", description: "d" },
+      operationalData: formState.operationalData,
+      isAdditionalActionPromised: formState.isAdditionalActionPromised,
+    });
     formState.getMediaSelection = jest.fn(() => ({
       mediaSource: formState.mediaSource,
       selectedFile: formState.selectedFile,
@@ -273,6 +282,39 @@ describe("MemesArtSubmissionContainer", () => {
     });
     const res = await artworkProps.onSubmit();
     expect(res).toBeTruthy();
+  });
+
+  it("passes the additional action promise flag to submission", async () => {
+    const user = userEvent.setup();
+    const submitArtwork = jest.fn(async () => "result");
+    formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+    formState.isAdditionalActionPromised = true;
+    formState.existingMedia = {
+      url: "https://example.com/art.png",
+      mimeType: "image/png",
+    };
+    formState.artworkUploaded = true;
+    formState.artworkUrl = formState.existingMedia.url;
+    mockMutation.mockReturnValue({
+      submitArtwork,
+      uploadProgress: 0,
+      submissionPhase: "idle",
+      submissionError: undefined,
+      isSubmitting: false,
+    } as any);
+
+    render(<MemesArtSubmissionContainer onClose={onClose} wave={wave} />);
+
+    await user.click(screen.getByTestId("additional-submit"));
+
+    expect(submitArtwork).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isAdditionalActionPromised: true,
+      }),
+      "0x123",
+      false,
+      expect.any(Object)
+    );
   });
 
   it("shows resubmission acknowledgement before the prefilled form", () => {

@@ -12,7 +12,7 @@ import {
 const TITLE_CHARACTER_DANGER_THRESHOLD = 245;
 const DESCRIPTION_CHARACTER_DANGER_THRESHOLD = 7600;
 
-interface ArtworkDetailsProps {
+interface ArtworkDetailsBaseProps {
   readonly title: string;
   readonly description: string;
   readonly onTitleChange: (title: string) => void;
@@ -24,6 +24,21 @@ interface ArtworkDetailsProps {
   readonly showRequiredMarkers?: boolean | undefined;
   readonly size?: "default" | "sm" | undefined;
 }
+
+type ArtworkDetailsAdditionalActionProps =
+  | {
+      readonly showAdditionalActionPromised: true;
+      readonly isAdditionalActionPromised: boolean;
+      readonly onAdditionalActionPromisedChange: (value: boolean) => void;
+    }
+  | {
+      readonly showAdditionalActionPromised?: false | undefined;
+      readonly isAdditionalActionPromised?: boolean | undefined;
+      readonly onAdditionalActionPromisedChange?: undefined;
+    };
+
+type ArtworkDetailsProps = ArtworkDetailsBaseProps &
+  ArtworkDetailsAdditionalActionProps;
 
 const getFieldStateClass = (hasError: boolean, isFilled: boolean): string => {
   if (hasError) {
@@ -80,23 +95,73 @@ const FieldCharacterCount = ({
   );
 };
 
+const AdditionalActionPromiseCheckbox = ({
+  checked,
+  onChange,
+}: {
+  readonly checked: boolean;
+  readonly onChange: (value: boolean) => void;
+}) => {
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event.currentTarget.checked);
+    },
+    [onChange]
+  );
+
+  return (
+    <label
+      htmlFor="field-additional-action-promised"
+      className="tw-mt-4 tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-bg-iron-900/70 tw-px-3 tw-py-3 tw-ring-1 tw-ring-iron-800 tw-transition-colors desktop-hover:hover:tw-ring-iron-700"
+    >
+      <input
+        id="field-additional-action-promised"
+        name="isAdditionalActionPromised"
+        type="checkbox"
+        checked={checked}
+        onChange={handleChange}
+        className="tw-mt-0.5 tw-h-4 tw-w-4 tw-rounded tw-border-iron-700 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-500"
+      />
+      <span className="tw-flex tw-flex-col tw-gap-1">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+          This submission promises an additional action
+        </span>
+        <span className="tw-text-xs tw-leading-5 tw-text-iron-400">
+          Check this if the description includes a real-world or follow-up
+          promise, such as an event, donation, physical item, airdrop, or later
+          deliverable.
+        </span>
+      </span>
+    </label>
+  );
+};
+
 /**
  * ArtworkDetails - Component for the artwork title and description fields
  *
  * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
-const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
-  title,
-  description,
-  onTitleChange,
-  onDescriptionChange,
-  titleError,
-  descriptionError,
-  onTitleBlur,
-  onDescriptionBlur,
-  showRequiredMarkers = false,
-  size = "default",
-}) => {
+const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
+  const {
+    title,
+    description,
+    onTitleChange,
+    onDescriptionChange,
+    titleError,
+    descriptionError,
+    onTitleBlur,
+    onDescriptionBlur,
+    showRequiredMarkers = false,
+    size = "default",
+  } = props;
+  const additionalActionPromiseProps =
+    props.showAdditionalActionPromised === true
+      ? {
+          checked: props.isAdditionalActionPromised,
+          onChange: props.onAdditionalActionPromisedChange,
+        }
+      : null;
+
   // Refs to track input elements directly
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -322,6 +387,13 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
           </div>
 
           <ValidationError error={descriptionError} id="description-error" />
+
+          {additionalActionPromiseProps ? (
+            <AdditionalActionPromiseCheckbox
+              checked={additionalActionPromiseProps.checked}
+              onChange={additionalActionPromiseProps.onChange}
+            />
+          ) : null}
         </div>
       </div>
     </FormSection>
