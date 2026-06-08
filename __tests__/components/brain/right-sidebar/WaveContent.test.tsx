@@ -7,12 +7,6 @@ import {
 } from "@/components/brain/right-sidebar/BrainRightSidebar";
 import { WaveContent } from "@/components/brain/right-sidebar/WaveContent";
 
-const useWaveTimers = jest.fn();
-
-jest.mock("@/hooks/useWaveTimers", () => ({
-  useWaveTimers: (...args: any[]) => useWaveTimers(...args),
-}));
-
 jest.mock("@/components/waves/header/WaveHeader", () => ({
   __esModule: true,
   default: () => <div data-testid="header">header</div>,
@@ -28,14 +22,6 @@ jest.mock("@/components/common/TabToggleWithOverflow", () => ({
   ),
 }));
 
-jest.mock("@/components/waves/winners/WaveWinnersSmall", () => ({
-  __esModule: true,
-  WaveWinnersSmall: () => <div>winners</div>,
-}));
-jest.mock("@/components/waves/small-leaderboard/WaveSmallLeaderboard", () => ({
-  __esModule: true,
-  WaveSmallLeaderboard: () => <div>leaderboard</div>,
-}));
 jest.mock(
   "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters",
   () => ({
@@ -59,20 +45,10 @@ jest.mock(
   () => ({ __esModule: true, default: () => <div>followers</div> })
 );
 
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
-  usePathname: () => "/test",
-  useSearchParams: () => new URLSearchParams(),
-}));
-
 describe("WaveContent", () => {
   const wave = { wave: { type: ApiWaveType.Chat }, name: "Wave" } as any;
 
   it("renders non-rank wave without tabs", () => {
-    useWaveTimers.mockReturnValue({
-      voting: { isCompleted: false },
-      decisions: { firstDecisionDone: false },
-    });
     render(
       <WaveContent
         wave={wave}
@@ -87,42 +63,38 @@ describe("WaveContent", () => {
     expect(screen.getByText("content")).toBeInTheDocument();
   });
 
-  it("switches tab to about when voting completed", () => {
-    const setActiveTab = jest.fn();
-    useWaveTimers.mockReturnValue({
-      voting: { isCompleted: true },
-      decisions: { firstDecisionDone: true },
-    });
+  it("renders rank wave right-sidebar tabs without leaderboard or winners tabs", () => {
     render(
       <WaveContent
         wave={{ wave: { type: ApiWaveType.Rank }, name: "Wave" } as any}
         mode={Mode.CONTENT}
         setMode={jest.fn()}
-        activeTab={SidebarTab.LEADERBOARD}
-        setActiveTab={setActiveTab}
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={jest.fn()}
       />
     );
-    expect(setActiveTab).toHaveBeenCalledWith(SidebarTab.ABOUT);
+    expect(screen.getByTestId("tabs")).toHaveTextContent(
+      "ABOUT-About,Voters,Activity"
+    );
+    expect(screen.getByTestId("tabs")).not.toHaveTextContent("Leaderboard");
+    expect(screen.getByTestId("tabs")).not.toHaveTextContent("Winners");
   });
 
-  it("keeps approve wave approval tabs available after voting completes", () => {
-    const setActiveTab = jest.fn();
-    useWaveTimers.mockReturnValue({
-      voting: { isCompleted: true },
-      decisions: { firstDecisionDone: false },
-    });
+  it("renders approve wave right-sidebar tabs without approvals or approved tabs", () => {
     render(
       <WaveContent
         wave={{ wave: { type: ApiWaveType.Approve }, name: "Wave" } as any}
         mode={Mode.CONTENT}
         setMode={jest.fn()}
-        activeTab={SidebarTab.LEADERBOARD}
-        setActiveTab={setActiveTab}
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={jest.fn()}
       />
     );
 
-    expect(setActiveTab).not.toHaveBeenCalled();
-    expect(screen.getByTestId("tabs")).toHaveTextContent("Approvals");
-    expect(screen.getByTestId("tabs")).toHaveTextContent("Approved");
+    expect(screen.getByTestId("tabs")).toHaveTextContent(
+      "ABOUT-About,Voters,Activity"
+    );
+    expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approvals");
+    expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approved");
   });
 });

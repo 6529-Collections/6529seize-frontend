@@ -8,9 +8,13 @@ import { useWaveNotificationSettings } from "./wave-notification-settings/useWav
 
 interface WaveRatingProps {
   readonly wave: ApiWave;
+  readonly compact?: boolean | undefined;
 }
 
-export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
+export default function WaveNotificationSettings({
+  wave,
+  compact = false,
+}: WaveRatingProps) {
   const settings = useWaveNotificationSettings(wave);
 
   if (!settings.following) {
@@ -18,14 +22,26 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   }
 
   if (settings.isMuted) {
-    return <WaveMutedNotificationButton waveId={wave.id} settings={settings} />;
+    return (
+      <WaveMutedNotificationButton
+        waveId={wave.id}
+        settings={settings}
+        compact={compact}
+      />
+    );
   }
 
   if (settings.preferencesUnavailable) {
-    return <WaveNotificationRetryButton settings={settings} />;
+    return (
+      <WaveNotificationRetryButton settings={settings} compact={compact} />
+    );
   }
 
   return (
-    <WaveNotificationPreferenceButtons waveId={wave.id} settings={settings} />
+    <WaveNotificationPreferenceButtons
+      waveId={wave.id}
+      settings={settings}
+      compact={compact}
+    />
   );
 }

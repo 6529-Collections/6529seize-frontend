@@ -226,7 +226,7 @@ export default function MainStageNominationPopover({
     <HoverCard
       content={<MainStageNominationPopoverContent />}
       ariaLabel="Main Stage submission eligibility"
-      placement="bottom"
+      placement="auto"
       delayShow={150}
       delayHide={0}
       offset={12}

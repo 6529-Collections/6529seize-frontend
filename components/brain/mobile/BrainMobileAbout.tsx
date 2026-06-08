@@ -2,9 +2,7 @@
 
 import React, { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import WaveHeader, {
-  WaveHeaderPinnedSide,
-} from "@/components/waves/header/WaveHeader";
+import WaveHeader from "@/components/waves/header/WaveHeader";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
 import { commonApiFetch } from "@/services/api/common-api";
@@ -59,7 +57,6 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
             onFollowersClick={onFollowersClick}
             useRing={false}
             useRounded={false}
-            pinnedSide={WaveHeaderPinnedSide.LEFT}
           />
           {mode === Mode.CONTENT && <BrainRightSidebarContent wave={wave} />}
           {mode === Mode.FOLLOWERS && (

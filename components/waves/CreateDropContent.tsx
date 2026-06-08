@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable max-lines -- This composer already exceeds the diff lint limit. */
+
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import type {
   CreateDropConfig,
@@ -49,6 +51,11 @@ import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import type { CreateDropInputHandles } from "./CreateDropInput";
 import CreateDropInput from "./CreateDropInput";
 import CreateDropMetadata from "./CreateDropMetadata";
+import CreateDropPoll, {
+  createDefaultDropPollDraft,
+  validateCreateDropPollDraft,
+  type CreateDropPollDraft,
+} from "./CreateDropPoll";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import { CreateDropSubmit } from "./CreateDropSubmit";
 import SlowModeChatNotice from "./SlowModeChatNotice";
@@ -258,11 +265,13 @@ const hasSubmissionContent = ({
   files,
   parts,
   hasMetadata,
+  hasPoll,
 }: {
   readonly markdown: string | null;
   readonly files: File[];
   readonly parts: CreateDropPart[];
   readonly hasMetadata: boolean;
+  readonly hasPoll: boolean;
 }): boolean => {
   if (markdown && markdown.trim().length > 0) {
     return true;
@@ -276,7 +285,11 @@ const hasSubmissionContent = ({
     return true;
   }
 
-  return hasMetadata;
+  if (hasMetadata) {
+    return true;
+  }
+
+  return hasPoll;
 };
 
 const ensurePartsWithFallback = (
@@ -552,6 +565,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [metadataOpenState, setMetadataOpenState] =
     useState<ScopedValueState<boolean> | null>(null);
+  const [pollDraftState, setPollDraftState] =
+    useState<ScopedValueState<CreateDropPollDraft> | null>(null);
   const [showOptionsState, setShowOptionsState] =
     useState<ScopedValueState<boolean> | null>(null);
   const [selectedIdentityState, setSelectedIdentityState] =
@@ -704,6 +719,18 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
   const canMentionAll = wave.wave.authenticated_user_eligible_for_admin;
+  const canCreatePoll = canMentionAll === true && !isDropMode;
+  const pollDraft =
+    canCreatePoll && pollDraftState?.scopeKey === wave.id
+      ? pollDraftState.value
+      : null;
+  const pollValidation = useMemo(
+    () => validateCreateDropPollDraft(pollDraft),
+    [pollDraft]
+  );
+  const hasPoll = pollDraft !== null;
+  const hasValidPoll = pollValidation.request !== null;
+  const hasPollValidationError = hasPoll && pollValidation.error !== null;
 
   const getMarkdown = useMemo(
     () =>
@@ -784,8 +811,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         files,
         parts: dropParts,
         hasMetadata,
+        hasPoll: hasValidPoll,
       }) &&
       !hasMetadataValidationErrors &&
+      !hasPollValidationError &&
       !!(dropParts.length ? getCanSubmitStorm() : true)
     );
   };
@@ -957,6 +986,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   }, [isDropMode, isIdentitySubmissionExperience, metadata, selectedIdentity]);
 
+  const getPollRequest = () => {
+    if (!canCreatePoll) {
+      return null;
+    }
+
+    return pollValidation.request;
+  };
+
   const getReplyTo = () => {
     if (activeDrop?.action === ActiveDropAction.REPLY) {
       return {
@@ -973,10 +1010,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       const baseParts = drop?.parts.length ? drop.parts : [];
       const replyTo = getReplyTo();
       const replyToObj = replyTo ? { reply_to: replyTo } : {};
+      const pollRequest = getPollRequest();
+      const pollObj = pollRequest ? { poll: pollRequest } : {};
       return {
         title: null,
         ...replyToObj,
-        parts: ensurePartsWithFallback(baseParts, hasMetadata),
+        ...pollObj,
+        parts: ensurePartsWithFallback(baseParts, hasMetadata || hasValidPoll),
         mentioned_users: drop?.mentioned_users ?? [],
         mentioned_groups: getMentionedGroupsFromParts(baseParts, canMentionAll),
         mentioned_waves: drop?.mentioned_waves ?? [],
@@ -995,6 +1035,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
 
   const createGifDrop = (gif: string): CreateDropConfig => {
+    const pollRequest = getPollRequest();
+    const pollObj = pollRequest ? { poll: pollRequest } : {};
     const parts: CreateDropPart[] = [
       ...(drop?.parts ?? []),
       {
@@ -1015,6 +1057,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       ...replyToObj,
+      ...pollObj,
       parts,
       mentioned_users: [],
       mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
@@ -1061,13 +1104,19 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             },
           ];
 
-    const parts = ensurePartsWithFallback(nonCurationParts, hasMetadata);
+    const parts = ensurePartsWithFallback(
+      nonCurationParts,
+      hasMetadata || hasValidPoll
+    );
+    const pollRequest = getPollRequest();
+    const pollObj = pollRequest ? { poll: pollRequest } : {};
     const replyTo = getReplyTo();
     const replyToObj = replyTo ? { reply_to: replyTo } : {};
     return {
       title: null,
       drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       ...replyToObj,
+      ...pollObj,
       parts,
       mentioned_users: allMentions,
       mentioned_groups: getMentionedGroupsFromParts(parts, canMentionAll),
@@ -1162,6 +1211,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     createDropInputRef.current?.clearEditorState();
     setEditorState(null);
     setMetadata(initialMetadata);
+    setPollDraftState(null);
     setMentionedUsers([]);
     setMentionedWaves([]);
     setReferencedNfts([]);
@@ -1433,6 +1483,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (hasPollValidationError) {
+      return;
+    }
+
     if (
       missingRequirements.metadata.length ||
       missingRequirements.media.length
@@ -1469,6 +1523,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         scopeKey: dropModeSessionScopeKey,
         value: true,
       });
+      return;
+    }
+
+    if (hasPollValidationError) {
       return;
     }
 
@@ -1694,6 +1752,35 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       value: false,
     });
   }, [dropModeSessionScopeKey]);
+
+  const togglePoll = useCallback(() => {
+    if (!canCreatePoll) {
+      return;
+    }
+
+    setPollDraftState((current) =>
+      current?.scopeKey === wave.id
+        ? null
+        : {
+            scopeKey: wave.id,
+            value: createDefaultDropPollDraft(),
+          }
+    );
+  }, [canCreatePoll, wave.id]);
+
+  const updatePollDraft = useCallback(
+    (value: CreateDropPollDraft) => {
+      setPollDraftState({
+        scopeKey: wave.id,
+        value,
+      });
+    },
+    [wave.id]
+  );
+
+  const removePoll = useCallback(() => {
+    setPollDraftState(null);
+  }, []);
 
   const handleDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
@@ -2010,8 +2097,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                     !!missingRequirements.metadata.length
                   }
                   isRequiredMediaMissing={!!missingRequirements.media.length}
+                  canCreatePoll={canCreatePoll}
+                  isPollActive={hasPoll}
                   handleFileChange={handleFileChange}
                   onAddMetadataClick={openMetadata}
+                  onTogglePoll={togglePoll}
                   breakIntoStorm={breakIntoStorm}
                   setShowOptions={handleSetShowOptions}
                   onGifDrop={onGifDrop}
@@ -2039,6 +2129,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
                   onRequestEditLastDrop={handleRequestEditLastDrop}
                   onDrop={onDrop}
                 />
+                {pollDraft && (
+                  <CreateDropPoll
+                    draft={pollDraft}
+                    disabled={submitting}
+                    validationError={pollValidation.error}
+                    onChange={updatePollDraft}
+                    onRemove={removePoll}
+                  />
+                )}
                 {showCurationDropModeWarning && (
                   <div className="tw-mt-2 tw-text-[11px] tw-leading-4 tw-text-amber-200/90">
                     This looks like a curation URL.{" "}

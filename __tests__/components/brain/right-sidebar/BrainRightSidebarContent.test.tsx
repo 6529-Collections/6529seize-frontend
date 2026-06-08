@@ -22,14 +22,6 @@ jest.mock("@/components/waves/specs/WaveSpecs", () => ({
   },
 }));
 
-jest.mock("@/components/waves/specs/WaveIdentitySubmissionSpecs", () => ({
-  __esModule: true,
-  default: (props: any) => {
-    captured.push(`identity:${props.wave.id}`);
-    return <div data-testid="identity-submission-specs" />;
-  },
-}));
-
 jest.mock("@/components/waves/groups/WaveGroups", () => ({
   __esModule: true,
   default: (props: any) => {
@@ -48,12 +40,10 @@ describe("BrainRightSidebarContent", () => {
 
     expect(screen.getByTestId("boosted-drops")).toBeInTheDocument();
     expect(screen.getByTestId("wave-specs")).toBeInTheDocument();
-    expect(screen.getByTestId("identity-submission-specs")).toBeInTheDocument();
     expect(screen.getByTestId("wave-groups")).toBeInTheDocument();
     expect(captured).toEqual([
       "boosted:wave-1",
       "specs:wave-1",
-      "identity:wave-1",
       "groups:wave-1",
     ]);
   });

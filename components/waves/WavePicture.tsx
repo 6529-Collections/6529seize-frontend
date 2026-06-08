@@ -5,6 +5,10 @@ import { FallbackImage } from "@/components/common/FallbackImage";
 import { useAuth } from "@/components/auth/Auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
+import {
+  buildDirectMessageIdentityCandidates,
+  normalizeDirectMessageIdentity,
+} from "@/helpers/waves/direct-message-profile.helpers";
 
 interface WavePictureProps {
   readonly name: string;
@@ -13,16 +17,7 @@ interface WavePictureProps {
     readonly pfp: string;
     readonly identity?: string | null;
   }>;
-}
-
-interface IdentitySource {
-  readonly id?: string | null;
-  readonly handle?: string | null;
-  readonly normalised_handle?: string | null;
-  readonly primary_wallet?: string | null;
-  readonly primary_address?: string | null;
-  readonly query?: string | null;
-  readonly wallets?: ReadonlyArray<{ readonly wallet?: string | null }> | null;
+  readonly roundedClassName?: string | undefined;
 }
 
 const polygonsByCount: Record<number, string[]> = {
@@ -76,78 +71,26 @@ const polygonsByCount: Record<number, string[]> = {
   ],
 };
 
-const normalizeIdentity = (value: string | null | undefined): string | null => {
-  if (!value) {
-    return null;
-  }
-
-  const trimmed = value.trim().toLowerCase();
-  if (!trimmed) {
-    return null;
-  }
-
-  return trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
-};
-
-const addIdentityCandidate = (
-  candidates: Set<string>,
-  value: string | null | undefined
-) => {
-  const normalized = normalizeIdentity(value);
-  if (!normalized) {
-    return;
-  }
-
-  candidates.add(normalized);
-
-  if (normalized.startsWith("0x")) {
-    candidates.add(`id-${normalized}`);
-  }
-
-  if (normalized.startsWith("id-0x")) {
-    candidates.add(normalized.slice(3));
-  }
-};
-
-const addIdentitySourceCandidates = (
-  candidates: Set<string>,
-  identity: IdentitySource | null | undefined
-) => {
-  if (!identity) {
-    return;
-  }
-
-  addIdentityCandidate(candidates, identity.id);
-  addIdentityCandidate(candidates, identity.handle);
-  addIdentityCandidate(candidates, identity.normalised_handle);
-  addIdentityCandidate(candidates, identity.primary_wallet);
-  addIdentityCandidate(candidates, identity.primary_address);
-  addIdentityCandidate(candidates, identity.query);
-
-  identity.wallets?.forEach((wallet) =>
-    addIdentityCandidate(candidates, wallet.wallet)
-  );
-};
-
 export default function WavePicture({
   name,
   picture,
   contributors,
+  roundedClassName = "tw-rounded-full",
 }: WavePictureProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
 
   const authenticatedIdentityCandidates = useMemo(() => {
-    const candidates = new Set<string>();
-
-    addIdentitySourceCandidates(candidates, connectedProfile);
-    addIdentitySourceCandidates(candidates, activeProfileProxy?.created_by);
-
-    return candidates;
+    return buildDirectMessageIdentityCandidates(
+      connectedProfile,
+      activeProfileProxy?.created_by
+    );
   }, [activeProfileProxy, connectedProfile]);
 
   if (picture) {
     return (
-      <div className="tw-relative tw-h-full tw-w-full tw-overflow-hidden tw-rounded-full">
+      <div
+        className={`tw-relative tw-h-full tw-w-full tw-overflow-hidden ${roundedClassName}`}
+      >
         <FallbackImage
           primarySrc={picture}
           fallbackSrc={picture}
@@ -166,7 +109,7 @@ export default function WavePicture({
         return false;
       }
 
-      const normalizedContributorIdentity = normalizeIdentity(
+      const normalizedContributorIdentity = normalizeDirectMessageIdentity(
         contributor.identity
       );
       if (!normalizedContributorIdentity) {
@@ -182,7 +125,9 @@ export default function WavePicture({
   // 3) If no PFPS, show the default wave icon fallback
   if (pfps.length === 0) {
     return (
-      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-white/10">
+      <div
+        className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-white/10 ${roundedClassName}`}
+      >
         <FontAwesomeIcon
           icon={faWater}
           className="tw-size-[54%] tw-text-white/60"
@@ -202,7 +147,9 @@ export default function WavePicture({
   const polygons = polygonsByCount[sliceCount];
 
   return (
-    <div className="tw-relative tw-h-full tw-w-full">
+    <div
+      className={`tw-relative tw-h-full tw-w-full tw-overflow-hidden ${roundedClassName}`}
+    >
       {pfps.slice(0, sliceCount).map((pfp, i) => {
         const clip = polygons?.[i];
         return (
@@ -217,7 +164,7 @@ export default function WavePicture({
               alt={`Contributor-${i}`}
               fill
               sizes="64px"
-              className="tw-block tw-rounded-full tw-object-cover"
+              className="tw-block tw-object-cover"
             />
           </div>
         );

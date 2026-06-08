@@ -1,11 +1,13 @@
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiSubmissionDropStatus } from "@/generated/models/ApiSubmissionDropStatus";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
-import { commonApiFetch } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   fetchBoostedDropsV2,
+  fetchDropPollOptionVotersV2,
   fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
   fetchDropsV2ByIds,
@@ -13,15 +15,20 @@ import {
   fetchGlobalBoostedDropsV2,
   fetchWaveDropsFeedV2,
   mapLeaderboardDropV2,
+  voteDropPollV2,
 } from "@/services/api/wave-drops-v2-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiFetchWithRetry: jest.fn(),
+  commonApiPost: jest.fn(),
 }));
 
 const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
   typeof commonApiFetch
+>;
+const commonApiPostMock = commonApiPost as jest.MockedFunction<
+  typeof commonApiPost
 >;
 
 const identity = {
@@ -95,6 +102,26 @@ const priorityMetadata = [
     }),
   },
 ];
+
+const poll = {
+  id: "poll-1",
+  options: [
+    {
+      option_no: 1,
+      option_string: "First",
+      votes: 2,
+    },
+    {
+      option_no: 2,
+      option_string: "Second",
+      votes: 3,
+    },
+  ],
+  voted: [2],
+  multichoice: false,
+  closing_time: Date.now() + 60_000,
+  is_open: true,
+};
 
 const createEnrichableDrop = (overrides: Partial<ApiDropV2> = {}) => ({
   ...createDrop(1),
@@ -224,6 +251,25 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(result.drops[0]?.metadata).toEqual(priorityMetadata);
   });
 
+  it("preserves V2 poll data on hydrated legacy drops", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [
+        {
+          ...createDrop(1),
+          poll,
+        },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]?.poll).toEqual(poll);
+  });
+
   it("preserves no-negative vote waves on feed and drop results", async () => {
     commonApiFetchMock.mockResolvedValueOnce({
       wave: {
@@ -333,6 +379,23 @@ describe("fetchWaveDropsFeedV2", () => {
     });
 
     expect(drop.metadata).toEqual(priorityMetadata);
+  });
+
+  it("preserves V2 poll data on leaderboard legacy drops", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: {
+        ...createDrop(1),
+        poll,
+      } as unknown as ApiDropV2,
+      wave: {
+        id: "wave-1",
+        name: "Wave 1",
+        picture: null,
+        voting_credit_type: "TDH",
+      } as unknown as ApiWaveMin,
+    });
+
+    expect(drop.poll).toEqual(poll);
   });
 
   it("preserves the over-threshold timestamp on leaderboard drops", () => {
@@ -616,6 +679,63 @@ describe("fetchDropV2ById", () => {
     );
     expect(result.metadata).toEqual([...priorityMetadata, ...fullMetadata]);
     expect(result.top_raters).toEqual([]);
+  });
+});
+
+describe("drop poll helpers", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("votes through the V2 poll endpoint with a JSON options array", async () => {
+    commonApiPostMock.mockResolvedValueOnce({
+      ...createDrop(1),
+      poll: {
+        ...poll,
+        voted: [1],
+      },
+    });
+
+    const result = await voteDropPollV2({
+      drop: {
+        id: "drop-1",
+        wave: waveMin,
+      } as unknown as ApiDrop,
+      options: [1],
+    });
+
+    expect(commonApiPostMock).toHaveBeenCalledWith({
+      endpoint: "v2/drops/drop-1/poll/vote",
+      body: {
+        options: [1],
+      },
+    });
+    expect(result.poll?.voted).toEqual([1]);
+  });
+
+  it("fetches V2 poll option voters with pagination params", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [],
+      count: 0,
+      page: 2,
+      next: false,
+    });
+
+    await fetchDropPollOptionVotersV2({
+      dropId: "drop 1",
+      optionNo: 2,
+      page: 2,
+      pageSize: 20,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/drops/drop%201/poll/2/voters",
+      params: {
+        page: "2",
+        page_size: "20",
+      },
+      signal: undefined,
+    });
   });
 });
 

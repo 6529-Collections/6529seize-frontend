@@ -25,7 +25,7 @@ export default function WaveGroup({
     !scope.group?.is_direct_message;
 
   return (
-    <div className="tw-relative tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-h-6">
+    <div className="tw-group tw-relative tw-flex tw-min-h-8 tw-w-full tw-items-center tw-justify-between tw-px-2 tw-py-1 tw-text-sm">
       <div className="tw-flex tw-gap-x-4">
         <WaveGroupTitle type={type} />
       </div>
@@ -33,12 +33,12 @@ export default function WaveGroup({
         {scope.group ? (
           <WaveGroupScope group={scope.group} />
         ) : (
-          <span className="tw-font-medium tw-text-iron-200 tw-text-sm">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-50">
             Anyone
           </span>
         )}
         {showEdit && (
-          <div className="tw-ml-1">
+          <div className="tw-flex tw-items-center">
             <WaveGroupEditButtons
               wave={wave}
               type={type}

@@ -6,6 +6,8 @@ import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadata
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
+import type { ApiDropPollVoteRequest } from "@/generated/models/ApiDropPollVoteRequest";
+import type { ApiDropPollVotersPage } from "@/generated/models/ApiDropPollVotersPage";
 import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiDropReactionV2 } from "@/generated/models/ApiDropReactionV2";
@@ -25,6 +27,7 @@ import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
+  commonApiPost,
 } from "@/services/api/common-api";
 import {
   createBasePart,
@@ -389,6 +392,7 @@ const hydrateDropV2 = async ({
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
+    ...(drop.poll ? { poll: drop.poll } : {}),
     nft_links: drop.nft_links ?? [],
   };
 };
@@ -438,6 +442,7 @@ export const mapLeaderboardDropV2 = ({
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
+    ...(drop.poll ? { poll: drop.poll } : {}),
     nft_links: drop.nft_links ?? [],
   };
 };
@@ -649,6 +654,53 @@ export async function fetchDropV2ById(
     signal,
     includeFullMetadata: options?.includeFullMetadata ?? false,
     includeTopRaters: options?.includeTopRaters ?? false,
+  });
+}
+
+export async function voteDropPollV2({
+  drop,
+  options,
+}: {
+  readonly drop: ApiDrop;
+  readonly options: readonly number[];
+}): Promise<ApiDrop> {
+  const response = await commonApiPost<ApiDropPollVoteRequest, ApiDropV2>({
+    endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(drop.id))}/poll/vote`,
+    body: {
+      options,
+    } as unknown as ApiDropPollVoteRequest,
+  });
+
+  return hydrateDropV2({
+    drop: response,
+    wave: normalizeWaveMin(drop.wave),
+    includeFullMetadata: false,
+    includeTopRaters: false,
+  });
+}
+
+export async function fetchDropPollOptionVotersV2({
+  dropId,
+  optionNo,
+  page,
+  pageSize,
+  signal,
+}: {
+  readonly dropId: string;
+  readonly optionNo: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiDropPollVotersPage> {
+  return commonApiFetch<ApiDropPollVotersPage>({
+    endpoint: `v2/drops/${getDropEndpointId(
+      getNormalizedDropId(dropId)
+    )}/poll/${optionNo}/voters`,
+    params: {
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    },
+    signal,
   });
 }
 

@@ -1,22 +1,15 @@
 "use client";
 
-import React, { useMemo, useEffect, useCallback, type JSX } from "react";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import React, { type JSX } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
-import WaveHeader, {
-  WaveHeaderPinnedSide,
-} from "@/components/waves/header/WaveHeader";
-import { WaveWinnersSmall } from "@/components/waves/winners/WaveWinnersSmall";
+import WaveHeader from "@/components/waves/header/WaveHeader";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
-import { Mode, SidebarTab } from "./BrainRightSidebar";
-import { WaveSmallLeaderboard } from "@/components/waves/small-leaderboard/WaveSmallLeaderboard";
+import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
-import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -38,71 +31,19 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   activeTab,
   setActiveTab,
 }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
-
-  const onDropClick = useCallback(
-    (drop: ExtendedDrop) => {
-      const params = new URLSearchParams(searchParams.toString() || "");
-      params.set("drop", drop.id);
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
-    },
-    [router, pathname, searchParams]
-  );
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const isCompetitionWave = isRankWave || isApproveWave;
-  const {
-    voting: { isCompleted },
-    decisions: { firstDecisionDone },
-  } = useWaveTimers(wave);
+  const options: TabOption[] = [
+    { key: SidebarTab.ABOUT, label: "About" },
+    { key: SidebarTab.TOP_VOTERS, label: "Voters" },
+    { key: SidebarTab.ACTIVITY_LOG, label: "Activity" },
+  ];
 
-  // Handle tab validity when wave state changes
-  useEffect(() => {
-    const isLeaderboardAndVotingEnded =
-      activeTab === SidebarTab.LEADERBOARD && isCompleted && !isApproveWave;
-    const isWinnersAndFirstDecisionNotPassed =
-      activeTab === SidebarTab.WINNERS && !firstDecisionDone && !isApproveWave;
-    // If on Leaderboard tab and voting has ended, switch to About
-    if (isLeaderboardAndVotingEnded || isWinnersAndFirstDecisionNotPassed) {
-      setActiveTab(SidebarTab.ABOUT);
-    }
-  }, [isApproveWave, isCompleted, firstDecisionDone, activeTab, setActiveTab]);
-
-  // Generate tab options based on wave state
-  const options = useMemo(() => {
-    const tabs: TabOption[] = [{ key: SidebarTab.ABOUT, label: "About" }];
-
-    // Show Leaderboard tab always except when voting has ended
-    if (!isCompleted || isApproveWave) {
-      tabs.push({
-        key: SidebarTab.LEADERBOARD,
-        label: isApproveWave ? "Approvals" : "Leaderboard",
-      });
-    }
-
-    // Show Winners tab if first decision has passed
-    if (firstDecisionDone || isApproveWave) {
-      tabs.push({
-        key: SidebarTab.WINNERS,
-        label: isApproveWave ? "Approved" : "Winners",
-      });
-    }
-
-    tabs.push(
-      { key: SidebarTab.TOP_VOTERS, label: "Voters" },
-      { key: SidebarTab.ACTIVITY_LOG, label: "Activity" }
-    );
-
-    return tabs;
-  }, [isApproveWave, isCompleted, firstDecisionDone]);
-
-  const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
+  const competitionWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
       <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader
@@ -110,7 +51,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           onFollowersClick={onFollowersClick}
           useRing={false}
           useRounded={false}
-          pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
           <BrainRightSidebarContent wave={wave} />
@@ -120,16 +60,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
             closeFollowers={() => setMode(Mode.CONTENT)}
           />
         )}
-      </div>
-    ),
-    [SidebarTab.LEADERBOARD]: (
-      <div>
-        <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
-      </div>
-    ),
-    [SidebarTab.WINNERS]: (
-      <div>
-        <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
       </div>
     ),
     [SidebarTab.TOP_VOTERS]: (
@@ -143,6 +73,9 @@ export const WaveContent: React.FC<WaveContentProps> = ({
       </div>
     ),
   };
+  const activeCompetitionTab = competitionWaveComponents[activeTab]
+    ? activeTab
+    : SidebarTab.ABOUT;
 
   if (!isCompetitionWave) {
     return (
@@ -152,7 +85,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           onFollowersClick={onFollowersClick}
           useRing={false}
           useRounded={false}
-          pinnedSide={WaveHeaderPinnedSide.LEFT}
         />
         {mode === Mode.CONTENT ? (
           <BrainRightSidebarContent wave={wave} />
@@ -173,10 +105,10 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           options={options}
           activeKey={activeTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
-          maxVisibleTabs={3} // Show 3 tabs before overflow
+          maxVisibleTabs={3}
         />
       </div>
-      <div>{rankWaveComponents[activeTab]}</div>
+      <div>{competitionWaveComponents[activeCompetitionTab]}</div>
     </>
   );
 };
