@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
@@ -38,6 +39,7 @@ import PrimaryButton from "../utils/button/PrimaryButton";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import WaveDescriptionPopover from "@/components/waves/header/WaveDescriptionPopover";
 import WavePicture from "@/components/waves/WavePicture";
+import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
@@ -150,12 +152,14 @@ const HeaderTitleContent = ({
   activeWave,
   isWaveResolving,
   isDm,
+  directMessageProfileHref,
   previewText,
   finalTitle,
 }: {
   readonly activeWave: ApiWave | null;
   readonly isWaveResolving: boolean;
   readonly isDm: boolean;
+  readonly directMessageProfileHref: string | null;
   readonly previewText: string | null;
   readonly finalTitle: ReactNode;
 }) => {
@@ -163,36 +167,56 @@ const HeaderTitleContent = ({
     return <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>;
   }
 
+  const wavePictureContributors = activeWave.contributors_overview.map((c) => ({
+    pfp: c.contributor_pfp,
+    identity: c.contributor_identity,
+  }));
+  const wavePicture = (
+    <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
+      <WavePicture
+        name={activeWave.name}
+        picture={activeWave.picture ?? null}
+        contributors={wavePictureContributors}
+      />
+    </div>
+  );
+
   return (
     <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
-      <div className="tw-size-10 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
-        <WavePicture
-          name={activeWave.name}
-          picture={activeWave.picture ?? null}
-          contributors={activeWave.contributors_overview.map((c) => ({
-            pfp: c.contributor_pfp,
-            identity: c.contributor_identity,
-          }))}
-        />
-      </div>
-      {!isDm && previewText !== null ? (
-        <WaveDescriptionPopover
-          wave={activeWave}
-          align="center"
-          ariaLabel="Show wave description"
-          triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+      {isDm && directMessageProfileHref !== null ? (
+        <Link
+          href={directMessageProfileHref}
+          aria-label={`View ${activeWave.name}'s profile`}
+          className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-iron-50 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
         >
-          <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+          {wavePicture}
+          <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
             {activeWave.name}
           </span>
-          <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
-            {previewText}
-          </span>
-        </WaveDescriptionPopover>
+        </Link>
       ) : (
-        <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-          {activeWave.name}
-        </span>
+        <>
+          {wavePicture}
+          {!isDm && previewText !== null ? (
+            <WaveDescriptionPopover
+              wave={activeWave}
+              align="center"
+              ariaLabel="Show wave description"
+              triggerClassName="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+            >
+              <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                {activeWave.name}
+              </span>
+              <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+                {previewText}
+              </span>
+            </WaveDescriptionPopover>
+          ) : (
+            <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
+              {activeWave.name}
+            </span>
+          )}
+        </>
       )}
     </div>
   );
@@ -278,12 +302,15 @@ const HeaderDropActionButton = ({
       loading={false}
       disabled={!action.canOpen}
       onClicked={action.onOpen}
-      padding="tw-px-2.5 tw-py-2"
+      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
       title={title}
       ariaLabel={action.label}
+      className="tw-h-10 tw-min-w-10 sm:tw-h-auto sm:tw-min-w-0"
     >
-      <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-      <span>{action.compactLabel}</span>
+      <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
+      <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
+        {action.compactLabel}
+      </span>
     </PrimaryButton>
   );
 };
@@ -382,7 +409,7 @@ export default function AppHeader() {
   const profileClickTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-  const { activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const pathname = usePathname();
   const params = useParams();
   const { canGoBack } = useNavigationHistoryContext();
@@ -432,8 +459,15 @@ export default function AppHeader() {
   const headerDropAction = getHeaderDropAction({ activeWave, waveDropAction });
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
-  const { isRankWave, isMemesWave, isDm } = useWave(activeWave);
-  const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
+  const { isRankWave, isApproveWave, isMemesWave, isDm } = useWave(activeWave);
+  const directMessageProfileHref = getDirectMessageProfileHref({
+    isDirectMessage: isDm,
+    identity: activeWave?.name,
+    connectedProfile,
+    activeProfileProxyCreatedBy: activeProfileProxy?.created_by,
+  });
+  const showGalleryToggle =
+    !!waveId && !isRankWave && !isApproveWave && !isMemesWave && !isDm;
   const showWaveLinkAction = Boolean(activeWave && !isDm);
   const previewText = getWaveDescriptionPreviewText(activeWave);
   const {
@@ -568,6 +602,7 @@ export default function AppHeader() {
             activeWave={activeWave}
             isWaveResolving={isWaveResolving}
             isDm={isDm}
+            directMessageProfileHref={directMessageProfileHref}
             previewText={previewText}
             finalTitle={finalTitle}
           />

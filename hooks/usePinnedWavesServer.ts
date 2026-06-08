@@ -24,7 +24,7 @@ import {
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
 import { useOfficialWaves } from "./useOfficialWaves";
 
-export const MAX_PINNED_WAVES = 20;
+export const MAX_PINNED_WAVES = 100;
 
 // Cache time constants for React Query
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes

@@ -5,7 +5,7 @@ import {
 } from "@/hooks/usePinnedWaves";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-const MAX_PINNED_WAVES = 20;
+const MAX_PINNED_WAVES = 100;
 
 const baseWave = (
   overrides: Partial<PinnedWaveSnapshot> = {}

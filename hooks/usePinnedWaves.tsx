@@ -5,7 +5,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { Time } from "@/helpers/time";
 
-const MAX_PINNED_WAVES = 20;
+const MAX_PINNED_WAVES = 100;
 const STORAGE_KEY = "pinnedWave";
 const PINNED_WAVE_SNAPSHOT_TTL_MS = Time.days(1).toMillis();
 

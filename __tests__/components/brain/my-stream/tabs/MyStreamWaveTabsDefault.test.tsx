@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsDefault from "@/components/brain/my-stream/tabs/MyStreamWaveTabsDefault";
+import { AuthContext } from "@/components/auth/Auth";
 import { SidebarProvider } from "@/hooks/useSidebarState";
 
 const mockPush = jest.fn();
@@ -103,7 +104,7 @@ describe("MyStreamWaveTabsDefault", () => {
   };
   const createWave = (
     isDirectMessage = false,
-    overrides?: { id?: string; name?: string }
+    overrides: Record<string, any> = {}
   ) =>
     ({
       id: overrides?.id ?? "w1",
@@ -114,20 +115,22 @@ describe("MyStreamWaveTabsDefault", () => {
         parts: [{ content: "A chill place to discuss drops" }],
       },
       contributors_overview: [],
+      ...overrides,
       voting: {
         authenticated_user_eligible: true,
       },
       participation: {
         authenticated_user_eligible: true,
       },
-      chat: {
-        authenticated_user_eligible: true,
-        scope: {
-          group: {
-            is_direct_message: isDirectMessage,
+      chat:
+        overrides.chat ?? {
+          authenticated_user_eligible: true,
+          scope: {
+            group: {
+              is_direct_message: isDirectMessage,
+            },
           },
         },
-      },
     }) as any;
 
   beforeEach(() => {
@@ -235,6 +238,54 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
+    expect(
+      screen.queryByRole("button", { name: "Share wave" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("links 1:1 DM header to the other participant profile", () => {
+    useContentTab.mockReturnValue({
+      activeContentTab: "CHAT",
+      setActiveContentTab: jest.fn(),
+    });
+    const wave = createWave(true, {
+      name: "prxt0",
+      contributors_overview: [
+        { contributor_identity: "id-0xabc", contributor_pfp: "/me.png" },
+      ],
+    });
+
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: {
+              handle: "me",
+              normalised_handle: "me",
+              primary_wallet: "0xabc",
+              query: "id-0xabc",
+              wallets: [{ wallet: "0xabc" }],
+            },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <SidebarProvider>
+          <MyStreamWaveTabsDefault
+            wave={wave}
+            viewMode="chat"
+            onToggleViewMode={mockToggleViewMode}
+            showGalleryToggle={false}
+          />
+        </SidebarProvider>
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
+      .toHaveAttribute("href", "/prxt0");
     expect(
       screen.queryByRole("button", { name: "Share wave" })
     ).not.toBeInTheDocument();
