@@ -53,12 +53,10 @@ export default function useDeviceInfo(): DeviceInfo {
         uaDataMobile ??
         (classicMobile || (isCapacitor && (iPadDesktopUA || widthMobile)));
 
-      const isApp = isCapacitor;
-
       return {
         isMobileDevice,
         hasTouchScreen,
-        isApp,
+        isApp: isCapacitor,
         isAppleMobile: appleMobile,
       };
     },
