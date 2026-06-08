@@ -117,7 +117,10 @@ function setup(opts: any) {
     connectedAccounts: opts.connectedAccounts ?? [],
     seizeSwitchConnectedAccount: opts.seizeSwitchConnectedAccount ?? jest.fn(),
   });
-  (useAuth as jest.Mock).mockReturnValue({ activeProfileProxy: opts.proxy });
+  (useAuth as jest.Mock).mockReturnValue({
+    connectedProfile: opts.connectedProfile ?? null,
+    activeProfileProxy: opts.proxy ?? null,
+  });
   (useIdentity as jest.Mock).mockReturnValue({ profile: opts.profile });
   (useMyStreamOptional as jest.Mock).mockReturnValue(
     activeWaveId
@@ -406,6 +409,44 @@ describe("AppHeader", () => {
       screen.queryByRole("button", { name: "Show wave description" })
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("wave-picture")).toBeInTheDocument();
+  });
+
+  it("links 1:1 DM active wave title to the other participant profile", () => {
+    const wave = {
+      id: "w-dm",
+      name: "prxt0",
+      picture: "/prxt0.png",
+      contributors_overview: [
+        { contributor_identity: "id-0xabc", contributor_pfp: "/me.png" },
+      ],
+      description_drop: {
+        id: "drop-1",
+        parts: [{ content: "A chill place to discuss drops" }],
+      },
+      chat: { scope: { group: { is_direct_message: true } } },
+    };
+
+    setup({
+      wave,
+      asPath: "/messages/w-dm",
+      connectedProfile: {
+        handle: "me",
+        normalised_handle: "me",
+        primary_wallet: "0xabc",
+        query: "id-0xabc",
+        wallets: [{ wallet: "0xabc" }],
+      },
+      waveInfo: { isRankWave: false, isMemesWave: false, isDm: true },
+    });
+
+    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
+      .toHaveAttribute("href", "/prxt0");
+    expect(
+      screen.queryByRole("button", { name: /copy wave link|share wave/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Show wave description" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders description subtitle trigger for non-DM active wave", () => {
