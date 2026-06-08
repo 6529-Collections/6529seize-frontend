@@ -21,7 +21,7 @@ export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
         href={getWavePathRoute(wave.id)}
         className="tw-min-w-0 tw-no-underline"
       >
-        <h1 className="tw-mb-0 tw-truncate tw-text-lg tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-400">
+        <h1 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-normal tw-tracking-tight tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:group-hover:tw-text-iron-400">
           {wave.name}
         </h1>
       </Link>

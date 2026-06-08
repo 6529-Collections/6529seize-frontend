@@ -25,7 +25,7 @@ export default function WaveGroup({
     !scope.group?.is_direct_message;
 
   return (
-    <div className="tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-between tw-px-2 tw-py-1 tw-text-sm">
+    <div className="tw-group tw-relative tw-flex tw-min-h-8 tw-w-full tw-items-center tw-justify-between tw-px-2 tw-py-1 tw-text-sm">
       <div className="tw-flex tw-gap-x-4">
         <WaveGroupTitle type={type} />
       </div>
