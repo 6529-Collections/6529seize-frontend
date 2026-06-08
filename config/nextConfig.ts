@@ -1,6 +1,7 @@
 import { createSecurityHeaders } from "./securityHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
+import path from "node:path";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 
 const HTML_LIMITED_METADATA_BOTS =
@@ -10,6 +11,11 @@ export function sharedConfig(
   publicEnv: PublicEnv,
   assetPrefix: string
 ): NextConfig {
+  const sassLoadPaths = [
+    path.join(process.cwd(), "node_modules"),
+    path.join(process.cwd(), "node_modules", "bootstrap", "scss"),
+  ];
+
   return {
     assetPrefix,
     reactCompiler: true,
@@ -17,7 +23,11 @@ export function sharedConfig(
     htmlLimitedBots: HTML_LIMITED_METADATA_BOTS,
     compress: true,
     productionBrowserSourceMaps: true,
-    sassOptions: { quietDeps: true },
+    sassOptions: {
+      quietDeps: true,
+      includePaths: sassLoadPaths,
+      loadPaths: sassLoadPaths,
+    },
     allowedDevOrigins: ["172.20.10.3", "192.168.1.77"],
     images: {
       loader: "default",

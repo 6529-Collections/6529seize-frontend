@@ -1,1 +1,3 @@
 bin/*.cmd text eol=crlf
+generated/**/*.ts text eol=lf
+generated/**/*.tsx text eol=lf
