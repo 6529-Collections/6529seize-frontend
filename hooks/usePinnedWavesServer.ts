@@ -380,14 +380,17 @@ function usePinnedWaveMutations(
 }
 
 export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
   const { address } = useSeizeConnectContext();
   const queryClient = useQueryClient();
   const ongoingOperations = useRef<Set<string>>(new Set());
-  const isAuthenticated = !!connectedProfile?.handle && !activeProfileProxy;
+  const hasAuthenticatedProfile =
+    !!connectedProfile?.handle &&
+    !activeProfileProxy &&
+    (isAuthenticated ?? true);
   const activeProfileProxyId = activeProfileProxy?.id ?? null;
   const viewerIdentityKey = useMemo(() => {
-    if (!address) {
+    if (!address || isAuthenticated === false) {
       return null;
     }
 
@@ -397,7 +400,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
     }
 
     return `${normalizedAddress}:primary`;
-  }, [address, activeProfileProxyId]);
+  }, [address, activeProfileProxyId, isAuthenticated]);
   const pinnedWavesQueryKey = usePinnedWavesQueryKey(viewerIdentityKey);
   const { waves: officialWaves } = useOfficialWaves({ viewerIdentityKey });
   const officialWaveIds = useMemo(
@@ -407,7 +410,7 @@ export function usePinnedWavesServer(): UsePinnedWavesServerReturn {
   const { data, isLoading, isError, error, refetch } = usePinnedWavesQuery(
     queryClient,
     pinnedWavesQueryKey,
-    isAuthenticated
+    hasAuthenticatedProfile
   );
   const pinnedWaves = data ?? [];
   const { pinnedIds, canPinWave } = usePinnedWavesBudget(

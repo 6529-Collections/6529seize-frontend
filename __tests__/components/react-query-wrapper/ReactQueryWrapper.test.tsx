@@ -33,6 +33,7 @@ type ContextType = {
   onGroupChanged: (params: { groupId: string }) => void;
   onIdentityBulkRate: () => void;
   invalidateNotifications: () => void;
+  invalidateAuthSensitiveQueries: () => void;
 };
 
 const createTestSetup = () => {
@@ -177,6 +178,27 @@ describe("ReactQueryWrapper context", () => {
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS],
     });
+  });
+
+  it("invalidates auth-sensitive queries in a single cache scan", () => {
+    const { client, ctx } = createTestSetup();
+    act(() => ctx.invalidateAuthSensitiveQueries());
+
+    expect(client.invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+    });
+    const [{ predicate }] = (client.invalidateQueries as jest.Mock).mock
+      .calls[0] as [
+      {
+        readonly predicate: (query: {
+          readonly queryKey: readonly unknown[];
+        }) => boolean;
+      },
+    ];
+
+    expect(predicate({ queryKey: [QueryKey.PROFILE] })).toBe(true);
+    expect(predicate({ queryKey: [QueryKey.GROUPS] })).toBe(false);
   });
 });
 

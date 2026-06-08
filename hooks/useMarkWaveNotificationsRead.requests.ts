@@ -29,9 +29,6 @@ const latestVerifiedWaveReadIdentityByAddress = new Map<
   WaveReadVerifiedIdentity
 >();
 
-const createClearedWaveReadStateError = (reason: string): Error =>
-  new Error(`Pending wave notification read cleared: ${reason}.`);
-
 export const getStaleAddressEpochWaveReadResult = ({
   addressEpoch,
   latestAddressEpochRef,
@@ -49,9 +46,7 @@ export const getStaleAddressEpochWaveReadResult = ({
     return Promise.resolve("skipped");
   }
 
-  return Promise.reject(
-    createClearedWaveReadStateError("wallet address changed or disconnected")
-  );
+  return Promise.resolve("skipped");
 };
 
 const clearInFlightWaveReadState = (state: WaveReadRequestState): void => {
@@ -69,9 +64,7 @@ export const clearPendingWaveReadsForAddress = (addressKey: string): void => {
     }
 
     pendingWaveReadRequests.delete(requestKey);
-    state.reject(
-      createClearedWaveReadStateError("wallet address changed or disconnected")
-    );
+    state.resolve("skipped");
   }
 
   for (const [requestKey, state] of inFlightWaveReadRequests) {
@@ -89,9 +82,7 @@ export const clearPendingWaveReadsForAddress = (addressKey: string): void => {
 
 export const clearAllWaveReadState = (): void => {
   for (const state of pendingWaveReadRequests.values()) {
-    state.reject(
-      createClearedWaveReadStateError("no marker hooks are mounted")
-    );
+    state.resolve("skipped");
   }
 
   pendingWaveReadRequests.clear();
@@ -505,11 +496,7 @@ const flushQueuedWaveReadRequests = ({
       queuedRequest.addressEpoch !== queuedRequest.latestAddressEpochRef.current
     ) {
       pendingWaveReadRequests.delete(queuedRequest.requestKey);
-      queuedRequest.reject(
-        createClearedWaveReadStateError(
-          "wallet address changed or disconnected"
-        )
-      );
+      queuedRequest.resolve("skipped");
       continue;
     }
 

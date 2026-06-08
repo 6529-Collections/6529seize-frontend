@@ -27,7 +27,7 @@ type EnhancedWave = SidebarWave & {
  * @returns Wave list data and loading states
  */
 const useWavesList = () => {
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
   const { address } = useSeizeConnectContext();
   const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
   const {
@@ -46,10 +46,15 @@ const useWavesList = () => {
 
   // Track connected identity state - memoize to prevent re-renders
   const isConnectedIdentity = useMemo(() => {
-    return !!connectedProfile?.handle && !activeProfileProxy;
-  }, [connectedProfile?.handle, activeProfileProxy]);
+    return (
+      !!connectedProfile?.handle &&
+      !activeProfileProxy &&
+      (isAuthenticated ?? true)
+    );
+  }, [connectedProfile?.handle, activeProfileProxy, isAuthenticated]);
+  const isPendingAuthSwitch = Boolean(address && isAuthenticated === false);
   const viewerIdentityKey = useMemo(() => {
-    if (!address) {
+    if (!address || isAuthenticated === false) {
       return null;
     }
 
@@ -59,7 +64,7 @@ const useWavesList = () => {
     }
 
     return `${normalizedAddress}:primary`;
-  }, [address, activeProfileProxy?.id]);
+  }, [address, activeProfileProxy?.id, isAuthenticated]);
 
   // Fetch main waves list
   const {
@@ -76,6 +81,7 @@ const useWavesList = () => {
     following: isConnectedIdentity && following,
     directMessage: false,
     viewerIdentityKey,
+    enabled: !isPendingAuthSwitch,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
   });

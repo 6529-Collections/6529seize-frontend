@@ -120,6 +120,7 @@ const drop: any = {
   rating: 0,
   realtime_rating: 0,
   rating_prediction: 0,
+  reactions: [],
   top_raters: [],
   raters_count: 0,
   context_profile_context: null,
@@ -201,9 +202,8 @@ describe("WaveDrop", () => {
 
     fireEvent.click(screen.getByTestId("content"));
 
-    expect(mockWaveDropActions).toHaveBeenLastCalledWith(
-      expect.objectContaining({ suppressed: true }),
-      undefined
+    expect(mockWaveDropActions.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ suppressed: true })
     );
   });
 
@@ -271,5 +271,36 @@ describe("WaveDrop", () => {
     expect(mockWaveDropContent).toHaveBeenLastCalledWith(
       expect.objectContaining(guardProps)
     );
+  });
+
+  it("fades temporary drop content without adding a loader", () => {
+    isMobileMock.mockReturnValue(false);
+    const temporaryDrop = {
+      ...drop,
+      id: "temp-drop-1",
+      stableKey: "temp-drop-1",
+      stableHash: "temp-drop-1",
+    };
+
+    renderWithRedux(
+      <WaveDrop
+        drop={temporaryDrop}
+        previousDrop={drop}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("status", { name: "Sending drop" })).toBeNull();
+    expect(
+      screen.getByTestId("content").parentElement?.parentElement
+    ).toHaveClass("tw-opacity-75");
   });
 });

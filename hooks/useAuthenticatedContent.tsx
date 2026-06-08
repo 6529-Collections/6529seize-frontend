@@ -14,25 +14,31 @@ type ContentState =
   | "ready";
 
 export function useAuthenticatedContent() {
-  const { showWaves, connectedProfile, fetchingProfile } =
+  const { showWaves, connectedProfile, fetchingProfile, isAuthenticated } =
     useContext(AuthContext);
   const { spaces } = useLayout();
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { address, isAuthenticated: hasConnectedAccount } =
+    useSeizeConnectContext();
+  const hasAuthenticatedProfile =
+    isAuthenticated ?? (!!connectedProfile?.handle && showWaves);
 
   const contentState = useMemo<ContentState>(() => {
     // Not authenticated at all - check this FIRST before any loading states
-    if (!isAuthenticated) {
+    if (!hasConnectedAccount && !address) {
       return "not-authenticated";
     }
 
-    // Only check fetching if we're authenticated
     if (fetchingProfile) {
       return "loading";
     }
 
     // Authenticated but no profile
     if (!connectedProfile?.handle) {
-      return "needs-profile";
+      return hasConnectedAccount ? "needs-profile" : "loading";
+    }
+
+    if (!hasAuthenticatedProfile) {
+      return "loading";
     }
 
     // Profile exists but waves not enabled (proxy or other reason)
@@ -48,7 +54,9 @@ export function useAuthenticatedContent() {
     // All good, show content
     return "ready";
   }, [
-    isAuthenticated,
+    hasConnectedAccount,
+    address,
+    hasAuthenticatedProfile,
     fetchingProfile,
     connectedProfile,
     showWaves,
@@ -57,7 +65,7 @@ export function useAuthenticatedContent() {
 
   return {
     contentState,
-    isAuthenticated,
+    isAuthenticated: hasAuthenticatedProfile,
     connectedProfile,
     showWaves,
     fetchingProfile,

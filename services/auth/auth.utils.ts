@@ -7,6 +7,7 @@ import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
 export const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
+export const AUTH_TOKEN_CHANGED_EVENT = "6529-auth-token-changed";
 
 const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
 const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
@@ -89,9 +90,16 @@ const emitProfileSwitched = (): void => {
   }
 };
 
+const emitAuthTokenChanged = (): void => {
+  if (globalThis.window !== undefined) {
+    globalThis.dispatchEvent(new CustomEvent(AUTH_TOKEN_CHANGED_EVENT));
+  }
+};
+
 const setWalletAuthCookie = (jwt: string | null): void => {
   if (!jwt) {
     Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+    emitAuthTokenChanged();
     return;
   }
 
@@ -101,6 +109,7 @@ const setWalletAuthCookie = (jwt: string | null): void => {
     const expiresInSeconds = jwtExpiration - now;
     if (expiresInSeconds <= 0) {
       Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+      emitAuthTokenChanged();
       return;
     }
     const expiresInDays = expiresInSeconds / 86400;
@@ -109,8 +118,10 @@ const setWalletAuthCookie = (jwt: string | null): void => {
       ...COOKIE_OPTIONS,
       expires: expiresInDays,
     });
+    emitAuthTokenChanged();
   } catch {
     Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
+    emitAuthTokenChanged();
   }
 };
 
@@ -345,6 +356,7 @@ export const setAuthJwt = (
   role?: string
 ): boolean => {
   const storedAccounts = getStoredAccounts();
+  const previousActiveAddress = getActiveAddressFromStorage();
   const existingAccount =
     storedAccounts.find(
       (account) =>
@@ -382,6 +394,12 @@ export const setAuthJwt = (
   }
 
   emitWalletAccountsUpdated();
+  if (
+    previousActiveAddress &&
+    normalizeAddress(previousActiveAddress) !== normalizeAddress(address)
+  ) {
+    emitProfileSwitched();
+  }
   return true;
 };
 
@@ -418,8 +436,12 @@ export const getWalletRole = () => {
 };
 
 export const clearAllWalletAuth = (): void => {
+  const previousActiveAddress = getWalletAddress();
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
+  if (previousActiveAddress) {
+    emitProfileSwitched();
+  }
 };
 
 export const removeAuthJwt = () => {
@@ -433,6 +455,9 @@ export const removeAuthJwt = () => {
     }
     persistAccountsWithActive([], null);
     emitWalletAccountsUpdated();
+    if (legacyAddress) {
+      emitProfileSwitched();
+    }
     return;
   }
 
@@ -447,6 +472,13 @@ export const removeAuthJwt = () => {
   const nextActiveAddress = remainingAccounts[0]?.address ?? null;
   persistAccountsWithActive(remainingAccounts, nextActiveAddress);
   emitWalletAccountsUpdated();
+  if (
+    !nextActiveAddress ||
+    normalizeAddress(activeAccount.address) !==
+      normalizeAddress(nextActiveAddress)
+  ) {
+    emitProfileSwitched();
+  }
 };
 
 /**
