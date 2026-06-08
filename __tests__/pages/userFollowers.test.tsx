@@ -55,7 +55,6 @@ function DummyFollowersTab({ profile }: { readonly profile: any }) {
 const buildFactory = () =>
   createUserTabPage({
     subroute: " ",
-    metaLabel: "Followers",
     Tab: DummyFollowersTab,
   });
 

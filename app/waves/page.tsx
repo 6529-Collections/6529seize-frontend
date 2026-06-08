@@ -60,5 +60,5 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const waveId = getFirstSearchParamValue(resolvedParams, "wave");
-  return await buildWavesMetadata(waveId);
+  return await buildWavesMetadata(waveId, resolvedParams);
 }

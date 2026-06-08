@@ -22,6 +22,9 @@ jest.mock("@/components/waves/header/WaveHeaderFollowers", () => () => <div />);
 jest.mock("@/components/waves/header/WaveHeaderDescription", () => () => (
   <div data-testid="description" />
 ));
+jest.mock("@/components/waves/header/WaveHeaderPinButton", () => () => (
+  <div data-testid="wave-header-pin" />
+));
 jest.mock("@/components/waves/WavePicture", () => () => <div />);
 jest.mock("@/components/waves/specs/WaveNotificationSettings", () => () => (
   <div data-testid="wave-notification-settings" />
@@ -40,6 +43,7 @@ const baseWave: any = {
   metrics: { drops_count: 1 },
   chat: { scope: { group: { is_direct_message: false } } },
   wave: { type: ApiWaveType.Chat },
+  subscribed_actions: [],
 };
 
 describe("WaveHeader", () => {
@@ -96,20 +100,28 @@ describe("WaveHeader", () => {
     expect(screen.queryByLabelText("Edit wave picture")).toBeNull();
   });
 
-  it("stacks follow and notification controls for connected users", () => {
-    wrapper(baseWave, undefined, { connectedProfile: { handle: "alice" } });
+  it("places connected-user actions in the lower action row", () => {
+    wrapper(
+      { ...baseWave, subscribed_actions: ["drop_created"] },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
 
     const follow = screen.getByTestId("wave-header-follow");
     const notifications = screen.getByTestId("wave-notification-settings");
+    const pin = screen.getByTestId("wave-header-pin");
+    const actionRow = follow.parentElement?.parentElement;
 
     expect(follow).toHaveAttribute("data-full-width", "true");
-    expect(follow.parentElement).toHaveClass(
+    expect(actionRow).toHaveClass(
+      "tw-mt-4",
       "tw-flex",
-      "tw-w-48",
-      "tw-flex-col",
+      "tw-w-full",
       "tw-items-stretch",
-      "tw-gap-y-1.5"
+      "tw-gap-2"
     );
+    expect(notifications.parentElement?.parentElement).toBe(actionRow);
+    expect(pin.parentElement?.parentElement).toBe(actionRow);
     expect(
       follow.compareDocumentPosition(notifications) &
         Node.DOCUMENT_POSITION_FOLLOWING

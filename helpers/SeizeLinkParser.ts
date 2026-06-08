@@ -118,14 +118,11 @@ const getWaveIdFromWavesUrl = (
   };
 };
 
-const hasExactQueryKeys = (url: URL, expectedKeys: string[]): boolean => {
-  const actualKeys = Array.from(url.searchParams.keys());
-  if (actualKeys.length !== expectedKeys.length) {
-    return false;
-  }
-
-  const expectedSet = new Set(expectedKeys);
-  return actualKeys.every((key) => expectedSet.has(key));
+const hasOnlyQueryKeys = (url: URL, allowedKeys: string[]): boolean => {
+  const allowedSet = new Set(allowedKeys);
+  return Array.from(url.searchParams.keys()).every((key) =>
+    allowedSet.has(key)
+  );
 };
 
 export function parseSeizeQuoteLink(href: string): SeizeQuoteLinkInfo | null {
@@ -198,13 +195,13 @@ export function parseSeizeWaveLink(href: string): string | null {
   }
 
   if (isLegacyPath) {
-    if (!hasExactQueryKeys(url, ["wave"])) {
+    if (!hasOnlyQueryKeys(url, ["wave", "divider"])) {
       return null;
     }
     return waveId;
   }
 
-  if (Array.from(url.searchParams.keys()).length > 0) {
+  if (!hasOnlyQueryKeys(url, ["divider"])) {
     return null;
   }
 

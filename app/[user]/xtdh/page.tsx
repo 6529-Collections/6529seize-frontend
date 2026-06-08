@@ -9,7 +9,6 @@ const TAB_CONFIG = USER_PAGE_TAB_MAP[USER_PAGE_TAB_IDS.XTDH];
 
 const { Page, generateMetadata } = createUserTabPage({
   subroute: TAB_CONFIG.route,
-  metaLabel: TAB_CONFIG.metaLabel,
   Tab: UserPageXtdh,
 });
 

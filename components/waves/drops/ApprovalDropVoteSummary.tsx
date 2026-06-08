@@ -14,7 +14,7 @@ import {
 import { useApprovalDropStatus } from "@/hooks/waves/useApprovalDropStatus";
 import ParticipationDropVoteDetailsTrigger from "./participation/ratings/ParticipationDropVoteDetailsTrigger";
 
-export type ApprovalDropVoteSummaryVariant =
+type ApprovalDropVoteSummaryVariant =
   | "chat"
   | "leaderboard"
   | "compact"
@@ -185,10 +185,7 @@ export default function ApprovalDropVoteSummary({
           >
             {formatLargeNumber(current)}
           </span>
-          <span
-            aria-hidden="true"
-            className="tw-font-medium tw-text-iron-500"
-          >
+          <span aria-hidden="true" className="tw-font-medium tw-text-iron-500">
             /
           </span>
           <span
@@ -197,10 +194,7 @@ export default function ApprovalDropVoteSummary({
           >
             {formatLargeNumber(winningThreshold)}
           </span>
-          <span
-            aria-hidden="true"
-            className="tw-font-medium tw-text-iron-400"
-          >
+          <span aria-hidden="true" className="tw-font-medium tw-text-iron-400">
             {votingLabel}
           </span>
           <DropVoteProgressing
@@ -214,9 +208,7 @@ export default function ApprovalDropVoteSummary({
             tooltipLabel="Votes given now"
             compact
           />
-          <span className={`tw-font-normal ${statusClass}`}>
-            {statusLabel}
-          </span>
+          <span className={`tw-font-normal ${statusClass}`}>{statusLabel}</span>
         </div>
 
         {showVoters && (
