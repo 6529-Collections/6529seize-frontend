@@ -1,7 +1,6 @@
 "use client";
 
-import { useContext } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 
 export default function CreateDropActionsRow({
@@ -17,7 +16,7 @@ export default function CreateDropActionsRow({
   readonly breakIntoStorm: () => void;
   readonly disabled?: boolean | undefined;
 }) {
-  const { setToast } = useContext(AuthContext);
+  const { setToast } = useAuth();
   return (
     <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
       <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
