@@ -1,0 +1,161 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
+
+export const SIDEBAR_SUBWAVE_ROW_TRANSITION_MS = 180 as const;
+
+type SidebarWaveRowAnimationState = "entered" | "entering" | "exiting";
+type AfterPaintHandle =
+  | {
+      type: "animation-frames";
+      firstId: number;
+      secondId: number | null;
+    }
+  | {
+      readonly type: "timeout";
+      readonly id: ReturnType<typeof globalThis.setTimeout>;
+    };
+
+export interface AnimatedSidebarWaveTreeRow extends SidebarWaveTreeRow {
+  readonly animationState: SidebarWaveRowAnimationState;
+}
+
+const getEnteredRows = (
+  rows: readonly SidebarWaveTreeRow[]
+): AnimatedSidebarWaveTreeRow[] =>
+  rows.map((row) => ({
+    ...row,
+    animationState: "entered",
+  }));
+
+const requestAfterPaint = (callback: () => void) => {
+  if (typeof globalThis.requestAnimationFrame === "function") {
+    const handle: AfterPaintHandle = {
+      type: "animation-frames",
+      firstId: 0,
+      secondId: null,
+    };
+    handle.firstId = globalThis.requestAnimationFrame(() => {
+      handle.secondId = globalThis.requestAnimationFrame(callback);
+    });
+    return handle;
+  }
+
+  return {
+    type: "timeout",
+    id: globalThis.setTimeout(callback, 32),
+  } satisfies AfterPaintHandle;
+};
+
+const cancelAfterPaint = (handle: AfterPaintHandle) => {
+  if (
+    handle.type === "animation-frames" &&
+    typeof globalThis.cancelAnimationFrame === "function"
+  ) {
+    globalThis.cancelAnimationFrame(handle.firstId);
+    if (handle.secondId !== null) {
+      globalThis.cancelAnimationFrame(handle.secondId);
+    }
+    return;
+  }
+
+  if (handle.type === "timeout") {
+    globalThis.clearTimeout(handle.id);
+  }
+};
+
+const groupExitingRowsByParent = (
+  rows: readonly AnimatedSidebarWaveTreeRow[],
+  nextKeys: ReadonlySet<string>
+) => {
+  const map = new Map<string, AnimatedSidebarWaveTreeRow[]>();
+
+  for (const row of rows) {
+    if (nextKeys.has(row.key) || row.depth === 0 || row.parentWaveId === null) {
+      continue;
+    }
+
+    const parentRows = map.get(row.parentWaveId) ?? [];
+    parentRows.push({
+      ...row,
+      animationState: "exiting",
+    });
+    map.set(row.parentWaveId, parentRows);
+  }
+
+  return map;
+};
+
+export function useAnimatedSidebarWaveRows(
+  rows: readonly SidebarWaveTreeRow[]
+) {
+  const [animatedRows, setAnimatedRows] = useState<
+    AnimatedSidebarWaveTreeRow[]
+  >(() => getEnteredRows(rows));
+
+  const rowKeys = useMemo(() => rows.map((row) => row.key), [rows]);
+  const rowKeySignature = rowKeys.join("\n");
+
+  useEffect(() => {
+    const nextKeys = new Set(rowKeys);
+
+    setAnimatedRows((previousRows) => {
+      const previousRowsByKey = new Map(
+        previousRows.map((row) => [row.key, row])
+      );
+      const exitingRowsByParent = groupExitingRowsByParent(
+        previousRows,
+        nextKeys
+      );
+      const nextRows: AnimatedSidebarWaveTreeRow[] = [];
+
+      for (const row of rows) {
+        const previousRow = previousRowsByKey.get(row.key);
+        const animationState =
+          row.depth === 1 && previousRow === undefined
+            ? "entering"
+            : "entered";
+
+        nextRows.push({
+          ...row,
+          animationState,
+        });
+
+        if (row.depth === 0) {
+          nextRows.push(...(exitingRowsByParent.get(row.wave.id) ?? []));
+          exitingRowsByParent.delete(row.wave.id);
+        }
+      }
+
+      for (const exitingRows of exitingRowsByParent.values()) {
+        nextRows.push(...exitingRows);
+      }
+
+      return nextRows;
+    });
+
+    const enterFrame = requestAfterPaint(() => {
+      setAnimatedRows((previousRows) =>
+        previousRows.map((row) =>
+          row.animationState === "entering"
+            ? { ...row, animationState: "entered" }
+            : row
+        )
+      );
+    });
+
+    const exitTimer = globalThis.setTimeout(() => {
+      setAnimatedRows((previousRows) =>
+        previousRows.filter((row) => row.animationState !== "exiting")
+      );
+    }, SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+
+    return () => {
+      cancelAfterPaint(enterFrame);
+      globalThis.clearTimeout(exitTimer);
+    };
+  }, [rowKeySignature, rowKeys, rows]);
+
+  return animatedRows;
+}

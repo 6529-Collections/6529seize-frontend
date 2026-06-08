@@ -14,9 +14,15 @@ import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
+import { SidebarWaveTreeRowTransition } from "../waves/SidebarWaveTreeRowTransition";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
+import {
+  useSidebarWaveTree,
+  type SidebarWaveTreeRow,
+} from "@/hooks/useSidebarWaveTree";
+import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 
 function isValidWave(wave: unknown): wave is MinimalWave {
   if (wave === null || wave === undefined || typeof wave !== "object") {
@@ -208,6 +214,12 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
   const seizeSettings = useSeizeSettingsOptional();
+  const { activeWave } = useMyStream();
+  const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
+    waves,
+    activeWaveId: activeWave.id,
+    storageScope: connectedProfile?.handle ?? null,
+  });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
@@ -219,7 +231,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       const pinned: MinimalWave[] = [];
       const regular: MinimalWave[] = [];
 
-      for (const wave of waves) {
+      for (const wave of topLevelWaves) {
         if (seizeSettings?.isAnnouncementsWave(wave.id)) {
           announcements.push(wave);
         } else if (wave.isOfficial) {
@@ -237,19 +249,56 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         pinnedWaves: pinned,
         regularWaves: regular,
       };
-    }, [waves, seizeSettings]);
+    }, [topLevelWaves, seizeSettings]);
+
+  const announcementRows = useMemo(
+    () => getRows(announcementWaves),
+    [announcementWaves, getRows]
+  );
+  const officialRows = useMemo(
+    () => getRows(officialWaves),
+    [officialWaves, getRows]
+  );
+  const pinnedRows = useMemo(
+    () => getRows(pinnedWaves),
+    [pinnedWaves, getRows]
+  );
+  const regularRows = useMemo(
+    () => getRows(regularWaves),
+    [regularWaves, getRows]
+  );
+  const animatedAnnouncementRows =
+    useAnimatedSidebarWaveRows(announcementRows);
+  const animatedOfficialRows = useAnimatedSidebarWaveRows(officialRows);
+  const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
+  const animatedRegularRows = useAnimatedSidebarWaveRows(regularRows);
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED
     : WAVE_ROW_HEIGHT_DEFAULT;
 
-  const virtual = useVirtualizedWaves<MinimalWave>(
-    regularWaves,
+  const virtual = useVirtualizedWaves<SidebarWaveTreeRow>(
+    animatedRegularRows,
     "web-unified-waves-regular",
     scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight,
     5
+  );
+
+  const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
+    <WebBrainLeftSidebarWave
+      wave={row.wave}
+      onHover={onHover}
+      showPin={showPin && row.depth === 0}
+      basePath={basePath}
+      collapsed={isCollapsed}
+      depth={row.depth}
+      canExpand={row.canExpand && !isCollapsed}
+      isExpanded={row.isExpanded}
+      hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+      onToggleExpand={toggleParent}
+    />
   );
 
   return (
@@ -315,108 +364,111 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         )}
 
         <div>
-          {announcementWaves.length > 0 && (
+          {announcementRows.length > 0 && (
             <section
               className={`tw-flex tw-flex-col ${
                 isCollapsed ? "tw-items-center tw-gap-y-2" : ""
               }`}
               aria-label="Announcement waves"
             >
-              {announcementWaves
-                .filter((wave): wave is MinimalWave => {
+              {animatedAnnouncementRows
+                .filter((row) => {
+                  const wave = row.wave;
                   if (!isValidWave(wave)) {
                     console.warn("Invalid announcement wave object", wave);
                     return false;
                   }
                   return true;
                 })
-                .map((wave) => (
-                  <div key={wave.id} className="tw-w-full">
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin && !isCollapsed && wave.isPinned}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
+                .map((row) => (
+                  <SidebarWaveTreeRowTransition
+                    key={row.key}
+                    row={row}
+                    rowHeight={rowHeight}
+                    className="tw-w-full"
+                  >
+                    {renderWaveRow(
+                      row,
+                      !hidePin && !isCollapsed && row.wave.isPinned
+                    )}
+                  </SidebarWaveTreeRowTransition>
                 ))}
             </section>
           )}
-          {announcementWaves.length > 0 &&
+          {announcementRows.length > 0 &&
             !hideHeaders &&
-            (officialWaves.length > 0 ||
-              pinnedWaves.length > 0 ||
-              regularWaves.length > 0) && (
+            (officialRows.length > 0 ||
+              pinnedRows.length > 0 ||
+              regularRows.length > 0) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {officialWaves.length > 0 && (
+          {officialRows.length > 0 && (
             <section
               className={`tw-flex tw-flex-col ${
                 isCollapsed ? "tw-items-center tw-gap-y-2" : ""
               }`}
               aria-label="Official waves"
             >
-              {officialWaves
-                .filter((wave): wave is MinimalWave => {
+              {animatedOfficialRows
+                .filter((row) => {
+                  const wave = row.wave;
                   if (!isValidWave(wave)) {
                     console.warn("Invalid official wave object", wave);
                     return false;
                   }
                   return true;
                 })
-                .map((wave) => (
-                  <div key={wave.id} className="tw-w-full">
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={false}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
+                .map((row) => (
+                  <SidebarWaveTreeRowTransition
+                    key={row.key}
+                    row={row}
+                    rowHeight={rowHeight}
+                    className="tw-w-full"
+                  >
+                    {renderWaveRow(row, false)}
+                  </SidebarWaveTreeRowTransition>
                 ))}
             </section>
           )}
-          {officialWaves.length > 0 &&
+          {officialRows.length > 0 &&
             !hideHeaders &&
-            (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+            (pinnedRows.length > 0 || regularRows.length > 0) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {!hideHeaders && pinnedWaves.length > 0 && (
+          {!hideHeaders && pinnedRows.length > 0 && (
             <section
               className={`tw-flex tw-flex-col ${
                 isCollapsed ? "tw-items-center tw-gap-y-2" : ""
               }`}
               aria-label="Pinned waves"
             >
-              {pinnedWaves
-                .filter((wave): wave is MinimalWave => {
+              {animatedPinnedRows
+                .filter((row) => {
+                  const wave = row.wave;
                   if (!isValidWave(wave)) {
                     console.warn("Invalid pinned wave object", wave);
                     return false;
                   }
                   return true;
                 })
-                .map((wave) => (
-                  <div key={wave.id} className="tw-w-full">
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin && !isCollapsed}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
+                .map((row) => (
+                  <SidebarWaveTreeRowTransition
+                    key={row.key}
+                    row={row}
+                    rowHeight={rowHeight}
+                    className="tw-w-full"
+                  >
+                    {renderWaveRow(row, !hidePin && !isCollapsed)}
+                  </SidebarWaveTreeRowTransition>
                 ))}
             </section>
           )}
           {!hideHeaders &&
-            pinnedWaves.length > 0 &&
-            regularWaves.length > 0 && (
+            pinnedRows.length > 0 &&
+            regularRows.length > 0 && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {regularWaves.length > 0 ? (
+          {animatedRegularRows.length > 0 ? (
             <section
               ref={listContainerRef}
               style={{
@@ -426,7 +478,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               aria-label="Regular waves list"
             >
               {virtual.virtualItems.map((v: VirtualItem) => {
-                if (v.index === regularWaves.length) {
+                if (v.index === animatedRegularRows.length) {
                   return (
                     <div
                       key="sentinel"
@@ -440,14 +492,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     />
                   );
                 }
-                const wave = regularWaves[v.index];
+                const row = animatedRegularRows[v.index];
+                const wave = row?.wave;
                 if (!isValidWave(wave)) {
                   console.warn("Invalid wave object at index", v.index, wave);
                   return null;
                 }
                 return (
-                  <div
-                    key={wave.id}
+                  <SidebarWaveTreeRowTransition
+                    key={row.key}
+                    row={row}
+                    rowHeight={rowHeight}
                     style={{
                       position: "absolute",
                       width: "100%",
@@ -455,14 +510,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                       height: v.size,
                     }}
                   >
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin && !isCollapsed}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
+                    {renderWaveRow(row, !hidePin && !isCollapsed)}
+                  </SidebarWaveTreeRowTransition>
                 );
               })}
             </section>

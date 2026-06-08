@@ -191,4 +191,53 @@ describe("BrainLeftSidebarWave", () => {
     render(<BrainLeftSidebarWave wave={wave} onHover={onHover} showPin />);
     expect(screen.getByTestId("pin")).toHaveTextContent("true");
   });
+
+  it("renders the subwave expand button as an avatar overlay without opening the wave", async () => {
+    const onToggleExpand = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        canExpand
+        hasUnreadSubwaves
+        onToggleExpand={onToggleExpand}
+      />
+    );
+
+    const expandButton = screen.getByRole("button", {
+      name: "Expand Chat Wave subwaves",
+    });
+
+    expect(expandButton).toHaveAttribute("aria-expanded", "false");
+    expect(expandButton).toHaveClass("tw-absolute");
+    expect(expandButton).toHaveClass("tw-left-4");
+    expect(expandButton).toHaveClass("tw-top-8");
+    expect(expandButton.querySelector(".tw-bg-primary-400")).not.toBeNull();
+    expect(screen.getByRole("link").parentElement).toHaveClass("tw-gap-x-4");
+
+    await user.click(expandButton);
+
+    expect(onToggleExpand).toHaveBeenCalledWith("1");
+    expect(setActiveWave).not.toHaveBeenCalled();
+  });
+
+  it("does not render a nested expand button for child rows", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={baseWave}
+        onHover={onHover}
+        depth={1}
+        canExpand
+        onToggleExpand={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link").parentElement).toHaveClass("tw-gap-x-2");
+    expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
+  });
 });

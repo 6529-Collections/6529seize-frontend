@@ -35,6 +35,10 @@ jest.mock("@/hooks/useOfficialWaves", () => ({
   useOfficialWaves: jest.fn(),
 }));
 
+jest.mock("@/hooks/useWaveSubwaves", () => ({
+  useWaveSubwavesMap: jest.fn(),
+}));
+
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: jest.fn(),
 }));
@@ -50,6 +54,8 @@ const useSeizeSettingsMock = require("@/contexts/SeizeSettingsContext")
 const useWaveByIdMock = useWaveById as jest.Mock;
 const useOfficialWavesMock =
   require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
+const useWaveSubwavesMapMock =
+  require("@/hooks/useWaveSubwaves").useWaveSubwavesMap as jest.Mock;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider
@@ -77,10 +83,13 @@ const createSidebarWave = ({
   id,
   name: id,
   type,
+  createdAt: 0,
   picture: null,
   contributors: [],
   isDirectMessage,
   hasCompetition: type !== ApiWaveType.Chat,
+  parentWaveId: null,
+  hasSubwaves: false,
   descriptionDrop: {
     contents: null,
     media: [],
@@ -100,6 +109,7 @@ const createLegacyApiWave = (id: string, latestDropTimestamp: number) =>
   ({
     id,
     name: id,
+    created_at: 0,
     picture: null,
     contributors_overview: [],
     metrics: {
@@ -111,6 +121,8 @@ const createLegacyApiWave = (id: string, latestDropTimestamp: number) =>
       muted: false,
     },
     wave: { type: ApiWaveType.Rank },
+    parent_wave: null,
+    has_subwaves: false,
     chat: { scope: { group: { is_direct_message: false } } },
     visibility: { scope: { group: null } },
     description_drop: { parts: [] },
@@ -190,6 +202,12 @@ beforeEach(() => {
     refetch: announcementRefetchMock,
     isFetching: false,
   });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: false,
+    refetch: jest.fn(),
+  });
 });
 
 test("combines main and pinned waves, filtering DMs and flagging pinned", () => {
@@ -214,6 +232,54 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
       refetchIntervalInBackground: false,
     })
   );
+});
+
+test("filters direct subwaves from top-level data and appends loaded subwaves", () => {
+  const parentWave = {
+    ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
+    hasSubwaves: true,
+  };
+  const childWave = {
+    ...createSidebarWave({ id: "child", latestDropTimestamp: 300 }),
+    parentWaveId: "parent",
+  };
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [parentWave, childWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [childWave],
+    subwavesByParentId: new Map([
+      ["parent", { subwaves: [childWave], isFetching: false }],
+    ]),
+    isFetching: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(useWaveSubwavesMapMock).toHaveBeenCalledWith({
+    parentWaveIds: ["parent"],
+  });
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "parent",
+    "child",
+  ]);
 });
 
 test("places official waves below announcements and ignores stale official pinned flags", () => {
@@ -273,6 +339,7 @@ test("places official waves below announcements and ignores stale official pinne
 test("refetches official waves when refetching all waves", () => {
   const mainWavesRefetch = jest.fn();
   const pinnedRefetch = jest.fn();
+  const subwavesRefetch = jest.fn();
   useWavesV2Mock.mockReturnValue({
     waves: [mainWave],
     isFetching: false,
@@ -291,6 +358,12 @@ test("refetches official waves when refetching all waves", () => {
     isError: false,
     refetch: pinnedRefetch,
   });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: false,
+    refetch: subwavesRefetch,
+  });
 
   const { result } = renderHook(() => useWavesList(), { wrapper });
 
@@ -299,6 +372,7 @@ test("refetches official waves when refetching all waves", () => {
   expect(mainWavesRefetch).toHaveBeenCalled();
   expect(officialWavesRefetchMock).toHaveBeenCalled();
   expect(pinnedRefetch).toHaveBeenCalled();
+  expect(subwavesRefetch).toHaveBeenCalled();
 });
 
 test("injects the announcement wave once and excludes it from pinned metadata", () => {

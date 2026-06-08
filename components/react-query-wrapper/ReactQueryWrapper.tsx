@@ -95,6 +95,7 @@ export enum QueryKey {
   WAVES_OVERVIEW = "WAVES_OVERVIEW",
   WAVES_OVERVIEW_PUBLIC = "WAVES_OVERVIEW_PUBLIC",
   WAVES_V2 = "WAVES_V2",
+  WAVE_SUBWAVES = "WAVE_SUBWAVES",
   OFFICIAL_WAVES = "OFFICIAL_WAVES",
   WAVES = "WAVES",
   WAVES_PUBLIC = "WAVES_PUBLIC",
@@ -919,6 +920,11 @@ const createReactQueryContextValue = (
     queryClient
       .invalidateQueries({
         queryKey: [QueryKey.WAVES_V2],
+      })
+      .catch(() => undefined);
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVE_SUBWAVES],
       })
       .catch(() => undefined);
     queryClient

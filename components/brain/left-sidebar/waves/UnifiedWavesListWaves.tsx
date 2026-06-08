@@ -2,12 +2,20 @@
 
 import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
+import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import SectionHeader from "./SectionHeader";
 import JoinedToggle from "./JoinedToggle";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useAuth } from "@/components/auth/Auth";
+import {
+  useSidebarWaveTree,
+  type SidebarWaveTreeRow,
+} from "@/hooks/useSidebarWaveTree";
+import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 
 // VirtualItem interface is now imported from useVirtualizedWaves
 
@@ -112,6 +120,13 @@ const UnifiedWavesListWaves = forwardRef<
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
     const seizeSettings = useSeizeSettingsOptional();
+    const { activeWave } = useMyStream();
+    const { connectedProfile } = useAuth();
+    const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
+      waves,
+      activeWaveId: activeWave.id,
+      storageScope: connectedProfile?.handle ?? null,
+    });
 
     const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =
       useMemo(() => {
@@ -120,7 +135,7 @@ const UnifiedWavesListWaves = forwardRef<
         const pinned: MinimalWave[] = [];
         const regular: MinimalWave[] = [];
 
-        for (const wave of waves) {
+        for (const wave of topLevelWaves) {
           if (seizeSettings?.isAnnouncementsWave(wave.id)) {
             announcements.push(wave);
           } else if (wave.isOfficial) {
@@ -138,15 +153,51 @@ const UnifiedWavesListWaves = forwardRef<
           pinnedWaves: pinned,
           regularWaves: regular,
         };
-      }, [waves, seizeSettings]);
+      }, [topLevelWaves, seizeSettings]);
 
-    const virtual = useVirtualizedWaves<MinimalWave>(
-      regularWaves,
+    const announcementRows = useMemo(
+      () => getRows(announcementWaves),
+      [announcementWaves, getRows]
+    );
+    const officialRows = useMemo(
+      () => getRows(officialWaves),
+      [officialWaves, getRows]
+    );
+    const pinnedRows = useMemo(
+      () => getRows(pinnedWaves),
+      [pinnedWaves, getRows]
+    );
+    const regularRows = useMemo(
+      () => getRows(regularWaves),
+      [regularWaves, getRows]
+    );
+    const animatedAnnouncementRows =
+      useAnimatedSidebarWaveRows(announcementRows);
+    const animatedOfficialRows = useAnimatedSidebarWaveRows(officialRows);
+    const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
+    const animatedRegularRows = useAnimatedSidebarWaveRows(regularRows);
+
+    const virtual = useVirtualizedWaves<SidebarWaveTreeRow>(
+      animatedRegularRows,
       "unified-waves-regular",
       scrollContainerRef,
       listContainerRef,
       WAVE_ROW_HEIGHT,
       VIRTUALIZATION_OVERSCAN
+    );
+
+    const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
+      <BrainLeftSidebarWave
+        wave={row.wave}
+        onHover={onHover}
+        showPin={showPin && row.depth === 0}
+        isDirectMessage={isDirectMessage}
+        depth={row.depth}
+        canExpand={row.canExpand}
+        isExpanded={row.isExpanded}
+        hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+        onToggleExpand={toggleParent}
+      />
     );
 
     useImperativeHandle(ref, () => ({
@@ -164,13 +215,14 @@ const UnifiedWavesListWaves = forwardRef<
           />
         )}
 
-        {announcementWaves.length > 0 && (
+        {announcementRows.length > 0 && (
           <section
             className="tw-flex tw-flex-col"
             aria-label="Announcement waves"
           >
-            {announcementWaves
-              .filter((wave): wave is MinimalWave => {
+            {animatedAnnouncementRows
+              .filter((row) => {
+                const wave = row.wave;
                 if (!isValidWave(wave)) {
                   console.warn("Invalid announcement wave object", wave);
                   if (!validateWaveDetailed(wave)) {
@@ -183,31 +235,31 @@ const UnifiedWavesListWaves = forwardRef<
                 }
                 return true;
               })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin && wave.isPinned}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
+              .map((row) => (
+                <SidebarWaveTreeRowTransition
+                  key={row.key}
+                  row={row}
+                  rowHeight={WAVE_ROW_HEIGHT}
+                >
+                  {renderWaveRow(row, !hidePin && row.wave.isPinned)}
+                </SidebarWaveTreeRowTransition>
               ))}
           </section>
         )}
 
         {!hideHeaders &&
-          announcementWaves.length > 0 &&
-          (officialWaves.length > 0 ||
-            pinnedWaves.length > 0 ||
-            regularWaves.length > 0) && (
+          announcementRows.length > 0 &&
+          (officialRows.length > 0 ||
+            pinnedRows.length > 0 ||
+            regularRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
-        {officialWaves.length > 0 && (
+        {officialRows.length > 0 && (
           <section className="tw-flex tw-flex-col" aria-label="Official waves">
-            {officialWaves
-              .filter((wave): wave is MinimalWave => {
+            {animatedOfficialRows
+              .filter((row) => {
+                const wave = row.wave;
                 if (!isValidWave(wave)) {
                   console.warn("Invalid official wave object", wave);
                   if (!validateWaveDetailed(wave)) {
@@ -220,30 +272,30 @@ const UnifiedWavesListWaves = forwardRef<
                 }
                 return true;
               })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={false}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
+              .map((row) => (
+                <SidebarWaveTreeRowTransition
+                  key={row.key}
+                  row={row}
+                  rowHeight={WAVE_ROW_HEIGHT}
+                >
+                  {renderWaveRow(row, false)}
+                </SidebarWaveTreeRowTransition>
               ))}
           </section>
         )}
 
         {!hideHeaders &&
-          officialWaves.length > 0 &&
-          (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+          officialRows.length > 0 &&
+          (pinnedRows.length > 0 || regularRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {/* Conditionally show pinned section */}
-        {!hideHeaders && pinnedWaves.length > 0 && (
+        {!hideHeaders && pinnedRows.length > 0 && (
           <section className="tw-flex tw-flex-col" aria-label="Pinned waves">
-            {pinnedWaves
-              .filter((wave): wave is MinimalWave => {
+            {animatedPinnedRows
+              .filter((row) => {
+                const wave = row.wave;
                 if (!isValidWave(wave)) {
                   console.warn("Invalid pinned wave object", wave);
                   if (!validateWaveDetailed(wave)) {
@@ -256,26 +308,25 @@ const UnifiedWavesListWaves = forwardRef<
                 }
                 return true;
               })
-              .map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
+              .map((row) => (
+                <SidebarWaveTreeRowTransition
+                  key={row.key}
+                  row={row}
+                  rowHeight={WAVE_ROW_HEIGHT}
+                >
+                  {renderWaveRow(row, !hidePin)}
+                </SidebarWaveTreeRowTransition>
               ))}
           </section>
         )}
 
         {/* Add divider between pinned and regular waves */}
-        {!hideHeaders && pinnedWaves.length > 0 && regularWaves.length > 0 && (
+        {!hideHeaders && pinnedRows.length > 0 && regularRows.length > 0 && (
           <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
         )}
 
         {/* Conditionally show regular waves or maintain structure */}
-        {regularWaves.length > 0 ? (
+        {animatedRegularRows.length > 0 ? (
           <section
             ref={listContainerRef}
             style={{
@@ -285,7 +336,7 @@ const UnifiedWavesListWaves = forwardRef<
             aria-label="Regular waves list"
           >
             {virtual.virtualItems.map((v: VirtualItem) => {
-              if (v.index === regularWaves.length) {
+              if (v.index === animatedRegularRows.length) {
                 return (
                   <div
                     key="sentinel"
@@ -298,7 +349,8 @@ const UnifiedWavesListWaves = forwardRef<
                   />
                 );
               }
-              const wave = regularWaves[v.index];
+              const row = animatedRegularRows[v.index];
+              const wave = row?.wave;
               if (!isValidWave(wave)) {
                 console.warn("Invalid wave object at index", v.index, wave);
                 if (!validateWaveDetailed(wave)) {
@@ -308,21 +360,18 @@ const UnifiedWavesListWaves = forwardRef<
               }
               // TypeScript now knows wave is definitely MinimalWave
               return (
-                <div
-                  key={wave.id}
+                <SidebarWaveTreeRowTransition
+                  key={row.key}
+                  row={row}
+                  rowHeight={WAVE_ROW_HEIGHT}
                   style={{
                     ...absolutePositionedStyle,
                     top: v.start,
                     height: v.size,
                   }}
                 >
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    onHover={onHover}
-                    showPin={!hidePin}
-                    isDirectMessage={isDirectMessage}
-                  />
-                </div>
+                  {renderWaveRow(row, !hidePin)}
+                </SidebarWaveTreeRowTransition>
               );
             })}
           </section>

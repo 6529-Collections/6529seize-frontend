@@ -12,12 +12,15 @@ export interface MinimalWave {
   id: string;
   name: string;
   type: ApiWaveType;
+  createdAt: number;
   newDropsCount: MinimalWaveNewDropsCount;
   picture: string | null;
   contributors: readonly SidebarWaveContributor[];
   isPinned: boolean;
   isOfficial: boolean;
   isMuted: boolean;
+  parentWaveId: string | null;
+  hasSubwaves: boolean;
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
@@ -162,6 +165,7 @@ function useEnhancedWavesListCore(
         id: wave.id,
         name: wave.name,
         type: wave.type,
+        createdAt: wave.createdAt,
         picture: wave.picture,
         contributors: wave.contributors,
         newDropsCount: newDrops,
@@ -170,6 +174,8 @@ function useEnhancedWavesListCore(
           : false,
         isOfficial: wave.isOfficial ?? false,
         isMuted: wave.muted,
+        parentWaveId: wave.parentWaveId,
+        hasSubwaves: wave.hasSubwaves,
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,

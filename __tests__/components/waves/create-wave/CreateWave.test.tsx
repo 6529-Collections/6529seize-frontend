@@ -294,11 +294,19 @@ describe("CreateWave", () => {
     global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
   });
 
-  const renderCreateWave = () => {
+  const renderCreateWave = ({
+    parentWaveId,
+  }: {
+    readonly parentWaveId?: string | null | undefined;
+  } = {}) => {
     return render(
       <AuthContext.Provider value={mockAuthContext}>
         <ReactQueryWrapperContext.Provider value={mockQueryContext}>
-          <CreateWave profile={mockProfile} onBack={onBack} />
+          <CreateWave
+            profile={mockProfile}
+            onBack={onBack}
+            parentWaveId={parentWaveId}
+          />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
@@ -311,6 +319,14 @@ describe("CreateWave", () => {
       'Create Wave "Test Wave"'
     );
     expect(screen.getByTestId("create-wave-overview")).toBeInTheDocument();
+  });
+
+  it("uses subwave title when creating under a parent wave", () => {
+    renderCreateWave({ parentWaveId: "parent-wave" });
+
+    expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
+      'Create subwave "Test Wave"'
+    );
   });
 
   it("calls onBack when back button is clicked", () => {
@@ -384,6 +400,26 @@ describe("CreateWave", () => {
         expect(mockRequestDrop).not.toHaveBeenCalled();
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
         expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+      });
+    });
+
+    it("passes parent wave id into submitted subwave body", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+
+      renderCreateWave({ parentWaveId: "parent-wave" });
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockedGetCreateNewWaveBody).toHaveBeenCalledWith(
+          expect.objectContaining({
+            parentWaveId: "parent-wave",
+          })
+        );
       });
     });
 

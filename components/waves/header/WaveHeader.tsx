@@ -55,6 +55,12 @@ export default function WaveHeader({
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
     canUseWaveActions && connectedHandle === wave.author.handle;
+  const showCreateSubwaveOption =
+    canUseWaveActions &&
+    !isDirectMessage &&
+    !wave.parent_wave &&
+    wave.wave.authenticated_user_eligible_for_admin === true;
+  const showOptions = showOwnerOptions || showCreateSubwaveOption;
 
   return (
     <div
@@ -125,9 +131,12 @@ export default function WaveHeader({
                   <WaveNotificationSettings wave={wave} compact />
                 </div>
               )}
-              {showOwnerOptions && (
+              {showOptions && (
                 <div className="tw-flex tw-shrink-0 tw-items-center">
-                  <WaveHeaderOptions wave={wave} />
+                  <WaveHeaderOptions
+                    wave={wave}
+                    showOwnerActions={showOwnerOptions}
+                  />
                 </div>
               )}
               <div className="tw-shrink-0">

@@ -12,6 +12,7 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
+import { useWaveSubwavesMap } from "./useWaveSubwaves";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import { useOfficialWaves } from "./useOfficialWaves";
 import type { SidebarWave } from "@/types/waves.types";
@@ -95,7 +96,10 @@ const useWavesList = () => {
   const visibleOfficialWaves = useMemo(
     () =>
       officialWaves.filter(
-        (wave) => !wave.isDirectMessage && !isAnnouncementsWave(wave.id)
+        (wave) =>
+          !wave.isDirectMessage &&
+          !wave.parentWaveId &&
+          !isAnnouncementsWave(wave.id)
       ),
     [officialWaves, isAnnouncementsWave]
   );
@@ -134,7 +138,11 @@ const useWavesList = () => {
   const announcementWave = useMemo(() => {
     const resolvedWave =
       trackedAnnouncementWave ?? fetchedAnnouncementSidebarWave;
-    if (!resolvedWave || resolvedWave.isDirectMessage) {
+    if (
+      !resolvedWave ||
+      resolvedWave.isDirectMessage ||
+      resolvedWave.parentWaveId
+    ) {
       return null;
     }
     return resolvedWave;
@@ -145,6 +153,9 @@ const useWavesList = () => {
     const map = new Map<string, SidebarWave>();
     mainWaves.forEach((wave) => {
       if (!isAnnouncementsWave(wave.id) && !officialWaveIds.has(wave.id)) {
+        if (wave.parentWaveId) {
+          return;
+        }
         map.set(wave.id, wave);
       }
     });
@@ -158,24 +169,6 @@ const useWavesList = () => {
 
   // Server provides full pinned waves data, so no individual fetching needed
   const missingPinnedIds = useMemo<string[]>(() => [], []);
-  // Function to refetch all waves (main and pinned)
-  const refetchAllWaves = useCallback(() => {
-    // Refetch main waves overview
-    mainWavesRefetch();
-    // Refetch official waves
-    officialWavesRefetch();
-    // Refetch server-side pinned waves
-    void refetchPinnedWaves();
-    if (shouldFetchAnnouncementWave) {
-      void announcementRefetch();
-    }
-  }, [
-    mainWavesRefetch,
-    officialWavesRefetch,
-    refetchPinnedWaves,
-    announcementRefetch,
-    shouldFetchAnnouncementWave,
-  ]);
 
   // Use server-provided pinned waves
   const separatelyFetchedPinnedWaves = useMemo(() => {
@@ -183,6 +176,7 @@ const useWavesList = () => {
     return serverPinnedWaves.filter(
       (wave) =>
         !mainWaveIds.has(wave.id) &&
+        !wave.parentWaveId &&
         !isAnnouncementsWave(wave.id) &&
         !officialWaveIds.has(wave.id)
     );
@@ -196,6 +190,7 @@ const useWavesList = () => {
     serverPinnedWaves.forEach((wave) => {
       if (
         !wave.isDirectMessage &&
+        !wave.parentWaveId &&
         !isAnnouncementsWave(wave.id) &&
         !officialWaveIds.has(wave.id)
       ) {
@@ -218,6 +213,7 @@ const useWavesList = () => {
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
       if (
         wave.isDirectMessage ||
+        wave.parentWaveId ||
         isAnnouncementsWave(wave.id) ||
         officialWaveIds.has(wave.id)
       ) {
@@ -265,8 +261,45 @@ const useWavesList = () => {
     officialWaveIds,
   ]);
 
+  const subwaveParentIds = useMemo(
+    () =>
+      combinedWaves
+        .filter((wave) => wave.hasSubwaves && !wave.parentWaveId)
+        .map((wave) => wave.id),
+    [combinedWaves]
+  );
+
+  const {
+    subwaves,
+    isFetching: isSubwavesFetching,
+    refetch: refetchSubwaves,
+  } = useWaveSubwavesMap({
+    parentWaveIds: subwaveParentIds,
+  });
+
+  // Function to refetch all waves (main, pinned, official, announcements, subwaves)
+  const refetchAllWaves = useCallback(() => {
+    mainWavesRefetch();
+    officialWavesRefetch();
+    void refetchPinnedWaves();
+    refetchSubwaves();
+    if (shouldFetchAnnouncementWave) {
+      void announcementRefetch();
+    }
+  }, [
+    mainWavesRefetch,
+    officialWavesRefetch,
+    refetchPinnedWaves,
+    refetchSubwaves,
+    announcementRefetch,
+    shouldFetchAnnouncementWave,
+  ]);
+
   // Derived data should come directly from memoized inputs
-  const allWaves = combinedWaves;
+  const allWaves = useMemo(
+    () => [...combinedWaves, ...subwaves],
+    [combinedWaves, subwaves]
+  );
 
   // New drops counting logic has been removed and will be managed by context
 
@@ -287,7 +320,7 @@ const useWavesList = () => {
       waves: allWaves,
 
       // Original waves pagination and loading
-      isFetching: isFetching || isOfficialWavesFetching,
+      isFetching: isFetching || isOfficialWavesFetching || isSubwavesFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPage: fetchNextPageStable,
@@ -318,6 +351,7 @@ const useWavesList = () => {
       allWaves,
       isFetching,
       isOfficialWavesFetching,
+      isSubwavesFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPageStable,

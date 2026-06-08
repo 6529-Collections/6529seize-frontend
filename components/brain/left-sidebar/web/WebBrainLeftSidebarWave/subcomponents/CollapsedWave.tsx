@@ -16,6 +16,7 @@ interface CollapsedWaveProps {
   readonly tooltipId: string;
   readonly tooltipPlacement: WaveTooltipPlacement;
   readonly wave: MinimalWave;
+  readonly hasUnreadSubwaves?: boolean | undefined;
 }
 
 export const CollapsedWave = ({
@@ -30,6 +31,7 @@ export const CollapsedWave = ({
   tooltipId,
   tooltipPlacement,
   wave,
+  hasUnreadSubwaves = false,
 }: CollapsedWaveProps) => (
   <div
     className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
@@ -53,6 +55,12 @@ export const CollapsedWave = ({
           showNewDropsBadge={!isActive && haveNewDrops}
           wave={wave}
         />
+        {hasUnreadSubwaves && (
+          <span
+            aria-hidden="true"
+            className="tw-absolute tw-bottom-[-3px] tw-left-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+          />
+        )}
       </div>
     </Link>
     {showTooltip && (

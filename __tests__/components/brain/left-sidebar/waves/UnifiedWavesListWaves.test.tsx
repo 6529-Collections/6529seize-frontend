@@ -1,11 +1,13 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
+import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import { useAuth } from "@/components/auth/Auth";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
 jest.mock("@/components/utils/switch/CommonSwitch", () => (props: any) => (
@@ -19,7 +21,19 @@ jest.mock(
     <div
       data-testid={`wave-${props.wave.id}`}
       data-pin={String(props.showPin)}
-    />
+      data-depth={String(props.depth)}
+      data-can-expand={String(props.canExpand)}
+      data-expanded={String(props.isExpanded)}
+      data-unread-subwaves={String(props.hasUnreadSubwaves)}
+    >
+      {props.canExpand && (
+        <button
+          type="button"
+          data-testid={`toggle-${props.wave.id}`}
+          onClick={() => props.onToggleExpand?.(props.wave.id)}
+        />
+      )}
+    </div>
   )
 );
 jest.mock(
@@ -38,11 +52,15 @@ jest.mock("@/hooks/useVirtualizedWaves");
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettingsOptional: jest.fn(),
 }));
+jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStream: jest.fn(),
+}));
 
 const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 const mockUseAuth = useAuth as jest.Mock;
 const mockUseVirtualizedWaves = useVirtualizedWaves as jest.Mock;
 const mockUseSeizeSettingsOptional = useSeizeSettingsOptional as jest.Mock;
+const mockUseMyStream = useMyStream as jest.Mock;
 
 const scrollRef = {
   current: document.createElement("div"),
@@ -59,10 +77,14 @@ const baseWaves = [
 
 beforeEach(() => {
   jest.clearAllMocks();
+  window.localStorage.clear();
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseAuth.mockReturnValue({
     connectedProfile: { handle: "alice" },
     activeProfileProxy: null,
+  });
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: null, set: jest.fn() },
   });
   mockUseSeizeSettingsOptional.mockReturnValue({
     isAnnouncementsWave: (waveId: string) => waveId === "a1",
@@ -174,4 +196,125 @@ it("respects hide options and does not render toggle when not connected", () => 
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
   expect(screen.queryByTestId("wave-p1")).toBeNull();
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "false");
+});
+
+it("expands regular subwaves and keeps child rows unpinned", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "parent",
+          hasSubwaves: true,
+        }),
+        createMockMinimalWave({
+          id: "child",
+          parentWaveId: "parent",
+          hasSubwaves: true,
+          createdAt: 10,
+          unreadDropsCount: 1,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-unread-subwaves",
+    "true"
+  );
+  expect(screen.queryByTestId("wave-child")).toBeNull();
+
+  fireEvent.click(screen.getByTestId("toggle-parent"));
+
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-expanded",
+    "true"
+  );
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-unread-subwaves",
+    "false"
+  );
+  expect(screen.getByTestId("wave-child")).toHaveAttribute("data-depth", "1");
+  expect(screen.getByTestId("wave-child")).toHaveAttribute(
+    "data-can-expand",
+    "false"
+  );
+  expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
+    "data-sidebar-subwave-row-state",
+    "entering"
+  );
+  expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
+});
+
+it("keeps child rows mounted while collapse animation runs", () => {
+  jest.useFakeTimers();
+
+  try {
+    render(
+      <UnifiedWavesListWaves
+        waves={[
+          createMockMinimalWave({
+            id: "parent",
+            hasSubwaves: true,
+          }),
+          createMockMinimalWave({
+            id: "child",
+            parentWaveId: "parent",
+            createdAt: 10,
+          }),
+        ]}
+        onHover={jest.fn()}
+        scrollContainerRef={scrollRef}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("toggle-parent"));
+    expect(screen.getByTestId("wave-child")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("toggle-parent"));
+
+    expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
+      "data-sidebar-subwave-row-state",
+      "exiting"
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+    });
+
+    expect(screen.queryByTestId("wave-child")).toBeNull();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("auto-expands the parent for the active subwave", () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "child", set: jest.fn() },
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "parent",
+          hasSubwaves: true,
+        }),
+        createMockMinimalWave({
+          id: "child",
+          parentWaveId: "parent",
+          createdAt: 10,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-expanded",
+    "true"
+  );
+  expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 });
