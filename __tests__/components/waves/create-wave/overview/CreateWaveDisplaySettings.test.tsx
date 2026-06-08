@@ -59,4 +59,21 @@ describe("CreateWaveDisplaySettings", () => {
       screen.getByText("Use two different tab labels.")
     ).toBeInTheDocument();
   });
+
+  it("shows reserved label validation", () => {
+    render(
+      <CreateWaveDisplaySettings
+        display={{
+          approvalsTabLabel: "Chat",
+          approvedTabLabel: "Selected",
+        }}
+        errors={[CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED]}
+        onChange={jest.fn()}
+      />
+    );
+
+    expect(
+      screen.getByText("Labels cannot match existing tabs.")
+    ).toBeInTheDocument();
+  });
 });

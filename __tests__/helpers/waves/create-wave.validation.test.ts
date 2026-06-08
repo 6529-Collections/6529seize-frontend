@@ -99,6 +99,9 @@ describe("create-wave.validation", () => {
     expect(errors).not.toContain(
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
     );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
+    );
   });
 
   it("rejects approve display labels over the limit after trimming", () => {
@@ -144,6 +147,31 @@ describe("create-wave.validation", () => {
       CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
     );
   });
+
+  it.each(["Chat", " chat ", "MY VOTES"])(
+    "rejects reserved approve display label %s",
+    (label) => {
+      const config = {
+        ...baseConfig,
+        overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+        display: {
+          approve: {
+            approvalsTabLabel: label,
+            approvedTabLabel: "Selected",
+          },
+        },
+      };
+
+      const errors = getCreateWaveValidationErrors({
+        step: CreateWaveStep.OVERVIEW,
+        config,
+      });
+
+      expect(errors).toContain(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
+      );
+    }
+  );
 
   it("allows recurring rank waves without an end date", () => {
     const now = 1_000;

@@ -92,4 +92,24 @@ describe("wave-metadata.helpers", () => {
       approved: "Approved",
     });
   });
+
+  it("falls back to defaults for reserved metadata labels", () => {
+    const labels = getApproveWaveTabLabelsFromMetadata([
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+        data_value: "Chat",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+        data_value: "Selected",
+      },
+    ]);
+
+    expect(labels).toEqual({
+      approvals: "Approvals",
+      approved: "Approved",
+    });
+  });
 });

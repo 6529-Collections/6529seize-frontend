@@ -9,6 +9,14 @@ export const DEFAULT_APPROVE_WAVE_TAB_LABELS = {
   approved: "Approved",
 } as const;
 
+export const RESERVED_APPROVE_WAVE_TAB_LABELS = [
+  "Chat",
+  "Sales",
+  "Outcome",
+  "My Votes",
+  "About",
+] as const;
+
 export const WAVE_DISPLAY_METADATA_KEYS = {
   approvalsTabLabel: "wave_display.approve.tabs.approvals_label",
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
@@ -28,8 +36,25 @@ export const normalizeWaveTabLabel = (
   value: string | null | undefined
 ): string => value?.trim() ?? "";
 
+const normalizeComparableWaveTabLabel = (
+  value: string | null | undefined
+): string => normalizeWaveTabLabel(value).toLowerCase();
+
 export const isValidCustomWaveTabLabel = (value: string): boolean =>
   value.length > 0 && value.length <= APPROVE_WAVE_TAB_LABEL_MAX_LENGTH;
+
+export const isReservedApproveWaveTabLabel = (
+  value: string | null | undefined
+): boolean => {
+  const normalizedValue = normalizeComparableWaveTabLabel(value);
+  if (!normalizedValue) {
+    return false;
+  }
+
+  return RESERVED_APPROVE_WAVE_TAB_LABELS.some(
+    (label) => normalizeComparableWaveTabLabel(label) === normalizedValue
+  );
+};
 
 const getEffectiveTabLabel = ({
   customLabel,
@@ -63,10 +88,18 @@ export const areApproveWaveTabLabelsDuplicate = (
 ): boolean => {
   const effectiveLabels = getEffectiveApproveWaveTabLabels(labels);
   return (
-    effectiveLabels.approvals.trim().toLowerCase() ===
-    effectiveLabels.approved.trim().toLowerCase()
+    normalizeComparableWaveTabLabel(effectiveLabels.approvals) ===
+    normalizeComparableWaveTabLabel(effectiveLabels.approved)
   );
 };
+
+export const doApproveWaveTabLabelsUseReservedLabels = (
+  labels?: ApproveWaveLabelInput | null
+): boolean =>
+  [
+    labels?.approvalsTabLabel,
+    labels?.approvedTabLabel,
+  ].some((label) => isReservedApproveWaveTabLabel(label));
 
 const getMetadataRequest = ({
   dataKey,
@@ -153,8 +186,11 @@ export const getApproveWaveTabLabelsFromMetadata = (
   });
 
   if (
-    labels.approvals.trim().toLowerCase() ===
-    labels.approved.trim().toLowerCase()
+    normalizeComparableWaveTabLabel(labels.approvals) ===
+      normalizeComparableWaveTabLabel(labels.approved) ||
+    [labels.approvals, labels.approved].some((label) =>
+      isReservedApproveWaveTabLabel(label)
+    )
   ) {
     return DEFAULT_APPROVE_WAVE_TAB_LABELS;
   }

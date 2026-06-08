@@ -23,11 +23,16 @@ export default function CreateWaveDisplaySettings({
   const hasDuplicateError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
   );
+  const hasReservedError = errors.includes(
+    CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED
+  );
   const errorMessage = hasLengthError
     ? `Labels must be ${APPROVE_WAVE_TAB_LABEL_MAX_LENGTH} characters or fewer.`
     : hasDuplicateError
       ? "Use two different tab labels."
-      : null;
+      : hasReservedError
+        ? "Labels cannot match existing tabs."
+        : null;
   const errorId = "create-wave-display-settings-error";
   const labels = getEffectiveApproveWaveTabLabels(display);
 

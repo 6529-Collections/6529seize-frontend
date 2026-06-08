@@ -21,6 +21,7 @@ import { Time } from "@/helpers/time";
 import {
   APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
   areApproveWaveTabLabelsDuplicate,
+  doApproveWaveTabLabelsUseReservedLabels,
   normalizeWaveTabLabel,
 } from "./wave-metadata.helpers";
 
@@ -61,6 +62,7 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE = "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE",
   APPROVE_WAVE_TAB_LABEL_TOO_LONG = "APPROVE_WAVE_TAB_LABEL_TOO_LONG",
   APPROVE_WAVE_TAB_LABELS_DUPLICATE = "APPROVE_WAVE_TAB_LABELS_DUPLICATE",
+  APPROVE_WAVE_TAB_LABEL_RESERVED = "APPROVE_WAVE_TAB_LABEL_RESERVED",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -96,6 +98,9 @@ const getOverviewValidationErrors = ({
       errors.push(
         CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
       );
+    }
+    if (doApproveWaveTabLabelsUseReservedLabels(approveDisplay)) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED);
     }
   }
 
