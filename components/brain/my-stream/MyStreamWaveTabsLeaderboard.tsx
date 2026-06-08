@@ -3,6 +3,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { BrainView } from "../mobile/brainMobileViews";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
+import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
 
 type RegisterTabRef = (view: BrainView, el: HTMLButtonElement | null) => void;
 
@@ -28,20 +29,21 @@ const MyStreamWaveTabsLeaderboard: React.FC<
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
+  const approveLabels = useApproveWaveCustomTabLabels(wave);
   const primaryView =
     isCompleted && !isApproveWave
       ? BrainView.SUBMISSIONS
       : BrainView.LEADERBOARD;
   let primaryLabel: string;
   if (isApproveWave) {
-    primaryLabel = "Approvals";
+    primaryLabel = approveLabels.approvals;
   } else if (isCompleted) {
     primaryLabel = "Submissions";
   } else {
     primaryLabel = "Leaderboard";
   }
   const showWinnersTab = isApproveWave || firstDecisionDone;
-  const winnersLabel = isApproveWave ? "Approved" : "Winners";
+  const winnersLabel = isApproveWave ? approveLabels.approved : "Winners";
 
   // Leaderboard tab classes
   const leaderboardButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-7 tw-rounded-lg ${

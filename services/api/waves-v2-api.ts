@@ -1,5 +1,7 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import type { ApiWaveOverviewPage } from "@/generated/models/ApiWaveOverviewPage";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -7,7 +9,7 @@ import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
-import { commonApiFetch } from "./common-api";
+import { commonApiFetch, commonApiPost } from "./common-api";
 
 interface FetchWavesV2PageProps {
   readonly page: number;
@@ -202,4 +204,33 @@ export async function fetchOfficialWaves(): Promise<SidebarWave[]> {
   });
 
   return response.map(mapApiWaveOverviewToSidebarWave);
+}
+
+export async function fetchWaveMetadata({
+  waveId,
+  headers,
+}: {
+  readonly waveId: string;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<ApiWaveMetadata[]> {
+  return await commonApiFetch<ApiWaveMetadata[]>({
+    endpoint: `v2/waves/${waveId}/metadata`,
+    headers,
+  });
+}
+
+export async function createWaveMetadata({
+  waveId,
+  body,
+  headers,
+}: {
+  readonly waveId: string;
+  readonly body: ApiCreateWaveMetadataRequest;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<ApiWaveMetadata> {
+  return await commonApiPost<ApiCreateWaveMetadataRequest, ApiWaveMetadata>({
+    endpoint: `v2/waves/${waveId}/metadata`,
+    body,
+    headers,
+  });
 }

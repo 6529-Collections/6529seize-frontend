@@ -90,6 +90,12 @@ export function useWaveConfig() {
         thresholdTimeMs: null,
         maxWinners: null,
       },
+      display: {
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "",
+        },
+      },
     };
   };
 
@@ -186,6 +192,13 @@ export function useWaveConfig() {
     setConfig((prev) => ({
       ...prev,
       outcomes,
+    }));
+  };
+
+  const setDisplay = (display: CreateWaveConfig["display"]) => {
+    setConfig((prev) => ({
+      ...prev,
+      display,
     }));
   };
 
@@ -443,6 +456,7 @@ export function useWaveConfig() {
     setDrops,
     setDropsAdminCanDelete,
     setOutcomes,
+    setDisplay,
     // Navigation
     onStep,
     // Outcome management

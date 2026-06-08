@@ -10,7 +10,7 @@ import { useMutation } from "@tanstack/react-query";
  * @returns UseMutation result
  */
 export const useAddWaveMutation = (options: {
-  onSuccess: (response: ApiWave) => void;
+  onSuccess: (response: ApiWave) => void | Promise<void>;
   onError: (error: unknown) => void;
   onSettled: () => void;
 }): UseMutationResult<ApiWave, unknown, ApiCreateNewWave, unknown> => {

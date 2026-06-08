@@ -3,10 +3,13 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
+import { getCreateWaveDisplayMetadataRequests } from "@/helpers/waves/wave-metadata.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { createWaveMetadata } from "@/services/api/waves-v2-api";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
@@ -53,7 +56,29 @@ export function useCreateWaveSubmission({
   });
 
   const addWaveMutation = useAddWaveMutation({
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
+      const metadataRequests =
+        config.overview.type === ApiWaveType.Approve
+          ? getCreateWaveDisplayMetadataRequests(config.display?.approve)
+          : [];
+      if (metadataRequests.length > 0) {
+        try {
+          await Promise.all(
+            metadataRequests.map((body) =>
+              createWaveMetadata({
+                waveId: response.id,
+                body,
+              })
+            )
+          );
+        } catch {
+          setToast({
+            message: "Wave created, but custom display settings were not saved.",
+            type: "warning",
+          });
+        }
+      }
+
       void waitAndInvalidateDrops();
       onWaveCreated();
       onSuccess?.();

@@ -52,6 +52,12 @@ describe("create-wave.validation", () => {
     },
     outcomes: [{ id: 1 }],
     approval: { threshold: null, thresholdTimeMs: null, maxWinners: null },
+    display: {
+      approve: {
+        approvalsTabLabel: "",
+        approvedTabLabel: "",
+      },
+    },
   };
 
   afterEach(() => {
@@ -68,6 +74,75 @@ describe("create-wave.validation", () => {
       config,
     });
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
+  });
+
+  it("allows approve display labels under the limit", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      display: {
+        approve: {
+          approvalsTabLabel: "Candidates",
+          approvedTabLabel: "Selected",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    );
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+    );
+  });
+
+  it("rejects approve display labels over the limit after trimming", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      display: {
+        approve: {
+          approvalsTabLabel: "A".repeat(25),
+          approvedTabLabel: "",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
+    );
+  });
+
+  it("rejects duplicate effective approve display labels", () => {
+    const config = {
+      ...baseConfig,
+      overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
+      display: {
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "Approvals",
+        },
+      },
+    };
+
+    const errors = getCreateWaveValidationErrors({
+      step: CreateWaveStep.OVERVIEW,
+      config,
+    });
+
+    expect(errors).toContain(
+      CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+    );
   });
 
   it("allows recurring rank waves without an end date", () => {

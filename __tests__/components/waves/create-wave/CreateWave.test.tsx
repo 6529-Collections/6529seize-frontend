@@ -67,6 +67,10 @@ jest.mock("@/hooks/groups/useGroupMutations", () => ({
   useGroupMutations: jest.fn(),
 }));
 
+jest.mock("@/services/api/waves-v2-api", () => ({
+  createWaveMetadata: jest.fn(),
+}));
+
 // Mock step components
 jest.mock("@/components/waves/create-wave/overview/CreateWaveOverview", () => {
   return function MockCreateWaveOverview() {
@@ -130,6 +134,7 @@ import { getAdminGroupId } from "@/components/waves/create-wave/services/waveGro
 import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
+import { createWaveMetadata } from "@/services/api/waves-v2-api";
 
 const mockedUseRouter = useRouter as jest.Mock;
 const mockedUseWaveConfig = useWaveConfig as jest.Mock;
@@ -139,6 +144,7 @@ const mockedGenerateDropPart = generateDropPart as jest.Mock;
 const mockedGetAdminGroupId = getAdminGroupId as jest.Mock;
 const mockedMultiPartUpload = multiPartUpload as jest.Mock;
 const mockedUseGroupMutations = useGroupMutations as jest.Mock;
+const mockedCreateWaveMetadata = createWaveMetadata as jest.Mock;
 
 describe("CreateWave", () => {
   const mockRouter = {
@@ -225,6 +231,12 @@ describe("CreateWave", () => {
         thresholdTimeMs: null,
         maxWinners: null,
       },
+      display: {
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "",
+        },
+      },
       chat: { enabled: true },
     },
     step: CreateWaveStep.OVERVIEW,
@@ -237,6 +249,7 @@ describe("CreateWave", () => {
     setDates: jest.fn(),
     setDrops: jest.fn(),
     setOutcomes: jest.fn(),
+    setDisplay: jest.fn(),
     setDropsAdminCanDelete: jest.fn(),
     onStep: jest.fn(),
     onOutcomeTypeChange: jest.fn(),
@@ -282,6 +295,11 @@ describe("CreateWave", () => {
     mockedUseWaveConfig.mockReturnValue(mockWaveConfig);
     mockedUseAddWaveMutation.mockReturnValue(mockAddWaveMutation);
     mockedGetAdminGroupId.mockResolvedValue("admin-group-id");
+    mockedCreateWaveMetadata.mockResolvedValue({
+      id: 1,
+      data_key: "key",
+      data_value: "value",
+    });
     mockedMultiPartUpload.mockResolvedValue({
       url: "https://example.com/image.jpg",
     });
@@ -611,7 +629,7 @@ describe("CreateWave", () => {
         const mutation = {
           mutateAsync: jest.fn().mockImplementation(async (data) => {
             const result = { id: "new-wave-id" };
-            onSuccess(result);
+            await onSuccess(result);
             return result;
           }),
         };
@@ -627,6 +645,102 @@ describe("CreateWave", () => {
         expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
         expect(mockQueryContext.waitAndInvalidateDrops).toHaveBeenCalled();
         expect(mockQueryContext.onWaveCreated).toHaveBeenCalled();
+      });
+      expect(mockedCreateWaveMetadata).not.toHaveBeenCalled();
+    });
+
+    it("saves changed display metadata before redirecting", async () => {
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            approve: {
+              approvalsTabLabel: " Candidates ",
+              approvedTabLabel: "Selected",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async () => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
+      });
+
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(1, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approvals_label",
+          data_value: "Candidates",
+        },
+      });
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(2, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approved_label",
+          data_value: "Selected",
+        },
+      });
+      expect(
+        mockedCreateWaveMetadata.mock.invocationCallOrder[0]
+      ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]);
+    });
+
+    it("warns and still redirects when display metadata save fails", async () => {
+      mockedCreateWaveMetadata.mockRejectedValue(new Error("metadata failed"));
+      const configOnDescriptionStep = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            approve: {
+              approvalsTabLabel: "Candidates",
+              approvedTabLabel: "",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
+        mutateAsync: jest.fn().mockImplementation(async () => {
+          const result = { id: "new-wave-id" };
+          await onSuccess(result);
+          return result;
+        }),
+      }));
+
+      renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          message: "Wave created, but custom display settings were not saved.",
+          type: "warning",
+        });
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
       });
     });
 

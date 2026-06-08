@@ -92,6 +92,12 @@ describe("useWaveConfig", () => {
         thresholdTimeMs: null,
         maxWinners: null,
       });
+      expect(result.current.config.display).toEqual({
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "",
+        },
+      });
     });
 
     it("should initialize with default groups, drops, and other settings", () => {
@@ -176,6 +182,10 @@ describe("useWaveConfig", () => {
       });
       expect(result.current.config.drops.adminCanDeleteDrops).toBe(true);
       expect(result.current.config.approval.maxWinners).toBeNull();
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "",
+        approvedTabLabel: "",
+      });
     });
   });
 
@@ -257,6 +267,24 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.outcomes).toEqual(newOutcomes);
+    });
+
+    it("should update display section", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setDisplay({
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+      });
+
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
     });
   });
 
