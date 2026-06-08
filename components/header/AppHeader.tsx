@@ -278,12 +278,15 @@ const HeaderDropActionButton = ({
       loading={false}
       disabled={!action.canOpen}
       onClicked={action.onOpen}
-      padding="tw-px-2.5 tw-py-2"
+      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
       title={title}
       ariaLabel={action.label}
+      className="tw-h-10 tw-min-w-10 sm:tw-h-auto sm:tw-min-w-0"
     >
-      <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-      <span>{action.compactLabel}</span>
+      <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
+      <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
+        {action.compactLabel}
+      </span>
     </PrimaryButton>
   );
 };
@@ -432,8 +435,9 @@ export default function AppHeader() {
   const headerDropAction = getHeaderDropAction({ activeWave, waveDropAction });
 
   const { viewMode, toggleViewMode } = useWaveViewMode(waveId ?? "");
-  const { isRankWave, isMemesWave, isDm } = useWave(activeWave);
-  const showGalleryToggle = !!waveId && !isRankWave && !isMemesWave && !isDm;
+  const { isRankWave, isApproveWave, isMemesWave, isDm } = useWave(activeWave);
+  const showGalleryToggle =
+    !!waveId && !isRankWave && !isApproveWave && !isMemesWave && !isDm;
   const showWaveLinkAction = Boolean(activeWave && !isDm);
   const previewText = getWaveDescriptionPreviewText(activeWave);
   const {

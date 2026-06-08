@@ -19,9 +19,10 @@ interface MyStreamWaveTabsMemeSubmitProps {
 }
 
 const HEADER_ACTION_BUTTON_CLASS =
-  "tw-max-w-[11.5rem] tw-whitespace-nowrap tw-text-xs lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
-const HEADER_ACTION_BUTTON_TEXT_CLASS = "tw-min-w-0 tw-truncate";
-const NOT_ELIGIBLE_BUTTON_CLASS = `tw-group tw-flex tw-w-auto tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-[#2a2c32] tw-bg-[#181a1d] tw-px-2.5 tw-py-2 tw-text-xs tw-font-semibold tw-text-[#d6d8dd] tw-transition-colors tw-duration-[180ms] tw-ease-out hover:tw-border-[#3a3d45] hover:tw-bg-[#202329] hover:tw-text-[#f2f3f5] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 ${HEADER_ACTION_BUTTON_CLASS}`;
+  "tw-h-8 tw-min-w-8 tw-max-w-[2rem] tw-whitespace-nowrap tw-text-xs sm:tw-h-auto sm:tw-min-w-0 sm:tw-max-w-[11.5rem] lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
+const HEADER_ACTION_BUTTON_TEXT_CLASS =
+  "tw-sr-only tw-min-w-0 tw-truncate sm:tw-not-sr-only sm:tw-inline";
+const NOT_ELIGIBLE_BUTTON_CLASS = `tw-group tw-flex tw-w-auto tw-cursor-pointer tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-[#2a2c32] tw-bg-[#181a1d] tw-p-0 tw-text-xs tw-font-semibold tw-text-[#d6d8dd] tw-transition-colors tw-duration-[180ms] tw-ease-out hover:tw-border-[#3a3d45] hover:tw-bg-[#202329] hover:tw-text-[#f2f3f5] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 sm:tw-px-2.5 sm:tw-py-2 ${HEADER_ACTION_BUTTON_CLASS}`;
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
 const getActiveLabels = ({
@@ -130,6 +131,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <ClosedButton
         title={tooltipText}
         fullWidth={false}
+        padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
         className={HEADER_ACTION_BUTTON_CLASS}
       >
         <CalendarClosedIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -153,6 +155,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         title={tooltipText}
         variant="info"
         fullWidth={false}
+        padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
         className={HEADER_ACTION_BUTTON_CLASS}
       >
         <ClockIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -176,9 +179,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           className={NOT_ELIGIBLE_BUTTON_CLASS}
         >
           <PermissionIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-opacity-70 tw-transition-opacity tw-duration-[180ms] tw-ease-out group-hover:tw-opacity-100" />
-          <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-            How to Submit
-          </span>
+          <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>How to Submit</span>
         </button>
       </MainStageNominationPopover>
     );
@@ -198,6 +199,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         title={tooltipText}
         variant="muted"
         fullWidth={false}
+        padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
         className={HEADER_ACTION_BUTTON_CLASS}
       >
         <LimitIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -277,7 +279,9 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       disabled={!canSubmit}
       onClicked={handleMemesSubmit}
       size="sm"
+      padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
       title={tooltipText}
+      className={HEADER_ACTION_BUTTON_CLASS}
     >
       {isEndingVerySoon && canSubmit ? (
         <ClockIcon className="tw-text-red-500 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-animate-pulse" />
@@ -316,7 +320,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
           />
         </svg>
       )}
-      <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap">
+      <div className="tw-sr-only tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap sm:tw-not-sr-only sm:tw-flex">
         {showSplitActiveLabels ? (
           <>
             <span className="xl:tw-hidden">{activeLabelCompact}</span>

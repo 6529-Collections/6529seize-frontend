@@ -4,6 +4,7 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import type { CompactMenuItem } from "@/components/compact-menu";
 import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
@@ -47,6 +48,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
   const renderHeaderLeadingActions = ({
     activeContentTab: headerActiveContentTab,
+    isCompact: headerIsCompact,
     tooltipId,
   }: MyStreamWaveTabsHeaderActionContext) => {
     const action = chatSubmitDropAction;
@@ -72,23 +74,26 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               loading={false}
               disabled={!action.canOpen}
               onClicked={action.onOpen}
-              padding="tw-px-2.5 tw-py-2"
+              padding="tw-p-0 sm:tw-px-2.5 sm:tw-py-2"
               title={chatSubmitDropTitle}
               ariaLabel={action.label}
+              className="tw-h-8 tw-w-8 tw-min-w-8 sm:tw-h-auto sm:tw-w-auto sm:tw-min-w-0"
             >
-              <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
-              <span>{action.compactLabel}</span>
+              <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
+              <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
+                {action.compactLabel}
+              </span>
             </PrimaryButton>
           </span>
         )}
-        {showGalleryToggle && !activeCurationId && (
+        {!headerIsCompact && showGalleryToggle && !activeCurationId && (
           <button
             type="button"
             onClick={onToggleViewMode}
             aria-label={galleryToggleLabel}
             data-tooltip-id={tooltipId}
             data-tooltip-content={galleryToggleLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
           >
             {viewMode === "chat" ? (
               <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
@@ -101,6 +106,31 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     );
   };
 
+  const renderHeaderOverflowMenuItems = ({
+    isCompact: headerIsCompact,
+  }: MyStreamWaveTabsHeaderActionContext): CompactMenuItem[] => {
+    if (!headerIsCompact) {
+      return [];
+    }
+
+    const items: CompactMenuItem[] = [];
+    if (showGalleryToggle && !activeCurationId) {
+      items.push({
+        id: "toggle-view-mode",
+        label: galleryToggleLabel,
+        icon:
+          viewMode === "chat" ? (
+            <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          ) : (
+            <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          ),
+        onSelect: onToggleViewMode,
+      });
+    }
+
+    return items;
+  };
+
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-bg-iron-950">
       <MyStreamWaveTabsHeader
@@ -111,9 +141,10 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         isCompact={isCompact}
         showBackButton={showBackButton}
         headerActionsTooltipId={headerActionsTooltipId}
-        headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-px-4"
+        headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-gap-x-4 sm:tw-px-4"
         actionsClassName="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-self-stretch"
         renderLeadingActions={renderHeaderLeadingActions}
+        renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />
       <div className="tw-border-b tw-border-l-0 tw-border-t-0 tw-border-solid tw-border-iron-800">
         <MyStreamWaveDesktopTabs

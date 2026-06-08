@@ -13,7 +13,7 @@ function WaveIdentitySubmissionSpecsRow({
   readonly value: string;
 }) {
   return (
-    <div className="tw-group tw-flex tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-px-2 tw-py-1 tw-text-sm">
+    <div className="tw-group tw-flex tw-min-h-8 tw-w-full tw-items-start tw-justify-between tw-gap-2 tw-px-2 tw-py-1 tw-text-sm">
       <span className="tw-font-normal tw-text-iron-500">{label}</span>
       <span className="tw-flex-1 tw-text-right tw-font-medium tw-text-iron-50">
         {value}
