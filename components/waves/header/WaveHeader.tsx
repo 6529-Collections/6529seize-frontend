@@ -146,7 +146,7 @@ export default function WaveHeader({
           </div>
         </div>
 
-        <div className="tw-text-sm">
+        <div className="tw-mt-1 tw-text-sm">
           <span className="tw-font-normal tw-text-iron-500">
             Created {created} ·{" "}
             {Time.millis(wave.created_at).toDate().toLocaleDateString()}

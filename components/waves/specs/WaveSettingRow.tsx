@@ -250,7 +250,7 @@ export default function WaveSettingRow({
 
   return (
     <div
-      className={`tw-group tw-grid tw-w-full ${rowGridClasses} tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1 tw-text-sm`}
+      className={`tw-group tw-grid tw-min-h-8 tw-w-full ${rowGridClasses} tw-items-center tw-gap-x-2 tw-gap-y-1 tw-px-2 tw-py-1 tw-text-sm`}
     >
       <span className="tw-min-w-0 tw-font-normal tw-text-iron-500">
         {label}
