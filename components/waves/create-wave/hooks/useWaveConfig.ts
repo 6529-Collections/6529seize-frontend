@@ -157,11 +157,23 @@ export function useWaveConfig() {
 
   // Section state updates
   const setOverview = (overview: CreateWaveConfig["overview"]) => {
-    setEndDateConfig({ time: null, period: null });
-    setConfig(() => ({
-      ...getInitialConfig({ type: overview.type }),
-      overview,
-    }));
+    const isTypeChange = config.overview.type !== overview.type;
+    if (isTypeChange) {
+      setEndDateConfig({ time: null, period: null });
+    }
+    setConfig((prev) => {
+      if (prev.overview.type === overview.type) {
+        return {
+          ...prev,
+          overview,
+        };
+      }
+
+      return {
+        ...getInitialConfig({ type: overview.type }),
+        overview,
+      };
+    });
   };
 
   const setDates = (dates: CreateWaveConfig["dates"]) => {
