@@ -20,24 +20,24 @@ export function PollVoteOption({
     ? "tw-rounded"
     : "tw-rounded-full";
   const rowStateClass = checked
-    ? "tw-border-white/20 tw-bg-white/[0.06] desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06]"
-    : "tw-border-white/[0.06] tw-bg-white/[0.025] desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-white/[0.05]";
+    ? "tw-border-iron-600 tw-bg-iron-800 tw-shadow-[0_0_15px_rgba(245,245,245,0.04)]"
+    : "tw-border-iron-800 tw-bg-iron-900/80 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800";
   const indicatorStateClass = checked
-    ? "tw-scale-110 tw-border-white tw-bg-white desktop-hover:group-hover/vote:tw-scale-100 desktop-hover:group-hover/vote:tw-border-iron-200 desktop-hover:group-hover/vote:tw-bg-iron-200"
-    : "tw-border-white/25 tw-bg-black/30 desktop-hover:group-hover/vote:tw-border-white/50";
+    ? "tw-scale-110 tw-border-iron-50 tw-bg-iron-50 desktop-hover:group-hover/vote:tw-scale-100 desktop-hover:group-hover/vote:tw-border-iron-200 desktop-hover:group-hover/vote:tw-bg-iron-200"
+    : "tw-border-iron-600 tw-bg-iron-900/50 desktop-hover:group-hover/vote:tw-border-iron-400";
   const selectionFillClass = checked
     ? "tw-scale-x-100 tw-opacity-100"
     : "tw-scale-x-0 tw-opacity-0";
 
   return (
     <label
-      className={`tw-group/vote tw-relative tw-flex tw-min-h-11 tw-transform-gpu tw-cursor-pointer tw-items-start tw-gap-3 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-transition-all tw-duration-300 active:tw-scale-[0.99] ${rowStateClass} ${
+      className={`tw-group/vote tw-relative tw-flex tw-min-h-11 tw-transform-gpu tw-cursor-pointer tw-items-start tw-gap-2.5 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-px-3.5 tw-py-3 tw-transition-all tw-duration-300 active:tw-scale-[0.99] ${rowStateClass} ${
         disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
       }`}
     >
       {!multichoice && (
         <span
-          className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-full tw-origin-left tw-transform-gpu tw-bg-white/[0.12] tw-transition-[transform,opacity] tw-duration-300 tw-ease-out ${selectionFillClass}`}
+          className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-full tw-origin-left tw-transform-gpu tw-bg-iron-700 tw-transition-[transform,opacity] tw-duration-300 tw-ease-out ${selectionFillClass}`}
           aria-hidden="true"
         />
       )}
@@ -57,7 +57,7 @@ export function PollVoteOption({
       >
         {multichoice ? (
           <CheckIcon
-            className={`tw-size-2.5 tw-text-black tw-transition-all tw-duration-200 ${
+            className={`tw-size-2.5 tw-text-iron-950 tw-transition-all tw-duration-200 ${
               checked
                 ? "tw-scale-100 tw-opacity-100"
                 : "tw-scale-50 tw-opacity-0"
@@ -66,7 +66,7 @@ export function PollVoteOption({
           />
         ) : (
           <span
-            className={`tw-size-1.5 tw-rounded-full tw-bg-black tw-transition-all tw-duration-200 ${
+            className={`tw-size-1.5 tw-rounded-full tw-bg-iron-950 tw-transition-all tw-duration-200 ${
               checked
                 ? "tw-scale-100 tw-opacity-100"
                 : "tw-scale-0 tw-opacity-0"
@@ -77,8 +77,8 @@ export function PollVoteOption({
       <span
         className={`tw-relative tw-z-10 tw-min-w-0 tw-break-words tw-text-sm tw-leading-5 tw-transition-colors tw-duration-300 ${
           checked
-            ? "tw-font-semibold tw-text-white"
-            : "tw-font-medium tw-text-iron-300 desktop-hover:group-hover/vote:tw-text-iron-100"
+            ? "tw-font-medium tw-text-iron-50"
+            : "tw-font-medium tw-text-iron-100 desktop-hover:group-hover/vote:tw-text-iron-50"
         }`}
       >
         {option.option_string}

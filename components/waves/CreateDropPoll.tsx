@@ -176,13 +176,13 @@ export default function CreateDropPoll({
   };
 
   return (
-    <div className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl tw-shadow-black/60">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.05] tw-px-4 tw-pb-3 tw-pt-4">
+    <div className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-shadow-2xl tw-shadow-black/60 tw-backdrop-blur">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-4 tw-pb-3 tw-pt-4">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
-          <h3 className="tw-mb-0 tw-text-[13px] tw-font-bold tw-tracking-wide tw-text-white">
+          <h3 className="tw-mb-0 tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
             Create Poll
           </h3>
-          <div className="tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-900 tw-p-0.5">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/60 tw-p-0.5">
             <button
               type="button"
               aria-pressed={!draft.multichoice}
@@ -190,7 +190,7 @@ export default function CreateDropPoll({
               onClick={() => onChange({ ...draft, multichoice: false })}
               className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-[11.5px] tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
                 draft.multichoice
-                  ? "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-200"
+                  ? "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
                   : "tw-bg-white tw-text-black tw-shadow-sm"
               }`}
             >
@@ -204,7 +204,7 @@ export default function CreateDropPoll({
               className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-[11.5px] tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
                 draft.multichoice
                   ? "tw-bg-white tw-text-black tw-shadow-sm"
-                  : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-200"
+                  : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
               }`}
             >
               Multiple
@@ -216,7 +216,7 @@ export default function CreateDropPoll({
           aria-label="Remove poll"
           disabled={disabled}
           onClick={onRemove}
-          className="tw-flex tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.025] tw-p-0 tw-text-iron-400 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-white"
+          className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.035] tw-p-0 tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-white"
         >
           <XMarkIcon className="tw-size-4" aria-hidden="true" />
         </button>
@@ -237,8 +237,8 @@ export default function CreateDropPoll({
                     draft.multichoice ? "tw-rounded-[4px]" : "tw-rounded-full"
                   } ${
                     hasOptionValue
-                      ? "tw-border-white/30 tw-bg-white/[0.05]"
-                      : "tw-border-white/10 tw-bg-transparent"
+                      ? "tw-border-iron-400 tw-bg-iron-800"
+                      : "tw-border-iron-700 tw-bg-iron-900/60"
                   }`}
                   aria-hidden="true"
                 >
@@ -248,7 +248,7 @@ export default function CreateDropPoll({
                         ? "tw-size-[7px] tw-rounded-[2px]"
                         : "tw-size-1.5 tw-rounded-full"
                     } ${
-                      hasOptionValue ? "tw-bg-white/40" : "tw-bg-transparent"
+                      hasOptionValue ? "tw-bg-iron-300" : "tw-bg-transparent"
                     }`}
                   />
                 </span>
@@ -259,7 +259,7 @@ export default function CreateDropPoll({
                   maxLength={MAX_POLL_OPTION_LENGTH}
                   aria-label={`Poll option ${index + 1}`}
                   onChange={(event) => updateOption(index, event.target.value)}
-                  className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.04] tw-px-3 tw-py-2 tw-text-[13px] tw-font-medium tw-text-white tw-outline-none tw-transition-all placeholder:tw-text-iron-600 hover:tw-border-white/[0.12] hover:tw-bg-white/[0.055] focus:tw-border-white/20 focus:tw-bg-white/[0.055] disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
+                  className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3 tw-py-2.5 tw-text-[13px] tw-font-medium tw-text-iron-50 tw-outline-none tw-transition-all placeholder:tw-text-iron-500 hover:tw-border-iron-600 hover:tw-bg-iron-800 focus:tw-border-white/30 focus:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60"
                   placeholder={`Option ${index + 1}`}
                 />
                 <button
@@ -267,7 +267,7 @@ export default function CreateDropPoll({
                   aria-label={`Remove option ${index + 1}`}
                   disabled={disabled || !canRemoveOption}
                   onClick={() => removeOption(index)}
-                  className={`tw-flex tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all disabled:tw-cursor-not-allowed desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-rose-400 ${
+                  className={`tw-flex tw-size-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-all disabled:tw-cursor-not-allowed desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-rose-400 ${
                     canRemoveOption && !disabled
                       ? "tw-opacity-80 desktop-hover:hover:tw-opacity-100"
                       : "tw-opacity-40"
@@ -286,7 +286,7 @@ export default function CreateDropPoll({
               onClick={addOption}
               className="tw-flex tw-w-fit tw-flex-shrink-0 tw-items-center tw-gap-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-40 desktop-hover:hover:tw-text-iron-300"
             >
-              <span className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-dashed tw-border-white/15">
+              <span className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-dashed tw-border-iron-600">
                 <PlusIcon className="tw-size-2.5" aria-hidden="true" />
               </span>
               <span className="tw-text-sm tw-font-medium">Add option</span>
@@ -299,17 +299,17 @@ export default function CreateDropPoll({
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.05] tw-pt-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1.5 sm:tw-flex-row sm:tw-items-center">
             <label
               htmlFor={closingTimeInputId}
-              className="tw-mb-0 tw-text-[11px] tw-font-medium tw-text-iron-600"
+              className="tw-mb-0 tw-text-[11px] tw-font-medium tw-text-iron-400"
             >
               Closing time
             </label>
             <label
               htmlFor={closingTimeInputId}
-              className="tw-group/closing-time tw-relative tw-mb-0 tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.045] tw-px-3 tw-py-2 tw-transition-all focus-within:tw-border-white/25 focus-within:tw-bg-white/[0.06] hover:tw-border-white/20 hover:tw-bg-white/[0.06] sm:tw-w-auto"
+              className="tw-group/closing-time tw-relative tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all focus-within:tw-border-white/30 focus-within:tw-bg-iron-800 hover:tw-border-iron-600 hover:tw-bg-iron-800 sm:tw-w-auto"
             >
               <input
                 id={closingTimeInputId}
@@ -322,10 +322,10 @@ export default function CreateDropPoll({
                 onChange={(event) =>
                   onChange({ ...draft, closingTime: event.target.value })
                 }
-                className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-pr-8 tw-text-[13px] tw-font-medium tw-text-iron-200 tw-outline-none tw-transition-all [color-scheme:dark] disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-flex-none [&::-webkit-calendar-picker-indicator]:tw-opacity-0"
+                className="tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-pr-8 tw-text-[13.5px] tw-font-medium tw-text-iron-100 tw-outline-none tw-transition-all [color-scheme:dark] disabled:tw-cursor-not-allowed disabled:tw-opacity-60 sm:tw-flex-none [&::-webkit-calendar-picker-indicator]:tw-opacity-0"
               />
               <CalendarIcon
-                className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-400 tw-transition-colors group-hover/closing-time:tw-text-iron-100"
+                className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-300 tw-transition-colors group-hover/closing-time:tw-text-iron-50"
                 aria-hidden="true"
               />
             </label>
