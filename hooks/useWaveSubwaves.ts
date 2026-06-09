@@ -24,6 +24,26 @@ export function getWaveSubwavesQueryKeyParams(
   };
 }
 
+export function getWaveSubwavesQueryKey(parentWaveId: string) {
+  return [
+    QueryKey.WAVE_SUBWAVES,
+    getWaveSubwavesQueryKeyParams(parentWaveId),
+  ] as const;
+}
+
+export function getWaveSubwavesQueryOptions(parentWaveId: string) {
+  return {
+    queryKey: getWaveSubwavesQueryKey(parentWaveId),
+    queryFn: () =>
+      fetchAllWaveSubwaves({
+        parentWaveId,
+        pageSize: WAVE_SUBWAVES_PAGE_SIZE,
+        sort: ApiSubwavesSort.CreatedAt,
+      }),
+    staleTime: 60_000,
+  } as const;
+}
+
 interface WaveSubwavesMapValue {
   readonly subwaves: readonly SidebarWave[];
   readonly isFetching: boolean;
@@ -72,20 +92,10 @@ export function useWaveSubwavesMap({
 
   const queries = useQueries({
     queries: uniqueParentWaveIds.map((parentWaveId) => ({
-      queryKey: [
-        QueryKey.WAVE_SUBWAVES,
-        getWaveSubwavesQueryKeyParams(parentWaveId),
-      ],
-      queryFn: () =>
-        fetchAllWaveSubwaves({
-          parentWaveId,
-          pageSize: WAVE_SUBWAVES_PAGE_SIZE,
-          sort: ApiSubwavesSort.CreatedAt,
-        }),
+      ...getWaveSubwavesQueryOptions(parentWaveId),
       enabled: Boolean(parentWaveId),
       refetchInterval,
       refetchIntervalInBackground: false,
-      staleTime: 60_000,
     })),
   });
 

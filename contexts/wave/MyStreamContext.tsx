@@ -41,6 +41,8 @@ interface WavesContextData {
   readonly fetchNextPage: () => void;
   readonly addPinnedWave: (id: string) => void;
   readonly removePinnedWave: (id: string) => void;
+  readonly loadSubwavesForParent: (parentWaveId: string) => void;
+  readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
   readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
 }
 
@@ -295,6 +297,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       fetchNextPage: wavesHookData.fetchNextPage,
       addPinnedWave: wavesHookData.addPinnedWave,
       removePinnedWave: wavesHookData.removePinnedWave,
+      loadSubwavesForParent: wavesHookData.loadSubwavesForParent,
+      prefetchSubwavesForParent: wavesHookData.prefetchSubwavesForParent,
       restoreWaveUnreadCount: wavesHookData.restoreWaveUnreadCount,
     };
 
@@ -306,6 +310,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       fetchNextPage: dmWavesHookData.fetchNextPage,
       addPinnedWave: dmWavesHookData.addPinnedWave,
       removePinnedWave: dmWavesHookData.removePinnedWave,
+      loadSubwavesForParent: dmWavesHookData.loadSubwavesForParent,
+      prefetchSubwavesForParent: dmWavesHookData.prefetchSubwavesForParent,
       restoreWaveUnreadCount: dmWavesHookData.restoreWaveUnreadCount,
     };
 
@@ -341,6 +347,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     wavesHookData.fetchNextPage,
     wavesHookData.addPinnedWave,
     wavesHookData.removePinnedWave,
+    wavesHookData.loadSubwavesForParent,
+    wavesHookData.prefetchSubwavesForParent,
     wavesHookData.restoreWaveUnreadCount,
     dmWavesHookData.waves,
     dmWavesHookData.isFetching,
@@ -349,6 +357,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     dmWavesHookData.fetchNextPage,
     dmWavesHookData.addPinnedWave,
     dmWavesHookData.removePinnedWave,
+    dmWavesHookData.loadSubwavesForParent,
+    dmWavesHookData.prefetchSubwavesForParent,
     dmWavesHookData.restoreWaveUnreadCount,
     activeWaveId,
     setActiveWaveAndRegister,

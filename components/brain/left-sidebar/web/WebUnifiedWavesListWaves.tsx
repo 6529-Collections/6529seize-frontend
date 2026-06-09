@@ -214,10 +214,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
   const seizeSettings = useSeizeSettingsOptional();
-  const { activeWave } = useMyStream();
+  const { activeWave, waves: streamWaves } = useMyStream();
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
+    onParentExpand: streamWaves.loadSubwavesForParent,
   });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
@@ -297,6 +298,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       isExpanded={row.isExpanded}
       hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
       onToggleExpand={toggleParent}
+      onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
     />
   );
 

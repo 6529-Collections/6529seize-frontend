@@ -8,7 +8,7 @@ import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
 import {
   getWaveHomeRoute,
@@ -18,6 +18,8 @@ import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -29,6 +31,7 @@ interface BrainLeftSidebarWaveProps {
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
+  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const getPresentNumber = (value: number | null): number | null => {
@@ -49,6 +52,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   isExpanded = false,
   hasUnreadSubwaves = false,
   onToggleExpand,
+  onPrefetchSubwaves,
 }) => {
   const { activeWave } = useMyStream();
   const { id: activeWaveId, set: setActiveWave } = activeWave;
@@ -113,6 +117,40 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   }, [activeWaveId, onHover, prefetchWaveData, wave.id]);
 
   const isActive = wave.id === activeWaveId;
+  const subwavePrefetchTimerRef = useRef<
+    ReturnType<typeof globalThis.setTimeout> | null
+  >(null);
+  const shouldPrefetchSubwaves = Boolean(
+    canExpand && depth === 0 && !hasTouchScreen && onPrefetchSubwaves
+  );
+
+  const cancelSubwavePrefetch = useCallback(() => {
+    if (subwavePrefetchTimerRef.current === null) {
+      return;
+    }
+
+    globalThis.clearTimeout(subwavePrefetchTimerRef.current);
+    subwavePrefetchTimerRef.current = null;
+  }, []);
+
+  const scheduleSubwavePrefetch = useCallback(() => {
+    if (!shouldPrefetchSubwaves) {
+      return;
+    }
+
+    cancelSubwavePrefetch();
+    subwavePrefetchTimerRef.current = globalThis.setTimeout(() => {
+      subwavePrefetchTimerRef.current = null;
+      onPrefetchSubwaves?.(wave.id);
+    }, SUBWAVE_PREFETCH_HOVER_INTENT_MS);
+  }, [
+    cancelSubwavePrefetch,
+    onPrefetchSubwaves,
+    shouldPrefetchSubwaves,
+    wave.id,
+  ]);
+
+  useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   const handleWaveClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -167,6 +205,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   return (
     <div
+      {...(!hasTouchScreen && {
+        onMouseEnter: scheduleSubwavePrefetch,
+        onMouseLeave: cancelSubwavePrefetch,
+      })}
       className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70"
@@ -179,6 +221,8 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           aria-label={expandButtonLabel}
           aria-expanded={isExpanded}
           onClick={handleToggleExpand}
+          onFocus={scheduleSubwavePrefetch}
+          onBlur={cancelSubwavePrefetch}
           className="tw-absolute tw-left-4 tw-top-8 tw-z-10 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800 tw-p-0 tw-text-iron-200 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white"
         >
           <ChevronRightIcon

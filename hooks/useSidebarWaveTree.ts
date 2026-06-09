@@ -21,9 +21,11 @@ const hasUnreadDrops = (wave: MinimalWave) =>
 export function useSidebarWaveTree({
   waves,
   activeWaveId,
+  onParentExpand,
 }: {
   readonly waves: readonly MinimalWave[];
   readonly activeWaveId: string | null;
+  readonly onParentExpand?: ((parentWaveId: string) => void) | undefined;
 }) {
   const [manualExpandedParentIds, setManualExpandedParentIds] = useState<
     readonly string[]
@@ -81,6 +83,11 @@ export function useSidebarWaveTree({
 
   const toggleParent = useCallback(
     (waveId: string) => {
+      const isExpanded = getIsExpanded(waveId);
+      if (!isExpanded) {
+        onParentExpand?.(waveId);
+      }
+
       setManualExpandedParentIds((previousParentIds) => {
         const nextExpandedParentIds = new Set(previousParentIds);
         if (nextExpandedParentIds.has(waveId)) {
@@ -91,7 +98,7 @@ export function useSidebarWaveTree({
         return Array.from(nextExpandedParentIds);
       });
     },
-    []
+    [getIsExpanded, onParentExpand]
   );
 
   const getRows = useCallback(

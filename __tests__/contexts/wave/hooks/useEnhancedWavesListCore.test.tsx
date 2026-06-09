@@ -32,6 +32,8 @@ const createWavesData = ({
   fetchNextPage: jest.fn(),
   mainWavesRefetch,
   refetchAllWaves,
+  loadSubwavesForParent: jest.fn(),
+  prefetchSubwavesForParent: jest.fn(),
   addPinnedWave: jest.fn(),
   removePinnedWave: jest.fn(),
 });

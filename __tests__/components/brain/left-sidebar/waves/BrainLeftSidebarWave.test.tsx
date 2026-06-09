@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -221,6 +221,63 @@ describe("BrainLeftSidebarWave", () => {
 
     expect(onToggleExpand).toHaveBeenCalledWith("1");
     expect(setActiveWave).not.toHaveBeenCalled();
+  });
+
+  it("prefetches subwaves after hover intent on expandable parent rows", () => {
+    jest.useFakeTimers();
+    const onPrefetchSubwaves = jest.fn();
+
+    try {
+      render(
+        <BrainLeftSidebarWave
+          wave={baseWave}
+          onHover={onHover}
+          canExpand
+          onPrefetchSubwaves={onPrefetchSubwaves}
+        />
+      );
+
+      fireEvent.mouseEnter(screen.getByRole("link").parentElement!);
+
+      act(() => {
+        jest.advanceTimersByTime(149);
+      });
+      expect(onPrefetchSubwaves).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(onPrefetchSubwaves).toHaveBeenCalledWith("1");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("cancels subwave prefetch when hover intent ends early", () => {
+    jest.useFakeTimers();
+    const onPrefetchSubwaves = jest.fn();
+
+    try {
+      render(
+        <BrainLeftSidebarWave
+          wave={baseWave}
+          onHover={onHover}
+          canExpand
+          onPrefetchSubwaves={onPrefetchSubwaves}
+        />
+      );
+
+      const row = screen.getByRole("link").parentElement!;
+      fireEvent.mouseEnter(row);
+      fireEvent.mouseLeave(row);
+
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+      expect(onPrefetchSubwaves).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("does not render a nested expand button for child rows", () => {

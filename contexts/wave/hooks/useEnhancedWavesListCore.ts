@@ -39,6 +39,8 @@ interface WavesDataSource {
   fetchNextPage: () => void;
   mainWavesRefetch: () => void;
   refetchAllWaves: () => void;
+  loadSubwavesForParent: (parentWaveId: string) => void;
+  prefetchSubwavesForParent: (parentWaveId: string) => void;
   addPinnedWave: (waveId: string) => void;
   removePinnedWave: (waveId: string) => void;
 }
@@ -222,6 +224,8 @@ function useEnhancedWavesListCore(
         ? wavesData.removePinnedWave
         : () => {},
       refetchAllWaves: wavesData.refetchAllWaves,
+      loadSubwavesForParent: wavesData.loadSubwavesForParent,
+      prefetchSubwavesForParent: wavesData.prefetchSubwavesForParent,
       resetAllWavesNewDropsCount,
       restoreWaveUnreadCount,
     }),
@@ -234,6 +238,8 @@ function useEnhancedWavesListCore(
       wavesData.addPinnedWave,
       wavesData.removePinnedWave,
       wavesData.refetchAllWaves,
+      wavesData.loadSubwavesForParent,
+      wavesData.prefetchSubwavesForParent,
       resetAllWavesNewDropsCount,
       restoreWaveUnreadCount,
       options.supportsPinning,

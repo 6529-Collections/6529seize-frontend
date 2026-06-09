@@ -26,10 +26,12 @@ describe("useSidebarWaveTree", () => {
   ];
 
   it("keeps manual expansion in memory and sorts expanded subwaves by created time", () => {
+    const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
         waves,
         activeWaveId: null,
+        onParentExpand,
       })
     );
 
@@ -42,6 +44,8 @@ describe("useSidebarWaveTree", () => {
     act(() => {
       result.current.toggleParent("parent");
     });
+
+    expect(onParentExpand).toHaveBeenCalledWith("parent");
 
     const expandedRows = result.current.getRows(result.current.topLevelWaves);
 
@@ -60,6 +64,7 @@ describe("useSidebarWaveTree", () => {
       result.current.toggleParent("parent");
     });
 
+    expect(onParentExpand).toHaveBeenCalledTimes(1);
     expect(
       result.current
         .getRows(result.current.topLevelWaves)
@@ -68,10 +73,12 @@ describe("useSidebarWaveTree", () => {
   });
 
   it("auto-expands the active subwave parent without local storage", () => {
+    const onParentExpand = jest.fn();
     const { result } = renderHook(() =>
       useSidebarWaveTree({
         waves,
         activeWaveId: "older-child",
+        onParentExpand,
       })
     );
 
@@ -82,6 +89,7 @@ describe("useSidebarWaveTree", () => {
       "older-child",
       "newer-child",
     ]);
+    expect(onParentExpand).not.toHaveBeenCalled();
     expect(window.localStorage.length).toBe(0);
   });
 });

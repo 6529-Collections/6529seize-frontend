@@ -24,6 +24,7 @@ interface WebBrainLeftSidebarWaveProps {
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
+  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 const TOOLTIP_PLACEMENT = "right" as const;
@@ -39,6 +40,7 @@ const WebBrainLeftSidebarWave = ({
   isExpanded = false,
   hasUnreadSubwaves = false,
   onToggleExpand,
+  onPrefetchSubwaves,
 }: WebBrainLeftSidebarWaveProps) => {
   const { activeWave } = useMyStream();
   const pathname = usePathname();
@@ -123,6 +125,7 @@ const WebBrainLeftSidebarWave = ({
       isExpanded={isExpanded}
       hasUnreadSubwaves={hasUnreadSubwaves}
       onToggleExpand={onToggleExpand}
+      onPrefetchSubwaves={hasTouchScreen ? undefined : onPrefetchSubwaves}
     />
   );
 };

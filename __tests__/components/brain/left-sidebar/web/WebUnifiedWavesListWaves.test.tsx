@@ -45,6 +45,8 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
 const mockUseVirtualizedWaves = useVirtualizedWaves as jest.Mock;
 const mockUseSeizeSettingsOptional = useSeizeSettingsOptional as jest.Mock;
 const mockUseMyStream = useMyStream as jest.Mock;
+const loadSubwavesForParent = jest.fn();
+const prefetchSubwavesForParent = jest.fn();
 
 const scrollRef = {
   current: document.createElement("div"),
@@ -63,6 +65,10 @@ beforeEach(() => {
   window.localStorage.clear();
   mockUseMyStream.mockReturnValue({
     activeWave: { id: null, set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+    },
   });
   mockUseSeizeSettingsOptional.mockReturnValue({
     isAnnouncementsWave: (waveId: string) => waveId === "a1",
@@ -194,6 +200,7 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
 
   fireEvent.click(screen.getByTestId("toggle-parent"));
 
+  expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
   expect(screen.getByTestId("wave-parent")).toHaveAttribute(
     "data-expanded",
     "true"
@@ -238,9 +245,11 @@ it("keeps child rows mounted while collapse animation runs", () => {
     );
 
     fireEvent.click(screen.getByTestId("toggle-parent"));
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
     expect(screen.getByTestId("wave-child")).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId("toggle-parent"));
+    expect(loadSubwavesForParent).toHaveBeenCalledTimes(1);
 
     expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
       "data-sidebar-subwave-row-state",
@@ -260,6 +269,10 @@ it("keeps child rows mounted while collapse animation runs", () => {
 it("auto-expands the parent for the active subwave", () => {
   mockUseMyStream.mockReturnValue({
     activeWave: { id: "child", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+    },
   });
 
   render(

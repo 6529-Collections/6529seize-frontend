@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ExpandedWave } from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/ExpandedWave";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
@@ -104,5 +104,54 @@ describe("ExpandedWave", () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole("link").parentElement).toHaveClass("tw-gap-x-2");
     expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
+  });
+
+  it("prefetches subwaves after hover intent on expandable rows", () => {
+    jest.useFakeTimers();
+    const onPrefetchSubwaves = jest.fn();
+
+    try {
+      renderExpandedWave({
+        canExpand: true,
+        onPrefetchSubwaves,
+      });
+
+      fireEvent.mouseEnter(screen.getByRole("link").parentElement!);
+
+      act(() => {
+        jest.advanceTimersByTime(149);
+      });
+      expect(onPrefetchSubwaves).not.toHaveBeenCalled();
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(onPrefetchSubwaves).toHaveBeenCalledWith("1");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("cancels subwave prefetch when hover intent ends early", () => {
+    jest.useFakeTimers();
+    const onPrefetchSubwaves = jest.fn();
+
+    try {
+      renderExpandedWave({
+        canExpand: true,
+        onPrefetchSubwaves,
+      });
+
+      const row = screen.getByRole("link").parentElement!;
+      fireEvent.mouseEnter(row);
+      fireEvent.mouseLeave(row);
+
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+      expect(onPrefetchSubwaves).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

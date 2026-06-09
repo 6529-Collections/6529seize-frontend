@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -12,10 +12,14 @@ import {
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
-import { useWaveSubwavesMap } from "./useWaveSubwaves";
+import {
+  getWaveSubwavesQueryOptions,
+  useWaveSubwavesMap,
+} from "./useWaveSubwaves";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 import { useOfficialWaves } from "./useOfficialWaves";
 import type { SidebarWave } from "@/types/waves.types";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Enhanced wave interface with isPinned field and newDropsCount
 type EnhancedWave = SidebarWave & {
@@ -23,11 +27,18 @@ type EnhancedWave = SidebarWave & {
   readonly isOfficial?: boolean;
 };
 
+// V2 overview, pinned, official, and announcement wave sources are root-wave
+// sources. This guard is defensive against stale or malformed cached data; it is
+// not intended to hide user-visible subwaves.
+const isExpectedRootSidebarWave = (wave: SidebarWave) =>
+  wave.parentWaveId === null;
+
 /**
  * Hook for managing and fetching waves list including pinned waves
  * @returns Wave list data and loading states
  */
 const useWavesList = () => {
+  const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
   const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
@@ -98,7 +109,7 @@ const useWavesList = () => {
       officialWaves.filter(
         (wave) =>
           !wave.isDirectMessage &&
-          !wave.parentWaveId &&
+          isExpectedRootSidebarWave(wave) &&
           !isAnnouncementsWave(wave.id)
       ),
     [officialWaves, isAnnouncementsWave]
@@ -141,7 +152,7 @@ const useWavesList = () => {
     if (
       !resolvedWave ||
       resolvedWave.isDirectMessage ||
-      resolvedWave.parentWaveId
+      !isExpectedRootSidebarWave(resolvedWave)
     ) {
       return null;
     }
@@ -153,7 +164,7 @@ const useWavesList = () => {
     const map = new Map<string, SidebarWave>();
     mainWaves.forEach((wave) => {
       if (!isAnnouncementsWave(wave.id) && !officialWaveIds.has(wave.id)) {
-        if (wave.parentWaveId) {
+        if (!isExpectedRootSidebarWave(wave)) {
           return;
         }
         map.set(wave.id, wave);
@@ -176,7 +187,7 @@ const useWavesList = () => {
     return serverPinnedWaves.filter(
       (wave) =>
         !mainWaveIds.has(wave.id) &&
-        !wave.parentWaveId &&
+        isExpectedRootSidebarWave(wave) &&
         !isAnnouncementsWave(wave.id) &&
         !officialWaveIds.has(wave.id)
     );
@@ -190,7 +201,7 @@ const useWavesList = () => {
     serverPinnedWaves.forEach((wave) => {
       if (
         !wave.isDirectMessage &&
-        !wave.parentWaveId &&
+        isExpectedRootSidebarWave(wave) &&
         !isAnnouncementsWave(wave.id) &&
         !officialWaveIds.has(wave.id)
       ) {
@@ -213,7 +224,7 @@ const useWavesList = () => {
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
       if (
         wave.isDirectMessage ||
-        wave.parentWaveId ||
+        !isExpectedRootSidebarWave(wave) ||
         isAnnouncementsWave(wave.id) ||
         officialWaveIds.has(wave.id)
       ) {
@@ -261,12 +272,43 @@ const useWavesList = () => {
     officialWaveIds,
   ]);
 
-  const subwaveParentIds = useMemo(
-    () =>
-      combinedWaves
-        .filter((wave) => wave.hasSubwaves && !wave.parentWaveId)
-        .map((wave) => wave.id),
+  const [loadedSubwaveParentIds, setLoadedSubwaveParentIds] = useState<
+    readonly string[]
+  >([]);
+
+  const rootWaveIds = useMemo(
+    () => new Set(combinedWaves.map((wave) => wave.id)),
     [combinedWaves]
+  );
+
+  const loadSubwavesForParent = useCallback(
+    (parentWaveId: string) => {
+      if (!rootWaveIds.has(parentWaveId)) {
+        return;
+      }
+
+      setLoadedSubwaveParentIds((previousParentIds) => {
+        if (previousParentIds.includes(parentWaveId)) {
+          return previousParentIds;
+        }
+
+        return [...previousParentIds, parentWaveId];
+      });
+    },
+    [rootWaveIds]
+  );
+
+  const prefetchSubwavesForParent = useCallback(
+    (parentWaveId: string) => {
+      if (!rootWaveIds.has(parentWaveId)) {
+        return;
+      }
+
+      void queryClient
+        .prefetchQuery(getWaveSubwavesQueryOptions(parentWaveId))
+        .catch(() => undefined);
+    },
+    [queryClient, rootWaveIds]
   );
 
   const {
@@ -274,7 +316,7 @@ const useWavesList = () => {
     isFetching: isSubwavesFetching,
     refetch: refetchSubwaves,
   } = useWaveSubwavesMap({
-    parentWaveIds: subwaveParentIds,
+    parentWaveIds: loadedSubwaveParentIds,
   });
 
   // Function to refetch all waves (main, pinned, official, announcements, subwaves)
@@ -346,6 +388,8 @@ const useWavesList = () => {
       mainWavesRefetch,
       // Refetch all waves including main and pinned
       refetchAllWaves,
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
     }),
     [
       allWaves,
@@ -370,6 +414,8 @@ const useWavesList = () => {
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
     ]
   );
 };

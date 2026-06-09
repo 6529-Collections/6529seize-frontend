@@ -119,10 +119,11 @@ const UnifiedWavesListWaves = forwardRef<
   ) => {
     const listContainerRef = useRef<HTMLDivElement>(null);
     const seizeSettings = useSeizeSettingsOptional();
-    const { activeWave } = useMyStream();
+    const { activeWave, waves: streamWaves } = useMyStream();
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
+      onParentExpand: streamWaves.loadSubwavesForParent,
     });
 
     const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =
@@ -194,6 +195,7 @@ const UnifiedWavesListWaves = forwardRef<
         isExpanded={row.isExpanded}
         hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
         onToggleExpand={toggleParent}
+        onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
       />
     );
 

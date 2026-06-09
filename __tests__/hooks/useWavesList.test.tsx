@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import React from "react";
 import useWavesList from "@/hooks/useWavesList";
 import { AuthContext } from "@/components/auth/Auth";
@@ -6,6 +6,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveById } from "@/hooks/useWaveById";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("@/hooks/useWavesV2", () => {
   const actual = jest.requireActual("@/hooks/useWavesV2");
@@ -37,6 +38,11 @@ jest.mock("@/hooks/useOfficialWaves", () => ({
 
 jest.mock("@/hooks/useWaveSubwaves", () => ({
   useWaveSubwavesMap: jest.fn(),
+  getWaveSubwavesQueryOptions: jest.fn((parentWaveId: string) => ({
+    queryKey: ["WAVE_SUBWAVES", { parent_wave_id: parentWaveId }],
+    queryFn: jest.fn().mockResolvedValue([]),
+    staleTime: 60_000,
+  })),
 }));
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
@@ -56,15 +62,21 @@ const useOfficialWavesMock =
   require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
 const useWaveSubwavesMapMock =
   require("@/hooks/useWaveSubwaves").useWaveSubwavesMap as jest.Mock;
+const getWaveSubwavesQueryOptionsMock =
+  require("@/hooks/useWaveSubwaves").getWaveSubwavesQueryOptions as jest.Mock;
+
+let queryClient: QueryClient;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AuthContext.Provider
-    value={
-      { connectedProfile: { handle: "me" }, activeProfileProxy: null } as any
-    }
-  >
-    {children}
-  </AuthContext.Provider>
+  <QueryClientProvider client={queryClient}>
+    <AuthContext.Provider
+      value={
+        { connectedProfile: { handle: "me" }, activeProfileProxy: null } as any
+      }
+    >
+      {children}
+    </AuthContext.Provider>
+  </QueryClientProvider>
 );
 
 const createSidebarWave = ({
@@ -161,6 +173,9 @@ let officialWavesRefetchMock: jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   announcementRefetchMock = jest.fn();
   officialWavesRefetchMock = jest.fn();
   useSeizeConnectContextMock.mockReturnValue({ address: "0xABC" });
@@ -234,7 +249,29 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   );
 });
 
-test("appends loaded subwaves under their top-level parents", () => {
+test("documents root-wave sources by ignoring malformed subwave cache entries", () => {
+  const malformedPinnedSubwave = {
+    ...createSidebarWave({ id: "subwave", latestDropTimestamp: 400 }),
+    parentWaveId: "parent",
+  };
+
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: ["subwave", "2"],
+    pinnedWaves: [malformedPinnedSubwave],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual(["2"]);
+  expect(result.current.pinnedWaves).toEqual([]);
+});
+
+test("starts without subwave queries, then appends subwaves for loaded parents", () => {
   const parentWave = {
     ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
     hasSubwaves: true,
@@ -262,24 +299,81 @@ test("appends loaded subwaves under their top-level parents", () => {
     isError: false,
     refetch: jest.fn(),
   });
-  useWaveSubwavesMapMock.mockReturnValue({
-    subwaves: [childWave],
-    subwavesByParentId: new Map([
-      ["parent", { subwaves: [childWave], isFetching: false }],
-    ]),
-    isFetching: false,
-    refetch: jest.fn(),
-  });
+  useWaveSubwavesMapMock.mockImplementation(
+    ({ parentWaveIds }: { readonly parentWaveIds: readonly string[] }) => ({
+      subwaves: parentWaveIds.includes("parent") ? [childWave] : [],
+      subwavesByParentId: new Map(
+        parentWaveIds.includes("parent")
+          ? [["parent", { subwaves: [childWave], isFetching: false }]]
+          : []
+      ),
+      isFetching: false,
+      refetch: jest.fn(),
+    })
+  );
 
   const { result } = renderHook(() => useWavesList(), { wrapper });
 
-  expect(useWaveSubwavesMapMock).toHaveBeenCalledWith({
+  expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
+    parentWaveIds: [],
+  });
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual(["parent"]);
+
+  act(() => {
+    result.current.loadSubwavesForParent("parent");
+  });
+
+  expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
     parentWaveIds: ["parent"],
   });
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "parent",
     "child",
   ]);
+});
+
+test("prefetches subwaves without adding parent ids to rendered rows", () => {
+  const parentWave = {
+    ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
+    hasSubwaves: true,
+  };
+  const prefetchSpy = jest.spyOn(queryClient, "prefetchQuery");
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [parentWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  act(() => {
+    result.current.prefetchSubwavesForParent("parent");
+  });
+
+  expect(getWaveSubwavesQueryOptionsMock).toHaveBeenCalledWith("parent");
+  expect(prefetchSpy).toHaveBeenCalledWith(
+    expect.objectContaining({
+      queryKey: ["WAVE_SUBWAVES", { parent_wave_id: "parent" }],
+    })
+  );
+  expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
+    parentWaveIds: [],
+  });
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual(["parent"]);
 });
 
 test("places official waves below announcements and ignores stale official pinned flags", () => {

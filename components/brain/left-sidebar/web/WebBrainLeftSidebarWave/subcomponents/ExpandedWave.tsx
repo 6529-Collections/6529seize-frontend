@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef } from "react";
 import type { MouseEvent, RefObject } from "react";
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -7,6 +8,8 @@ import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+
+const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface ExpandedWaveProps {
   readonly formattedWaveName: string;
@@ -31,6 +34,7 @@ interface ExpandedWaveProps {
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
+  readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
 
 export const ExpandedWave = ({
@@ -56,6 +60,7 @@ export const ExpandedWave = ({
   isExpanded = false,
   hasUnreadSubwaves = false,
   onToggleExpand,
+  onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
   const tooltipAttributes = showExpandedTooltip
     ? {
@@ -75,6 +80,40 @@ export const ExpandedWave = ({
   const rowGapClasses = depth === 1 ? "tw-gap-x-2" : "tw-gap-x-4";
   const shouldShowExpandControl = canExpand && depth === 0;
   const expandButtonLabel = `${isExpanded ? "Collapse" : "Expand"} ${formattedWaveName} subwaves`;
+  const subwavePrefetchTimerRef = useRef<
+    ReturnType<typeof globalThis.setTimeout> | null
+  >(null);
+  const shouldPrefetchSubwaves = Boolean(
+    shouldShowExpandControl && onPrefetchSubwaves
+  );
+
+  const cancelSubwavePrefetch = useCallback(() => {
+    if (subwavePrefetchTimerRef.current === null) {
+      return;
+    }
+
+    globalThis.clearTimeout(subwavePrefetchTimerRef.current);
+    subwavePrefetchTimerRef.current = null;
+  }, []);
+
+  const scheduleSubwavePrefetch = useCallback(() => {
+    if (!shouldPrefetchSubwaves) {
+      return;
+    }
+
+    cancelSubwavePrefetch();
+    subwavePrefetchTimerRef.current = globalThis.setTimeout(() => {
+      subwavePrefetchTimerRef.current = null;
+      onPrefetchSubwaves?.(waveId);
+    }, SUBWAVE_PREFETCH_HOVER_INTENT_MS);
+  }, [
+    cancelSubwavePrefetch,
+    onPrefetchSubwaves,
+    shouldPrefetchSubwaves,
+    waveId,
+  ]);
+
+  useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   const handleToggleExpand = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -84,6 +123,8 @@ export const ExpandedWave = ({
 
   return (
     <div
+      onMouseEnter={scheduleSubwavePrefetch}
+      onMouseLeave={cancelSubwavePrefetch}
       className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
@@ -96,6 +137,8 @@ export const ExpandedWave = ({
           aria-label={expandButtonLabel}
           aria-expanded={isExpanded}
           onClick={handleToggleExpand}
+          onFocus={scheduleSubwavePrefetch}
+          onBlur={cancelSubwavePrefetch}
           className="tw-absolute tw-left-4 tw-top-8 tw-z-10 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800 tw-p-0 tw-text-iron-200 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white"
         >
           <ChevronRightIcon
