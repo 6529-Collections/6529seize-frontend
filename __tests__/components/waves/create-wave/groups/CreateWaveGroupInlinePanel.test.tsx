@@ -255,6 +255,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.queryByRole("button", { name: "Back to options" })
     ).not.toBeInTheDocument();
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
   it("returns to options when the active identity pill is clicked", async () => {
@@ -451,9 +452,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.getByTestId("rule-rep")).toBeInTheDocument();
 
-    await user.click(
-      screen.getByRole("button", { name: "Close inline group panel" })
-    );
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.queryByTestId("rule-rep")).not.toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();
@@ -472,9 +471,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
 
-    await user.click(
-      screen.getByRole("button", { name: "Close inline group panel" })
-    );
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
 
     expect(screen.queryByTestId("identities-panel")).not.toBeInTheDocument();
     expect(screen.getByText("Unsaved group")).toBeInTheDocument();

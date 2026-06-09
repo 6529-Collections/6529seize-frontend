@@ -44,9 +44,9 @@ jest.mock("@/helpers/waves/waves.helpers", () => ({
 }));
 
 jest.mock(
-  "@/components/waves/create-wave/groups/CreateWaveGroupInlinePanel",
+  "@/components/groups/assignment/GroupAssignmentDialog",
   () =>
-    function MockCreateWaveGroupInlinePanel(props: any) {
+    function MockGroupAssignmentDialog(props: any) {
       mockInlinePanelProps = props;
       const selectedGroup = {
         id: "group-2",
