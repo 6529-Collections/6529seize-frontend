@@ -12,7 +12,7 @@ import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -685,7 +685,8 @@ const WaveDrop = ({
   });
 
   const isMobile = useIsMobileDevice();
-  const hasTouch = useHasTouchInput() || isMobile;
+  const isTouchOnlyDevice = useIsTouchDevice();
+  const hasTouch = isTouchOnlyDevice || isMobile;
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
   const allowLongPress = showInteractions && hasTouch && !isMdUp;

@@ -4,11 +4,13 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { editSlice } from "@/store/editSlice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 const mockWaveDropActions = jest.fn();
 const mockWaveDropContent = jest.fn();
+const mockWaveDropHeader = jest.fn();
 const mockMutate = jest.fn();
 let mockEditMentionedGroups: ApiDropGroupMention[] = [];
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
@@ -41,9 +43,10 @@ jest.mock("@/components/waves/drops/WaveDropContent", () => {
     );
   };
 });
-jest.mock("@/components/waves/drops/WaveDropHeader", () => () => (
-  <div data-testid="header" />
-));
+jest.mock("@/components/waves/drops/WaveDropHeader", () => (props: any) => {
+  mockWaveDropHeader(props);
+  return <div data-testid="header" />;
+});
 jest.mock("@/components/waves/drops/WaveDropAuthorPfp", () => () => (
   <div data-testid="pfp" />
 ));
@@ -52,6 +55,9 @@ jest.mock("@/components/waves/drops/WaveDropMetadata", () => () => (
 ));
 jest.mock("@/components/waves/drops/WaveDropRatings", () => () => (
   <div data-testid="ratings" />
+));
+jest.mock("@/components/waves/drops/WaveDropReactions", () => () => (
+  <div data-testid="reactions" />
 ));
 jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => () => (
   <div data-testid="mobile" />
@@ -77,6 +83,12 @@ jest.mock("@/hooks/drops/useDropUpdateMutation", () => ({
 }));
 
 const isMobileMock = useIsMobileDevice as jest.Mock;
+const isTouchDeviceMock = useIsTouchDevice as jest.Mock;
+
+const getLastMockProps = (mock: jest.Mock) => {
+  const lastCall = mock.mock.calls.at(-1);
+  return lastCall?.[0];
+};
 
 // Create a test store
 const createTestStore = () =>
@@ -134,12 +146,14 @@ describe("WaveDrop", () => {
   beforeEach(() => {
     mockWaveDropActions.mockClear();
     mockWaveDropContent.mockClear();
+    mockWaveDropHeader.mockClear();
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
+    isMobileMock.mockReturnValue(false);
+    isTouchDeviceMock.mockReturnValue(false);
   });
 
   it("shows actions on desktop", () => {
-    isMobileMock.mockReturnValue(false);
     const { getByTestId } = renderWithRedux(
       <WaveDrop
         drop={drop}
@@ -157,6 +171,63 @@ describe("WaveDrop", () => {
       />
     );
     expect(getByTestId("actions")).toBeInTheDocument();
+  });
+
+  it("keeps hybrid touchscreen laptops on desktop drop interactions", () => {
+    isMobileMock.mockReturnValue(false);
+    isTouchDeviceMock.mockReturnValue(false);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("actions")).toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: false })
+    );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: false })
+    );
+  });
+
+  it("keeps mobile drop interactions for true mobile devices", () => {
+    isMobileMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: true })
+    );
   });
 
   it("hides actions on mobile", () => {
@@ -201,9 +272,8 @@ describe("WaveDrop", () => {
 
     fireEvent.click(screen.getByTestId("content"));
 
-    expect(mockWaveDropActions).toHaveBeenLastCalledWith(
-      expect.objectContaining({ suppressed: true }),
-      undefined
+    expect(getLastMockProps(mockWaveDropActions)).toEqual(
+      expect.objectContaining({ suppressed: true })
     );
   });
 
