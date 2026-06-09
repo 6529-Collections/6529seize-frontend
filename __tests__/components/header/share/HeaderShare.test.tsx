@@ -2,7 +2,7 @@ import HeaderShare from "@/components/header/share/HeaderShare";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -337,6 +337,48 @@ describe("HeaderShare", () => {
       // Should still show mobile/core options but content changes
       expect(screen.getByText("6529 Mobile")).toBeInTheDocument();
       expect(screen.getByText("6529 Desktop")).toBeInTheDocument();
+    });
+  });
+
+  describe("Connection transfer codes", () => {
+    beforeEach(() => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+      mockAuthUtils.getWalletAddress.mockReturnValue(
+        "0x1234567890123456789012345678901234567890"
+      );
+      mockAuthUtils.getWalletRole.mockReturnValue(null);
+      mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: "0x1234567890123456789012345678901234567890",
+        hasInitializationError: false,
+        initializationError: null,
+      });
+    });
+
+    it("aborts in-flight transfer-code creation when the modal closes", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const signals: AbortSignal[] = [];
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockImplementation(
+        ({ signal }: { readonly signal?: AbortSignal }) => {
+          signals.push(signal!);
+          return new Promise(() => undefined);
+        }
+      );
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(1)
+      );
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+
+      expect(signals[0]?.aborted).toBe(true);
     });
   });
 

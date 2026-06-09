@@ -70,6 +70,10 @@ const normalizeIncomingMessage = (
   };
 };
 
+const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
+const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
+const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
+
 /**
  * Calculate delay for exponential backoff
  */
@@ -126,6 +130,18 @@ export function WebSocketProvider({
 
     const message = normalizeIncomingMessage(parsed);
     if (!message) {
+      return;
+    }
+
+    if (message.type === WEBSOCKET_AUTHENTICATED) {
+      setStatus(WebSocketStatus.CONNECTED);
+      reconnectAttemptsRef.current = 0;
+      return;
+    }
+
+    if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
+      setStatus(WebSocketStatus.DISCONNECTED);
+      wsRef.current?.close(1008, "Authentication failed");
       return;
     }
 
@@ -231,17 +247,18 @@ export function WebSocketProvider({
             return;
           }
 
-          setStatus(WebSocketStatus.CONNECTED);
-
           if (useMessageAuth) {
+            setStatus(WebSocketStatus.AUTHENTICATING);
             ws.send(
               JSON.stringify({
-                type: "AUTHENTICATE",
+                type: WEBSOCKET_AUTHENTICATE,
                 access_token: token,
               })
             );
+            return;
           }
 
+          setStatus(WebSocketStatus.CONNECTED);
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
         };

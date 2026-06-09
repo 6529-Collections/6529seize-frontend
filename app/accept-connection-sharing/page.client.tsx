@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -40,8 +41,15 @@ function AcceptConnectionSharing(
 
   const { token, transferCode, address, role } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
+  const hasTransferCode = transferCode.trim().length > 0;
+  const hasUnsupportedWebTransferCode =
+    isConnectionTransferV2Enabled() &&
+    hasTransferCode &&
+    !Capacitor.isNativePlatform();
   const isTransferCodeFlow =
-    isConnectionTransferV2Enabled() && transferCode.trim().length > 0;
+    isConnectionTransferV2Enabled() &&
+    hasTransferCode &&
+    Capacitor.isNativePlatform();
 
   const { profile, isLoading: profileLoading } = useIdentity({
     handleOrWallet: address || null,
@@ -156,7 +164,21 @@ function AcceptConnectionSharing(
           </h1>
         </header>
 
-        {(!isTransferCodeFlow && (!token || !address)) ||
+        {hasUnsupportedWebTransferCode ? (
+          <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
+            <p className="tw-text-base tw-text-neutral-300">
+              Open this connection link in the 6529 mobile app.
+            </p>
+            <p className="tw-mt-4">
+              <Link
+                href="/"
+                className="tw-text-sm tw-font-medium tw-text-emerald-400 hover:tw-underline"
+              >
+                Take me home
+              </Link>
+            </p>
+          </div>
+        ) : (!isTransferCodeFlow && (!token || !address)) ||
         (isTransferCodeFlow && !address) ? (
           <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
             <p className="tw-text-base tw-text-neutral-300">
