@@ -47,6 +47,7 @@ interface BrainMobileTabsProps {
   readonly onViewChange: (view: BrainView) => void;
   readonly wave?: ApiWave | undefined;
   readonly waveActive: boolean;
+  readonly hasPolls?: boolean | undefined;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
   readonly isApp?: boolean | undefined;
@@ -57,6 +58,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   onViewChange,
   wave,
   waveActive,
+  hasPolls = false,
   showWavesTab,
   showStreamBack,
   isApp,
@@ -298,6 +300,21 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               })}
             >
               About
+            </span>
+          </button>
+        )}
+        {waveActive && wave && hasPolls && (
+          <button
+            ref={getActiveButtonRef(activeView === BrainView.POLLS)}
+            onClick={() => handleWaveViewChange(BrainView.POLLS)}
+            className={getTabButtonClassName(activeView === BrainView.POLLS)}
+          >
+            <span
+              className={getTabTextClassName({
+                isActive: activeView === BrainView.POLLS,
+              })}
+            >
+              Polls
             </span>
           </button>
         )}

@@ -21,11 +21,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
 import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
+import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
@@ -107,6 +107,7 @@ const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.WINNERS]: "Winners",
   [MyStreamWaveTab.OUTCOME]: "Outcome",
   [MyStreamWaveTab.MY_VOTES]: "My Votes",
+  [MyStreamWaveTab.POLLS]: "Polls",
   [MyStreamWaveTab.FAQ]: "FAQ",
 };
 
@@ -313,8 +314,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   showCreateCurationAction = true,
 }) => {
   const searchParams = useSearchParams();
-  const { availableTabs, updateAvailableTabs, setActiveContentTab } =
-    useContentTab();
+  const { availableTabs, updateAvailableTabs } = useContentTab();
   const { activeProfileProxy, connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const {
@@ -362,6 +362,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isProfileWave &&
     isConnectedProfileWaveAuthor &&
     activeProfileProxy === null;
+  const hasPolls = useWaveHasPolls({ waveId: wave.id });
 
   const filteredDecisions = useMemo(() => {
     const decisionsAsApiFormat = allDecisions.map((decision) => ({
@@ -426,6 +427,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       waveId: wave.id,
       isMemesWave,
       isChatWave,
+      hasPolls,
       hasAuthenticatedProfile,
       isCurationWave,
       isApproveWave,
@@ -437,6 +439,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     wave,
     isMemesWave,
     isChatWave,
+    hasPolls,
     isApproveWave,
     hasAuthenticatedProfile,
     isCurationWave,
@@ -445,12 +448,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     searchParams,
     updateAvailableTabs,
   ]);
-
-  useEffect(() => {
-    if (wave.wave.type === ApiWaveType.Chat && !activeCurationId) {
-      setActiveContentTab(MyStreamWaveTab.CHAT);
-    }
-  }, [wave.wave.type, activeCurationId, setActiveContentTab]);
 
   const standardOptions: TabOption[] = useMemo(
     () =>
@@ -586,7 +583,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     };
   }, [activeKey, options]);
 
-  if (isChatWave && !canManageCurations && curations.length === 0) {
+  if (
+    isChatWave &&
+    !canManageCurations &&
+    curations.length === 0 &&
+    standardOptions.length <= 1
+  ) {
     return null;
   }
 

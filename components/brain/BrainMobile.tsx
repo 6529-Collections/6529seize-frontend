@@ -17,6 +17,7 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWaveData } from "@/hooks/useWaveData";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { useWave } from "@/hooks/useWave";
+import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import MemesQuickVoteDialog from "./left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
@@ -105,6 +106,10 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
+  const hasPolls = useWaveHasPolls({
+    waveId,
+    enabled: wave !== null && wave !== undefined,
+  });
   const { activeView, onViewChange } = useBrainMobileActiveView({
     firstDecisionDone,
     isApp,
@@ -114,6 +119,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     isMemesWave,
     isRankWave,
     isApproveWave,
+    hasPolls,
     pathname,
     searchParams,
     wave,
@@ -212,6 +218,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           onViewChange={onViewChange}
           wave={wave}
           waveActive={hasWave}
+          hasPolls={hasPolls}
           showWavesTab={hydrated}
           showStreamBack={hydrated}
           isApp={isApp}
@@ -234,6 +241,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               isMemesWave={isMemesWave}
               isRankWave={isRankWave}
               isApproveWave={isApproveWave}
+              hasPolls={hasPolls}
               onDropClick={onDropClick}
               onOpenQuickVote={quickVote.openQuickVote}
               onPrefetchQuickVote={quickVote.prefetchQuickVote}
