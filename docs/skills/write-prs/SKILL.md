@@ -63,6 +63,16 @@ description: Write, open, iterate, merge, and optionally deploy pull requests wi
    - Discover available bot feedback from PR comments, review comments, review threads, checks, or local repo tools.
    - In this repo, CodeRabbit and Claude can both appear as PR review bots, but either one may be absent on a given PR. Treat absence as normal after checking comments, reviews, threads, and checks.
    - Recognize bot authors or display names that include CodeRabbit, `coderabbitai[bot]`, Claude, or `claude[bot]`.
+   - Track repo PR review bots and status checks by exact check name when present:
+     - `Code scanning results / CodeQL`
+     - `CodeQL / Analyze (actions) (dynamic)`
+     - `CodeQL / Analyze (javascript-typescript) (dynamic)`
+     - `CodeQL / Analyze (python) (dynamic)`
+     - `CodeRabbit`
+     - `DCO`
+     - `security/snyk (6529)`
+     - `SonarCloud Code Analysis`
+   - For each tracked bot or status check, verify the latest pushed commit, capture the current state, and inspect any failure, skipped review, alert, or warning details before deciding readiness.
    - For local CodeRabbit review in this repo, use `6529 run cr` or the `quality:cr` scripts when they fit the change scope.
    - Treat bot findings as review input, not orders. Fix valid correctness, security, performance, test, docs, accessibility, and maintainability issues.
    - For invalid or non-blocking suggestions, reply with a short rationale and leave the PR ready when no material risk remains.
