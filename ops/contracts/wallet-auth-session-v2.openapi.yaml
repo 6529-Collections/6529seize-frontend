@@ -211,6 +211,15 @@ components:
             - 2
           default: 2
     SessionLoginResponse:
+      oneOf:
+        - $ref: "#/components/schemas/SessionLoginWebResponse"
+        - $ref: "#/components/schemas/SessionLoginNativeResponse"
+      discriminator:
+        propertyName: client_type
+        mapping:
+          web: "#/components/schemas/SessionLoginWebResponse"
+          native: "#/components/schemas/SessionLoginNativeResponse"
+    SessionLoginWebResponse:
       type: object
       additionalProperties: false
       required:
@@ -231,19 +240,76 @@ components:
         access_token_expires_at:
           $ref: "#/components/schemas/IsoDateTime"
         client_type:
-          $ref: "#/components/schemas/ClientType"
+          type: string
+          enum:
+            - web
+    SessionLoginNativeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - address
+        - access_token
+        - access_token_expires_at
+        - client_type
+        - native_refresh_token
+        - refresh_token_expires_at
+      properties:
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type:
+            - string
+            - "null"
+        access_token:
+          type: string
+          minLength: 1
+        access_token_expires_at:
+          $ref: "#/components/schemas/IsoDateTime"
+        client_type:
+          type: string
+          enum:
+            - native
         native_refresh_token:
           type: string
           minLength: 32
-          description: Present only when client_type is native.
         refresh_token_expires_at:
           $ref: "#/components/schemas/IsoDateTime"
     SessionRefreshRequest:
+      oneOf:
+        - $ref: "#/components/schemas/SessionRefreshWebRequest"
+        - $ref: "#/components/schemas/SessionRefreshNativeRequest"
+      discriminator:
+        propertyName: client_type
+        mapping:
+          web: "#/components/schemas/SessionRefreshWebRequest"
+          native: "#/components/schemas/SessionRefreshNativeRequest"
+      description: Web clients may omit the body and rely on the 6529_session cookie. Native clients must send client_type, client_address, and native_refresh_token.
+    SessionRefreshWebRequest:
       type: object
       additionalProperties: false
+      required:
+        - client_type
       properties:
         client_type:
-          $ref: "#/components/schemas/ClientType"
+          type: string
+          enum:
+            - web
+        role:
+          type:
+            - string
+            - "null"
+    SessionRefreshNativeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - client_type
+        - client_address
+        - native_refresh_token
+      properties:
+        client_type:
+          type: string
+          enum:
+            - native
         client_address:
           $ref: "#/components/schemas/EthereumAddress"
         native_refresh_token:
@@ -253,8 +319,16 @@ components:
           type:
             - string
             - "null"
-      description: Web clients may omit the body and rely on the 6529_session cookie. Native clients must send client_type, client_address, and native_refresh_token.
     SessionRefreshResponse:
+      oneOf:
+        - $ref: "#/components/schemas/SessionRefreshWebResponse"
+        - $ref: "#/components/schemas/SessionRefreshNativeResponse"
+      discriminator:
+        propertyName: client_type
+        mapping:
+          web: "#/components/schemas/SessionRefreshWebResponse"
+          native: "#/components/schemas/SessionRefreshNativeResponse"
+    SessionRefreshWebResponse:
       type: object
       additionalProperties: false
       required:
@@ -275,19 +349,75 @@ components:
         access_token_expires_at:
           $ref: "#/components/schemas/IsoDateTime"
         client_type:
-          $ref: "#/components/schemas/ClientType"
+          type: string
+          enum:
+            - web
+    SessionRefreshNativeResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - address
+        - access_token
+        - access_token_expires_at
+        - client_type
+        - native_refresh_token
+        - refresh_token_expires_at
+      properties:
+        address:
+          $ref: "#/components/schemas/EthereumAddress"
+        role:
+          type:
+            - string
+            - "null"
+        access_token:
+          type: string
+          minLength: 1
+        access_token_expires_at:
+          $ref: "#/components/schemas/IsoDateTime"
+        client_type:
+          type: string
+          enum:
+            - native
         native_refresh_token:
           type: string
           minLength: 32
-          description: Present only when client_type is native; replaces the submitted native_refresh_token.
+          description: Replaces the submitted native_refresh_token.
         refresh_token_expires_at:
           $ref: "#/components/schemas/IsoDateTime"
     SessionLogoutRequest:
+      oneOf:
+        - $ref: "#/components/schemas/SessionLogoutWebRequest"
+        - $ref: "#/components/schemas/SessionLogoutNativeRequest"
+      discriminator:
+        propertyName: client_type
+        mapping:
+          web: "#/components/schemas/SessionLogoutWebRequest"
+          native: "#/components/schemas/SessionLogoutNativeRequest"
+    SessionLogoutWebRequest:
       type: object
       additionalProperties: false
+      required:
+        - client_type
       properties:
         client_type:
-          $ref: "#/components/schemas/ClientType"
+          type: string
+          enum:
+            - web
+        all_sessions:
+          type: boolean
+          default: false
+    SessionLogoutNativeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - client_type
+        - client_address
+        - native_refresh_token
+      properties:
+        client_type:
+          type: string
+          enum:
+            - native
         client_address:
           $ref: "#/components/schemas/EthereumAddress"
         native_refresh_token:
