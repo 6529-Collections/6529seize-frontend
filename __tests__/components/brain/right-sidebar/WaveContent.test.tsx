@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   Mode,
@@ -40,6 +39,10 @@ jest.mock("@/components/brain/right-sidebar/BrainRightSidebarContent", () => ({
   __esModule: true,
   default: () => <div>content</div>,
 }));
+jest.mock("@/components/brain/right-sidebar/BrainRightSidebarSettings", () => ({
+  __esModule: true,
+  default: () => <div>settings</div>,
+}));
 jest.mock(
   "@/components/brain/right-sidebar/BrainRightSidebarFollowers",
   () => ({ __esModule: true, default: () => <div>followers</div> })
@@ -48,7 +51,7 @@ jest.mock(
 describe("WaveContent", () => {
   const wave = { wave: { type: ApiWaveType.Chat }, name: "Wave" } as any;
 
-  it("renders non-rank wave without tabs", () => {
+  it("renders normal wave with about and settings tabs", () => {
     render(
       <WaveContent
         wave={wave}
@@ -59,7 +62,44 @@ describe("WaveContent", () => {
       />
     );
     expect(screen.getByTestId("header")).toBeInTheDocument();
-    expect(screen.queryByTestId("tabs")).toBeNull();
+    expect(screen.getByTestId("tabs")).toHaveTextContent(
+      "ABOUT-About,Settings"
+    );
+    expect(screen.getByText("content")).toBeInTheDocument();
+  });
+
+  it("renders settings tab content", () => {
+    render(
+      <WaveContent
+        wave={wave}
+        mode={Mode.CONTENT}
+        setMode={jest.fn()}
+        activeTab={SidebarTab.SETTINGS}
+        setActiveTab={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("tabs")).toHaveTextContent(
+      "SETTINGS-About,Settings"
+    );
+    expect(screen.getByText("settings")).toBeInTheDocument();
+    expect(screen.queryByTestId("header")).toBeNull();
+  });
+
+  it("falls back to about when active tab is unavailable for the wave type", () => {
+    render(
+      <WaveContent
+        wave={wave}
+        mode={Mode.CONTENT}
+        setMode={jest.fn()}
+        activeTab={SidebarTab.TOP_VOTERS}
+        setActiveTab={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("tabs")).toHaveTextContent(
+      "ABOUT-About,Settings"
+    );
     expect(screen.getByText("content")).toBeInTheDocument();
   });
 
@@ -74,7 +114,7 @@ describe("WaveContent", () => {
       />
     );
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Voters,Activity"
+      "ABOUT-About,Settings,Voters,Activity"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Leaderboard");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Winners");
@@ -92,7 +132,7 @@ describe("WaveContent", () => {
     );
 
     expect(screen.getByTestId("tabs")).toHaveTextContent(
-      "ABOUT-About,Voters,Activity"
+      "ABOUT-About,Settings,Voters,Activity"
     );
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approvals");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approved");

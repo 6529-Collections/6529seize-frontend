@@ -92,6 +92,12 @@ describe("useWaveConfig", () => {
         thresholdTimeMs: null,
         maxWinners: null,
       });
+      expect(result.current.config.display).toEqual({
+        approve: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "",
+        },
+      });
     });
 
     it("should initialize with default groups, drops, and other settings", () => {
@@ -176,6 +182,96 @@ describe("useWaveConfig", () => {
       });
       expect(result.current.config.drops.adminCanDeleteDrops).toBe(true);
       expect(result.current.config.approval.maxWinners).toBeNull();
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "",
+        approvedTabLabel: "",
+      });
+    });
+
+    it("should preserve approve display labels when editing overview with the same type", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve Wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDisplay({
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+      });
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          name: "Renamed Approve Wave",
+        });
+      });
+
+      expect(result.current.config.overview.name).toBe("Renamed Approve Wave");
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
+    });
+
+    it("should preserve non-overview config when editing overview with the same type", () => {
+      const { result } = renderHook(() => useWaveConfig());
+      const image = new File([""], "updated-image.jpg", {
+        type: "image/jpeg",
+      });
+
+      act(() => {
+        result.current.setOverview({
+          type: ApiWaveType.Approve,
+          name: "Approve Wave",
+          image: null,
+        });
+      });
+
+      act(() => {
+        result.current.setDates({
+          ...result.current.config.dates,
+          endDate: 2000000,
+        });
+        result.current.onApprovalMaxWinnersChange(4);
+        result.current.setDisplay({
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+        result.current.setEndDateConfig({
+          time: 3600,
+          period: null,
+        });
+      });
+
+      act(() => {
+        result.current.setOverview({
+          ...result.current.config.overview,
+          image,
+        });
+      });
+
+      expect(result.current.config.overview.image).toEqual(image);
+      expect(result.current.config.dates.endDate).toBe(2000000);
+      expect(result.current.config.approval.maxWinners).toBe(4);
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
+      expect(result.current.endDateConfig).toEqual({
+        time: 3600,
+        period: null,
+      });
     });
   });
 
@@ -257,6 +353,24 @@ describe("useWaveConfig", () => {
       });
 
       expect(result.current.config.outcomes).toEqual(newOutcomes);
+    });
+
+    it("should update display section", () => {
+      const { result } = renderHook(() => useWaveConfig());
+
+      act(() => {
+        result.current.setDisplay({
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        });
+      });
+
+      expect(result.current.config.display.approve).toEqual({
+        approvalsTabLabel: "Candidates",
+        approvedTabLabel: "Selected",
+      });
     });
   });
 
