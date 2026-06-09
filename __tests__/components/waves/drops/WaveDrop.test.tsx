@@ -230,6 +230,36 @@ describe("WaveDrop", () => {
     );
   });
 
+  it("keeps desktop actions with touch entry for touch-only non-mobile devices", () => {
+    isMobileMock.mockReturnValue(false);
+    isTouchDeviceMock.mockReturnValue(true);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("actions")).toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: true })
+    );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: true })
+    );
+  });
+
   it("hides actions on mobile", () => {
     isMobileMock.mockReturnValue(true);
     const { queryByTestId } = renderWithRedux(
