@@ -9,15 +9,18 @@ BrokenLink = tuple[Path, int, str]
 
 
 def is_code_fence(line: str) -> bool:
+    """Return whether a Markdown line starts a fenced code block."""
     stripped = line.lstrip()
     return stripped.startswith(("```", "~~~"))
 
 
 def is_indented_code(line: str) -> bool:
+    """Return whether a Markdown line is an indented code block line."""
     return line.startswith(("    ", "\t"))
 
 
 def strip_inline_code(line: str) -> str:
+    """Remove inline code spans before link extraction."""
     result: list[str] = []
     cursor = 0
     while cursor < len(line):
@@ -42,6 +45,7 @@ def strip_inline_code(line: str) -> str:
 
 
 def iter_markdown_link_targets(line: str):
+    """Yield inline Markdown link targets from a non-code line."""
     # Reference-style links are intentionally out of scope for this scanner.
     cursor = 0
     while cursor < len(line):
@@ -63,6 +67,7 @@ def iter_markdown_link_targets(line: str):
 
 
 def normalize_target(raw_target: str) -> str:
+    """Normalize a Markdown link target for local path checks."""
     target = raw_target.strip()
     if target.startswith("<") and target.endswith(">"):
         target = target[1:-1].strip()
@@ -77,12 +82,14 @@ def normalize_target(raw_target: str) -> str:
 
 
 def resolve_target(source_file: Path, target: str, repo_root: Path) -> Path:
+    """Resolve a local Markdown target against its source file."""
     if target.startswith("/"):
         return (repo_root / target.lstrip("/")).resolve()
     return (source_file.parent / target).resolve()
 
 
 def should_skip_target(target: str) -> bool:
+    """Return whether a normalized target should be ignored."""
     return (
         not target
         or target.startswith("#")
@@ -91,6 +98,7 @@ def should_skip_target(target: str) -> bool:
 
 
 def find_broken_links(md_file: Path, repo_root: Path) -> list[BrokenLink]:
+    """Find broken local Markdown links in one Markdown file."""
     broken: list[BrokenLink] = []
     lines = md_file.read_text(encoding="utf-8").splitlines()
     in_fenced_code = False
@@ -113,6 +121,7 @@ def find_broken_links(md_file: Path, repo_root: Path) -> list[BrokenLink]:
 
 
 def print_broken_links(broken: list[BrokenLink], repo_root: Path) -> None:
+    """Print broken links using repo-relative file paths."""
     print("Broken markdown links found:")
     for file_path, line_no, target in broken:
         rel = file_path.relative_to(repo_root)
@@ -120,6 +129,7 @@ def print_broken_links(broken: list[BrokenLink], repo_root: Path) -> None:
 
 
 def main() -> int:
+    """Validate all Markdown links under the docs directory."""
     repo_root = Path.cwd().resolve()
     docs_root = repo_root / "docs"
     if not docs_root.exists():
