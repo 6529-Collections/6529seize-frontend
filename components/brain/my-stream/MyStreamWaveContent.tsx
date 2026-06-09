@@ -31,6 +31,7 @@ import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 import MyStreamWaveSales from "./MyStreamWaveSales";
+import MyStreamWavePolls from "./MyStreamWavePolls";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
@@ -572,6 +573,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
     [MyStreamWaveTab.MY_VOTES]: (
       <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+    ),
+    [MyStreamWaveTab.POLLS]: (
+      <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
   };

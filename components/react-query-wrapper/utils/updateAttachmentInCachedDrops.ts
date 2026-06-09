@@ -108,6 +108,7 @@ const CACHED_DROP_QUERY_KEYS = [
   QueryKey.DROPS,
   QueryKey.DROPS_LEADERBOARD,
   QueryKey.DROP,
+  QueryKey.WAVE_POLLS,
   QueryKey.PROFILE_DROPS,
   QueryKey.FEED_ITEMS,
 ] as const;

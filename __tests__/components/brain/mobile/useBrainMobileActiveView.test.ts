@@ -147,6 +147,24 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.MY_VOTES);
   });
 
+  it("keeps Polls for loaded waves", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isCompleted: false,
+          isRankWave: false,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+
+    act(() => {
+      result.current.onViewChange(BrainView.POLLS);
+    });
+
+    expect(result.current.activeView).toBe(BrainView.POLLS);
+  });
+
   it("resets My Votes for guests on normal rank waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(

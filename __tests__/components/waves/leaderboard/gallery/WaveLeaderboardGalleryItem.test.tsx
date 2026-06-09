@@ -46,7 +46,11 @@ jest.mock("@/components/voting", () => ({
   ),
 }));
 jest.mock("@/components/voting/VotingModalButton", () => (props: any) => (
-  <button data-testid="vote-btn" onClick={props.onClick}>
+  <button
+    data-testid="vote-btn"
+    onClick={props.onClick}
+    className={props.className}
+  >
     {props.children ?? "Vote"}
   </button>
 ));
@@ -132,7 +136,61 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(screen.getByTestId("modal")).toHaveAttribute("data-open", "true");
   });
 
-  it("renders the compact vote-details chip in the gallery footer", () => {
+  it("renders the title as natural wrapping text without truncation", () => {
+    const title =
+      "When The World is Destroyed Again Because The Drop Title Keeps Going";
+
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{ ...drop, title }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    const titleElement = screen.getByRole("heading", { name: title });
+
+    expect(titleElement).toHaveClass(
+      "tw-whitespace-normal",
+      "tw-[overflow-wrap:anywhere]",
+      "tw-break-words"
+    );
+    expect(titleElement).not.toHaveClass("tw-line-clamp-2");
+    expect(titleElement).not.toHaveClass("tw-min-h-[2.25rem]");
+    expect(titleElement).not.toHaveClass("tw-truncate");
+    expect(titleElement).toHaveTextContent(title);
+  });
+
+  it("keeps additional action out of the title row and preserves footer order", () => {
+    const title = "Additional Action Drop Title";
+
+    render(
+      <WaveLeaderboardGalleryItem
+        drop={{
+          ...drop,
+          title,
+          is_additional_action_promised: true,
+        }}
+        onDropClick={jest.fn()}
+      />
+    );
+
+    const titleElement = screen.getByRole("heading", { name: title });
+    const trigger = screen.getByRole("button", {
+      name: "View voters and vote log for 3 voters",
+    });
+    const voteButton = screen.getByTestId("vote-btn");
+
+    expect(screen.getByText("Additional Action")).toBeInTheDocument();
+    expect(titleElement).toHaveClass("tw-whitespace-normal");
+    expect(titleElement).not.toHaveClass("tw-line-clamp-2");
+    expect(titleElement).not.toHaveClass("tw-truncate");
+    expect(
+      trigger.compareDocumentPosition(voteButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it("renders matching-height gallery actions in the footer", () => {
     render(<WaveLeaderboardGalleryItem drop={drop} onDropClick={jest.fn()} />);
 
     const trigger = screen.getByRole("button", {
@@ -144,10 +202,13 @@ describe("WaveLeaderboardGalleryItem", () => {
     expect(trigger).toHaveClass(
       "tw-border-iron-700",
       "tw-bg-iron-900/40",
-      "tw-px-1.5",
-      "tw-py-0.5"
+      "tw-box-border",
+      "tw-h-8",
+      "tw-px-2.5",
+      "tw-py-0"
     );
     expect(trigger.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(voteButton).toHaveClass("tw-box-border", "tw-h-8");
     expect(voteButton).toHaveTextContent("You: 1 NIC");
     expect(
       trigger.compareDocumentPosition(voteButton) &

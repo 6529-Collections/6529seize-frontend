@@ -101,6 +101,7 @@ export enum QueryKey {
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVES_SEARCH = "WAVES_SEARCH",
   WAVE = "WAVE",
+  WAVE_POLLS = "WAVE_POLLS",
   WAVE_CURATIONS = "WAVE_CURATIONS",
   WAVE_LOGS = "WAVE_LOGS",
   WAVE_VOTERS = "WAVE_VOTERS",
@@ -975,6 +976,9 @@ const createReactQueryContextValue = (
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP],
+    });
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.WAVE_POLLS],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_VOTERS],
