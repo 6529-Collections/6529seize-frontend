@@ -5,7 +5,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import type { UseMutationResult } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 
-export interface AddWaveMutationVariables {
+interface AddWaveMutationVariables {
   readonly body: ApiCreateNewWave;
   readonly displayMetadataRequests: readonly ApiCreateWaveMetadataRequest[];
 }

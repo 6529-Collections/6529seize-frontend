@@ -13,7 +13,7 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 }));
 
 const mockApproveLabels = {
-  approvals: "Approvals",
+  approvals: "Proposals",
   approved: "Approved",
 };
 
@@ -44,7 +44,7 @@ describe("MyStreamWaveTabsLeaderboard", () => {
   beforeEach(() => {
     mockCompleted = false;
     mockFirstDecision = false;
-    mockApproveLabels.approvals = "Approvals";
+    mockApproveLabels.approvals = "Proposals";
     mockApproveLabels.approved = "Approved";
   });
 
@@ -106,7 +106,7 @@ describe("MyStreamWaveTabsLeaderboard", () => {
       { wave: { wave: { type: ApiWaveType.Approve } } }
     );
 
-    const approvalsButton = screen.getByText("Approvals");
+    const approvalsButton = screen.getByText("Proposals");
     const approvedButton = screen.getByText("Approved");
 
     expect(registerTabRef).toHaveBeenCalledWith(
@@ -133,7 +133,7 @@ describe("MyStreamWaveTabsLeaderboard", () => {
 
     expect(screen.getByText("Candidates")).toBeInTheDocument();
     expect(screen.getByText("Selected")).toBeInTheDocument();
-    expect(screen.queryByText("Approvals")).toBeNull();
+    expect(screen.queryByText("Proposals")).toBeNull();
     expect(screen.queryByText("Approved")).toBeNull();
   });
 });
