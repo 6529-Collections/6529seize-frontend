@@ -22,12 +22,11 @@ import { useDropPollOptionVoters } from "@/hooks/useDropPollOptionVoters";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type PollView = "vote" | "results";
 
@@ -75,20 +74,6 @@ const getScopedPollInteractionState = (
     : getDefaultPollInteractionState(poll);
 };
 
-const getPollToggleLabel = ({
-  effectiveView,
-  hasVoted,
-}: {
-  readonly effectiveView: PollView;
-  readonly hasVoted: boolean;
-}): string => {
-  if (effectiveView === "vote") {
-    return "Results";
-  }
-
-  return hasVoted ? "Change vote" : "Vote";
-};
-
 const getPollSubmitLabel = ({
   isPending,
   hasVoted,
@@ -117,6 +102,36 @@ const getPollClosingLabel = (poll: ApiDropPoll): string => {
   return poll.is_open ? `Closes ${time}` : `Closed ${time}`;
 };
 
+const getVoteCountLabel = (votes: number): string =>
+  `${formatNumberWithCommas(votes)} ${votes === 1 ? "vote" : "votes"}`;
+
+const getOptimisticPoll = (
+  poll: ApiDropPoll,
+  selectedOptionNos: readonly number[]
+): ApiDropPoll => {
+  const previousVotedOptionNos = new Set(poll.voted);
+  const nextVotedOptionNos = new Set(selectedOptionNos);
+
+  return {
+    ...poll,
+    voted: [...selectedOptionNos],
+    options: poll.options.map((option) => {
+      const previousVote = previousVotedOptionNos.has(option.option_no) ? 1 : 0;
+      const nextVote = nextVotedOptionNos.has(option.option_no) ? 1 : 0;
+      const voteDelta = nextVote - previousVote;
+
+      if (voteDelta === 0) {
+        return option;
+      }
+
+      return {
+        ...option,
+        votes: Math.max(0, option.votes + voteDelta),
+      };
+    }),
+  };
+};
+
 function PollVoterAvatar({
   identity,
 }: {
@@ -124,7 +139,7 @@ function PollVoterAvatar({
 }) {
   const label = getIdentityLabel(identity);
   const avatarClassName =
-    "tw-size-7 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10";
+    "tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-iron-50/5 tw-bg-iron-800 tw-object-cover";
 
   if (!identity.pfp) {
     return <div className={avatarClassName} aria-hidden="true" />;
@@ -135,8 +150,8 @@ function PollVoterAvatar({
       unoptimized
       src={resolveIpfsUrlSync(identity.pfp)}
       alt={`${label}'s avatar`}
-      width={28}
-      height={28}
+      width={20}
+      height={20}
       className={avatarClassName}
     />
   );
@@ -148,7 +163,7 @@ function PollVoterRow({ voter }: { readonly voter: ApiIdentityOverview }) {
   const shouldLimit = shouldLimitIdentityLabel(label);
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2.5 tw-px-3 tw-py-2">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
       <PollVoterAvatar identity={voter} />
       <UserProfileTooltipWrapper user={hrefValue}>
         <Link
@@ -158,16 +173,72 @@ function PollVoterRow({ voter }: { readonly voter: ApiIdentityOverview }) {
         >
           <span
             className={`tw-block tw-min-w-0 ${
-              shouldLimit ? "tw-max-w-[10rem] tw-truncate" : "tw-break-all"
+              shouldLimit ? "tw-max-w-[10rem] tw-truncate" : "tw-truncate"
             }`}
           >
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
+            <span className="tw-text-xs tw-text-iron-300 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-100">
               {label}
             </span>
           </span>
         </Link>
       </UserProfileTooltipWrapper>
     </div>
+  );
+}
+
+function PollOptionVoterPreviewAvatar({
+  identity,
+}: {
+  readonly identity: ApiIdentityOverview;
+}) {
+  const label = getIdentityLabel(identity);
+  const avatarClassName =
+    "tw-size-[18px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-iron-950";
+
+  if (!identity.pfp) {
+    return <span className={avatarClassName} aria-hidden="true" />;
+  }
+
+  return (
+    <Image
+      unoptimized
+      src={resolveIpfsUrlSync(identity.pfp)}
+      alt={`${label}'s avatar`}
+      width={18}
+      height={18}
+      className={avatarClassName}
+    />
+  );
+}
+
+function PollOptionVoterPreviews({
+  dropId,
+  option,
+}: {
+  readonly dropId: string;
+  readonly option: ApiDropPollOption;
+}) {
+  const { voters } = useDropPollOptionVoters({
+    dropId,
+    optionNo: option.option_no,
+    enabled: option.votes > 0,
+  });
+
+  const previewVoters = voters.slice(0, 3);
+
+  if (previewVoters.length === 0) {
+    return null;
+  }
+
+  return (
+    <span
+      className="tw-flex tw--space-x-1.5 tw-opacity-80 tw-transition-opacity desktop-hover:group-hover/result:tw-opacity-100"
+      aria-hidden="true"
+    >
+      {previewVoters.map((voter) => (
+        <PollOptionVoterPreviewAvatar key={voter.id} identity={voter} />
+      ))}
+    </span>
   );
 }
 
@@ -193,7 +264,7 @@ function PollOptionVoters({
 
   if (option.votes === 0) {
     return (
-      <div className="tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-500">
+      <div className="tw-px-3 tw-py-2.5 tw-text-xs tw-font-medium tw-text-iron-500">
         No votes yet
       </div>
     );
@@ -201,7 +272,7 @@ function PollOptionVoters({
 
   if (isLoading) {
     return (
-      <div className="tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-iron-500">
+      <div className="tw-px-3 tw-py-2.5 tw-text-xs tw-font-medium tw-text-iron-500">
         Loading voters...
       </div>
     );
@@ -209,21 +280,21 @@ function PollOptionVoters({
 
   if (isError) {
     return (
-      <div className="tw-px-3 tw-py-2 tw-text-xs tw-font-medium tw-text-rose-300">
+      <div className="tw-px-3 tw-py-2.5 tw-text-xs tw-font-medium tw-text-rose-300">
         Voters could not be loaded.
       </div>
     );
   }
 
   return (
-    <div className="tw-border-t tw-border-solid tw-border-iron-800/70">
-      <div className="tw-divide-y tw-divide-iron-800/70">
+    <div>
+      <div className="tw-flex tw-flex-col tw-gap-2">
         {voters.map((voter) => (
           <PollVoterRow key={voter.id} voter={voter} />
         ))}
       </div>
       {hasNextPage && (
-        <div className="tw-px-3 tw-pb-2">
+        <div className="tw-mt-2">
           <button
             type="button"
             disabled={isFetchingNextPage}
@@ -231,7 +302,7 @@ function PollOptionVoters({
               event.stopPropagation();
               void fetchNextPage();
             }}
-            className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800"
+            className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-50/10 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-50/25 desktop-hover:hover:tw-text-iron-50"
           >
             {isFetchingNextPage ? "Loading..." : "Load more"}
           </button>
@@ -256,18 +327,71 @@ function PollVoteOption({
   readonly disabled: boolean;
   readonly onChange: (optionNo: number) => void;
 }) {
+  const indicatorShapeClass = multichoice
+    ? "tw-rounded-[5px]"
+    : "tw-rounded-full";
+  const rowStateClass = checked
+    ? "tw-border-iron-50/30 tw-bg-iron-50/[0.08] desktop-hover:hover:tw-border-iron-50/50 desktop-hover:hover:tw-bg-iron-50/[0.12]"
+    : "tw-border-iron-50/5 tw-bg-iron-50/[0.02] desktop-hover:hover:tw-border-iron-50/30 desktop-hover:hover:tw-bg-iron-50/[0.08]";
+  const indicatorStateClass = checked
+    ? "tw-scale-110 tw-border-iron-50 tw-bg-iron-50 desktop-hover:group-hover/vote:tw-scale-100 desktop-hover:group-hover/vote:tw-border-iron-200 desktop-hover:group-hover/vote:tw-bg-iron-200"
+    : "tw-border-iron-50/20 tw-bg-black/40 desktop-hover:group-hover/vote:tw-border-iron-50/60 desktop-hover:group-hover/vote:tw-bg-black/60";
+  const selectionFillClass = checked
+    ? "tw-scale-x-100 tw-opacity-100"
+    : "tw-scale-x-0 tw-opacity-0";
+
   return (
-    <label className="tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-p-3 tw-transition desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/80">
+    <label
+      className={`tw-group/vote tw-relative tw-flex tw-h-11 tw-transform-gpu tw-cursor-pointer tw-items-center tw-gap-3 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-transition-all tw-duration-300 active:tw-scale-[0.99] ${rowStateClass} ${
+        disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
+      }`}
+    >
+      {!multichoice && (
+        <span
+          className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-full tw-origin-left tw-transform-gpu tw-bg-iron-50/20 tw-transition-[transform,opacity] tw-duration-300 tw-ease-out ${selectionFillClass}`}
+          aria-hidden="true"
+        />
+      )}
       <input
         type={multichoice ? "checkbox" : "radio"}
         name={groupName}
         checked={checked}
         disabled={disabled}
+        aria-label={option.option_string}
         onClick={(event) => event.stopPropagation()}
         onChange={() => onChange(option.option_no)}
-        className="tw-mt-1 tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-border-iron-600 tw-bg-iron-950 tw-text-primary-400 focus:tw-ring-primary-400"
+        className="tw-peer tw-sr-only"
       />
-      <span className="tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+      <span
+        className={`tw-relative tw-z-10 tw-flex tw-size-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-border tw-border-solid tw-shadow-sm tw-transition-all tw-duration-300 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-iron-400/70 ${indicatorShapeClass} ${indicatorStateClass}`}
+        aria-hidden="true"
+      >
+        {multichoice ? (
+          <CheckIcon
+            className={`tw-size-3.5 tw-text-iron-950 tw-transition-all tw-duration-200 ${
+              checked
+                ? "tw-scale-100 tw-opacity-100"
+                : "tw-scale-50 tw-opacity-0"
+            }`}
+            strokeWidth={3}
+          />
+        ) : (
+          <span
+            className={`tw-size-[7px] tw-rounded-full tw-bg-iron-950 tw-transition-all tw-duration-200 ${
+              checked
+                ? "tw-scale-100 tw-opacity-100"
+                : "tw-scale-0 tw-opacity-0"
+            }`}
+          />
+        )}
+      </span>
+      <span
+        className={`tw-relative tw-z-10 tw-min-w-0 tw-break-words tw-text-sm tw-leading-5 tw-transition-colors tw-duration-300 ${
+          checked
+            ? "tw-font-semibold tw-text-iron-50"
+            : "tw-font-medium tw-text-iron-200 desktop-hover:group-hover/vote:tw-text-iron-50"
+        }`}
+      >
         {option.option_string}
       </span>
     </label>
@@ -275,61 +399,148 @@ function PollVoteOption({
 }
 
 function PollResultOption({
+  dropId,
   option,
   totalVotes,
   isSelected,
+  isDimmed,
   isExpanded,
+  multichoice,
+  showSelectionIndicator,
   onToggle,
 }: {
+  readonly dropId: string;
   readonly option: ApiDropPollOption;
   readonly totalVotes: number;
   readonly isSelected: boolean;
+  readonly isDimmed: boolean;
   readonly isExpanded: boolean;
+  readonly multichoice: boolean;
+  readonly showSelectionIndicator: boolean;
   readonly onToggle: (optionNo: number) => void;
 }) {
   const percentage =
     totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+  const fillScale = Math.max(0, Math.min(100, percentage)) / 100;
+  const [animateIn, setAnimateIn] = useState(false);
+  const indicatorShapeClass = multichoice
+    ? "tw-rounded-[5px]"
+    : "tw-rounded-full";
+  const indicatorStateClass = isSelected
+    ? "tw-scale-110 tw-border-iron-50 tw-bg-iron-50"
+    : "tw-border-iron-50/20 tw-bg-black/40";
+
+  useEffect(() => {
+    setAnimateIn(false);
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        setAnimateIn(true);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, [fillScale]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60">
+    <div className="tw-overflow-hidden tw-rounded-lg">
       <button
         type="button"
         aria-expanded={isExpanded}
+        aria-label={`${isExpanded ? "Hide" : "View"} voters for ${
+          option.option_string
+        }. ${getVoteCountLabel(option.votes)}, ${percentage} percent.`}
         onClick={(event) => {
           event.stopPropagation();
           onToggle(option.option_no);
         }}
-        className="tw-relative tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left"
+        className={`tw-group/result tw-relative tw-flex tw-h-11 tw-w-full tw-transform-gpu tw-cursor-pointer tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-0 tw-text-left tw-outline-none tw-transition-all tw-duration-300 focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 ${
+          isSelected
+            ? "tw-border-iron-50/30 tw-bg-iron-50/[0.08] desktop-hover:hover:tw-border-iron-50/50 desktop-hover:hover:tw-bg-iron-50/[0.12]"
+            : "tw-border-iron-50/5 tw-bg-iron-50/[0.02] desktop-hover:hover:tw-border-iron-50/30 desktop-hover:hover:tw-bg-iron-50/[0.08]"
+        } ${
+          isDimmed
+            ? "tw-opacity-40 tw-grayscale desktop-hover:hover:tw-opacity-100 desktop-hover:hover:tw-grayscale-0"
+            : "tw-opacity-100"
+        }`}
       >
         <div
-          className="tw-absolute tw-inset-y-0 tw-left-0 tw-bg-primary-500/15"
-          style={{ width: `${percentage}%` }}
+          className={`tw-absolute tw-inset-y-0 tw-left-0 tw-w-full tw-origin-left tw-transform-gpu tw-transition-[transform,background-color] tw-duration-700 tw-ease-out ${
+            isSelected ? "tw-bg-iron-50/20" : "tw-bg-iron-50/10"
+          }`}
+          style={{ transform: `scaleX(${animateIn ? fillScale : 0})` }}
           aria-hidden="true"
         />
-        <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-gap-3 tw-px-3 tw-py-2.5">
-          <div className="tw-min-w-0 tw-flex-1">
-            <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
-              {isSelected && (
-                <CheckCircleIcon
-                  className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-text-primary-300"
-                  aria-hidden="true"
-                />
-              )}
-              <span className="tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
-                {option.option_string}
+        <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-px-4">
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
+            {showSelectionIndicator && (
+              <span
+                className={`tw-flex tw-size-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-border tw-border-solid tw-shadow-sm tw-transition-all tw-duration-300 ${indicatorShapeClass} ${indicatorStateClass}`}
+                aria-hidden="true"
+              >
+                {multichoice ? (
+                  <CheckIcon
+                    className={`tw-size-3.5 tw-text-iron-950 tw-transition-all tw-duration-300 ${
+                      isSelected
+                        ? "tw-scale-100 tw-opacity-100"
+                        : "tw-scale-50 tw-opacity-0"
+                    }`}
+                    strokeWidth={3}
+                  />
+                ) : (
+                  <span
+                    className={`tw-size-[7px] tw-rounded-full tw-bg-iron-950 tw-transition-all tw-duration-300 ${
+                      isSelected
+                        ? "tw-scale-100 tw-opacity-100"
+                        : "tw-scale-0 tw-opacity-0"
+                    }`}
+                  />
+                )}
               </span>
-            </div>
-            <div className="tw-mt-1 tw-text-xs tw-font-medium tw-text-iron-500">
-              {formatNumberWithCommas(option.votes)}{" "}
-              {option.votes === 1 ? "vote" : "votes"}
-            </div>
+            )}
+            <span
+              className={`tw-min-w-0 tw-break-words tw-text-sm tw-leading-5 tw-transition-colors tw-duration-300 ${
+                isSelected
+                  ? "tw-font-semibold tw-text-iron-50"
+                  : "tw-font-medium tw-text-iron-200"
+              }`}
+            >
+              {option.option_string}
+            </span>
           </div>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2">
-            <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-100">
+          <div
+            className={`tw-ml-2 tw-flex tw-flex-shrink-0 tw-items-center tw-gap-3 tw-transition-all tw-duration-500 ${
+              animateIn
+                ? "tw-translate-x-0 tw-opacity-100"
+                : "tw-translate-x-4 tw-opacity-0"
+            }`}
+          >
+            <span className="tw-flex tw-items-center tw-gap-1.5">
+              {option.votes > 0 && (
+                <PollOptionVoterPreviews dropId={dropId} option={option} />
+              )}
+              <span
+                className={`tw-text-[11px] tw-font-medium tw-tabular-nums tw-transition-colors ${
+                  option.votes > 0
+                    ? "tw-text-iron-400 desktop-hover:group-hover/result:tw-text-iron-200"
+                    : "tw-text-iron-500"
+                }`}
+              >
+                {getVoteCountLabel(option.votes)}
+              </span>
+            </span>
+            <span
+              className={`tw-w-8 tw-text-right tw-text-[13.5px] tw-font-semibold tw-tabular-nums ${
+                isSelected ? "tw-text-iron-50" : "tw-text-iron-400"
+              }`}
+            >
               {percentage}%
             </span>
             <ChevronDownIcon
-              className={`tw-size-4 tw-text-iron-500 tw-transition-transform ${
+              className={`tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 desktop-hover:group-hover/result:tw-text-iron-300 ${
                 isExpanded ? "tw-rotate-180" : ""
               }`}
               aria-hidden="true"
@@ -389,21 +600,88 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     },
   });
 
+  const submitPollVote = useCallback(
+    async (selectedOptionNos: readonly number[]): Promise<boolean> => {
+      if (!poll?.is_open || selectedOptionNos.length === 0) {
+        return false;
+      }
+
+      const { success } = await requestAuth();
+      if (!success) {
+        return false;
+      }
+
+      const previousLocalPollOverride = localPollOverride;
+      const previousInteractionState = interactionState;
+      const optimisticPoll = getOptimisticPoll(poll, selectedOptionNos);
+
+      setLocalPollOverride({
+        sourcePoll: drop.poll,
+        poll: optimisticPoll,
+      });
+      setInteractionState({
+        ...getDefaultPollInteractionState(optimisticPoll),
+        view: "results",
+      });
+
+      voteMutation.mutate(selectedOptionNos, {
+        onError: () => {
+          setLocalPollOverride(previousLocalPollOverride);
+          setInteractionState(previousInteractionState);
+        },
+      });
+
+      return true;
+    },
+    [
+      drop.poll,
+      interactionState,
+      localPollOverride,
+      poll,
+      requestAuth,
+      voteMutation,
+    ]
+  );
+
   const handleVoteOptionChange = useCallback(
     (optionNo: number) => {
       if (!poll) {
         return;
       }
 
-      setInteractionState((current) => {
-        const scopedState = getScopedPollInteractionState(current, poll);
-        if (!poll.multichoice) {
+      if (!poll.multichoice) {
+        setInteractionState((current) => {
+          const scopedState = getScopedPollInteractionState(current, poll);
           return {
             ...scopedState,
             selectedOptionNos: [optionNo],
           };
-        }
+        });
+        void submitPollVote([optionNo]).then((submitted) => {
+          if (submitted) {
+            return;
+          }
 
+          setInteractionState((current) => {
+            const scopedState = getScopedPollInteractionState(current, poll);
+            if (
+              scopedState.selectedOptionNos.length !== 1 ||
+              scopedState.selectedOptionNos[0] !== optionNo
+            ) {
+              return scopedState;
+            }
+
+            return {
+              ...scopedState,
+              selectedOptionNos: [...poll.voted],
+            };
+          });
+        });
+        return;
+      }
+
+      setInteractionState((current) => {
+        const scopedState = getScopedPollInteractionState(current, poll);
         const next = new Set(scopedState.selectedOptionNos);
         if (next.has(optionNo)) {
           next.delete(optionNo);
@@ -416,7 +694,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         };
       });
     },
-    [poll]
+    [poll, submitPollVote]
   );
 
   const handleSubmitVote = useCallback(async () => {
@@ -429,13 +707,24 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return;
     }
 
-    const { success } = await requestAuth();
-    if (!success) {
+    await submitPollVote(scopedState.selectedOptionNos);
+  }, [interactionState, poll, submitPollVote]);
+
+  const showVoteView = useCallback(() => {
+    if (!poll?.is_open) {
       return;
     }
 
-    voteMutation.mutate(scopedState.selectedOptionNos);
-  }, [interactionState, poll, requestAuth, voteMutation]);
+    setInteractionState((current) => {
+      const scopedState = getScopedPollInteractionState(current, poll);
+      return {
+        ...scopedState,
+        view: "vote",
+        selectedOptionNos: [...poll.voted],
+        expandedOptionNo: null,
+      };
+    });
+  }, [poll]);
 
   if (!poll) {
     return null;
@@ -448,60 +737,42 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     return total + option.votes;
   }, 0);
   const votedOptionNos = new Set(poll.voted);
-  const effectiveView = poll.is_open ? scopedState.view : "results";
+  const showSelectionIndicator = votedOptionNos.size > 0;
+  const canShowResults = !poll.is_open || hasVoted;
+  const effectiveView =
+    canShowResults && (!poll.is_open || scopedState.view === "results")
+      ? "results"
+      : "vote";
   const expandedOptionNo = scopedState.expandedOptionNo;
   const voteOptionGroupName = `drop-poll-${poll.id}`;
-  const toggleViewLabel = getPollToggleLabel({
-    effectiveView,
-    hasVoted,
-  });
   const submitButtonLabel = getPollSubmitLabel({
     isPending: voteMutation.isPending,
     hasVoted,
   });
+  const showResultsFooterActions = effectiveView === "results" && hasVoted;
+  const showFooterAction = poll.is_open && showResultsFooterActions;
+  const showMultichoiceSubmit = poll.multichoice && selectedOptions.size > 0;
 
   return (
     <div
-      className="tw-mt-3 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-p-3"
+      className="tw-mt-3 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-iron-50/10 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg tw-backdrop-blur sm:tw-max-w-[480px]"
       onClick={(event) => event.stopPropagation()}
     >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-        <div className="tw-min-w-0">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
-              Poll
-            </span>
-          </div>
-          <div className="tw-mt-1 tw-text-xs tw-font-medium tw-text-iron-500">
-            {getPollClosingLabel(poll)}
-          </div>
+      <div className="tw-mb-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
+        <div className="tw-text-[15px] tw-font-bold tw-text-iron-50">Poll</div>
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-400">
+          <span
+            className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full ${
+              poll.is_open ? "tw-bg-green" : "tw-bg-iron-600"
+            }`}
+            aria-hidden="true"
+          />
+          <span className="tw-truncate">{getPollClosingLabel(poll)}</span>
         </div>
-        {poll.is_open && (
-          <button
-            type="button"
-            onClick={() => {
-              setInteractionState((current) => {
-                const currentState = getScopedPollInteractionState(
-                  current,
-                  poll
-                );
-                const nextView =
-                  currentState.view === "results" ? "vote" : "results";
-                return {
-                  ...currentState,
-                  view: nextView,
-                };
-              });
-            }}
-            className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-100 tw-transition desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800"
-          >
-            {toggleViewLabel}
-          </button>
-        )}
       </div>
 
       {effectiveView === "vote" && poll.is_open ? (
-        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2">
+        <div className="tw-flex tw-flex-col tw-gap-2">
           {poll.options.map((option) => (
             <PollVoteOption
               key={option.option_no}
@@ -513,52 +784,119 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               onChange={handleVoteOptionChange}
             />
           ))}
-          <div className="tw-mt-1 tw-flex tw-justify-end">
-            <button
-              type="button"
-              disabled={selectedOptions.size === 0 || voteMutation.isPending}
-              onClick={(event) => {
-                event.stopPropagation();
-                void handleSubmitVote();
-              }}
-              className="tw-text-primary-200 tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-primary-500/60 tw-bg-primary-500/15 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-transition disabled:tw-cursor-not-allowed disabled:tw-border-iron-700 disabled:tw-bg-iron-800 disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-primary-500/25"
+          {poll.multichoice && (
+            <div
+              className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
+                showMultichoiceSubmit
+                  ? "tw-mt-3.5 tw-grid-rows-[1fr] tw-opacity-100"
+                  : "tw-mt-0 tw-grid-rows-[0fr] tw-opacity-0"
+              }`}
             >
-              {submitButtonLabel}
-            </button>
-          </div>
+              <div
+                aria-hidden={!showMultichoiceSubmit}
+                inert={!showMultichoiceSubmit}
+                className="tw-overflow-hidden"
+              >
+                <button
+                  type="button"
+                  disabled={!showMultichoiceSubmit || voteMutation.isPending}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void handleSubmitVote();
+                  }}
+                  className="tw-flex tw-w-full tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-50 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-iron-950 tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-iron-700 disabled:tw-bg-iron-800 disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-200"
+                >
+                  {submitButtonLabel}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-2">
-          {poll.options.map((option) => (
-            <div key={option.option_no}>
-              <PollResultOption
-                option={option}
-                totalVotes={totalVotes}
-                isSelected={votedOptionNos.has(option.option_no)}
-                isExpanded={expandedOptionNo === option.option_no}
-                onToggle={(optionNo) =>
-                  setInteractionState((current) => {
-                    const currentState = getScopedPollInteractionState(
-                      current,
-                      poll
-                    );
-                    return {
-                      ...currentState,
-                      expandedOptionNo:
-                        currentState.expandedOptionNo === optionNo
-                          ? null
-                          : optionNo,
-                    };
-                  })
-                }
-              />
-              {expandedOptionNo === option.option_no && (
-                <div className="tw-overflow-hidden tw-rounded-b-lg tw-border-x tw-border-b tw-border-solid tw-border-iron-800 tw-bg-iron-950">
-                  <PollOptionVoters dropId={drop.id} option={option} />
+        <div className="tw-flex tw-flex-col tw-gap-2">
+          {poll.options.map((option) => {
+            const isExpanded = expandedOptionNo === option.option_no;
+
+            return (
+              <div key={option.option_no}>
+                <PollResultOption
+                  dropId={drop.id}
+                  option={option}
+                  totalVotes={totalVotes}
+                  isSelected={votedOptionNos.has(option.option_no)}
+                  isDimmed={hasVoted && !votedOptionNos.has(option.option_no)}
+                  isExpanded={isExpanded}
+                  multichoice={poll.multichoice}
+                  showSelectionIndicator={showSelectionIndicator}
+                  onToggle={(optionNo) =>
+                    setInteractionState((current) => {
+                      const currentState = getScopedPollInteractionState(
+                        current,
+                        poll
+                      );
+                      return {
+                        ...currentState,
+                        expandedOptionNo:
+                          currentState.expandedOptionNo === optionNo
+                            ? null
+                            : optionNo,
+                      };
+                    })
+                  }
+                />
+                <div
+                  className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
+                    isExpanded
+                      ? "tw-mb-1 tw-mt-1 tw-grid-rows-[1fr] tw-opacity-100"
+                      : "tw-mb-0 tw-mt-0 tw-grid-rows-[0fr] tw-opacity-0"
+                  }`}
+                >
+                  <div
+                    aria-hidden={!isExpanded}
+                    inert={!isExpanded}
+                    className="tw-overflow-hidden"
+                  >
+                    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-50/[0.07] tw-bg-iron-50/[0.03] tw-px-3.5 tw-py-2.5">
+                      <PollOptionVoters dropId={drop.id} option={option} />
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {showFooterAction && (
+        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-50/5 tw-pt-3.5">
+          <div className="tw-flex tw-h-7 tw-items-center tw-justify-end tw-gap-2 tw-overflow-hidden">
+            <button
+              type="button"
+              disabled={voteMutation.isPending}
+              onClick={(event) => {
+                event.stopPropagation();
+                showVoteView();
+              }}
+              className="tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-50/10 tw-bg-transparent tw-px-3 tw-text-[13px] tw-font-semibold tw-text-iron-400 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-iron-50/25 desktop-hover:hover:tw-text-iron-50"
+            >
+              Change vote
+            </button>
+            <span
+              className={`tw-flex tw-h-7 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-bg-iron-50/10 tw-px-3 tw-text-[13px] tw-font-bold tw-text-iron-50 tw-transition-opacity tw-duration-500 ${
+                showResultsFooterActions
+                  ? "tw-opacity-100"
+                  : "tw-pointer-events-none tw-opacity-0"
+              }`}
+              aria-hidden={!showResultsFooterActions}
+            >
+              <span>Voted</span>
+              <CheckIcon
+                className="tw-size-4 tw-text-green"
+                strokeWidth={3}
+                aria-hidden="true"
+              />
+            </span>
+          </div>
         </div>
       )}
     </div>
