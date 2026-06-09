@@ -10,11 +10,11 @@ BrokenLink = tuple[Path, int, str]
 
 def is_code_fence(line: str) -> bool:
     stripped = line.lstrip()
-    return stripped.startswith("```") or stripped.startswith("~~~")
+    return stripped.startswith(("```", "~~~"))
 
 
 def is_indented_code(line: str) -> bool:
-    return line.startswith("    ") or line.startswith("\t")
+    return line.startswith(("    ", "\t"))
 
 
 def strip_inline_code(line: str) -> str:
