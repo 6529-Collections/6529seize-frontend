@@ -350,11 +350,14 @@ const UnifiedWavesListWaves = forwardRef<
                 );
               }
               const row = animatedRegularRows[v.index];
-              const wave = row?.wave;
-              if (!isValidWave(wave)) {
-                console.warn("Invalid wave object at index", v.index, wave);
-                if (!validateWaveDetailed(wave)) {
-                  console.warn("Wave failed detailed validation:", wave);
+              if (!row || !isValidWave(row.wave)) {
+                console.warn(
+                  "Invalid wave object at index",
+                  v.index,
+                  row?.wave
+                );
+                if (!validateWaveDetailed(row?.wave)) {
+                  console.warn("Wave failed detailed validation:", row?.wave);
                 }
                 return null;
               }

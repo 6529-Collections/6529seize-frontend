@@ -509,9 +509,12 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   );
                 }
                 const row = animatedRegularRows[v.index];
-                const wave = row?.wave;
-                if (!isValidWave(wave)) {
-                  console.warn("Invalid wave object at index", v.index, wave);
+                if (!row || !isValidWave(row.wave)) {
+                  console.warn(
+                    "Invalid wave object at index",
+                    v.index,
+                    row?.wave
+                  );
                   return null;
                 }
                 return (
