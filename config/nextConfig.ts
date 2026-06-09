@@ -16,7 +16,6 @@ export function sharedConfig(
     reactStrictMode: false,
     htmlLimitedBots: HTML_LIMITED_METADATA_BOTS,
     compress: true,
-    productionBrowserSourceMaps: true,
     sassOptions: { quietDeps: true },
     allowedDevOrigins: ["172.20.10.3", "192.168.1.77"],
     images: {
