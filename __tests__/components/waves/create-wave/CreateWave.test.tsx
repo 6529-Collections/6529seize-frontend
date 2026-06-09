@@ -312,15 +312,15 @@ describe("CreateWave", () => {
     global.URL.createObjectURL = jest.fn(() => "mocked-object-url");
   });
 
-  const renderCreateWave = () => {
-    return render(
-      <AuthContext.Provider value={mockAuthContext}>
-        <ReactQueryWrapperContext.Provider value={mockQueryContext}>
-          <CreateWave profile={mockProfile} onBack={onBack} />
-        </ReactQueryWrapperContext.Provider>
-      </AuthContext.Provider>
-    );
-  };
+  const createWaveElement = () => (
+    <AuthContext.Provider value={mockAuthContext}>
+      <ReactQueryWrapperContext.Provider value={mockQueryContext}>
+        <CreateWave profile={mockProfile} onBack={onBack} />
+      </ReactQueryWrapperContext.Provider>
+    </AuthContext.Provider>
+  );
+
+  const renderCreateWave = () => render(createWaveElement());
 
   it("renders the create wave form with main steps and current step content", () => {
     renderCreateWave();
@@ -401,7 +401,13 @@ describe("CreateWave", () => {
         expect(mockGetDropSnapshot).toHaveBeenCalled();
         expect(mockRequestDrop).not.toHaveBeenCalled();
         expect(mockedGetAdminGroupId).toHaveBeenCalled();
-        expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalled();
+        expect(mockAddWaveMutation.mutateAsync).toHaveBeenCalledWith({
+          body: {
+            name: "Test Wave",
+            description: "Test description",
+          },
+          displayMetadataRequests: [],
+        });
       });
     });
 
@@ -627,9 +633,9 @@ describe("CreateWave", () => {
       // Mock the mutation to call onSuccess
       mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => {
         const mutation = {
-          mutateAsync: jest.fn().mockImplementation(async (data) => {
+          mutateAsync: jest.fn().mockImplementation(async (variables) => {
             const result = { id: "new-wave-id" };
-            await onSuccess(result);
+            await onSuccess(result, variables);
             return result;
           }),
         };
@@ -669,9 +675,9 @@ describe("CreateWave", () => {
       };
       mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
       mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
-        mutateAsync: jest.fn().mockImplementation(async () => {
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
           const result = { id: "new-wave-id" };
-          await onSuccess(result);
+          await onSuccess(result, variables);
           return result;
         }),
       }));
@@ -703,6 +709,115 @@ describe("CreateWave", () => {
       ).toBeLessThan(mockRouter.push.mock.invocationCallOrder[0]);
     });
 
+    it("uses the display metadata snapshot from submit time", async () => {
+      const submittedConfig = {
+        ...mockWaveConfig,
+        config: {
+          ...mockWaveConfig.config,
+          overview: {
+            ...mockWaveConfig.config.overview,
+            type: "APPROVE",
+          },
+          display: {
+            approve: {
+              approvalsTabLabel: "Candidates",
+              approvedTabLabel: "Selected",
+            },
+          },
+        },
+        step: CreateWaveStep.DESCRIPTION,
+      };
+      const laterConfig = {
+        ...submittedConfig,
+        config: {
+          ...submittedConfig.config,
+          display: {
+            approve: {
+              approvalsTabLabel: "Apps",
+              approvedTabLabel: "Chosen",
+            },
+          },
+        },
+      };
+      let latestOnSuccess:
+        | ((
+            result: { readonly id: string },
+            variables: unknown
+          ) => Promise<void>)
+        | undefined;
+      let resolveMutation: (() => void) | undefined;
+      const mutateAsync = jest.fn().mockImplementation(async (variables) => {
+        await new Promise<void>((resolve) => {
+          resolveMutation = resolve;
+        });
+        const result = { id: "new-wave-id" };
+        await latestOnSuccess?.(result, variables);
+        return result;
+      });
+
+      mockedUseWaveConfig.mockReturnValue(submittedConfig);
+      mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => {
+        latestOnSuccess = onSuccess;
+        return { mutateAsync };
+      });
+
+      const renderResult = renderCreateWave();
+
+      fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+
+      await waitFor(() => {
+        expect(mutateAsync).toHaveBeenCalledWith({
+          body: {
+            name: "Test Wave",
+            description: "Test description",
+          },
+          displayMetadataRequests: [
+            {
+              data_key: "wave_display.approve.tabs.approvals_label",
+              data_value: "Candidates",
+            },
+            {
+              data_key: "wave_display.approve.tabs.approved_label",
+              data_value: "Selected",
+            },
+          ],
+        });
+      });
+
+      mockedUseWaveConfig.mockReturnValue(laterConfig);
+      renderResult.rerender(createWaveElement());
+
+      await act(async () => {
+        resolveMutation?.();
+      });
+
+      await waitFor(() => {
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
+      });
+
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(1, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approvals_label",
+          data_value: "Candidates",
+        },
+      });
+      expect(mockedCreateWaveMetadata).toHaveBeenNthCalledWith(2, {
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approved_label",
+          data_value: "Selected",
+        },
+      });
+      expect(mockedCreateWaveMetadata).not.toHaveBeenCalledWith({
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.approve.tabs.approvals_label",
+          data_value: "Apps",
+        },
+      });
+    });
+
     it("warns and still redirects when display metadata save fails", async () => {
       mockedCreateWaveMetadata.mockRejectedValue(new Error("metadata failed"));
       const configOnDescriptionStep = {
@@ -724,9 +839,9 @@ describe("CreateWave", () => {
       };
       mockedUseWaveConfig.mockReturnValue(configOnDescriptionStep);
       mockedUseAddWaveMutation.mockImplementation(({ onSuccess }) => ({
-        mutateAsync: jest.fn().mockImplementation(async () => {
+        mutateAsync: jest.fn().mockImplementation(async (variables) => {
           const result = { id: "new-wave-id" };
-          await onSuccess(result);
+          await onSuccess(result, variables);
           return result;
         }),
       }));

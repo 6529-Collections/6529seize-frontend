@@ -56,15 +56,11 @@ export function useCreateWaveSubmission({
   });
 
   const addWaveMutation = useAddWaveMutation({
-    onSuccess: async (response) => {
-      const metadataRequests =
-        config.overview.type === ApiWaveType.Approve
-          ? getCreateWaveDisplayMetadataRequests(config.display?.approve)
-          : [];
-      if (metadataRequests.length > 0) {
+    onSuccess: async (response, variables) => {
+      if (variables.displayMetadataRequests.length > 0) {
         try {
           await Promise.all(
-            metadataRequests.map((body) =>
+            variables.displayMetadataRequests.map((body) =>
               createWaveMetadata({
                 waveId: response.id,
                 body,
@@ -185,20 +181,30 @@ export function useCreateWaveSubmission({
         ? await multiPartUpload({ file: config.overview.image, path: "wave" })
         : null;
 
-      const waveBody = getCreateNewWaveBody({
-        config: {
-          ...config,
-          groups: {
-            ...config.groups,
-            admin: adminGroupId,
-          },
+      const submissionConfig: CreateWaveConfig = {
+        ...config,
+        groups: {
+          ...config.groups,
+          admin: adminGroupId,
         },
+      };
+      const waveBody = getCreateNewWaveBody({
+        config: submissionConfig,
         picture: picture?.url ?? null,
         drop: dropRequest,
       });
+      const displayMetadataRequests =
+        submissionConfig.overview.type === ApiWaveType.Approve
+          ? getCreateWaveDisplayMetadataRequests(
+              submissionConfig.display.approve
+            )
+          : [];
 
       mutationStarted = true;
-      await addWaveMutation.mutateAsync(waveBody);
+      await addWaveMutation.mutateAsync({
+        body: waveBody,
+        displayMetadataRequests,
+      });
     } catch (error) {
       if (!mutationStarted) {
         setToast({
