@@ -82,6 +82,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
   setActiveWalletAccount: jest.fn(() => true),
 }));
 
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  logoutSessionV2: jest.fn(() => Promise.resolve()),
+}));
+
 jest.mock("@/src/utils/security-logger", () => ({
   createConnectionEventContext: jest.fn(() => ({})),
   createValidationEventContext: jest.fn(() => ({})),

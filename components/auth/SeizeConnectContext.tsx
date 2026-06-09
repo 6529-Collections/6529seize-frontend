@@ -29,6 +29,7 @@ import {
   setActiveWalletAccount,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
+import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import { WalletInitializationError } from "@/src/errors/wallet";
@@ -831,6 +832,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      await logoutSessionV2({ address: getWalletAddress() });
       removeAuthJwt();
       refreshStoredConnectedAccounts();
 
@@ -842,7 +844,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error: unknown) {
       const authError = new AuthenticationError(
-        "Failed to clear authentication state after successful wallet disconnect",
+        "Failed to revoke authentication state after successful wallet disconnect",
         error
       );
       logError("seizeDisconnectAndLogout", authError);
@@ -873,6 +875,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      await logoutSessionV2({ address: getWalletAddress(), allSessions: true });
       let remainingProfiles = getConnectedWalletAccounts().length;
       const maxIterations = Math.max(
         MAX_CONNECTED_PROFILES * 2,

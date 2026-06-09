@@ -14,6 +14,7 @@ import type {
 import { WebSocketStatus } from "./WebSocketTypes";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { getAuthJwt } from "../auth/auth.utils";
+import { isWalletAuthSessionV2Enabled } from "../auth/session-v2.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
@@ -203,7 +204,8 @@ export function WebSocketProvider({
 
       // Build URL with optional token
       let url = config.url;
-      if (token) {
+      const useMessageAuth = !!token && isWalletAuthSessionV2Enabled();
+      if (token && !useMessageAuth) {
         url += `?token=${encodeURIComponent(token)}`;
       }
 
@@ -218,6 +220,15 @@ export function WebSocketProvider({
           }
 
           setStatus(WebSocketStatus.CONNECTED);
+
+          if (useMessageAuth) {
+            ws.send(
+              JSON.stringify({
+                type: "AUTHENTICATE",
+                access_token: token,
+              })
+            );
+          }
 
           // Reset reconnect attempts on successful connection
           reconnectAttemptsRef.current = 0;
