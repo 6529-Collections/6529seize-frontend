@@ -4,7 +4,10 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
-import { useDropPollOptionVoters } from "@/hooks/useDropPollOptionVoters";
+import {
+  DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE,
+  useDropPollOptionVoters,
+} from "@/hooks/useDropPollOptionVoters";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -102,10 +105,14 @@ export function PollOptionVoterPreviews({
   const { voters } = useDropPollOptionVoters({
     dropId,
     optionNo: option.option_no,
-    enabled: false,
+    enabled: option.votes > 0,
+    pageSize: DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE,
   });
 
-  const previewVoters = voters.slice(0, 3);
+  const previewVoters = voters.slice(
+    0,
+    DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE
+  );
 
   if (previewVoters.length === 0) {
     return null;
