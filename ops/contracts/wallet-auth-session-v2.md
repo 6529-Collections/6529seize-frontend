@@ -116,7 +116,8 @@ Response:
 - `transfer_code`
 - `expires_at`
 - `address`
-- `role`
+- `target_client_type`
+- `role` (optional; string or null)
 - `deep_link_path`
 
 The QR/deep link may contain `transfer_code`, `address`, and `role`. It must never contain refresh tokens or access tokens.
