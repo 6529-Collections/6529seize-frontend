@@ -102,6 +102,15 @@ export interface CreateWaveApprovalConfig {
   readonly maxWinners: number | null;
 }
 
+export interface CreateWaveApproveDisplayConfig {
+  readonly approvalsTabLabel: string;
+  readonly approvedTabLabel: string;
+}
+
+export interface CreateWaveDisplayConfig {
+  readonly approve: CreateWaveApproveDisplayConfig;
+}
+
 export enum CreateWaveOutcomeType {
   MANUAL = "MANUAL",
   REP = "REP",
@@ -152,6 +161,7 @@ export interface CreateWaveConfig {
   readonly voting: CreateWaveVotingConfig;
   readonly outcomes: CreateWaveOutcomeConfig[];
   readonly approval: CreateWaveApprovalConfig;
+  readonly display: CreateWaveDisplayConfig;
 }
 
 export enum CreateWaveStepStatus {

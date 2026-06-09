@@ -69,6 +69,15 @@ jest.mock("@/hooks/waves/useWaveCurationReorderMutation", () => ({
   }),
 }));
 
+const mockApproveLabels = {
+  approvals: "Approvals",
+  approved: "Approved",
+};
+
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useApproveWaveCustomTabLabels: () => mockApproveLabels,
+}));
+
 jest.mock("@/hooks/useProfileWave", () => ({
   getProfileWaveIdentity: () => "",
   useProfileWave: () => ({ data: null }),
@@ -122,6 +131,8 @@ function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockApproveLabels.approvals = "Approvals";
+  mockApproveLabels.approved = "Approved";
   searchParamsGet.mockReturnValue(null);
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
   mockWaveInfo = {
@@ -420,6 +431,30 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.getAllByText("Approved").length).toBeGreaterThan(0);
     expect(screen.queryByText("Leaderboard")).toBeNull();
     expect(screen.queryByText("Winners")).toBeNull();
+  });
+
+  it("uses custom approve wave tab labels", () => {
+    mockApproveLabels.approvals = "Candidates";
+    mockApproveLabels.approved = "Selected";
+    mockWaveInfo = {
+      isChatWave: false,
+      isApproveWave: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: false,
+    };
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
+    ];
+
+    renderComponent(MyStreamWaveTab.LEADERBOARD);
+
+    expect(screen.getAllByText("Candidates").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Selected").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Approvals")).toBeNull();
+    expect(screen.queryByText("Approved")).toBeNull();
   });
 
   it("forces a transient switch to Chat when serialNo is present", () => {

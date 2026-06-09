@@ -1,10 +1,5 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
-import WaveGroup from "../specs/groups/group/WaveGroup";
-import { WaveGroupType } from "../specs/groups/group/WaveGroup.types";
-import WaveActiveCurationSection from "./curation/WaveActiveCurationSection";
-import WaveDisableLinks from "../specs/WaveDisableLinks";
-import WaveSlowMode from "../specs/WaveSlowMode";
+import WaveSettingsSections from "./WaveSettingsSections";
 
 interface WaveGroupsProps {
   readonly wave: ApiWave;
@@ -15,60 +10,12 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
   const ringClasses = useRing
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "tw-rounded-b-xl lg:tw-rounded-b-none";
-  const showChatSettings = wave.chat.enabled;
 
   return (
     <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
       <div className={`tw-relative tw-h-full tw-bg-iron-950 ${ringClasses}`}>
         <div className="no-scrollbar tw-h-full tw-overflow-y-auto tw-overflow-x-hidden">
-          <div className="tw-pb-4">
-            <WaveActiveCurationSection wave={wave} />
-            <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-6 tw-px-4 tw-pt-6">
-              <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-300">
-                Settings & access
-              </p>
-            </div>
-            <div className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
-              {showChatSettings && (
-                <>
-                  <WaveSlowMode wave={wave} />
-                  <WaveDisableLinks wave={wave} />
-                </>
-              )}
-
-              <WaveGroup
-                scope={wave.visibility.scope}
-                type={WaveGroupType.VIEW}
-                wave={wave}
-              />
-              {wave.wave.type !== ApiWaveType.Chat && (
-                <>
-                  <WaveGroup
-                    scope={wave.participation.scope}
-                    type={WaveGroupType.DROP}
-                    wave={wave}
-                  />
-                  <WaveGroup
-                    scope={wave.voting.scope}
-                    type={WaveGroupType.VOTE}
-                    wave={wave}
-                  />
-                </>
-              )}
-
-              <WaveGroup
-                scope={wave.chat.scope}
-                type={WaveGroupType.CHAT}
-                wave={wave}
-              />
-
-              <WaveGroup
-                scope={wave.wave.admin_group}
-                type={WaveGroupType.ADMIN}
-                wave={wave}
-              />
-            </div>
-          </div>
+          <WaveSettingsSections wave={wave} />
         </div>
       </div>
     </div>
