@@ -1,6 +1,8 @@
 import {
   DEFAULT_APPROVE_WAVE_TAB_LABELS,
   WAVE_DISPLAY_METADATA_KEYS,
+  getApproveWaveDisplayMetadataDraft,
+  getApproveWaveDisplayMetadataUpdate,
   getApproveWaveTabLabelsFromMetadata,
   getCreateWaveDisplayMetadataRequests,
 } from "@/helpers/waves/wave-metadata.helpers";
@@ -31,6 +33,108 @@ describe("wave-metadata.helpers", () => {
         data_value: "Selected",
       },
     ]);
+  });
+
+  it("extracts editable draft values from latest metadata", () => {
+    expect(
+      getApproveWaveDisplayMetadataDraft([
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+          data_value: "Old",
+        },
+        {
+          id: 2,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+          data_value: " Candidates ",
+        },
+        {
+          id: 3,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+          data_value: DEFAULT_APPROVE_WAVE_TAB_LABELS.approved,
+        },
+      ])
+    ).toEqual({
+      approvalsTabLabel: "Candidates",
+      approvedTabLabel: "",
+    });
+  });
+
+  it("computes create operations for changed custom labels", () => {
+    expect(
+      getApproveWaveDisplayMetadataUpdate({
+        metadata: [],
+        display: {
+          approvalsTabLabel: " Candidates ",
+          approvedTabLabel: "",
+        },
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+          data_value: "Candidates",
+        },
+      ],
+      deleteIds: [],
+    });
+  });
+
+  it("deletes all existing rows when labels reset to defaults", () => {
+    expect(
+      getApproveWaveDisplayMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+            data_value: "Old",
+          },
+          {
+            id: 2,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+            data_value: "Candidates",
+          },
+          {
+            id: 3,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+            data_value: "Selected",
+          },
+        ],
+        display: {
+          approvalsTabLabel: "",
+          approvedTabLabel: "Selected",
+        },
+      })
+    ).toEqual({
+      create: [],
+      deleteIds: [1, 2],
+    });
+  });
+
+  it("does not create or delete unchanged metadata", () => {
+    expect(
+      getApproveWaveDisplayMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+            data_value: "Candidates",
+          },
+          {
+            id: 2,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+            data_value: "Selected",
+          },
+        ],
+        display: {
+          approvalsTabLabel: "Candidates",
+          approvedTabLabel: "Selected",
+        },
+      })
+    ).toEqual({
+      create: [],
+      deleteIds: [],
+    });
   });
 
   it("uses the highest metadata id for duplicate keys", () => {

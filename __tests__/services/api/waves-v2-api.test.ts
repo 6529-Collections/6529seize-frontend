@@ -1,13 +1,19 @@
 import {
   createWaveMetadata,
+  deleteWaveMetadata,
   fetchWaveMetadata,
 } from "@/services/api/waves-v2-api";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import {
+  commonApiDelete,
+  commonApiFetch,
+  commonApiPost,
+} from "@/services/api/common-api";
 
 jest.mock("@/services/api/common-api");
 
 const mockedCommonApiFetch = commonApiFetch as jest.Mock;
 const mockedCommonApiPost = commonApiPost as jest.Mock;
+const mockedCommonApiDelete = commonApiDelete as jest.Mock;
 
 describe("waves-v2-api", () => {
   beforeEach(() => {
@@ -37,6 +43,19 @@ describe("waves-v2-api", () => {
     expect(mockedCommonApiPost).toHaveBeenCalledWith({
       endpoint: "v2/waves/wave-1/metadata",
       body,
+      headers: undefined,
+    });
+  });
+
+  it("deletes wave metadata", async () => {
+    mockedCommonApiDelete.mockResolvedValue(undefined);
+
+    await expect(
+      deleteWaveMetadata({ waveId: "wave-1", metadataId: 7 })
+    ).resolves.toBeUndefined();
+
+    expect(mockedCommonApiDelete).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/metadata/7",
       headers: undefined,
     });
   });

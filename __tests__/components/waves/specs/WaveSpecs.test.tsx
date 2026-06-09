@@ -9,7 +9,13 @@ import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generat
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WAVE_DISPLAY_METADATA_KEYS } from "@/helpers/waves/wave-metadata.helpers";
 import { commonApiPost } from "@/services/api/common-api";
+import {
+  createWaveMetadata,
+  deleteWaveMetadata,
+  fetchWaveMetadata,
+} from "@/services/api/waves-v2-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -27,8 +33,17 @@ jest.mock("@/components/waves/specs/WaveAuthor", () => () => (
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
+jest.mock("@/services/api/waves-v2-api", () => ({
+  createWaveMetadata: jest.fn(),
+  deleteWaveMetadata: jest.fn(),
+  fetchWaveMetadata: jest.fn(),
+}));
 
 const commonApiPostMock = commonApiPost as jest.Mock;
+const createWaveMetadataMock = createWaveMetadata as jest.Mock;
+const deleteWaveMetadataMock = deleteWaveMetadata as jest.Mock;
+const fetchWaveMetadataMock = fetchWaveMetadata as jest.Mock;
+let waveMetadata: any[] = [];
 
 const makeWave = (
   overrides: {
@@ -104,6 +119,8 @@ const renderWaveSpecs = ({
       queries: { retry: false },
     },
   });
+  const requestAuth = jest.fn(async () => ({ success: true }));
+  const setToast = jest.fn();
   const Providers = ({ children }: { readonly children: React.ReactNode }) => (
     <AuthContext.Provider
       value={
@@ -111,8 +128,8 @@ const renderWaveSpecs = ({
           connectedProfile:
             connectedHandle === null ? null : { handle: connectedHandle },
           activeProfileProxy: null,
-          requestAuth: jest.fn(async () => ({ success: true })),
-          setToast: jest.fn(),
+          requestAuth,
+          setToast,
         } as any
       }
     >
@@ -129,6 +146,8 @@ const renderWaveSpecs = ({
   return {
     ...render(<WaveSpecs wave={wave} />, { wrapper: Providers }),
     queryClient,
+    requestAuth,
+    setToast,
   };
 };
 
@@ -173,6 +192,14 @@ const expectApprovalQueriesInvalidated = (
 describe("WaveSpecs", () => {
   beforeEach(() => {
     commonApiPostMock.mockResolvedValue(makeWave());
+    waveMetadata = [];
+    fetchWaveMetadataMock.mockImplementation(async () => waveMetadata);
+    createWaveMetadataMock.mockResolvedValue({
+      id: 10,
+      data_key: "key",
+      data_value: "value",
+    });
+    deleteWaveMetadataMock.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -227,16 +254,23 @@ describe("WaveSpecs", () => {
     expect(screen.getByText("Approval threshold")).toBeInTheDocument();
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(screen.getByText("Hold time: 2m")).toBeInTheDocument();
+    expect(screen.getByText("Tab labels")).toBeInTheDocument();
+    expect(screen.getByText("Approvals")).toBeInTheDocument();
+    expect(screen.getByText("Approved")).toBeInTheDocument();
   });
 
   it.each([ApiWaveType.Chat, ApiWaveType.Rank])(
-    "hides approval threshold settings for %s waves",
+    "hides approve-only settings for %s waves",
     (waveType) => {
       renderWaveSpecs({ wave: makeWave({ waveType }) });
 
       expect(screen.queryByText("Approval threshold")).not.toBeInTheDocument();
+      expect(screen.queryByText("Tab labels")).not.toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: "Edit approval threshold" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Edit tab labels" })
       ).not.toBeInTheDocument();
     }
   );
@@ -290,6 +324,213 @@ describe("WaveSpecs", () => {
     expect(
       screen.queryByRole("button", { name: "Edit approval threshold" })
     ).not.toBeInTheDocument();
+  });
+
+  it("shows tab label edit icon only when user can edit wave", async () => {
+    const { rerender } = renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    expect(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <WaveSpecs
+        wave={makeWave({
+          canAdmin: false,
+          waveType: ApiWaveType.Approve,
+        })}
+      />
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("button", { name: "Edit tab labels" })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("opens tab label editor with defaults as blank fields", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    );
+
+    expect(screen.getByLabelText("Approvals tab label")).toHaveValue("");
+    expect(screen.getByLabelText("Approved tab label")).toHaveValue("");
+    expect(screen.getByPlaceholderText("Approvals")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Approved")).toBeInTheDocument();
+  });
+
+  it("opens tab label editor with custom metadata values", async () => {
+    const user = userEvent.setup();
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+        data_value: "Candidates",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+        data_value: "Selected",
+      },
+    ];
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    );
+
+    expect(screen.getByLabelText("Approvals tab label")).toHaveValue(
+      "Candidates"
+    );
+    expect(screen.getByLabelText("Approved tab label")).toHaveValue("Selected");
+  });
+
+  it("saves custom tab label metadata and invalidates metadata", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    );
+    await user.type(screen.getByLabelText("Approvals tab label"), "Candidates");
+
+    expect(screen.getByText("Candidates")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+          data_value: "Candidates",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+    });
+  });
+
+  it("uses defaults by deleting existing tab label metadata", async () => {
+    const user = userEvent.setup();
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+        data_value: "Old",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+        data_value: "Candidates",
+      },
+      {
+        id: 3,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+        data_value: "Selected",
+      },
+    ];
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    );
+    await user.click(screen.getByRole("button", { name: "Use defaults" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledTimes(3);
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 1,
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 2,
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 3,
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps tab label editor open when metadata save fails", async () => {
+    createWaveMetadataMock.mockRejectedValueOnce(new Error("metadata failed"));
+    const user = userEvent.setup();
+    const { setToast } = renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    );
+    await user.type(screen.getByLabelText("Approvals tab label"), "Candidates");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(setToast).toHaveBeenCalledWith({
+        type: "error",
+        message: "metadata failed",
+      });
+    });
+    expect(screen.getByLabelText("Approvals tab label")).toBeInTheDocument();
+  });
+
+  it("shows tab label validation after editing", async () => {
+    const user = userEvent.setup();
+    renderWaveSpecs({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit tab labels" })
+    );
+    await user.type(screen.getByLabelText("Approved tab label"), "Approvals");
+
+    expect(
+      screen.getByText("Use two different tab labels.")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   });
 
   it("saves approval threshold settings", async () => {

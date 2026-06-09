@@ -5,6 +5,7 @@ import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
 import WaveApprovalThresholds from "./WaveApprovalThresholds";
+import WaveApproveTabLabels from "./WaveApproveTabLabels";
 import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
 
 const CREDIT_SCOPE_LABELS: Record<ApiWaveCreditScope, string> = {
@@ -67,7 +68,12 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
             </>
           )}
 
-          {isApproveWave && <WaveApprovalThresholds wave={wave} />}
+          {isApproveWave && (
+            <>
+              <WaveApprovalThresholds wave={wave} />
+              <WaveApproveTabLabels wave={wave} />
+            </>
+          )}
 
           <div className="tw-group tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm">
             <span className="tw-font-normal tw-text-iron-500">Creator</span>

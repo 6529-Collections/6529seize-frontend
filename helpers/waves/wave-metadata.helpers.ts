@@ -22,6 +22,26 @@ export const WAVE_DISPLAY_METADATA_KEYS = {
   approvedTabLabel: "wave_display.approve.tabs.approved_label",
 } as const;
 
+type ApproveWaveDisplayMetadataField = {
+  readonly displayKey: keyof CreateWaveApproveDisplayConfig;
+  readonly dataKey: string;
+  readonly defaultValue: string;
+};
+
+const APPROVE_WAVE_DISPLAY_METADATA_FIELDS: readonly ApproveWaveDisplayMetadataField[] =
+  [
+    {
+      displayKey: "approvalsTabLabel",
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+      defaultValue: DEFAULT_APPROVE_WAVE_TAB_LABELS.approvals,
+    },
+    {
+      displayKey: "approvedTabLabel",
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+      defaultValue: DEFAULT_APPROVE_WAVE_TAB_LABELS.approved,
+    },
+  ];
+
 interface ApproveWaveLabelInput {
   readonly approvalsTabLabel?: string | null | undefined;
   readonly approvedTabLabel?: string | null | undefined;
@@ -30,6 +50,11 @@ interface ApproveWaveLabelInput {
 export interface ApproveWaveTabLabels {
   readonly approvals: string;
   readonly approved: string;
+}
+
+export interface ApproveWaveDisplayMetadataUpdate {
+  readonly create: ApiCreateWaveMetadataRequest[];
+  readonly deleteIds: number[];
 }
 
 export const normalizeWaveTabLabel = (
@@ -147,6 +172,30 @@ export const getCreateWaveDisplayMetadataRequests = (
   );
 };
 
+export const getApproveWaveDisplayMetadataRows = ({
+  metadata,
+  dataKey,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly dataKey: string;
+}): ApiWaveMetadata[] =>
+  metadata?.filter((item) => item.data_key === dataKey) ?? [];
+
+const getLatestMetadataItem = ({
+  metadata,
+  dataKey,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly dataKey: string;
+}): ApiWaveMetadata | null => {
+  const rows = getApproveWaveDisplayMetadataRows({ metadata, dataKey });
+  if (!rows.length) {
+    return null;
+  }
+
+  return rows.reduce((latest, item) => (item.id > latest.id ? item : latest));
+};
+
 const getLatestMetadataValue = ({
   metadata,
   dataKey,
@@ -154,21 +203,7 @@ const getLatestMetadataValue = ({
   readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
   readonly dataKey: string;
 }): string | null => {
-  if (!metadata?.length) {
-    return null;
-  }
-
-  let latest: ApiWaveMetadata | null = null;
-  for (const item of metadata) {
-    if (item.data_key !== dataKey) {
-      continue;
-    }
-    if (latest === null || item.id > latest.id) {
-      latest = item;
-    }
-  }
-
-  return latest?.data_value ?? null;
+  return getLatestMetadataItem({ metadata, dataKey })?.data_value ?? null;
 };
 
 export const getApproveWaveTabLabelsFromMetadata = (
@@ -196,4 +231,70 @@ export const getApproveWaveTabLabelsFromMetadata = (
   }
 
   return labels;
+};
+
+export const getApproveWaveDisplayMetadataDraft = (
+  metadata: readonly ApiWaveMetadata[] | null | undefined
+): CreateWaveApproveDisplayConfig => {
+  const getDraftValue = ({
+    dataKey,
+    defaultValue,
+  }: {
+    readonly dataKey: string;
+    readonly defaultValue: string;
+  }): string => {
+    const value = normalizeWaveTabLabel(
+      getLatestMetadataValue({ metadata, dataKey })
+    );
+
+    return value === defaultValue ? "" : value;
+  };
+
+  return {
+    approvalsTabLabel: getDraftValue({
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+      defaultValue: DEFAULT_APPROVE_WAVE_TAB_LABELS.approvals,
+    }),
+    approvedTabLabel: getDraftValue({
+      dataKey: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+      defaultValue: DEFAULT_APPROVE_WAVE_TAB_LABELS.approved,
+    }),
+  };
+};
+
+export const getApproveWaveDisplayMetadataUpdate = ({
+  metadata,
+  display,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly display: CreateWaveApproveDisplayConfig;
+}): ApproveWaveDisplayMetadataUpdate => {
+  const create: ApiCreateWaveMetadataRequest[] = [];
+  const deleteIds: number[] = [];
+
+  for (const field of APPROVE_WAVE_DISPLAY_METADATA_FIELDS) {
+    const rows = getApproveWaveDisplayMetadataRows({
+      metadata,
+      dataKey: field.dataKey,
+    });
+    const latestValue = normalizeWaveTabLabel(
+      getLatestMetadataValue({ metadata, dataKey: field.dataKey })
+    );
+    const request = getMetadataRequest({
+      dataKey: field.dataKey,
+      dataValue: display[field.displayKey],
+      defaultValue: field.defaultValue,
+    });
+
+    if (request === null) {
+      deleteIds.push(...rows.map((row) => row.id));
+      continue;
+    }
+
+    if (latestValue !== request.data_value) {
+      create.push(request);
+    }
+  }
+
+  return { create, deleteIds };
 };

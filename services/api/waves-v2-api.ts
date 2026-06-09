@@ -9,7 +9,7 @@ import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
-import { commonApiFetch, commonApiPost } from "./common-api";
+import { commonApiDelete, commonApiFetch, commonApiPost } from "./common-api";
 
 interface FetchWavesV2PageProps {
   readonly page: number;
@@ -231,6 +231,21 @@ export async function createWaveMetadata({
   return await commonApiPost<ApiCreateWaveMetadataRequest, ApiWaveMetadata>({
     endpoint: `v2/waves/${waveId}/metadata`,
     body,
+    headers,
+  });
+}
+
+export async function deleteWaveMetadata({
+  waveId,
+  metadataId,
+  headers,
+}: {
+  readonly waveId: string;
+  readonly metadataId: number;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<void> {
+  await commonApiDelete({
+    endpoint: `v2/waves/${waveId}/metadata/${metadataId}`,
     headers,
   });
 }
