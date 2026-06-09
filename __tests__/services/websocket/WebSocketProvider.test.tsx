@@ -18,6 +18,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  isWalletAuthSessionV2Enabled: jest.fn(() => false),
+}));
+
 class MockWebSocket {
   static OPEN = 1;
   static CONNECTING = 0;
@@ -88,6 +92,10 @@ describe("WebSocketProvider", () => {
       typeof authUtils.getAuthJwt
     >;
     mockGetAuthJwt.mockReturnValue("fresh-token");
+    const {
+      isWalletAuthSessionV2Enabled,
+    } = require("@/services/auth/session-v2.utils");
+    isWalletAuthSessionV2Enabled.mockReturnValue(false);
 
     jest.clearAllMocks();
   });
@@ -150,6 +158,37 @@ describe("WebSocketProvider", () => {
       });
 
       expect(global.WebSocket).toHaveBeenCalledWith("ws://test");
+    });
+
+    it("uses message-based authentication in session v2 mode", () => {
+      const {
+        isWalletAuthSessionV2Enabled,
+      } = require("@/services/auth/session-v2.utils");
+      isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("test-token");
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledWith("ws://test");
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: "AUTHENTICATE",
+          access_token: "test-token",
+        })
+      );
     });
 
     it("disconnects intentionally and prevents reconnection", () => {

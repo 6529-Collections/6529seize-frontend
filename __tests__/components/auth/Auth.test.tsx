@@ -51,6 +51,12 @@ jest.mock("@/services/auth/auth.utils", () => ({
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  isWalletAuthSessionV2Enabled: jest.fn(() => false),
+  loginWithSessionV2: jest.fn(),
+  persistSessionResponse: jest.fn(),
+}));
+
 // Using jwt-validation.utils instead of direct jwt-decode
 
 jest.mock("@tanstack/react-query", () => ({

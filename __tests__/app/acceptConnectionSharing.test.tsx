@@ -29,6 +29,19 @@ jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(() => ({ profile: null, isLoading: false })),
 }));
 
+jest.mock("@/components/nft-transfer/TransferModalPfp", () => ({
+  __esModule: true,
+  default: ({ alt }: { readonly alt: string }) => (
+    <div data-testid="transfer-pfp">{alt}</div>
+  ),
+}));
+
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  isConnectionTransferV2Enabled: jest.fn(() => false),
+  persistSessionResponse: jest.fn(),
+  redeemConnectionTransfer: jest.fn(),
+}));
+
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
@@ -80,6 +93,6 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
     expect(screen.getByText(/Incoming connection/)).toBeInTheDocument();
-    expect(screen.getByText(/0x123/)).toBeInTheDocument();
+    expect(screen.getAllByText(/0x123/).length).toBeGreaterThan(0);
   });
 });
