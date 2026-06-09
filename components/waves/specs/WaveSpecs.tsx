@@ -5,8 +5,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
-import WaveApprovalThresholds from "./WaveApprovalThresholds";
-import WaveApproveTabLabels from "./WaveApproveTabLabels";
 import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
 
 const CREDIT_SCOPE_LABELS: Record<ApiWaveCreditScope, string> = {
@@ -24,7 +22,6 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
-  const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const creditScope = wave.voting.credit_scope ?? ApiWaveCreditScope.Wave;
   const creditScopeLabel =
     CREDIT_SCOPE_LABELS[creditScope] ??
@@ -75,13 +72,6 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
                   {creditScopeLabel}
                 </span>
               </div>
-            </>
-          )}
-
-          {isApproveWave && (
-            <>
-              <WaveApprovalThresholds wave={wave} />
-              <WaveApproveTabLabels wave={wave} />
             </>
           )}
 

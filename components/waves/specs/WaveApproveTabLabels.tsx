@@ -10,9 +10,11 @@ import {
   areApproveWaveTabLabelsDuplicate,
   doApproveWaveTabLabelsUseReservedLabels,
   getApproveWaveDisplayMetadataDraft,
+  getApproveWaveDisplayMetadataRows,
   getApproveWaveDisplayMetadataUpdate,
   getApproveWaveTabLabelsFromMetadata,
   normalizeWaveTabLabel,
+  WAVE_DISPLAY_METADATA_KEYS,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
@@ -23,7 +25,9 @@ import {
 import type { CreateWaveApproveDisplayConfig } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
-import WaveApproveTabLabelsEditorForm from "./WaveApproveTabLabelsEditorForm";
+import WaveApproveTabLabelsEditorForm, {
+  type ApproveTabLabelField,
+} from "./WaveApproveTabLabelsEditorForm";
 import WaveSettingRow from "./WaveSettingRow";
 
 interface WaveApproveTabLabelsProps {
@@ -61,6 +65,36 @@ const getValidationErrorMessage = (
   return null;
 };
 
+const getMetadataKeyForField = (field: ApproveTabLabelField): string =>
+  field === "approvals"
+    ? WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel
+    : WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel;
+
+const getApproveWaveDisplayMetadataFieldUpdate = ({
+  metadata,
+  display,
+  field,
+}: {
+  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  readonly display: CreateWaveApproveDisplayConfig;
+  readonly field: ApproveTabLabelField;
+}) => {
+  const dataKey = getMetadataKeyForField(field);
+  const fieldMetadataIds = new Set(
+    getApproveWaveDisplayMetadataRows({ metadata, dataKey }).map(
+      (item) => item.id
+    )
+  );
+  const update = getApproveWaveDisplayMetadataUpdate({ metadata, display });
+
+  return {
+    create: update.create.filter((body) => body.data_key === dataKey),
+    deleteIds: update.deleteIds.filter((metadataId) =>
+      fieldMetadataIds.has(metadataId)
+    ),
+  };
+};
+
 export default function WaveApproveTabLabels({
   wave,
 }: WaveApproveTabLabelsProps) {
@@ -84,24 +118,9 @@ export default function WaveApproveTabLabels({
     !metadataQuery.isLoading &&
     !metadataQuery.isError &&
     canEditWave({ connectedProfile, activeProfileProxy, wave });
-  const operations = useMemo(
-    () =>
-      getApproveWaveDisplayMetadataUpdate({
-        metadata,
-        display: draft,
-      }),
-    [draft, metadata]
-  );
   const validationErrorMessage = getValidationErrorMessage(draft);
   const visibleErrorMessage =
     hasTouched || hasSubmitted ? validationErrorMessage : null;
-  const hasChanges =
-    operations.create.length > 0 || operations.deleteIds.length > 0;
-  const saveDisabled =
-    Boolean(validationErrorMessage) ||
-    !hasChanges ||
-    metadataQuery.isLoading ||
-    metadataQuery.isError;
 
   const resetEditor = useCallback(() => {
     setDraft(getApproveWaveDisplayMetadataDraft(metadata));
@@ -116,12 +135,14 @@ export default function WaveApproveTabLabels({
 
   const saveLabels = (
     closeEditor: () => void,
+    field: ApproveTabLabelField,
     displaySnapshot: CreateWaveApproveDisplayConfig,
     metadataSnapshot: readonly ApiWaveMetadata[] | null
   ) => {
-    const update = getApproveWaveDisplayMetadataUpdate({
+    const update = getApproveWaveDisplayMetadataFieldUpdate({
       metadata: metadataSnapshot,
       display: displaySnapshot,
+      field,
     });
 
     if (!update.create.length && !update.deleteIds.length) {
@@ -167,47 +188,68 @@ export default function WaveApproveTabLabels({
     return null;
   }
 
-  const valueLabel = (
-    <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-1">
-      <span>{labels.approvals}</span>
-      <span aria-hidden="true">·</span>
-      <span>{labels.approved}</span>
-    </span>
-  );
+  const getSaveDisabled = (field: ApproveTabLabelField): boolean => {
+    const update = getApproveWaveDisplayMetadataFieldUpdate({
+      metadata,
+      display: draft,
+      field,
+    });
+    const hasChanges = update.create.length > 0 || update.deleteIds.length > 0;
 
-  const renderEditor = ({
-    closeEditor,
-  }: {
-    readonly closeEditor: () => void;
-  }) => (
-    <WaveApproveTabLabelsEditorForm
-      disabled={isSaving}
-      display={draft}
-      errorMessage={visibleErrorMessage}
-      onCancel={closeEditor}
-      onDisplayChange={setTouchedDraft}
-      onSave={() => {
-        setHasSubmitted(true);
-        if (validationErrorMessage) {
-          return;
-        }
-        saveLabels(closeEditor, { ...draft }, metadata);
-      }}
-      onUseDefaults={() => {
-        setTouchedDraft(EMPTY_DISPLAY);
-      }}
-      saveDisabled={saveDisabled}
-    />
-  );
+    return (
+      Boolean(validationErrorMessage) ||
+      !hasChanges ||
+      metadataQuery.isLoading ||
+      metadataQuery.isError
+    );
+  };
+
+  const renderEditor =
+    (field: ApproveTabLabelField) =>
+    ({ closeEditor }: { readonly closeEditor: () => void }) => (
+      <WaveApproveTabLabelsEditorForm
+        disabled={isSaving}
+        display={draft}
+        errorMessage={visibleErrorMessage}
+        field={field}
+        onCancel={closeEditor}
+        onDisplayChange={setTouchedDraft}
+        onSave={() => {
+          setHasSubmitted(true);
+          if (validationErrorMessage) {
+            return;
+          }
+          saveLabels(closeEditor, field, { ...draft }, metadata);
+        }}
+        onUseDefault={() => {
+          setTouchedDraft(
+            field === "approvals"
+              ? { ...draft, approvalsTabLabel: "" }
+              : { ...draft, approvedTabLabel: "" }
+          );
+        }}
+        saveDisabled={getSaveDisabled(field)}
+      />
+    );
 
   return (
-    <WaveSettingRow
-      canEdit={canEdit}
-      editLabel="Edit tab labels"
-      label="Tab labels"
-      onOpen={resetEditor}
-      renderEditor={renderEditor}
-      valueLabel={valueLabel}
-    />
+    <>
+      <WaveSettingRow
+        canEdit={canEdit}
+        editLabel="Edit approvals tab label"
+        label="Approvals tab"
+        onOpen={resetEditor}
+        renderEditor={renderEditor("approvals")}
+        valueLabel={labels.approvals}
+      />
+      <WaveSettingRow
+        canEdit={canEdit}
+        editLabel="Edit approved tab label"
+        label="Approved tab"
+        onOpen={resetEditor}
+        renderEditor={renderEditor("approved")}
+        valueLabel={labels.approved}
+      />
+    </>
   );
 }
