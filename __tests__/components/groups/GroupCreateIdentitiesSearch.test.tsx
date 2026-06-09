@@ -49,4 +49,30 @@ describe('GroupCreateIdentitiesSearch', () => {
       'inline'
     );
   });
+
+  it('keeps results open while tabbing inside search and closes after leaving', async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <GroupCreateIdentitiesSearch
+          selectedWallets={[]}
+          onIdentitySelect={jest.fn()}
+        />
+        <button type="button">outside</button>
+      </>
+    );
+
+    const input = screen.getByRole('textbox');
+    await user.click(input);
+    expect(screen.getByRole('button', { name: 'select' })).toBeInTheDocument();
+
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'select' })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'outside' })).toHaveFocus();
+    expect(
+      screen.queryByRole('button', { name: 'select' })
+    ).not.toBeInTheDocument();
+  });
 });
