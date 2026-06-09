@@ -1,17 +1,12 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import BoostIcon from "@/components/common/icons/BoostIcon";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { canShowDropBoostAction } from "@/helpers/waves/drop-boost.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import { AnimatePresence, motion } from "framer-motion";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 
 interface WaveDropActionsBoostProps {
@@ -23,13 +18,14 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   drop,
   showCount = true,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = useAuth();
   const { toggleBoost, isPending } = useDropBoostMutation();
   const [isAnimating, setIsAnimating] = useState(false);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canBoost = !isTemporaryDrop && !!connectedProfile;
+  const canShowBoost = canShowDropBoostAction({ drop, connectedProfile });
+  const canBoost = canShowBoost && !isTemporaryDrop && !!connectedProfile;
   const isBoosted = drop.context_profile_context?.boosted ?? false;
   const boostCount = drop.boosts;
 
@@ -57,6 +53,10 @@ const WaveDropActionsBoost: React.FC<WaveDropActionsBoostProps> = ({
   }, [canBoost, isPending, toggleBoost, drop]);
 
   const tooltipId = `boost-drop-${drop.id}`;
+
+  if (!canShowBoost) {
+    return null;
+  }
 
   return (
     <>
