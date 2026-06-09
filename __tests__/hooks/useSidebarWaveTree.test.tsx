@@ -72,6 +72,69 @@ describe("useSidebarWaveTree", () => {
     ).toEqual(["parent"]);
   });
 
+  it("can hide expanded child rows without clearing expansion state", () => {
+    const onParentExpand = jest.fn();
+    const wavesWithUnreadSubwave = [
+      createMockMinimalWave({
+        id: "parent",
+        hasSubwaves: true,
+      }),
+      createMockMinimalWave({
+        id: "child",
+        parentWaveId: "parent",
+        createdAt: 10,
+        unreadDropsCount: 1,
+      }),
+    ];
+    const { result, rerender } = renderHook(
+      ({ showExpandedSubwaves }: { readonly showExpandedSubwaves: boolean }) =>
+        useSidebarWaveTree({
+          waves: wavesWithUnreadSubwave,
+          activeWaveId: null,
+          onParentExpand,
+          showExpandedSubwaves,
+        }),
+      {
+        initialProps: {
+          showExpandedSubwaves: true,
+        },
+      }
+    );
+
+    act(() => {
+      result.current.toggleParent("parent");
+    });
+
+    expect(
+      result.current
+        .getRows(result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent", "child"]);
+
+    rerender({ showExpandedSubwaves: false });
+
+    const hiddenRows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(hiddenRows.map((row) => row.wave.id)).toEqual(["parent"]);
+    expect(hiddenRows[0]).toMatchObject({
+      canExpand: true,
+      isExpanded: false,
+      hasUnreadSubwaves: true,
+    });
+
+    rerender({ showExpandedSubwaves: true });
+
+    const restoredRows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(restoredRows.map((row) => row.wave.id)).toEqual([
+      "parent",
+      "child",
+    ]);
+    expect(restoredRows[0]).toMatchObject({
+      isExpanded: true,
+    });
+  });
+
   it("auto-expands the active subwave parent without local storage", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>

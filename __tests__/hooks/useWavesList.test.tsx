@@ -345,6 +345,59 @@ test("starts without subwave queries, then appends subwaves for loaded parents",
   ]);
 });
 
+test("keeps public fetching state scoped to root wave sources", () => {
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: true,
+    refetch: jest.fn(),
+  });
+
+  const { result, rerender } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.isFetching).toBe(false);
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [mainWave],
+    isFetching: true,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: false,
+    refetch: jest.fn(),
+  });
+
+  rerender();
+
+  expect(result.current.isFetching).toBe(true);
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  useOfficialWavesMock.mockReturnValue({
+    waves: [],
+    isFetching: true,
+    status: "success",
+    refetch: officialWavesRefetchMock,
+  });
+
+  rerender();
+
+  expect(result.current.isFetching).toBe(true);
+});
+
 test("prefetches subwaves without adding parent ids to rendered rows", () => {
   const parentWave = {
     ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),

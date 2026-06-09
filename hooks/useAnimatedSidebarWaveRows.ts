@@ -21,6 +21,10 @@ export interface AnimatedSidebarWaveTreeRow extends SidebarWaveTreeRow {
   readonly animationState: SidebarWaveRowAnimationState;
 }
 
+interface UseAnimatedSidebarWaveRowsOptions {
+  readonly keepExitingRows?: boolean | undefined;
+}
+
 const getEnteredRows = (
   rows: readonly SidebarWaveTreeRow[]
 ): AnimatedSidebarWaveTreeRow[] =>
@@ -88,7 +92,8 @@ const groupExitingRowsByParent = (
 };
 
 export function useAnimatedSidebarWaveRows(
-  rows: readonly SidebarWaveTreeRow[]
+  rows: readonly SidebarWaveTreeRow[],
+  { keepExitingRows = true }: UseAnimatedSidebarWaveRowsOptions = {}
 ) {
   const [animatedRows, setAnimatedRows] = useState<
     AnimatedSidebarWaveTreeRow[]
@@ -96,6 +101,7 @@ export function useAnimatedSidebarWaveRows(
 
   const rowKeys = useMemo(() => rows.map((row) => row.key), [rows]);
   const rowKeySignature = rowKeys.join("\n");
+  const currentRows = useMemo(() => getEnteredRows(rows), [rows]);
 
   useEffect(() => {
     const nextKeys = new Set(rowKeys);
@@ -104,10 +110,9 @@ export function useAnimatedSidebarWaveRows(
       const previousRowsByKey = new Map(
         previousRows.map((row) => [row.key, row])
       );
-      const exitingRowsByParent = groupExitingRowsByParent(
-        previousRows,
-        nextKeys
-      );
+      const exitingRowsByParent = keepExitingRows
+        ? groupExitingRowsByParent(previousRows, nextKeys)
+        : new Map<string, AnimatedSidebarWaveTreeRow[]>();
       const nextRows: AnimatedSidebarWaveTreeRow[] = [];
 
       for (const row of rows) {
@@ -155,7 +160,7 @@ export function useAnimatedSidebarWaveRows(
       cancelAfterPaint(enterFrame);
       globalThis.clearTimeout(exitTimer);
     };
-  }, [rowKeySignature, rowKeys, rows]);
+  }, [keepExitingRows, rowKeySignature, rowKeys, rows]);
 
-  return animatedRows;
+  return keepExitingRows ? animatedRows : currentRows;
 }

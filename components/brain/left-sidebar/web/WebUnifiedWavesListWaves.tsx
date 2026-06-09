@@ -220,6 +220,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     activeWaveId: activeWave.id,
     activeParentWaveId: activeWave.parentWaveId,
     onParentExpand: streamWaves.loadSubwavesForParent,
+    showExpandedSubwaves: !isCollapsed,
   });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
@@ -268,11 +269,24 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     () => getRows(regularWaves),
     [regularWaves, getRows]
   );
+  const rowAnimationOptions = useMemo(
+    () => ({ keepExitingRows: !isCollapsed }),
+    [isCollapsed]
+  );
   const animatedAnnouncementRows =
-    useAnimatedSidebarWaveRows(announcementRows);
-  const animatedOfficialRows = useAnimatedSidebarWaveRows(officialRows);
-  const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
-  const animatedRegularRows = useAnimatedSidebarWaveRows(regularRows);
+    useAnimatedSidebarWaveRows(announcementRows, rowAnimationOptions);
+  const animatedOfficialRows = useAnimatedSidebarWaveRows(
+    officialRows,
+    rowAnimationOptions
+  );
+  const animatedPinnedRows = useAnimatedSidebarWaveRows(
+    pinnedRows,
+    rowAnimationOptions
+  );
+  const animatedRegularRows = useAnimatedSidebarWaveRows(
+    regularRows,
+    rowAnimationOptions
+  );
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED

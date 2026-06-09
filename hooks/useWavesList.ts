@@ -315,7 +315,6 @@ const useWavesList = () => {
 
   const {
     subwaves,
-    isFetching: isSubwavesFetching,
     refetch: refetchSubwaves,
   } = useWaveSubwavesMap({
     parentWaveIds: loadedSubwaveParentIds,
@@ -365,7 +364,7 @@ const useWavesList = () => {
       waves: allWaves,
 
       // Original waves pagination and loading
-      isFetching: isFetching || isOfficialWavesFetching || isSubwavesFetching,
+      isFetching: isFetching || isOfficialWavesFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPage: fetchNextPageStable,
@@ -398,7 +397,6 @@ const useWavesList = () => {
       allWaves,
       isFetching,
       isOfficialWavesFetching,
-      isSubwavesFetching,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPageStable,

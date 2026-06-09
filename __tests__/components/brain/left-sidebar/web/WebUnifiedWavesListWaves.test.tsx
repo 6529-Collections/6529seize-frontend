@@ -227,6 +227,73 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
   expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
 });
 
+it("hides expanded child rows immediately while the sidebar is collapsed", () => {
+  const waves = [
+    createMockMinimalWave({
+      id: "parent",
+      hasSubwaves: true,
+    }),
+    createMockMinimalWave({
+      id: "child",
+      parentWaveId: "parent",
+      createdAt: 10,
+      unreadDropsCount: 1,
+    }),
+  ];
+  const sentinelRef = React.createRef<HTMLDivElement>();
+  const { rerender } = render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={sentinelRef}
+    />
+  );
+
+  fireEvent.click(screen.getByTestId("toggle-parent"));
+
+  expect(screen.getByTestId("wave-child")).toBeInTheDocument();
+
+  rerender(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={sentinelRef}
+      isCollapsed
+    />
+  );
+
+  expect(screen.queryByTestId("wave-child")).toBeNull();
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-expanded",
+    "false"
+  );
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-can-expand",
+    "false"
+  );
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-unread-subwaves",
+    "true"
+  );
+
+  rerender(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={sentinelRef}
+    />
+  );
+
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-expanded",
+    "true"
+  );
+  expect(screen.getByTestId("wave-child")).toBeInTheDocument();
+});
+
 it("keeps child rows mounted while collapse animation runs", () => {
   jest.useFakeTimers();
 
