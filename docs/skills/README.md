@@ -19,5 +19,5 @@ This folder stores repo-local Codex skills and agent guidance.
 
 ## Related Areas
 
-- [Developer Documentation](../developer/pnpm-and-socket-firewall.md)
+- [Developer Setup: pnpm and Socket Firewall](../developer/pnpm-and-socket-firewall.md)
 - [Documentation Index](../README.md)
