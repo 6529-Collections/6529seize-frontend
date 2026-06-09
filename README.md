@@ -195,10 +195,9 @@ packaging. The production bundle is built as Next standalone output, static
 assets are uploaded to S3/CloudFront, and Elastic Beanstalk starts `server.js`
 through [Procfile](Procfile).
 
-Operational helper scripts such as `ghruns`, `ghdeploy`, `6529 staging`, and
-PM2 launch examples are documented in
-[docs/developer/pnpm-and-socket-firewall.md](docs/developer/pnpm-and-socket-firewall.md)
-or the relevant script help output.
+Repository and deployment helper details, including `ghruns`, `ghdeploy`,
+`6529 staging`, and PM2 launch examples, are documented in
+[docs/developer/pnpm-and-socket-firewall.md](docs/developer/pnpm-and-socket-firewall.md).
 
 ## Contributing
 
