@@ -58,6 +58,7 @@ description: Write, open, iterate, merge, and optionally deploy pull requests wi
    - In this repo, use signed commits: `git commit -s ...`.
    - Keep follow-up commits focused and give them clear messages describing the bot/user feedback addressed.
    - Push after each meaningful round of fixes so review bots evaluate the latest head.
+   - After the initial PR push, keep the agent/thread open until every tracked bot or status check triggered for that head commit reaches a terminal state.
 
 6. Iterate with available review bots:
    - Discover available bot feedback from PR comments, review comments, review threads, checks, or local repo tools.
@@ -73,6 +74,8 @@ description: Write, open, iterate, merge, and optionally deploy pull requests wi
      - `security/snyk (6529)`
      - `SonarCloud Code Analysis`
    - For each tracked bot or status check, verify the latest pushed commit, capture the current state, and inspect any failure, skipped review, alert, or warning details before deciding readiness.
+   - After every follow-up commit, repeat the wait: keep the agent/thread open until all tracked bots and checks for the new head commit are done, including success, failure, skipped, or cancelled states.
+   - Review every new bot comment or finding and make an explicit fix-or-defer decision. The default is to address it; defer only when the comment is wrong, inapplicable, duplicative, or lower value than the churn it would create, and document the rationale.
    - For local CodeRabbit review in this repo, use `6529 run cr` or the `quality:cr` scripts when they fit the change scope.
    - Treat bot findings as review input, not orders. Fix valid correctness, security, performance, test, docs, accessibility, and maintainability issues.
    - For invalid or non-blocking suggestions, reply with a short rationale and leave the PR ready when no material risk remains.
