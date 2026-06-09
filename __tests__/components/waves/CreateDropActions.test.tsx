@@ -152,8 +152,11 @@ describe("CreateDropActions", () => {
     submitting: false,
     isRequiredMetadataMissing: false,
     isRequiredMediaMissing: false,
+    canCreatePoll: false,
+    isPollActive: false,
     handleFileChange: jest.fn(),
     onAddMetadataClick: jest.fn(),
+    onTogglePoll: jest.fn(),
     breakIntoStorm: jest.fn(),
     onGifDrop: jest.fn(),
     showOptions: true,
@@ -280,6 +283,40 @@ describe("CreateDropActions", () => {
     expect(screen.getAllByLabelText("Upload a file").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Add GIF").length).toBeGreaterThan(0);
     expect(screen.getAllByTestId("storm-button").length).toBeGreaterThan(0);
+  });
+
+  it("renders poll action for admins and toggles it", async () => {
+    render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
+
+    const pollButton = screen.getByLabelText("Add poll");
+    await userEvent.click(pollButton);
+
+    expect(defaultProps.onTogglePoll).toHaveBeenCalled();
+  });
+
+  it("renders poll action before the storm button", () => {
+    render(<CreateDropActions {...defaultProps} canCreatePoll={true} />);
+
+    const pollButton = screen.getByLabelText("Add poll");
+    const stormButton = screen.getByTestId("storm-button");
+    expect(
+      pollButton.compareDocumentPosition(stormButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("shows active poll action state", () => {
+    render(
+      <CreateDropActions
+        {...defaultProps}
+        canCreatePoll={true}
+        isPollActive={true}
+      />
+    );
+
+    const pollButton = screen.getByLabelText("Remove poll");
+    expect(pollButton).toHaveAttribute("aria-pressed", "true");
+    expect(pollButton).toHaveClass("tw-bg-primary-500/20");
   });
 
   it("calls onAddMetadataClick when metadata button is clicked", async () => {

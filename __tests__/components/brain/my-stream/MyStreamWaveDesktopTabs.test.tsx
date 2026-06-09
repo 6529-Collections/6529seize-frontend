@@ -150,7 +150,7 @@ beforeEach(() => {
 });
 
 describe("MyStreamWaveDesktopTabs", () => {
-  it("returns null for chat waves", () => {
+  it("renders Polls for chat waves when available", () => {
     mockWaveInfo = {
       isChatWave: true,
       isApproveWave: false,
@@ -158,8 +158,12 @@ describe("MyStreamWaveDesktopTabs", () => {
       isCurationWave: false,
       isRankWave: false,
     };
-    const { container } = renderComponent();
-    expect(container.firstChild).toBeNull();
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS];
+
+    renderComponent();
+
+    expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Polls").length).toBeGreaterThan(0);
   });
 
   it("filters hidden My Votes without correcting the active tab", () => {
@@ -214,6 +218,16 @@ describe("MyStreamWaveDesktopTabs", () => {
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
     expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+  });
+
+  it("shows Polls when available and activates it", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS];
+
+    renderComponent(MyStreamWaveTab.CHAT);
+
+    fireEvent.click(screen.getAllByRole("tab", { name: "Polls" })[0]);
+
+    expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.POLLS);
   });
 
   it("hides My Votes for guests on normal rank waves", () => {

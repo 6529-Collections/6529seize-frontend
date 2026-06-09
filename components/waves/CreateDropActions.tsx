@@ -4,6 +4,7 @@ import { publicEnv } from "@/config/env";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ChartBarIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
@@ -20,8 +21,11 @@ interface CreateDropActionsProps {
   readonly animateOptions: boolean;
   readonly isRequiredMetadataMissing: boolean;
   readonly isRequiredMediaMissing: boolean;
+  readonly canCreatePoll: boolean;
+  readonly isPollActive: boolean;
   readonly handleFileChange: (files: File[]) => void;
   readonly onAddMetadataClick: () => void;
+  readonly onTogglePoll: () => void;
   readonly breakIntoStorm: () => void;
   readonly setShowOptions: (showOptions: boolean) => void;
   readonly onGifDrop: (gif: string) => void;
@@ -37,8 +41,11 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     animateOptions,
     isRequiredMediaMissing,
     isRequiredMetadataMissing,
+    canCreatePoll,
+    isPollActive,
     handleFileChange,
     onAddMetadataClick,
+    onTogglePoll,
     breakIntoStorm,
     setShowOptions,
     onGifDrop,
@@ -139,6 +146,42 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
           animate: { opacity: 1, scale: 1 },
           transition: { duration: 0 },
         };
+
+    const pollAction = canCreatePoll ? (
+      <>
+        <button
+          type="button"
+          aria-label={isPollActive ? "Remove poll" : "Add poll"}
+          aria-pressed={isPollActive}
+          onClick={onTogglePoll}
+          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${
+            isPollActive
+              ? "tw-text-primary-200 tw-bg-primary-500/20"
+              : "tw-bg-iron-700 tw-text-iron-300"
+          }`}
+          data-tooltip-id="add-poll-tooltip"
+        >
+          <ChartBarIcon
+            className="tw-size-5 tw-flex-shrink-0 lg:tw-size-4"
+            aria-hidden="true"
+          />
+        </button>
+        {!isMobile && (
+          <Tooltip
+            id="add-poll-tooltip"
+            place="top"
+            offset={8}
+            opacity={1}
+            positionStrategy="fixed"
+            style={TOOLTIP_STYLES}
+          >
+            <span className="tw-text-xs">
+              {isPollActive ? "Remove poll" : "Add poll"}
+            </span>
+          </Tooltip>
+        )}
+      </>
+    ) : null;
 
     return (
       <LayoutGroup>
@@ -297,6 +340,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         )}
                       </>
                     )}
+                    {pollAction}
                     <StormButton
                       isStormMode={isStormMode}
                       canAddPart={canAddPart}
@@ -313,7 +357,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   onClick={onSetShowIconsClick}
                   className={`tw-absolute tw-inset-y-0 tw-left-0 tw-my-auto tw-flex-shrink-0 ${
                     (isDropMode && isRequiredMetadataMissing) ||
-                    isRequiredMediaMissing
+                    isRequiredMediaMissing ||
+                    isPollActive
                       ? "tw-text-[#FEDF89]"
                       : "tw-text-iron-400"
                   } tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70`}

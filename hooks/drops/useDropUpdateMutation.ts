@@ -6,7 +6,7 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useContext } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 
@@ -17,7 +17,7 @@ interface DropUpdateMutationParams {
 }
 
 export const useDropUpdateMutation = () => {
-  const { setToast } = useContext(AuthContext);
+  const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
   const myStreamContext = useMyStream();
 

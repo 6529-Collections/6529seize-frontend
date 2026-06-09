@@ -17,6 +17,7 @@ import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadataResponse } from '../models/ApiDropMetadataResponse';
 import { ApiDropNftLink } from '../models/ApiDropNftLink';
 import { ApiDropPart } from '../models/ApiDropPart';
+import { ApiDropPoll } from '../models/ApiDropPoll';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
@@ -70,6 +71,7 @@ export class ApiDropWithoutWave {
     'boosts': number;
     'is_additional_action_promised': boolean | null;
     'hide_link_preview': boolean;
+    'poll'?: ApiDropPoll;
     'nft_links'?: Array<ApiDropNftLink>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -249,6 +251,12 @@ export class ApiDropWithoutWave {
             "name": "hide_link_preview",
             "baseName": "hide_link_preview",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "poll",
+            "baseName": "poll",
+            "type": "ApiDropPoll",
             "format": ""
         },
         {

@@ -16,6 +16,7 @@ export enum MyStreamWaveTab {
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
+  POLLS = "POLLS",
   FAQ = "FAQ",
 }
 

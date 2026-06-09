@@ -2,6 +2,7 @@
 
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import type { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
@@ -11,6 +12,35 @@ import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helper
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
+
+const getOptimisticPoll = (
+  dropRequest: ApiCreateDropRequest
+): ApiDropPoll | undefined => {
+  if (!dropRequest.poll) {
+    return undefined;
+  }
+
+  const rawOptions = (dropRequest.poll as { readonly options?: unknown })
+    .options;
+  const options = Array.isArray(rawOptions)
+    ? rawOptions.filter(
+        (option): option is string => typeof option === "string"
+      )
+    : [];
+
+  return {
+    id: `${getOptimisticDropId()}-poll`,
+    options: options.map((option, index) => ({
+      option_no: index + 1,
+      option_string: option,
+      votes: 0,
+    })),
+    voted: [],
+    multichoice: dropRequest.poll.multichoice,
+    closing_time: dropRequest.poll.closing_time,
+    is_open: dropRequest.poll.closing_time > Date.now(),
+  };
+};
 
 export const getOptimisticDrop = (
   dropRequest: ApiCreateDropRequest,
@@ -37,6 +67,7 @@ export const getOptimisticDrop = (
 
   const replyTo = getReplyTo();
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
+  const poll = getOptimisticPoll(dropRequest);
 
   return {
     id: getOptimisticDropId(),
@@ -139,5 +170,6 @@ export const getOptimisticDrop = (
       dropRequest.is_additional_action_promised ?? false,
     hide_link_preview: false,
     mentioned_groups: dropRequest.mentioned_groups ?? [],
+    ...(poll ? { poll } : {}),
   };
 };

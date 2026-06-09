@@ -75,6 +75,7 @@ export enum QueryKey {
   DROPS = "DROPS",
   DROPS_LEADERBOARD = "DROPS_LEADERBOARD",
   DROP_VOTERS = "DROP_VOTERS",
+  DROP_POLL_VOTERS = "DROP_POLL_VOTERS",
   DROP_VOTE_LOGS = "DROP_VOTE_LOGS",
   BOOSTED_DROPS = "BOOSTED_DROPS",
   DROP = "DROP",
@@ -100,6 +101,7 @@ export enum QueryKey {
   WAVES_PUBLIC = "WAVES_PUBLIC",
   WAVES_SEARCH = "WAVES_SEARCH",
   WAVE = "WAVE",
+  WAVE_POLLS = "WAVE_POLLS",
   WAVE_METADATA = "WAVE_METADATA",
   WAVE_CURATIONS = "WAVE_CURATIONS",
   WAVE_LOGS = "WAVE_LOGS",
@@ -954,9 +956,19 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP],
     });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVE_POLLS],
+      })
+      .catch(() => undefined);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_VOTERS],
     });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.DROP_POLL_VOTERS],
+      })
+      .catch(() => undefined);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_VOTE_LOGS],
     });

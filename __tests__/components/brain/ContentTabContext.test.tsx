@@ -60,6 +60,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
@@ -81,6 +82,7 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.POLLS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
@@ -137,6 +139,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
   });
 
@@ -158,6 +161,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.POLLS,
     ]);
   });
 
@@ -188,7 +192,10 @@ describe("ContentTabContext", () => {
       })
     );
 
-    expect(result.current.availableTabs).toEqual([MyStreamWaveTab.CHAT]);
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.POLLS,
+    ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
@@ -211,6 +218,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.SALES,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
   });
 
@@ -234,6 +242,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
   });
@@ -259,6 +268,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.POLLS,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
@@ -283,6 +293,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.POLLS,
     ]);
   });
 
