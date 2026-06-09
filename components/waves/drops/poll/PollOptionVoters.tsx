@@ -44,7 +44,7 @@ function PollVoterRow({ voter }: { readonly voter: ApiIdentityOverview }) {
   const shouldLimit = shouldLimitIdentityLabel(label);
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded tw-px-1.5 tw-py-0.5 -tw-mx-1.5 tw-transition-colors desktop-hover:hover:tw-bg-iron-800">
+    <div className="-tw-mx-1.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded tw-px-1.5 tw-py-0.5 tw-transition-colors desktop-hover:hover:tw-bg-iron-800">
       <PollVoterAvatar identity={voter} />
       <UserProfileTooltipWrapper user={hrefValue}>
         <Link
@@ -102,7 +102,7 @@ export function PollOptionVoterPreviews({
   const { voters } = useDropPollOptionVoters({
     dropId,
     optionNo: option.option_no,
-    enabled: option.votes > 0,
+    enabled: false,
   });
 
   const previewVoters = voters.slice(0, 3);
@@ -126,9 +126,11 @@ export function PollOptionVoterPreviews({
 export function PollOptionVoters({
   dropId,
   option,
+  enabled,
 }: {
   readonly dropId: string;
   readonly option: ApiDropPollOption;
+  readonly enabled: boolean;
 }) {
   const {
     voters,
@@ -140,7 +142,7 @@ export function PollOptionVoters({
   } = useDropPollOptionVoters({
     dropId,
     optionNo: option.option_no,
-    enabled: option.votes > 0,
+    enabled: enabled && option.votes > 0,
   });
 
   if (option.votes === 0) {

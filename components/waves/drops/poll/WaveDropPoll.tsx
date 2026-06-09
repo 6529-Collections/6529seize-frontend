@@ -269,7 +269,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
 
   return (
     <div
-      className="tw-mt-3 tw-mb-2 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg tw-backdrop-blur md:tw-max-w-2xl"
+      className="tw-mb-2 tw-mt-3 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg tw-backdrop-blur md:tw-max-w-2xl"
       onClick={(event) => event.stopPropagation()}
     >
       <div className="tw-mb-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
@@ -371,7 +371,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                     className="tw-overflow-hidden"
                   >
                     <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2.5">
-                      <PollOptionVoters dropId={drop.id} option={option} />
+                      <PollOptionVoters
+                        dropId={drop.id}
+                        option={option}
+                        enabled={isExpanded}
+                      />
                     </div>
                   </div>
                 </div>

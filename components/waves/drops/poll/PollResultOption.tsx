@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
+import { usePrefetchDropPollOptionVoters } from "@/hooks/useDropPollOptionVoters";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { getVoteCountLabel } from "./WaveDropPoll.helpers";
@@ -35,6 +36,13 @@ export function PollResultOption({
   const indicatorStateClass = isSelected
     ? "tw-scale-110 tw-border-iron-50 tw-bg-iron-50 desktop-hover:group-hover/result:tw-scale-100 desktop-hover:group-hover/result:tw-border-iron-200 desktop-hover:group-hover/result:tw-bg-iron-200"
     : "tw-border-iron-600 tw-bg-iron-900/50 desktop-hover:group-hover/result:tw-border-iron-400";
+  const prefetchVoters = usePrefetchDropPollOptionVoters();
+  const handlePrefetchVoters = () =>
+    prefetchVoters({
+      dropId,
+      optionNo: option.option_no,
+      enabled: option.votes > 0,
+    });
 
   useEffect(() => {
     setAnimateIn(false);
@@ -63,6 +71,8 @@ export function PollResultOption({
           event.stopPropagation();
           onToggle(option.option_no);
         }}
+        onFocus={handlePrefetchVoters}
+        onPointerEnter={handlePrefetchVoters}
         className={`tw-group/result tw-relative tw-flex tw-min-h-11 tw-w-full tw-transform-gpu tw-cursor-pointer tw-items-stretch tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-0 tw-text-left tw-outline-none tw-transition-all tw-duration-300 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 ${
           isSelected
             ? "tw-border-iron-600 tw-bg-iron-800 tw-shadow-[0_0_15px_rgba(245,245,245,0.04)]"
