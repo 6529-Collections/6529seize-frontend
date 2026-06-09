@@ -138,6 +138,8 @@ export type CreateWaveGroupInlinePanelProps = {
   readonly disabled?: boolean;
   readonly selectedGroup: ApiGroupFull | null;
   readonly allowGroupClear?: boolean;
+  readonly collapseOnClickAway?: boolean;
+  readonly startMode?: "actions" | "existing";
   readonly onChange: (group: ApiGroupFull | null) => void | Promise<void>;
   readonly onCreateGroup: (
     payload: ApiCreateGroup
@@ -370,13 +372,18 @@ export function useCreateWaveGroupInlinePanel({
   disabled = false,
   selectedGroup,
   allowGroupClear = true,
+  collapseOnClickAway = true,
+  startMode = "actions",
   onChange,
   onCreateGroup,
 }: CreateWaveGroupInlinePanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(
-    () => createInitialInlineGroupBuilderState()
+    () => ({
+      ...createInitialInlineGroupBuilderState(),
+      panel: startMode === "existing" ? PANEL_SEARCH : PANEL_ACTIONS,
+    })
   );
   const {
     canCreateDraft,
@@ -425,7 +432,7 @@ export function useCreateWaveGroupInlinePanel({
   });
 
   useClickAway(panelRef, () => {
-    if (builder.panel !== PANEL_ACTIONS) {
+    if (collapseOnClickAway && builder.panel !== PANEL_ACTIONS) {
       collapseBuilderPanel();
     }
   });

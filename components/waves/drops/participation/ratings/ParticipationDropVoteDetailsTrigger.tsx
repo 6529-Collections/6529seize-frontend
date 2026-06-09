@@ -19,7 +19,7 @@ import { createPortal } from "react-dom";
 import { ParticipationDropVoteDetailsContent } from "./ParticipationDropVoteDetailsContent";
 
 type VoteDetailsTab = "voters" | "logs";
-type VoteDetailsTriggerDensity = "default" | "compact";
+type VoteDetailsTriggerDensity = "default" | "compact" | "gallery";
 
 interface ParticipationDropVoteDetailsTriggerProps {
   readonly drop: ApiDrop;
@@ -291,13 +291,20 @@ export default function ParticipationDropVoteDetailsTrigger({
         )
       : null;
   const isCompact = density === "compact";
-  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 ${
-    isCompact
-      ? "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-xs tw-leading-4"
-      : "tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm tw-leading-5"
-  }`;
+  const isGallery = density === "gallery";
+  const isSmallDensity = isCompact || isGallery;
+  let densityClassName: string;
+  if (isGallery) {
+    densityClassName =
+      "tw-box-border tw-h-8 tw-gap-1 tw-px-2.5 tw-py-0 tw-text-xs tw-leading-4";
+  } else if (isCompact) {
+    densityClassName = "tw-gap-1 tw-px-1.5 tw-py-0.5 tw-text-xs tw-leading-4";
+  } else {
+    densityClassName = "tw-gap-1.5 tw-px-2 tw-py-1 tw-text-sm tw-leading-5";
+  }
+  const triggerClassName = `tw-inline-flex tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-shadow-sm tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100 ${densityClassName}`;
   const chevronClassName = `tw-flex-shrink-0 tw-text-iron-500 tw-transition-transform tw-duration-200 ${
-    isCompact ? "tw-size-3" : "tw-size-3.5"
+    isSmallDensity ? "tw-size-3" : "tw-size-3.5"
   } ${isOpen ? "tw-rotate-180" : ""}`;
 
   return (
