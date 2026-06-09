@@ -28,7 +28,7 @@ const getPollResultButtonClassName = ({
 }): string => {
   const selectionClassName = isSelected
     ? "tw-border-iron-600 tw-bg-iron-800 tw-shadow-[0_0_15px_rgba(245,245,245,0.04)]"
-    : "tw-border-iron-700 tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80";
+    : "tw-border-iron-800 tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-800/80";
   const opacityClassName = isDimmed
     ? "tw-opacity-80 desktop-hover:hover:tw-opacity-100"
     : "tw-opacity-100";
