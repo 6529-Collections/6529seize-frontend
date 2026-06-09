@@ -31,9 +31,7 @@ export function PollResultOption({
     totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
   const fillScale = Math.max(0, Math.min(100, percentage)) / 100;
   const [animateIn, setAnimateIn] = useState(false);
-  const indicatorShapeClass = multichoice
-    ? "tw-rounded"
-    : "tw-rounded-full";
+  const indicatorShapeClass = multichoice ? "tw-rounded" : "tw-rounded-full";
   const indicatorStateClass = isSelected
     ? "tw-scale-110 tw-border-iron-50 tw-bg-iron-50 desktop-hover:group-hover/result:tw-scale-100 desktop-hover:group-hover/result:tw-border-iron-200 desktop-hover:group-hover/result:tw-bg-iron-200"
     : "tw-border-iron-600 tw-bg-iron-900/50 desktop-hover:group-hover/result:tw-border-iron-400";
@@ -68,7 +66,7 @@ export function PollResultOption({
         className={`tw-group/result tw-relative tw-flex tw-min-h-11 tw-w-full tw-transform-gpu tw-cursor-pointer tw-items-stretch tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-0 tw-text-left tw-outline-none tw-transition-all tw-duration-300 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 ${
           isSelected
             ? "tw-border-iron-600 tw-bg-iron-800 tw-shadow-[0_0_15px_rgba(245,245,245,0.04)]"
-            : "tw-border-iron-800 tw-bg-iron-900/80 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800"
+            : "tw-border-iron-700 tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
         } ${
           isDimmed
             ? "tw-opacity-80 desktop-hover:hover:tw-opacity-100"

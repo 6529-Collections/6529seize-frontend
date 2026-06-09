@@ -182,16 +182,16 @@ export default function CreateDropPoll({
           <h3 className="tw-mb-0 tw-text-[13.5px] tw-font-bold tw-tracking-wide tw-text-iron-50">
             Create Poll
           </h3>
-          <div className="tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/60 tw-p-0.5">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/60 tw-p-0.5">
             <button
               type="button"
               aria-pressed={!draft.multichoice}
               disabled={disabled}
               onClick={() => onChange({ ...draft, multichoice: false })}
-              className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-[11.5px] tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
+              className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
                 draft.multichoice
-                  ? "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
-                  : "tw-bg-white tw-text-black tw-shadow-sm"
+                  ? "tw-bg-iron-800/60 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+                  : "tw-bg-iron-50 tw-text-iron-950 tw-shadow-sm"
               }`}
             >
               Single
@@ -201,10 +201,10 @@ export default function CreateDropPoll({
               aria-pressed={draft.multichoice}
               disabled={disabled}
               onClick={() => onChange({ ...draft, multichoice: true })}
-              className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-[11.5px] tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
+              className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
                 draft.multichoice
-                  ? "tw-bg-white tw-text-black tw-shadow-sm"
-                  : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
+                  ? "tw-bg-iron-50 tw-text-iron-950 tw-shadow-sm"
+                  : "tw-bg-iron-800/60 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
               }`}
             >
               Multiple

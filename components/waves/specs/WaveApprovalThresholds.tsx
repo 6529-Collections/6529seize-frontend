@@ -203,9 +203,13 @@ export default function WaveApprovalThresholds({
   const approvalCountLabel = formatApprovalCount(threshold);
   const minDurationLabel = formatThresholdMinDuration(minDurationMs);
 
-  const renderEditor =
-    (field: ApprovalThresholdEditorField) =>
-    ({ closeEditor }: { readonly closeEditor: () => void }) => (
+  const renderEditor = (field: ApprovalThresholdEditorField) =>
+    function WaveApprovalThresholdsEditor({
+      closeEditor,
+    }: {
+      readonly closeEditor: () => void;
+    }) {
+      return (
       <WaveApprovalThresholdsEditorForm
         disabled={mutating}
         field={field}
@@ -225,7 +229,8 @@ export default function WaveApprovalThresholds({
         thresholdValue={thresholdValue}
         unit={unit}
       />
-    );
+      );
+    };
 
   return (
     <>

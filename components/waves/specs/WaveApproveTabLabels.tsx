@@ -204,9 +204,13 @@ export default function WaveApproveTabLabels({
     );
   };
 
-  const renderEditor =
-    (field: ApproveTabLabelField) =>
-    ({ closeEditor }: { readonly closeEditor: () => void }) => (
+  const renderEditor = (field: ApproveTabLabelField) =>
+    function WaveApproveTabLabelsEditor({
+      closeEditor,
+    }: {
+      readonly closeEditor: () => void;
+    }) {
+      return (
       <WaveApproveTabLabelsEditorForm
         disabled={isSaving}
         display={draft}
@@ -230,7 +234,8 @@ export default function WaveApproveTabLabels({
         }}
         saveDisabled={getSaveDisabled(field)}
       />
-    );
+      );
+    };
 
   return (
     <>

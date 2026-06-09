@@ -2,9 +2,10 @@ import type { DropInteractionParams } from "@/components/waves/drops/Drop";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type {
-  INotificationGeneric,
-  TypedNotification,
+import {
+  DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+  type INotificationGeneric,
+  type TypedNotification,
 } from "@/types/feed.types";
 import { memo } from "react";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
@@ -52,6 +53,7 @@ function NotificationItemComponent({
           />
         );
       case ApiNotificationCause.DropVoted:
+      case DROP_POLL_VOTED_NOTIFICATION_CAUSE:
       case ApiNotificationCause.DropReacted:
       case ApiNotificationCause.DropBoosted:
         return (
