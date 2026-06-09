@@ -11,9 +11,13 @@ jest.mock(
   () =>
     function MockGroupCreateIdentitiesSearch(props: {
       readonly selectedWallets: string[];
+      readonly resultsLayout?: string;
     }) {
       return (
-        <div data-testid="identities-search">
+        <div
+          data-testid="identities-search"
+          data-results-layout={props.resultsLayout}
+        >
           {props.selectedWallets.join(",")}
         </div>
       );
@@ -82,6 +86,7 @@ function renderWithProfile({
         identities={identities}
         onIdentitySelect={onIdentitySelect}
         onRemove={onRemove}
+        resultsLayout="popover"
       />
     </AuthContext.Provider>
   );
@@ -126,6 +131,26 @@ describe("CreateWaveInlineGroupIdentities", () => {
 
     expect(screen.getByTestId("identities-search")).toHaveTextContent(
       "0xAAA1,0xAAA2"
+    );
+    expect(screen.getByTestId("identities-search")).toHaveAttribute(
+      "data-results-layout",
+      "popover"
+    );
+  });
+
+  it("passes inline result layout to the search field when requested", () => {
+    render(
+      <CreateWaveInlineGroupIdentities
+        identities={[]}
+        onIdentitySelect={jest.fn()}
+        onRemove={jest.fn()}
+        resultsLayout="inline"
+      />
+    );
+
+    expect(screen.getByTestId("identities-search")).toHaveAttribute(
+      "data-results-layout",
+      "inline"
     );
   });
 

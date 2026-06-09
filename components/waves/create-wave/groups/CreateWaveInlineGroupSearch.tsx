@@ -1,5 +1,6 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import CreateWaveGroupSearchField from "./CreateWaveGroupSearchField";
+import type { CreateWaveGroupSearchResultsLayout } from "./CreateWaveGroupSearchResults";
 
 export default function CreateWaveInlineGroupSearch({
   defaultLabel,
@@ -7,6 +8,7 @@ export default function CreateWaveInlineGroupSearch({
   hasUnsavedGroup,
   selectedGroup,
   allowGroupClear = true,
+  resultsLayout = "popover",
   onSelect,
 }: {
   readonly defaultLabel: string;
@@ -14,6 +16,7 @@ export default function CreateWaveInlineGroupSearch({
   readonly hasUnsavedGroup: boolean;
   readonly selectedGroup: ApiGroupFull | null;
   readonly allowGroupClear?: boolean;
+  readonly resultsLayout?: CreateWaveGroupSearchResultsLayout;
   readonly onSelect: (group: ApiGroupFull | null) => void;
 }) {
   return (
@@ -34,6 +37,7 @@ export default function CreateWaveInlineGroupSearch({
         disabled={disabled}
         selectedGroup={selectedGroup}
         allowClear={allowGroupClear}
+        resultsLayout={resultsLayout}
         onSelect={onSelect}
       />
     </div>

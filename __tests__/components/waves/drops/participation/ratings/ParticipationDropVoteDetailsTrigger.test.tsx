@@ -172,6 +172,26 @@ describe("ParticipationDropVoteDetailsTrigger", () => {
       "tw-py-0.5",
       "tw-text-xs"
     );
+    expect(trigger).not.toHaveClass("tw-h-8");
+    expect(trigger.querySelector("svg")).toHaveClass("tw-size-3");
+  });
+
+  it("renders gallery density at the fixed action height", () => {
+    render(
+      <ParticipationDropVoteDetailsTrigger drop={drop} density="gallery" />
+    );
+
+    const trigger = screen.getByRole("button", {
+      name: triggerButtonName,
+    });
+
+    expect(trigger).toHaveClass(
+      "tw-box-border",
+      "tw-h-8",
+      "tw-px-2.5",
+      "tw-py-0",
+      "tw-text-xs"
+    );
     expect(trigger.querySelector("svg")).toHaveClass("tw-size-3");
   });
 
