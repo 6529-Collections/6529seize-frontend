@@ -18,8 +18,8 @@ export function PollVoteOption({
 }) {
   const indicatorShapeClass = multichoice ? "tw-rounded" : "tw-rounded-full";
   const rowStateClass = checked
-    ? "tw-border-iron-600 tw-bg-iron-800 tw-shadow-[0_0_15px_rgba(245,245,245,0.04)]"
-    : "tw-border-iron-700 tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80";
+    ? "tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_0_15px_rgba(245,245,245,0.04)]"
+    : "tw-border-iron-800 tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-800/80";
   const indicatorStateClass = checked
     ? "tw-scale-110 tw-border-iron-50 tw-bg-iron-50 desktop-hover:group-hover/vote:tw-scale-100 desktop-hover:group-hover/vote:tw-border-iron-200 desktop-hover:group-hover/vote:tw-bg-iron-200"
     : "tw-border-iron-600 tw-bg-iron-900/50 desktop-hover:group-hover/vote:tw-border-iron-400";
