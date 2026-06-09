@@ -9,7 +9,12 @@ jest.mock('@/helpers/AllowlistToolHelpers', () => ({
 jest.mock('@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems', () => ({
   __esModule: true,
   default: (props: any) => (
-    <div>{props.open && <button onClick={() => props.onSelect({ wallet: '0x1' })}>select</button>}</div>
+    <div
+      data-testid="identity-search-items"
+      data-results-layout={props.resultsLayout}
+    >
+      {props.open && <button onClick={() => props.onSelect({ wallet: '0x1' })}>select</button>}
+    </div>
   )
 }));
 
@@ -28,5 +33,20 @@ describe('GroupCreateIdentitiesSearch', () => {
     await userEvent.click(screen.getByText('select'));
     expect(onSelect).toHaveBeenCalledWith({ wallet: '0x1' });
     expect(input).toHaveValue('');
+  });
+
+  it('passes inline results layout to search items', () => {
+    render(
+      <GroupCreateIdentitiesSearch
+        selectedWallets={[]}
+        resultsLayout="inline"
+        onIdentitySelect={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('identity-search-items')).toHaveAttribute(
+      'data-results-layout',
+      'inline'
+    );
   });
 });
