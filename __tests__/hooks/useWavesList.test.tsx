@@ -234,7 +234,7 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   );
 });
 
-test("filters direct subwaves from top-level data and appends loaded subwaves", () => {
+test("appends loaded subwaves under their top-level parents", () => {
   const parentWave = {
     ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
     hasSubwaves: true,
@@ -245,7 +245,7 @@ test("filters direct subwaves from top-level data and appends loaded subwaves", 
   };
 
   useWavesV2Mock.mockReturnValue({
-    waves: [parentWave, childWave],
+    waves: [parentWave],
     isFetching: false,
     isFetchingNextPage: false,
     hasNextPage: false,

@@ -29,6 +29,35 @@ interface WaveSubwavesMapValue {
   readonly isFetching: boolean;
 }
 
+export async function fetchAllWaveSubwaves({
+  parentWaveId,
+  pageSize = WAVE_SUBWAVES_PAGE_SIZE,
+  sort = ApiSubwavesSort.CreatedAt,
+}: {
+  readonly parentWaveId: string;
+  readonly pageSize?: number | undefined;
+  readonly sort?: ApiSubwavesSort | undefined;
+}): Promise<SidebarWave[]> {
+  const waves: SidebarWave[] = [];
+  let page = 1;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    const subwavesPage = await fetchWaveSubwavesPage({
+      parentWaveId,
+      page,
+      pageSize,
+      sort,
+    });
+
+    waves.push(...subwavesPage.waves);
+    hasNextPage = subwavesPage.next;
+    page += 1;
+  }
+
+  return waves;
+}
+
 export function useWaveSubwavesMap({
   parentWaveIds,
   refetchInterval = SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
@@ -48,9 +77,8 @@ export function useWaveSubwavesMap({
         getWaveSubwavesQueryKeyParams(parentWaveId),
       ],
       queryFn: () =>
-        fetchWaveSubwavesPage({
+        fetchAllWaveSubwaves({
           parentWaveId,
-          page: 1,
           pageSize: WAVE_SUBWAVES_PAGE_SIZE,
           sort: ApiSubwavesSort.CreatedAt,
         }),
@@ -67,7 +95,7 @@ export function useWaveSubwavesMap({
     uniqueParentWaveIds.forEach((parentWaveId, index) => {
       const query = queries[index];
       map.set(parentWaveId, {
-        subwaves: query?.data?.waves ?? [],
+        subwaves: query?.data ?? [],
         isFetching: query?.isFetching ?? false,
       });
     });

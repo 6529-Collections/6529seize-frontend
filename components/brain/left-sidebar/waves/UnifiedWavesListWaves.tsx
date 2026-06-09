@@ -10,7 +10,6 @@ import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { useAuth } from "@/components/auth/Auth";
 import {
   useSidebarWaveTree,
   type SidebarWaveTreeRow,
@@ -121,11 +120,9 @@ const UnifiedWavesListWaves = forwardRef<
     const listContainerRef = useRef<HTMLDivElement>(null);
     const seizeSettings = useSeizeSettingsOptional();
     const { activeWave } = useMyStream();
-    const { connectedProfile } = useAuth();
     const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
       waves,
       activeWaveId: activeWave.id,
-      storageScope: connectedProfile?.handle ?? null,
     });
 
     const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =

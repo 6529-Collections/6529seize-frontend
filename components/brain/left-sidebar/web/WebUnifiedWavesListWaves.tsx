@@ -218,7 +218,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
-    storageScope: connectedProfile?.handle ?? null,
   });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
