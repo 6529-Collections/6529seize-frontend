@@ -156,6 +156,68 @@ describe("useSidebarWaveTree", () => {
     expect(window.localStorage.length).toBe(0);
   });
 
+  it("lets manual collapse hide the active subwave parent rows", () => {
+    const onParentExpand = jest.fn();
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves,
+        activeWaveId: "older-child",
+        onParentExpand,
+      })
+    );
+
+    expect(
+      result.current
+        .getRows(result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent", "older-child", "newer-child"]);
+    expect(onParentExpand).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      result.current.toggleParent("parent");
+    });
+
+    expect(
+      result.current
+        .getRows(result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent"]);
+    expect(onParentExpand).toHaveBeenCalledTimes(1);
+  });
+
+  it("reopens a manually collapsed active subwave parent", () => {
+    const onParentExpand = jest.fn();
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves,
+        activeWaveId: "older-child",
+        onParentExpand,
+      })
+    );
+
+    act(() => {
+      result.current.toggleParent("parent");
+    });
+
+    expect(
+      result.current
+        .getRows(result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent"]);
+
+    act(() => {
+      result.current.toggleParent("parent");
+    });
+
+    expect(
+      result.current
+        .getRows(result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent", "older-child", "newer-child"]);
+    expect(onParentExpand).toHaveBeenCalledTimes(2);
+    expect(onParentExpand).toHaveBeenLastCalledWith("parent");
+  });
+
   it("loads a direct active subwave parent before the child is in the list", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>

@@ -36,6 +36,9 @@ export function useSidebarWaveTree({
   const [manualExpandedParentIds, setManualExpandedParentIds] = useState<
     readonly string[]
   >([]);
+  const [manualCollapsedParentIds, setManualCollapsedParentIds] = useState<
+    readonly string[]
+  >([]);
 
   const topLevelWaves = useMemo(
     () => waves.filter((wave) => wave.parentWaveId === null),
@@ -85,11 +88,22 @@ export function useSidebarWaveTree({
     () => new Set(manualExpandedParentIds),
     [manualExpandedParentIds]
   );
+  const collapsedParentIds = useMemo(
+    () => new Set(manualCollapsedParentIds),
+    [manualCollapsedParentIds]
+  );
 
   const getIsExpanded = useCallback(
-    (waveId: string) =>
-      expandedParentIds.has(waveId) || resolvedActiveParentWaveId === waveId,
-    [resolvedActiveParentWaveId, expandedParentIds]
+    (waveId: string) => {
+      if (collapsedParentIds.has(waveId)) {
+        return false;
+      }
+
+      return (
+        expandedParentIds.has(waveId) || resolvedActiveParentWaveId === waveId
+      );
+    },
+    [collapsedParentIds, resolvedActiveParentWaveId, expandedParentIds]
   );
 
   const getHasUnreadSubwaves = useCallback(
@@ -105,9 +119,19 @@ export function useSidebarWaveTree({
         onParentExpand?.(waveId);
       }
 
+      setManualCollapsedParentIds((previousParentIds) => {
+        const nextCollapsedParentIds = new Set(previousParentIds);
+        if (isExpanded) {
+          nextCollapsedParentIds.add(waveId);
+        } else {
+          nextCollapsedParentIds.delete(waveId);
+        }
+        return Array.from(nextCollapsedParentIds);
+      });
+
       setManualExpandedParentIds((previousParentIds) => {
         const nextExpandedParentIds = new Set(previousParentIds);
-        if (nextExpandedParentIds.has(waveId)) {
+        if (isExpanded) {
           nextExpandedParentIds.delete(waveId);
         } else {
           nextExpandedParentIds.add(waveId);
