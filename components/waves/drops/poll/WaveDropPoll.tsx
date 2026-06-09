@@ -10,7 +10,7 @@ import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { type SyntheticEvent, useCallback, useState } from "react";
 import { PollOptionVoters } from "./PollOptionVoters";
 import { PollResultOption } from "./PollResultOption";
 import { PollVoteOption } from "./PollVoteOption";
@@ -66,6 +66,10 @@ const getScopedPollInteractionState = (
     : getDefaultPollInteractionState(poll);
 };
 
+const stopPollEventPropagation = (event: SyntheticEvent) => {
+  event.stopPropagation();
+};
+
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
@@ -102,9 +106,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         updatedDrop,
         ProcessIncomingDropType.DROP_INSERT
       );
-      void queryClient.invalidateQueries({
-        queryKey: [QueryKey.DROP_POLL_VOTERS],
-      });
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.DROP_POLL_VOTERS],
+        })
+        .catch(() => undefined);
     },
     onError: (error) => {
       setToast({
@@ -171,26 +177,28 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
             selectedOptionNos: [optionNo],
           };
         });
-        void submitPollVote([optionNo]).then((submitted) => {
-          if (submitted) {
-            return;
-          }
-
-          setInteractionState((current) => {
-            const scopedState = getScopedPollInteractionState(current, poll);
-            if (
-              scopedState.selectedOptionNos.length !== 1 ||
-              scopedState.selectedOptionNos[0] !== optionNo
-            ) {
-              return scopedState;
+        submitPollVote([optionNo])
+          .then((submitted) => {
+            if (submitted) {
+              return;
             }
 
-            return {
-              ...scopedState,
-              selectedOptionNos: [...poll.voted],
-            };
-          });
-        });
+            setInteractionState((current) => {
+              const scopedState = getScopedPollInteractionState(current, poll);
+              if (
+                scopedState.selectedOptionNos.length !== 1 ||
+                scopedState.selectedOptionNos[0] !== optionNo
+              ) {
+                return scopedState;
+              }
+
+              return {
+                ...scopedState,
+                selectedOptionNos: [...poll.voted],
+              };
+            });
+          })
+          .catch(() => undefined);
         return;
       }
 
@@ -269,8 +277,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
 
   return (
     <div
+      role="presentation"
       className="tw-mb-2 tw-mt-3 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg tw-backdrop-blur md:tw-max-w-2xl"
-      onClick={(event) => event.stopPropagation()}
+      onClick={stopPollEventPropagation}
+      onKeyDown={stopPollEventPropagation}
     >
       <div className="tw-mb-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
         <div className="tw-text-[15px] tw-font-bold tw-text-white">Poll</div>
@@ -316,7 +326,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                   disabled={!showMultichoiceSubmit || voteMutation.isPending}
                   onClick={(event) => {
                     event.stopPropagation();
-                    void handleSubmitVote();
+                    handleSubmitVote().catch(() => undefined);
                   }}
                   className="tw-flex tw-w-full tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
                 >

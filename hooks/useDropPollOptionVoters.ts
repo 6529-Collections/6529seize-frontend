@@ -99,32 +99,32 @@ export function usePrefetchDropPollOptionVoters() {
         return;
       }
 
-      void queryClient.prefetchInfiniteQuery({
-        queryKey: getDropPollOptionVotersQueryKey({
-          dropId: normalizedDropId,
-          optionNo,
-          pageSize,
-        }),
-        queryFn: ({
-          pageParam,
-          signal,
-        }: {
-          pageParam: number;
-          signal?: AbortSignal | undefined;
-        }) =>
-          fetchDropPollOptionVotersPage({
+      queryClient
+        .prefetchInfiniteQuery({
+          queryKey: getDropPollOptionVotersQueryKey({
             dropId: normalizedDropId,
             optionNo,
+          pageSize,}),
+          queryFn: ({
             pageParam,
-            pageSize,
             signal,
-          }),
-        initialPageParam: 1,
-        getNextPageParam: getNextDropPollOptionVotersPageParam,
-        pages: 1,
-        staleTime: DROP_POLL_OPTION_VOTERS_STALE_TIME_MS,
-        ...getDefaultQueryRetry(),
-      });
+          }: {
+            pageParam: number;
+            signal?: AbortSignal | undefined;
+          }) =>
+            fetchDropPollOptionVotersPage({
+              dropId: normalizedDropId,
+              optionNo,
+              pageParam,pageSize,
+              signal,
+            }),
+          initialPageParam: 1,
+          getNextPageParam: getNextDropPollOptionVotersPageParam,
+          pages: 1,
+          staleTime: DROP_POLL_OPTION_VOTERS_STALE_TIME_MS,
+          ...getDefaultQueryRetry(),
+        })
+        .catch(() => undefined);
     },
     [queryClient]
   );

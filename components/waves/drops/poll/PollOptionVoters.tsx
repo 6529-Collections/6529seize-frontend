@@ -190,7 +190,7 @@ export function PollOptionVoters({
             disabled={isFetchingNextPage}
             onClick={(event) => {
               event.stopPropagation();
-              void fetchNextPage();
+              fetchNextPage().catch(() => undefined);
             }}
             className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-text-iron-200"
           >

@@ -956,15 +956,19 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP],
     });
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.WAVE_POLLS],
-    });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.WAVE_POLLS],
+      })
+      .catch(() => undefined);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_VOTERS],
     });
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP_POLL_VOTERS],
-    });
+    queryClient
+      .invalidateQueries({
+        queryKey: [QueryKey.DROP_POLL_VOTERS],
+      })
+      .catch(() => undefined);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_VOTE_LOGS],
     });

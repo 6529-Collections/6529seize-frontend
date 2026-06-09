@@ -113,7 +113,17 @@ export default function CreateDropPoll({
   const canAddOption = draft.options.length < MAX_POLL_OPTIONS;
   const canRemoveOption = draft.options.length > MIN_POLL_OPTIONS;
   const closingTimeInputId = useId();
+  const optionKeyBaseId = useId();
   const closingTimeInputRef = useRef<HTMLInputElement>(null);
+  const nextOptionKeyIndexRef = useRef(draft.options.length);
+  const [optionKeys, setOptionKeys] = useState<readonly string[]>(() =>
+    draft.options.map((_, index) => `${optionKeyBaseId}-option-${index}`)
+  );
+  const createOptionKey = (): string => {
+    const key = `${optionKeyBaseId}-option-${nextOptionKeyIndexRef.current}`;
+    nextOptionKeyIndexRef.current += 1;
+    return key;
+  };
   const [minClosingTime] = useState(() =>
     toDateTimeLocalValue(Date.now() + 60_000)
   );
@@ -132,6 +142,9 @@ export default function CreateDropPoll({
       return;
     }
 
+    setOptionKeys((current) =>
+      current.filter((_, optionIndex) => optionIndex !== index)
+    );
     onChange({
       ...draft,
       options: draft.options.filter((_, optionIndex) => optionIndex !== index),
@@ -143,6 +156,8 @@ export default function CreateDropPoll({
       return;
     }
 
+    const nextOptionKey = createOptionKey();
+    setOptionKeys((current) => [...current, nextOptionKey]);
     onChange({
       ...draft,
       options: [...draft.options, ""],
@@ -174,6 +189,12 @@ export default function CreateDropPoll({
 
     input.focus();
   };
+
+  const optionRows = draft.options.map((option, index) => ({
+    index,
+    key: optionKeys[index] ?? `${optionKeyBaseId}-option-${index}`,
+    option,
+  }));
 
   return (
     <div className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-shadow-2xl tw-shadow-black/60 tw-backdrop-blur">
@@ -224,12 +245,12 @@ export default function CreateDropPoll({
 
       <div className="tw-flex tw-flex-col tw-gap-3 tw-px-4 tw-py-3">
         <div className="tw-flex tw-flex-col tw-gap-2">
-          {draft.options.map((option, index) => {
+          {optionRows.map(({ index, key, option }) => {
             const hasOptionValue = option.trim().length > 0;
 
             return (
               <div
-                key={index}
+                key={key}
                 className="tw-group/option tw-flex tw-items-center tw-gap-2"
               >
                 <span

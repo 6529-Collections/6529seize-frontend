@@ -169,7 +169,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
   });
 
   const handleRetry = useCallback(() => {
-    void refetch();
+    refetch().catch(() => undefined);
   }, [refetch]);
 
   const handleIntersection = useCallback(
@@ -178,7 +178,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
         return;
       }
 
-      void fetchNextPage();
+      fetchNextPage().catch(() => undefined);
     },
     [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage]
   );

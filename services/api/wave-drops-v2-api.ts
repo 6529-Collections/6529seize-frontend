@@ -113,7 +113,7 @@ export type WavePollsSort = "created_at" | "closing_time";
 export type ApiWavePollDropRow = Partial<ApiWavePoll> & {
   readonly poll?: ApiDropPoll | undefined;
 };
-export type ApiWavePollsPage = Omit<ApiDropPollsPage, "data"> & {
+type ApiWavePollsPage = Omit<ApiDropPollsPage, "data"> & {
   readonly data: ApiWavePollDropRow[];
 };
 
