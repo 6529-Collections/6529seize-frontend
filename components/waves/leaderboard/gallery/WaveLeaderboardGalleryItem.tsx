@@ -174,13 +174,13 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
       ? ""
       : "tw-transition-all tw-duration-300 tw-ease-out";
     const groupClasses = artFocused ? `tw-group ${transitionClasses}` : "";
-    const containerClass = `${groupClasses} tw-relative tw-w-full tw-min-w-0 tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
+    const containerClass = `${groupClasses} tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-bg-iron-950/50 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg desktop-hover:hover:tw-border-iron-700 tw-shadow-lg desktop-hover:hover:tw-shadow-xl`;
 
     const highlightAnimation =
       isHighlighting && !hasTouchScreen ? "tw-animate-gallery-reveal" : "";
 
     const baseImageClasses =
-      "tw-aspect-square tw-relative tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
+      "tw-aspect-square tw-relative tw-flex-shrink-0 tw-cursor-pointer tw-touch-pan-y tw-overflow-hidden tw-bg-iron-900 tw-group/image";
 
     const imageScaleClasses = hasTouchScreen
       ? ""
@@ -207,39 +207,44 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
             />
           </div>
         </button>
-        <div className="tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
-          <div className="tw-mb-3 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
-            <div className="tw-mr-2 tw-min-w-0 tw-flex-1">
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5">
+        <div className="tw-flex tw-flex-1 tw-flex-col tw-rounded-b-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
+          <div className="tw-mb-3 tw-min-w-0">
+            <div className="tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-2">
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-1.5">
                 <MediaTypeBadge
                   mimeType={primaryMedia?.mime_type}
                   dropId={drop.id}
                   size="sm"
                 />
-                {drop.title && (
-                  <h3 className="tw-mb-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
-                    {drop.title}
-                  </h3>
-                )}
                 {drop.is_additional_action_promised === true && (
                   <AdditionalActionPromiseBadge />
                 )}
               </div>
-              {drop.author?.handle && (
-                <UserProfileTooltipWrapper
-                  user={drop.author.handle ?? drop.author.id}
-                >
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    href={`/${drop.author?.handle}`}
-                    className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
-                  >
-                    {drop.author?.handle}
-                  </Link>
-                </UserProfileTooltipWrapper>
-              )}
+              <div className="tw-flex-shrink-0">
+                <LeaderboardResultBadge
+                  drop={drop}
+                  isApproveDrop={isApproveDrop}
+                />
+              </div>
             </div>
-            <LeaderboardResultBadge drop={drop} isApproveDrop={isApproveDrop} />
+            {drop.title && (
+              <h3 className="tw-mb-0 tw-mt-2 tw-min-w-0 tw-whitespace-normal tw-[overflow-wrap:anywhere] tw-break-words tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+                {drop.title}
+              </h3>
+            )}
+            {drop.author?.handle && (
+              <UserProfileTooltipWrapper
+                user={drop.author.handle ?? drop.author.id}
+              >
+                <Link
+                  onClick={(e) => e.stopPropagation()}
+                  href={`/${drop.author?.handle}`}
+                  className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                >
+                  {drop.author?.handle}
+                </Link>
+              </UserProfileTooltipWrapper>
+            )}
           </div>
           <WaveLeaderboardIdentity
             drop={drop}
@@ -257,11 +262,11 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
               />
             </div>
           </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
+          <div className="tw-mt-auto tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-2">
             <div className="tw-flex tw-flex-shrink-0">
               <ParticipationDropVoteDetailsTrigger
                 drop={drop}
-                density="compact"
+                density="gallery"
               />
             </div>
             {canShowVotingAction && (
@@ -270,7 +275,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                   drop={drop}
                   onClick={handleVoteButtonClick}
                   variant={artFocused ? "subtle" : "default"}
-                  className="tw-min-w-0 tw-max-w-full"
+                  className="tw-box-border tw-h-8 tw-min-w-0 tw-max-w-full"
                 >
                   {voteButtonLabel}
                 </VotingModalButton>
