@@ -108,7 +108,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   } = useWaveTimers(wave);
   const hasPolls = useWaveHasPolls({
     waveId,
-    enabled: wave !== null && wave !== undefined,
+    enabled: wave !== undefined,
   });
   const { activeView, onViewChange } = useBrainMobileActiveView({
     firstDecisionDone,

@@ -955,7 +955,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP],
     });
-    queryClient.invalidateQueries({
+    void queryClient.invalidateQueries({
       queryKey: [QueryKey.WAVE_POLLS],
     });
     queryClient.invalidateQueries({

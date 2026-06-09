@@ -32,11 +32,11 @@ export function PollResultOption({
   const fillScale = Math.max(0, Math.min(100, percentage)) / 100;
   const [animateIn, setAnimateIn] = useState(false);
   const indicatorShapeClass = multichoice
-    ? "tw-rounded-[5px]"
+    ? "tw-rounded"
     : "tw-rounded-full";
   const indicatorStateClass = isSelected
-    ? "tw-scale-110 tw-border-white tw-bg-white"
-    : "tw-border-white/20 tw-bg-black/40";
+    ? "tw-scale-110 tw-border-white tw-bg-white desktop-hover:group-hover/result:tw-scale-100 desktop-hover:group-hover/result:tw-border-iron-200 desktop-hover:group-hover/result:tw-bg-iron-200"
+    : "tw-border-white/25 tw-bg-black/30 desktop-hover:group-hover/result:tw-border-white/50";
 
   useEffect(() => {
     setAnimateIn(false);
@@ -54,7 +54,7 @@ export function PollResultOption({
   }, [fillScale]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-xl">
+    <div className="tw-overflow-hidden tw-rounded-lg">
       <button
         type="button"
         aria-expanded={isExpanded}
@@ -65,7 +65,7 @@ export function PollResultOption({
           event.stopPropagation();
           onToggle(option.option_no);
         }}
-        className={`tw-group/result tw-relative tw-flex tw-min-h-11 tw-w-full tw-transform-gpu tw-cursor-pointer tw-items-stretch tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-p-0 tw-text-left tw-outline-none tw-transition-all tw-duration-300 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 ${
+        className={`tw-group/result tw-relative tw-flex tw-min-h-11 tw-w-full tw-transform-gpu tw-cursor-pointer tw-items-stretch tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-p-0 tw-text-left tw-outline-none tw-transition-all tw-duration-300 focus-visible:tw-ring-2 focus-visible:tw-ring-white/30 ${
           isSelected
             ? "tw-border-white/20 tw-bg-white/[0.06] desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06]"
             : "tw-border-white/[0.06] tw-bg-white/[0.025] desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-white/[0.05]"
@@ -78,8 +78,8 @@ export function PollResultOption({
         <div
           className={`tw-absolute tw-inset-y-0 tw-left-0 tw-w-full tw-origin-left tw-transform-gpu tw-transition-[transform,background-color] tw-duration-700 tw-ease-out ${
             isSelected
-              ? "tw-bg-white/[0.12]"
-              : "tw-bg-white/[0.05] desktop-hover:group-hover/result:tw-bg-white/[0.08]"
+              ? "tw-bg-white/[0.18]"
+              : "tw-bg-white/[0.07] desktop-hover:group-hover/result:tw-bg-white/[0.10]"
           }`}
           style={{ transform: `scaleX(${animateIn ? fillScale : 0})` }}
           aria-hidden="true"
@@ -88,12 +88,12 @@ export function PollResultOption({
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-3">
             {showSelectionIndicator && (
               <span
-                className={`tw-mt-0.5 tw-flex tw-size-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-border tw-border-solid tw-shadow-sm tw-transition-all tw-duration-300 ${indicatorShapeClass} ${indicatorStateClass}`}
+                className={`tw-mt-0.5 tw-flex tw-size-4 tw-shrink-0 tw-items-center tw-justify-center tw-border tw-border-solid tw-transition-all tw-duration-300 ${indicatorShapeClass} ${indicatorStateClass}`}
                 aria-hidden="true"
               >
                 {multichoice ? (
                   <CheckIcon
-                    className={`tw-size-3 tw-text-black tw-transition-all tw-duration-300 ${
+                    className={`tw-size-2.5 tw-text-black tw-transition-all tw-duration-300 ${
                       isSelected
                         ? "tw-scale-100 tw-opacity-100"
                         : "tw-scale-50 tw-opacity-0"
@@ -102,7 +102,7 @@ export function PollResultOption({
                   />
                 ) : (
                   <span
-                    className={`tw-size-[7px] tw-rounded-full tw-bg-black tw-transition-all tw-duration-300 ${
+                    className={`tw-size-1.5 tw-rounded-full tw-bg-black tw-transition-all tw-duration-300 ${
                       isSelected
                         ? "tw-scale-100 tw-opacity-100"
                         : "tw-scale-0 tw-opacity-0"

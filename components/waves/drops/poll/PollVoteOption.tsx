@@ -17,21 +17,21 @@ export function PollVoteOption({
   readonly onChange: (optionNo: number) => void;
 }) {
   const indicatorShapeClass = multichoice
-    ? "tw-rounded-[5px]"
+    ? "tw-rounded"
     : "tw-rounded-full";
   const rowStateClass = checked
     ? "tw-border-white/20 tw-bg-white/[0.06] desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.06]"
     : "tw-border-white/[0.06] tw-bg-white/[0.025] desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-bg-white/[0.05]";
   const indicatorStateClass = checked
-    ? "tw-scale-110 tw-border-white tw-bg-white desktop-hover:group-hover/vote:tw-scale-100 desktop-hover:group-hover/vote:tw-border-white desktop-hover:group-hover/vote:tw-bg-white"
-    : "tw-border-white/20 tw-bg-black/40 desktop-hover:group-hover/vote:tw-border-white/60 desktop-hover:group-hover/vote:tw-bg-black/60";
+    ? "tw-scale-110 tw-border-white tw-bg-white desktop-hover:group-hover/vote:tw-scale-100 desktop-hover:group-hover/vote:tw-border-iron-200 desktop-hover:group-hover/vote:tw-bg-iron-200"
+    : "tw-border-white/25 tw-bg-black/30 desktop-hover:group-hover/vote:tw-border-white/50";
   const selectionFillClass = checked
     ? "tw-scale-x-100 tw-opacity-100"
     : "tw-scale-x-0 tw-opacity-0";
 
   return (
     <label
-      className={`tw-group/vote tw-relative tw-flex tw-min-h-11 tw-transform-gpu tw-cursor-pointer tw-items-start tw-gap-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-px-4 tw-py-3 tw-transition-all tw-duration-300 active:tw-scale-[0.99] ${rowStateClass} ${
+      className={`tw-group/vote tw-relative tw-flex tw-min-h-11 tw-transform-gpu tw-cursor-pointer tw-items-start tw-gap-3 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3 tw-transition-all tw-duration-300 active:tw-scale-[0.99] ${rowStateClass} ${
         disabled ? "tw-cursor-not-allowed tw-opacity-60" : ""
       }`}
     >
@@ -52,12 +52,12 @@ export function PollVoteOption({
         className="tw-peer tw-sr-only"
       />
       <span
-        className={`tw-relative tw-z-10 tw-mt-0.5 tw-flex tw-size-[18px] tw-flex-shrink-0 tw-items-center tw-justify-center tw-border tw-border-solid tw-shadow-sm tw-transition-all tw-duration-300 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-white/30 ${indicatorShapeClass} ${indicatorStateClass}`}
+        className={`tw-relative tw-z-10 tw-mt-0.5 tw-flex tw-size-4 tw-shrink-0 tw-items-center tw-justify-center tw-border tw-border-solid tw-transition-all tw-duration-300 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-white/30 ${indicatorShapeClass} ${indicatorStateClass}`}
         aria-hidden="true"
       >
         {multichoice ? (
           <CheckIcon
-            className={`tw-size-3 tw-text-black tw-transition-all tw-duration-200 ${
+            className={`tw-size-2.5 tw-text-black tw-transition-all tw-duration-200 ${
               checked
                 ? "tw-scale-100 tw-opacity-100"
                 : "tw-scale-50 tw-opacity-0"
@@ -66,7 +66,7 @@ export function PollVoteOption({
           />
         ) : (
           <span
-            className={`tw-size-[7px] tw-rounded-full tw-bg-black tw-transition-all tw-duration-200 ${
+            className={`tw-size-1.5 tw-rounded-full tw-bg-black tw-transition-all tw-duration-200 ${
               checked
                 ? "tw-scale-100 tw-opacity-100"
                 : "tw-scale-0 tw-opacity-0"

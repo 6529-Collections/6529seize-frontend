@@ -163,7 +163,7 @@ export default function CreateDropPoll({
       readonly showPicker?: () => void;
     };
 
-    if (pickerInput.showPicker) {
+    if (typeof pickerInput.showPicker === "function") {
       try {
         pickerInput.showPicker();
       } catch {
