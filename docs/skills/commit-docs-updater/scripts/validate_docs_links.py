@@ -1,21 +1,42 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
-LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
-EXTERNAL_PREFIXES = ("http://", "https://", "mailto:", "tel:", "data:")
+EXTERNAL_PREFIXES = ("https://", "mailto:", "tel:", "data:")
+
+
+def iter_markdown_link_targets(line: str):
+    cursor = 0
+    while cursor < len(line):
+        label_start = line.find("[", cursor)
+        if label_start == -1:
+            return
+        label_end = line.find("]", label_start + 1)
+        if label_end == -1:
+            return
+        target_start = label_end + 1
+        if target_start >= len(line) or line[target_start] != "(":
+            cursor = label_end + 1
+            continue
+        target_end = line.find(")", target_start + 1)
+        if target_end == -1:
+            return
+        yield line[target_start + 1 : target_end]
+        cursor = target_end + 1
 
 
 def normalize_target(raw_target: str) -> str:
     target = raw_target.strip()
     if target.startswith("<") and target.endswith(">"):
         target = target[1:-1].strip()
-    quoted_title = re.match(r"^(?P<path>.+?)\s+(['\"])(?P<title>.*)\2$", target)
-    if quoted_title:
-        target = quoted_title.group("path").strip()
+    for quote in ("'", '"'):
+        title_marker = f" {quote}"
+        title_start = target.find(title_marker)
+        if title_start != -1 and target.endswith(quote):
+            target = target[:title_start].strip()
+            break
     target = target.split("#", 1)[0].strip()
     return target
 
@@ -39,8 +60,7 @@ def main() -> int:
     for md_file in markdown_files:
         lines = md_file.read_text(encoding="utf-8").splitlines()
         for idx, line in enumerate(lines, start=1):
-            for match in LINK_RE.finditer(line):
-                raw_target = match.group(1)
+            for raw_target in iter_markdown_link_targets(line):
                 target = normalize_target(raw_target)
                 if not target:
                     continue
