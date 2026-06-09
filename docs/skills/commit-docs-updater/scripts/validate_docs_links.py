@@ -8,7 +8,41 @@ EXTERNAL_PREFIXES = ("https://", "mailto:", "tel:", "data:")
 BrokenLink = tuple[Path, int, str]
 
 
+def is_code_fence(line: str) -> bool:
+    stripped = line.lstrip()
+    return stripped.startswith("```") or stripped.startswith("~~~")
+
+
+def is_indented_code(line: str) -> bool:
+    return line.startswith("    ") or line.startswith("\t")
+
+
+def strip_inline_code(line: str) -> str:
+    result: list[str] = []
+    cursor = 0
+    while cursor < len(line):
+        if line[cursor] != "`":
+            result.append(line[cursor])
+            cursor += 1
+            continue
+
+        tick_count = 1
+        while cursor + tick_count < len(line) and line[cursor + tick_count] == "`":
+            tick_count += 1
+
+        marker = "`" * tick_count
+        closing = line.find(marker, cursor + tick_count)
+        if closing == -1:
+            result.append(line[cursor])
+            cursor += 1
+            continue
+        cursor = closing + tick_count
+
+    return "".join(result)
+
+
 def iter_markdown_link_targets(line: str):
+    # Reference-style links are intentionally out of scope for this scanner.
     cursor = 0
     while cursor < len(line):
         label_start = line.find("[", cursor)
@@ -59,8 +93,15 @@ def should_skip_target(target: str) -> bool:
 def find_broken_links(md_file: Path, repo_root: Path) -> list[BrokenLink]:
     broken: list[BrokenLink] = []
     lines = md_file.read_text(encoding="utf-8").splitlines()
+    in_fenced_code = False
     for idx, line in enumerate(lines, start=1):
-        for raw_target in iter_markdown_link_targets(line):
+        if is_code_fence(line):
+            in_fenced_code = not in_fenced_code
+            continue
+        if in_fenced_code or is_indented_code(line):
+            continue
+
+        for raw_target in iter_markdown_link_targets(strip_inline_code(line)):
             target = normalize_target(raw_target)
             if should_skip_target(target):
                 continue
