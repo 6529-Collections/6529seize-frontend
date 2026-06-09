@@ -20,7 +20,7 @@ function PollVoterAvatar({
 }) {
   const label = getIdentityLabel(identity);
   const avatarClassName =
-    "tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-800 tw-object-cover";
+    "tw-size-4 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-object-cover";
 
   if (!identity.pfp) {
     return <div className={avatarClassName} aria-hidden="true" />;
@@ -31,8 +31,8 @@ function PollVoterAvatar({
       unoptimized
       src={resolveIpfsUrlSync(identity.pfp)}
       alt={`${label}'s avatar`}
-      width={20}
-      height={20}
+      width={16}
+      height={16}
       className={avatarClassName}
     />
   );
@@ -44,7 +44,7 @@ function PollVoterRow({ voter }: { readonly voter: ApiIdentityOverview }) {
   const shouldLimit = shouldLimitIdentityLabel(label);
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+    <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded tw-px-1.5 tw-py-0.5 -tw-mx-1.5 tw-transition-colors desktop-hover:hover:tw-bg-iron-800">
       <PollVoterAvatar identity={voter} />
       <UserProfileTooltipWrapper user={hrefValue}>
         <Link
@@ -57,7 +57,7 @@ function PollVoterRow({ voter }: { readonly voter: ApiIdentityOverview }) {
               shouldLimit ? "tw-max-w-[10rem] tw-truncate" : "tw-truncate"
             }`}
           >
-            <span className="tw-text-xs tw-text-iron-400 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-100">
+            <span className="tw-text-[11.5px] tw-text-iron-400 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-200">
               {label}
             </span>
           </span>
@@ -74,7 +74,7 @@ function PollOptionVoterPreviewAvatar({
 }) {
   const label = getIdentityLabel(identity);
   const avatarClassName =
-    "tw-size-[18px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-iron-950";
+    "tw-size-5 tw-flex-shrink-0 tw-rounded-full tw-border tw-border-solid tw-border-iron-900 tw-bg-iron-800 tw-object-cover";
 
   if (!identity.pfp) {
     return <span className={avatarClassName} aria-hidden="true" />;
@@ -85,8 +85,8 @@ function PollOptionVoterPreviewAvatar({
       unoptimized
       src={resolveIpfsUrlSync(identity.pfp)}
       alt={`${label}'s avatar`}
-      width={18}
-      height={18}
+      width={20}
+      height={20}
       className={avatarClassName}
     />
   );
@@ -183,7 +183,7 @@ export function PollOptionVoters({
               event.stopPropagation();
               void fetchNextPage();
             }}
-            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-white/[0.12] desktop-hover:hover:tw-text-iron-100"
+            className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-text-iron-200"
           >
             {isFetchingNextPage ? "Loading..." : "Load more"}
           </button>

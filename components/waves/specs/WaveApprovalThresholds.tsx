@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import WaveApprovalThresholdsEditorForm, {
+  type ApprovalThresholdEditorField,
   type ApprovalThresholdTimeUnit,
 } from "./WaveApprovalThresholdsEditorForm";
 import WaveSettingRow from "./WaveSettingRow";
@@ -86,6 +87,13 @@ const formatThresholdMinDuration = (
   return `${minutes}m`;
 };
 
+const formatApprovalCount = (threshold: number | null): string =>
+  threshold === null
+    ? "Not set"
+    : `${formatNumberWithCommas(threshold)} approval${
+        threshold === 1 ? "" : "s"
+      }`;
+
 const getApprovalWindowDurationMs = (wave: ApiWave): number | null => {
   const startTime = wave.participation.period?.min;
   const endTime = getApprovalWindowEndTime(wave);
@@ -133,16 +141,27 @@ export default function WaveApprovalThresholds({
     wave.wave.winning_threshold_min_duration_ms,
   ]);
 
-  const handleSave = (closeEditor: () => void) => {
+  const handleSaveThreshold = (closeEditor: () => void) => {
     const parsedThreshold = parsePositiveWholeNumberInput(thresholdValue);
     if (parsedThreshold === null) {
       setToast({
         type: "error",
-        message: "Approval threshold must be a whole number greater than 0",
+        message: "Required approvals must be a whole number greater than 0",
       });
       return;
     }
 
+    saveWaveConfigUpdate(
+      closeEditor,
+      (waveConfig) => ({
+        ...waveConfig,
+        winning_threshold: parsedThreshold,
+      }),
+      () => invalidateWaveApprovalStatusQueries(queryClient, wave.id)
+    );
+  };
+
+  const handleSaveHoldTime = (closeEditor: () => void) => {
     const trimmedMinTimeValue = minTimeValue.trim();
     const parsedMinTime =
       trimmedMinTimeValue === ""
@@ -175,56 +194,62 @@ export default function WaveApprovalThresholds({
       closeEditor,
       (waveConfig) => ({
         ...waveConfig,
-        winning_threshold: parsedThreshold,
         winning_threshold_min_duration_ms: nextMinDurationMs,
       }),
       () => invalidateWaveApprovalStatusQueries(queryClient, wave.id)
     );
   };
 
-  const valueLabel =
-    threshold === null
-      ? "Not set"
-      : (() => {
-          const minDurationLabel = formatThresholdMinDuration(minDurationMs);
-          return (
-            <span className="tw-inline-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-1">
-              <span>{formatNumberWithCommas(threshold)}</span>
-              <span aria-hidden="true">·</span>
-              <span className="tw-whitespace-nowrap">
-                Hold time: {minDurationLabel}
-              </span>
-            </span>
-          );
-        })();
+  const approvalCountLabel = formatApprovalCount(threshold);
+  const minDurationLabel = formatThresholdMinDuration(minDurationMs);
 
-  const renderEditor = ({
-    closeEditor,
-  }: {
-    readonly closeEditor: () => void;
-  }) => (
-    <WaveApprovalThresholdsEditorForm
-      disabled={mutating}
-      inputRef={inputRef}
-      minTimeValue={minTimeValue}
-      onCancel={closeEditor}
-      onMinTimeValueChange={setMinTimeValue}
-      onSave={() => handleSave(closeEditor)}
-      onThresholdValueChange={setThresholdValue}
-      onUnitChange={setUnit}
-      thresholdValue={thresholdValue}
-      unit={unit}
-    />
-  );
+  const renderEditor = (field: ApprovalThresholdEditorField) =>
+    function WaveApprovalThresholdsEditor({
+      closeEditor,
+    }: {
+      readonly closeEditor: () => void;
+    }) {
+      return (
+      <WaveApprovalThresholdsEditorForm
+        disabled={mutating}
+        field={field}
+        inputRef={inputRef}
+        minTimeValue={minTimeValue}
+        onCancel={closeEditor}
+        onMinTimeValueChange={setMinTimeValue}
+        onSave={() => {
+          if (field === "threshold") {
+            handleSaveThreshold(closeEditor);
+            return;
+          }
+          handleSaveHoldTime(closeEditor);
+        }}
+        onThresholdValueChange={setThresholdValue}
+        onUnitChange={setUnit}
+        thresholdValue={thresholdValue}
+        unit={unit}
+      />
+      );
+    };
 
   return (
-    <WaveSettingRow
-      canEdit={canEdit}
-      editLabel="Edit approval threshold"
-      label="Approval threshold"
-      onOpen={resetEditor}
-      renderEditor={renderEditor}
-      valueLabel={valueLabel}
-    />
+    <>
+      <WaveSettingRow
+        canEdit={canEdit}
+        editLabel="Edit approve after"
+        label="Approve after"
+        onOpen={resetEditor}
+        renderEditor={renderEditor("threshold")}
+        valueLabel={approvalCountLabel}
+      />
+      <WaveSettingRow
+        canEdit={canEdit}
+        editLabel="Edit hold time"
+        label="Hold time"
+        onOpen={resetEditor}
+        renderEditor={renderEditor("holdTime")}
+        valueLabel={minDurationLabel}
+      />
+    </>
   );
 }

@@ -370,7 +370,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                     inert={!isExpanded}
                     className="tw-overflow-hidden"
                   >
-                    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.02] tw-px-3.5 tw-py-2.5">
+                    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2.5">
                       <PollOptionVoters dropId={drop.id} option={option} />
                     </div>
                   </div>

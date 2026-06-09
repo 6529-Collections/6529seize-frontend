@@ -6,10 +6,13 @@ import { useEmoji } from "@/contexts/EmojiContext";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
-import type {
-  INotificationDropBoosted,
-  INotificationDropReacted,
-  INotificationDropVoted,
+import {
+  DROP_POLL_VOTED_NOTIFICATION_CAUSE,
+  type INotificationDropBoosted,
+  type INotificationDropPollVoted,
+  type INotificationDropReacted,
+  type INotificationDropVoted,
+  type NotificationPollVoteOption,
 } from "@/types/feed.types";
 import ReactionEmojiPreview from "./ReactionEmojiPreview";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
@@ -33,6 +36,7 @@ export const getNotificationVoteColor = (vote: number) => {
 
 type NotificationUnion =
   | INotificationDropVoted
+  | INotificationDropPollVoted
   | INotificationDropReacted
   | INotificationDropBoosted;
 
@@ -83,6 +87,17 @@ function NotificationVoteInlinePart({
   );
 }
 
+function getPollOptionText(
+  options: readonly NotificationPollVoteOption[]
+): string | null {
+  const optionText = options
+    .map((option) => option.option_string.trim())
+    .filter((option) => option.length > 0)
+    .join(", ");
+
+  return optionText.length > 0 ? optionText : null;
+}
+
 export default function NotificationDropReacted({
   notification,
   activeDrop,
@@ -94,6 +109,7 @@ export default function NotificationDropReacted({
   const { findCustomEmoji, findNativeEmoji } = useEmoji();
 
   const isVoted = notification.cause === ApiNotificationCause.DropVoted;
+  const isPollVoted = notification.cause === DROP_POLL_VOTED_NOTIFICATION_CAUSE;
   const isReacted = notification.cause === ApiNotificationCause.DropReacted;
   const isBoosted = notification.cause === ApiNotificationCause.DropBoosted;
   const drop = notification.related_drops[0];
@@ -159,6 +175,30 @@ export default function NotificationDropReacted({
           createdAt={notification.created_at}
           className={voteTextClassName}
         />
+      </>
+    );
+  } else if (isPollVoted) {
+    const pollOptionText = getPollOptionText(
+      notification.additional_context.poll_options
+    );
+
+    actionElement = (
+      <>
+        {pollOptionText ? (
+          <>
+            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+              voted for
+            </span>
+            <span className="tw-min-w-0 tw-max-w-full tw-break-words tw-text-sm tw-font-medium tw-text-iron-200">
+              {pollOptionText}
+            </span>
+          </>
+        ) : (
+          <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+            voted in poll
+          </span>
+        )}
+        <NotificationTimestamp createdAt={notification.created_at} />
       </>
     );
   } else if (isBoosted) {

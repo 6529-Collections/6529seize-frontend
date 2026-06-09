@@ -6,6 +6,17 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 
+export const DROP_POLL_VOTED_NOTIFICATION_CAUSE = "DROP_POLL_VOTED" as const;
+
+export type NotificationCause =
+  | ApiNotificationCause
+  | typeof DROP_POLL_VOTED_NOTIFICATION_CAUSE;
+
+export type NotificationPollVoteOption = {
+  readonly option_no: number;
+  readonly option_string: string;
+};
+
 type NotificationWaveOverview = ApiWaveOverview & {
   readonly is_direct_message?: boolean;
 };
@@ -90,6 +101,14 @@ export type INotificationDropVoted = NotificationBase &
     };
   };
 
+export type INotificationDropPollVoted = NotificationBase &
+  WithDrops & {
+    readonly cause: typeof DROP_POLL_VOTED_NOTIFICATION_CAUSE;
+    readonly additional_context: {
+      readonly poll_options: readonly NotificationPollVoteOption[];
+    };
+  };
+
 export type INotificationDropReacted = NotificationBase &
   WithDrops & {
     readonly cause: ApiNotificationCause.DropReacted;
@@ -153,6 +172,7 @@ export type TypedNotification =
   | INotificationIdentityRep
   | INotificationIdentityNic
   | INotificationDropVoted
+  | INotificationDropPollVoted
   | INotificationDropReacted
   | INotificationDropBoosted
   | INotificationDropQuoted

@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -10,7 +10,7 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useContext, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 interface BoostMutationParams {
@@ -26,7 +26,7 @@ interface UseDropBoostMutationReturn {
 }
 
 export const useDropBoostMutation = (): UseDropBoostMutationReturn => {
-  const { setToast, connectedProfile } = useContext(AuthContext);
+  const { setToast, connectedProfile } = useAuth();
   const myStreamContext = useMyStreamOptional();
   const queryClient = useQueryClient();
   const rollbackRef = useRef<(() => void) | null>(null);

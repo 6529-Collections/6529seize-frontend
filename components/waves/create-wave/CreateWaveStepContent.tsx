@@ -46,6 +46,7 @@ export default function CreateWaveStepContent({
     setDates,
     setDrops,
     setOutcomes,
+    setDisplay,
     setDropsAdminCanDelete,
     onOutcomeTypeChange,
     onGroupSelect,
@@ -68,8 +69,10 @@ export default function CreateWaveStepContent({
       return (
         <CreateWaveOverview
           overview={config.overview}
+          display={config.display}
           errors={errors}
           setOverview={setOverview}
+          setDisplay={setDisplay}
         />
       );
     case CreateWaveStep.GROUPS:

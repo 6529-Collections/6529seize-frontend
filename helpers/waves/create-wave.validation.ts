@@ -8,6 +8,7 @@ import type {
   CreateWaveApprovalConfig,
   CreateWaveConfig,
   CreateWaveDatesConfig,
+  CreateWaveDisplayConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
   CreateWaveOutcomeConfig,
@@ -17,6 +18,12 @@ import type {
 } from "@/types/waves.types";
 import { CreateWaveStep } from "@/types/waves.types";
 import { Time } from "@/helpers/time";
+import {
+  APPROVE_WAVE_TAB_LABEL_MAX_LENGTH,
+  areApproveWaveTabLabelsDuplicate,
+  doApproveWaveTabLabelsUseReservedLabels,
+  normalizeWaveTabLabel,
+} from "./wave-metadata.helpers";
 
 export enum CREATE_WAVE_VALIDATION_ERROR {
   NAME_REQUIRED = "NAME_REQUIRED",
@@ -53,6 +60,9 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED = "CARD_SET_TDH_VOTING_FULL_SET_NOT_ALLOWED",
   RANK_DECISION_TIME_MUST_BE_IN_FUTURE = "RANK_DECISION_TIME_MUST_BE_IN_FUTURE",
   RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE = "RANK_FIRST_DECISION_TIME_MUST_BE_AFTER_OR_EQUAL_TO_VOTING_START_DATE",
+  APPROVE_WAVE_TAB_LABEL_TOO_LONG = "APPROVE_WAVE_TAB_LABEL_TOO_LONG",
+  APPROVE_WAVE_TAB_LABELS_DUPLICATE = "APPROVE_WAVE_TAB_LABELS_DUPLICATE",
+  APPROVE_WAVE_TAB_LABEL_RESERVED = "APPROVE_WAVE_TAB_LABEL_RESERVED",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -61,8 +71,10 @@ const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 
 const getOverviewValidationErrors = ({
   overview,
+  display,
 }: {
   readonly overview: WaveOverviewConfig;
+  readonly display?: CreateWaveDisplayConfig | undefined;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
   if (!overview.name) {
@@ -70,6 +82,28 @@ const getOverviewValidationErrors = ({
   } else if (overview.name.length > MAX_NAME_LENGTH) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
   }
+
+  if (overview.type === ApiWaveType.Approve) {
+    const approveDisplay = display?.approve;
+    const labels = [
+      normalizeWaveTabLabel(approveDisplay?.approvalsTabLabel),
+      normalizeWaveTabLabel(approveDisplay?.approvedTabLabel),
+    ];
+    if (
+      labels.some((label) => label.length > APPROVE_WAVE_TAB_LABEL_MAX_LENGTH)
+    ) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG);
+    }
+    if (areApproveWaveTabLabelsDuplicate(approveDisplay)) {
+      errors.push(
+        CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE
+      );
+    }
+    if (doApproveWaveTabLabelsUseReservedLabels(approveDisplay)) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_RESERVED);
+    }
+  }
+
   return errors;
 };
 
@@ -521,7 +555,10 @@ export const getCreateWaveValidationErrors = ({
   switch (step) {
     case CreateWaveStep.OVERVIEW:
       errors.push(
-        ...getOverviewValidationErrors({ overview: config.overview })
+        ...getOverviewValidationErrors({
+          overview: config.overview,
+          display: config.display,
+        })
       );
       break;
     case CreateWaveStep.GROUPS:

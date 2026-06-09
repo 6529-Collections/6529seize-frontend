@@ -24,10 +24,10 @@ import {
   useCreateWaveGroupInlinePanel,
 } from "@/components/waves/create-wave/groups/useCreateWaveGroupInlinePanel";
 
-export type GroupAssignmentPanelLayout = "inline" | "dialog";
-export type GroupAssignmentPanelStartMode = "actions" | "existing";
+type GroupAssignmentPanelLayout = "inline" | "dialog";
+type GroupAssignmentPanelStartMode = "actions" | "existing";
 
-export type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
+type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
   readonly layout?: GroupAssignmentPanelLayout;
   readonly startMode?: GroupAssignmentPanelStartMode;
 };
@@ -330,10 +330,7 @@ export default function GroupAssignmentPanel({
               ruleActive={isRulePanel}
               onAddIdentity={() => togglePanel("identity", isIdentityPanel)}
               onAddRule={() =>
-                togglePanel(
-                  "rule-list",
-                  displayedBuilder.panel === "rule-list"
-                )
+                togglePanel("rule-list", displayedBuilder.panel === "rule-list")
               }
             />
 
