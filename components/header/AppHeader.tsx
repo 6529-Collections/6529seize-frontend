@@ -3,6 +3,8 @@
 import {
   Bars3Icon,
   ChatBubbleLeftIcon,
+  EllipsisHorizontalIcon,
+  PaperAirplaneIcon,
   Squares2X2Icon,
   ShareIcon,
   LinkIcon,
@@ -11,8 +13,9 @@ import {
 import { PlusIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
@@ -42,6 +45,9 @@ import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import useCreateModalState from "@/hooks/useCreateModalState";
+import { getActiveViewFromUrl } from "../navigation/ViewContext";
+import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -207,7 +213,7 @@ const HeaderTitleContent = ({
               <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
                 {activeWave.name}
               </span>
-              <span className="tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400">
+              <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
                 {previewText}
               </span>
             </WaveDescriptionPopover>
@@ -219,70 +225,6 @@ const HeaderTitleContent = ({
         </>
       )}
     </div>
-  );
-};
-
-const HeaderGalleryToggle = ({
-  showGalleryToggle,
-  viewMode,
-  toggleViewMode,
-}: {
-  readonly showGalleryToggle: boolean;
-  readonly viewMode: "chat" | "gallery";
-  readonly toggleViewMode: () => void;
-}) => {
-  if (!showGalleryToggle) {
-    return null;
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={toggleViewMode}
-      aria-label={
-        viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view"
-      }
-      className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-300"
-    >
-      {viewMode === "chat" ? (
-        <Squares2X2Icon className="tw-h-5 tw-w-5" />
-      ) : (
-        <ChatBubbleLeftIcon className="tw-h-5 tw-w-5" />
-      )}
-    </button>
-  );
-};
-
-const HeaderWaveLinkAction = ({
-  showWaveLinkAction,
-  handleWaveLinkActionClick,
-  waveLinkActionLabel,
-  waveLinkActionMode,
-  waveLinkActionIconColor,
-  renderWaveLinkActionIcon,
-}: {
-  readonly showWaveLinkAction: boolean;
-  readonly handleWaveLinkActionClick: () => void;
-  readonly waveLinkActionLabel: string;
-  readonly waveLinkActionMode: string;
-  readonly waveLinkActionIconColor: string;
-  readonly renderWaveLinkActionIcon: () => ReactNode;
-}) => {
-  if (!showWaveLinkAction) {
-    return null;
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={handleWaveLinkActionClick}
-      aria-label={waveLinkActionLabel}
-      title={waveLinkActionLabel}
-      data-wave-link-action-mode={waveLinkActionMode}
-      className={`tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 ${waveLinkActionIconColor}`}
-    >
-      {renderWaveLinkActionIcon()}
-    </button>
   );
 };
 
@@ -312,6 +254,33 @@ const HeaderDropActionButton = ({
         {action.compactLabel}
       </span>
     </PrimaryButton>
+  );
+};
+
+const HeaderMoreMenu = ({
+  items,
+}: {
+  readonly items: readonly CompactMenuItem[];
+}) => {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <CompactMenu
+      aria-label="More header actions"
+      className="tw-flex-shrink-0"
+      unstyledTrigger
+      triggerClassName="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      trigger={
+        <>
+          <span className="tw-sr-only">More header actions</span>
+          <EllipsisHorizontalIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
+        </>
+      }
+      items={items}
+      menuWidthClassName="tw-w-56"
+    />
   );
 };
 
@@ -398,6 +367,9 @@ export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const myStream = useMyStreamOptional();
   const { waveDropAction } = useHeaderContext();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
+  const searchParams = useSearchParams();
+  const { openDirectMessage } = useCreateModalState();
   const {
     address,
     isAuthenticated,
@@ -485,15 +457,17 @@ export default function AppHeader() {
       ? "tw-text-iron-300"
       : "tw-text-emerald-300";
   const renderWaveLinkActionIcon = () => {
+    const iconClassName = `tw-h-4 tw-w-4 ${waveLinkActionIconColor}`;
+
     if (waveLinkActionFeedbackState !== "idle") {
-      return <CheckIcon className="tw-h-5 tw-w-5" />;
+      return <CheckIcon className={iconClassName} />;
     }
 
     if (waveLinkActionMode === "share") {
-      return <ShareIcon className="tw-h-5 tw-w-5" />;
+      return <ShareIcon className={iconClassName} />;
     }
 
-    return <LinkIcon className="tw-h-5 tw-w-5" />;
+    return <LinkIcon className={iconClassName} />;
   };
 
   const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
@@ -504,6 +478,14 @@ export default function AppHeader() {
   const isCreateRoute =
     pathname === "/waves/create" || pathname === "/messages/create";
   const isInsideWave = !!waveId;
+  const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const activeView = getActiveViewFromUrl({
+    activeWaveId: waveParam,
+    searchParams,
+  });
+  const isMessagesContext = activeView === "messages";
+  const isOnMessagesRoute = pathname === "/messages" && !waveParam;
+  const showCreateDmAction = isOnMessagesRoute || isMessagesContext;
 
   const isProfilePage = typeof params["user"] === "string";
 
@@ -578,25 +560,63 @@ export default function AppHeader() {
     pageTitle,
     pathSegments,
   });
+  const galleryToggleLabel =
+    viewMode === "chat" ? "Switch to gallery view" : "Switch to chat view";
+  const appHeaderMoreMenuItems: CompactMenuItem[] = [];
+
+  if (showGalleryToggle) {
+    appHeaderMoreMenuItems.push({
+      id: "toggle-view-mode",
+      label: galleryToggleLabel,
+      icon:
+        viewMode === "chat" ? (
+          <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        ) : (
+          <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        ),
+      onSelect: toggleViewMode,
+    });
+  }
+
+  if (showCreateDmAction) {
+    appHeaderMoreMenuItems.push({
+      id: "create-dm",
+      label: "Create DM",
+      icon: <PaperAirplaneIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />,
+      onSelect: openDirectMessage,
+    });
+  }
+
+  if (showWaveLinkAction) {
+    appHeaderMoreMenuItems.push({
+      id: "wave-link",
+      label: waveLinkActionLabel,
+      icon: renderWaveLinkActionIcon(),
+      onSelect: handleWaveLinkActionClick,
+    });
+  }
 
   return (
     <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
-      <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-px-4">
-        {showBackButton && <BackButton />}
-        {!showBackButton && (
-          <button
-            type="button"
-            aria-label={
-              hasMultipleConnectedAccounts
-                ? "Open menu (double-click to switch accounts)"
-                : "Open menu"
-            }
-            onClick={onProfileActivate}
-            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-transparent tw-bg-transparent"
-          >
-            {pfpElement}
-          </button>
-        )}
+      <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-gap-x-2 tw-px-4">
+        <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
+          {showBackButton ? (
+            <BackButton />
+          ) : (
+            <button
+              type="button"
+              aria-label={
+                hasMultipleConnectedAccounts
+                  ? "Open menu (double-click to switch accounts)"
+                  : "Open menu"
+              }
+              onClick={onProfileActivate}
+              className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-transparent tw-bg-transparent"
+            >
+              {pfpElement}
+            </button>
+          )}
+        </div>
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-2">
           <HeaderTitleContent
             activeWave={activeWave}
@@ -609,23 +629,10 @@ export default function AppHeader() {
         </div>
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end tw-gap-x-1">
           <HeaderDropActionButton action={headerDropAction} />
-          <HeaderGalleryToggle
-            showGalleryToggle={showGalleryToggle}
-            viewMode={viewMode}
-            toggleViewMode={toggleViewMode}
-          />
+          {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
           <div className="tw-flex-shrink-0">
             <HeaderActionButtons />
           </div>
-          {isHomeRoute && <NetworkHealthCTA className="md:tw-hidden" />}
-          <HeaderWaveLinkAction
-            showWaveLinkAction={showWaveLinkAction}
-            handleWaveLinkActionClick={handleWaveLinkActionClick}
-            waveLinkActionLabel={waveLinkActionLabel}
-            waveLinkActionMode={waveLinkActionMode}
-            waveLinkActionIconColor={waveLinkActionIconColor}
-            renderWaveLinkActionIcon={renderWaveLinkActionIcon}
-          />
           <div className="tw-flex-shrink-0">
             <HeaderSearchButton
               wave={
@@ -635,6 +642,7 @@ export default function AppHeader() {
               }
             />
           </div>
+          <HeaderMoreMenu items={appHeaderMoreMenuItems} />
         </div>
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
