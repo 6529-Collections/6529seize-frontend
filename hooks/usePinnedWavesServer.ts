@@ -30,7 +30,8 @@ export const MAX_PINNED_WAVES = 100;
 const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PINNED_WAVES_GC_TIME = 10 * 60 * 1000; // 10 minutes
 const PINNED_WAVES_REFETCH_INTERVAL = 2 * 60 * 1000; // 2 minutes
-const PINNED_WAVES_PAGE_SIZE = MAX_PINNED_WAVES;
+const PINNED_WAVES_QUERY_LIMIT = MAX_PINNED_WAVES;
+const PINNED_WAVES_API_PAGE_SIZE = 20;
 
 type PinnedWavesQueryKey = readonly [
   QueryKey.WAVES_V2,
@@ -61,7 +62,7 @@ function createPinnedWavesQueryKey(
     QueryKey.WAVES_V2,
     getWavesV2OverviewQueryKeyParams({
       overviewType: ApiWavesOverviewType.MostSubscribed,
-      pageSize: PINNED_WAVES_PAGE_SIZE,
+      pageSize: PINNED_WAVES_QUERY_LIMIT,
       pinned: ApiWavesPinFilter.Pinned,
       viewerIdentityKey,
     }),
@@ -77,6 +78,30 @@ function usePinnedWavesQueryKey(
   );
 }
 
+async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
+  const pinnedWaves: SidebarWave[] = [];
+  let pageNumber = 1;
+
+  while (pinnedWaves.length < MAX_PINNED_WAVES) {
+    const page = await fetchWavesV2Page({
+      page: pageNumber,
+      pageSize: PINNED_WAVES_API_PAGE_SIZE,
+      overviewType: ApiWavesOverviewType.MostSubscribed,
+      pinned: ApiWavesPinFilter.Pinned,
+    });
+
+    pinnedWaves.push(...page.waves);
+
+    if (!page.next || page.waves.length === 0) {
+      break;
+    }
+
+    pageNumber += 1;
+  }
+
+  return pinnedWaves.slice(0, MAX_PINNED_WAVES);
+}
+
 function usePinnedWavesQuery(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
@@ -84,16 +109,7 @@ function usePinnedWavesQuery(
 ) {
   const query = useQuery<SidebarWave[], Error>({
     queryKey,
-    queryFn: async () => {
-      const page = await fetchWavesV2Page({
-        page: 1,
-        pageSize: PINNED_WAVES_PAGE_SIZE,
-        overviewType: ApiWavesOverviewType.MostSubscribed,
-        pinned: ApiWavesPinFilter.Pinned,
-      });
-
-      return page.waves;
-    },
+    queryFn: fetchPinnedWavesPages,
     enabled: isAuthenticated,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
