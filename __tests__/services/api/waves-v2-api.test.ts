@@ -1,18 +1,35 @@
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
-import { commonApiFetch } from "@/services/api/common-api";
-import { fetchWaveSubwavesPage } from "@/services/api/waves-v2-api";
+import {
+  commonApiDelete,
+  commonApiFetch,
+  commonApiPost,
+} from "@/services/api/common-api";
+import {
+  createWaveMetadata,
+  deleteWaveMetadata,
+  fetchWaveMetadata,
+  fetchWaveSubwavesPage,
+} from "@/services/api/waves-v2-api";
 
 jest.mock("@/services/api/common-api", () => ({
+  commonApiDelete: jest.fn(),
   commonApiFetch: jest.fn(),
+  commonApiPost: jest.fn(),
 }));
 
+const commonApiDeleteMock = commonApiDelete as jest.MockedFunction<
+  typeof commonApiDelete
+>;
 const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
   typeof commonApiFetch
 >;
+const commonApiPostMock = commonApiPost as jest.MockedFunction<
+  typeof commonApiPost
+>;
 
-describe("fetchWaveSubwavesPage", () => {
+describe("waves-v2-api", () => {
   beforeEach(() => {
-    commonApiFetchMock.mockReset();
+    jest.clearAllMocks();
   });
 
   it("fetches subwaves with created-time sort and maps parent metadata", async () => {
@@ -76,6 +93,46 @@ describe("fetchWaveSubwavesPage", () => {
           subscribed: true,
         },
       ],
+    });
+  });
+
+  it("fetches wave metadata", async () => {
+    commonApiFetchMock.mockResolvedValue([]);
+
+    await expect(fetchWaveMetadata({ waveId: "wave-1" })).resolves.toEqual([]);
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/metadata",
+      headers: undefined,
+    });
+  });
+
+  it("creates wave metadata", async () => {
+    const response = { id: 1, data_key: "key", data_value: "value" };
+    const body = { data_key: "key", data_value: "value" };
+    commonApiPostMock.mockResolvedValue(response);
+
+    await expect(
+      createWaveMetadata({ waveId: "wave-1", body })
+    ).resolves.toEqual(response);
+
+    expect(commonApiPostMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/metadata",
+      body,
+      headers: undefined,
+    });
+  });
+
+  it("deletes wave metadata", async () => {
+    commonApiDeleteMock.mockResolvedValue(undefined);
+
+    await expect(
+      deleteWaveMetadata({ waveId: "wave-1", metadataId: 7 })
+    ).resolves.toBeUndefined();
+
+    expect(commonApiDeleteMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves/wave-1/metadata/7",
+      headers: undefined,
     });
   });
 });

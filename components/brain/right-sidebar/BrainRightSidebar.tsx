@@ -10,10 +10,9 @@ import { WaveContent } from "./WaveContent";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useSidebarState } from "../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
-import { Mode } from "./BrainRightSidebarTypes";
-import type { SidebarTab } from "./BrainRightSidebarTypes";
+import { Mode, type SidebarTab } from "./BrainRightSidebarTypes";
 
-export { SidebarTab } from "./BrainRightSidebarTypes";
+export { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 
 interface BrainRightSidebarProps {
   readonly waveId: string | null | undefined;

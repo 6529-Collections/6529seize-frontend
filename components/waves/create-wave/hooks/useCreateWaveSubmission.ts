@@ -3,10 +3,13 @@ import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
+import { getCreateWaveDisplayMetadataRequests } from "@/helpers/waves/wave-metadata.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { createWaveMetadata } from "@/services/api/waves-v2-api";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
@@ -55,7 +58,25 @@ export function useCreateWaveSubmission({
   });
 
   const addWaveMutation = useAddWaveMutation({
-    onSuccess: (response) => {
+    onSuccess: async (response, variables) => {
+      if (variables.displayMetadataRequests.length > 0) {
+        try {
+          await Promise.all(
+            variables.displayMetadataRequests.map((body) =>
+              createWaveMetadata({
+                waveId: response.id,
+                body,
+              })
+            )
+          );
+        } catch {
+          setToast({
+            message: "Wave created, but custom display settings were not saved.",
+            type: "warning",
+          });
+        }
+      }
+
       void waitAndInvalidateDrops();
       onWaveCreated();
       onSuccess?.();
@@ -162,21 +183,31 @@ export function useCreateWaveSubmission({
         ? await multiPartUpload({ file: config.overview.image, path: "wave" })
         : null;
 
-      const waveBody = getCreateNewWaveBody({
-        config: {
-          ...config,
-          groups: {
-            ...config.groups,
-            admin: adminGroupId,
-          },
+      const submissionConfig: CreateWaveConfig = {
+        ...config,
+        groups: {
+          ...config.groups,
+          admin: adminGroupId,
         },
+      };
+      const waveBody = getCreateNewWaveBody({
+        config: submissionConfig,
         picture: picture?.url ?? null,
         drop: dropRequest,
         parentWaveId,
       });
+      const displayMetadataRequests =
+        submissionConfig.overview.type === ApiWaveType.Approve
+          ? getCreateWaveDisplayMetadataRequests(
+              submissionConfig.display.approve
+            )
+          : [];
 
       mutationStarted = true;
-      await addWaveMutation.mutateAsync(waveBody);
+      await addWaveMutation.mutateAsync({
+        body: waveBody,
+        displayMetadataRequests,
+      });
     } catch (error) {
       if (!mutationStarted) {
         setToast({

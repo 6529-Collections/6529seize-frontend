@@ -1,11 +1,12 @@
 "use client";
 
-import { AuthContext } from "@/components/auth/Auth";
+import { useAuth } from "@/components/auth/Auth";
 import BoostIcon from "@/components/common/icons/BoostIcon";
+import { canShowDropBoostAction } from "@/helpers/waves/drop-boost.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropBoostMutation } from "@/hooks/drops/useDropBoostMutation";
 import type { FC } from "react";
-import { useContext, useState } from "react";
+import { useState } from "react";
 
 interface WaveDropMobileMenuBoostProps {
   readonly drop: ExtendedDrop;
@@ -18,12 +19,13 @@ const WaveDropMobileMenuBoost: FC<WaveDropMobileMenuBoostProps> = ({
   onBoostChange,
   onBoostAnimation,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile } = useAuth();
   const { toggleBoost, isPending } = useDropBoostMutation();
   const [isLocalPending, setIsLocalPending] = useState(false);
 
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canBoost = !isTemporaryDrop && !!connectedProfile;
+  const canShowBoost = canShowDropBoostAction({ drop, connectedProfile });
+  const canBoost = canShowBoost && !isTemporaryDrop && !!connectedProfile;
   const isBoosted = drop.context_profile_context?.boosted ?? false;
   const isLoading = isPending || isLocalPending;
 

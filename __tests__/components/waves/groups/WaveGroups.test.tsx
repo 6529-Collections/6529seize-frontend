@@ -39,6 +39,14 @@ jest.mock(
     },
   })
 );
+jest.mock("@/components/waves/specs/WaveApprovalThresholds", () => ({
+  __esModule: true,
+  default: () => <div data-testid="approval-thresholds" />,
+}));
+jest.mock("@/components/waves/specs/WaveApproveTabLabels", () => ({
+  __esModule: true,
+  default: () => <div data-testid="approve-tab-labels" />,
+}));
 
 const commonApiPostMock = commonApiPost as jest.Mock;
 
@@ -156,7 +164,7 @@ describe("WaveGroups", () => {
     const { getAllByTestId, getByTestId, container } = renderWaveGroups({
       wave: baseWave,
     });
-    expect(screen.getByText("Settings & access")).toBeInTheDocument();
+    expect(screen.getByText("Access")).toBeInTheDocument();
     expect(screen.queryByText("General")).not.toBeInTheDocument();
     expect(screen.getByText("Curation")).toBeInTheDocument();
     expect(getAllByTestId(/group-/)).toHaveLength(5);
@@ -289,7 +297,7 @@ describe("WaveGroups", () => {
     await user.click(screen.getByRole("button", { name: "Edit slow mode" }));
     expect(screen.getByLabelText("Slow mode value")).toBeInTheDocument();
 
-    await user.click(screen.getByText("Settings & access"));
+    await user.click(screen.getByText("Access"));
 
     await waitFor(() =>
       expect(screen.queryByLabelText("Slow mode value")).not.toBeInTheDocument()
