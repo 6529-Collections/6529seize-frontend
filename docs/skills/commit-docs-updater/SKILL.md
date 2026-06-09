@@ -52,7 +52,7 @@ commit="$(git rev-parse --short=12 "${target}^{commit}")"
 ```
 
 2. Capture commit scope.
-- Run `.codex/skills/commit-docs-updater/scripts/commit_scope.sh [commit]`.
+- Run `docs/skills/commit-docs-updater/scripts/commit_scope.sh [commit]`.
 - Review patch and changed files:
 ```bash
 git show --stat --patch --find-renames --find-copies "${target}^{commit}"
@@ -107,7 +107,7 @@ git show --stat --patch --find-renames --find-copies "${target}^{commit}"
 - Do not leave docs in a half-migrated structure; complete moved/renamed link updates in the same change.
 
 9. Validate.
-- Run `.codex/skills/commit-docs-updater/scripts/validate_docs_links.py`.
+- Run `docs/skills/commit-docs-updater/scripts/validate_docs_links.py`.
 - Re-scan touched docs for statements that conflict with current behavior.
 - Re-scan touched docs for forbidden commit-centric wording.
 - Ensure root and area indexes reference moved/new/deleted files correctly.
