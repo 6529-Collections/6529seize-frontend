@@ -13,28 +13,32 @@ import {
 import { useCallback, useMemo } from "react";
 
 const DROP_POLL_OPTION_VOTERS_PAGE_SIZE = 20;
+export const DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE = 3;
 const DROP_POLL_OPTION_VOTERS_STALE_TIME_MS = 60_000;
 
 interface UseDropPollOptionVotersProps {
   readonly dropId: string;
   readonly optionNo: number | null;
   readonly enabled?: boolean | undefined;
+  readonly pageSize?: number | undefined;
 }
 
 interface DropPollOptionVotersParams {
   readonly dropId: string;
   readonly optionNo: number | null;
+  readonly pageSize?: number | undefined;
 }
 
 const getDropPollOptionVotersQueryKey = ({
   dropId,
   optionNo,
+  pageSize = DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
 }: DropPollOptionVotersParams) => [
   QueryKey.DROP_POLL_VOTERS,
   {
     dropId: dropId.trim(),
     optionNo,
-    pageSize: DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
+    pageSize,
   },
 ];
 
@@ -55,6 +59,7 @@ const fetchDropPollOptionVotersPage = async ({
   dropId,
   optionNo,
   pageParam,
+  pageSize = DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
   signal,
 }: DropPollOptionVotersParams & {
   readonly pageParam: number;
@@ -68,7 +73,7 @@ const fetchDropPollOptionVotersPage = async ({
     dropId: dropId.trim(),
     optionNo,
     page: pageParam,
-    pageSize: DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
+    pageSize,
     signal,
   });
 };
@@ -81,6 +86,7 @@ export function usePrefetchDropPollOptionVoters() {
       dropId,
       optionNo,
       enabled = true,
+      pageSize = DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
     }: DropPollOptionVotersParams & {
       readonly enabled?: boolean | undefined;
     }) => {
@@ -93,30 +99,32 @@ export function usePrefetchDropPollOptionVoters() {
         return;
       }
 
-      void queryClient.prefetchInfiniteQuery({
-        queryKey: getDropPollOptionVotersQueryKey({
-          dropId: normalizedDropId,
-          optionNo,
-        }),
-        queryFn: ({
-          pageParam,
-          signal,
-        }: {
-          pageParam: number;
-          signal?: AbortSignal | undefined;
-        }) =>
-          fetchDropPollOptionVotersPage({
+      queryClient
+        .prefetchInfiniteQuery({
+          queryKey: getDropPollOptionVotersQueryKey({
             dropId: normalizedDropId,
             optionNo,
+          pageSize,}),
+          queryFn: ({
             pageParam,
             signal,
-          }),
-        initialPageParam: 1,
-        getNextPageParam: getNextDropPollOptionVotersPageParam,
-        pages: 1,
-        staleTime: DROP_POLL_OPTION_VOTERS_STALE_TIME_MS,
-        ...getDefaultQueryRetry(),
-      });
+          }: {
+            pageParam: number;
+            signal?: AbortSignal | undefined;
+          }) =>
+            fetchDropPollOptionVotersPage({
+              dropId: normalizedDropId,
+              optionNo,
+              pageParam,pageSize,
+              signal,
+            }),
+          initialPageParam: 1,
+          getNextPageParam: getNextDropPollOptionVotersPageParam,
+          pages: 1,
+          staleTime: DROP_POLL_OPTION_VOTERS_STALE_TIME_MS,
+          ...getDefaultQueryRetry(),
+        })
+        .catch(() => undefined);
     },
     [queryClient]
   );
@@ -126,6 +134,7 @@ export function useDropPollOptionVoters({
   dropId,
   optionNo,
   enabled = true,
+  pageSize = DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
 }: UseDropPollOptionVotersProps) {
   const normalizedDropId = dropId.trim();
   const canFetch =
@@ -136,8 +145,9 @@ export function useDropPollOptionVoters({
       getDropPollOptionVotersQueryKey({
         dropId: normalizedDropId,
         optionNo,
+        pageSize,
       }),
-    [normalizedDropId, optionNo]
+    [normalizedDropId, optionNo, pageSize]
   );
 
   const query = useInfiniteQuery({
@@ -153,6 +163,7 @@ export function useDropPollOptionVoters({
         dropId: normalizedDropId,
         optionNo,
         pageParam,
+        pageSize,
         signal,
       }),
     initialPageParam: 1,

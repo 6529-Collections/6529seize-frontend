@@ -4,7 +4,10 @@ import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileToo
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
-import { useDropPollOptionVoters } from "@/hooks/useDropPollOptionVoters";
+import {
+  DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE,
+  useDropPollOptionVoters,
+} from "@/hooks/useDropPollOptionVoters";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -102,10 +105,14 @@ export function PollOptionVoterPreviews({
   const { voters } = useDropPollOptionVoters({
     dropId,
     optionNo: option.option_no,
-    enabled: false,
+    enabled: option.votes > 0,
+    pageSize: DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE,
   });
 
-  const previewVoters = voters.slice(0, 3);
+  const previewVoters = voters.slice(
+    0,
+    DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE
+  );
 
   if (previewVoters.length === 0) {
     return null;
@@ -183,7 +190,7 @@ export function PollOptionVoters({
             disabled={isFetchingNextPage}
             onClick={(event) => {
               event.stopPropagation();
-              void fetchNextPage();
+              fetchNextPage().catch(() => undefined);
             }}
             className="tw-inline-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-400 tw-transition disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-text-iron-200"
           >
