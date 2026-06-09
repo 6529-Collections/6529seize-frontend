@@ -24,6 +24,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
+import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
@@ -57,6 +58,11 @@ interface TabOption {
   readonly leadingIconTooltipId?: string | undefined;
   readonly hasIndicator?: boolean | undefined;
   readonly action?: React.ReactNode | undefined;
+}
+
+interface ApproveTabLabels {
+  readonly approvals: string;
+  readonly approved: string;
 }
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
@@ -111,18 +117,20 @@ const TAB_LABELS: Record<MyStreamWaveTab, string> = {
 };
 
 const getTabLabel = ({
+  approveLabels,
   isApproveWave,
   tab,
 }: {
+  readonly approveLabels: ApproveTabLabels;
   readonly isApproveWave: boolean;
   readonly tab: MyStreamWaveTab;
 }): string => {
   if (isApproveWave && tab === MyStreamWaveTab.LEADERBOARD) {
-    return "Approvals";
+    return approveLabels.approvals;
   }
 
   if (isApproveWave && tab === MyStreamWaveTab.WINNERS) {
-    return "Approved";
+    return approveLabels.approved;
   }
 
   return TAB_LABELS[tab];
@@ -325,6 +333,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isRankWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
+  const approveLabels = useApproveWaveCustomTabLabels(wave);
   const isCompetitionWave = isRankWave || isApproveWave;
   const {
     voting: { isUpcoming, isCompleted },
@@ -472,11 +481,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         })
         .map((tab) => ({
           key: tab,
-          label: getTabLabel({ isApproveWave, tab }),
+          label: getTabLabel({ approveLabels, isApproveWave, tab }),
           panelId: getContentTabPanelId(tab),
         })),
     [
       availableTabs,
+      approveLabels,
       hasAuthenticatedProfile,
       isApproveWave,
       isCompetitionWave,

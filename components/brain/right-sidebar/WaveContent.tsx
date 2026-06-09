@@ -7,6 +7,7 @@ import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow
 import WaveHeader from "@/components/waves/header/WaveHeader";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
+import BrainRightSidebarSettings from "./BrainRightSidebarSettings";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
@@ -39,11 +40,16 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const isCompetitionWave = isRankWave || isApproveWave;
   const options: TabOption[] = [
     { key: SidebarTab.ABOUT, label: "About" },
-    { key: SidebarTab.TOP_VOTERS, label: "Voters" },
-    { key: SidebarTab.ACTIVITY_LOG, label: "Activity" },
+    { key: SidebarTab.SETTINGS, label: "Settings" },
+    ...(isCompetitionWave
+      ? [
+          { key: SidebarTab.TOP_VOTERS, label: "Voters" },
+          { key: SidebarTab.ACTIVITY_LOG, label: "Activity" },
+        ]
+      : []),
   ];
 
-  const competitionWaveComponents: Record<SidebarTab, JSX.Element> = {
+  const sidebarTabComponents: Partial<Record<SidebarTab, JSX.Element>> = {
     [SidebarTab.ABOUT]: (
       <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
         <WaveHeader
@@ -62,53 +68,38 @@ export const WaveContent: React.FC<WaveContentProps> = ({
         )}
       </div>
     ),
-    [SidebarTab.TOP_VOTERS]: (
-      <div className="tw-p-4">
-        <WaveLeaderboardRightSidebarVoters wave={wave} />
-      </div>
-    ),
-    [SidebarTab.ACTIVITY_LOG]: (
-      <div className="tw-p-4">
-        <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
-      </div>
-    ),
+    [SidebarTab.SETTINGS]: <BrainRightSidebarSettings wave={wave} />,
+    ...(isCompetitionWave
+      ? {
+          [SidebarTab.TOP_VOTERS]: (
+            <div className="tw-p-4">
+              <WaveLeaderboardRightSidebarVoters wave={wave} />
+            </div>
+          ),
+          [SidebarTab.ACTIVITY_LOG]: (
+            <div className="tw-p-4">
+              <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
+            </div>
+          ),
+        }
+      : {}),
   };
-  const activeCompetitionTab = competitionWaveComponents[activeTab]
+  const activeSidebarTab = sidebarTabComponents[activeTab]
     ? activeTab
     : SidebarTab.ABOUT;
-
-  if (!isCompetitionWave) {
-    return (
-      <div className="tw-h-full tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-700">
-        <WaveHeader
-          wave={wave}
-          onFollowersClick={onFollowersClick}
-          useRing={false}
-          useRounded={false}
-        />
-        {mode === Mode.CONTENT ? (
-          <BrainRightSidebarContent wave={wave} />
-        ) : (
-          <BrainRightSidebarFollowers
-            wave={wave}
-            closeFollowers={() => setMode(Mode.CONTENT)}
-          />
-        )}
-      </div>
-    );
-  }
+  const activeSidebarComponent = sidebarTabComponents[activeSidebarTab];
 
   return (
     <>
       <div className="tw-pb-px tw-pl-2.5">
         <TabToggleWithOverflow
           options={options}
-          activeKey={activeTab}
+          activeKey={activeSidebarTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
-          maxVisibleTabs={3}
+          maxVisibleTabs={options.length}
         />
       </div>
-      <div>{competitionWaveComponents[activeCompetitionTab]}</div>
+      <div>{activeSidebarComponent}</div>
     </>
   );
 };

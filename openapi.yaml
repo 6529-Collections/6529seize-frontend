@@ -7359,6 +7359,107 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/{id}/metadata:
+    get:
+      tags:
+        - WavesV2
+      summary: Get V2 wave metadata
+      operationId: getWaveMetadata
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleGetWaveMetadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveMetadata"
+        "404":
+          description: Wave not found
+    post:
+      tags:
+        - WavesV2
+      summary: Create V2 wave metadata
+      operationId: createWaveMetadata
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleCreateWaveMetadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateWaveMetadataRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveMetadata"
+        "400":
+          description: Invalid request
+        "403":
+          description: User cannot manage wave metadata
+        "404":
+          description: Wave not found
+  /v2/waves/{id}/metadata/{metadata_id}:
+    delete:
+      tags:
+        - WavesV2
+      summary: Delete V2 wave metadata
+      operationId: deleteWaveMetadata
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/waves-v2.handlers"
+          name: handleDeleteWaveMetadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: metadata_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveMetadata"
+        "403":
+          description: User cannot manage wave metadata
+        "404":
+          description: Wave metadata not found
   /v2/waves/{id}/drops:
     get:
       tags:
@@ -9864,6 +9965,19 @@ components:
           type: boolean
         signer_address:
           type: string
+    ApiCreateWaveMetadataRequest:
+      type: object
+      required:
+        - data_key
+        - data_value
+      properties:
+        data_key:
+          type: string
+          minLength: 1
+          maxLength: 500
+        data_value:
+          type: string
+          maxLength: 8000
     ApiCreateWaveOutcome:
       type: object
       required:
@@ -14362,6 +14476,22 @@ components:
         contents:
           type: object
           additionalProperties: true
+    ApiWaveMetadata:
+      type: object
+      required:
+        - id
+        - data_key
+        - data_value
+      properties:
+        id:
+          type: integer
+          format: int64
+        data_key:
+          type: string
+          maxLength: 500
+        data_value:
+          type: string
+          maxLength: 8000
     ApiWaveMetadataType:
       type: string
       enum:
