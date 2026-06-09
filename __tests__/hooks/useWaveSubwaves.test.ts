@@ -1,6 +1,10 @@
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
 import { fetchWaveSubwavesPage } from "@/services/api/waves-v2-api";
-import { fetchAllWaveSubwaves } from "@/hooks/useWaveSubwaves";
+import {
+  fetchAllWaveSubwaves,
+  getWaveSubwavesQueryKey,
+  getWaveSubwavesQueryOptions,
+} from "@/hooks/useWaveSubwaves";
 import type { SidebarWave } from "@/types/waves.types";
 
 jest.mock("@/services/api/waves-v2-api", () => ({
@@ -71,5 +75,34 @@ describe("fetchAllWaveSubwaves", () => {
       sort: ApiSubwavesSort.CreatedAt,
     });
     expect(subwaves.map((wave) => wave.id)).toEqual(["child-1"]);
+  });
+});
+
+describe("subwave query keys", () => {
+  it("includes normalized viewer identity when present", () => {
+    expect(getWaveSubwavesQueryKey("parent-wave", " 0xABC:Primary ")).toEqual([
+      "WAVE_SUBWAVES",
+      {
+        parent_wave_id: "parent-wave",
+        page: 1,
+        page_size: 100,
+        sort: ApiSubwavesSort.CreatedAt,
+        viewer_identity: "0xabc:primary",
+      },
+    ]);
+  });
+
+  it("omits viewer identity when no viewer is available", () => {
+    const queryOptions = getWaveSubwavesQueryOptions("parent-wave", null);
+
+    expect(queryOptions.queryKey).toEqual([
+      "WAVE_SUBWAVES",
+      {
+        parent_wave_id: "parent-wave",
+        page: 1,
+        page_size: 100,
+        sort: ApiSubwavesSort.CreatedAt,
+      },
+    ]);
   });
 });

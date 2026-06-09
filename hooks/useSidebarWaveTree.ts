@@ -1,7 +1,7 @@
 "use client";
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
 
@@ -21,10 +21,12 @@ const hasUnreadDrops = (wave: MinimalWave) =>
 export function useSidebarWaveTree({
   waves,
   activeWaveId,
+  activeParentWaveId,
   onParentExpand,
 }: {
   readonly waves: readonly MinimalWave[];
   readonly activeWaveId: string | null;
+  readonly activeParentWaveId?: string | null | undefined;
   readonly onParentExpand?: ((parentWaveId: string) => void) | undefined;
 }) {
   const [manualExpandedParentIds, setManualExpandedParentIds] = useState<
@@ -56,13 +58,24 @@ export function useSidebarWaveTree({
     return map;
   }, [waves]);
 
-  const activeParentWaveId = useMemo(() => {
+  const activeParentWaveIdFromWaves = useMemo(() => {
     if (activeWaveId === null) {
       return null;
     }
 
     return waves.find((wave) => wave.id === activeWaveId)?.parentWaveId ?? null;
   }, [activeWaveId, waves]);
+
+  const resolvedActiveParentWaveId =
+    activeParentWaveId ?? activeParentWaveIdFromWaves;
+
+  useEffect(() => {
+    if (resolvedActiveParentWaveId === null) {
+      return;
+    }
+
+    onParentExpand?.(resolvedActiveParentWaveId);
+  }, [onParentExpand, resolvedActiveParentWaveId]);
 
   const expandedParentIds = useMemo(
     () => new Set(manualExpandedParentIds),
@@ -71,8 +84,8 @@ export function useSidebarWaveTree({
 
   const getIsExpanded = useCallback(
     (waveId: string) =>
-      expandedParentIds.has(waveId) || activeParentWaveId === waveId,
-    [activeParentWaveId, expandedParentIds]
+      expandedParentIds.has(waveId) || resolvedActiveParentWaveId === waveId,
+    [resolvedActiveParentWaveId, expandedParentIds]
   );
 
   const getHasUnreadSubwaves = useCallback(

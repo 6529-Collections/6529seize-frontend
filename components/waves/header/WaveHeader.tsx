@@ -34,6 +34,7 @@ export default function WaveHeader({
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const isSubwave = Boolean(wave.parent_wave);
   const canEdit = useMemo(
     () =>
       !isDirectMessage &&
@@ -58,7 +59,7 @@ export default function WaveHeader({
   const showCreateSubwaveOption =
     canUseWaveActions &&
     !isDirectMessage &&
-    !wave.parent_wave &&
+    !isSubwave &&
     wave.wave.authenticated_user_eligible_for_admin === true;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
 
@@ -150,9 +151,11 @@ export default function WaveHeader({
           <div className="tw-min-w-0 tw-flex-1">
             <WaveHeaderName wave={wave} />
           </div>
-          <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-end">
-            <WaveHeaderPinButton waveId={wave.id} />
-          </div>
+          {!isSubwave && (
+            <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-end">
+              <WaveHeaderPinButton waveId={wave.id} />
+            </div>
+          )}
         </div>
 
         <div className="tw-mt-1 tw-text-sm">

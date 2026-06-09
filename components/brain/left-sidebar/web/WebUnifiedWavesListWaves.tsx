@@ -218,6 +218,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
     waves,
     activeWaveId: activeWave.id,
+    activeParentWaveId: activeWave.parentWaveId,
     onParentExpand: streamWaves.loadSubwavesForParent,
   });
 

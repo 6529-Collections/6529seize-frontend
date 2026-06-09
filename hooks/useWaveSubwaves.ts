@@ -14,26 +14,39 @@ import { useCallback, useMemo } from "react";
 export const WAVE_SUBWAVES_PAGE_SIZE = 100;
 
 export function getWaveSubwavesQueryKeyParams(
-  parentWaveId: string
+  parentWaveId: string,
+  viewerIdentityKey?: string | null | undefined
 ): WaveSubwavesQueryKeyParams {
+  const normalizedViewerIdentityKey =
+    viewerIdentityKey?.trim().toLowerCase() ?? null;
+
   return {
     parent_wave_id: parentWaveId,
     page: 1,
     page_size: WAVE_SUBWAVES_PAGE_SIZE,
     sort: ApiSubwavesSort.CreatedAt,
+    ...(normalizedViewerIdentityKey
+      ? { viewer_identity: normalizedViewerIdentityKey }
+      : {}),
   };
 }
 
-export function getWaveSubwavesQueryKey(parentWaveId: string) {
+export function getWaveSubwavesQueryKey(
+  parentWaveId: string,
+  viewerIdentityKey?: string | null | undefined
+) {
   return [
     QueryKey.WAVE_SUBWAVES,
-    getWaveSubwavesQueryKeyParams(parentWaveId),
+    getWaveSubwavesQueryKeyParams(parentWaveId, viewerIdentityKey),
   ] as const;
 }
 
-export function getWaveSubwavesQueryOptions(parentWaveId: string) {
+export function getWaveSubwavesQueryOptions(
+  parentWaveId: string,
+  viewerIdentityKey?: string | null | undefined
+) {
   return {
-    queryKey: getWaveSubwavesQueryKey(parentWaveId),
+    queryKey: getWaveSubwavesQueryKey(parentWaveId, viewerIdentityKey),
     queryFn: () =>
       fetchAllWaveSubwaves({
         parentWaveId,
@@ -80,9 +93,11 @@ export async function fetchAllWaveSubwaves({
 
 export function useWaveSubwavesMap({
   parentWaveIds,
+  viewerIdentityKey,
   refetchInterval = SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
 }: {
   readonly parentWaveIds: readonly string[];
+  readonly viewerIdentityKey?: string | null | undefined;
   readonly refetchInterval?: number | undefined;
 }) {
   const uniqueParentWaveIds = useMemo(
@@ -92,7 +107,7 @@ export function useWaveSubwavesMap({
 
   const queries = useQueries({
     queries: uniqueParentWaveIds.map((parentWaveId) => ({
-      ...getWaveSubwavesQueryOptions(parentWaveId),
+      ...getWaveSubwavesQueryOptions(parentWaveId, viewerIdentityKey),
       enabled: Boolean(parentWaveId),
       refetchInterval,
       refetchIntervalInBackground: false,

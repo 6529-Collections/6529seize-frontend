@@ -35,6 +35,7 @@ export interface WaveSubwavesQueryKeyParams {
   readonly page: number;
   readonly page_size: number;
   readonly sort: ApiSubwavesSort;
+  readonly viewer_identity?: string | undefined;
 }
 
 export interface WavesV2OverviewQueryKeyParams {

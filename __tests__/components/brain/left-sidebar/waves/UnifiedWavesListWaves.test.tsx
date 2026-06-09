@@ -1,5 +1,11 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import { SIDEBAR_SUBWAVE_ROW_TRANSITION_MS } from "@/hooks/useAnimatedSidebarWaveRows";
@@ -330,4 +336,37 @@ it("auto-expands the parent for the active subwave", () => {
     "true"
   );
   expect(screen.getByTestId("wave-child")).toBeInTheDocument();
+});
+
+it("loads and expands a direct active subwave parent before the child row is available", async () => {
+  mockUseMyStream.mockReturnValue({
+    activeWave: { id: "child", parentWaveId: "parent", set: jest.fn() },
+    waves: {
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
+    },
+  });
+
+  render(
+    <UnifiedWavesListWaves
+      waves={[
+        createMockMinimalWave({
+          id: "parent",
+          hasSubwaves: true,
+        }),
+      ]}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+
+  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+    "data-expanded",
+    "true"
+  );
+  expect(screen.queryByTestId("wave-child")).toBeNull();
+
+  await waitFor(() => {
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
+  });
 });

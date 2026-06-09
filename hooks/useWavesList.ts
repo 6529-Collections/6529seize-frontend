@@ -305,10 +305,12 @@ const useWavesList = () => {
       }
 
       void queryClient
-        .prefetchQuery(getWaveSubwavesQueryOptions(parentWaveId))
+        .prefetchQuery(
+          getWaveSubwavesQueryOptions(parentWaveId, viewerIdentityKey)
+        )
         .catch(() => undefined);
     },
-    [queryClient, rootWaveIds]
+    [queryClient, rootWaveIds, viewerIdentityKey]
   );
 
   const {
@@ -317,6 +319,7 @@ const useWavesList = () => {
     refetch: refetchSubwaves,
   } = useWaveSubwavesMap({
     parentWaveIds: loadedSubwaveParentIds,
+    viewerIdentityKey,
   });
 
   // Function to refetch all waves (main, pinned, official, announcements, subwaves)

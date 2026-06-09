@@ -89,7 +89,28 @@ describe("useSidebarWaveTree", () => {
       "older-child",
       "newer-child",
     ]);
-    expect(onParentExpand).not.toHaveBeenCalled();
+    expect(onParentExpand).toHaveBeenCalledWith("parent");
     expect(window.localStorage.length).toBe(0);
+  });
+
+  it("loads a direct active subwave parent before the child is in the list", () => {
+    const onParentExpand = jest.fn();
+    const { result } = renderHook(() =>
+      useSidebarWaveTree({
+        waves: [waves[0]!],
+        activeWaveId: "direct-child",
+        activeParentWaveId: "parent",
+        onParentExpand,
+      })
+    );
+
+    const rows = result.current.getRows(result.current.topLevelWaves);
+
+    expect(onParentExpand).toHaveBeenCalledWith("parent");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      wave: expect.objectContaining({ id: "parent" }),
+      isExpanded: true,
+    });
   });
 });

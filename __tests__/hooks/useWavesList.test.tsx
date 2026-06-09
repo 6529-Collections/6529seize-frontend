@@ -38,11 +38,21 @@ jest.mock("@/hooks/useOfficialWaves", () => ({
 
 jest.mock("@/hooks/useWaveSubwaves", () => ({
   useWaveSubwavesMap: jest.fn(),
-  getWaveSubwavesQueryOptions: jest.fn((parentWaveId: string) => ({
-    queryKey: ["WAVE_SUBWAVES", { parent_wave_id: parentWaveId }],
-    queryFn: jest.fn().mockResolvedValue([]),
-    staleTime: 60_000,
-  })),
+  getWaveSubwavesQueryOptions: jest.fn(
+    (parentWaveId: string, viewerIdentityKey?: string | null) => ({
+      queryKey: [
+        "WAVE_SUBWAVES",
+        {
+          parent_wave_id: parentWaveId,
+          ...(viewerIdentityKey
+            ? { viewer_identity: viewerIdentityKey }
+            : {}),
+        },
+      ],
+      queryFn: jest.fn().mockResolvedValue([]),
+      staleTime: 60_000,
+    })
+  ),
 }));
 
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
@@ -316,15 +326,18 @@ test("starts without subwave queries, then appends subwaves for loaded parents",
 
   expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
     parentWaveIds: [],
+    viewerIdentityKey: "0xabc:primary",
   });
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual(["parent"]);
 
   act(() => {
     result.current.loadSubwavesForParent("parent");
+    result.current.loadSubwavesForParent("parent");
   });
 
   expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
     parentWaveIds: ["parent"],
+    viewerIdentityKey: "0xabc:primary",
   });
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "parent",
@@ -364,14 +377,24 @@ test("prefetches subwaves without adding parent ids to rendered rows", () => {
     result.current.prefetchSubwavesForParent("parent");
   });
 
-  expect(getWaveSubwavesQueryOptionsMock).toHaveBeenCalledWith("parent");
+  expect(getWaveSubwavesQueryOptionsMock).toHaveBeenCalledWith(
+    "parent",
+    "0xabc:primary"
+  );
   expect(prefetchSpy).toHaveBeenCalledWith(
     expect.objectContaining({
-      queryKey: ["WAVE_SUBWAVES", { parent_wave_id: "parent" }],
+      queryKey: [
+        "WAVE_SUBWAVES",
+        {
+          parent_wave_id: "parent",
+          viewer_identity: "0xabc:primary",
+        },
+      ],
     })
   );
   expect(useWaveSubwavesMapMock).toHaveBeenLastCalledWith({
     parentWaveIds: [],
+    viewerIdentityKey: "0xabc:primary",
   });
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual(["parent"]);
 });
