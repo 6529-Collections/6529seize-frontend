@@ -4,6 +4,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
+  isNativeSecureStorageAvailable,
   removeNativeRefreshToken,
   setNativeRefreshToken,
 } from "./native-refresh-token-storage";
@@ -160,6 +161,10 @@ export async function persistSessionResponse(
   response: SessionLoginResponse | SessionRefreshResponse
 ): Promise<boolean> {
   if (response.client_type === "native") {
+    if (!isNativeSecureStorageAvailable()) {
+      return false;
+    }
+
     await setNativeRefreshToken({
       address: response.address,
       refreshToken: response.native_refresh_token,
@@ -176,8 +181,10 @@ export async function persistSessionResponse(
 
 export async function createConnectionTransfer({
   role,
+  signal,
 }: {
   readonly role: string | null;
+  readonly signal?: AbortSignal | undefined;
 }): Promise<CreateConnectionTransferResponse> {
   return await commonApiPost<
     {
@@ -192,6 +199,7 @@ export async function createConnectionTransfer({
       ...(role != null ? { role } : {}),
     },
     credentials: "include",
+    signal,
   });
 }
 

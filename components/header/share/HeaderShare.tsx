@@ -27,6 +27,23 @@ import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
 
+type CachedConnectionTransfer = {
+  readonly addressKey: string;
+  readonly roleKey: string;
+  readonly expiresAtMs: number;
+  readonly transfer: Awaited<ReturnType<typeof createConnectionTransfer>>;
+};
+
+function isAbortError(error: unknown, signal?: AbortSignal): boolean {
+  return (
+    signal?.aborted === true ||
+    (typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "AbortError")
+  );
+}
+
 interface OSInfo {
   name: "windows" | "mac" | "linux";
   url: string;
@@ -249,6 +266,10 @@ export function HeaderQRModal({
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const transferAbortRef = useRef<AbortController | null>(null);
+  const cachedConnectionTransferRef = useRef<CachedConnectionTransfer | null>(
+    null
+  );
 
   const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
     if (event.key !== "Tab") {
@@ -329,7 +350,8 @@ export function HeaderQRModal({
   async function generateSources(
     refreshToken: string | null,
     walletAddress: string | null,
-    role: string | null
+    role: string | null,
+    signal?: AbortSignal
   ) {
     let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
@@ -357,7 +379,31 @@ export function HeaderQRModal({
 
     if (isConnectionTransferV2Enabled() && walletAddress && isAuthenticated) {
       try {
-        const transfer = await createConnectionTransfer({ role });
+        const cachedTransfer = cachedConnectionTransferRef.current;
+        const addressKey = walletAddress.toLowerCase();
+        const roleKey = role ?? "";
+        const transfer =
+          cachedTransfer &&
+          cachedTransfer.addressKey === addressKey &&
+          cachedTransfer.roleKey === roleKey &&
+          cachedTransfer.expiresAtMs > Date.now() + 30_000
+            ? cachedTransfer.transfer
+            : await createConnectionTransfer({ role, signal });
+
+        if (signal?.aborted) {
+          return;
+        }
+
+        const expiresAtMs = Date.parse(transfer.expires_at);
+        if (Number.isFinite(expiresAtMs)) {
+          cachedConnectionTransferRef.current = {
+            addressKey,
+            roleKey,
+            expiresAtMs,
+            transfer,
+          };
+        }
+
         shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?transfer_code=${transfer.transfer_code}&address=${transfer.address}`;
         shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${transfer.deep_link_path}`;
 
@@ -369,6 +415,9 @@ export function HeaderQRModal({
         setShareConnectionAppUrl(shareConnectionAppUrl);
         setShareConnectionCoreUrl(shareConnectionCoreUrl);
       } catch (error: unknown) {
+        if (isAbortError(error, signal)) {
+          return;
+        }
         console.error("Failed to create connection transfer", error);
         setCanShareConnection(false);
         setShareConnectionAppUrl("");
@@ -394,18 +443,30 @@ export function HeaderQRModal({
 
     QRCode.toDataURL(browserUrl, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
+        if (signal?.aborted) {
+          return;
+        }
         setNavigateBrowserSrc(dataUrl);
       })
       .catch((error: unknown) => {
+        if (isAbortError(error, signal)) {
+          return;
+        }
         console.error("Failed to generate browser QR code", error);
         setNavigateBrowserSrc("");
       });
 
     QRCode.toDataURL(appUrl, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
+        if (signal?.aborted) {
+          return;
+        }
         setNavigateAppSrc(dataUrl);
       })
       .catch((error: unknown) => {
+        if (isAbortError(error, signal)) {
+          return;
+        }
         console.error("Failed to generate mobile app QR code", error);
         setNavigateAppSrc("");
       });
@@ -413,9 +474,15 @@ export function HeaderQRModal({
     if (shareConnectionAppUrl) {
       QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 })
         .then((dataUrl: string) => {
+          if (signal?.aborted) {
+            return;
+          }
           setShareConnectionSrc(dataUrl);
         })
         .catch((error: unknown) => {
+          if (isAbortError(error, signal)) {
+            return;
+          }
           console.error("Failed to generate share connection QR code", error);
           setShareConnectionSrc("");
         });
@@ -423,13 +490,29 @@ export function HeaderQRModal({
   }
 
   useEffect(() => {
-    if (show) {
-      void generateSources(
-        getRefreshToken(),
-        getWalletAddress(),
-        getWalletRole()
-      );
+    if (!show) {
+      transferAbortRef.current?.abort();
+      transferAbortRef.current = null;
+      return;
     }
+
+    transferAbortRef.current?.abort();
+    const controller = new AbortController();
+    transferAbortRef.current = controller;
+
+    void generateSources(
+      getRefreshToken(),
+      getWalletAddress(),
+      getWalletRole(),
+      controller.signal
+    );
+
+    return () => {
+      controller.abort();
+      if (transferAbortRef.current === controller) {
+        transferAbortRef.current = null;
+      }
+    };
   }, [show]);
 
   useEffect(() => {
