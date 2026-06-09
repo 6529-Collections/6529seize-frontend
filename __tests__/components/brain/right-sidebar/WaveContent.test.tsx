@@ -3,7 +3,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   Mode,
   SidebarTab,
-} from "@/components/brain/right-sidebar/BrainRightSidebar";
+} from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { WaveContent } from "@/components/brain/right-sidebar/WaveContent";
 
 jest.mock("@/components/waves/header/WaveHeader", () => ({
@@ -134,7 +134,7 @@ describe("WaveContent", () => {
     expect(screen.getByTestId("tabs")).toHaveTextContent(
       "ABOUT-About,Settings,Voters,Activity"
     );
-    expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approvals");
+    expect(screen.getByTestId("tabs")).not.toHaveTextContent("Proposals");
     expect(screen.getByTestId("tabs")).not.toHaveTextContent("Approved");
   });
 });

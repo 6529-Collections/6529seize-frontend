@@ -133,7 +133,7 @@ describe("create-wave.validation", () => {
       display: {
         approve: {
           approvalsTabLabel: "",
-          approvedTabLabel: "Approvals",
+          approvedTabLabel: "Proposals",
         },
       },
     };

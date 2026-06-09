@@ -172,7 +172,7 @@ describe("wave-metadata.helpers", () => {
     ]);
 
     expect(labels).toEqual({
-      approvals: "Approvals",
+      approvals: "Proposals",
       approved: "Selected",
     });
   });
@@ -192,7 +192,7 @@ describe("wave-metadata.helpers", () => {
     ]);
 
     expect(labels).toEqual({
-      approvals: "Approvals",
+      approvals: "Proposals",
       approved: "Approved",
     });
   });
@@ -212,7 +212,7 @@ describe("wave-metadata.helpers", () => {
     ]);
 
     expect(labels).toEqual({
-      approvals: "Approvals",
+      approvals: "Proposals",
       approved: "Approved",
     });
   });

@@ -17,9 +17,9 @@ describe("CreateWaveDisplaySettings", () => {
       />
     );
 
-    expect(screen.getByText("Approvals")).toBeInTheDocument();
+    expect(screen.getByText("Proposals")).toBeInTheDocument();
     expect(screen.getByText("Approved")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Approvals")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Proposals")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Approved")).toBeInTheDocument();
   });
 
@@ -50,7 +50,9 @@ describe("CreateWaveDisplaySettings", () => {
           approvalsTabLabel: "Selected",
           approvedTabLabel: "Selected",
         }}
-        errors={[CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE]}
+        errors={[
+          CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABELS_DUPLICATE,
+        ]}
         onChange={jest.fn()}
       />
     );

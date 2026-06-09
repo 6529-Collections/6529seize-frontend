@@ -5,11 +5,11 @@ import type { CreateWaveApproveDisplayConfig } from "@/types/waves.types";
 export const APPROVE_WAVE_TAB_LABEL_MAX_LENGTH = 24;
 
 export const DEFAULT_APPROVE_WAVE_TAB_LABELS = {
-  approvals: "Approvals",
+  approvals: "Proposals",
   approved: "Approved",
 } as const;
 
-export const RESERVED_APPROVE_WAVE_TAB_LABELS = [
+const RESERVED_APPROVE_WAVE_TAB_LABELS = [
   "Chat",
   "Sales",
   "Outcome",
@@ -47,12 +47,12 @@ interface ApproveWaveLabelInput {
   readonly approvedTabLabel?: string | null | undefined;
 }
 
-export interface ApproveWaveTabLabels {
+interface ApproveWaveTabLabels {
   readonly approvals: string;
   readonly approved: string;
 }
 
-export interface ApproveWaveDisplayMetadataUpdate {
+interface ApproveWaveDisplayMetadataUpdate {
   readonly create: ApiCreateWaveMetadataRequest[];
   readonly deleteIds: number[];
 }
@@ -65,10 +65,10 @@ const normalizeComparableWaveTabLabel = (
   value: string | null | undefined
 ): string => normalizeWaveTabLabel(value).toLowerCase();
 
-export const isValidCustomWaveTabLabel = (value: string): boolean =>
+const isValidCustomWaveTabLabel = (value: string): boolean =>
   value.length > 0 && value.length <= APPROVE_WAVE_TAB_LABEL_MAX_LENGTH;
 
-export const isReservedApproveWaveTabLabel = (
+const isReservedApproveWaveTabLabel = (
   value: string | null | undefined
 ): boolean => {
   const normalizedValue = normalizeComparableWaveTabLabel(value);
@@ -121,10 +121,9 @@ export const areApproveWaveTabLabelsDuplicate = (
 export const doApproveWaveTabLabelsUseReservedLabels = (
   labels?: ApproveWaveLabelInput | null
 ): boolean =>
-  [
-    labels?.approvalsTabLabel,
-    labels?.approvedTabLabel,
-  ].some((label) => isReservedApproveWaveTabLabel(label));
+  [labels?.approvalsTabLabel, labels?.approvedTabLabel].some((label) =>
+    isReservedApproveWaveTabLabel(label)
+  );
 
 const getMetadataRequest = ({
   dataKey,
