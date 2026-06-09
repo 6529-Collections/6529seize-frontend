@@ -135,10 +135,11 @@ Requirements:
 Response:
 
 - `access_token`
+- `access_token_expires_at`
 - `native_refresh_token`
+- `refresh_token_expires_at`
 - `address`
-- `role`
-- expiration metadata
+- `role` (optional; string or null)
 
 ## Structured Signature Contract
 

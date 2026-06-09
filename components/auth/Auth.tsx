@@ -53,6 +53,11 @@ import {
 } from "@/services/auth/auth.utils";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
+import {
+  isWalletAuthSessionV2Enabled,
+  loginWithSessionV2,
+  persistSessionResponse,
+} from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
@@ -564,25 +569,31 @@ export default function Auth({
         return { success: false };
       }
 
-      const tokenResponse = await commonApiPost<
-        ApiLoginRequest,
-        ApiLoginResponse
-      >({
-        endpoint: "auth/login",
-        body: {
-          server_signature,
-          client_signature: clientSignature.signature,
-          is_safe_wallet: isSafeWallet,
-          client_address: signerAddress,
-          ...(role != null && { role }),
-        },
-      });
-      const isPersisted = setAuthJwt(
-        signerAddress,
-        tokenResponse.token,
-        tokenResponse.refresh_token,
-        role ?? undefined
-      );
+      const isPersisted = isWalletAuthSessionV2Enabled()
+        ? await loginWithSessionV2({
+            serverSignature: server_signature,
+            clientSignature: clientSignature.signature,
+            signerAddress,
+            role,
+            isSafeWallet,
+          }).then(persistSessionResponse)
+        : await commonApiPost<ApiLoginRequest, ApiLoginResponse>({
+            endpoint: "auth/login",
+            body: {
+              server_signature,
+              client_signature: clientSignature.signature,
+              is_safe_wallet: isSafeWallet,
+              client_address: signerAddress,
+              ...(role != null && { role }),
+            },
+          }).then((tokenResponse) =>
+            setAuthJwt(
+              signerAddress,
+              tokenResponse.token,
+              tokenResponse.refresh_token,
+              role ?? undefined
+            )
+          );
       if (!isPersisted) {
         setToast({
           message: "Couldn't save this connected profile. Please try again.",

@@ -28,6 +28,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   ),
 }));
 jest.mock("@/services/auth/auth.utils");
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  createConnectionTransfer: jest.fn(),
+  isConnectionTransferV2Enabled: jest.fn(() => false),
+}));
 
 // Mock Reown AppKit
 jest.mock("@reown/appkit/react", () => ({
@@ -131,14 +135,7 @@ Object.assign(navigator, {
   },
 });
 
-// Mock window.location
-Object.defineProperty(window, "location", {
-  value: {
-    origin: "https://test.6529.io",
-    href: "https://test.6529.io/test-path",
-  },
-  writable: true,
-});
+const testOrigin = window.location.origin;
 
 describe("HeaderShare", () => {
   const mockSeizeConnect = require("@/components/auth/SeizeConnectContext");
@@ -361,7 +358,7 @@ describe("HeaderShare", () => {
 
       // Should call QRCode.toDataURL for browser and app URLs
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        "https://test.6529.io/mock-path?something=value",
+        `${testOrigin}/mock-path?something=value`,
         { width: 500, margin: 0 }
       );
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -471,7 +468,7 @@ describe("HeaderShare", () => {
 
       // Verify multiple QR codes are generated (browser + app + possibly share)
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        expect.stringContaining("https://test.6529.io"),
+        expect.stringContaining(testOrigin),
         expect.any(Object)
       );
       expect(qrcode.toDataURL).toHaveBeenCalledWith(

@@ -52,6 +52,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  logoutSessionV2: jest.fn(() => Promise.resolve()),
+}));
+
 const addressA = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const addressB = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const unknownAddress = "0xcccccccccccccccccccccccccccccccccccccccc";

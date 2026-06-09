@@ -30,6 +30,9 @@ jest.mock("@/helpers/safeLocalStorage", () => ({
     removeItem: jest.fn(),
   },
 }));
+jest.mock("@/services/auth/native-refresh-token-storage", () => ({
+  removeNativeRefreshToken: jest.fn(),
+}));
 
 describe("auth.utils", () => {
   const setupStorageMocks = () => {
@@ -113,6 +116,27 @@ describe("auth.utils", () => {
       "6529-wallet-role"
     );
     expect(safeLocalStorage.removeItem).toHaveBeenCalledWith("auth-role-addr");
+  });
+
+  it("setAuthJwt supports web sessions without a refresh token", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    const didStore = setAuthJwt("0xAaA", "jwt-a", null, "role-a");
+
+    expect(didStore).toBe(true);
+    expect(getConnectedWalletAccounts()[0]).toEqual(
+      expect.objectContaining({
+        address: "0xAaA",
+        refreshToken: null,
+        jwt: "jwt-a",
+      })
+    );
+    expect(getRefreshToken()).toBe(null);
+    expect(safeLocalStorage.removeItem).toHaveBeenCalledWith(
+      "6529-wallet-refresh-token"
+    );
   });
 
   it("syncWalletRoleWithServer stores server role", () => {

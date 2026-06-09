@@ -18,6 +18,10 @@ import {
   getWalletAddress,
   getWalletRole,
 } from "@/services/auth/auth.utils";
+import {
+  createConnectionTransfer,
+  isConnectionTransferV2Enabled,
+} from "@/services/auth/session-v2.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 
@@ -233,6 +237,8 @@ export function HeaderQRModal({
   const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
+  const [canShareConnection, setCanShareConnection] =
+    useState<boolean>(isAuthenticated);
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
@@ -320,7 +326,7 @@ export function HeaderQRModal({
     [trapFocusInDialog]
   );
 
-  function generateSources(
+  async function generateSources(
     refreshToken: string | null,
     walletAddress: string | null,
     role: string | null
@@ -349,7 +355,28 @@ export function HeaderQRModal({
     let shareConnectionAppUrl = "";
     let shareConnectionCoreUrl = "";
 
-    if (refreshToken && walletAddress) {
+    if (isConnectionTransferV2Enabled() && walletAddress && isAuthenticated) {
+      try {
+        const transfer = await createConnectionTransfer({ role });
+        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?transfer_code=${transfer.transfer_code}&address=${transfer.address}`;
+        shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${transfer.deep_link_path}`;
+
+        if (transfer.role) {
+          shareConnectionAppUrl += `&role=${transfer.role}`;
+        }
+
+        setCanShareConnection(true);
+        setShareConnectionAppUrl(shareConnectionAppUrl);
+        setShareConnectionCoreUrl(shareConnectionCoreUrl);
+      } catch (error: unknown) {
+        console.error("Failed to create connection transfer", error);
+        setCanShareConnection(false);
+        setShareConnectionAppUrl("");
+        setShareConnectionCoreUrl("");
+        setShareConnectionSrc("");
+        setActiveTab(Mode.NAVIGATE);
+      }
+    } else if (refreshToken && walletAddress) {
       shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
       shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
 
@@ -357,9 +384,11 @@ export function HeaderQRModal({
         shareConnectionAppUrl += `&role=${role}`;
         shareConnectionCoreUrl += `&role=${role}`;
       }
+      setCanShareConnection(true);
       setShareConnectionAppUrl(shareConnectionAppUrl);
       setShareConnectionCoreUrl(shareConnectionCoreUrl);
     } else {
+      setCanShareConnection(false);
       setShareConnectionSrc("");
     }
 
@@ -395,7 +424,11 @@ export function HeaderQRModal({
 
   useEffect(() => {
     if (show) {
-      generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
+      void generateSources(
+        getRefreshToken(),
+        getWalletAddress(),
+        getWalletRole()
+      );
     }
   }, [show]);
 
@@ -694,7 +727,7 @@ export function HeaderQRModal({
             Share
           </h2>
           <ModalMenu
-            isShareConnection={!!getRefreshToken()}
+            isShareConnection={canShareConnection}
             activeTab={activeTab}
             activeSubTab={activeSubTab}
             onTabChange={(tab, subTab) => {

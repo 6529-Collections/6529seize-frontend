@@ -76,6 +76,9 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   CORE_SCHEME: z.string().optional(),
+  AUTH_LEGACY_REFRESH_ENABLED: z.string().optional(),
+  AUTH_SESSION_V2_ENABLED: z.string().optional(),
+  AUTH_TRANSFER_CODES_ENABLED: z.string().optional(),
   DEV_MODE_AUTH_JWT: z.string().optional(),
   DEV_MODE_MEMES_WAVE_ID: z.string().optional(),
   DEV_MODE_CURATION_WAVE_ID: z.string().optional(),
