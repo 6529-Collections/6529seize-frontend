@@ -21,6 +21,10 @@ export class AuthNonceUnstructuredQuery {
     */
     'short_nonce'?: boolean;
     'structured_signature'?: boolean;
+    /**
+    * Accepted for flat query parity; ignored unless structured_signature is true.
+    */
+    'chain_id'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -43,6 +47,12 @@ export class AuthNonceUnstructuredQuery {
             "name": "structured_signature",
             "baseName": "structured_signature",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "chain_id",
+            "baseName": "chain_id",
+            "type": "number",
             "format": ""
         }    ];
 

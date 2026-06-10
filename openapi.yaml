@@ -14900,6 +14900,13 @@ components:
           enum:
             - false
           default: false
+        chain_id:
+          type: integer
+          minimum: 1
+          default: 1
+          description: >-
+            Accepted for flat query parity; ignored unless structured_signature
+            is true.
     AuthNonceStructuredQuery:
       type: object
       additionalProperties: false
