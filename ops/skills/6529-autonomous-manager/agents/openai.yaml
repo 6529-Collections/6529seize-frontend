@@ -1,0 +1,4 @@
+interface:
+  display_name: "6529 Autonomous Manager"
+  short_description: "Own scoped 6529 frontend workstreams from instruction to validated closeout."
+  default_prompt: "Use $6529-autonomous-manager to own this 6529 frontend workstream end to end, validate the changed surface, and report evidence-backed closeout."
