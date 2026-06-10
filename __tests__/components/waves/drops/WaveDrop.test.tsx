@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
@@ -96,22 +96,55 @@ const getLastMockProps = (mock: jest.Mock) => {
   return lastCall?.[0];
 };
 
-const setHoverSupport = (hasHover: boolean) => {
+type MediaQueryChangeListener = () => void;
+
+const HOVER_INPUT_MEDIA_QUERIES = new Set([
+  "(any-hover: hover)",
+  "(hover: hover)",
+]);
+
+const setHoverSupport = (initialHasHover: boolean) => {
+  let hasHover = initialHasHover;
+  const listeners = new Set<MediaQueryChangeListener>();
+
   Object.defineProperty(globalThis, "matchMedia", {
     writable: true,
     value: jest.fn((query: string) => ({
-      matches:
-        hasHover &&
-        (query === "(any-hover: hover)" || query === "(hover: hover)"),
+      get matches() {
+        return hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query);
+      },
       media: query,
       onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
+      addListener: jest.fn((listener: MediaQueryChangeListener) => {
+        listeners.add(listener);
+      }),
+      removeListener: jest.fn((listener: MediaQueryChangeListener) => {
+        listeners.delete(listener);
+      }),
+      addEventListener: jest.fn(
+        (eventName: string, listener: MediaQueryChangeListener) => {
+          if (eventName === "change") {
+            listeners.add(listener);
+          }
+        }
+      ),
+      removeEventListener: jest.fn(
+        (eventName: string, listener: MediaQueryChangeListener) => {
+          if (eventName === "change") {
+            listeners.delete(listener);
+          }
+        }
+      ),
       dispatchEvent: jest.fn(),
     })),
   });
+
+  return {
+    setHasHover(nextHasHover: boolean) {
+      hasHover = nextHasHover;
+      listeners.forEach((listener) => listener());
+    },
+  };
 };
 
 // Create a test store
@@ -228,6 +261,42 @@ describe("WaveDrop", () => {
     );
     expect(getLastMockProps(mockWaveDropContent)).toEqual(
       expect.objectContaining({ hasTouch: false })
+    );
+  });
+
+  it("enables touch entry when hover support is removed while open", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    const hoverSupport = setHoverSupport(true);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: false })
+    );
+
+    act(() => {
+      hoverSupport.setHasHover(false);
+    });
+
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: true })
     );
   });
 
