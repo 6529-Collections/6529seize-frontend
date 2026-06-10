@@ -58,30 +58,34 @@ describe("sandboxed external iframe URL helpers", () => {
   });
 
   it("opens canonical URLs with opener and referrer protections", () => {
-    const originalOpen = window.open;
-    const open = jest.fn();
-    window.open = open;
+    const openSpy = jest
+      .spyOn(globalThis.window, "open")
+      .mockImplementation(() => null);
 
-    openExternalMetadataUrl(" https://EXAMPLE.com/media/index.html ");
+    try {
+      openExternalMetadataUrl(" https://EXAMPLE.com/media/index.html ");
 
-    expect(open).toHaveBeenCalledWith(
-      "https://example.com/media/index.html",
-      "_blank",
-      "noopener,noreferrer"
-    );
-
-    window.open = originalOpen;
+      expect(openSpy).toHaveBeenCalledWith(
+        "https://example.com/media/index.html",
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } finally {
+      openSpy.mockRestore();
+    }
   });
 
   it("does not open invalid URLs", () => {
-    const originalOpen = window.open;
-    const open = jest.fn();
-    window.open = open;
+    const openSpy = jest
+      .spyOn(globalThis.window, "open")
+      .mockImplementation(() => null);
 
-    openExternalMetadataUrl("javascript:alert(1)");
+    try {
+      openExternalMetadataUrl("javascript:alert(1)");
 
-    expect(open).not.toHaveBeenCalled();
-
-    window.open = originalOpen;
+      expect(openSpy).not.toHaveBeenCalled();
+    } finally {
+      openSpy.mockRestore();
+    }
   });
 });
