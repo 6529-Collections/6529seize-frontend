@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { UnlockAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 
-export const useAppWalletPasswordModal = () => {
+export const useAppWalletPasswordModal = (
+  onVerifiedUnlock?:
+    | ((address: string, password: string) => Promise<unknown> | unknown)
+    | undefined
+) => {
   const [isOpen, setIsOpen] = useState(false);
   const [resolve, setResolve] = useState<(password: string) => void>();
   const [reject, setReject] = useState<(reason?: any) => void>();
@@ -48,6 +52,7 @@ export const useAppWalletPasswordModal = () => {
       address_hashed={addressHashed}
       show={isOpen}
       onHide={() => handleCancel()}
+      onVerifiedUnlock={onVerifiedUnlock}
       onUnlock={(pass: string) => {
         handlePasswordSubmit(pass);
       }}
