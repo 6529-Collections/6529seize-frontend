@@ -61,6 +61,15 @@ function AcceptConnectionSharing(
   const acceptConnection = async () => {
     try {
       if (isTransferCodeFlow) {
+        if (address && !canStoreAnotherWalletAccount(address)) {
+          setToast({
+            message: "Maximum connected profiles reached",
+            type: "error",
+          });
+          setAcceptingConnection(false);
+          return;
+        }
+
         const redeemResponse = await redeemConnectionTransfer(transferCode);
         const hasValidRedeemResponse =
           !!redeemResponse.address &&
