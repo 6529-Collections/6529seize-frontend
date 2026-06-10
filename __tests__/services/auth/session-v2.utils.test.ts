@@ -48,7 +48,11 @@ describe("session-v2.utils", () => {
     (setAuthJwt as jest.Mock).mockReturnValue(true);
   });
 
-  it("rolls back a native refresh token when auth persistence fails", async () => {
+  it("revokes a native session when auth persistence fails", async () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
     (setAuthJwt as jest.Mock).mockReturnValue(false);
 
     await expect(
@@ -66,6 +70,17 @@ describe("session-v2.utils", () => {
     expect(setNativeRefreshToken).toHaveBeenCalledWith({
       address: "0xabc",
       refreshToken: "native-refresh-token",
+    });
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-logout",
+      body: {
+        client_type: "native",
+        client_address: "0xabc",
+        native_refresh_token: "native-refresh-token",
+        all_sessions: false,
+      },
+      credentials: "include",
+      parseJson: false,
     });
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
@@ -108,6 +123,32 @@ describe("session-v2.utils", () => {
       endpoint: "auth/session-refresh",
       body: {
         client_type: "web",
+      },
+      signal: undefined,
+      credentials: "include",
+      errorMode: "structured",
+    });
+  });
+
+  it("treats unauthorized native refresh as an invalid session", async () => {
+    const unauthorizedError = Object.assign(new Error("Unauthorized"), {
+      status: 401,
+      response: { status: 401 },
+    });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(unauthorizedError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-refresh",
+      body: {
+        client_type: "native",
+        client_address: "0xabc",
+        native_refresh_token: "native-refresh-token",
       },
       signal: undefined,
       credentials: "include",

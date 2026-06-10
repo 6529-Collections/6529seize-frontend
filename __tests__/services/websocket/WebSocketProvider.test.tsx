@@ -307,6 +307,13 @@ describe("WebSocketProvider", () => {
       });
 
       expect(ws.close).toHaveBeenCalledWith(1011, "Authentication timeout");
+
+      act(() => {
+        ws.triggerClose(1011, "Authentication timeout");
+        jest.advanceTimersByTime(10000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
     });
 
     it("allows reconnect after message authentication fails when the token changes", () => {
