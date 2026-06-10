@@ -125,11 +125,13 @@ const applyCanonicalDropUpdate = async ({
   updateData,
 }: CanonicalDropUpdateParams): Promise<void> => {
   const apiDrop = await fetchDropByIdBatched(dropId);
-  const reconciledApiDrop = reconcileDropAuthenticatedPollVote(
-    apiDrop,
-    existingDrop,
-    { preferExistingVote: options.preferExistingPollVote }
-  );
+  const preferExistingPollVote = options.preferExistingPollVote;
+  const reconciledApiDrop =
+    preferExistingPollVote === undefined
+      ? reconcileDropAuthenticatedPollVote(apiDrop, existingDrop)
+      : reconcileDropAuthenticatedPollVote(apiDrop, existingDrop, {
+          preferExistingVote: preferExistingPollVote,
+        });
 
   if (!shouldApplyCanonicalDrop(type, reconciledApiDrop)) {
     return;
@@ -161,12 +163,15 @@ const buildOptimisticDrop = ({
   readonly existingDrop: ExtendedDrop | null;
   readonly options: ProcessIncomingDropOptions;
 }): ExtendedDrop => {
+  const preferExistingPollVote = options.preferExistingPollVote;
   const reconciledDrop =
     existingDrop === null
       ? drop
-      : reconcileDropAuthenticatedPollVote(drop, existingDrop, {
-          preferExistingVote: options.preferExistingPollVote,
-        });
+      : preferExistingPollVote === undefined
+        ? reconcileDropAuthenticatedPollVote(drop, existingDrop)
+        : reconcileDropAuthenticatedPollVote(drop, existingDrop, {
+            preferExistingVote: preferExistingPollVote,
+          });
 
   return {
     ...reconciledDrop,
@@ -543,9 +548,14 @@ const useProcessIncomingDrop = ({
       }
 
       if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-        updateDropInCachedDrops(queryClient, drop, {
-          preferExistingPollVote: options.preferExistingPollVote,
-        });
+        const preferExistingPollVote = options.preferExistingPollVote;
+        if (preferExistingPollVote === undefined) {
+          updateDropInCachedDrops(queryClient, drop);
+        } else {
+          updateDropInCachedDrops(queryClient, drop, {
+            preferExistingPollVote,
+          });
+        }
       }
 
       if (isWaveMuted(waveId)) {
