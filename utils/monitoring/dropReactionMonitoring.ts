@@ -11,6 +11,7 @@ const REACTION_FEATURE = "drop-reaction";
 const REACTION_REQUEST_OPERATION = "reaction-request";
 const REACTION_ANOMALY_OPERATION = "reaction-anomaly";
 const ANOMALY_OPTIMISTIC_REVERTED = "optimistic-reverted";
+const WEBSOCKET_STATUSES = new Set<string>(Object.values(WebSocketStatus));
 
 export type ReactionSource = "quick-react" | "picker" | "chip";
 type ReactionAction = "add" | "remove" | "replace";
@@ -140,12 +141,8 @@ function toNullableReaction(value: string | null | undefined): string | null {
 function toWebsocketStatus(
   value: WebSocketStatus | string | null | undefined
 ): WebSocketStatus | null {
-  if (
-    value === WebSocketStatus.CONNECTED ||
-    value === WebSocketStatus.CONNECTING ||
-    value === WebSocketStatus.DISCONNECTED
-  ) {
-    return value;
+  if (typeof value === "string" && WEBSOCKET_STATUSES.has(value)) {
+    return value as WebSocketStatus;
   }
 
   return null;

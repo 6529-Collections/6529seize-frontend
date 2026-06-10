@@ -75,11 +75,11 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 
-const TestProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const TestProvider: React.FC<{
+  children: React.ReactNode;
+  setToast?: jest.Mock;
+}> = ({ children, setToast = jest.fn() }) => {
   const setTitle = jest.fn();
-  const setToast = jest.fn();
   const authContextValue = useMemo(
     () => ({ setTitle, setToast }),
     [setTitle, setToast]
@@ -202,6 +202,7 @@ describe("AcceptConnectionSharing page", () => {
     await waitFor(() =>
       expect(redeemConnectionTransfer).toHaveBeenCalledWith("abc12345")
     );
+    expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
     expect(persistSessionResponse).toHaveBeenCalledWith(
       expect.objectContaining({
         client_type: "native",
@@ -211,5 +212,33 @@ describe("AcceptConnectionSharing page", () => {
     );
     expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
     expect(push).toHaveBeenCalledWith("/");
+  });
+
+  it("does not burn a native transfer code when profile storage is full", async () => {
+    const setToast = jest.fn();
+    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(true);
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(false);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("transfer_code=abc12345&address=0x123")
+    );
+
+    render(
+      <TestProvider setToast={setToast}>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(setToast).toHaveBeenCalledWith({
+        message: "Maximum connected profiles reached",
+        type: "error",
+      })
+    );
+    expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
+    expect(redeemConnectionTransfer).not.toHaveBeenCalled();
+    expect(persistSessionResponse).not.toHaveBeenCalled();
   });
 });

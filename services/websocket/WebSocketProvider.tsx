@@ -74,6 +74,19 @@ const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
 const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
 const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
 
+const createCredentialMarker = (credential: string): string => {
+  let primary = 0;
+  let secondary = 5381;
+
+  for (let index = 0; index < credential.length; index += 1) {
+    const code = credential.charCodeAt(index);
+    primary = (primary * 31 + code) % 2_147_483_647;
+    secondary = (secondary * 33 + code) % 2_147_483_647;
+  }
+
+  return `${credential.length}:${primary}:${secondary}`;
+};
+
 /**
  * Calculate delay for exponential backoff
  */
@@ -112,6 +125,7 @@ export function WebSocketProvider({
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
+  const rejectedCredentialMarkerRef = useRef<string | null>(null);
 
   /**
    * Parse and route incoming WebSocket messages
@@ -140,6 +154,9 @@ export function WebSocketProvider({
     }
 
     if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
+      rejectedCredentialMarkerRef.current = reconnectTokenRef.current
+        ? createCredentialMarker(reconnectTokenRef.current)
+        : null;
       setStatus(WebSocketStatus.DISCONNECTED);
       isManualDisconnectRef.current = true;
       wsRef.current?.close(1008, "Authentication failed");
@@ -213,6 +230,26 @@ export function WebSocketProvider({
    */
   const connect = useCallback(
     function connectSocket(token?: string) {
+      const useMessageAuth = !!token && isWalletAuthSessionV2Enabled();
+      const credentialMarker = token ? createCredentialMarker(token) : null;
+
+      if (
+        useMessageAuth &&
+        credentialMarker !== null &&
+        rejectedCredentialMarkerRef.current === credentialMarker
+      ) {
+        reconnectTokenRef.current = token;
+        isManualDisconnectRef.current = true;
+        clearReconnectTimer();
+        reconnectAttemptsRef.current = 0;
+        setStatus(WebSocketStatus.DISCONNECTED);
+        return;
+      }
+
+      if (credentialMarker !== rejectedCredentialMarkerRef.current) {
+        rejectedCredentialMarkerRef.current = null;
+      }
+
       // Store token for potential reconnection
       reconnectTokenRef.current = token;
 
@@ -233,7 +270,6 @@ export function WebSocketProvider({
 
       // Build URL with optional token
       let url = config.url;
-      const useMessageAuth = !!token && isWalletAuthSessionV2Enabled();
       if (token && !useMessageAuth) {
         url += `?token=${encodeURIComponent(token)}`;
       }
