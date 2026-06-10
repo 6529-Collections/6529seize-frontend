@@ -421,16 +421,16 @@ export const getWalletRole = () => {
   return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
 };
 
-export const clearAllWalletAuth = (): void => {
+export const clearAllWalletAuth = async (): Promise<void> => {
   const accounts = getStoredAccounts();
-  for (const account of accounts) {
-    void removeNativeRefreshToken(account.address);
-  }
+  await Promise.all(
+    accounts.map((account) => removeNativeRefreshToken(account.address))
+  );
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
 };
 
-export const removeAuthJwt = () => {
+export const removeAuthJwt = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   const activeAccount = getActiveAccountFromAccounts(accounts);
 
@@ -444,7 +444,7 @@ export const removeAuthJwt = () => {
     return;
   }
 
-  void removeNativeRefreshToken(activeAccount.address);
+  await removeNativeRefreshToken(activeAccount.address);
 
   const remainingAccounts = accounts.filter(
     (account) =>

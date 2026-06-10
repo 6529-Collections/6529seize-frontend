@@ -160,6 +160,7 @@ export async function refreshSessionV2({
 export async function persistSessionResponse(
   response: SessionLoginResponse | SessionRefreshResponse
 ): Promise<boolean> {
+  let didPersistNativeRefreshToken = false;
   if (response.client_type === "native") {
     if (!isNativeSecureStorageAvailable()) {
       return false;
@@ -169,14 +170,29 @@ export async function persistSessionResponse(
       address: response.address,
       refreshToken: response.native_refresh_token,
     });
+    didPersistNativeRefreshToken = true;
   }
 
-  return setAuthJwt(
-    response.address,
-    response.access_token,
-    null,
-    response.role ?? undefined
-  );
+  let didPersistAuth = false;
+  try {
+    didPersistAuth = setAuthJwt(
+      response.address,
+      response.access_token,
+      null,
+      response.role ?? undefined
+    );
+  } catch (error) {
+    if (didPersistNativeRefreshToken) {
+      await removeNativeRefreshToken(response.address);
+    }
+    throw error;
+  }
+
+  if (!didPersistAuth && didPersistNativeRefreshToken) {
+    await removeNativeRefreshToken(response.address);
+  }
+
+  return didPersistAuth;
 }
 
 export async function createConnectionTransfer({
@@ -210,10 +226,6 @@ export async function logoutSessionV2({
   readonly address: string | null;
   readonly allSessions?: boolean | undefined;
 }): Promise<void> {
-  if (!isWalletAuthSessionV2Enabled()) {
-    return;
-  }
-
   const clientType = getSessionClientType();
   if (clientType === "native") {
     if (!address) {
@@ -243,6 +255,10 @@ export async function logoutSessionV2({
       parseJson: false,
     });
     await removeNativeRefreshToken(address);
+    return;
+  }
+
+  if (!isWalletAuthSessionV2Enabled()) {
     return;
   }
 
