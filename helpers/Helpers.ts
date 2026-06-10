@@ -9,6 +9,7 @@ import {
 } from "@/components/user/layout/userTabs.config";
 import { publicEnv } from "@/config/env";
 import {
+  canonicalizeGatewayHostname,
   normalizeDecentralizedMediaUrl,
   parseDecentralizedMediaRef,
   toExternalFallbackUrls,
@@ -343,7 +344,16 @@ export function parseIpfsUrlToGateway(url: string) {
   }
   const fallbacks = toExternalFallbackUrls(parsed);
   return (
-    fallbacks.find((fallback) => fallback.includes("://cf-ipfs.com/")) ??
+    fallbacks.find((fallback) => {
+      try {
+        return (
+          canonicalizeGatewayHostname(new URL(fallback).hostname) ===
+          "cf-ipfs.com"
+        );
+      } catch {
+        return false;
+      }
+    }) ??
     fallbacks[0] ??
     parseIpfsUrl(url)
   );
