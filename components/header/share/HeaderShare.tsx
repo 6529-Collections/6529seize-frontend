@@ -409,11 +409,11 @@ export function HeaderQRModal({
           };
         }
 
-        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?transfer_code=${transfer.transfer_code}&address=${transfer.address}`;
+        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?transfer_code=${encodeURIComponent(transfer.transfer_code)}&address=${encodeURIComponent(transfer.address)}`;
         shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${transfer.deep_link_path}`;
 
         if (transfer.role) {
-          shareConnectionAppUrl += `&role=${transfer.role}`;
+          shareConnectionAppUrl += `&role=${encodeURIComponent(transfer.role)}`;
         }
 
         setCanShareConnection(true);

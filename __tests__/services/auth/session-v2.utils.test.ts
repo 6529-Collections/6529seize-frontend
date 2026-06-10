@@ -11,6 +11,7 @@ import {
 import {
   logoutSessionV2,
   persistSessionResponse,
+  refreshSessionV2,
 } from "@/services/auth/session-v2.utils";
 
 jest.mock("@capacitor/core", () => ({
@@ -67,6 +68,51 @@ describe("session-v2.utils", () => {
       refreshToken: "native-refresh-token",
     });
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
+  });
+
+  it("revokes a web session cookie when auth persistence fails", async () => {
+    publicEnv.AUTH_SESSION_V2_ENABLED = "true";
+    (setAuthJwt as jest.Mock).mockReturnValue(false);
+
+    await expect(
+      persistSessionResponse({
+        client_type: "web",
+        address: "0xabc",
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      })
+    ).resolves.toBe(false);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-logout",
+      body: {
+        client_type: "web",
+        all_sessions: false,
+      },
+      credentials: "include",
+      parseJson: false,
+    });
+  });
+
+  it("treats unauthorized web refresh as an invalid session", async () => {
+    const unauthorizedError = Object.assign(new Error("Unauthorized"), {
+      status: 401,
+      response: { status: 401 },
+    });
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(unauthorizedError);
+
+    await expect(refreshSessionV2({ address: "0xabc" })).resolves.toBeNull();
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-refresh",
+      body: {
+        client_type: "web",
+      },
+      signal: undefined,
+      credentials: "include",
+      errorMode: "structured",
+    });
   });
 
   it("revokes an existing native session even when the rollout flag is disabled", async () => {
