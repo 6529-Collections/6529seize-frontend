@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 from pathlib import Path
 from typing import Sequence
@@ -35,6 +36,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Run primary and second-view remediation passes for a docs area."""
     args = parse_args(argv)
     repo_root = Path.cwd().resolve()
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", args.area):
+        print(f"ERROR: invalid docs area: {args.area}")
+        return 1
+
     area_dir = repo_root / "ops" / "docs" / args.area
     if not area_dir.exists() or not area_dir.is_dir():
         print(f"ERROR: docs area not found: ops/docs/{args.area}")

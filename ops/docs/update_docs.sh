@@ -6,8 +6,6 @@ if [[ -n "$(git status --porcelain -- . ':(exclude)ops/docs')" ]]; then
   exit 1
 fi
 
-LAST_COMMIT_HASH="$(git rev-parse --short HEAD)"
-
 CODEX_ARGS=()
 if [[ -L ops/docs ]]; then
   DOCS_REAL_PATH="$(cd ops/docs && pwd -P)"
