@@ -68,19 +68,23 @@ class AreaAudit:
 
 
 def run(args: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    """Run a subprocess and capture its text output."""
     return subprocess.run(args, cwd=cwd, capture_output=True, text=True)
 
 
 def read_text(path: Path) -> str:
+    """Read UTF-8 text from a docs file."""
     return path.read_text(encoding="utf-8")
 
 
 def has_heading(text: str, heading: str) -> bool:
+    """Return whether Markdown text contains a second-level heading."""
     pattern = rf"^##\s+{re.escape(heading)}\s*$"
     return re.search(pattern, text, flags=re.MULTILINE) is not None
 
 
 def normalize_target(raw_target: str) -> str:
+    """Normalize a Markdown link target for duplicate detection."""
     target = raw_target.strip()
     if target.startswith("<") and target.endswith(">"):
         target = target[1:-1].strip()
@@ -92,6 +96,7 @@ def normalize_target(raw_target: str) -> str:
 
 
 def local_targets(text: str) -> list[str]:
+    """Return non-external Markdown link targets from text."""
     targets: list[str] = []
     for raw in LINK_RE.findall(text):
         target = normalize_target(raw)
@@ -104,11 +109,13 @@ def local_targets(text: str) -> list[str]:
 
 
 def duplicate_targets(text: str) -> list[str]:
+    """Return duplicate local Markdown link targets from text."""
     counts = Counter(local_targets(text))
     return sorted([target for target, count in counts.items() if count > 1])
 
 
 def extract_route_tokens(text: str) -> list[str]:
+    """Extract concrete route tokens from Markdown text."""
     tokens: set[str] = set()
     for raw in BACKTICK_RE.findall(text):
         token = raw.strip()
@@ -124,6 +131,7 @@ def extract_route_tokens(text: str) -> list[str]:
 
 
 def git_latest_timestamp(repo_root: Path, paths: Iterable[Path]) -> int | None:
+    """Return the latest git commit timestamp for the given paths."""
     rel_paths: list[str] = []
     for path in paths:
         if path.is_absolute():
@@ -152,6 +160,7 @@ def git_latest_timestamp(repo_root: Path, paths: Iterable[Path]) -> int | None:
 
 
 def existing_source_dirs(repo_root: Path) -> list[str]:
+    """Return source directories that exist in the repository."""
     return [name for name in SOURCE_DIR_CANDIDATES if (repo_root / name).exists()]
 
 
@@ -161,6 +170,7 @@ def find_route_matches(
     source_dirs: list[str],
     cache: dict[str, list[Path]],
 ) -> list[Path]:
+    """Find source files that reference a route token."""
     if token in cache:
         return cache[token]
 
@@ -191,6 +201,7 @@ def find_route_matches(
 
 
 def compute_merge_candidates(scope_name: str, feature_pages: list[Path]) -> list[str]:
+    """Identify feature-page clusters that may be merge candidates."""
     candidates: list[str] = []
     if len(feature_pages) < MERGE_CLUSTER_THRESHOLD:
         return candidates
@@ -229,6 +240,7 @@ def compute_merge_candidates(scope_name: str, feature_pages: list[Path]) -> list
 
 
 def score_audit(audit: AreaAudit) -> int:
+    """Compute a prioritization score for an area audit."""
     score = 0
     score += 3 * len(audit.area_missing_headings)
     score += 2 * sum(len(v) for v in audit.subarea_missing_headings.values())
@@ -249,6 +261,7 @@ def score_audit(audit: AreaAudit) -> int:
 
 
 def audit_area(repo_root: Path, docs_root: Path, area: str) -> AreaAudit:
+    """Audit one docs area for structure, links, and stale-route signals."""
     area_dir = docs_root / area
     if not area_dir.exists() or not area_dir.is_dir():
         raise ValueError(f"Area not found: {area}")
@@ -365,6 +378,7 @@ def audit_area(repo_root: Path, docs_root: Path, area: str) -> AreaAudit:
 
 
 def audit_all_areas(repo_root: Path, docs_root: Path) -> list[AreaAudit]:
+    """Audit all docs areas that have an area README."""
     audits: list[AreaAudit] = []
     for area_dir in sorted(docs_root.iterdir()):
         if not area_dir.is_dir():
@@ -377,6 +391,7 @@ def audit_all_areas(repo_root: Path, docs_root: Path) -> list[AreaAudit]:
 
 
 def index_issue_count(audit: AreaAudit) -> int:
+    """Count index and discoverability issues in an area audit."""
     return (
         len(audit.area_missing_headings)
         + sum(len(v) for v in audit.subarea_missing_headings.values())
@@ -388,6 +403,7 @@ def index_issue_count(audit: AreaAudit) -> int:
 
 
 def print_summary_table(audits: list[AreaAudit]) -> None:
+    """Print a compact score table for area audits."""
     print(
         f"{'area':<16}{'score':>7}{'pages':>7}{'feat':>7}{'flow':>7}"
         f"{'trbl':>7}{'stale':>7}{'idx':>7}"
@@ -402,6 +418,7 @@ def print_summary_table(audits: list[AreaAudit]) -> None:
 
 
 def reasons(audit: AreaAudit) -> list[str]:
+    """Return human-readable reasons an area should be remediated."""
     items: list[str] = []
     if audit.area_missing_headings:
         items.append(
@@ -430,6 +447,7 @@ def reasons(audit: AreaAudit) -> list[str]:
 
 
 def print_pick(audit: AreaAudit, max_items: int) -> None:
+    """Print the next recommended docs area to remediate."""
     print(f"next_area={audit.area}")
     print(f"score={audit.score}")
     print("")
@@ -447,6 +465,7 @@ def print_pick(audit: AreaAudit, max_items: int) -> None:
 
 
 def print_list(title: str, values: list[str], max_items: int) -> None:
+    """Print a titled list with optional truncation."""
     print(title)
     if not values:
         print("- none")
@@ -463,6 +482,7 @@ def print_list(title: str, values: list[str], max_items: int) -> None:
 
 
 def print_detail(audit: AreaAudit, max_items: int) -> None:
+    """Print detailed audit findings for one docs area."""
     print(f"area={audit.area}")
     print(f"score={audit.score}")
     print("")
@@ -504,6 +524,7 @@ def print_detail(audit: AreaAudit, max_items: int) -> None:
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments for area health auditing."""
     parser = argparse.ArgumentParser(
         description=(
             "Audit docs areas for structure, discoverability, and stale-content signals. "
@@ -526,6 +547,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run area health auditing from the command line."""
     args = parse_args(argv)
     repo_root = Path.cwd().resolve()
     docs_root = repo_root / "ops" / "docs"

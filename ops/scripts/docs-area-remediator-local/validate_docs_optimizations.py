@@ -39,10 +39,12 @@ README_FILENAME = "README.md"
 
 
 def run(args: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
+    """Run a subprocess and capture its text output."""
     return subprocess.run(args, cwd=cwd, capture_output=True, text=True)
 
 
 def changed_docs_areas(repo_root: Path, staged: bool) -> list[str]:
+    """Return docs areas touched by staged, unstaged, or untracked changes."""
     cmd = ["git", "diff", "--name-only", "--", DOCS_ROOT_PATH]
     if staged:
         cmd = ["git", "diff", "--cached", "--name-only", "--", DOCS_ROOT_PATH]
@@ -88,6 +90,7 @@ def changed_docs_areas(repo_root: Path, staged: bool) -> list[str]:
 
 
 def summarize(audit: AreaAudit, strict: bool) -> tuple[list[str], list[str]]:
+    """Summarize audit findings into errors and warnings."""
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -145,6 +148,7 @@ def summarize(audit: AreaAudit, strict: bool) -> tuple[list[str], list[str]]:
 
 
 def print_detail(title: str, lines: list[str], limit: int) -> None:
+    """Print a titled list with optional truncation."""
     print(title)
     if not lines:
         print("- none")
@@ -159,6 +163,7 @@ def print_detail(title: str, lines: list[str], limit: int) -> None:
 
 
 def strip_query_outside_placeholders(token: str) -> str:
+    """Remove query strings unless they are inside route placeholders."""
     curly_depth = 0
     square_depth = 0
     for idx, ch in enumerate(token):
@@ -180,6 +185,7 @@ def strip_query_outside_placeholders(token: str) -> str:
 
 
 def canonicalize_route(route: str) -> str | None:
+    """Normalize a route-like token into validator route syntax."""
     token = route.strip()
     if not token.startswith("/"):
         return None
@@ -228,6 +234,7 @@ def canonicalize_route(route: str) -> str | None:
 
 
 def in_scope_route(route: str) -> bool:
+    """Return whether a route belongs to the docs validation scope."""
     for prefix in SCOPE_PREFIXES:
         if route == prefix:
             return True
@@ -237,6 +244,7 @@ def in_scope_route(route: str) -> bool:
 
 
 def app_route_from_page_path(path: str) -> str | None:
+    """Convert an App Router page path into a route pattern."""
     root = "app/"
     if not path.startswith(root):
         return None
@@ -271,6 +279,7 @@ def app_route_from_page_path(path: str) -> str | None:
 
 
 def pages_route_from_page_path(path: str) -> str | None:
+    """Convert a Pages Router file path into a route pattern."""
     root = "pages/"
     if not path.startswith(root):
         return None
@@ -307,6 +316,7 @@ def pages_route_from_page_path(path: str) -> str | None:
 
 
 def route_from_page_path(path: str) -> str | None:
+    """Convert a Next.js page file path into a route pattern."""
     route = app_route_from_page_path(path)
     if route:
         return route
@@ -314,6 +324,7 @@ def route_from_page_path(path: str) -> str | None:
 
 
 def collect_app_routes(repo_root: Path) -> set[str]:
+    """Collect route patterns from app and pages route files."""
     routes: set[str] = set()
 
     app_dir = repo_root / "app"
@@ -340,6 +351,7 @@ def collect_app_routes(repo_root: Path) -> set[str]:
 
 
 def section_body(text: str, heading: str) -> str:
+    """Extract text beneath a second-level Markdown heading."""
     lines = text.splitlines()
     in_section = False
     body: list[str] = []
@@ -361,6 +373,7 @@ def section_body(text: str, heading: str) -> str:
 
 
 def extract_route_tokens_for_ownership(text: str) -> list[str]:
+    """Extract route tokens used for docs ownership declarations."""
     tokens: set[str] = set()
     for raw in ROUTE_TOKEN_RE.findall(text):
         token = raw.strip()
@@ -374,6 +387,7 @@ def extract_route_tokens_for_ownership(text: str) -> list[str]:
 
 
 def has_negative_route_context(line: str) -> bool:
+    """Return whether a line negates or excludes route ownership."""
     lowered = line.lower()
     if "unsupported" in lowered:
         return True
@@ -387,6 +401,7 @@ def has_negative_route_context(line: str) -> bool:
 
 
 def extract_documented_route_tokens(text: str) -> list[str]:
+    """Extract documented route tokens from Markdown text."""
     tokens: set[str] = set()
     for line in text.splitlines():
         if has_negative_route_context(line):
@@ -397,12 +412,14 @@ def extract_documented_route_tokens(text: str) -> list[str]:
 
 
 def route_matches_pattern(route: str, pattern: str) -> bool:
+    """Return whether a route matches a normalized route pattern."""
     route_segments = [seg for seg in route.split("/") if seg]
     pattern_segments = [seg for seg in pattern.split("/") if seg]
     return route_segments_match(route_segments, pattern_segments)
 
 
 def route_segments_match(route_segments: list[str], pattern_segments: list[str]) -> bool:
+    """Recursively match route segments against dynamic placeholders."""
     if not pattern_segments:
         return not route_segments
 
@@ -440,16 +457,19 @@ def route_segments_match(route_segments: list[str], pattern_segments: list[str])
 
 
 def routes_overlap(route_a: str, route_b: str) -> bool:
+    """Return whether either route pattern can cover the other route."""
     return route_matches_pattern(route_a, route_b) or route_matches_pattern(
         route_b, route_a
     )
 
 
 def should_skip_ownership_doc(path: Path, docs_root: Path) -> bool:
+    """Return whether a README should be skipped for ownership extraction."""
     return path.name == README_FILENAME and path != docs_root / README_FILENAME
 
 
 def documented_routes_for_page(path: Path, text: str) -> set[str]:
+    """Return documented in-scope routes for a non-index docs page."""
     if path.name == README_FILENAME:
         return set()
 
@@ -462,6 +482,7 @@ def documented_routes_for_page(path: Path, text: str) -> set[str]:
 
 
 def owner_routes_for_page(repo_root: Path, path: Path, text: str) -> dict[str, set[str]]:
+    """Map ownership route tokens in a docs page to that page path."""
     location = section_body(text, "Location in the Site")
     if not location:
         return {}
@@ -478,6 +499,7 @@ def owner_routes_for_page(repo_root: Path, path: Path, text: str) -> dict[str, s
 def collect_docs_route_owners(
     repo_root: Path, docs_root: Path
 ) -> tuple[dict[str, set[str]], set[str]]:
+    """Collect route owners and documented routes from docs pages."""
     owners: dict[str, set[str]] = {}
     all_documented_routes: set[str] = set()
 
@@ -495,6 +517,7 @@ def collect_docs_route_owners(
 
 
 def route_ownership_report(repo_root: Path, docs_root: Path) -> tuple[list[str], list[str], list[str]]:
+    """Compare app routes with docs route ownership declarations."""
     app_routes = {route for route in collect_app_routes(repo_root) if in_scope_route(route)}
     owner_map, documented_routes = collect_docs_route_owners(repo_root, docs_root)
     owner_routes = {route for route in owner_map if in_scope_route(route)}
@@ -523,6 +546,7 @@ def route_ownership_report(repo_root: Path, docs_root: Path) -> tuple[list[str],
 
 
 def load_scores(path: Path) -> dict[str, int]:
+    """Load persisted area quality scores from disk."""
     if not path.exists():
         return {}
     try:
@@ -542,6 +566,7 @@ def load_scores(path: Path) -> dict[str, int]:
 
 
 def save_scores(path: Path, scores: dict[str, int]) -> None:
+    """Persist area quality scores to disk."""
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -551,6 +576,7 @@ def save_scores(path: Path, scores: dict[str, int]) -> None:
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments for docs optimization validation."""
     parser = argparse.ArgumentParser(
         description=(
             "Validate docs optimization passes against current code and IA constraints."
@@ -597,6 +623,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run docs optimization validation for selected areas."""
     args = parse_args(argv)
     repo_root = Path.cwd().resolve()
     docs_root = repo_root / "ops" / "docs"

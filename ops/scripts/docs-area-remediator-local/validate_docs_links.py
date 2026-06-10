@@ -11,6 +11,7 @@ EXTERNAL_PREFIXES = ("http://", "https://", "mailto:", "tel:", "data:")
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments for docs link validation."""
     parser = argparse.ArgumentParser(
         description="Validate local markdown links under ops/docs/."
     )
@@ -23,10 +24,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def read_text(path: Path) -> str:
+    """Read UTF-8 text from a docs file."""
     return path.read_text(encoding="utf-8")
 
 
 def normalize_target(raw_target: str) -> str:
+    """Normalize a Markdown link target for filesystem resolution."""
     target = raw_target.strip()
     if target.startswith("<") and target.endswith(">"):
         target = target[1:-1].strip()
@@ -41,6 +44,7 @@ def normalize_target(raw_target: str) -> str:
 
 
 def resolve_candidates(source_file: Path, target: str, repo_root: Path) -> list[Path]:
+    """Return possible filesystem targets for a local Markdown link."""
     if target.startswith("/"):
         base = (repo_root / target.lstrip("/")).resolve()
     else:
@@ -59,6 +63,7 @@ def resolve_candidates(source_file: Path, target: str, repo_root: Path) -> list[
 
 
 def collect_broken_links(docs_files: Iterable[Path], repo_root: Path) -> list[tuple[Path, int, str]]:
+    """Collect unresolved local links from the provided docs files."""
     broken: list[tuple[Path, int, str]] = []
 
     for path in docs_files:
@@ -81,6 +86,7 @@ def collect_broken_links(docs_files: Iterable[Path], repo_root: Path) -> list[tu
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run docs link validation and print a concise report."""
     args = parse_args(argv)
     repo_root = Path.cwd().resolve()
     docs_root = (repo_root / args.docs_root).resolve()

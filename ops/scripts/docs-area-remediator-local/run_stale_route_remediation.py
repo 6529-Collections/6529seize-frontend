@@ -8,6 +8,7 @@ from typing import Sequence
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments for stale-route remediation."""
     parser = argparse.ArgumentParser(
         description=(
             "Run docs stale-route remediation for a docs area using Codex skill prompts."
@@ -25,11 +26,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 def run_codex(repo_root: Path, instruction: str) -> int:
+    """Run Codex with a remediation instruction from the repo root."""
     result = subprocess.run(["codex", "exec", "--", instruction], cwd=repo_root)
     return result.returncode
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run primary and second-view remediation passes for a docs area."""
     args = parse_args(argv)
     repo_root = Path.cwd().resolve()
     area_dir = repo_root / "ops" / "docs" / args.area
