@@ -30,22 +30,26 @@ jest.mock(
 
 jest.mock(
   "@/components/nextGen/collections/nextgenToken/NextGenZoomableImage",
-  () => ({
-    __esModule: true,
-    default: (props: any) => {
+  () => {
+    function MockNextGenZoomableImage(props: any) {
       const React = require("react");
       React.useEffect(() => {
         props.onImageLoaded();
       }, []);
       return <img data-testid="zoom" />;
-    },
-  })
+    }
+
+    return {
+      __esModule: true,
+      default: MockNextGenZoomableImage,
+    };
+  }
 );
 
 jest.mock(
   "@/components/nextGen/collections/nextgenToken/Lightbulb",
   () => (props: any) => (
-    <span data-testid={`light-${props.mode}`} onClick={props.onClick} />
+    <button data-testid={`light-${props.mode}`} onClick={props.onClick} />
   )
 );
 

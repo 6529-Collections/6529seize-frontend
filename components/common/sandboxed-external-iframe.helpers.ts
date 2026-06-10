@@ -75,10 +75,11 @@ export function openExternalMetadataUrl(src: string | null | undefined): void {
   }
 
   const canonicalUrl = canonicalizeExternalMetadataUrl(src);
+  const browserWindow = globalThis.window;
 
-  if (!canonicalUrl || typeof window === "undefined") {
+  if (!canonicalUrl || typeof browserWindow === "undefined") {
     return;
   }
 
-  window.open(canonicalUrl, "_blank", SAFE_EXTERNAL_OPEN_FEATURES);
+  browserWindow.open(canonicalUrl, "_blank", SAFE_EXTERNAL_OPEN_FEATURES);
 }
