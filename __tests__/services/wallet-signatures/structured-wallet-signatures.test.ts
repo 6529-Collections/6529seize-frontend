@@ -3,6 +3,7 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
   buildDropSignatureMessage,
+  buildNextgenAdminSignatureMessage,
   buildStructuredWalletSignatureMessage,
   canonicalJSONStringify,
   getWalletSignatureDomain,
@@ -99,6 +100,16 @@ describe("structured wallet signatures", () => {
     expect(result.payloadHash).toBe(
       new DropHasher().hash({ drop, termsOfService })
     );
+  });
+
+  it("builds NextGen admin messages with an explicit chain id", () => {
+    const result = buildNextgenAdminSignatureMessage({
+      address: "0x1111111111111111111111111111111111111111",
+      chainId: 11155111,
+      payload: { collection_id: 1 },
+    });
+
+    expect(result.message).toContain("Chain ID: 11155111");
   });
 
   function createDrop(): ApiCreateDropRequest {

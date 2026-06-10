@@ -148,14 +148,17 @@ export function buildRememeSignatureMessage({
 
 export function buildNextgenAdminSignatureMessage({
   address,
+  chainId = 1,
   payload,
 }: {
   readonly address: string;
+  readonly chainId?: number | undefined;
   readonly payload: unknown;
 }): StructuredWalletSignatureResult {
   return buildStructuredWalletSignatureMessage({
     kind: "action",
     address,
+    chainId,
     action: "nextgen_admin",
     payloadHash: hashStructuredWalletSignaturePayload(payload),
     purpose: "Sign this message to perform a 6529 NextGen admin action.",

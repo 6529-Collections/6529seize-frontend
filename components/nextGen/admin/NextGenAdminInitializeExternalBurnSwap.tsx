@@ -11,7 +11,7 @@ import {
   buildNextgenAdminSignatureMessage,
   isStructuredSignaturesEnabled,
 } from "@/services/wallet-signatures/structured-wallet-signatures";
-import { FunctionSelectors } from "../nextgen_contracts";
+import { FunctionSelectors, NEXTGEN_CHAIN_ID } from "../nextgen_contracts";
 import {
   getCollectionIdsForAddress,
   useCollectionAdmin,
@@ -105,6 +105,7 @@ export default function NextGenAdminInitializeExternalBurnSwap(
       const signatureMessage = isStructuredSignaturesEnabled()
         ? buildNextgenAdminSignatureMessage({
             address: account.address as string,
+            chainId: NEXTGEN_CHAIN_ID,
             payload,
           }).message
         : null;
