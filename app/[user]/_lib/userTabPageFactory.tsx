@@ -110,8 +110,8 @@ export function createUserTabPage<
     params,
     searchParams,
   }: {
-    readonly params?: Promise<UserRouteParams> | undefined;
-    readonly searchParams?: Promise<UserSearchParams> | undefined;
+    readonly params?: Promise<UserRouteParams>;
+    readonly searchParams?: Promise<UserSearchParams>;
   }) {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {
@@ -167,7 +167,7 @@ export function createUserTabPage<
   async function generateMetadata({
     params,
   }: {
-    readonly params?: Promise<UserRouteParams> | undefined;
+    readonly params?: Promise<UserRouteParams>;
   }): Promise<Metadata> {
     const resolvedParams = params ? await params : undefined;
     if (!resolvedParams?.user) {

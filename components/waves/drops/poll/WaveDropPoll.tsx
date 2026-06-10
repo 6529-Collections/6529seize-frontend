@@ -7,10 +7,17 @@ import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUp
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { type SyntheticEvent, useCallback, useState } from "react";
+import {
+  type SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { PollOptionVoters } from "./PollOptionVoters";
 import { PollResultOption } from "./PollResultOption";
 import { PollVoteOption } from "./PollVoteOption";
@@ -66,20 +73,99 @@ const getScopedPollInteractionState = (
     : getDefaultPollInteractionState(poll);
 };
 
+const getEffectivePollView = ({
+  canShowResults,
+  isOpen,
+  scopedView,
+}: {
+  readonly canShowResults: boolean;
+  readonly isOpen: boolean;
+  readonly scopedView: PollView;
+}): PollView => {
+  if (canShowResults && (!isOpen || scopedView === "results")) {
+    return "results";
+  }
+
+  return "vote";
+};
+
 const stopPollEventPropagation = (event: SyntheticEvent) => {
   event.stopPropagation();
+};
+
+const getLocalPoll = (
+  localPollOverride: LocalPollOverride | null,
+  sourcePoll: ApiDropPoll | undefined
+): ApiDropPoll | null => {
+  if (!localPollOverride) {
+    return null;
+  }
+
+  if (localPollOverride.sourcePoll === sourcePoll) {
+    return localPollOverride.poll;
+  }
+
+  return (
+    preserveAuthenticatedPollVote(sourcePoll, localPollOverride.poll, {
+      preferExistingVote: true,
+    }) ?? null
+  );
+};
+
+const UPDATED_VOTE_STATUS_DURATION_MS = 2500;
+
+const useUpdatedVoteStatus = () => {
+  const showUpdatedTimeoutRef = useRef<ReturnType<
+    typeof globalThis.setTimeout
+  > | null>(null);
+  const [showUpdated, setShowUpdated] = useState(false);
+
+  const flashUpdatedVoteStatus = useCallback(() => {
+    setShowUpdated(true);
+
+    if (showUpdatedTimeoutRef.current) {
+      globalThis.clearTimeout(showUpdatedTimeoutRef.current);
+    }
+
+    showUpdatedTimeoutRef.current = globalThis.setTimeout(() => {
+      setShowUpdated(false);
+      showUpdatedTimeoutRef.current = null;
+    }, UPDATED_VOTE_STATUS_DURATION_MS);
+  }, []);
+
+  const clearUpdatedVoteStatus = useCallback(() => {
+    if (showUpdatedTimeoutRef.current) {
+      globalThis.clearTimeout(showUpdatedTimeoutRef.current);
+      showUpdatedTimeoutRef.current = null;
+    }
+
+    setShowUpdated(false);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (showUpdatedTimeoutRef.current) {
+        globalThis.clearTimeout(showUpdatedTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return {
+    clearUpdatedVoteStatus,
+    flashUpdatedVoteStatus,
+    showUpdated,
+  };
 };
 
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
   const myStream = useMyStreamOptional();
+  const { clearUpdatedVoteStatus, flashUpdatedVoteStatus, showUpdated } =
+    useUpdatedVoteStatus();
   const [localPollOverride, setLocalPollOverride] =
     useState<LocalPollOverride | null>(null);
-  const localPoll =
-    localPollOverride && localPollOverride.sourcePoll === drop.poll
-      ? localPollOverride.poll
-      : null;
+  const localPoll = getLocalPoll(localPollOverride, drop.poll);
   const poll = localPoll ?? drop.poll;
   const [interactionState, setInteractionState] =
     useState<PollInteractionState | null>(null);
@@ -113,6 +199,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         .catch(() => undefined);
     },
     onError: (error) => {
+      clearUpdatedVoteStatus();
       setToast({
         message: error instanceof Error ? error.message : String(error),
         type: "error",
@@ -121,7 +208,14 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   });
 
   const submitPollVote = useCallback(
-    async (selectedOptionNos: readonly number[]): Promise<boolean> => {
+    async (
+      selectedOptionNos: readonly number[],
+      {
+        showUpdatedStatus = false,
+      }: {
+        readonly showUpdatedStatus?: boolean;
+      } = {}
+    ): Promise<boolean> => {
       if (!poll?.is_open || selectedOptionNos.length === 0) {
         return false;
       }
@@ -145,6 +239,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       });
 
       voteMutation.mutate(selectedOptionNos, {
+        onSuccess: () => {
+          if (showUpdatedStatus) {
+            flashUpdatedVoteStatus();
+          }
+        },
         onError: () => {
           setLocalPollOverride(previousLocalPollOverride);
           setInteractionState(previousInteractionState);
@@ -155,6 +254,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     },
     [
       drop.poll,
+      flashUpdatedVoteStatus,
       interactionState,
       localPollOverride,
       poll,
@@ -170,6 +270,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       }
 
       if (!poll.multichoice) {
+        const showUpdatedStatus = poll.voted.length > 0;
         setInteractionState((current) => {
           const scopedState = getScopedPollInteractionState(current, poll);
           return {
@@ -177,7 +278,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
             selectedOptionNos: [optionNo],
           };
         });
-        submitPollVote([optionNo])
+        submitPollVote([optionNo], { showUpdatedStatus })
           .then((submitted) => {
             if (submitted) {
               return;
@@ -229,7 +330,9 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return;
     }
 
-    await submitPollVote(scopedState.selectedOptionNos);
+    await submitPollVote(scopedState.selectedOptionNos, {
+      showUpdatedStatus: poll.voted.length > 0,
+    });
   }, [interactionState, poll, submitPollVote]);
 
   const showVoteView = useCallback(() => {
@@ -242,6 +345,22 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       return {
         ...scopedState,
         view: "vote",
+        selectedOptionNos: [...poll.voted],
+        expandedOptionNo: null,
+      };
+    });
+  }, [poll]);
+
+  const cancelVoteChange = useCallback(() => {
+    if (!poll) {
+      return;
+    }
+
+    setInteractionState((current) => {
+      const scopedState = getScopedPollInteractionState(current, poll);
+      return {
+        ...scopedState,
+        view: "results",
         selectedOptionNos: [...poll.voted],
         expandedOptionNo: null,
       };
@@ -261,10 +380,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const votedOptionNos = new Set(poll.voted);
   const showSelectionIndicator = votedOptionNos.size > 0;
   const canShowResults = !poll.is_open || hasVoted;
-  const effectiveView =
-    canShowResults && (!poll.is_open || scopedState.view === "results")
-      ? "results"
-      : "vote";
+  const effectiveView = getEffectivePollView({
+    canShowResults,
+    isOpen: poll.is_open,
+    scopedView: scopedState.view,
+  });
   const expandedOptionNo = scopedState.expandedOptionNo;
   const voteOptionGroupName = `drop-poll-${poll.id}`;
   const submitButtonLabel = getPollSubmitLabel({
@@ -273,7 +393,13 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   });
   const showResultsFooterActions = effectiveView === "results" && hasVoted;
   const showFooterAction = poll.is_open && showResultsFooterActions;
-  const showMultichoiceSubmit = poll.multichoice && selectedOptions.size > 0;
+  const isChangingVote = effectiveView === "vote" && hasVoted;
+  const showVoteEditFooterAction =
+    effectiveView === "vote" && poll.is_open && isChangingVote;
+  const showMultichoiceActions =
+    poll.multichoice && (selectedOptions.size > 0 || isChangingVote);
+  const multichoiceSubmitDisabled =
+    selectedOptions.size === 0 || voteMutation.isPending;
 
   return (
     <div
@@ -287,7 +413,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-400">
           <span
             className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full ${
-              poll.is_open ? "tw-bg-green" : "tw-bg-iron-600"
+              poll.is_open ? "tw-bg-emerald-500" : "tw-bg-iron-600"
             }`}
             aria-hidden="true"
           />
@@ -308,30 +434,32 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               onChange={handleVoteOptionChange}
             />
           ))}
-          {poll.multichoice && (
+          {poll.multichoice && !isChangingVote && (
             <div
               className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
-                showMultichoiceSubmit
+                showMultichoiceActions
                   ? "tw-mt-3.5 tw-grid-rows-[1fr] tw-opacity-100"
                   : "tw-mt-0 tw-grid-rows-[0fr] tw-opacity-0"
               }`}
             >
               <div
-                aria-hidden={!showMultichoiceSubmit}
-                inert={!showMultichoiceSubmit}
+                aria-hidden={!showMultichoiceActions}
+                inert={!showMultichoiceActions}
                 className="tw-overflow-hidden"
               >
-                <button
-                  type="button"
-                  disabled={!showMultichoiceSubmit || voteMutation.isPending}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleSubmitVote().catch(() => undefined);
-                  }}
-                  className="tw-flex tw-w-full tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
-                >
-                  {submitButtonLabel}
-                </button>
+                <div className="tw-flex tw-gap-2">
+                  <button
+                    type="button"
+                    disabled={multichoiceSubmitDisabled}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleSubmitVote().catch(() => undefined);
+                    }}
+                    className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
+                  >
+                    {submitButtonLabel}
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -339,7 +467,8 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       ) : (
         <div className="tw-flex tw-flex-col tw-gap-2">
           {poll.options.map((option) => {
-            const isExpanded = expandedOptionNo === option.option_no;
+            const isExpanded =
+              option.votes > 0 && expandedOptionNo === option.option_no;
 
             return (
               <div key={option.option_no}>
@@ -350,7 +479,6 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                   isSelected={votedOptionNos.has(option.option_no)}
                   isDimmed={hasVoted && !votedOptionNos.has(option.option_no)}
                   isExpanded={isExpanded}
-                  multichoice={poll.multichoice}
                   showSelectionIndicator={showSelectionIndicator}
                   onToggle={(optionNo) =>
                     setInteractionState((current) => {
@@ -368,30 +496,77 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                     })
                   }
                 />
-                <div
-                  className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
-                    isExpanded
-                      ? "tw-mb-1 tw-mt-1 tw-grid-rows-[1fr] tw-opacity-100"
-                      : "tw-mb-0 tw-mt-0 tw-grid-rows-[0fr] tw-opacity-0"
-                  }`}
-                >
+                {option.votes > 0 && (
                   <div
-                    aria-hidden={!isExpanded}
-                    inert={!isExpanded}
-                    className="tw-overflow-hidden"
+                    className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
+                      isExpanded
+                        ? "tw-mb-1 tw-mt-1 tw-grid-rows-[1fr] tw-opacity-100"
+                        : "tw-mb-0 tw-mt-0 tw-grid-rows-[0fr] tw-opacity-0"
+                    }`}
                   >
-                    <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2.5">
-                      <PollOptionVoters
-                        dropId={drop.id}
-                        option={option}
-                        enabled={isExpanded}
-                      />
+                    <div
+                      aria-hidden={!isExpanded}
+                      inert={!isExpanded}
+                      className="tw-overflow-hidden"
+                    >
+                      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2.5">
+                        <PollOptionVoters
+                          dropId={drop.id}
+                          option={option}
+                          enabled={isExpanded}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {showVoteEditFooterAction && (
+        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+          {poll.multichoice ? (
+            <div className="tw-flex tw-gap-2">
+              <button
+                type="button"
+                disabled={voteMutation.isPending}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  cancelVoteChange();
+                }}
+                className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={multichoiceSubmitDisabled}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleSubmitVote().catch(() => undefined);
+                }}
+                className="tw-flex tw-flex-1 tw-transform-gpu tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white tw-bg-white tw-px-4 tw-py-2 tw-text-[13.5px] tw-font-bold tw-text-black tw-transition-all tw-duration-300 disabled:tw-cursor-not-allowed disabled:tw-border-white/[0.06] disabled:tw-bg-white/[0.025] disabled:tw-text-iron-500 desktop-hover:hover:tw-bg-iron-100"
+              >
+                {submitButtonLabel}
+              </button>
+            </div>
+          ) : (
+            <div className="tw-flex tw-justify-start">
+              <button
+                type="button"
+                disabled={voteMutation.isPending}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  cancelVoteChange();
+                }}
+                className="tw-flex tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-text-iron-300 tw-transition-all disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-text-white"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -409,20 +584,23 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
             >
               Change vote
             </button>
-            <span
-              className={`tw-flex tw-h-8 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-white/[0.06] tw-px-3.5 tw-text-[13px] tw-font-bold tw-text-white tw-transition-opacity tw-duration-500 ${
-                showResultsFooterActions
-                  ? "tw-opacity-100"
-                  : "tw-pointer-events-none tw-opacity-0"
-              }`}
-              aria-hidden={!showResultsFooterActions}
-            >
-              <span>Voted</span>
-              <CheckIcon
-                className="tw-size-3.5 tw-text-green"
-                strokeWidth={3}
+            <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
+              <span
+                className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
                 aria-hidden="true"
-              />
+              >
+                <CheckIcon
+                  className="tw-size-2.5 tw-text-emerald-400"
+                  strokeWidth={3}
+                />
+              </span>
+              <span
+                className={`tw-text-[12px] tw-font-medium tw-transition-colors tw-duration-300 ${
+                  showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
+                }`}
+              >
+                {showUpdated ? "Updated" : "Voted"}
+              </span>
             </span>
           </div>
         </div>
