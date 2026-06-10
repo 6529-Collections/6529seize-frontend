@@ -76,9 +76,13 @@ function replaceDrop(
   }
 
   if (isMatchingDrop(value, drop.id)) {
-    const reconciledDrop = reconcileDropAuthenticatedPollVote(drop, value, {
-      preferExistingVote: options.preferExistingPollVote ?? false,
-    });
+    const preferExistingPollVote = options.preferExistingPollVote;
+    const reconciledDrop =
+      preferExistingPollVote === undefined
+        ? reconcileDropAuthenticatedPollVote(drop, value)
+        : reconcileDropAuthenticatedPollVote(drop, value, {
+            preferExistingVote: preferExistingPollVote,
+          });
 
     return {
       ...reconciledDrop,
