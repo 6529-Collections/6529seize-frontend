@@ -199,10 +199,12 @@ describe("WebSocketProvider", () => {
     });
 
     it("keeps session v2 sockets disconnected when message authentication fails", () => {
+      jest.useFakeTimers();
       const {
         isWalletAuthSessionV2Enabled,
       } = require("@/services/auth/session-v2.utils");
       isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      mockGetAuthJwt.mockReturnValue("bad-token");
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -227,6 +229,13 @@ describe("WebSocketProvider", () => {
 
       expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
       expect(ws.close).toHaveBeenCalledWith(1008, "Authentication failed");
+
+      act(() => {
+        ws.triggerClose(1008, "Authentication failed");
+        jest.advanceTimersByTime(10000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
     });
 
     it("disconnects intentionally and prevents reconnection", () => {
