@@ -174,58 +174,56 @@ const handleTokenRefresh = async ({
   }
 
   try {
-    if (isWalletAuthSessionV2Enabled()) {
-      if (!walletAddress) {
-        return { isValid: false, wasCancelled: false };
-      }
-
+    if (isWalletAuthSessionV2Enabled() && walletAddress) {
       const refreshedSession = await refreshSessionV2({
         address: walletAddress,
         abortSignal,
       });
 
-      if (!refreshedSession) {
-        return { isValid: false, wasCancelled: false };
+      if (refreshedSession) {
+        if (abortSignal.aborted) {
+          return { isValid: false, wasCancelled: true };
+        }
+
+        if (!areEqualAddresses(refreshedSession.address, wallet)) {
+          throw new Error(
+            `Address mismatch in token response: expected ${wallet}, got ${refreshedSession.address}`
+          );
+        }
+
+        const walletRole = getWalletRole();
+        const freshTokenRole = getRole(refreshedSession.access_token);
+
+        if (role) {
+          validateProxyRole({
+            role,
+            activeProfileProxy,
+            freshTokenRole,
+          });
+        }
+
+        if (walletRole !== freshTokenRole) {
+          logErrorSecurely("JWT_ROLE_UPDATE", {
+            message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
+            oldRole: walletRole,
+            newRole: freshTokenRole,
+            address: refreshedSession.address,
+          });
+        }
+
+        const didPersist = await persistSessionResponse(refreshedSession);
+        if (!didPersist) {
+          throw new Error("Failed to persist refreshed session");
+        }
+
+        syncWalletRoleWithServer(freshTokenRole, refreshedSession.address);
+
+        return { isValid: true, wasCancelled: false };
       }
+    }
 
-      if (abortSignal.aborted) {
-        return { isValid: false, wasCancelled: true };
-      }
-
-      if (!areEqualAddresses(refreshedSession.address, wallet)) {
-        throw new Error(
-          `Address mismatch in token response: expected ${wallet}, got ${refreshedSession.address}`
-        );
-      }
-
-      const walletRole = getWalletRole();
-      const freshTokenRole = getRole(refreshedSession.access_token);
-
-      if (role) {
-        validateProxyRole({
-          role,
-          activeProfileProxy,
-          freshTokenRole,
-        });
-      }
-
-      if (walletRole !== freshTokenRole) {
-        logErrorSecurely("JWT_ROLE_UPDATE", {
-          message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
-          oldRole: walletRole,
-          newRole: freshTokenRole,
-          address: refreshedSession.address,
-        });
-      }
-
-      const didPersist = await persistSessionResponse(refreshedSession);
-      if (!didPersist) {
-        throw new Error("Failed to persist refreshed session");
-      }
-
-      syncWalletRoleWithServer(freshTokenRole, refreshedSession.address);
-
-      return { isValid: true, wasCancelled: false };
+    if (abortSignal.aborted) {
+      return { isValid: false, wasCancelled: true };
     }
 
     if (!isLegacyRefreshEnabled()) {
