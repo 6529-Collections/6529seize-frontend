@@ -117,7 +117,9 @@ describe("session-v2.utils", () => {
 
   it("revokes an existing native session even when the rollout flag is disabled", async () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-    (getNativeRefreshToken as jest.Mock).mockResolvedValue("native-refresh-token");
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
 
     await logoutSessionV2({ address: "0xabc", allSessions: true });
 
@@ -135,9 +137,17 @@ describe("session-v2.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
-  it("does not call web session logout when session v2 is disabled", async () => {
-    await logoutSessionV2({ address: "0xabc" });
+  it("attempts web session logout even when the rollout flag is disabled", async () => {
+    await logoutSessionV2({ address: "0xabc", allSessions: true });
 
-    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-logout",
+      body: {
+        client_type: "web",
+        all_sessions: true,
+      },
+      credentials: "include",
+      parseJson: false,
+    });
   });
 });

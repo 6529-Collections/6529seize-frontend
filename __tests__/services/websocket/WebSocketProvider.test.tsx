@@ -195,10 +195,7 @@ describe("WebSocketProvider", () => {
       act(() => {
         jest.advanceTimersByTime(8000);
       });
-      expect(ws.close).not.toHaveBeenCalledWith(
-        1011,
-        "Authentication timeout"
-      );
+      expect(ws.close).not.toHaveBeenCalledWith(1011, "Authentication timeout");
 
       act(() => {
         ws.triggerClose(1006, "Unexpected close");
@@ -297,10 +294,7 @@ describe("WebSocketProvider", () => {
       act(() => {
         jest.advanceTimersByTime(7999);
       });
-      expect(ws.close).not.toHaveBeenCalledWith(
-        1011,
-        "Authentication timeout"
-      );
+      expect(ws.close).not.toHaveBeenCalledWith(1011, "Authentication timeout");
 
       act(() => {
         jest.advanceTimersByTime(1);

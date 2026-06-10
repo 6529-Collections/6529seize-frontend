@@ -52,6 +52,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: jest.fn(() => "web"),
   isWalletAuthSessionV2Enabled: jest.fn(() => false),
   loginWithSessionV2: jest.fn(),
   persistSessionResponse: jest.fn(),
@@ -242,6 +243,7 @@ describe("Auth component", () => {
     });
 
     const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.getSessionClientType.mockReturnValue("web");
     sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(false);
     sessionV2.loginWithSessionV2.mockReset();
     sessionV2.persistSessionResponse.mockReset();
@@ -366,6 +368,50 @@ describe("Auth component", () => {
         sessionResponse
       );
       expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("blocks adding a second web account when session v2 uses a single cookie", async () => {
+      const existingAddress = "0x1111111111111111111111111111111111111111";
+      const nextAddress = "0x2222222222222222222222222222222222222222";
+      walletAddress = nextAddress;
+      connectedAccountsOverride = [
+        {
+          address: existingAddress,
+          role: null,
+          isActive: true,
+          isConnected: false,
+        },
+      ];
+      const authUtils = require("@/services/auth/auth.utils");
+      authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.getSessionClientType.mockReturnValue("web");
+      const toast = require("react-toastify").toast;
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      expect(authUtils.canStoreAnotherWalletAccount).toHaveBeenCalledWith(
+        nextAddress,
+        { allowAdditionalAccounts: false }
+      );
+      expect(mockCommonApiFetch).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(toast).toHaveBeenCalledWith(
+        "Disconnect the current profile before connecting another profile",
+        expect.objectContaining({ type: "error" })
+      );
     });
   });
 
