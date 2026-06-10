@@ -70,14 +70,6 @@ const createResponse = (status: number, options: MockResponseOptions = {}) => {
   };
 };
 
-const getPinnedLookup = (): MockLookup => {
-  const lookup = mockAgentOptions[0]?.connect?.lookup;
-  if (!lookup) {
-    throw new Error("Pinned lookup was not configured.");
-  }
-  return lookup;
-};
-
 const readPinnedLookupAddress = async (
   hostname: string,
   init: RequestInit | undefined
@@ -85,10 +77,16 @@ const readPinnedLookupAddress = async (
   const dispatcher = (
     init as (RequestInit & { dispatcher?: unknown }) | undefined
   )?.dispatcher;
-  expect(dispatcher).toBe(mockAgentInstances[0]);
+  const dispatcherIndex = mockAgentInstances.indexOf(dispatcher);
+  expect(dispatcherIndex).toBeGreaterThanOrEqual(0);
+
+  const lookup = mockAgentOptions[dispatcherIndex]?.connect?.lookup;
+  if (!lookup) {
+    throw new Error("Pinned lookup was not configured for dispatcher.");
+  }
 
   return new Promise((resolve, reject) => {
-    getPinnedLookup()(hostname, {}, (error, address, family) => {
+    lookup(hostname, {}, (error, address, family) => {
       if (error) {
         reject(error);
         return;

@@ -96,6 +96,10 @@ type LookupOptions = {
   readonly all?: boolean | undefined;
 };
 
+type RequestInitWithDuplex = RequestInit & {
+  readonly duplex?: UndiciRequestInit["duplex"] | undefined;
+};
+
 const DEFAULT_PROTOCOLS = ["http:", "https:"];
 const DEFAULT_REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 const DISALLOWED_HOST_PATTERNS: ReadonlySet<string> = new Set([
@@ -280,21 +284,21 @@ function pinnedPublicUrlLookup(
     return;
   }
 
-  if (options.all) {
-    callback(
-      null,
-      validated.addresses.map(({ address, family }) => ({ address, family }))
-    );
-    return;
-  }
-
-  const [firstAddress] = validated.addresses;
+  const firstAddress = validated.addresses[0];
   if (!firstAddress) {
     const error = new Error(
       "Validated URL host has no pinned addresses."
     ) as NodeJS.ErrnoException;
     error.code = "ERR_URL_GUARD_LOOKUP_EMPTY";
     callback(error, "", 0);
+    return;
+  }
+
+  if (options.all) {
+    callback(
+      null,
+      validated.addresses.map(({ address, family }) => ({ address, family }))
+    );
     return;
   }
 
@@ -480,12 +484,73 @@ export async function assertPublicUrl(
   await validatePublicUrl(url, options);
 }
 
+function toUndiciRequestInit(init: RequestInit): UndiciRequestInit {
+  const undiciInit: UndiciRequestInit = {
+    dispatcher: publicUrlFetchDispatcher,
+  };
+  const initWithDuplex = init as RequestInitWithDuplex;
+
+  if (init.body !== undefined) {
+    undiciInit.body = init.body as Exclude<
+      UndiciRequestInit["body"],
+      undefined
+    >;
+  }
+  if (init.cache !== undefined) {
+    undiciInit.cache = init.cache;
+  }
+  if (init.credentials !== undefined) {
+    undiciInit.credentials = init.credentials;
+  }
+  if (initWithDuplex.duplex !== undefined) {
+    undiciInit.duplex = initWithDuplex.duplex;
+  }
+  if (init.headers !== undefined) {
+    undiciInit.headers = init.headers as Exclude<
+      UndiciRequestInit["headers"],
+      undefined
+    >;
+  }
+  if (init.integrity !== undefined) {
+    undiciInit.integrity = init.integrity;
+  }
+  if (init.keepalive !== undefined) {
+    undiciInit.keepalive = init.keepalive;
+  }
+  if (init.method !== undefined) {
+    undiciInit.method = init.method;
+  }
+  if (init.mode !== undefined) {
+    undiciInit.mode = init.mode;
+  }
+  if (init.redirect !== undefined) {
+    undiciInit.redirect = init.redirect;
+  }
+  if (init.referrer !== undefined) {
+    undiciInit.referrer = init.referrer;
+  }
+  if (init.referrerPolicy !== undefined) {
+    undiciInit.referrerPolicy = init.referrerPolicy;
+  }
+  if (init.signal !== undefined) {
+    undiciInit.signal = init.signal;
+  }
+  if (init.window !== undefined) {
+    undiciInit.window = init.window;
+  }
+
+  return undiciInit;
+}
+
 function fetchWithValidatedAddresses(
   url: URL,
   init: RequestInit,
   validated: ValidatedPublicUrl,
   fetchImpl?: typeof fetch | undefined
 ): Promise<Response> {
+  // SECURITY: custom fetch implementations bypass the pinned DNS dispatcher.
+  // Keep fetchImpl limited to tests or trusted callers that do not need SSRF
+  // rebinding protection.
   if (fetchImpl) {
     return fetchImpl(url.toString(), init);
   }
@@ -493,10 +558,10 @@ function fetchWithValidatedAddresses(
   return pinnedLookupContext.run(
     validated,
     () =>
-      undiciFetch(url.toString(), {
-        ...init,
-        dispatcher: publicUrlFetchDispatcher,
-      } as unknown as UndiciRequestInit) as unknown as Promise<Response>
+      undiciFetch(
+        url.toString(),
+        toUndiciRequestInit(init)
+      ) as unknown as Promise<Response>
   );
 }
 
