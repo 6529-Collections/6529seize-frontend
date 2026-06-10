@@ -165,17 +165,18 @@ jobs:
           echo "Deploying branch: $BRANCH"
           echo "Expected commit: $EXPECTED_SHA"
 
-          git fetch --prune origin "$BRANCH:refs/remotes/origin/$BRANCH"
-          remote_sha="$(git rev-parse "origin/$BRANCH")"
+          git fetch --no-tags origin "$BRANCH"
+          remote_sha="$(git rev-parse FETCH_HEAD)"
           if [[ "$remote_sha" != "$EXPECTED_SHA" ]]; then
-            echo "origin/$BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
+            echo "origin $BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
             echo "A newer staging push may have superseded this run; refusing to deploy a different commit." >&2
             exit 1
           fi
 
-          git checkout -B "$BRANCH" "origin/$BRANCH"
-          git branch --set-upstream-to="origin/$BRANCH" "$BRANCH"
-          git reset --hard "origin/$BRANCH"
+          git checkout -B "$BRANCH" FETCH_HEAD
+          git config "branch.$BRANCH.remote" origin
+          git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+          git reset --hard FETCH_HEAD
 
           SKIP_STAGING_PULL=1 ./bin/6529 staging
 
