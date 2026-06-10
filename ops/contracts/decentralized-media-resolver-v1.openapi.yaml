@@ -55,6 +55,7 @@ components:
       properties:
         items:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/MediaResolution"
     MediaResolution:
@@ -89,6 +90,7 @@ components:
           description: 6529 resolver URL.
         external_fallback_urls:
           type: array
+          maxItems: 50
           items:
             type: string
             format: uri

@@ -358,6 +358,8 @@ function parseArweaveTxSubdomainUrl(url: URL): ParsedDecentralizedMedia | null {
 
   const txid = hostname.slice(0, -suffix.length);
   const pathParts = splitPath(url.pathname);
+  // Tx subdomain hosts are canonicalized to lowercase; v1 keeps path casing
+  // exact, so only duplicate lowercase txid path prefixes are stripped.
   const normalizedPathParts =
     pathParts[0] === txid ? pathParts.slice(1) : pathParts;
   return makeParsed("arweave", txid, normalizedPathParts, getUrlWarnings(url));

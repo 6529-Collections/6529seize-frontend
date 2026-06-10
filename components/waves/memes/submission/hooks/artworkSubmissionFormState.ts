@@ -113,6 +113,10 @@ const sanitizeInteractiveHash = (
     ((provider === "ipfs" && parsed.protocol === "ipfs") ||
       (provider === "arweave" && parsed.protocol === "arweave"))
   ) {
+    if (provider === "ipfs") {
+      return parsed.id;
+    }
+
     return parsed.path ? `${parsed.id}/${parsed.path}` : parsed.id;
   }
 
