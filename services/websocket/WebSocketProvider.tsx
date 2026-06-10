@@ -20,6 +20,7 @@ import { isWalletAuthSessionV2Enabled } from "../auth/session-v2.utils";
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
 const MAX_RECONNECT_DELAY = 30000; // Max 30 seconds
 const DEFAULT_MAX_RECONNECT_ATTEMPTS = 20; // Try up to 20 times before giving up
+const AUTHENTICATION_TIMEOUT_MS = 8000;
 
 type WebSocketMessagePayload = {
   readonly type?: unknown;
@@ -115,9 +116,17 @@ export function WebSocketProvider({
   // Reconnection tracking
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const authenticationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
   const rejectedCredentialMarkerRef = useRef<string | null>(null);
+
+  const clearAuthenticationTimer = useCallback(() => {
+    if (authenticationTimerRef.current) {
+      clearTimeout(authenticationTimerRef.current);
+      authenticationTimerRef.current = null;
+    }
+  }, []);
 
   /**
    * Parse and route incoming WebSocket messages
@@ -140,12 +149,14 @@ export function WebSocketProvider({
     }
 
     if (message.type === WEBSOCKET_AUTHENTICATED) {
+      clearAuthenticationTimer();
       setStatus(WebSocketStatus.CONNECTED);
       reconnectAttemptsRef.current = 0;
       return;
     }
 
     if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
+      clearAuthenticationTimer();
       rejectedCredentialMarkerRef.current = reconnectTokenRef.current
         ? createCredentialMarker(reconnectTokenRef.current)
         : null;
@@ -169,7 +180,7 @@ export function WebSocketProvider({
         // Keep one subscriber failure from blocking the remaining handlers.
       }
     }
-  }, []);
+  }, [clearAuthenticationTimer]);
 
   /**
    * Clear any pending reconnection timer
@@ -246,6 +257,7 @@ export function WebSocketProvider({
 
       // Close existing connection if any
       if (wsRef.current) {
+        clearAuthenticationTimer();
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -280,6 +292,11 @@ export function WebSocketProvider({
                 access_token: token,
               })
             );
+            authenticationTimerRef.current = setTimeout(() => {
+              if (wsRef.current === ws && ws.readyState === WebSocket.OPEN) {
+                ws.close(1011, "Authentication timeout");
+              }
+            }, AUTHENTICATION_TIMEOUT_MS);
             return;
           }
 
@@ -302,6 +319,7 @@ export function WebSocketProvider({
           }
 
           // Clean up WebSocket
+          clearAuthenticationTimer();
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
 
@@ -328,13 +346,20 @@ export function WebSocketProvider({
         // Store the WebSocket reference
         wsRef.current = ws;
       } catch {
+        clearAuthenticationTimer();
         setStatus(WebSocketStatus.DISCONNECTED);
 
         // Schedule reconnect even for connection errors
         attemptReconnect(connectSocket);
       }
     },
-    [config.url, handleMessage, clearReconnectTimer, attemptReconnect]
+    [
+      config.url,
+      handleMessage,
+      clearReconnectTimer,
+      clearAuthenticationTimer,
+      attemptReconnect,
+    ]
   );
 
   /**
@@ -346,6 +371,7 @@ export function WebSocketProvider({
 
     // Clear any pending reconnect
     clearReconnectTimer();
+    clearAuthenticationTimer();
 
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
@@ -356,7 +382,7 @@ export function WebSocketProvider({
       wsRef.current = null;
       setStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer]);
 
   /**
    * Subscribe to a specific message type
@@ -410,6 +436,7 @@ export function WebSocketProvider({
     return () => {
       // Clear any pending reconnect
       clearReconnectTimer();
+      clearAuthenticationTimer();
 
       // Close the connection
       if (wsRef.current) {
@@ -417,7 +444,7 @@ export function WebSocketProvider({
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer]);
 
   // Create context value
   const contextValue: WebSocketContextValue = useMemo(
