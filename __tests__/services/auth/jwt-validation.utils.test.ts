@@ -350,6 +350,55 @@ describe("jwt-validation.utils", () => {
         expect(mockedRedeemRefreshTokenWithRetries).not.toHaveBeenCalled();
       });
 
+      it("should fall back to legacy refresh when session v2 has no session during migration", async () => {
+        const mockPayload = {
+          id: "user-id",
+          sub: "0x123",
+          iat: 800000,
+          exp: 900000,
+          role: "user",
+        };
+        const mockRefreshResponse = {
+          address: "0x123",
+          token: "new-legacy-jwt-token",
+        };
+        mockedJwtDecode
+          .mockReturnValueOnce(mockPayload)
+          .mockReturnValueOnce({ ...mockPayload, role: "admin" });
+        mockedIsWalletAuthSessionV2Enabled.mockReturnValue(true);
+        mockedIsLegacyRefreshEnabled.mockReturnValue(true);
+        mockedGetRefreshToken.mockReturnValue("legacy-refresh-token");
+        mockedGetWalletAddress.mockReturnValue("0x123");
+        mockedGetWalletRole.mockReturnValue("user");
+        mockedRefreshSessionV2.mockResolvedValue(null);
+        mockedRedeemRefreshTokenWithRetries.mockResolvedValue(
+          mockRefreshResponse
+        );
+        mockedAreEqualAddresses.mockReturnValue(true);
+
+        const result = await validateJwt(validParams);
+
+        expect(result).toEqual({ isValid: true, wasCancelled: false });
+        expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+          address: "0x123",
+          abortSignal: validParams.abortSignal,
+        });
+        expect(mockedRedeemRefreshTokenWithRetries).toHaveBeenCalledWith(
+          "0x123",
+          "legacy-refresh-token",
+          null,
+          3,
+          validParams.abortSignal
+        );
+        expect(setAuthJwt).toHaveBeenCalledWith(
+          "0x123",
+          "new-legacy-jwt-token",
+          "legacy-refresh-token",
+          "admin"
+        );
+        expect(mockedPersistSessionResponse).not.toHaveBeenCalled();
+      });
+
       it("should treat an aborted session v2 persistence failure as cancelled", async () => {
         const mockPayload = {
           id: "user-id",
