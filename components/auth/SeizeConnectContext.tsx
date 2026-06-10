@@ -25,6 +25,7 @@ import {
   type ConnectedWalletAccount,
   getConnectedWalletAccounts,
   getWalletAddress,
+  isAuthAddressAuthorized,
   removeAuthJwt,
   setActiveWalletAccount,
   WALLET_ACCOUNTS_UPDATED_EVENT,
@@ -129,7 +130,13 @@ interface SeizeConnectContextType {
   /** Whether a wallet is currently connected to the app */
   isConnected: boolean;
 
-  /** Whether the user is authenticated with a wallet address */
+  /** Whether there is an active wallet address, regardless of auth validity */
+  hasActiveWalletAddress: boolean;
+
+  /** Whether the active wallet address has valid auth state */
+  hasValidWalletAuth: boolean;
+
+  /** @deprecated Use hasActiveWalletAddress or hasValidWalletAuth. */
   isAuthenticated: boolean;
 
   /** Current connection state for better timing control */
@@ -1189,6 +1196,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   }, [activeAddress, storedConnectedAccounts]);
 
+  const hasActiveWalletAddress = !!activeAddress;
+  const hasValidWalletAuth = useMemo(
+    () =>
+      isAuthAddressAuthorized({
+        address: activeAddress,
+        connectedAccounts: storedConnectedAccounts,
+      }),
+    [activeAddress, storedConnectedAccounts]
+  );
+
   const jwtPollingStoredConnectedAccounts = useMemo(() => {
     if (!activeAddress) {
       return storedConnectedAccounts;
@@ -1259,7 +1276,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       seizeAddConnectedAccount,
       seizeConnectOpen: state.open,
       isConnected: isActiveWalletConnected,
-      isAuthenticated: !!activeAddress,
+      hasActiveWalletAddress,
+      hasValidWalletAuth,
+      isAuthenticated: hasValidWalletAuth,
       connectionState: walletState.status, // Unified state machine
       walletState, // Expose unified state for advanced consumers
       hasInitializationError,
@@ -1270,6 +1289,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }),
     [
       activeAddress,
+      hasActiveWalletAddress,
+      hasValidWalletAuth,
       isActiveWalletConnected,
       connectedAccounts,
       walletInfo?.name,

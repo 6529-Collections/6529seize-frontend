@@ -50,6 +50,19 @@ jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  isAuthAddressAuthorized: jest.fn(
+    ({
+      address,
+      connectedAccounts,
+    }: {
+      readonly address: string | null | undefined;
+      readonly connectedAccounts: readonly { readonly address: string }[];
+    }) =>
+      !!address &&
+      connectedAccounts.some(
+        (account) => account.address.toLowerCase() === address.toLowerCase()
+      )
+  ),
   setActiveWalletAccount: jest.fn(() => true),
   removeAuthJwt: jest.fn(),
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",

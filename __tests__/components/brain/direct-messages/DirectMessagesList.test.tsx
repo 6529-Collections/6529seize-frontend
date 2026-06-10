@@ -45,7 +45,10 @@ jest.mock('@/contexts/wave/MyStreamContext', () => ({
 }));
 
 jest.mock('@/components/auth/SeizeConnectContext', () => ({
-  useSeizeConnectContext: () => ({ isAuthenticated: mockAuth }),
+  useSeizeConnectContext: () => ({
+    isAuthenticated: mockAuth,
+    hasValidWalletAuth: mockAuth,
+  }),
 }));
 
 jest.mock('@/hooks/useDeviceInfo', () => jest.fn(() => ({ isApp: mockIsApp })));
