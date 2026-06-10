@@ -99,7 +99,7 @@ export function canonicalJSONStringify(value: unknown): string {
 
   const record = value as Record<string, unknown>;
   const keyValuePairs = Object.keys(record)
-    .sort((a, b) => a.localeCompare(b))
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
     .filter((key) => record[key] !== undefined)
     .map(
       (key) => `${JSON.stringify(key)}:${canonicalJSONStringify(record[key])}`

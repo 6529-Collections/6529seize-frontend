@@ -68,11 +68,16 @@ const handleInvalidJwtWhenDisconnected = (
 
 // Helper function to handle invalid JWT when user is connected
 const handleInvalidJwtWhenConnected = async (
-  callbacks: ImmediateValidationCallbacks
-): Promise<void> => {
+  callbacks: ImmediateValidationCallbacks,
+  abortSignal: AbortSignal
+): Promise<boolean> => {
   await callbacks.onRemoveJwt();
+  if (abortSignal.aborted) {
+    return false;
+  }
   callbacks.onInvalidateCache();
   callbacks.onShowSignModal(true);
+  return true;
 };
 
 // Helper function to create validation result
@@ -91,6 +96,7 @@ const handleJwtValidationResult = async (
   isValid: boolean,
   wasCancelled: boolean,
   isConnected: boolean,
+  abortSignal: AbortSignal,
   callbacks: ImmediateValidationCallbacks
 ): Promise<ImmediateValidationResult> => {
   if (wasCancelled) {
@@ -103,7 +109,10 @@ const handleJwtValidationResult = async (
 
   // Handle invalid JWT
   if (isConnected) {
-    await handleInvalidJwtWhenConnected(callbacks);
+    const handled = await handleInvalidJwtWhenConnected(callbacks, abortSignal);
+    if (!handled) {
+      return createCancelledResult();
+    }
   } else {
     handleInvalidJwtWhenDisconnected(callbacks);
   }
@@ -121,6 +130,9 @@ const handleValidationError = async (
   if (isAuthenticationRoleError(error)) {
     callbacks.onLogError("validateJwt_role_error", error);
     await callbacks.onRemoveJwt();
+    if (abortSignal.aborted) {
+      return createCancelledResult();
+    }
     callbacks.onInvalidateCache();
     callbacks.onShowSignModal(true);
   } else {
@@ -187,6 +199,7 @@ export const validateAuthImmediate = async ({
       isValid,
       wasCancelled,
       isConnected,
+      abortSignal,
       callbacks
     );
   } catch (error) {
