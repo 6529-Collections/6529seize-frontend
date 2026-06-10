@@ -42,7 +42,7 @@ function WebSidebarUser({
   const {
     address,
     seizeConnect,
-    isAuthenticated,
+    hasValidWalletAuth: isAuthenticated,
     isConnected,
     connectedAccounts,
     connectedAccountUnreadNotifications,
