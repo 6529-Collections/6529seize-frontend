@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
-const DECENTRALIZED_URL_PATTERN = /(ipfs|ipns|ar):\/\/[^\s"'`]+/g;
+const DECENTRALIZED_URL_PATTERN = /(ipfs|ipns|ar):\/\/[^\s"'`]+/gi;
+const DECENTRALIZED_SCHEME_PATTERN = /(ipfs|ipns|ar):\/\//i;
 const ATTRIBUTES_TO_REWRITE = [
   "src",
   "srcset",
@@ -17,11 +18,7 @@ const ATTRIBUTES_SELECTOR = ATTRIBUTES_TO_REWRITE.map(
 ).join(",");
 
 const containsDecentralizedScheme = (value: string | null | undefined) =>
-  Boolean(
-    value?.includes("ipfs://") ||
-    value?.includes("ipns://") ||
-    value?.includes("ar://")
-  );
+  DECENTRALIZED_SCHEME_PATTERN.test(value ?? "");
 
 const replaceDecentralizedScheme = (value: string) =>
   value.replaceAll(DECENTRALIZED_URL_PATTERN, (match) =>
