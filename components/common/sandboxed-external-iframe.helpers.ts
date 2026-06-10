@@ -75,9 +75,9 @@ export function openExternalMetadataUrl(src: string | null | undefined): void {
   }
 
   const canonicalUrl = canonicalizeExternalMetadataUrl(src);
-  const browserWindow = globalThis.window;
+  const browserWindow = Reflect.get(globalThis, "window") as Window | undefined;
 
-  if (!canonicalUrl || typeof browserWindow === "undefined") {
+  if (!canonicalUrl || browserWindow === undefined) {
     return;
   }
 
