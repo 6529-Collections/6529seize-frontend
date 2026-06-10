@@ -21,7 +21,7 @@ export default function WaveHeaderOptions({
       <button
         ref={buttonRef}
         type="button"
-        className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-inset desktop-hover:hover:tw-ring-iron-700"
+        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition-all tw-duration-200 active:tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-300"
         id="options-menu-0-button"
         aria-expanded={isOptionsOpen}
         aria-haspopup="true"
