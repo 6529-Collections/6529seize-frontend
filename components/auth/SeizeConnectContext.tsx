@@ -879,7 +879,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      await logoutSessionV2({ address: getWalletAddress(), allSessions: true });
       let remainingProfiles = getConnectedWalletAccounts().length;
       const maxIterations = Math.max(
         MAX_CONNECTED_PROFILES * 2,
@@ -895,6 +894,22 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           );
           logError("seizeDisconnectAndLogoutAll", iterationError);
           throw iterationError;
+        }
+
+        const activeAddress = getWalletAddress();
+        if (activeAddress) {
+          try {
+            await logoutSessionV2({
+              address: activeAddress,
+              allSessions: true,
+            });
+          } catch (error: unknown) {
+            const revokeError =
+              error instanceof Error
+                ? error
+                : new Error("Failed to revoke session during logout all");
+            logError("seizeDisconnectAndLogoutAll.logoutSessionV2", revokeError);
+          }
         }
 
         await removeAuthJwt();

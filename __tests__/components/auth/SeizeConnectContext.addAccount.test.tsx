@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   SeizeConnectProvider,
   useSeizeConnectContext,
@@ -109,6 +109,16 @@ function AddAccountButton() {
   const { seizeAddConnectedAccount } = useSeizeConnectContext();
 
   return <button onClick={seizeAddConnectedAccount}>Add account</button>;
+}
+
+function LogoutAllButton() {
+  const { seizeDisconnectAndLogoutAll } = useSeizeConnectContext();
+
+  return (
+    <button onClick={() => void seizeDisconnectAndLogoutAll()}>
+      Logout all
+    </button>
+  );
 }
 
 describe("SeizeConnectProvider add-account flow", () => {
@@ -262,5 +272,104 @@ describe("SeizeConnectProvider add-account flow", () => {
 
     expect(mockDisconnect).not.toHaveBeenCalled();
     expect(mockOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("revokes every stored native account during logout all", async () => {
+    const addressB = "0x00000000000000000000000000000000000000BB";
+    const addressC = "0x00000000000000000000000000000000000000CC";
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    const accounts = [ACTIVE_ADDRESS, addressB, addressC];
+
+    authUtils.getConnectedWalletAccounts.mockImplementation(() =>
+      accounts.map((address: string) => ({
+        address,
+        refreshToken: null,
+        role: null,
+        jwt: null,
+        profileId: null,
+        profileHandle: null,
+      }))
+    );
+    authUtils.getWalletAddress.mockImplementation(() => accounts[0] ?? null);
+    authUtils.removeAuthJwt.mockImplementation(() => {
+      accounts.shift();
+    });
+    sessionV2.logoutSessionV2.mockResolvedValue(undefined);
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutAllButton />
+      </SeizeConnectProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
+    });
+
+    await waitFor(() =>
+      expect(sessionV2.logoutSessionV2).toHaveBeenCalledTimes(3)
+    );
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    expect(sessionV2.logoutSessionV2).toHaveBeenNthCalledWith(1, {
+      address: ACTIVE_ADDRESS,
+      allSessions: true,
+    });
+    expect(sessionV2.logoutSessionV2).toHaveBeenNthCalledWith(2, {
+      address: addressB,
+      allSessions: true,
+    });
+    expect(sessionV2.logoutSessionV2).toHaveBeenNthCalledWith(3, {
+      address: addressC,
+      allSessions: true,
+    });
+    expect(authUtils.removeAuthJwt).toHaveBeenCalledTimes(3);
+  });
+
+  it("continues logout all cleanup when one account revocation fails", async () => {
+    const addressB = "0x00000000000000000000000000000000000000BB";
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    const accounts = [ACTIVE_ADDRESS, addressB];
+    const revokeError = new Error("session revoke failed");
+
+    authUtils.getConnectedWalletAccounts.mockImplementation(() =>
+      accounts.map((address: string) => ({
+        address,
+        refreshToken: null,
+        role: null,
+        jwt: null,
+        profileId: null,
+        profileHandle: null,
+      }))
+    );
+    authUtils.getWalletAddress.mockImplementation(() => accounts[0] ?? null);
+    authUtils.removeAuthJwt.mockImplementation(() => {
+      accounts.shift();
+    });
+    sessionV2.logoutSessionV2
+      .mockRejectedValueOnce(revokeError)
+      .mockResolvedValue(undefined);
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutAllButton />
+      </SeizeConnectProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Logout all" }));
+    });
+
+    await waitFor(() =>
+      expect(authUtils.removeAuthJwt).toHaveBeenCalledTimes(2)
+    );
+
+    expect(sessionV2.logoutSessionV2).toHaveBeenCalledTimes(2);
+    expect(mockLogError).toHaveBeenCalledWith(
+      "seizeDisconnectAndLogoutAll.logoutSessionV2",
+      revokeError
+    );
   });
 });

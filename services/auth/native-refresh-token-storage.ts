@@ -20,8 +20,8 @@ export async function setNativeRefreshToken({
     return;
   }
   const key = getNativeRefreshTokenKey(address);
-  inMemoryNativeRefreshTokens.set(key, refreshToken);
   await SecureStoragePlugin.set({ key, value: refreshToken });
+  inMemoryNativeRefreshTokens.set(key, refreshToken);
 }
 
 export async function getNativeRefreshToken(

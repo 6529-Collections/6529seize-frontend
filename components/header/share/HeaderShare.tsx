@@ -497,6 +497,7 @@ export function HeaderQRModal({
   useEffect(() => {
     if (!show) {
       shareGenerationIdRef.current += 1;
+      cachedConnectionTransferRef.current = null;
       transferAbortRef.current?.abort();
       transferAbortRef.current = null;
       return;
