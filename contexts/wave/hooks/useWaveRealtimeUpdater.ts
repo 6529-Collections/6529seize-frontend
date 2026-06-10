@@ -83,6 +83,10 @@ const isCanonicalDropUpdate = (type: ProcessIncomingDropType): boolean =>
   type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
   type === ProcessIncomingDropType.DROP_REACTION_UPDATE;
 
+const reportBackgroundTaskError = (message: string, error: unknown): void => {
+  console.error(message, error);
+};
+
 const shouldApplyCanonicalDrop = (
   type: ProcessIncomingDropType,
   drop: ApiDrop
@@ -326,6 +330,8 @@ const useActiveWaveReadMarker = ({
   "activeWaveId" | "removeWaveDeliveredNotifications"
 >): ((waveId: string) => void) => {
   const activeWaveIdRef = useRef(activeWaveId);
+  const pendingDeliveredNotificationsRef = useRef<Promise<void> | null>(null);
+  const pendingReadNotificationsRef = useRef<Promise<void> | null>(null);
   useLayoutEffect(() => {
     activeWaveIdRef.current = activeWaveId;
   }, [activeWaveId]);
@@ -338,40 +344,152 @@ const useActiveWaveReadMarker = ({
     );
   }, []);
 
+  const removeDeliveredNotifications = useCallback(
+    async (waveId: string) => {
+      try {
+        await removeWaveDeliveredNotifications(waveId);
+      } catch (error) {
+        reportBackgroundTaskError(
+          "Failed to remove wave delivered notifications:",
+          error
+        );
+      }
+    },
+    [removeWaveDeliveredNotifications]
+  );
+
+  const markNotificationsRead = useCallback(
+    async (waveId: string) => {
+      try {
+        await markWaveNotificationsRead(waveId, {
+          shouldSend: () => canSendReadForWave(waveId),
+        });
+      } catch (error) {
+        reportBackgroundTaskError("Failed to mark wave as read:", error);
+      }
+    },
+    [markWaveNotificationsRead, canSendReadForWave]
+  );
+
   return useCallback(
     (waveId: string) => {
       if (activeWaveId !== waveId || document.visibilityState !== "visible") {
         return;
       }
 
-      void (async () => {
-        try {
-          await removeWaveDeliveredNotifications(waveId);
-        } catch (error) {
-          console.error(
-            "Failed to remove wave delivered notifications:",
-            error
-          );
-        }
-      })();
-      void (async () => {
-        try {
-          await markWaveNotificationsRead(waveId, {
-            shouldSend: () => canSendReadForWave(waveId),
-          });
-        } catch (error) {
-          console.error("Failed to mark wave as read:", error);
-        }
-      })();
+      pendingDeliveredNotificationsRef.current =
+        removeDeliveredNotifications(waveId);
+      pendingReadNotificationsRef.current = markNotificationsRead(waveId);
     },
-    [
-      activeWaveId,
-      removeWaveDeliveredNotifications,
-      markWaveNotificationsRead,
-      canSendReadForWave,
-    ]
+    [activeWaveId, removeDeliveredNotifications, markNotificationsRead]
   );
 };
+
+const useVisibilityEligibilityRefresh = (): ((
+  waveId: string
+) => Promise<void>) => {
+  const { refreshEligibility } = useWaveEligibility();
+  const tabJustBecameVisibleRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        tabJustBecameVisibleRef.current = true;
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  return useCallback(
+    async (waveId: string) => {
+      if (!tabJustBecameVisibleRef.current) {
+        return;
+      }
+
+      tabJustBecameVisibleRef.current = false;
+      try {
+        await refreshEligibility(waveId);
+      } catch (error) {
+        reportBackgroundTaskError("Failed to refresh wave eligibility:", error);
+      }
+    },
+    [refreshEligibility]
+  );
+};
+
+interface ApplyCanonicalDropUpdateForExistingDropParams {
+  readonly dropId: string;
+  readonly existingDrop: ExtendedDrop;
+  readonly waveId: string;
+  readonly type: ProcessIncomingDropType;
+  readonly options: ProcessIncomingDropOptions;
+}
+
+const useCanonicalDropUpdateForExistingDrop = ({
+  queryClient,
+  updateData,
+}: Pick<UseProcessIncomingDropParams, "queryClient" | "updateData">): ((
+  params: ApplyCanonicalDropUpdateForExistingDropParams
+) => Promise<void>) =>
+  useCallback(
+    async ({
+      dropId,
+      existingDrop,
+      waveId,
+      type,
+      options,
+    }: ApplyCanonicalDropUpdateForExistingDropParams) => {
+      try {
+        await applyCanonicalDropUpdate({
+          dropId,
+          existingDrop,
+          waveId,
+          type,
+          options,
+          queryClient,
+          updateData,
+        });
+      } catch (error) {
+        reportBackgroundTaskError(
+          "Failed to apply canonical drop update:",
+          error
+        );
+      }
+    },
+    [queryClient, updateData]
+  );
+
+const useNewestMessagesAfterDropUpdate = (
+  initiateFetchNewestCycle: InitiateFetchNewestCycleFn
+): ((
+  waveId: string,
+  serialNoForFetch: number | null,
+  optimisticDropId: string
+) => Promise<void>) =>
+  useCallback(
+    async (
+      waveId: string,
+      serialNoForFetch: number | null,
+      optimisticDropId: string
+    ) => {
+      if (serialNoForFetch === null || optimisticDropId.startsWith("temp-")) {
+        return;
+      }
+
+      try {
+        await initiateFetchNewestCycle(waveId, serialNoForFetch);
+      } catch (error) {
+        reportBackgroundTaskError(
+          "Failed to sync newest wave messages:",
+          error
+        );
+      }
+    },
+    [initiateFetchNewestCycle]
+  );
 
 interface UseProcessIncomingDropParams extends Pick<
   UseWaveRealtimeUpdaterProps,
@@ -396,8 +514,6 @@ const useProcessIncomingDrop = ({
   isWaveMuted,
   queryClient,
 }: UseProcessIncomingDropParams): ProcessIncomingDropFn => {
-  const { refreshEligibility } = useWaveEligibility();
-  const tabJustBecameVisibleRef = useRef<boolean>(false);
   const initiateFetchNewestCycle = useNewestMessagesSync({
     getData,
     updateData,
@@ -407,18 +523,13 @@ const useProcessIncomingDrop = ({
     activeWaveId,
     removeWaveDeliveredNotifications,
   });
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        tabJustBecameVisibleRef.current = true;
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
+  const refreshEligibilityAfterVisibilityChange =
+    useVisibilityEligibilityRefresh();
+  const applyCanonicalDropUpdateForExistingDrop =
+    useCanonicalDropUpdateForExistingDrop({ queryClient, updateData });
+  const syncNewestMessagesAfterDropUpdate = useNewestMessagesAfterDropUpdate(
+    initiateFetchNewestCycle
+  );
 
   return useCallback(
     async (
@@ -441,10 +552,7 @@ const useProcessIncomingDrop = ({
         return;
       }
 
-      if (tabJustBecameVisibleRef.current) {
-        tabJustBecameVisibleRef.current = false;
-        void refreshEligibility(waveId);
-      }
+      await refreshEligibilityAfterVisibilityChange(waveId);
 
       const currentData = getData(waveId);
       if (!currentData) {
@@ -462,14 +570,12 @@ const useProcessIncomingDrop = ({
         if (existingFullDrop === null) {
           return;
         }
-        await applyCanonicalDropUpdate({
+        await applyCanonicalDropUpdateForExistingDrop({
           dropId: drop.id,
           existingDrop: existingFullDrop,
           waveId,
           type,
           options,
-          queryClient,
-          updateData,
         });
         return;
       }
@@ -480,15 +586,16 @@ const useProcessIncomingDrop = ({
         options,
       });
 
-      const serialNoForFetch = currentData.latestFetchedSerialNo;
       updateData({
         key: waveId,
         drops: [optimisticDrop],
       });
 
-      if (serialNoForFetch !== null && !optimisticDrop.id.startsWith("temp-")) {
-        void initiateFetchNewestCycle(waveId, serialNoForFetch);
-      }
+      await syncNewestMessagesAfterDropUpdate(
+        waveId,
+        currentData.latestFetchedSerialNo,
+        optimisticDrop.id
+      );
 
       markActiveWaveAsRead(waveId);
     },
@@ -496,11 +603,12 @@ const useProcessIncomingDrop = ({
       getData,
       updateData,
       registerWave,
-      initiateFetchNewestCycle,
+      applyCanonicalDropUpdateForExistingDrop,
       markActiveWaveAsRead,
-      refreshEligibility,
+      refreshEligibilityAfterVisibilityChange,
       isWaveMuted,
       queryClient,
+      syncNewestMessagesAfterDropUpdate,
     ]
   );
 };
@@ -547,13 +655,17 @@ const useAttachmentStatusUpdate = ({
 const useDropUpdateMessages = (
   processIncomingDrop: ProcessIncomingDropFn
 ): void => {
+  const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
+
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     (messageData) => {
-      void processIncomingDrop(
+      pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_INSERT,
-        { preferExistingPollVote: true }
+        {
+          preferExistingPollVote: true,
+        }
       );
     }
   );
@@ -561,7 +673,7 @@ const useDropUpdateMessages = (
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_RATING_UPDATE,
     (messageData) => {
-      void processIncomingDrop(
+      pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_RATING_UPDATE,
         { preferExistingPollVote: true }
@@ -572,7 +684,7 @@ const useDropUpdateMessages = (
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_REACTION_UPDATE,
     (messageData) => {
-      void processIncomingDrop(
+      pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_REACTION_UPDATE,
         { preferExistingPollVote: true }
