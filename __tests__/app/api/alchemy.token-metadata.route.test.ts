@@ -9,9 +9,14 @@ jest.mock("next/server", () => ({
 }));
 
 const mockFetchPublicJson = jest.fn();
+const mockIsTrustedVercelRuntime = jest.fn(() => true);
 
 jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(() => "test-alchemy-key"),
+}));
+
+jest.mock("@/config/deploymentEnv", () => ({
+  isTrustedVercelRuntime: () => mockIsTrustedVercelRuntime(),
 }));
 
 jest.mock("@/lib/security/urlGuard", () => {
@@ -68,6 +73,7 @@ function requestFor(
     "content-type": "application/json",
     "user-agent": "jest",
     "x-forwarded-for": clientIp,
+    "x-vercel-id": "iad1::jest",
   });
   Object.entries(headers ?? {}).forEach(([name, value]) => {
     requestHeaders.set(name, value);
@@ -96,6 +102,7 @@ function requestFor(
 
 describe("app/api/alchemy/token-metadata route", () => {
   beforeEach(() => {
+    mockIsTrustedVercelRuntime.mockReturnValue(true);
     mockNextResponseJson.mockClear();
     mockFetchPublicJson.mockReset();
     mockFetchPublicJson.mockResolvedValue({ tokens: [] });
@@ -204,6 +211,26 @@ describe("app/api/alchemy/token-metadata route", () => {
           { address: CONTRACT, tokenIds: [String(2000 + index)] },
           "203.0.113.41",
           { authorization: `Bearer caller-supplied-${index}` }
+        )
+      )) as RouteResponse;
+    }
+
+    expect(response?.status).toBe(429);
+    expect(response?.body).toEqual({
+      error: "Too many token metadata requests",
+    });
+    expect(mockFetchPublicJson).toHaveBeenCalledTimes(20);
+  });
+
+  it("does not let untrusted forwarded headers mint rate limit buckets", async () => {
+    mockIsTrustedVercelRuntime.mockReturnValue(false);
+    let response: RouteResponse | undefined;
+
+    for (let index = 0; index < 21; index += 1) {
+      response = (await POST(
+        requestFor(
+          { address: CONTRACT, tokenIds: [String(3000 + index)] },
+          `203.0.113.${index}`
         )
       )) as RouteResponse;
     }

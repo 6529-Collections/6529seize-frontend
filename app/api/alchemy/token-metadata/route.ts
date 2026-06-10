@@ -1,7 +1,9 @@
+import { isIP } from "node:net";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { isTrustedVercelRuntime } from "@/config/deploymentEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { fetchPublicJson, UrlGuardError } from "@/lib/security/urlGuard";
 import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
@@ -217,16 +219,40 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
   };
 }
 
-function getClientAddress(request: NextRequest): string {
-  const proxyAddress =
-    request.headers.get("cf-connecting-ip")?.trim() ||
-    request.headers.get("x-real-ip")?.trim() ||
-    request.headers.get("x-forwarded-for")?.trim();
-
-  if (proxyAddress) {
-    return proxyAddress;
+function normaliseIpAddress(value: string | null): string | null {
+  const ipAddress = value?.trim().toLowerCase();
+  if (!ipAddress || isIP(ipAddress) === 0) {
+    return null;
   }
-  return "unknown";
+  return ipAddress;
+}
+
+function getClosestForwardedAddress(value: string | null): string | null {
+  const forwardedAddresses =
+    value
+      ?.split(",")
+      .map(normaliseIpAddress)
+      .filter((ipAddress): ipAddress is string => ipAddress !== null) ?? [];
+
+  return forwardedAddresses.at(-1) ?? null;
+}
+
+function hasTrustedProxyMarker(request: NextRequest): boolean {
+  return (
+    isTrustedVercelRuntime() &&
+    Boolean(request.headers.get("x-vercel-id")?.trim())
+  );
+}
+
+function getClientAddress(request: NextRequest): string | null {
+  if (!hasTrustedProxyMarker(request)) {
+    return null;
+  }
+
+  return (
+    getClosestForwardedAddress(request.headers.get("x-forwarded-for")) ??
+    normaliseIpAddress(request.headers.get("x-real-ip"))
+  );
 }
 
 function fingerprint(value: string): string {
@@ -241,7 +267,9 @@ function fingerprint(value: string): string {
 
 function getRateLimitKey(request: NextRequest): string {
   const clientAddress = getClientAddress(request);
-  return `client:${fingerprint(clientAddress)}`;
+  return clientAddress
+    ? `client:${fingerprint(clientAddress)}`
+    : "client:unknown";
 }
 
 function pruneRateLimitBuckets(now = Date.now()): void {
