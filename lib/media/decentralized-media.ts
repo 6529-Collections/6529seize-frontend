@@ -496,6 +496,8 @@ function isValidProtocolId(
 }
 
 function looksLikeIpfsCid(value: string): boolean {
+  // Supports CIDv0 base58btc and CIDv1 base32; other CIDv1 multibase
+  // encodings are intentionally outside this resolver v1 allowlist.
   return /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|[bB][aA][fF][a-zA-Z2-7]{20,})$/.test(
     value
   );
