@@ -31,6 +31,10 @@ jest.mock("viem", () => ({
   getAddress: jest.fn((address: string) => address.toLowerCase()),
 }));
 
+jest.mock("wagmi", () => ({
+  useAccount: jest.fn(() => ({})),
+}));
+
 jest.mock("@/hooks/useConnectedAccountsUnreadNotifications", () => ({
   useConnectedAccountsUnreadNotifications: jest.fn(() => ({})),
 }));
@@ -53,6 +57,8 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: jest.fn(() => "web"),
+  isWalletAuthSessionV2Enabled: jest.fn(() => false),
   logoutSessionV2: jest.fn(() => Promise.resolve()),
 }));
 
