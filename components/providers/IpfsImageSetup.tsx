@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 
-const IPFS_URL_PATTERN = /ipfs:\/\/[^\s"'`]+/g;
+const DECENTRALIZED_URL_PATTERN = /(ipfs|ipns|ar):\/\/[^\s"'`]+/g;
 const ATTRIBUTES_TO_REWRITE = [
   "src",
   "srcset",
@@ -12,17 +12,28 @@ const ATTRIBUTES_TO_REWRITE = [
   "data-src",
   "data-srcset",
 ];
-const ATTRIBUTES_SELECTOR = ATTRIBUTES_TO_REWRITE.map((attr) => `[${attr}]`).join(",");
+const ATTRIBUTES_SELECTOR = ATTRIBUTES_TO_REWRITE.map(
+  (attr) => `[${attr}]`
+).join(",");
 
-const replaceIpfsScheme = (value: string) =>
-  value.replaceAll(IPFS_URL_PATTERN, (match) => resolveIpfsUrlSync(match));
+const containsDecentralizedScheme = (value: string | null | undefined) =>
+  Boolean(
+    value?.includes("ipfs://") ||
+    value?.includes("ipns://") ||
+    value?.includes("ar://")
+  );
+
+const replaceDecentralizedScheme = (value: string) =>
+  value.replaceAll(DECENTRALIZED_URL_PATTERN, (match) =>
+    resolveIpfsUrlSync(match)
+  );
 
 const rewriteAttributeValue = (value: string | null) => {
-  if (!value?.includes("ipfs://")) {
+  if (!value || !containsDecentralizedScheme(value)) {
     return value;
   }
 
-  return replaceIpfsScheme(value);
+  return replaceDecentralizedScheme(value);
 };
 
 export default function IpfsImageSetup() {
@@ -51,7 +62,7 @@ function useIpfsImageSetup() {
 
       applyToNode(node);
       for (const child of Array.from(
-        node.querySelectorAll(ATTRIBUTES_SELECTOR),
+        node.querySelectorAll(ATTRIBUTES_SELECTOR)
       )) {
         applyToNode(child);
       }
@@ -59,7 +70,7 @@ function useIpfsImageSetup() {
 
     const applyToTree = () => {
       for (const el of Array.from(
-        document.querySelectorAll(ATTRIBUTES_SELECTOR),
+        document.querySelectorAll(ATTRIBUTES_SELECTOR)
       )) {
         applyToNode(el);
       }
@@ -90,7 +101,7 @@ function useIpfsImageSetup() {
           const attrValue = target.getAttribute(attrName);
           if (
             attrValue === mutation.oldValue ||
-            !attrValue?.includes("ipfs://")
+            !containsDecentralizedScheme(attrValue)
           ) {
             continue;
           }
@@ -136,7 +147,7 @@ function useIpfsImageSetup() {
         }
 
         const attrValue = target.getAttribute(attrName);
-        return attrValue?.includes("ipfs://") ?? false;
+        return containsDecentralizedScheme(attrValue) ?? false;
       });
 
       if (relevantMutations.length === 0) {

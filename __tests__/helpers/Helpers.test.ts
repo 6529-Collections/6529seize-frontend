@@ -49,8 +49,8 @@ describe("Helpers utility functions", () => {
     expect(addProtocol("")).toBe("");
   });
 
-  test("parseIpfsUrl converts ipfs protocol to gateway url", () => {
-    expect(parseIpfsUrl("ipfs://hash")).toBe("https://ipfs.io/ipfs/hash");
+  test("parseIpfsUrl converts ipfs protocol to the 6529 resolver url", () => {
+    expect(parseIpfsUrl("ipfs://hash")).toBe("https://media.6529.io/ipfs/hash");
     expect(parseIpfsUrl("https://site")).toBe("https://site");
   });
 

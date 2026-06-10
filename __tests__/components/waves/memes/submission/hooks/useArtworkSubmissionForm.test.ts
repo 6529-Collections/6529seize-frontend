@@ -541,7 +541,7 @@ describe("useArtworkSubmissionForm", () => {
     });
     expect(result.current.externalMediaError).toBeNull();
     expect(result.current.externalMediaPreviewUrl).toBe(
-      `https://ipfs.io/ipfs/${CID_V1}`
+      `https://media.6529.io/ipfs/${CID_V1}`
     );
     expect(result.current.externalMediaValidationStatus).toBe("valid");
   });

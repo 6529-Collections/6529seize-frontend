@@ -48,39 +48,33 @@ describe("IpfsContext", () => {
 
   it("resolves ipfs urls to gateway", async () => {
     const url = await resolveIpfsUrl("ipfs://abc");
-    expect(url).toBe("https://ipfs.test.6529.io/ipfs/abc");
+    expect(url).toBe("https://media.6529.io/ipfs/abc");
   });
 
   it("resolves synchronously when needed", () => {
     expect(resolveIpfsUrlSync("ipfs://sync")).toBe(
-      "https://ipfs.test.6529.io/ipfs/sync"
+      "https://media.6529.io/ipfs/sync"
     );
   });
 
-  it("normalizes ipfs.io urls back to the configured gateway", () => {
+  it("normalizes ipfs.io urls back to the 6529 resolver", () => {
     expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync")).toBe(
-      "https://ipfs.test.6529.io/ipfs/sync"
+      "https://media.6529.io/ipfs/sync"
     );
   });
 
-  it("preserves configured gateway port and base path when rewriting ipfs.io urls", () => {
-    publicEnv.IPFS_GATEWAY_ENDPOINT =
-      "https://ipfs.test.6529.io:8443/base/ipfs";
+  it("uses the configured media resolver endpoint when provided", () => {
+    publicEnv.MEDIA_RESOLVER_ENDPOINT = "https://media.test.6529.io/base";
 
     expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync?x=1#hash")).toBe(
-      "https://ipfs.test.6529.io:8443/base/ipfs/sync?x=1#hash"
+      "https://media.test.6529.io/base/ipfs/sync"
     );
   });
 
-  it("returns original url if env missing", async () => {
+  it("does not require the legacy gateway endpoint to resolve media", async () => {
     publicEnv.IPFS_GATEWAY_ENDPOINT = undefined;
     publicEnv.IPFS_API_ENDPOINT = undefined;
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
     const url = await resolveIpfsUrl("ipfs://xyz");
-    expect(url).toBe("ipfs://xyz");
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(url).toBe("https://media.6529.io/ipfs/xyz");
   });
 });
