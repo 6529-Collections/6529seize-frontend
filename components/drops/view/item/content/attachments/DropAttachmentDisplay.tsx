@@ -4,6 +4,10 @@ import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import {
+  parseDecentralizedMediaRef,
+  toNativeUri,
+} from "@/lib/media/decentralized-media";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import JsonPreview from "@/components/drops/view/item/content/attachments/JsonPreview";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
@@ -52,10 +56,13 @@ function getAttachmentMetadataUrl(rawUrl: string): string | null {
     return null;
   }
 
-  if (trimmedUrl.toLowerCase().startsWith("ipfs://")) {
-    const withoutProtocol = trimmedUrl.slice("ipfs://".length);
-    const rootCid = withoutProtocol.split(/[/?#]/)[0];
-    return rootCid ? `ipfs://${rootCid}/metadata.json` : null;
+  const parsedMedia = parseDecentralizedMediaRef(trimmedUrl);
+  if (parsedMedia?.protocol === "ipfs") {
+    return toNativeUri({
+      protocol: "ipfs",
+      id: parsedMedia.id,
+      path: "metadata.json",
+    });
   }
 
   try {

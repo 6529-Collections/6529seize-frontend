@@ -1,6 +1,8 @@
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import { buildResponse } from "@/app/api/open-graph/utils";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { publicEnv } from "@/config/env";
+import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import { fetchAlchemyMetadataCandidate } from "../opensea/alchemy";
@@ -18,7 +20,6 @@ const TRANSIENT_CACHE_TTL_MS = 5 * 60 * 1000;
 const TRANSIENT_HOST = "transient.xyz";
 const TRANSIENT_NFT_PATH_PATTERN =
   /^\/nfts\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const DEFAULT_IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
 
 const ALCHEMY_NETWORK_BY_TRANSIENT_CHAIN: Record<string, string> = {
@@ -199,20 +200,12 @@ const extractTransientContext = (url: URL): TransientContext | null => {
 
 const normalizeMediaUrl = (value: string): string => {
   const trimmed = value.trim();
-
-  if (trimmed.startsWith("ipfs://ipfs/")) {
-    return `${DEFAULT_IPFS_GATEWAY}${trimmed.slice("ipfs://ipfs/".length)}`;
-  }
-
-  if (trimmed.startsWith("ipfs://")) {
-    return `${DEFAULT_IPFS_GATEWAY}${trimmed.slice("ipfs://".length)}`;
-  }
-
-  if (trimmed.startsWith("ar://")) {
-    return `https://arweave.net/${trimmed.slice("ar://".length)}`;
-  }
-
-  return trimmed;
+  return (
+    normalizeDecentralizedMediaUrl(
+      trimmed,
+      publicEnv.MEDIA_RESOLVER_ENDPOINT
+    ) ?? trimmed
+  );
 };
 
 const resolveAlchemyImage = (

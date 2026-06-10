@@ -5,13 +5,18 @@ import type {
   EnsNamePreview,
   EnsOwnership,
   EnsPreview,
-  TextRecordKey} from "@/components/waves/ens/types";
-import {
-  TEXT_RECORD_KEYS
+  TextRecordKey,
 } from "@/components/waves/ens/types";
+import { TEXT_RECORD_KEYS } from "@/components/waves/ens/types";
 import type { EnsTarget } from "@/lib/ens/detect";
 import { stripHtmlTags } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { publicEnv } from "@/config/env";
+import {
+  normalizeDecentralizedMediaUrl,
+  parseDecentralizedMediaRef,
+  to6529ResolverUrl,
+} from "@/lib/media/decentralized-media";
 import { ens_normalize } from "@adraffy/ens-normalize";
 import * as contentHash from "@ensdomains/content-hash";
 import { toUnicode } from "punycode";
@@ -174,14 +179,12 @@ function sanitizeUrl(value: string | null): string | null {
     return null;
   }
 
-  if (trimmed.startsWith("ipfs://")) {
-    return `https://cf-ipfs.com/ipfs/${trimmed.slice(7)}`;
-  }
-  if (trimmed.startsWith("ipns://")) {
-    return `https://cf-ipfs.com/ipns/${trimmed.slice(7)}`;
-  }
-  if (trimmed.startsWith("ar://")) {
-    return `https://arweave.net/${trimmed.slice(5)}`;
+  const normalizedMediaUrl = normalizeDecentralizedMediaUrl(
+    trimmed,
+    publicEnv.MEDIA_RESOLVER_ENDPOINT
+  );
+  if (normalizedMediaUrl && normalizedMediaUrl !== trimmed) {
+    return normalizedMediaUrl;
   }
 
   try {
@@ -211,11 +214,13 @@ function buildGatewayUrl(
 
   switch (protocol) {
     case "ipfs":
-      return `https://cf-ipfs.com/ipfs/${value.replaceAll(/^ipfs:\/\//i, "")}`;
     case "ipns":
-      return `https://cf-ipfs.com/ipns/${value.replaceAll(/^ipns:\/\//i, "")}`;
-    case "arweave":
-      return `https://arweave.net/${value.replaceAll(/^ar:\/\//i, "")}`;
+    case "arweave": {
+      const parsed = parseDecentralizedMediaRef(value);
+      return parsed
+        ? to6529ResolverUrl(parsed, publicEnv.MEDIA_RESOLVER_ENDPOINT)
+        : null;
+    }
     default:
       return null;
   }
@@ -357,7 +362,7 @@ async function loadOwnership(
 
   isWrapped = Boolean(
     registryOwner &&
-      registryOwner.toLowerCase() === NAME_WRAPPER_ADDRESS.toLowerCase()
+    registryOwner.toLowerCase() === NAME_WRAPPER_ADDRESS.toLowerCase()
   );
 
   if (isEthSecondLevel(normalized)) {
@@ -493,7 +498,7 @@ async function fetchEnsName(input: string): Promise<EnsNamePreview> {
       string | null,
       Partial<Record<TextRecordKey, string | null>>,
       EnsContenthash | null,
-      EnsOwnership
+      EnsOwnership,
     ];
 
   const sanitizedRecords: Partial<Record<TextRecordKey, string | null>> = {};

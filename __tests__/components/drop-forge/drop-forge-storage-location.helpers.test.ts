@@ -1,10 +1,3 @@
-jest.mock("@/components/ipfs/IPFSContext", () => ({
-  resolveIpfsUrlSync: (url: string) =>
-    url.startsWith("ipfs://")
-      ? `https://gateway.example/ipfs/${url.slice("ipfs://".length)}`
-      : url,
-}));
-
 import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 
 describe("getDropForgeStorageLocationInfo", () => {
@@ -27,9 +20,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "arweave",
       providerBadgeLabel: null,
       openUrl:
-        "https://arweave.net/OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8",
+        "https://media.6529.io/arweave/OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8",
       copyValue:
-        "https://arweave.net/OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8",
+        "https://media.6529.io/arweave/OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8",
     });
   });
 
@@ -45,9 +38,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "arweave",
       providerBadgeLabel: null,
       openUrl:
-        "https://arweave.net/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+        "https://media.6529.io/arweave/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
       copyValue:
-        "https://arweave.net/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+        "https://media.6529.io/arweave/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
     });
   });
 
@@ -66,9 +59,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "ipfs",
       providerBadgeLabel: "IPFS",
       openUrl:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
       copyValue:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
     });
   });
 
@@ -87,9 +80,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "ipfs",
       providerBadgeLabel: "IPFS",
       openUrl:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
       copyValue:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
     });
   });
 
@@ -107,9 +100,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "ipfs",
       providerBadgeLabel: "IPFS",
       openUrl:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
       copyValue:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
     });
 
     expect(
@@ -123,9 +116,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "ipfs",
       providerBadgeLabel: "IPFS",
       openUrl:
-        "https://gateway.example/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
+        "https://media.6529.io/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
       copyValue:
-        "https://gateway.example/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
+        "https://media.6529.io/ipfs/QmYwAPJzv5CZsnAzt8auVZRnG1R8n4wqxW48UUfZo59SyY",
     });
   });
 
@@ -144,9 +137,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "ipfs",
       providerBadgeLabel: "IPFS",
       openUrl:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
       copyValue:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa",
     });
   });
 
@@ -165,9 +158,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "ipfs",
       providerBadgeLabel: "IPFS",
       openUrl:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
       copyValue:
-        "https://gateway.example/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
+        "https://media.6529.io/ipfs/bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa/dir/file.png",
     });
   });
 
@@ -185,9 +178,9 @@ describe("getDropForgeStorageLocationInfo", () => {
       provider: "arweave",
       providerBadgeLabel: null,
       openUrl:
-        "https://arweave.net/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+        "https://media.6529.io/arweave/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
       copyValue:
-        "https://arweave.net/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
+        "https://media.6529.io/arweave/OdpVtqurZU9P-uEAJ4BsDIjAduAufQ6_sJxTu6MNYHc",
     });
   });
 });

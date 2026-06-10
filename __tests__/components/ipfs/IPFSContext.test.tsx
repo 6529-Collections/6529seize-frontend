@@ -13,6 +13,7 @@ jest.mock("@/components/ipfs/IPFSService");
 const MockIpfsService = IpfsService as jest.MockedClass<typeof IpfsService>;
 
 const originalEnv = { ...publicEnv };
+const CID = "bafybeigdyrzt5sfp7udm7hu76mjts3sfb44oixwkw55rmpbc6g6wuigv3i";
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -46,41 +47,35 @@ describe("IpfsContext", () => {
     }).toThrow("useIpfsService must be used within an IpfsProvider");
   });
 
-  it("resolves ipfs urls to gateway", async () => {
-    const url = await resolveIpfsUrl("ipfs://abc");
-    expect(url).toBe("https://ipfs.test.6529.io/ipfs/abc");
+  it("resolves ipfs urls to gateway", () => {
+    const url = resolveIpfsUrl(`ipfs://${CID}`);
+    expect(url).toBe(`https://media.6529.io/ipfs/${CID}`);
   });
 
   it("resolves synchronously when needed", () => {
-    expect(resolveIpfsUrlSync("ipfs://sync")).toBe(
-      "https://ipfs.test.6529.io/ipfs/sync"
+    expect(resolveIpfsUrlSync(`ipfs://${CID}`)).toBe(
+      `https://media.6529.io/ipfs/${CID}`
     );
   });
 
-  it("normalizes ipfs.io urls back to the configured gateway", () => {
-    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync")).toBe(
-      "https://ipfs.test.6529.io/ipfs/sync"
+  it("normalizes ipfs.io urls back to the 6529 resolver", () => {
+    expect(resolveIpfsUrlSync(`https://ipfs.io/ipfs/${CID}`)).toBe(
+      `https://media.6529.io/ipfs/${CID}`
     );
   });
 
-  it("preserves configured gateway port and base path when rewriting ipfs.io urls", () => {
-    publicEnv.IPFS_GATEWAY_ENDPOINT =
-      "https://ipfs.test.6529.io:8443/base/ipfs";
+  it("uses the configured media resolver endpoint when provided", () => {
+    publicEnv.MEDIA_RESOLVER_ENDPOINT = "https://media.test.6529.io/base";
 
-    expect(resolveIpfsUrlSync("https://ipfs.io/ipfs/sync?x=1#hash")).toBe(
-      "https://ipfs.test.6529.io:8443/base/ipfs/sync?x=1#hash"
+    expect(resolveIpfsUrlSync(`https://ipfs.io/ipfs/${CID}?x=1#hash`)).toBe(
+      `https://media.test.6529.io/base/ipfs/${CID}`
     );
   });
 
-  it("returns original url if env missing", async () => {
+  it("does not require the legacy gateway endpoint to resolve media", () => {
     publicEnv.IPFS_GATEWAY_ENDPOINT = undefined;
     publicEnv.IPFS_API_ENDPOINT = undefined;
-    const consoleSpy = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-    const url = await resolveIpfsUrl("ipfs://xyz");
-    expect(url).toBe("ipfs://xyz");
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    const url = resolveIpfsUrl(`ipfs://${CID}`);
+    expect(url).toBe(`https://media.6529.io/ipfs/${CID}`);
   });
 });

@@ -4,6 +4,8 @@ import {
 } from "@/components/waves/memes/submission/constants/security";
 
 const CID_V0 = "QmULf712pVAVBPDBenmE4PGQGA8EWY9uFRiiRmLksfu6Tn";
+const CID_SUBDOMAIN =
+  "bafybeigdyrztobg3tv6zj5n6xvztf4k5p3xf7r6xkqfq5jz3o5quftdjum";
 
 jest.mock("@/lib/media/ipfs-gateways", () => ({
   getConfiguredIpfsGatewayHost: () => "ipfs.6529.io",
@@ -34,13 +36,29 @@ describe("interactive media security helpers", () => {
     ).toBe(true);
   });
 
-  it("allows query params on canonical interactive media URLs", () => {
+  it("strips query params when canonicalizing interactive media URLs", () => {
     expect(
       canonicalizeInteractiveMediaUrl(
         `https://ipfs.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294`
       )
+    ).toBe(`https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html`);
+  });
+
+  it("allows media resolver interactive URLs", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html`
+      )
+    ).toBe(`https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html`);
+  });
+
+  it("allows recognized IPFS subdomain gateways", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://${CID_SUBDOMAIN}.ipfs.nftstorage.link/pendulums_mint_script.html`
+      )
     ).toBe(
-      `https://ipfs.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294`
+      `https://media.6529.io/ipfs/${CID_SUBDOMAIN}/pendulums_mint_script.html`
     );
   });
 

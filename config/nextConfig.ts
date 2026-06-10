@@ -2,6 +2,8 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
+import { getMediaResolverHostname } from "../lib/media/decentralized-media";
+import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 
 const HTML_LIMITED_METADATA_BOTS =
   /facebookexternalhit|facebookcatalog|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|SkypeUriPreview|TelegramBot|redditbot|Pinterestbot|opentweet/i;
@@ -24,7 +26,15 @@ export function sharedConfig(
       remotePatterns: [
         { protocol: "https", hostname: "6529.io" },
         { protocol: "https", hostname: "staging.6529.io" },
+        {
+          protocol: "https",
+          hostname: getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
+        },
         ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
+          protocol: "https" as const,
+          hostname,
+        })),
+        ...IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
           protocol: "https" as const,
           hostname,
         })),
@@ -54,7 +64,8 @@ export function sharedConfig(
           source: "/:path*",
           headers: createSecurityHeaders(
             publicEnv["API_ENDPOINT"],
-            publicEnv["IPFS_GATEWAY_ENDPOINT"]
+            publicEnv["IPFS_GATEWAY_ENDPOINT"],
+            publicEnv["MEDIA_RESOLVER_ENDPOINT"]
           ),
         },
       ];
