@@ -157,17 +157,45 @@ paths:
       summary: Get a message to sign with your web3 wallet
       operationId: getNonce
       parameters:
-        - name: auth_nonce_query
+        - name: signer_address
           in: query
-          description: >-
-            Serialized as normal query fields. When structured_signature is
-            true, clients must also send domain; chain_id defaults to 1 when
-            omitted.
           required: true
-          style: form
-          explode: true
           schema:
-            $ref: "#/components/schemas/AuthNonceQuery"
+            type: string
+          description: Your wallet address
+        - name: short_nonce
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: If true, the nonce will be shorter and easier to sign.
+        - name: structured_signature
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            If true, the nonce is returned as a structured wallet signature
+            message and domain is required.
+        - name: domain
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+          description: Required when structured_signature is true.
+        - name: chain_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Chain id embedded in structured signatures.
+      x-6529-query-schema:
+        $ref: "#/components/schemas/AuthNonceQuery"
       responses:
         "200":
           description: successful operation
@@ -14863,6 +14891,7 @@ components:
           description: Your wallet address
         short_nonce:
           type: boolean
+          default: false
           description: >-
             If true, the nonce will be shorter and easier to sign. Default is
             false.
@@ -14884,6 +14913,7 @@ components:
           description: Your wallet address
         short_nonce:
           type: boolean
+          default: false
           description: >-
             If true, the nonce will be shorter and easier to sign. Default is
             false.
@@ -14900,6 +14930,7 @@ components:
           description: Required when structured_signature is true.
         chain_id:
           type: integer
+          minimum: 1
           default: 1
           description: Chain id embedded in structured signatures.
     ApiNonceResponse:
