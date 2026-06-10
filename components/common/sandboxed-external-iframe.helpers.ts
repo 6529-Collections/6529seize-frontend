@@ -49,10 +49,16 @@ function parseHttpsMetadataUrl(src: string): URL | null {
   return parsedUrl;
 }
 
+/**
+ * Canonicalize metadata-provided external URLs before opening them in a new tab.
+ */
 export function canonicalizeExternalMetadataUrl(src: string): string | null {
   return parseHttpsMetadataUrl(src)?.toString() ?? null;
 }
 
+/**
+ * Canonicalize HTML embed URLs while preserving stricter IPFS and Arweave media rules.
+ */
 export function canonicalizeExternalMetadataHtmlUrl(
   src: string
 ): string | null {
@@ -69,6 +75,9 @@ export function canonicalizeExternalMetadataHtmlUrl(
   return parsedUrl.toString();
 }
 
+/**
+ * Open canonical metadata URLs without granting opener or referrer access.
+ */
 export function openExternalMetadataUrl(src: string | null | undefined): void {
   if (!src) {
     return;
