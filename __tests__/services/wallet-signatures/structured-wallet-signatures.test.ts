@@ -66,6 +66,7 @@ describe("structured wallet signatures", () => {
 
   it("hashes payloads with canonical key ordering", () => {
     expect(canonicalJSONStringify({ b: 2, a: 1 })).toBe('{"a":1,"b":2}');
+    expect(canonicalJSONStringify({ ä: 1, z: 2 })).toBe('{"z":2,"ä":1}');
     expect(hashStructuredWalletSignaturePayload({ b: 2, a: 1 })).toBe(
       hashStructuredWalletSignaturePayload({ a: 1, b: 2 })
     );

@@ -44,7 +44,7 @@ function getSubmissionErrorMessage(error: unknown): string {
 }
 
 async function postRememeSubmission(body: {
-  address: string | undefined;
+  address: string;
   signature: string;
   signature_message?: string | undefined;
   rememe: {
@@ -87,6 +87,7 @@ export default function RememeAddPage() {
   const signedRememeRef = useRef<ReturnType<typeof buildRememeObject> | null>(
     null
   );
+  const signerAddressRef = useRef<string | null>(null);
   const [memes, setMemes] = useState<NFT[]>([]);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
@@ -188,9 +189,14 @@ export default function RememeAddPage() {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data && addRememe) {
+      const signerAddress = signerAddressRef.current;
+      if (!signerAddress) {
+        setSignErrors(["Error: Connect a wallet before signing"]);
+        return;
+      }
       setSubmitting(true);
       postRememeSubmission({
-        address: address,
+        address: signerAddress,
         signature: signMessage.data,
         ...(signatureMessageRef.current
           ? { signature_message: signatureMessageRef.current }
@@ -287,6 +293,7 @@ export default function RememeAddPage() {
                           setSignErrors([]);
                           signatureMessageRef.current = null;
                           signedRememeRef.current = null;
+                          signerAddressRef.current = null;
                           signMessage.reset();
                         }}
                       />
@@ -358,18 +365,21 @@ export default function RememeAddPage() {
                         setSignErrors([]);
                         setSubmissionResult(undefined);
                         if (addRememe) {
+                          if (!address) {
+                            signerAddressRef.current = null;
+                            signedRememeRef.current = null;
+                            setSignErrors([
+                              "Error: Connect a wallet before signing",
+                            ]);
+                            return;
+                          }
+                          const signingAddress = address;
                           const rememe = buildRememeObject();
                           signedRememeRef.current = rememe;
+                          signerAddressRef.current = signingAddress;
                           if (isStructuredSignaturesEnabled()) {
-                            if (!address) {
-                              signedRememeRef.current = null;
-                              setSignErrors([
-                                "Error: Connect a wallet before signing",
-                              ]);
-                              return;
-                            }
                             const { message } = buildRememeSignatureMessage({
-                              address,
+                              address: signingAddress,
                               rememe,
                             });
                             signatureMessageRef.current = message;

@@ -1,21 +1,24 @@
-import { validateAuthImmediate } from '@/services/auth/immediate-validation.utils';
-import { validateJwt } from '@/services/auth/jwt-validation.utils';
-import { validateRoleForAuthentication } from '@/utils/role-validation';
+import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
+import { validateJwt } from "@/services/auth/jwt-validation.utils";
+import { validateRoleForAuthentication } from "@/utils/role-validation";
 import {
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
-  InvalidRoleStateError
-} from '@/errors/authentication';
+  InvalidRoleStateError,
+} from "@/errors/authentication";
 
 // Mock dependencies
-jest.mock('@/services/auth/jwt-validation.utils');
-jest.mock('@/utils/role-validation');
+jest.mock("@/services/auth/jwt-validation.utils");
+jest.mock("@/utils/role-validation");
 
 const mockValidateJwt = validateJwt as jest.MockedFunction<typeof validateJwt>;
-const mockValidateRoleForAuthentication = validateRoleForAuthentication as jest.MockedFunction<typeof validateRoleForAuthentication>;
+const mockValidateRoleForAuthentication =
+  validateRoleForAuthentication as jest.MockedFunction<
+    typeof validateRoleForAuthentication
+  >;
 
-describe('validateAuthImmediate', () => {
+describe("validateAuthImmediate", () => {
   const mockCallbacks = {
     onShowSignModal: jest.fn(),
     onInvalidateCache: jest.fn(),
@@ -25,26 +28,26 @@ describe('validateAuthImmediate', () => {
   };
 
   const baseParams = {
-    currentAddress: '0x123',
-    connectionAddress: '0x123',
-    jwt: 'valid-jwt-token',
+    currentAddress: "0x123",
+    connectionAddress: "0x123",
+    jwt: "valid-jwt-token",
     activeProfileProxy: null,
     isConnected: true,
-    operationId: 'test-operation',
+    operationId: "test-operation",
     abortSignal: new AbortController().signal,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockValidateRoleForAuthentication.mockReturnValue('test-role');
+    mockValidateRoleForAuthentication.mockReturnValue("test-role");
   });
 
-  describe('Address Consistency Checks', () => {
-    it('should return cancelled when address changes before validation', async () => {
+  describe("Address Consistency Checks", () => {
+    it("should return cancelled when address changes before validation", async () => {
       const params = {
         ...baseParams,
-        currentAddress: '0x123',
-        connectionAddress: '0x456', // Different address
+        currentAddress: "0x123",
+        connectionAddress: "0x456", // Different address
       };
 
       const result = await validateAuthImmediate({
@@ -64,7 +67,7 @@ describe('validateAuthImmediate', () => {
       expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
     });
 
-    it('should return cancelled when abort signal is already aborted', async () => {
+    it("should return cancelled when abort signal is already aborted", async () => {
       const abortController = new AbortController();
       abortController.abort();
 
@@ -88,8 +91,8 @@ describe('validateAuthImmediate', () => {
     });
   });
 
-  describe('Successful JWT Validation', () => {
-    it('should return success when JWT is valid', async () => {
+  describe("Successful JWT Validation", () => {
+    it("should return success when JWT is valid", async () => {
       mockValidateJwt.mockResolvedValue({
         isValid: true,
         wasCancelled: false,
@@ -107,10 +110,10 @@ describe('validateAuthImmediate', () => {
       });
 
       expect(mockValidateJwt).toHaveBeenCalledWith({
-        jwt: 'valid-jwt-token',
-        wallet: '0x123',
+        jwt: "valid-jwt-token",
+        wallet: "0x123",
         role: null,
-        operationId: 'test-operation',
+        operationId: "test-operation",
         abortSignal: baseParams.abortSignal,
         activeProfileProxy: null,
       });
@@ -120,10 +123,10 @@ describe('validateAuthImmediate', () => {
       expect(mockCallbacks.onReset).not.toHaveBeenCalled();
     });
 
-    it('should call validateRoleForAuthentication when activeProfileProxy exists', async () => {
+    it("should call validateRoleForAuthentication when activeProfileProxy exists", async () => {
       const mockProxy = {
-        id: 'proxy-id',
-        created_by: { id: 'creator-id' }
+        id: "proxy-id",
+        created_by: { id: "creator-id" },
       };
 
       mockValidateJwt.mockResolvedValue({
@@ -143,18 +146,18 @@ describe('validateAuthImmediate', () => {
 
       expect(mockValidateRoleForAuthentication).toHaveBeenCalledWith(mockProxy);
       expect(mockValidateJwt).toHaveBeenCalledWith({
-        jwt: 'valid-jwt-token',
-        wallet: '0x123',
-        role: 'test-role',
-        operationId: 'test-operation',
+        jwt: "valid-jwt-token",
+        wallet: "0x123",
+        role: "test-role",
+        operationId: "test-operation",
         abortSignal: baseParams.abortSignal,
         activeProfileProxy: mockProxy,
       });
     });
   });
 
-  describe('Invalid JWT Handling', () => {
-    it('should call reset when JWT is invalid and user is not connected', async () => {
+  describe("Invalid JWT Handling", () => {
+    it("should call reset when JWT is invalid and user is not connected", async () => {
       mockValidateJwt.mockResolvedValue({
         isValid: false,
         wasCancelled: false,
@@ -180,7 +183,7 @@ describe('validateAuthImmediate', () => {
       expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
     });
 
-    it('should trigger re-authentication when JWT is invalid and user is connected', async () => {
+    it("should trigger re-authentication when JWT is invalid and user is connected", async () => {
       mockValidateJwt.mockResolvedValue({
         isValid: false,
         wasCancelled: false,
@@ -202,7 +205,38 @@ describe('validateAuthImmediate', () => {
       expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
     });
 
-    it('should not process result when validation was cancelled', async () => {
+    it("should stop after JWT removal if validation is aborted", async () => {
+      const abortController = new AbortController();
+      const callbacks = {
+        ...mockCallbacks,
+        onRemoveJwt: jest.fn(async () => {
+          abortController.abort();
+        }),
+      };
+      mockValidateJwt.mockResolvedValue({
+        isValid: false,
+        wasCancelled: false,
+      });
+
+      const result = await validateAuthImmediate({
+        params: {
+          ...baseParams,
+          abortSignal: abortController.signal,
+        },
+        callbacks,
+      });
+
+      expect(result).toEqual({
+        validationCompleted: false,
+        wasCancelled: true,
+        shouldShowModal: false,
+      });
+      expect(callbacks.onRemoveJwt).toHaveBeenCalled();
+      expect(callbacks.onInvalidateCache).not.toHaveBeenCalled();
+      expect(callbacks.onShowSignModal).not.toHaveBeenCalled();
+    });
+
+    it("should not process result when validation was cancelled", async () => {
       mockValidateJwt.mockResolvedValue({
         isValid: false,
         wasCancelled: true,
@@ -225,8 +259,8 @@ describe('validateAuthImmediate', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle MissingActiveProfileError correctly', async () => {
+  describe("Error Handling", () => {
+    it("should handle MissingActiveProfileError correctly", async () => {
       const error = new MissingActiveProfileError();
       mockValidateJwt.mockRejectedValue(error);
 
@@ -241,14 +275,17 @@ describe('validateAuthImmediate', () => {
         shouldShowModal: true,
       });
 
-      expect(mockCallbacks.onLogError).toHaveBeenCalledWith('validateJwt_role_error', error);
+      expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
+        "validateJwt_role_error",
+        error
+      );
       expect(mockCallbacks.onRemoveJwt).toHaveBeenCalled();
       expect(mockCallbacks.onInvalidateCache).toHaveBeenCalled();
       expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
     });
 
-    it('should handle RoleValidationError correctly', async () => {
-      const error = new RoleValidationError('expected-role', 'actual-role');
+    it("should handle RoleValidationError correctly", async () => {
+      const error = new RoleValidationError("expected-role", "actual-role");
       mockValidateJwt.mockRejectedValue(error);
 
       const result = await validateAuthImmediate({
@@ -262,14 +299,17 @@ describe('validateAuthImmediate', () => {
         shouldShowModal: true,
       });
 
-      expect(mockCallbacks.onLogError).toHaveBeenCalledWith('validateJwt_role_error', error);
+      expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
+        "validateJwt_role_error",
+        error
+      );
       expect(mockCallbacks.onRemoveJwt).toHaveBeenCalled();
       expect(mockCallbacks.onInvalidateCache).toHaveBeenCalled();
       expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
     });
 
-    it('should handle AuthenticationRoleError correctly', async () => {
-      const error = new AuthenticationRoleError('role error');
+    it("should handle AuthenticationRoleError correctly", async () => {
+      const error = new AuthenticationRoleError("role error");
       mockValidateJwt.mockRejectedValue(error);
 
       const result = await validateAuthImmediate({
@@ -277,14 +317,17 @@ describe('validateAuthImmediate', () => {
         callbacks: mockCallbacks,
       });
 
-      expect(mockCallbacks.onLogError).toHaveBeenCalledWith('validateJwt_role_error', error);
+      expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
+        "validateJwt_role_error",
+        error
+      );
       expect(mockCallbacks.onRemoveJwt).toHaveBeenCalled();
       expect(mockCallbacks.onInvalidateCache).toHaveBeenCalled();
       expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
     });
 
-    it('should handle InvalidRoleStateError correctly', async () => {
-      const error = new InvalidRoleStateError('invalid role state');
+    it("should handle InvalidRoleStateError correctly", async () => {
+      const error = new InvalidRoleStateError("invalid role state");
       mockValidateJwt.mockRejectedValue(error);
 
       const result = await validateAuthImmediate({
@@ -292,14 +335,17 @@ describe('validateAuthImmediate', () => {
         callbacks: mockCallbacks,
       });
 
-      expect(mockCallbacks.onLogError).toHaveBeenCalledWith('validateJwt_role_error', error);
+      expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
+        "validateJwt_role_error",
+        error
+      );
       expect(mockCallbacks.onRemoveJwt).toHaveBeenCalled();
       expect(mockCallbacks.onInvalidateCache).toHaveBeenCalled();
       expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
     });
 
-    it('should handle general errors correctly', async () => {
-      const error = new Error('general error');
+    it("should handle general errors correctly", async () => {
+      const error = new Error("general error");
       mockValidateJwt.mockRejectedValue(error);
 
       const result = await validateAuthImmediate({
@@ -313,14 +359,17 @@ describe('validateAuthImmediate', () => {
         shouldShowModal: true,
       });
 
-      expect(mockCallbacks.onLogError).toHaveBeenCalledWith('validateJwt_general_error', error);
+      expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
+        "validateJwt_general_error",
+        error
+      );
       expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
     });
 
-    it('should not process errors when operation is aborted', async () => {
+    it("should not process errors when operation is aborted", async () => {
       const abortController = new AbortController();
-      const error = new Error('test error');
-      
+      const error = new Error("test error");
+
       mockValidateJwt.mockImplementation(() => {
         abortController.abort();
         throw error;
@@ -347,14 +396,14 @@ describe('validateAuthImmediate', () => {
       expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
     });
 
-    it('should not process errors when address changes during error handling', async () => {
-      const error = new Error('test error');
+    it("should not process errors when address changes during error handling", async () => {
+      const error = new Error("test error");
       mockValidateJwt.mockRejectedValue(error);
 
       const params = {
         ...baseParams,
-        currentAddress: '0x123',
-        connectionAddress: '0x456', // Different address
+        currentAddress: "0x123",
+        connectionAddress: "0x456", // Different address
       };
 
       const result = await validateAuthImmediate({
@@ -372,8 +421,8 @@ describe('validateAuthImmediate', () => {
       expect(mockCallbacks.onLogError).not.toHaveBeenCalled();
     });
 
-    it('should not show modal when user is not connected on error', async () => {
-      const error = new Error('test error');
+    it("should not show modal when user is not connected on error", async () => {
+      const error = new Error("test error");
       mockValidateJwt.mockRejectedValue(error);
 
       const params = {
@@ -392,23 +441,26 @@ describe('validateAuthImmediate', () => {
         shouldShowModal: false,
       });
 
-      expect(mockCallbacks.onLogError).toHaveBeenCalledWith('validateJwt_general_error', error);
+      expect(mockCallbacks.onLogError).toHaveBeenCalledWith(
+        "validateJwt_general_error",
+        error
+      );
       // Should not show modal when not connected
       expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
     });
   });
 
-  describe('Post-validation Address Checks', () => {
-    it('should return cancelled when address changes after validation', async () => {
+  describe("Post-validation Address Checks", () => {
+    it("should return cancelled when address changes after validation", async () => {
       // This test verifies that the original logic checks currentAddress !== connectionAddress
       // after validation. Since our utility gets both addresses as static values,
       // this scenario would be handled by the component calling validateAuthImmediate
       // with different currentAddress and connectionAddress values.
-      
+
       const params = {
         ...baseParams,
-        currentAddress: '0x123',
-        connectionAddress: '0x456', // Different address simulates post-validation change
+        currentAddress: "0x123",
+        connectionAddress: "0x456", // Different address simulates post-validation change
       };
 
       mockValidateJwt.mockResolvedValue({
