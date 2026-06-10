@@ -291,9 +291,9 @@ describe("auth.utils", () => {
   });
 
   it("removeAuthJwt promotes next connected account", async () => {
-    const { removeNativeRefreshToken } = require(
-      "@/services/auth/native-refresh-token-storage"
-    );
+    const {
+      removeNativeRefreshToken,
+    } = require("@/services/auth/native-refresh-token-storage");
     const storage = setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
@@ -313,9 +313,9 @@ describe("auth.utils", () => {
   });
 
   it("clearAllWalletAuth clears all accounts and cookie", async () => {
-    const { removeNativeRefreshToken } = require(
-      "@/services/auth/native-refresh-token-storage"
-    );
+    const {
+      removeNativeRefreshToken,
+    } = require("@/services/auth/native-refresh-token-storage");
     const storage = setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
@@ -350,6 +350,41 @@ describe("auth.utils", () => {
     expect(canStoreAnotherWalletAccount()).toBe(false);
     expect(canStoreAnotherWalletAccount("0x006")).toBe(false);
     expect(canStoreAnotherWalletAccount("0x005")).toBe(true);
+    expect(
+      canStoreAnotherWalletAccount("0x006", {
+        allowAdditionalAccounts: false,
+      })
+    ).toBe(false);
+    expect(
+      canStoreAnotherWalletAccount("0x005", {
+        allowAdditionalAccounts: false,
+      })
+    ).toBe(true);
+  });
+
+  it("allows the first account but blocks additional accounts when requested", () => {
+    setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    expect(
+      canStoreAnotherWalletAccount("0x001", {
+        allowAdditionalAccounts: false,
+      })
+    ).toBe(true);
+
+    setAuthJwt("0x001", "jwt-1", "refresh-1", "role-1");
+
+    expect(
+      canStoreAnotherWalletAccount("0x002", {
+        allowAdditionalAccounts: false,
+      })
+    ).toBe(false);
+    expect(
+      canStoreAnotherWalletAccount("0x001", {
+        allowAdditionalAccounts: false,
+      })
+    ).toBe(true);
   });
 
   it("does not add a new account when already at max profiles", () => {

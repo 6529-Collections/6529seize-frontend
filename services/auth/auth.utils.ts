@@ -303,11 +303,20 @@ export const getConnectedWalletAccounts = (): ConnectedWalletAccount[] => {
 };
 
 export const canStoreAnotherWalletAccount = (
-  address?: string | null
+  address?: string | null,
+  {
+    allowAdditionalAccounts = true,
+  }: { readonly allowAdditionalAccounts?: boolean } = {}
 ): boolean => {
   const accounts = getStoredAccounts();
 
   if (!address) {
+    if (accounts.length === 0) {
+      return true;
+    }
+    if (!allowAdditionalAccounts) {
+      return false;
+    }
     return accounts.length < MAX_CONNECTED_PROFILES;
   }
 
@@ -316,7 +325,13 @@ export const canStoreAnotherWalletAccount = (
     (account) => normalizeAddress(account.address) === normalizedAddress
   );
 
-  return alreadyExists || accounts.length < MAX_CONNECTED_PROFILES;
+  if (alreadyExists || accounts.length === 0) {
+    return true;
+  }
+  if (!allowAdditionalAccounts) {
+    return false;
+  }
+  return accounts.length < MAX_CONNECTED_PROFILES;
 };
 
 export const setActiveWalletAccount = (address: string): boolean => {

@@ -54,6 +54,7 @@ import {
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
 import {
+  getSessionClientType,
   isWalletAuthSessionV2Enabled,
   loginWithSessionV2,
   persistSessionResponse,
@@ -541,9 +542,17 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
-      if (!canStoreAnotherWalletAccount(signerAddress)) {
+      const isSingleWebSessionV2 =
+        isWalletAuthSessionV2Enabled() && getSessionClientType() === "web";
+      if (
+        !canStoreAnotherWalletAccount(signerAddress, {
+          allowAdditionalAccounts: !isSingleWebSessionV2,
+        })
+      ) {
         setToast({
-          message: "You've reached the connected profile limit.",
+          message: isSingleWebSessionV2
+            ? "Disconnect the current profile before connecting another profile"
+            : "You've reached the connected profile limit.",
           type: "error",
         });
         return { success: false };

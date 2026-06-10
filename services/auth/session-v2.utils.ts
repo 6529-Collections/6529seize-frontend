@@ -9,9 +9,9 @@ import {
   setNativeRefreshToken,
 } from "./native-refresh-token-storage";
 
-export type AuthSessionClientType = "web" | "native";
+type AuthSessionClientType = "web" | "native";
 
-export interface SessionLoginRequest {
+interface SessionLoginRequest {
   readonly client_type: AuthSessionClientType;
   readonly server_signature: string;
   readonly client_signature: string;
@@ -22,7 +22,7 @@ export interface SessionLoginRequest {
   readonly version?: number;
 }
 
-export interface SessionWebResponse {
+interface SessionWebResponse {
   readonly address: string;
   readonly role: string | null;
   readonly access_token: string;
@@ -30,7 +30,7 @@ export interface SessionWebResponse {
   readonly client_type: "web";
 }
 
-export interface SessionNativeResponse {
+interface SessionNativeResponse {
   readonly address: string;
   readonly role: string | null;
   readonly access_token: string;
@@ -40,8 +40,8 @@ export interface SessionNativeResponse {
   readonly refresh_token_expires_at: string;
 }
 
-export type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
-export type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
+type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
+type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
 
 type ApiStatusError = {
   readonly status?: unknown;
@@ -50,7 +50,7 @@ type ApiStatusError = {
   };
 };
 
-export interface CreateConnectionTransferResponse {
+interface CreateConnectionTransferResponse {
   readonly transfer_code: string;
   readonly expires_at: string;
   readonly address: string;
@@ -59,7 +59,7 @@ export interface CreateConnectionTransferResponse {
   readonly deep_link_path: string;
 }
 
-export interface RedeemConnectionTransferResponse {
+interface RedeemConnectionTransferResponse {
   readonly address: string;
   readonly role: string | null;
   readonly access_token: string;
@@ -72,7 +72,7 @@ export function isWalletAuthSessionV2Enabled(): boolean {
   return publicEnv.AUTH_SESSION_V2_ENABLED === "true";
 }
 
-export function isAuthTransferCodesEnabled(): boolean {
+function isAuthTransferCodesEnabled(): boolean {
   return publicEnv.AUTH_TRANSFER_CODES_ENABLED === "true";
 }
 
@@ -295,10 +295,6 @@ export async function logoutSessionV2({
       parseJson: false,
     });
     await removeNativeRefreshToken(address);
-    return;
-  }
-
-  if (!isWalletAuthSessionV2Enabled()) {
     return;
   }
 

@@ -1,5 +1,11 @@
 import React from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import {
   SeizeConnectProvider,
   useSeizeConnectContext,
@@ -83,6 +89,8 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: jest.fn(() => "web"),
+  isWalletAuthSessionV2Enabled: jest.fn(() => false),
   logoutSessionV2: jest.fn(() => Promise.resolve()),
 }));
 
@@ -121,6 +129,14 @@ function LogoutAllButton() {
   );
 }
 
+function LogoutButton() {
+  const { seizeDisconnectAndLogout } = useSeizeConnectContext();
+
+  return (
+    <button onClick={() => void seizeDisconnectAndLogout()}>Logout</button>
+  );
+}
+
 describe("SeizeConnectProvider add-account flow", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -138,10 +154,16 @@ describe("SeizeConnectProvider add-account flow", () => {
     };
     mockAppKitState = { open: false };
     mockDisconnect.mockResolvedValue(undefined);
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(false);
+    sessionV2.getSessionClientType.mockReturnValue("web");
+    sessionV2.logoutSessionV2.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
     jest.useRealTimers();
   });
 
@@ -272,6 +294,51 @@ describe("SeizeConnectProvider add-account flow", () => {
 
     expect(mockDisconnect).not.toHaveBeenCalled();
     expect(mockOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not start add-account flow for web session v2 with an existing account", () => {
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+    sessionV2.getSessionClientType.mockReturnValue("web");
+    authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
+
+    render(
+      <SeizeConnectProvider>
+        <AddAccountButton />
+      </SeizeConnectProvider>
+    );
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Add account" }));
+    });
+
+    expect(authUtils.canStoreAnotherWalletAccount).not.toHaveBeenCalled();
+    expect(mockDisconnect).not.toHaveBeenCalled();
+    expect(mockOpen).not.toHaveBeenCalled();
+  });
+
+  it("continues single logout cleanup when session revocation fails", async () => {
+    const authUtils = require("@/services/auth/auth.utils");
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    const revokeError = new Error("session revoke failed");
+    sessionV2.logoutSessionV2.mockRejectedValueOnce(revokeError);
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutButton />
+      </SeizeConnectProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Logout" }));
+    });
+
+    await waitFor(() => expect(authUtils.removeAuthJwt).toHaveBeenCalled());
+    expect(mockLogError).toHaveBeenCalledWith(
+      "seizeDisconnectAndLogout.logoutSessionV2",
+      revokeError
+    );
   });
 
   it("revokes every stored native account during logout all", async () => {

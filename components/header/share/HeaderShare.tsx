@@ -500,6 +500,9 @@ export function HeaderQRModal({
       cachedConnectionTransferRef.current = null;
       transferAbortRef.current?.abort();
       transferAbortRef.current = null;
+      setCanShareConnection(false);
+      setShareConnectionAppUrl("");
+      setShareConnectionCoreUrl("");
       return;
     }
 

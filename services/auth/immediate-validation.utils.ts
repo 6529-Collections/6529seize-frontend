@@ -4,7 +4,7 @@ import {
   AuthenticationRoleError,
   RoleValidationError,
   MissingActiveProfileError,
-  InvalidRoleStateError
+  InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { getNodeEnv, publicEnv } from "@/config/env";
@@ -46,15 +46,17 @@ const isOperationValid = (
 const createCancelledResult = (): ImmediateValidationResult => ({
   validationCompleted: false,
   wasCancelled: true,
-  shouldShowModal: false
+  shouldShowModal: false,
 });
 
 // Helper function to check if error is an authentication role error
 const isAuthenticationRoleError = (error: unknown): boolean => {
-  return error instanceof MissingActiveProfileError ||
+  return (
+    error instanceof MissingActiveProfileError ||
     error instanceof RoleValidationError ||
     error instanceof AuthenticationRoleError ||
-    error instanceof InvalidRoleStateError;
+    error instanceof InvalidRoleStateError
+  );
 };
 
 // Helper function to handle invalid JWT when user is disconnected
@@ -81,7 +83,7 @@ const createValidationResult = (
 ): ImmediateValidationResult => ({
   validationCompleted,
   wasCancelled,
-  shouldShowModal
+  shouldShowModal,
 });
 
 // Helper function to handle JWT validation results
@@ -105,7 +107,7 @@ const handleJwtValidationResult = async (
   } else {
     handleInvalidJwtWhenDisconnected(callbacks);
   }
-  
+
   return createValidationResult(true, false, isConnected);
 };
 
@@ -117,12 +119,12 @@ const handleValidationError = async (
   callbacks: ImmediateValidationCallbacks
 ): Promise<ImmediateValidationResult> => {
   if (isAuthenticationRoleError(error)) {
-    callbacks.onLogError('validateJwt_role_error', error);
+    callbacks.onLogError("validateJwt_role_error", error);
     await callbacks.onRemoveJwt();
     callbacks.onInvalidateCache();
     callbacks.onShowSignModal(true);
   } else {
-    callbacks.onLogError('validateJwt_general_error', error);
+    callbacks.onLogError("validateJwt_general_error", error);
     if (isConnected) {
       callbacks.onShowSignModal(true);
     }
@@ -137,7 +139,7 @@ const handleValidationError = async (
 
 export const validateAuthImmediate = async ({
   params,
-  callbacks
+  callbacks,
 }: {
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
@@ -156,7 +158,7 @@ export const validateAuthImmediate = async ({
     activeProfileProxy,
     isConnected,
     operationId,
-    abortSignal
+    abortSignal,
   } = params;
 
   try {
@@ -168,10 +170,12 @@ export const validateAuthImmediate = async ({
     const { isValid, wasCancelled } = await validateJwt({
       jwt,
       wallet: currentAddress,
-      role: activeProfileProxy ? validateRoleForAuthentication(activeProfileProxy) : null,
+      role: activeProfileProxy
+        ? validateRoleForAuthentication(activeProfileProxy)
+        : null,
       operationId,
       abortSignal,
-      activeProfileProxy
+      activeProfileProxy,
     });
 
     // Post-validation check
@@ -185,7 +189,6 @@ export const validateAuthImmediate = async ({
       isConnected,
       callbacks
     );
-
   } catch (error) {
     // Only handle errors if operation is still valid
     if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {

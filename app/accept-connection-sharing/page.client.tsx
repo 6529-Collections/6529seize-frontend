@@ -188,7 +188,7 @@ function AcceptConnectionSharing(
             </p>
           </div>
         ) : (!isTransferCodeFlow && (!token || !address)) ||
-        (isTransferCodeFlow && !address) ? (
+          (isTransferCodeFlow && !address) ? (
           <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
             <p className="tw-text-base tw-text-neutral-300">
               Missing required parameters
