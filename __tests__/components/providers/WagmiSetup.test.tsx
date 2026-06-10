@@ -6,6 +6,8 @@
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import WagmiSetup from "@/components/providers/WagmiSetup";
+import { validateWalletSafely } from "@/utils/wallet-validation.utils";
+import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { act, render, waitFor } from "@testing-library/react";
 import React from "react";
 
@@ -79,6 +81,13 @@ jest.mock("@/utils/error-sanitizer", () => ({
   sanitizeErrorForUser: jest.fn((error) => error.message || "Sanitized error"),
   logErrorSecurely: jest.fn(),
 }));
+jest.mock("@/utils/wallet-validation.utils", () => ({
+  validateWalletSafely: jest.fn(),
+}));
+jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
+  APP_WALLET_CONNECTOR_TYPE: "app-wallet",
+  createAppWalletConnector: jest.fn(),
+}));
 jest.mock("wagmi", () => ({
   WagmiProvider: ({ children }: any) => (
     <div data-testid="wagmi-provider">{children}</div>
@@ -106,6 +115,10 @@ describe("WagmiSetup Security Tests", () => {
   let mockSetToast: jest.Mock;
   let mockAdapterCreateMethod: jest.Mock;
   let mockUseAppWallets: jest.Mock;
+  let mockConnectorSetup: jest.Mock;
+  let mockConnectorSetState: jest.Mock;
+  let mockValidateWalletSafely: jest.Mock;
+  let mockCreateAppWalletConnector: jest.Mock;
   const MockAppKitAdapterManager =
     require("@/components/providers/AppKitAdapterManager").AppKitAdapterManager;
   const originalEthereumDescriptor = Object.getOwnPropertyDescriptor(
@@ -172,6 +185,17 @@ describe("WagmiSetup Security Tests", () => {
     mockSetToast = jest.fn();
     mockAdapterCreateMethod = jest.fn();
     mockUseAppWallets = useAppWallets as jest.Mock;
+    mockConnectorSetup = jest.fn((connector) => connector);
+    mockConnectorSetState = jest.fn();
+    mockValidateWalletSafely = validateWalletSafely as jest.Mock;
+    mockCreateAppWalletConnector = createAppWalletConnector as jest.Mock;
+    mockValidateWalletSafely.mockImplementation(() => undefined);
+    mockCreateAppWalletConnector.mockImplementation(
+      (_chains, options: { appWallet: { address: string } }) => ({
+        id: "app-wallet",
+        address: options.appWallet.address,
+      })
+    );
 
     (useAuth as jest.Mock).mockReturnValue({
       setToast: mockSetToast,
@@ -185,6 +209,7 @@ describe("WagmiSetup Security Tests", () => {
       createAppWallet: jest.fn(),
       importAppWallet: jest.fn(),
       deleteAppWallet: jest.fn(),
+      migrateAppWallet: jest.fn(),
     });
 
     MockAppKitAdapterManager.mockImplementation(() => ({
@@ -196,7 +221,17 @@ describe("WagmiSetup Security Tests", () => {
     // Default successful mock response
     mockInitializeAppKit.mockReturnValue({
       adapter: {
-        wagmiConfig: { chains: [], client: {} },
+        wagmiConfig: {
+          chains: [],
+          client: {},
+          connectors: [],
+          _internal: {
+            connectors: {
+              setup: mockConnectorSetup,
+              setState: mockConnectorSetState,
+            },
+          },
+        },
       },
     });
   });
@@ -1092,8 +1127,28 @@ describe("WagmiSetup Security Tests", () => {
 
     it("should handle app wallet updates through connector injection", async () => {
       const mockAppWallets = [
-        { address: "0x123", address_hashed: "hash1", name: "Wallet 1" },
-        { address: "0x456", address_hashed: "hash2", name: "Wallet 2" },
+        {
+          address: "0x1234567890123456789012345678901234567890",
+          address_hashed:
+            "hash123456789012345678901234567890123456789012345678901234567890",
+          name: "Wallet 1",
+          created_at: Date.now(),
+          mnemonic: "",
+          private_key:
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          imported: false,
+        },
+        {
+          address: "0x4564567890123456789012345678901234567890",
+          address_hashed:
+            "hash456789012345678901234567890123456789012345678901234567890",
+          name: "Wallet 2",
+          created_at: Date.now(),
+          mnemonic: "",
+          private_key:
+            "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+          imported: false,
+        },
       ];
 
       // Update useAppWallets to return wallets
@@ -1104,12 +1159,91 @@ describe("WagmiSetup Security Tests", () => {
         createAppWallet: jest.fn(),
         importAppWallet: jest.fn(),
         deleteAppWallet: jest.fn(),
+        migrateAppWallet: jest.fn(),
       });
 
       await renderAndWaitForMount();
 
       // Should call initializeAppKit and then handle wallet connector injection
       expect(mockInitializeAppKit).toHaveBeenCalled();
+    });
+
+    it("skips one invalid app wallet without dropping healthy connectors", async () => {
+      const validWallet = {
+        address: "0x1234567890123456789012345678901234567890",
+        address_hashed:
+          "hash123456789012345678901234567890123456789012345678901234567890",
+        name: "Wallet 1",
+        created_at: Date.now(),
+        mnemonic: "",
+        private_key:
+          "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        imported: false,
+      };
+      const invalidWallet = {
+        ...validWallet,
+        address: "0x4564567890123456789012345678901234567890",
+        address_hashed:
+          "hash456789012345678901234567890123456789012345678901234567890",
+        name: "Wallet 2",
+      };
+      const existingConnector = { id: "wallet-connect" };
+
+      mockInitializeAppKit.mockReturnValue({
+        adapter: {
+          wagmiConfig: {
+            chains: [],
+            client: {},
+            connectors: [existingConnector],
+            _internal: {
+              connectors: {
+                setup: mockConnectorSetup,
+                setState: mockConnectorSetState,
+              },
+            },
+          },
+        },
+      });
+      mockUseAppWallets.mockReturnValue({
+        fetchingAppWallets: false,
+        appWallets: [validWallet, invalidWallet],
+        appWalletsSupported: true,
+        createAppWallet: jest.fn(),
+        importAppWallet: jest.fn(),
+        deleteAppWallet: jest.fn(),
+        migrateAppWallet: jest.fn(),
+      });
+      mockValidateWalletSafely.mockImplementation((wallet) => {
+        if (wallet.address === invalidWallet.address) {
+          throw new Error("corrupt wallet");
+        }
+      });
+
+      await renderAndWaitForMount();
+
+      await waitFor(() => {
+        expect(mockConnectorSetState).toHaveBeenCalledWith([
+          { id: "app-wallet", address: validWallet.address },
+          existingConnector,
+        ]);
+      });
+      expect(mockCreateAppWalletConnector).toHaveBeenCalledTimes(1);
+      expect(mockCreateAppWalletConnector).toHaveBeenCalledWith(
+        [],
+        { appWallet: validWallet },
+        expect.any(Function)
+      );
+      expect(mockValidateWalletSafely).toHaveBeenCalledWith(validWallet);
+      expect(mockValidateWalletSafely).toHaveBeenCalledWith(invalidWallet);
+      expect(mockLogErrorSecurely).toHaveBeenCalledWith(
+        `[WagmiSetup] Skipping invalid app-wallet connector ${invalidWallet.address}`,
+        expect.any(Error)
+      );
+      expect(mockSetToast).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "error",
+        })
+      );
     });
 
     it("should use fail-fast approach by design", async () => {

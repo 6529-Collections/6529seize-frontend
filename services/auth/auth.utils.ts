@@ -3,6 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE, MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
+import { removeNativeRefreshToken } from "./native-refresh-token-storage";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
@@ -16,7 +17,7 @@ const WALLET_ACTIVE_ADDRESS_STORAGE_KEY = "6529-wallet-active-address";
 
 export interface ConnectedWalletAccount {
   readonly address: string;
-  readonly refreshToken: string;
+  readonly refreshToken: string | null;
   readonly role: string | null;
   readonly jwt: string | null;
   readonly profileId: string | null;
@@ -127,21 +128,19 @@ const hasRequiredAccountFields = (
   record: Partial<ConnectedWalletAccount>
 ): record is Partial<ConnectedWalletAccount> & {
   address: string;
-  refreshToken: string;
-} =>
-  typeof record.address === "string" &&
-  record.address.trim().length > 0 &&
-  typeof record.refreshToken === "string" &&
-  record.refreshToken.trim().length > 0;
+} => typeof record.address === "string" && record.address.trim().length > 0;
 
 const toStoredAccount = (
   record: Partial<ConnectedWalletAccount> & {
     address: string;
-    refreshToken: string;
   }
 ): ConnectedWalletAccount => ({
   address: record.address,
-  refreshToken: record.refreshToken,
+  refreshToken:
+    typeof record.refreshToken === "string" &&
+    record.refreshToken.trim().length > 0
+      ? record.refreshToken
+      : null,
   role: typeof record.role === "string" ? record.role : null,
   jwt: typeof record.jwt === "string" ? record.jwt : null,
   profileId: typeof record.profileId === "string" ? record.profileId : null,
@@ -213,10 +212,14 @@ const synchronizeLegacyStorage = (
   }
 
   safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, activeAccount.address);
-  safeLocalStorage.setItem(
-    WALLET_REFRESH_TOKEN_STORAGE_KEY,
-    activeAccount.refreshToken
-  );
+  if (activeAccount.refreshToken) {
+    safeLocalStorage.setItem(
+      WALLET_REFRESH_TOKEN_STORAGE_KEY,
+      activeAccount.refreshToken
+    );
+  } else {
+    safeLocalStorage.removeItem(WALLET_REFRESH_TOKEN_STORAGE_KEY);
+  }
 
   const addressRoleStorageKey = getAddressRoleStorageKey(activeAccount.address);
   if (activeAccount.role) {
@@ -300,11 +303,20 @@ export const getConnectedWalletAccounts = (): ConnectedWalletAccount[] => {
 };
 
 export const canStoreAnotherWalletAccount = (
-  address?: string | null
+  address?: string | null,
+  {
+    allowAdditionalAccounts = true,
+  }: { readonly allowAdditionalAccounts?: boolean } = {}
 ): boolean => {
   const accounts = getStoredAccounts();
 
   if (!address) {
+    if (accounts.length === 0) {
+      return true;
+    }
+    if (!allowAdditionalAccounts) {
+      return false;
+    }
     return accounts.length < MAX_CONNECTED_PROFILES;
   }
 
@@ -313,7 +325,13 @@ export const canStoreAnotherWalletAccount = (
     (account) => normalizeAddress(account.address) === normalizedAddress
   );
 
-  return alreadyExists || accounts.length < MAX_CONNECTED_PROFILES;
+  if (alreadyExists || accounts.length === 0) {
+    return true;
+  }
+  if (!allowAdditionalAccounts) {
+    return false;
+  }
+  return accounts.length < MAX_CONNECTED_PROFILES;
 };
 
 export const setActiveWalletAccount = (address: string): boolean => {
@@ -341,7 +359,7 @@ export const setActiveWalletAccount = (address: string): boolean => {
 export const setAuthJwt = (
   address: string,
   jwt: string,
-  refreshToken: string,
+  refreshToken: string | null,
   role?: string
 ): boolean => {
   const storedAccounts = getStoredAccounts();
@@ -353,7 +371,7 @@ export const setAuthJwt = (
 
   const nextAccount: ConnectedWalletAccount = {
     address,
-    refreshToken,
+    refreshToken: refreshToken ?? null,
     role: role ?? null,
     jwt,
     profileId: existingAccount?.profileId ?? null,
@@ -399,6 +417,7 @@ export const getAuthJwt = () => {
 export const getRefreshToken = () => {
   const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
   if (activeAccount?.refreshToken) return activeAccount.refreshToken;
+  if (activeAccount) return null;
   return safeLocalStorage.getItem(WALLET_REFRESH_TOKEN_STORAGE_KEY) ?? null;
 };
 
@@ -417,24 +436,53 @@ export const getWalletRole = () => {
   return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
 };
 
-export const clearAllWalletAuth = (): void => {
+const getNativeRefreshTokenCleanupAddresses = (
+  accounts: readonly ConnectedWalletAccount[]
+): string[] => {
+  const addresses = accounts.map((account) => account.address);
+  const legacyAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
+  if (legacyAddress) {
+    addresses.push(legacyAddress);
+  }
+
+  const seen = new Set<string>();
+  return addresses.filter((address) => {
+    const normalizedAddress = normalizeAddress(address);
+    if (seen.has(normalizedAddress)) {
+      return false;
+    }
+    seen.add(normalizedAddress);
+    return true;
+  });
+};
+
+export const clearAllWalletAuth = async (): Promise<void> => {
+  const accounts = getStoredAccounts();
+  await Promise.all(
+    getNativeRefreshTokenCleanupAddresses(accounts).map((address) =>
+      removeNativeRefreshToken(address)
+    )
+  );
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
 };
 
-export const removeAuthJwt = () => {
+export const removeAuthJwt = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   const activeAccount = getActiveAccountFromAccounts(accounts);
 
   if (!activeAccount) {
     const legacyAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
     if (legacyAddress) {
+      await removeNativeRefreshToken(legacyAddress);
       safeLocalStorage.removeItem(getAddressRoleStorageKey(legacyAddress));
     }
     persistAccountsWithActive([], null);
     emitWalletAccountsUpdated();
     return;
   }
+
+  await removeNativeRefreshToken(activeAccount.address);
 
   const remainingAccounts = accounts.filter(
     (account) =>

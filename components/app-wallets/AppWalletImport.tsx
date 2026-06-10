@@ -14,11 +14,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ethers } from "ethers";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAuth } from "../auth/Auth";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { useAppWallets } from "./AppWalletsContext";
+import {
+  APP_WALLET_MNEMONIC_UNAVAILABLE,
+  useAppWallets,
+} from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
-const MNEMONIC_NA = "N/A";
+const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
 
 export default function AppWalletImport() {
   const [isMnemonic, setIsMnemonic] = useState(true);
@@ -40,7 +42,8 @@ export default function AppWalletImport() {
           <Col>
             <Link
               className="font-smaller d-flex align-items-center gap-2 decoration-none"
-              href="/tools/app-wallets">
+              href="/tools/app-wallets"
+            >
               <FontAwesomeIcon icon={faCircleArrowLeft} height={16} />
               Back to App Wallets
             </Link>
@@ -48,9 +51,7 @@ export default function AppWalletImport() {
         </Row>
         <Row className="pt-4">
           <Col>
-            <h1>
-              Import App Wallet
-            </h1>
+            <h1>Import App Wallet</h1>
           </Col>
         </Row>
         <Row className="pt-4">
@@ -58,7 +59,8 @@ export default function AppWalletImport() {
             <Button
               variant={isMnemonic ? "info" : "outline-info"}
               onClick={() => setIsMnemonic(true)}
-              className="btn-block">
+              className="btn-block"
+            >
               Mnemonic
             </Button>
           </Col>
@@ -66,7 +68,8 @@ export default function AppWalletImport() {
             <Button
               variant={!isMnemonic ? "info" : "outline-info"}
               onClick={() => setIsMnemonic(false)}
-              className="btn-block">
+              className="btn-block"
+            >
               Private Key
             </Button>
           </Col>
@@ -124,7 +127,8 @@ function AppWalletImportMnemonic() {
             sm={4}
             md={3}
             className="pt-2 pb-2"
-            key={getRandomObjectId()}>
+            key={`mnemonic-word-${i}`}
+          >
             <Container className={`${styles["phrase"]}`}>
               <Row>
                 <Col className="d-flex gap-2">
@@ -167,14 +171,16 @@ function AppWalletImportMnemonic() {
             variant="warning"
             onClick={clear}
             className="font-bolder"
-            disabled={!phrase.some((w) => w) && !isCompletePhrase()}>
+            disabled={!phrase.some((w) => w) && !isCompletePhrase()}
+          >
             Clear
           </Button>
           <Button
             variant="primary"
             disabled={!isCompletePhrase() || isReadonly}
             onClick={validate}
-            className="font-bolder">
+            className="font-bolder"
+          >
             Validate
           </Button>
         </Col>
@@ -245,21 +251,26 @@ function AppWalletImportPrivateKey() {
             variant="warning"
             onClick={clear}
             className="font-bolder"
-            disabled={!privateKey}>
+            disabled={!privateKey}
+          >
             Clear
           </Button>
           <Button
             variant="primary"
             disabled={!privateKey || isReadonly}
             onClick={validate}
-            className="font-bolder">
+            className="font-bolder"
+          >
             Validate
           </Button>
         </Col>
       </Row>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
-        <ValidatedWallet wallet={validatedWallet} mnemonic={MNEMONIC_NA} />
+        <ValidatedWallet
+          wallet={validatedWallet}
+          mnemonic={MNEMONIC_UNAVAILABLE}
+        />
       )}
     </Container>
   );
@@ -324,7 +335,8 @@ function ImportWallet(
       <Button
         variant="primary"
         onClick={() => setShowImportModal(true)}
-        className="d-flex align-items-center gap-2">
+        className="d-flex align-items-center gap-2"
+      >
         <FontAwesomeIcon icon={faPlusCircle} height={16} /> Import Wallet
       </Button>
     </div>

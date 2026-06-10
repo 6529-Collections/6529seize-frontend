@@ -12,6 +12,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  isWalletAuthSessionV2Enabled: jest.fn(() => false),
+}));
+
 class MockWebSocket {
   static OPEN = 1;
   static CONNECTING = 0;
@@ -82,6 +86,10 @@ describe("WebSocketProvider", () => {
       typeof authUtils.getAuthJwt
     >;
     mockGetAuthJwt.mockReturnValue("fresh-token");
+    const {
+      isWalletAuthSessionV2Enabled,
+    } = require("@/services/auth/session-v2.utils");
+    isWalletAuthSessionV2Enabled.mockReturnValue(false);
 
     jest.clearAllMocks();
   });
@@ -144,6 +152,192 @@ describe("WebSocketProvider", () => {
       });
 
       expect(global.WebSocket).toHaveBeenCalledWith("ws://test");
+    });
+
+    it("uses message-based authentication in session v2 mode", () => {
+      jest.useFakeTimers();
+      const {
+        isWalletAuthSessionV2Enabled,
+      } = require("@/services/auth/session-v2.utils");
+      isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      mockGetAuthJwt.mockReturnValue("test-token");
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("test-token");
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledWith("ws://test");
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.AUTHENTICATING);
+      expect(ws.send).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: "AUTHENTICATE",
+          access_token: "test-token",
+        })
+      );
+
+      act(() => {
+        ws.triggerMessage({ type: "AUTHENTICATED" });
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+      expect(ws.close).not.toHaveBeenCalledWith(1011, "Authentication timeout");
+
+      act(() => {
+        ws.triggerClose(1006, "Unexpected close");
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenLastCalledWith("ws://test");
+
+      const reconnectedWs = (
+        global.WebSocket as jest.MockedFunction<typeof WebSocket>
+      ).mock.results[1]?.value as MockWebSocket;
+
+      act(() => {
+        reconnectedWs.triggerOpen();
+      });
+
+      expect(reconnectedWs.send).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: "AUTHENTICATE",
+          access_token: "test-token",
+        })
+      );
+    });
+
+    it("keeps session v2 sockets disconnected when message authentication fails", () => {
+      jest.useFakeTimers();
+      const {
+        isWalletAuthSessionV2Enabled,
+      } = require("@/services/auth/session-v2.utils");
+      isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      mockGetAuthJwt.mockReturnValue("bad-token");
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("bad-token");
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.AUTHENTICATING);
+
+      act(() => {
+        ws.triggerMessage({ type: "AUTHENTICATION_FAILED" });
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
+      expect(ws.close).toHaveBeenCalledWith(1008, "Authentication failed");
+
+      act(() => {
+        result.current.connect("bad-token");
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        ws.triggerClose(1008, "Authentication failed");
+        jest.advanceTimersByTime(10000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes session v2 sockets when message authentication times out", () => {
+      jest.useFakeTimers();
+      const {
+        isWalletAuthSessionV2Enabled,
+      } = require("@/services/auth/session-v2.utils");
+      isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("stuck-token");
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      expect(result.current.status).toBe(WebSocketStatus.AUTHENTICATING);
+
+      act(() => {
+        jest.advanceTimersByTime(7999);
+      });
+      expect(ws.close).not.toHaveBeenCalledWith(1011, "Authentication timeout");
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+
+      expect(ws.close).toHaveBeenCalledWith(1011, "Authentication timeout");
+
+      act(() => {
+        ws.triggerClose(1011, "Authentication timeout");
+        jest.advanceTimersByTime(10000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(1);
+    });
+
+    it("allows reconnect after message authentication fails when the token changes", () => {
+      const {
+        isWalletAuthSessionV2Enabled,
+      } = require("@/services/auth/session-v2.utils");
+      isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("bad-token");
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+        ws.triggerMessage({ type: "AUTHENTICATION_FAILED" });
+      });
+
+      act(() => {
+        result.current.connect("fresh-token");
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenLastCalledWith("ws://test");
     });
 
     it("disconnects intentionally and prevents reconnection", () => {

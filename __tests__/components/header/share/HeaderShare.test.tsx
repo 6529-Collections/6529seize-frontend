@@ -2,7 +2,7 @@ import HeaderShare from "@/components/header/share/HeaderShare";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 
@@ -17,6 +17,7 @@ jest.mock("@/hooks/useElectron", () => ({
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({
     isAuthenticated: false,
+    hasValidWalletAuth: false,
     seizeConnect: jest.fn(),
     seizeAcceptConnection: jest.fn(),
     address: undefined,
@@ -28,6 +29,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   ),
 }));
 jest.mock("@/services/auth/auth.utils");
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  createConnectionTransfer: jest.fn(),
+  isConnectionTransferV2Enabled: jest.fn(() => false),
+}));
 
 // Mock Reown AppKit
 jest.mock("@reown/appkit/react", () => ({
@@ -131,14 +136,7 @@ Object.assign(navigator, {
   },
 });
 
-// Mock window.location
-Object.defineProperty(window, "location", {
-  value: {
-    origin: "https://test.6529.io",
-    href: "https://test.6529.io/test-path",
-  },
-  writable: true,
-});
+const testOrigin = window.location.origin;
 
 describe("HeaderShare", () => {
   const mockSeizeConnect = require("@/components/auth/SeizeConnectContext");
@@ -154,6 +152,7 @@ describe("HeaderShare", () => {
 
     mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
       isAuthenticated: false,
+      hasValidWalletAuth: false,
       seizeConnect: jest.fn(),
       seizeAcceptConnection: jest.fn(),
       address: undefined,
@@ -164,6 +163,10 @@ describe("HeaderShare", () => {
     // Reset QRCode mock
     const qrcode = require("qrcode");
     qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
+
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.isConnectionTransferV2Enabled.mockReturnValue(false);
+    sessionV2.createConnectionTransfer.mockReset();
   });
 
   afterEach(() => {
@@ -246,6 +249,7 @@ describe("HeaderShare", () => {
 
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: true,
+        hasValidWalletAuth: true,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: "0x1234567890123456789012345678901234567890",
@@ -277,6 +281,7 @@ describe("HeaderShare", () => {
 
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: false,
+        hasValidWalletAuth: false,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: undefined,
@@ -343,6 +348,229 @@ describe("HeaderShare", () => {
     });
   });
 
+  describe("Connection transfer codes", () => {
+    beforeEach(() => {
+      mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+      mockIsMobile.mockReturnValue(false);
+      mockAuthUtils.getWalletAddress.mockReturnValue(
+        "0x1234567890123456789012345678901234567890"
+      );
+      mockAuthUtils.getWalletRole.mockReturnValue(null);
+      mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
+        isAuthenticated: true,
+        hasValidWalletAuth: true,
+        seizeConnect: jest.fn(),
+        seizeAcceptConnection: jest.fn(),
+        address: "0x1234567890123456789012345678901234567890",
+        hasInitializationError: false,
+        initializationError: null,
+      });
+    });
+
+    it("aborts in-flight transfer-code creation when the modal closes", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const signals: AbortSignal[] = [];
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockImplementation(
+        ({ signal }: { readonly signal?: AbortSignal }) => {
+          signals.push(signal!);
+          return new Promise(() => undefined);
+        }
+      );
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(1)
+      );
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+
+      expect(signals[0]?.aborted).toBe(true);
+    });
+
+    it("generates connection QR codes from one-time transfer codes", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockResolvedValue({
+        transfer_code: "transfer-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?transfer_code=transfer-code&address=0x1234567890123456789012345678901234567890",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledWith({
+          role: null,
+          signal: expect.objectContaining({ aborted: false }),
+        })
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=transfer-code"),
+          { width: 500, margin: 0 }
+        )
+      );
+      expect(
+        qrcode.toDataURL.mock.calls.some(
+          (call: unknown[]) =>
+            typeof call[0] === "string" &&
+            call[0].includes("mock-refresh-token")
+        )
+      ).toBe(false);
+    });
+
+    it("mints a fresh transfer code after the share modal closes", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer
+        .mockResolvedValueOnce({
+          transfer_code: "first-transfer-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?transfer_code=first-transfer-code&address=0x1234567890123456789012345678901234567890",
+        })
+        .mockResolvedValueOnce({
+          transfer_code: "second-transfer-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?transfer_code=second-transfer-code&address=0x1234567890123456789012345678901234567890",
+        });
+
+      renderWithProviders(<HeaderShare />);
+
+      const shareButton = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(1)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=first-transfer-code"),
+          { width: 500, margin: 0 }
+        )
+      );
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(2)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=second-transfer-code"),
+          { width: 500, margin: 0 }
+        )
+      );
+    });
+
+    it("clears one-time transfer URLs as soon as the share modal closes", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer
+        .mockResolvedValueOnce({
+          transfer_code: "first-transfer-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?transfer_code=first-transfer-code&address=0x1234567890123456789012345678901234567890",
+        })
+        .mockImplementationOnce(() => new Promise(() => undefined));
+
+      renderWithProviders(<HeaderShare />);
+
+      const shareButton = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(shareButton);
+
+      await screen.findByTitle(/first-transfer-code/);
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        screen.queryByTitle(/first-transfer-code/)
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Connection")).not.toBeInTheDocument();
+    });
+
+    it("encodes transfer-code deep-link query values", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockResolvedValue({
+        transfer_code: "transfer&code=value%",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: "role+admin&test",
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?transfer_code=transfer%26code%3Dvalue%25&address=0x1234567890123456789012345678901234567890&role=role%2Badmin%26test",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=transfer%26code%3Dvalue%25"),
+          { width: 500, margin: 0 }
+        )
+      );
+      expect(
+        qrcode.toDataURL.mock.calls.some(
+          (call: unknown[]) =>
+            typeof call[0] === "string" &&
+            call[0].includes("role=role%2Badmin%26test")
+        )
+      ).toBe(true);
+    });
+
+    it("disables the Connection tab when transfer-code creation fails", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      jest.spyOn(console, "error").mockImplementation(() => undefined);
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockRejectedValue(
+        new Error("transfer creation failed")
+      );
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalled()
+      );
+      await waitFor(() =>
+        expect(screen.queryByText("Connection")).not.toBeInTheDocument()
+      );
+      expect(screen.getByText("Current URL")).toBeInTheDocument();
+    });
+  });
+
   describe("QR Code Generation", () => {
     beforeEach(() => {
       mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
@@ -361,7 +589,7 @@ describe("HeaderShare", () => {
 
       // Should call QRCode.toDataURL for browser and app URLs
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        "https://test.6529.io/mock-path?something=value",
+        `${testOrigin}/mock-path?something=value`,
         { width: 500, margin: 0 }
       );
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -471,7 +699,7 @@ describe("HeaderShare", () => {
 
       // Verify multiple QR codes are generated (browser + app + possibly share)
       expect(qrcode.toDataURL).toHaveBeenCalledWith(
-        expect.stringContaining("https://test.6529.io"),
+        expect.stringContaining(testOrigin),
         expect.any(Object)
       );
       expect(qrcode.toDataURL).toHaveBeenCalledWith(

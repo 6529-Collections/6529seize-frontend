@@ -182,7 +182,8 @@ const executeApiRequest = async <T>(
   body?: BodyInit,
   signal?: AbortSignal,
   parseJson: boolean = true,
-  errorMode: ApiErrorMode = "legacy-string"
+  errorMode: ApiErrorMode = "legacy-string",
+  credentials?: RequestCredentials
 ): Promise<T> => {
   const requestStartedAtMs = getRequestTimingNow();
   let status: number | "aborted" | "network_error" | "unknown" = "unknown";
@@ -193,6 +194,7 @@ const executeApiRequest = async <T>(
       headers,
       ...(body !== undefined ? { body: body } : {}),
       ...(signal !== undefined ? { signal: signal } : {}),
+      ...(credentials !== undefined ? { credentials } : {}),
     });
     status = res.status;
 
@@ -410,6 +412,8 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   params?: Z | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  credentials?: RequestCredentials | undefined;
+  parseJson?: boolean | undefined;
 }): Promise<U> => {
   const url = buildUrl(
     param.endpoint,
@@ -422,8 +426,9 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
     getHeaders(param.headers, true),
     JSON.stringify(param.body),
     param.signal,
-    true,
-    param.errorMode ?? "legacy-string"
+    param.parseJson ?? true,
+    param.errorMode ?? "legacy-string",
+    param.credentials
   );
 };
 

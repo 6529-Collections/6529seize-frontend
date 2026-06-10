@@ -159,18 +159,43 @@ paths:
       parameters:
         - name: signer_address
           in: query
-          description: Your wallet address
           required: true
           schema:
             type: string
+          description: Your wallet address
         - name: short_nonce
           in: query
-          description: >-
-            If true, the nonce will be shorter and easier to sign. Default is
-            false.
           required: false
           schema:
             type: boolean
+            default: false
+          description: If true, the nonce will be shorter and easier to sign.
+        - name: structured_signature
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: >-
+            If true, the nonce is returned as a structured wallet signature
+            message and domain is required.
+        - name: domain
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+          description: Required when structured_signature is true.
+        - name: chain_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Chain id embedded in structured signatures.
+      x-6529-query-schema:
+        $ref: "#/components/schemas/AuthNonceQuery"
       responses:
         "200":
           description: successful operation
@@ -10138,10 +10163,20 @@ components:
             $ref: "#/components/schemas/ApiDropMetadata"
         signature:
           description: >-
-            If wave requires drop signatures then this needs to be set.
-            Signature of a drop is ethSign(creatorWallet,
+            If wave requires drop signatures then this needs to be set. In
+            legacy mode, the signature is ethSign(creatorWallet,
             sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest
-            - signature (+ wave.participation.terms if it exists))))
+            - signature - signature_message (+ wave.participation.terms if it
+            exists)))). In structured-signature mode, the signature is
+            ethSign(creatorWallet, signature_message), and signature_message's
+            payload_hash is derived from that same canonical payload.
+          type: string
+          nullable: true
+        signature_message:
+          description: >-
+            Optional request-only structured wallet signature message containing
+            the exact bytes signed in structured-signature mode. This field is
+            omitted from the payload hash before signature verification.
           type: string
           nullable: true
         is_safe_signature:
@@ -12489,6 +12524,70 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiNft"
+    AuthNonceQuery:
+      oneOf:
+        - $ref: "#/components/schemas/AuthNonceUnstructuredQuery"
+        - $ref: "#/components/schemas/AuthNonceStructuredQuery"
+    AuthNonceUnstructuredQuery:
+      type: object
+      additionalProperties: false
+      required:
+        - signer_address
+      properties:
+        signer_address:
+          type: string
+          description: Your wallet address
+        short_nonce:
+          type: boolean
+          default: false
+          description: >-
+            If true, the nonce will be shorter and easier to sign. Default is
+            false.
+        structured_signature:
+          type: boolean
+          enum:
+            - false
+          default: false
+        chain_id:
+          type: integer
+          minimum: 1
+          default: 1
+          description: >-
+            Accepted for flat query parity; ignored unless structured_signature
+            is true.
+    AuthNonceStructuredQuery:
+      type: object
+      additionalProperties: false
+      required:
+        - signer_address
+        - structured_signature
+        - domain
+      properties:
+        signer_address:
+          type: string
+          description: Your wallet address
+        short_nonce:
+          type: boolean
+          default: false
+          description: >-
+            If true, the nonce will be shorter and easier to sign. Default is
+            false.
+        structured_signature:
+          type: boolean
+          enum:
+            - true
+          description: >-
+            Returns the nonce as a structured wallet signature message with
+            domain, wallet, expiry, nonce, and action fields.
+        domain:
+          type: string
+          minLength: 1
+          description: Required when structured_signature is true.
+        chain_id:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Chain id embedded in structured signatures.
     ApiNonceResponse:
       type: object
       required:

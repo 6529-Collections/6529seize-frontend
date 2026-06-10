@@ -43,6 +43,10 @@ jest.mock("viem", () => ({
   getAddress: jest.fn((address: string) => address.toLowerCase()),
 }));
 
+jest.mock("wagmi", () => ({
+  useAccount: jest.fn(() => ({})),
+}));
+
 jest.mock("@/hooks/useConnectedAccountsUnreadNotifications", () => ({
   useConnectedAccountsUnreadNotifications: jest.fn(() => ({})),
 }));
@@ -59,6 +63,19 @@ jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  isAuthAddressAuthorized: jest.fn(
+    ({
+      address,
+      connectedAccounts,
+    }: {
+      readonly address: string | null | undefined;
+      readonly connectedAccounts: readonly { readonly address: string }[];
+    }) =>
+      !!address &&
+      connectedAccounts.some(
+        (account) => account.address.toLowerCase() === address.toLowerCase()
+      )
+  ),
   setActiveWalletAccount: jest.fn(() => true),
   removeAuthJwt: jest.fn(),
   WALLET_ACCOUNTS_UPDATED_EVENT: "6529-wallet-accounts-updated",
@@ -103,6 +120,8 @@ const TestComponent: React.FC = () => {
     seizeConnect,
     seizeAcceptConnection,
     address,
+    hasActiveWalletAddress,
+    hasValidWalletAuth,
     isAuthenticated,
     hasInitializationError,
     initializationError,
@@ -144,6 +163,12 @@ const TestComponent: React.FC = () => {
         Accept Invalid
       </button>
       <div data-testid="address">{address || "undefined"}</div>
+      <div data-testid="has-active-wallet-address">
+        {hasActiveWalletAddress.toString()}
+      </div>
+      <div data-testid="has-valid-wallet-auth">
+        {hasValidWalletAuth.toString()}
+      </div>
       <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>
       <div data-testid="has-error">{hasInitializationError.toString()}</div>
       <div data-testid="error-message">
@@ -859,9 +884,13 @@ describe("SeizeConnectContext Security Logging", () => {
         "0x1234567890123456789012345678901234567890"
       );
 
-      // Should be authenticated
-      const authenticatedElement = screen.getByTestId("is-authenticated");
-      expect(authenticatedElement.textContent).toBe("true");
+      expect(screen.getByTestId("has-active-wallet-address")).toHaveTextContent(
+        "true"
+      );
+      expect(screen.getByTestId("has-valid-wallet-auth")).toHaveTextContent(
+        "false"
+      );
+      expect(screen.getByTestId("is-authenticated")).toHaveTextContent("false");
     });
 
     it("initialization with invalid stored address clears auth state", async () => {
@@ -1078,6 +1107,20 @@ describe("SeizeConnectContext Security Vulnerability Fix", () => {
       const checksummedAddress = "0x1234567890AbcdEF1234567890AbcDEF12345678";
 
       mockGetWalletAddress.mockReturnValue(validAddress);
+      (
+        authUtils.getConnectedWalletAccounts as jest.MockedFunction<
+          typeof authUtils.getConnectedWalletAccounts
+        >
+      ).mockReturnValue([
+        {
+          address: validAddress,
+          refreshToken: null,
+          role: null,
+          jwt: "jwt",
+          profileId: null,
+          profileHandle: null,
+        },
+      ]);
       mockIsAddress.mockReturnValue(true);
       mockGetAddress.mockReturnValue(checksummedAddress);
 
@@ -1091,7 +1134,105 @@ describe("SeizeConnectContext Security Vulnerability Fix", () => {
       expect(screen.getByTestId("address")).toHaveTextContent(
         checksummedAddress
       );
+      expect(screen.getByTestId("has-active-wallet-address")).toHaveTextContent(
+        "true"
+      );
+      expect(screen.getByTestId("has-valid-wallet-auth")).toHaveTextContent(
+        "true"
+      );
       expect(screen.getByTestId("is-authenticated")).toHaveTextContent("true");
+    });
+
+    it("should reject malformed native stored addresses that only satisfy prefix and length", async () => {
+      const previousCapacitor = (globalThis.window as any).Capacitor;
+      (globalThis.window as any).Capacitor = {
+        isNativePlatform: jest.fn(() => true),
+      };
+
+      try {
+        const malformedNativeAddress = `0x${"g".repeat(40)}`;
+
+        mockGetWalletAddress.mockReturnValue(malformedNativeAddress);
+        mockIsAddress.mockReturnValue(false);
+
+        renderWithProvider();
+
+        await waitFor(() => {
+          expect(screen.getByTestId("test-component")).toBeInTheDocument();
+        });
+
+        expect(malformedNativeAddress).toHaveLength(42);
+        expect(screen.getByTestId("has-error")).toHaveTextContent("true");
+        expect(screen.getByTestId("address")).toHaveTextContent("undefined");
+        expect(screen.getByTestId("is-authenticated")).toHaveTextContent(
+          "false"
+        );
+        expect(mockRemoveAuthJwt).toHaveBeenCalled();
+        expect(mockGetAddress).not.toHaveBeenCalled();
+      } finally {
+        if (previousCapacitor === undefined) {
+          delete (globalThis.window as any).Capacitor;
+        } else {
+          (globalThis.window as any).Capacitor = previousCapacitor;
+        }
+      }
+    });
+
+    it("should normalize native stored addresses through getAddress", async () => {
+      const previousCapacitor = (globalThis.window as any).Capacitor;
+      (globalThis.window as any).Capacitor = {
+        isNativePlatform: jest.fn(() => true),
+      };
+
+      try {
+        const validAddress = "0x1234567890abcdef1234567890abcdef12345678";
+        const checksummedAddress = "0x1234567890AbcdEF1234567890AbcDEF12345678";
+
+        mockGetWalletAddress.mockReturnValue(validAddress);
+        (
+          authUtils.getConnectedWalletAccounts as jest.MockedFunction<
+            typeof authUtils.getConnectedWalletAccounts
+          >
+        ).mockReturnValue([
+          {
+            address: validAddress,
+            refreshToken: null,
+            role: null,
+            jwt: "jwt",
+            profileId: null,
+            profileHandle: null,
+          },
+        ]);
+        mockIsAddress.mockReturnValue(true);
+        mockGetAddress.mockReturnValue(checksummedAddress);
+
+        renderWithProvider();
+
+        await waitFor(() => {
+          expect(screen.getByTestId("test-component")).toBeInTheDocument();
+        });
+
+        expect(screen.getByTestId("has-error")).toHaveTextContent("false");
+        expect(screen.getByTestId("address")).toHaveTextContent(
+          checksummedAddress
+        );
+        expect(
+          screen.getByTestId("has-active-wallet-address")
+        ).toHaveTextContent("true");
+        expect(screen.getByTestId("has-valid-wallet-auth")).toHaveTextContent(
+          "true"
+        );
+        expect(screen.getByTestId("is-authenticated")).toHaveTextContent(
+          "true"
+        );
+        expect(mockGetAddress).toHaveBeenCalledWith(validAddress);
+      } finally {
+        if (previousCapacitor === undefined) {
+          delete (globalThis.window as any).Capacitor;
+        } else {
+          (globalThis.window as any).Capacitor = previousCapacitor;
+        }
+      }
     });
 
     it("should handle no stored address scenario", async () => {
@@ -1332,6 +1473,8 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     // Verify all expected context values are present
     expect(screen.getByTestId("address")).toBeInTheDocument();
+    expect(screen.getByTestId("has-active-wallet-address")).toBeInTheDocument();
+    expect(screen.getByTestId("has-valid-wallet-auth")).toBeInTheDocument();
     expect(screen.getByTestId("is-authenticated")).toBeInTheDocument();
     expect(screen.getByTestId("has-error")).toBeInTheDocument();
     expect(screen.getByTestId("error-message")).toBeInTheDocument();

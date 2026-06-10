@@ -76,6 +76,7 @@ beforeEach(() => {
     seizeConnectOpen: false,
     isConnected: true,
     isAuthenticated: true,
+    hasValidWalletAuth: true,
   } as any);
 });
 describe("CreateDropWrapper", () => {

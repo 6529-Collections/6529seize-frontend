@@ -11,6 +11,7 @@ export type WebSocketMessage<T = {}> = {
  * Connection status for the WebSocket
  */
 export enum WebSocketStatus {
+  AUTHENTICATING = "authenticating",
   CONNECTED = "connected",
   CONNECTING = "connecting",
   DISCONNECTED = "disconnected",

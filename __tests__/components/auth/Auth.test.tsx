@@ -51,6 +51,13 @@ jest.mock("@/services/auth/auth.utils", () => ({
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: jest.fn(() => "web"),
+  isWalletAuthSessionV2Enabled: jest.fn(() => false),
+  loginWithSessionV2: jest.fn(),
+  persistSessionResponse: jest.fn(),
+}));
+
 // Using jwt-validation.utils instead of direct jwt-decode
 
 jest.mock("@tanstack/react-query", () => ({
@@ -147,9 +154,8 @@ const mockSeizeDisconnectAndLogout = jest.fn(() => Promise.resolve());
 const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({
-    address: walletAddress,
-    connectedAccounts:
+  useSeizeConnectContext: jest.fn(() => {
+    const connectedAccounts =
       connectedAccountsOverride ??
       (walletAddress
         ? [
@@ -160,13 +166,24 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
               isConnected: !!walletAddress,
             },
           ]
-        : []),
-    isConnected: !!walletAddress,
-    seizeDisconnect: mockSeizeDisconnect,
-    seizeDisconnectAndLogout: mockSeizeDisconnectAndLogout,
-    isSafeWallet: false,
-    connectionState: connectionState,
-  })),
+        : []);
+
+    const { isAuthAddressAuthorized } = require("@/services/auth/auth.utils");
+
+    return {
+      address: walletAddress,
+      connectedAccounts,
+      hasValidWalletAuth: isAuthAddressAuthorized({
+        address: walletAddress,
+        connectedAccounts,
+      }),
+      isConnected: !!walletAddress,
+      seizeDisconnect: mockSeizeDisconnect,
+      seizeDisconnectAndLogout: mockSeizeDisconnectAndLogout,
+      isSafeWallet: false,
+      connectionState: connectionState,
+    };
+  }),
 }));
 
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<
@@ -234,6 +251,13 @@ describe("Auth component", () => {
       token: "jwt-token",
       refresh_token: "refresh-token",
     });
+
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.getSessionClientType.mockReturnValue("web");
+    sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(false);
+    sessionV2.loginWithSessionV2.mockReset();
+    sessionV2.persistSessionResponse.mockReset();
+    sessionV2.persistSessionResponse.mockResolvedValue(true);
 
     // Reset useIdentity mock
     mockUseIdentity.mockReturnValue({ profile: null, isLoading: false });
@@ -306,6 +330,98 @@ describe("Auth component", () => {
       );
       await user.click(screen.getByTestId("req"));
       expect(toast).toHaveBeenCalled();
+    });
+
+    it("uses session v2 sign-in instead of legacy auth login when enabled", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      mockCommonApiFetch.mockResolvedValue({
+        nonce: "sign this nonce",
+        server_signature: "server-signature",
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "web",
+        address: validAddress,
+        role: null,
+        access_token: "session-access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockResolvedValue(true);
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      await waitFor(() =>
+        expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+          serverSignature: "server-signature",
+          clientSignature: "0xsignature",
+          signerAddress: validAddress,
+          role: null,
+          isSafeWallet: false,
+        })
+      );
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse
+      );
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("blocks adding a second web account when session v2 uses a single cookie", async () => {
+      const existingAddress = "0x1111111111111111111111111111111111111111";
+      const nextAddress = "0x2222222222222222222222222222222222222222";
+      walletAddress = nextAddress;
+      connectedAccountsOverride = [
+        {
+          address: existingAddress,
+          role: null,
+          isActive: true,
+          isConnected: false,
+        },
+      ];
+      const authUtils = require("@/services/auth/auth.utils");
+      authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.getSessionClientType.mockReturnValue("web");
+      const toast = require("react-toastify").toast;
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      expect(authUtils.canStoreAnotherWalletAccount).toHaveBeenCalledWith(
+        nextAddress,
+        { allowAdditionalAccounts: false }
+      );
+      expect(mockCommonApiFetch).not.toHaveBeenCalled();
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      expect(toast).toHaveBeenCalledWith(
+        "Disconnect the current profile before connecting another profile",
+        expect.objectContaining({ type: "error" })
+      );
     });
   });
 

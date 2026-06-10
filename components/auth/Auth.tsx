@@ -42,7 +42,6 @@ import {
   canStoreAnotherWalletAccount,
   getAuthJwt,
   getWalletAddress,
-  isAuthAddressAuthorized,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
   setActiveWalletAccount,
@@ -51,6 +50,16 @@ import {
 } from "@/services/auth/auth.utils";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
+import {
+  getSessionClientType,
+  isWalletAuthSessionV2Enabled,
+  loginWithSessionV2,
+  persistSessionResponse,
+} from "@/services/auth/session-v2.utils";
+import {
+  getWalletSignatureDomain,
+  isStructuredSignaturesEnabled,
+} from "@/services/wallet-signatures/structured-wallet-signatures";
 import {
   logErrorSecurely,
   sanitizeErrorForUser,
@@ -144,20 +153,13 @@ export default function Auth({
 
   const {
     address,
-    connectedAccounts,
+    hasValidWalletAuth: isAddressAuthorized,
     isConnected,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     isSafeWallet,
     connectionState,
   } = useSeizeConnectContext();
-
-  const isAddressAuthorized = useMemo(() => {
-    return isAuthAddressAuthorized({
-      address,
-      connectedAccounts,
-    });
-  }, [address, connectedAccounts]);
 
   const {
     signMessage,
@@ -362,7 +364,7 @@ export default function Auth({
                 onShowSignModal: setShowSignModal,
                 onInvalidateCache: invalidateAll,
                 onReset: reset,
-                onRemoveJwt: removeAuthJwt,
+                onRemoveJwt: () => removeAuthJwt(),
                 onLogError: logErrorSecurely,
               },
             })
@@ -421,11 +423,17 @@ export default function Auth({
     }
 
     try {
+      const params: Record<string, string> = {
+        signer_address: signerAddress,
+      };
+      if (isStructuredSignaturesEnabled()) {
+        params["structured_signature"] = "true";
+        params["domain"] = getWalletSignatureDomain();
+        params["chain_id"] = "1";
+      }
       const response = await commonApiFetch<ApiNonceResponse>({
         endpoint: "auth/nonce",
-        params: {
-          signer_address: signerAddress,
-        },
+        params,
       });
 
       // Response validation - fail fast on invalid response
@@ -555,9 +563,17 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
-      if (!canStoreAnotherWalletAccount(signerAddress)) {
+      const isSingleWebSessionV2 =
+        isWalletAuthSessionV2Enabled() && getSessionClientType() === "web";
+      if (
+        !canStoreAnotherWalletAccount(signerAddress, {
+          allowAdditionalAccounts: !isSingleWebSessionV2,
+        })
+      ) {
         setToast({
-          message: "Maximum connected profiles reached",
+          message: isSingleWebSessionV2
+            ? "Disconnect the current profile before connecting another profile"
+            : "Maximum connected profiles reached",
           type: "error",
         });
         return { success: false };
@@ -583,25 +599,31 @@ export default function Auth({
         return { success: false };
       }
 
-      const tokenResponse = await commonApiPost<
-        ApiLoginRequest,
-        ApiLoginResponse
-      >({
-        endpoint: "auth/login",
-        body: {
-          server_signature,
-          client_signature: clientSignature.signature,
-          is_safe_wallet: isSafeWallet,
-          client_address: signerAddress,
-          ...(role != null && { role }),
-        },
-      });
-      const isPersisted = setAuthJwt(
-        signerAddress,
-        tokenResponse.token,
-        tokenResponse.refresh_token,
-        role ?? undefined
-      );
+      const isPersisted = isWalletAuthSessionV2Enabled()
+        ? await loginWithSessionV2({
+            serverSignature: server_signature,
+            clientSignature: clientSignature.signature,
+            signerAddress,
+            role,
+            isSafeWallet,
+          }).then(persistSessionResponse)
+        : await commonApiPost<ApiLoginRequest, ApiLoginResponse>({
+            endpoint: "auth/login",
+            body: {
+              server_signature,
+              client_signature: clientSignature.signature,
+              is_safe_wallet: isSafeWallet,
+              client_address: signerAddress,
+              ...(role != null && { role }),
+            },
+          }).then((tokenResponse) =>
+            setAuthJwt(
+              signerAddress,
+              tokenResponse.token,
+              tokenResponse.refresh_token,
+              role ?? undefined
+            )
+          );
       if (!isPersisted) {
         setToast({
           message: "Failed to persist connected profile",
@@ -710,7 +732,7 @@ export default function Auth({
     });
 
     if (!isValid) {
-      removeAuthJwt();
+      await removeAuthJwt();
       const { success } = await requestSignIn({
         signerAddress: walletAddress,
         role,
@@ -780,7 +802,7 @@ export default function Auth({
       return;
     }
 
-    removeAuthJwt();
+    await removeAuthJwt();
     try {
       const { success } = await requestSignIn({
         signerAddress: address,

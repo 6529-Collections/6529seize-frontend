@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable max-lines -- This composer already exceeds the diff lint limit. */
-
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import type {
   CreateDropConfig,
@@ -1253,7 +1251,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
     // Use direct signature if there are no terms to display
     if (!wave.participation.terms) {
-      const { success, signature } = await signDrop({
+      const { success, signature, signatureMessage } = await signDrop({
         drop: requestBody,
         termsOfService: null,
       });
@@ -1265,6 +1263,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return {
         ...requestBody,
         signature,
+        ...(signatureMessage ? { signature_message: signatureMessage } : {}),
       };
     }
 
@@ -1274,6 +1273,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       const handleSigningComplete = (result: {
         success: boolean;
         signature?: string | undefined;
+        signatureMessage?: string | undefined;
       }) => {
         if (!result.success || !result.signature) {
           resolve(null);
@@ -1283,6 +1283,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         const updatedDropRequest = {
           ...requestBody,
           signature: result.signature,
+          ...(result.signatureMessage
+            ? { signature_message: result.signatureMessage }
+            : {}),
         };
         resolve(updatedDropRequest);
       };

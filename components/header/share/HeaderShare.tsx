@@ -18,10 +18,31 @@ import {
   getWalletAddress,
   getWalletRole,
 } from "@/services/auth/auth.utils";
+import {
+  createConnectionTransfer,
+  isConnectionTransferV2Enabled,
+} from "@/services/auth/session-v2.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
+
+type CachedConnectionTransfer = {
+  readonly addressKey: string;
+  readonly roleKey: string;
+  readonly expiresAtMs: number;
+  readonly transfer: Awaited<ReturnType<typeof createConnectionTransfer>>;
+};
+
+function isAbortError(error: unknown, signal?: AbortSignal): boolean {
+  return (
+    signal?.aborted === true ||
+    (typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "AbortError")
+  );
+}
 
 interface OSInfo {
   name: "windows" | "mac" | "linux";
@@ -219,10 +240,10 @@ export function HeaderQRModal({
   const [shouldRender, setShouldRender] = useState(show);
   const [isVisible, setIsVisible] = useState(show);
 
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { hasValidWalletAuth } = useSeizeConnectContext();
 
   const [activeTab, setActiveTab] = useState<Mode>(
-    isAuthenticated ? Mode.SHARE : Mode.NAVIGATE
+    hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE
   );
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
 
@@ -233,6 +254,8 @@ export function HeaderQRModal({
   const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
+  const [canShareConnection, setCanShareConnection] =
+    useState<boolean>(hasValidWalletAuth);
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
@@ -243,6 +266,11 @@ export function HeaderQRModal({
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  const transferAbortRef = useRef<AbortController | null>(null);
+  const shareGenerationIdRef = useRef(0);
+  const cachedConnectionTransferRef = useRef<CachedConnectionTransfer | null>(
+    null
+  );
 
   const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
     if (event.key !== "Tab") {
@@ -320,11 +348,16 @@ export function HeaderQRModal({
     [trapFocusInDialog]
   );
 
-  function generateSources(
+  async function generateSources(
     refreshToken: string | null,
     walletAddress: string | null,
-    role: string | null
+    role: string | null,
+    signal?: AbortSignal
   ) {
+    const generationId = ++shareGenerationIdRef.current;
+    const isStaleGeneration = () =>
+      generationId !== shareGenerationIdRef.current || signal?.aborted;
+
     let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
       routerPath = routerPath.slice(0, -1);
@@ -349,7 +382,59 @@ export function HeaderQRModal({
     let shareConnectionAppUrl = "";
     let shareConnectionCoreUrl = "";
 
-    if (refreshToken && walletAddress) {
+    if (
+      isConnectionTransferV2Enabled() &&
+      walletAddress &&
+      hasValidWalletAuth
+    ) {
+      try {
+        const cachedTransfer = cachedConnectionTransferRef.current;
+        const addressKey = walletAddress.toLowerCase();
+        const roleKey = role ?? "";
+        const transfer =
+          cachedTransfer &&
+          cachedTransfer.addressKey === addressKey &&
+          cachedTransfer.roleKey === roleKey &&
+          cachedTransfer.expiresAtMs > Date.now() + 30_000
+            ? cachedTransfer.transfer
+            : await createConnectionTransfer({ role, signal });
+
+        if (isStaleGeneration()) {
+          return;
+        }
+
+        const expiresAtMs = Date.parse(transfer.expires_at);
+        if (Number.isFinite(expiresAtMs)) {
+          cachedConnectionTransferRef.current = {
+            addressKey,
+            roleKey,
+            expiresAtMs,
+            transfer,
+          };
+        }
+
+        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?transfer_code=${encodeURIComponent(transfer.transfer_code)}&address=${encodeURIComponent(transfer.address)}`;
+        shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${transfer.deep_link_path}`;
+
+        if (transfer.role) {
+          shareConnectionAppUrl += `&role=${encodeURIComponent(transfer.role)}`;
+        }
+
+        setCanShareConnection(true);
+        setShareConnectionAppUrl(shareConnectionAppUrl);
+        setShareConnectionCoreUrl(shareConnectionCoreUrl);
+      } catch (error: unknown) {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
+          return;
+        }
+        console.error("Failed to create connection transfer", error);
+        setCanShareConnection(false);
+        setShareConnectionAppUrl("");
+        setShareConnectionCoreUrl("");
+        setShareConnectionSrc("");
+        setActiveTab(Mode.NAVIGATE);
+      }
+    } else if (refreshToken && walletAddress) {
       shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
       shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
 
@@ -357,26 +442,40 @@ export function HeaderQRModal({
         shareConnectionAppUrl += `&role=${role}`;
         shareConnectionCoreUrl += `&role=${role}`;
       }
+      setCanShareConnection(true);
       setShareConnectionAppUrl(shareConnectionAppUrl);
       setShareConnectionCoreUrl(shareConnectionCoreUrl);
     } else {
+      setCanShareConnection(false);
       setShareConnectionSrc("");
     }
 
     QRCode.toDataURL(browserUrl, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
+        if (isStaleGeneration()) {
+          return;
+        }
         setNavigateBrowserSrc(dataUrl);
       })
       .catch((error: unknown) => {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
+          return;
+        }
         console.error("Failed to generate browser QR code", error);
         setNavigateBrowserSrc("");
       });
 
     QRCode.toDataURL(appUrl, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
+        if (isStaleGeneration()) {
+          return;
+        }
         setNavigateAppSrc(dataUrl);
       })
       .catch((error: unknown) => {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
+          return;
+        }
         console.error("Failed to generate mobile app QR code", error);
         setNavigateAppSrc("");
       });
@@ -384,9 +483,15 @@ export function HeaderQRModal({
     if (shareConnectionAppUrl) {
       QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 })
         .then((dataUrl: string) => {
+          if (isStaleGeneration()) {
+            return;
+          }
           setShareConnectionSrc(dataUrl);
         })
         .catch((error: unknown) => {
+          if (isStaleGeneration() || isAbortError(error, signal)) {
+            return;
+          }
           console.error("Failed to generate share connection QR code", error);
           setShareConnectionSrc("");
         });
@@ -394,13 +499,40 @@ export function HeaderQRModal({
   }
 
   useEffect(() => {
-    if (show) {
-      generateSources(getRefreshToken(), getWalletAddress(), getWalletRole());
+    if (!show) {
+      shareGenerationIdRef.current += 1;
+      cachedConnectionTransferRef.current = null;
+      transferAbortRef.current?.abort();
+      transferAbortRef.current = null;
+      setCanShareConnection(false);
+      setShareConnectionAppUrl("");
+      setShareConnectionCoreUrl("");
+      setShareConnectionSrc("");
+      return;
     }
-  }, [show]);
+
+    transferAbortRef.current?.abort();
+    const controller = new AbortController();
+    transferAbortRef.current = controller;
+
+    void generateSources(
+      getRefreshToken(),
+      getWalletAddress(),
+      getWalletRole(),
+      controller.signal
+    );
+
+    return () => {
+      shareGenerationIdRef.current += 1;
+      controller.abort();
+      if (transferAbortRef.current === controller) {
+        transferAbortRef.current = null;
+      }
+    };
+  }, [show, hasValidWalletAuth]);
 
   useEffect(() => {
-    setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
+    setActiveTab(hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE);
     setActiveSubTab(SubMode.APP);
     if (show) return;
     const timer = setTimeout(() => {
@@ -409,7 +541,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show, isAuthenticated]);
+  }, [show, hasValidWalletAuth]);
 
   useEffect(() => {
     if (show) {
@@ -694,7 +826,7 @@ export function HeaderQRModal({
             Share
           </h2>
           <ModalMenu
-            isShareConnection={!!getRefreshToken()}
+            isShareConnection={canShareConnection}
             activeTab={activeTab}
             activeSubTab={activeSubTab}
             onTabChange={(tab, subTab) => {
