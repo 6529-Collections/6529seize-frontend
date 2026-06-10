@@ -3,6 +3,7 @@
       "app/**/page.{ts,tsx,js,jsx}",
       "app/**/layout.{ts,tsx,js,jsx}",
       "app/**/route.{ts,tsx,js,jsx}",
+      "app/**/loading.{ts,tsx,js,jsx}",
       "app/**/not-found.{ts,tsx,js,jsx}",
       "app/**/error.{ts,tsx,js,jsx}",
       "app/global-error.{ts,tsx,js,jsx}",
