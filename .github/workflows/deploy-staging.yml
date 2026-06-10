@@ -39,7 +39,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
@@ -80,7 +80,7 @@ jobs:
         env:
           BRANCH: ${{ env.STAGING_BRANCH }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
-          INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
         run: |
@@ -175,7 +175,7 @@ jobs:
       - name: Wait for staging deploy
         env:
           COMMAND_ID: ${{ steps.send-command.outputs.command-id }}
-          INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
