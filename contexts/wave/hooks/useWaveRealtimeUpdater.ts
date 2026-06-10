@@ -164,14 +164,15 @@ const buildOptimisticDrop = ({
   readonly options: ProcessIncomingDropOptions;
 }): ExtendedDrop => {
   const preferExistingPollVote = options.preferExistingPollVote;
-  const reconciledDrop =
-    existingDrop === null
-      ? drop
-      : preferExistingPollVote === undefined
-        ? reconcileDropAuthenticatedPollVote(drop, existingDrop)
-        : reconcileDropAuthenticatedPollVote(drop, existingDrop, {
-            preferExistingVote: preferExistingPollVote,
-          });
+  let reconciledDrop = drop;
+  if (existingDrop !== null && preferExistingPollVote === undefined) {
+    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop);
+  }
+  if (existingDrop !== null && preferExistingPollVote !== undefined) {
+    reconciledDrop = reconcileDropAuthenticatedPollVote(drop, existingDrop, {
+      preferExistingVote: preferExistingPollVote,
+    });
+  }
 
   return {
     ...reconciledDrop,
