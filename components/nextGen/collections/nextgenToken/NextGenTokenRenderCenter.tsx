@@ -5,6 +5,7 @@ import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { numberWithCommas } from "@/helpers/Helpers";
+import { openExternalMetadataUrl } from "@/components/common/sandboxed-external-iframe.helpers";
 import { useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { mainnet } from "wagmi/chains";
@@ -99,7 +100,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    window.open(url, "_blank");
+    openExternalMetadataUrl(url);
   }
 
   return (

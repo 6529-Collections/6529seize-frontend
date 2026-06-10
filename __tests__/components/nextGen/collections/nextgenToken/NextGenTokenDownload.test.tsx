@@ -106,7 +106,11 @@ it("opens link and downloads via button in main component", async () => {
   );
 
   await userEvent.click(icon!);
-  expect(open).toHaveBeenCalledWith("https://img.com/png4k/file.png", "_blank");
+  expect(open).toHaveBeenCalledWith(
+    "https://img.com/png4k/file.png",
+    "_blank",
+    "noopener,noreferrer"
+  );
 
   const download = container.querySelector(
     `[data-tooltip-id="download-${token.id}-${Resolution["4K"]}"]`

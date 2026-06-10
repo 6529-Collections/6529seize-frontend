@@ -10,6 +10,30 @@ jest.mock("@/hooks/isMobileScreen", () => ({
   default: () => false,
 }));
 
+jest.mock("@/components/common/SandboxedExternalIframe", () => ({
+  __esModule: true,
+  default: function MockSandboxedExternalIframe({
+    canonicalizeSrc,
+    fallback,
+    src,
+    title,
+  }: any) {
+    const canonicalSrc = canonicalizeSrc ? canonicalizeSrc(src) : src;
+
+    if (!canonicalSrc) {
+      return fallback ? <>{fallback}</> : null;
+    }
+
+    return (
+      <iframe
+        data-testid="sandboxed-external-iframe"
+        src={canonicalSrc}
+        title={title}
+      />
+    );
+  },
+}));
+
 jest.mock("@/components/user/utils/UserCICAndLevel", () => ({
   __esModule: true,
   UserCICAndLevelSize: {
@@ -79,23 +103,36 @@ test("renders thumbnail image within link by default", () => {
 });
 
 test("renders iframe when animation shown and link hidden", () => {
-  const tokenWithAnimation = { ...token, animation_url: "anim.html" };
+  const tokenWithAnimation = {
+    ...token,
+    animation_url: "https://generator.6529.io/mainnet/html/1",
+  };
   render(
     <NextGenTokenImage token={tokenWithAnimation} show_animation hide_link />
   );
   const frame = screen.getByTitle("token");
   expect(frame).toBeInTheDocument();
-  expect(frame).toHaveAttribute("src", "anim.html");
+  expect(frame).toHaveAttribute(
+    "src",
+    "https://generator.6529.io/mainnet/html/1"
+  );
+  expect(frame).toHaveAttribute("data-testid", "sandboxed-external-iframe");
 });
 
 test("renders iframe within link when animation shown and link not hidden", () => {
-  const tokenWithAnimation = { ...token, animation_url: "anim.html" };
+  const tokenWithAnimation = {
+    ...token,
+    animation_url: "https://generator.6529.io/mainnet/html/1",
+  };
   render(<NextGenTokenImage token={tokenWithAnimation} show_animation />);
   const link = screen.getByRole("link");
   const frame = screen.getByTitle("token");
   expect(link).toBeInTheDocument();
   expect(frame).toBeInTheDocument();
-  expect(frame).toHaveAttribute("src", "anim.html");
+  expect(frame).toHaveAttribute(
+    "src",
+    "https://generator.6529.io/mainnet/html/1"
+  );
   expect(link).toContainElement(frame);
 });
 
@@ -284,17 +321,39 @@ test("renders owner info without normalised_handle", () => {
 });
 
 test("renders animation iframe when animation_url is available", () => {
-  const tokenWithAnimation = { ...token, animation_url: "anim.html" };
+  const tokenWithAnimation = {
+    ...token,
+    animation_url: "https://generator.6529.io/mainnet/html/1",
+  };
   render(
     <NextGenTokenImage token={tokenWithAnimation} show_animation hide_link />
   );
 
   const frame = screen.getByTitle("token");
-  expect(frame).toHaveAttribute("src", "anim.html");
+  expect(frame).toHaveAttribute(
+    "src",
+    "https://generator.6529.io/mainnet/html/1"
+  );
+});
+
+test("falls back to the image for unsafe animation URLs", () => {
+  const tokenWithAnimation = {
+    ...token,
+    animation_url: "javascript:alert(1)",
+  };
+  render(
+    <NextGenTokenImage token={tokenWithAnimation} show_animation hide_link />
+  );
+
+  expect(screen.queryByTitle("token")).not.toBeInTheDocument();
+  expect(screen.getByAltText("token")).toHaveAttribute("src", "thumb.png");
 });
 
 test("renders image when show_animation is false", () => {
-  const tokenWithAnimation = { ...token, animation_url: "anim.html" };
+  const tokenWithAnimation = {
+    ...token,
+    animation_url: "https://generator.6529.io/mainnet/html/1",
+  };
   render(
     <NextGenTokenImage
       token={tokenWithAnimation}

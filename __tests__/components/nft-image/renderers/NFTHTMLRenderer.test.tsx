@@ -25,6 +25,35 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
   };
 });
 
+jest.mock("@/components/common/SandboxedExternalIframe", () => {
+  return function MockSandboxedExternalIframe({
+    canonicalizeSrc,
+    fallback,
+    id,
+    onError,
+    onLoad,
+    src,
+    title,
+  }: any) {
+    const canonicalSrc = canonicalizeSrc ? canonicalizeSrc(src) : src;
+
+    if (!canonicalSrc) {
+      return fallback ? <>{fallback}</> : null;
+    }
+
+    return (
+      <iframe
+        data-testid="sandboxed-external-iframe"
+        id={id}
+        onError={onError}
+        onLoad={onLoad}
+        src={canonicalSrc}
+        title={title}
+      />
+    );
+  };
+});
+
 const createMockNFT = (overrides: Partial<BaseNFT> = {}): BaseNFT =>
   ({
     id: 1,
@@ -203,9 +232,7 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      // When both are undefined, src becomes undefined and React removes the attribute
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
 
     it("handles null animation sources gracefully", () => {
@@ -222,9 +249,7 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      // When both are null, src becomes null and React removes the attribute
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
   });
 
@@ -241,7 +266,6 @@ describe("NFTHTMLRenderer", () => {
       const props = createDefaultProps();
       render(<NFTHTMLRenderer {...props} />);
 
-      // When no id is provided, title will be undefined
       const iframe = document.querySelector("iframe");
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute("id", "iframe-1");
@@ -266,7 +290,7 @@ describe("NFTHTMLRenderer", () => {
 
       const iframe = document.querySelector("iframe");
       expect(iframe).toBeInTheDocument();
-      expect(iframe).not.toHaveAttribute("title");
+      expect(iframe).toHaveAttribute("title", "Test NFT");
     });
   });
 
@@ -310,32 +334,29 @@ describe("NFTHTMLRenderer", () => {
   });
 
   describe("Edge Cases and Error Handling", () => {
-    it("crashes when metadata is undefined (IMPLEMENTATION BUG)", () => {
+    it("handles undefined metadata gracefully", () => {
       const nft = createMockNFT({
-        ...(undefined !== undefined ? { metadata: undefined } : {}),
+        animation: undefined as any,
+        metadata: undefined as any,
       });
-      const props = createDefaultProps({ nft, id: "test-iframe" });
-
-      // The getSrc function has a bug - it checks "metadata" in nft but doesn't check if metadata is null/undefined
-      // Line 10: const hasAnimation = hasMetadata && nft.metadata.animation;
-      // This will crash when nft.metadata is undefined despite hasMetadata being true
-      expect(() => {
-        render(<NFTHTMLRenderer {...props} />);
-      }).toThrow("Cannot read properties of undefined (reading 'animation')");
-    });
-
-    it("handles empty metadata object gracefully", () => {
-      const nft = createMockNFT({ metadata: {} });
       const props = createDefaultProps({ nft, id: "test-iframe" });
 
       expect(() => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      expect(iframe).toBeInTheDocument();
-      // Empty metadata means animation_url is undefined, so no src attribute
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
+    });
+
+    it("handles empty metadata object gracefully", () => {
+      const nft = createMockNFT({ animation: undefined as any, metadata: {} });
+      const props = createDefaultProps({ nft, id: "test-iframe" });
+
+      expect(() => {
+        render(<NFTHTMLRenderer {...props} />);
+      }).not.toThrow();
+
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
 
     it("handles minimal NFT properties", () => {
@@ -394,12 +415,11 @@ describe("NFTHTMLRenderer", () => {
   });
 
   describe("Security Considerations", () => {
-    it("does not sanitize iframe src but passes it through as-is", () => {
-      // Note: In a real application, iframe src should be validated/sanitized
-      // This test documents current behavior
+    it("renders canonicalized HTTPS metadata URLs in a sandboxed iframe", () => {
       const nft = createMockNFT({
+        animation: "",
         metadata: {
-          animation: "https://untrusted-domain.com/content.html",
+          animation: " https://UNTRUSTED-DOMAIN.com/content.html ",
         },
       });
       const props = createDefaultProps({ nft, id: "test-iframe" });
@@ -407,24 +427,26 @@ describe("NFTHTMLRenderer", () => {
 
       const iframe = screen.getByTitle("test-iframe");
       expect(iframe).toHaveAttribute(
+        "data-testid",
+        "sandboxed-external-iframe"
+      );
+      expect(iframe).toHaveAttribute(
         "src",
         "https://untrusted-domain.com/content.html"
       );
     });
 
-    it("handles potentially malicious URLs but some crash in test environment", () => {
-      const safeUrls = [
+    it("rejects unsafe iframe metadata URLs", () => {
+      const unsafeUrls = [
         'data:text/html,<script>alert("xss")</script>',
         "file:///etc/passwd",
         "ftp://malicious.com/file",
-      ];
-      const crashingUrls = [
-        'javascript:alert("xss")', // JSDOM crashes on javascript: URLs
+        'javascript:alert("xss")',
       ];
 
-      // Test safe URLs that don't crash JSDOM
-      safeUrls.forEach((url, index) => {
+      unsafeUrls.forEach((url, index) => {
         const nft = createMockNFT({
+          animation: "",
           metadata: {
             animation: url,
           },
@@ -438,37 +460,17 @@ describe("NFTHTMLRenderer", () => {
           render(<NFTHTMLRenderer {...props} />);
         }).not.toThrow();
 
-        const iframe = screen.getByTitle(`test-iframe-safe-${index}`);
-        expect(iframe).toHaveAttribute("src", url);
+        expect(
+          screen.queryByTitle(`test-iframe-safe-${index}`)
+        ).not.toBeInTheDocument();
       });
-
-      // Document that javascript: URLs cause issues in test environment
-      // React itself doesn't block these at render time, but JSDOM throws an error
-      // when the iframe tries to load the javascript: URL
-      const nft = createMockNFT({
-        metadata: {
-          animation: 'javascript:alert("xss")',
-        },
-      });
-      const props = createDefaultProps({ nft, id: "test-iframe-js" });
-
-      // The component renders successfully but the iframe src causes JSDOM to error
-      expect(() => {
-        render(<NFTHTMLRenderer {...props} />);
-      }).not.toThrow();
-
-      // React actually transforms javascript: URLs to throw an error instead
-      const iframe = screen.getByTitle("test-iframe-js");
-      expect(iframe).toHaveAttribute(
-        "src",
-        "javascript:throw new Error('React has blocked a javascript: URL as a security precaution.')"
-      );
     });
 
     it("handles empty string URLs correctly", () => {
       const baseNft = createMockNFT();
       const nft = {
         ...baseNft,
+        animation: "",
         metadata: {
           ...baseNft.metadata,
           animation: "", // Empty string is falsy, so will use animation_url
@@ -481,9 +483,7 @@ describe("NFTHTMLRenderer", () => {
         render(<NFTHTMLRenderer {...props} />);
       }).not.toThrow();
 
-      const iframe = screen.getByTitle("test-iframe");
-      // React/DOM removes empty src attributes for security
-      expect(iframe).not.toHaveAttribute("src");
+      expect(screen.queryByTitle("test-iframe")).not.toBeInTheDocument();
     });
   });
 
@@ -532,7 +532,7 @@ describe("NFTHTMLRenderer", () => {
       const iframe = document.querySelector("iframe");
       expect(iframe).toBeInTheDocument();
       expect(iframe).toHaveAttribute("id", "iframe-1");
-      expect(iframe).not.toHaveAttribute("title");
+      expect(iframe).toHaveAttribute("title", "Test HTML NFT");
 
       // Since showBalance is false, balance element should not exist
       expect(screen.queryByTestId("nft-image-balance")).not.toBeInTheDocument();
@@ -542,6 +542,7 @@ describe("NFTHTMLRenderer", () => {
   describe("Animation Source Priority Logic", () => {
     it("prioritizes metadata.animation over animation_url when both exist", () => {
       const nft = createMockNFT({
+        animation: "",
         metadata: {
           animation: "https://priority.com/animation.html",
           animation_url: "https://fallback.com/animation.html",
@@ -562,6 +563,7 @@ describe("NFTHTMLRenderer", () => {
 
       falsyValues.forEach((falsyValue, index) => {
         const nft = createMockNFT({
+          animation: "",
           metadata: {
             animation: falsyValue,
             animation_url: "https://fallback.com/animation.html",
@@ -581,6 +583,7 @@ describe("NFTHTMLRenderer", () => {
 
     it("handles NFTLite type correctly (no metadata property check)", () => {
       const nftLite = createMockNFTLite({
+        animation: "",
         metadata: {
           animation_url: "https://nftlite.com/animation.html",
         },

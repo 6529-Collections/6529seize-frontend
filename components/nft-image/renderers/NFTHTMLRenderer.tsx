@@ -1,5 +1,7 @@
 "use client";
 
+import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { canonicalizeExternalMetadataHtmlUrl } from "@/components/common/sandboxed-external-iframe.helpers";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.scss";
@@ -83,11 +85,15 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
         />
       )}
       {activeUrl ? (
-        <iframe
-          title={props.id}
+        <SandboxedExternalIframe
+          title={props.id ?? props.nft.name}
           src={activeUrl}
           id={props.id ?? `iframe-${props.nft.id}`}
           key={`${props.nft.contract}-${props.nft.id}-${activeUrl}`}
+          className="tw-bg-transparent"
+          containerClassName="tw-h-full tw-w-full"
+          showBanner={false}
+          canonicalizeSrc={canonicalizeExternalMetadataHtmlUrl}
           onLoad={() => {
             setDidLoadCurrentUrl(true);
           }}

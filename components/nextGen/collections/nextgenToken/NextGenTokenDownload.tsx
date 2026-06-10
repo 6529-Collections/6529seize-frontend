@@ -9,6 +9,7 @@ import useDownloader from "@/hooks/useDownloader";
 import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
 import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
+import { openExternalMetadataUrl } from "@/components/common/sandboxed-external-iframe.helpers";
 
 export enum Resolution {
   "Thumbnail" = "Thumbnail",
@@ -115,7 +116,7 @@ export default function NextGenTokenDownload(
           style={{ cursor: "pointer", height: "20px", width: "20px" }}
           onClick={() => {
             const h = getUrl(props.token, quality);
-            window.open(h, "_blank");
+            openExternalMetadataUrl(h);
           }}
           icon={faExternalLink}
         />

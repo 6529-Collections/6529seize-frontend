@@ -1,7 +1,9 @@
 import type { NextGenTokenRarityType } from "@/components/nextGen/nextgen_helpers";
+import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
+import { canonicalizeExternalMetadataHtmlUrl } from "@/components/common/sandboxed-external-iframe.helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -52,8 +54,7 @@ export function NextGenTokenImage(
       const handleOrWallet =
         props.token.normalised_handle ?? formatAddress(props.token.owner);
       const profileHref = `/${props.token.normalised_handle ?? props.token.owner}`;
-      const initial =
-        handleOrWallet.trim().charAt(0) || "?";
+      const initial = handleOrWallet.trim().charAt(0) || "?";
       const ownerInfo = (
         <div className="tailwind-scope tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2.5">
           <ProfileAvatar
@@ -311,10 +312,13 @@ export function NextGenTokenImage(
   }
 
   function getContent() {
-    if (props.show_animation && props.token.animation_url) {
+    const animationUrl =
+      props.token.animation_url || props.token.generator?.html;
+
+    if (props.show_animation && animationUrl) {
       return (
-        <iframe
-          style={{
+        <SandboxedExternalIframe
+          containerStyle={{
             width: "100%",
             height: props.is_fullscreen
               ? "100vh"
@@ -323,8 +327,12 @@ export function NextGenTokenImage(
                 : "85vh",
             marginBottom: "-8px",
           }}
-          src={props.token.animation_url ?? props.token.generator?.html}
+          src={animationUrl}
           title={props.token.name}
+          className="tw-bg-transparent"
+          showBanner={false}
+          canonicalizeSrc={canonicalizeExternalMetadataHtmlUrl}
+          fallback={getImage()}
         />
       );
     } else {

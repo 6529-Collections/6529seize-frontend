@@ -11,9 +11,14 @@ const DEFAULT_SANDBOX = "allow-scripts";
 interface SandboxedExternalIframeProps {
   readonly src: string;
   readonly title: string;
+  readonly id?: string | undefined;
   readonly className?: string | undefined;
+  readonly style?: React.CSSProperties | undefined;
   readonly fallback?: React.ReactNode | undefined;
   readonly containerClassName?: string | undefined;
+  readonly containerStyle?: React.CSSProperties | undefined;
+  readonly showBanner?: boolean | undefined;
+  readonly canonicalizeSrc?: ((src: string) => string | null) | undefined;
   readonly onLoad?:
     | React.IframeHTMLAttributes<HTMLIFrameElement>["onLoad"]
     | undefined;
@@ -37,9 +42,14 @@ interface SandboxedExternalIframeProps {
 const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   src,
   title,
+  id,
   className,
+  style,
   fallback = null,
   containerClassName,
+  containerStyle,
+  showBanner = true,
+  canonicalizeSrc = canonicalizeInteractiveMediaUrl,
   onLoad,
   onError,
   iframeRef,
@@ -49,8 +59,8 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   const [isVisible, setIsVisible] = useState(false);
 
   const canonicalSrc = useMemo(
-    () => canonicalizeInteractiveMediaUrl(src),
-    [src]
+    () => canonicalizeSrc(src),
+    [canonicalizeSrc, src]
   );
 
   const frameClassName = useMemo(() => {
@@ -140,9 +150,10 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     baseProps.fetchPriority = "low";
     baseProps.credentialless = "";
     baseProps.className = frameClassName;
+    baseProps.style = style;
 
     return baseProps;
-  }, [canonicalSrc, frameClassName]);
+  }, [canonicalSrc, frameClassName, style]);
 
   if (!canonicalSrc || !iframeProps) {
     return fallback ? <>{fallback}</> : null;
@@ -185,12 +196,13 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     .join(" ");
 
   return (
-    <div ref={containerRef} className={containerClasses}>
-      {banner}
+    <div ref={containerRef} className={containerClasses} style={containerStyle}>
+      {showBanner ? banner : null}
       <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         {isVisible ? (
           <iframe
             {...iframeProps}
+            id={id}
             ref={iframeRef}
             title={iframeTitle}
             onLoad={onLoad}

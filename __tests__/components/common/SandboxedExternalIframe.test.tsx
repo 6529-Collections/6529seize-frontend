@@ -64,4 +64,38 @@ describe("SandboxedExternalIframe", () => {
     expect(firstOnVisible).not.toHaveBeenCalled();
     expect(secondOnVisible).toHaveBeenCalledTimes(1);
   });
+
+  it("uses a caller-provided canonicalizer and forwards iframe options", () => {
+    render(
+      <SandboxedExternalIframe
+        id="media-frame"
+        src="https://example.com/media"
+        title="Media"
+        showBanner={false}
+        canonicalizeSrc={() => "https://canonical.example/media"}
+      />
+    );
+
+    act(() => {
+      observerCallback?.(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        new MockIntersectionObserver(
+          jest.fn()
+        ) as unknown as IntersectionObserver
+      );
+    });
+
+    const iframe = document.querySelector("iframe");
+    expect(iframe).toHaveAttribute("id", "media-frame");
+    expect(iframe).toHaveAttribute("src", "https://canonical.example/media");
+    expect(iframe).toHaveAttribute(
+      "title",
+      "Media: https://canonical.example/media"
+    );
+    expect(iframe).toHaveAttribute("sandbox", "allow-scripts");
+    expect(iframe).toHaveAttribute("referrerpolicy", "no-referrer");
+    expect(document.body).not.toHaveTextContent(
+      "Untrusted interactive content"
+    );
+  });
 });

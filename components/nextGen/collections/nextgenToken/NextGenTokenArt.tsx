@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import { openExternalMetadataUrl } from "@/components/common/sandboxed-external-iframe.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Lightbulb from "./Lightbulb";
@@ -61,7 +62,6 @@ function NextGenTokenArtImage(
       />
     );
   }
-  
 
   return (
     <NextGenTokenImage
@@ -157,19 +157,22 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           sm={mode === Mode.HIGH_RES ? 4 : 6}
           className={`pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-start"
-          }`}>
+          }`}
+        >
           <button
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.IMAGE ? styles["imageResolutionBtnSelected"] : ""
             }`}
-            onClick={() => setMode(Mode.IMAGE)}>
+            onClick={() => setMode(Mode.IMAGE)}
+          >
             2K
           </button>
           <button
             className={`unselectable ${styles["imageResolutionBtn"]} ${
               mode === Mode.HIGH_RES ? styles["imageResolutionBtnSelected"] : ""
             }`}
-            onClick={() => setMode(Mode.HIGH_RES)}>
+            onClick={() => setMode(Mode.HIGH_RES)}
+          >
             {isMobileDevice ? "8K" : "16K"}
           </button>
           <FontAwesomeIcon
@@ -185,7 +188,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Live
           </Tooltip>
         </Col>
@@ -193,7 +197,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           <Col
             xs={6}
             sm={4}
-            className="pt-2 pb-2 d-flex align-items-center gap-1 justify-content-center">
+            className="py-2 d-flex align-items-center gap-1 justify-content-center"
+          >
             {showZoomControls && (
               <>
                 <FontAwesomeIcon
@@ -231,7 +236,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           sm={mode === Mode.HIGH_RES ? 4 : 6}
           className={`pt-2 pb-2 d-flex gap-3 align-items-center ${
             isMobileScreen ? "justify-content-center" : "justify-content-end"
-          }`}>
+          }`}
+        >
           <Lightbulb
             mode="black"
             className={styles["modeIcon"]!}
@@ -256,7 +262,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                   backgroundColor: "#1F2937",
                   color: "white",
                   padding: "4px 8px",
-                }}>
+                }}
+              >
                 Download
               </Tooltip>
             </Dropdown.Toggle>
@@ -278,7 +285,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             className={styles["modeIcon"]}
             onClick={() => {
               const href = getCurrentHref();
-              window.open(href, "_blank");
+              openExternalMetadataUrl(href);
             }}
             icon={faExternalLink}
             data-tooltip-id={`external-tooltip-${props.token.id}`}
@@ -290,7 +297,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Open in new tab
           </Tooltip>
           <FontAwesomeIcon
@@ -306,7 +314,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               backgroundColor: "#1F2937",
               color: "white",
               padding: "4px 8px",
-            }}>
+            }}
+          >
             Fullscreen
           </Tooltip>
         </Col>
@@ -356,7 +365,8 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                         ? styles["lightBoxContent"]
                         : "col pt-3"
                     }
-                    ref={tokenImageRef}>
+                    ref={tokenImageRef}
+                  >
                     <NextGenTokenArtImage
                       token={props.token}
                       mode={mode}
