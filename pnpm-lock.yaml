@@ -325,6 +325,9 @@ importers:
       three:
         specifier: 0.163.0
         version: 0.163.0
+      undici:
+        specifier: 7.25.0
+        version: 7.25.0
       unified:
         specifier: 11.0.5
         version: 11.0.5
