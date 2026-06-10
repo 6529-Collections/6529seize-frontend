@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Capacitor } from "@capacitor/core";
 import React, { useMemo } from "react";
 
@@ -8,8 +8,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   isConnectionTransferV2Enabled,
+  persistSessionResponse,
   redeemConnectionTransfer,
 } from "@/services/auth/session-v2.utils";
+import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -45,6 +47,15 @@ jest.mock("@/services/auth/session-v2.utils", () => ({
   isConnectionTransferV2Enabled: jest.fn(() => false),
   persistSessionResponse: jest.fn(),
   redeemConnectionTransfer: jest.fn(),
+}));
+
+jest.mock("@/services/auth/auth.utils", () => ({
+  canStoreAnotherWalletAccount: jest.fn(() => true),
+  setAuthJwt: jest.fn(),
+}));
+
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn(),
 }));
 
 jest.mock("@capacitor/core", () => ({
@@ -87,6 +98,9 @@ describe("AcceptConnectionSharing page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(false);
     (redeemConnectionTransfer as jest.Mock).mockReset();
+    (persistSessionResponse as jest.Mock).mockReset();
+    (persistSessionResponse as jest.Mock).mockResolvedValue(true);
+    (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(true);
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
@@ -151,5 +165,51 @@ describe("AcceptConnectionSharing page", () => {
 
     expect(screen.getByText(/Incoming connection/)).toBeInTheDocument();
     expect(screen.getByText("Accept connection")).toBeInTheDocument();
+  });
+
+  it("redeems and persists a native transfer-code session", async () => {
+    const push = jest.fn();
+    const seizeAcceptConnection = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(true);
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("transfer_code=abc12345&address=0x123")
+    );
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      address: undefined,
+      seizeDisconnectAndLogout: jest.fn(),
+      seizeAcceptConnection,
+    });
+    (redeemConnectionTransfer as jest.Mock).mockResolvedValue({
+      client_type: "native",
+      address: "0x123",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "native-refresh-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    });
+
+    render(
+      <TestProvider>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+
+    fireEvent.click(screen.getByText("Accept connection"));
+
+    await waitFor(() =>
+      expect(redeemConnectionTransfer).toHaveBeenCalledWith("abc12345")
+    );
+    expect(persistSessionResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client_type: "native",
+        address: "0x123",
+        native_refresh_token: "native-refresh-token",
+      })
+    );
+    expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+    expect(push).toHaveBeenCalledWith("/");
   });
 });

@@ -267,6 +267,7 @@ export function HeaderQRModal({
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const transferAbortRef = useRef<AbortController | null>(null);
+  const shareGenerationIdRef = useRef(0);
   const cachedConnectionTransferRef = useRef<CachedConnectionTransfer | null>(
     null
   );
@@ -353,6 +354,10 @@ export function HeaderQRModal({
     role: string | null,
     signal?: AbortSignal
   ) {
+    const generationId = ++shareGenerationIdRef.current;
+    const isStaleGeneration = () =>
+      generationId !== shareGenerationIdRef.current || signal?.aborted;
+
     let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
       routerPath = routerPath.slice(0, -1);
@@ -390,7 +395,7 @@ export function HeaderQRModal({
             ? cachedTransfer.transfer
             : await createConnectionTransfer({ role, signal });
 
-        if (signal?.aborted) {
+        if (isStaleGeneration()) {
           return;
         }
 
@@ -415,7 +420,7 @@ export function HeaderQRModal({
         setShareConnectionAppUrl(shareConnectionAppUrl);
         setShareConnectionCoreUrl(shareConnectionCoreUrl);
       } catch (error: unknown) {
-        if (isAbortError(error, signal)) {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
           return;
         }
         console.error("Failed to create connection transfer", error);
@@ -443,13 +448,13 @@ export function HeaderQRModal({
 
     QRCode.toDataURL(browserUrl, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
-        if (signal?.aborted) {
+        if (isStaleGeneration()) {
           return;
         }
         setNavigateBrowserSrc(dataUrl);
       })
       .catch((error: unknown) => {
-        if (isAbortError(error, signal)) {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
           return;
         }
         console.error("Failed to generate browser QR code", error);
@@ -458,13 +463,13 @@ export function HeaderQRModal({
 
     QRCode.toDataURL(appUrl, { width: 500, margin: 0 })
       .then((dataUrl: string) => {
-        if (signal?.aborted) {
+        if (isStaleGeneration()) {
           return;
         }
         setNavigateAppSrc(dataUrl);
       })
       .catch((error: unknown) => {
-        if (isAbortError(error, signal)) {
+        if (isStaleGeneration() || isAbortError(error, signal)) {
           return;
         }
         console.error("Failed to generate mobile app QR code", error);
@@ -474,13 +479,13 @@ export function HeaderQRModal({
     if (shareConnectionAppUrl) {
       QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 })
         .then((dataUrl: string) => {
-          if (signal?.aborted) {
+          if (isStaleGeneration()) {
             return;
           }
           setShareConnectionSrc(dataUrl);
         })
         .catch((error: unknown) => {
-          if (isAbortError(error, signal)) {
+          if (isStaleGeneration() || isAbortError(error, signal)) {
             return;
           }
           console.error("Failed to generate share connection QR code", error);
@@ -491,6 +496,7 @@ export function HeaderQRModal({
 
   useEffect(() => {
     if (!show) {
+      shareGenerationIdRef.current += 1;
       transferAbortRef.current?.abort();
       transferAbortRef.current = null;
       return;
@@ -508,6 +514,7 @@ export function HeaderQRModal({
     );
 
     return () => {
+      shareGenerationIdRef.current += 1;
       controller.abort();
       if (transferAbortRef.current === controller) {
         transferAbortRef.current = null;

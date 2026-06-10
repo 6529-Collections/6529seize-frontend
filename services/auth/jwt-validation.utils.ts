@@ -168,10 +168,6 @@ const handleTokenRefresh = async ({
 }): Promise<ValidateJwtResult> => {
   const walletAddress = getWalletAddress();
 
-  if (!walletAddress) {
-    throw new Error("No wallet address available for JWT renewal");
-  }
-
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
     return { isValid: false, wasCancelled: true };
@@ -179,6 +175,10 @@ const handleTokenRefresh = async ({
 
   try {
     if (isWalletAuthSessionV2Enabled()) {
+      if (!walletAddress) {
+        return { isValid: false, wasCancelled: false };
+      }
+
       const refreshedSession = await refreshSessionV2({
         address: walletAddress,
         abortSignal,
@@ -238,6 +238,10 @@ const handleTokenRefresh = async ({
     // Return false to trigger the sign modal, don't throw an error
     if (!refreshToken) {
       return { isValid: false, wasCancelled: false };
+    }
+
+    if (!walletAddress) {
+      throw new Error("No wallet address available for JWT renewal");
     }
 
     const redeemResponse = await redeemRefreshTokenWithRetries(

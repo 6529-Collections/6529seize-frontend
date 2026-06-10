@@ -241,6 +241,12 @@ describe("Auth component", () => {
       refresh_token: "refresh-token",
     });
 
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(false);
+    sessionV2.loginWithSessionV2.mockReset();
+    sessionV2.persistSessionResponse.mockReset();
+    sessionV2.persistSessionResponse.mockResolvedValue(true);
+
     // Reset useIdentity mock
     mockUseIdentity.mockReturnValue({ profile: null, isLoading: false });
 
@@ -312,6 +318,54 @@ describe("Auth component", () => {
       );
       await user.click(screen.getByTestId("req"));
       expect(toast).toHaveBeenCalled();
+    });
+
+    it("uses session v2 sign-in instead of legacy auth login when enabled", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      mockCommonApiFetch.mockResolvedValue({
+        nonce: "sign this nonce",
+        server_signature: "server-signature",
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "web",
+        address: validAddress,
+        role: null,
+        access_token: "session-access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      };
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockResolvedValue(true);
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      await waitFor(() =>
+        expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+          serverSignature: "server-signature",
+          clientSignature: "0xsignature",
+          signerAddress: validAddress,
+          role: null,
+          isSafeWallet: false,
+        })
+      );
+      expect(sessionV2.persistSessionResponse).toHaveBeenCalledWith(
+        sessionResponse
+      );
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
   });
 

@@ -161,6 +161,10 @@ describe("HeaderShare", () => {
     // Reset QRCode mock
     const qrcode = require("qrcode");
     qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
+
+    const sessionV2 = require("@/services/auth/session-v2.utils");
+    sessionV2.isConnectionTransferV2Enabled.mockReturnValue(false);
+    sessionV2.createConnectionTransfer.mockReset();
   });
 
   afterEach(() => {
@@ -379,6 +383,66 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByLabelText("Close share modal"));
 
       expect(signals[0]?.aborted).toBe(true);
+    });
+
+    it("generates connection QR codes from one-time transfer codes", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockResolvedValue({
+        transfer_code: "transfer-code",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: null,
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?transfer_code=transfer-code&address=0x1234567890123456789012345678901234567890",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledWith({
+          role: null,
+          signal: expect.objectContaining({ aborted: false }),
+        })
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=transfer-code"),
+          { width: 500, margin: 0 }
+        )
+      );
+      expect(
+        qrcode.toDataURL.mock.calls.some(
+          (call: unknown[]) =>
+            typeof call[0] === "string" &&
+            call[0].includes("mock-refresh-token")
+        )
+      ).toBe(false);
+    });
+
+    it("disables the Connection tab when transfer-code creation fails", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      jest.spyOn(console, "error").mockImplementation(() => undefined);
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockRejectedValue(
+        new Error("transfer creation failed")
+      );
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalled()
+      );
+      await waitFor(() =>
+        expect(screen.queryByText("Connection")).not.toBeInTheDocument()
+      );
+      expect(screen.getByText("Current URL")).toBeInTheDocument();
     });
   });
 

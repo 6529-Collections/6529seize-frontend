@@ -252,6 +252,17 @@ const validateStoredAddress = (
   };
 };
 
+const clearInvalidStoredAuthState = async (): Promise<void> => {
+  try {
+    await removeAuthJwt();
+  } catch (cleanupError) {
+    logError(
+      "auth_cleanup_during_init",
+      new Error(`Failed to clear invalid auth state: ${cleanupError}`)
+    );
+  }
+};
+
 // Unified Wallet State Machine - eliminates multiple state variables and inconsistencies
 type WalletState =
   | { status: "initializing" }
@@ -278,14 +289,7 @@ const handleInitializationError = (
     );
 
     // Clear invalid stored address
-    try {
-      removeAuthJwt();
-    } catch (cleanupError) {
-      logError(
-        "auth_cleanup_during_init",
-        new Error(`Failed to clear invalid auth state: ${cleanupError}`)
-      );
-    }
+    void clearInvalidStoredAuthState();
 
     const initError = new WalletInitializationError(
       "Invalid wallet address found in storage during initialization. This indicates potential data corruption or security breach.",
@@ -833,7 +837,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       await logoutSessionV2({ address: getWalletAddress() });
-      removeAuthJwt();
+      await removeAuthJwt();
       refreshStoredConnectedAccounts();
 
       const nextActiveAddress = getWalletAddress();
@@ -893,7 +897,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
           throw iterationError;
         }
 
-        removeAuthJwt();
+        await removeAuthJwt();
         const nextRemainingProfiles = getConnectedWalletAccounts().length;
         if (nextRemainingProfiles >= remainingProfiles) {
           throw new Error("Failed to clear all authenticated profiles.");

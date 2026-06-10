@@ -367,7 +367,7 @@ export default function Auth({
                 onShowSignModal: setShowSignModal,
                 onInvalidateCache: invalidateAll,
                 onReset: reset,
-                onRemoveJwt: removeAuthJwt,
+                onRemoveJwt: () => removeAuthJwt(),
                 onLogError: logErrorSecurely,
               },
             })
@@ -721,7 +721,7 @@ export default function Auth({
     });
 
     if (!isValid) {
-      removeAuthJwt();
+      await removeAuthJwt();
       const { success } = await requestSignIn({
         signerAddress: walletAddress,
         role,
@@ -791,7 +791,7 @@ export default function Auth({
       return;
     }
 
-    removeAuthJwt();
+    await removeAuthJwt();
     try {
       const { success } = await requestSignIn({
         signerAddress: address,
