@@ -11,7 +11,7 @@ SKILL_DOCS_VALIDATOR="$REPO_ROOT/.codex/skills/docs-area-remediator/scripts/vali
 LOCAL_STALE_ROUTE_REMEDIATOR="$REPO_ROOT/scripts/docs-area-remediator-local/run_stale_route_remediation.py"
 SKILL_STALE_ROUTE_REMEDIATOR="$REPO_ROOT/.codex/skills/docs-area-remediator/scripts/run_stale_route_remediation.py"
 LOCAL_DOCS_LINK_VALIDATOR="$REPO_ROOT/scripts/docs-area-remediator-local/validate_docs_links.py"
-SKILL_DOCS_LINK_VALIDATOR="$REPO_ROOT/.codex/skills/commit-docs-updater/scripts/validate_docs_links.py"
+SKILL_DOCS_LINK_VALIDATOR="$REPO_ROOT/docs/skills/commit-docs-updater/scripts/validate_docs_links.py"
 ROUTE_OWNERSHIP_SKILL_FILE="$REPO_ROOT/.codex/skills/docs-route-ownership-remediator/SKILL.md"
 
 if [[ -r "$LOCAL_DOCS_VALIDATOR" ]]; then

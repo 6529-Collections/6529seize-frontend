@@ -133,7 +133,9 @@ export function useDropMessages(
           return;
         }
 
-        updateDropInCachedDrops(queryClient, message);
+        updateDropInCachedDrops(queryClient, message, {
+          preferExistingPollVote: true,
+        });
         requestRefetch();
       },
       [dropId, queryClient, requestRefetch, waveId]
