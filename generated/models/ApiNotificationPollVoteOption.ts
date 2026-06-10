@@ -11,14 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiDropV2 } from '../models/ApiDropV2';
 import { HttpFile } from '../http/http';
 
-export class ApiDropPollsPage {
-    'data': Array<ApiDropV2>;
-    'count': number;
-    'page': number;
-    'next': boolean;
+export class ApiNotificationPollVoteOption {
+    'option_no': number;
+    'option_string': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,32 +23,20 @@ export class ApiDropPollsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "data",
-            "baseName": "data",
-            "type": "Array<ApiDropV2>",
-            "format": ""
-        },
-        {
-            "name": "count",
-            "baseName": "count",
+            "name": "option_no",
+            "baseName": "option_no",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "page",
-            "baseName": "page",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "next",
-            "baseName": "next",
-            "type": "boolean",
+            "name": "option_string",
+            "baseName": "option_string",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropPollsPage.attributeTypeMap;
+        return ApiNotificationPollVoteOption.attributeTypeMap;
     }
 
     public constructor() {

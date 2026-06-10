@@ -60,6 +60,8 @@ Timestamp source and precedence:
   stays stable.
 - If a row is active and the tab is hidden, unread can increase until the tab
   is visible again.
+- Poll-response websocket updates refresh poll data but do not update row
+  unread/new-drop badges.
 - Returning to a visible tab resets the active row's live new-drop counter and
   keeps `Last drop`.
 - Muted rows ignore live websocket timestamp/unread updates, but later list
