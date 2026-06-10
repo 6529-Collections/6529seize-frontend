@@ -207,10 +207,6 @@ interface AddressValidationResult {
     | undefined;
 }
 
-const isCapacitorPlatform = (): boolean => {
-  return !!globalThis.window?.Capacitor?.isNativePlatform?.();
-};
-
 const normalizeAddress = (address: string): string => address.toLowerCase();
 
 const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
@@ -218,17 +214,6 @@ const ADD_FLOW_CANCEL_GRACE_MS: number = 5000;
 const validateStoredAddress = (
   storedAddress: string
 ): AddressValidationResult => {
-  // Capacitor-specific validation (more lenient)
-  if (isCapacitorPlatform()) {
-    if (storedAddress.startsWith("0x") && storedAddress.length === 42) {
-      return {
-        isValid: true,
-        normalizedAddress: storedAddress.toLowerCase(),
-      };
-    }
-  }
-
-  // Standard validation using viem
   if (isAddress(storedAddress)) {
     return {
       isValid: true,
