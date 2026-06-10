@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout staging branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           ref: ${{ env.STAGING_BRANCH }}
           fetch-depth: 1
@@ -37,18 +37,18 @@ jobs:
 
       - name: Validate staging configuration
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
           test -n "$AWS_ACCESS_KEY_ID" || {
-            echo "Missing STAGING_AWS_ACCESS_KEY_ID secret." >&2
+            echo "Missing AWS_ACCESS_KEY_ID secret." >&2
             exit 1
           }
           test -n "$AWS_SECRET_ACCESS_KEY" || {
-            echo "Missing STAGING_AWS_SECRET_ACCESS_KEY secret." >&2
+            echo "Missing AWS_SECRET_ACCESS_KEY secret." >&2
             exit 1
           }
           test -n "$INSTANCE_ID" || {
@@ -69,10 +69,10 @@ jobs:
           }
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@ff717079ee2060e4bcee96c4779b553acc87447c # v4
         with:
-          aws-access-key-id: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Send staging deploy command
