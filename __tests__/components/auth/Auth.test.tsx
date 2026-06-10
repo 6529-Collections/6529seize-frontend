@@ -154,9 +154,8 @@ const mockSeizeDisconnectAndLogout = jest.fn(() => Promise.resolve());
 const mockSeizeDisconnect = jest.fn(() => Promise.resolve());
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: jest.fn(() => ({
-    address: walletAddress,
-    connectedAccounts:
+  useSeizeConnectContext: jest.fn(() => {
+    const connectedAccounts =
       connectedAccountsOverride ??
       (walletAddress
         ? [
@@ -167,13 +166,24 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
               isConnected: !!walletAddress,
             },
           ]
-        : []),
-    isConnected: !!walletAddress,
-    seizeDisconnect: mockSeizeDisconnect,
-    seizeDisconnectAndLogout: mockSeizeDisconnectAndLogout,
-    isSafeWallet: false,
-    connectionState: connectionState,
-  })),
+        : []);
+
+    const { isAuthAddressAuthorized } = require("@/services/auth/auth.utils");
+
+    return {
+      address: walletAddress,
+      connectedAccounts,
+      hasValidWalletAuth: isAuthAddressAuthorized({
+        address: walletAddress,
+        connectedAccounts,
+      }),
+      isConnected: !!walletAddress,
+      seizeDisconnect: mockSeizeDisconnect,
+      seizeDisconnectAndLogout: mockSeizeDisconnectAndLogout,
+      isSafeWallet: false,
+      connectionState: connectionState,
+    };
+  }),
 }));
 
 const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<

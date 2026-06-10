@@ -240,10 +240,10 @@ export function HeaderQRModal({
   const [shouldRender, setShouldRender] = useState(show);
   const [isVisible, setIsVisible] = useState(show);
 
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { hasValidWalletAuth } = useSeizeConnectContext();
 
   const [activeTab, setActiveTab] = useState<Mode>(
-    isAuthenticated ? Mode.SHARE : Mode.NAVIGATE
+    hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE
   );
   const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
 
@@ -255,7 +255,7 @@ export function HeaderQRModal({
   const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
     useState<string>("");
   const [canShareConnection, setCanShareConnection] =
-    useState<boolean>(isAuthenticated);
+    useState<boolean>(hasValidWalletAuth);
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
@@ -382,7 +382,11 @@ export function HeaderQRModal({
     let shareConnectionAppUrl = "";
     let shareConnectionCoreUrl = "";
 
-    if (isConnectionTransferV2Enabled() && walletAddress && isAuthenticated) {
+    if (
+      isConnectionTransferV2Enabled() &&
+      walletAddress &&
+      hasValidWalletAuth
+    ) {
       try {
         const cachedTransfer = cachedConnectionTransferRef.current;
         const addressKey = walletAddress.toLowerCase();
@@ -525,10 +529,10 @@ export function HeaderQRModal({
         transferAbortRef.current = null;
       }
     };
-  }, [show]);
+  }, [show, hasValidWalletAuth]);
 
   useEffect(() => {
-    setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
+    setActiveTab(hasValidWalletAuth ? Mode.SHARE : Mode.NAVIGATE);
     setActiveSubTab(SubMode.APP);
     if (show) return;
     const timer = setTimeout(() => {
@@ -537,7 +541,7 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }, 150);
     return () => clearTimeout(timer);
-  }, [show, isAuthenticated]);
+  }, [show, hasValidWalletAuth]);
 
   useEffect(() => {
     if (show) {

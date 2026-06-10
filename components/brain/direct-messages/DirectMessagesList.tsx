@@ -29,7 +29,7 @@ interface DirectMessagesListProps {
 const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
-  const { isAuthenticated } = useSeizeConnectContext();
+  const { hasValidWalletAuth } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
 
@@ -79,14 +79,15 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, list.length > 0]);
 
-  const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
+  const shouldShowPlaceholder =
+    !hasValidWalletAuth || !connectedProfile?.handle;
   const wavesWithPinned = useMemo(
     () => list.map((w) => ({ ...w, isPinned: false })),
     [list],
   );
 
   if (shouldShowPlaceholder) {
-    if (!isAuthenticated) {
+    if (!hasValidWalletAuth) {
       return <ConnectWallet />;
     }
 

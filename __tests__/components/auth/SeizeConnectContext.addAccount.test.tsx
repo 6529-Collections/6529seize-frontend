@@ -84,6 +84,19 @@ jest.mock("@/services/auth/auth.utils", () => ({
     },
   ]),
   getWalletAddress: jest.fn(() => ACTIVE_ADDRESS),
+  isAuthAddressAuthorized: jest.fn(
+    ({
+      address,
+      connectedAccounts,
+    }: {
+      readonly address: string | null | undefined;
+      readonly connectedAccounts: readonly { readonly address: string }[];
+    }) =>
+      !!address &&
+      connectedAccounts.some(
+        (account) => account.address.toLowerCase() === address.toLowerCase()
+      )
+  ),
   removeAuthJwt: jest.fn(),
   setActiveWalletAccount: jest.fn(() => true),
 }));

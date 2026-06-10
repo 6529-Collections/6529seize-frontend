@@ -44,7 +44,6 @@ import {
   canStoreAnotherWalletAccount,
   getAuthJwt,
   getWalletAddress,
-  isAuthAddressAuthorized,
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
   setActiveWalletAccount,
@@ -146,20 +145,13 @@ export default function Auth({
 
   const {
     address,
-    connectedAccounts,
+    hasValidWalletAuth: isAddressAuthorized,
     isConnected,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     isSafeWallet,
     connectionState,
   } = useSeizeConnectContext();
-
-  const isAddressAuthorized = useMemo(() => {
-    return isAuthAddressAuthorized({
-      address,
-      connectedAccounts,
-    });
-  }, [address, connectedAccounts]);
 
   const {
     signMessage,

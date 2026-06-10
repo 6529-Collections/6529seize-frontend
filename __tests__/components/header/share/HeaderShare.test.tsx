@@ -17,6 +17,7 @@ jest.mock("@/hooks/useElectron", () => ({
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(() => ({
     isAuthenticated: false,
+    hasValidWalletAuth: false,
     seizeConnect: jest.fn(),
     seizeAcceptConnection: jest.fn(),
     address: undefined,
@@ -151,6 +152,7 @@ describe("HeaderShare", () => {
 
     mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
       isAuthenticated: false,
+      hasValidWalletAuth: false,
       seizeConnect: jest.fn(),
       seizeAcceptConnection: jest.fn(),
       address: undefined,
@@ -247,6 +249,7 @@ describe("HeaderShare", () => {
 
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: true,
+        hasValidWalletAuth: true,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: "0x1234567890123456789012345678901234567890",
@@ -278,6 +281,7 @@ describe("HeaderShare", () => {
 
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: false,
+        hasValidWalletAuth: false,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: undefined,
@@ -354,6 +358,7 @@ describe("HeaderShare", () => {
       mockAuthUtils.getWalletRole.mockReturnValue(null);
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: true,
+        hasValidWalletAuth: true,
         seizeConnect: jest.fn(),
         seizeAcceptConnection: jest.fn(),
         address: "0x1234567890123456789012345678901234567890",
