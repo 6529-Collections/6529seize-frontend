@@ -1,7 +1,7 @@
 "use client";
 
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type SidebarWaveDepth = 0 | 1;
 
@@ -39,6 +39,15 @@ export function useSidebarWaveTree({
   const [manualCollapsedParentIds, setManualCollapsedParentIds] = useState<
     readonly string[]
   >([]);
+  const onParentExpandRef = useRef(onParentExpand);
+
+  useEffect(() => {
+    onParentExpandRef.current = onParentExpand;
+  }, [onParentExpand]);
+
+  const requestParentExpand = useCallback((parentWaveId: string) => {
+    onParentExpandRef.current?.(parentWaveId);
+  }, []);
 
   const topLevelWaves = useMemo(
     () => waves.filter((wave) => wave.parentWaveId === null),
@@ -81,8 +90,8 @@ export function useSidebarWaveTree({
       return;
     }
 
-    onParentExpand?.(resolvedActiveParentWaveId);
-  }, [onParentExpand, resolvedActiveParentWaveId]);
+    requestParentExpand(resolvedActiveParentWaveId);
+  }, [requestParentExpand, resolvedActiveParentWaveId]);
 
   const expandedParentIds = useMemo(
     () => new Set(manualExpandedParentIds),
@@ -116,7 +125,7 @@ export function useSidebarWaveTree({
     (waveId: string) => {
       const isExpanded = getIsExpanded(waveId);
       if (!isExpanded) {
-        onParentExpand?.(waveId);
+        requestParentExpand(waveId);
       }
 
       setManualCollapsedParentIds((previousParentIds) => {
@@ -139,7 +148,7 @@ export function useSidebarWaveTree({
         return Array.from(nextExpandedParentIds);
       });
     },
-    [getIsExpanded, onParentExpand]
+    [getIsExpanded, requestParentExpand]
   );
 
   const getRows = useCallback(

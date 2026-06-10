@@ -287,6 +287,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     regularRows,
     rowAnimationOptions
   );
+  const hasAnnouncementRows = animatedAnnouncementRows.length > 0;
+  const hasOfficialRows = animatedOfficialRows.length > 0;
+  const hasPinnedRows = animatedPinnedRows.length > 0;
+  const hasRegularRows = animatedRegularRows.length > 0;
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED
@@ -380,7 +384,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         )}
 
         <div>
-          {announcementRows.length > 0 && (
+          {hasAnnouncementRows && (
             <section
               className={`tw-flex tw-flex-col ${
                 isCollapsed ? "tw-items-center tw-gap-y-2" : ""
@@ -411,14 +415,12 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 ))}
             </section>
           )}
-          {announcementRows.length > 0 &&
+          {hasAnnouncementRows &&
             !hideHeaders &&
-            (officialRows.length > 0 ||
-              pinnedRows.length > 0 ||
-              regularRows.length > 0) && (
+            (hasOfficialRows || hasPinnedRows || hasRegularRows) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {officialRows.length > 0 && (
+          {hasOfficialRows && (
             <section
               className={`tw-flex tw-flex-col ${
                 isCollapsed ? "tw-items-center tw-gap-y-2" : ""
@@ -446,12 +448,12 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 ))}
             </section>
           )}
-          {officialRows.length > 0 &&
+          {hasOfficialRows &&
             !hideHeaders &&
-            (pinnedRows.length > 0 || regularRows.length > 0) && (
+            (hasPinnedRows || hasRegularRows) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {!hideHeaders && pinnedRows.length > 0 && (
+          {!hideHeaders && hasPinnedRows && (
             <section
               className={`tw-flex tw-flex-col ${
                 isCollapsed ? "tw-items-center tw-gap-y-2" : ""
@@ -480,11 +482,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             </section>
           )}
           {!hideHeaders &&
-            pinnedRows.length > 0 &&
-            regularRows.length > 0 && (
+            hasPinnedRows &&
+            hasRegularRows && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {animatedRegularRows.length > 0 ? (
+          {hasRegularRows ? (
             <section
               ref={listContainerRef}
               style={{

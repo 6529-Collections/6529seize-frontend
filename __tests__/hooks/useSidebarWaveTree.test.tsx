@@ -156,6 +156,40 @@ describe("useSidebarWaveTree", () => {
     expect(window.localStorage.length).toBe(0);
   });
 
+  it("does not reload the same active parent when the expand callback changes", () => {
+    const firstOnParentExpand = jest.fn();
+    const secondOnParentExpand = jest.fn();
+    const { result, rerender } = renderHook(
+      ({
+        onParentExpand,
+      }: {
+        readonly onParentExpand: (parentWaveId: string) => void;
+      }) =>
+        useSidebarWaveTree({
+          waves,
+          activeWaveId: "older-child",
+          onParentExpand,
+        }),
+      {
+        initialProps: {
+          onParentExpand: firstOnParentExpand,
+        },
+      }
+    );
+
+    expect(firstOnParentExpand).toHaveBeenCalledTimes(1);
+    expect(firstOnParentExpand).toHaveBeenCalledWith("parent");
+
+    rerender({ onParentExpand: secondOnParentExpand });
+
+    expect(secondOnParentExpand).not.toHaveBeenCalled();
+    expect(
+      result.current
+        .getRows(result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent", "older-child", "newer-child"]);
+  });
+
   it("lets manual collapse hide the active subwave parent rows", () => {
     const onParentExpand = jest.fn();
     const { result } = renderHook(() =>

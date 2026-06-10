@@ -339,6 +339,61 @@ it("keeps child rows mounted while collapse animation runs", () => {
   }
 });
 
+it("keeps official child rows mounted while the section exit animation runs", () => {
+  jest.useFakeTimers();
+
+  try {
+    const officialParent = createMockMinimalWave({
+      id: "official-parent",
+      isOfficial: true,
+      hasSubwaves: true,
+    });
+    const officialChild = createMockMinimalWave({
+      id: "official-child",
+      parentWaveId: "official-parent",
+      createdAt: 10,
+    });
+    const sentinelRef = React.createRef<HTMLDivElement>();
+    const { rerender } = render(
+      <WebUnifiedWavesListWaves
+        waves={[officialParent, officialChild]}
+        onHover={jest.fn()}
+        scrollContainerRef={scrollRef}
+        sentinelRef={sentinelRef}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("toggle-official-parent"));
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("official-parent");
+    expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-official-child")).toBeInTheDocument();
+
+    rerender(
+      <WebUnifiedWavesListWaves
+        waves={[officialChild]}
+        onHover={jest.fn()}
+        scrollContainerRef={scrollRef}
+        sentinelRef={sentinelRef}
+      />
+    );
+
+    expect(screen.queryByTestId("wave-official-parent")).toBeNull();
+    expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("wave-official-child").parentElement
+    ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
+
+    act(() => {
+      jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
+    });
+
+    expect(screen.queryByTestId("wave-official-child")).toBeNull();
+    expect(screen.queryByLabelText("Official waves")).toBeNull();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 it("auto-expands the parent for the active subwave", () => {
   mockUseMyStream.mockReturnValue({
     activeWave: { id: "child", set: jest.fn() },
