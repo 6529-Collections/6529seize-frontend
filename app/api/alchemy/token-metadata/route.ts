@@ -14,10 +14,8 @@ const MAX_BODY_BYTES = 32 * 1024;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 500;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const ANONYMOUS_RATE_LIMIT = 20;
-const AUTHENTICATED_RATE_LIMIT = 60;
+const REQUEST_RATE_LIMIT = 20;
 const MAX_RATE_LIMIT_BUCKETS = 1000;
-const WALLET_AUTH_COOKIE = "wallet-auth";
 const TOKEN_ID_DECIMAL_PATTERN = /^(0|[1-9][0-9]{0,77})$/;
 const TOKEN_ID_HEX_PATTERN = /^0x[0-9a-fA-F]{1,64}$/;
 
@@ -220,57 +218,20 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
   };
 }
 
-function isAuthHeaderWhitespace(value: string): boolean {
-  return value === " " || value === "\t";
-}
-
-function parseBearerToken(authHeader: string | null): string | null {
-  if (!authHeader) {
-    return null;
-  }
-
-  const trimmed = authHeader.trim();
-  const scheme = "bearer";
-  if (!trimmed.toLowerCase().startsWith(scheme)) {
-    return null;
-  }
-
-  let index = scheme.length;
-  if (!isAuthHeaderWhitespace(trimmed[index] ?? "")) {
-    return null;
-  }
-
-  while (isAuthHeaderWhitespace(trimmed[index] ?? "")) {
-    index += 1;
-  }
-
-  const token = trimmed.slice(index).trim();
-  return token.length > 0 ? token : null;
-}
-
-function getRequestAuthToken(request: NextRequest): string | null {
-  const bearer = parseBearerToken(request.headers.get("authorization"));
-  if (bearer) {
-    return bearer;
-  }
-
-  const walletCookie = request.cookies?.get(WALLET_AUTH_COOKIE)?.value?.trim();
-  return walletCookie && walletCookie.length > 0 ? walletCookie : null;
-}
-
 function getClientAddress(request: NextRequest): string {
-  const forwardedFor = request.headers
-    .get("x-forwarded-for")
-    ?.split(",")[0]
-    ?.trim();
-  if (forwardedFor) {
-    return forwardedFor;
+  const proxyAddress =
+    request.headers.get("cf-connecting-ip")?.trim() ||
+    request.headers.get("x-real-ip")?.trim() ||
+    request.headers.get("x-forwarded-for")?.trim();
+
+  if (proxyAddress) {
+    return proxyAddress;
   }
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
+  return "unknown";
 }
 
 function fingerprint(value: string): string {
-  // Avoid storing raw auth tokens or IP headers in rate-limit map keys.
+  // Avoid storing raw IP headers in rate-limit map keys.
   let hash = 0x811c9dc5;
   for (let i = 0; i < value.length; i += 1) {
     hash ^= value.charCodeAt(i);
@@ -279,25 +240,9 @@ function fingerprint(value: string): string {
   return `${value.length.toString(36)}:${(hash >>> 0).toString(36)}`;
 }
 
-function getRateLimitKey(request: NextRequest): {
-  key: string;
-  limit: number;
-} {
-  const authToken = getRequestAuthToken(request);
-  if (authToken) {
-    return {
-      key: `auth:${fingerprint(authToken)}`,
-      limit: AUTHENTICATED_RATE_LIMIT,
-    };
-  }
-
+function getRateLimitKey(request: NextRequest): string {
   const clientAddress = getClientAddress(request);
-  const userAgent = request.headers.get("user-agent") ?? "";
-  const anonymousIdentity = `${clientAddress}:${userAgent.slice(0, 128)}`;
-  return {
-    key: `anon:${fingerprint(anonymousIdentity)}`,
-    limit: ANONYMOUS_RATE_LIMIT,
-  };
+  return `client:${fingerprint(clientAddress)}`;
 }
 
 function pruneRateLimitBuckets(now = Date.now()): void {
@@ -326,7 +271,7 @@ function enforceRateLimit(request: NextRequest): NextResponse | null {
   const now = Date.now();
   pruneRateLimitBuckets(now);
 
-  const { key, limit } = getRateLimitKey(request);
+  const key = getRateLimitKey(request);
   const existing = rateLimitBuckets.get(key);
   const entry =
     existing && existing.resetAt > now
@@ -336,7 +281,7 @@ function enforceRateLimit(request: NextRequest): NextResponse | null {
   entry.count += 1;
   rateLimitBuckets.set(key, entry);
 
-  if (entry.count <= limit) {
+  if (entry.count <= REQUEST_RATE_LIMIT) {
     return null;
   }
 

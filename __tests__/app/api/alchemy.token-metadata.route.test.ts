@@ -31,9 +31,25 @@ jest.mock("@/lib/security/urlGuard", () => {
   };
 });
 
+import type { NextRequest } from "next/server";
 import { POST } from "@/app/api/alchemy/token-metadata/route";
 
 const CONTRACT = "0x0000000000000000000000000000000000000001";
+
+type MockBodyReadResult =
+  | { readonly done: false; readonly value: Uint8Array }
+  | { readonly done: true; readonly value: undefined };
+
+type MockRequest = {
+  readonly body: {
+    getReader(): {
+      read: jest.Mock<Promise<MockBodyReadResult>, []>;
+    };
+  };
+  readonly cookies: { readonly get: jest.Mock };
+  readonly headers: Headers;
+  readonly signal: AbortSignal;
+};
 
 type RouteResponse = {
   readonly body: unknown;
@@ -45,16 +61,16 @@ function requestFor(
   body: unknown,
   clientIp: string,
   headers?: Record<string, string>
-): unknown {
+): NextRequest {
   const rawBody = typeof body === "string" ? body : JSON.stringify(body);
   const encodedBody = new TextEncoder().encode(rawBody);
   let bodyRead = false;
 
-  return {
+  const request: MockRequest = {
     body: {
       getReader() {
         return {
-          read: jest.fn(async () => {
+          read: jest.fn<Promise<MockBodyReadResult>, []>(async () => {
             if (bodyRead) {
               return { done: true, value: undefined };
             }
@@ -73,6 +89,7 @@ function requestFor(
     }),
     signal: new AbortController().signal,
   };
+  return request as unknown as NextRequest;
 }
 
 describe("app/api/alchemy/token-metadata route", () => {
@@ -94,10 +111,10 @@ describe("app/api/alchemy/token-metadata route", () => {
     };
 
     const first = (await POST(
-      requestFor(body, "203.0.113.10") as any
+      requestFor(body, "203.0.113.10")
     )) as RouteResponse;
     const second = (await POST(
-      requestFor(body, "203.0.113.11") as any
+      requestFor(body, "203.0.113.11")
     )) as RouteResponse;
 
     expect(first.status).toBe(200);
@@ -129,7 +146,7 @@ describe("app/api/alchemy/token-metadata route", () => {
           ),
         },
         "203.0.113.20"
-      ) as any
+      )
     )) as RouteResponse;
 
     expect(response.status).toBe(413);
@@ -144,10 +161,10 @@ describe("app/api/alchemy/token-metadata route", () => {
       requestFor(
         { tokens: [{ contract: "not-an-address", tokenId: "1" }] },
         "203.0.113.30"
-      ) as any
+      )
     )) as RouteResponse;
     const invalidTokenId = (await POST(
-      requestFor({ address: CONTRACT, tokenIds: ["-1"] }, "203.0.113.31") as any
+      requestFor({ address: CONTRACT, tokenIds: ["-1"] }, "203.0.113.31")
     )) as RouteResponse;
 
     expect(invalidContract.status).toBe(400);
@@ -165,7 +182,27 @@ describe("app/api/alchemy/token-metadata route", () => {
         requestFor(
           { address: CONTRACT, tokenIds: [String(1000 + index)] },
           "203.0.113.40"
-        ) as any
+        )
+      )) as RouteResponse;
+    }
+
+    expect(response?.status).toBe(429);
+    expect(response?.body).toEqual({
+      error: "Too many token metadata requests",
+    });
+    expect(mockFetchPublicJson).toHaveBeenCalledTimes(20);
+  });
+
+  it("does not let arbitrary bearer headers bypass the client rate limit", async () => {
+    let response: RouteResponse | undefined;
+
+    for (let index = 0; index < 21; index += 1) {
+      response = (await POST(
+        requestFor(
+          { address: CONTRACT, tokenIds: [String(2000 + index)] },
+          "203.0.113.41",
+          { authorization: `Bearer caller-supplied-${index}` }
+        )
       )) as RouteResponse;
     }
 
@@ -181,7 +218,7 @@ describe("app/api/alchemy/token-metadata route", () => {
       requestFor(
         `{"address":"${CONTRACT}","tokenIds":["${"1".repeat(33_000)}"]}`,
         "203.0.113.50"
-      ) as any
+      )
     )) as RouteResponse;
 
     expect(response.status).toBe(413);
