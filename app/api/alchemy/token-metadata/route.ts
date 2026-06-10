@@ -16,8 +16,8 @@ const MAX_CACHE_ENTRIES = 500;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const REQUEST_RATE_LIMIT = 20;
 const MAX_RATE_LIMIT_BUCKETS = 1000;
-const TOKEN_ID_DECIMAL_PATTERN = /^(0|[1-9][0-9]{0,77})$/;
-const TOKEN_ID_HEX_PATTERN = /^0x[0-9a-fA-F]{1,64}$/;
+const TOKEN_ID_DECIMAL_PATTERN = /^(0|[1-9]\d{0,77})$/;
+const TOKEN_ID_HEX_PATTERN = /^0x[\da-fA-F]{1,64}$/;
 
 type TokenMetadataRequestBody = {
   readonly address?: unknown;
@@ -56,14 +56,13 @@ function parseChain(chain: unknown): SupportedChain | null {
 }
 
 function normaliseTokenId(value: unknown): string | null {
-  const tokenId =
-    typeof value === "number"
-      ? Number.isSafeInteger(value) && value >= 0
-        ? String(value)
-        : null
-      : typeof value === "string"
-        ? value.trim()
-        : null;
+  let tokenId: string | null = null;
+  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) {
+    tokenId = String(value);
+  }
+  if (typeof value === "string") {
+    tokenId = value.trim();
+  }
 
   if (!tokenId) {
     return null;
@@ -234,7 +233,7 @@ function fingerprint(value: string): string {
   // Avoid storing raw IP headers in rate-limit map keys.
   let hash = 0x811c9dc5;
   for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
+    hash ^= value.codePointAt(i) ?? 0;
     hash = Math.imul(hash, 0x01000193);
   }
   return `${value.length.toString(36)}:${(hash >>> 0).toString(36)}`;
@@ -257,13 +256,11 @@ function pruneRateLimitBuckets(now = Date.now()): void {
   });
 
   while (rateLimitBuckets.size >= MAX_RATE_LIMIT_BUCKETS) {
-    const oldestKey = rateLimitBuckets.keys().next().value as
-      | string
-      | undefined;
-    if (!oldestKey) {
+    const oldestBucket = rateLimitBuckets.keys().next();
+    if (oldestBucket.done) {
       break;
     }
-    rateLimitBuckets.delete(oldestKey);
+    rateLimitBuckets.delete(oldestBucket.value);
   }
 }
 
@@ -346,7 +343,7 @@ async function readJsonBody(
   rawBody += decoder.decode();
 
   try {
-    return { ok: true, body: JSON.parse(rawBody) as TokenMetadataRequestBody };
+    return { ok: true, body: JSON.parse(rawBody) };
   } catch {
     return { ok: false, response: jsonError("Invalid JSON payload") };
   }
@@ -381,11 +378,11 @@ function pruneBatchCache(now = Date.now()): void {
   });
 
   while (batchCache.size >= MAX_CACHE_ENTRIES) {
-    const oldestKey = batchCache.keys().next().value as string | undefined;
-    if (!oldestKey) {
+    const oldestBatch = batchCache.keys().next();
+    if (oldestBatch.done) {
       break;
     }
-    batchCache.delete(oldestKey);
+    batchCache.delete(oldestBatch.value);
   }
 }
 

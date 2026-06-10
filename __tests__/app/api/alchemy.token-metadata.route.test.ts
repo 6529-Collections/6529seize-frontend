@@ -5,7 +5,6 @@ const mockNextResponseJson = jest.fn((body: unknown, init?: ResponseInit) => ({
 }));
 
 jest.mock("next/server", () => ({
-  NextRequest: class {},
   NextResponse: { json: mockNextResponseJson },
 }));
 
@@ -65,6 +64,14 @@ function requestFor(
   const rawBody = typeof body === "string" ? body : JSON.stringify(body);
   const encodedBody = new TextEncoder().encode(rawBody);
   let bodyRead = false;
+  const requestHeaders = new Headers({
+    "content-type": "application/json",
+    "user-agent": "jest",
+    "x-forwarded-for": clientIp,
+  });
+  Object.entries(headers ?? {}).forEach(([name, value]) => {
+    requestHeaders.set(name, value);
+  });
 
   const request: MockRequest = {
     body: {
@@ -81,12 +88,7 @@ function requestFor(
       },
     },
     cookies: { get: jest.fn() },
-    headers: new Headers({
-      "content-type": "application/json",
-      "user-agent": "jest",
-      "x-forwarded-for": clientIp,
-      ...(headers ?? {}),
-    }),
+    headers: requestHeaders,
     signal: new AbortController().signal,
   };
   return request as unknown as NextRequest;
