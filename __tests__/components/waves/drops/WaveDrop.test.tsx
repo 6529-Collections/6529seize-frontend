@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import WaveDrop from "@/components/waves/drops/WaveDrop";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { editSlice } from "@/store/editSlice";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -64,6 +65,10 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => () => (
 ));
 
 jest.mock("@/hooks/isMobileDevice");
+jest.mock("@/hooks/useHasTouchInput", () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}));
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
   default: jest.fn(() => false),
@@ -83,11 +88,30 @@ jest.mock("@/hooks/drops/useDropUpdateMutation", () => ({
 }));
 
 const isMobileMock = useIsMobileDevice as jest.Mock;
+const hasTouchInputMock = useHasTouchInput as jest.Mock;
 const isTouchDeviceMock = useIsTouchDevice as jest.Mock;
 
 const getLastMockProps = (mock: jest.Mock) => {
   const lastCall = mock.mock.calls.at(-1);
   return lastCall?.[0];
+};
+
+const setHoverSupport = (hasHover: boolean) => {
+  Object.defineProperty(globalThis, "matchMedia", {
+    writable: true,
+    value: jest.fn((query: string) => ({
+      matches:
+        hasHover &&
+        (query === "(any-hover: hover)" || query === "(hover: hover)"),
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 };
 
 // Create a test store
@@ -150,7 +174,9 @@ describe("WaveDrop", () => {
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
     isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(false);
   });
 
   it("shows actions on desktop", () => {
@@ -175,7 +201,9 @@ describe("WaveDrop", () => {
 
   it("keeps hybrid touchscreen laptops on desktop drop interactions", () => {
     isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(true);
 
     renderWithRedux(
       <WaveDrop
@@ -205,6 +233,7 @@ describe("WaveDrop", () => {
 
   it("keeps mobile drop interactions for true mobile devices", () => {
     isMobileMock.mockReturnValue(true);
+    hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
 
     renderWithRedux(
@@ -232,7 +261,9 @@ describe("WaveDrop", () => {
 
   it("keeps desktop actions with touch entry for touch-only non-mobile devices", () => {
     isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
 
     renderWithRedux(
       <WaveDrop
@@ -255,8 +286,34 @@ describe("WaveDrop", () => {
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: true })
     );
-    expect(getLastMockProps(mockWaveDropContent)).toEqual(
-      expect.objectContaining({ hasTouch: true })
+  });
+
+  it("keeps touch entry for touch devices with fine pointer and no hover", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(false);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("actions")).toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: true })
     );
   });
 

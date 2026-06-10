@@ -12,6 +12,7 @@ import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -41,6 +42,27 @@ import WaveDropReply from "./WaveDropReply";
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
+
+const getHasHoverInput = (): boolean => {
+  const win = globalThis as typeof globalThis & {
+    matchMedia?: (query: string) => MediaQueryList;
+  };
+
+  return (
+    (win.matchMedia?.("(any-hover: hover)")?.matches ?? false) ||
+    (win.matchMedia?.("(hover: hover)")?.matches ?? false)
+  );
+};
+
+const useHasHoverInput = (): boolean => {
+  const [hasHoverInput, setHasHoverInput] = useState(getHasHoverInput);
+
+  useEffect(() => {
+    setHasHoverInput(getHasHoverInput());
+  }, []);
+
+  return hasHoverInput;
+};
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -686,7 +708,10 @@ const WaveDrop = ({
 
   const isMobile = useIsMobileDevice();
   const isTouchOnlyDevice = useIsTouchDevice();
-  const hasTouch = isTouchOnlyDevice || isMobile;
+  const hasTouchInput = useHasTouchInput();
+  const hasHoverInput = useHasHoverInput();
+  const hasTouch =
+    isMobile || isTouchOnlyDevice || (hasTouchInput && !hasHoverInput);
   const breakpoint = useBreakpoint();
   const isMdUp = breakpoint === "MD";
   const allowLongPress = showInteractions && hasTouch && !isMdUp;
