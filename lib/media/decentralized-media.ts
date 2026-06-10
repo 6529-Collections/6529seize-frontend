@@ -405,7 +405,12 @@ function buildSubdomainUrl(
 }
 
 function normalizeOrigin(origin: string): string {
-  return origin.replace(/\/+$/, "");
+  let end = origin.length;
+  while (end > 0 && origin.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return origin.slice(0, end);
 }
 
 function parseHttpUrl(input: string): URL | null {
