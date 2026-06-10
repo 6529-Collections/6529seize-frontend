@@ -264,6 +264,14 @@ export function UnlockAppWalletModal(
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const sensitiveActionConfirmed =
+    !sensitiveAction || confirmation === sensitiveAction.confirmationText;
+
+  const canUnlock =
+    !unlocking &&
+    walletPass.length >= LEGACY_UNLOCK_MIN_PASS_LENGTH &&
+    sensitiveActionConfirmed;
+
   const handleHide = useCallback(() => {
     setWalletPass("");
     setConfirmation("");
@@ -273,11 +281,7 @@ export function UnlockAppWalletModal(
   }, [onHide]);
 
   const handleKeyPress = (e: any) => {
-    if (
-      e.key === "Enter" &&
-      walletPass &&
-      (!sensitiveAction || confirmation === sensitiveAction.confirmationText)
-    ) {
+    if (e.key === "Enter" && canUnlock) {
       handleUnlock();
     }
   };
@@ -333,9 +337,6 @@ export function UnlockAppWalletModal(
     showUnlockError,
     walletPass,
   ]);
-
-  const sensitiveActionConfirmed =
-    !sensitiveAction || confirmation === sensitiveAction.confirmationText;
 
   return (
     <Modal
@@ -409,16 +410,7 @@ export function UnlockAppWalletModal(
         <Button variant="secondary" onClick={() => handleHide()}>
           Cancel
         </Button>
-        <Button
-          variant="primary"
-          disabled={
-            unlocking ||
-            !walletPass ||
-            walletPass.length < LEGACY_UNLOCK_MIN_PASS_LENGTH ||
-            !sensitiveActionConfirmed
-          }
-          onClick={handleUnlock}
-        >
+        <Button variant="primary" disabled={!canUnlock} onClick={handleUnlock}>
           {unlocking ? "Unlocking..." : "Unlock"}
         </Button>
       </Modal.Footer>
