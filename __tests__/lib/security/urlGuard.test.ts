@@ -22,6 +22,7 @@ type MockAgentOptions = {
 
 const mockAgentOptions: MockAgentOptions[] = [];
 const mockAgentInstances: unknown[] = [];
+const mockAgentOptionsByInstance = new WeakMap<object, MockAgentOptions>();
 const mockUndiciFetch = jest.fn();
 
 jest.mock("undici", () => ({
@@ -31,6 +32,7 @@ jest.mock("undici", () => ({
       destroy: jest.fn(),
       dispatch: jest.fn(),
     };
+    mockAgentOptionsByInstance.set(instance, options);
     mockAgentOptions.push(options);
     mockAgentInstances.push(instance);
     return instance;
@@ -77,10 +79,11 @@ const readPinnedLookupAddress = async (
   const dispatcher = (
     init as (RequestInit & { dispatcher?: unknown }) | undefined
   )?.dispatcher;
-  const dispatcherIndex = mockAgentInstances.indexOf(dispatcher);
-  expect(dispatcherIndex).toBeGreaterThanOrEqual(0);
+  if (typeof dispatcher !== "object" || dispatcher === null) {
+    throw new Error("Pinned dispatcher was not configured.");
+  }
 
-  const lookup = mockAgentOptions[dispatcherIndex]?.connect?.lookup;
+  const lookup = mockAgentOptionsByInstance.get(dispatcher)?.connect?.lookup;
   if (!lookup) {
     throw new Error("Pinned lookup was not configured for dispatcher.");
   }
@@ -104,6 +107,8 @@ describe("urlGuard", () => {
   beforeEach(() => {
     lookup.mockReset();
     mockUndiciFetch.mockReset();
+    mockAgentOptions.length = 0;
+    mockAgentInstances.length = 0;
   });
 
   it("validates redirect hops before fetching content", async () => {
