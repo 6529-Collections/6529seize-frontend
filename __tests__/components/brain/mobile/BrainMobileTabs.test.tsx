@@ -12,6 +12,7 @@ enum BrainView {
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
+  POLLS = "POLLS",
   FAQ = "FAQ",
   WAVES = "WAVES",
   MESSAGES = "MESSAGES",
@@ -196,6 +197,27 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("My Votes")).toBeInTheDocument();
     expect(screen.getByText("Outcome")).toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
+  });
+
+  it("renders Polls for active waves and switches to it", async () => {
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={createWave()}
+      />
+    );
+
+    const polls = screen.getByRole("button", { name: /polls/i });
+    expect(polls).toBeInTheDocument();
+
+    await userEvent.click(polls);
+
+    expect(onViewChange).toHaveBeenCalledWith(BrainView.POLLS);
   });
 
   it("renders My Votes for curation rank wave", () => {

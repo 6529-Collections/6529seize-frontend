@@ -12,6 +12,7 @@
  */
 
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
+import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
@@ -27,6 +28,7 @@ export class ApiCreateDropRequest {
     'drop_type'?: ApiDropType;
     'is_additional_action_promised'?: boolean;
     'mentioned_groups'?: Array<ApiDropGroupMention>;
+    'poll'?: ApiCreateDropPollRequest;
     'title'?: string | null;
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
@@ -73,6 +75,12 @@ export class ApiCreateDropRequest {
             "name": "mentioned_groups",
             "baseName": "mentioned_groups",
             "type": "Array<ApiDropGroupMention>",
+            "format": ""
+        },
+        {
+            "name": "poll",
+            "baseName": "poll",
+            "type": "ApiCreateDropPollRequest",
             "format": ""
         },
         {

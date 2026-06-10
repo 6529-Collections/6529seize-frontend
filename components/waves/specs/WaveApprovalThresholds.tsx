@@ -203,29 +203,37 @@ export default function WaveApprovalThresholds({
   const approvalCountLabel = formatApprovalCount(threshold);
   const minDurationLabel = formatThresholdMinDuration(minDurationMs);
 
-  const renderEditor =
-    (field: ApprovalThresholdEditorField) =>
-    ({ closeEditor }: { readonly closeEditor: () => void }) => (
-      <WaveApprovalThresholdsEditorForm
-        disabled={mutating}
-        field={field}
-        inputRef={inputRef}
-        minTimeValue={minTimeValue}
-        onCancel={closeEditor}
-        onMinTimeValueChange={setMinTimeValue}
-        onSave={() => {
-          if (field === "threshold") {
-            handleSaveThreshold(closeEditor);
-            return;
-          }
-          handleSaveHoldTime(closeEditor);
-        }}
-        onThresholdValueChange={setThresholdValue}
-        onUnitChange={setUnit}
-        thresholdValue={thresholdValue}
-        unit={unit}
-      />
-    );
+  const renderEditor = (field: ApprovalThresholdEditorField) => {
+    function WaveApprovalThresholdsFieldEditor({
+      closeEditor,
+    }: {
+      readonly closeEditor: () => void;
+    }) {
+      return (
+        <WaveApprovalThresholdsEditorForm
+          disabled={mutating}
+          field={field}
+          inputRef={inputRef}
+          minTimeValue={minTimeValue}
+          onCancel={closeEditor}
+          onMinTimeValueChange={setMinTimeValue}
+          onSave={() => {
+            if (field === "threshold") {
+              handleSaveThreshold(closeEditor);
+              return;
+            }
+            handleSaveHoldTime(closeEditor);
+          }}
+          onThresholdValueChange={setThresholdValue}
+          onUnitChange={setUnit}
+          thresholdValue={thresholdValue}
+          unit={unit}
+        />
+      );
+    }
+
+    return WaveApprovalThresholdsFieldEditor;
+  };
 
   return (
     <>

@@ -2493,6 +2493,96 @@ paths:
           description: Invalid request
         "404":
           description: Drop not found
+  /v2/drops/{id}/poll/{option_no}/voters:
+    get:
+      tags:
+        - DropsV2
+      summary: Get V2 drop poll option voters by drop ID and option number.
+      operationId: getDropPollOptionVotersV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drop-polls.handlers"
+          name: handleGetDropPollOptionVotersV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: option_no
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropPollVotersPage"
+        "400":
+          description: Invalid request
+        "404":
+          description: Drop, poll, or option not found
+  /v2/drops/{id}/poll/vote:
+    post:
+      tags:
+        - DropsV2
+      summary: Vote in a V2 drop poll.
+      operationId: voteDropPollV2
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drops/drop-polls.handlers"
+          name: handleVoteDropPollV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropPollVoteRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropV2"
+        "400":
+          description: Invalid request or closed poll
+        "403":
+          description: User cannot vote
+        "404":
+          description: Drop or poll not found
   /feed:
     get:
       tags:
@@ -7515,6 +7605,75 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeedV2"
+  /v2/waves/{id}/polls:
+    get:
+      tags:
+        - WavesV2
+      summary: Get V2 polls in a wave.
+      operationId: getWavePollsV2
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/drops/drop-polls.handlers"
+          name: handleGetWavePollsV2
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+            default: ASC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - created_at
+              - closing_time
+            default: created_at
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - open
+              - closed
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropPollsPage"
+        "400":
+          description: Invalid request
+        "404":
+          description: Wave not found
   /v2/waves/{id}/curations/{curation_id}/drops:
     get:
       tags:
@@ -9427,6 +9586,28 @@ components:
           default: []
           items:
             $ref: "#/components/schemas/ApiDropAttachmentReference"
+    ApiCreateDropPollRequest:
+      type: object
+      required:
+        - options
+        - multichoice
+        - closing_time
+      properties:
+        options:
+          type: array
+          minItems: 2
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 500
+        multichoice:
+          type: boolean
+        closing_time:
+          type: integer
+          format: int64
+          description: Future Unix timestamp in milliseconds.
     ApiCreateDropRequest:
       type: object
       required:
@@ -9447,6 +9628,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropGroupMention"
+        poll:
+          $ref: "#/components/schemas/ApiCreateDropPollRequest"
     ApiCreateGroup:
       type: object
       required:
@@ -10201,6 +10384,8 @@ components:
           nullable: true
         hide_link_preview:
           type: boolean
+        poll:
+          $ref: "#/components/schemas/ApiDropPoll"
         nft_links:
           type: array
           items:
@@ -10504,6 +10689,89 @@ components:
             $ref: "#/components/schemas/ApiAttachment"
         quoted_drop:
           $ref: "#/components/schemas/ApiDropPartQuoteV2"
+    ApiDropPoll:
+      type: object
+      required:
+        - id
+        - options
+        - voted
+        - multichoice
+        - closing_time
+        - is_open
+      properties:
+        id:
+          type: string
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropPollOption"
+        voted:
+          description: Option numbers voted for by the authenticated context profile.
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+        multichoice:
+          type: boolean
+        closing_time:
+          type: integer
+          format: int64
+        is_open:
+          type: boolean
+    ApiDropPollOption:
+      type: object
+      required:
+        - option_no
+        - option_string
+        - votes
+      properties:
+        option_no:
+          type: integer
+          format: int64
+          minimum: 1
+        option_string:
+          type: string
+          maxLength: 500
+        votes:
+          type: integer
+          format: int64
+    ApiDropPollsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWavePoll"
+    ApiDropPollVoteRequest:
+      type: object
+      required:
+        - options
+      properties:
+        options:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+    ApiDropPollVotersPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiIdentityOverview"
     ApiDropRater:
       type: object
       required:
@@ -10763,6 +11031,8 @@ components:
           $ref: "#/components/schemas/ApiSubmissionDropContext"
         context_profile_context:
           $ref: "#/components/schemas/ApiDropV2ContextProfileContext"
+        poll:
+          $ref: "#/components/schemas/ApiDropPoll"
         wave:
           $ref: "#/components/schemas/ApiWaveOverview"
     ApiDropV2ContextProfileContext:
@@ -11020,6 +11290,8 @@ components:
           nullable: true
         hide_link_preview:
           type: boolean
+        poll:
+          $ref: "#/components/schemas/ApiDropPoll"
         nft_links:
           type: array
           items:
@@ -14919,6 +15191,46 @@ components:
       type: string
       enum:
         - IDENTITY
+    ApiWavePoll:
+      type: object
+      required:
+        - id
+        - wave_id
+        - drop_id
+        - created_at
+        - options
+        - voted
+        - multichoice
+        - closing_time
+        - is_open
+      properties:
+        id:
+          type: string
+        wave_id:
+          type: string
+        drop_id:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+        options:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropPollOption"
+        voted:
+          description: Option numbers voted for by the authenticated context profile.
+          type: array
+          items:
+            type: integer
+            format: int64
+            minimum: 1
+        multichoice:
+          type: boolean
+        closing_time:
+          type: integer
+          format: int64
+        is_open:
+          type: boolean
     ApiWaveRequiredMetadata:
       type: object
       required:

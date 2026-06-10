@@ -25,6 +25,7 @@ interface UseBrainMobileActiveViewParams {
   readonly isApp: boolean;
   readonly isCompleted: boolean;
   readonly hasAuthenticatedProfile: boolean;
+  readonly hasPolls?: boolean | undefined;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
@@ -43,6 +44,7 @@ interface UseBrainMobileActiveViewResult {
 interface WaveViewState {
   readonly firstDecisionDone: boolean;
   readonly hasAuthenticatedProfile: boolean;
+  readonly hasPolls: boolean;
   readonly isApproveWave: boolean;
   readonly isCompleted: boolean;
   readonly isCurationWave: boolean;
@@ -117,6 +119,7 @@ function getWaveDefaultView({
 function getWaveViewAvailability({
   firstDecisionDone,
   hasAuthenticatedProfile,
+  hasPolls = false,
   isApproveWave,
   isCompleted,
   isCurationWave,
@@ -134,6 +137,7 @@ function getWaveViewAvailability({
     [BrainView.OUTCOME]: isCompetitionWave && !isCurationWave,
     [BrainView.MY_VOTES]:
       isCompetitionWave && (isCurationWave || hasAuthenticatedProfile),
+    [BrainView.POLLS]: hasPolls,
     [BrainView.FAQ]: isMemesWave,
   };
 }
@@ -144,6 +148,7 @@ function normalizeActiveView({
   hasWave,
   isCompleted,
   hasAuthenticatedProfile,
+  hasPolls,
   isCurationWave,
   isMemesWave,
   isRankWave,
@@ -156,6 +161,7 @@ function normalizeActiveView({
   readonly hasWave: boolean;
   readonly isCompleted: boolean;
   readonly hasAuthenticatedProfile: boolean;
+  readonly hasPolls: boolean;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
@@ -167,6 +173,7 @@ function normalizeActiveView({
   const waveViewState: WaveViewState = {
     firstDecisionDone,
     hasAuthenticatedProfile,
+    hasPolls,
     isApproveWave,
     isCompleted,
     isCurationWave,
@@ -219,6 +226,7 @@ export function useBrainMobileActiveView({
   isApp,
   isCompleted,
   hasAuthenticatedProfile,
+  hasPolls = false,
   isCurationWave,
   isMemesWave,
   isRankWave,
@@ -271,6 +279,7 @@ export function useBrainMobileActiveView({
     hasWave,
     isCompleted,
     hasAuthenticatedProfile,
+    hasPolls,
     isCurationWave,
     isMemesWave,
     isRankWave,

@@ -6,6 +6,10 @@ import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadata
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
 import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
+import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import type { ApiDropPollVoteRequest } from "@/generated/models/ApiDropPollVoteRequest";
+import type { ApiDropPollsPage } from "@/generated/models/ApiDropPollsPage";
+import type { ApiDropPollVotersPage } from "@/generated/models/ApiDropPollVotersPage";
 import type { ApiDropRater } from "@/generated/models/ApiDropRater";
 import type { ApiDropReaction } from "@/generated/models/ApiDropReaction";
 import type { ApiDropReactionV2 } from "@/generated/models/ApiDropReactionV2";
@@ -21,10 +25,13 @@ import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import type { ApiPageSortDirection } from "@/generated/models/ApiPageSortDirection";
 import {
   commonApiFetch,
   commonApiFetchWithRetry,
+  commonApiPost,
 } from "@/services/api/common-api";
 import {
   createBasePart,
@@ -98,6 +105,25 @@ interface FetchWaveDropsSearchV2Props {
   readonly term: string;
   readonly page: number;
   readonly size: number;
+  readonly signal?: AbortSignal | undefined;
+}
+
+export type WavePollsState = "OPEN" | "CLOSED";
+export type WavePollsSort = "created_at" | "closing_time";
+export type ApiWavePollDropRow = Partial<ApiWavePoll> & {
+  readonly poll?: ApiDropPoll | undefined;
+};
+type ApiWavePollsPage = Omit<ApiDropPollsPage, "data"> & {
+  readonly data: ApiWavePollDropRow[];
+};
+
+interface FetchWavePollsV2Props {
+  readonly waveId: string;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly sortDirection: ApiPageSortDirection;
+  readonly sort: WavePollsSort;
+  readonly state?: WavePollsState | undefined;
   readonly signal?: AbortSignal | undefined;
 }
 
@@ -389,6 +415,7 @@ const hydrateDropV2 = async ({
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
+    ...(drop.poll ? { poll: drop.poll } : {}),
     nft_links: drop.nft_links ?? [],
   };
 };
@@ -438,6 +465,7 @@ export const mapLeaderboardDropV2 = ({
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,
+    ...(drop.poll ? { poll: drop.poll } : {}),
     nft_links: drop.nft_links ?? [],
   };
 };
@@ -633,6 +661,33 @@ export async function fetchWaveDropsSearchV2({
   };
 }
 
+export async function fetchWavePollsV2({
+  waveId,
+  page,
+  pageSize,
+  sortDirection,
+  sort,
+  state,
+  signal,
+}: FetchWavePollsV2Props): Promise<ApiWavePollsPage> {
+  const params: Record<string, string> = {
+    page: page.toString(),
+    page_size: pageSize.toString(),
+    sort_direction: sortDirection,
+    sort,
+  };
+
+  if (state) {
+    params["state"] = state;
+  }
+
+  return commonApiFetch<ApiWavePollsPage>({
+    endpoint: `v2/waves/${waveId}/polls`,
+    params,
+    signal,
+  });
+}
+
 export async function fetchDropV2ById(
   dropId: string,
   signal?: AbortSignal,
@@ -649,6 +704,53 @@ export async function fetchDropV2ById(
     signal,
     includeFullMetadata: options?.includeFullMetadata ?? false,
     includeTopRaters: options?.includeTopRaters ?? false,
+  });
+}
+
+export async function voteDropPollV2({
+  drop,
+  options,
+}: {
+  readonly drop: ApiDrop;
+  readonly options: readonly number[];
+}): Promise<ApiDrop> {
+  const response = await commonApiPost<ApiDropPollVoteRequest, ApiDropV2>({
+    endpoint: `v2/drops/${getDropEndpointId(getNormalizedDropId(drop.id))}/poll/vote`,
+    body: {
+      options,
+    } as unknown as ApiDropPollVoteRequest,
+  });
+
+  return hydrateDropV2({
+    drop: response,
+    wave: normalizeWaveMin(drop.wave),
+    includeFullMetadata: false,
+    includeTopRaters: false,
+  });
+}
+
+export async function fetchDropPollOptionVotersV2({
+  dropId,
+  optionNo,
+  page,
+  pageSize,
+  signal,
+}: {
+  readonly dropId: string;
+  readonly optionNo: number;
+  readonly page: number;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<ApiDropPollVotersPage> {
+  return commonApiFetch<ApiDropPollVotersPage>({
+    endpoint: `v2/drops/${getDropEndpointId(
+      getNormalizedDropId(dropId)
+    )}/poll/${optionNo}/voters`,
+    params: {
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    },
+    signal,
   });
 }
 

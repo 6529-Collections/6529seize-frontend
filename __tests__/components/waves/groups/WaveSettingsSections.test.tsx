@@ -251,7 +251,7 @@ describe("WaveSettingsSections", () => {
 
     expect(screen.getByText("Approvals tab")).toBeInTheDocument();
     expect(screen.getByText("Approved tab")).toBeInTheDocument();
-    expect(screen.getByText("Approvals")).toBeInTheDocument();
+    expect(screen.getByText("Proposals")).toBeInTheDocument();
     expect(screen.getByText("Approved")).toBeInTheDocument();
     await waitFor(() => {
       expect(
@@ -351,7 +351,7 @@ describe("WaveSettingsSections", () => {
     expect(
       screen.queryByLabelText("Approved tab label")
     ).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Approvals")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Proposals")).toBeInTheDocument();
   });
 
   it("opens tab label editor with custom metadata values", async () => {
@@ -527,7 +527,7 @@ describe("WaveSettingsSections", () => {
     await user.click(
       await screen.findByRole("button", { name: "Edit approved tab label" })
     );
-    await user.type(screen.getByLabelText("Approved tab label"), "Approvals");
+    await user.type(screen.getByLabelText("Approved tab label"), "Proposals");
 
     expect(
       screen.getByText("Use two different tab labels.")

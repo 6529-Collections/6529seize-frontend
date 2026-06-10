@@ -204,33 +204,41 @@ export default function WaveApproveTabLabels({
     );
   };
 
-  const renderEditor =
-    (field: ApproveTabLabelField) =>
-    ({ closeEditor }: { readonly closeEditor: () => void }) => (
-      <WaveApproveTabLabelsEditorForm
-        disabled={isSaving}
-        display={draft}
-        errorMessage={visibleErrorMessage}
-        field={field}
-        onCancel={closeEditor}
-        onDisplayChange={setTouchedDraft}
-        onSave={() => {
-          setHasSubmitted(true);
-          if (validationErrorMessage) {
-            return;
-          }
-          saveLabels(closeEditor, field, { ...draft }, metadata);
-        }}
-        onUseDefault={() => {
-          setTouchedDraft(
-            field === "approvals"
-              ? { ...draft, approvalsTabLabel: "" }
-              : { ...draft, approvedTabLabel: "" }
-          );
-        }}
-        saveDisabled={getSaveDisabled(field)}
-      />
-    );
+  const renderEditor = (field: ApproveTabLabelField) => {
+    function WaveApproveTabLabelsFieldEditor({
+      closeEditor,
+    }: {
+      readonly closeEditor: () => void;
+    }) {
+      return (
+        <WaveApproveTabLabelsEditorForm
+          disabled={isSaving}
+          display={draft}
+          errorMessage={visibleErrorMessage}
+          field={field}
+          onCancel={closeEditor}
+          onDisplayChange={setTouchedDraft}
+          onSave={() => {
+            setHasSubmitted(true);
+            if (validationErrorMessage) {
+              return;
+            }
+            saveLabels(closeEditor, field, { ...draft }, metadata);
+          }}
+          onUseDefault={() => {
+            setTouchedDraft(
+              field === "approvals"
+                ? { ...draft, approvalsTabLabel: "" }
+                : { ...draft, approvedTabLabel: "" }
+            );
+          }}
+          saveDisabled={getSaveDisabled(field)}
+        />
+      );
+    }
+
+    return WaveApproveTabLabelsFieldEditor;
+  };
 
   return (
     <>
