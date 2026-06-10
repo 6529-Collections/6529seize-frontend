@@ -139,60 +139,61 @@ export function WebSocketProvider({
   /**
    * Parse and route incoming WebSocket messages
    */
-  const handleMessage = useCallback((event: MessageEvent<unknown>) => {
-    if (typeof event.data !== "string") {
-      return;
-    }
-
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(event.data);
-    } catch {
-      return;
-    }
-
-    const message = normalizeIncomingMessage(parsed);
-    if (!message) {
-      return;
-    }
-
-    if (message.type === WEBSOCKET_AUTHENTICATED) {
-      clearAuthenticationTimer();
-      setStatus(WebSocketStatus.CONNECTED);
-      reconnectAttemptsRef.current = 0;
-      return;
-    }
-
-    if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
-      clearAuthenticationTimer();
-      rejectedCredentialMarkerRef.current = reconnectTokenRef.current
-        ? createCredentialMarker(reconnectTokenRef.current)
-        : null;
-      setStatus(WebSocketStatus.DISCONNECTED);
-      isManualDisconnectRef.current = true;
-      wsRef.current?.close(1008, "Authentication failed");
-      return;
-    }
-
-    // Get subscribers for this message type
-    const subscribers = subscribersRef.current.get(message.type);
-
-    if (!subscribers) {
-      return;
-    }
-
-    setWebSocketMessageMetadata(message.data, {
-      reason: message.reason,
-    });
-
-    for (const subscriber of subscribers) {
-      try {
-        subscriber(message.data);
-      } catch {
-        // Keep one subscriber failure from blocking the remaining handlers.
+  const handleMessage = useCallback(
+    (event: MessageEvent<unknown>) => {
+      if (typeof event.data !== "string") {
+        return;
       }
-    }
-  }, [clearAuthenticationTimer]);
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+
+      const message = normalizeIncomingMessage(parsed);
+      if (!message) {
+        return;
+      }
+
+      if (message.type === WEBSOCKET_AUTHENTICATED) {
+        clearAuthenticationTimer();
+        setStatus(WebSocketStatus.CONNECTED);
+        reconnectAttemptsRef.current = 0;
+        return;
+      }
+
+      if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
+        clearAuthenticationTimer();
+        rejectedCredentialMarkerRef.current = reconnectTokenRef.current
+          ? createCredentialMarker(reconnectTokenRef.current)
+          : null;
+        setStatus(WebSocketStatus.DISCONNECTED);
+        isManualDisconnectRef.current = true;
+        wsRef.current?.close(1008, "Authentication failed");
+        return;
+      }
+
+      // Get subscribers for this message type
+      const subscribers = subscribersRef.current.get(message.type);
+
+      if (!subscribers) {
+        return;
+      }
+
+      setWebSocketMessageMetadata(message.data, {
+      reason: message.reason,
+    });for (const subscriber of subscribers) {
+        try {
+          subscriber(message.data);
+        } catch {
+          // Keep one subscriber failure from blocking the remaining handlers.
+        }
+      }
+    },
+    [clearAuthenticationTimer]
+  );
 
   /**
    * Clear any pending reconnection timer

@@ -477,6 +477,40 @@ describe("HeaderShare", () => {
       );
     });
 
+    it("clears one-time transfer URLs as soon as the share modal closes", async () => {
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer
+        .mockResolvedValueOnce({
+          transfer_code: "first-transfer-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?transfer_code=first-transfer-code&address=0x1234567890123456789012345678901234567890",
+        })
+        .mockImplementationOnce(() => new Promise(() => undefined));
+
+      renderWithProviders(<HeaderShare />);
+
+      const shareButton = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(shareButton);
+
+      await screen.findByTitle(/first-transfer-code/);
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(2)
+      );
+      expect(
+        screen.queryByTitle(/first-transfer-code/)
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Connection")).not.toBeInTheDocument();
+    });
+
     it("encodes transfer-code deep-link query values", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");
@@ -497,9 +531,7 @@ describe("HeaderShare", () => {
 
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
-          expect.stringContaining(
-            "transfer_code=transfer%26code%3Dvalue%25"
-          ),
+          expect.stringContaining("transfer_code=transfer%26code%3Dvalue%25"),
           { width: 500, margin: 0 }
         )
       );
