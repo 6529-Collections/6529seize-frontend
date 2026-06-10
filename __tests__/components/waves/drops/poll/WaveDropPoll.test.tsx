@@ -88,17 +88,33 @@ const renderPoll = (poll: ApiDropPoll) => {
     },
   });
 
-  return render(
+  const renderResult = render(
     <QueryClientProvider client={queryClient}>
       <WaveDropPoll drop={createDrop(poll)} />
     </QueryClientProvider>
   );
+
+  return {
+    ...renderResult,
+    rerenderPoll: (nextPoll: ApiDropPoll) =>
+      renderResult.rerender(
+        <QueryClientProvider client={queryClient}>
+          <WaveDropPoll drop={createDrop(nextPoll)} />
+        </QueryClientProvider>
+      ),
+  };
 };
 
 describe("WaveDropPoll", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRequestAuth.mockResolvedValue({ success: true });
+    fetchDropPollOptionVotersV2Mock.mockResolvedValue({
+      data: [],
+      count: 0,
+      page: 1,
+      next: false,
+    });
   });
 
   it("defaults to voting view when the user has not voted", () => {
@@ -160,6 +176,51 @@ describe("WaveDropPoll", () => {
       await screen.findByRole("button", { name: "Change vote" })
     ).toBeInTheDocument();
     expect(mockProcessIncomingDrop).toHaveBeenCalled();
+  });
+
+  it("keeps the user's selected option when a websocket poll update has a stale vote", async () => {
+    const poll = createPoll();
+    const updatedPoll = createPoll({ voted: [2] });
+    const websocketPoll = createPoll({
+      options: [
+        {
+          option_no: 1,
+          option_string: "First",
+          votes: 3,
+        },
+        {
+          option_no: 2,
+          option_string: "Second",
+          votes: 2,
+        },
+      ],
+      voted: [1],
+    });
+    voteDropPollV2Mock.mockResolvedValueOnce(createDrop(updatedPoll));
+
+    const { rerenderPoll } = renderPoll(poll);
+
+    await userEvent.click(screen.getByLabelText("Second"));
+
+    expect(
+      await screen.findByRole("button", { name: "Change vote" })
+    ).toBeInTheDocument();
+
+    rerenderPoll(websocketPoll);
+
+    expect(
+      screen.getByRole("button", { name: "Change vote" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Voted")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /First/ })).not.toHaveClass(
+      "tw-border-iron-600"
+    );
+    expect(screen.getByRole("button", { name: /Second/ })).toHaveClass(
+      "tw-border-iron-600"
+    );
+    expect(
+      screen.queryByRole("button", { name: "Submit vote" })
+    ).not.toBeInTheDocument();
   });
 
   it("keeps closed polls in results view only", () => {
