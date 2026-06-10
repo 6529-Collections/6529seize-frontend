@@ -220,9 +220,36 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
   };
 }
 
+function isAuthHeaderWhitespace(value: string): boolean {
+  return value === " " || value === "\t";
+}
+
+function parseBearerToken(authHeader: string | null): string | null {
+  if (!authHeader) {
+    return null;
+  }
+
+  const trimmed = authHeader.trim();
+  const scheme = "bearer";
+  if (!trimmed.toLowerCase().startsWith(scheme)) {
+    return null;
+  }
+
+  let index = scheme.length;
+  if (!isAuthHeaderWhitespace(trimmed[index] ?? "")) {
+    return null;
+  }
+
+  while (isAuthHeaderWhitespace(trimmed[index] ?? "")) {
+    index += 1;
+  }
+
+  const token = trimmed.slice(index).trim();
+  return token.length > 0 ? token : null;
+}
+
 function getRequestAuthToken(request: NextRequest): string | null {
-  const authHeader = request.headers.get("authorization")?.trim();
-  const bearer = authHeader?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+  const bearer = parseBearerToken(request.headers.get("authorization"));
   if (bearer) {
     return bearer;
   }
