@@ -35,6 +35,7 @@ ROUTE_TOKEN_RE = re.compile(r"`([^`\n]+)`")
 IGNORED_DOCUMENTED_ROUTES = {"/{param}/rep"}
 DOCS_ROOT_PATH = "ops/docs"
 DOCS_ROOT_PARTS = Path(DOCS_ROOT_PATH).parts
+README_FILENAME = "README.md"
 
 
 def run(args: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -445,11 +446,11 @@ def routes_overlap(route_a: str, route_b: str) -> bool:
 
 
 def should_skip_ownership_doc(path: Path, docs_root: Path) -> bool:
-    return path.name == "README.md" and path != docs_root / "README.md"
+    return path.name == README_FILENAME and path != docs_root / README_FILENAME
 
 
 def documented_routes_for_page(path: Path, text: str) -> set[str]:
-    if path.name == "README.md":
+    if path.name == README_FILENAME:
         return set()
 
     routes: set[str] = set()
@@ -611,7 +612,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not areas:
             areas = changed_docs_areas(repo_root, staged=args.staged)
 
-        areas = [area for area in areas if area and area != "README.md"]
+        areas = [area for area in areas if area and area != README_FILENAME]
         if not areas:
             mode = "staged docs changes" if args.staged else "docs changes"
             print(f"No areas found from {mode}.")
