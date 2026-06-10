@@ -141,6 +141,7 @@ export function WebSocketProvider({
 
     if (message.type === WEBSOCKET_AUTHENTICATION_FAILED) {
       setStatus(WebSocketStatus.DISCONNECTED);
+      isManualDisconnectRef.current = true;
       wsRef.current?.close(1008, "Authentication failed");
       return;
     }
