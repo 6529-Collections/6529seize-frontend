@@ -161,10 +161,12 @@ describe("WebSocketProvider", () => {
     });
 
     it("uses message-based authentication in session v2 mode", () => {
+      jest.useFakeTimers();
       const {
         isWalletAuthSessionV2Enabled,
       } = require("@/services/auth/session-v2.utils");
       isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      mockGetAuthJwt.mockReturnValue("test-token");
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -196,6 +198,29 @@ describe("WebSocketProvider", () => {
       });
 
       expect(result.current.status).toBe(WebSocketStatus.CONNECTED);
+
+      act(() => {
+        ws.triggerClose(1006, "Unexpected close");
+        jest.advanceTimersByTime(2000);
+      });
+
+      expect(global.WebSocket).toHaveBeenCalledTimes(2);
+      expect(global.WebSocket).toHaveBeenLastCalledWith("ws://test");
+
+      const reconnectedWs = (
+        global.WebSocket as jest.MockedFunction<typeof WebSocket>
+      ).mock.results[1]?.value as MockWebSocket;
+
+      act(() => {
+        reconnectedWs.triggerOpen();
+      });
+
+      expect(reconnectedWs.send).toHaveBeenCalledWith(
+        JSON.stringify({
+          type: "AUTHENTICATE",
+          access_token: "test-token",
+        })
+      );
     });
 
     it("keeps session v2 sockets disconnected when message authentication fails", () => {

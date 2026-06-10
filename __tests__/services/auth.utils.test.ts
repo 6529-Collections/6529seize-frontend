@@ -239,9 +239,9 @@ describe("auth.utils", () => {
     ).toBe(false);
   });
 
-  it("removeAuthJwt clears storage and cookie", () => {
+  it("removeAuthJwt clears storage and cookie", async () => {
     (safeLocalStorage.getItem as jest.Mock).mockReturnValue("Addr");
-    removeAuthJwt();
+    await removeAuthJwt();
     expect(Cookies.remove).toHaveBeenCalledWith("wallet-auth", {
       secure: true,
       sameSite: "strict",
@@ -290,7 +290,10 @@ describe("auth.utils", () => {
     ).toEqual(["0xAaA", "0xBbB"]);
   });
 
-  it("removeAuthJwt promotes next connected account", () => {
+  it("removeAuthJwt promotes next connected account", async () => {
+    const { removeNativeRefreshToken } = require(
+      "@/services/auth/native-refresh-token-storage"
+    );
     const storage = setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
@@ -298,8 +301,9 @@ describe("auth.utils", () => {
     setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
     setAuthJwt("0x222", "jwt-2", "refresh-2", "role-2");
 
-    removeAuthJwt();
+    await removeAuthJwt();
 
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0x222");
     expect(getWalletAddress()).toBe("0x111");
     expect(getRefreshToken()).toBe("refresh-1");
     expect(storage.get("6529-wallet-active-address")).toBe("0x111");
@@ -308,7 +312,10 @@ describe("auth.utils", () => {
     expect(remainingAccounts[0]?.address).toBe("0x111");
   });
 
-  it("clearAllWalletAuth clears all accounts and cookie", () => {
+  it("clearAllWalletAuth clears all accounts and cookie", async () => {
+    const { removeNativeRefreshToken } = require(
+      "@/services/auth/native-refresh-token-storage"
+    );
     const storage = setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
     jest.spyOn(Date, "now").mockReturnValue(0);
@@ -318,8 +325,10 @@ describe("auth.utils", () => {
     expect(getConnectedWalletAccounts()).toHaveLength(2);
     expect(getWalletAddress()).toBe("0x222");
 
-    clearAllWalletAuth();
+    await clearAllWalletAuth();
 
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0x111");
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0x222");
     expect(getConnectedWalletAccounts()).toHaveLength(0);
     expect(getWalletAddress()).toBe(null);
     expect(getRefreshToken()).toBe(null);

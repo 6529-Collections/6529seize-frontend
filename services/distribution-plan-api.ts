@@ -10,7 +10,7 @@ const handleResponse = async <T>(
   readonly data: T | null;
 }> => {
   if (res.status === 401) {
-    removeAuthJwt();
+    await removeAuthJwt();
     makeErrorToast("Please reconnect your wallet.");
     return {
       success: false,

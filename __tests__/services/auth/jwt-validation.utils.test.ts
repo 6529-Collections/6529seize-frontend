@@ -13,6 +13,12 @@ import { redeemRefreshTokenWithRetries } from "@/services/auth/token-refresh.uti
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
+  isLegacyRefreshEnabled,
+  isWalletAuthSessionV2Enabled,
+  persistSessionResponse,
+  refreshSessionV2,
+} from "@/services/auth/session-v2.utils";
+import {
   TokenRefreshCancelledError,
   AuthenticationRoleError,
   RoleValidationError,
@@ -52,11 +58,26 @@ const mockedRedeemRefreshTokenWithRetries =
 const mockedAreEqualAddresses = areEqualAddresses as jest.MockedFunction<
   typeof areEqualAddresses
 >;
+const mockedIsLegacyRefreshEnabled =
+  isLegacyRefreshEnabled as jest.MockedFunction<typeof isLegacyRefreshEnabled>;
+const mockedIsWalletAuthSessionV2Enabled =
+  isWalletAuthSessionV2Enabled as jest.MockedFunction<
+    typeof isWalletAuthSessionV2Enabled
+  >;
+const mockedPersistSessionResponse =
+  persistSessionResponse as jest.MockedFunction<typeof persistSessionResponse>;
+const mockedRefreshSessionV2 = refreshSessionV2 as jest.MockedFunction<
+  typeof refreshSessionV2
+>;
 
 describe("jwt-validation.utils", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     jest.spyOn(Date, "now").mockReturnValue(1000000 * 1000); // Mock current time
+    mockedIsLegacyRefreshEnabled.mockReturnValue(true);
+    mockedIsWalletAuthSessionV2Enabled.mockReturnValue(false);
+    mockedPersistSessionResponse.mockResolvedValue(true);
+    mockedRefreshSessionV2.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -268,6 +289,7 @@ describe("jwt-validation.utils", () => {
         };
         mockedJwtDecode.mockReturnValue(mockPayload);
         mockedGetRefreshToken.mockReturnValue(null);
+        mockedGetWalletAddress.mockReturnValue(null);
 
         const result = await validateJwt(validParams);
 
@@ -289,6 +311,75 @@ describe("jwt-validation.utils", () => {
         await expect(validateJwt(validParams)).rejects.toThrow(
           "No wallet address available for JWT renewal"
         );
+      });
+
+      it("should refresh via session v2 and persist the session response", async () => {
+        const mockPayload = {
+          id: "user-id",
+          sub: "0x123",
+          iat: 800000,
+          exp: 900000,
+          role: null as any,
+        };
+        const refreshedSession = {
+          client_type: "web" as const,
+          address: "0x123",
+          role: null,
+          access_token: "new-v2-jwt-token",
+          access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        };
+        mockedJwtDecode
+          .mockReturnValueOnce(mockPayload)
+          .mockReturnValueOnce({ ...mockPayload, role: null as any });
+        mockedIsWalletAuthSessionV2Enabled.mockReturnValue(true);
+        mockedGetWalletAddress.mockReturnValue("0x123");
+        mockedGetWalletRole.mockReturnValue(null);
+        mockedRefreshSessionV2.mockResolvedValue(refreshedSession);
+        mockedPersistSessionResponse.mockResolvedValue(true);
+        mockedAreEqualAddresses.mockReturnValue(true);
+
+        const result = await validateJwt(validParams);
+
+        expect(result).toEqual({ isValid: true, wasCancelled: false });
+        expect(mockedRefreshSessionV2).toHaveBeenCalledWith({
+          address: "0x123",
+          abortSignal: validParams.abortSignal,
+        });
+        expect(mockedPersistSessionResponse).toHaveBeenCalledWith(
+          refreshedSession
+        );
+        expect(mockedRedeemRefreshTokenWithRetries).not.toHaveBeenCalled();
+      });
+
+      it("should treat an aborted session v2 persistence failure as cancelled", async () => {
+        const mockPayload = {
+          id: "user-id",
+          sub: "0x123",
+          iat: 800000,
+          exp: 900000,
+          role: null as any,
+        };
+        mockedJwtDecode
+          .mockReturnValueOnce(mockPayload)
+          .mockReturnValueOnce({ ...mockPayload, role: null as any });
+        mockedIsWalletAuthSessionV2Enabled.mockReturnValue(true);
+        mockedGetWalletAddress.mockReturnValue("0x123");
+        mockedGetWalletRole.mockReturnValue(null);
+        mockedRefreshSessionV2.mockResolvedValue({
+          client_type: "web",
+          address: "0x123",
+          role: null,
+          access_token: "new-v2-jwt-token",
+          access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        });
+        mockedPersistSessionResponse.mockRejectedValue(
+          Object.assign(new Error("aborted"), { name: "AbortError" })
+        );
+        mockedAreEqualAddresses.mockReturnValue(true);
+
+        const result = await validateJwt(validParams);
+
+        expect(result).toEqual({ isValid: false, wasCancelled: true });
       });
 
       it("should successfully refresh token and update storage", async () => {
