@@ -307,6 +307,80 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).not.toHaveBeenCalled();
   });
 
+  it("preserves authenticated poll votes on websocket drop updates", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "poll-drop",
+            type: DropSize.FULL,
+            stableKey: "poll-drop",
+            stableHash: "poll-drop",
+            serial_no: 10,
+            created_at: 1000,
+            author: { subscribed_actions: [] },
+            wave: { id: "wave1" },
+            poll: {
+              id: "poll-1",
+              options: [
+                { option_no: 1, option_string: "First", votes: 2 },
+                { option_no: 2, option_string: "Second", votes: 2 },
+              ],
+              voted: [2],
+              multichoice: false,
+              closing_time: 2000,
+              is_open: true,
+            },
+            context_profile_context: null,
+          },
+        ],
+        latestFetchedSerialNo: null,
+      },
+    };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    const websocketDrop: any = {
+      id: "poll-drop",
+      serial_no: 10,
+      created_at: 1000,
+      author: { subscribed_actions: [] },
+      wave: { id: "wave1" },
+      poll: {
+        id: "poll-1",
+        options: [
+          { option_no: 1, option_string: "First", votes: 3 },
+          { option_no: 2, option_string: "Second", votes: 2 },
+        ],
+        voted: [1],
+        multichoice: false,
+        closing_time: 2000,
+        is_open: true,
+      },
+      context_profile_context: null,
+    };
+
+    await act(async () =>
+      result.current.processIncomingDrop(
+        websocketDrop,
+        ProcessIncomingDropType.DROP_INSERT,
+        { preferExistingPollVote: true }
+      )
+    );
+
+    expect(props.updateData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drops: [
+          expect.objectContaining({
+            poll: expect.objectContaining({
+              options: websocketDrop.poll.options,
+              voted: [2],
+            }),
+          }),
+        ],
+      })
+    );
+  });
+
   it("removes drop when processDropRemoved is called", async () => {
     const props = baseProps({});
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));

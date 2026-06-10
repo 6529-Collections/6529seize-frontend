@@ -121,6 +121,27 @@ const mapWavePollToDropPoll = (
   is_open: poll.is_open,
 });
 
+const getWavePollRowPoll = (row: ApiWavePollDropRow): ApiDropPoll | null => {
+  const embeddedPoll = row.poll ?? null;
+
+  if (!embeddedPoll) {
+    return hasStandalonePollFields(row) ? mapWavePollToDropPoll(row) : null;
+  }
+
+  if (!hasStandalonePollFields(row)) {
+    return embeddedPoll;
+  }
+
+  return {
+    ...embeddedPoll,
+    options: row.options,
+    voted: row.voted,
+    multichoice: row.multichoice,
+    closing_time: row.closing_time,
+    is_open: row.is_open,
+  };
+};
+
 const normalizeWavePollRow = (
   row: ApiWavePollDropRow,
   wave: ApiWaveMin
@@ -128,6 +149,7 @@ const normalizeWavePollRow = (
   const pollDropRow = row as WavePollDropRow;
 
   if (hasEmbeddableDropFields(pollDropRow)) {
+    const poll = getWavePollRowPoll(pollDropRow);
     const mappedDrop = {
       ...mapLeaderboardDropV2({ drop: pollDropRow, wave }),
       wave,
@@ -135,19 +157,15 @@ const normalizeWavePollRow = (
 
     return {
       dropId: pollDropRow.id,
-      poll: pollDropRow.poll ?? null,
-      drop: pollDropRow.poll
-        ? { ...mappedDrop, poll: pollDropRow.poll }
-        : mappedDrop,
+      poll,
+      drop: poll ? { ...mappedDrop, poll } : mappedDrop,
     };
   }
 
   if (isNonEmptyString(row.drop_id)) {
     return {
       dropId: row.drop_id,
-      poll: hasStandalonePollFields(row)
-        ? mapWavePollToDropPoll(row)
-        : (row.poll ?? null),
+      poll: getWavePollRowPoll(row),
       drop: null,
     };
   }

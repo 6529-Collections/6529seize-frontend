@@ -129,7 +129,9 @@ export function useWaveCurationDrops({
           return;
         }
 
-        updateDropInCachedDrops(queryClient, message);
+        updateDropInCachedDrops(queryClient, message, {
+          preferExistingPollVote: true,
+        });
         requestRefetch();
       },
       [queryClient, requestRefetch, waveId]
