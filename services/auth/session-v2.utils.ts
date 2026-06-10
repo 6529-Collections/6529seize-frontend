@@ -103,7 +103,7 @@ async function rollbackUnpersistedSession(
 ): Promise<void> {
   try {
     if (didPersistNativeRefreshToken) {
-      await removeNativeRefreshToken(response.address);
+      await logoutSessionV2({ address: response.address });
       return;
     }
 
@@ -157,23 +157,31 @@ export async function refreshSessionV2({
     if (!nativeRefreshToken) {
       return null;
     }
-    return await commonApiPost<
-      {
-        readonly client_type: "native";
-        readonly client_address: string;
-        readonly native_refresh_token: string;
-      },
-      SessionNativeResponse
-    >({
-      endpoint: "auth/session-refresh",
-      body: {
-        client_type: "native",
-        client_address: address,
-        native_refresh_token: nativeRefreshToken,
-      },
-      signal: abortSignal,
-      credentials: "include",
-    });
+    try {
+      return await commonApiPost<
+        {
+          readonly client_type: "native";
+          readonly client_address: string;
+          readonly native_refresh_token: string;
+        },
+        SessionNativeResponse
+      >({
+        endpoint: "auth/session-refresh",
+        body: {
+          client_type: "native",
+          client_address: address,
+          native_refresh_token: nativeRefreshToken,
+        },
+        signal: abortSignal,
+        credentials: "include",
+        errorMode: "structured",
+      });
+    } catch (error: unknown) {
+      if (isUnauthorizedApiError(error)) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   try {

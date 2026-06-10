@@ -307,6 +307,7 @@ export function WebSocketProvider({
             );
             authenticationTimerRef.current = setTimeout(() => {
               if (wsRef.current === ws && ws.readyState === WebSocket.OPEN) {
+                isManualDisconnectRef.current = true;
                 ws.close(1011, "Authentication timeout");
               }
             }, AUTHENTICATION_TIMEOUT_MS);

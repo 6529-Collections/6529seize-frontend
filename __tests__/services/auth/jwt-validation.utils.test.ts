@@ -50,7 +50,6 @@ const mockedGetWalletAddress = getWalletAddress as jest.MockedFunction<
 const mockedGetWalletRole = getWalletRole as jest.MockedFunction<
   typeof getWalletRole
 >;
-const mockedSetAuthJwt = setAuthJwt as jest.MockedFunction<typeof setAuthJwt>;
 const mockedRedeemRefreshTokenWithRetries =
   redeemRefreshTokenWithRetries as jest.MockedFunction<
     typeof redeemRefreshTokenWithRetries
