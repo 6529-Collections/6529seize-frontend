@@ -340,6 +340,20 @@ describe("auth.utils", () => {
     expect(storage.get("6529-wallet-active-address")).toBeUndefined();
   });
 
+  it("clearAllWalletAuth removes native token for legacy-only wallet address", async () => {
+    const {
+      removeNativeRefreshToken,
+    } = require("@/services/auth/native-refresh-token-storage");
+    const storage = setupStorageMocks();
+    storage.set("6529-wallet-address", "0xlegacy");
+
+    await clearAllWalletAuth();
+
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xlegacy");
+    expect(getConnectedWalletAccounts()).toHaveLength(0);
+    expect(getWalletAddress()).toBe(null);
+  });
+
   it("enforces max connected profiles when adding new addresses", () => {
     setupStorageMocks();
     (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });

@@ -178,6 +178,21 @@ describe("session-v2.utils", () => {
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
   });
 
+  it("removes the native refresh token when native logout fails", async () => {
+    const logoutError = new Error("logout failed");
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    (getNativeRefreshToken as jest.Mock).mockResolvedValue(
+      "native-refresh-token"
+    );
+    (commonApiPost as jest.Mock).mockRejectedValueOnce(logoutError);
+
+    await expect(
+      logoutSessionV2({ address: "0xabc", allSessions: true })
+    ).rejects.toBe(logoutError);
+
+    expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
+  });
+
   it("attempts web session logout even when the rollout flag is disabled", async () => {
     await logoutSessionV2({ address: "0xabc", allSessions: true });
 

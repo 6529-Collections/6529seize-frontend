@@ -503,6 +503,7 @@ export function HeaderQRModal({
       setCanShareConnection(false);
       setShareConnectionAppUrl("");
       setShareConnectionCoreUrl("");
+      setShareConnectionSrc("");
       return;
     }
 

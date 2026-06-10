@@ -283,26 +283,29 @@ export async function logoutSessionV2({
     if (!nativeRefreshToken) {
       return;
     }
-    await commonApiPost<
-      {
-        readonly client_type: "native";
-        readonly client_address: string;
-        readonly native_refresh_token: string;
-        readonly all_sessions: boolean;
-      },
-      void
-    >({
-      endpoint: "auth/session-logout",
-      body: {
-        client_type: "native",
-        client_address: address,
-        native_refresh_token: nativeRefreshToken,
-        all_sessions: allSessions,
-      },
-      credentials: "include",
-      parseJson: false,
-    });
-    await removeNativeRefreshToken(address);
+    try {
+      await commonApiPost<
+        {
+          readonly client_type: "native";
+          readonly client_address: string;
+          readonly native_refresh_token: string;
+          readonly all_sessions: boolean;
+        },
+        void
+      >({
+        endpoint: "auth/session-logout",
+        body: {
+          client_type: "native",
+          client_address: address,
+          native_refresh_token: nativeRefreshToken,
+          all_sessions: allSessions,
+        },
+        credentials: "include",
+        parseJson: false,
+      });
+    } finally {
+      await removeNativeRefreshToken(address);
+    }
     return;
   }
 

@@ -47,6 +47,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const signedPayloadRef = useRef<ReturnType<
     typeof buildNextgenBurnPayload
   > | null>(null);
+  const signerAddressRef = useRef<string | null>(null);
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -101,8 +102,14 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
 
   useEffect(() => {
     if (signMessage.isSuccess && signMessage.data) {
+      const signerAddress = signerAddressRef.current;
+      if (!signerAddress) {
+        setUploadError("Error: Connect a wallet before signing");
+        setLoading(false);
+        return;
+      }
       const data = {
-        wallet: account.address as string,
+        wallet: signerAddress,
         signature: signMessage.data,
         ...(signatureMessageRef.current
           ? { signature_message: signatureMessageRef.current }
@@ -164,18 +171,21 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
     contractWrite.reset();
     signatureMessageRef.current = null;
     signedPayloadRef.current = null;
+    signerAddressRef.current = null;
     const valid = validate();
     if (valid) {
-      if (isStructuredSignaturesEnabled() && !account.address) {
+      const signerAddress = account.address;
+      if (!signerAddress) {
         setUploadError("Error: Connect a wallet before signing");
         setLoading(false);
         return;
       }
       const payload = buildNextgenBurnPayload();
       signedPayloadRef.current = payload;
+      signerAddressRef.current = signerAddress;
       const signatureMessage = isStructuredSignaturesEnabled()
         ? buildNextgenAdminSignatureMessage({
-            address: account.address as string,
+            address: signerAddress,
             payload,
           }).message
         : null;

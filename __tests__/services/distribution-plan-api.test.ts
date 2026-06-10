@@ -48,6 +48,23 @@ describe("distribution-plan-api", () => {
     expect(res.success).toBe(false);
   });
 
+  it("handles unauthorized when JWT cleanup fails", async () => {
+    (removeAuthJwt as jest.Mock).mockRejectedValueOnce(
+      new Error("cleanup failed")
+    );
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ status: 401, json: jest.fn() }) as any;
+
+    const res = await distributionPlanApiFetch<any>("/x");
+
+    expect(removeAuthJwt).toHaveBeenCalled();
+    expect(makeErrorToast).toHaveBeenCalledWith(
+      "Please reconnect your wallet."
+    );
+    expect(res.success).toBe(false);
+  });
+
   it("posts data with auth header", async () => {
     (getAuthJwt as jest.Mock).mockReturnValue("jwt");
     global.fetch = jest

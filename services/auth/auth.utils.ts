@@ -436,10 +436,32 @@ export const getWalletRole = () => {
   return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
 };
 
+const getNativeRefreshTokenCleanupAddresses = (
+  accounts: readonly ConnectedWalletAccount[]
+): string[] => {
+  const addresses = accounts.map((account) => account.address);
+  const legacyAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
+  if (legacyAddress) {
+    addresses.push(legacyAddress);
+  }
+
+  const seen = new Set<string>();
+  return addresses.filter((address) => {
+    const normalizedAddress = normalizeAddress(address);
+    if (seen.has(normalizedAddress)) {
+      return false;
+    }
+    seen.add(normalizedAddress);
+    return true;
+  });
+};
+
 export const clearAllWalletAuth = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   await Promise.all(
-    accounts.map((account) => removeNativeRefreshToken(account.address))
+    getNativeRefreshTokenCleanupAddresses(accounts).map((address) =>
+      removeNativeRefreshToken(address)
+    )
   );
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
@@ -452,6 +474,7 @@ export const removeAuthJwt = async (): Promise<void> => {
   if (!activeAccount) {
     const legacyAddress = safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY);
     if (legacyAddress) {
+      await removeNativeRefreshToken(legacyAddress);
       safeLocalStorage.removeItem(getAddressRoleStorageKey(legacyAddress));
     }
     persistAccountsWithActive([], null);
