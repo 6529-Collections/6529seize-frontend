@@ -77,6 +77,7 @@ export default defineConfig([
     "standalone/standalone-memes-mint/src/tailwind.config.cjs",
     ".claude/**",
     ".codex/**",
+    ".deepsec/**",
   ]),
 
   // Base config with Next.js rules
