@@ -1141,8 +1141,7 @@ describe("SeizeConnectContext Security Vulnerability Fix", () => {
 
       try {
         const validAddress = "0x1234567890abcdef1234567890abcdef12345678";
-        const checksummedAddress =
-          "0x1234567890AbcdEF1234567890AbcDEF12345678";
+        const checksummedAddress = "0x1234567890AbcdEF1234567890AbcDEF12345678";
 
         mockGetWalletAddress.mockReturnValue(validAddress);
         mockIsAddress.mockReturnValue(true);

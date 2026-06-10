@@ -205,7 +205,7 @@ describe("AppWalletsContext", () => {
       expect(screen.getByTestId("context-functions-exist")).toHaveTextContent(
         "true"
       );
-      const initialRenderCount = parseInt(
+      const initialRenderCount = Number.parseInt(
         screen.getByTestId("render-count").textContent || "0"
       );
 
@@ -226,7 +226,7 @@ describe("AppWalletsContext", () => {
       );
       // Component should have re-rendered since we created a new provider instance
       expect(
-        parseInt(screen.getByTestId("render-count").textContent || "0")
+        Number.parseInt(screen.getByTestId("render-count").textContent || "0")
       ).toBeGreaterThan(initialRenderCount);
     });
   });
