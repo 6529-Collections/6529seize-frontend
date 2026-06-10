@@ -20,8 +20,6 @@ type MockAgentOptions = {
   };
 };
 
-const mockAgentOptions: MockAgentOptions[] = [];
-const mockAgentInstances: unknown[] = [];
 const mockAgentOptionsByInstance = new WeakMap<object, MockAgentOptions>();
 const mockUndiciFetch = jest.fn();
 
@@ -33,8 +31,6 @@ jest.mock("undici", () => ({
       dispatch: jest.fn(),
     };
     mockAgentOptionsByInstance.set(instance, options);
-    mockAgentOptions.push(options);
-    mockAgentInstances.push(instance);
     return instance;
   }),
   fetch: (...args: unknown[]) => mockUndiciFetch(...args),
@@ -107,8 +103,6 @@ describe("urlGuard", () => {
   beforeEach(() => {
     lookup.mockReset();
     mockUndiciFetch.mockReset();
-    mockAgentOptions.length = 0;
-    mockAgentInstances.length = 0;
   });
 
   it("validates redirect hops before fetching content", async () => {
