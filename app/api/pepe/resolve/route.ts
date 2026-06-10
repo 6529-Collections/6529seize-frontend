@@ -1,16 +1,23 @@
 import * as cheerio from "cheerio";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { publicEnv } from "@/config/env";
-import LruTtlCache from "@/lib/cache/lruTtl";
 import {
-  UrlGuardError,
-  fetchPublicJson,
-  fetchPublicUrl,
-} from "@/lib/security/urlGuard";
+  assertContentType,
+  isHtmlContentType,
+  isTolerantJsonContentType,
+  readLimitedJson,
+  readLimitedText,
+} from "@/lib/fetch/limitedBody";
+import LruTtlCache from "@/lib/cache/lruTtl";
+import { UrlGuardError, fetchPublicUrl } from "@/lib/security/urlGuard";
 
 const TOKENSCAN_BASE = "https://tokenscan.io/api";
+export const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
+const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
+const HTML_ACCEPT_HEADER =
+  "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
 
 type PepeKind = "asset" | "collection" | "artist" | "set";
 
@@ -41,11 +48,14 @@ type AssetPreview = BasePreview & {
   readonly supply?: number | null | undefined;
   readonly holders?: number | null | undefined;
   readonly image?: string | null | undefined;
-  readonly links?: {
-    readonly horizon?: string | undefined;
-    readonly xchain?: string | undefined;
-    readonly wiki?: string | undefined;
-  } | null | undefined;
+  readonly links?:
+    | {
+        readonly horizon?: string | undefined;
+        readonly xchain?: string | undefined;
+        readonly wiki?: string | undefined;
+      }
+    | null
+    | undefined;
   readonly market?: Market | null | undefined;
 };
 
@@ -53,34 +63,46 @@ type CollectionPreview = BasePreview & {
   readonly kind: "collection";
   readonly name?: string | undefined;
   readonly image?: string | null | undefined;
-  readonly stats?: {
-    readonly items?: number | null | undefined;
-    readonly floorSats?: number | null | undefined;
-  } | null | undefined;
+  readonly stats?:
+    | {
+        readonly items?: number | null | undefined;
+        readonly floorSats?: number | null | undefined;
+      }
+    | null
+    | undefined;
 };
 
 type ArtistPreview = BasePreview & {
   readonly kind: "artist";
   readonly name?: string | undefined;
   readonly image?: string | null | undefined;
-  readonly stats?: {
-    readonly uniqueCards?: number | null | undefined;
-    readonly collections?: string[] | null | undefined;
-  } | null | undefined;
+  readonly stats?:
+    | {
+        readonly uniqueCards?: number | null | undefined;
+        readonly collections?: string[] | null | undefined;
+      }
+    | null
+    | undefined;
 };
 
 type SetPreview = BasePreview & {
   readonly kind: "set";
   readonly name?: string | undefined;
   readonly image?: string | null | undefined;
-  readonly stats?: {
-    readonly items?: number | null | undefined;
-    readonly fullSetFloorSats?: number | null | undefined;
-    readonly lastSaleValuationSats?: number | null | undefined;
-  } | null | undefined;
-  readonly links?: {
-    readonly wiki?: string | undefined;
-  } | null | undefined;
+  readonly stats?:
+    | {
+        readonly items?: number | null | undefined;
+        readonly fullSetFloorSats?: number | null | undefined;
+        readonly lastSaleValuationSats?: number | null | undefined;
+      }
+    | null
+    | undefined;
+  readonly links?:
+    | {
+        readonly wiki?: string | undefined;
+      }
+    | null
+    | undefined;
 };
 
 type Preview = AssetPreview | CollectionPreview | ArtistPreview | SetPreview;
@@ -133,8 +155,7 @@ async function fetchText(
       url,
       {
         headers: {
-          accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          accept: HTML_ACCEPT_HEADER,
         },
       },
       {
@@ -147,7 +168,10 @@ async function fetchText(
       return null;
     }
 
-    return await response.text();
+    assertContentType(response.headers, isHtmlContentType, "HTML", {
+      allowMissing: true,
+    });
+    return await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
   } catch (error) {
     if (error instanceof UrlGuardError) {
       return null;
@@ -158,7 +182,7 @@ async function fetchText(
 
 async function fetchJson<T>(url: string, timeoutMs = 4000): Promise<T | null> {
   try {
-    return await fetchPublicJson<T>(
+    const response = await fetchPublicUrl(
       url,
       {
         headers: {
@@ -170,6 +194,15 @@ async function fetchJson<T>(url: string, timeoutMs = 4000): Promise<T | null> {
         userAgent: USER_AGENT,
       }
     );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    assertContentType(response.headers, isTolerantJsonContentType, "JSON", {
+      allowMissing: true,
+    });
+    return await readLimitedJson<T>(response, JSON_RESPONSE_MAX_BYTES);
   } catch (error) {
     if (error instanceof UrlGuardError) {
       return null;

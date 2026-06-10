@@ -2,6 +2,15 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
+  BodyTooLargeError,
+  UnsupportedContentTypeError,
+  assertContentType,
+  isHtmlContentType,
+  isJsonContentType,
+  readLimitedJson,
+  readLimitedText,
+} from "@/lib/fetch/limitedBody";
+import {
   UrlGuardError,
   assertPublicUrl,
   fetchPublicUrl,
@@ -31,6 +40,8 @@ const USER_AGENT = LINK_PREVIEW_USER_AGENT;
 const MAX_REDIRECTS = 5;
 const BATCH_CONCURRENCY = 5;
 const MAX_BATCH_URLS = BATCH_CONCURRENCY;
+const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
+const BATCH_REQUEST_MAX_BYTES = 64 * 1024;
 
 const HTML_FETCH_HEADERS = {
   accept: HTML_ACCEPT_HEADER,
@@ -153,6 +164,42 @@ const isUrlGuardError = (error: unknown): error is UrlGuardError =>
 
 const isEnsPreviewError = (error: unknown): error is EnsPreviewError =>
   typeof EnsPreviewError === "function" && error instanceof EnsPreviewError;
+
+/**
+ * Detects bounded-body reader failures that should produce client responses.
+ */
+const isLimitedBodyError = (
+  error: unknown
+): error is BodyTooLargeError | UnsupportedContentTypeError =>
+  error instanceof BodyTooLargeError ||
+  error instanceof UnsupportedContentTypeError;
+
+/**
+ * Converts preview fetch body-limit failures into user-facing JSON errors.
+ */
+function previewLimitErrorResponse(
+  error: BodyTooLargeError | UnsupportedContentTypeError
+) {
+  const message =
+    error instanceof BodyTooLargeError
+      ? "Preview response is too large to process safely."
+      : "Preview URL did not return readable HTML metadata.";
+  return NextResponse.json({ error: message }, { status: error.statusCode });
+}
+
+/**
+ * Converts oversized or non-JSON batch request bodies into clear API errors.
+ */
+function batchBodyLimitErrorResponse(
+  error: BodyTooLargeError | UnsupportedContentTypeError
+) {
+  const message =
+    error instanceof BodyTooLargeError
+      ? "Open graph batch request body is too large."
+      : "Open graph batch request body must be JSON.";
+  return NextResponse.json({ error: message }, { status: error.statusCode });
+}
+
 type FetchInput = Parameters<typeof fetch>[0];
 
 const isRequestLike = (value: unknown): value is { url: string } => {
@@ -252,13 +299,21 @@ function ensureSuccessfulResponse(response: Response): void {
   }
 }
 
+/**
+ * Validates and reads an HTML response using the shared byte-limited reader.
+ */
 async function extractHtmlResponse(
   response: Response,
   fallbackUrl: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
   try {
-    const html = await response.text();
-    const contentType = response.headers.get("content-type");
+    const contentType = assertContentType(
+      response.headers,
+      isHtmlContentType,
+      "HTML",
+      { allowMissing: true }
+    );
+    const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
     const finalUrl = response.url || fallbackUrl.toString();
 
     return {
@@ -267,7 +322,7 @@ async function extractHtmlResponse(
       finalUrl,
     };
   } catch (error) {
-    if (error instanceof UrlGuardError) {
+    if (error instanceof UrlGuardError || isLimitedBodyError(error)) {
       throw error;
     }
 
@@ -277,6 +332,9 @@ async function extractHtmlResponse(
   }
 }
 
+/**
+ * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
+ */
 async function fetchHtml(
   url: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
@@ -322,6 +380,10 @@ function handlePreviewError(error: unknown) {
       { error: error.message },
       { status: error.status }
     );
+  }
+
+  if (isLimitedBodyError(error)) {
+    return previewLimitErrorResponse(error);
   }
 
   if (isUrlGuardError(error)) {
@@ -471,8 +533,15 @@ export async function POST(request: NextRequest) {
   let body: unknown;
 
   try {
-    body = await request.json();
-  } catch {
+    assertContentType(request.headers, isJsonContentType, "JSON", {
+      allowMissing: true,
+    });
+    body = await readLimitedJson(request, BATCH_REQUEST_MAX_BYTES);
+  } catch (error) {
+    if (isLimitedBodyError(error)) {
+      return batchBodyLimitErrorResponse(error);
+    }
+
     return NextResponse.json(
       { error: "Invalid open graph batch request body." },
       { status: 400 }
