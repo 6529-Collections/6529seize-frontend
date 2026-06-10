@@ -23,6 +23,7 @@ EXTERNAL_PREFIXES = ("http://", "https://", "mailto:", "tel:", "data:")
 PLACEHOLDER_RE = re.compile(r"No dedicated .* documented yet", re.IGNORECASE)
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 BACKTICK_RE = re.compile(r"`([^`\n]+)`")
+AREA_NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]*")
 
 SOURCE_DIR_CANDIDATES = (
     "app",
@@ -262,6 +263,9 @@ def score_audit(audit: AreaAudit) -> int:
 
 def audit_area(repo_root: Path, docs_root: Path, area: str) -> AreaAudit:
     """Audit one docs area for structure, links, and stale-route signals."""
+    if not AREA_NAME_RE.fullmatch(area):
+        raise ValueError(f"Invalid area name: {area}")
+
     area_dir = docs_root / area
     if not area_dir.exists() or not area_dir.is_dir():
         raise ValueError(f"Area not found: {area}")
