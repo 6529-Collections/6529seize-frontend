@@ -120,7 +120,7 @@ jobs:
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
-          set -euo pipefail
+          set -eu
           REPO_DIR=$repo_dir_q
           RUN_AS=$run_as_q
           BRANCH=$branch_q
