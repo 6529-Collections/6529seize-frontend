@@ -140,43 +140,58 @@ jobs:
             exit 1
           fi
 
-          sudo -Hiu "$RUN_AS" env \
-            REPO_DIR="$REPO_DIR" \
-            BRANCH="$BRANCH" \
-            EXPECTED_SHA="$EXPECTED_SHA" \
-            bash -lc '
-              set -euo pipefail
+          deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
+          cleanup() {
+            rm -f "$deploy_script"
+          }
+          trap cleanup EXIT HUP INT TERM
 
-              cd "$REPO_DIR"
+          cat > "$deploy_script" <<'DEPLOY_SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
 
-              echo "Repository: $(pwd)"
-              echo "Deploying branch: $BRANCH"
-              echo "Expected commit: $EXPECTED_SHA"
+          if [[ "$#" -ne 3 ]]; then
+            echo "Usage: $0 <repo-dir> <branch> <expected-sha>" >&2
+            exit 1
+          fi
 
-              git fetch --prune origin "$BRANCH:refs/remotes/origin/$BRANCH"
-              remote_sha="$(git rev-parse "origin/$BRANCH")"
-              if [ "$remote_sha" != "$EXPECTED_SHA" ]; then
-                echo "origin/$BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
-                echo "A newer staging push may have superseded this run; refusing to deploy a different commit." >&2
-                exit 1
-              fi
+          REPO_DIR="$1"
+          BRANCH="$2"
+          EXPECTED_SHA="$3"
 
-              git checkout -B "$BRANCH" "origin/$BRANCH"
-              git branch --set-upstream-to="origin/$BRANCH" "$BRANCH"
-              git reset --hard "origin/$BRANCH"
+          cd "$REPO_DIR"
 
-              SKIP_STAGING_PULL=1 ./bin/6529 staging
+          echo "Repository: $(pwd)"
+          echo "Deploying branch: $BRANCH"
+          echo "Expected commit: $EXPECTED_SHA"
 
-              deployed_sha="$(git rev-parse HEAD)"
-              echo "Deployed commit: $deployed_sha"
-              if [ "$deployed_sha" != "$EXPECTED_SHA" ]; then
-                echo "Expected $EXPECTED_SHA but deployed $deployed_sha" >&2
-                exit 1
-              fi
+          git fetch --prune origin "$BRANCH:refs/remotes/origin/$BRANCH"
+          remote_sha="$(git rev-parse "origin/$BRANCH")"
+          if [[ "$remote_sha" != "$EXPECTED_SHA" ]]; then
+            echo "origin/$BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
+            echo "A newer staging push may have superseded this run; refusing to deploy a different commit." >&2
+            exit 1
+          fi
 
-              pm2 describe 6529seize >/dev/null
-              pm2 status 6529seize
-            '
+          git checkout -B "$BRANCH" "origin/$BRANCH"
+          git branch --set-upstream-to="origin/$BRANCH" "$BRANCH"
+          git reset --hard "origin/$BRANCH"
+
+          SKIP_STAGING_PULL=1 ./bin/6529 staging
+
+          deployed_sha="$(git rev-parse HEAD)"
+          echo "Deployed commit: $deployed_sha"
+          if [[ "$deployed_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Expected $EXPECTED_SHA but deployed $deployed_sha" >&2
+            exit 1
+          fi
+
+          pm2 describe 6529seize >/dev/null
+          pm2 status 6529seize
+          DEPLOY_SCRIPT
+
+          chmod 755 "$deploy_script"
+          sudo -H -u "$RUN_AS" bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
           REMOTE_SCRIPT_BODY
           )"
 
