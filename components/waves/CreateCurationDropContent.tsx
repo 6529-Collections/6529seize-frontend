@@ -131,7 +131,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
 
       // Use direct signature if there are no terms to display
       if (!wave.participation.terms) {
-        const { success, signature } = await signDrop({
+        const { success, signature, signatureMessage } = await signDrop({
           drop: requestBody,
           termsOfService: null,
         });
@@ -143,6 +143,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         return {
           ...requestBody,
           signature,
+          ...(signatureMessage ? { signature_message: signatureMessage } : {}),
         };
       }
 
@@ -151,6 +152,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         const handleSigningComplete = (result: {
           success: boolean;
           signature?: string | undefined;
+          signatureMessage?: string | undefined;
         }) => {
           if (!result.success || !result.signature) {
             resolve(null);
@@ -160,6 +162,9 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
           resolve({
             ...requestBody,
             signature: result.signature,
+            ...(result.signatureMessage
+              ? { signature_message: result.signatureMessage }
+              : {}),
           });
         };
 

@@ -168,6 +168,9 @@ Backend verification:
 - `wallet_kind_hint` and frontend Safe detection are never authority.
 
 Legacy signatures remain accepted only while `AUTH_STRUCTURED_SIGNATURES_REQUIRED=false`.
+During rollout, action endpoints that previously accepted only `signature` must also
+accept request-only `signature_message` so the backend can verify the exact text
+the wallet signed. Servers must not persist `signature_message`.
 
 ## WebSocket Auth Contract
 

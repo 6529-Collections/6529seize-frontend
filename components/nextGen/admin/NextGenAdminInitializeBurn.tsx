@@ -4,6 +4,10 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { publicEnv } from "@/config/env";
 import { NULL_ADDRESS } from "@/constants/constants";
 import { postData } from "@/services/6529api";
+import {
+  buildNextgenAdminSignatureMessage,
+  isStructuredSignaturesEnabled,
+} from "@/services/wallet-signatures/structured-wallet-signatures";
 import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
@@ -39,6 +43,10 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
   const account = useSeizeConnectContext();
   const signMessage = useSignMessage();
   const uuid = useRef(uuidv4()).current;
+  const signatureMessageRef = useRef<string | null>(null);
+  const signedPayloadRef = useRef<ReturnType<
+    typeof buildNextgenBurnPayload
+  > | null>(null);
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(
@@ -96,14 +104,10 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
       const data = {
         wallet: account.address as string,
         signature: signMessage.data,
-        uuid: uuid,
-        collection_id: mintCollectionID,
-        burn_collection: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
-        burn_collection_id: burnCollectionID,
-        min_token_index: 0,
-        max_token_index: 0,
-        burn_address: NULL_ADDRESS,
-        status: status,
+        ...(signatureMessageRef.current
+          ? { signature_message: signatureMessageRef.current }
+          : {}),
+        ...(signedPayloadRef.current ?? buildNextgenBurnPayload()),
       };
 
       postData(
@@ -158,14 +162,43 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
     setUploadError(undefined);
     signMessage.reset();
     contractWrite.reset();
+    signatureMessageRef.current = null;
+    signedPayloadRef.current = null;
     const valid = validate();
     if (valid) {
+      if (isStructuredSignaturesEnabled() && !account.address) {
+        setUploadError("Error: Connect a wallet before signing");
+        setLoading(false);
+        return;
+      }
+      const payload = buildNextgenBurnPayload();
+      signedPayloadRef.current = payload;
+      const signatureMessage = isStructuredSignaturesEnabled()
+        ? buildNextgenAdminSignatureMessage({
+            address: account.address as string,
+            payload,
+          }).message
+        : null;
+      signatureMessageRef.current = signatureMessage;
       signMessage.signMessage({
-        message: uuid,
+        message: signatureMessage ?? uuid,
       });
     } else {
       setLoading(false);
     }
+  }
+
+  function buildNextgenBurnPayload() {
+    return {
+      uuid,
+      collection_id: Number(mintCollectionID),
+      burn_collection: NEXTGEN_CORE[NEXTGEN_CHAIN_ID],
+      burn_collection_id: Number(burnCollectionID),
+      min_token_index: 0,
+      max_token_index: 0,
+      burn_address: NULL_ADDRESS,
+      status,
+    };
   }
 
   useEffect(() => {
