@@ -444,6 +444,36 @@ def routes_overlap(route_a: str, route_b: str) -> bool:
     )
 
 
+def should_skip_ownership_doc(path: Path, docs_root: Path) -> bool:
+    return path.name == "README.md" and path != docs_root / "README.md"
+
+
+def documented_routes_for_page(path: Path, text: str) -> set[str]:
+    if path.name == "README.md":
+        return set()
+
+    routes: set[str] = set()
+    for raw in extract_documented_route_tokens(text):
+        normalized = canonicalize_route(raw)
+        if normalized and normalized not in IGNORED_DOCUMENTED_ROUTES:
+            routes.add(normalized)
+    return routes
+
+
+def owner_routes_for_page(repo_root: Path, path: Path, text: str) -> dict[str, set[str]]:
+    location = section_body(text, "Location in the Site")
+    if not location:
+        return {}
+
+    rel = str(path.relative_to(repo_root))
+    owners: dict[str, set[str]] = {}
+    for raw in extract_route_tokens_for_ownership(location):
+        normalized = canonicalize_route(raw)
+        if normalized:
+            owners.setdefault(normalized, set()).add(rel)
+    return owners
+
+
 def collect_docs_route_owners(
     repo_root: Path, docs_root: Path
 ) -> tuple[dict[str, set[str]], set[str]]:
@@ -451,27 +481,14 @@ def collect_docs_route_owners(
     all_documented_routes: set[str] = set()
 
     for path in sorted(docs_root.rglob("*.md")):
-        is_root_readme = path == docs_root / "README.md"
-        if path.name == "README.md" and not is_root_readme:
+        if should_skip_ownership_doc(path, docs_root):
             continue
 
         text = read_text(path)
-        if path.name != "README.md":
-            for raw in extract_documented_route_tokens(text):
-                normalized = canonicalize_route(raw)
-                if normalized and normalized not in IGNORED_DOCUMENTED_ROUTES:
-                    all_documented_routes.add(normalized)
+        all_documented_routes.update(documented_routes_for_page(path, text))
 
-        location = section_body(text, "Location in the Site")
-        if not location:
-            continue
-
-        for raw in extract_route_tokens_for_ownership(location):
-            normalized = canonicalize_route(raw)
-            if not normalized:
-                continue
-            rel = str(path.relative_to(repo_root))
-            owners.setdefault(normalized, set()).add(rel)
+        for route, rel_paths in owner_routes_for_page(repo_root, path, text).items():
+            owners.setdefault(route, set()).update(rel_paths)
 
     return owners, all_documented_routes
 
