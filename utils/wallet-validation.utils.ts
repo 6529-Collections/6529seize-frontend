@@ -6,17 +6,43 @@ import {
 } from "@/src/errors/wallet-validation";
 
 const ETHEREUM_ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/;
-const MIN_HASH_LENGTH = 64;
 const MIN_NAME_LENGTH = 1;
 const MAX_NAME_LENGTH = 100;
-const MIN_PRIVATE_KEY_LENGTH = 32;
-const MIN_MNEMONIC_WORDS = 12;
-const MAX_MNEMONIC_WORDS = 24;
 const APP_WALLET_MNEMONIC_UNAVAILABLE = "N/A";
-const LEGACY_ENCRYPTED_SECRET_PATTERN = /^[0-9a-f]+:[0-9a-f]+:[0-9a-f]*$/i;
+const HEX_PATTERN = /^[0-9a-f]+$/i;
+const MIN_LEGACY_IV_BYTES = 12;
+const MAX_LEGACY_IV_BYTES = 16;
+const LEGACY_AUTH_TAG_BYTES = 16;
 
-const isLegacyEncryptedSecret = (value: string): boolean =>
-  LEGACY_ENCRYPTED_SECRET_PATTERN.test(value);
+const isHexByteString = (value: string): boolean =>
+  value.length > 0 && value.length % 2 === 0 && HEX_PATTERN.test(value);
+
+const isLegacyEncryptedSecret = (value: string): boolean => {
+  const [ivHex, authTagHex, encryptedHex, ...extraParts] = value.split(":");
+
+  if (
+    extraParts.length > 0 ||
+    !ivHex ||
+    !authTagHex ||
+    !encryptedHex ||
+    !isHexByteString(ivHex) ||
+    !isHexByteString(authTagHex) ||
+    !isHexByteString(encryptedHex)
+  ) {
+    return false;
+  }
+
+  const ivBytes = ivHex.length / 2;
+  const authTagBytes = authTagHex.length / 2;
+  const encryptedBytes = encryptedHex.length / 2;
+
+  return (
+    ivBytes >= MIN_LEGACY_IV_BYTES &&
+    ivBytes <= MAX_LEGACY_IV_BYTES &&
+    authTagBytes === LEGACY_AUTH_TAG_BYTES &&
+    encryptedBytes > 0
+  );
+};
 
 const validateWalletExists = (wallet: AppWallet): void => {
   if (!wallet) {
@@ -53,9 +79,18 @@ const validateWalletAddressHash = (wallet: AppWallet): void => {
     throw new WalletValidationError("Wallet address_hashed must be a string");
   }
 
-  if (wallet.address_hashed.length < MIN_HASH_LENGTH) {
+  if (wallet.encryption_version === 2) {
+    if (!isAppWalletEncryptedEnvelope(wallet.address_hashed)) {
+      throw new WalletValidationError(
+        "Wallet address_hashed envelope is invalid"
+      );
+    }
+    return;
+  }
+
+  if (!isLegacyEncryptedSecret(wallet.address_hashed)) {
     throw new WalletValidationError(
-      "Wallet address_hashed too short - potential security issue"
+      "Wallet address_hashed legacy encrypted payload is invalid"
     );
   }
 };
@@ -95,15 +130,18 @@ const validatePrivateKey = (wallet: AppWallet): void => {
     return;
   }
 
-  if (wallet.private_key.length < MIN_PRIVATE_KEY_LENGTH) {
+  if (!isLegacyEncryptedSecret(wallet.private_key)) {
     throw new WalletSecurityError(
-      "Private key too short - security violation detected"
+      "Private key legacy encrypted payload is invalid"
     );
   }
 };
 
 const validateMnemonic = (wallet: AppWallet): void => {
   if (!wallet.mnemonic) {
+    if (wallet.has_mnemonic === true) {
+      throw new WalletSecurityError("Mnemonic encrypted payload is required");
+    }
     return;
   }
 
@@ -129,33 +167,13 @@ const validateMnemonic = (wallet: AppWallet): void => {
     return;
   }
 
-  const words = wallet.mnemonic.trim().split(/\s+/);
-
-  if (words.some((word) => !word || word.length === 0)) {
-    throw new WalletSecurityError(
-      "Mnemonic contains empty words - security violation detected"
-    );
-  }
-
-  if (words.length < MIN_MNEMONIC_WORDS || words.length > MAX_MNEMONIC_WORDS) {
-    throw new WalletSecurityError(
-      `Mnemonic must contain between ${MIN_MNEMONIC_WORDS} and ${MAX_MNEMONIC_WORDS} words`
-    );
-  }
+  throw new WalletSecurityError("Mnemonic must be stored encrypted");
 };
 
 export function validateWalletSafely(wallet: AppWallet): void {
   validateWalletExists(wallet);
   validateWalletAddress(wallet);
   validateWalletAddressHash(wallet);
-  if (
-    wallet.encryption_version === 2 &&
-    !isAppWalletEncryptedEnvelope(wallet.address_hashed)
-  ) {
-    throw new WalletValidationError(
-      "Wallet address_hashed envelope is invalid"
-    );
-  }
   validateWalletName(wallet);
   validatePrivateKey(wallet);
   validateMnemonic(wallet);
