@@ -33,6 +33,8 @@ DEFAULT_SCORES_FILE = ".codex/skills/docs-area-remediator/.state/quality-scores.
 HEADING_RE = re.compile(r"^##\s+(.+?)\s*$")
 ROUTE_TOKEN_RE = re.compile(r"`([^`\n]+)`")
 IGNORED_DOCUMENTED_ROUTES = {"/{param}/rep"}
+DOCS_ROOT_PATH = "ops/docs"
+DOCS_ROOT_PARTS = Path(DOCS_ROOT_PATH).parts
 
 
 def run(args: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -40,9 +42,9 @@ def run(args: Sequence[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 
 def changed_docs_areas(repo_root: Path, staged: bool) -> list[str]:
-    cmd = ["git", "diff", "--name-only", "--", "ops/docs"]
+    cmd = ["git", "diff", "--name-only", "--", DOCS_ROOT_PATH]
     if staged:
-        cmd = ["git", "diff", "--cached", "--name-only", "--", "ops/docs"]
+        cmd = ["git", "diff", "--cached", "--name-only", "--", DOCS_ROOT_PATH]
     result = run(cmd, repo_root)
     if result.returncode != 0:
         return []
@@ -54,14 +56,17 @@ def changed_docs_areas(repo_root: Path, staged: bool) -> list[str]:
             continue
         parts = Path(rel).parts
         # Only treat nested docs paths as area-scoped (ops/docs/<area>/...).
-        if len(parts) >= 4 and parts[0] == "ops" and parts[1] == "docs":
-            areas.add(parts[2])
+        if (
+            len(parts) > len(DOCS_ROOT_PARTS) + 1
+            and parts[: len(DOCS_ROOT_PARTS)] == DOCS_ROOT_PARTS
+        ):
+            areas.add(parts[len(DOCS_ROOT_PARTS)])
 
     if staged or areas:
         return sorted(areas)
 
     untracked = run(
-        ["git", "ls-files", "--others", "--exclude-standard", "--", "ops/docs"],
+        ["git", "ls-files", "--others", "--exclude-standard", "--", DOCS_ROOT_PATH],
         repo_root,
     )
     if untracked.returncode != 0:
@@ -72,8 +77,11 @@ def changed_docs_areas(repo_root: Path, staged: bool) -> list[str]:
         if not rel:
             continue
         parts = Path(rel).parts
-        if len(parts) >= 4 and parts[0] == "ops" and parts[1] == "docs":
-            areas.add(parts[2])
+        if (
+            len(parts) > len(DOCS_ROOT_PARTS) + 1
+            and parts[: len(DOCS_ROOT_PARTS)] == DOCS_ROOT_PARTS
+        ):
+            areas.add(parts[len(DOCS_ROOT_PARTS)])
 
     return sorted(areas)
 
