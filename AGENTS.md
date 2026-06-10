@@ -23,10 +23,8 @@ Fight entropy. Leave the codebase better than you found it.
 
 ## Communication
 
-- Use the repo-local skill `$explain-simply` from `.codex/skills/explain-simply` for user-facing explanations, summaries, reviews, and rewrites when communicating with the user.
 - Prefer short, plain English, simple words, and concrete examples.
 - If the user says `word soup`, `simpler`, or asks for basic English, rewrite the answer in simpler terms.
-- Treat `$explain-simply` as explanation-only. Do not start a review, edit, command, or other action unless the user explicitly asked for that task.
 
 ## Git
 
