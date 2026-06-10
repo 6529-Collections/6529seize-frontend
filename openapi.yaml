@@ -157,43 +157,17 @@ paths:
       summary: Get a message to sign with your web3 wallet
       operationId: getNonce
       parameters:
-        - name: signer_address
+        - name: auth_nonce_query
           in: query
-          description: Your wallet address
+          description: >-
+            Serialized as normal query fields. When structured_signature is
+            true, clients must also send domain; chain_id defaults to 1 when
+            omitted.
           required: true
+          style: form
+          explode: true
           schema:
-            type: string
-        - name: short_nonce
-          in: query
-          description: >-
-            If true, the nonce will be shorter and easier to sign. Default is
-            false.
-          required: false
-          schema:
-            type: boolean
-        - name: structured_signature
-          in: query
-          description: >-
-            If true, the nonce is returned as a structured wallet signature
-            message with domain, wallet, expiry, nonce, and action fields.
-            Clients that set this flag must also send domain. If chain_id is
-            omitted, the API embeds chain id 1.
-          required: false
-          schema:
-            type: boolean
-        - name: domain
-          in: query
-          description: Required when structured_signature is true.
-          required: false
-          schema:
-            type: string
-        - name: chain_id
-          in: query
-          description: Chain id embedded in structured signatures. Defaults to 1.
-          required: false
-          schema:
-            type: integer
-            default: 1
+            $ref: "#/components/schemas/AuthNonceQuery"
       responses:
         "200":
           description: successful operation
@@ -14874,6 +14848,60 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiNft"
+    AuthNonceQuery:
+      oneOf:
+        - $ref: "#/components/schemas/AuthNonceUnstructuredQuery"
+        - $ref: "#/components/schemas/AuthNonceStructuredQuery"
+    AuthNonceUnstructuredQuery:
+      type: object
+      additionalProperties: false
+      required:
+        - signer_address
+      properties:
+        signer_address:
+          type: string
+          description: Your wallet address
+        short_nonce:
+          type: boolean
+          description: >-
+            If true, the nonce will be shorter and easier to sign. Default is
+            false.
+        structured_signature:
+          type: boolean
+          enum:
+            - false
+          default: false
+    AuthNonceStructuredQuery:
+      type: object
+      additionalProperties: false
+      required:
+        - signer_address
+        - structured_signature
+        - domain
+      properties:
+        signer_address:
+          type: string
+          description: Your wallet address
+        short_nonce:
+          type: boolean
+          description: >-
+            If true, the nonce will be shorter and easier to sign. Default is
+            false.
+        structured_signature:
+          type: boolean
+          enum:
+            - true
+          description: >-
+            Returns the nonce as a structured wallet signature message with
+            domain, wallet, expiry, nonce, and action fields.
+        domain:
+          type: string
+          minLength: 1
+          description: Required when structured_signature is true.
+        chain_id:
+          type: integer
+          default: 1
+          description: Chain id embedded in structured signatures.
     ApiNonceResponse:
       type: object
       required:

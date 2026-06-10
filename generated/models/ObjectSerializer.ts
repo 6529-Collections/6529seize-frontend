@@ -434,6 +434,9 @@ export * from '../models/ApiXTdhGrantsPage';
 export * from '../models/ApiXTdhStats';
 export * from '../models/ApiXTdhToken';
 export * from '../models/ApiXTdhTokensPage';
+export * from '../models/AuthNonceQuery';
+export * from '../models/AuthNonceStructuredQuery';
+export * from '../models/AuthNonceUnstructuredQuery';
 export * from '../models/CreateDirectMessageWaveRequest';
 export * from '../models/DistributionNormalized';
 export * from '../models/DistributionNormalizedPage';
@@ -917,6 +920,9 @@ import { ApiXTdhGrantsPage } from '../models/ApiXTdhGrantsPage';
 import { ApiXTdhStats } from '../models/ApiXTdhStats';
 import { ApiXTdhToken } from '../models/ApiXTdhToken';
 import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
+import { AuthNonceQueryClass } from '../models/AuthNonceQuery';
+import { AuthNonceStructuredQuery } from '../models/AuthNonceStructuredQuery';
+import { AuthNonceUnstructuredQuery } from '../models/AuthNonceUnstructuredQuery';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { DistributionNormalized } from '../models/DistributionNormalized';
 import { DistributionNormalizedPage } from '../models/DistributionNormalizedPage';
@@ -1446,6 +1452,9 @@ let typeMap: {[index: string]: any} = {
     "ApiXTdhStats": ApiXTdhStats,
     "ApiXTdhToken": ApiXTdhToken,
     "ApiXTdhTokensPage": ApiXTdhTokensPage,
+    "AuthNonceQuery": AuthNonceQueryClass,
+    "AuthNonceStructuredQuery": AuthNonceStructuredQuery,
+    "AuthNonceUnstructuredQuery": AuthNonceUnstructuredQuery,
     "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
     "DistributionNormalized": DistributionNormalized,
     "DistributionNormalizedPage": DistributionNormalizedPage,
