@@ -54,7 +54,7 @@ export default function BlogFromFibonacciToFidenzaPage() {
       <meta name="twitter:data2" content="20 minutes" />
       {/* / Yoast SEO plugin. */}
       <link rel="dns-prefetch" href="//stats.wp.com" />
-      <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+      <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
       <link
         rel="alternate"
         type="application/rss+xml"
@@ -209,7 +209,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
       <link
         rel="stylesheet"
         id="font-awesome-css"
-        href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css?ver=6.7"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css?ver=6.7"
         type="text/css"
         media="all"
       />
