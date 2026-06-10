@@ -4,13 +4,20 @@ import {
   isArweaveGatewayRuntimeHost,
 } from "@/lib/media/arweave-gateways";
 import { getConfiguredIpfsGatewayHost } from "@/lib/media/ipfs-gateways";
+import {
+  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  parseDecentralizedMediaRef,
+  to6529ResolverUrl,
+} from "@/lib/media/decentralized-media";
+import { publicEnv } from "@/config/env";
 
 const DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS = ["ipfs.io", "www.ipfs.io"];
+const MEDIA_RESOLVER_HOST = "media.6529.io";
 
 const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>(
   [
     ...DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS,
-    getConfiguredIpfsGatewayHost(),
+    getConfiguredIpfsGatewayHost(publicEnv.IPFS_GATEWAY_ENDPOINT),
   ].filter((value): value is string => Boolean(value))
 );
 
@@ -63,7 +70,11 @@ const getInteractiveMediaProviderForHost = (
 };
 
 export const isInteractiveMediaAllowedHost = (hostname: string): boolean =>
-  getInteractiveMediaProviderForHost(hostname) !== null;
+  canonicalizeInteractiveMediaHostname(hostname) === MEDIA_RESOLVER_HOST ||
+  getInteractiveMediaProviderForHost(hostname) !== null ||
+  parseDecentralizedMediaRef(
+    `https://${canonicalizeInteractiveMediaHostname(hostname)}`
+  ) !== null;
 
 const isValidIpfsCid = (cid: string): boolean =>
   CIDV0_PATTERN.test(cid) || CIDV1_PATTERN.test(cid);
@@ -128,6 +139,24 @@ export const isInteractiveMediaContentPathAllowed = (
   hostname: string,
   pathname: string
 ): boolean => {
+  const normalizedHostname = canonicalizeInteractiveMediaHostname(hostname);
+  const parsedMedia = parseDecentralizedMediaRef(
+    `https://${normalizedHostname}${pathname}`
+  );
+  if (parsedMedia?.protocol === "ipfs") {
+    if (!isInteractiveMediaContentIdentifier("ipfs", parsedMedia.id)) {
+      return false;
+    }
+    return isSafeIpfsNestedContentPath(parsedMedia.path || undefined);
+  }
+
+  if (parsedMedia?.protocol === "arweave") {
+    return (
+      !parsedMedia.path &&
+      isInteractiveMediaContentIdentifier("arweave", parsedMedia.id)
+    );
+  }
+
   const provider = getInteractiveMediaProviderForHost(hostname);
   if (!provider) {
     return false;
@@ -182,6 +211,20 @@ export const isInteractiveMediaContentPathAllowed = (
 };
 
 export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
+  if (/%2e|%2f|%5c/i.test(src)) {
+    return null;
+  }
+
+  if (/^(ipfs|ar):\/\//i.test(src)) {
+    const nativeRef = parseDecentralizedMediaRef(src);
+    if (
+      nativeRef &&
+      (nativeRef.protocol === "ipfs" || nativeRef.protocol === "arweave")
+    ) {
+      return to6529ResolverUrl(nativeRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
+    }
+  }
+
   let parsedUrl: URL;
   try {
     parsedUrl = new URL(src);
@@ -237,6 +280,11 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
   parsedUrl.password = "";
   parsedUrl.hash = "";
 
+  const decentralizedRef = parseDecentralizedMediaRef(parsedUrl.toString());
+  if (decentralizedRef) {
+    return to6529ResolverUrl(decentralizedRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
+  }
+
   return parsedUrl.toString();
 };
 
@@ -244,8 +292,8 @@ export const INTERACTIVE_MEDIA_GATEWAY_BASE_URL: Record<
   InteractiveMediaProvider,
   string
 > = {
-  ipfs: "https://ipfs.io/ipfs/",
-  arweave: "https://arweave.net/",
+  ipfs: `${DEFAULT_MEDIA_RESOLVER_ENDPOINT}/ipfs/`,
+  arweave: `${DEFAULT_MEDIA_RESOLVER_ENDPOINT}/arweave/`,
 };
 
 export const INTERACTIVE_MEDIA_ALLOWED_CONTENT_TYPES = [
