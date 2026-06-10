@@ -171,6 +171,26 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: structured_signature
+          in: query
+          description: >-
+            If true, the nonce is returned as a structured wallet signature
+            message with domain, wallet, expiry, nonce, and action fields.
+          required: false
+          schema:
+            type: boolean
+        - name: domain
+          in: query
+          description: Required when structured_signature is true.
+          required: false
+          schema:
+            type: string
+        - name: chain_id
+          in: query
+          description: Chain id embedded in structured signatures. Defaults to 1.
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: successful operation
@@ -12147,7 +12167,15 @@ components:
             If wave requires drop signatures then this needs to be set.
             Signature of a drop is ethSign(creatorWallet,
             sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest
-            - signature (+ wave.participation.terms if it exists))))
+            - signature - signature_message (+ wave.participation.terms if it
+            exists))))
+          type: string
+          nullable: true
+        signature_message:
+          description: >-
+            Optional request-only structured wallet signature message. Present
+            when structured signatures are enabled and omitted from the payload
+            hash before signature verification.
           type: string
           nullable: true
         is_safe_signature:

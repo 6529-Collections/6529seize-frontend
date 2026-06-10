@@ -18,9 +18,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { useSignMessage } from "wagmi";
+import {
+  buildRememeSignatureMessage,
+  isStructuredSignaturesEnabled,
+} from "@/services/wallet-signatures/structured-wallet-signatures";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import type { ProcessedRememe } from "./RememeAddComponent";
@@ -42,6 +46,7 @@ function getSubmissionErrorMessage(error: unknown): string {
 async function postRememeSubmission(body: {
   address: string | undefined;
   signature: string;
+  signature_message?: string | undefined;
   rememe: {
     contract: string | undefined;
     token_ids: string[] | undefined;
@@ -78,6 +83,10 @@ export default function RememeAddPage() {
   const { seizeSettings } = useSeizeSettings();
 
   const signMessage = useSignMessage();
+  const signatureMessageRef = useRef<string | null>(null);
+  const signedRememeRef = useRef<ReturnType<typeof buildRememeObject> | null>(
+    null
+  );
   const [memes, setMemes] = useState<NFT[]>([]);
   const [userTDH, setUserTDH] = useState<ConsolidatedTDH>();
 
@@ -183,7 +192,10 @@ export default function RememeAddPage() {
       postRememeSubmission({
         address: address,
         signature: signMessage.data,
-        rememe: buildRememeObject(),
+        ...(signatureMessageRef.current
+          ? { signature_message: signatureMessageRef.current }
+          : {}),
+        rememe: signedRememeRef.current ?? buildRememeObject(),
       })
         .then((response) => {
           const success = response.status === 201;
@@ -273,6 +285,8 @@ export default function RememeAddPage() {
                           setReferences(references);
                           setCheckList([]);
                           setSignErrors([]);
+                          signatureMessageRef.current = null;
+                          signedRememeRef.current = null;
                           signMessage.reset();
                         }}
                       />
@@ -344,8 +358,27 @@ export default function RememeAddPage() {
                         setSignErrors([]);
                         setSubmissionResult(undefined);
                         if (addRememe) {
+                          const rememe = buildRememeObject();
+                          signedRememeRef.current = rememe;
+                          if (isStructuredSignaturesEnabled()) {
+                            if (!address) {
+                              signedRememeRef.current = null;
+                              setSignErrors([
+                                "Error: Connect a wallet before signing",
+                              ]);
+                              return;
+                            }
+                            const { message } = buildRememeSignatureMessage({
+                              address,
+                              rememe,
+                            });
+                            signatureMessageRef.current = message;
+                            signMessage.signMessage({ message });
+                            return;
+                          }
+                          signatureMessageRef.current = null;
                           signMessage.signMessage({
-                            message: JSON.stringify(buildRememeObject()),
+                            message: JSON.stringify(rememe),
                           });
                         }
                       }}

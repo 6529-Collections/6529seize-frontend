@@ -316,7 +316,7 @@ export default function QuorumProposalDropModal({
       }
 
       if (!wave.participation.terms) {
-        const { success, signature } = await signDrop({
+        const { success, signature, signatureMessage } = await signDrop({
           drop: requestBody,
           termsOfService: null,
         });
@@ -328,6 +328,7 @@ export default function QuorumProposalDropModal({
         return {
           ...requestBody,
           signature,
+          ...(signatureMessage ? { signature_message: signatureMessage } : {}),
         };
       }
 
@@ -335,6 +336,7 @@ export default function QuorumProposalDropModal({
         const handleSigningComplete = (result: {
           success: boolean;
           signature?: string | undefined;
+          signatureMessage?: string | undefined;
         }) => {
           if (!result.success || !result.signature) {
             resolve(null);
@@ -344,6 +346,9 @@ export default function QuorumProposalDropModal({
           resolve({
             ...requestBody,
             signature: result.signature,
+            ...(result.signatureMessage
+              ? { signature_message: result.signatureMessage }
+              : {}),
           });
         };
 

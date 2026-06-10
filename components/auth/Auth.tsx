@@ -59,6 +59,10 @@ import {
   loginWithSessionV2,
   persistSessionResponse,
 } from "@/services/auth/session-v2.utils";
+import {
+  getWalletSignatureDomain,
+  isStructuredSignaturesEnabled,
+} from "@/services/wallet-signatures/structured-wallet-signatures";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
@@ -419,11 +423,17 @@ export default function Auth({
     }
 
     try {
+      const params: Record<string, string> = {
+        signer_address: signerAddress,
+      };
+      if (isStructuredSignaturesEnabled()) {
+        params["structured_signature"] = "true";
+        params["domain"] = getWalletSignatureDomain();
+        params["chain_id"] = "1";
+      }
       const response = await commonApiFetch<ApiNonceResponse>({
         endpoint: "auth/nonce",
-        params: {
-          signer_address: signerAddress,
-        },
+        params,
       });
 
       // Response validation - fail fast on invalid response
