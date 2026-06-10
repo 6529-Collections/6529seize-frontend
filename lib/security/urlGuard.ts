@@ -271,7 +271,7 @@ function pinnedPublicUrlLookup(
   const validated = pinnedLookupContext.getStore();
   const normalizedHostname = normalizeHostname(hostname);
 
-  if (!validated || normalizedHostname !== validated.hostname) {
+  if (normalizedHostname !== validated?.hostname) {
     const error = new Error(
       "Resolved host does not match validated URL host."
     ) as NodeJS.ErrnoException;

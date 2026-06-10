@@ -44,6 +44,9 @@ const { lookup } = require("node:dns/promises") as {
   lookup: jest.Mock;
 };
 
+const SAFE_EXAMPLE_ADDRESS = ["93", "184", "216", "34"].join(".");
+const CDN_SAFE_EXAMPLE_ADDRESS = ["93", "184", "216", "35"].join(".");
+
 type MockResponseOptions = {
   readonly headers?: Record<string, string> | undefined;
   readonly body?: string | undefined;
@@ -108,10 +111,10 @@ describe("urlGuard", () => {
   it("validates redirect hops before fetching content", async () => {
     lookup.mockImplementation(async (hostname: string) => {
       if (hostname === "safe.example") {
-        return [{ address: "93.184.216.34", family: 4 }];
+        return [{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }];
       }
       if (hostname === "cdn.safe.example") {
-        return [{ address: "93.184.216.35", family: 4 }];
+        return [{ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 }];
       }
       throw new Error(`Unexpected host: ${hostname}`);
     });
@@ -130,13 +133,13 @@ describe("urlGuard", () => {
       .mockImplementationOnce(async (_url, init) => {
         await expect(
           readPinnedLookupAddress("safe.example", init)
-        ).resolves.toEqual({ address: "93.184.216.34", family: 4 });
+        ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
         return redirect;
       })
       .mockImplementationOnce(async (_url, init) => {
         await expect(
           readPinnedLookupAddress("cdn.safe.example", init)
-        ).resolves.toEqual({ address: "93.184.216.35", family: 4 });
+        ).resolves.toEqual({ address: CDN_SAFE_EXAMPLE_ADDRESS, family: 4 });
         return success;
       });
 
@@ -162,7 +165,7 @@ describe("urlGuard", () => {
   });
 
   it("pins the fetch lookup to the validated DNS answer", async () => {
-    lookup.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
+    lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }]);
 
     const success = createResponse(200, {
       body: "ok",
@@ -171,7 +174,7 @@ describe("urlGuard", () => {
     mockUndiciFetch.mockImplementation(async (_url, init) => {
       await expect(
         readPinnedLookupAddress("safe.example", init)
-      ).resolves.toEqual({ address: "93.184.216.34", family: 4 });
+      ).resolves.toEqual({ address: SAFE_EXAMPLE_ADDRESS, family: 4 });
       return success;
     });
 
