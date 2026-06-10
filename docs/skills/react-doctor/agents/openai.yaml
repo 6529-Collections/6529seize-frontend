@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Doctor"
+  short_description: "Run the repo's React Doctor diff check after React changes."
+  default_prompt: "Use $react-doctor to check the current React changes and summarize the diagnostics."

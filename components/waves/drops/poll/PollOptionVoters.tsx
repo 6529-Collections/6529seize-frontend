@@ -120,7 +120,7 @@ export function PollOptionVoterPreviews({
 
   return (
     <span
-      className="tw-flex tw--space-x-1.5 tw-opacity-80 tw-transition-opacity desktop-hover:group-hover/result:tw-opacity-100"
+      className="tw-flex tw-h-5 tw-flex-shrink-0 tw-items-center -tw-space-x-1.5 tw-opacity-80 tw-transition-opacity desktop-hover:group-hover/result:tw-opacity-100"
       aria-hidden="true"
     >
       {previewVoters.map((voter) => (

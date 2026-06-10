@@ -1,8 +1,10 @@
 import { permanentRedirect } from "next/navigation";
 
 type PageProps = {
-  readonly params?: Promise<{ user: string }> | undefined;
-  readonly searchParams?: Promise<Record<string, string | string[] | undefined>> | undefined;
+  readonly params?: Promise<{ user: string }>;
+  readonly searchParams?: Promise<
+    Record<string, string | string[] | undefined>
+  >;
 };
 
 function buildQueryString(
