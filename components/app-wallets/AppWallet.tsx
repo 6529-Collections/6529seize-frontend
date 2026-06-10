@@ -35,7 +35,6 @@ import { useAuth } from "../auth/Auth";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { UnlockAppWalletModal } from "./AppWalletModal";
 import { decryptData } from "./app-wallet-helpers";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import { Share } from "@capacitor/share";
@@ -217,12 +216,15 @@ export default function AppWalletComponent(
     }
 
     try {
-      if (clipboard.readText) {
-        const currentText = await clipboard.readText();
-        if (currentText !== value) {
-          return;
-        }
+      if (!clipboard.readText) {
+        return;
       }
+
+      const currentText = await clipboard.readText();
+      if (currentText !== value) {
+        return;
+      }
+
       await clipboard.writeText("");
     } catch {
       // Clipboard read/write permissions vary by platform; clearing is best-effort.
@@ -570,7 +572,7 @@ export default function AppWalletComponent(
               index={i + 1}
               word={w}
               hidden={!revealPhrase}
-              key={getRandomObjectId()}
+              key={`${appWallet.address}-mnemonic-${i}`}
             />
           ))
         ) : (
