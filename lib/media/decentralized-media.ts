@@ -56,6 +56,8 @@ export const ARWEAVE_TX_SUBDOMAIN_SUFFIXES = [
 
 const IPFS_PATH_GATEWAY_SET = new Set<string>(IPFS_PATH_GATEWAY_HOSTS);
 const ARWEAVE_GATEWAY_SET = new Set<string>(ARWEAVE_GATEWAY_HOSTS);
+const ARWEAVE_TX_ID_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+const DNS_SAFE_LABEL_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 
 type ParsedDecentralizedMedia = {
   readonly ref: DecentralizedMediaRef;
@@ -90,9 +92,11 @@ export function toExternalFallbackUrls(ref: DecentralizedMediaRef): string[] {
       ...ARWEAVE_GATEWAY_HOSTS.map(
         (host) => `https://${host}/${buildPath(ref.id, ref.path)}`
       ),
-      ...ARWEAVE_TX_SUBDOMAIN_SUFFIXES.map((suffix) =>
-        buildSubdomainUrl(ref.id, suffix.slice(1), ref.path)
-      ),
+      ...(isDnsSafeSubdomainId(ref.id)
+        ? ARWEAVE_TX_SUBDOMAIN_SUFFIXES.map((suffix) =>
+            buildSubdomainUrl(ref.id, suffix.slice(1), ref.path)
+          )
+        : []),
     ];
   }
 
@@ -107,9 +111,11 @@ export function toExternalFallbackUrls(ref: DecentralizedMediaRef): string[] {
 
   return [
     ...pathGatewayUrls,
-    ...IPFS_SUBDOMAIN_GATEWAY_SUFFIXES.map((suffix) =>
-      buildSubdomainUrl(ref.id, suffix.slice(1), ref.path)
-    ),
+    ...(isDnsSafeSubdomainId(ref.id)
+      ? IPFS_SUBDOMAIN_GATEWAY_SUFFIXES.map((suffix) =>
+          buildSubdomainUrl(ref.id, suffix.slice(1), ref.path)
+        )
+      : []),
   ];
 }
 
@@ -365,6 +371,7 @@ function makeParsed(
 ): ParsedDecentralizedMedia | null {
   const normalizedId = id.trim();
   if (!isValidIdSegment(normalizedId)) return null;
+  if (!isValidProtocolId(protocol, normalizedId)) return null;
 
   return {
     ref: {
@@ -445,7 +452,14 @@ function getUnrecognizedWarnings(input: string): string[] {
   if (/^https?:\/\//i.exec(trimmed)) {
     return parseHttpUrl(trimmed) ? [] : ["invalid_url"];
   }
-  if (/^[a-z][a-z0-9+.-]*:\/\//i.exec(trimmed)) return ["unsupported_scheme"];
+  const schemeMatch = /^([a-z][a-z0-9+.-]*):\/\//i.exec(trimmed);
+  if (schemeMatch?.[1]) {
+    const scheme = schemeMatch[1].toLowerCase();
+    if (scheme === "ipfs" || scheme === "ipns" || scheme === "ar") {
+      return ["invalid_url"];
+    }
+    return ["unsupported_scheme"];
+  }
   if (trimmed.includes("://")) return ["invalid_url"];
   return [];
 }
@@ -470,10 +484,27 @@ function isValidIdSegment(value: string): boolean {
   return value.length > 0 && !/[\s/?#]/.exec(value);
 }
 
+function isValidProtocolId(
+  protocol: DecentralizedMediaProtocol,
+  value: string
+): boolean {
+  if (protocol === "ipfs") return looksLikeIpfsCid(value);
+  if (protocol === "arweave") return looksLikeArweaveTxId(value);
+  return true;
+}
+
 function looksLikeIpfsCid(value: string): boolean {
   return /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|[bB][aA][fF][a-zA-Z2-7]{20,})$/.test(
     value
   );
+}
+
+function looksLikeArweaveTxId(value: string): boolean {
+  return ARWEAVE_TX_ID_PATTERN.test(value);
+}
+
+function isDnsSafeSubdomainId(value: string): boolean {
+  return DNS_SAFE_LABEL_PATTERN.test(value);
 }
 
 function dedupe(list: readonly string[]): string[] {
