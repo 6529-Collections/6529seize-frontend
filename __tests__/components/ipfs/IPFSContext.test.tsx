@@ -47,8 +47,8 @@ describe("IpfsContext", () => {
     }).toThrow("useIpfsService must be used within an IpfsProvider");
   });
 
-  it("resolves ipfs urls to gateway", async () => {
-    const url = await resolveIpfsUrl(`ipfs://${CID}`);
+  it("resolves ipfs urls to gateway", () => {
+    const url = resolveIpfsUrl(`ipfs://${CID}`);
     expect(url).toBe(`https://media.6529.io/ipfs/${CID}`);
   });
 
@@ -72,10 +72,10 @@ describe("IpfsContext", () => {
     );
   });
 
-  it("does not require the legacy gateway endpoint to resolve media", async () => {
+  it("does not require the legacy gateway endpoint to resolve media", () => {
     publicEnv.IPFS_GATEWAY_ENDPOINT = undefined;
     publicEnv.IPFS_API_ENDPOINT = undefined;
-    const url = await resolveIpfsUrl(`ipfs://${CID}`);
+    const url = resolveIpfsUrl(`ipfs://${CID}`);
     expect(url).toBe(`https://media.6529.io/ipfs/${CID}`);
   });
 });
