@@ -424,6 +424,59 @@ describe("HeaderShare", () => {
       ).toBe(false);
     });
 
+    it("mints a fresh transfer code after the share modal closes", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer
+        .mockResolvedValueOnce({
+          transfer_code: "first-transfer-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?transfer_code=first-transfer-code&address=0x1234567890123456789012345678901234567890",
+        })
+        .mockResolvedValueOnce({
+          transfer_code: "second-transfer-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          role: null,
+          target_client_type: "native",
+          deep_link_path:
+            "/accept-connection-sharing?transfer_code=second-transfer-code&address=0x1234567890123456789012345678901234567890",
+        });
+
+      renderWithProviders(<HeaderShare />);
+
+      const shareButton = screen.getByRole("button", { name: "QR Code" });
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(1)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=first-transfer-code"),
+          { width: 500, margin: 0 }
+        )
+      );
+
+      await userEvent.click(screen.getByLabelText("Close share modal"));
+      await userEvent.click(shareButton);
+
+      await waitFor(() =>
+        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(2)
+      );
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining("transfer_code=second-transfer-code"),
+          { width: 500, margin: 0 }
+        )
+      );
+    });
+
     it("disables the Connection tab when transfer-code creation fails", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       jest.spyOn(console, "error").mockImplementation(() => undefined);
