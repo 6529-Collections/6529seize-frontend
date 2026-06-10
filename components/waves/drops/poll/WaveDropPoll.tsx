@@ -7,6 +7,7 @@ import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUp
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -70,16 +71,32 @@ const stopPollEventPropagation = (event: SyntheticEvent) => {
   event.stopPropagation();
 };
 
+const getLocalPoll = (
+  localPollOverride: LocalPollOverride | null,
+  sourcePoll: ApiDropPoll | undefined
+): ApiDropPoll | null => {
+  if (!localPollOverride) {
+    return null;
+  }
+
+  if (localPollOverride.sourcePoll === sourcePoll) {
+    return localPollOverride.poll;
+  }
+
+  return (
+    preserveAuthenticatedPollVote(sourcePoll, localPollOverride.poll, {
+      preferExistingVote: true,
+    }) ?? null
+  );
+};
+
 export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   const queryClient = useQueryClient();
   const { requestAuth, setToast } = useAuth();
   const myStream = useMyStreamOptional();
   const [localPollOverride, setLocalPollOverride] =
     useState<LocalPollOverride | null>(null);
-  const localPoll =
-    localPollOverride && localPollOverride.sourcePoll === drop.poll
-      ? localPollOverride.poll
-      : null;
+  const localPoll = getLocalPoll(localPollOverride, drop.poll);
   const poll = localPoll ?? drop.poll;
   const [interactionState, setInteractionState] =
     useState<PollInteractionState | null>(null);
@@ -409,14 +426,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
             >
               Change vote
             </button>
-            <span
-              className={`tw-flex tw-h-8 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-white/[0.06] tw-px-3.5 tw-text-[13px] tw-font-bold tw-text-white tw-transition-opacity tw-duration-500 ${
-                showResultsFooterActions
-                  ? "tw-opacity-100"
-                  : "tw-pointer-events-none tw-opacity-0"
-              }`}
-              aria-hidden={!showResultsFooterActions}
-            >
+            <span className="tw-flex tw-h-8 tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-bg-white/[0.06] tw-px-3.5 tw-text-[13px] tw-font-bold tw-text-white tw-opacity-100 tw-transition-opacity tw-duration-500">
               <span>Voted</span>
               <CheckIcon
                 className="tw-size-3.5 tw-text-green"

@@ -19,6 +19,7 @@ import type { WaveDataStoreUpdater } from "./types";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { useQueryClient } from "@tanstack/react-query";
+import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import {
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
@@ -44,8 +45,13 @@ export enum ProcessIncomingDropType {
 
 type ProcessIncomingDropFn = (
   dropData: ApiDrop,
-  type: ProcessIncomingDropType
+  type: ProcessIncomingDropType,
+  options?: ProcessIncomingDropOptions
 ) => void;
+
+export interface ProcessIncomingDropOptions {
+  readonly preferExistingPollVote?: boolean;
+}
 
 function replaceAttachmentInPart(
   part: ApiDropPart,
@@ -196,13 +202,19 @@ export function useWaveRealtimeUpdater({
 
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    async (drop: ApiDrop, type: ProcessIncomingDropType) => {
+    async (
+      drop: ApiDrop,
+      type: ProcessIncomingDropType,
+      options: ProcessIncomingDropOptions = {}
+    ) => {
       if (!drop?.wave?.id) {
         return;
       }
 
       if (type !== ProcessIncomingDropType.DROP_REACTION_UPDATE) {
-        updateDropInCachedDrops(queryClient, drop);
+        updateDropInCachedDrops(queryClient, drop, {
+          preferExistingPollVote: options.preferExistingPollVote,
+        });
       }
 
       const waveId = drop.wave.id;
@@ -245,25 +257,31 @@ export function useWaveRealtimeUpdater({
       ) {
         const apiDrop = await fetchDropByIdBatched(drop.id);
         if (apiDrop) {
+          const reconciledApiDrop = reconcileDropAuthenticatedPollVote(
+            apiDrop,
+            existingDrop,
+            { preferExistingVote: options.preferExistingPollVote }
+          );
           if (type === ProcessIncomingDropType.DROP_REACTION_UPDATE) {
             const reconciliation = recordReactionRealtimeReconciliation({
               drop: {
-                id: apiDrop.id,
-                wave: { id: apiDrop.wave.id },
-                context_profile_context: apiDrop.context_profile_context,
+                id: reconciledApiDrop.id,
+                wave: { id: reconciledApiDrop.wave.id },
+                context_profile_context:
+                  reconciledApiDrop.context_profile_context,
               },
               websocketStatus: WebSocketStatus.CONNECTED,
             });
             if (!reconciliation.shouldApplyCanonicalDrop) {
               return;
             }
-            updateDropInCachedDrops(queryClient, apiDrop);
+            updateDropInCachedDrops(queryClient, reconciledApiDrop);
           }
           updateData({
             key: waveId,
             drops: [
               {
-                ...apiDrop,
+                ...reconciledApiDrop,
                 type: DropSize.FULL,
                 stableHash: existingDrop.stableHash,
                 stableKey: existingDrop.stableKey,
@@ -274,35 +292,40 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
+      const reconciledDrop = existingDrop
+        ? reconcileDropAuthenticatedPollVote(drop, existingDrop, {
+            preferExistingVote: options.preferExistingPollVote,
+          })
+        : drop;
       const optimisticDrop: ExtendedDrop = {
-        ...drop,
+        ...reconciledDrop,
         type: DropSize.FULL,
         author: {
-          ...drop.author,
+          ...reconciledDrop.author,
           subscribed_actions: existingDrop
             ? existingDrop.author.subscribed_actions
-            : (drop.author.subscribed_actions ?? []),
+            : reconciledDrop.author.subscribed_actions,
         },
         wave: {
-          ...drop.wave,
+          ...reconciledDrop.wave,
           authenticated_user_eligible_to_participate: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_participate
-            : (drop.wave.authenticated_user_eligible_to_participate ?? false),
+            : reconciledDrop.wave.authenticated_user_eligible_to_participate,
           authenticated_user_eligible_to_vote: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_vote
-            : (drop.wave.authenticated_user_eligible_to_vote ?? false),
+            : reconciledDrop.wave.authenticated_user_eligible_to_vote,
           authenticated_user_eligible_to_chat: existingDrop
             ? existingDrop.wave.authenticated_user_eligible_to_chat
-            : (drop.wave.authenticated_user_eligible_to_chat ?? false),
+            : reconciledDrop.wave.authenticated_user_eligible_to_chat,
           authenticated_user_admin: existingDrop
             ? existingDrop.wave.authenticated_user_admin
-            : (drop.wave.authenticated_user_admin ?? false),
+            : reconciledDrop.wave.authenticated_user_admin,
         }, // Assuming message structure matches ApiDrop + ApiWaveMin
-        stableKey: drop.id,
-        stableHash: drop.id, // Use ID for hash temporarily
+        stableKey: reconciledDrop.id,
+        stableHash: reconciledDrop.id, // Use ID for hash temporarily
         context_profile_context: existingDrop
           ? existingDrop.context_profile_context
-          : (drop.context_profile_context ?? null),
+          : (reconciledDrop.context_profile_context ?? null),
       };
 
       // Important: Identify the serial number *before* adding the optimistic drop
@@ -393,7 +416,9 @@ export function useWaveRealtimeUpdater({
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     (messageData) => {
-      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_INSERT);
+      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_INSERT, {
+        preferExistingPollVote: true,
+      });
     }
   );
 
@@ -402,7 +427,8 @@ export function useWaveRealtimeUpdater({
     (messageData) => {
       processIncomingDrop(
         messageData,
-        ProcessIncomingDropType.DROP_RATING_UPDATE
+        ProcessIncomingDropType.DROP_RATING_UPDATE,
+        { preferExistingPollVote: true }
       );
     }
   );
@@ -412,7 +438,8 @@ export function useWaveRealtimeUpdater({
     (messageData) => {
       processIncomingDrop(
         messageData,
-        ProcessIncomingDropType.DROP_REACTION_UPDATE
+        ProcessIncomingDropType.DROP_REACTION_UPDATE,
+        { preferExistingPollVote: true }
       );
     }
   );
