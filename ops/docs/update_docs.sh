@@ -9,14 +9,14 @@ fi
 LAST_COMMIT_HASH="$(git rev-parse --short HEAD)"
 
 CODEX_ARGS=()
-if [[ -L docs ]]; then
-  DOCS_REAL_PATH="$(cd docs && pwd -P)"
+if [[ -L ops/docs ]]; then
+  DOCS_REAL_PATH="$(cd ops/docs && pwd -P)"
   CODEX_ARGS+=(--add-dir "$DOCS_REAL_PATH")
 fi
 
 codex exec "${CODEX_ARGS[@]}" -- 'Use $commit-docs-updater. Context: ops/docs may be a symlink in this workflow, and that is expected.'
 
-if [[ -L docs ]]; then
+if [[ -L ops/docs ]]; then
   echo "ops/docs is symlinked in this worktree; skipping git add/commit."
   exit 0
 fi
@@ -29,4 +29,3 @@ fi
 git add ops/docs
 
 codex exec "${CODEX_ARGS[@]}" -- 'Use $docs-precommit-guard. Context: ops/docs may be a symlink in this workflow, and that is expected.'
-
