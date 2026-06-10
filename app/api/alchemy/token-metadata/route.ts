@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -244,7 +243,13 @@ function getClientAddress(request: NextRequest): string {
 }
 
 function fingerprint(value: string): string {
-  return createHash("sha256").update(value).digest("hex");
+  // Avoid storing raw auth tokens or IP headers in rate-limit map keys.
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `${value.length.toString(36)}:${(hash >>> 0).toString(36)}`;
 }
 
 function getRateLimitKey(request: NextRequest): {
