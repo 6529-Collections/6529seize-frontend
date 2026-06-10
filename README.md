@@ -173,7 +173,7 @@ Otherwise, open a new shell after running `./bin/6529 bootstrap`.
 
 ### Environment
 
-To run the project you need a .env file.
+To run the project, create a `.env` file.
 
 [Sample .env file](https://github.com/6529-Collections/6529seize-frontend/tree/main/.env.sample)
 
