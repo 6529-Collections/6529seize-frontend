@@ -50,7 +50,7 @@ describe("NextGenCollectionDetails", () => {
     );
 
     expect(screen.getByText(artistSignature)).toBeInTheDocument();
-    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(container.querySelector("img")).toBeNull();
   });
 
   it("renders trait sets view", () => {
