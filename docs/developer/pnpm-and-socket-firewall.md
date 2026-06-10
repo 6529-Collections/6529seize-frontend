@@ -101,6 +101,60 @@ If pnpm reports ignored install/build scripts, use:
 6529 approve-builds
 ```
 
+## GitHub workflow helpers
+
+This repository also includes helper commands in `bin/` for GitHub Actions and
+production deploy operations. If the repo `.envrc` is allowed, `bin/` is added
+to `PATH` while you are inside this repository.
+
+### `ghruns`
+
+`ghruns` lists recent GitHub Actions runs for this repository:
+
+```bash
+ghruns
+```
+
+It is scoped to:
+
+```bash
+gh run list -R "6529-Collections/6529seize-frontend"
+```
+
+In an interactive terminal, `ghruns` opens a live dashboard. It refreshes every
+5 seconds, keeps the same repository scope, and accepts the usual
+`gh run list` filters such as `--branch`, `--workflow`, `--status`, and `-L`.
+
+Dashboard controls:
+
+- `Up` / `Down` moves through recent runs.
+- `Enter` opens `gh run watch` for the highlighted run.
+- `r` refreshes immediately.
+- `q` quits.
+
+The helper falls back to plain `gh run list` output in non-interactive shells
+and when output-formatting flags such as `--json`, `--jq`, or `--template` are
+used.
+
+### `ghdeploy`
+
+`ghdeploy` triggers the production deploy workflow for the current branch:
+
+```bash
+ghdeploy
+```
+
+Run it from the repository root. Before triggering
+`.github/workflows/build-upload-deploy-prod.yml`, it checks that:
+
+- the current branch is not detached
+- the working tree is fully clean, including no untracked files
+- the current branch has an upstream
+- the current branch is exactly in sync with its upstream after a fetch
+
+If those checks pass, it asks for confirmation before running the production
+workflow against the current branch.
+
 ## Guardrails in this repo
 
 - [`package.json`](../../package.json) pins `pnpm@10.33.0`.
