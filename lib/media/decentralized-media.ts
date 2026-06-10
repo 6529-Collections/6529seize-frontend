@@ -406,7 +406,7 @@ function buildSubdomainUrl(
 
 function normalizeOrigin(origin: string): string {
   let end = origin.length;
-  while (end > 0 && origin.charCodeAt(end - 1) === 47) {
+  while (end > 0 && origin.codePointAt(end - 1) === 47) {
     end -= 1;
   }
 
