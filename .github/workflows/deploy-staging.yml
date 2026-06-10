@@ -39,7 +39,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
@@ -52,7 +52,7 @@ jobs:
             exit 1
           }
           test -n "$INSTANCE_ID" || {
-            echo "Missing STAGING_INSTANCE_ID repository variable." >&2
+            echo "Missing STAGING_INSTANCE_ID secret." >&2
             exit 1
           }
           test -n "$AWS_REGION" || {
@@ -75,12 +75,39 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Verify staging instance is online in SSM
+        env:
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
+        run: |
+          set -euo pipefail
+
+          instance_info="$(
+            aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=$INSTANCE_ID" \
+              --output json
+          )"
+
+          managed_count="$(jq '.InstanceInformationList | length' <<< "$instance_info")"
+          if [ "$managed_count" -ne 1 ]; then
+            echo "Instance $INSTANCE_ID is not registered as an SSM managed node in $AWS_REGION for these AWS credentials." >&2
+            echo "Check that the EC2 instance is in this account/region, has an IAM instance profile with AmazonSSMManagedInstanceCore, has SSM Agent running, and has outbound HTTPS access to SSM." >&2
+            exit 1
+          fi
+
+          ping_status="$(jq -r '.InstanceInformationList[0].PingStatus' <<< "$instance_info")"
+          if [ "$ping_status" != "Online" ]; then
+            echo "Instance $INSTANCE_ID is registered in SSM but is not Online. Current PingStatus: $ping_status" >&2
+            exit 1
+          fi
+
+          echo "Instance $INSTANCE_ID is online in SSM."
+
       - name: Send staging deploy command
         id: send-command
         env:
           BRANCH: ${{ env.STAGING_BRANCH }}
           EXPECTED_SHA: ${{ steps.expected-commit.outputs.sha }}
-          INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
           REPO_DIR: ${{ env.STAGING_REPO_DIR }}
           RUN_AS: ${{ env.STAGING_RUN_AS }}
         run: |
@@ -93,7 +120,7 @@ jobs:
 
           remote_script="$(
             cat <<REMOTE_SCRIPT_VARS
-          set -euo pipefail
+          set -eu
           REPO_DIR=$repo_dir_q
           RUN_AS=$run_as_q
           BRANCH=$branch_q
@@ -113,43 +140,101 @@ jobs:
             exit 1
           fi
 
-          sudo -Hiu "$RUN_AS" env \
-            REPO_DIR="$REPO_DIR" \
-            BRANCH="$BRANCH" \
-            EXPECTED_SHA="$EXPECTED_SHA" \
-            bash -lc '
-              set -euo pipefail
+          sfw_bin="$(command -v sfw || true)"
+          if [ -n "$sfw_bin" ] && command -v node >/dev/null 2>&1; then
+            sfw_root="$(
+              node - "$sfw_bin" <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
 
-              cd "$REPO_DIR"
+          let current = fs.realpathSync(process.argv[2]);
+          if (fs.statSync(current).isFile()) {
+            current = path.dirname(current);
+          }
 
-              echo "Repository: $(pwd)"
-              echo "Deploying branch: $BRANCH"
-              echo "Expected commit: $EXPECTED_SHA"
+          while (current !== path.dirname(current)) {
+            const packageJson = path.join(current, "package.json");
+            if (fs.existsSync(packageJson)) {
+              try {
+                const manifest = JSON.parse(fs.readFileSync(packageJson, "utf8"));
+                if (manifest.name === "sfw") {
+                  console.log(current);
+                  process.exit(0);
+                }
+              } catch {
+                process.exit(1);
+              }
+            }
+            current = path.dirname(current);
+          }
 
-              git fetch --prune origin "$BRANCH:refs/remotes/origin/$BRANCH"
-              remote_sha="$(git rev-parse "origin/$BRANCH")"
-              if [ "$remote_sha" != "$EXPECTED_SHA" ]; then
-                echo "origin/$BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
-                echo "A newer staging push may have superseded this run; refusing to deploy a different commit." >&2
-                exit 1
-              fi
+          process.exit(1);
+          NODE
+              true
+            )"
 
-              git checkout -B "$BRANCH" "origin/$BRANCH"
-              git branch --set-upstream-to="origin/$BRANCH" "$BRANCH"
-              git reset --hard "origin/$BRANCH"
+            if [ -n "$sfw_root" ]; then
+              echo "Preparing Socket Firewall cache at $sfw_root/.sfw-cache"
+              mkdir -p "$sfw_root/.sfw-cache"
+              chown -R "$RUN_AS:$RUN_AS" "$sfw_root/.sfw-cache"
+            else
+              echo "Could not resolve Socket Firewall package root for $sfw_bin; continuing without cache preparation."
+            fi
+          fi
 
-              SKIP_STAGING_PULL=1 ./bin/6529 staging
+          deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
+          cleanup() {
+            rm -f "$deploy_script"
+          }
+          trap cleanup EXIT HUP INT TERM
 
-              deployed_sha="$(git rev-parse HEAD)"
-              echo "Deployed commit: $deployed_sha"
-              if [ "$deployed_sha" != "$EXPECTED_SHA" ]; then
-                echo "Expected $EXPECTED_SHA but deployed $deployed_sha" >&2
-                exit 1
-              fi
+          cat > "$deploy_script" <<'DEPLOY_SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
 
-              pm2 describe 6529seize >/dev/null
-              pm2 status 6529seize
-            '
+          if [[ "$#" -ne 3 ]]; then
+            echo "Usage: $0 <repo-dir> <branch> <expected-sha>" >&2
+            exit 1
+          fi
+
+          REPO_DIR="$1"
+          BRANCH="$2"
+          EXPECTED_SHA="$3"
+
+          cd "$REPO_DIR"
+
+          echo "Repository: $(pwd)"
+          echo "Deploying branch: $BRANCH"
+          echo "Expected commit: $EXPECTED_SHA"
+
+          git fetch --no-tags origin "$BRANCH"
+          remote_sha="$(git rev-parse FETCH_HEAD)"
+          if [[ "$remote_sha" != "$EXPECTED_SHA" ]]; then
+            echo "origin $BRANCH is $remote_sha, expected $EXPECTED_SHA." >&2
+            echo "A newer staging push may have superseded this run; refusing to deploy a different commit." >&2
+            exit 1
+          fi
+
+          git checkout -B "$BRANCH" FETCH_HEAD
+          git config "branch.$BRANCH.remote" origin
+          git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"
+          git reset --hard FETCH_HEAD
+
+          SKIP_STAGING_PULL=1 ./bin/6529 staging
+
+          deployed_sha="$(git rev-parse HEAD)"
+          echo "Deployed commit: $deployed_sha"
+          if [[ "$deployed_sha" != "$EXPECTED_SHA" ]]; then
+            echo "Expected $EXPECTED_SHA but deployed $deployed_sha" >&2
+            exit 1
+          fi
+
+          pm2 describe 6529seize >/dev/null
+          pm2 status 6529seize
+          DEPLOY_SCRIPT
+
+          chmod 755 "$deploy_script"
+          sudo -H -u "$RUN_AS" bash "$deploy_script" "$REPO_DIR" "$BRANCH" "$EXPECTED_SHA"
           REMOTE_SCRIPT_BODY
           )"
 
@@ -175,7 +260,7 @@ jobs:
       - name: Wait for staging deploy
         env:
           COMMAND_ID: ${{ steps.send-command.outputs.command-id }}
-          INSTANCE_ID: ${{ vars.STAGING_INSTANCE_ID }}
+          INSTANCE_ID: ${{ secrets.STAGING_INSTANCE_ID }}
         run: |
           set -euo pipefail
 
