@@ -152,6 +152,11 @@ const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
   // Upload a larger set of source maps for prettier stack traces (increases build time)
   widenClientFileUpload: true,
 
+  // Sentry needs build-time maps for symbolication; deployed browser assets do not.
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
+
   // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
