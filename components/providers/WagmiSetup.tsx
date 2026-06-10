@@ -263,20 +263,28 @@ export default function WagmiSetup({
     try {
       // Create connectors for current wallets
       const connectors = appWallets
-        .map((wallet) => {
-          validateWalletSafely(wallet);
-          const connector = createAppWalletConnector(
-            Array.from(currentAdapter.wagmiConfig.chains),
-            { appWallet: wallet },
-            () =>
-              appWalletPasswordModal.requestPassword(
-                wallet.address,
-                wallet.address_hashed
-              )
-          );
-          return currentAdapter.wagmiConfig._internal.connectors.setup(
-            connector
-          );
+        .flatMap((wallet) => {
+          try {
+            validateWalletSafely(wallet);
+            const connector = createAppWalletConnector(
+              Array.from(currentAdapter.wagmiConfig.chains),
+              { appWallet: wallet },
+              () =>
+                appWalletPasswordModal.requestPassword(
+                  wallet.address,
+                  wallet.address_hashed
+                )
+            );
+            const setupConnector =
+              currentAdapter.wagmiConfig._internal.connectors.setup(connector);
+            return setupConnector ? [setupConnector] : [];
+          } catch (error) {
+            logErrorSecurely(
+              `[WagmiSetup] Skipping invalid app-wallet connector ${wallet.address}`,
+              error
+            );
+            return [];
+          }
         })
         .filter((connector) => connector !== null);
 

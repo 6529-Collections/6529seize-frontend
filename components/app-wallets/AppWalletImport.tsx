@@ -21,7 +21,7 @@ import {
 } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
-const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE ?? "N/A";
+const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
 
 export default function AppWalletImport() {
   const [isMnemonic, setIsMnemonic] = useState(true);

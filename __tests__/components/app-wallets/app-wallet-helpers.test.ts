@@ -43,6 +43,43 @@ describe("app-wallet-helpers", () => {
     expect(getAppWalletEncryptionVersion(encrypted)).toBe(2);
   });
 
+  it("decrypts v2 envelopes created with older supported KDF iterations", async () => {
+    const legacyV2Iterations = 100001;
+    const v2Salt = crypto.randomBytes(16).toString("hex");
+    const iv = crypto.randomBytes(12);
+    const key = crypto.pbkdf2Sync(
+      password,
+      Buffer.from(v2Salt, "hex"),
+      legacyV2Iterations,
+      32,
+      "sha256"
+    );
+    const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+    let encrypted = cipher.update(data, "utf8", "hex");
+    encrypted += cipher.final("hex");
+
+    const olderV2Envelope = JSON.stringify({
+      version: 2,
+      algorithm: "aes-256-gcm",
+      kdf: {
+        name: "pbkdf2",
+        hash: "sha256",
+        iterations: legacyV2Iterations,
+        salt: v2Salt,
+        key_length: 32,
+      },
+      iv: iv.toString("hex"),
+      auth_tag: cipher.getAuthTag().toString("hex"),
+      ciphertext: encrypted,
+    });
+
+    expect(isAppWalletEncryptedEnvelope(olderV2Envelope)).toBe(true);
+    expect(getAppWalletEncryptionVersion(olderV2Envelope)).toBe(2);
+    await expect(decryptData(salt, olderV2Envelope, password)).resolves.toBe(
+      data
+    );
+  });
+
   it("throws when decrypting with wrong password", async () => {
     const encrypted = await encryptData(salt, data, password);
     await expect(
