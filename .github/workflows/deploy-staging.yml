@@ -140,6 +140,48 @@ jobs:
             exit 1
           fi
 
+          sfw_bin="$(command -v sfw || true)"
+          if [ -n "$sfw_bin" ] && command -v node >/dev/null 2>&1; then
+            sfw_root="$(
+              node - "$sfw_bin" <<'NODE'
+          const fs = require("node:fs");
+          const path = require("node:path");
+
+          let current = fs.realpathSync(process.argv[2]);
+          if (fs.statSync(current).isFile()) {
+            current = path.dirname(current);
+          }
+
+          while (current !== path.dirname(current)) {
+            const packageJson = path.join(current, "package.json");
+            if (fs.existsSync(packageJson)) {
+              try {
+                const manifest = JSON.parse(fs.readFileSync(packageJson, "utf8"));
+                if (manifest.name === "sfw") {
+                  console.log(current);
+                  process.exit(0);
+                }
+              } catch {
+                process.exit(1);
+              }
+            }
+            current = path.dirname(current);
+          }
+
+          process.exit(1);
+          NODE
+              true
+            )"
+
+            if [ -n "$sfw_root" ]; then
+              echo "Preparing Socket Firewall cache at $sfw_root/.sfw-cache"
+              mkdir -p "$sfw_root/.sfw-cache"
+              chown -R "$RUN_AS:$RUN_AS" "$sfw_root/.sfw-cache"
+            else
+              echo "Could not resolve Socket Firewall package root for $sfw_bin; continuing without cache preparation."
+            fi
+          fi
+
           deploy_script="$(mktemp /tmp/6529-staging-deploy.XXXXXX.sh)"
           cleanup() {
             rm -f "$deploy_script"
