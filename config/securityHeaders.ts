@@ -57,6 +57,7 @@ function cspDirective(
 interface SecurityHeaderOptions {
   readonly allowInsecureLocalhostConnectSrc?: boolean | undefined;
   readonly allowUnsafeEval?: boolean | undefined;
+  readonly webSocketEndpoint?: string | undefined;
 }
 
 export function createSecurityHeaders(
@@ -69,12 +70,17 @@ export function createSecurityHeaders(
     apiEndpoint,
     options.allowInsecureLocalhostConnectSrc
   );
+  const configuredWebSocketSource = getConfiguredConnectSource(
+    options.webSocketEndpoint,
+    options.allowInsecureLocalhostConnectSrc
+  );
   const configuredIpfsGatewaySource =
     getConfiguredIpfsGatewaySource(ipfsGatewayEndpoint);
   const connectSrc = [
     "'self'",
     "blob:",
     configuredApiSource,
+    configuredWebSocketSource,
     // Wallet/RPC providers, presigned uploads, analytics, and user media probes
     // can resolve to many origins; keep this broad but HTTPS/WSS-only.
     "https:",

@@ -62,6 +62,7 @@ export function sharedConfig(
               allowUnsafeEval:
                 publicEnv.NODE_ENV === "development" ||
                 publicEnv.NODE_ENV === "local",
+              webSocketEndpoint: publicEnv["WS_ENDPOINT"],
             }
           ),
         },

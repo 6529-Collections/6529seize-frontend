@@ -144,6 +144,43 @@ describe("createSecurityHeaders CSP", () => {
     ).toContain(localApiEndpoint);
   });
 
+  it("only allows insecure loopback WebSocket endpoints when enabled for local tooling", () => {
+    const localWebSocketEndpoint = "ws:" + "//localhost:3000";
+
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({
+          webSocketEndpoint: localWebSocketEndpoint,
+        }),
+        "connect-src"
+      )
+    ).not.toContain(localWebSocketEndpoint);
+
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({
+          allowInsecureLocalhostConnectSrc: true,
+          webSocketEndpoint: localWebSocketEndpoint,
+        }),
+        "connect-src"
+      )
+    ).toContain(localWebSocketEndpoint);
+  });
+
+  it("omits insecure remote WebSocket endpoints even when local tooling is enabled", () => {
+    const remoteWebSocketEndpoint = "ws:" + "//api.example.com";
+    const connectSrc = getDirectiveSources(
+      getContentSecurityPolicy({
+        allowInsecureLocalhostConnectSrc: true,
+        webSocketEndpoint: remoteWebSocketEndpoint,
+      }),
+      "connect-src"
+    );
+
+    expect(connectSrc).not.toContain(remoteWebSocketEndpoint);
+    expect(connectSrc.some((source) => source.startsWith("ws:"))).toBe(false);
+  });
+
   it("only includes a configured IPFS gateway when it is HTTPS", () => {
     expect(getContentSecurityPolicy()).toContain("https://ipfs.6529.io");
     expect(
