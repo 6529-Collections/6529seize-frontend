@@ -4,6 +4,7 @@ const ENCRYPTION_ALGORITHM = "aes-256-gcm";
 const LEGACY_KDF_ITERATIONS = 100000;
 const CURRENT_ENCRYPTION_VERSION = 2;
 const CURRENT_KDF_ITERATIONS = 600000;
+const MIN_V2_DECRYPT_KDF_ITERATIONS = LEGACY_KDF_ITERATIONS + 1;
 const CURRENT_KDF_SALT_BYTES = 16;
 const CURRENT_IV_BYTES = 12;
 const ENCRYPTION_KEY_BYTES = 32;
@@ -99,7 +100,7 @@ function parseEnvelope(
       parsed.algorithm !== ENCRYPTION_ALGORITHM ||
       parsed.kdf?.name !== "pbkdf2" ||
       parsed.kdf.hash !== "sha256" ||
-      parsed.kdf.iterations < CURRENT_KDF_ITERATIONS ||
+      parsed.kdf.iterations < MIN_V2_DECRYPT_KDF_ITERATIONS ||
       parsed.kdf.key_length !== ENCRYPTION_KEY_BYTES ||
       !isHex(parsed.kdf.salt) ||
       Buffer.from(parsed.kdf.salt, "hex").length < CURRENT_KDF_SALT_BYTES ||
