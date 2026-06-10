@@ -162,7 +162,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
     isFetchingNextPage,
     refetch,
   } = useWavePollDrops({
-    waveId: wave.id,
+    wave,
     state: stateFilterItem.apiState,
     sortDirection: sortItem.sortDirection,
     sort: sortItem.sort,
