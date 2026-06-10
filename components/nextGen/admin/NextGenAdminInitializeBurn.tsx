@@ -186,6 +186,7 @@ export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
       const signatureMessage = isStructuredSignaturesEnabled()
         ? buildNextgenAdminSignatureMessage({
             address: signerAddress,
+            chainId: NEXTGEN_CHAIN_ID,
             payload,
           }).message
         : null;
