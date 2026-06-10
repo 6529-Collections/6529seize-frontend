@@ -1,4 +1,29 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import { createSecurityHeaders } from "@/config/securityHeaders";
+
+function findFilesMatching(directory: string, pattern: RegExp): string[] {
+  const matches: string[] = [];
+
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const entryPath = join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      matches.push(...findFilesMatching(entryPath, pattern));
+      continue;
+    }
+
+    if (
+      entry.isFile() &&
+      /\.(?:js|jsx|ts|tsx|mdx)$/.test(entry.name) &&
+      pattern.test(readFileSync(entryPath, "utf8"))
+    ) {
+      matches.push(relative(process.cwd(), entryPath));
+    }
+  }
+
+  return matches.sort();
+}
 
 function getContentSecurityPolicy(
   options?: Parameters<typeof createSecurityHeaders>[2]
@@ -108,6 +133,15 @@ describe("createSecurityHeaders CSP", () => {
     );
 
     expect(styleSrc.some((source) => source.startsWith("http:"))).toBe(false);
+  });
+
+  it("does not leave protocol-relative cdnjs links in app pages", () => {
+    expect(
+      findFilesMatching(
+        join(process.cwd(), "app"),
+        /(^|[^:])\/\/cdnjs\.cloudflare\.com/
+      )
+    ).toEqual([]);
   });
 
   it("omits insecure remote API endpoints from connect sources", () => {
