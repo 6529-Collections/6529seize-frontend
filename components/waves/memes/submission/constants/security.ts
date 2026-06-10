@@ -210,31 +210,83 @@ export const isInteractiveMediaContentPathAllowed = (
   return false;
 };
 
+const canonicalizeNativeInteractiveMediaUrl = (
+  src: string
+): string | null | undefined => {
+  if (!/^(ipfs|ar):\/\//i.test(src)) {
+    return undefined;
+  }
+
+  const nativeRef = parseDecentralizedMediaRef(src);
+  if (nativeRef?.protocol === "ipfs" || nativeRef?.protocol === "arweave") {
+    return to6529ResolverUrl(nativeRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
+  }
+
+  return null;
+};
+
+const parseSecureInteractiveMediaUrl = (src: string): URL | null => {
+  try {
+    const parsedUrl = new URL(src);
+    if (parsedUrl.protocol !== "https:") {
+      return null;
+    }
+
+    return parsedUrl;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeInteractiveMediaPort = (parsedUrl: URL): boolean => {
+  if (!parsedUrl.port) {
+    return true;
+  }
+
+  if (parsedUrl.port !== "443") {
+    return false;
+  }
+
+  parsedUrl.port = "";
+  return true;
+};
+
+const normalizeInteractiveMediaHostname = (parsedUrl: URL): boolean => {
+  const normalizedHostname = canonicalizeInteractiveMediaHostname(
+    parsedUrl.hostname
+  );
+  if (!normalizedHostname) {
+    return false;
+  }
+
+  if (normalizedHostname !== parsedUrl.hostname) {
+    parsedUrl.hostname = normalizedHostname;
+  }
+
+  return true;
+};
+
+const canonicalizeParsedInteractiveMediaUrl = (
+  parsedUrl: URL
+): string | null => {
+  const decentralizedRef = parseDecentralizedMediaRef(parsedUrl.toString());
+  if (decentralizedRef) {
+    return to6529ResolverUrl(decentralizedRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
+  }
+
+  return parsedUrl.toString();
+};
+
 export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
   if (/%2e|%2f|%5c/i.test(src)) {
     return null;
   }
 
-  if (/^(ipfs|ar):\/\//i.test(src)) {
-    const nativeRef = parseDecentralizedMediaRef(src);
-    if (
-      nativeRef &&
-      (nativeRef.protocol === "ipfs" || nativeRef.protocol === "arweave")
-    ) {
-      return to6529ResolverUrl(nativeRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
-    }
-  }
+  const nativeUrl = canonicalizeNativeInteractiveMediaUrl(src);
+  if (nativeUrl !== undefined) return nativeUrl;
 
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(src);
-  } catch {
-    return null;
-  }
-
-  if (parsedUrl.protocol !== "https:") {
-    return null;
-  }
+  const parsedUrl = parseSecureInteractiveMediaUrl(src);
+  if (!parsedUrl) return null;
 
   if (parsedUrl.username || parsedUrl.password) {
     return null;
@@ -244,24 +296,9 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
     return null;
   }
 
-  if (parsedUrl.port) {
-    if (parsedUrl.port === "443") {
-      parsedUrl.port = "";
-    } else {
-      return null;
-    }
-  }
+  if (!normalizeInteractiveMediaPort(parsedUrl)) return null;
 
-  const normalizedHostname = canonicalizeInteractiveMediaHostname(
-    parsedUrl.hostname
-  );
-  if (!normalizedHostname) {
-    return null;
-  }
-
-  if (normalizedHostname !== parsedUrl.hostname) {
-    parsedUrl.hostname = normalizedHostname;
-  }
+  if (!normalizeInteractiveMediaHostname(parsedUrl)) return null;
 
   if (!isInteractiveMediaAllowedHost(parsedUrl.hostname)) {
     return null;
@@ -280,12 +317,7 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
   parsedUrl.password = "";
   parsedUrl.hash = "";
 
-  const decentralizedRef = parseDecentralizedMediaRef(parsedUrl.toString());
-  if (decentralizedRef) {
-    return to6529ResolverUrl(decentralizedRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
-  }
-
-  return parsedUrl.toString();
+  return canonicalizeParsedInteractiveMediaUrl(parsedUrl);
 };
 
 export const INTERACTIVE_MEDIA_GATEWAY_BASE_URL: Record<
