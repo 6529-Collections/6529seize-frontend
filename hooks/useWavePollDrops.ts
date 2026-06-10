@@ -4,23 +4,28 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiPageSortDirection } from "@/generated/models/ApiPageSortDirection";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import type { ApiWavePoll } from "@/generated/models/ApiWavePoll";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import {
   fetchDropsV2ByIds,
   fetchWavePollsV2,
+  mapLeaderboardDropV2,
   type ApiWavePollDropRow,
   type WavePollsSort,
   type WavePollsState,
 } from "@/services/api/wave-drops-v2-api";
+import { normalizeWaveMin } from "@/services/api/drop-v2-mappers";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
 const WAVE_POLLS_PAGE_SIZE = 20;
 
 interface UseWavePollDropsProps {
-  readonly waveId: string;
+  readonly wave: ApiWave | ApiWaveMin;
   readonly sortDirection: ApiPageSortDirection;
   readonly sort: WavePollsSort;
   readonly state?: WavePollsState | undefined;
@@ -36,6 +41,7 @@ interface WavePollDropsPage {
 interface NormalizedWavePollRow {
   readonly dropId: string;
   readonly poll: ApiDropPoll | null;
+  readonly drop: ApiDrop | null;
 }
 
 type StandaloneWavePollFields = Pick<
@@ -49,8 +55,49 @@ type StandaloneWavePollFields = Pick<
   | "is_open"
 >;
 
+type WavePollDropRow = ApiWavePollDropRow & Partial<ApiDropV2>;
+
+type EmbeddableDropRow = WavePollDropRow &
+  Pick<
+    ApiDropV2,
+    | "id"
+    | "serial_no"
+    | "created_at"
+    | "is_signed"
+    | "hide_link_preview"
+    | "parts_count"
+    | "author"
+    | "drop_type"
+    | "boosts"
+  >;
+
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === "object";
+
+const hasEmbeddableDropFields = (
+  row: WavePollDropRow
+): row is EmbeddableDropRow => {
+  const author = row.author;
+
+  return (
+    isNonEmptyString(row.id) &&
+    typeof row.serial_no === "number" &&
+    typeof row.created_at === "number" &&
+    typeof row.is_signed === "boolean" &&
+    typeof row.hide_link_preview === "boolean" &&
+    typeof row.parts_count === "number" &&
+    isRecord(author) &&
+    isNonEmptyString(author.id) &&
+    isNonEmptyString(author.primary_address) &&
+    typeof author.level === "number" &&
+    isRecord(author.badges) &&
+    typeof row.drop_type === "string" &&
+    typeof row.boosts === "number"
+  );
+};
 
 const hasStandalonePollFields = (
   row: ApiWavePollDropRow
@@ -75,14 +122,33 @@ const mapWavePollToDropPoll = (
 });
 
 const normalizeWavePollRow = (
-  row: ApiWavePollDropRow
+  row: ApiWavePollDropRow,
+  wave: ApiWaveMin
 ): NormalizedWavePollRow | null => {
+  const pollDropRow = row as WavePollDropRow;
+
+  if (hasEmbeddableDropFields(pollDropRow)) {
+    const mappedDrop = {
+      ...mapLeaderboardDropV2({ drop: pollDropRow, wave }),
+      wave,
+    };
+
+    return {
+      dropId: pollDropRow.id,
+      poll: pollDropRow.poll ?? null,
+      drop: pollDropRow.poll
+        ? { ...mappedDrop, poll: pollDropRow.poll }
+        : mappedDrop,
+    };
+  }
+
   if (isNonEmptyString(row.drop_id)) {
     return {
       dropId: row.drop_id,
       poll: hasStandalonePollFields(row)
         ? mapWavePollToDropPoll(row)
         : (row.poll ?? null),
+      drop: null,
     };
   }
 
@@ -90,6 +156,7 @@ const normalizeWavePollRow = (
     return {
       dropId: row.id,
       poll: row.poll,
+      drop: null,
     };
   }
 
@@ -97,33 +164,39 @@ const normalizeWavePollRow = (
 };
 
 const normalizeWavePollRows = (
-  rows: readonly ApiWavePollDropRow[]
+  rows: readonly ApiWavePollDropRow[],
+  wave: ApiWaveMin
 ): NormalizedWavePollRow[] =>
   rows.reduce<NormalizedWavePollRow[]>((acc, row) => {
-    const normalizedRow = normalizeWavePollRow(row);
+    const normalizedRow = normalizeWavePollRow(row, wave);
     if (normalizedRow) {
       acc.push(normalizedRow);
     }
     return acc;
   }, []);
 
-const overlayPollsOnDrops = ({
-  drops,
+const resolvePollDrops = ({
+  fetchedDrops,
   pollRows,
 }: {
-  readonly drops: readonly ApiDrop[];
+  readonly fetchedDrops: readonly ApiDrop[];
   readonly pollRows: readonly NormalizedWavePollRow[];
 }): ApiDrop[] => {
-  const dropsById = new Map(drops.map((drop) => [drop.id, drop]));
+  const fetchedDropsById = new Map(fetchedDrops.map((drop) => [drop.id, drop]));
 
   return pollRows.reduce<ApiDrop[]>((acc, pollRow) => {
-    const drop = dropsById.get(pollRow.dropId);
-    if (!drop) {
+    if (pollRow.drop) {
+      acc.push(pollRow.drop);
+      return acc;
+    }
+
+    const fetchedDrop = fetchedDropsById.get(pollRow.dropId);
+    if (!fetchedDrop) {
       return acc;
     }
 
     acc.push({
-      ...drop,
+      ...fetchedDrop,
       ...(pollRow.poll ? { poll: pollRow.poll } : {}),
     });
     return acc;
@@ -155,12 +228,14 @@ const processPollDrops = (
 };
 
 export function useWavePollDrops({
-  waveId,
+  wave,
   sortDirection,
   sort,
   state,
   enabled = true,
 }: UseWavePollDropsProps) {
+  const waveMin = useMemo(() => normalizeWaveMin(wave), [wave]);
+  const waveId = waveMin.id;
   const isQueryEnabled = enabled && waveId.trim().length > 0;
   const queryKey = useMemo(
     () =>
@@ -203,12 +278,18 @@ export function useWavePollDrops({
         state,
         signal,
       });
-      const pollRows = normalizeWavePollRows(pollsPage.data);
-      const dropIds = [...new Set(pollRows.map((pollRow) => pollRow.dropId))];
+      const pollRows = normalizeWavePollRows(pollsPage.data, waveMin);
+      const fallbackDropIds = [
+        ...new Set(
+          pollRows
+            .filter((pollRow) => !pollRow.drop)
+            .map((pollRow) => pollRow.dropId)
+        ),
+      ];
       const drops =
-        dropIds.length > 0
+        fallbackDropIds.length > 0
           ? await fetchDropsV2ByIds({
-              dropIds,
+              dropIds: fallbackDropIds,
               signal,
               includeFullMetadata: false,
               includeTopRaters: false,
@@ -216,7 +297,7 @@ export function useWavePollDrops({
           : [];
 
       return {
-        drops: overlayPollsOnDrops({ drops, pollRows }),
+        drops: resolvePollDrops({ fetchedDrops: drops, pollRows }),
         page: pollsPage.page,
         next: pollsPage.next,
       };
