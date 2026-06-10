@@ -15,10 +15,13 @@ import { ethers } from "ethers";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAuth } from "../auth/Auth";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
-import { useAppWallets } from "./AppWalletsContext";
+import {
+  APP_WALLET_MNEMONIC_UNAVAILABLE,
+  useAppWallets,
+} from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
-const MNEMONIC_NA = "N/A";
+const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE ?? "N/A";
 
 export default function AppWalletImport() {
   const [isMnemonic, setIsMnemonic] = useState(true);
@@ -265,7 +268,10 @@ function AppWalletImportPrivateKey() {
       </Row>
       {error && <ValidationError error={error} />}
       {validatedWallet && (
-        <ValidatedWallet wallet={validatedWallet} mnemonic={MNEMONIC_NA} />
+        <ValidatedWallet
+          wallet={validatedWallet}
+          mnemonic={MNEMONIC_UNAVAILABLE}
+        />
       )}
     </Container>
   );

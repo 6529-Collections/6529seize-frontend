@@ -21,6 +21,7 @@ import {
   markMobileLaunchStep,
   measureMobileLaunchAsync,
 } from "@/utils/monitoring/mobileLaunchTiming";
+import { validateWalletSafely } from "@/utils/wallet-validation.utils";
 import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
@@ -136,9 +137,9 @@ export default function WagmiSetup({
 }) {
   const enableTestnet = publicEnv.DROP_FORGE_TESTNET === true;
 
-  const appWalletPasswordModal = useAppWalletPasswordModal();
   const { setToast } = useAuth();
-  const { appWallets } = useAppWallets();
+  const { appWallets, migrateAppWallet } = useAppWallets();
+  const appWalletPasswordModal = useAppWalletPasswordModal(migrateAppWallet);
 
   const [currentAdapter, setCurrentAdapter] = useState<WagmiAdapter | null>(
     null
@@ -263,6 +264,7 @@ export default function WagmiSetup({
       // Create connectors for current wallets
       const connectors = appWallets
         .map((wallet) => {
+          validateWalletSafely(wallet);
           const connector = createAppWalletConnector(
             Array.from(currentAdapter.wagmiConfig.chains),
             { appWallet: wallet },

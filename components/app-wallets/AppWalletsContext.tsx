@@ -9,10 +9,16 @@ import React, {
 } from "react";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { ethers } from "ethers";
-import { encryptData } from "./app-wallet-helpers";
+import {
+  decryptData,
+  encryptData,
+  isAppWalletEncryptedEnvelope,
+} from "./app-wallet-helpers";
 import { Time } from "@/helpers/time";
 import useCapacitor from "@/hooks/useCapacitor";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
+
+export const APP_WALLET_MNEMONIC_UNAVAILABLE = "N/A";
 
 export interface AppWallet {
   name: string;
@@ -22,6 +28,9 @@ export interface AppWallet {
   mnemonic: string;
   private_key: string;
   imported: boolean;
+  encryption_version?: 1 | 2;
+  has_mnemonic?: boolean;
+  migrated_at?: number;
 }
 
 interface AppWalletsContextProps {
@@ -37,6 +46,7 @@ interface AppWalletsContextProps {
     privateKey: string
   ) => Promise<boolean>;
   deleteAppWallet: (address: string) => Promise<boolean>;
+  migrateAppWallet: (address: string, pass: string) => Promise<boolean>;
 }
 
 const AppWalletsContext = createContext<AppWalletsContextProps | undefined>(
@@ -44,6 +54,53 @@ const AppWalletsContext = createContext<AppWalletsContextProps | undefined>(
 );
 
 const WALLET_KEY_PREFIX = "app-wallet_";
+
+const isSameAddress = (a: string, b: string): boolean =>
+  a.toLowerCase() === b.toLowerCase();
+
+const isV2Wallet = (wallet: AppWallet): boolean =>
+  wallet.encryption_version === 2 &&
+  isAppWalletEncryptedEnvelope(wallet.address_hashed) &&
+  isAppWalletEncryptedEnvelope(wallet.private_key) &&
+  (wallet.has_mnemonic === false ||
+    isAppWalletEncryptedEnvelope(wallet.mnemonic));
+
+async function buildEncryptedAppWallet(params: {
+  name: string;
+  address: string;
+  mnemonic: string;
+  privateKey: string;
+  pass: string;
+  imported: boolean;
+  createdAt?: number;
+  migratedAt?: number;
+}): Promise<AppWallet> {
+  const hasMnemonic = params.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE;
+  const [encryptedAddress, encryptedMnemonic, encryptedPrivateKey] =
+    await Promise.all([
+      encryptData(params.address, params.address, params.pass),
+      encryptData(params.address, params.mnemonic, params.pass),
+      encryptData(params.address, params.privateKey, params.pass),
+    ]);
+
+  const appWallet: AppWallet = {
+    name: params.name,
+    created_at: params.createdAt ?? Time.now().toSeconds(),
+    address: params.address,
+    address_hashed: encryptedAddress,
+    mnemonic: encryptedMnemonic,
+    private_key: encryptedPrivateKey,
+    imported: params.imported,
+    encryption_version: 2,
+    has_mnemonic: hasMnemonic,
+  };
+
+  if (params.migratedAt !== undefined) {
+    appWallet.migrated_at = params.migratedAt;
+  }
+
+  return appWallet;
+}
 
 export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -125,31 +182,14 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!appWalletsSupported) return false;
 
       const wallet = ethers.Wallet.createRandom();
-      const encryptedAddress = await encryptData(
-        wallet.address,
-        wallet.address,
-        pass
-      );
-      const encryptedMnemonic = await encryptData(
-        wallet.address,
-        wallet.mnemonic?.phrase ?? "",
-        pass
-      );
-      const encryptedPrivateKey = await encryptData(
-        wallet.address,
-        wallet.privateKey,
-        pass
-      );
-
-      const appWallet: AppWallet = {
+      const appWallet = await buildEncryptedAppWallet({
         name,
-        created_at: Time.now().toSeconds(),
         address: wallet.address,
-        address_hashed: encryptedAddress,
-        mnemonic: encryptedMnemonic,
-        private_key: encryptedPrivateKey,
+        mnemonic: wallet.mnemonic?.phrase ?? APP_WALLET_MNEMONIC_UNAVAILABLE,
+        privateKey: wallet.privateKey,
+        pass,
         imported: false,
-      };
+      });
 
       const result = await SecureStoragePlugin.set({
         key: `${WALLET_KEY_PREFIX}${wallet.address}`,
@@ -173,27 +213,14 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
     ): Promise<boolean> => {
       if (!appWalletsSupported) return false;
 
-      const encryptedAddress = await encryptData(address, address, walletPass);
-      const encryptedMnemonic = await encryptData(
+      const wallet = await buildEncryptedAppWallet({
+        name: walletName,
         address,
         mnemonic,
-        walletPass
-      );
-      const encryptedPrivateKey = await encryptData(
-        address,
         privateKey,
-        walletPass
-      );
-
-      const wallet: AppWallet = {
-        name: walletName,
-        created_at: Time.now().toSeconds(),
-        address,
-        address_hashed: encryptedAddress,
-        mnemonic: encryptedMnemonic,
-        private_key: encryptedPrivateKey,
+        pass: walletPass,
         imported: true,
-      };
+      });
 
       const result = await SecureStoragePlugin.set({
         key: `${WALLET_KEY_PREFIX}${address}`,
@@ -222,6 +249,76 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
     [appWalletsSupported, fetchAppWallets]
   );
 
+  const migrateAppWallet = useCallback(
+    async (address: string, pass: string): Promise<boolean> => {
+      if (!appWalletsSupported || !ethers.isAddress(address)) {
+        return false;
+      }
+
+      try {
+        const key = `${WALLET_KEY_PREFIX}${address}`;
+        const valueResult = await SecureStoragePlugin.get({ key });
+        const wallet = JSON.parse(valueResult.value) as AppWallet;
+
+        if (!wallet || !isSameAddress(wallet.address, address)) {
+          return false;
+        }
+
+        if (isV2Wallet(wallet)) {
+          return true;
+        }
+
+        const decryptedAddress = await decryptData(
+          wallet.address,
+          wallet.address_hashed,
+          pass
+        );
+
+        if (!isSameAddress(decryptedAddress, wallet.address)) {
+          return false;
+        }
+
+        const hasMnemonic =
+          wallet.has_mnemonic ??
+          wallet.mnemonic !== APP_WALLET_MNEMONIC_UNAVAILABLE;
+        const decryptedMnemonic = hasMnemonic
+          ? await decryptData(wallet.address, wallet.mnemonic, pass)
+          : APP_WALLET_MNEMONIC_UNAVAILABLE;
+        const decryptedPrivateKey = await decryptData(
+          wallet.address,
+          wallet.private_key,
+          pass
+        );
+
+        const migratedWallet = await buildEncryptedAppWallet({
+          name: wallet.name,
+          address: wallet.address,
+          mnemonic: decryptedMnemonic,
+          privateKey: decryptedPrivateKey,
+          pass,
+          imported: wallet.imported,
+          createdAt: wallet.created_at,
+          migratedAt: Time.now().toSeconds(),
+        });
+
+        const result = await SecureStoragePlugin.set({
+          key,
+          value: JSON.stringify(migratedWallet),
+        });
+
+        if (result.value) {
+          await fetchAppWallets();
+        }
+
+        return result.value;
+      } catch (error) {
+        console.error("Error migrating app wallet:", error);
+        return false;
+      }
+    },
+    [appWalletsSupported, fetchAppWallets]
+  );
+
   const value = useMemo(
     () => ({
       fetchingAppWallets,
@@ -230,6 +327,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       createAppWallet,
       importAppWallet,
       deleteAppWallet,
+      migrateAppWallet,
     }),
     [
       fetchingAppWallets,
@@ -238,6 +336,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       createAppWallet,
       importAppWallet,
       deleteAppWallet,
+      migrateAppWallet,
     ]
   );
 
@@ -267,7 +366,7 @@ const getAllWallets = async () => {
     const walletValues = await Promise.all(
       walletKeys.map(async (key) => {
         const valueResult = await SecureStoragePlugin.get({ key });
-        return JSON.parse(valueResult.value);
+        return JSON.parse(valueResult.value) as AppWallet;
       })
     );
 

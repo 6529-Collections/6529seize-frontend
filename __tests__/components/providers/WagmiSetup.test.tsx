@@ -185,6 +185,7 @@ describe("WagmiSetup Security Tests", () => {
       createAppWallet: jest.fn(),
       importAppWallet: jest.fn(),
       deleteAppWallet: jest.fn(),
+      migrateAppWallet: jest.fn(),
     });
 
     MockAppKitAdapterManager.mockImplementation(() => ({
@@ -1092,8 +1093,28 @@ describe("WagmiSetup Security Tests", () => {
 
     it("should handle app wallet updates through connector injection", async () => {
       const mockAppWallets = [
-        { address: "0x123", address_hashed: "hash1", name: "Wallet 1" },
-        { address: "0x456", address_hashed: "hash2", name: "Wallet 2" },
+        {
+          address: "0x1234567890123456789012345678901234567890",
+          address_hashed:
+            "hash123456789012345678901234567890123456789012345678901234567890",
+          name: "Wallet 1",
+          created_at: Date.now(),
+          mnemonic: "",
+          private_key:
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          imported: false,
+        },
+        {
+          address: "0x4564567890123456789012345678901234567890",
+          address_hashed:
+            "hash456789012345678901234567890123456789012345678901234567890",
+          name: "Wallet 2",
+          created_at: Date.now(),
+          mnemonic: "",
+          private_key:
+            "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+          imported: false,
+        },
       ];
 
       // Update useAppWallets to return wallets
@@ -1104,6 +1125,7 @@ describe("WagmiSetup Security Tests", () => {
         createAppWallet: jest.fn(),
         importAppWallet: jest.fn(),
         deleteAppWallet: jest.fn(),
+        migrateAppWallet: jest.fn(),
       });
 
       await renderAndWaitForMount();

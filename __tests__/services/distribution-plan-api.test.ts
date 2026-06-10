@@ -26,12 +26,10 @@ beforeEach(() => {
 
 describe("distribution-plan-api", () => {
   it("handles successful fetch", async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({
-        status: 200,
-        json: () => Promise.resolve({ foo: "bar" }),
-      }) as any;
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: () => Promise.resolve({ foo: "bar" }),
+    }) as any;
     const result = await distributionPlanApiFetch<any>("/path");
     expect(result).toEqual({ success: true, data: { foo: "bar" } });
   });
@@ -67,12 +65,10 @@ describe("distribution-plan-api", () => {
 
   it("posts data with auth header", async () => {
     (getAuthJwt as jest.Mock).mockReturnValue("jwt");
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({
-        status: 200,
-        json: () => Promise.resolve({ a: 1 }),
-      }) as any;
+    global.fetch = jest.fn().mockResolvedValue({
+      status: 200,
+      json: () => Promise.resolve({ a: 1 }),
+    }) as any;
     await distributionPlanApiPost<any>({ endpoint: "/p", body: { x: 1 } });
     const call = (fetch as jest.Mock).mock.calls[0];
     expect(call[1].headers["Authorization"]).toBe("Bearer jwt");
