@@ -43,6 +43,13 @@ export interface SessionNativeResponse {
 export type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 export type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
 
+type ApiStatusError = {
+  readonly status?: unknown;
+  readonly response?: {
+    readonly status?: unknown;
+  };
+};
+
 export interface CreateConnectionTransferResponse {
   readonly transfer_code: string;
   readonly expires_at: string;
@@ -79,6 +86,33 @@ export function isConnectionTransferV2Enabled(): boolean {
 
 export function getSessionClientType(): AuthSessionClientType {
   return Capacitor.isNativePlatform() ? "native" : "web";
+}
+
+function isUnauthorizedApiError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const statusError = error as ApiStatusError;
+  return statusError.status === 401 || statusError.response?.status === 401;
+}
+
+async function rollbackUnpersistedSession(
+  response: SessionLoginResponse | SessionRefreshResponse,
+  didPersistNativeRefreshToken: boolean
+): Promise<void> {
+  try {
+    if (didPersistNativeRefreshToken) {
+      await removeNativeRefreshToken(response.address);
+      return;
+    }
+
+    if (response.client_type === "web") {
+      await logoutSessionV2({ address: response.address });
+    }
+  } catch {
+    // Best-effort cleanup: preserve the original persistence result/error.
+  }
 }
 
 export async function loginWithSessionV2({
@@ -142,19 +176,27 @@ export async function refreshSessionV2({
     });
   }
 
-  return await commonApiPost<
-    {
-      readonly client_type: "web";
-    },
-    SessionWebResponse
-  >({
-    endpoint: "auth/session-refresh",
-    body: {
-      client_type: "web",
-    },
-    signal: abortSignal,
-    credentials: "include",
-  });
+  try {
+    return await commonApiPost<
+      {
+        readonly client_type: "web";
+      },
+      SessionWebResponse
+    >({
+      endpoint: "auth/session-refresh",
+      body: {
+        client_type: "web",
+      },
+      signal: abortSignal,
+      credentials: "include",
+      errorMode: "structured",
+    });
+  } catch (error: unknown) {
+    if (isUnauthorizedApiError(error)) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function persistSessionResponse(
@@ -182,14 +224,12 @@ export async function persistSessionResponse(
       response.role ?? undefined
     );
   } catch (error) {
-    if (didPersistNativeRefreshToken) {
-      await removeNativeRefreshToken(response.address);
-    }
+    await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
     throw error;
   }
 
-  if (!didPersistAuth && didPersistNativeRefreshToken) {
-    await removeNativeRefreshToken(response.address);
+  if (!didPersistAuth) {
+    await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
   }
 
   return didPersistAuth;

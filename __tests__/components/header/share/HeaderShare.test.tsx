@@ -477,6 +477,41 @@ describe("HeaderShare", () => {
       );
     });
 
+    it("encodes transfer-code deep-link query values", async () => {
+      const qrcode = require("qrcode");
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
+      sessionV2.createConnectionTransfer.mockResolvedValue({
+        transfer_code: "transfer&code=value%",
+        expires_at: new Date(Date.now() + 300_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: "role+admin&test",
+        target_client_type: "native",
+        deep_link_path:
+          "/accept-connection-sharing?transfer_code=transfer%26code%3Dvalue%25&address=0x1234567890123456789012345678901234567890&role=role%2Badmin%26test",
+      });
+
+      renderWithProviders(<HeaderShare />);
+
+      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
+
+      await waitFor(() =>
+        expect(qrcode.toDataURL).toHaveBeenCalledWith(
+          expect.stringContaining(
+            "transfer_code=transfer%26code%3Dvalue%25"
+          ),
+          { width: 500, margin: 0 }
+        )
+      );
+      expect(
+        qrcode.toDataURL.mock.calls.some(
+          (call: unknown[]) =>
+            typeof call[0] === "string" &&
+            call[0].includes("role=role%2Badmin%26test")
+        )
+      ).toBe(true);
+    });
+
     it("disables the Connection tab when transfer-code creation fails", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       jest.spyOn(console, "error").mockImplementation(() => undefined);
