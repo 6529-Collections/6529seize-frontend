@@ -30,6 +30,24 @@ beforeEach(() => {
 });
 
 describe("WaveDropPartContentMediaImage", () => {
+  it("fills a reserved-height media container without natural aspect sizing", () => {
+    const { container } = render(
+      <WaveDropPartContentMediaImage
+        src="https://example.com/path/image.png"
+        fillContainer
+      />
+    );
+
+    const outer = container.firstElementChild;
+    const button = screen.getByRole("button", { name: /open drop media/i });
+    const imageWrapper = button.firstElementChild;
+
+    expect(outer).toHaveClass("tw-h-full");
+    expect(button).toHaveClass("tw-h-full");
+    expect(imageWrapper).toHaveClass("tw-h-full", "tw-w-full");
+    expect(imageWrapper).not.toHaveStyle({ maxHeight: "16rem" });
+  });
+
   it("opens and closes the image modal", () => {
     render(
       <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
