@@ -478,7 +478,6 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
             return (
               <div key={option.option_no}>
                 <PollResultOption
-                  dropId={drop.id}
                   option={option}
                   totalVotes={totalVotes}
                   isSelected={votedOptionNos.has(option.option_no)}
