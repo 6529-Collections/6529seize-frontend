@@ -1,5 +1,4 @@
-import {
-  default as sitemapConfig,
+import sitemapConfig, {
   buildAdditionalSitemapPaths,
   getNftSitemapPaths,
   getPublicWavePaths,

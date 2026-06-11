@@ -253,12 +253,13 @@ async function getPlainApiSitemapPaths(
     fetchJson
   );
 
-  return ids.map((id) =>
-    createSitemapPath(`/${sitePath}/${encodeURIComponent(`${id}`)}`, {
+  return ids.map((id) => {
+    const encodedId = encodeURIComponent(String(id));
+    return createSitemapPath(`/${sitePath}/${encodedId}`, {
       changefreq: "daily",
       priority,
-    })
-  );
+    });
+  });
 }
 
 export async function getNextgenCollectionPaths(
