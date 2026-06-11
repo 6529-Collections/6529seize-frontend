@@ -70,6 +70,10 @@ const LABEL_ORDER = new Map(
   MANAGED_LABELS.map((label, index) => [label, index])
 );
 
+function compareStrings(left, right) {
+  return left.localeCompare(right);
+}
+
 function parsePackageJson(value, label) {
   if (typeof value === "string") {
     try {
@@ -146,7 +150,7 @@ function collectDirectDependencyChanges(basePackageJson, headPackageJson) {
     const headDeps = headPackageJson[field] ?? {};
     const names = new Set([...Object.keys(baseDeps), ...Object.keys(headDeps)]);
 
-    for (const name of [...names].sort()) {
+    for (const name of [...names].sort(compareStrings)) {
       const from = baseDeps[name];
       const to = headDeps[name];
       if (from === to) {
@@ -204,7 +208,7 @@ function collectPnpmPackageKeys(lockfileText) {
       continue;
     }
 
-    const match = /^  ([^ ].*):\s*$/.exec(line);
+    const match = /^ {2}([^ ].*):\s*$/.exec(line);
     if (match) {
       keys.push(stripYamlQuotes(match[1]));
     }
@@ -236,13 +240,13 @@ function collectRequiresBuildPackageKeys(lockfileText) {
       continue;
     }
 
-    const packageMatch = /^  ([^ ].*):\s*$/.exec(line);
+    const packageMatch = /^ {2}([^ ].*):\s*$/.exec(line);
     if (packageMatch) {
       currentPackageKey = stripYamlQuotes(packageMatch[1]);
       continue;
     }
 
-    if (currentPackageKey && /^    requiresBuild:\s*true\s*$/.test(line)) {
+    if (currentPackageKey && /^ {4}requiresBuild:\s*true\s*$/.test(line)) {
       packageKeys.add(currentPackageKey);
     }
   }
@@ -376,6 +380,248 @@ function formatAge(publishedAt, now) {
   return `${ageDays.toFixed(1)} days`;
 }
 
+async function collectRegistryFindings(directChanges, fetchPackageInfo) {
+  const registryFindings = [];
+
+  for (const change of directChanges.filter((item) => item.to)) {
+    try {
+      const info = await fetchPackageInfo(change.name, change.to);
+      registryFindings.push({
+        change,
+        publishedAt: info.publishedAt ?? null,
+        scripts: info.scripts ?? {},
+        error: info.error ?? null,
+      });
+    } catch (error) {
+      registryFindings.push({
+        change,
+        publishedAt: null,
+        scripts: {},
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  return registryFindings;
+}
+
+function collectPackageAgeFindings(registryFindings, now, minimumReleaseAgeMs) {
+  return registryFindings.map((finding) => {
+    if (!finding.publishedAt) {
+      return {
+        ...finding,
+        status: "unknown",
+      };
+    }
+
+    const ageMs = now.getTime() - finding.publishedAt.getTime();
+    return {
+      ...finding,
+      ageMs,
+      status: ageMs >= minimumReleaseAgeMs ? "old-enough" : "too-new",
+    };
+  });
+}
+
+function collectInstallScriptPackageNames(
+  registryFindings,
+  addedRequiresBuildEntries
+) {
+  const registryInstallScriptFindings = registryFindings.filter((finding) =>
+    Object.keys(finding.scripts ?? {}).some((scriptName) =>
+      INSTALL_SCRIPT_NAMES.has(scriptName)
+    )
+  );
+
+  return new Set([
+    ...registryInstallScriptFindings.map((finding) => finding.change.name),
+    ...addedRequiresBuildEntries.map((entry) => entry.name),
+  ]);
+}
+
+function formatChangeList(changes) {
+  return changes.map(formatPackageChange).join(", ");
+}
+
+function formatTransitiveEntries(entries) {
+  const packageList = entries
+    .slice(0, 10)
+    .map((entry) => entry.key)
+    .join(", ");
+  return `${packageList}${entries.length > 10 ? ", ..." : ""}`;
+}
+
+function collectEligibilityBlockers(context) {
+  const {
+    isDependabot,
+    directChanges,
+    productionChanges,
+    nonPatchChanges,
+    highRiskChanges,
+    newDirectChanges,
+    addedTransitivePackageEntries,
+    installScriptPackageNames,
+    tooNewPackages,
+    unknownAgePackages,
+    minimumReleaseAgeMinutes,
+    now,
+  } = context;
+  const eligibilityBlockers = [];
+
+  if (!isDependabot) {
+    eligibilityBlockers.push("PR author is not Dependabot.");
+  }
+  if (directChanges.length === 0) {
+    eligibilityBlockers.push("No direct dependency update was detected.");
+  }
+  if (productionChanges.length > 0) {
+    eligibilityBlockers.push(
+      `Runtime dependency changed: ${formatChangeList(productionChanges)}.`
+    );
+  }
+  if (nonPatchChanges.length > 0) {
+    eligibilityBlockers.push(
+      `Non-patch dependency change detected: ${formatChangeList(nonPatchChanges)}.`
+    );
+  }
+  if (highRiskChanges.length > 0) {
+    eligibilityBlockers.push(
+      `High-risk package changed: ${formatChangeList(highRiskChanges)}.`
+    );
+  }
+  if (newDirectChanges.length > 0) {
+    eligibilityBlockers.push(
+      `New direct dependency added: ${formatChangeList(newDirectChanges)}.`
+    );
+  }
+  if (addedTransitivePackageEntries.length > 0) {
+    eligibilityBlockers.push(
+      `New transitive package entries detected: ${formatTransitiveEntries(
+        addedTransitivePackageEntries
+      )}.`
+    );
+  }
+  if (installScriptPackageNames.size > 0) {
+    eligibilityBlockers.push(
+      `Install/build script exposure detected: ${[...installScriptPackageNames]
+        .sort(compareStrings)
+        .join(", ")}.`
+    );
+  }
+  if (tooNewPackages.length > 0) {
+    eligibilityBlockers.push(
+      `Package version is younger than ${minimumReleaseAgeMinutes} minutes: ${tooNewPackages
+        .map(
+          (finding) =>
+            `${finding.change.name} (${formatAge(finding.publishedAt, now)})`
+        )
+        .join(", ")}.`
+    );
+  }
+  if (unknownAgePackages.length > 0) {
+    eligibilityBlockers.push(
+      `Package publish age could not be confirmed: ${unknownAgePackages
+        .map((finding) => finding.change.name)
+        .join(", ")}.`
+    );
+  }
+
+  return getBlockingSummary(eligibilityBlockers);
+}
+
+function getRiskLevel(context) {
+  const {
+    majorChanges,
+    highRiskChanges,
+    installScriptPackageNames,
+    productionChanges,
+    newDirectChanges,
+    addedTransitivePackageEntries,
+    nonPatchChanges,
+    tooNewPackages,
+    unknownAgePackages,
+  } = context;
+
+  if (
+    majorChanges.length > 0 ||
+    highRiskChanges.length > 0 ||
+    installScriptPackageNames.size > 0
+  ) {
+    return "high";
+  }
+
+  if (
+    productionChanges.length > 0 ||
+    newDirectChanges.length > 0 ||
+    addedTransitivePackageEntries.length > 0 ||
+    nonPatchChanges.length > 0 ||
+    tooNewPackages.length > 0 ||
+    unknownAgePackages.length > 0
+  ) {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function isAutoMergeEligible(context) {
+  const {
+    isDependabot,
+    riskLevel,
+    directChanges,
+    developmentChanges,
+    newDirectChanges,
+    addedTransitivePackageEntries,
+    installScriptPackageNames,
+    tooNewPackages,
+    unknownAgePackages,
+  } = context;
+
+  return (
+    isDependabot &&
+    riskLevel === "low" &&
+    directChanges.length > 0 &&
+    developmentChanges.length === directChanges.length &&
+    directChanges.every((change) => change.updateType === "patch") &&
+    newDirectChanges.length === 0 &&
+    addedTransitivePackageEntries.length === 0 &&
+    installScriptPackageNames.size === 0 &&
+    tooNewPackages.length === 0 &&
+    unknownAgePackages.length === 0
+  );
+}
+
+function buildDependencyLabels(context) {
+  const {
+    riskLevel,
+    productionChanges,
+    directChanges,
+    newDirectChanges,
+    addedTransitivePackageEntries,
+    installScriptPackageNames,
+    autoMergeEligible,
+  } = context;
+  const labels = [`risk:${riskLevel}`];
+
+  if (productionChanges.length > 0) {
+    labels.push("deps:runtime");
+  } else if (directChanges.length > 0) {
+    labels.push("deps:dev-only");
+  }
+  labels.push(updateTypeLabel(directChanges));
+  if (newDirectChanges.length > 0 || addedTransitivePackageEntries.length > 0) {
+    labels.push("deps:new-package");
+  }
+  if (installScriptPackageNames.size > 0) {
+    labels.push("deps:install-script");
+  }
+  labels.push(
+    autoMergeEligible ? "auto-merge:candidate" : "auto-merge:blocked"
+  );
+
+  return sortLabels(labels);
+}
+
 async function analyzeDependencyRisk(options) {
   const basePackageJson = parsePackageJson(
     options.basePackageJson,
@@ -438,186 +684,60 @@ async function analyzeDependencyRisk(options) {
     requiresBuildPackageKeys.has(entry.key)
   );
 
-  const registryFindings = [];
-  for (const change of directChanges.filter((item) => item.to)) {
-    try {
-      const info = await fetchPackageInfo(change.name, change.to);
-      registryFindings.push({
-        change,
-        publishedAt: info.publishedAt ?? null,
-        scripts: info.scripts ?? {},
-        error: info.error ?? null,
-      });
-    } catch (error) {
-      registryFindings.push({
-        change,
-        publishedAt: null,
-        scripts: {},
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
-  }
-
-  const packageAgeFindings = registryFindings.map((finding) => {
-    if (!finding.publishedAt) {
-      return {
-        ...finding,
-        status: "unknown",
-      };
-    }
-
-    const ageMs = now.getTime() - finding.publishedAt.getTime();
-    return {
-      ...finding,
-      ageMs,
-      status: ageMs >= minimumReleaseAgeMs ? "old-enough" : "too-new",
-    };
-  });
-
+  const registryFindings = await collectRegistryFindings(
+    directChanges,
+    fetchPackageInfo
+  );
+  const packageAgeFindings = collectPackageAgeFindings(
+    registryFindings,
+    now,
+    minimumReleaseAgeMs
+  );
   const tooNewPackages = packageAgeFindings.filter(
     (finding) => finding.status === "too-new"
   );
   const unknownAgePackages = packageAgeFindings.filter(
     (finding) => finding.status === "unknown"
   );
-  const registryInstallScriptFindings = registryFindings.filter((finding) =>
-    Object.keys(finding.scripts ?? {}).some((scriptName) =>
-      INSTALL_SCRIPT_NAMES.has(scriptName)
-    )
+  const installScriptPackageNames = collectInstallScriptPackageNames(
+    registryFindings,
+    addedRequiresBuildEntries
   );
-  const installScriptPackageNames = new Set([
-    ...registryInstallScriptFindings.map((finding) => finding.change.name),
-    ...addedRequiresBuildEntries.map((entry) => entry.name),
-  ]);
-
-  const eligibilityBlockers = [];
-  if (!isDependabot) {
-    eligibilityBlockers.push("PR author is not Dependabot.");
-  }
-  if (directChanges.length === 0) {
-    eligibilityBlockers.push("No direct dependency update was detected.");
-  }
-  if (productionChanges.length > 0) {
-    eligibilityBlockers.push(
-      `Runtime dependency changed: ${productionChanges
-        .map(formatPackageChange)
-        .join(", ")}.`
-    );
-  }
-  if (nonPatchChanges.length > 0) {
-    eligibilityBlockers.push(
-      `Non-patch dependency change detected: ${nonPatchChanges
-        .map(formatPackageChange)
-        .join(", ")}.`
-    );
-  }
-  if (highRiskChanges.length > 0) {
-    eligibilityBlockers.push(
-      `High-risk package changed: ${highRiskChanges
-        .map(formatPackageChange)
-        .join(", ")}.`
-    );
-  }
-  if (newDirectChanges.length > 0) {
-    eligibilityBlockers.push(
-      `New direct dependency added: ${newDirectChanges
-        .map(formatPackageChange)
-        .join(", ")}.`
-    );
-  }
-  if (addedTransitivePackageEntries.length > 0) {
-    eligibilityBlockers.push(
-      `New transitive package entries detected: ${addedTransitivePackageEntries
-        .slice(0, 10)
-        .map((entry) => entry.key)
-        .join(
-          ", "
-        )}${addedTransitivePackageEntries.length > 10 ? ", ..." : ""}.`
-    );
-  }
-  if (installScriptPackageNames.size > 0) {
-    eligibilityBlockers.push(
-      `Install/build script exposure detected: ${[...installScriptPackageNames]
-        .sort()
-        .join(", ")}.`
-    );
-  }
-  if (tooNewPackages.length > 0) {
-    eligibilityBlockers.push(
-      `Package version is younger than ${minimumReleaseAgeMinutes} minutes: ${tooNewPackages
-        .map(
-          (finding) =>
-            `${finding.change.name} (${formatAge(finding.publishedAt, now)})`
-        )
-        .join(", ")}.`
-    );
-  }
-  if (unknownAgePackages.length > 0) {
-    eligibilityBlockers.push(
-      `Package publish age could not be confirmed: ${unknownAgePackages
-        .map((finding) => finding.change.name)
-        .join(", ")}.`
-    );
-  }
-
-  let riskLevel = "low";
-  if (
-    majorChanges.length > 0 ||
-    highRiskChanges.length > 0 ||
-    installScriptPackageNames.size > 0
-  ) {
-    riskLevel = "high";
-  } else if (
-    productionChanges.length > 0 ||
-    newDirectChanges.length > 0 ||
-    addedTransitivePackageEntries.length > 0 ||
-    nonPatchChanges.length > 0 ||
-    tooNewPackages.length > 0 ||
-    unknownAgePackages.length > 0
-  ) {
-    riskLevel = "medium";
-  }
-
-  const autoMergeEligible =
-    isDependabot &&
-    riskLevel === "low" &&
-    directChanges.length > 0 &&
-    developmentChanges.length === directChanges.length &&
-    directChanges.every((change) => change.updateType === "patch") &&
-    newDirectChanges.length === 0 &&
-    addedTransitivePackageEntries.length === 0 &&
-    installScriptPackageNames.size === 0 &&
-    tooNewPackages.length === 0 &&
-    unknownAgePackages.length === 0;
-
-  const labels = [`risk:${riskLevel}`];
-  if (productionChanges.length > 0) {
-    labels.push("deps:runtime");
-  } else if (directChanges.length > 0) {
-    labels.push("deps:dev-only");
-  }
-  labels.push(updateTypeLabel(directChanges));
-  if (newDirectChanges.length > 0 || addedTransitivePackageEntries.length > 0) {
-    labels.push("deps:new-package");
-  }
-  if (installScriptPackageNames.size > 0) {
-    labels.push("deps:install-script");
-  }
-  labels.push(
-    autoMergeEligible ? "auto-merge:candidate" : "auto-merge:blocked"
-  );
+  const context = {
+    isDependabot,
+    directChanges,
+    productionChanges,
+    developmentChanges,
+    newDirectChanges,
+    majorChanges,
+    nonPatchChanges,
+    highRiskChanges,
+    addedTransitivePackageEntries,
+    installScriptPackageNames,
+    tooNewPackages,
+    unknownAgePackages,
+    minimumReleaseAgeMinutes,
+    now,
+  };
+  const riskLevel = getRiskLevel(context);
+  const autoMergeEligible = isAutoMergeEligible({ ...context, riskLevel });
+  const labels = buildDependencyLabels({
+    ...context,
+    riskLevel,
+    autoMergeEligible,
+  });
 
   return {
     riskLevel,
     autoMergeEligible,
-    labels: sortLabels(labels),
+    labels,
     directChanges,
     addedPackageEntries,
     addedTransitivePackageEntries,
     addedRequiresBuildEntries,
     registryFindings,
     packageAgeFindings,
-    eligibilityBlockers: getBlockingSummary(eligibilityBlockers),
+    eligibilityBlockers: collectEligibilityBlockers(context),
     minimumReleaseAgeMinutes,
   };
 }
@@ -687,11 +807,41 @@ function buildMarkdownSummary(result) {
   ].join("\n");
 }
 
+function resolveGitCommand() {
+  if (process.env.GIT_COMMAND) {
+    if (!path.isAbsolute(process.env.GIT_COMMAND)) {
+      throw new Error("GIT_COMMAND must be an absolute path when set.");
+    }
+
+    if (!fs.existsSync(process.env.GIT_COMMAND)) {
+      throw new Error(`GIT_COMMAND does not exist: ${process.env.GIT_COMMAND}`);
+    }
+
+    return process.env.GIT_COMMAND;
+  }
+
+  if (process.platform !== "win32") {
+    return "git";
+  }
+
+  const candidates = [
+    "C:\\Program Files\\Git\\cmd\\git.exe",
+    "C:\\Program Files\\Git\\bin\\git.exe",
+  ];
+  const command = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!command) {
+    throw new Error(
+      "Unable to locate git.exe. Set GIT_COMMAND to an absolute git executable path."
+    );
+  }
+
+  return command;
+}
+
 function runGit(args, options = {}) {
-  const result = spawnSync("git", args, {
+  const result = spawnSync(resolveGitCommand(), args, {
     cwd: options.cwd ?? process.cwd(),
     encoding: "utf8",
-    shell: process.platform === "win32",
     stdio: ["ignore", "pipe", "pipe"],
   });
 
