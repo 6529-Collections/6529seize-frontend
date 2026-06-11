@@ -91,6 +91,11 @@ describe("ReMemes metadata", () => {
     const metadata = await generateRememeDetailMetadata({
       params: Promise.resolve({ contract: "0xabc", id: "7" }),
     });
+
+    expect(fetchUrl).toHaveBeenCalledWith(
+      expect.stringContaining("/api/rememes?contract=0xabc&id=7")
+    );
+
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
@@ -117,6 +122,11 @@ describe("ReMemes metadata", () => {
     const metadata = await generateRememeDetailMetadata({
       params: Promise.resolve({ contract: "0xabc", id: "8" }),
     });
+
+    expect(fetchUrl).toHaveBeenCalledWith(
+      expect.stringContaining("/api/rememes?contract=0xabc&id=8")
+    );
+
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
 
