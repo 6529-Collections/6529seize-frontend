@@ -1,3 +1,6 @@
+/**
+ * Captures mocked JSON responses from the Pepe resolve route.
+ */
 const nextResponseJson = jest.fn(
   (
     body: unknown,
@@ -19,37 +22,129 @@ jest.mock("next/server", () => ({
 }));
 
 const mockFetchPublicUrl = jest.fn();
-const mockFetchPublicJson = jest.fn();
 
 jest.mock("@/lib/security/urlGuard", () => {
   const actual = jest.requireActual("@/lib/security/urlGuard");
   return {
     ...actual,
     fetchPublicUrl: mockFetchPublicUrl,
-    fetchPublicJson: mockFetchPublicJson,
   };
 });
 
-type GetHandler = typeof import("@/app/api/pepe/resolve/route").GET;
-let GET: GetHandler;
+type PepeResolveRoute = typeof import("@/app/api/pepe/resolve/route");
+let GET: PepeResolveRoute["GET"];
+let HTML_RESPONSE_MAX_BYTES: PepeResolveRoute["HTML_RESPONSE_MAX_BYTES"];
 
 beforeAll(async () => {
-  ({ GET } = await import("@/app/api/pepe/resolve/route"));
+  ({ GET, HTML_RESPONSE_MAX_BYTES } =
+    await import("@/app/api/pepe/resolve/route"));
 });
 
 describe("/api/pepe/resolve", () => {
   beforeEach(() => {
     nextResponseJson.mockClear();
     mockFetchPublicUrl.mockReset();
-    mockFetchPublicJson.mockReset();
   });
 
+  /**
+   * Creates a single-read stream body for byte-limited response tests.
+   */
+  const createBody = (body: string): ReadableStream<Uint8Array> => {
+    const bytes = new TextEncoder().encode(body);
+    let consumed = false;
+
+    return {
+      getReader: () => ({
+        read: async () => {
+          if (consumed) {
+            return { done: true, value: undefined };
+          }
+          consumed = true;
+          return { done: false, value: bytes };
+        },
+        cancel: async () => {
+          consumed = true;
+        },
+        releaseLock: () => undefined,
+      }),
+    } as unknown as ReadableStream<Uint8Array>;
+  };
+
+  /**
+   * Creates a minimal fetch response shape with an optional stream body.
+   */
+  const createFetchResponse = (
+    body: string | null,
+    options: {
+      status?: number | undefined;
+      headers?: Record<string, string> | undefined;
+    } = {}
+  ): Response =>
+    ({
+      status: options.status ?? 200,
+      ok: (options.status ?? 200) >= 200 && (options.status ?? 200) < 300,
+      headers: new Headers(options.headers),
+      body: body === null ? null : createBody(body),
+    }) as unknown as Response;
+
+  /**
+   * Creates an HTML response for Pepe page and wiki fetch mocks.
+   */
   const createTextResponse = (body: string, status = 200) =>
-    new Response(body, {
+    createFetchResponse(body, {
       status,
-      headers: new Headers({ "content-type": "text/html" }),
+      headers: { "content-type": "text/html" },
     });
 
+  /**
+   * Creates a JSON response for tokenscan and price fetch mocks.
+   */
+  const createJsonResponse = (body: unknown, status = 200) =>
+    createFetchResponse(JSON.stringify(body), {
+      status,
+      headers: { "content-type": "application/json" },
+    });
+
+  /**
+   * Trims trailing URL slashes without a regex so static analysis stays quiet.
+   */
+  const trimTrailingSlashesForTest = (value: string): string => {
+    let end = value.length;
+    while (end > 0 && value.codePointAt(end - 1) === 47) {
+      end -= 1;
+    }
+    return end === value.length ? value : value.slice(0, end);
+  };
+
+  /**
+   * Converts a mocked fetchPublicUrl call into its requested URL string.
+   */
+  const fetchCallToUrlForTest = (call: readonly unknown[]): string => {
+    const input = call[0];
+    return typeof input === "string" ? input : String(input);
+  };
+
+  /**
+   * Matches Pepe wiki URLs among fetchPublicUrl mock calls.
+   */
+  const isPepeWikiUrlForTest = (url: string): boolean =>
+    url.startsWith("https://wiki.pepe.wtf/");
+
+  /**
+   * Matches rare-pepe wiki lookup URLs.
+   */
+  const isRarePepeWikiUrlForTest = (url: string): boolean =>
+    url.includes("/rare-pepes/");
+
+  /**
+   * Extracts the final path segment from a wiki URL.
+   */
+  const extractLastPathPartForTest = (url: string): string =>
+    url.split("/").pop() ?? "";
+
+  /**
+   * Slugifies Pepe names with the same broad shape as the route helper.
+   */
   const slugifyNameForTest = (value: string) =>
     value
       .toLowerCase()
@@ -90,53 +185,59 @@ describe("/api/pepe/resolve", () => {
         return createTextResponse(html);
       }
       if (url.startsWith("https://wiki.pepe.wtf/")) {
-        const wikiPath = url.replace("https://wiki.pepe.wtf/", "").replace(/\/+$/, "");
+        const wikiPath = trimTrailingSlashesForTest(
+          url.slice("https://wiki.pepe.wtf/".length)
+        );
         if (wikiPath.startsWith("rare-pepes/")) {
           const slug = wikiPath.split("/").pop() ?? "";
           if (!expectedWikiSlugs.has(slug)) {
             throw new Error(`Unexpected rare pepe slug ${slug}`);
           }
-          return new Response(null, { status: 404 });
+          return createFetchResponse(null, { status: 404 });
         }
         if (wikiPath.startsWith("book-of-kek/")) {
           const slug = wikiPath.split("/").pop() ?? "";
           if (!expectedWikiSlugs.has(slug)) {
             throw new Error(`Unexpected book of kek slug ${slug}`);
           }
-          return new Response(null, { status: 404 });
+          return createFetchResponse(null, { status: 404 });
         }
         if (!wikiPath.includes("/") && expectedWikiSlugs.has(wikiPath)) {
-          return new Response(null, { status: 200 });
+          return createFetchResponse(null);
         }
+      }
+      if (url === "https://tokenscan.io/api/api/asset/GOXPEPE") {
+        return createJsonResponse({ supply: "1000" });
+      }
+      if (url === "https://tokenscan.io/api/api/holders/GOXPEPE") {
+        return createJsonResponse({ data: [{}, {}] });
+      }
+      if (
+        url === "https://tokenscan.io/api/api/dispensers/GOXPEPE?status=open"
+      ) {
+        return createJsonResponse({
+          data: [{ satoshi_price: 2500 }, { satoshirate: 4000 }],
+        });
+      }
+      if (url === "https://tokenscan.io/api/api/market/GOXPEPE/BTC/history") {
+        return createJsonResponse({ data: [{ price_sats: 1500 }] });
+      }
+      if (url === "https://tokenscan.io/api/api/market/GOXPEPE/XCP/history") {
+        return createJsonResponse({ data: [{ price: 1.5 }] });
+      }
+      if (url.startsWith("https://api.coingecko.com/")) {
+        return createJsonResponse({
+          bitcoin: { eth: 15 },
+          counterparty: { eth: 0.002 },
+        });
       }
       throw new Error(`Unexpected fetchPublicUrl call to ${url}`);
     });
 
-    mockFetchPublicJson.mockImplementation(async (input: string | URL) => {
-      const url = typeof input === "string" ? input : input.toString();
-      if (url === "https://tokenscan.io/api/api/asset/GOXPEPE") {
-        return { supply: "1000" };
-      }
-      if (url === "https://tokenscan.io/api/api/holders/GOXPEPE") {
-        return { data: [{}, {}] };
-      }
-      if (url === "https://tokenscan.io/api/api/dispensers/GOXPEPE?status=open") {
-        return { data: [{ satoshi_price: 2500 }, { satoshirate: 4000 }] };
-      }
-      if (url === "https://tokenscan.io/api/api/market/GOXPEPE/BTC/history") {
-        return { data: [{ price_sats: 1500 }] };
-      }
-      if (url === "https://tokenscan.io/api/api/market/GOXPEPE/XCP/history") {
-        return { data: [{ price: 1.5 }] };
-      }
-      if (url.startsWith("https://api.coingecko.com/")) {
-        return { bitcoin: { eth: 15 }, counterparty: { eth: 0.002 } };
-      }
-      throw new Error(`Unexpected fetchPublicJson call to ${url}`);
-    });
-
     const request = {
-      nextUrl: new URL("https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"),
+      nextUrl: new URL(
+        "https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"
+      ),
     } as any;
 
     const response1 = await GET(request);
@@ -162,46 +263,27 @@ describe("/api/pepe/resolve", () => {
       })
     );
     expect(typeof payload1.market?.updatedISO).toBe("string");
-    expect(Number.isNaN(Date.parse(payload1.market?.updatedISO ?? ""))).toBe(false);
+    expect(Number.isNaN(Date.parse(payload1.market?.updatedISO ?? ""))).toBe(
+      false
+    );
 
     expect(response1.headers.get("X-Cache")).toBe("MISS");
     expect(response1.headers.get("Cache-Control")).toContain("s-maxage=600");
     expect(mockFetchPublicUrl).toHaveBeenCalled();
-    expect(mockFetchPublicJson).toHaveBeenCalled();
-    const wikiCallResults = mockFetchPublicUrl.mock.calls
-      .map(([input], index) => {
-        const url = typeof input === "string" ? input : input.toString();
-        return {
-          url,
-          result: mockFetchPublicUrl.mock.results[index],
-        };
-      })
-      .filter(({ url }) => url.startsWith("https://wiki.pepe.wtf/"));
+    const wikiCallUrls = mockFetchPublicUrl.mock.calls
+      .map(fetchCallToUrlForTest)
+      .filter(isPepeWikiUrlForTest);
 
-    expect(wikiCallResults.length).toBeGreaterThan(0);
-
-    const successfulWikiProbe = wikiCallResults.find(
-      ({ result }) => result.type === "return" && Boolean(result.value?.ok)
-    );
-    if (successfulWikiProbe) {
-      expect(payload1.links?.wiki).toBe(successfulWikiProbe.url);
-      const wikiSlug = successfulWikiProbe.url.replace("https://wiki.pepe.wtf/", "").replace(/\/+$/, "");
-      expect(expectedWikiSlugs.has(wikiSlug)).toBe(true);
-    } else {
-      expect(payload1.links?.wiki).toBeUndefined();
-    }
+    expect(wikiCallUrls.length).toBeGreaterThan(0);
+    expect(payload1.links?.wiki).toBe(`https://wiki.pepe.wtf/${nameSlug}`);
 
     expect(
-      wikiCallResults.some(({ url }) => {
-        if (!url.includes("/rare-pepes/")) {
-          return false;
-        }
-        const slug = url.split("/").pop() ?? "";
-        return expectedWikiSlugs.has(slug);
-      })
+      wikiCallUrls
+        .filter(isRarePepeWikiUrlForTest)
+        .map(extractLastPathPartForTest)
+        .some(expectedWikiSlugs.has.bind(expectedWikiSlugs))
     ).toBe(true);
     const urlCallsAfterFirst = mockFetchPublicUrl.mock.calls.length;
-    const jsonCallsAfterFirst = mockFetchPublicJson.mock.calls.length;
 
     const response2 = await GET(request);
     expect(response2.status).toBe(200);
@@ -209,7 +291,6 @@ describe("/api/pepe/resolve", () => {
     expect(payload2).toEqual(payload1);
     expect(response2.headers.get("X-Cache")).toBe("HIT");
     expect(mockFetchPublicUrl.mock.calls.length).toBe(urlCallsAfterFirst);
-    expect(mockFetchPublicJson.mock.calls.length).toBe(jsonCallsAfterFirst);
   });
 
   it("returns 400 for invalid params", async () => {
@@ -220,6 +301,35 @@ describe("/api/pepe/resolve", () => {
     const response = await GET(request);
     expect(response.status).toBe(400);
     expect(mockFetchPublicUrl).not.toHaveBeenCalled();
-    expect(mockFetchPublicJson).not.toHaveBeenCalled();
+  });
+
+  it("falls back safely when Pepe HTML exceeds the byte limit", async () => {
+    mockFetchPublicUrl.mockImplementation(async (input: string | URL) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.startsWith("https://pepe.wtf/collection/")) {
+        return createFetchResponse("<html></html>", {
+          headers: {
+            "content-length": `${HTML_RESPONSE_MAX_BYTES + 1}`,
+            "content-type": "text/html",
+          },
+        });
+      }
+      throw new Error(`Unexpected fetchPublicUrl call to ${url}`);
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/pepe/resolve?kind=collection&slug=rare-pepes"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      kind: "collection",
+      image: null,
+      name: "Rare Pepes",
+    });
   });
 });
