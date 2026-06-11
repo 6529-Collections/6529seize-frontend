@@ -5,6 +5,7 @@ import { useSidebarWaveTree } from "@/hooks/useSidebarWaveTree";
 describe("useSidebarWaveTree", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   const waves = [
@@ -58,7 +59,18 @@ describe("useSidebarWaveTree", () => {
       canExpand: true,
       isExpanded: true,
     });
-    expect(expandedRows[1]).toMatchObject({ depth: 1, canExpand: false });
+    expect(expandedRows[1]).toMatchObject({
+      depth: 1,
+      canExpand: false,
+      isFirstSubwave: true,
+      isLastSubwave: false,
+    });
+    expect(expandedRows[2]).toMatchObject({
+      depth: 1,
+      canExpand: false,
+      isFirstSubwave: false,
+      isLastSubwave: true,
+    });
 
     act(() => {
       result.current.toggleParent("parent");
@@ -70,6 +82,45 @@ describe("useSidebarWaveTree", () => {
         .getRows(result.current.topLevelWaves)
         .map((row) => row.wave.id)
     ).toEqual(["parent"]);
+  });
+
+  it("restores manually expanded parents after a sidebar remount", () => {
+    const firstOnParentExpand = jest.fn();
+    const firstRender = renderHook(() =>
+      useSidebarWaveTree({
+        waves,
+        activeWaveId: null,
+        onParentExpand: firstOnParentExpand,
+      })
+    );
+
+    act(() => {
+      firstRender.result.current.toggleParent("parent");
+    });
+
+    expect(
+      firstRender.result.current
+        .getRows(firstRender.result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent", "older-child", "newer-child"]);
+
+    firstRender.unmount();
+
+    const secondOnParentExpand = jest.fn();
+    const secondRender = renderHook(() =>
+      useSidebarWaveTree({
+        waves,
+        activeWaveId: null,
+        onParentExpand: secondOnParentExpand,
+      })
+    );
+
+    expect(
+      secondRender.result.current
+        .getRows(secondRender.result.current.topLevelWaves)
+        .map((row) => row.wave.id)
+    ).toEqual(["parent", "older-child", "newer-child"]);
+    expect(secondOnParentExpand).toHaveBeenCalledWith("parent");
   });
 
   it("can hide expanded child rows without clearing expansion state", () => {
@@ -126,10 +177,7 @@ describe("useSidebarWaveTree", () => {
 
     const restoredRows = result.current.getRows(result.current.topLevelWaves);
 
-    expect(restoredRows.map((row) => row.wave.id)).toEqual([
-      "parent",
-      "child",
-    ]);
+    expect(restoredRows.map((row) => row.wave.id)).toEqual(["parent", "child"]);
     expect(restoredRows[0]).toMatchObject({
       isExpanded: true,
     });

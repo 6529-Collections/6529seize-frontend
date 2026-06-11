@@ -71,9 +71,12 @@ describe("CollapsedWave", () => {
     });
 
     expect(link).toHaveAttribute("href", "/waves/1");
-    expect(
-      link.querySelector("[aria-hidden='true'].tw-bg-primary-400")
-    ).not.toBeNull();
+    const unreadSubwavesDot = link.querySelector(
+      "[aria-hidden='true'].tw-bg-primary-400"
+    );
+    expect(unreadSubwavesDot).not.toBeNull();
+    expect(unreadSubwavesDot).toHaveClass("tw-right-[-3px]");
+    expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
   });
 
   it("keeps direct unread drops in the collapsed link name", () => {

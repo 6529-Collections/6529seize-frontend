@@ -28,8 +28,10 @@ interface BrainLeftSidebarWaveProps {
   readonly isDirectMessage?: boolean | undefined;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
+  readonly reserveExpandControlSpace?: boolean | undefined;
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly isLastSubwave?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
@@ -42,6 +44,124 @@ const getPresentNumber = (value: number | null): number | null => {
   return value;
 };
 
+const DROP_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]";
+const UNREAD_BADGE_CLASSES =
+  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm";
+const MUTED_BADGE_CLASSES =
+  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
+const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
+
+const getFormattedWaveName = (wave: MinimalWave): string => {
+  if (wave.type !== ApiWaveType.Chat) {
+    return wave.name;
+  }
+
+  const marker = "id-";
+  const addressPrefix = `${marker}0x`;
+  const markerIndex = wave.name.indexOf(addressPrefix);
+
+  if (markerIndex === -1) {
+    return wave.name;
+  }
+
+  const prefix = wave.name.slice(0, markerIndex + marker.length);
+  const addressStart = markerIndex + marker.length;
+  const candidateAddress = wave.name.slice(addressStart, addressStart + 42);
+
+  if (!isValidEthAddress(candidateAddress)) {
+    return wave.name;
+  }
+
+  const suffix = wave.name.slice(addressStart + candidateAddress.length);
+  return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
+};
+
+const isModifiedAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
+  event.metaKey ||
+  event.ctrlKey ||
+  event.shiftKey ||
+  event.altKey ||
+  event.button === 1;
+
+const getRowLayoutClasses = ({
+  isChildRow,
+  shouldReserveExpandControlSpace,
+}: {
+  readonly isChildRow: boolean;
+  readonly shouldReserveExpandControlSpace: boolean;
+}) => {
+  if (isChildRow) {
+    return {
+      rowPaddingClasses: "tw-pl-[84px] tw-pr-5 md:tw-pl-20",
+      rowGapClasses: "tw-gap-x-2",
+      linkGapClasses: "tw-space-x-2",
+    };
+  }
+
+  if (shouldReserveExpandControlSpace) {
+    return {
+      rowPaddingClasses: "tw-pl-2 tw-pr-5",
+      rowGapClasses: "tw-gap-x-2",
+      linkGapClasses: "tw-space-x-3",
+    };
+  }
+
+  return {
+    rowPaddingClasses: "tw-px-5",
+    rowGapClasses: "tw-gap-x-4",
+    linkGapClasses: "tw-space-x-3",
+  };
+};
+
+function ExpandControl({
+  formattedWaveName,
+  isExpanded,
+  onBlur,
+  onClick,
+  onFocus,
+  shouldReserveSpace,
+  shouldShowButton,
+}: {
+  readonly formattedWaveName: string;
+  readonly isExpanded: boolean;
+  readonly onBlur: () => void;
+  readonly onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  readonly onFocus: () => void;
+  readonly shouldReserveSpace: boolean;
+  readonly shouldShowButton: boolean;
+}) {
+  if (!shouldReserveSpace) {
+    return null;
+  }
+
+  const buttonStateClasses = isExpanded
+    ? "tw-bg-iron-700/60 tw-text-iron-300 tw-opacity-100"
+    : "tw-bg-transparent tw-text-iron-500 tw-opacity-70";
+
+  return (
+    <div className="tw-flex tw-h-10 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center md:tw-w-5">
+      {shouldShowButton && (
+        <button
+          type="button"
+          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${formattedWaveName} subwaves`}
+          aria-expanded={isExpanded}
+          onClick={onClick}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          className={`tw-relative tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700/70 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-opacity-100 md:tw-size-5 ${buttonStateClasses}`}
+        >
+          <ChevronRightIcon
+            className={`tw-size-3.5 tw-transition-transform tw-duration-200 tw-ease-out ${
+              isExpanded ? "tw-rotate-90" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </button>
+      )}
+    </div>
+  );
+}
+
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
   onHover,
@@ -49,8 +169,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   isDirectMessage = false,
   depth = 0,
   canExpand = false,
+  reserveExpandControlSpace = false,
   isExpanded = false,
   hasUnreadSubwaves = false,
+  isLastSubwave = false,
   onToggleExpand,
   onPrefetchSubwaves,
 }) => {
@@ -66,30 +188,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     wave.newDropsCount.latestDropTimestamp
   );
 
-  const formattedWaveName = useMemo(() => {
-    if (wave.type === ApiWaveType.Chat) {
-      const marker = "id-";
-      const addressPrefix = `${marker}0x`;
-      const markerIndex = wave.name.indexOf(addressPrefix);
-
-      if (markerIndex !== -1) {
-        const prefix = wave.name.slice(0, markerIndex + marker.length);
-        const addressStart = markerIndex + marker.length;
-        const candidateAddress = wave.name.slice(
-          addressStart,
-          addressStart + 42
-        );
-
-        if (isValidEthAddress(candidateAddress)) {
-          const suffix = wave.name.slice(
-            addressStart + candidateAddress.length
-          );
-          return `${prefix}${formatAddress(candidateAddress)}${suffix}`;
-        }
-      }
-    }
-    return wave.name;
-  }, [wave.name, wave.type]);
+  const formattedWaveName = useMemo(() => getFormattedWaveName(wave), [wave]);
 
   const href = useMemo(() => {
     if (activeWaveId === wave.id) {
@@ -117,9 +216,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   }, [activeWaveId, onHover, prefetchWaveData, wave.id]);
 
   const isActive = wave.id === activeWaveId;
-  const subwavePrefetchTimerRef = useRef<
-    ReturnType<typeof globalThis.setTimeout> | null
-  >(null);
+  const subwavePrefetchTimerRef = useRef<ReturnType<
+    typeof globalThis.setTimeout
+  > | null>(null);
   const shouldPrefetchSubwaves = Boolean(
     canExpand && depth === 0 && !hasTouchScreen && onPrefetchSubwaves
   );
@@ -155,13 +254,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const handleWaveClick = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (event.defaultPrevented) return;
-      if (
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey ||
-        event.button === 1
-      ) {
+      if (isModifiedAnchorClick(event)) {
         return;
       }
       event.preventDefault();
@@ -192,16 +285,26 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   );
 
   const getAvatarRingClasses = () => {
-    if (isActive)
-      return "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
+    if (isActive) return activeRingClasses;
     return "tw-ring-1 tw-ring-iron-700";
   };
 
-  const rowPaddingClasses =
-    depth === 1 ? "tw-pl-9 tw-pr-5" : "tw-px-5";
-  const rowGapClasses = depth === 1 ? "tw-gap-x-2" : "tw-gap-x-4";
+  const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
-  const expandButtonLabel = `${isExpanded ? "Collapse" : "Expand"} ${formattedWaveName} subwaves`;
+  const shouldReserveExpandControlSpace =
+    shouldShowExpandControl || (reserveExpandControlSpace && depth === 0);
+  const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
+    getRowLayoutClasses({
+      isChildRow,
+      shouldReserveExpandControlSpace,
+    });
+  const avatarSizeClasses = isChildRow ? "tw-size-7" : "tw-size-8";
+  const activeRingClasses = isChildRow
+    ? "tw-ring-1 tw-ring-offset-1 tw-ring-offset-iron-900 tw-ring-primary-400"
+    : "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400";
+  const dropBadgeClasses = isChildRow
+    ? "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg"
+    : "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg";
 
   return (
     <div
@@ -215,38 +318,29 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      {shouldShowExpandControl ? (
-        <button
-          type="button"
-          aria-label={expandButtonLabel}
-          aria-expanded={isExpanded}
-          onClick={handleToggleExpand}
-          onFocus={scheduleSubwavePrefetch}
-          onBlur={cancelSubwavePrefetch}
-          className="tw-absolute tw-left-4 tw-top-8 tw-z-10 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800 tw-p-0 tw-text-iron-200 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white"
-        >
-          <ChevronRightIcon
-            className={`tw-size-4 tw-transition-transform tw-duration-200 tw-ease-out ${
-              isExpanded ? "tw-rotate-90" : ""
-            }`}
-            aria-hidden="true"
-          />
-          {hasUnreadSubwaves && (
-            <span
-              aria-hidden="true"
-              className="tw-absolute tw-bottom-0 tw-right-0 tw-size-2 tw-rounded-full tw-bg-primary-400"
-            />
-          )}
-        </button>
-      ) : depth === 1 ? (
-        <div className="tw-mt-2 tw-size-5 tw-flex-shrink-0" />
-      ) : null}
+      <ExpandControl
+        formattedWaveName={formattedWaveName}
+        isExpanded={isExpanded}
+        onBlur={cancelSubwavePrefetch}
+        onClick={handleToggleExpand}
+        onFocus={scheduleSubwavePrefetch}
+        shouldReserveSpace={shouldReserveExpandControlSpace}
+        shouldShowButton={shouldShowExpandControl}
+      />
+      {isChildRow && (
+        <span
+          aria-hidden="true"
+          className={`tw-absolute -tw-top-1 tw-left-14 tw-w-px tw-bg-iron-700/60 md:tw-left-[52px] ${
+            isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
+          }`}
+        />
+      )}
       <Link
         href={href}
         prefetch={false}
         {...(!hasTouchScreen && { onMouseEnter: onWaveHover })}
         onClick={handleWaveClick}
-        className={`tw-flex tw-flex-1 tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -254,7 +348,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       >
         <div className="tw-relative">
           <div
-            className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
+            className={`tw-relative ${avatarSizeClasses} tw-rounded-full tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${getAvatarRingClasses()} ${
               isActive
                 ? "tw-opacity-100"
                 : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
@@ -266,9 +360,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               contributors={wave.contributors}
             />
             {isDropWave && (
-              <div className="tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg">
+              <div className={dropBadgeClasses}>
                 <svg
-                  className="tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]"
+                  className={DROP_ICON_CLASSES}
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 576 512"
@@ -281,22 +375,30 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </div>
             )}
             {!isActive && haveNewDrops && !wave.isMuted && (
-              <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
+              <div className={UNREAD_BADGE_CLASSES}>
                 {unreadCount > 99 ? "99+" : unreadCount}
               </div>
             )}
             {wave.isMuted && (
-              <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm">
+              <div className={MUTED_BADGE_CLASSES}>
                 <FontAwesomeIcon
                   icon={faBellSlash}
-                  className="tw-size-2.5 tw-flex-shrink-0"
+                  className={MUTED_ICON_CLASSES}
                 />
               </div>
             )}
           </div>
+          {hasUnreadSubwaves && (
+            <span
+              aria-hidden="true"
+              className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+            />
+          )}
         </div>
-        <div className="tw-flex-1">
-          <div className="tw-text-sm tw-font-medium">{formattedWaveName}</div>
+        <div className="tw-min-w-0 tw-flex-1">
+          <div className="tw-truncate tw-text-sm tw-font-medium">
+            {formattedWaveName}
+          </div>
           {latestDropTimestamp !== null && (
             <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>

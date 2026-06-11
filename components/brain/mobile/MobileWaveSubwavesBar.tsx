@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { TrophyIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -27,6 +27,8 @@ interface MobileWaveSubwaveItem {
   readonly unreadDropsCount: number;
 }
 
+const EMPTY_SUBWAVES: readonly SidebarWave[] = [];
+
 const getViewerIdentityKey = ({
   address,
   activeProfileProxyId,
@@ -39,15 +41,25 @@ const getViewerIdentityKey = ({
   }
 
   const normalizedAddress = address.toLowerCase();
-  if (activeProfileProxyId != null) {
+  if (activeProfileProxyId !== null && activeProfileProxyId !== undefined) {
     return `${normalizedAddress}:proxy:${activeProfileProxyId}`;
   }
 
   return `${normalizedAddress}:primary`;
 };
 
-const formatWaveLabel = (name: string | null | undefined, fallbackId: string) =>
-  name?.trim() || fallbackId.slice(0, 8);
+const formatWaveLabel = (
+  name: string | null | undefined,
+  fallbackId: string
+) => {
+  const trimmedName = name?.trim();
+
+  if (trimmedName !== undefined && trimmedName.length > 0) {
+    return trimmedName;
+  }
+
+  return fallbackId.slice(0, 8);
+};
 
 const getParentWaveItem = (wave: ApiWave): MobileWaveSubwaveItem => {
   const parentWave = wave.parent_wave;
@@ -136,8 +148,10 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
     parentWaveIds: shouldFetchSubwaves ? [rootWaveId] : [],
     viewerIdentityKey,
   });
-  const fetchedSubwaves =
-    subwavesByParentId.get(rootWaveId)?.subwaves ?? [];
+  const fetchedSubwaves = useMemo(
+    () => subwavesByParentId.get(rootWaveId)?.subwaves ?? EMPTY_SUBWAVES,
+    [rootWaveId, subwavesByParentId]
+  );
 
   const items = useMemo<MobileWaveSubwaveItem[]>(() => {
     const subwaveItems = fetchedSubwaves.map(getSidebarWaveItem);

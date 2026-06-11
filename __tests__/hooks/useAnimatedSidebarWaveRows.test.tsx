@@ -24,6 +24,8 @@ const expandedRows: SidebarWaveTreeRow[] = [
     isExpanded: true,
     canExpand: true,
     hasUnreadSubwaves: false,
+    isFirstSubwave: false,
+    isLastSubwave: false,
   },
   {
     key: "parent:child",
@@ -33,6 +35,8 @@ const expandedRows: SidebarWaveTreeRow[] = [
     isExpanded: false,
     canExpand: false,
     hasUnreadSubwaves: false,
+    isFirstSubwave: true,
+    isLastSubwave: true,
   },
 ];
 

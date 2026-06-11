@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 import SectionHeader from "./SectionHeader";
@@ -39,7 +45,6 @@ function validateWaveDetailed(wave: unknown): wave is MinimalWave {
   if (!isValidWave(wave)) return false;
   return (
     typeof wave.type === "string" &&
-    wave.newDropsCount !== null &&
     typeof wave.newDropsCount === "object" &&
     typeof wave.newDropsCount.count === "number" &&
     (wave.newDropsCount.latestDropTimestamp === null ||
@@ -54,6 +59,7 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 // Virtualization constants
 const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
+const SUBWAVE_ROW_HEIGHT = 54 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
 
 // Common styles for positioned elements
@@ -175,15 +181,26 @@ const UnifiedWavesListWaves = forwardRef<
     const animatedOfficialRows = useAnimatedSidebarWaveRows(officialRows);
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
     const animatedRegularRows = useAnimatedSidebarWaveRows(regularRows);
+    const reserveExpandControlSpace = [
+      ...announcementRows,
+      ...officialRows,
+      ...pinnedRows,
+      ...regularRows,
+    ].some((row) => row.depth === 0 && row.canExpand);
+    const getSidebarRowHeight = useCallback(
+      (row: SidebarWaveTreeRow) =>
+        row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
+      []
+    );
 
-    const virtual = useVirtualizedWaves<SidebarWaveTreeRow>(
-      animatedRegularRows,
-      "unified-waves-regular",
+    const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+      items: animatedRegularRows,
+      key: "unified-waves-regular",
       scrollContainerRef,
       listContainerRef,
-      WAVE_ROW_HEIGHT,
-      VIRTUALIZATION_OVERSCAN
-    );
+      rowHeight: getSidebarRowHeight,
+      overscan: VIRTUALIZATION_OVERSCAN,
+    });
 
     const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
       <BrainLeftSidebarWave
@@ -193,8 +210,10 @@ const UnifiedWavesListWaves = forwardRef<
         isDirectMessage={isDirectMessage}
         depth={row.depth}
         canExpand={row.canExpand}
+        reserveExpandControlSpace={reserveExpandControlSpace}
         isExpanded={row.isExpanded}
         hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+        isLastSubwave={row.isLastSubwave}
         onToggleExpand={toggleParent}
         onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
       />
@@ -211,6 +230,11 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders && (
           <SectionHeader
             label="All Waves"
+            paddingClassName={
+              reserveExpandControlSpace
+                ? "tw-pl-10 tw-pr-4 md:tw-pl-9"
+                : "tw-px-4"
+            }
             rightContent={hideToggle ? undefined : <JoinedToggle />}
           />
         )}
@@ -239,7 +263,7 @@ const UnifiedWavesListWaves = forwardRef<
                 <SidebarWaveTreeRowTransition
                   key={row.key}
                   row={row}
-                  rowHeight={WAVE_ROW_HEIGHT}
+                  rowHeight={getSidebarRowHeight(row)}
                 >
                   {renderWaveRow(row, !hidePin && row.wave.isPinned)}
                 </SidebarWaveTreeRowTransition>
@@ -276,7 +300,7 @@ const UnifiedWavesListWaves = forwardRef<
                 <SidebarWaveTreeRowTransition
                   key={row.key}
                   row={row}
-                  rowHeight={WAVE_ROW_HEIGHT}
+                  rowHeight={getSidebarRowHeight(row)}
                 >
                   {renderWaveRow(row, false)}
                 </SidebarWaveTreeRowTransition>
@@ -312,7 +336,7 @@ const UnifiedWavesListWaves = forwardRef<
                 <SidebarWaveTreeRowTransition
                   key={row.key}
                   row={row}
-                  rowHeight={WAVE_ROW_HEIGHT}
+                  rowHeight={getSidebarRowHeight(row)}
                 >
                   {renderWaveRow(row, !hidePin)}
                 </SidebarWaveTreeRowTransition>
@@ -366,7 +390,7 @@ const UnifiedWavesListWaves = forwardRef<
                 <SidebarWaveTreeRowTransition
                   key={row.key}
                   row={row}
-                  rowHeight={WAVE_ROW_HEIGHT}
+                  rowHeight={getSidebarRowHeight(row)}
                   style={{
                     ...absolutePositionedStyle,
                     top: v.start,

@@ -7,7 +7,7 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
@@ -42,6 +42,7 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
 const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
+const SUBWAVE_ROW_HEIGHT = 54 as const;
 const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 const PROFILE_FEED_LABEL = "Profile Waves Feed";
 const TOOLTIP_STYLE = {
@@ -128,9 +129,11 @@ function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
 function WebProfileFeedShortcut({
   basePath,
   isCollapsed,
+  reserveExpandControlSpace,
 }: {
   readonly basePath: string;
   readonly isCollapsed: boolean;
+  readonly reserveExpandControlSpace: boolean;
 }) {
   const { activeWave } = useMyStream();
   const isActive = activeWave.id === null;
@@ -171,7 +174,9 @@ function WebProfileFeedShortcut({
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+        reserveExpandControlSpace ? "tw-pl-10 tw-pr-5 md:tw-pl-7" : "tw-px-5"
+      } ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
@@ -273,8 +278,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     () => ({ keepExitingRows: !isCollapsed }),
     [isCollapsed]
   );
-  const animatedAnnouncementRows =
-    useAnimatedSidebarWaveRows(announcementRows, rowAnimationOptions);
+  const animatedAnnouncementRows = useAnimatedSidebarWaveRows(
+    announcementRows,
+    rowAnimationOptions
+  );
   const animatedOfficialRows = useAnimatedSidebarWaveRows(
     officialRows,
     rowAnimationOptions
@@ -291,19 +298,35 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasOfficialRows = animatedOfficialRows.length > 0;
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasRegularRows = animatedRegularRows.length > 0;
+  const reserveExpandControlSpace =
+    !isCollapsed &&
+    [...announcementRows, ...officialRows, ...pinnedRows, ...regularRows].some(
+      (row) => row.depth === 0 && row.canExpand
+    );
+  const headerPaddingClassName = reserveExpandControlSpace
+    ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
+    : "tw-px-4";
+  const filterPaddingClassName = reserveExpandControlSpace
+    ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
+    : "tw-px-4";
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED
     : WAVE_ROW_HEIGHT_DEFAULT;
-
-  const virtual = useVirtualizedWaves<SidebarWaveTreeRow>(
-    animatedRegularRows,
-    "web-unified-waves-regular",
-    scrollContainerRef ?? listContainerRef,
-    listContainerRef,
-    rowHeight,
-    5
+  const getSidebarRowHeight = useCallback(
+    (row: SidebarWaveTreeRow) =>
+      row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight,
+    [rowHeight]
   );
+
+  const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+    items: animatedRegularRows,
+    key: "web-unified-waves-regular",
+    scrollContainerRef: scrollContainerRef ?? listContainerRef,
+    listContainerRef,
+    rowHeight: getSidebarRowHeight,
+    overscan: 5,
+  });
 
   const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
     <WebBrainLeftSidebarWave
@@ -314,8 +337,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       collapsed={isCollapsed}
       depth={row.depth}
       canExpand={row.canExpand && !isCollapsed}
+      reserveExpandControlSpace={reserveExpandControlSpace}
       isExpanded={row.isExpanded}
       hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+      isLastSubwave={row.isLastSubwave}
       onToggleExpand={toggleParent}
       onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
     />
@@ -349,6 +374,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           ) : (
             <SectionHeader
               label="Waves"
+              paddingClassName={headerPaddingClassName}
               rightContent={
                 showCreateWaveButton ? (
                   <div
@@ -372,7 +398,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             />
           ))}
         {!hideHeaders && !hideToggle && !isCollapsed && (
-          <div className="tw-mt-4 tw-flex tw-px-4 tw-pb-3">
+          <div className={`tw-mt-4 tw-flex tw-pb-3 ${filterPaddingClassName}`}>
             <WavesFilterToggle />
           </div>
         )}
@@ -380,6 +406,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           <WebProfileFeedShortcut
             basePath={basePath}
             isCollapsed={isCollapsed}
+            reserveExpandControlSpace={reserveExpandControlSpace}
           />
         )}
 
@@ -404,7 +431,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   <SidebarWaveTreeRowTransition
                     key={row.key}
                     row={row}
-                    rowHeight={rowHeight}
+                    rowHeight={getSidebarRowHeight(row)}
                     className="tw-w-full"
                   >
                     {renderWaveRow(
@@ -440,7 +467,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   <SidebarWaveTreeRowTransition
                     key={row.key}
                     row={row}
-                    rowHeight={rowHeight}
+                    rowHeight={getSidebarRowHeight(row)}
                     className="tw-w-full"
                   >
                     {renderWaveRow(row, false)}
@@ -473,7 +500,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   <SidebarWaveTreeRowTransition
                     key={row.key}
                     row={row}
-                    rowHeight={rowHeight}
+                    rowHeight={getSidebarRowHeight(row)}
                     className="tw-w-full"
                   >
                     {renderWaveRow(row, !hidePin && !isCollapsed)}
@@ -481,11 +508,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                 ))}
             </section>
           )}
-          {!hideHeaders &&
-            hasPinnedRows &&
-            hasRegularRows && (
-              <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-            )}
+          {!hideHeaders && hasPinnedRows && hasRegularRows && (
+            <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          )}
           {hasRegularRows ? (
             <section
               ref={listContainerRef}
@@ -523,7 +548,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   <SidebarWaveTreeRowTransition
                     key={row.key}
                     row={row}
-                    rowHeight={rowHeight}
+                    rowHeight={getSidebarRowHeight(row)}
                     style={{
                       position: "absolute",
                       width: "100%",

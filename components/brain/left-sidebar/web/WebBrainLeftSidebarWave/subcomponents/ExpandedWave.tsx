@@ -11,6 +11,85 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
+const getRowLayoutClasses = ({
+  isChildRow,
+  shouldReserveExpandControlSpace,
+}: {
+  readonly isChildRow: boolean;
+  readonly shouldReserveExpandControlSpace: boolean;
+}) => {
+  if (isChildRow) {
+    return {
+      rowPaddingClasses: "tw-pl-[84px] tw-pr-5 md:tw-pl-[72px]",
+      rowGapClasses: "tw-gap-x-2",
+      linkGapClasses: "tw-space-x-2",
+    };
+  }
+
+  if (shouldReserveExpandControlSpace) {
+    return {
+      rowPaddingClasses: "tw-pl-2 tw-pr-5 md:tw-pl-1",
+      rowGapClasses: "tw-gap-x-2 md:tw-gap-x-1",
+      linkGapClasses: "tw-space-x-3",
+    };
+  }
+
+  return {
+    rowPaddingClasses: "tw-px-5",
+    rowGapClasses: "tw-gap-x-4",
+    linkGapClasses: "tw-space-x-3",
+  };
+};
+
+function ExpandControl({
+  formattedWaveName,
+  isExpanded,
+  onBlur,
+  onClick,
+  onFocus,
+  shouldReserveSpace,
+  shouldShowButton,
+}: {
+  readonly formattedWaveName: string;
+  readonly isExpanded: boolean;
+  readonly onBlur: () => void;
+  readonly onClick: (event: MouseEvent<HTMLButtonElement>) => void;
+  readonly onFocus: () => void;
+  readonly shouldReserveSpace: boolean;
+  readonly shouldShowButton: boolean;
+}) {
+  if (!shouldReserveSpace) {
+    return null;
+  }
+
+  const buttonStateClasses = isExpanded
+    ? "tw-bg-iron-700/60 tw-text-iron-300 tw-opacity-100"
+    : "tw-bg-transparent tw-text-iron-500 tw-opacity-70";
+
+  return (
+    <div className="tw-flex tw-h-10 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center md:tw-w-5">
+      {shouldShowButton && (
+        <button
+          type="button"
+          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${formattedWaveName} subwaves`}
+          aria-expanded={isExpanded}
+          onClick={onClick}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          className={`tw-relative tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700/70 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-opacity-100 md:tw-size-5 ${buttonStateClasses}`}
+        >
+          <ChevronRightIcon
+            className={`tw-size-3.5 tw-transition-transform tw-duration-200 tw-ease-out ${
+              isExpanded ? "tw-rotate-90" : ""
+            }`}
+            aria-hidden="true"
+          />
+        </button>
+      )}
+    </div>
+  );
+}
+
 interface ExpandedWaveProps {
   readonly formattedWaveName: string;
   readonly haveNewDrops: boolean;
@@ -31,8 +110,10 @@ interface ExpandedWaveProps {
   readonly waveId: string;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
+  readonly reserveExpandControlSpace?: boolean | undefined;
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
+  readonly isLastSubwave?: boolean | undefined;
   readonly onToggleExpand?: ((waveId: string) => void) | undefined;
   readonly onPrefetchSubwaves?: ((waveId: string) => void) | undefined;
 }
@@ -57,8 +138,10 @@ export const ExpandedWave = ({
   waveId,
   depth = 0,
   canExpand = false,
+  reserveExpandControlSpace = false,
   isExpanded = false,
   hasUnreadSubwaves = false,
+  isLastSubwave = false,
   onToggleExpand,
   onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
@@ -75,14 +158,18 @@ export const ExpandedWave = ({
     Number.isFinite(latestDropTimestamp)
       ? latestDropTimestamp
       : null;
-  const rowPaddingClasses =
-    depth === 1 ? "tw-pl-9 tw-pr-5" : "tw-px-5";
-  const rowGapClasses = depth === 1 ? "tw-gap-x-2" : "tw-gap-x-4";
+  const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
-  const expandButtonLabel = `${isExpanded ? "Collapse" : "Expand"} ${formattedWaveName} subwaves`;
-  const subwavePrefetchTimerRef = useRef<
-    ReturnType<typeof globalThis.setTimeout> | null
-  >(null);
+  const shouldReserveExpandControlSpace =
+    shouldShowExpandControl || (reserveExpandControlSpace && depth === 0);
+  const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
+    getRowLayoutClasses({
+      isChildRow,
+      shouldReserveExpandControlSpace,
+    });
+  const subwavePrefetchTimerRef = useRef<ReturnType<
+    typeof globalThis.setTimeout
+  > | null>(null);
   const shouldPrefetchSubwaves = Boolean(
     shouldShowExpandControl && onPrefetchSubwaves
   );
@@ -131,38 +218,29 @@ export const ExpandedWave = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      {shouldShowExpandControl ? (
-        <button
-          type="button"
-          aria-label={expandButtonLabel}
-          aria-expanded={isExpanded}
-          onClick={handleToggleExpand}
-          onFocus={scheduleSubwavePrefetch}
-          onBlur={cancelSubwavePrefetch}
-          className="tw-absolute tw-left-4 tw-top-8 tw-z-10 tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-iron-800 tw-p-0 tw-text-iron-200 tw-shadow-sm tw-transition-colors desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white"
-        >
-          <ChevronRightIcon
-            className={`tw-size-4 tw-transition-transform tw-duration-200 tw-ease-out ${
-              isExpanded ? "tw-rotate-90" : ""
-            }`}
-            aria-hidden="true"
-          />
-          {hasUnreadSubwaves && (
-            <span
-              aria-hidden="true"
-              className="tw-absolute tw-bottom-0 tw-right-0 tw-size-2 tw-rounded-full tw-bg-primary-400"
-            />
-          )}
-        </button>
-      ) : depth === 1 ? (
-        <div className="tw-mt-2 tw-size-5 tw-flex-shrink-0" />
-      ) : null}
+      <ExpandControl
+        formattedWaveName={formattedWaveName}
+        isExpanded={isExpanded}
+        onBlur={cancelSubwavePrefetch}
+        onClick={handleToggleExpand}
+        onFocus={scheduleSubwavePrefetch}
+        shouldReserveSpace={shouldReserveExpandControlSpace}
+        shouldShowButton={shouldShowExpandControl}
+      />
+      {isChildRow && (
+        <span
+          aria-hidden="true"
+          className={`tw-absolute -tw-top-1 tw-left-14 tw-w-px tw-bg-iron-700/60 md:tw-left-11 ${
+            isLastSubwave ? "tw-bottom-4" : "-tw-bottom-1"
+          }`}
+        />
+      )}
       <Link
         href={href}
         prefetch={false}
         {...(onMouseEnter ? { onMouseEnter } : {})}
         onClick={onClick}
-        className={`tw-flex tw-min-w-0 tw-flex-1 tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
             : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
@@ -174,7 +252,14 @@ export const ExpandedWave = ({
             isDropWave={isDropWave}
             showNewDropsBadge={!isActive && haveNewDrops}
             wave={wave}
+            size={isChildRow ? "sm" : "default"}
           />
+          {hasUnreadSubwaves && (
+            <span
+              aria-hidden="true"
+              className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-2.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-950 tw-bg-primary-400"
+            />
+          )}
         </div>
         <div className="tw-min-w-0 tw-flex-1">
           <div
