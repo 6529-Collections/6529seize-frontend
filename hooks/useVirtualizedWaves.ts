@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useScrollPositionContext } from "@/contexts/ScrollPositionContext";
 
 export interface VirtualItem {
@@ -11,6 +11,11 @@ export interface VirtualItem {
 
 const SENTINEL_HEIGHT = 40;
 type VirtualRowHeight<T> = number | ((item: T, index: number) => number);
+
+interface VirtualLayout {
+  readonly viewportHeight: number;
+  readonly listOffset: number;
+}
 
 interface UseVirtualizedWavesOptions<T> {
   readonly items: readonly T[];
@@ -27,6 +32,21 @@ const restoreScrollPosition = (element: HTMLElement, top: number) => {
     element.scrollTo({ top });
   }
 };
+
+const readVirtualLayout = (
+  scrollContainer: HTMLElement | null,
+  listContainer: HTMLDivElement | null
+): VirtualLayout => ({
+  viewportHeight: scrollContainer?.clientHeight ?? 0,
+  listOffset: listContainer?.offsetTop ?? 0,
+});
+
+const areVirtualLayoutsEqual = (
+  previousLayout: VirtualLayout,
+  nextLayout: VirtualLayout
+) =>
+  previousLayout.viewportHeight === nextLayout.viewportHeight &&
+  previousLayout.listOffset === nextLayout.listOffset;
 
 const measureRows = <T>(items: readonly T[], rowHeight: VirtualRowHeight<T>) =>
   items.reduce<{
@@ -66,9 +86,26 @@ export function useVirtualizedWaves<T>({
   const { getPosition, setPosition } = useScrollPositionContext();
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [layout, setLayout] = useState<VirtualLayout>({
+    viewportHeight: 0,
+    listOffset: 0,
+  });
+
+  const updateLayout = useCallback(() => {
+    const nextLayout = readVirtualLayout(
+      scrollContainerRef.current,
+      listContainerRef.current
+    );
+
+    setLayout((previousLayout) =>
+      areVirtualLayoutsEqual(previousLayout, nextLayout)
+        ? previousLayout
+        : nextLayout
+    );
+  }, [listContainerRef, scrollContainerRef]);
 
   // Restore scroll position on mount
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isActive) {
       return;
     }
@@ -76,25 +113,46 @@ export function useVirtualizedWaves<T>({
     if (!el) return;
 
     restoreScrollPosition(el, getPosition(key));
+    setScrollOffset(el.scrollTop);
+    updateLayout();
     const onScroll = () => {
       setScrollOffset(el.scrollTop);
       setPosition(key, el.scrollTop);
+      updateLayout();
     };
     el.addEventListener("scroll", onScroll);
+
+    const canObserveResize = typeof globalThis.ResizeObserver === "function";
+    const resizeObserver = canObserveResize
+      ? new globalThis.ResizeObserver(updateLayout)
+      : null;
+
+    resizeObserver?.observe(el);
+    if (listContainerRef.current !== null) {
+      resizeObserver?.observe(listContainerRef.current);
+    }
+
     return () => {
       setPosition(key, el.scrollTop);
       el.removeEventListener("scroll", onScroll);
+      resizeObserver?.disconnect();
     };
-  }, [getPosition, setPosition, key, scrollContainerRef, isActive]);
+  }, [
+    getPosition,
+    isActive,
+    key,
+    listContainerRef,
+    scrollContainerRef,
+    setPosition,
+    updateLayout,
+  ]);
 
-  const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;
-  const listOffset = listContainerRef.current?.offsetTop ?? 0;
   const { measurements, totalHeight: measuredRowsHeight } = useMemo(
     () => measureRows(items, rowHeight),
     [items, rowHeight]
   );
-  const visibleStart = Math.max(scrollOffset - listOffset, 0);
-  const visibleEnd = scrollOffset + viewportHeight - listOffset;
+  const visibleStart = Math.max(scrollOffset - layout.listOffset, 0);
+  const visibleEnd = scrollOffset + layout.viewportHeight - layout.listOffset;
   const firstVisibleIndex = measurements.findIndex(
     (measurement) => measurement.start + measurement.size > visibleStart
   );

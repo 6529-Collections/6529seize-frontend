@@ -6,7 +6,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { formatAddress, isValidEthAddress } from "../../../../helpers/Helpers";
@@ -17,6 +16,8 @@ import {
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
+import { SidebarWaveExpandControl } from "./SidebarWaveExpandControl";
+import { getSidebarWaveRowLayoutClasses } from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
@@ -82,85 +83,6 @@ const isModifiedAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
   event.shiftKey ||
   event.altKey ||
   event.button === 1;
-
-const getRowLayoutClasses = ({
-  isChildRow,
-  shouldReserveExpandControlSpace,
-}: {
-  readonly isChildRow: boolean;
-  readonly shouldReserveExpandControlSpace: boolean;
-}) => {
-  if (isChildRow) {
-    return {
-      rowPaddingClasses: "tw-pl-[84px] tw-pr-5 md:tw-pl-20",
-      rowGapClasses: "tw-gap-x-2",
-      linkGapClasses: "tw-space-x-2",
-    };
-  }
-
-  if (shouldReserveExpandControlSpace) {
-    return {
-      rowPaddingClasses: "tw-pl-2 tw-pr-5",
-      rowGapClasses: "tw-gap-x-2",
-      linkGapClasses: "tw-space-x-3",
-    };
-  }
-
-  return {
-    rowPaddingClasses: "tw-px-5",
-    rowGapClasses: "tw-gap-x-4",
-    linkGapClasses: "tw-space-x-3",
-  };
-};
-
-function ExpandControl({
-  formattedWaveName,
-  isExpanded,
-  onBlur,
-  onClick,
-  onFocus,
-  shouldReserveSpace,
-  shouldShowButton,
-}: {
-  readonly formattedWaveName: string;
-  readonly isExpanded: boolean;
-  readonly onBlur: () => void;
-  readonly onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  readonly onFocus: () => void;
-  readonly shouldReserveSpace: boolean;
-  readonly shouldShowButton: boolean;
-}) {
-  if (!shouldReserveSpace) {
-    return null;
-  }
-
-  const buttonStateClasses = isExpanded
-    ? "tw-bg-iron-700/60 tw-text-iron-300 tw-opacity-100"
-    : "tw-bg-transparent tw-text-iron-500 tw-opacity-70";
-
-  return (
-    <div className="tw-flex tw-h-10 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center md:tw-w-5">
-      {shouldShowButton && (
-        <button
-          type="button"
-          aria-label={`${isExpanded ? "Collapse" : "Expand"} ${formattedWaveName} subwaves`}
-          aria-expanded={isExpanded}
-          onClick={onClick}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          className={`tw-relative tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition-all tw-duration-200 desktop-hover:hover:tw-bg-iron-700/70 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-opacity-100 md:tw-size-5 ${buttonStateClasses}`}
-        >
-          <ChevronRightIcon
-            className={`tw-size-3.5 tw-transition-transform tw-duration-200 tw-ease-out ${
-              isExpanded ? "tw-rotate-90" : ""
-            }`}
-            aria-hidden="true"
-          />
-        </button>
-      )}
-    </div>
-  );
-}
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
@@ -294,9 +216,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const shouldReserveExpandControlSpace =
     shouldShowExpandControl || (reserveExpandControlSpace && depth === 0);
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
-    getRowLayoutClasses({
+    getSidebarWaveRowLayoutClasses({
       isChildRow,
       shouldReserveExpandControlSpace,
+      variant: "app",
     });
   const avatarSizeClasses = isChildRow ? "tw-size-7" : "tw-size-8";
   const activeRingClasses = isChildRow
@@ -318,7 +241,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           : "desktop-hover:hover:tw-bg-iron-800/80"
       }`}
     >
-      <ExpandControl
+      <SidebarWaveExpandControl
         formattedWaveName={formattedWaveName}
         isExpanded={isExpanded}
         onBlur={cancelSubwavePrefetch}

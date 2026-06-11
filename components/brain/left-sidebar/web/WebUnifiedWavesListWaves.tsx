@@ -12,6 +12,7 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
+import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
 import { SidebarWaveTreeRowTransition } from "../waves/SidebarWaveTreeRowTransition";
@@ -23,20 +24,11 @@ import {
   type SidebarWaveTreeRow,
 } from "@/hooks/useSidebarWaveTree";
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
-
-function isValidWave(wave: unknown): wave is MinimalWave {
-  if (wave === null || wave === undefined || typeof wave !== "object") {
-    return false;
-  }
-
-  const w = wave as MinimalWave;
-  return (
-    typeof w.id === "string" &&
-    w.id.length > 0 &&
-    typeof w.name === "string" &&
-    typeof w.isPinned === "boolean"
-  );
-}
+import {
+  groupSidebarWaves,
+  hasExpandableTopLevelRows,
+  isValidSidebarWave,
+} from "../waves/sidebarWaveListUtils";
 
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
@@ -125,6 +117,77 @@ function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
     event.button === 2
   );
 }
+
+function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
+  return (
+    <div
+      data-tooltip-id="create-wave-tooltip"
+      data-tooltip-content="Create wave"
+    >
+      <PrimaryButton
+        onClicked={onClick}
+        loading={false}
+        disabled={false}
+        padding="tw-p-2.5"
+      >
+        <FontAwesomeIcon icon={faPlus} className="tw-size-4 tw-flex-shrink-0" />
+      </PrimaryButton>
+    </div>
+  );
+}
+
+function WebWavesListHeader({
+  headerPaddingClassName,
+  isCollapsed,
+  onCreateWave,
+  showCreateWaveButton,
+}: {
+  readonly headerPaddingClassName: string;
+  readonly isCollapsed: boolean;
+  readonly onCreateWave: () => void;
+  readonly showCreateWaveButton: boolean;
+}) {
+  if (isCollapsed) {
+    if (!showCreateWaveButton) {
+      return null;
+    }
+
+    return (
+      <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
+        <CreateWaveButton onClick={onCreateWave} />
+      </div>
+    );
+  }
+
+  return (
+    <SectionHeader
+      label="Waves"
+      paddingClassName={headerPaddingClassName}
+      rightContent={
+        showCreateWaveButton ? (
+          <CreateWaveButton onClick={onCreateWave} />
+        ) : undefined
+      }
+    />
+  );
+}
+
+const isVisibleSectionRow = ({
+  row,
+  sectionName,
+}: {
+  readonly row: SidebarWaveTreeRow;
+  readonly sectionName: string;
+}) => {
+  const wave = row.wave;
+
+  if (isValidSidebarWave(wave)) {
+    return true;
+  }
+
+  console.warn(`Invalid ${sectionName} wave object`, wave);
+  return false;
+};
 
 function WebProfileFeedShortcut({
   basePath,
@@ -232,31 +295,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
 
   const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =
-    useMemo(() => {
-      const announcements: MinimalWave[] = [];
-      const official: MinimalWave[] = [];
-      const pinned: MinimalWave[] = [];
-      const regular: MinimalWave[] = [];
-
-      for (const wave of topLevelWaves) {
-        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
-          announcements.push(wave);
-        } else if (wave.isOfficial) {
-          official.push(wave);
-        } else if (wave.isPinned) {
-          pinned.push(wave);
-        } else {
-          regular.push(wave);
-        }
-      }
-
-      return {
-        announcementWaves: announcements,
-        officialWaves: official,
-        pinnedWaves: pinned,
-        regularWaves: regular,
-      };
-    }, [topLevelWaves, seizeSettings]);
+    useMemo(
+      () =>
+        groupSidebarWaves({
+          isAnnouncementsWave:
+            seizeSettings !== null
+              ? (waveId) => seizeSettings.isAnnouncementsWave(waveId)
+              : undefined,
+          waves: topLevelWaves,
+        }),
+      [topLevelWaves, seizeSettings]
+    );
 
   const announcementRows = useMemo(
     () => getRows(announcementWaves),
@@ -300,8 +349,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasRegularRows = animatedRegularRows.length > 0;
   const reserveExpandControlSpace =
     !isCollapsed &&
-    [...announcementRows, ...officialRows, ...pinnedRows, ...regularRows].some(
-      (row) => row.depth === 0 && row.canExpand
+    [announcementRows, officialRows, pinnedRows, regularRows].some(
+      hasExpandableTopLevelRows
     );
   const headerPaddingClassName = reserveExpandControlSpace
     ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
@@ -309,6 +358,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const filterPaddingClassName = reserveExpandControlSpace
     ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
     : "tw-px-4";
+  const sectionClassName = isCollapsed
+    ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
+    : "tw-flex tw-flex-col";
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED
@@ -349,54 +401,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   return (
     <>
       <div className="tw-flex tw-flex-col">
-        {!hideHeaders &&
-          (isCollapsed ? (
-            showCreateWaveButton && (
-              <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
-                <div
-                  data-tooltip-id="create-wave-tooltip"
-                  data-tooltip-content="Create wave"
-                >
-                  <PrimaryButton
-                    onClicked={openWave}
-                    loading={false}
-                    disabled={false}
-                    padding="tw-p-2.5"
-                  >
-                    <FontAwesomeIcon
-                      icon={faPlus}
-                      className="tw-size-4 tw-flex-shrink-0"
-                    />
-                  </PrimaryButton>
-                </div>
-              </div>
-            )
-          ) : (
-            <SectionHeader
-              label="Waves"
-              paddingClassName={headerPaddingClassName}
-              rightContent={
-                showCreateWaveButton ? (
-                  <div
-                    data-tooltip-id="create-wave-tooltip"
-                    data-tooltip-content="Create wave"
-                  >
-                    <PrimaryButton
-                      onClicked={openWave}
-                      loading={false}
-                      disabled={false}
-                      padding="tw-p-2.5"
-                    >
-                      <FontAwesomeIcon
-                        icon={faPlus}
-                        className="tw-size-4 tw-flex-shrink-0"
-                      />
-                    </PrimaryButton>
-                  </div>
-                ) : undefined
-              }
-            />
-          ))}
+        {!hideHeaders && (
+          <WebWavesListHeader
+            headerPaddingClassName={headerPaddingClassName}
+            isCollapsed={isCollapsed}
+            onCreateWave={openWave}
+            showCreateWaveButton={showCreateWaveButton}
+          />
+        )}
         {!hideHeaders && !hideToggle && !isCollapsed && (
           <div className={`tw-mt-4 tw-flex tw-pb-3 ${filterPaddingClassName}`}>
             <WavesFilterToggle />
@@ -412,35 +424,22 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
         <div>
           {hasAnnouncementRows && (
-            <section
-              className={`tw-flex tw-flex-col ${
-                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-              }`}
-              aria-label="Announcement waves"
-            >
-              {animatedAnnouncementRows
-                .filter((row) => {
-                  const wave = row.wave;
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid announcement wave object", wave);
-                    return false;
-                  }
-                  return true;
-                })
-                .map((row) => (
-                  <SidebarWaveTreeRowTransition
-                    key={row.key}
-                    row={row}
-                    rowHeight={getSidebarRowHeight(row)}
-                    className="tw-w-full"
-                  >
-                    {renderWaveRow(
-                      row,
-                      !hidePin && !isCollapsed && row.wave.isPinned
-                    )}
-                  </SidebarWaveTreeRowTransition>
-                ))}
-            </section>
+            <SidebarWaveRowsSection
+              ariaLabel="Announcement waves"
+              className={sectionClassName}
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleSectionRow({ row, sectionName: "announcement" })
+              }
+              renderRow={(row) =>
+                renderWaveRow(
+                  row,
+                  !hidePin && !isCollapsed && row.wave.isPinned
+                )
+              }
+              rows={animatedAnnouncementRows}
+              transitionClassName="tw-w-full"
+            />
           )}
           {hasAnnouncementRows &&
             !hideHeaders &&
@@ -448,32 +447,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
           {hasOfficialRows && (
-            <section
-              className={`tw-flex tw-flex-col ${
-                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-              }`}
-              aria-label="Official waves"
-            >
-              {animatedOfficialRows
-                .filter((row) => {
-                  const wave = row.wave;
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid official wave object", wave);
-                    return false;
-                  }
-                  return true;
-                })
-                .map((row) => (
-                  <SidebarWaveTreeRowTransition
-                    key={row.key}
-                    row={row}
-                    rowHeight={getSidebarRowHeight(row)}
-                    className="tw-w-full"
-                  >
-                    {renderWaveRow(row, false)}
-                  </SidebarWaveTreeRowTransition>
-                ))}
-            </section>
+            <SidebarWaveRowsSection
+              ariaLabel="Official waves"
+              className={sectionClassName}
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleSectionRow({ row, sectionName: "official" })
+              }
+              renderRow={(row) => renderWaveRow(row, false)}
+              rows={animatedOfficialRows}
+              transitionClassName="tw-w-full"
+            />
           )}
           {hasOfficialRows &&
             !hideHeaders &&
@@ -481,32 +465,17 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
           {!hideHeaders && hasPinnedRows && (
-            <section
-              className={`tw-flex tw-flex-col ${
-                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-              }`}
-              aria-label="Pinned waves"
-            >
-              {animatedPinnedRows
-                .filter((row) => {
-                  const wave = row.wave;
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid pinned wave object", wave);
-                    return false;
-                  }
-                  return true;
-                })
-                .map((row) => (
-                  <SidebarWaveTreeRowTransition
-                    key={row.key}
-                    row={row}
-                    rowHeight={getSidebarRowHeight(row)}
-                    className="tw-w-full"
-                  >
-                    {renderWaveRow(row, !hidePin && !isCollapsed)}
-                  </SidebarWaveTreeRowTransition>
-                ))}
-            </section>
+            <SidebarWaveRowsSection
+              ariaLabel="Pinned waves"
+              className={sectionClassName}
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleSectionRow({ row, sectionName: "pinned" })
+              }
+              renderRow={(row) => renderWaveRow(row, !hidePin && !isCollapsed)}
+              rows={animatedPinnedRows}
+              transitionClassName="tw-w-full"
+            />
           )}
           {!hideHeaders && hasPinnedRows && hasRegularRows && (
             <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
@@ -536,7 +505,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   );
                 }
                 const row = animatedRegularRows[v.index];
-                if (!row || !isValidWave(row.wave)) {
+                if (!row || !isValidSidebarWave(row.wave)) {
                   console.warn(
                     "Invalid wave object at index",
                     v.index,
