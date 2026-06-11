@@ -80,10 +80,10 @@ jobs:
         continue-on-error: true
         run: ./bin/6529 run typecheck:ci
 
-      - name: Unit tests
+      - name: Dependency governance unit tests
         id: tests
         continue-on-error: true
-        run: ./bin/6529 run test:no-coverage
+        run: ./bin/6529 run test:no-coverage -- __tests__/scripts/dependency-risk-gate.test.ts
 
       - name: Build app
         id: build
@@ -195,7 +195,7 @@ jobs:
           check_outcome "Frozen install" "$INSTALL_OUTCOME"
           check_outcome "package.json pin lint" "$LINT_PACKAGE_JSON_OUTCOME"
           check_outcome "Typecheck" "$TYPECHECK_OUTCOME"
-          check_outcome "Unit tests" "$TESTS_OUTCOME"
+          check_outcome "Dependency governance unit tests" "$TESTS_OUTCOME"
           check_outcome "Build" "$BUILD_OUTCOME"
 
           exit "$failed"
