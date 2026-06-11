@@ -82,4 +82,62 @@ describe("useVirtualizedWaves", () => {
       { index: 1, start: 62, size: 54 },
     ]);
   });
+
+  it("binds scrolling when the scroll container ref is assigned after mount", () => {
+    jest.useFakeTimers();
+    const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+    const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
+    globalThis.requestAnimationFrame = undefined as never;
+    globalThis.cancelAnimationFrame = undefined as never;
+
+    try {
+      const scrollContainer = document.createElement("div");
+      Object.defineProperty(scrollContainer, "clientHeight", { value: 100 });
+      const listContainer = document.createElement("div");
+      Object.defineProperty(listContainer, "offsetTop", { value: 0 });
+      const items = Array.from({ length: 10 }, (_, i) => i);
+      const scrollRef: { current: HTMLDivElement | null } = {
+        current: null,
+      };
+      const listRef: { current: HTMLDivElement | null } = {
+        current: listContainer,
+      };
+
+      const { result, rerender } = renderHook(
+        () =>
+          useVirtualizedWaves({
+            items,
+            key: "late-container",
+            scrollContainerRef: scrollRef,
+            listContainerRef: listRef,
+            rowHeight: 50,
+            overscan: 0,
+          }),
+        { wrapper }
+      );
+
+      expect(result.current.virtualItems).toEqual([
+        { index: 10, start: 500, size: 40 },
+      ]);
+
+      scrollRef.current = scrollContainer;
+      act(() => {
+        jest.advanceTimersByTime(16);
+      });
+      rerender();
+      expect(result.current.virtualItems.length).toBe(3);
+
+      act(() => {
+        scrollContainer.scrollTop = 120;
+        scrollContainer.dispatchEvent(new Event("scroll"));
+      });
+
+      rerender();
+      expect(result.current.virtualItems[0]?.index).toBe(2);
+    } finally {
+      globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+      globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
+      jest.useRealTimers();
+    }
+  });
 });
