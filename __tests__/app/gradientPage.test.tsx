@@ -1,4 +1,5 @@
 import { generateMetadata } from "@/app/6529-gradient/[id]/page";
+import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { fetchUrl } from "@/services/6529api";
 
 // === Mock Services & Dependencies ===
@@ -27,10 +28,6 @@ jest.mock("@/components/latest-activity/LatestActivityRow", () => ({
   __esModule: true,
   default: () => <tr data-testid="activity-row" />,
 }));
-jest.mock("@/components/nft-attributes/NftStats", () => ({
-  __esModule: true,
-  default: () => <></>,
-}));
 jest.mock("@/components/nft-navigation/NftNavigation", () => ({
   __esModule: true,
   default: () => <></>,
@@ -53,11 +50,26 @@ describe("generateMetadata", () => {
 
     expect(metadata.title).toBe("6529 Gradient #10");
 
-    const images = Array.isArray(metadata.openGraph?.images)
-      ? metadata.openGraph.images
-      : [metadata.openGraph?.images];
+    const [image] = metadata.openGraph?.images as {
+      alt: string;
+      height: number;
+      url: string;
+      width: number;
+    }[];
+    const url = new URL(image.url);
 
-    expect(images?.[0]).toBe("https://example.com/thumb.png");
+    expect(image).toMatchObject({
+      alt: "6529 Gradient #10 social card",
+      height: 630,
+      width: 1200,
+    });
+    expect(url.pathname).toBe(`/api/og-metadata/nfts/${GRADIENT_CONTRACT}/10`);
+    expect(url.searchParams.get("badge")).toBe("6529 Gradient");
+    expect(url.searchParams.get("collection")).toBe("6529 Gradient");
+    expect(url.searchParams.get("image")).toBe("https://example.com/thumb.png");
+    expect(url.searchParams.get("subtitle")).toBe("Collections");
+    expect(url.searchParams.get("title")).toBe("6529 Gradient #10");
+    expect(metadata.twitter?.card).toBe("summary_large_image");
   });
 
   it("falls back to image if thumbnail is missing", async () => {
@@ -69,24 +81,28 @@ describe("generateMetadata", () => {
       params: Promise.resolve({ id: "20" }),
     });
 
-    const images = Array.isArray(metadata.openGraph?.images)
-      ? metadata.openGraph.images
-      : [metadata.openGraph?.images];
+    const [image] = metadata.openGraph?.images as {
+      url: string;
+    }[];
+    const url = new URL(image.url);
 
-    expect(images?.[0]).toBe("https://example.com/image.png");
+    expect(url.pathname).toBe(`/api/og-metadata/nfts/${GRADIENT_CONTRACT}/20`);
+    expect(url.searchParams.get("image")).toBe("https://example.com/image.png");
   });
 
-  it("uses default image if no data", async () => {
+  it("uses branded card without raw image if no data", async () => {
     (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
 
     const metadata = await generateMetadata({
       params: Promise.resolve({ id: "30" }),
     });
 
-    const images = Array.isArray(metadata.openGraph?.images)
-      ? metadata.openGraph.images
-      : [metadata.openGraph?.images];
+    const [image] = metadata.openGraph?.images as {
+      url: string;
+    }[];
+    const url = new URL(image.url);
 
-    expect(images?.[0]).toBe("https://test.6529.io/6529io.png");
+    expect(url.pathname).toBe(`/api/og-metadata/nfts/${GRADIENT_CONTRACT}/30`);
+    expect(url.searchParams.get("image")).toBeNull();
   });
 });

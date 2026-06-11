@@ -1,6 +1,9 @@
 import MemeLabComponent from "@/components/memelab/MemeLab";
-import { getAppMetadata } from "@/components/providers/metadata";
-import { publicEnv } from "@/config/env";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
@@ -13,10 +16,12 @@ export default function MemeLab() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "Meme Lab",
-    ogImage: `${publicEnv.BASE_ENDPOINT}/meme-lab.jpg`,
-    description: "Collections",
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: "Meme Lab",
+      ogImage: getCollectionSocialCardImagePath("meme-lab"),
+      ogImageAlt: "Meme Lab collection social card",
+      description: "Collections",
+    })
+  );
 }

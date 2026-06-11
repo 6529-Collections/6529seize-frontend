@@ -1,6 +1,9 @@
 import GradientsComponent from "@/components/6529Gradient/6529Gradient";
-import { getAppMetadata } from "@/components/providers/metadata";
-import { publicEnv } from "@/config/env";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
@@ -13,10 +16,12 @@ export default function GradientsPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "6529 Gradient",
-    description: "Collections",
-    ogImage: `${publicEnv.BASE_ENDPOINT}/gradients-preview.png`,
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: "6529 Gradient",
+      description: "Collections",
+      ogImage: getCollectionSocialCardImagePath("6529-gradient"),
+      ogImageAlt: "6529 Gradient collection social card",
+    })
+  );
 }
