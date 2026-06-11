@@ -3,6 +3,11 @@ import {
   renderBrandedCollectionOgImage,
   type BrandedCollectionOgImageModel,
 } from "@/app/api/og-metadata/_lib/brandedCards";
+import {
+  getQueryText,
+  OG_CACHE_CONTROL,
+  OG_IMAGE_SIZE,
+} from "@/app/api/og-metadata/_lib/routeUtils";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
 import { ImageResponse } from "next/og";
@@ -10,14 +15,6 @@ import { NextResponse } from "next/server";
 
 export const runtime = "edge";
 export const revalidate = 3600;
-
-const OG_IMAGE_SIZE = {
-  width: 1200,
-  height: 630,
-} as const;
-const OG_CACHE_CONTROL =
-  "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400";
-const MAX_TEXT_LENGTH = 180;
 
 const COLLECTION_DEFAULTS: Record<
   string,
@@ -52,14 +49,6 @@ const COLLECTION_DEFAULTS: Record<
     subtitle: "The Memes by 6529",
     title: "The Memes",
   },
-};
-
-const getQueryText = (
-  searchParams: URLSearchParams,
-  key: string
-): string | null => {
-  const normalized = getUsableText(searchParams.get(key));
-  return normalized ? normalized.slice(0, MAX_TEXT_LENGTH) : null;
 };
 
 const getCollectionCardModel = ({

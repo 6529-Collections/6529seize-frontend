@@ -112,4 +112,32 @@ describe("branded OG card renderers", () => {
       ])
     );
   });
+
+  it("proxies protocol-relative card art URLs", () => {
+    const element = renderBrandedNftOgImage({
+      contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      id: "6529",
+      imageUrl: "//cdn.test/meme.png",
+      origin: "http://localhost:3001",
+      title: "Protocol-relative art",
+    });
+
+    expect(collectImageSrcs(element)).toEqual(
+      expect.arrayContaining([
+        "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Fcdn.test%2Fmeme.png&w=538",
+      ])
+    );
+  });
+
+  it("does not treat bare relative card art URLs as local assets", () => {
+    const element = renderBrandedCollectionOgImage({
+      imageUrl: "memes-preview.png",
+      slug: "the-memes",
+      title: "The Memes",
+    });
+
+    expect(collectImageSrcs(element)).not.toContain(
+      "https://6529.test/memes-preview.png"
+    );
+  });
 });

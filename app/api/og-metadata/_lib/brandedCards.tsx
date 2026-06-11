@@ -72,6 +72,14 @@ const getDisplayImageUrl = ({
     return null;
   }
 
+  if (normalizedImageUrl.startsWith("//")) {
+    return getMediaProxyUrl({
+      sourceUrl: `https:${normalizedImageUrl}`,
+      origin,
+      width,
+    });
+  }
+
   try {
     const url = new URL(normalizedImageUrl);
     return url.protocol === "https:"
@@ -82,10 +90,14 @@ const getDisplayImageUrl = ({
         })
       : null;
   } catch {
-    const localPath = normalizedImageUrl.startsWith("/")
-      ? normalizedImageUrl
-      : `/${normalizedImageUrl}`;
-    return new URL(localPath, publicEnv.BASE_ENDPOINT).toString();
+    if (!normalizedImageUrl.startsWith("/")) {
+      return null;
+    }
+
+    const resolvedUrl = new URL(normalizedImageUrl, publicEnv.BASE_ENDPOINT);
+    const baseOrigin = new URL(publicEnv.BASE_ENDPOINT).origin;
+
+    return resolvedUrl.origin === baseOrigin ? resolvedUrl.toString() : null;
   }
 };
 
