@@ -9,7 +9,6 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { createWaveMetadata } from "@/services/api/waves-v2-api";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
@@ -193,12 +192,10 @@ export function useCreateWaveSubmission({
         picture: picture?.url ?? null,
         drop: dropRequest,
       });
-      const displayMetadataRequests =
-        submissionConfig.overview.type === ApiWaveType.Approve
-          ? getCreateWaveDisplayMetadataRequests(
-              submissionConfig.display.approve
-            )
-          : [];
+      const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
+        display: submissionConfig.display,
+        waveType: submissionConfig.overview.type,
+      });
 
       mutationStarted = true;
       await addWaveMutation.mutateAsync({

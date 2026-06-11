@@ -14,6 +14,7 @@ This page owns both so users can map configured outcomes to per-rank results.
 - `Outcome` tab on `/waves/{waveId}` and `/messages/{waveId}` when that tab
   is available.
 - Curation waves do not show the `Outcome` tab.
+- Rank and Approve waves can hide outcomes from wave display settings.
 - Ranked surfaces that can show outcome summaries:
   - right-sidebar `Leaderboard` rows
   - leaderboard compact rows (top-three and standard)
@@ -26,6 +27,8 @@ This page owns both so users can map configured outcomes to per-rank results.
 - Open a wave where `Outcome` is available and select `Outcome`.
 - Open a ranked row/card that shows `Outcome` or `Outcome:`.
 - Expand an outcome card and use `View X more` when present.
+- Admins can use wave settings `Display` -> `Outcomes` to switch outcomes
+  between `Shown` and `Hidden`.
 
 ## User Journey
 
@@ -60,6 +63,9 @@ This page owns both so users can map configured outcomes to per-rank results.
 - Outcome cards continue loading while scrolling and show `Loading more outcomes...`.
 - Ranked rows/cards with rewards show outcome details; rows/cards with no rewards
   omit outcome controls.
+- When outcomes are `Hidden`, the `Outcome` tab and ranked outcome summaries are
+  not shown. Leaderboards, winners, submissions, votes, and voting controls still
+  work normally.
 
 ## Edge Cases
 
@@ -71,6 +77,8 @@ This page owns both so users can map configured outcomes to per-rank results.
   is pending.
 - If rank data is missing for a lookup response, no outcome control is shown for
   that row/card.
+- If outcome visibility metadata is missing or invalid, outcomes default to
+  `Shown`.
 
 ## Failure and Recovery
 

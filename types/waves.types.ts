@@ -109,6 +109,7 @@ export interface CreateWaveApproveDisplayConfig {
 
 export interface CreateWaveDisplayConfig {
   readonly approve: CreateWaveApproveDisplayConfig;
+  readonly outcomesVisible: boolean;
 }
 
 export enum CreateWaveOutcomeType {

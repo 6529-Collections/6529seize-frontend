@@ -13,6 +13,7 @@ interface WaveWinnersDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly isApprovalWave?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
@@ -21,6 +22,7 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
   onDropClick,
   isApprovalWave = false,
   contentPresentation = "default",
+  outcomesVisible = true,
 }) => {
   const { isMemesWave } = useWave(wave);
 
@@ -40,6 +42,7 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
       onDropClick={onDropClick}
       isApprovalWave={isApprovalWave}
       contentPresentation={contentPresentation}
+      outcomesVisible={outcomesVisible}
     />
   );
 };

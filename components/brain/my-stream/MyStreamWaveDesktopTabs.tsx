@@ -23,7 +23,10 @@ import { useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
-import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
+import {
+  useApproveWaveCustomTabLabels,
+  useWaveOutcomeVisibility,
+} from "@/hooks/waves/useWaveMetadata";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
@@ -334,6 +337,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const approveLabels = useApproveWaveCustomTabLabels(wave);
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
   const isCompetitionWave = isRankWave || isApproveWave;
   const {
     voting: { isUpcoming, isCompleted },
@@ -440,6 +444,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       hasAuthenticatedProfile,
       isCurationWave,
       isApproveWave,
+      showOutcomeTab: outcomesVisible,
       votingState,
       hasFirstDecisionPassed: firstDecisionDone,
       transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
@@ -450,6 +455,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isChatWave,
     hasPolls,
     isApproveWave,
+    outcomesVisible,
     hasAuthenticatedProfile,
     isCurationWave,
     votingState,
@@ -474,6 +480,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           if (tab === MyStreamWaveTab.FAQ) {
             return isMemesWave;
           }
+          if (tab === MyStreamWaveTab.OUTCOME) {
+            return outcomesVisible;
+          }
           return true;
         })
         .map((tab) => ({
@@ -489,6 +498,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isCompetitionWave,
       isMemesWave,
       isCurationWave,
+      outcomesVisible,
     ]
   );
 

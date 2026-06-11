@@ -271,6 +271,32 @@ describe("BrainMobileTabs", () => {
     expect(screen.getByText("Outcome")).toBeInTheDocument();
   });
 
+  it("hides Outcome when outcomes are hidden for rank waves", () => {
+    (useWave as jest.Mock).mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: false,
+      isRankWave: true,
+      isApproveWave: false,
+    });
+
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.ABOUT}
+        onViewChange={onViewChange}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={false}
+        wave={createWave()}
+        outcomesVisible={false}
+      />
+    );
+
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).toBeNull();
+    expect(screen.getByText("My Votes")).toBeInTheDocument();
+  });
+
   it("hides My Votes for guests on normal rank waves", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,

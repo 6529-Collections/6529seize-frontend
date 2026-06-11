@@ -7,6 +7,7 @@ interface QuorumWaveSmallLeaderboardDropProps {
   readonly isApproveWave?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
@@ -17,6 +18,7 @@ export const QuorumWaveSmallLeaderboardDrop: React.FC<
   isApproveWave = false,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  outcomesVisible = true,
   onDropClick,
 }) => {
   return (
@@ -27,6 +29,7 @@ export const QuorumWaveSmallLeaderboardDrop: React.FC<
       isApproveWave={isApproveWave}
       onDropClick={onDropClick}
       contentPresentation="quorumCompact"
+      outcomesVisible={outcomesVisible}
     />
   );
 };

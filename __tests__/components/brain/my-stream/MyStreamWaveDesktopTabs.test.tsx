@@ -76,6 +76,7 @@ const mockApproveLabels = {
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
   useApproveWaveCustomTabLabels: () => mockApproveLabels,
+  useWaveOutcomeVisibility: () => mockOutcomesVisible,
 }));
 
 jest.mock("@/hooks/useProfileWave", () => ({
@@ -106,6 +107,7 @@ let mockWaveInfo: any = {
 };
 let mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
 let mockDecisions: { timestamp: number }[] = [];
+let mockOutcomesVisible = true;
 const { useAuth } = require("@/components/auth/Auth");
 
 function renderComponent(activeTab: MyStreamWaveTab = MyStreamWaveTab.CHAT) {
@@ -144,6 +146,7 @@ beforeEach(() => {
   };
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
+  mockOutcomesVisible = true;
   (useAuth as jest.Mock).mockReturnValue({
     connectedProfile: { handle: "alice" },
   });
