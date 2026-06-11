@@ -32,11 +32,7 @@ const WavesView: React.FC = () => {
   // internally via MyStreamWaveChat. We pass null to BrainContent because
   // the wave's internal state controls the reply/quote input box.
   return (
-    <BrainContent
-      activeDrop={null}
-      onCancelReplyQuote={() => {}}
-      showPinnedWaves={Boolean(serialisedWaveId)}
-    >
+    <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
       {content}
     </BrainContent>
   );

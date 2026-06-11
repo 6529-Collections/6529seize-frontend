@@ -63,7 +63,6 @@ export default function NotificationsPage() {
         <BrainContent
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}
-          showPinnedWaves={false}
         >
           <Notifications
             activeDrop={activeDrop}

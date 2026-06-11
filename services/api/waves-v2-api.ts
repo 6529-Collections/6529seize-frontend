@@ -4,6 +4,7 @@ import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import type { ApiWaveOverviewPage } from "@/generated/models/ApiWaveOverviewPage";
+import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
@@ -22,6 +23,21 @@ interface FetchWavesV2PageProps {
   readonly excludeFollowed?: boolean | undefined;
   readonly identity?: string | undefined;
   readonly headers?: Record<string, string> | undefined;
+}
+
+interface FetchWaveSubwavesPageProps {
+  readonly parentWaveId: string;
+  readonly page?: number | undefined;
+  readonly pageSize?: number | undefined;
+  readonly sort?: ApiSubwavesSort | undefined;
+}
+
+export interface WaveSubwavesQueryKeyParams {
+  readonly parent_wave_id: string;
+  readonly page: number;
+  readonly page_size: number;
+  readonly sort: ApiSubwavesSort;
+  readonly viewer_identity?: string | undefined;
 }
 
 export interface WavesV2OverviewQueryKeyParams {
@@ -76,6 +92,7 @@ const mapApiWaveOverviewToSidebarWave = (
   return {
     id: wave.id,
     name: wave.name,
+    createdAt: wave.created_at,
     type: wave.has_competition ? ApiWaveType.Rank : ApiWaveType.Chat,
     picture: wave.pfp ?? null,
     contributors:
@@ -85,6 +102,8 @@ const mapApiWaveOverviewToSidebarWave = (
       })) ?? [],
     isDirectMessage: wave.is_dm_wave,
     hasCompetition: wave.has_competition,
+    parentWaveId: wave.parent_wave?.id ?? null,
+    hasSubwaves: wave.has_subwaves ?? false,
     descriptionDrop: {
       contents: wave.description_drop.contents ?? null,
       media: wave.description_drop.media ?? [],
@@ -125,6 +144,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
   return {
     id: wave.id,
     name: wave.name,
+    createdAt: wave.created_at,
     type: wave.wave.type,
     picture: wave.picture,
     contributors: wave.contributors_overview.map((contributor) => ({
@@ -133,6 +153,8 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     })),
     isDirectMessage,
     hasCompetition: wave.wave.type !== ApiWaveType.Chat,
+    parentWaveId: wave.parent_wave?.id ?? null,
+    hasSubwaves: wave.has_subwaves ?? false,
     descriptionDrop: getApiWaveDescriptionDrop(wave),
     totalDropsCount: wave.metrics.drops_count,
     isPrivate: Boolean(wave.visibility.scope.group) && !isDirectMessage,
@@ -193,6 +215,32 @@ export async function fetchWavesV2Page({
 
   return {
     waves: response.data.map(mapApiWaveOverviewToSidebarWave),
+    page: response.page,
+    next: response.next,
+  };
+}
+
+export async function fetchWaveSubwavesPage({
+  parentWaveId,
+  page = 1,
+  pageSize = 100,
+  sort = ApiSubwavesSort.CreatedAt,
+}: FetchWaveSubwavesPageProps): Promise<SidebarWavesPage> {
+  const response = await commonApiFetch<ApiWaveOverviewPage>({
+    endpoint: `waves/${parentWaveId}/subwaves`,
+    params: {
+      page: `${page}`,
+      page_size: `${pageSize}`,
+      sort,
+    },
+  });
+
+  return {
+    waves: response.data.map((wave) => ({
+      ...mapApiWaveOverviewToSidebarWave(wave),
+      parentWaveId,
+      hasSubwaves: false,
+    })),
     page: response.page,
     next: response.next,
   };
