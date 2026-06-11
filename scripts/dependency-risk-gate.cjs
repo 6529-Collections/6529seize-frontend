@@ -828,8 +828,8 @@ function resolveGitCommand() {
   }
 
   const candidates = [
-    "C:\\Program Files\\Git\\cmd\\git.exe",
-    "C:\\Program Files\\Git\\bin\\git.exe",
+    String.raw`C:\Program Files\Git\cmd\git.exe`,
+    String.raw`C:\Program Files\Git\bin\git.exe`,
   ];
   const command = candidates.find((candidate) => fs.existsSync(candidate));
   if (!command) {
