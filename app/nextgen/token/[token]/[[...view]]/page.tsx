@@ -1,5 +1,9 @@
-import { getAppMetadata } from "@/components/providers/metadata";
-import { publicEnv } from "@/config/env";
+import {
+  getAppMetadata,
+  getLargeSocialCardMetadata,
+  getNftSocialCardImagePath,
+} from "@/components/providers/metadata";
+import { NEXTGEN_CONTRACT } from "@/constants/constants";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
@@ -16,7 +20,21 @@ export async function generateMetadata({
   const headers = await getAppCommonHeaders();
   const data = await fetchTokenData(token, headers);
   if (!data) {
-    return getAppMetadata({ title: "NextGen Token" });
+    return getAppMetadata(
+      getLargeSocialCardMetadata({
+        title: "NextGen Token",
+        description: "NextGen",
+        ogImage: getNftSocialCardImagePath({
+          badge: "NextGen",
+          collection: "NextGen",
+          contract: NEXTGEN_CONTRACT,
+          id: token,
+          subtitle: "NextGen",
+          title: `NextGen #${token}`,
+        }),
+        ogImageAlt: "NextGen Token social card",
+      })
+    );
   }
   const resolvedView = getContentView(view?.[0] ?? "");
   const viewDisplay =
@@ -24,15 +42,27 @@ export async function generateMetadata({
   const baseTitle =
     data.token?.name ?? `${data.collection.name} - #${data.tokenId}`;
   const title = viewDisplay ? `${baseTitle} | ${viewDisplay}` : baseTitle;
-  return getAppMetadata({
-    title,
-    ogImage:
-      data.token?.thumbnail_url ||
-      data.token?.image_url ||
-      data.collection.banner ||
-      `${publicEnv.BASE_ENDPOINT}/nextgen.png`,
-    description: "NextGen",
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title,
+      description: "NextGen",
+      ogImage: getNftSocialCardImagePath({
+        artist: data.collection.artist,
+        badge: "NextGen",
+        collection: data.collection.name,
+        contract: NEXTGEN_CONTRACT,
+        id: data.tokenId,
+        image:
+          data.token?.thumbnail_url ||
+          data.token?.image_url ||
+          data.collection.banner ||
+          data.collection.image,
+        subtitle: `${data.collection.name} #${data.tokenId} | NextGen`,
+        title,
+      }),
+      ogImageAlt: `${title} social card`,
+    })
+  );
 }
 
 export default async function NextGenTokenPage({

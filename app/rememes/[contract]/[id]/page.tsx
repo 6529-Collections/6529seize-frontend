@@ -1,4 +1,8 @@
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getLargeSocialCardMetadata,
+  getNftSocialCardImagePath,
+} from "@/components/providers/metadata";
 import RememePage from "@/components/rememes/RememePage";
 import { publicEnv } from "@/config/env";
 import { formatAddress } from "@/helpers/Helpers";
@@ -7,6 +11,17 @@ import styles from "@/styles/Home.module.scss";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Rememe } from "@/entities/INFT";
 import type { Metadata } from "next";
+
+const getRememeCollectionName = (rememe?: Rememe): string =>
+  rememe?.contract_opensea_data?.collectionName?.trim() || "ReMemes";
+
+const getRememeImage = (rememe?: Rememe): string | undefined =>
+  rememe?.s3_image_scaled ||
+  rememe?.s3_image_original ||
+  rememe?.image ||
+  rememe?.media?.find((media) => media.gateway)?.gateway ||
+  rememe?.contract_opensea_data?.imageUrl ||
+  undefined;
 
 export default async function ReMeme({
   params,
@@ -29,18 +44,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { contract, id } = await params;
   let name = `${formatAddress(contract)} #${id}`;
-  let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
+  let rememe: Rememe | undefined;
+
   try {
     const response = await fetchUrl<DBResponse<Rememe>>(
       `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
     );
 
     if (response?.data?.length > 0) {
-      if (response.data[0]?.metadata?.name) {
-        name = response.data[0]?.metadata.name;
-      }
-      if (response.data[0]?.image) {
-        image = response.data[0]?.image;
+      rememe = response.data[0];
+      if (rememe?.metadata?.name) {
+        name = rememe.metadata.name;
       }
     }
   } catch (error) {
@@ -50,10 +64,22 @@ export async function generateMetadata({
     );
   }
 
-  return getAppMetadata({
-    title: name,
-    ogImage: image ?? `${publicEnv.BASE_ENDPOINT}/re-memes-b.jpeg`,
-    description: `ReMemes`,
-    twitterCard: "summary",
-  });
+  const collectionName = getRememeCollectionName(rememe);
+
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: name,
+      description: "ReMemes",
+      ogImage: getNftSocialCardImagePath({
+        badge: "ReMemes",
+        collection: collectionName,
+        contract,
+        id,
+        image: getRememeImage(rememe),
+        subtitle: `${collectionName} #${id} | ReMemes`,
+        title: name,
+      }),
+      ogImageAlt: `${name} ReMeme social card`,
+    })
+  );
 }

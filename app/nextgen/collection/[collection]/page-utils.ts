@@ -1,4 +1,8 @@
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -46,6 +50,29 @@ export function getContentViewKeyByValue(value: string): string {
   return NextgenCollectionView.OVERVIEW;
 }
 
+export function getNextgenCollectionMetadata({
+  collection,
+  subtitle,
+  title,
+}: {
+  readonly collection: NextGenCollection;
+  readonly subtitle?: string | undefined;
+  readonly title: string;
+}): Metadata {
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title,
+      description: "NextGen",
+      ogImage: getCollectionSocialCardImagePath("nextgen", {
+        image: collection.banner || collection.image,
+        subtitle: subtitle ?? `${collection.name} | NextGen`,
+        title,
+      }),
+      ogImageAlt: `${title} social card`,
+    })
+  );
+}
+
 export async function generateNextgenCollectionMetadata({
   collection,
   headers,
@@ -59,10 +86,9 @@ export async function generateNextgenCollectionMetadata({
   if (!resolvedCollection) {
     return getAppMetadata({ title: page });
   }
-  return getAppMetadata({
+  return getNextgenCollectionMetadata({
+    collection: resolvedCollection,
+    subtitle: `${resolvedCollection.name} | NextGen`,
     title: `${page} | ${resolvedCollection.name}`,
-    ogImage: resolvedCollection.image,
-    description: "NextGen",
-    twitterCard: "summary_large_image",
   });
 }
