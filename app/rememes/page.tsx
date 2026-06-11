@@ -1,6 +1,9 @@
-import { getAppMetadata } from "@/components/providers/metadata";
+import {
+  getAppMetadata,
+  getCollectionSocialCardImagePath,
+  getLargeSocialCardMetadata,
+} from "@/components/providers/metadata";
 import Rememes from "@/components/rememes/Rememes";
-import { publicEnv } from "@/config/env";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
@@ -13,9 +16,12 @@ export default function ReMemesPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "ReMemes",
-    description: "Collections",
-    ogImage: `${publicEnv.BASE_ENDPOINT}/re-memes-b.jpeg`,
-  });
+  return getAppMetadata(
+    getLargeSocialCardMetadata({
+      title: "ReMemes",
+      description: "Collections",
+      ogImage: getCollectionSocialCardImagePath("rememes"),
+      ogImageAlt: "ReMemes collection social card",
+    })
+  );
 }
