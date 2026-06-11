@@ -60,7 +60,8 @@ Fight entropy. Leave the codebase better than you found it.
 - Follow existing patterns before introducing new abstractions.
 - Keep changes scoped to the requested behavior.
 - Avoid editing generated files directly unless regenerating them from source.
-- User-facing documentation lives under `docs/`; update it when user-visible behavior changes.
+- User-facing documentation lives under `ops/docs/`; update it when user-visible behavior changes.
+- Repository operations, roadmaps, repo-local skills, runbooks, operational scripts, and durable workstream state live under `ops/`.
 - Keep files short and focused on a single concern.
 - Keep functions simple and avoid high branching or deeply nested logic.
 - Prefer splitting components and logic into smaller, self-sufficient functions/files.

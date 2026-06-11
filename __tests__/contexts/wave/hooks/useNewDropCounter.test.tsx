@@ -2,6 +2,7 @@ import { renderHook, act } from "@testing-library/react";
 import React from "react";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 import { AuthContext } from "@/components/auth/Auth";
+import { WS_DROP_UPDATE_REASON_POLL_RESPONSE } from "@/helpers/Types";
 
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: jest.fn(),
@@ -59,6 +60,26 @@ describe("useNewDropCounter", () => {
     });
     expect(result.current.newDropsCounts["wave1"]?.count).toBe(0);
     expect(result.current.newDropsCounts["wave2"]?.count).toBe(0);
+  });
+
+  it("does not increment counts for poll response updates", () => {
+    const refetch = jest.fn();
+    const { result } = renderHook(
+      () => useNewDropCounter(null, waves, refetch),
+      { wrapper }
+    );
+
+    act(() => {
+      wsCallback({
+        wave: { id: "wave2" },
+        author: { handle: "other" },
+        created_at: 30,
+        reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+      });
+    });
+
+    expect(result.current.newDropsCounts["wave2"]?.count ?? 0).toBe(0);
+    expect(refetch).not.toHaveBeenCalled();
   });
 
   it("ignores messages from connected profile and resets on active change", () => {

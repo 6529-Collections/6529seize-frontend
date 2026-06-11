@@ -64,7 +64,7 @@ The default app port is `3001`.
 - Add dependencies only through `6529 add <package>` or
   `6529 add -D <package>`.
 - Avoid editing generated files directly unless regenerating them from source.
-- Update user-facing documentation under `docs/` when user-visible behavior
+- Update user-facing documentation under `ops/docs/` when user-visible behavior
   changes.
 
 Useful commands:
@@ -114,5 +114,5 @@ User-facing documentation should describe current product behavior, not commit
 history. Prefer concrete route, action, state, and recovery details over broad
 claims.
 
-Start at [docs/README.md](docs/README.md) to find the canonical area for the
+Start at [ops/docs/README.md](ops/docs/README.md) to find the canonical area for the
 behavior you are changing.

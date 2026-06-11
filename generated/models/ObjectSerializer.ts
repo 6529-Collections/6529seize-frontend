@@ -187,6 +187,7 @@ export * from '../models/ApiNotification';
 export * from '../models/ApiNotificationAdditionalContextV2';
 export * from '../models/ApiNotificationCause';
 export * from '../models/ApiNotificationDropReactedReactor';
+export * from '../models/ApiNotificationPollVoteOption';
 export * from '../models/ApiNotificationV2';
 export * from '../models/ApiNotificationsResponse';
 export * from '../models/ApiNotificationsResponseV2';
@@ -577,6 +578,7 @@ import { ApiNotification        } from '../models/ApiNotification';
 import { ApiNotificationAdditionalContextV2 } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
+import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
 import { ApiNotificationV2         } from '../models/ApiNotificationV2';
 import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
@@ -1016,6 +1018,7 @@ let typeMap: {[index: string]: any} = {
     "ApiNotification": ApiNotification,
     "ApiNotificationAdditionalContextV2": ApiNotificationAdditionalContextV2,
     "ApiNotificationDropReactedReactor": ApiNotificationDropReactedReactor,
+    "ApiNotificationPollVoteOption": ApiNotificationPollVoteOption,
     "ApiNotificationV2": ApiNotificationV2,
     "ApiNotificationsResponse": ApiNotificationsResponse,
     "ApiNotificationsResponseV2": ApiNotificationsResponseV2,

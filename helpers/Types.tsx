@@ -347,6 +347,10 @@ export enum WsMessageType {
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
 }
 
+export const WS_DROP_UPDATE_REASON_POLL_RESPONSE = "POLL_RESPONSE" as const;
+
+export type WsDropUpdateReason = typeof WS_DROP_UPDATE_REASON_POLL_RESPONSE;
+
 export interface WsTypingMessage {
   readonly type: WsMessageType.USER_IS_TYPING;
   readonly data: {
@@ -359,6 +363,7 @@ export interface WsTypingMessage {
 export interface WsDropUpdateMessage {
   type: WsMessageType.DROP_UPDATE;
   data: ApiDrop;
+  reason?: WsDropUpdateReason;
 }
 
 export interface WsAttachmentStatusUpdateMessage {
