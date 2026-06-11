@@ -742,27 +742,42 @@ async function analyzeDependencyRisk(options) {
   };
 }
 
-function formatMarkdownTable(rows) {
+function formatMarkdownTable(rows, emptyMessage = "_None._") {
   if (rows.length === 0) {
-    return "_None._";
+    return emptyMessage;
   }
 
   return rows.join("\n");
 }
 
 function buildMarkdownSummary(result) {
-  const directRows = result.directChanges.map(
-    (change) =>
-      `| ${change.name} | ${change.dependencyType} | ${change.from ?? "(new)"} | ${
-        change.to ?? "(removed)"
-      } | ${change.updateType} |`
-  );
-  const ageRows = result.packageAgeFindings.map((finding) => {
+  const directTableRows = result.directChanges.map((change) => {
+    return `| ${change.name} | ${change.dependencyType} | ${
+      change.from ?? "(new)"
+    } | ${change.to ?? "(removed)"} | ${change.updateType} |`;
+  });
+  const ageTableRows = result.packageAgeFindings.map((finding) => {
     const published = finding.publishedAt
       ? finding.publishedAt.toISOString()
       : "(unknown)";
     return `| ${finding.change.name} | ${finding.change.to} | ${published} | ${finding.status} |`;
   });
+  const directTable =
+    directTableRows.length > 0
+      ? formatMarkdownTable([
+          "| Package | Scope | From | To | Update |",
+          "| --- | --- | --- | --- | --- |",
+          ...directTableRows,
+        ])
+      : formatMarkdownTable([]);
+  const ageTable =
+    ageTableRows.length > 0
+      ? formatMarkdownTable([
+          "| Package | Version | Published | Status |",
+          "| --- | --- | --- | --- |",
+          ...ageTableRows,
+        ])
+      : formatMarkdownTable([], "_No changed package versions to check._");
 
   return [
     "## Dependency Risk Gate",
@@ -776,13 +791,7 @@ function buildMarkdownSummary(result) {
     "",
     "### Changed Direct Dependencies",
     "",
-    result.directChanges.length > 0
-      ? [
-          "| Package | Scope | From | To | Update |",
-          "| --- | --- | --- | --- | --- |",
-          ...directRows,
-        ].join("\n")
-      : "_None._",
+    directTable,
     "",
     "### Eligibility Blockers",
     "",
@@ -796,13 +805,7 @@ function buildMarkdownSummary(result) {
     "",
     "### Package Age",
     "",
-    result.packageAgeFindings.length > 0
-      ? [
-          "| Package | Version | Published | Status |",
-          "| --- | --- | --- | --- |",
-          ...ageRows,
-        ].join("\n")
-      : "_No changed package versions to check._",
+    ageTable,
     "",
   ].join("\n");
 }
