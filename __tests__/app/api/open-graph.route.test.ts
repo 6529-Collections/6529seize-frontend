@@ -1,7 +1,12 @@
+import type { NextRequest } from "next/server";
+
 import { publicEnv } from "@/config/env";
 
 const mockFetchPublicUrl = jest.fn();
 
+/**
+ * Captures mocked JSON responses from the OpenGraph route.
+ */
 const nextResponseJsonRoute = jest.fn(
   (body: unknown, init?: { status?: number | undefined }) => ({
     status: init?.status ?? 200,
@@ -106,6 +111,33 @@ const DEFAULT_USER_AGENT =
 const originalFetch = global.fetch;
 const mockFetch = jest.fn();
 
+/**
+ * Creates a single-read stream body for OpenGraph request and response mocks.
+ */
+const createBody = (body: string): ReadableStream<Uint8Array> => {
+  const bytes = new TextEncoder().encode(body);
+  let consumed = false;
+
+  return {
+    getReader: () => ({
+      read: async () => {
+        if (consumed) {
+          return { done: true, value: undefined };
+        }
+        consumed = true;
+        return { done: false, value: bytes };
+      },
+      cancel: async () => {
+        consumed = true;
+      },
+      releaseLock: () => undefined,
+    }),
+  } as unknown as ReadableStream<Uint8Array>;
+};
+
+/**
+ * Loads the route after resetting modules so mocked dependencies are fresh.
+ */
 async function loadRoute(): Promise<void> {
   jest.resetModules();
   ({ GET, POST } = await import("../../../app/api/open-graph/route"));
@@ -183,6 +215,9 @@ describe("open-graph API route", () => {
     }
   });
 
+  /**
+   * Creates a response object for guarded OpenGraph fetch mocks.
+   */
   const createResponse = (
     status: number,
     options: {
@@ -190,22 +225,34 @@ describe("open-graph API route", () => {
       body?: string | undefined;
       url?: string | undefined;
     } = {}
-  ) => {
-    const headerEntries = Object.entries(options.headers ?? {}).reduce(
-      (map, [key, value]) => map.set(key.toLowerCase(), value),
-      new Map<string, string>()
-    );
-
-    return {
+  ): Response =>
+    ({
       status,
       ok: status >= 200 && status < 300,
-      headers: {
-        get: (name: string) => headerEntries.get(name.toLowerCase()) ?? null,
-      },
-      text: async () => options.body ?? "",
+      headers: new Headers(options.headers),
+      body: createBody(options.body ?? ""),
       url: options.url ?? "https://example.com/final",
-    };
-  };
+    }) as unknown as Response;
+
+  /**
+   * Creates a JSON batch request with a stream-backed body.
+   */
+  const createJsonRequest = (body: unknown): NextRequest =>
+    createStreamRequest(JSON.stringify(body), {
+      "content-type": "application/json",
+    });
+
+  /**
+   * Creates a request-like object with caller-specified content headers.
+   */
+  const createStreamRequest = (
+    body: string,
+    headers: Record<string, string>
+  ): NextRequest =>
+    ({
+      headers: new Headers(headers),
+      body: createBody(body),
+    }) as unknown as NextRequest;
 
   it("returns 400 when the URL is missing", async () => {
     guard.parsePublicUrl.mockImplementation(() => {
@@ -428,6 +475,69 @@ describe("open-graph API route", () => {
     expect(await response.json()).toEqual(googlePayload);
     expect(utils.buildResponse).not.toHaveBeenCalled();
     expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects oversized HTML responses before parsing metadata", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: {
+        "content-length": `${8 * 1024 * 1024 + 1}`,
+        "content-type": "text/html",
+      },
+      body: "<html></html>",
+      url: "https://large.example/page",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://large.example/page"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(413);
+    expect(await response.json()).toEqual({
+      error: "Preview response is too large to process safely.",
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  it("rejects non-HTML preview responses", async () => {
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "image/png" },
+      body: "png",
+      url: "https://image.example/file.png",
+    });
+
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://image.example/file.png"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(415);
+    expect(await response.json()).toEqual({
+      error: "Preview URL did not return readable HTML metadata.",
+    });
+    expect(utils.buildResponse).not.toHaveBeenCalled();
   });
 
   it("uses compound plan when available", async () => {
@@ -665,11 +775,9 @@ describe("open-graph API route", () => {
       })),
     }));
 
-    const request = {
-      json: async () => ({
-        urls: [" https://one.example/article ", "https://two.example/article"],
-      }),
-    } as any;
+    const request = createJsonRequest({
+      urls: [" https://one.example/article ", "https://two.example/article"],
+    });
 
     const response = await POST(request);
 
@@ -702,11 +810,9 @@ describe("open-graph API route", () => {
       execute,
     });
 
-    const request = {
-      json: async () => ({
-        urls: ["https://one.example/article", " https://one.example/article "],
-      }),
-    } as any;
+    const request = createJsonRequest({
+      urls: ["https://one.example/article", " https://one.example/article "],
+    });
 
     const response = await POST(request);
 
@@ -745,11 +851,9 @@ describe("open-graph API route", () => {
       })),
     }));
 
-    const request = {
-      json: async () => ({
-        urls: ["https://good.example/article", "bad-url"],
-      }),
-    } as any;
+    const request = createJsonRequest({
+      urls: ["https://good.example/article", "bad-url"],
+    });
 
     const response = await POST(request);
 
@@ -768,9 +872,9 @@ describe("open-graph API route", () => {
   });
 
   it("returns 400 for invalid POST batch bodies", async () => {
-    const request = {
-      json: async () => ({ urls: "https://one.example/article" }),
-    } as any;
+    const request = createJsonRequest({
+      urls: "https://one.example/article",
+    });
 
     const response = await POST(request);
 
@@ -782,18 +886,16 @@ describe("open-graph API route", () => {
   });
 
   it("returns 400 when POST includes more than 5 unique urls", async () => {
-    const request = {
-      json: async () => ({
-        urls: [
-          "https://one.example/article",
-          "https://two.example/article",
-          "https://three.example/article",
-          "https://four.example/article",
-          "https://five.example/article",
-          "https://six.example/article",
-        ],
-      }),
-    } as any;
+    const request = createJsonRequest({
+      urls: [
+        "https://one.example/article",
+        "https://two.example/article",
+        "https://three.example/article",
+        "https://four.example/article",
+        "https://five.example/article",
+        "https://six.example/article",
+      ],
+    });
 
     const response = await POST(request);
 
@@ -816,11 +918,9 @@ describe("open-graph API route", () => {
     );
     ensRouteModule.fetchEnsPreview.mockResolvedValue(previewPayload);
 
-    const request = {
-      json: async () => ({
-        urls: ["vitalik.eth"],
-      }),
-    } as any;
+    const request = createJsonRequest({
+      urls: ["vitalik.eth"],
+    });
 
     const response = await POST(request);
 
@@ -833,6 +933,33 @@ describe("open-graph API route", () => {
     });
     expect(ensRouteModule.fetchEnsPreview).toHaveBeenCalledWith(ensTarget);
     expect(guard.parsePublicUrl).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized POST bodies", async () => {
+    const request = createStreamRequest("{}", {
+      "content-length": `${64 * 1024 + 1}`,
+      "content-type": "application/json",
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(413);
+    expect(await response.json()).toEqual({
+      error: "Open graph batch request body is too large.",
+    });
+  });
+
+  it("rejects non-JSON POST bodies", async () => {
+    const request = createStreamRequest("{}", {
+      "content-type": "text/plain",
+    });
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(415);
+    expect(await response.json()).toEqual({
+      error: "Open graph batch request body must be JSON.",
+    });
   });
 
   it("handles ENS previews when detected", async () => {
