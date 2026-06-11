@@ -190,16 +190,12 @@ const getSliderRangeState = ({
   );
   const isFixedRange = minValue === maxValue;
   const rangeSize = maxValue - minValue;
-  let zeroPercentage = 50;
-  let currentPercentage = 50;
-
-  if (isFixedRange) {
-    zeroPercentage = 50;
-    currentPercentage = 50;
-  } else {
-    zeroPercentage = ((0 - minValue) / rangeSize) * 100;
-    currentPercentage = ((logValue - minValue) / rangeSize) * 100;
-  }
+  const zeroPercentage = isFixedRange
+    ? 50
+    : ((0 - minValue) / rangeSize) * 100;
+  const currentPercentage = isFixedRange
+    ? 50
+    : ((logValue - minValue) / rangeSize) * 100;
 
   const progressOriginPercentage = clampToRange(zeroPercentage, 0, 100);
   const showZeroScaleMarker = getShowZeroScaleMarker({

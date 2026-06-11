@@ -178,28 +178,28 @@ $btn-dimension: 72px;
   .voteButtonPositive {
     background: #10b981;
     border-color: #10b981;
-    color: #0d0d10;
+    color: #000;
     box-shadow: none;
 
     &:not(:disabled):hover {
       background: #059669;
       border-color: #059669;
       box-shadow: none;
-      color: #0d0d10;
+      color: #000;
     }
   }
 
   .voteButtonNegative {
     background: #f43f5e;
     border-color: #f43f5e;
-    color: #0d0d10;
+    color: #000;
     box-shadow: none;
 
     &:not(:disabled):hover {
       background: #e11d48;
       border-color: #e11d48;
       box-shadow: none;
-      color: #0d0d10;
+      color: #000;
     }
   }
 

@@ -3,8 +3,6 @@
 import type {
   Dispatch,
   FC,
-  KeyboardEvent,
-  MouseEvent,
   SetStateAction,
 } from "react";
 import { useRef, useState } from "react";
@@ -132,14 +130,6 @@ const getExchangeIconFlip = (
   return "vertical";
 };
 
-const stopVoteContainerClick = (e: MouseEvent<HTMLDivElement>) => {
-  e.stopPropagation();
-};
-
-const stopVoteContainerKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-  e.stopPropagation();
-};
-
 const VoteModeField: FC<VoteModeFieldProps> = ({
   isSliderMode,
   voteValue,
@@ -239,14 +229,10 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-      <div
-        className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1.5"
-        role="group"
-        aria-label="Vote controls"
-        tabIndex={0}
-        onClick={stopVoteContainerClick}
-        onKeyDown={stopVoteContainerKeyDown}
+      <fieldset
+        className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1.5"
       >
+        <legend className="tw-sr-only">Vote controls</legend>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
@@ -300,19 +286,15 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             creditScope={creditScope}
           />
         </div>
-      </div>
+      </fieldset>
     );
   }
 
   return (
-    <div
-      className="tw-space-y-4"
-      role="group"
-      aria-label="Vote controls"
-      tabIndex={0}
-      onClick={stopVoteContainerClick}
-      onKeyDown={stopVoteContainerKeyDown}
+    <fieldset
+      className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0"
     >
+      <legend className="tw-sr-only">Vote controls</legend>
       <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
         <VoteModeField
           isSliderMode={isSliderMode}
@@ -366,6 +348,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           submitBlockReason={submitBlockReason}
         />
       </div>
-    </div>
+    </fieldset>
   );
 };

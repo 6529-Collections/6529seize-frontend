@@ -230,28 +230,15 @@ describe("SingleWaveDropVoteSlider", () => {
   });
 
   it("stops click propagation from the range input", () => {
-    const parentClickHandler = jest.fn();
-
-    render(
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={parentClickHandler}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            parentClickHandler();
-          }
-        }}
-      >
-        <SingleWaveDropVoteSlider {...defaultProps} />
-      </div>
-    );
+    render(<SingleWaveDropVoteSlider {...defaultProps} />);
 
     const slider = screen.getAllByRole("slider")[0];
+    const clickEvent = new MouseEvent("click", { bubbles: true });
+    const stopPropagation = jest.spyOn(clickEvent, "stopPropagation");
 
-    fireEvent.click(slider);
+    slider.dispatchEvent(clickEvent);
 
-    expect(parentClickHandler).not.toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
   });
 
   it("handles mouse events for dragging state", () => {
