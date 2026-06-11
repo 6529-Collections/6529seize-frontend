@@ -3,8 +3,14 @@ import { renderHook, act } from "@testing-library/react";
 import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { WebSocketContext } from "@/services/websocket/WebSocketContext";
 import type { WebSocketConfig } from "@/services/websocket/WebSocketTypes";
-import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
-import { WsMessageType } from "@/helpers/Types";
+import {
+  getWebSocketMessageReason,
+  WebSocketStatus,
+} from "@/services/websocket/WebSocketTypes";
+import {
+  WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+  WsMessageType,
+} from "@/helpers/Types";
 import * as authUtils from "@/services/auth/auth.utils";
 
 // Mock auth utils
@@ -235,6 +241,44 @@ describe("WebSocketProvider", () => {
       });
 
       expect(callback).toHaveBeenCalledTimes(1); // Should not be called again
+    });
+
+    it("preserves message reason metadata while routing data", () => {
+      const wrapper = createWrapper({ url: "ws://test" });
+      const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
+        wrapper,
+      });
+
+      act(() => {
+        result.current.connect("token");
+      });
+
+      const ws = (global.WebSocket as jest.MockedFunction<typeof WebSocket>)
+        .mock.results[0]?.value as MockWebSocket;
+
+      act(() => {
+        ws.triggerOpen();
+      });
+
+      let receivedReason: string | null = null;
+      const callback = jest.fn((data) => {
+        receivedReason = getWebSocketMessageReason(data);
+      });
+
+      act(() => {
+        result.current.subscribe(WsMessageType.DROP_UPDATE, callback);
+      });
+
+      act(() => {
+        ws.triggerMessage({
+          type: WsMessageType.DROP_UPDATE,
+          data: { id: 1 },
+          reason: WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+        });
+      });
+
+      expect(callback).toHaveBeenCalledWith({ id: 1 });
+      expect(receivedReason).toBe(WS_DROP_UPDATE_REASON_POLL_RESPONSE);
     });
 
     it("handles wrapped payload messages and routes nested data", () => {
