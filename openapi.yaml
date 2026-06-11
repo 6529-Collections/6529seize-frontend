@@ -10740,9 +10740,13 @@ components:
       type: object
       required:
         - data
+        - open_unanswered
       allOf:
         - $ref: "#/components/schemas/ApiPageBase"
       properties:
+        open_unanswered:
+          type: number
+          format: int64
         data:
           type: array
           items:
