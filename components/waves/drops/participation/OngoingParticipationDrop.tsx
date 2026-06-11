@@ -12,6 +12,7 @@ import { useCallback, useState } from "react";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -95,7 +96,9 @@ export default function OngoingParticipationDrop({
   const { canShowVote } = useDropInteractionRules(drop);
   const isMobile = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const isTouchDevice = useIsTouchDevice();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
     metadata: drop.metadata,
@@ -155,6 +158,7 @@ export default function OngoingParticipationDrop({
       onQuoteClick={onQuoteClick}
       setLongPressTriggered={setLongPressTriggered}
       isCompetitionDrop={true}
+      hasTouch={hasTouch}
       mediaImageScale={mediaImageScale}
       fullWidthMedia={fullWidthMedia}
       fullWidthLinkPreviews={fullWidthLinkPreviews}
@@ -294,7 +298,7 @@ export default function OngoingParticipationDrop({
       {showInteractions && (
         <WaveDropMobileMenu
           drop={drop}
-          isOpen={isSlideUp}
+          isOpen={isSlideUp && hasTouch}
           longPressTriggered={longPressTriggered}
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}

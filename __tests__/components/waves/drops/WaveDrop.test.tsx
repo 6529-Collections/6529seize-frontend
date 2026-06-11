@@ -147,6 +147,16 @@ const setHoverSupport = (initialHasHover: boolean) => {
   };
 };
 
+/** Sets the jsdom viewport width and notifies resize subscribers. */
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(globalThis.window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  globalThis.window.dispatchEvent(new Event("resize"));
+};
+
 // Create a test store
 const createTestStore = () =>
   configureStore({
@@ -210,6 +220,7 @@ describe("WaveDrop", () => {
     hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
     setHoverSupport(false);
+    setViewportWidth(1440);
   });
 
   it("shows actions on desktop", () => {
@@ -264,11 +275,45 @@ describe("WaveDrop", () => {
     );
   });
 
+  it("keeps desktop layout controls when touch-only detection is reported on a wide viewport", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(1440);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("actions")).toBeInTheDocument();
+    expect(getLastMockProps(mockWaveDropHeader)).toEqual(
+      expect.objectContaining({ showActionsButton: false })
+    );
+    expect(getLastMockProps(mockWaveDropContent)).toEqual(
+      expect.objectContaining({ hasTouch: false })
+    );
+  });
+
   it("enables touch entry when hover support is removed while open", () => {
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(false);
     const hoverSupport = setHoverSupport(true);
+    setViewportWidth(800);
 
     renderWithRedux(
       <WaveDrop
@@ -304,6 +349,7 @@ describe("WaveDrop", () => {
     isMobileMock.mockReturnValue(true);
     hasTouchInputMock.mockReturnValue(false);
     isTouchDeviceMock.mockReturnValue(false);
+    setViewportWidth(390);
 
     renderWithRedux(
       <WaveDrop
@@ -333,6 +379,7 @@ describe("WaveDrop", () => {
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(true);
     setHoverSupport(false);
+    setViewportWidth(800);
 
     renderWithRedux(
       <WaveDrop
@@ -362,6 +409,7 @@ describe("WaveDrop", () => {
     hasTouchInputMock.mockReturnValue(true);
     isTouchDeviceMock.mockReturnValue(false);
     setHoverSupport(false);
+    setViewportWidth(800);
 
     renderWithRedux(
       <WaveDrop

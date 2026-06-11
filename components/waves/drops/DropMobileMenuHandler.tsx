@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 
 interface DropMobileMenuHandlerProps {
@@ -26,7 +27,9 @@ export default function DropMobileMenuHandler({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const isTouchDevice = useIsTouchDevice();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
@@ -103,7 +106,7 @@ export default function DropMobileMenuHandler({
       {children} {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
-        isOpen={isSlideUp}
+        isOpen={isSlideUp && hasTouch}
         longPressTriggered={longPressTriggered}
         showReplyAndQuote={showReplyAndQuote}
         setOpen={setIsSlideUp}

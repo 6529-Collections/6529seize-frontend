@@ -10,6 +10,7 @@ import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
@@ -106,7 +107,9 @@ export default function EndedParticipationDrop({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const isTouchDevice = useIsTouchDevice();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
   const showIdentity = identityMode !== "hidden";
   const isStackedTimestamp = timestampLayout === "stacked";
   const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
@@ -244,9 +247,7 @@ export default function EndedParticipationDrop({
               ? showIdentity && (
                   <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
                     <WaveDropAuthorPfp drop={drop} />
-                    <div className="tw-min-w-0 tw-flex-1">
-                      {identityHeader}
-                    </div>
+                    <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
                   </div>
                 )
               : showIdentity && <WaveDropAuthorPfp drop={drop} />}
@@ -333,7 +334,7 @@ export default function EndedParticipationDrop({
           {showInteractions && (
             <WaveDropMobileMenu
               drop={drop}
-              isOpen={isSlideUp}
+              isOpen={isSlideUp && hasTouch}
               longPressTriggered={longPressTriggered}
               showReplyAndQuote={showReplyAndQuote}
               setOpen={setIsSlideUp}
