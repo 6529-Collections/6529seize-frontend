@@ -197,6 +197,11 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
           queryKey: [QueryKey.DROP_POLL_VOTERS],
         })
         .catch(() => undefined);
+      queryClient
+        .invalidateQueries({
+          queryKey: [QueryKey.WAVE_POLLS],
+        })
+        .catch(() => undefined);
     },
     onError: (error) => {
       clearUpdatedVoteStatus();
