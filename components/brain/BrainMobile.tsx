@@ -34,6 +34,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
+import MobileWaveSubwavesBar from "./mobile/MobileWaveSubwavesBar";
 import BrainMobileViewContent from "./mobile/BrainMobileViewContent";
 import { BrainView } from "./mobile/brainMobileViews";
 import { useBrainMobileActiveView } from "./mobile/useBrainMobileActiveView";
@@ -228,6 +229,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           isApp={isApp}
         />
       )}
+      {isApp && wave && <MobileWaveSubwavesBar wave={wave} />}
       <LazyMotion features={domAnimation}>
         <AnimatePresence mode="wait">
           <m.div

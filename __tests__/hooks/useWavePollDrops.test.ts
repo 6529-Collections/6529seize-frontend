@@ -90,6 +90,7 @@ const embeddedPollRow = {
     ],
     voted: [1],
     multichoice: false,
+    anonymous: false,
     closing_time: 2000,
     is_open: true,
   },
@@ -99,6 +100,7 @@ const embeddedPollRow = {
   ],
   voted: [2],
   multichoice: false,
+  anonymous: true,
   closing_time: 2000,
   is_open: true,
 } as any;
@@ -119,6 +121,7 @@ describe("useWavePollDrops", () => {
 
   it("prefers poll row authenticated vote state over embedded drop poll state", async () => {
     fetchWavePollsV2Mock.mockResolvedValue({
+      open_unanswered: 0,
       data: [embeddedPollRow],
       count: 1,
       page: 1,

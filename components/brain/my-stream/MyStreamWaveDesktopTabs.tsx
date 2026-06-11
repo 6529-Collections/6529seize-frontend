@@ -29,11 +29,12 @@ import {
 } from "@/hooks/waves/useWaveMetadata";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
-import { useWaveHasPolls } from "@/hooks/useWaveHasPolls";
+import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
+import { TabCountBadge } from "@/components/common/TabCountBadge";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
   useContentTab,
@@ -57,6 +58,7 @@ interface TabOption {
   readonly key: string;
   readonly label: string;
   readonly panelId: string;
+  readonly badgeCount?: number | null | undefined;
   readonly leadingIcon?: React.ReactNode | undefined;
   readonly leadingIconTooltipId?: string | undefined;
   readonly hasIndicator?: boolean | undefined;
@@ -183,6 +185,7 @@ function DesktopTabButton({
     >
       <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
         <span className="tw-leading-5">{option.label}</span>
+        <TabCountBadge count={option.badgeCount} />
         {option.leadingIcon}
       </span>
       {option.hasIndicator && (
@@ -375,7 +378,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isProfileWave &&
     isConnectedProfileWaveAuthor &&
     activeProfileProxy === null;
-  const hasPolls = useWaveHasPolls({ waveId: wave.id });
+  const { hasPolls, unansweredPolls } = useWavePollSummary({
+    waveId: wave.id,
+  });
 
   const filteredDecisions = useMemo(() => {
     const decisionsAsApiFormat = allDecisions.map((decision) => ({
@@ -489,6 +494,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           key: tab,
           label: getTabLabel({ approveLabels, isApproveWave, tab }),
           panelId: getContentTabPanelId(tab),
+          badgeCount:
+            tab === MyStreamWaveTab.POLLS ? unansweredPolls : undefined,
         })),
     [
       availableTabs,
@@ -499,6 +506,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isMemesWave,
       isCurationWave,
       outcomesVisible,
+      unansweredPolls,
     ]
   );
 

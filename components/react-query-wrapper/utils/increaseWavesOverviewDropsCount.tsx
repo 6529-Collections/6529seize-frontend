@@ -196,6 +196,38 @@ const updateWavesV2CacheData = (
   };
 };
 
+const updateSidebarWaveQueryCaches = async ({
+  queryClient,
+  queryKey,
+  waveId,
+  timestamp,
+}: {
+  readonly queryClient: QueryClient;
+  readonly queryKey: QueryKey;
+  readonly waveId: string;
+  readonly timestamp: number;
+}) => {
+  const queries = queryClient.getQueriesData<WavesV2CacheData>({
+    queryKey: [queryKey],
+  });
+
+  for (const [cacheQueryKey, data] of queries) {
+    if (!hasSidebarWaveInCacheData(data, waveId)) {
+      continue;
+    }
+
+    await queryClient.cancelQueries({ queryKey: cacheQueryKey });
+
+    queryClient.setQueryData<WavesV2CacheData | undefined>(
+      cacheQueryKey,
+      (oldData) => updateWavesV2CacheData(oldData, waveId, timestamp),
+      {
+        updatedAt: timestamp,
+      }
+    );
+  }
+};
+
 export const increaseWavesOverviewDropsCount = async (
   queryClient: QueryClient,
   waveId: string
@@ -221,43 +253,22 @@ export const increaseWavesOverviewDropsCount = async (
     );
   }
 
-  const v2Queries = queryClient.getQueriesData<WavesV2CacheData>({
-    queryKey: [QueryKey.WAVES_V2],
+  await updateSidebarWaveQueryCaches({
+    queryClient,
+    queryKey: QueryKey.WAVES_V2,
+    waveId,
+    timestamp,
   });
-
-  for (const [queryKey, data] of v2Queries) {
-    if (!hasSidebarWaveInCacheData(data, waveId)) {
-      continue;
-    }
-
-    await queryClient.cancelQueries({ queryKey });
-
-    queryClient.setQueryData<WavesV2CacheData | undefined>(
-      queryKey,
-      (oldData) => updateWavesV2CacheData(oldData, waveId, timestamp),
-      {
-        updatedAt: timestamp,
-      }
-    );
-  }
-
-  const officialQueries = queryClient.getQueriesData<WavesV2CacheData>({
-    queryKey: [QueryKey.OFFICIAL_WAVES],
+  await updateSidebarWaveQueryCaches({
+    queryClient,
+    queryKey: QueryKey.OFFICIAL_WAVES,
+    waveId,
+    timestamp,
   });
-
-  for (const [queryKey, data] of officialQueries) {
-    if (!hasSidebarWaveInCacheData(data, waveId)) {
-      continue;
-    }
-
-    await queryClient.cancelQueries({ queryKey });
-
-    queryClient.setQueryData<WavesV2CacheData | undefined>(
-      queryKey,
-      (oldData) => updateWavesV2CacheData(oldData, waveId, timestamp),
-      {
-        updatedAt: timestamp,
-      }
-    );
-  }
+  await updateSidebarWaveQueryCaches({
+    queryClient,
+    queryKey: QueryKey.WAVE_SUBWAVES,
+    waveId,
+    timestamp,
+  });
 };

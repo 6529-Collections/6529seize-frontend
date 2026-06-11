@@ -22,6 +22,7 @@ interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
   readonly descriptionRef: RefObject<CreateWaveDescriptionHandles | null>;
   readonly onSuccess?: (() => void) | undefined;
+  readonly parentWaveId?: string | null | undefined;
 }
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -40,6 +41,7 @@ export function useCreateWaveSubmission({
   config,
   descriptionRef,
   onSuccess,
+  parentWaveId,
 }: UseCreateWaveSubmissionParams) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
@@ -191,6 +193,7 @@ export function useCreateWaveSubmission({
         config: submissionConfig,
         picture: picture?.url ?? null,
         drop: dropRequest,
+        parentWaveId,
       });
       const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
         display: submissionConfig.display,

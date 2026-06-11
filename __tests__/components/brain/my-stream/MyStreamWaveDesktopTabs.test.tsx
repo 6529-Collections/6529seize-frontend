@@ -7,6 +7,7 @@ import { Time } from "@/helpers/time";
 const setActiveTab = jest.fn();
 const updateAvailableTabs = jest.fn();
 const searchParamsGet = jest.fn();
+let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => ({
@@ -84,6 +85,11 @@ jest.mock("@/hooks/useProfileWave", () => ({
   useProfileWave: () => ({ data: null }),
 }));
 
+jest.mock("@/hooks/useWaveHasPolls", () => ({
+  useWaveHasPolls: () => mockWavePollSummary.hasPolls,
+  useWavePollSummary: () => mockWavePollSummary,
+}));
+
 jest.mock("@/components/waves/leaderboard/time/CompactTimeCountdown", () => ({
   __esModule: true,
   CompactTimeCountdown: ({ timeLeft }: any) => (
@@ -147,6 +153,7 @@ beforeEach(() => {
   mockVoting = { isUpcoming: false, isCompleted: false, isInProgress: true };
   mockDecisions = [];
   mockOutcomesVisible = true;
+  mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
   (useAuth as jest.Mock).mockReturnValue({
     connectedProfile: { handle: "alice" },
   });
@@ -167,6 +174,18 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Polls").length).toBeGreaterThan(0);
+  });
+
+  it("renders unanswered poll count on the Polls tab", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS];
+    mockWavePollSummary = { hasPolls: true, unansweredPolls: 7 };
+
+    renderComponent();
+
+    expect(
+      screen.getAllByRole("tab", { name: /polls/i }).length
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText("7").length).toBeGreaterThan(0);
   });
 
   it("filters hidden My Votes without correcting the active tab", () => {
