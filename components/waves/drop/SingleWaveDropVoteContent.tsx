@@ -1,10 +1,11 @@
 "use client";
 
-import type { FC } from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
 import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import {
+  type SingleWaveDropVoteMode,
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
 } from "./SingleWaveDropVote.types";
@@ -24,7 +25,47 @@ interface SingleWaveDropVoteContentProps {
   readonly onVoteSuccess?: (() => void) | undefined;
   readonly onVoteRequestStarted?: (() => void) | undefined;
   readonly submissionMode?: SingleWaveDropVoteSubmissionMode | undefined;
+  readonly voteMode?: SingleWaveDropVoteMode | undefined;
+  readonly onVoteModeChange?:
+    | ((voteMode: SingleWaveDropVoteMode) => void)
+    | undefined;
 }
+
+type VoteModeControlState = {
+  readonly isControlled: boolean;
+  readonly value: SingleWaveDropVoteMode;
+  readonly setValue: (voteMode: SingleWaveDropVoteMode) => void;
+};
+
+const getVoteModeControlState = ({
+  voteMode,
+  onVoteModeChange,
+  uncontrolledVoteMode,
+  setUncontrolledVoteMode,
+}: {
+  readonly voteMode: SingleWaveDropVoteMode | undefined;
+  readonly onVoteModeChange:
+    | ((voteMode: SingleWaveDropVoteMode) => void)
+    | undefined;
+  readonly uncontrolledVoteMode: SingleWaveDropVoteMode;
+  readonly setUncontrolledVoteMode: Dispatch<
+    SetStateAction<SingleWaveDropVoteMode>
+  >;
+}): VoteModeControlState => {
+  if (voteMode !== undefined && onVoteModeChange !== undefined) {
+    return {
+      isControlled: true,
+      value: voteMode,
+      setValue: onVoteModeChange,
+    };
+  }
+
+  return {
+    isControlled: false,
+    value: uncontrolledVoteMode,
+    setValue: setUncontrolledVoteMode,
+  };
+};
 
 export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   drop,
@@ -32,6 +73,8 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   onVoteSuccess,
   onVoteRequestStarted,
   submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
+  voteMode,
+  onVoteModeChange,
 }) => {
   const {
     displayDrop,
@@ -45,9 +88,20 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     handleVoteApplied,
     handleBackgroundVoteApplied,
   } = useSingleWaveDropVoteState({ drop });
-  const [isSliderMode, setIsSliderMode] = useState(
-    size !== SingleWaveDropVoteSize.MINI
-  );
+  const [uncontrolledVoteMode, setUncontrolledVoteMode] =
+    useState<SingleWaveDropVoteMode>(
+      size !== SingleWaveDropVoteSize.MINI ? "slider" : "numeric"
+    );
+  const voteModeControl = getVoteModeControlState({
+    voteMode,
+    onVoteModeChange,
+    uncontrolledVoteMode,
+    setUncontrolledVoteMode,
+  });
+  const hasExternalVoteModeControl = voteModeControl.isControlled;
+  const currentVoteMode = voteModeControl.value;
+  const setCurrentVoteMode = voteModeControl.setValue;
+  const isSliderMode = currentVoteMode === "slider";
 
   const voteLabel =
     WAVE_VOTING_LABELS[displayDrop.wave.voting_credit_type] || "votes";
@@ -79,7 +133,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
       >
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
-            onClick={() => setIsSliderMode(!isSliderMode)}
+            onClick={() =>
+              setCurrentVoteMode(isSliderMode ? "numeric" : "slider")
+            }
             className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-font-medium tw-transition-all desktop-hover:hover:tw-bg-iron-600"
             title={isSliderMode ? "Switch to numeric" : "Switch to slider"}
             aria-label={
@@ -124,6 +180,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             <SingleWaveDropVoteSubmit
               drop={displayDrop}
               newRating={submitVoteValue}
+              voteLabel={voteLabel}
               ref={submitRef}
               onVoteApplied={handleSubmitVoteApplied}
               onVoteSuccess={onVoteSuccess}
@@ -148,61 +205,74 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   }
 
   return (
-    <div className="tw-space-y-6" onClick={(e) => e.stopPropagation()}>
-      <div className="tw-flex tw-gap-3">
-        <div className="tw-h-14 tw-min-w-0 tw-flex-1">
-          {isSliderMode ? (
-            <SingleWaveDropVoteSlider
-              voteValue={voteValue}
-              minValue={minRating}
-              maxValue={maxRating}
-              setVoteValue={setVoteValue}
-              onValueAccepted={handleSliderValueAccepted}
-              rank={displayDrop.rank}
-              label={voteLabel}
-            />
-          ) : (
-            <SingleWaveDropVoteInput
-              voteValue={voteValue}
-              minValue={minRating}
-              maxValue={maxRating}
-              setVoteValue={setVoteValue}
-              onSubmit={handleSubmit}
-              label={voteLabel}
-            />
-          )}
-        </div>
-        <div className="tw-flex-shrink-0">
-          <SingleWaveDropVoteSubmit
-            drop={displayDrop}
-            newRating={submitVoteValue}
-            ref={submitRef}
-            onVoteApplied={handleSubmitVoteApplied}
-            onVoteSuccess={onVoteSuccess}
-            onVoteRequestStarted={onVoteRequestStarted}
-            submissionMode={submissionMode}
-            submitBlockReason={submitBlockReason}
+    <div className="tw-space-y-4" onClick={(e) => e.stopPropagation()}>
+      <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
+        {isSliderMode ? (
+          <SingleWaveDropVoteSlider
+            voteValue={voteValue}
+            minValue={minRating}
+            maxValue={maxRating}
+            setVoteValue={setVoteValue}
+            onValueAccepted={handleSliderValueAccepted}
+            rank={displayDrop.rank}
+            label={voteLabel}
           />
-        </div>
+        ) : (
+          <SingleWaveDropVoteInput
+            voteValue={voteValue}
+            minValue={minRating}
+            maxValue={maxRating}
+            setVoteValue={setVoteValue}
+            onSubmit={handleSubmit}
+            label={voteLabel}
+          />
+        )}
       </div>
 
-      <div className="tw-flex tw-items-center tw-justify-between">
+      <div
+        className={`tw-flex tw-items-center tw-justify-between tw-gap-4 ${
+          isSliderMode ? "tw-pt-5" : ""
+        }`}
+      >
         <SingleWaveDropVoteStats
           currentRating={displayDrop.context_profile_context?.rating ?? 0}
           maxRating={maxRating}
           label={voteLabel}
           creditScope={creditScope}
-        />
-        <button
-          onClick={() => setIsSliderMode(!isSliderMode)}
-          className="tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
-          title="Switch mode"
-          aria-label={
-            isSliderMode ? "Switch to numeric input" : "Switch to slider input"
+          className={
+            hasExternalVoteModeControl ? "tw-w-full tw-justify-between" : ""
           }
-        >
-          {isSliderMode ? "Switch to numeric" : "Switch to slider"}
-        </button>
+        />
+        {!hasExternalVoteModeControl && (
+          <button
+            onClick={() =>
+              setCurrentVoteMode(isSliderMode ? "numeric" : "slider")
+            }
+            className="tw-flex-shrink-0 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
+            title="Switch mode"
+            aria-label={
+              isSliderMode
+                ? "Switch to numeric input"
+                : "Switch to slider input"
+            }
+          >
+            {isSliderMode ? "Switch to numeric" : "Switch to slider"}
+          </button>
+        )}
+      </div>
+
+      <div className="wave-drop-vote-submit-full">
+        <SingleWaveDropVoteSubmit
+          drop={displayDrop}
+          newRating={submitVoteValue}
+          voteLabel={voteLabel}
+          ref={submitRef}
+          onVoteApplied={handleSubmitVoteApplied}
+          onVoteSuccess={onVoteSuccess}
+          onVoteRequestStarted={onVoteRequestStarted}
+          submissionMode={submissionMode}
+          submitBlockReason={submitBlockReason}
+        />
       </div>
     </div>
   );

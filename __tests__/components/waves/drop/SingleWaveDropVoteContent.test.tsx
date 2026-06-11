@@ -767,7 +767,7 @@ describe("SingleWaveDropVoteContent", () => {
 
     const container = screen
       .getByTestId("vote-slider")
-      .closest(".tw-space-y-6");
+      .closest(".tw-space-y-4");
     fireEvent.click(container!);
 
     expect(parentClickHandler).not.toHaveBeenCalled();
