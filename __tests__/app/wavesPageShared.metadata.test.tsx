@@ -56,10 +56,14 @@ describe("buildWavesMetadata", () => {
           url: "https://6529.io/api/og-metadata/waves/wave-1",
           width: 1200,
           height: 630,
+          alt: "The Memes - Main Stage wave social card",
         },
       ],
     });
-    expect(metadata.twitter).toEqual({ card: "summary_large_image" });
+    expect(metadata.twitter).toEqual({
+      card: "summary_large_image",
+      site: "@6529Collections",
+    });
   });
 
   it("uses chat drop metadata when a serial number is shared", async () => {
@@ -97,10 +101,14 @@ describe("buildWavesMetadata", () => {
           url: "https://6529.io/api/og-metadata/drops/6411",
           width: 1200,
           height: 630,
+          alt: "@phoebeum drop in Memes-Chat social card",
         },
       ],
     });
-    expect(metadata.twitter).toEqual({ card: "summary_large_image" });
+    expect(metadata.twitter).toEqual({
+      card: "summary_large_image",
+      site: "@6529Collections",
+    });
   });
 
   it("uses drop metadata when a drop id query param is shared", async () => {
@@ -181,9 +189,13 @@ describe("buildWavesMetadata", () => {
           url: "https://6529.io/api/og-metadata/drops/6408",
           width: 1200,
           height: 630,
+          alt: "Test resubmission preview drop social card",
         },
       ],
     });
-    expect(metadata.twitter).toEqual({ card: "summary_large_image" });
+    expect(metadata.twitter).toEqual({
+      card: "summary_large_image",
+      site: "@6529Collections",
+    });
   });
 });
