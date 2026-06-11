@@ -13,3 +13,4 @@
 - CodeRabbit completed #2603 with no actionable comments; merged standards PR.
 - Implemented The Memes list-card i18n helper path and accessibility updates,
   with default route locale remaining `en-US`.
+- Opened The Memes list-card implementation PR #2604 as review-ready only.
