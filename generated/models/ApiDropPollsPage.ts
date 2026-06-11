@@ -11,11 +11,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiWavePoll } from '../models/ApiWavePoll';
+import { ApiDropV2 } from '../models/ApiDropV2';
 import { HttpFile } from '../http/http';
 
 export class ApiDropPollsPage {
-    'data': Array<ApiWavePoll>;
+    'open_unanswered': number;
+    'data': Array<ApiDropV2>;
     'count': number;
     'page': number;
     'next': boolean;
@@ -26,9 +27,15 @@ export class ApiDropPollsPage {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
+            "name": "open_unanswered",
+            "baseName": "open_unanswered",
+            "type": "number",
+            "format": "int64"
+        },
+        {
             "name": "data",
             "baseName": "data",
-            "type": "Array<ApiWavePoll>",
+            "type": "Array<ApiDropV2>",
             "format": ""
         },
         {

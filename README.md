@@ -27,7 +27,7 @@ network scoring views, delegation tools, and supporting utility routes.
 - **Open data and tools**: downloadable datasets, API utilities, block finder,
   subscription reports, and app-wallet routes.
 
-For route-level user documentation, start at [docs/README.md](docs/README.md).
+For route-level user documentation, start at [ops/docs/README.md](ops/docs/README.md).
 
 ## Tech Stack
 
@@ -123,14 +123,15 @@ If pnpm reports ignored install/build scripts, run:
 ```
 
 For deeper package-manager, Socket Firewall, and deployment-wrapper details,
-read [docs/developer/pnpm-and-socket-firewall.md](docs/developer/pnpm-and-socket-firewall.md).
+read [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
 
 ## Repository Map
 
 - `app/`: Next.js App Router routes. New routes should be created here.
 - `AGENTS.md`: repository instructions for agents and automated coding tools.
 - `components/`: shared and feature-specific UI components.
-- `docs/`: user-facing documentation for routes, flows, feature behavior, and
+- `ops/`: operational material, including docs, skills, scripts, roadmaps, and workstream state.
+- `ops/docs/`: user-facing documentation for routes, flows, feature behavior, and
   troubleshooting.
 - `generated/`: TypeScript models generated from `openapi.yaml`.
 - `helpers/`, `hooks/`, `services/`, `contexts/`, `store/`, `utils/`: shared
@@ -178,15 +179,15 @@ deployment-sensitive code:
 
 ## Documentation
 
-- User-facing route and feature docs: [docs/README.md](docs/README.md)
+- User-facing route and feature docs: [ops/docs/README.md](ops/docs/README.md)
 - Agent and automation instructions: [AGENTS.md](AGENTS.md)
 - Package-manager and deployment-wrapper guidance:
-  [docs/developer/pnpm-and-socket-firewall.md](docs/developer/pnpm-and-socket-firewall.md)
+  [ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md)
 - Standalone Memes mint page notes:
   [standalone/standalone-memes-mint/README.md](standalone/standalone-memes-mint/README.md)
 
 When behavior changes are visible to users, update the relevant docs under
-`docs/` in the same pull request.
+`ops/docs/` in the same pull request.
 
 ## Deployment Notes
 
@@ -197,7 +198,7 @@ through [Procfile](Procfile).
 
 Repository and deployment helper details, including `ghruns`, `ghdeploy`,
 `6529 staging`, and PM2 launch examples, are documented in
-[docs/developer/pnpm-and-socket-firewall.md](docs/developer/pnpm-and-socket-firewall.md).
+[ops/docs/developer/pnpm-and-socket-firewall.md](ops/docs/developer/pnpm-and-socket-firewall.md).
 
 ## Contributing
 

@@ -12,6 +12,7 @@ import { useId, useRef, useState } from "react";
 export interface CreateDropPollDraft {
   readonly options: readonly string[];
   readonly multichoice: boolean;
+  readonly anonymous: boolean;
   readonly closingTime: string;
 }
 
@@ -44,6 +45,7 @@ const toDateTimeLocalValue = (timestamp: number): string => {
 export const createDefaultDropPollDraft = (): CreateDropPollDraft => ({
   options: ["", ""],
   multichoice: false,
+  anonymous: false,
   closingTime: toDateTimeLocalValue(Date.now() + DEFAULT_POLL_DURATION_MS),
 });
 
@@ -97,6 +99,7 @@ export const validateCreateDropPollDraft = (
     request: {
       options,
       multichoice: draft.multichoice,
+      anonymous: draft.anonymous,
       closing_time: closingTime,
     } as unknown as ApiCreateDropPollRequest,
     error: null,
@@ -113,6 +116,7 @@ export default function CreateDropPoll({
   const canAddOption = draft.options.length < MAX_POLL_OPTIONS;
   const canRemoveOption = draft.options.length > MIN_POLL_OPTIONS;
   const closingTimeInputId = useId();
+  const anonymousInputId = useId();
   const optionKeyBaseId = useId();
   const closingTimeInputRef = useRef<HTMLInputElement>(null);
   const nextOptionKeyIndexRef = useRef(draft.options.length);
@@ -351,6 +355,28 @@ export default function CreateDropPoll({
               />
             </label>
           </div>
+          <label
+            htmlFor={anonymousInputId}
+            className={`tw-mb-0 tw-flex tw-min-h-10 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/80 tw-px-3.5 tw-py-2 tw-transition-all sm:tw-w-auto ${
+              disabled
+                ? "tw-cursor-not-allowed tw-opacity-60"
+                : "tw-cursor-pointer hover:tw-border-iron-600 hover:tw-bg-iron-800"
+            }`}
+          >
+            <input
+              id={anonymousInputId}
+              type="checkbox"
+              checked={draft.anonymous}
+              disabled={disabled}
+              onChange={(event) =>
+                onChange({ ...draft, anonymous: event.target.checked })
+              }
+              className="tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-accent-white disabled:tw-cursor-not-allowed"
+            />
+            <span className="tw-whitespace-nowrap tw-text-[12.5px] tw-font-medium tw-text-iron-200">
+              Anonymous poll
+            </span>
+          </label>
         </div>
       </div>
     </div>
