@@ -8,6 +8,7 @@ import { getVoteCountLabel } from "./WaveDropPoll.helpers";
 interface PollResultOptionProps {
   readonly option: ApiDropPollOption;
   readonly totalVotes: number;
+  readonly canShowVoters: boolean;
   readonly isSelected: boolean;
   readonly isDimmed: boolean;
   readonly isExpanded: boolean;
@@ -215,6 +216,7 @@ const getPollResultFillClassName = ({
 export function PollResultOption({
   option,
   totalVotes,
+  canShowVoters,
   isSelected,
   isDimmed,
   isExpanded,
@@ -224,18 +226,18 @@ export function PollResultOption({
   const percentage =
     totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
   const fillScale = Math.max(0, Math.min(100, percentage)) / 100;
-  const canShowVoters = option.votes > 0;
+  const canShowOptionVoters = canShowVoters && option.votes > 0;
   const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onToggle(option.option_no);
   };
   const optionClassName = getPollResultOptionClassName({
-    canShowVoters,
+    canShowVoters: canShowOptionVoters,
     isSelected,
     isDimmed,
   });
   const fillClassName = getPollResultFillClassName({
-    canShowVoters,
+    canShowVoters: canShowOptionVoters,
     isSelected,
   });
   const fillStyle = {
@@ -254,13 +256,13 @@ export function PollResultOption({
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-2.5">
           {showSelectionIndicator && isSelected && <PollResultSelectedMarker />}
           <PollResultOptionLabel
-            canShowVoters={canShowVoters}
+            canShowVoters={canShowOptionVoters}
             isSelected={isSelected}
             optionString={option.option_string}
           />
         </div>
         <PollResultOptionStats
-          canShowVoters={canShowVoters}
+          canShowVoters={canShowOptionVoters}
           isExpanded={isExpanded}
           isSelected={isSelected}
           option={option}
@@ -272,7 +274,7 @@ export function PollResultOption({
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg">
-      {canShowVoters ? (
+      {canShowOptionVoters ? (
         <button
           type="button"
           aria-expanded={isExpanded}

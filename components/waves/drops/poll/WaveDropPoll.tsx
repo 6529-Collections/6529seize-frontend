@@ -472,14 +472,16 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       ) : (
         <div className="tw-flex tw-flex-col tw-gap-2">
           {poll.options.map((option) => {
+            const canShowOptionVoters = !poll.anonymous && option.votes > 0;
             const isExpanded =
-              option.votes > 0 && expandedOptionNo === option.option_no;
+              canShowOptionVoters && expandedOptionNo === option.option_no;
 
             return (
               <div key={option.option_no}>
                 <PollResultOption
                   option={option}
                   totalVotes={totalVotes}
+                  canShowVoters={canShowOptionVoters}
                   isSelected={votedOptionNos.has(option.option_no)}
                   isDimmed={hasVoted && !votedOptionNos.has(option.option_no)}
                   isExpanded={isExpanded}
@@ -500,7 +502,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                     })
                   }
                 />
-                {option.votes > 0 && (
+                {canShowOptionVoters && (
                   <div
                     className={`tw-grid tw-transition-all tw-duration-300 tw-ease-out ${
                       isExpanded
