@@ -34,6 +34,7 @@ export const validateSidebarWaveDetailed = (
       readonly newDropsCount?: {
         readonly count?: unknown;
         readonly latestDropTimestamp?: unknown;
+        readonly firstUnreadSerialNo?: unknown;
       } | null;
     }
   ).newDropsCount;
@@ -45,6 +46,8 @@ export const validateSidebarWaveDetailed = (
     typeof newDropsCount.count === "number" &&
     (newDropsCount.latestDropTimestamp === null ||
       typeof newDropsCount.latestDropTimestamp === "number") &&
+    (newDropsCount.firstUnreadSerialNo === null ||
+      typeof newDropsCount.firstUnreadSerialNo === "number") &&
     Array.isArray(wave.contributors) &&
     (wave.picture === null || typeof wave.picture === "string")
   );
