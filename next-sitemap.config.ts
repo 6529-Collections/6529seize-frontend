@@ -321,14 +321,86 @@ function dedupeSitemapFields(paths: readonly ISitemapField[]): ISitemapField[] {
   for (const path of paths) {
     if (!pathsByLocation.has(path.loc)) {
       pathsByLocation.set(path.loc, path);
+      continue;
+    }
+
+    const existingPath = pathsByLocation.get(path.loc);
+    if (
+      existingPath &&
+      (existingPath.changefreq !== path.changefreq ||
+        existingPath.priority !== path.priority ||
+        existingPath.lastmod !== path.lastmod)
+    ) {
+      console.warn(
+        `dedupeSitemapFields discarded duplicate sitemap path with different metadata: ${path.loc}`
+      );
     }
   }
   return Array.from(pathsByLocation.values());
 }
 
+function getSettledSitemapPaths(
+  result: PromiseSettledResult<ISitemapField[]>,
+  label: string
+): ISitemapField[] {
+  if (result.status === "fulfilled") {
+    return result.value;
+  }
+
+  console.error(`Sitemap generation failed for ${label}:`, result.reason);
+  return [];
+}
+
 export async function buildAdditionalSitemapPaths(
   fetchJson: FetchJson = defaultFetchJson
 ): Promise<ISitemapField[]> {
+  const sitemapFeeds = [
+    {
+      label: "memes",
+      promise: getNftCollectionPaths("/the-memes", "memes", fetchJson),
+    },
+    {
+      label: "gradient",
+      promise: getPlainApiSitemapPaths(
+        "6529-gradient",
+        "gradient",
+        fetchJson,
+        0.7
+      ),
+    },
+    {
+      label: "meme-lab",
+      promise: getNftCollectionPaths("/meme-lab", "meme-lab", fetchJson),
+    },
+    {
+      label: "nextgen-tokens",
+      promise: getPlainApiSitemapPaths(
+        "nextgen/token",
+        "nextgen/tokens",
+        fetchJson,
+        0.7
+      ),
+    },
+    {
+      label: "nextgen-collections",
+      promise: getNextgenCollectionPaths(fetchJson),
+    },
+    {
+      label: "public-waves",
+      promise: getPublicWavePaths(fetchJson),
+    },
+  ] as const;
+
+  const settledFeeds = await Promise.allSettled(
+    sitemapFeeds.map((feed) => feed.promise)
+  );
+  const pathGroups = settledFeeds.map((result, index) =>
+    getSettledSitemapPaths(
+      result,
+      sitemapFeeds[index]?.label ?? `feed-${index}`
+    )
+  );
+
   const [
     memesPaths,
     gradientPaths,
@@ -336,23 +408,16 @@ export async function buildAdditionalSitemapPaths(
     nextgenTokensPaths,
     nextgenCollectionPaths,
     publicWavePaths,
-  ] = await Promise.all([
-    getNftCollectionPaths("/the-memes", "memes", fetchJson),
-    getPlainApiSitemapPaths("6529-gradient", "gradient", fetchJson, 0.7),
-    getNftCollectionPaths("/meme-lab", "meme-lab", fetchJson),
-    getPlainApiSitemapPaths("nextgen/token", "nextgen/tokens", fetchJson, 0.7),
-    getNextgenCollectionPaths(fetchJson),
-    getPublicWavePaths(fetchJson),
-  ]);
+  ] = pathGroups;
 
   return dedupeSitemapFields([
     ...getAboutPaths(),
-    ...memesPaths,
-    ...gradientPaths,
-    ...memeLabPaths,
-    ...nextgenTokensPaths,
-    ...nextgenCollectionPaths,
-    ...publicWavePaths,
+    ...(memesPaths ?? []),
+    ...(gradientPaths ?? []),
+    ...(memeLabPaths ?? []),
+    ...(nextgenTokensPaths ?? []),
+    ...(nextgenCollectionPaths ?? []),
+    ...(publicWavePaths ?? []),
   ]);
 }
 
@@ -405,7 +470,6 @@ const config: IConfig = {
       loc: path,
       changefreq: override.changefreq,
       priority: override.priority,
-      lastmod: new Date().toISOString(),
     };
   },
 };

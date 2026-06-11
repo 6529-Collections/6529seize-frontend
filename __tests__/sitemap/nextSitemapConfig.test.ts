@@ -1,4 +1,5 @@
 import {
+  default as sitemapConfig,
   buildAdditionalSitemapPaths,
   getNftSitemapPaths,
   getPublicWavePaths,
@@ -116,10 +117,72 @@ describe("next-sitemap config", () => {
     expect(locations).toContain("/waves/5f207393-5418-4a75-8738-e40edb44a94d");
   });
 
+  it("continues building sitemap paths when one API feed fails", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    const fetchJson = makeFetchJson({
+      "https://api.6529.io/sitemap/memes": {
+        data: [1],
+        next: null,
+      },
+      "https://api.6529.io/sitemap/gradient": new Error("gradient failed"),
+      "https://api.6529.io/sitemap/meme-lab": {
+        data: [10],
+        next: null,
+      },
+      "https://api.6529.io/sitemap/nextgen/tokens": {
+        data: [10000000000],
+        next: null,
+      },
+      "https://api.6529.io/sitemap/nextgen/collections": {
+        data: ["Pebbles"],
+        next: null,
+      },
+      "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+        {
+          data: [],
+          next: false,
+        },
+    });
+
+    const throwingFetchJson = async (url: string): Promise<unknown> => {
+      const response = await fetchJson(url);
+      if (response instanceof Error) {
+        throw response;
+      }
+      return response;
+    };
+
+    try {
+      const paths = await buildAdditionalSitemapPaths(throwingFetchJson);
+      const locations = paths.map((path) => path.loc);
+
+      expect(locations).toContain("/the-memes/1");
+      expect(locations).not.toContain("/6529-gradient/0");
+      expect(consoleError).toHaveBeenCalledWith(
+        "Sitemap generation failed for gradient:",
+        expect.any(Error)
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("excludes app-only and restricted routes from generated sitemap output", () => {
     expect(shouldExcludeSitemapPath("/access")).toBe(true);
     expect(shouldExcludeSitemapPath("/messages/create?wave=abc")).toBe(true);
     expect(shouldExcludeSitemapPath("/tools/app-wallets")).toBe(true);
     expect(shouldExcludeSitemapPath("/waves")).toBe(false);
+  });
+
+  it("does not stamp transformed static routes with synthetic lastmod values", async () => {
+    await expect(
+      sitemapConfig.transform!(sitemapConfig, "/waves")
+    ).resolves.toEqual({
+      loc: "/waves",
+      changefreq: "hourly",
+      priority: 0.9,
+    });
   });
 });
