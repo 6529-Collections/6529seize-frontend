@@ -46,18 +46,22 @@ export function useWaveOutcomeVisibility(
   const isCompetitionWave =
     wave?.wave.type === ApiWaveType.Rank ||
     wave?.wave.type === ApiWaveType.Approve;
-  const { data, isError, isLoading } = useWaveMetadata(wave?.id, {
+  const { data } = useWaveMetadata(wave?.id, {
     enabled: isCompetitionWave,
   });
 
   return useMemo(
     () => {
-      if (!isCompetitionWave || isLoading || isError) {
+      if (!isCompetitionWave) {
         return true;
+      }
+
+      if (data === undefined) {
+        return false;
       }
 
       return getWaveOutcomeVisibilityFromMetadata(data);
     },
-    [data, isCompetitionWave, isError, isLoading]
+    [data, isCompetitionWave]
   );
 }
