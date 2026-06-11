@@ -3,6 +3,10 @@ import { type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MemesSort } from "@/types/enums";
 
+function assertUnhandled(value: never, label: string): never {
+  throw new Error(`Unhandled ${label}: ${String(value)}`);
+}
+
 export function getMemesSortLabel(
   sort: MemesSort,
   locale: SupportedLocale
@@ -30,6 +34,8 @@ export function getMemesSortLabel(
       return t(locale, "theMemes.sort.volume");
     case MemesSort.HIGHEST_OFFER:
       return t(locale, "theMemes.sort.highestOffer");
+    default:
+      return assertUnhandled(sort, "MemesSort");
   }
 }
 
@@ -46,5 +52,7 @@ export function getVolumeTypeLabel(
       return t(locale, "theMemes.volume.30Days");
     case VolumeType.ALL_TIME:
       return t(locale, "theMemes.volume.allTime");
+    default:
+      return assertUnhandled(volumeType, "VolumeType");
   }
 }

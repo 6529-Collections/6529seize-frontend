@@ -10,16 +10,27 @@ export const SUPPORTED_LOCALES = [
 
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
-const SUPPORTED_LOCALE_SET = new Set<string>(SUPPORTED_LOCALES);
+const SUPPORTED_LOCALE_BY_KEY = SUPPORTED_LOCALES.reduce<
+  Record<string, SupportedLocale>
+>((locales, locale) => {
+  locales[locale.toLowerCase()] = locale;
+  return locales;
+}, {});
 
-export function isSupportedLocale(
+function getCanonicalSupportedLocale(
   locale: string | null | undefined
-): locale is SupportedLocale {
-  return typeof locale === "string" && SUPPORTED_LOCALE_SET.has(locale);
+): SupportedLocale | undefined {
+  return typeof locale === "string"
+    ? SUPPORTED_LOCALE_BY_KEY[locale.toLowerCase()]
+    : undefined;
+}
+
+export function isSupportedLocale(locale: string | null | undefined): boolean {
+  return getCanonicalSupportedLocale(locale) !== undefined;
 }
 
 export function normalizeLocale(
   locale: string | null | undefined
 ): SupportedLocale {
-  return isSupportedLocale(locale) ? locale : DEFAULT_LOCALE;
+  return getCanonicalSupportedLocale(locale) ?? DEFAULT_LOCALE;
 }

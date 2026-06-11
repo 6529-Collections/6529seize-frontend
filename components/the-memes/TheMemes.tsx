@@ -168,7 +168,7 @@ export default function TheMemesComponent() {
   const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
 
-  useSetTitle("The Memes | Collections");
+  useSetTitle(t(locale, "theMemes.documentTitle"));
 
   useEffect(() => {
     const initialSortDir = getInitialSortDirection(searchParams);

@@ -1,4 +1,5 @@
 export const EN_US_MESSAGES = {
+  "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",

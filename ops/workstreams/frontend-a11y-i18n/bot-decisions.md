@@ -11,3 +11,4 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-11 | #2603 | Merge        | Branch protection allowed merge after green checks                       | Merged standards PR                  |
 | 2026-06-11 | #2604 | Claude       | Review skipped because organization monthly code review cap was reached  | Treat as unavailable, not actionable |
 | 2026-06-11 | #2604 | SonarCloud   | Flagged i18n default object parameters and interpolation character class | Fixed                                |
+| 2026-06-11 | #2604 | CodeRabbit   | Flagged Suspense, title i18n, locale matching, and exhaustive guards     | Fixed                                |

@@ -1,6 +1,7 @@
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.sorting.regionLabel": "Tri des memes",
   "theMemes.sorting.sortBy": "Trier par",
   "theMemes.sorting.directionLegend": "Sens du tri",

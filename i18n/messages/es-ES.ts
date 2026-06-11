@@ -1,6 +1,7 @@
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const ES_ES_MESSAGES = {
+  "theMemes.documentTitle": "The Memes | Colecciones",
   "theMemes.sorting.regionLabel": "Orden de memes",
   "theMemes.sorting.sortBy": "Ordenar por",
   "theMemes.sorting.directionLegend": "Dirección de ordenación",

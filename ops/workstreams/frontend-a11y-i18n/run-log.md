@@ -16,3 +16,6 @@
 - Opened The Memes list-card implementation PR #2604 as review-ready only.
 - Addressed SonarCloud maintainability findings on #2604's i18n helper defaults
   and message interpolation pattern.
+- Addressed CodeRabbit feedback on #2604: added page-level Suspense for
+  `useSearchParams`, localized the document title, made locale normalization
+  case-insensitive, and added exhaustive guards for enum label helpers.

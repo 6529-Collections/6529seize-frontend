@@ -23,7 +23,10 @@ describe("frontend i18n helpers", () => {
       "de-DE",
     ]);
     expect(isSupportedLocale("en-GB")).toBe(true);
+    expect(isSupportedLocale("en-us")).toBe(true);
     expect(isSupportedLocale("en-UK")).toBe(false);
+    expect(normalizeLocale("en-us")).toBe(DEFAULT_LOCALE);
+    expect(normalizeLocale("DE-de")).toBe("de-DE");
     expect(normalizeLocale("en-UK")).toBe(DEFAULT_LOCALE);
   });
 
@@ -35,6 +38,7 @@ describe("frontend i18n helpers", () => {
         tokenId: "1",
       })
     ).toBe("Voir Meme, carte n° 1");
+    expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
     expect(t("en-GB", "theMemes.sorting.sortBy")).toBe("Sort by");
   });
 
