@@ -9,6 +9,8 @@ import {
   WAVE_FOLLOWING_WAVES_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 
+const noopWaveAction = () => {};
+
 const useDmWavesList = () => {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy, isAuthenticated } = useAuth();
@@ -52,8 +54,10 @@ const useDmWavesList = () => {
   }, [mainWaves]);
 
   // minimal wrapper to match waves list return signature
-  const addPinnedWave = () => {};
-  const removePinnedWave = () => {};
+  const addPinnedWave = noopWaveAction;
+  const removePinnedWave = noopWaveAction;
+  const loadSubwavesForParent = noopWaveAction;
+  const prefetchSubwavesForParent = noopWaveAction;
 
   const fetchNextPageStable = useCallback(
     () => fetchNextPage(),
@@ -73,6 +77,8 @@ const useDmWavesList = () => {
       hasPinnedWavesError: false,
       addPinnedWave,
       removePinnedWave,
+      loadSubwavesForParent,
+      prefetchSubwavesForParent,
       mainWaves,
       missingPinnedIds: [],
       mainWavesRefetch: refetch,

@@ -119,6 +119,7 @@ describe("useWavePollDrops", () => {
 
   it("prefers poll row authenticated vote state over embedded drop poll state", async () => {
     fetchWavePollsV2Mock.mockResolvedValue({
+      open_unanswered: 0,
       data: [embeddedPollRow],
       count: 1,
       page: 1,

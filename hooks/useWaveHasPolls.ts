@@ -8,15 +8,43 @@ import { useQuery } from "@tanstack/react-query";
 
 const WAVE_POLLS_AVAILABILITY_PAGE_SIZE = 1;
 
+interface WavePollSummary {
+  readonly hasPolls: boolean;
+  readonly unansweredPolls: number;
+}
+
 interface UseWaveHasPollsProps {
   readonly waveId: string | null | undefined;
   readonly enabled?: boolean | undefined;
 }
 
-export function useWaveHasPolls({
+const EMPTY_WAVE_POLL_SUMMARY: WavePollSummary = {
+  hasPolls: false,
+  unansweredPolls: 0,
+};
+
+const normalizeUnansweredPollCount = (value: unknown): number => {
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return 0;
+  }
+
+  return Math.floor(value);
+};
+
+const getUnansweredPollCount = (
+  pollsPage: Readonly<{
+    open_unanswered?: unknown;
+    unanswered_polls?: unknown;
+  }>
+): number =>
+  normalizeUnansweredPollCount(
+    pollsPage.open_unanswered ?? pollsPage.unanswered_polls
+  );
+
+export function useWavePollSummary({
   waveId,
   enabled = true,
-}: UseWaveHasPollsProps): boolean {
+}: UseWaveHasPollsProps): WavePollSummary {
   const normalizedWaveId = waveId?.trim() ?? "";
   const isEnabled = enabled && normalizedWaveId.length > 0;
 
@@ -24,7 +52,7 @@ export function useWaveHasPolls({
     queryKey: [
       QueryKey.WAVE_POLLS,
       {
-        scope: "has-polls",
+        scope: "poll-summary",
         waveId: normalizedWaveId,
         pageSize: WAVE_POLLS_AVAILABILITY_PAGE_SIZE,
         sortDirection: ApiPageSortDirection.Desc,
@@ -41,12 +69,19 @@ export function useWaveHasPolls({
         signal,
       });
 
-      return pollsPage.count > 0 || pollsPage.data.length > 0;
+      return {
+        hasPolls: pollsPage.count > 0 || pollsPage.data.length > 0,
+        unansweredPolls: getUnansweredPollCount(pollsPage),
+      };
     },
     enabled: isEnabled,
     staleTime: 60_000,
     ...getDefaultQueryRetry(),
   });
 
-  return data === true;
+  return data ?? EMPTY_WAVE_POLL_SUMMARY;
+}
+
+export function useWaveHasPolls(props: UseWaveHasPollsProps): boolean {
+  return useWavePollSummary(props).hasPolls;
 }

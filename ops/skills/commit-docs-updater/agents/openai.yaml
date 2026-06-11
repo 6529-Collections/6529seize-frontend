@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit Docs Updater"
+  short_description: "Curate ops/docs as a navigable area-based user guide using one commit as discovery input"
+  default_prompt: "Use $commit-docs-updater to update user-facing ops/docs in a commit-agnostic, current-state guide style. Reorganize folders/files/indexes for navigability, document only user-visible behavior, and keep no legacy path structure."

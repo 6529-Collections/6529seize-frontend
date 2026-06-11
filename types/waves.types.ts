@@ -184,10 +184,13 @@ export interface SidebarWave {
   readonly id: string;
   readonly name: string;
   readonly type: ApiWaveType;
+  readonly createdAt: number;
   readonly picture: string | null;
   readonly contributors: readonly SidebarWaveContributor[];
   readonly isDirectMessage: boolean;
   readonly hasCompetition: boolean;
+  readonly parentWaveId: string | null;
+  readonly hasSubwaves: boolean;
   readonly descriptionDrop: SidebarWaveDescriptionDrop;
   readonly totalDropsCount: number;
   readonly isPrivate: boolean;

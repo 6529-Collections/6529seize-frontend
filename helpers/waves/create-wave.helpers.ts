@@ -386,10 +386,12 @@ export const getCreateNewWaveBody = ({
   drop,
   picture,
   config,
+  parentWaveId,
 }: {
   readonly drop: ApiCreateWaveDropRequest;
   readonly picture: string | null;
   readonly config: CreateWaveConfig;
+  readonly parentWaveId?: string | null | undefined;
 }): ApiCreateNewWave => {
   const endDate =
     config.overview.type === ApiWaveType.Approve
@@ -400,6 +402,7 @@ export const getCreateNewWaveBody = ({
     name: config.overview.name,
     description_drop: drop,
     picture,
+    ...(parentWaveId ? { parent_wave_id: parentWaveId } : {}),
     voting: {
       scope: {
         group_id: config.groups.canVote,
