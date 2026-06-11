@@ -14,3 +14,5 @@
 - Implemented The Memes list-card i18n helper path and accessibility updates,
   with default route locale remaining `en-US`.
 - Opened The Memes list-card implementation PR #2604 as review-ready only.
+- Addressed SonarCloud maintainability findings on #2604's i18n helper defaults
+  and message interpolation pattern.

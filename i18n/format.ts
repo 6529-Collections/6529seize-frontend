@@ -5,6 +5,13 @@ const SHORT_DATE_FORMAT = {
   month: "short",
   year: "numeric",
 } satisfies Intl.DateTimeFormatOptions;
+const DEFAULT_RELATIVE_TIME_FORMAT_OPTIONS = {
+  numeric: "auto",
+} satisfies Intl.RelativeTimeFormatOptions;
+const DEFAULT_COLLATOR_OPTIONS = {
+  sensitivity: "base",
+  numeric: true,
+} satisfies Intl.CollatorOptions;
 
 function toFiniteNumber(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -67,7 +74,7 @@ export function formatRelativeTime(
   locale: SupportedLocale,
   value: number,
   unit: Intl.RelativeTimeFormatUnit,
-  options: Intl.RelativeTimeFormatOptions = { numeric: "auto" }
+  options: Intl.RelativeTimeFormatOptions = DEFAULT_RELATIVE_TIME_FORMAT_OPTIONS
 ): string {
   return new Intl.RelativeTimeFormat(locale, options).format(value, unit);
 }
@@ -76,7 +83,7 @@ export function compareLocalized(
   locale: SupportedLocale,
   left: string,
   right: string,
-  options: Intl.CollatorOptions = { sensitivity: "base", numeric: true }
+  options: Intl.CollatorOptions = DEFAULT_COLLATOR_OPTIONS
 ): number {
   return new Intl.Collator(locale, options).compare(left, right);
 }

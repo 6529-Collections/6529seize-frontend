@@ -12,19 +12,22 @@ export const TAB_TOGGLE_WITH_OVERFLOW_MESSAGES = {
 
 type MessageParams = Record<string, string | number>;
 
-const MESSAGE_DICTIONARIES = {
+const MESSAGE_DICTIONARIES: Record<
+  SupportedLocale,
+  Partial<Record<MessageKey, string>>
+> = {
   [DEFAULT_LOCALE]: EN_US_MESSAGES,
   "en-GB": EN_GB_MESSAGES,
   "fr-FR": FR_FR_MESSAGES,
   "es-ES": ES_ES_MESSAGES,
   "de-DE": DE_DE_MESSAGES,
-} satisfies Record<SupportedLocale, Partial<Record<MessageKey, string>>>;
+};
 
 function interpolateMessage(
   template: string,
   params: MessageParams = {}
 ): string {
-  return template.replace(/\{([A-Za-z0-9_]+)\}/g, (match, paramName) => {
+  return template.replace(/\{(\w+)\}/g, (match, paramName) => {
     const value = params[paramName];
     return value === undefined ? match : String(value);
   });
