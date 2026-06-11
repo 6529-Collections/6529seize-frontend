@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-PR 1: baseline audit correction and coverage matrix.
+Seven-PR OG/social standardization stack published for review.
 
 ## Branch
 
@@ -10,12 +10,15 @@ PR 1: baseline audit correction and coverage matrix.
 
 ## Scope
 
-- Document that profile, wave, and drop OG/social cards already exist.
-- Reframe the work as expansion and standardization.
-- Link the shared docs index to the new coverage matrix.
-- Keep implementation changes for later PRs.
+- PR 1 owns the baseline audit correction and coverage matrix.
+- PRs 2-7 own helper contracts, existing endpoint normalization, branded
+  collection/NFT card routes, collection/NFT metadata migrations, NextGen and
+  ReMemes migrations, and guardrails/docs.
+- Keep this branch docs-only; implementation changes live on the stacked
+  branches.
 
 ## Open Decisions
 
-- PR 4 endpoint shape for NFT and collection cards.
-- PR 6 batch size for legacy editorial and museum migrations.
+- None blocking for this stack.
+- Editorial, museum, about, author, and other inline-meta legacy pages remain a
+  future follow-up after the collection/NFT and NextGen/ReMemes route families.

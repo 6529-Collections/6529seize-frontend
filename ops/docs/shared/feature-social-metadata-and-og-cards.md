@@ -42,17 +42,17 @@ The main metadata integration points are:
 
 ## Coverage Matrix
 
-| Area | Current behavior | Expansion and standardization target |
-| --- | --- | --- |
-| Profiles | Dynamic profile OG image route, large-card dimensions, profile page wiring. | Keep existing card renderer, centralize URL/dimension helpers, and ensure all profile subroutes use the same image and title rules. |
-| Waves | Dynamic wave OG image route for public wave links. | Keep the route, standardize fallback title/description rules, and document direct-message privacy behavior. |
-| Drop shares | `?drop=` and `?serialNo=` can resolve to dynamic drop OG images. | Preserve query-driven drop cards, normalize titles for chat vs submission drops, and make fallback behavior explicit. |
-| Direct messages | Generic `Messages` metadata; direct-message wave routes do not expose message content in cards. | Keep generic cards unless product explicitly approves public preview metadata for private contexts. |
-| Home and static app routes | Shared fallback metadata and some route-specific images. | Give top-level public routes consistent title, description, image, card type, and dimensions. |
-| The Memes, Meme Lab, ReMemes, 6529 Gradient | Token routes fetch/use entity images, often with `summary` Twitter cards or raw token aspect ratios. | Add branded NFT social cards that frame token art in 1200x630 images and standardize `summary_large_image` where appropriate. |
-| NextGen collections and tokens | Collection/token routes set entity images when available. | Add branded collection and token cards with a consistent visual contract and fallback chain. |
-| Blog, museum, about, author, and legacy editorial pages | Many pages still contain inline Yoast-style `<meta>` fragments while `generateMetadata` often returns title-only metadata. | Move social metadata into route metadata builders and migrate inline fragments out in batches. |
-| Tools and admin-style pages | Mostly generic shared metadata. | Keep generic where sharing is not meaningful; add route-specific descriptions only for public utility pages. |
+| Area                                                    | Current behavior                                                                                                           | Expansion and standardization target                                                                                                |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Profiles                                                | Dynamic profile OG image route, large-card dimensions, profile page wiring.                                                | Keep existing card renderer, centralize URL/dimension helpers, and ensure all profile subroutes use the same image and title rules. |
+| Waves                                                   | Dynamic wave OG image route for public wave links.                                                                         | Keep the route, standardize fallback title/description rules, and document direct-message privacy behavior.                         |
+| Drop shares                                             | `?drop=` and `?serialNo=` can resolve to dynamic drop OG images.                                                           | Preserve query-driven drop cards, normalize titles for chat vs submission drops, and make fallback behavior explicit.               |
+| Direct messages                                         | Generic `Messages` metadata; direct-message wave routes do not expose message content in cards.                            | Keep generic cards unless product explicitly approves public preview metadata for private contexts.                                 |
+| Home and static app routes                              | Shared fallback metadata and some route-specific images.                                                                   | Give top-level public routes consistent title, description, image, card type, and dimensions.                                       |
+| The Memes, Meme Lab, ReMemes, 6529 Gradient             | Token routes fetch/use entity images, often with `summary` Twitter cards or raw token aspect ratios.                       | Add branded NFT social cards that frame token art in 1200x630 images and standardize `summary_large_image` where appropriate.       |
+| NextGen collections and tokens                          | Collection/token routes set entity images when available.                                                                  | Add branded collection and token cards with a consistent visual contract and fallback chain.                                        |
+| Blog, museum, about, author, and legacy editorial pages | Many pages still contain inline Yoast-style `<meta>` fragments while `generateMetadata` often returns title-only metadata. | Move social metadata into route metadata builders and migrate inline fragments out in batches.                                      |
+| Tools and admin-style pages                             | Mostly generic shared metadata.                                                                                            | Keep generic where sharing is not meaningful; add route-specific descriptions only for public utility pages.                        |
 
 ## Standard Contract
 
@@ -94,22 +94,30 @@ Every public shareable route should eventually follow the same contract:
    - Use token/collection art as media inside a 6529-branded 1200x630 frame
      rather than relying on arbitrary raw image aspect ratios.
 
-5. Add legacy metadata builders and pilot migrations.
-   - Create a reusable metadata data shape for editorial and museum pages.
-   - Migrate a small representative set of about, blog, and museum pages from
-     inline meta fragments into `generateMetadata`.
+5. Standardize legacy collection and NFT metadata builders.
+   - Add helper path builders for branded collection and NFT social-card image
+     routes.
+   - Migrate The Memes, Meme Lab, 6529 Gradient, The Memes mint, shared
+     The Memes/Meme Lab NFT metadata, and 6529 Gradient detail metadata to the
+     branded card contract.
 
-6. Migrate legacy pages in batches.
-   - Convert the remaining blog, museum, about, and author pages by content
-     family.
-   - Remove stale inline OG/Twitter fragments after route metadata owns the
-     behavior.
+6. Standardize NextGen and ReMemes metadata.
+   - Migrate ReMemes landing, add, and detail routes to branded
+     collection/NFT cards.
+   - Migrate NextGen landing, admin, collection, collection subpage, and token
+     routes while preserving entity-specific titles, artists, collection names,
+     token ids, and media fallbacks.
 
-7. Add metadata guardrails.
+7. Add metadata guardrails and durable docs.
    - Add checks for public routes that should have non-generic image metadata.
-   - Add tests or lint coverage to block new inline OG/Twitter fragments in page
-     bodies outside an explicit allowlist.
-   - Keep docs and coverage matrix updated as routes graduate.
+   - Add tests that keep standardized collection/NFT route metadata on the
+     shared helper contract.
+   - Add current-state docs for the dynamic card families, helper contract,
+     standardized coverage, and future expansion checklist.
+
+Editorial and museum-page migrations remain a future follow-up after this
+seven-PR standardization stack; those pages are still represented in the
+coverage matrix because they keep legacy inline OG/Twitter fragments.
 
 ## Edge Cases
 

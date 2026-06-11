@@ -11,9 +11,9 @@ routes by building on the existing dynamic profile, wave, and drop OG endpoints.
 2. Shared metadata contract and helper expansion.
 3. Normalize existing profile, wave, and drop OG usage.
 4. Branded NFT and collection social cards.
-5. Legacy metadata builders and pilot migrations.
-6. Legacy migration batches.
-7. Metadata guardrails.
+5. Legacy collection and NFT metadata builders.
+6. NextGen and ReMemes metadata standardization.
+7. Metadata guardrails and durable docs.
 
 ## Evidence Standard
 
