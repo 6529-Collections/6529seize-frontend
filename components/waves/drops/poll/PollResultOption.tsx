@@ -107,7 +107,7 @@ function PollResultOptionLabel({
 
   return (
     <span
-      className={`tw-min-w-0 tw-break-words tw-text-[13px] tw-leading-5 tw-transition-colors tw-duration-300 ${labelClassName}`}
+      className={`tw-[overflow-wrap:anywhere] tw-min-w-0 tw-break-words tw-text-[13px] tw-leading-5 tw-transition-colors tw-duration-300 ${labelClassName}`}
     >
       {optionString}
     </span>
@@ -176,7 +176,7 @@ function PollResultOptionStats({
   const chevronClassName = isExpanded ? "tw-rotate-180" : "";
 
   return (
-    <div className="tw-ml-2 tw-flex tw-h-5 tw-flex-shrink-0 tw-translate-x-0 tw-animate-poll-result-stats-in tw-items-center tw-gap-2.5 tw-opacity-100 tw-transition-all tw-duration-500 motion-reduce:tw-animate-none">
+    <div className="tw-ml-0 tw-flex tw-h-5 tw-flex-shrink-0 tw-translate-x-0 tw-animate-poll-result-stats-in tw-items-center tw-gap-2.5 tw-opacity-100 tw-transition-all tw-duration-500 motion-reduce:tw-animate-none sm:tw-ml-2">
       <span className="tw-flex tw-h-5 tw-items-center tw-gap-1.5">
         {canShowVoters && (
           <PollOptionVoterPreviews dropId={dropId} option={option} />
@@ -266,7 +266,7 @@ export function PollResultOption({
         style={fillStyle}
         aria-hidden="true"
       />
-      <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-items-start tw-justify-between tw-gap-3 tw-px-3.5 tw-py-3">
+      <div className="tw-relative tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-2 tw-px-3.5 tw-py-3 sm:tw-flex-row sm:tw-justify-between sm:tw-gap-3">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-2.5">
           {showSelectionIndicator && isSelected && <PollResultSelectedMarker />}
           <PollResultOptionLabel
