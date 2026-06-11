@@ -11,11 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiWavePoll } from '../models/ApiWavePoll';
+import { ApiDropV2 } from '../models/ApiDropV2';
 import { HttpFile } from '../http/http';
 
 export class ApiDropPollsPage {
-    'data': Array<ApiWavePoll>;
+    'data': Array<ApiDropV2>;
     'count': number;
     'page': number;
     'next': boolean;
@@ -28,7 +28,7 @@ export class ApiDropPollsPage {
         {
             "name": "data",
             "baseName": "data",
-            "type": "Array<ApiWavePoll>",
+            "type": "Array<ApiDropV2>",
             "format": ""
         },
         {

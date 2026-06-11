@@ -7640,13 +7640,13 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
-        - name: order
+        - name: sort_direction
           in: query
           required: false
           schema:
             $ref: "#/components/schemas/ApiPageSortDirection"
-            default: ASC
-        - name: order_by
+            default: DESC
+        - name: sort
           in: query
           required: false
           schema:
@@ -7661,8 +7661,8 @@ paths:
           schema:
             type: string
             enum:
-              - open
-              - closed
+              - OPEN
+              - CLOSED
       responses:
         "200":
           description: successful operation
@@ -10746,7 +10746,7 @@ components:
         data:
           type: array
           items:
-            $ref: "#/components/schemas/ApiWavePoll"
+            $ref: "#/components/schemas/ApiDropV2"
     ApiDropPollVoteRequest:
       type: object
       required:
@@ -12559,6 +12559,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiNotificationDropReactedReactor"
+        poll_options:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiNotificationPollVoteOption"
         quote_drop_id:
           type: string
         quote_drop_part:
@@ -12592,6 +12596,7 @@ components:
         - DROP_QUOTED
         - DROP_REPLIED
         - DROP_VOTED
+        - DROP_POLL_VOTED
         - DROP_REACTED
         - DROP_BOOSTED
         - WAVE_CREATED
@@ -12608,6 +12613,18 @@ components:
           type: string
         subscribed:
           type: boolean
+    ApiNotificationPollVoteOption:
+      type: object
+      required:
+        - option_no
+        - option_string
+      properties:
+        option_no:
+          type: integer
+          format: int64
+          minimum: 1
+        option_string:
+          type: string
     ApiNotificationsResponse:
       type: object
       required:

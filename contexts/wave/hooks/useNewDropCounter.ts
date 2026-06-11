@@ -2,7 +2,11 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
-import { WsMessageType } from "@/helpers/Types";
+import {
+  WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+  WsMessageType,
+} from "@/helpers/Types";
+import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { SidebarWave } from "@/types/waves.types";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -42,6 +46,11 @@ export function getNewestTimestamp(
 
   return Math.max(cached, server);
 }
+
+const isPollResponseDropUpdate = (
+  message: WsDropUpdateMessage["data"]
+): boolean =>
+  getWebSocketMessageReason(message) === WS_DROP_UPDATE_REASON_POLL_RESPONSE;
 
 /**
  * Hook to manage new drop counts via WebSockets
@@ -172,6 +181,7 @@ function useNewDropCounter(
     useCallback(
       (message) => {
         if (!message?.wave.id) return;
+        if (isPollResponseDropUpdate(message)) return;
 
         const waveId = message.wave.id;
         const wave = waves.find((w) => w.id === waveId);

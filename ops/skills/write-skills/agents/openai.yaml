@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write Skills"
+  short_description: "Create effective Codex SKILL.md files."
+  default_prompt: "Create or improve a Codex skill for this repository."

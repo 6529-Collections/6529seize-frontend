@@ -132,14 +132,6 @@ export default function WaveHeader({
                   <WaveNotificationSettings wave={wave} compact />
                 </div>
               )}
-              {showOptions && (
-                <div className="tw-flex tw-shrink-0 tw-items-center">
-                  <WaveHeaderOptions
-                    wave={wave}
-                    showOwnerActions={showOwnerOptions}
-                  />
-                </div>
-              )}
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
@@ -151,9 +143,15 @@ export default function WaveHeader({
           <div className="tw-min-w-0 tw-flex-1">
             <WaveHeaderName wave={wave} />
           </div>
-          {!isSubwave && (
-            <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-end">
-              <WaveHeaderPinButton waveId={wave.id} />
+          {(showOptions || !isSubwave) && (
+            <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-1.5">
+              {showOptions && (
+                <WaveHeaderOptions
+                  wave={wave}
+                  showOwnerActions={showOwnerOptions}
+                />
+              )}
+              {!isSubwave && <WaveHeaderPinButton waveId={wave.id} />}
             </div>
           )}
         </div>
