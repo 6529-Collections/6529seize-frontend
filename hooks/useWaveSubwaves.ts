@@ -140,7 +140,7 @@ export function useWaveSubwavesMap({
 
   const refetch = useCallback(() => {
     queries.forEach((query) => {
-      void query.refetch().catch(() => undefined);
+      query.refetch().catch(() => undefined);
     });
   }, [queries]);
 

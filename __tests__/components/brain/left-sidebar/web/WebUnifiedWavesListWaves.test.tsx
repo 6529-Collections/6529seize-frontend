@@ -73,8 +73,8 @@ const baseWaves = [
 
 beforeEach(() => {
   jest.clearAllMocks();
-  window.localStorage.clear();
-  window.sessionStorage.clear();
+  globalThis.localStorage.clear();
+  globalThis.sessionStorage.clear();
   mockUseMyStream.mockReturnValue({
     activeWave: { id: null, set: jest.fn() },
     waves: {

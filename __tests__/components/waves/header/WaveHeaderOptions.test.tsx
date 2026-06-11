@@ -52,13 +52,15 @@ const createWrapper = (auth: any = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+  const authValue = {
+    connectedProfile: null,
+    activeProfileProxy: null,
+    ...auth,
+  };
+
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <AuthContext.Provider
-        value={
-          { connectedProfile: null, activeProfileProxy: null, ...auth } as any
-        }
-      >
+      <AuthContext.Provider value={authValue}>
         {children}
       </AuthContext.Provider>
     </QueryClientProvider>

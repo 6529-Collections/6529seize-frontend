@@ -304,7 +304,7 @@ const useWavesList = () => {
         return;
       }
 
-      void queryClient
+      queryClient
         .prefetchQuery(
           getWaveSubwavesQueryOptions(parentWaveId, viewerIdentityKey)
         )

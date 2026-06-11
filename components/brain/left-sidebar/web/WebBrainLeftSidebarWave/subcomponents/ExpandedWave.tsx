@@ -135,6 +135,7 @@ export const ExpandedWave = ({
     <div
       onMouseEnter={scheduleSubwavePrefetch}
       onMouseLeave={cancelSubwavePrefetch}
+      role="group"
       className={`tw-group tw-relative tw-flex tw-items-start ${rowGapClasses} ${rowPaddingClasses} tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"

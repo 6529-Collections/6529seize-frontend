@@ -225,7 +225,12 @@ describe("ExpandedWave", () => {
         onPrefetchSubwaves,
       });
 
-      fireEvent.mouseEnter(screen.getByRole("link").parentElement!);
+      const waveRow = screen.getByRole("link").parentElement;
+      if (waveRow === null) {
+        throw new Error("Expected wave link to have a row parent");
+      }
+
+      fireEvent.mouseEnter(waveRow);
 
       act(() => {
         jest.advanceTimersByTime(149);
@@ -251,7 +256,11 @@ describe("ExpandedWave", () => {
         onPrefetchSubwaves,
       });
 
-      const row = screen.getByRole("link").parentElement!;
+      const row = screen.getByRole("link").parentElement;
+      if (row === null) {
+        throw new Error("Expected wave link to have a row parent");
+      }
+
       fireEvent.mouseEnter(row);
       fireEvent.mouseLeave(row);
 

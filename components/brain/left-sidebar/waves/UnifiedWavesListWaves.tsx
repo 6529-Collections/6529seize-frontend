@@ -136,9 +136,9 @@ const UnifiedWavesListWaves = forwardRef<
         () =>
           groupSidebarWaves({
             isAnnouncementsWave:
-              seizeSettings !== null
-                ? (waveId) => seizeSettings.isAnnouncementsWave(waveId)
-                : undefined,
+              seizeSettings === null
+                ? undefined
+                : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
             waves: topLevelWaves,
           }),
         [topLevelWaves, seizeSettings]

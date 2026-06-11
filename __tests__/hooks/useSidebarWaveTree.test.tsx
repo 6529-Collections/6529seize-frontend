@@ -4,8 +4,8 @@ import { useSidebarWaveTree } from "@/hooks/useSidebarWaveTree";
 
 describe("useSidebarWaveTree", () => {
   beforeEach(() => {
-    window.localStorage.clear();
-    window.sessionStorage.clear();
+    globalThis.localStorage.clear();
+    globalThis.sessionStorage.clear();
   });
 
   const waves = [
@@ -201,7 +201,7 @@ describe("useSidebarWaveTree", () => {
       "newer-child",
     ]);
     expect(onParentExpand).toHaveBeenCalledWith("parent");
-    expect(window.localStorage.length).toBe(0);
+    expect(globalThis.localStorage.length).toBe(0);
   });
 
   it("does not reload the same active parent when the expand callback changes", () => {

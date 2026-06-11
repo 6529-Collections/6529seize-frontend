@@ -98,8 +98,7 @@ function useNewDropCounter(
       };
 
       if (
-        previous &&
-        previous.count === next.count &&
+        previous?.count === next.count &&
         previous.latestDropTimestamp === next.latestDropTimestamp &&
         previous.firstUnreadSerialNo === next.firstUnreadSerialNo
       ) {
@@ -133,8 +132,7 @@ function useNewDropCounter(
         };
 
         if (
-          !previous ||
-          previous.count !== next.count ||
+          previous?.count !== next.count ||
           previous.latestDropTimestamp !== next.latestDropTimestamp ||
           previous.firstUnreadSerialNo !== next.firstUnreadSerialNo
         ) {

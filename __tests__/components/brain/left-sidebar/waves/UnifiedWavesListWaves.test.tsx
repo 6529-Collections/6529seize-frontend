@@ -89,8 +89,8 @@ const baseWaves = [
 
 beforeEach(() => {
   jest.clearAllMocks();
-  window.localStorage.clear();
-  window.sessionStorage.clear();
+  globalThis.localStorage.clear();
+  globalThis.sessionStorage.clear();
   mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   mockUseAuth.mockReturnValue({
     connectedProfile: { handle: "alice" },

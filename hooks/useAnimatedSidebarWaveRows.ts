@@ -91,6 +91,20 @@ const groupExitingRowsByParent = (
   return map;
 };
 
+const markEnteringRowsAsEntered = (
+  rows: readonly AnimatedSidebarWaveTreeRow[]
+): AnimatedSidebarWaveTreeRow[] =>
+  rows.map((row) =>
+    row.animationState === "entering"
+      ? { ...row, animationState: "entered" }
+      : row
+  );
+
+const removeExitingRows = (
+  rows: readonly AnimatedSidebarWaveTreeRow[]
+): AnimatedSidebarWaveTreeRow[] =>
+  rows.filter((row) => row.animationState !== "exiting");
+
 export function useAnimatedSidebarWaveRows(
   rows: readonly SidebarWaveTreeRow[],
   { keepExitingRows = true }: UseAnimatedSidebarWaveRowsOptions = {}
@@ -141,19 +155,11 @@ export function useAnimatedSidebarWaveRows(
     });
 
     const enterFrame = requestAfterPaint(() => {
-      setAnimatedRows((previousRows) =>
-        previousRows.map((row) =>
-          row.animationState === "entering"
-            ? { ...row, animationState: "entered" }
-            : row
-        )
-      );
+      setAnimatedRows(markEnteringRowsAsEntered);
     });
 
     const exitTimer = globalThis.setTimeout(() => {
-      setAnimatedRows((previousRows) =>
-        previousRows.filter((row) => row.animationState !== "exiting")
-      );
+      setAnimatedRows(removeExitingRows);
     }, SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
 
     return () => {
