@@ -36,6 +36,10 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
   ),
 }));
 
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) => url,
+}));
+
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
   voteDropPollV2: jest.fn(),
   fetchDropPollOptionVotersV2: jest.fn(),
@@ -127,7 +131,7 @@ describe("WaveDropPoll", () => {
     expect(screen.queryByRole("button", { name: "Submit vote" })).toBeNull();
   });
 
-  it("shows results before voting and expands voters for an option", async () => {
+  it("shows results without fetching voters until an option expands", async () => {
     fetchDropPollOptionVotersV2Mock.mockResolvedValue({
       data: [
         {
@@ -137,6 +141,7 @@ describe("WaveDropPoll", () => {
           level: 1,
           classification: ApiProfileClassification.Pseudonym,
           badges: {},
+          pfp: "https://example.com/alice.png",
         },
       ],
       count: 1,
@@ -151,10 +156,24 @@ describe("WaveDropPoll", () => {
       })
     );
 
-    await userEvent.click(
-      screen.getByRole("button", { name: /View voters for First/ })
-    );
+    const firstOption = screen.getByRole("button", {
+      name: /View voters for First/,
+    });
 
+    expect(screen.getByText("2 votes")).toBeInTheDocument();
+    expect(screen.getByText("67%")).toBeInTheDocument();
+    expect(screen.getByText("1 vote")).toBeInTheDocument();
+    expect(screen.getByText("33%")).toBeInTheDocument();
+    expect(fetchDropPollOptionVotersV2Mock).not.toHaveBeenCalled();
+
+    await userEvent.hover(firstOption);
+    firstOption.focus();
+
+    expect(fetchDropPollOptionVotersV2Mock).not.toHaveBeenCalled();
+
+    await userEvent.click(firstOption);
+
+    expect(fetchDropPollOptionVotersV2Mock).toHaveBeenCalledTimes(1);
     expect(fetchDropPollOptionVotersV2Mock).toHaveBeenCalledWith(
       expect.objectContaining({
         dropId: "drop-1",
@@ -164,6 +183,7 @@ describe("WaveDropPoll", () => {
       })
     );
     expect(await screen.findByText("alice")).toBeInTheDocument();
+    expect(await screen.findByAltText("alice's avatar")).toBeInTheDocument();
   });
 
   it("submits a vote and switches to results", async () => {
