@@ -69,6 +69,7 @@ const createPoll = (overrides: Partial<ApiDropPoll> = {}): ApiDropPoll => ({
   ],
   voted: [],
   multichoice: false,
+  anonymous: false,
   closing_time: Date.now() + 60_000,
   is_open: true,
   ...overrides,
@@ -184,6 +185,23 @@ describe("WaveDropPoll", () => {
     );
     expect(await screen.findByText("alice")).toBeInTheDocument();
     expect(await screen.findByAltText("alice's avatar")).toBeInTheDocument();
+  });
+
+  it("does not expose voter expansion for anonymous polls", () => {
+    renderPoll(
+      createPoll({
+        anonymous: true,
+        is_open: false,
+        closing_time: Date.now() - 60_000,
+      })
+    );
+
+    expect(screen.getByText("2 votes")).toBeInTheDocument();
+    expect(screen.getByText("67%")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /View voters for First/ })
+    ).not.toBeInTheDocument();
+    expect(fetchDropPollOptionVotersV2Mock).not.toHaveBeenCalled();
   });
 
   it("submits a vote and switches to results", async () => {

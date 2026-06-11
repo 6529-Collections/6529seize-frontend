@@ -90,6 +90,7 @@ const embeddedPollRow = {
     ],
     voted: [1],
     multichoice: false,
+    anonymous: false,
     closing_time: 2000,
     is_open: true,
   },
@@ -99,6 +100,7 @@ const embeddedPollRow = {
   ],
   voted: [2],
   multichoice: false,
+  anonymous: true,
   closing_time: 2000,
   is_open: true,
 } as any;

@@ -2544,6 +2544,8 @@ paths:
                 $ref: "#/components/schemas/ApiDropPollVotersPage"
         "400":
           description: Invalid request
+        "403":
+          description: Poll is anonymous
         "404":
           description: Drop, poll, or option not found
   /v2/drops/{id}/poll/vote:
@@ -9604,6 +9606,9 @@ components:
             maxLength: 500
         multichoice:
           type: boolean
+        anonymous:
+          type: boolean
+          default: false
         closing_time:
           type: integer
           format: int64
@@ -10696,6 +10701,7 @@ components:
         - options
         - voted
         - multichoice
+        - anonymous
         - closing_time
         - is_open
       properties:
@@ -10713,6 +10719,8 @@ components:
             format: int64
             minimum: 1
         multichoice:
+          type: boolean
+        anonymous:
           type: boolean
         closing_time:
           type: integer
@@ -15222,6 +15230,7 @@ components:
         - options
         - voted
         - multichoice
+        - anonymous
         - closing_time
         - is_open
       properties:
@@ -15246,6 +15255,8 @@ components:
             format: int64
             minimum: 1
         multichoice:
+          type: boolean
+        anonymous:
           type: boolean
         closing_time:
           type: integer
