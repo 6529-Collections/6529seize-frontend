@@ -7,6 +7,112 @@ repository operations but should not appear in user-facing product docs.
 Keep roadmap pages current-state oriented. Archive or replace stale plans
 instead of leaving conflicting guidance in place.
 
+## Public Rendering And SEO Roadmap
+
+Last reviewed: 2026-06-11 against `origin/main` at `278c5fa1a`, with the
+public rendering audit focused on App Router route metadata, server-rendered
+body content, sitemap/canonical behavior, and structured data coverage.
+
+The app has useful route metadata and a growing structured data layer, but many
+important public pages still render their substantive visible content after
+client-side fetches. For example, `app/the-memes/[id]/page.tsx` emits metadata
+and JSON-LD on the server, then delegates the actual detail page experience to
+`components/the-memes/MemePage.tsx`. Similar patterns exist for Meme Lab,
+6529 Gradient, ReMemes, collection grids, homepage dynamic sections, and
+Discover. Profiles and NextGen token pages are stronger examples because they
+already fetch meaningful public data on the server and pass it into rendered
+layouts.
+
+The root layout currently exports `fetchCache = "force-no-store"` in
+`app/layout.tsx`, which makes cacheable public rendering and ISR unavailable by
+default across the route tree. Treat that as the first architectural constraint
+to resolve before assuming static or revalidated public pages can work.
+
+### P1: Establish Public Versus Personalized Rendering Boundaries
+
+Separate public, crawlable rendering from authenticated and wallet-personalized
+behavior.
+
+Remediation:
+
+- Remove root-level `fetchCache = "force-no-store"` and keep the shared root
+  layout cache-neutral.
+- Move `no-store` behavior to authenticated route segments, request-specific
+  fetches, or components that truly depend on cookies, wallet state, or private
+  session data.
+- Add or document a public server fetch path that does not read request cookies
+  or attach auth headers, and gives public data explicit `revalidate` rules.
+- Keep wallet ownership, write actions, user-specific controls, private waves,
+  and live-only UI client-rendered or explicitly uncached.
+
+### P1: Server-Render High-Value Public Page Shells
+
+Render the crawlable public content in the initial HTML, then hydrate the
+interactive app experience on top.
+
+Remediation:
+
+- Start with `/the-memes/[id]` as the reference implementation: server-render
+  the token title, artwork, artist, description, edition/supply, drop details,
+  breadcrumbs, and a small public stats snapshot.
+- Apply the same pattern to `/meme-lab/[id]`, `/6529-gradient/[id]`,
+  `/rememes/[contract]/[id]`, and `/nextgen/token/[token]` where any content is
+  still effect-only after hydration.
+- Server-render the first page or top public items for `/the-memes`,
+  `/meme-lab`, `/6529-gradient`, `/rememes`, `/discover`, and homepage dynamic
+  sections, then hydrate filters, sorting, infinite scroll, and live refreshes.
+- For Waves, either provide a public share/SEO shell for public waves and drops
+  or explicitly keep private/app-only surfaces out of the index.
+
+### P1: Define Canonical, Sitemap, And Indexing Policy
+
+Avoid asking crawlers to choose between route variants that the app has not made
+distinct in server-rendered HTML.
+
+Remediation:
+
+- Add `metadataBase` in the shared metadata helper and emit route-specific
+  `alternates.canonical` values for public pages.
+- Normalize trailing slash and query-string behavior across metadata,
+  redirects, and sitemap output.
+- Remove `?focus=...` sitemap entries unless those tab URLs have unique
+  crawlable server-rendered content and explicit self-canonicals.
+- Use real API update/mint timestamps for sitemap `lastmod` where available
+  instead of build time for every URL.
+- Migrate legacy pages that render manual `<title>`, `<meta>`, and canonical
+  tags in JSX into App Router `metadata` or `generateMetadata`.
+
+### P2: Align Structured Data With Visible Server Content
+
+Structured data should describe content that is also present in the rendered
+HTML response.
+
+Remediation:
+
+- Keep using the shared JSON-LD helpers, but expand coverage to ReMemes,
+  collection list pages, article/category pages, and profile tabs where they
+  are meant to be indexed.
+- Add consistent `BreadcrumbList` data for public token/detail routes.
+- Use `CollectionPage` and `ItemList` for server-rendered collection grids.
+- Keep `VisualArtwork` or NFT-like structured data on detail pages aligned with
+  the server-rendered title, image, creator, description, and collection data.
+
+### P2: Add Public HTML Snapshot Verification
+
+Prevent regressions where metadata exists but the meaningful page body is only
+available after JavaScript executes.
+
+Remediation:
+
+- Add focused tests or scripts that fetch representative public routes and
+  assert the raw HTML contains the expected H1, canonical link, primary image
+  metadata, JSON-LD, and first set of public cards/details.
+- Cover at least `/`, `/the-memes`, `/the-memes/1`, one Meme Lab token, one
+  Gradient token, one ReMeme, one public profile, one NextGen token, and one
+  public Wave/share route if indexing is intended.
+- Run `6529 run build` during the implementation work to inspect route
+  static/dynamic indicators after cache boundary changes.
+
 ## Security Remediation Backlog
 
 Last verified: 2026-06-11 against `origin/main` at `124d99859` and the open
