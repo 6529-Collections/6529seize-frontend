@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import type { Dispatch, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import { getSliderTheme } from "./types/slider.types";
 import {
   domAnimation,
@@ -12,12 +12,18 @@ import {
   useTransform,
 } from "framer-motion";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
+import {
+  SliderScaleLabels,
+  SliderThumb,
+  type SliderVisualState,
+  SliderZeroMarker,
+} from "./SingleWaveDropVoteSliderVisuals";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
   readonly minValue: number;
   readonly maxValue: number;
-  readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
+  readonly setVoteValue: Dispatch<SetStateAction<string | number>>;
   readonly onValueAccepted?: ((value: number) => void) | undefined;
   readonly rank?: number | null | undefined;
   readonly label: string;
@@ -30,6 +36,31 @@ type ProgressBarStyle = {
 };
 
 type SliderTheme = ReturnType<typeof getSliderTheme>;
+
+type SliderVoteState = {
+  readonly numericVoteValue: number;
+  readonly isPositiveVote: boolean;
+  readonly isNegativeVote: boolean;
+  readonly isNeutralVote: boolean;
+};
+
+type SliderGeometry = {
+  readonly hitAreaPadding: number;
+  readonly thumbHitWidth: number;
+  readonly thumbHitHeight: number;
+  readonly rootClassName: string;
+  readonly trackContainerClassName: string;
+  readonly tooltipBottomClassName: string;
+};
+
+type SliderRangeState = {
+  readonly logValue: number;
+  readonly currentPercentage: number;
+  readonly progressOriginPercentage: number;
+  readonly progressBarStyle: ProgressBarStyle;
+  readonly showZeroScaleMarker: boolean;
+  readonly tooltipOffset: number;
+};
 
 const clampToRange = (
   value: number,
@@ -103,6 +134,92 @@ const transformFromLog = (
   const result = sign * Math.pow(10, normalizedValue * logScale);
 
   return Math.round(result);
+};
+
+const getSliderVoteState = (voteValue: number | string): SliderVoteState => {
+  let numericVoteValue = 0;
+  if (typeof voteValue === "number" && Number.isFinite(voteValue)) {
+    numericVoteValue = voteValue;
+  }
+
+  return {
+    numericVoteValue,
+    isPositiveVote: numericVoteValue > 0,
+    isNegativeVote: numericVoteValue < 0,
+    isNeutralVote: numericVoteValue === 0,
+  };
+};
+
+const getSliderGeometry = (isMini: boolean): SliderGeometry => {
+  if (isMini) {
+    return {
+      hitAreaPadding: 16,
+      thumbHitWidth: 72,
+      thumbHitHeight: 48,
+      rootClassName: "tw-flex tw-h-6 tw-items-center [touch-action:none]",
+      trackContainerClassName: "tw-group tw-relative tw-mt-3 tw-h-[6px]",
+      tooltipBottomClassName: "tw-bottom-6",
+    };
+  }
+
+  return {
+    hitAreaPadding: 24,
+    thumbHitWidth: 96,
+    thumbHitHeight: 64,
+    rootClassName: "tw-flex tw-h-[72px] tw-items-center [touch-action:none]",
+    trackContainerClassName: "tw-group tw-relative tw-mt-8 tw-h-[7px]",
+    tooltipBottomClassName: "tw-bottom-10",
+  };
+};
+
+const getSliderRangeState = ({
+  numericVoteValue,
+  minValue,
+  maxValue,
+  isMini,
+}: {
+  readonly numericVoteValue: number;
+  readonly minValue: number;
+  readonly maxValue: number;
+  readonly isMini: boolean;
+}): SliderRangeState => {
+  const logValue = clampToRange(
+    transformToLog(numericVoteValue, minValue, maxValue),
+    minValue,
+    maxValue
+  );
+  const isFixedRange = minValue === maxValue;
+  const rangeSize = maxValue - minValue;
+  let zeroPercentage = 50;
+  let currentPercentage = 50;
+
+  if (isFixedRange) {
+    zeroPercentage = 50;
+    currentPercentage = 50;
+  } else {
+    zeroPercentage = ((0 - minValue) / rangeSize) * 100;
+    currentPercentage = ((logValue - minValue) / rangeSize) * 100;
+  }
+
+  const progressOriginPercentage = clampToRange(zeroPercentage, 0, 100);
+  const showZeroScaleMarker = getShowZeroScaleMarker({
+    isMini,
+    minValue,
+    maxValue,
+  });
+
+  return {
+    logValue,
+    currentPercentage,
+    progressOriginPercentage,
+    progressBarStyle: getProgressBarStyle(
+      numericVoteValue,
+      currentPercentage,
+      progressOriginPercentage
+    ),
+    showZeroScaleMarker,
+    tooltipOffset: getTooltipOffset(currentPercentage),
+  };
 };
 
 const getTrackClasses = (
@@ -335,6 +452,89 @@ const getTooltipOffset = (currentPercentage: number): number => {
   return 0;
 };
 
+const getShowZeroScaleMarker = ({
+  isMini,
+  minValue,
+  maxValue,
+}: {
+  readonly isMini: boolean;
+  readonly minValue: number;
+  readonly maxValue: number;
+}): boolean => {
+  if (isMini) {
+    return false;
+  }
+
+  return minValue < 0 && maxValue > 0;
+};
+
+const getSliderVisualState = ({
+  isMini,
+  theme,
+  voteState,
+  minValue,
+  maxValue,
+}: {
+  readonly isMini: boolean;
+  readonly theme: SliderTheme;
+  readonly voteState: SliderVoteState;
+  readonly minValue: number;
+  readonly maxValue: number;
+}): SliderVisualState => ({
+  trackClasses: getTrackClasses(isMini, theme),
+  progressClasses: getProgressClasses({
+    isMini,
+    isPositiveVote: voteState.isPositiveVote,
+    isNegativeVote: voteState.isNegativeVote,
+    theme,
+  }),
+  tooltipClasses: getTooltipClasses({
+    isMini,
+    isPositiveVote: voteState.isPositiveVote,
+    isNegativeVote: voteState.isNegativeVote,
+    theme,
+  }),
+  tooltipArrowClasses: getTooltipArrowClasses({
+    isMini,
+    isPositiveVote: voteState.isPositiveVote,
+    isNegativeVote: voteState.isNegativeVote,
+    theme,
+  }),
+  thumbClasses: getThumbClasses({
+    isMini,
+    isPositiveVote: voteState.isPositiveVote,
+    isNegativeVote: voteState.isNegativeVote,
+    theme,
+  }),
+  thumbOuterClasses: getThumbOuterClasses(
+    voteState.isPositiveVote,
+    voteState.isNegativeVote
+  ),
+  thumbIdleShadow: getThumbIdleShadow({
+    isMini,
+    isPositiveVote: voteState.isPositiveVote,
+    isNegativeVote: voteState.isNegativeVote,
+  }),
+  thumbDraggingShadow: getThumbDraggingShadow({
+    isMini,
+    isPositiveVote: voteState.isPositiveVote,
+    isNegativeVote: voteState.isNegativeVote,
+  }),
+  zeroMarkerClasses: getZeroMarkerClasses(voteState.isNeutralVote),
+  thumbVisualBoxClasses: getThumbVisualBoxClasses(isMini),
+  minLabelClasses: getMinLabelClasses(minValue),
+  maxLabelClasses: getMaxLabelClasses(maxValue),
+  maxLabelPrefix: getMaxLabelPrefix(maxValue),
+});
+
+const getThumbContainerScale = (isDragging: boolean): number => {
+  if (isDragging) {
+    return 1.1;
+  }
+
+  return 1;
+};
+
 export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
@@ -345,12 +545,9 @@ export default function WaveDropVoteSlider({
   label,
   size = SingleWaveDropVoteSize.NORMAL,
 }: WaveDropVoteSliderProps) {
-  const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const isMini = size === SingleWaveDropVoteSize.MINI;
-  const hitAreaPadding = isMini ? 16 : 24;
-  const thumbHitWidth = isMini ? 72 : 96;
-  const thumbHitHeight = isMini ? 48 : 64;
+  const geometry = getSliderGeometry(isMini);
   const theme = getSliderTheme(rank);
 
   const getAcceptedVoteValue = (newValue: number) => {
@@ -366,106 +563,39 @@ export default function WaveDropVoteSlider({
     onValueAccepted?.(getAcceptedVoteValue(newValue));
   };
 
-  const numericVoteValue =
-    typeof voteValue === "number" && Number.isFinite(voteValue) ? voteValue : 0;
-  const isPositiveVote = numericVoteValue > 0;
-  const isNegativeVote = numericVoteValue < 0;
-  const isNeutralVote = !isPositiveVote && !isNegativeVote;
-  const trackClasses = getTrackClasses(isMini, theme);
-  const progressClasses = getProgressClasses({
+  const voteState = getSliderVoteState(voteValue);
+  const visualState = getSliderVisualState({
     isMini,
-    isPositiveVote,
-    isNegativeVote,
     theme,
-  });
-  const tooltipClasses = getTooltipClasses({
-    isMini,
-    isPositiveVote,
-    isNegativeVote,
-    theme,
-  });
-  const tooltipArrowClasses = getTooltipArrowClasses({
-    isMini,
-    isPositiveVote,
-    isNegativeVote,
-    theme,
-  });
-  const thumbClasses = getThumbClasses({
-    isMini,
-    isPositiveVote,
-    isNegativeVote,
-    theme,
-  });
-  const thumbOuterClasses = getThumbOuterClasses(
-    isPositiveVote,
-    isNegativeVote
-  );
-  const thumbIdleShadow = getThumbIdleShadow({
-    isMini,
-    isPositiveVote,
-    isNegativeVote,
-  });
-  const thumbDraggingShadow = getThumbDraggingShadow({
-    isMini,
-    isPositiveVote,
-    isNegativeVote,
-  });
-  const zeroMarkerClasses = getZeroMarkerClasses(isNeutralVote);
-  const thumbVisualBoxClasses = getThumbVisualBoxClasses(isMini);
-  const logValue = clampToRange(
-    transformToLog(numericVoteValue, minValue, maxValue),
+    voteState,
     minValue,
-    maxValue
-  );
+    maxValue,
+  });
+  const rangeState = getSliderRangeState({
+    numericVoteValue: voteState.numericVoteValue,
+    minValue,
+    maxValue,
+    isMini,
+  });
 
-  const isFixedRange = minValue === maxValue;
-  const rangeSize = maxValue - minValue;
-
-  const zeroPercentage = isFixedRange ? 50 : ((0 - minValue) / rangeSize) * 100;
-  const progressOriginPercentage = clampToRange(zeroPercentage, 0, 100);
-  const showZeroScaleMarker = !isMini && minValue < 0 && maxValue > 0;
-  const minLabelClasses = getMinLabelClasses(minValue);
-  const maxLabelClasses = getMaxLabelClasses(maxValue);
-  const maxLabelPrefix = getMaxLabelPrefix(maxValue);
-
-  const currentPercentage = isFixedRange
-    ? 50
-    : ((logValue - minValue) / rangeSize) * 100;
-  const tooltipOffset = getTooltipOffset(currentPercentage);
-
-  const x = useMotionValue(currentPercentage);
+  const x = useMotionValue(rangeState.currentPercentage);
   const xSmooth = useSpring(x, { damping: 20, stiffness: 300 });
   const scale = useTransform(xSmooth, [0, 100], [0.95, 1.05]);
 
   useEffect(() => {
-    x.set(currentPercentage);
-  }, [currentPercentage, x]);
-
-  const progressBarStyle = getProgressBarStyle(
-    numericVoteValue,
-    currentPercentage,
-    progressOriginPercentage
-  );
+    x.set(rangeState.currentPercentage);
+  }, [rangeState.currentPercentage, x]);
 
   return (
     <LazyMotion features={domAnimation}>
-      <div
-        className={`tw-flex tw-items-center [touch-action:none] ${
-          isMini ? "tw-h-6" : "tw-h-[72px]"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={geometry.rootClassName}>
         <div className="tw-relative tw-flex-1 tw-overflow-visible">
-          <div
-            className={`tw-group tw-relative ${
-              isMini ? "tw-mt-3 tw-h-[6px]" : "tw-mt-8 tw-h-[7px]"
-            }`}
-          >
+          <div className={geometry.trackContainerClassName}>
             <input
               type="range"
               min={minValue}
               max={maxValue}
-              value={logValue}
+              value={rangeState.logValue}
               onChange={(e) => handleSliderChange(Number(e.target.value))}
               onClick={(e) => {
                 e.stopPropagation();
@@ -482,46 +612,45 @@ export default function WaveDropVoteSlider({
               }}
               className="tw-absolute tw-left-0 tw-right-0 tw-z-10 tw-w-full tw-cursor-pointer tw-appearance-none tw-opacity-0"
               style={{
-                top: -hitAreaPadding,
-                bottom: -hitAreaPadding,
+                top: -geometry.hitAreaPadding,
+                bottom: -geometry.hitAreaPadding,
               }}
             />
 
             <m.div
-              className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-z-0 tw-rounded-full ${trackClasses}`}
+              className={`tw-pointer-events-none tw-absolute tw-inset-0 tw-z-0 tw-rounded-full ${visualState.trackClasses}`}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             />
 
             <m.div
-              className={`tw-pointer-events-none tw-absolute tw-z-10 tw-h-full tw-rounded-full ${progressClasses}`}
-              style={progressBarStyle}
+              className={`tw-pointer-events-none tw-absolute tw-z-10 tw-h-full tw-rounded-full ${visualState.progressClasses}`}
+              style={rangeState.progressBarStyle}
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             />
 
-            {showZeroScaleMarker && (
-              <div
-                className={`tw-pointer-events-none tw-absolute tw-top-1/2 tw-z-20 tw-h-[13px] tw-w-0.5 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full ${zeroMarkerClasses}`}
-                style={{ left: `${progressOriginPercentage}%` }}
-              />
-            )}
+            <SliderZeroMarker
+              showZeroScaleMarker={rangeState.showZeroScaleMarker}
+              progressOriginPercentage={rangeState.progressOriginPercentage}
+              zeroMarkerClasses={visualState.zeroMarkerClasses}
+            />
 
             <div
               className="tw-absolute tw-left-0 tw-right-0 tw-z-30"
               style={{
-                top: -hitAreaPadding,
-                bottom: -hitAreaPadding,
-                clipPath: `ellipse(${thumbHitWidth / 2}px ${thumbHitHeight / 2}px at ${currentPercentage}% 50%)`,
+                top: -geometry.hitAreaPadding,
+                bottom: -geometry.hitAreaPadding,
+                clipPath: `ellipse(${geometry.thumbHitWidth / 2}px ${geometry.thumbHitHeight / 2}px at ${rangeState.currentPercentage}% 50%)`,
               }}
             >
               <input
                 type="range"
                 min={minValue}
                 max={maxValue}
-                value={logValue}
+                value={rangeState.logValue}
                 onChange={(e) => handleSliderChange(Number(e.target.value))}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -551,98 +680,38 @@ export default function WaveDropVoteSlider({
             </div>
 
             <m.div
-              ref={thumbRef}
               style={{
-                left: `${currentPercentage}%`,
+                left: `${rangeState.currentPercentage}%`,
                 top: "50%",
                 x: "-50%",
                 y: "-50%",
-                scale: isDragging ? 1.1 : 1,
+                scale: getThumbContainerScale(isDragging),
               }}
               className="tw-pointer-events-none tw-absolute tw-z-40"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3, type: "spring" }}
             >
-              <div className={thumbVisualBoxClasses}>
-                <div
-                  className={`tw-absolute ${
-                    isMini ? "tw-bottom-6" : "tw-bottom-10"
-                  } tw-left-1/2 tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-border tw-text-center tw-transition-transform tw-duration-200 tw-ease-out ${tooltipClasses}`}
-                  style={{
-                    transform: `translateX(calc(-50% + ${tooltipOffset}%))`,
-                  }}
-                >
-                  <span className="tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-1">
-                    <span className="tw-min-w-0 tw-truncate tw-leading-[14px]">
-                      {formatNumberWithCommas(numericVoteValue)}
-                    </span>
-                    <span className="tw-sr-only">{label}</span>
-                  </span>
-                  {isMini && (
-                    <div
-                      className={`tw-absolute tw-bottom-[-4px] tw-left-1/2 tw-h-2 tw-w-2 -tw-translate-x-1/2 tw-rotate-45 tw-border-b tw-border-r ${tooltipArrowClasses}`}
-                    />
-                  )}
-                </div>
-
-                {isMini ? (
-                  <m.div
-                    className={`tw-rounded-full tw-transition-shadow ${thumbClasses}`}
-                    style={{
-                      scale: isDragging ? 1.1 : scale,
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    animate={{
-                      boxShadow: isDragging
-                        ? thumbDraggingShadow
-                        : thumbIdleShadow,
-                    }}
-                    transition={{ duration: 0.2 }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <m.div
-                    className={thumbOuterClasses}
-                    style={{
-                      scale: isDragging ? 1.08 : scale,
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.97 }}
-                    animate={{
-                      boxShadow: isDragging
-                        ? thumbDraggingShadow
-                        : thumbIdleShadow,
-                    }}
-                    transition={{ duration: 0.2 }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className={thumbClasses} />
-                  </m.div>
-                )}
-              </div>
+              <SliderThumb
+                isMini={isMini}
+                isDragging={isDragging}
+                scale={scale}
+                numericVoteValue={voteState.numericVoteValue}
+                label={label}
+                visualState={visualState}
+                tooltipBottomClassName={geometry.tooltipBottomClassName}
+                tooltipOffset={rangeState.tooltipOffset}
+              />
             </m.div>
 
-            {!isMini && (
-              <div className="tw-pointer-events-none tw-absolute tw-left-0 tw-right-0 tw-top-6 tw-flex tw-h-4 tw-items-center tw-justify-between tw-text-[10px] tw-font-medium">
-                <span className={minLabelClasses}>
-                  {formatNumberWithCommas(minValue)}
-                </span>
-                {showZeroScaleMarker && (
-                  <span
-                    className="tw-absolute -tw-translate-x-1/2 tw-text-iron-500"
-                    style={{ left: `${progressOriginPercentage}%` }}
-                  >
-                    0
-                  </span>
-                )}
-                <span className={maxLabelClasses}>
-                  {maxLabelPrefix}
-                  {formatNumberWithCommas(maxValue)}
-                </span>
-              </div>
-            )}
+            <SliderScaleLabels
+              isMini={isMini}
+              minValue={minValue}
+              maxValue={maxValue}
+              showZeroScaleMarker={rangeState.showZeroScaleMarker}
+              progressOriginPercentage={rangeState.progressOriginPercentage}
+              visualState={visualState}
+            />
           </div>
         </div>
       </div>

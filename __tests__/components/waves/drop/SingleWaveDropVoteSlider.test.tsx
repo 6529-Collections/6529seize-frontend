@@ -233,7 +233,16 @@ describe("SingleWaveDropVoteSlider", () => {
     const parentClickHandler = jest.fn();
 
     render(
-      <div onClick={parentClickHandler}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={parentClickHandler}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            parentClickHandler();
+          }
+        }}
+      >
         <SingleWaveDropVoteSlider {...defaultProps} />
       </div>
     );

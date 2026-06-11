@@ -89,7 +89,7 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
           surfaceClassName="tw-w-full tw-bg-[#131316] tw-rounded-xl tw-relative tw-border tw-border-solid tw-border-[#26272B] tw-overflow-hidden tw-shadow-2xl"
           headerClassName="tw-relative tw-z-10 tw-px-6 tw-pt-5 tw-pb-5 tw-flex tw-justify-between tw-items-start"
           titleClassName="tw-text-lg tw-font-semibold tw-text-white tw-mb-0"
-          closeButtonClassName="-tw-mr-2 tw-size-9 tw-rounded-lg tw-p-0 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-600 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-300"
+          closeButtonClassName="-tw-mr-2 -tw-mt-1 tw-size-9 tw-rounded-lg tw-p-0 tw-flex tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-text-iron-600 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-300"
           closeIconClassName="tw-size-5 tw-flex-shrink-0"
           wrapperClassName="tw-px-0"
           headerActions={

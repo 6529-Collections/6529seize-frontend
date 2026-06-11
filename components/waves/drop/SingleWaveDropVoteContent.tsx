@@ -1,6 +1,12 @@
 "use client";
 
-import type { Dispatch, FC, SetStateAction } from "react";
+import type {
+  Dispatch,
+  FC,
+  KeyboardEvent,
+  MouseEvent,
+  SetStateAction,
+} from "react";
 import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
@@ -37,6 +43,19 @@ type VoteModeControlState = {
   readonly setValue: (voteMode: SingleWaveDropVoteMode) => void;
 };
 
+interface VoteModeFieldProps {
+  readonly isSliderMode: boolean;
+  readonly voteValue: number | string;
+  readonly minRating: number;
+  readonly maxRating: number;
+  readonly label: string;
+  readonly setVoteValue: Dispatch<SetStateAction<string | number>>;
+  readonly onValueAccepted: (value: number) => void;
+  readonly onSubmit: () => void;
+  readonly rank?: number | null | undefined;
+  readonly size?: SingleWaveDropVoteSize | undefined;
+}
+
 const getVoteModeControlState = ({
   voteMode,
   onVoteModeChange,
@@ -67,6 +86,100 @@ const getVoteModeControlState = ({
   };
 };
 
+const getInitialVoteMode = (
+  size: SingleWaveDropVoteSize
+): SingleWaveDropVoteMode => {
+  if (size === SingleWaveDropVoteSize.MINI) {
+    return "numeric";
+  }
+
+  return "slider";
+};
+
+const getNextVoteMode = (
+  isSliderMode: boolean
+): SingleWaveDropVoteMode => {
+  if (isSliderMode) {
+    return "numeric";
+  }
+
+  return "slider";
+};
+
+const getSwitchModeTitle = (isSliderMode: boolean): string => {
+  if (isSliderMode) {
+    return "Switch to numeric";
+  }
+
+  return "Switch to slider";
+};
+
+const getSwitchModeAriaLabel = (isSliderMode: boolean): string => {
+  if (isSliderMode) {
+    return "Switch to numeric input";
+  }
+
+  return "Switch to slider input";
+};
+
+const getExchangeIconFlip = (
+  isSliderMode: boolean
+): "horizontal" | "vertical" => {
+  if (isSliderMode) {
+    return "horizontal";
+  }
+
+  return "vertical";
+};
+
+const stopVoteContainerClick = (e: MouseEvent<HTMLDivElement>) => {
+  e.stopPropagation();
+};
+
+const stopVoteContainerKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+  e.stopPropagation();
+};
+
+const VoteModeField: FC<VoteModeFieldProps> = ({
+  isSliderMode,
+  voteValue,
+  minRating,
+  maxRating,
+  label,
+  setVoteValue,
+  onValueAccepted,
+  onSubmit,
+  rank,
+  size,
+}) => {
+  if (isSliderMode) {
+    return (
+      <SingleWaveDropVoteSlider
+        voteValue={voteValue}
+        minValue={minRating}
+        maxValue={maxRating}
+        label={label}
+        setVoteValue={setVoteValue}
+        onValueAccepted={onValueAccepted}
+        rank={rank}
+        size={size}
+      />
+    );
+  }
+
+  return (
+    <SingleWaveDropVoteInput
+      voteValue={voteValue}
+      minValue={minRating}
+      maxValue={maxRating}
+      setVoteValue={setVoteValue}
+      onSubmit={onSubmit}
+      label={label}
+      size={size}
+    />
+  );
+};
+
 export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   drop,
   size,
@@ -89,9 +202,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     handleBackgroundVoteApplied,
   } = useSingleWaveDropVoteState({ drop });
   const [uncontrolledVoteMode, setUncontrolledVoteMode] =
-    useState<SingleWaveDropVoteMode>(
-      size !== SingleWaveDropVoteSize.MINI ? "slider" : "numeric"
-    );
+    useState<SingleWaveDropVoteMode>(getInitialVoteMode(size));
   const voteModeControl = getVoteModeControlState({
     voteMode,
     onVoteModeChange,
@@ -99,6 +210,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     setUncontrolledVoteMode,
   });
   const hasExternalVoteModeControl = voteModeControl.isControlled;
+  const showInternalVoteModeControl = hasExternalVoteModeControl === false;
   const currentVoteMode = voteModeControl.value;
   const setCurrentVoteMode = voteModeControl.setValue;
   const isSliderMode = currentVoteMode === "slider";
@@ -129,51 +241,39 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     return (
       <div
         className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1.5"
-        onClick={(e) => e.stopPropagation()}
+        role="group"
+        aria-label="Vote controls"
+        tabIndex={0}
+        onClick={stopVoteContainerClick}
+        onKeyDown={stopVoteContainerKeyDown}
       >
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
-            onClick={() =>
-              setCurrentVoteMode(isSliderMode ? "numeric" : "slider")
-            }
+            onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-font-medium tw-transition-all desktop-hover:hover:tw-bg-iron-600"
-            title={isSliderMode ? "Switch to numeric" : "Switch to slider"}
-            aria-label={
-              isSliderMode
-                ? "Switch to numeric input"
-                : "Switch to slider input"
-            }
+            title={getSwitchModeTitle(isSliderMode)}
+            aria-label={getSwitchModeAriaLabel(isSliderMode)}
           >
             <FontAwesomeIcon
               icon={faExchange}
               className="tw-size-3 tw-flex-shrink-0 tw-text-white"
-              flip={isSliderMode ? "horizontal" : "vertical"}
+              flip={getExchangeIconFlip(isSliderMode)}
             />
           </button>
 
           <div className="tw-h-8 tw-min-w-0 tw-flex-1">
-            {isSliderMode ? (
-              <SingleWaveDropVoteSlider
-                voteValue={voteValue}
-                minValue={minRating}
-                maxValue={maxRating}
-                label={voteLabel}
-                setVoteValue={setVoteValue}
-                onValueAccepted={handleSliderValueAccepted}
-                rank={displayDrop.rank}
-                size={size}
-              />
-            ) : (
-              <SingleWaveDropVoteInput
-                voteValue={voteValue}
-                minValue={minRating}
-                maxValue={maxRating}
-                setVoteValue={setVoteValue}
-                onSubmit={handleSubmit}
-                label={voteLabel}
-                size={size}
-              />
-            )}
+            <VoteModeField
+              isSliderMode={isSliderMode}
+              voteValue={voteValue}
+              minRating={minRating}
+              maxRating={maxRating}
+              label={voteLabel}
+              setVoteValue={setVoteValue}
+              onValueAccepted={handleSliderValueAccepted}
+              onSubmit={handleSubmit}
+              rank={displayDrop.rank}
+              size={size}
+            />
           </div>
 
           <div className="tw-h-8 tw-flex-shrink-0">
@@ -205,28 +305,26 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   }
 
   return (
-    <div className="tw-space-y-4" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="tw-space-y-4"
+      role="group"
+      aria-label="Vote controls"
+      tabIndex={0}
+      onClick={stopVoteContainerClick}
+      onKeyDown={stopVoteContainerKeyDown}
+    >
       <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
-        {isSliderMode ? (
-          <SingleWaveDropVoteSlider
-            voteValue={voteValue}
-            minValue={minRating}
-            maxValue={maxRating}
-            setVoteValue={setVoteValue}
-            onValueAccepted={handleSliderValueAccepted}
-            rank={displayDrop.rank}
-            label={voteLabel}
-          />
-        ) : (
-          <SingleWaveDropVoteInput
-            voteValue={voteValue}
-            minValue={minRating}
-            maxValue={maxRating}
-            setVoteValue={setVoteValue}
-            onSubmit={handleSubmit}
-            label={voteLabel}
-          />
-        )}
+        <VoteModeField
+          isSliderMode={isSliderMode}
+          voteValue={voteValue}
+          minRating={minRating}
+          maxRating={maxRating}
+          setVoteValue={setVoteValue}
+          onValueAccepted={handleSliderValueAccepted}
+          onSubmit={handleSubmit}
+          rank={displayDrop.rank}
+          label={voteLabel}
+        />
       </div>
 
       <div
@@ -243,20 +341,14 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             hasExternalVoteModeControl ? "tw-w-full tw-justify-between" : ""
           }
         />
-        {!hasExternalVoteModeControl && (
+        {showInternalVoteModeControl && (
           <button
-            onClick={() =>
-              setCurrentVoteMode(isSliderMode ? "numeric" : "slider")
-            }
+            onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             className="tw-flex-shrink-0 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
             title="Switch mode"
-            aria-label={
-              isSliderMode
-                ? "Switch to numeric input"
-                : "Switch to slider input"
-            }
+            aria-label={getSwitchModeAriaLabel(isSliderMode)}
           >
-            {isSliderMode ? "Switch to numeric" : "Switch to slider"}
+            {getSwitchModeTitle(isSliderMode)}
           </button>
         )}
       </div>

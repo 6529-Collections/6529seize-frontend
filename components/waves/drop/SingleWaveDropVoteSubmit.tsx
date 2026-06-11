@@ -498,7 +498,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     }
 
     const idleButtonLabel =
-      voteAmountLabel !== null ? `Vote ${voteAmountLabel}` : "Vote";
+      voteAmountLabel === null ? "Vote" : `Vote ${voteAmountLabel}`;
 
     const getButtonContent = () => {
       return (

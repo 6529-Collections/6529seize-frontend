@@ -756,7 +756,12 @@ describe("SingleWaveDropVoteContent", () => {
     const parentClickHandler = jest.fn();
 
     render(
-      <div onClick={parentClickHandler}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={parentClickHandler}
+        onKeyDown={parentClickHandler}
+      >
         <SingleWaveDropVoteContent
           drop={drop}
           size={SingleWaveDropVoteSize.NORMAL}
