@@ -13,6 +13,7 @@ import type {
 import {
     STATEMENT_META
 } from "@/helpers/Types";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
@@ -67,8 +68,10 @@ export default function UserPageIdentityAddStatementsForm({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't add this NIC statement.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

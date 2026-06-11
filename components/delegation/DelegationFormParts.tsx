@@ -4,6 +4,7 @@ import {
   DELEGATION_ALL_ADDRESS,
   DELEGATION_CONTRACT,
 } from "@/constants/constants";
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses, getTransactionLink } from "@/helpers/Helpers";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
@@ -139,6 +140,14 @@ function DelegationAddressDisplay(props: Readonly<{ address: string }>) {
   );
 }
 
+function getTransactionAction(hash: any) {
+  return {
+    label: "View transaction",
+    href: getTransactionLink(DELEGATION_CONTRACT.chain_id, hash),
+    external: true,
+  };
+}
+
 export function DelegationFormOptionsFormGroup(
   props: Readonly<{
     title: string;
@@ -251,7 +260,7 @@ export function DelegationSubmitGroups(
     gasError?: string | undefined;
     validate: () => string[];
     onHide: () => void;
-    onSetToast: (toast: { title: string; message: string }) => void;
+    onSetToast: (toast: AppToastInput) => void;
     submitBtnLabel?: string | undefined;
   }>
 ) {
@@ -272,7 +281,7 @@ export function DelegationSubmitGroups(
   });
   const [errors, setErrors] = useState<string[]>([]);
   const emitToast = useEffectEvent(
-    (toast: { title: string; message: string }) => {
+    (toast: AppToastInput) => {
       onSetToast(toast);
     }
   );
@@ -285,41 +294,36 @@ export function DelegationSubmitGroups(
     } else {
       writeDelegation.writeContract(writeParams);
       onSetToast({
+        type: "info",
         title,
-        message: "Confirm in your wallet...",
+        description: "Confirm this transaction in your wallet.",
       });
     }
-  }
-
-  function getTransactionAnchor(hash: any) {
-    return `<a href=${getTransactionLink(DELEGATION_CONTRACT.chain_id, hash)}
-    target="_blank"
-    rel="noopener noreferrer"
-    className=${styles["etherscanLink"]}>
-      view
-    </a>`;
   }
 
   useEffect(() => {
     if (writeDelegation.error) {
       emitToast({
+        type: "error",
         title,
-        message: writeDelegation.error.message.split("Request Arguments")[0]!,
+        description: "The transaction could not be submitted.",
+        details: writeDelegation.error.message.split("Request Arguments")[0]!,
       });
     }
     if (writeDelegation.data) {
       if (waitWriteDelegation.isLoading) {
         emitToast({
+          type: "info",
           title,
-          message: `Transaction submitted...
-                    ${getTransactionAnchor(writeDelegation.data)}
-                    <br />Waiting for confirmation...`,
+          description: "Transaction submitted. Waiting for confirmation.",
+          action: getTransactionAction(writeDelegation.data),
         });
       } else {
         emitToast({
-          title,
-          message: `Transaction Successful!
-                    ${getTransactionAnchor(writeDelegation.data)}`,
+          type: "success",
+          title: "Transaction confirmed.",
+          description: title,
+          action: getTransactionAction(writeDelegation.data),
         });
       }
     }

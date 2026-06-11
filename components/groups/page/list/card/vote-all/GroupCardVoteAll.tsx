@@ -11,6 +11,7 @@ import {
 import { CreditDirection } from "../GroupCard";
 import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 import type { Page } from "@/helpers/Types";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { CommunityMembersQuery } from "@/app/network/page";
 import { SortDirection } from "@/entities/ISort";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -138,8 +139,10 @@ export default function GroupCardVoteAll({
       }),
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update group ratings.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
       throw error;
     },

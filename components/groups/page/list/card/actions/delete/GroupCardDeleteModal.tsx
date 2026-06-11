@@ -43,8 +43,10 @@ export default function GroupCardDeleteModal({
         return;
       }
       setToast({
-        message: result.error,
         type: "error",
+        title: "Couldn't delete this group.",
+        description: "Please try again.",
+        details: result.error,
       });
       return;
     }

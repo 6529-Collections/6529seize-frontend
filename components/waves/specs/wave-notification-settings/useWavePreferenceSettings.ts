@@ -3,13 +3,13 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/models/ApiUpdateWaveNotificationPreferencesRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
 import { commonApiPost } from "@/services/api/common-api";
 import { useCallback, useMemo, useState } from "react";
 import {
   ALL_GROUP_MENTION,
   getAllDropsTooltip,
-  getErrorMessage,
   type NotificationLoadingTarget,
 } from "./waveNotificationSettings.helpers";
 
@@ -66,8 +66,10 @@ export function useWavePreferenceSettings(wave: ApiWave) {
         await refetch();
       } catch (error) {
         setToast({
-          message: getErrorMessage(error, errorMessage),
           type: "error",
+          title: "Couldn't update notification settings.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error, errorMessage),
         });
       } finally {
         setLoadingTarget(null);
