@@ -43,10 +43,16 @@ export function getDefaultOgImageUrl(
   return getAbsoluteOgImageUrl(DEFAULT_OG_IMAGE_PATH, baseEndpoint);
 }
 
-export function getLargeSocialCardMetadata(
-  metadata: LargeSocialCardMetadata,
+export function getLargeSocialCardMetadata<
+  Metadata extends LargeSocialCardMetadata,
+>(
+  metadata: Metadata,
   baseEndpoint = publicEnv.BASE_ENDPOINT
-): Partial<PageSSRMetadata> {
+): Omit<Metadata, "ogImage"> &
+  Pick<
+    PageSSRMetadata,
+    "ogImage" | "ogImageHeight" | "ogImageWidth" | "twitterCard"
+  > {
   return {
     ...metadata,
     ogImage: getAbsoluteOgImageUrl(metadata.ogImage, baseEndpoint),
