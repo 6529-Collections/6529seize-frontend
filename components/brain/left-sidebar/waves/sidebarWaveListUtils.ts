@@ -29,12 +29,25 @@ export const validateSidebarWaveDetailed = (
     return false;
   }
 
+  const newDropsCount = (
+    wave as {
+      readonly newDropsCount?: {
+        readonly count?: unknown;
+        readonly latestDropTimestamp?: unknown;
+        readonly firstUnreadSerialNo?: unknown;
+      } | null;
+    }
+  ).newDropsCount;
+
   return (
     typeof wave.type === "string" &&
-    typeof wave.newDropsCount === "object" &&
-    typeof wave.newDropsCount.count === "number" &&
-    (wave.newDropsCount.latestDropTimestamp === null ||
-      typeof wave.newDropsCount.latestDropTimestamp === "number") &&
+    newDropsCount !== null &&
+    typeof newDropsCount === "object" &&
+    typeof newDropsCount.count === "number" &&
+    (newDropsCount.latestDropTimestamp === null ||
+      typeof newDropsCount.latestDropTimestamp === "number") &&
+    (newDropsCount.firstUnreadSerialNo === null ||
+      typeof newDropsCount.firstUnreadSerialNo === "number") &&
     Array.isArray(wave.contributors) &&
     (wave.picture === null || typeof wave.picture === "string")
   );
