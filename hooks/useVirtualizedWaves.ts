@@ -48,31 +48,31 @@ const areVirtualLayoutsEqual = (
   previousLayout.viewportHeight === nextLayout.viewportHeight &&
   previousLayout.listOffset === nextLayout.listOffset;
 
-const measureRows = <T>(items: readonly T[], rowHeight: VirtualRowHeight<T>) =>
-  items.reduce<{
-    readonly measurements: readonly Omit<VirtualItem, "index">[];
-    readonly totalHeight: number;
-  }>(
-    (state, item, index) => {
-      const size =
-        typeof rowHeight === "function" ? rowHeight(item, index) : rowHeight;
+const measureRows = <T>(
+  items: readonly T[],
+  rowHeight: VirtualRowHeight<T>
+) => {
+  const measurements: Omit<VirtualItem, "index">[] = [];
+  let totalHeight = 0;
 
-      return {
-        measurements: [
-          ...state.measurements,
-          {
-            start: state.totalHeight,
-            size,
-          },
-        ],
-        totalHeight: state.totalHeight + size,
-      };
-    },
-    {
-      measurements: [],
-      totalHeight: 0,
-    }
-  );
+  let index = 0;
+  for (const item of items) {
+    const size =
+      typeof rowHeight === "function" ? rowHeight(item, index) : rowHeight;
+
+    measurements.push({
+      start: totalHeight,
+      size,
+    });
+    totalHeight += size;
+    index += 1;
+  }
+
+  return {
+    measurements,
+    totalHeight,
+  };
+};
 
 export function useVirtualizedWaves<T>({
   items,
