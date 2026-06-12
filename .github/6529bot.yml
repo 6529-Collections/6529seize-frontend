@@ -1,0 +1,40 @@
+version: 1
+enabled: true
+
+reviewKinds:
+  allowed: [general, followup, wcag, i18n, security]
+  initial: []
+  followup: []
+
+commands:
+  enabled: true
+
+lanes:
+  - provider: anthropic
+    model: claude-opus-4-8
+
+limits:
+  maxJobsPerDelivery: 2
+
+admission:
+  publicRepoMode: trusted
+  privateRepoMode: open
+  draftPrMode: skip
+  trustedPermission: write
+  trustedUsers: []
+  trustedTeams: []
+  trustedOrganizations: []
+  denyUsers: []
+
+budget:
+  mode: enforce
+  defaultEstimatedCostUsd: 1
+  caps:
+    repo:
+      dailyUsd: 5
+    requestor:
+      dailyUsd: 2
+    pr:
+      dailyUsd: 2
+    review_kind:
+      dailyUsd: 3
