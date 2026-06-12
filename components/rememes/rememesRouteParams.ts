@@ -106,7 +106,9 @@ export function getRememeDetailHref({
   readonly locale: SupportedLocale;
 }): string {
   return getRouteHrefWithLocale({
-    href: `/rememes/${contract}/${id}`,
+    href: `/rememes/${encodeURIComponent(contract)}/${encodeURIComponent(
+      String(id)
+    )}`,
     locale,
   });
 }

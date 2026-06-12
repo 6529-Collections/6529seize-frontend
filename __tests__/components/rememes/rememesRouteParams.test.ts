@@ -50,5 +50,12 @@ describe("Rememes route params", () => {
     expect(
       getRememeDetailHref({ contract: "0xabc", id: 1, locale: "de-DE" })
     ).toBe("/rememes/0xabc/1?locale=de-DE");
+    expect(
+      getRememeDetailHref({
+        contract: "collection/alpha",
+        id: "token#1",
+        locale: "de-DE",
+      })
+    ).toBe("/rememes/collection%2Falpha/token%231?locale=de-DE");
   });
 });

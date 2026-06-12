@@ -57,7 +57,7 @@
 
 ## Common Scenarios
 
-- Filter by one Meme reference, then open a replica from detail `Live`.
+- Filter by one Meme reference, then open a replica from detail `Overview`.
 - Switch to `Recently Added` to inspect newer additions first.
 - Open `Metadata` for token URI and attributes, then open `References` to
   inspect linked Meme cards.

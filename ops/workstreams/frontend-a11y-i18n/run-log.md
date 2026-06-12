@@ -144,3 +144,9 @@
   same while the source no longer adds a repeated flat key block.
 - Validation for the Sonar follow-up passed: focused i18n Jest suite, focused
   Prettier check, `typecheck:changed`, and `lint:changed`.
+- CodeRabbit completed a manual review on PR #2610 after auto-review was
+  skipped for the stacked base branch. Accepted both valid quick wins: encoded
+  Rememe detail route segments in `getRememeDetailHref` and updated the
+  Rememes feature doc's stale `Live` tab reference to `Overview`.
+- Validation for the CodeRabbit follow-up passed: focused Rememes route-param
+  Jest suite, focused Prettier check, `typecheck:changed`, and `lint:changed`.
