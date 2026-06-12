@@ -543,6 +543,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               show={true}
               nft={nft}
               pageSize={ACTIVITY_PAGE_SIZE}
+              locale={locale}
             />
           )}
         {activeTab === MEME_FOCUS.HISTORY &&

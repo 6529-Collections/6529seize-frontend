@@ -275,3 +275,36 @@
   exited 0 at 98/100 with only the unrelated dirty EmojiContext
   fetch-in-effect diagnostic and the existing test-only `next/image` mock
   warning.
+- Confirmed PR #2613 is bot-happy again on latest head `0b79960`: CodeRabbit
+  completed with no actionable comments, no review threads were open, DCO
+  passed, SonarCloud passed, Snyk passed, and Claude remained skipped by the
+  organization monthly code review spending cap. Per workstream policy, do not
+  merge PR #2613 without human approval.
+- Started stacked branch `codex/the-memes-activity-a11y-i18n` from PR #2613
+  for the next safe The Memes Card Activity tab surface.
+- Implemented the initial The Memes Card Activity accessibility and i18n pass:
+  activity region labeling, hidden table caption, message-backed activity
+  headings, transaction-type dropdown label/options, loading and empty states,
+  and locale-aware ETH volume formatting. Shared `LatestActivityRow`
+  transaction copy/date formatting and shared pagination copy remain deferred.
+- Validation passed for the activity slice: targeted Card Activity and i18n
+  Jest suites (2 suites, 21 tests), focused Prettier, `lint:changed`,
+  `typecheck:changed`, and `react-doctor:diff`. React Doctor exited 0 at
+  95/100 with only the unrelated dirty EmojiContext fetch-in-effect diagnostic
+  and existing `MemePage` size/state/useSearchParams warnings.
+- Browser smoke passed on the live local frontend at
+  `/the-memes/1?focus=activity&locale=de-DE` for desktop and a 390px mobile
+  viewport. Verified document title, selected Card Activity tab, activity
+  region label, hidden table caption, German ETH number formatting,
+  transaction-type dropdown accessible name/options, 44px dropdown target size,
+  no horizontal overflow, and no Next.js runtime session errors. Shared local
+  waves/emoji requests still log API/403 errors unrelated to this route change.
+- Opened review-ready stacked PR #2614 against PR #2613. Per workstream policy,
+  do not merge PR #2614 without human approval.
+- Addressed SonarCloud feedback on PR #2614 by replacing the Card Activity
+  loading state's explicit `role="status"` wrapper with native `<output>` while
+  preserving the translated accessible name.
+- Validation for the SonarCloud follow-up passed: focused Card Activity and
+  i18n Jest suites (2 suites, 22 tests), focused Prettier, `lint:changed`,
+  `typecheck:changed`, and `react-doctor:diff`. React Doctor exited 0 at
+  99/100 with only the unrelated dirty EmojiContext fetch-in-effect diagnostic.

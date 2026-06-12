@@ -50,10 +50,13 @@
 6. Previous/next arrows move to adjacent card IDs and keep the full query string.
 7. The `Overview` live stats use the active supported `locale` for source
    copy fallbacks, mint dates, counts, ranks, percentages, and market numbers.
-8. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
+8. `Card Activity` uses the active supported `locale` for volume labels and
+   ETH numbers, activity headings, the transaction-type dropdown label/options,
+   loading and empty states, and the hidden activity-table caption.
+9. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
    for later tab switches.
-9. If a numeric card id is unresolved, the route removes `focus`, hides tab
-   content, and shows the shared next-mint fallback panel.
+10. If a numeric card id is unresolved, the route removes `focus`, hides tab
+    content, and shows the shared next-mint fallback panel.
 
 ## Route States
 
@@ -106,6 +109,11 @@
 - Overview live-stat labels, creator labels, additional-details controls, mint
   dates, counts, ranks, percentages, and market numbers are routed through the
   progressive i18n helpers.
+- Card Activity headings, dropdown labels/options, volume labels and ETH
+  numbers, loading and empty states, and the hidden table caption are routed
+  through the progressive i18n helpers.
+- Shared activity-row copy, pagination copy, and transaction-specific date and
+  amount formatting remain deferred activity-surface debt.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the

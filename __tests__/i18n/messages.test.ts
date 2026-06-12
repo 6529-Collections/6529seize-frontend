@@ -69,6 +69,14 @@ describe("frontend i18n helpers", () => {
         total: "100",
       })
     ).toBe("Rank 1/100");
+    expect(t("de-DE", "theMemes.detail.activity.region")).toBe(
+      t("en-US", "theMemes.detail.activity.region")
+    );
+    expect(
+      t("es-ES", "theMemes.detail.activity.table.caption", { tokenId: 1 })
+    ).toBe(
+      t("en-US", "theMemes.detail.activity.table.caption", { tokenId: 1 })
+    );
     expect(
       t("de-DE", "rememes.detail.documentTitle", {
         name: "Meme",
