@@ -95,6 +95,10 @@ const TIMELINE_MESSAGES = namespaceMessages("timeline", [
   ["fields.addedImage", "Added Image"],
   ["fields.removedAnimation", "Removed Animation"],
   ["fields.addedAnimation", "Added Animation"],
+  ["media.defaultLabel", "Timeline media"],
+  ["media.imageAlt", "{label} preview image"],
+  ["media.videoAriaLabel", "{label} preview video"],
+  ["media.htmlTitle", "{label} interactive preview"],
 ] as const);
 
 const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [

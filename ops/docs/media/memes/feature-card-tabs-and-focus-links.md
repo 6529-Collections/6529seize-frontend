@@ -54,7 +54,8 @@
    ETH numbers, activity headings, the transaction-type dropdown label/options,
    loading and empty states, and the hidden activity-table caption.
 9. `Timeline` uses the active supported `locale` for its region label, UTC date
-   formatting, URI/TXN link labels, and change field labels.
+   formatting, URI/TXN link labels, change field labels, and timeline media
+   accessible names.
 10. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
     for later tab switches.
 11. If a numeric card id is unresolved, the route removes `focus`, hides tab
@@ -118,8 +119,11 @@
   amount formatting remain deferred activity-surface debt.
 - Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
   change field labels are routed through the progressive i18n helpers.
-- Timeline media alt text, iframe titles, raw metadata values, and event text
-  remain deferred shared-timeline debt.
+- Timeline image alt text, video accessible labels, and HTML iframe titles use
+  message-backed text based on the localized change label.
+- Timeline metadata values render as plain text with preserved line breaks;
+  event text remains source-data copy and deeper media semantics remain
+  deferred shared-timeline debt.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the

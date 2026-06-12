@@ -83,6 +83,12 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "timeline.links.uriAriaLabel")).toBe(
       t("en-US", "timeline.links.uriAriaLabel")
     );
+    const timelineMediaParams = {
+      label: t("en-US", "timeline.fields.addedImage"),
+    };
+    expect(t("es-ES", "timeline.media.imageAlt", timelineMediaParams)).toBe(
+      t("en-US", "timeline.media.imageAlt", timelineMediaParams)
+    );
     expect(
       t("de-DE", "rememes.detail.documentTitle", {
         name: "Meme",
