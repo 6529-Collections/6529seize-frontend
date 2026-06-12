@@ -50,7 +50,7 @@ pagination.
 
 ### Distribution Route `/meme-lab/{id}/distribution`
 
-1. Open this route from `Distribution Plan` on `Live`, or open the route
+1. Open this route from `Distribution Plan` on `Overview`, or open the route
    directly.
 2. The route validates `{id}` as a positive integer.
 3. Review the page header, optional distribution photos, and wallet table.
