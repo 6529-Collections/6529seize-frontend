@@ -493,6 +493,7 @@ export const EN_US_MESSAGES = {
   "rememes.logoAlt": "ReMemes",
   "rememes.actions.add": "Add ReMeme",
   "rememes.results.count": "(x{count})",
+  "rememes.results.gridLabel": "ReMemes results",
   "rememes.sorting.filterLabel": "Sort",
   "rememes.sort.random": "Random",
   "rememes.sort.recentlyAdded": "Recently Added",

@@ -1,6 +1,7 @@
 import {
   getInitialRememesMemeId,
   getRememeDetailHref,
+  getRememesAddHref,
   getRememesBrowseQuery,
   getRouteHrefWithLocale,
   getRememesRouteLocale,
@@ -50,6 +51,10 @@ describe("Rememes route params", () => {
     expect(
       getRememeDetailHref({ contract: "0xabc", id: 1, locale: "de-DE" })
     ).toBe("/rememes/0xabc/1?locale=de-DE");
+    expect(getRememesAddHref({ locale: "en-US" })).toBe("/rememes/add");
+    expect(getRememesAddHref({ locale: "de-DE" })).toBe(
+      "/rememes/add?locale=de-DE"
+    );
     expect(
       getRememeDetailHref({
         contract: "collection/alpha",

@@ -7,7 +7,8 @@
 - Browse supports sort/filter controls, random refresh, pagination, and detail
   handoff.
 - Browse is progressively i18n-ready for labels, accessible names, metadata,
-  logo alt text, loading text, and count formatting.
+  logo alt text, loading text, count formatting, locale-preserving card/detail
+  navigation, and the Add ReMeme action.
 - Detail is progressively i18n-ready for document metadata, labels, accessible
   names, tab labels, reference-card labels, and locale-preserving navigation.
 - Detail uses in-page tabs: `Overview`, `Metadata`, and `References`.
@@ -35,7 +36,7 @@
 3. Review the header actions:
    - Result count badge
    - `LFG: Start the Show!`
-   - `Add ReMeme` (`/rememes/add`)
+   - `Add ReMeme` (`/rememes/add`, preserving non-default `locale`)
 4. Apply filters:
    - `Sort`: `Random` or `Recently Added`
    - `Token Type`: `All`, `ERC-721`, `ERC-1155`
@@ -73,8 +74,10 @@
 - Non-numeric `meme_id` values are cleared back to `/rememes`.
 - Count formatting follows the active locale; visible token IDs remain stable
   identifiers.
-- Browse card, detail back, replica, and reference-card links preserve
-  non-default `locale` values.
+- Browse exposes the card grid as a labelled results list for assistive
+  technology.
+- Browse card, Add ReMeme, detail back, replica, and reference-card links
+  preserve non-default `locale` values.
 - Sort, token type, and page are in-memory state and reset on reload.
 - Changing sort/token type/meme filter resets pagination to page 1.
 - Detail tabs (`Overview`, `Metadata`, `References`) are in-page state only and
