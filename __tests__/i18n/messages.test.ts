@@ -40,6 +40,10 @@ describe("frontend i18n helpers", () => {
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
     expect(t("en-GB", "theMemes.sorting.sortBy")).toBe("Sort by");
+    expect(t("fr-FR", "theMemes.detail.tabs.collectors")).toBe("Collectors");
+    expect(t("es-ES", "theMemes.detail.heading.card", { tokenId: 1 })).toBe(
+      "Card 1"
+    );
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {
