@@ -27,7 +27,7 @@ page migration PRs for safe media surfaces.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
 - Current implementation surface: The Memes header calendar period strip,
   stacked on PR #2619. The branch is
-  `codex/meme-calendar-periods-a11y-i18n`; the PR is expected to be
+  `codex/meme-calendar-periods-a11y-i18n`; PR #2620 is open and must be
   review-ready only.
 - Scope includes passing the active detail-page locale into the period strip,
   routing season/period labels and accessible names through source messages,
@@ -40,8 +40,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open the stacked review-ready PR for
-   `codex/meme-calendar-periods-a11y-i18n`.
+1. Trigger available review bots on PR #2620.
 2. Iterate on actionable CodeRabbit/Claude/CI feedback.
 3. Keep page implementation PRs review-ready only; do not merge without human
    approval.

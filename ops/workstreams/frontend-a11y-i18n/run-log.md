@@ -483,3 +483,5 @@
   locale-preserving season link href, labelled period group, 24px season-link
   target, no horizontal overflow, no mobile page errors, and no Next.js runtime
   session errors.
+- Opened review-ready stacked PR #2620 against PR #2619. Per workstream policy,
+  do not merge PR #2620 without human approval.
