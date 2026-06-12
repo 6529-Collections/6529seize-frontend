@@ -299,3 +299,5 @@
   transaction-type dropdown accessible name/options, 44px dropdown target size,
   no horizontal overflow, and no Next.js runtime session errors. Shared local
   waves/emoji requests still log API/403 errors unrelated to this route change.
+- Opened review-ready stacked PR #2614 against PR #2613. Per workstream policy,
+  do not merge PR #2614 without human approval.
