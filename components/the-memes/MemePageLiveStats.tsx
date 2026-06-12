@@ -6,12 +6,15 @@ import ProfileAvatar, {
 } from "@/components/common/profile/ProfileAvatar";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
+import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import type { BaseNFT, MemesExtendedData, NFT } from "@/entities/INFT";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import useCapacitor from "@/hooks/useCapacitor";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { FireIcon } from "@heroicons/react/24/outline";
 import {
   ArrowUpRightIcon,
@@ -398,8 +401,14 @@ function getInitials(value: string | undefined) {
     .toUpperCase();
 }
 
-function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
-  const distributionPlanLink = getDistributionPlanLink(nft);
+function MemeDistributionPlanLink({
+  nft,
+  locale,
+}: {
+  readonly nft: NFT;
+  readonly locale: SupportedLocale;
+}) {
+  const distributionPlanLink = getDistributionPlanLink(nft, locale);
 
   return (
     <section className="tw-pt-6">
@@ -409,7 +418,7 @@ function MemeDistributionPlanLink({ nft }: { readonly nft: NFT }) {
         rel={nft.has_distribution ? undefined : "noopener noreferrer"}
         className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-white"
       >
-        <span>Distribution Plan</span>
+        <span>{t(locale, "distribution.planLink")}</span>
         <ArrowUpRightIcon className="-tw-mr-1 tw-h-4 tw-w-4 tw-text-iron-500" />
       </Link>
     </section>
@@ -461,7 +470,13 @@ function MemeMarketplaceLinks({ nft }: { readonly nft: NFT }) {
   );
 }
 
-export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
+export function MemeNftLivePanel({
+  nft,
+  locale = DEFAULT_LOCALE,
+}: {
+  readonly nft: NFT;
+  readonly locale?: SupportedLocale;
+}) {
   return (
     <section className="tw-pt-6 md:tw-pt-8">
       <h3 className={`${SECTION_HEADER_TITLE_CLASS} tw-mb-4`}>
@@ -489,7 +504,7 @@ export function MemeNftLivePanel({ nft }: { readonly nft: NFT }) {
         />
         <MemeMarketplaceLinks nft={nft} />
       </div>
-      <MemeDistributionPlanLink nft={nft} />
+      <MemeDistributionPlanLink nft={nft} locale={locale} />
     </section>
   );
 }
@@ -527,9 +542,13 @@ function MarketMetric({
   );
 }
 
-function getDistributionPlanLink(nft: NFT) {
+function getDistributionPlanLink(nft: NFT, locale: SupportedLocale) {
   if (nft.has_distribution) {
-    return `/the-memes/${nft.id}/distribution`;
+    return getDistributionDetailHref({
+      basePath: "/the-memes",
+      id: nft.id,
+      locale,
+    });
   }
   if (nft.id > 3) {
     return `https://github.com/6529-Collections/thememecards/tree/main/card${nft.id}`;

@@ -38,19 +38,6 @@ jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
 }));
-jest.mock("@/components/nft-attributes/NftStats", () => ({
-  __esModule: true,
-  NftPageStats: ({ afterMetadata }: { afterMetadata?: React.ReactNode }) => (
-    <>
-      <tr>
-        <td>Metadata</td>
-        <td>View</td>
-      </tr>
-      {afterMetadata}
-      <tr data-testid="nft-stats" />
-    </>
-  ),
-}));
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   CookieConsentProvider: ({ children }: { children: React.ReactNode }) => (
@@ -344,7 +331,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.getByText("97")).toBeInTheDocument();
     expect(screen.getByText("Rank 480/498")).toHaveClass(
       "tw-text-[10px]",
-      "md:tw-text-xs"
+      "md:tw-text-[11px]"
     );
     expect(exMuseumLabel).toBeInTheDocument();
     expect(
@@ -367,6 +354,23 @@ describe("MemePageLiveRightMenu distribution link", () => {
     });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
+  });
+
+  it("preserves locale in distribution plan links", async () => {
+    const nft = createNft({ id: 5, has_distribution: true });
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageLiveRightMenu show nft={nft} locale="de-DE" />
+        </CookieConsentProvider>
+      );
+    });
+
+    const link = screen.getByRole("link", { name: /distribution plan/i });
+    expect(link).toHaveAttribute(
+      "href",
+      `/the-memes/5/distribution?locale=de-DE`
+    );
   });
 
   it("shows marketplace links outside non-US iOS", async () => {

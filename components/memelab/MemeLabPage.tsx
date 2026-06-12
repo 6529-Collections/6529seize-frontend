@@ -794,6 +794,7 @@ export default function MemeLabPageComponent({
         nft={nft}
         nftMeta={nftMeta}
         showMarketplaceLinks={!capacitor.isIos || country === "US"}
+        locale={locale}
         artworkFooter={
           hasOwnershipContext ? (
             <MemeLabYourCardsPanel nft={nft} nftBalance={nftBalance} />

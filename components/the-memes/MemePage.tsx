@@ -445,7 +445,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               fullWidth
             />
           )}
-          <MemePageLiveRightMenu show={true} nft={nft} nftMeta={nftMeta} />
+          <MemePageLiveRightMenu
+            show={true}
+            nft={nft}
+            nftMeta={nftMeta}
+            locale={locale}
+          />
         </div>
       </div>
     );

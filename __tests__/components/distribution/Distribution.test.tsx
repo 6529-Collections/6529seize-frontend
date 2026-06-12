@@ -251,7 +251,7 @@ describe("DistributionPage", () => {
           screen.getByText(/Distribution Plan will be made available soon/)
         ).toBeInTheDocument();
         expect(screen.getByText(/check back later/)).toBeInTheDocument();
-        expect(screen.getByAltText("SummerGlasses")).toBeInTheDocument();
+        expect(screen.queryByAltText("SummerGlasses")).not.toBeInTheDocument();
       });
     });
 
@@ -348,6 +348,39 @@ describe("DistributionPage", () => {
         },
         { timeout: 5000 }
       );
+    });
+
+    it("renders localized table labels and counts when a locale is provided", async () => {
+      mockFetchAllPages.mockResolvedValue([]);
+      mockFetchUrl.mockResolvedValue({
+        count: 2000,
+        data: [
+          {
+            ...mockDistributionData[0],
+            minted: 1234,
+            total_count: 2000,
+          },
+        ],
+      });
+
+      render(
+        <DistributionPage
+          header="Test"
+          contract="0x123"
+          link=""
+          locale="de-DE"
+        />
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("table", {
+            name: /Test Card #123 distribution wallet allocations/i,
+          })
+        ).toBeInTheDocument();
+        expect(screen.getByText("x2.000")).toBeInTheDocument();
+        expect(screen.getByText("1.234")).toBeInTheDocument();
+      });
     });
 
     it("shows loading state during data fetch", async () => {
@@ -785,7 +818,7 @@ describe("DistributionPage", () => {
 
       await waitFor(() => {
         expect(mockSetTitle).toHaveBeenCalledWith(
-          "Test Collection #123 | DISTRIBUTION"
+          "Test Collection #123 | Distribution"
         );
       });
     });

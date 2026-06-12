@@ -2,19 +2,33 @@ import styles from "@/styles/Home.module.scss";
 
 import DistributionComponent from "@/components/distribution/Distribution";
 import {
+  getDistributionRouteLocale,
+  type DistributionSearchParams,
+} from "@/components/distribution/distributionRouteParams";
+import {
   getSharedAppServerSideProps,
   MEME_FOCUS,
 } from "@/components/the-memes/MemeShared";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { Metadata } from "next";
 
-export default function MemeDistributionPage() {
+type MemeDistributionPageProps = {
+  readonly params: Promise<{ id: string }>;
+  readonly searchParams: Promise<DistributionSearchParams>;
+};
+
+export default async function MemeDistributionPage({
+  searchParams,
+}: MemeDistributionPageProps) {
+  const locale = getDistributionRouteLocale(await searchParams);
+
   return (
     <main className={styles["main"]}>
       <DistributionComponent
         header="Meme Lab"
         contract={MEMELAB_CONTRACT}
         link="/meme-lab"
+        locale={locale}
       />
     </main>
   );
@@ -22,14 +36,19 @@ export default function MemeDistributionPage() {
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
-  const { id } = await params;
+  searchParams,
+}: MemeDistributionPageProps): Promise<Metadata> {
+  const [{ id }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = getDistributionRouteLocale(resolvedSearchParams);
+
   return getSharedAppServerSideProps(
     MEMELAB_CONTRACT,
     id,
     MEME_FOCUS.LIVE,
-    true
+    true,
+    locale
   );
 }
