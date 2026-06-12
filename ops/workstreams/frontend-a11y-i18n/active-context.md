@@ -27,7 +27,8 @@ page migration PRs for safe media surfaces.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
 - Current implementation surface: `/meme-calendar` lower drilldown card pass,
   stacked on PR #2622. The branch is
-  `codex/meme-calendar-drilldown-a11y-i18n`; PR is pending.
+  `codex/meme-calendar-drilldown-a11y-i18n`; PR #2623 is open and
+  review-ready only.
 - Scope includes higher-level lower-calendar drilldown card titles, date
   ranges, mint ranges, accessible button names, and focus-visible behavior for
   `Year`, `Epoch`, `Period`, `Era`, and `Eon` views.
@@ -37,9 +38,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Finish the `/meme-calendar` drilldown card slice.
-2. Run focused calendar/i18n checks and browser smoke on the live frontend.
-3. Open a review-ready stacked PR against PR #2622 and iterate bots.
-4. Keep page implementation PRs review-ready only; do not merge without human
+1. Confirm PR #2623 checks and bot feedback after the latest push.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback.
+3. Keep page implementation PRs review-ready only; do not merge without human
    approval.
-5. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+4. Preserve the unrelated dirty EmojiContext and bootstrap style files.
