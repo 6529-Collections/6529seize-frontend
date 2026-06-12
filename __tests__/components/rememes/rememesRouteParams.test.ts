@@ -1,6 +1,8 @@
 import {
   getInitialRememesMemeId,
+  getRememeDetailHref,
   getRememesBrowseQuery,
+  getRouteHrefWithLocale,
   getRememesRouteLocale,
   getSearchParamValue,
   shouldNormalizeRememesMemeId,
@@ -36,5 +38,24 @@ describe("Rememes route params", () => {
     expect(getRememesBrowseQuery({ locale: "de-DE", memeId: 42 })).toBe(
       "meme_id=42&locale=de-DE"
     );
+  });
+
+  it("builds locale-preserving detail hrefs", () => {
+    expect(getRouteHrefWithLocale({ href: "/rememes", locale: "en-US" })).toBe(
+      "/rememes"
+    );
+    expect(
+      getRouteHrefWithLocale({ href: "/rememes?page=2", locale: "de-DE" })
+    ).toBe("/rememes?page=2&locale=de-DE");
+    expect(
+      getRememeDetailHref({ contract: "0xabc", id: 1, locale: "de-DE" })
+    ).toBe("/rememes/0xabc/1?locale=de-DE");
+    expect(
+      getRememeDetailHref({
+        contract: "collection/alpha",
+        id: "token#1",
+        locale: "de-DE",
+      })
+    ).toBe("/rememes/collection%2Falpha/token%231?locale=de-DE");
   });
 });

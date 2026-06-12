@@ -77,3 +77,38 @@ export function getRememesBrowseQuery({
 
   return query.toString();
 }
+
+export function getRouteHrefWithLocale({
+  href,
+  locale,
+}: {
+  readonly href: string;
+  readonly locale: SupportedLocale;
+}): string {
+  if (locale === DEFAULT_LOCALE) {
+    return href;
+  }
+
+  const [pathname, currentQuery = ""] = href.split("?");
+  const query = new URLSearchParams(currentQuery);
+  query.set("locale", locale);
+
+  return `${pathname}?${query.toString()}`;
+}
+
+export function getRememeDetailHref({
+  contract,
+  id,
+  locale,
+}: {
+  readonly contract: string;
+  readonly id: string | number;
+  readonly locale: SupportedLocale;
+}): string {
+  return getRouteHrefWithLocale({
+    href: `/rememes/${encodeURIComponent(contract)}/${encodeURIComponent(
+      String(id)
+    )}`,
+    locale,
+  });
+}
