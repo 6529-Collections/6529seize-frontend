@@ -31,10 +31,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Finish the Meme Lab browse/collection card PR from
-   `codex/meme-lab-cards-a11y-i18n`.
-2. Run focused lint, typecheck, react-doctor, and browser smoke on
-   `/meme-lab` and `/meme-lab/collection/{collection}`.
-3. Open the Meme Lab card PR stacked on PR #2607 and leave it review-ready only.
+1. Monitor PR #2608 for CodeRabbit, Claude if available, and CI feedback.
+2. Fix valid bot or CI findings on PR #2608.
+3. Leave PR #2608 review-ready only; do not merge it.
 4. Iterate with CodeRabbit, Claude if available, and CI feedback without
    merging page-change PRs.

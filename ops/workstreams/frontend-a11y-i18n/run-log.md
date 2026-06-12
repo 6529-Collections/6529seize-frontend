@@ -73,3 +73,5 @@
   Verified sorting region labels, sort direction accessible names, German
   volume/date formatting, card accessible names, collection view accessible
   names, and the fixed collection route loading cards.
+- Opened review-ready stacked PR #2608 against PR #2607. Per workstream policy,
+  do not merge PR #2608 without human approval.
