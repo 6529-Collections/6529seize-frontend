@@ -1,6 +1,7 @@
 import {
   getReviewbotPublicUsageSummary,
   normalizeReviewbotUsageApiBaseUrl,
+  normalizeReviewbotUsageSummaryPath,
 } from "@/services/reviewbot-usage-api";
 
 describe("reviewbot usage api", () => {
@@ -8,10 +9,31 @@ describe("reviewbot usage api", () => {
     expect(
       normalizeReviewbotUsageApiBaseUrl("https://reviewbot.6529.io/")
     ).toBe("https://reviewbot.6529.io");
-    expect(normalizeReviewbotUsageApiBaseUrl("ftp://reviewbot.6529.io")).toBe(
+    expect(normalizeReviewbotUsageApiBaseUrl("http://localhost:42929/")).toBe(
+      "http://localhost:42929"
+    );
+    expect(normalizeReviewbotUsageApiBaseUrl("http://reviewbot.6529.io")).toBe(
+      null
+    );
+    expect(normalizeReviewbotUsageApiBaseUrl("mailto:reviewbot@6529.io")).toBe(
       null
     );
     expect(normalizeReviewbotUsageApiBaseUrl("not a url")).toBe(null);
+  });
+
+  it("keeps configured summary paths on the usage API origin", () => {
+    expect(normalizeReviewbotUsageSummaryPath("/custom/summary")).toBe(
+      "/custom/summary"
+    );
+    expect(
+      normalizeReviewbotUsageSummaryPath("/custom/summary?scope=public")
+    ).toBe("/custom/summary?scope=public");
+    expect(
+      normalizeReviewbotUsageSummaryPath("https://example.com/summary")
+    ).toBe("/api/public/usage/summary");
+    expect(normalizeReviewbotUsageSummaryPath("//example.com/summary")).toBe(
+      "/api/public/usage/summary"
+    );
   });
 
   it("returns an unconfigured result without a base URL", async () => {

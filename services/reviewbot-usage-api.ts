@@ -7,6 +7,7 @@ import { z } from "zod";
 const DEFAULT_PUBLIC_SUMMARY_PATH = "/api/public/usage/summary";
 const DEFAULT_SUMMARY_DAYS = 30;
 const DEFAULT_TIMEOUT_MS = 8_000;
+const LOCAL_API_HOSTS = new Set(["127.0.0.1", "::1", "localhost"]);
 
 const safeNumberSchema = z.coerce.number().finite().catch(0);
 const safeIntegerSchema = z.coerce.number().int().nonnegative().catch(0);
@@ -94,9 +95,9 @@ export async function getReviewbotPublicUsageSummary(
 
   const fetchImpl = options.fetchImpl ?? fetch;
   const days = normalizeDays(options.days ?? DEFAULT_SUMMARY_DAYS);
-  const summaryPath =
-    env["REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH"] ||
-    DEFAULT_PUBLIC_SUMMARY_PATH;
+  const summaryPath = normalizeReviewbotUsageSummaryPath(
+    env["REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH"]
+  );
   const url = new URL(summaryPath, `${apiBaseUrl}/`);
   url.searchParams.set("days", String(days));
 
@@ -152,12 +153,35 @@ export function normalizeReviewbotUsageApiBaseUrl(
 
   try {
     const url = new URL(raw);
-    if (url.protocol !== "https:" && url.protocol !== "http:") {
+    if (url.protocol === "http:" && LOCAL_API_HOSTS.has(url.hostname)) {
+      return url.toString().replace(/\/$/, "");
+    }
+    if (url.protocol !== "https:") {
       return null;
     }
     return url.toString().replace(/\/$/, "");
   } catch {
     return null;
+  }
+}
+
+export function normalizeReviewbotUsageSummaryPath(
+  value: string | undefined
+): string {
+  const raw = value?.trim();
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
+    return DEFAULT_PUBLIC_SUMMARY_PATH;
+  }
+
+  try {
+    const url = new URL(raw, "https://reviewbot.local");
+    url.hash = "";
+    if (url.origin !== "https://reviewbot.local") {
+      return DEFAULT_PUBLIC_SUMMARY_PATH;
+    }
+    return `${url.pathname}${url.search}`;
+  } catch {
+    return DEFAULT_PUBLIC_SUMMARY_PATH;
   }
 }
 
