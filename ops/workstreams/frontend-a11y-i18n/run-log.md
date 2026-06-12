@@ -422,3 +422,5 @@
   overflow, no page errors in the mobile smoke, and no Next.js runtime session
   errors. Shared local API/resource requests still log unrelated browser console
   failures in the desktop session.
+- Opened review-ready stacked PR #2618 against PR #2617. Per workstream policy,
+  do not merge PR #2618 without human approval.

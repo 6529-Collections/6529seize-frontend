@@ -26,8 +26,8 @@ page migration PRs for safe media surfaces.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
 - Current implementation surface: The Memes Art additional-details labels and
-  Arweave link rows, stacked on PR #2617. PR #2617 is bot-happy on latest head
-  `5987023`, review-ready only, and must not be merged without human approval.
+  Arweave link rows, stacked on PR #2617 and opened as PR #2618. PR #2618 is
+  review-ready only and must not be merged without human approval.
 - Scope includes passing the active detail-page locale into The Art details,
   routing section headings, metric labels, empty states, open/download labels,
   and download progress/completion states through progressive messages, and
@@ -38,8 +38,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open a review-ready PR stacked on PR #2617.
-2. Trigger available review bots and iterate on actionable feedback.
-3. Keep page implementation PRs review-ready only; do not merge without human
+1. Trigger available review bots on PR #2618 and iterate on actionable
+   feedback.
+2. Keep page implementation PRs review-ready only; do not merge without human
    approval.
-4. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+3. Preserve the unrelated dirty EmojiContext and bootstrap style files.
