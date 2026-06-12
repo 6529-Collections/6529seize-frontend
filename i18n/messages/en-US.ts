@@ -78,6 +78,25 @@ const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["activity.transactionType", "Transaction Type"],
 ] as const);
 
+const TIMELINE_MESSAGES = namespaceMessages("timeline", [
+  ["date.utc", "{date} UTC"],
+  ["links.uri", "URI"],
+  ["links.uriAriaLabel", "Open metadata URI"],
+  ["links.txn", "TXN"],
+  ["links.txnAriaLabel", "Open transaction on Etherscan"],
+  ["fields.from", "From"],
+  ["fields.to", "To"],
+  ["fields.value", "Value"],
+  ["fields.removedValue", "Removed Value"],
+  ["fields.addedValue", "Added Value"],
+  ["fields.removedUrl", "Removed URL"],
+  ["fields.addedUrl", "Added URL"],
+  ["fields.removedImage", "Removed Image"],
+  ["fields.addedImage", "Added Image"],
+  ["fields.removedAnimation", "Removed Animation"],
+  ["fields.addedAnimation", "Added Animation"],
+] as const);
+
 const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [
   ["title", "Distribution"],
   ["documentTitle", "{collection} #{tokenId} | Distribution"],
@@ -169,6 +188,11 @@ const THE_MEMES_DETAIL_ACTIVITY_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const THE_MEMES_DETAIL_TIMELINE_MESSAGES = namespaceMessages(
+  "theMemes.detail.timeline",
+  [["region", "The Memes card timeline"]] as const
+);
+
 export const EN_US_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.title": "The Memes",
@@ -213,6 +237,8 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
+  ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
+  ...TIMELINE_MESSAGES,
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Edition Size",
   "theMemes.sort.meme": "Meme",

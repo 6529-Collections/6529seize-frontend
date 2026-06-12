@@ -882,7 +882,7 @@ export default function MemeLabPageComponent({
         className="tw-pb-5 tw-pt-3"
       >
         <div className="tw-mx-auto tw-w-full md:tw-w-10/12">
-          {nft && <Timeline nft={nft} steps={nftHistory} />}
+          {nft && <Timeline nft={nft} steps={nftHistory} locale={locale} />}
         </div>
       </section>
     );
