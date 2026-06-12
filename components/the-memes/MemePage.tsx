@@ -521,6 +521,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           <MemePageReferencesSubMenu
             show={activeTab === MEME_FOCUS.REFERENCES}
             nft={nft}
+            locale={locale}
           />
           {userLoaded && (
             <MemePageYourCardsSubMenu

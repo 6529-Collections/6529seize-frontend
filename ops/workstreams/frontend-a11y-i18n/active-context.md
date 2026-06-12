@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/the-memes-art-details-a11y-i18n`
+`codex/the-memes-references-a11y-i18n`
 
 ## Constraints
 
@@ -25,21 +25,23 @@ page migration PRs for safe media surfaces.
 - WCAG target: WCAG 2.2 AA.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
-- Current implementation surface: The Memes Art additional-details labels and
-  Arweave link rows, stacked on PR #2617 and opened as PR #2618. PR #2618 is
-  review-ready only and must not be merged without human approval.
-- Scope includes passing the active detail-page locale into The Art details,
-  routing section headings, metric labels, empty states, open/download labels,
-  and download progress/completion states through progressive messages, and
-  using locale-aware formatting for TDH and rank values.
-- Property trait names/values, media URLs, and raw NFT metadata remain
-  source-data copy; deeper media semantics remain deferred Art surface debt.
+- Current implementation surface: The Memes References tab, stacked on PR
+  #2618. The branch is `codex/the-memes-references-a11y-i18n`; local
+  validation passed and PR publication is next. The PR must be review-ready
+  only.
+- Scope includes passing the active detail-page locale into References,
+  routing Meme Lab/ReMemes descriptions, logo alt text, sort trigger/options,
+  refresh labels, empty state, ReMeme card accessible names, locale-preserving
+  ReMeme links, and replica counts through progressive messages/formatters.
+- Meme Lab referenced card copy comes from the shared ReMeme references grid
+  and receives the active locale. ReMeme names, collection names, token IDs, and
+  source NFT metadata remain source-data copy.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Trigger available review bots on PR #2618 and iterate on actionable
-   feedback.
-2. Keep page implementation PRs review-ready only; do not merge without human
+1. Open a stacked review-ready PR against PR #2618 and trigger available bots.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback.
+3. Keep page implementation PRs review-ready only; do not merge without human
    approval.
-3. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+4. Preserve the unrelated dirty EmojiContext and bootstrap style files.

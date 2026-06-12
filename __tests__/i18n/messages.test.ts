@@ -81,6 +81,14 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "theMemes.detail.timeline.region")).toBe(
       t("en-US", "theMemes.detail.timeline.region")
     );
+    expect(t("fr-FR", "theMemes.detail.references.rememes.description")).toBe(
+      t("en-US", "theMemes.detail.references.rememes.description")
+    );
+    expect(
+      t("es-ES", "theMemes.detail.references.sort.trigger", {
+        sort: t("es-ES", "rememes.sort.random"),
+      })
+    ).toBe(`Sort: ${t("es-ES", "rememes.sort.random")}`);
     expect(t("fr-FR", "theMemes.detail.art.media.fullscreen")).toBe(
       t("en-US", "theMemes.detail.art.media.fullscreen")
     );

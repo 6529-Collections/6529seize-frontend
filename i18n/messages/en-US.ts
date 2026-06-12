@@ -197,6 +197,26 @@ const THE_MEMES_DETAIL_TIMELINE_MESSAGES = namespaceMessages(
   [["region", "The Memes card timeline"]] as const
 );
 
+const THE_MEMES_DETAIL_REFERENCES_MESSAGES = namespaceMessages(
+  "theMemes.detail.references",
+  [
+    ["empty.rememes", "ReMemes that reference this NFT will appear here."],
+    [
+      "memeLab.description",
+      "The Meme Lab is the lab for Meme Artists to release work that is related to The Meme Cards.",
+    ],
+    ["memeLab.logoAlt", "Meme Lab"],
+    ["refresh.ariaLabel", "Refresh ReMemes results"],
+    ["refresh.tooltip", "Refresh results"],
+    [
+      "rememes.description",
+      'ReMemes are community-created and community-submitted NFTs inspired by the Meme Cards. They are not created or "authorized" by 6529 Collections.',
+    ],
+    ["rememes.logoAlt", "ReMemes"],
+    ["sort.trigger", "Sort: {sort}"],
+  ] as const
+);
+
 const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages("theMemes.detail.art", [
   ["download.cancelDownload", "Cancel download"],
   ["download.complete", "Complete"],
@@ -293,6 +313,7 @@ export const EN_US_MESSAGES = {
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
+  ...THE_MEMES_DETAIL_REFERENCES_MESSAGES,
   ...THE_MEMES_DETAIL_ART_MESSAGES,
   ...TIMELINE_MESSAGES,
   "theMemes.sort.age": "Age",
