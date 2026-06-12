@@ -15,20 +15,23 @@ import {
 import { t } from "@/i18n/messages";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createElement } from "react";
 
 let mockCountry = "US";
 let mockIsIos = false;
+const mockMemePageArt = jest.fn((..._args: unknown[]) => (
+  <div data-testid="meme-page-art" />
+));
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ unoptimized, priority, ...props }: any) => (
-    <img
-      alt={props.alt ?? ""}
-      {...props}
-      data-unoptimized={unoptimized}
-      data-priority={priority}
-    />
-  ),
+  default: ({ unoptimized, priority, ...props }: any) =>
+    createElement("img", {
+      ...props,
+      alt: props.alt ?? "",
+      "data-unoptimized": unoptimized,
+      "data-priority": priority,
+    }),
 }));
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -40,7 +43,7 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("@/components/the-memes/MemePageArt", () => ({
   __esModule: true,
-  MemePageArt: () => <div data-testid="meme-page-art" />,
+  MemePageArt: (...args: unknown[]) => mockMemePageArt(...args),
 }));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
@@ -93,6 +96,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockMemePageArt.mockClear();
   mockCountry = "US";
   mockIsIos = false;
 });
@@ -524,6 +528,23 @@ describe("MemePageLiveSubMenu details", () => {
       expect(
         screen.getByRole("button", { name: /additional details/i })
       ).toHaveAttribute("aria-expanded", "true")
+    );
+  });
+
+  it("passes locale into additional details content", () => {
+    render(
+      <MemePageLiveSubMenu
+        show
+        nft={createNft()}
+        nftMeta={createMeta()}
+        defaultAdditionalDetailsOpen={true}
+        locale="de-DE"
+      />
+    );
+
+    expect(mockMemePageArt).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" }),
+      undefined
     );
   });
 });

@@ -393,3 +393,39 @@
   were verified with the 390px viewport instead.
 - Opened review-ready stacked PR #2617 against PR #2616. Per workstream policy,
   do not merge PR #2617 without human approval.
+- Confirmed PR #2617 is bot-happy on latest head `5987023`: CodeRabbit passed
+  with no actionable comments or review threads, DCO passed, SonarCloud passed,
+  Snyk passed, and Claude remained skipped by the organization monthly code
+  review spending cap. Per workstream policy, do not merge PR #2617 without
+  human approval.
+- Started stacked branch `codex/the-memes-art-details-a11y-i18n` from PR #2617
+  for the next The Memes Art details row/link-label slice.
+- Implemented the initial The Memes Art details accessibility and i18n pass:
+  the active detail-page locale now reaches the Art details component; section
+  headings, metric labels, empty states, Arweave open labels, visible open text,
+  and download progress/completion labels use source messages; and TDH/rank
+  values use locale-aware number formatting. Property trait names/values, media
+  URLs, and raw NFT metadata remain source-data copy.
+- While validating the Art details slice, tightened the shared text-style
+  `Download` action and Art Arweave `Open` links to 24px minimum target height,
+  and replaced Download's clickable status icons with semantic icon buttons.
+- Validation passed for the Art details slice: targeted Download, The Memes Art
+  details, The Memes live submenu, and i18n Jest suites (4 suites, 31 tests),
+  focused Prettier, `lint:changed`, `typecheck:changed`, and
+  `react-doctor:diff`. React Doctor exited 0 at 99/100 with only the unrelated
+  dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for
+  `/the-memes/1?focus=the-art&locale=de-DE` at desktop and a 390px responsive
+  viewport. Verified additional details are expanded for the `the-art` focus
+  key, Art details section headings and Arweave open/download accessible names,
+  German number formatting in details, 24px row action targets, no horizontal
+  overflow, no page errors in the mobile smoke, and no Next.js runtime session
+  errors. Shared local API/resource requests still log unrelated browser console
+  failures in the desktop session.
+- Opened review-ready stacked PR #2618 against PR #2617. Per workstream policy,
+  do not merge PR #2618 without human approval.
+- Addressed CodeRabbit feedback on PR #2618 by marking the route-status row as
+  review-ready only and matching the download-progress fallback test to the
+  formatted string passed by production code.
+- Validation for the PR #2618 bot-feedback follow-up passed: focused i18n Jest
+  suite, focused Prettier, `lint:changed`, and `typecheck:changed`.

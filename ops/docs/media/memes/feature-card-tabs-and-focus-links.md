@@ -60,7 +60,10 @@
     for later tab switches.
 11. The header Art Viewer uses the active supported `locale` for media action
     accessible names and save dialog titles.
-12. If a numeric card id is unresolved, the route removes `focus`, hides tab
+12. The Art additional-details rows use the active supported `locale` for
+    section headings, metric labels, empty states, open/download labels, and
+    TDH/rank number formatting.
+13. If a numeric card id is unresolved, the route removes `focus`, hides tab
     content, and shows the shared next-mint fallback panel.
 
 ## Route States
@@ -122,8 +125,10 @@
 - Header Art Viewer fullscreen/open/download/downloading/close controls,
   previous/next media buttons, and save dialog titles are routed through the
   progressive i18n helpers.
-- The Art additional-details section labels and Arweave link-row copy remain
-  deferred Art surface debt.
+- The Art additional-details section headings, metric labels, empty states,
+  open/download labels, and TDH/rank number formatting are routed through the
+  progressive i18n helpers. Property trait names/values and media URLs remain
+  source-data copy.
 - Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
   change field labels are routed through the progressive i18n helpers.
 - Timeline image alt text, video accessible labels, and HTML iframe titles use

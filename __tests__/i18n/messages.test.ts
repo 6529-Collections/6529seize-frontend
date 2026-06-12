@@ -1,6 +1,7 @@
 import {
   compareLocalized,
   formatDate,
+  formatInteger,
   formatNumber,
   formatRelativeTime,
 } from "@/i18n/format";
@@ -82,6 +83,18 @@ describe("frontend i18n helpers", () => {
     );
     expect(t("fr-FR", "theMemes.detail.art.media.fullscreen")).toBe(
       t("en-US", "theMemes.detail.art.media.fullscreen")
+    );
+    expect(t("de-DE", "theMemes.detail.art.sections.arweaveLinks")).toBe(
+      t("en-US", "theMemes.detail.art.sections.arweaveLinks")
+    );
+    expect(
+      t("es-ES", "theMemes.detail.art.download.downloadingProgress", {
+        percentage: formatInteger("es-ES", 50),
+      })
+    ).toBe(
+      t("en-US", "theMemes.detail.art.download.downloadingProgress", {
+        percentage: formatInteger("en-US", 50),
+      })
     );
     expect(t("fr-FR", "timeline.links.uriAriaLabel")).toBe(
       t("en-US", "timeline.links.uriAriaLabel")

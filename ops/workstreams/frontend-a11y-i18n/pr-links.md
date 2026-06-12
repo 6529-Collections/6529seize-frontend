@@ -15,3 +15,4 @@
 | The Memes timeline    | `codex/the-memes-timeline-a11y-i18n`    | #2615 | Open, review-ready only |
 | Timeline media        | `codex/timeline-media-a11y-i18n`        | #2616 | Open, review-ready only |
 | The Memes art viewer  | `codex/the-memes-art-viewer-a11y-i18n`  | #2617 | Open, review-ready only |
+| The Memes art details | `codex/the-memes-art-details-a11y-i18n` | #2618 | Open, review-ready only |
