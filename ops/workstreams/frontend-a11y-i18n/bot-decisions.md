@@ -16,3 +16,4 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-12 | #2607 | Snyk         | PR check passed                                                          | Accept                               |
 | 2026-06-12 | #2607 | CodeRabbit   | Flagged dead `MemeTab.title` and duplicate `MEME_FOCUS_VALUES` guards    | Fixed                                |
 | 2026-06-12 | #2607 | CodeRabbit   | Flagged hardcoded detail locale, metadata locale path, and focus docs    | Fixed                                |
+| 2026-06-12 | #2622 | SonarCloud   | Flagged guide `role="region"` and month-cell cognitive complexity        | Fixed                                |

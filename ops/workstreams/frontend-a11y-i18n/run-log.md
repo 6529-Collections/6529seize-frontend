@@ -555,3 +555,9 @@
   resource errors were from the shared backend/emoji feed.
 - Opened review-ready stacked PR #2622 against PR #2621. Per workstream policy,
   do not merge PR #2622 without human approval.
+- Addressed SonarCloud feedback on PR #2622 by replacing the guide panel's
+  generic `role="region"` with a native labelled `section` and extracting the
+  lower-calendar month cell metadata/tooltip rendering from the inline map to
+  reduce cognitive complexity. Re-ran the focused calendar/i18n Jest suites,
+  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and a live browser
+  smoke on `/meme-calendar?locale=de-DE`.
