@@ -67,14 +67,12 @@ export default function Timeline(props: Readonly<Props>) {
   };
 
   function printAttribute(label: string, value: any, fullWidth?: boolean) {
+    const displayValue = String(numberWithCommasFromString(value));
+
     return (
       <Col sm={12} md={fullWidth ? 12 : 6}>
         <b>{label}:</b>{" "}
-        <div
-          dangerouslySetInnerHTML={{
-            __html: numberWithCommasFromString(value).replaceAll("\n", "<br>"),
-          }}
-        ></div>
+        <div className={styles["metadataValue"]}>{displayValue}</div>
       </Col>
     );
   }

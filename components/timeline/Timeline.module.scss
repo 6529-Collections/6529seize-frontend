@@ -169,3 +169,8 @@
   font-size: smaller;
   overflow-wrap: anywhere;
 }
+
+.metadataValue {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}

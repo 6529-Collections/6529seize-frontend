@@ -9,6 +9,7 @@ jest.mock("@/components/timeline/Timeline.module.scss", () => ({
   content: "content",
   linkIcon: "linkIcon",
   changesUl: "changesUl",
+  metadataValue: "metadataValue",
 }));
 
 let mediaProps: any[] = [];
@@ -72,6 +73,22 @@ describe("Timeline", () => {
     expect(
       screen.getByText(`${t("de-DE", "timeline.fields.removedValue")}:`)
     ).toBeInTheDocument();
+  });
+
+  it("renders timeline metadata values as text", () => {
+    const { container } = render(
+      <Timeline
+        nft={baseNft}
+        steps={[makeStep("some_key", undefined, "alpha\n<b>beta</b>")]}
+      />
+    );
+
+    expect(container.innerHTML).toContain("&lt;b&gt;beta&lt;/b&gt;");
+    expect(
+      Array.from(container.querySelectorAll("b")).some(
+        (node) => node.textContent === "beta"
+      )
+    ).toBe(false);
   });
 
   it("passes image type for image changes", () => {
