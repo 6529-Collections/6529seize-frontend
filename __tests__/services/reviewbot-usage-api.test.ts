@@ -1,0 +1,113 @@
+import {
+  getReviewbotPublicUsageSummary,
+  normalizeReviewbotUsageApiBaseUrl,
+} from "@/services/reviewbot-usage-api";
+
+describe("reviewbot usage api", () => {
+  it("normalizes supported base URLs", () => {
+    expect(
+      normalizeReviewbotUsageApiBaseUrl("https://reviewbot.6529.io/")
+    ).toBe("https://reviewbot.6529.io");
+    expect(normalizeReviewbotUsageApiBaseUrl("ftp://reviewbot.6529.io")).toBe(
+      null
+    );
+    expect(normalizeReviewbotUsageApiBaseUrl("not a url")).toBe(null);
+  });
+
+  it("returns an unconfigured result without a base URL", async () => {
+    await expect(
+      getReviewbotPublicUsageSummary({ env: {} })
+    ).resolves.toMatchObject({
+      status: "unconfigured",
+    });
+  });
+
+  it("loads and parses public usage summaries", async () => {
+    const fetchImpl = jest.fn(
+      async () =>
+        ({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            ok: true,
+            range: {
+              days: 30,
+              from: "2026-05-12T00:00:00.000Z",
+              to: "2026-06-11T00:00:00.000Z",
+            },
+            totals: {
+              reviewRuns: 2,
+              costUsd: 1.25,
+              totalTokens: 1000,
+              budgetSkippedRuns: 1,
+            },
+            byDay: [
+              {
+                key: "2026-06-11",
+                reviewRuns: 2,
+                costUsd: 1.25,
+                totalTokens: 1000,
+                budgetSkippedRuns: 1,
+              },
+            ],
+            byProviderModel: [],
+            byRepo: [],
+            byReviewKind: [],
+          }),
+        }) as Response
+    );
+
+    const result = await getReviewbotPublicUsageSummary({
+      days: 7,
+      env: {
+        REVIEWBOT_USAGE_API_BASE_URL: "https://reviewbot.6529.io",
+      },
+      fetchImpl,
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      summary: {
+        totals: {
+          reviewRuns: 2,
+          costUsd: 1.25,
+          totalTokens: 1000,
+          budgetSkippedRuns: 1,
+        },
+      },
+    });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      new URL("https://reviewbot.6529.io/api/public/usage/summary?days=7"),
+      expect.objectContaining({
+        cache: "no-store",
+        headers: {
+          accept: "application/json",
+        },
+      })
+    );
+  });
+
+  it("returns unavailable when the API errors", async () => {
+    const fetchImpl = jest.fn(
+      async () =>
+        ({
+          ok: false,
+          status: 503,
+          json: async () => ({
+            error: "unavailable",
+          }),
+        }) as Response
+    );
+
+    await expect(
+      getReviewbotPublicUsageSummary({
+        env: {
+          REVIEWBOT_USAGE_API_BASE_URL: "https://reviewbot.6529.io",
+        },
+        fetchImpl,
+      })
+    ).resolves.toMatchObject({
+      status: "unavailable",
+    });
+  });
+});
