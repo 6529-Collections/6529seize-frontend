@@ -686,6 +686,27 @@ describe("MemePage navigation integration", () => {
       { timeout: 5000 }
     );
   });
+
+  it("preserves the active locale on the season link", async () => {
+    currentLocale = "de-DE";
+
+    renderPage();
+
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole("link", { name: "View SZN 1 cards" })
+        ).toHaveAttribute(
+          "href",
+          "/the-memes?szn=1&sort=age&sort_dir=ASC&locale=de-DE"
+        );
+        expect(
+          screen.getByLabelText("Meme calendar position")
+        ).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
+  });
 });
 
 describe("MemePage accessibility labels", () => {

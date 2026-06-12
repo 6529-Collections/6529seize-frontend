@@ -133,6 +133,17 @@ const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [
   ["notFound.label", "DISTRIBUTION"],
 ] as const);
 
+const MEME_CALENDAR_MESSAGES = namespaceMessages("memeCalendar", [
+  ["periods.seasonShort", "SZN"],
+  ["periods.seasonLinkAriaLabel", "View SZN {season} cards"],
+  ["periods.positionLabel", "Meme calendar position"],
+  ["periods.year", "YEAR"],
+  ["periods.epoch", "EPOCH"],
+  ["periods.period", "PERIOD"],
+  ["periods.era", "ERA"],
+  ["periods.eon", "EON"],
+] as const);
+
 const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
   "theMemes.detail.live",
   [
@@ -316,6 +327,7 @@ export const EN_US_MESSAGES = {
   ...THE_MEMES_DETAIL_REFERENCES_MESSAGES,
   ...THE_MEMES_DETAIL_ART_MESSAGES,
   ...TIMELINE_MESSAGES,
+  ...MEME_CALENDAR_MESSAGES,
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Edition Size",
   "theMemes.sort.meme": "Meme",
