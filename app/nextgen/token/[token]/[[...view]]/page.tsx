@@ -1,6 +1,8 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildNextgenTokenPageJsonLd } from "@/lib/structured-data/nextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -47,14 +49,28 @@ export default async function NextGenTokenPage({
     notFound();
   }
   const resolvedView = getContentView(view?.[0] ?? "");
+  const viewPath =
+    resolvedView === NextgenCollectionView.ABOUT ? "" : `/${resolvedView}`;
+  const path = `/nextgen/token/${token}${viewPath}`;
   return (
-    <NextGenTokenPageClient
-      tokenId={data.tokenId}
-      token={data.token}
-      traits={data.traits}
-      tokenCount={data.tokenCount}
-      collection={data.collection}
-      view={resolvedView}
-    />
+    <>
+      <JsonLdScript
+        data={buildNextgenTokenPageJsonLd({
+          collection: data.collection,
+          token: data.token,
+          tokenId: data.tokenId,
+          traits: data.traits,
+          path,
+        })}
+      />
+      <NextGenTokenPageClient
+        tokenId={data.tokenId}
+        token={data.token}
+        traits={data.traits}
+        tokenCount={data.tokenCount}
+        collection={data.collection}
+        view={resolvedView}
+      />
+    </>
   );
 }

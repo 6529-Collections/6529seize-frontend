@@ -26,6 +26,11 @@ import {
   type RouteSearchParams,
 } from "@/helpers/navigation.helpers";
 import { publicEnv } from "@/config/env";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import {
+  buildWavePageJsonLd,
+  buildWavesIndexPageJsonLd,
+} from "@/lib/structured-data/waves";
 
 export type WavesSearchParams = RouteSearchParams;
 
@@ -49,9 +54,47 @@ export const getFirstSearchParamValue = (
   return typeof value === "string" ? value : null;
 };
 
+const getStructuredDataDropParam = (
+  searchParams: WavesSearchParams
+): { key: "serialNo" | "drop"; value: string } | null => {
+  const serialNo = getFirstSearchParamValue(searchParams, "serialNo")?.trim();
+  if (serialNo) {
+    return { key: "serialNo", value: serialNo };
+  }
+
+  const drop = getFirstSearchParamValue(searchParams, "drop")?.trim();
+  if (drop) {
+    return { key: "drop", value: drop };
+  }
+
+  return null;
+};
+
 const getDropMetadataId = (searchParams: WavesSearchParams): string | null =>
-  getFirstSearchParamValue(searchParams, "serialNo") ||
-  getFirstSearchParamValue(searchParams, "drop");
+  getStructuredDataDropParam(searchParams)?.value ?? null;
+
+const buildWaveStructuredDataPath = ({
+  waveId,
+  searchParams,
+}: {
+  readonly waveId: string | null;
+  readonly searchParams: WavesSearchParams;
+}): string => {
+  if (waveId === null) {
+    return "/waves";
+  }
+
+  const params = new URLSearchParams();
+  const dropParam = getStructuredDataDropParam(searchParams);
+
+  if (dropParam) {
+    params.set(dropParam.key, dropParam.value);
+  }
+
+  const queryString = params.toString();
+  const path = `/waves/${encodeURIComponent(waveId)}`;
+  return queryString ? `${path}?${queryString}` : path;
+};
 
 const fetchWaveCached = cache(
   async (
@@ -168,6 +211,14 @@ export async function renderWavesPageContent({
   }
 
   const hasDrop = Boolean(getFirstSearchParamValue(searchParams, "drop"));
+  const dropMetadataId = getDropMetadataId(searchParams)?.trim();
+  const dropMetadata =
+    context.wave && dropMetadataId
+      ? await fetchDropOgMetadataCached(
+          dropMetadataId,
+          JSON.stringify(context.headers)
+        )
+      : null;
   const hasRecentDropCloseNavigation =
     cookieStore.get(DROP_CLOSE_COOKIE_NAME)?.value === "1";
   const shouldPrefetch =
@@ -192,11 +243,27 @@ export async function renderWavesPageContent({
   }
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={null}>
-        <WavesPageClient />
-      </Suspense>
-    </HydrationBoundary>
+    <>
+      <JsonLdScript
+        data={
+          context.wave
+            ? buildWavePageJsonLd({
+                wave: context.wave,
+                path: buildWaveStructuredDataPath({
+                  waveId: context.waveId,
+                  searchParams,
+                }),
+                dropMetadata,
+              })
+            : buildWavesIndexPageJsonLd()
+        }
+      />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <Suspense fallback={null}>
+          <WavesPageClient />
+        </Suspense>
+      </HydrationBoundary>
+    </>
   );
 }
 
