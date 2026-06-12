@@ -53,6 +53,19 @@ describe("Meme Distribution Page", () => {
     );
   });
 
+  it("falls back to the default locale for unsupported locale values", async () => {
+    const page = await MemeDistributionPage({
+      searchParams: Promise.resolve({ locale: "unsupported-LC" }),
+    });
+
+    render(page);
+
+    expect(screen.getByTestId("distribution")).toHaveAttribute(
+      "locale",
+      "en-US"
+    );
+  });
+
   it("delegates generateMetadata", async () => {
     mockShared.mockResolvedValue({ title: "My Title" });
 

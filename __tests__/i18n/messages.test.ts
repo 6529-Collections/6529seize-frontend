@@ -71,19 +71,21 @@ describe("frontend i18n helpers", () => {
         name: "Meme Lab Card",
       })
     ).toBe("Meme Lab Card 1 - Meme Lab Card");
-    expect(
-      t("de-DE", "distribution.heading", {
-        collection: "Meme Lab",
-        tokenId: 1,
-      })
-    ).toBe("Meme Lab Card #1 Distribution");
-    expect(
-      t("es-ES", "distribution.photos.alt", {
-        collection: "The Memes",
-        tokenId: 2,
-        photoNumber: 3,
-      })
-    ).toBe("The Memes Card #2 distribution photo 3");
+    const distributionHeadingParams = {
+      collection: "Meme Lab",
+      tokenId: 1,
+    };
+    expect(t("de-DE", "distribution.heading", distributionHeadingParams)).toBe(
+      t("en-US", "distribution.heading", distributionHeadingParams)
+    );
+    const distributionPhotoParams = {
+      collection: "The Memes",
+      tokenId: 2,
+      photoNumber: 3,
+    };
+    expect(t("es-ES", "distribution.photos.alt", distributionPhotoParams)).toBe(
+      t("en-US", "distribution.photos.alt", distributionPhotoParams)
+    );
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {

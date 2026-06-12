@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import { mainnet } from "viem/chains";
 import Address from "@/components/address/Address";
@@ -52,7 +52,6 @@ export default function DistributionPage(props: Readonly<Props>) {
   const [isValidNftId, setIsValidNftId] = useState(false);
 
   const [distributions, setDistributions] = useState<Distribution[]>([]);
-  const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
     DistributionPhoto[]
   >([]);
@@ -64,17 +63,17 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   const [fetching, setFetching] = useState(true);
 
-  function updateDistributionPhases(mydistributions: Distribution[]) {
+  const distributionsPhases = useMemo(() => {
     const phasesSet = new Set<string>();
-    mydistributions.forEach((d) => {
+    distributions.forEach((d) => {
       d.phases.forEach((p) => {
         phasesSet.add(p);
       });
     });
     const phases = Array.from(phasesSet);
     phases.sort((a, b) => compareLocalized(locale, a, b));
-    setDistributionsPhases(phases);
-  }
+    return phases;
+  }, [distributions, locale]);
 
   async function fetchDistribution() {
     setFetching(true);
@@ -86,7 +85,6 @@ export default function DistributionPage(props: Readonly<Props>) {
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
       setDistributions(mydistributions);
-      updateDistributionPhases(mydistributions);
     } catch (error) {
       console.error(
         `Failed to fetch distribution data for NFT ${nftId} on contract ${props.contract}`,
@@ -94,7 +92,6 @@ export default function DistributionPage(props: Readonly<Props>) {
       );
       setTotalResults(0);
       setDistributions([]);
-      setDistributionsPhases([]);
     } finally {
       setFetching(false);
     }

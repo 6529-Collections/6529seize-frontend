@@ -10,3 +10,4 @@
 | `/rememes/{contract}/{id}` detail      | PR open              | PR open           | PR #2610; stacked on PR #2609; do not merge yet           |
 | `/meme-lab/{id}` detail                | PR open              | PR open           | PR #2611; stacked on PR #2610; do not merge yet           |
 | `/meme-lab/{id}/distribution`          | PR open              | PR open           | PR #2612; stacked on PR #2611; do not merge yet           |
+| `/the-memes/{id}/distribution`         | PR open              | PR open           | PR #2612; stacked on PR #2611; do not merge yet           |

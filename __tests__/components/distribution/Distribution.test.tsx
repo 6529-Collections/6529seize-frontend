@@ -1,5 +1,6 @@
 import DistributionPage from "@/components/distribution/Distribution";
 import { MEMES_CONTRACT } from "@/constants/constants";
+import { t } from "@/i18n/messages";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
@@ -373,6 +374,14 @@ describe("DistributionPage", () => {
       );
 
       await waitFor(() => {
+        expect(
+          screen.getByText(
+            t("de-DE", "distribution.table.caption", {
+              collection: "Test",
+              tokenId: "123",
+            })
+          )
+        ).toBeInTheDocument();
         expect(
           screen.getByRole("table", {
             name: /Test Card #123 distribution wallet allocations/i,
