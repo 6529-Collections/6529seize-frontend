@@ -75,3 +75,7 @@
   names, and the fixed collection route loading cards.
 - Opened review-ready stacked PR #2608 against PR #2607. Per workstream policy,
   do not merge PR #2608 without human approval.
+- SonarCloud initially failed PR #2608 on new-code duplication. Refactored the
+  duplicated Meme Lab card rendering, metric formatting, and sort-control setup
+  into shared Meme Lab helpers/components, then reran focused validation and
+  desktop/mobile browser smoke.

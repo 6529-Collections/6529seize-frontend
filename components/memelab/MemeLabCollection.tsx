@@ -1,34 +1,23 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
-import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
-import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
-import NFTImage from "@/components/nft-image/NFTImage";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import type { SortDirection } from "@/entities/ISort";
 import { addProtocol } from "@/helpers/Helpers";
-import { getNftMimeType } from "@/helpers/nft.helpers";
-import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  getInitialRouterValues,
-  printNftContent,
-  sortChanged,
-} from "./MemeLab";
-import { getMemeLabSortLabel } from "./memeLabI18n";
+import { getInitialRouterValues, sortChanged } from "./MemeLab";
+import MemeLabNftCard from "./MemeLabNftCard";
+import MemeLabSortControls from "./MemeLabSortControls";
 
 const MEME_LAB_COLLECTION_SORT_OPTIONS = Object.values(MemeLabSort).filter(
   (sort) =>
@@ -130,55 +119,17 @@ export default function LabCollection({
   }, [sort, sortDir, nftsLoaded, locale]);
 
   function printNft(nft: LabNFT) {
-    const mediaMimeType = getNftMimeType(nft);
-    const tokenId = formatInteger(locale, nft.id);
-
     return (
-      <Link
+      <MemeLabNftCard
         key={`${nft.contract}-${nft.id}`}
-        href={`/meme-lab/${nft.id}`}
-        aria-label={t(locale, "memeLab.card.linkAriaLabel", {
-          name: nft.name,
-          tokenId,
-        })}
-        className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-      >
-        <div className="tw-bg-iron-900">
-          <NFTImage
-            nft={nft}
-            animation={false}
-            height={300}
-            showBalance={false}
-            showThumbnail={true}
-          />
-        </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
-          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-md tw-font-semibold tw-leading-snug tw-text-iron-50">
-            {nft.name}
-          </div>
-          <CollectionCardMetadataRow
-            tokenId={nft.id}
-            mediaMimeType={mediaMimeType}
-            mediaBadgeId={`${nft.contract}-${nft.id}`}
-            align="center"
-            ownership={{
-              contract: nft.contract,
-              tokenId: nft.id,
-              show: connectedProfile !== null,
-            }}
-          />
-          <CollectionCardMetricLine
-            text={t(locale, "memeLab.card.metric.artists", {
-              value: nft.artist,
-            })}
-            align="center"
-          />
-          <CollectionCardMetricLine
-            text={printNftContent(nft, sort, nftMetas, volumeType, locale)}
-            align="center"
-          />
-        </div>
-      </Link>
+        nft={nft}
+        sort={sort}
+        nftMetas={nftMetas}
+        volumeType={volumeType}
+        hasConnectedProfile={connectedProfile !== null}
+        locale={locale}
+        showArtistMetric={true}
+      />
     );
   }
 
@@ -239,34 +190,17 @@ export default function LabCollection({
               )}
             </div>
           </header>
-          <CollectionSortControls
+          <MemeLabSortControls
             ariaLabel={t(locale, "memeLab.sorting.collectionRegionLabel")}
             sortDirection={sortDir}
             setSortDirection={setSortDir}
             currentSort={sort}
             sortOptions={MEME_LAB_COLLECTION_SORT_OPTIONS}
             setSort={setSort}
-            getSortLabel={(sortOption) =>
-              getMemeLabSortLabel(sortOption, locale)
-            }
-            getSortButtonAriaLabel={(sortOption) =>
-              t(locale, "memeLab.sorting.sortButtonLabel", {
-                sort: getMemeLabSortLabel(sortOption, locale),
-              })
-            }
-            sortByLabel={t(locale, "memeLab.sorting.sortBy")}
-            directionLegend={t(locale, "memeLab.sorting.directionLegend")}
-            ascendingLabel={t(locale, "memeLab.sorting.ascendingLabel")}
-            descendingLabel={t(locale, "memeLab.sorting.descendingLabel")}
-          >
-            {printVolumeTypeDropdown(
-              sort === MemeLabSort.VOLUME,
-              setVolumeType,
-              () => setSort(MemeLabSort.VOLUME),
-              volumeType,
-              locale
-            )}
-          </CollectionSortControls>
+            setVolumeType={setVolumeType}
+            volumeType={volumeType}
+            locale={locale}
+          />
           {printNftsContent()}
         </div>
       </div>

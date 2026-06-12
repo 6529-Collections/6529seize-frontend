@@ -1,16 +1,11 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
-import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
-import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
-import NFTImage from "@/components/nft-image/NFTImage";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
@@ -18,25 +13,18 @@ import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { getValuesForVolumeType } from "@/helpers/Helpers";
-import { getNftMimeType } from "@/helpers/nft.helpers";
-import {
-  formatDate,
-  formatInteger,
-  formatNumber,
-  formatPercent,
-  compareLocalized,
-  roundTo,
-} from "@/i18n/format";
+import { compareLocalized } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
-import { getMemeLabSortLabel } from "./memeLabI18n";
 import { getMemeLabCollectionPath } from "./memeLabRouteParams";
+import MemeLabNftCard from "./MemeLabNftCard";
+import MemeLabSortControls from "./MemeLabSortControls";
+export { printNftContent } from "./memeLabCardContent";
 
 const COLLECTION_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
@@ -98,124 +86,6 @@ function getMemeLabSortOptions(isCollection?: boolean) {
   return enumValues;
 }
 
-function formatEthMetric(
-  locale: SupportedLocale,
-  labelKey: MessageKey,
-  unavailableKey: MessageKey,
-  value: number,
-  precision: number
-) {
-  if (!Number.isFinite(value) || value <= 0) {
-    return t(locale, unavailableKey);
-  }
-
-  return t(locale, labelKey, {
-    value: t(locale, "memeLab.card.metric.ethValue", {
-      value: formatNumber(locale, roundTo(value, precision), {
-        maximumFractionDigits: precision,
-      }),
-    }),
-  });
-}
-
-function getVolumeForType(nft: LabNFT, volumeType: VolumeType) {
-  switch (volumeType) {
-    case VolumeType.HOURS_24:
-      return nft.total_volume_last_24_hours;
-    case VolumeType.DAYS_7:
-      return nft.total_volume_last_7_days;
-    case VolumeType.DAYS_30:
-      return nft.total_volume_last_1_month;
-    default:
-      return nft.total_volume;
-  }
-}
-
-function formatVolumeMetric(
-  nft: LabNFT,
-  volumeType: VolumeType,
-  locale: SupportedLocale
-) {
-  const volume = getVolumeForType(nft, volumeType);
-  const value =
-    volume > 0
-      ? t(locale, "memeLab.card.metric.ethValue", {
-          value: formatNumber(locale, roundTo(volume, 2), {
-            maximumFractionDigits: 2,
-          }),
-        })
-      : t(locale, "memeLab.card.metric.unavailable");
-
-  return t(locale, "memeLab.card.metric.volume", {
-    volumeType: getVolumeTypeLabel(volumeType, locale),
-    value,
-  });
-}
-
-export function printNftContent(
-  nft: LabNFT,
-  sort: MemeLabSort,
-  nftMetas: LabExtendedData[],
-  volumeType: VolumeType,
-  locale: SupportedLocale = DEFAULT_LOCALE
-) {
-  const nftMeta = nftMetas.find((nftm) => nftm.id === nft.id);
-
-  switch (sort) {
-    case MemeLabSort.AGE:
-    case MemeLabSort.ARTISTS:
-      return formatDate(locale, nft.mint_date);
-    case MemeLabSort.COLLECTIONS:
-      return t(locale, "memeLab.card.metric.artists", {
-        value: nft.artist,
-      });
-    case MemeLabSort.EDITION_SIZE:
-      return t(locale, "memeLab.card.metric.editionSize", {
-        value: formatInteger(locale, nft.supply),
-      });
-    case MemeLabSort.HODLERS:
-      return t(locale, "memeLab.card.metric.collectors", {
-        value: formatInteger(locale, nftMeta?.hodlers),
-      });
-    case MemeLabSort.UNIQUE_PERCENT:
-      return t(locale, "memeLab.card.metric.unique", {
-        value: formatPercent(locale, nftMeta?.percent_unique),
-      });
-    case MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM:
-      return t(locale, "memeLab.card.metric.uniqueExMuseum", {
-        value: formatPercent(locale, nftMeta?.percent_unique_cleaned),
-      });
-    case MemeLabSort.FLOOR_PRICE:
-      return formatEthMetric(
-        locale,
-        "memeLab.card.metric.floorPrice",
-        "memeLab.card.metric.floorPriceUnavailable",
-        nft.floor_price,
-        2
-      );
-    case MemeLabSort.MARKET_CAP:
-      return formatEthMetric(
-        locale,
-        "memeLab.card.metric.marketCap",
-        "memeLab.card.metric.marketCapUnavailable",
-        nft.market_cap,
-        2
-      );
-    case MemeLabSort.HIGHEST_OFFER:
-      return formatEthMetric(
-        locale,
-        "memeLab.card.metric.highestOffer",
-        "memeLab.card.metric.highestOfferUnavailable",
-        nft.highest_offer,
-        3
-      );
-    case MemeLabSort.VOLUME:
-      return formatVolumeMetric(nft, volumeType, locale);
-  }
-
-  return "";
-}
-
 export function sortChanged(
   router: ReturnType<typeof useRouter>,
   sort: MemeLabSort,
@@ -239,7 +109,7 @@ export function sortChanged(
     sort_dir: sortDir.toLowerCase(),
   };
   if (locale !== DEFAULT_LOCALE) {
-    newQuery.locale = locale;
+    newQuery["locale"] = locale;
   }
 
   router.replace(`?${new URLSearchParams(newQuery).toString()}`);
@@ -588,49 +458,16 @@ export default function MemeLabComponent({
   }, [sort, sortDir, nftsLoaded, volumeType, locale]);
 
   function printNft(nft: LabNFT) {
-    const mediaMimeType = getNftMimeType(nft);
-    const tokenId = formatInteger(locale, nft.id);
-
     return (
-      <Link
+      <MemeLabNftCard
         key={`${nft.contract}-${nft.id}`}
-        href={`/meme-lab/${nft.id}`}
-        aria-label={t(locale, "memeLab.card.linkAriaLabel", {
-          name: nft.name,
-          tokenId,
-        })}
-        className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-      >
-        <div className="tw-bg-iron-900">
-          <NFTImage
-            nft={nft}
-            animation={false}
-            height={300}
-            showBalance={false}
-            showThumbnail={true}
-          />
-        </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
-          <div className="tw-w-full tw-max-w-full tw-text-center tw-text-md tw-font-semibold tw-leading-snug tw-text-iron-50">
-            {nft.name}
-          </div>
-          <CollectionCardMetadataRow
-            tokenId={nft.id}
-            mediaMimeType={mediaMimeType}
-            mediaBadgeId={`${nft.contract}-${nft.id}`}
-            align="center"
-            ownership={{
-              contract: nft.contract,
-              tokenId: nft.id,
-              show: isConnected,
-            }}
-          />
-          <CollectionCardMetricLine
-            text={printNftContent(nft, sort, nftMetas, volumeType, locale)}
-            align="center"
-          />
-        </div>
-      </Link>
+        nft={nft}
+        sort={sort}
+        nftMetas={nftMetas}
+        volumeType={volumeType}
+        hasConnectedProfile={isConnected}
+        locale={locale}
+      />
     );
   }
 
@@ -742,34 +579,17 @@ export default function MemeLabComponent({
               </div>
             </div>
           </header>
-          <CollectionSortControls
+          <MemeLabSortControls
             ariaLabel={t(locale, "memeLab.sorting.regionLabel")}
             sortDirection={sortDir}
             setSortDirection={setSortDir}
             currentSort={sort}
             sortOptions={getMemeLabSortOptions()}
             setSort={setSort}
-            getSortLabel={(sortOption) =>
-              getMemeLabSortLabel(sortOption, locale)
-            }
-            getSortButtonAriaLabel={(sortOption) =>
-              t(locale, "memeLab.sorting.sortButtonLabel", {
-                sort: getMemeLabSortLabel(sortOption, locale),
-              })
-            }
-            sortByLabel={t(locale, "memeLab.sorting.sortBy")}
-            directionLegend={t(locale, "memeLab.sorting.directionLegend")}
-            ascendingLabel={t(locale, "memeLab.sorting.ascendingLabel")}
-            descendingLabel={t(locale, "memeLab.sorting.descendingLabel")}
-          >
-            {printVolumeTypeDropdown(
-              sort === MemeLabSort.VOLUME,
-              setVolumeType,
-              () => setSort(MemeLabSort.VOLUME),
-              volumeType,
-              locale
-            )}
-          </CollectionSortControls>
+            setVolumeType={setVolumeType}
+            volumeType={volumeType}
+            locale={locale}
+          />
           {printNftsContent()}
         </div>
       </div>
