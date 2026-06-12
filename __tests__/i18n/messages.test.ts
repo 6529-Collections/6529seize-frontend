@@ -137,6 +137,9 @@ describe("frontend i18n helpers", () => {
     expect(t("es-ES", "memeCalendar.overview.upcoming.mintTime")).toBe(
       t("en-US", "memeCalendar.overview.upcoming.mintTime")
     );
+    expect(t("de-DE", "memeCalendar.grid.previous", { division: "SZN" })).toBe(
+      t("en-US", "memeCalendar.grid.previous", { division: "SZN" })
+    );
     const timelineMediaParams = {
       label: t("en-US", "timeline.fields.addedImage"),
     };

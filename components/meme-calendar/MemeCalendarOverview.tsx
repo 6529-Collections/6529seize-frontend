@@ -274,7 +274,8 @@ export function MemeCalendarOverviewNextMint({
             locale,
             "memeCalendar.invites.addToGoogleCalendar"
           ),
-        }
+        },
+        locale
       ),
     [locale, mintDetails]
   );
@@ -420,7 +421,7 @@ export function MemeCalendarOverviewNextMint({
             </div>
           </div>
           <div className="tw-text-lg tw-font-semibold">
-            {formatFullDateTime(mintDetails.instantUtc, displayTz)}
+            {formatFullDateTime(mintDetails.instantUtc, displayTz, locale)}
           </div>
           <div className="tw-text-sm">
             {formatToFullDivision(mintDetails.instantUtc)}
@@ -522,8 +523,8 @@ function MemeCalendarOverviewUpcomingMints({
       <div className="tw-mb-3 tw-flex tw-items-center tw-justify-between">
         <div className="tw-font-semibold">{upcomingHeading}</div>
         <div className="tw-text-sm tw-text-gray-400">
-          {formatFullDate(seasonStart, displayTz)} -{" "}
-          {formatFullDate(seasonEndInclusive, displayTz)}
+          {formatFullDate(seasonStart, displayTz, locale)} -{" "}
+          {formatFullDate(seasonEndInclusive, displayTz, locale)}
         </div>
       </div>
 
@@ -557,7 +558,7 @@ function MemeCalendarOverviewUpcomingMints({
                     #{formatInteger(locale, meme)}
                   </td>
                   <td className="tw-py-2 tw-pr-4">
-                    {formatFullDateTime(instantUtc, displayTz)}
+                    {formatFullDateTime(instantUtc, displayTz, locale)}
                   </td>
                   <td
                     className="tw-flex tw-items-center tw-justify-end tw-py-2 tw-pr-6"
@@ -576,7 +577,8 @@ function MemeCalendarOverviewUpcomingMints({
                             locale,
                             "memeCalendar.invites.addToGoogleCalendar"
                           ),
-                        }
+                        },
+                        locale
                       ),
                     }}
                   ></td>

@@ -145,6 +145,21 @@ describe("printCalendarInvites", () => {
     expect(html).toContain('aria-label="Add &quot;ICS&quot; calendar"');
     expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
   });
+
+  it("formats calendar event titles with the active locale", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2026, 0, 2)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      1234,
+      "#fff",
+      22,
+      undefined,
+      "de-DE"
+    );
+
+    expect(decodeURIComponent(html)).toContain("SUMMARY:Meme #1.234 Minting");
+  });
 });
 
 describe("Eastern time transitions", () => {
