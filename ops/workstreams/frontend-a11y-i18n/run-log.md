@@ -259,3 +259,5 @@
   behavior, additional-details `aria-expanded`, no horizontal overflow, and no
   Next.js runtime session errors. Shared local-dev waves/emoji requests still
   log API/403 errors unrelated to this route change.
+- Opened review-ready stacked PR #2613 against PR #2612. Per workstream policy,
+  do not merge PR #2613 without human approval.
