@@ -150,3 +150,34 @@
   Rememes feature doc's stale `Live` tab reference to `Overview`.
 - Validation for the CodeRabbit follow-up passed: focused Rememes route-param
   Jest suite, focused Prettier check, `typecheck:changed`, and `lint:changed`.
+- Confirmed PR #2610 became bot-happy on latest head: CodeRabbit completed with
+  no actionable comments, Snyk passed, SonarCloud passed with 0.0% new-code
+  duplication, DCO passed, and Claude remained skipped by the organization code
+  review spending cap. Per workstream policy, do not merge PR #2610 without
+  human approval.
+- Started stacked branch `codex/meme-lab-detail-a11y-i18n` from PR #2610 for
+  the next read-only media detail surface.
+- Implemented the Meme Lab detail accessibility and i18n pass: server-side
+  `locale` parsing for the page and metadata path, message-backed detail tab
+  labels, history sub-tab labels, heading/back-link accessible names,
+  `aria-pressed` tab state, visible focus styling on primary tabs,
+  locale-preserving card/back/tab/reference links, and locale-aware collectors
+  metric formatting.
+- Updated the Meme Lab card route feature doc to describe the current
+  `Overview`, `Collectors`, `History`, and `References` tab model, legacy
+  focus-key mappings, and progressive locale query preservation.
+- Focused validation passed for the Meme Lab detail slice: targeted Jest suites
+  for the route, detail component, route params, and i18n messages; focused
+  Prettier check; `lint:changed`; and `typecheck:changed`.
+- React Doctor exited 0 at 94/100. Remaining diagnostics are the unrelated
+  dirty `contexts/EmojiContext.tsx` fetch-in-effect error, existing Meme Lab
+  component size/state warnings, a false-positive `useSearchParams` Suspense
+  warning covered by the route page wrapper, and a test-only `next/image` mock
+  warning.
+- Browser smoke passed on desktop and mobile for
+  `/meme-lab/1?locale=de-DE`. Verified document title, heading accessible name,
+  back-link locale preservation, `aria-pressed` tab state, focus-visible tab
+  styling, locale-preserving `Collectors`, `References`, and `History` tab
+  navigation, collectors/reference/history landmarks, 390px no-overflow mobile
+  layout, and practical tap target sizes. Shared local-dev waves/emoji requests
+  still log API/403 errors unrelated to this route change.

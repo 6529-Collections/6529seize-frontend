@@ -65,6 +65,12 @@ describe("frontend i18n helpers", () => {
         name: "Meme",
       })
     ).toBe("Meme | ReMemes");
+    expect(
+      t("fr-FR", "memeLab.detail.heading.ariaLabel", {
+        tokenId: 1,
+        name: "Meme Lab Card",
+      })
+    ).toBe("Meme Lab Card 1 - Meme Lab Card");
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {
