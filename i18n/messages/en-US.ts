@@ -197,6 +197,19 @@ const THE_MEMES_DETAIL_TIMELINE_MESSAGES = namespaceMessages(
   [["region", "The Memes card timeline"]] as const
 );
 
+const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages("theMemes.detail.art", [
+  ["media.close", "Close media"],
+  ["media.download", "Download media"],
+  ["media.downloading", "Downloading media"],
+  ["media.fullscreen", "Full screen"],
+  ["media.next", "Show next artwork media"],
+  ["media.openInBrowser", "Open in browser"],
+  ["media.openInNewTab", "Open in new tab"],
+  ["media.previous", "Show previous artwork media"],
+  ["media.saveAnimation", "Save animation"],
+  ["media.saveImage", "Save image"],
+] as const);
+
 export const EN_US_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.title": "The Memes",
@@ -242,6 +255,7 @@ export const EN_US_MESSAGES = {
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   ...THE_MEMES_DETAIL_TIMELINE_MESSAGES,
+  ...THE_MEMES_DETAIL_ART_MESSAGES,
   ...TIMELINE_MESSAGES,
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Edition Size",

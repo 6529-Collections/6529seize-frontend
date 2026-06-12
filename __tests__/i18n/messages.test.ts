@@ -80,6 +80,9 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "theMemes.detail.timeline.region")).toBe(
       t("en-US", "theMemes.detail.timeline.region")
     );
+    expect(t("fr-FR", "theMemes.detail.art.media.fullscreen")).toBe(
+      t("en-US", "theMemes.detail.art.media.fullscreen")
+    );
     expect(t("fr-FR", "timeline.links.uriAriaLabel")).toBe(
       t("en-US", "timeline.links.uriAriaLabel")
     );

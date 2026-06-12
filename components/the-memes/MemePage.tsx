@@ -421,6 +421,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
               showBalance={true}
+              locale={locale}
             />
           </div>
           {userLoaded && (

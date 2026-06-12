@@ -58,7 +58,9 @@
    accessible names.
 10. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
     for later tab switches.
-11. If a numeric card id is unresolved, the route removes `focus`, hides tab
+11. The header Art Viewer uses the active supported `locale` for media action
+    accessible names and save dialog titles.
+12. If a numeric card id is unresolved, the route removes `focus`, hides tab
     content, and shows the shared next-mint fallback panel.
 
 ## Route States
@@ -117,6 +119,11 @@
   through the progressive i18n helpers.
 - Shared activity-row copy, pagination copy, and transaction-specific date and
   amount formatting remain deferred activity-surface debt.
+- Header Art Viewer fullscreen/open/download/downloading/close controls,
+  previous/next media buttons, and save dialog titles are routed through the
+  progressive i18n helpers.
+- The Art additional-details section labels and Arweave link-row copy remain
+  deferred Art surface debt.
 - Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
   change field labels are routed through the progressive i18n helpers.
 - Timeline image alt text, video accessible labels, and HTML iframe titles use
