@@ -44,6 +44,13 @@ describe("frontend i18n helpers", () => {
     expect(t("es-ES", "theMemes.detail.heading.card", { tokenId: 1 })).toBe(
       "Card 1"
     );
+    expect(
+      t("en-US", "memeLab.card.linkAriaLabel", {
+        name: "Meme Lab NFT",
+        tokenId: 1,
+      })
+    ).toBe("View Meme Lab NFT, Meme Lab card #1");
+    expect(t("de-DE", "memeLab.sorting.sortBy")).toBe("Sort by");
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {

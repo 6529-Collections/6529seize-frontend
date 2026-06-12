@@ -47,3 +47,44 @@
 - Addressed follow-up CodeRabbit feedback on PR #2607 by threading a normalized
   optional `locale` query parameter through the detail UI and metadata path, and
   by documenting focus-key to visible-tab mappings.
+- Resolved the fixed CodeRabbit review thread on PR #2607 after confirming the
+  head remained green on CodeRabbit and Snyk.
+- Started stacked implementation branch `codex/meme-lab-cards-a11y-i18n` from
+  PR #2607 for the next safe media-card surface.
+- Implemented the first Meme Lab browse/collection card accessibility and i18n
+  pass: message-backed sort controls, list headings, loading text, collection
+  view labels, card accessible names, card metric labels, locale-aware date,
+  number, percent, ETH formatting, locale-preserving sort URLs, and localized
+  metadata titles/descriptions.
+- Removed `useSearchParams` from the Meme Lab client components by reading
+  search params in the server page wrappers and passing plain initial values
+  down, following the Next.js docs and clearing the React Doctor Suspense
+  warning.
+- Fixed Meme Lab collection `view` links for collection names with multiple
+  spaces and decoded legacy encoded-space URLs before querying collection data.
+- Focused Jest validation passed for Meme Lab card/list helpers, route-param
+  helpers, and i18n fallback coverage: 9 suites, 25 tests.
+- Focused ESLint, `typecheck:changed`, and `lint:changed` passed. React Doctor
+  still reports the unrelated EmojiContext fetch-in-effect diagnostic and
+  existing Meme Lab state-shape warnings, but no longer reports the
+  `useSearchParams` Suspense warning for this slice.
+- Browser smoke passed on desktop and mobile for `/meme-lab?locale=de-DE`,
+  `/meme-lab?sort=collections&locale=de-DE`, and the linked collection route.
+  Verified sorting region labels, sort direction accessible names, German
+  volume/date formatting, card accessible names, collection view accessible
+  names, and the fixed collection route loading cards.
+- Opened review-ready stacked PR #2608 against PR #2607. Per workstream policy,
+  do not merge PR #2608 without human approval.
+- SonarCloud initially failed PR #2608 on new-code duplication. Refactored the
+  duplicated Meme Lab card rendering, metric formatting, and sort-control setup
+  into shared Meme Lab helpers/components, then reran focused validation and
+  desktop/mobile browser smoke.
+- SonarCloud then reported the PR #2608 quality gate passing with 0.0% new-code
+  duplication. CodeRabbit completed with two valid nitpicks and no review
+  threads; Claude review remains unavailable because the organization code
+  review spending cap has been reached.
+- Addressed the CodeRabbit nitpicks by standardizing Meme Lab collection
+  search params on `sort_dir` and adding actual multiple-consecutive-space
+  route helper coverage.
+- Validation for the nitpick fix passed: focused route-param and i18n Jest
+  suites, `lint:changed`, `typecheck:changed`, and focused Prettier check.
