@@ -54,7 +54,9 @@ jest.mock("@/components/the-memes/MemePageActivity", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
-  MemePageArtViewer: () => <div data-testid="art-viewer" />,
+  MemePageArtViewer: ({ locale }: { readonly locale?: string }) => (
+    <div data-locale={locale} data-testid="art-viewer" />
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageArt", () => ({
@@ -97,12 +99,24 @@ const mockReplace = jest.fn(
   }
 );
 let currentFocus: string | null = null;
+let currentLocale: string | null = null;
 const mockSearchParams = {
-  get: jest.fn((key: string) => (key === "focus" ? currentFocus : null)),
+  get: jest.fn((key: string) => {
+    if (key === "focus") {
+      return currentFocus;
+    }
+    if (key === "locale") {
+      return currentLocale;
+    }
+    return null;
+  }),
   toString: jest.fn(() => {
     const params = new URLSearchParams();
     if (currentFocus) {
       params.set("focus", currentFocus);
+    }
+    if (currentLocale) {
+      params.set("locale", currentLocale);
     }
     return params.toString();
   }),
@@ -122,6 +136,7 @@ usePathnameMock.mockReturnValue("/the-memes/1");
 
 beforeEach(() => {
   currentFocus = null;
+  currentLocale = null;
   mockReplace.mockClear();
   mockSearchParams.get.mockClear();
   mockSearchParams.toString.mockClear();
@@ -262,6 +277,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 describe("MemePage tab navigation", () => {
   beforeEach(() => {
     currentFocus = null;
+    currentLocale = null;
     mockReplace.mockClear();
   });
 
@@ -389,6 +405,18 @@ describe("MemePage search params handling", () => {
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
     expect(artworkColumn).toHaveClass("tw-order-2");
     expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
+  });
+
+  it("passes active locale into the art viewer", async () => {
+    currentLocale = "de-DE";
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("art-viewer")).toHaveAttribute(
+        "data-locale",
+        "de-DE"
+      );
+    });
   });
 
   it("sets focus from valid search param", async () => {

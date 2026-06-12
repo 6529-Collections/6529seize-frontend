@@ -15,3 +15,4 @@
 | `/the-memes/{id}` card activity        | PR open              | PR open           | PR #2614; stacked on PR #2613; do not merge yet           |
 | `/the-memes/{id}` timeline             | PR open              | PR open           | PR #2615; stacked on PR #2614; do not merge yet           |
 | Shared Timeline media semantics        | PR open              | PR open           | PR #2616; stacked on PR #2615; do not merge yet           |
+| `/the-memes/{id}` art viewer actions   | PR open              | PR open           | PR #2617; stacked on PR #2616; do not merge yet           |
