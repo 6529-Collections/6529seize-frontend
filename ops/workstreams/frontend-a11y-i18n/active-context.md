@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/meme-lab-cards-a11y-i18n`
+`codex/rememes-cards-a11y-i18n`
 
 ## Constraints
 
@@ -25,14 +25,14 @@ page migration PRs for safe media surfaces.
 - WCAG target: WCAG 2.2 AA.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
-- First implementation surface: The Memes list card, then The Memes detail
-  tabs/focus links, then Meme Lab browse and collection cards.
+- Current implementation surface: Rememes browse cards, stacked on the
+  bot-happy Meme Lab card PR.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Re-check CodeRabbit, Snyk, and SonarCloud on the PR #2608 bot-feedback head.
-2. Leave PR #2608 review-ready only; do not merge it.
-3. If #2608 remains bot-happy, start the next safe media-card surface.
+1. Re-check CodeRabbit, Snyk, and SonarCloud on PR #2609.
+2. Address valid bot/CI feedback on PR #2609.
+3. Leave PR #2609 review-ready only; do not merge it.
 4. Iterate with CodeRabbit, Claude if available, and CI feedback without
    merging page-change PRs.

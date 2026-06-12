@@ -51,6 +51,15 @@ describe("frontend i18n helpers", () => {
       })
     ).toBe("View Meme Lab NFT, Meme Lab card #1");
     expect(t("de-DE", "memeLab.sorting.sortBy")).toBe("Sort by");
+    expect(
+      t("en-US", "rememes.card.linkAriaLabel", {
+        name: "ReMeme",
+        tokenId: 1,
+      })
+    ).toBe("View ReMeme, ReMeme #1");
+    expect(t("de-DE", "rememes.refresh.ariaLabel")).toBe(
+      "Refresh ReMemes results"
+    );
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {
