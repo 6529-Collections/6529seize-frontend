@@ -10,7 +10,7 @@ export type MemeLabListSearchParams = {
 
 export type MemeLabCollectionSearchParams = {
   readonly sort?: SearchParamValue;
-  readonly sortDir?: SearchParamValue;
+  readonly sort_dir?: SearchParamValue;
   readonly locale?: SearchParamValue;
 };
 
@@ -37,8 +37,11 @@ export function getMemeLabCollectionPath(collectionName: string): string {
 
 export function getMemeLabCollectionName(collectionParam: string): string {
   try {
-    return decodeURIComponent(collectionParam).replaceAll("-", " ");
+    return decodeURIComponent(collectionParam)
+      .replaceAll("-", " ")
+      .trim()
+      .replace(/\s+/g, " ");
   } catch {
-    return collectionParam.replaceAll("-", " ");
+    return collectionParam.replaceAll("-", " ").trim().replace(/\s+/g, " ");
   }
 }

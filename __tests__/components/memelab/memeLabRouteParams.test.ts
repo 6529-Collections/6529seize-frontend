@@ -14,9 +14,12 @@ describe("Meme Lab route params", () => {
   });
 
   it("round trips collection names with multiple spaces", () => {
-    const path = getMemeLabCollectionPath("6529 Intern JPGs");
+    const path = getMemeLabCollectionPath("6529  Intern   JPGs");
 
     expect(path).toBe("/meme-lab/collection/6529-Intern-JPGs");
+    expect(getMemeLabCollectionName("6529-Intern%20%20JPGs")).toBe(
+      "6529 Intern JPGs"
+    );
     expect(getMemeLabCollectionName("6529-Intern%20JPGs")).toBe(
       "6529 Intern JPGs"
     );

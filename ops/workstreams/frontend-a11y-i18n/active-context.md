@@ -31,8 +31,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Monitor PR #2608 for CodeRabbit, Claude if available, and CI feedback.
-2. Fix valid bot or CI findings on PR #2608.
-3. Leave PR #2608 review-ready only; do not merge it.
+1. Re-check CodeRabbit, Snyk, and SonarCloud on the PR #2608 bot-feedback head.
+2. Leave PR #2608 review-ready only; do not merge it.
+3. If #2608 remains bot-happy, start the next safe media-card surface.
 4. Iterate with CodeRabbit, Claude if available, and CI feedback without
    merging page-change PRs.

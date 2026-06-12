@@ -29,7 +29,9 @@ export default async function MemeLabCollectionPage({
       <MemeLabCollection
         collectionName={collectionName}
         initialSort={getSearchParamValue(resolvedSearchParams.sort)}
-        initialSortDirection={getSearchParamValue(resolvedSearchParams.sortDir)}
+        initialSortDirection={getSearchParamValue(
+          resolvedSearchParams.sort_dir
+        )}
         locale={locale}
       />
     </main>
