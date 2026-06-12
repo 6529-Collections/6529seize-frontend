@@ -88,3 +88,21 @@
   route helper coverage.
 - Validation for the nitpick fix passed: focused route-param and i18n Jest
   suites, `lint:changed`, `typecheck:changed`, and focused Prettier check.
+- Confirmed PR #2608 became CodeRabbit green with no review threads after the
+  bot-feedback fix.
+- Started stacked branch `codex/rememes-cards-a11y-i18n` from PR #2608 for the
+  next safe media-card surface.
+- Implemented the Rememes browse card accessibility and i18n pass: server-side
+  `meme_id`/`locale` parsing, message-backed labels and accessible names,
+  locale-aware result and replica counts, locale-preserving filter URLs, a
+  semantic add link, and visible keyboard focus on the random refresh control.
+- Focused Rememes validation passed: targeted Jest suites for Rememes component,
+  route params, and i18n messages; focused Prettier check; `lint:changed`; and
+  `typecheck:changed`.
+- React Doctor exited 0 at 97/100. Remaining diagnostics are the pre-existing
+  unrelated `contexts/EmojiContext.tsx` fetch-in-effect error and existing
+  Rememes component size/state warnings.
+- Browser smoke passed on desktop for `/rememes?locale=de-DE` and on mobile for
+  `/rememes?locale=de-DE&meme_id=1`. Verified add link, card accessible names,
+  logo alt text, refresh accessible name, filter accessible names, count
+  formatting, loaded state, and no Next/browser runtime errors.

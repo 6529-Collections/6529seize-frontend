@@ -6,6 +6,8 @@
 - `/rememes/{contract}/{id}` is the ReMeme detail route.
 - Browse supports sort/filter controls, random refresh, pagination, and detail
   handoff.
+- Browse is progressively i18n-ready for labels, accessible names, metadata,
+  logo alt text, loading text, and count formatting.
 - Detail uses in-page tabs: `Live`, `Metadata`, and `References`.
 
 ## Location in the Site
@@ -60,10 +62,14 @@
 
 ## URL and Query Behavior
 
-- Browse reads and writes only one query key: `meme_id`.
+- Browse reads `meme_id` and `locale`.
 - Changing `Meme Reference` updates the URL to `?meme_id={id}` (or clears it
-  for `All`).
+  for `All`) and preserves non-default `locale` values.
+- Supported locale query values are `en-US`, `en-GB`, `fr-FR`, `es-ES`, and
+  `de-DE`; unsupported locale values fall back to `en-US`.
 - Non-numeric `meme_id` values are cleared back to `/rememes`.
+- Count formatting follows the active locale; visible token IDs remain stable
+  identifiers.
 - Sort, token type, and page are in-memory state and reset on reload.
 - Changing sort/token type/meme filter resets pagination to page 1.
 - Detail tabs (`Live`, `Metadata`, `References`) are in-page state only and do
@@ -115,6 +121,8 @@
 - Filter state is not fully shareable by URL (`meme_id` only).
 - Detail tabs are not deep-linkable by URL.
 - Marketplace behavior is documented canonically in NFT marketplace docs.
+- Non-`en-US` Rememes browse translations currently fall back to `en-US` while
+  the route-level migration pattern is reviewed.
 
 ## Related Pages
 
