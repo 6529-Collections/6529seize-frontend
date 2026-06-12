@@ -13,4 +13,4 @@
 | `/the-memes/{id}/distribution`         | PR open              | PR open           | PR #2612; stacked on PR #2611; do not merge yet           |
 | `/the-memes/{id}` live stats           | PR open              | PR open           | PR #2613; stacked on PR #2612; do not merge yet           |
 | `/the-memes/{id}` card activity        | PR open              | PR open           | PR #2614; stacked on PR #2613; do not merge yet           |
-| `/the-memes/{id}` timeline             | In progress          | In progress       | Stacked on PR #2614; do not merge yet                     |
+| `/the-memes/{id}` timeline             | PR open              | PR open           | PR #2615; stacked on PR #2614; do not merge yet           |

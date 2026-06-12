@@ -334,3 +334,5 @@
   selected Timeline tabs, locale-backed region labels, German UTC date
   formatting, URI/TXN accessible link labels, no horizontal overflow, no
   unexpected HTTP failures, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2615 against PR #2614. Per workstream policy,
+  do not merge PR #2615 without human approval.
