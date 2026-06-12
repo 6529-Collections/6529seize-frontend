@@ -10,6 +10,9 @@ interface Props {
   height: 300 | 650;
 }
 
+const TRANSPARENT_IMAGE_SRC =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
 function getText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -86,8 +89,7 @@ export default function RememeImage(props: Readonly<Props>) {
 
   function isMp4() {
     return (
-      props.nft.metadata?.animation_details?.format &&
-      props.nft.metadata.animation_details.format.toLowerCase() === "mp4"
+      props.nft.metadata?.animation_details?.format?.toLowerCase() === "mp4"
     );
   }
 
@@ -128,9 +130,21 @@ export default function RememeImage(props: Readonly<Props>) {
           styles["imageWrapper"]
         } ${props.height === 300 ? styles["height300"] : ""}`}
       >
-        <div
-          role="img"
-          aria-label={imageAlt}
+        <Image
+          unoptimized
+          loading="eager"
+          priority
+          width="0"
+          height="0"
+          style={{
+            height: "auto",
+            width: "auto",
+            maxWidth: "100%",
+            maxHeight: "100%",
+          }}
+          id={`${props.nft.contract}-${props.nft.id}`}
+          src={TRANSPARENT_IMAGE_SRC}
+          alt={imageAlt}
           className={props.height === 650 ? styles["height650"] : ""}
         />
       </Col>

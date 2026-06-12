@@ -624,3 +624,10 @@
   blocked emoji feed, or third-party media resource loads.
 - Opened review-ready stacked PR #2624 against PR #2623. Per workstream policy,
   do not merge PR #2624 without human approval.
+- Addressed SonarCloud's PR #2624 issues by simplifying optional chaining,
+  removing the redundant explicit list role, and replacing the missing-image
+  placeholder `role="img"` with a real `next/image` placeholder carrying `alt`.
+  Re-ran the focused Rememes/image/i18n Jest suites, `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and a live browser smoke on
+  `/rememes?locale=de-DE`; results remained green apart from the known React
+  Doctor follow-up diagnostics.

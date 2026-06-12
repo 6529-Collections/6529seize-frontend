@@ -87,6 +87,9 @@ describe("RememeImage", () => {
     render(<RememeImage nft={nft} animation={false} height={300} />);
 
     const placeholder = screen.getByRole("img", { name: "Missing ReMeme" });
-    expect(placeholder).not.toHaveAttribute("src");
+    expect(placeholder).toHaveAttribute(
+      "src",
+      expect.stringMatching(/^data:image\/gif;base64,/)
+    );
   });
 });

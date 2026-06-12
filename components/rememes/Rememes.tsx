@@ -281,7 +281,6 @@ export default function Rememes({
       <ul
         aria-label={t(locale, "rememes.results.gridLabel")}
         className={REMEMES_GRID_CLASS}
-        role="list"
       >
         {rememes.map(printRememe)}
       </ul>
