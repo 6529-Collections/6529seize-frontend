@@ -15,16 +15,20 @@ import { VolumeType } from "@/entities/INFT";
 import type { SortDirection } from "@/entities/ISort";
 import { addProtocol } from "@/helpers/Helpers";
 import { getNftMimeType } from "@/helpers/nft.helpers";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import {
   getInitialRouterValues,
   printNftContent,
   sortChanged,
 } from "./MemeLab";
+import { getMemeLabSortLabel } from "./memeLabI18n";
 
 const MEME_LAB_COLLECTION_SORT_OPTIONS = Object.values(MemeLabSort).filter(
   (sort) =>
@@ -38,11 +42,16 @@ const COLLECTION_GRID_CLASS =
 
 export default function LabCollection({
   collectionName,
+  initialSort = null,
+  initialSortDirection = null,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly collectionName: string;
+  readonly initialSort?: string | null | undefined;
+  readonly initialSortDirection?: string | null | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { connectedProfile } = useContext(AuthContext);
 
   const [website, setWebsite] = useState<string>();
@@ -57,14 +66,12 @@ export default function LabCollection({
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
-    const { initialSortDir, initialSort } = getInitialRouterValues(
-      searchParams?.get("sortDir") ?? null,
-      searchParams?.get("sort") ?? null
-    );
+    const { initialSortDir, initialSort: parsedInitialSort } =
+      getInitialRouterValues(initialSortDirection, initialSort);
     setSortDir(initialSortDir);
-    setSort(initialSort);
+    setSort(parsedInitialSort);
     setVolumeType(VolumeType.HOURS_24);
-  }, []);
+  }, [initialSort, initialSortDirection]);
 
   useEffect(() => {
     if (collectionName) {
@@ -105,17 +112,35 @@ export default function LabCollection({
 
   useEffect(() => {
     if (sort && sortDir && nftsLoaded) {
-      sortChanged(router, sort, sortDir, volumeType, nfts, nftMetas, setNfts);
+      sortChanged(
+        router,
+        sort,
+        sortDir,
+        volumeType,
+        nfts,
+        nftMetas,
+        setNfts,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        locale
+      );
     }
-  }, [sort, sortDir, nftsLoaded]);
+  }, [sort, sortDir, nftsLoaded, locale]);
 
   function printNft(nft: LabNFT) {
     const mediaMimeType = getNftMimeType(nft);
+    const tokenId = formatInteger(locale, nft.id);
 
     return (
       <Link
         key={`${nft.contract}-${nft.id}`}
         href={`/meme-lab/${nft.id}`}
+        aria-label={t(locale, "memeLab.card.linkAriaLabel", {
+          name: nft.name,
+          tokenId,
+        })}
         className="tw-group tw-block tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
         <div className="tw-bg-iron-900">
@@ -143,11 +168,13 @@ export default function LabCollection({
             }}
           />
           <CollectionCardMetricLine
-            text={`Artists: ${nft.artist}`}
+            text={t(locale, "memeLab.card.metric.artists", {
+              value: nft.artist,
+            })}
             align="center"
           />
           <CollectionCardMetricLine
-            text={printNftContent(nft, sort, nftMetas, volumeType)}
+            text={printNftContent(nft, sort, nftMetas, volumeType, locale)}
             align="center"
           />
         </div>
@@ -187,7 +214,7 @@ export default function LabCollection({
           <header className="tw-pb-5">
             <div className="tw-flex tw-flex-col tw-gap-3">
               <h1 className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl">
-                Meme Lab Collections
+                {t(locale, "memeLab.collections.title")}
               </h1>
               <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
                 {collectionName}
@@ -213,18 +240,31 @@ export default function LabCollection({
             </div>
           </header>
           <CollectionSortControls
-            ariaLabel="Meme Lab collection sorting"
+            ariaLabel={t(locale, "memeLab.sorting.collectionRegionLabel")}
             sortDirection={sortDir}
             setSortDirection={setSortDir}
             currentSort={sort}
             sortOptions={MEME_LAB_COLLECTION_SORT_OPTIONS}
             setSort={setSort}
+            getSortLabel={(sortOption) =>
+              getMemeLabSortLabel(sortOption, locale)
+            }
+            getSortButtonAriaLabel={(sortOption) =>
+              t(locale, "memeLab.sorting.sortButtonLabel", {
+                sort: getMemeLabSortLabel(sortOption, locale),
+              })
+            }
+            sortByLabel={t(locale, "memeLab.sorting.sortBy")}
+            directionLegend={t(locale, "memeLab.sorting.directionLegend")}
+            ascendingLabel={t(locale, "memeLab.sorting.ascendingLabel")}
+            descendingLabel={t(locale, "memeLab.sorting.descendingLabel")}
           >
             {printVolumeTypeDropdown(
               sort === MemeLabSort.VOLUME,
               setVolumeType,
               () => setSort(MemeLabSort.VOLUME),
-              volumeType
+              volumeType,
+              locale
             )}
           </CollectionSortControls>
           {printNftsContent()}
