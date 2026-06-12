@@ -27,7 +27,7 @@ export default function ComponentAddSpots({
   const onAddSpots = () => {
     if (typeof maxMints !== "number") {
       setToasts({
-        messages: ["Please insert a max mint count."],
+        messages: ["Enter a max mint count."],
         type: "error",
       });
       return;

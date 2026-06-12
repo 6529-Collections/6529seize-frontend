@@ -146,7 +146,7 @@ export default function WaveApprovalThresholds({
     if (parsedThreshold === null) {
       setToast({
         type: "error",
-        message: "Required approvals must be a whole number greater than 0",
+        message: "Required approvals must be a whole number greater than 0.",
       });
       return;
     }

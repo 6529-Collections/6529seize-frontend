@@ -10,6 +10,7 @@ import type {
 } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
@@ -94,7 +95,10 @@ export default function UserPageHeaderAboutEdit({
       onClose();
     },
     onError: (error) => {
-      setErrorMsg(error as unknown as string);
+      setErrorMsg(
+        getToastErrorDetails(error) ??
+          "Couldn't save this about statement. Please try again."
+      );
     },
     onSettled: () => {
       setLoading(false);

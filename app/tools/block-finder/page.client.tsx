@@ -82,7 +82,7 @@ export default function BlockFinderClient() {
     if (timeWindow !== BlockPickerTimeWindow.NONE && !blockNumberIncludes) {
       setToast({
         message:
-          "You must provide some block number inclusions when using a time window!",
+          "Add at least one block number when using a time window.",
         type: "error",
       });
       return;
@@ -93,7 +93,7 @@ export default function BlockFinderClient() {
       !/^\d+(,\s*\d+)*$/.test(blockNumberIncludes.trim())
     ) {
       setToast({
-        message: "Block numbers must be numeric and comma-separated!",
+        message: "Enter block numbers separated by commas.",
         type: "error",
       });
       return;

@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -40,8 +41,10 @@ export default function WaveDeleteModal({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't delete this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
