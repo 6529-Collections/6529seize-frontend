@@ -1,6 +1,9 @@
 "use client";
 
 import useIsMobileScreen from "@/hooks/isMobileScreen";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   faCaretLeft,
   faCaretRight,
@@ -10,8 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState, type FormEvent } from "react";
 import { Tooltip } from "react-tooltip";
-import type { DisplayTz ,
-  ZoomLevel} from "./meme-calendar.helpers";
+import type { DisplayTz, ZoomLevel } from "./meme-calendar.helpers";
 import {
   addMonths,
   dateFromMintNumber,
@@ -43,7 +45,7 @@ import {
   SZN1_RANGE,
   SZN1_SEASON_INDEX,
   toISO,
-  ymd
+  ymd,
 } from "./meme-calendar.helpers";
 import { getMintOverrideNoteForUtcDay } from "./meme-calendar.overrides";
 import { getHistoricalMintsOnUtcDay } from "./meme-calendar.szn1";
@@ -68,31 +70,146 @@ function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
-function getZoomTitle(zoom: ZoomLevel, seasonIndex: number): string {
-  const seasonNumber =
-    displayedSeasonNumberFromIndex(seasonIndex).toLocaleString();
-  const yearNumber = displayedYearNumberFromIndex(seasonIndex).toLocaleString();
-  const epochNumber =
-    displayedEpochNumberFromIndex(seasonIndex).toLocaleString();
-  const periodNumber =
-    displayedPeriodNumberFromIndex(seasonIndex).toLocaleString();
-  const eraNumber = displayedEraNumberFromIndex(seasonIndex).toLocaleString();
-  const eonNumber = displayedEonNumberFromIndex(seasonIndex).toLocaleString();
+const ZOOM_LEVELS: readonly ZoomLevel[] = [
+  "szn",
+  "year",
+  "epoch",
+  "period",
+  "era",
+  "eon",
+];
 
+const ZOOM_MESSAGE_KEYS: Record<
+  ZoomLevel,
+  {
+    readonly division: MessageKey;
+    readonly title: MessageKey;
+    readonly zoom: MessageKey;
+  }
+> = {
+  szn: {
+    division: "memeCalendar.grid.division.szn",
+    title: "memeCalendar.grid.title.szn",
+    zoom: "memeCalendar.grid.zoom.szn",
+  },
+  year: {
+    division: "memeCalendar.grid.division.year",
+    title: "memeCalendar.grid.title.year",
+    zoom: "memeCalendar.grid.zoom.year",
+  },
+  epoch: {
+    division: "memeCalendar.grid.division.epoch",
+    title: "memeCalendar.grid.title.epoch",
+    zoom: "memeCalendar.grid.zoom.epoch",
+  },
+  period: {
+    division: "memeCalendar.grid.division.period",
+    title: "memeCalendar.grid.title.period",
+    zoom: "memeCalendar.grid.zoom.period",
+  },
+  era: {
+    division: "memeCalendar.grid.division.era",
+    title: "memeCalendar.grid.title.era",
+    zoom: "memeCalendar.grid.zoom.era",
+  },
+  eon: {
+    division: "memeCalendar.grid.division.eon",
+    title: "memeCalendar.grid.title.eon",
+    zoom: "memeCalendar.grid.zoom.eon",
+  },
+};
+
+const GRID_INFO_ITEMS = [
+  {
+    label: "memeCalendar.grid.info.mintingDays.label",
+    text: "memeCalendar.grid.info.mintingDays.text",
+  },
+  {
+    label: "memeCalendar.grid.info.szn.label",
+    text: "memeCalendar.grid.info.szn.text",
+    note: "memeCalendar.grid.info.szn.note",
+  },
+  {
+    label: "memeCalendar.grid.info.year.label",
+    text: "memeCalendar.grid.info.year.text",
+    note: "memeCalendar.grid.info.year.note",
+  },
+  {
+    label: "memeCalendar.grid.info.epoch.label",
+    text: "memeCalendar.grid.info.epoch.text",
+    note: "memeCalendar.grid.info.epoch.note",
+  },
+  {
+    label: "memeCalendar.grid.info.period.label",
+    text: "memeCalendar.grid.info.period.text",
+    note: "memeCalendar.grid.info.period.note",
+  },
+  {
+    label: "memeCalendar.grid.info.era.label",
+    text: "memeCalendar.grid.info.era.text",
+    note: "memeCalendar.grid.info.era.note",
+  },
+  {
+    label: "memeCalendar.grid.info.eon.label",
+    text: "memeCalendar.grid.info.eon.text",
+    note: "memeCalendar.grid.info.eon.note",
+  },
+  {
+    label: "memeCalendar.grid.info.yearZero.label",
+    text: "memeCalendar.grid.info.yearZero.text",
+    note: "memeCalendar.grid.info.yearZero.note",
+  },
+] as const satisfies ReadonlyArray<{
+  readonly label: MessageKey;
+  readonly text: MessageKey;
+  readonly note?: MessageKey;
+}>;
+
+function getZoomNumber(zoom: ZoomLevel, seasonIndex: number): number {
   switch (zoom) {
     case "szn":
-      return `SZN #${seasonNumber}`;
+      return displayedSeasonNumberFromIndex(seasonIndex);
     case "year":
-      return `Year #${yearNumber}`;
+      return displayedYearNumberFromIndex(seasonIndex);
     case "epoch":
-      return `Epoch #${epochNumber}`;
+      return displayedEpochNumberFromIndex(seasonIndex);
     case "period":
-      return `Period #${periodNumber}`;
+      return displayedPeriodNumberFromIndex(seasonIndex);
     case "era":
-      return `Era #${eraNumber}`;
+      return displayedEraNumberFromIndex(seasonIndex);
     case "eon":
-      return `Eon #${eonNumber}`;
+      return displayedEonNumberFromIndex(seasonIndex);
   }
+}
+
+function getZoomLabel(
+  locale: SupportedLocale,
+  zoom: ZoomLevel,
+  value: number
+): string {
+  return t(locale, ZOOM_MESSAGE_KEYS[zoom].zoom, {
+    value: formatInteger(locale, value),
+  });
+}
+
+function getZoomTitle(
+  locale: SupportedLocale,
+  zoom: ZoomLevel,
+  seasonIndex: number
+): string {
+  const value = formatInteger(locale, getZoomNumber(zoom, seasonIndex));
+  return t(locale, ZOOM_MESSAGE_KEYS[zoom].title, { value });
+}
+
+function getDivisionName(locale: SupportedLocale, zoom: ZoomLevel): string {
+  return t(locale, ZOOM_MESSAGE_KEYS[zoom].division);
+}
+
+function getCalendarInviteLabels(locale: SupportedLocale) {
+  return {
+    addToCalendar: t(locale, "memeCalendar.invites.addToCalendar"),
+    addToGoogleCalendar: t(locale, "memeCalendar.invites.addToGoogleCalendar"),
+  };
 }
 
 // Props types
@@ -101,12 +218,14 @@ interface MonthProps {
   readonly onSelectDay?: ((date: Date) => void) | undefined;
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
+  readonly locale: SupportedLocale;
 }
 interface SeasonViewProps {
   readonly seasonIndex: number;
   readonly onSelectDay?: ((date: Date) => void) | undefined;
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
+  readonly locale: SupportedLocale;
 }
 interface YearViewProps {
   readonly seasonIndex: number;
@@ -138,11 +257,38 @@ interface EonViewProps {
 /**
  * Month component - renders a month grid with weekday headers.
  */
-function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
+function Month({
+  date,
+  onSelectDay,
+  autoOpenYmd,
+  displayTz,
+  locale,
+}: MonthProps) {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
-  const monthName = formatUtcMonth(new Date(Date.UTC(year, month, 1)), "long");
+  const monthName = formatUtcMonth(
+    new Date(Date.UTC(year, month, 1)),
+    "long",
+    locale
+  );
+  const weekdays: readonly MessageKey[] = [
+    "memeCalendar.grid.weekday.mon",
+    "memeCalendar.grid.weekday.tue",
+    "memeCalendar.grid.weekday.wed",
+    "memeCalendar.grid.weekday.thu",
+    "memeCalendar.grid.weekday.fri",
+    "memeCalendar.grid.weekday.sat",
+    "memeCalendar.grid.weekday.sun",
+  ];
   const weeks = getMonthWeeks(year, month);
+  const firstMonthDay = new Date(Date.UTC(year, month, 1));
+  const firstMonthDow = firstMonthDay.getUTCDay();
+  const gridStartOffset = firstMonthDow === 0 ? -6 : 1 - firstMonthDow;
+  const cells = weeks.flat().map((day, cellOffset) => ({
+    day,
+    cellOffset,
+    keyDate: new Date(Date.UTC(year, month, 1 + gridStartOffset + cellOffset)),
+  }));
   useEffect(() => {
     if (!autoOpenYmd) return;
     const el = document.getElementById(`meme-cell-${autoOpenYmd}`);
@@ -175,7 +321,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
       </div>
       {/* Weekday header */}
       <div className="tw-mt-1 tw-grid tw-grid-cols-7 tw-text-center tw-text-xs tw-font-medium">
-        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((wd) => (
+        {weekdays.map((wd) => (
           <div
             key={wd}
             className="tw-border-b-2 tw-p-1"
@@ -184,23 +330,23 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               borderBottomStyle: "solid",
             }}
           >
-            {wd}
+            {t(locale, wd)}
           </div>
         ))}
         {/* Day cells */}
-        {weeks.flat().map((day, idx) => {
+        {cells.map(({ day, cellOffset, keyDate }) => {
           if (day === null) {
             return (
               <div
-                key={`empty-${year}-${month}-${idx}`}
+                key={`empty-${ymd(keyDate)}`}
                 className="tw-pointer-events-none tw-invisible"
               ></div>
             );
           }
 
           const cellDateUtcDay = new Date(Date.UTC(year, month, day));
-          const col = idx % 7;
-          const row = Math.floor(idx / 7);
+          const col = cellOffset % 7;
+          const row = Math.floor(cellOffset / 7);
           let tooltipPlace: "top" | "bottom" | "right";
           if (col <= 1) tooltipPlace = "right";
           else if (row <= 1) tooltipPlace = "bottom";
@@ -229,11 +375,14 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
             mintInstantUtc = first?.instantUtc;
             mintLabel =
               historical.length === 1
-                ? `#${first?.id}`
-                : `#${first?.id}-#${last?.id}`;
+                ? `#${formatInteger(locale, first?.id ?? 0)}`
+                : `#${formatInteger(locale, first?.id ?? 0)}-#${formatInteger(
+                    locale,
+                    last?.id ?? 0
+                  )}`;
           } else if (isScheduledMintDay) {
             mintNumber = getMintNumberForMintDate(cellDateUtcDay);
-            mintLabel = formatMint(mintNumber);
+            mintLabel = formatMint(mintNumber, locale);
             mintInstantUtc = mintStartInstantUtcForMintDay(cellDateUtcDay);
           }
 
@@ -270,35 +419,53 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
             // list each historical mint with exact timestamps
             const items = historical
               .map((h) => {
-                return `#${h.id}`;
+                return `#${formatInteger(locale, h.id)}`;
               })
               .join(", ");
+            const tooltipTitle = t(
+              locale,
+              historical.length > 1
+                ? "memeCalendar.grid.tooltip.memes"
+                : "memeCalendar.grid.tooltip.meme",
+              historical.length > 1 ? { mints: items } : { mint: items }
+            );
             tooltipHtml = `<div style="min-width:220px">
               <div style="font-weight:600; margin-bottom:3px; font-size:larger">
-                Meme${historical.length > 1 ? "s" : ""} ${items}
+                ${escapeHtml(tooltipTitle)}
               </div>
               <div style="margin-bottom:12px">${formatFullDate(
                 historical[0]?.instantUtc!,
-                displayTz
+                displayTz,
+                locale
               )}</div>
             </div>`;
           } else if (mintInstantUtc) {
             const now = new Date();
             const oneLine =
               mintInstantUtc.getTime() > now.getTime()
-                ? formatFullDateTime(mintInstantUtc, displayTz)
-                : formatFullDate(mintInstantUtc, displayTz);
+                ? formatFullDateTime(mintInstantUtc, displayTz, locale)
+                : formatFullDate(mintInstantUtc, displayTz, locale);
             const oneLineDivWithNote = noteTooltipContent
               ? `<div style="margin-bottom:12px">${oneLine}<br />
                 <span style="font-size:11px; color: #666;">*${noteTooltipContent}</span></div>`
               : `<div style="margin-bottom:12px">${oneLine}</div>`;
             const invites =
               mintInstantUtc.getTime() > now.getTime()
-                ? printCalendarInvites(mintInstantUtc, mintNumber!, "#000")
+                ? printCalendarInvites(
+                    mintInstantUtc,
+                    mintNumber!,
+                    "#000",
+                    22,
+                    getCalendarInviteLabels(locale),
+                    locale
+                  )
                 : "";
+            const tooltipTitle = t(locale, "memeCalendar.grid.tooltip.meme", {
+              mint: mintLabel,
+            });
             tooltipHtml = `
               <div style="min-width:220px">
-                <div style="font-weight:600; margin-bottom:3px; font-size:larger">Meme ${mintLabel}</div>
+                <div style="font-weight:600; margin-bottom:3px; font-size:larger">${escapeHtml(tooltipTitle)}</div>
                 ${oneLineDivWithNote}
                 ${invites}
               </div>`;
@@ -312,7 +479,7 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               type="button"
               id={`meme-cell-${ymd(cellDateUtcDay)}`}
               key={ymd(cellDateUtcDay)}
-              className="tw-flex tw-min-h-[2.5rem] tw-cursor-pointer tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-border-none tw-bg-transparent tw-py-2 hover:tw-bg-[#eee] hover:tw-text-black"
+              className="tw-flex tw-min-h-[2.5rem] tw-cursor-pointer tw-flex-col tw-items-center tw-justify-start tw-border-b-2 tw-border-none tw-bg-transparent tw-py-2 hover:tw-bg-[#eee] hover:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               style={{
                 borderColor: "#222222",
                 borderBottomStyle: "solid",
@@ -321,6 +488,10 @@ function Month({ date, onSelectDay, autoOpenYmd, displayTz }: MonthProps) {
               data-tooltip-html={tooltipHtml}
               data-tooltip-class-name={tooltipClassName}
               data-tooltip-place={tooltipPlace}
+              aria-label={t(locale, "memeCalendar.grid.dayMintAriaLabel", {
+                date: formatFullDate(cellDateUtcDay, "utc", locale),
+                mint: mintLabel ?? "",
+              })}
               onClick={() => onSelectDay?.(cellDateUtcDay)}
             >
               <span
@@ -353,6 +524,7 @@ function SeasonView({
   onSelectDay,
   autoOpenYmd,
   displayTz,
+  locale,
 }: SeasonViewProps) {
   const seasonStart = getSeasonStartDate(seasonIndex);
 
@@ -381,6 +553,7 @@ function SeasonView({
           onSelectDay={onSelectDay}
           autoOpenYmd={autoOpenYmd}
           displayTz={displayTz}
+          locale={locale}
         />
       ))}
     </div>
@@ -833,9 +1006,13 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
  */
 interface MemeCalendarProps {
   readonly displayTz: DisplayTz;
+  readonly locale?: SupportedLocale | undefined;
 }
 
-export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
+export default function MemeCalendar({
+  displayTz,
+  locale = DEFAULT_LOCALE,
+}: MemeCalendarProps) {
   const isMobile = useIsMobileScreen();
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
     try {
@@ -855,6 +1032,14 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
   const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
   const eraNumber = displayedEraNumberFromIndex(seasonIndex);
   const eonNumber = displayedEonNumberFromIndex(seasonIndex);
+  const zoomNumbers: Record<ZoomLevel, number> = {
+    szn: seasonNumber,
+    year: yearNumber,
+    epoch: epochNumber,
+    period: periodNumber,
+    era: eraNumber,
+    eon: eonNumber,
+  };
 
   // Jump to specific numbers (1‑based)
   const selectYear = (n: number) =>
@@ -874,6 +1059,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
             seasonIndex={seasonIndex}
             autoOpenYmd={autoOpenYmd ?? undefined}
             displayTz={displayTz}
+            locale={locale}
           />
         );
       case "year":
@@ -996,43 +1182,69 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
     jumpToMonthValue(jumpValue);
   };
 
+  const infoButtonLabel = t(
+    locale,
+    showInfo ? "memeCalendar.grid.info.hide" : "memeCalendar.grid.info.show"
+  );
+  const currentDivisionName = getDivisionName(locale, zoomLevel);
+  const previousDivisionLabel = t(locale, "memeCalendar.grid.previous", {
+    division: currentDivisionName,
+  });
+  const nextDivisionLabel = t(locale, "memeCalendar.grid.next", {
+    division: currentDivisionName,
+  });
+
   return (
     <div className="tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-[#0c0c0d] tw-p-4">
       {/* Division (zoom) selector buttons */}
       <div className="tw-mb-8 tw-grid tw-grid-cols-3 tw-gap-2 lg:tw-grid-cols-[repeat(6,minmax(0,1fr))_auto]">
-        {(
-          [
-            ["szn", `SZN ${seasonNumber.toLocaleString()}`],
-            ["year", `Year ${yearNumber.toLocaleString()}`],
-            ["epoch", `Epoch ${epochNumber.toLocaleString()}`],
-            ["period", `Period ${periodNumber.toLocaleString()}`],
-            ["era", `Era ${eraNumber.toLocaleString()}`],
-            ["eon", `Eon ${eonNumber.toLocaleString()}`],
-          ] as [ZoomLevel, string][]
-        ).map(([level, label]) => (
-          <button
-            key={level}
-            className={
-              "tw-w-full tw-rounded-md tw-border tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors " +
-              (zoomLevel === level
-                ? "tw-border-blue-500 tw-bg-blue-600 tw-text-white tw-shadow"
-                : "tw-border-gray-300 tw-bg-gray-100 tw-text-gray-900 hover:tw-bg-gray-200 dark:tw-border-gray-700 dark:tw-bg-gray-800 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700")
-            }
-            onClick={() => setZoomLevel(level)}
-          >
-            {label}
-          </button>
-        ))}
+        <fieldset className="tw-col-span-3 tw-grid tw-grid-cols-3 tw-gap-2 lg:tw-col-span-6 lg:tw-grid-cols-6">
+          <legend className="tw-sr-only">
+            {t(locale, "memeCalendar.grid.zoomGroup")}
+          </legend>
+          {ZOOM_LEVELS.map((level) => {
+            const label = getZoomLabel(locale, level, zoomNumbers[level]);
+            return (
+              <button
+                key={level}
+                type="button"
+                aria-pressed={zoomLevel === level}
+                className={
+                  "tw-w-full tw-rounded-md tw-border tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 " +
+                  (zoomLevel === level
+                    ? "tw-border-blue-500 tw-bg-blue-600 tw-text-white tw-shadow"
+                    : "tw-border-gray-300 tw-bg-gray-100 tw-text-gray-900 hover:tw-bg-gray-200 dark:tw-border-gray-700 dark:tw-bg-gray-800 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700")
+                }
+                onClick={() => setZoomLevel(level)}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </fieldset>
         <div className="tw-col-span-3 tw-flex tw-items-center tw-justify-end lg:tw-col-span-1">
-          <FontAwesomeIcon
-            icon={showInfo ? faXmarkCircle : faInfoCircle}
-            className="tw-h-8 tw-w-8 tw-cursor-pointer"
+          <button
+            type="button"
+            aria-controls="meme-calendar-info"
+            aria-expanded={showInfo}
+            aria-label={infoButtonLabel}
+            title={infoButtonLabel}
+            className="tw-inline-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-transparent tw-bg-transparent tw-text-gray-100 hover:tw-bg-gray-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
             onClick={() => setShowInfo((v) => !v)}
-          />
+          >
+            <FontAwesomeIcon
+              aria-hidden="true"
+              icon={showInfo ? faXmarkCircle : faInfoCircle}
+              className="tw-h-8 tw-w-8"
+            />
+          </button>
         </div>
       </div>
 
       <div
+        id="meme-calendar-info"
+        role="region"
+        aria-label={t(locale, "memeCalendar.grid.info.panelLabel")}
         className={
           "tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black " +
           "tw-origin-top tw-overflow-hidden tw-transition-all tw-duration-300 tw-ease-out " +
@@ -1046,43 +1258,13 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-gap-6">
           {/* Left side grows on md+ */}
           <div className="md:tw-flex-1">
-            {[
-              { label: "Minting Days", text: "Monday / Wednesday / Friday" },
-              {
-                label: "SZN",
-                text: "Traditional calendar quarter system / 3 months each",
-                note: "~ 39 mints",
-              },
-              { label: "YEAR", text: "4 SZNs in 1 YEAR", note: "~ 156 mints" },
-              {
-                label: "EPOCH",
-                text: "4 YEARs / 16 SZNs",
-                note: "~ 626 mints",
-              },
-              {
-                label: "PERIOD",
-                text: "5 EPOCHs / 20 YEARs / 80 SZNs",
-                note: "~ 3,130 mints",
-              },
-              {
-                label: "ERA",
-                text: "5 PERIODs / 20 EPOCHs / 100 YEARs / 400 SZNs",
-                note: "~ 15,650 mints",
-              },
-              {
-                label: "EON",
-                text: "10 ERAs / 100 PERIODs / 1,000 YEARs / 4,000 SZNs",
-                note: "~ 156,500 mints",
-              },
-              {
-                label: "Year 0",
-                text: "Jun 2022 - Dec 2022 / SZN1 / Year 0 was our experimental launch period, not bound by the later structured minting schedule.",
-                note: "Memes #1 - #47",
-              },
-            ].map(({ label, text, note }) => (
+            {GRID_INFO_ITEMS.map(({ label, text, note }) => (
               <div key={label} className="tw-py-2">
-                <span className="tw-font-bold">{label}</span> - {text}{" "}
-                {note && <span className="tw-text-gray-500">{note}</span>}
+                <span className="tw-font-bold">{t(locale, label)}</span> -{" "}
+                {t(locale, text)}{" "}
+                {note && (
+                  <span className="tw-text-gray-500">{t(locale, note)}</span>
+                )}
               </div>
             ))}
           </div>
@@ -1094,7 +1276,10 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
         {/* Left half: Prev | Title+Range | Next */}
         <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 lg:tw-max-w-[40%] lg:tw-basis-2/3">
           <button
-            className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-gray-300 tw-px-3 tw-py-1.5 tw-text-gray-900 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700"
+            type="button"
+            aria-label={previousDivisionLabel}
+            title={previousDivisionLabel}
+            className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-gray-300 tw-px-3 tw-py-1.5 tw-text-gray-900 hover:tw-bg-gray-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 dark:tw-border-gray-700 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700"
             onClick={() => {
               let delta = 0;
               if (zoomLevel === "epoch") {
@@ -1128,23 +1313,27 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               setSeasonIndex((s) => clampIndex(s + delta));
             }}
           >
-            <FontAwesomeIcon icon={faCaretLeft} />
+            <FontAwesomeIcon aria-hidden="true" icon={faCaretLeft} />
           </button>
 
           {/* Label block: title and date range; wraps if needed */}
           <div className="tw-min-w-0 tw-flex-1 tw-text-center">
             <div className="tw-text-sm tw-font-semibold">
-              {getZoomTitle(zoomLevel, seasonIndex)}
+              {getZoomTitle(locale, zoomLevel, seasonIndex)}
             </div>
             {(() => {
               const { start, end } = getRangeDatesByZoom(
                 zoomLevel,
                 seasonIndex
               );
-              const range = `${formatUtcMonthYear(start)} - ${formatUtcMonthYear(end)}`;
+              const range = `${formatUtcMonthYear(
+                start,
+                "short",
+                locale
+              )} - ${formatUtcMonthYear(end, "short", locale)}`;
               const mintRange = isSznOneIndex(seasonIndex)
                 ? "Memes #1 - #47"
-                : getRangeLabel(start, end);
+                : getRangeLabel(start, end, locale);
               return (
                 <div className="tw-whitespace-normal tw-break-words tw-text-xs tw-text-gray-400">
                   {range} / {mintRange}
@@ -1154,7 +1343,10 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           </div>
 
           <button
-            className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-gray-300 tw-px-3 tw-py-1.5 tw-text-gray-900 hover:tw-bg-gray-100 dark:tw-border-gray-700 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700"
+            type="button"
+            aria-label={nextDivisionLabel}
+            title={nextDivisionLabel}
+            className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-gray-300 tw-px-3 tw-py-1.5 tw-text-gray-900 hover:tw-bg-gray-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 dark:tw-border-gray-700 dark:tw-text-gray-100 dark:hover:tw-bg-gray-700"
             onClick={() => {
               let delta = 0;
               if (zoomLevel === "epoch") {
@@ -1188,7 +1380,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
               setSeasonIndex((s) => clampIndex(s + delta));
             }}
           >
-            <FontAwesomeIcon icon={faCaretRight} />
+            <FontAwesomeIcon aria-hidden="true" icon={faCaretRight} />
           </button>
         </div>
         {/* Right: controls — Jump to Today, Mint #, and Date jump (date hidden on small screens) */}
@@ -1197,17 +1389,22 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
           <div className="tw-flex tw-w-full tw-gap-3 sm:tw-w-auto sm:tw-gap-3">
             <button
               type="button"
-              className="tw-inline-flex tw-h-9 tw-flex-1 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-px-3 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-[#e9e9e9] sm:tw-w-auto sm:tw-flex-none"
+              className="tw-inline-flex tw-h-9 tw-flex-1 tw-shrink-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-px-3 tw-text-sm tw-font-semibold tw-text-black hover:tw-bg-[#e9e9e9] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-w-auto sm:tw-flex-none"
               onClick={handleJumpToToday}
             >
-              Jump to Today
+              {t(locale, "memeCalendar.grid.jumpToday")}
             </button>
             <form
               onSubmit={handleMintJumpSubmit}
               className="tw-w-full tw-flex-1 tw-shrink-0 sm:tw-w-auto sm:tw-flex-none"
             >
-              <div className="tw-flex tw-h-9 tw-w-full tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-[#e5e5e5] tw-bg-white tw-pl-3 tw-font-semibold tw-text-black">
-                <div className="tw-shrink-0 tw-select-none tw-pr-2">Meme #</div>
+              <div className="tw-flex tw-h-9 tw-w-full tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-pl-3 tw-font-semibold tw-text-black">
+                <label
+                  htmlFor="meme-calendar-mint-input"
+                  className="tw-shrink-0 tw-select-none tw-pr-2"
+                >
+                  {t(locale, "memeCalendar.grid.memeNumber")}
+                </label>
                 <input
                   id="meme-calendar-mint-input"
                   type="number"
@@ -1218,7 +1415,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                     const v = event.target.value.replaceAll(/\D/g, "");
                     setJumpMint(v);
                   }}
-                  className="tw-h-9 tw-w-full tw-min-w-0 tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none sm:tw-w-[8ch]"
+                  className="tw-h-9 tw-w-full tw-min-w-0 tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-0 focus-visible:tw-outline-primary-400 sm:tw-w-[8ch]"
                 />
               </div>
             </form>
@@ -1227,8 +1424,13 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
             onSubmit={handleDateJumpSubmit}
             className="tw-hidden tw-min-w-0 tw-max-w-full sm:tw-block sm:tw-w-auto sm:tw-basis-auto lg:tw-flex-1"
           >
-            <div className="tw-flex tw-h-9 tw-w-full tw-max-w-full tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-[#e5e5e5] tw-bg-white tw-pl-3 tw-font-semibold tw-text-black sm:tw-w-auto sm:tw-max-w-[28rem] lg:tw-w-full">
-              <div className="tw-shrink-0 tw-select-none tw-pr-2">Date</div>
+            <div className="tw-flex tw-h-9 tw-w-full tw-max-w-full tw-items-center tw-rounded-md tw-border tw-border-[#d1d1d1] tw-bg-white tw-pl-3 tw-font-semibold tw-text-black sm:tw-w-auto sm:tw-max-w-[28rem] lg:tw-w-full">
+              <label
+                htmlFor="meme-calendar-date-input"
+                className="tw-shrink-0 tw-select-none tw-pr-2"
+              >
+                {t(locale, "memeCalendar.grid.date")}
+              </label>
               <input
                 id="meme-calendar-date-input"
                 type="month"
@@ -1238,7 +1440,7 @@ export default function MemeCalendar({ displayTz }: MemeCalendarProps) {
                   setJumpValue(value);
                   jumpToMonthValue(value);
                 }}
-                className="tw-h-9 tw-w-full tw-min-w-0 tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none sm:tw-w-[16rem] lg:tw-w-full lg:tw-max-w-[28rem]"
+                className="tw-h-9 tw-w-full tw-min-w-0 tw-rounded-r-md tw-border-none tw-px-2 tw-text-black placeholder:tw-text-gray-500 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-0 focus-visible:tw-outline-primary-400 sm:tw-w-[16rem] lg:tw-w-full lg:tw-max-w-[28rem]"
               />
             </div>
           </form>

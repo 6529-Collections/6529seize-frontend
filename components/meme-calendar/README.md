@@ -48,14 +48,14 @@ These overrides feed into the eligibility logic used by all calendar utilities, 
 
 ## Calendar Link Helpers
 
-| Helper                                                                        | Summary                                                                                                                      |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `printCalendarInvites(dateOrInstant, mintNumber, fontColor?, size?, labels?)` | Produces the HTML snippet that renders accessible download links for both the ICS file and Google Calendar entry for a mint. |
+| Helper                                                                                 | Summary                                                                                                                                                                |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `printCalendarInvites(dateOrInstant, mintNumber, fontColor?, size?, labels?, locale?)` | Produces the HTML snippet that renders accessible download links for both the ICS file and Google Calendar entry for a mint, using the provided locale for event text. |
 
 ## Range & Display Utilities
 
-| Helper                                                      | Summary                                                                                                                         |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `getRangeDatesByZoom(zoom: ZoomLevel, seasonIndex: number)` | Returns the UTC start and end bounds for the selected timeline division (season → eon) so views can share consistent date math. |
-| `getRangeLabel(start: Date, end: Date)`                     | Formats a human-friendly “Memes #X - #Y” label using mint numbers that fall inside the provided date range.                     |
-| `formatMint(n: number)` / `formatFullDateTime(date, mode)`  | Formatting helpers used across the calendar to keep mint numbers and timestamps consistent.                                     |
+| Helper                                                                       | Summary                                                                                                                         |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `getRangeDatesByZoom(zoom: ZoomLevel, seasonIndex: number)`                  | Returns the UTC start and end bounds for the selected timeline division (season → eon) so views can share consistent date math. |
+| `getRangeLabel(start: Date, end: Date, locale?)`                             | Formats a human-friendly “Memes #X - #Y” label using mint numbers that fall inside the provided date range.                     |
+| `formatMint(n: number, locale?)` / `formatFullDateTime(date, mode, locale?)` | Formatting helpers used across the calendar to keep mint numbers and timestamps consistent.                                     |

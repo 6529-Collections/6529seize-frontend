@@ -11,13 +11,13 @@ jest.mock("@/components/meme-calendar/MemeCalendarOverview", () => ({
 
 jest.mock("@/components/meme-calendar/MemeCalendar", () => ({
   __esModule: true,
-  default: ({ displayTz }: { displayTz: string }) => (
-    <div data-testid="calendar" data-tz={displayTz} />
+  default: ({ displayTz, locale }: { displayTz: string; locale: string }) => (
+    <div data-locale={locale} data-testid="calendar" data-tz={displayTz} />
   ),
 }));
 
 describe("MemesMintingCalendar timezone toggle", () => {
-  it("labels the timezone controls and passes locale to the overview", async () => {
+  it("labels the timezone controls and passes locale to child views", async () => {
     render(<MemesMintingCalendar locale="de-DE" />);
 
     expect(
@@ -32,6 +32,10 @@ describe("MemesMintingCalendar timezone toggle", () => {
     expect(localButton).toHaveAttribute("aria-pressed", "true");
     expect(utcButton).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByTestId("overview")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.getByTestId("calendar")).toHaveAttribute(
       "data-locale",
       "de-DE"
     );

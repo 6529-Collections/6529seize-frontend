@@ -532,3 +532,24 @@
   Snyk passed. Claude did not produce a code review after `@claude review once`
   and left the repository-configured manual review instruction comment only.
   Per workstream policy, do not merge PR #2621 without human approval.
+- Started stacked branch `codex/meme-calendar-grid-a11y-i18n` from PR #2621 for
+  the next `/meme-calendar` lower grid/control accessibility and i18n slice.
+- Implemented the first lower custom calendar pass: lower zoom controls now use
+  native `fieldset`/`legend` semantics and message-backed pressed-state
+  buttons; the guide toggle is a named icon button controlling a labelled
+  region; previous/next controls have accessible names; jump controls use real
+  labels; default SZN month names, mint-day accessible names, mint numbers,
+  ranges, and calendar invite event text use locale-aware helpers.
+- Validation passed for the lower grid/control slice: focused calendar/i18n
+  Jest suites (5 suites, 27 tests), `lint:changed`, `typecheck:changed`, and
+  `react-doctor:diff` exit 0. React Doctor still reports the unrelated dirty
+  `contexts/EmojiContext.tsx` fetch-in-effect diagnostic plus broad
+  `MemeCalendar` component-size/state/renderView warnings left as follow-up
+  refactor debt.
+- Browser smoke passed on the live local frontend for
+  `/meme-calendar?locale=de-DE` at desktop and
+  `/meme-calendar?locale=fr-FR` at a 390px mobile viewport. Verified guide
+  toggle state, labelled region, named previous/next controls, labelled
+  `Meme #` input, hidden mobile `Date` input, localized month/mint-day labels,
+  no horizontal overflow, and no Next.js runtime session errors. Local console
+  resource errors were from the shared backend/emoji feed.
