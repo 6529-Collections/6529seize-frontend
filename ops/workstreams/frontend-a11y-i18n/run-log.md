@@ -137,3 +137,10 @@
   requests still log API/403 errors unrelated to this route change.
 - Opened review-ready stacked PR #2610 against PR #2609. Per workstream policy,
   do not merge PR #2610 without human approval.
+- SonarCloud initially failed PR #2610 on new-code duplication, isolated by the
+  Sonar API to the newly added Rememe detail source-message block in
+  `i18n/messages/en-US.ts`. Refactored those keys through a typed local
+  namespace builder so the public message keys and fallback behavior stay the
+  same while the source no longer adds a repeated flat key block.
+- Validation for the Sonar follow-up passed: focused i18n Jest suite, focused
+  Prettier check, `typecheck:changed`, and `lint:changed`.
