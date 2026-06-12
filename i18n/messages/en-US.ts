@@ -145,6 +145,30 @@ const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const THE_MEMES_DETAIL_ACTIVITY_MESSAGES = namespaceMessages(
+  "theMemes.detail.activity",
+  [
+    ["region", "The Memes card activity"],
+    ["transactionType", "Transaction Type"],
+    ["loading", "Loading card activity"],
+    ["empty", "Nothing here yet"],
+    ["table.caption", "The Memes Card {tokenId} activity"],
+    ["filters.allTransactions", "All Transactions"],
+    ["filters.airdrops", "Airdrops"],
+    ["filters.mints", "Mints"],
+    ["filters.sales", "Sales"],
+    ["filters.transfers", "Transfers"],
+    ["filters.burns", "Burns"],
+    ["volume.heading", "Card volumes"],
+    ["volume.24Hours", "24 Hours"],
+    ["volume.7Days", "7 Days"],
+    ["volume.1Month", "1 Month"],
+    ["volume.allTime", "All Time"],
+    ["volume.unavailable", "N/A"],
+    ["volume.ethValue", "{value} ETH"],
+  ] as const
+);
+
 export const EN_US_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.title": "The Memes",
@@ -188,6 +212,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
   ...THE_MEMES_DETAIL_LIVE_MESSAGES,
+  ...THE_MEMES_DETAIL_ACTIVITY_MESSAGES,
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Edition Size",
   "theMemes.sort.meme": "Meme",
