@@ -19,3 +19,6 @@
 - Addressed CodeRabbit feedback on #2604: added page-level Suspense for
   `useSearchParams`, localized the document title, made locale normalization
   case-insensitive, and added exhaustive guards for enum label helpers.
+- Fixed `react-doctor:diff` wrapper execution on Windows by resolving Git for
+  Windows and invoking the `react-doctor.cmd` shim through the shell; the command
+  now runs and reports only the pre-existing unrelated EmojiContext diagnostic.
