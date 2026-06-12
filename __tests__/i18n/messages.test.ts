@@ -1,6 +1,7 @@
 import {
   compareLocalized,
   formatDate,
+  formatInteger,
   formatNumber,
   formatRelativeTime,
 } from "@/i18n/format";
@@ -88,11 +89,11 @@ describe("frontend i18n helpers", () => {
     );
     expect(
       t("es-ES", "theMemes.detail.art.download.downloadingProgress", {
-        percentage: 50,
+        percentage: formatInteger("es-ES", 50),
       })
     ).toBe(
       t("en-US", "theMemes.detail.art.download.downloadingProgress", {
-        percentage: 50,
+        percentage: formatInteger("en-US", 50),
       })
     );
     expect(t("fr-FR", "timeline.links.uriAriaLabel")).toBe(

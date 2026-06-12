@@ -424,3 +424,8 @@
   failures in the desktop session.
 - Opened review-ready stacked PR #2618 against PR #2617. Per workstream policy,
   do not merge PR #2618 without human approval.
+- Addressed CodeRabbit feedback on PR #2618 by marking the route-status row as
+  review-ready only and matching the download-progress fallback test to the
+  formatted string passed by production code.
+- Validation for the PR #2618 bot-feedback follow-up passed: focused i18n Jest
+  suite, focused Prettier, `lint:changed`, and `typecheck:changed`.
