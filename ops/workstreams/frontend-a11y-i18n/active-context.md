@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/meme-calendar-grid-a11y-i18n`
+`codex/meme-calendar-drilldown-a11y-i18n`
 
 ## Constraints
 
@@ -25,21 +25,20 @@ page migration PRs for safe media surfaces.
 - WCAG target: WCAG 2.2 AA.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
-- Current implementation surface: `/meme-calendar` lower grid/control pass,
-  stacked on PR #2621. The branch is
-  `codex/meme-calendar-grid-a11y-i18n`; PR #2622 is open and review-ready only.
-- Scope includes lower-calendar zoom/guide/navigation/jump controls, default
-  SZN month labels, mint-day accessible names, mint numbers/ranges, and
-  calendar invite link/event labels through progressive messages/formatters.
-- Higher-level lower-calendar drilldown cards (`Year`, `Epoch`, `Period`,
-  `Era`, `Eon`) remain a deferred localization surface.
+- Current implementation surface: `/meme-calendar` lower drilldown card pass,
+  stacked on PR #2622. The branch is
+  `codex/meme-calendar-drilldown-a11y-i18n`; PR #2623 is open and
+  review-ready only.
+- Scope includes higher-level lower-calendar drilldown card titles, date
+  ranges, mint ranges, accessible button names, and focus-visible behavior for
+  `Year`, `Epoch`, `Period`, `Era`, and `Eon` views.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Confirm PR #2622 checks and bot feedback after the latest push.
+1. Confirm PR #2623 checks and bot feedback after the latest push.
 2. Iterate on actionable CodeRabbit/Claude/CI feedback.
 3. Keep page implementation PRs review-ready only; do not merge without human
    approval.

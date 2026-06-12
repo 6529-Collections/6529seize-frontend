@@ -561,3 +561,37 @@
   reduce cognitive complexity. Re-ran the focused calendar/i18n Jest suites,
   `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and a live browser
   smoke on `/meme-calendar?locale=de-DE`.
+- Started stacked branch `codex/meme-calendar-drilldown-a11y-i18n` from PR
+  #2622 for the next `/meme-calendar` lower drilldown card accessibility and
+  i18n slice.
+- Implemented the lower drilldown card pass: `Year`, `Epoch`, `Period`, `Era`,
+  and `Eon` views now receive the active locale; card titles, date ranges, mint
+  ranges, and accessible button names are routed through message/format helpers;
+  drilldown cards also expose consistent focus-visible styling.
+- Validation passed for the lower drilldown card slice: focused calendar/i18n
+  Jest suites (5 suites, 28 tests), `lint:changed`, `typecheck:changed`, and
+  `react-doctor:diff` exit 0. React Doctor still reports the unrelated dirty
+  `contexts/EmojiContext.tsx` fetch-in-effect diagnostic plus the existing
+  broad `MemeCalendar` component-size/state/renderView warnings.
+- Browser smoke passed on the live local frontend for
+  `/meme-calendar?locale=de-DE` at desktop and
+  `/meme-calendar?locale=fr-FR` at a 390px mobile viewport. Verified
+  drilldown card accessible names, localized month labels, ungrouped calendar
+  years, hidden mobile `Date` input, no horizontal overflow, and no Next.js
+  runtime session errors. Local console resource errors were from the shared
+  backend waves endpoints and blocked emoji feed.
+- Opened review-ready stacked PR #2623 against PR #2622. Per workstream policy,
+  do not merge PR #2623 without human approval.
+- Addressed SonarCloud's new-code duplication gate on PR #2623 by extracting
+  the repeated lower-calendar drilldown button markup into a shared
+  `DrilldownCard` component and the repeated SZN1 launch-period branch into
+  `HistoricalLaunchDrilldownCard`. Re-ran the focused calendar/i18n Jest
+  suites, `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and
+  desktop/mobile browser smoke on `/meme-calendar`; all remained green apart
+  from the known React Doctor follow-up diagnostics.
+- Addressed CodeRabbit's non-blocking cleanup notes on PR #2623 by
+  consolidating mint-range number formatting on `formatInteger` and renaming
+  drilldown card data from `label` to `mints`. Re-ran the focused
+  calendar/i18n Jest suites, `lint:changed`, `typecheck:changed`, and
+  `react-doctor:diff`; results remained green apart from the known React Doctor
+  follow-up diagnostics.

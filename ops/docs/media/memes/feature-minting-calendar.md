@@ -127,9 +127,11 @@ distribution routes.
   heading/empty state, lower-calendar zoom/guide/navigation/jump controls,
   default SZN month names, mint numbers, mint-day accessible names, and
   calendar invite link/event labels are routed through the source-message and
-  formatting helpers.
-- Higher-level lower-calendar drilldown cards (`Year`, `Epoch`, `Period`,
-  `Era`, `Eon`) remain a deferred localization surface.
+  formatting helpers. Higher-level lower-calendar drilldown cards (`Year`,
+  `Epoch`, `Period`, `Era`, `Eon`) now use message-backed titles, date ranges,
+  mint ranges, and accessible button names.
+- Reviewed non-English product translations and locale-prefixed routing remain
+  deferred.
 - `Date` jump is month-level only.
 - Compact fallback panels are intentionally limited to local-time next-mint
   context.

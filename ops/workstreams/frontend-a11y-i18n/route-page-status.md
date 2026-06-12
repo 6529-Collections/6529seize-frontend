@@ -21,3 +21,4 @@
 | `/the-memes/{id}` calendar periods     | PR open              | PR open           | PR #2620; review-ready only; stacked on PR #2619; do not merge yet |
 | `/meme-calendar` overview shell        | PR open              | PR open           | PR #2621; review-ready only; stacked on PR #2620; do not merge yet |
 | `/meme-calendar` lower grid controls   | PR open              | PR open           | PR #2622; review-ready only; stacked on PR #2621; do not merge yet |
+| `/meme-calendar` drilldown cards       | PR open              | PR open           | PR #2623; review-ready only; stacked on PR #2622; do not merge yet |

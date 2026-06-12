@@ -205,11 +205,145 @@ function getDivisionName(locale: SupportedLocale, zoom: ZoomLevel): string {
   return t(locale, ZOOM_MESSAGE_KEYS[zoom].division);
 }
 
+function getDivisionTitle(
+  locale: SupportedLocale,
+  zoom: ZoomLevel,
+  value: number
+): string {
+  return t(locale, ZOOM_MESSAGE_KEYS[zoom].title, {
+    value: formatInteger(locale, value),
+  });
+}
+
+function formatCalendarYear(locale: SupportedLocale, year: number): string {
+  return new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 0,
+    useGrouping: false,
+  }).format(year);
+}
+
+function getDivisionTitleWithGregorianYear(
+  locale: SupportedLocale,
+  zoom: ZoomLevel,
+  value: number,
+  year: number
+): string {
+  return t(locale, "memeCalendar.grid.titleWithGregorianYear", {
+    title: getDivisionTitle(locale, zoom, value),
+    year: formatCalendarYear(locale, year),
+  });
+}
+
+function getDateRangeLabel(
+  locale: SupportedLocale,
+  start: Date,
+  end: Date
+): string {
+  return t(locale, "memeCalendar.grid.dateRange", {
+    start: formatUtcMonthYear(start, "short", locale),
+    end: formatUtcMonthYear(end, "short", locale),
+  });
+}
+
+function getMemeRangeLabel(
+  locale: SupportedLocale,
+  start: number,
+  end: number
+): string {
+  return t(locale, "memeCalendar.grid.memeRange", {
+    start: formatInteger(locale, start),
+    end: formatInteger(locale, end),
+  });
+}
+
+function getDrilldownCardAriaLabel(
+  locale: SupportedLocale,
+  title: string,
+  range: string,
+  mints: string
+): string {
+  return t(locale, "memeCalendar.grid.cardAriaLabel", {
+    title,
+    range,
+    mints,
+  });
+}
+
 function getCalendarInviteLabels(locale: SupportedLocale) {
   return {
     addToCalendar: t(locale, "memeCalendar.invites.addToCalendar"),
     addToGoogleCalendar: t(locale, "memeCalendar.invites.addToGoogleCalendar"),
   };
+}
+
+const DRILLDOWN_CARD_CLASS =
+  "tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+
+interface DrilldownCardProps {
+  readonly title: string;
+  readonly range: string;
+  readonly mints: string;
+  readonly isCurrent: boolean;
+  readonly onClick: () => void;
+  readonly locale: SupportedLocale;
+}
+
+function DrilldownCard({
+  title,
+  range,
+  mints,
+  isCurrent,
+  onClick,
+  locale,
+}: DrilldownCardProps) {
+  return (
+    <button
+      type="button"
+      aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
+      className={DRILLDOWN_CARD_CLASS}
+      style={{
+        borderColor: isCurrent ? "#20fa59" : "#222222",
+        borderWidth: isCurrent ? "2px" : "1px",
+      }}
+      onClick={onClick}
+    >
+      <div className="tw-font-semibold">{title}</div>
+      <div className="tw-text-xs tw-text-gray-500">{range}</div>
+      <div className="tw-mt-1 tw-text-sm">{mints}</div>
+    </button>
+  );
+}
+
+interface HistoricalLaunchDrilldownCardProps {
+  readonly title: string;
+  readonly isCurrent: boolean;
+  readonly onClick: () => void;
+  readonly locale: SupportedLocale;
+}
+
+function HistoricalLaunchDrilldownCard({
+  title,
+  isCurrent,
+  onClick,
+  locale,
+}: HistoricalLaunchDrilldownCardProps) {
+  const start = new Date(SZN1_RANGE.start);
+  const end = new Date(SZN1_RANGE.end);
+  const range = getDateRangeLabel(locale, start, end);
+  const mints = getMemeRangeLabel(locale, 1, 47);
+
+  return (
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
+      <DrilldownCard
+        title={title}
+        range={range}
+        mints={mints}
+        isCurrent={isCurrent}
+        locale={locale}
+        onClick={onClick}
+      />
+    </div>
+  );
 }
 
 // Props types
@@ -231,27 +365,32 @@ interface YearViewProps {
   readonly seasonIndex: number;
   readonly onSelectSeason: (seasonIndex: number) => void;
   readonly onZoomToSeason: () => void;
+  readonly locale: SupportedLocale;
 }
 interface EpochViewProps {
   readonly seasonIndex: number;
   readonly onSelectSeason: (seasonIndex: number) => void;
   readonly onSelectYear: (yearNumber: number) => void;
   readonly onZoomToYear: () => void;
+  readonly locale: SupportedLocale;
 }
 interface PeriodViewProps {
   readonly seasonIndex: number;
   readonly onSelectEpoch: (epochNumber: number) => void;
   readonly onZoomToEpoch: () => void;
+  readonly locale: SupportedLocale;
 }
 interface EraViewProps {
   readonly seasonIndex: number;
   readonly onSelectPeriod: (periodNumber: number) => void;
   readonly onZoomToPeriod: () => void;
+  readonly locale: SupportedLocale;
 }
 interface EonViewProps {
   readonly seasonIndex: number;
   readonly onSelectEra: (eraNumber: number) => void;
   readonly onZoomToEra: () => void;
+  readonly locale: SupportedLocale;
 }
 
 type TooltipPlace = "top" | "bottom" | "right";
@@ -691,6 +830,7 @@ function YearView({
   seasonIndex,
   onSelectSeason,
   onZoomToSeason,
+  locale,
 }: YearViewProps) {
   const yearIndex = Math.floor(seasonIndex / SEASONS_PER_YEAR);
   const firstSeasonIndexOfYear = yearIndex * SEASONS_PER_YEAR;
@@ -699,33 +839,18 @@ function YearView({
   // ⭐ Special case: Year 0 (2022) shows a single SZN1 card (Jun–Dec 2022)
   const displayedYear = displayedYearNumberFromIndex(seasonIndex);
   if (displayedYear === 0) {
-    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
-    const sIdx = SZN1_SEASON_INDEX; // our SZN1 bucket
-    const isCurrent = currentIdx === sIdx;
+    const title = getDivisionTitle(locale, "szn", 1);
 
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-text-black"
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
-          onClick={() => {
-            onSelectSeason(sIdx);
-            onZoomToSeason();
-          }}
-        >
-          <div className="tw-font-semibold">SZN #1</div>
-          <div className="tw-text-xs tw-text-gray-500">
-            {formatUtcMonthYear(start)} - {formatUtcMonthYear(end)}
-          </div>
-          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
-        </button>
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectSeason(SZN1_SEASON_INDEX);
+          onZoomToSeason();
+        }}
+      />
     );
   }
   // 👇 existing code for other years stays the same
@@ -733,7 +858,14 @@ function YearView({
     const sIdx = firstSeasonIndexOfYear + s;
     const start = getSeasonStartDate(sIdx);
     const end = addMonths(start, 2);
-    return { sIdx, start, end, label: getRangeLabel(start, end) };
+    const title = getDivisionTitle(
+      locale,
+      "szn",
+      displayedSeasonNumberFromIndex(sIdx)
+    );
+    const range = getDateRangeLabel(locale, start, end);
+    const mints = getRangeLabel(start, end, locale);
+    return { sIdx, start, end, mints, range, title };
   });
 
   return (
@@ -741,27 +873,18 @@ function YearView({
       {seasons.map((s) => {
         const isCurrent = currentIdx === s.sIdx;
         return (
-          <button
-            type="button"
+          <DrilldownCard
             key={s.sIdx}
-            className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-            style={{
-              borderColor: isCurrent ? "#20fa59" : "#222222",
-              borderWidth: isCurrent ? "2px" : "1px",
-            }}
+            title={s.title}
+            range={s.range}
+            mints={s.mints}
+            isCurrent={isCurrent}
+            locale={locale}
             onClick={() => {
               onSelectSeason(s.sIdx);
               onZoomToSeason();
             }}
-          >
-            <div className="tw-font-semibold">
-              SZN #{displayedSeasonNumberFromIndex(s.sIdx)}
-            </div>
-            <div className="tw-text-xs tw-text-gray-500">
-              {formatUtcMonthYear(s.start)} - {formatUtcMonthYear(s.end)}
-            </div>
-            <div className="tw-mt-1 tw-text-sm">{s.label}</div>
-          </button>
+          />
         );
       })}
     </div>
@@ -776,36 +899,26 @@ function EpochView({
   onSelectYear,
   onSelectSeason,
   onZoomToYear,
+  locale,
 }: EpochViewProps) {
   const currentIdx = getSeasonIndexForDate(new Date());
   const epochNumber = displayedEpochNumberFromIndex(seasonIndex);
 
   if (epochNumber === 0) {
     // Special case: SZN1 epoch, single card for Year #0 (SZN1)
-    const sIdx = SZN1_SEASON_INDEX; // SZN1
-    // Highlight if currentIdx is within SZN1 range
-    const isCurrent = currentIdx === sIdx;
+    const title = getDivisionTitleWithGregorianYear(locale, "year", 0, 2022);
+
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
-          onClick={() => {
-            onSelectSeason(sIdx);
-            onSelectYear(0);
-            onZoomToYear();
-          }}
-        >
-          <div className="tw-font-semibold">Year #0 (2022)</div>
-          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
-        </button>
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectSeason(SZN1_SEASON_INDEX);
+          onSelectYear(0);
+          onZoomToYear();
+        }}
+      />
     );
   } else {
     // For epochNumber >= 1, show 4 years, starting with Jan 1 of year 2023 + 4*(epochNumber-1)
@@ -823,7 +936,14 @@ function EpochView({
         start,
         end,
         seasonIndex: yearSeasonIndex,
-        label: getRangeLabel(start, end),
+        mints: getRangeLabel(start, end, locale),
+        range: getDateRangeLabel(locale, start, end),
+        title: getDivisionTitleWithGregorianYear(
+          locale,
+          "year",
+          yearNumber,
+          year
+        ),
       };
     });
     return (
@@ -833,27 +953,18 @@ function EpochView({
             currentIdx >= y.seasonIndex &&
             currentIdx < y.seasonIndex + SEASONS_PER_YEAR;
           return (
-            <button
-              type="button"
+            <DrilldownCard
               key={toISO(y.start)}
-              className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-              style={{
-                borderColor: isCurrent ? "#20fa59" : "#222222",
-                borderWidth: isCurrent ? "2px" : "1px",
-              }}
+              title={y.title}
+              range={y.range}
+              mints={y.mints}
+              isCurrent={isCurrent}
+              locale={locale}
               onClick={() => {
                 onSelectYear(y.yearNumber);
                 onZoomToYear();
               }}
-            >
-              <div className="tw-font-semibold">
-                Year #{y.yearNumber} ({y.start.getUTCFullYear()})
-              </div>
-              <div className="tw-text-xs tw-text-gray-500">
-                {formatUtcMonthYear(y.start)} - {formatUtcMonthYear(y.end)}
-              </div>
-              <div className="tw-mt-1 tw-text-sm">{y.label}</div>
-            </button>
+            />
           );
         })}
       </div>
@@ -868,33 +979,24 @@ function PeriodView({
   seasonIndex,
   onSelectEpoch,
   onZoomToEpoch,
+  locale,
 }: PeriodViewProps) {
   const currentIdx = getSeasonIndexForDate(new Date());
   const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
 
   if (periodNumber === 0) {
-    const sIdx = SZN1_SEASON_INDEX; // SZN1
-    const isCurrent = currentIdx === sIdx;
+    const title = getDivisionTitleWithGregorianYear(locale, "epoch", 0, 2022);
+
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
-          onClick={() => {
-            onSelectEpoch(0);
-            onZoomToEpoch();
-          }}
-        >
-          <div className="tw-font-semibold">Epoch #0 (2022)</div>
-          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
-        </button>
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectEpoch(0);
+          onZoomToEpoch();
+        }}
+      />
     );
   } else {
     // For periodNumber >= 1, show 5 epochs, starting with epochNumber = 1 + 5*(periodNumber-1)
@@ -912,7 +1014,14 @@ function PeriodView({
         start,
         end,
         seasonIndex: seasonIndexForEpoch,
-        label: getRangeLabel(start, end),
+        mints: getRangeLabel(start, end, locale),
+        range: getDateRangeLabel(locale, start, end),
+        title: getDivisionTitleWithGregorianYear(
+          locale,
+          "epoch",
+          epochNumber,
+          startYear
+        ),
       };
     });
     return (
@@ -922,27 +1031,18 @@ function PeriodView({
             currentIdx >= ep.seasonIndex &&
             currentIdx < ep.seasonIndex + SEASONS_PER_EPOCH;
           return (
-            <button
-              type="button"
+            <DrilldownCard
               key={toISO(ep.start)}
-              className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-              style={{
-                borderColor: isCurrent ? "#20fa59" : "#222222",
-                borderWidth: isCurrent ? "2px" : "1px",
-              }}
+              title={ep.title}
+              range={ep.range}
+              mints={ep.mints}
+              isCurrent={isCurrent}
+              locale={locale}
               onClick={() => {
                 onSelectEpoch(ep.epochNumber);
                 onZoomToEpoch();
               }}
-            >
-              <div className="tw-font-semibold">
-                Epoch #{ep.epochNumber} ({ep.start.getUTCFullYear()})
-              </div>
-              <div className="tw-text-xs tw-text-gray-500">
-                {formatUtcMonthYear(ep.start)} - {formatUtcMonthYear(ep.end)}
-              </div>
-              <div className="tw-mt-1 tw-text-sm">{ep.label}</div>
-            </button>
+            />
           );
         })}
       </div>
@@ -957,34 +1057,24 @@ function EraView({
   seasonIndex,
   onSelectPeriod,
   onZoomToPeriod,
+  locale,
 }: EraViewProps) {
   const currentIdx = getSeasonIndexForDate(new Date());
   const eraNumber = displayedEraNumberFromIndex(seasonIndex);
 
   // Era #0 – special (SZN1 only)
   if (eraNumber === 0) {
-    const sIdx = SZN1_SEASON_INDEX; // SZN1 bucket
-    const isCurrent = currentIdx === sIdx;
+    const title = getDivisionTitleWithGregorianYear(locale, "period", 0, 2022);
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
-          onClick={() => {
-            onSelectPeriod(0);
-            onZoomToPeriod();
-          }}
-        >
-          <div className="tw-font-semibold">Period #0 (2022)</div>
-          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
-        </button>
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectPeriod(0);
+          onZoomToPeriod();
+        }}
+      />
     );
   }
 
@@ -1001,7 +1091,14 @@ function EraView({
       start,
       end,
       seasonIndex: seasonIndexForPeriod,
-      label: getRangeLabel(start, end),
+      mints: getRangeLabel(start, end, locale),
+      range: getDateRangeLabel(locale, start, end),
+      title: getDivisionTitleWithGregorianYear(
+        locale,
+        "period",
+        firstPeriodNumber + k,
+        py
+      ),
     };
   });
 
@@ -1012,27 +1109,18 @@ function EraView({
           currentIdx >= p.seasonIndex &&
           currentIdx < p.seasonIndex + SEASONS_PER_PERIOD;
         return (
-          <button
-            type="button"
+          <DrilldownCard
             key={toISO(p.start)}
-            className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-            style={{
-              borderColor: isCurrent ? "#20fa59" : "#222222",
-              borderWidth: isCurrent ? "2px" : "1px",
-            }}
+            title={p.title}
+            range={p.range}
+            mints={p.mints}
+            isCurrent={isCurrent}
+            locale={locale}
             onClick={() => {
               onSelectPeriod(p.periodNumber);
               onZoomToPeriod();
             }}
-          >
-            <div className="tw-font-semibold">
-              Period #{p.periodNumber} ({p.start.getUTCFullYear()})
-            </div>
-            <div className="tw-text-xs tw-text-gray-500">
-              {formatUtcMonthYear(p.start)} - {formatUtcMonthYear(p.end)}
-            </div>
-            <div className="tw-mt-1 tw-text-sm">{p.label}</div>
-          </button>
+          />
         );
       })}
     </div>
@@ -1042,34 +1130,28 @@ function EraView({
 /**
  * EonView - eras only, one per row, with ranges; drill into Era view.
  */
-function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
+function EonView({
+  seasonIndex,
+  onSelectEra,
+  onZoomToEra,
+  locale,
+}: EonViewProps) {
   const currentIdx = getSeasonIndexForDate(new Date());
   const eonNumber = displayedEonNumberFromIndex(seasonIndex);
 
   // Eon #0 – special (SZN1 only)
   if (eonNumber === 0) {
-    const sIdx = SZN1_SEASON_INDEX;
-    const isCurrent = currentIdx === sIdx;
+    const title = getDivisionTitleWithGregorianYear(locale, "era", 0, 2022);
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
-          onClick={() => {
-            onSelectEra(0);
-            onZoomToEra();
-          }}
-        >
-          <div className="tw-font-semibold">Era #0 (2022)</div>
-          <div className="tw-text-xs tw-text-gray-500">Jun 2022 - Dec 2022</div>
-          <div className="tw-mt-1 tw-text-sm">Memes #1 - #47</div>
-        </button>
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectEra(0);
+          onZoomToEra();
+        }}
+      />
     );
   }
 
@@ -1086,7 +1168,14 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
       start,
       end,
       seasonIndex: seasonIndexForEra,
-      label: getRangeLabel(start, end),
+      mints: getRangeLabel(start, end, locale),
+      range: getDateRangeLabel(locale, start, end),
+      title: getDivisionTitleWithGregorianYear(
+        locale,
+        "era",
+        firstEraNumber + k,
+        ey
+      ),
     };
   });
 
@@ -1097,27 +1186,18 @@ function EonView({ seasonIndex, onSelectEra, onZoomToEra }: EonViewProps) {
           currentIdx >= er.seasonIndex &&
           currentIdx < er.seasonIndex + SEASONS_PER_ERA;
         return (
-          <button
-            type="button"
+          <DrilldownCard
             key={toISO(er.start)}
-            className="tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black"
-            style={{
-              borderColor: isCurrent ? "#20fa59" : "#222222",
-              borderWidth: isCurrent ? "2px" : "1px",
-            }}
+            title={er.title}
+            range={er.range}
+            mints={er.mints}
+            isCurrent={isCurrent}
+            locale={locale}
             onClick={() => {
               onSelectEra(er.eraNumber);
               onZoomToEra();
             }}
-          >
-            <div className="tw-font-semibold">
-              Era #{er.eraNumber} ({er.start.getUTCFullYear()})
-            </div>
-            <div className="tw-text-xs tw-text-gray-500">
-              {formatUtcMonthYear(er.start)} - {formatUtcMonthYear(er.end)}
-            </div>
-            <div className="tw-mt-1 tw-text-sm">{er.label}</div>
-          </button>
+          />
         );
       })}
     </div>
@@ -1192,6 +1272,7 @@ export default function MemeCalendar({
             seasonIndex={seasonIndex}
             onSelectSeason={setSeasonIndex}
             onZoomToSeason={() => setZoomLevel("szn")}
+            locale={locale}
           />
         );
       case "epoch":
@@ -1201,6 +1282,7 @@ export default function MemeCalendar({
             onSelectSeason={setSeasonIndex}
             onSelectYear={selectYear}
             onZoomToYear={() => setZoomLevel("year")}
+            locale={locale}
           />
         );
       case "period":
@@ -1209,6 +1291,7 @@ export default function MemeCalendar({
             seasonIndex={seasonIndex}
             onSelectEpoch={selectEpoch}
             onZoomToEpoch={() => setZoomLevel("epoch")}
+            locale={locale}
           />
         );
       case "era":
@@ -1217,6 +1300,7 @@ export default function MemeCalendar({
             seasonIndex={seasonIndex}
             onSelectPeriod={selectPeriod}
             onZoomToPeriod={() => setZoomLevel("period")}
+            locale={locale}
           />
         );
       case "eon":
@@ -1225,6 +1309,7 @@ export default function MemeCalendar({
             seasonIndex={seasonIndex}
             onSelectEra={selectEra}
             onZoomToEra={() => setZoomLevel("era")}
+            locale={locale}
           />
         );
       default:
