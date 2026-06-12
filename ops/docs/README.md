@@ -70,9 +70,9 @@ March 19, 2026.
   `/tools/subscriptions-report`, `/tools/app-wallets`,
   `/tools/app-wallets/import-wallet`, `/tools/app-wallets/{appWalletAddress}`
 - [EMMA](emma/README.md): `/emma`, `/emma/plans`, `/emma/plans/{planId}`
-- [Open Data](open-data/README.md): `/open-data`, `/open-data/meme-subscriptions`,
-  `/open-data/network-metrics`, `/open-data/rememes`, `/open-data/royalties`,
-  `/open-data/team`
+- [Open Data](open-data/README.md): `/open-data`, `/open-data/6529bot`,
+  `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
+  `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
 - [Navigation](navigation/README.md): app shell controls and `/open-mobile`
 - [Shared](shared/README.md): behavior reused by multiple areas
 
@@ -120,8 +120,9 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/tools/api`, `/tools/block-finder`, `/tools/subscriptions-report`,
   `/tools/app-wallets`, `/tools/app-wallets/import-wallet`,
   `/tools/app-wallets/{appWalletAddress}`, `/open-data`,
-  `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
-  `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
+  `/open-data/6529bot`, `/open-data/meme-subscriptions`,
+  `/open-data/network-metrics`, `/open-data/rememes`,
+  `/open-data/royalties`, `/open-data/team`
 - Shared app-shell behavior:
   [Navigation](navigation/README.md) and [Shared](shared/README.md),
   including `/open-mobile`
