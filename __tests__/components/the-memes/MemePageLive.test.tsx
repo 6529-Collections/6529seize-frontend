@@ -351,7 +351,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     ).toHaveClass("tw-flex", "tw-flex-wrap");
   });
 
-  it("formats live stats with the selected locale", () => {
+  it("formats live panel stats with the selected locale", () => {
     const nft = createNft({
       mint_date: new Date("2024-01-02T00:00:00.000Z"),
       mint_price: 1234.5,
@@ -408,6 +408,13 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(
       screen.getByText(t("de-DE", "theMemes.detail.live.market.title"))
     ).toBeInTheDocument();
+  });
+
+  it("formats collector percentages with the selected locale", () => {
+    const nftMeta = {
+      ...createMeta(),
+      percent_unique: 0.1234,
+    };
 
     render(<MemeCollectorsStats nftMeta={nftMeta} locale="de-DE" />);
 
