@@ -34,10 +34,16 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
     Actions
   </button>
 ));
+jest.mock("@/components/waves/drops/DropCurationButton", () => () => (
+  <div data-testid="curation" />
+));
 jest.mock("@/components/waves/drops/WaveDropMetadata", () => (props: any) => {
   WaveDropMetadataMock(props);
   return <div data-testid="metadata" />;
 });
+jest.mock("@/components/waves/drops/WaveDropReactions", () => () => (
+  <div data-testid="reactions" />
+));
 jest.mock(
   "@/components/waves/drops/participation/ParticipationIdentityProfileCard",
   () => (props: any) => {
@@ -59,9 +65,20 @@ const drop: any = {
   metadata: [],
 };
 
+/** Sets the jsdom viewport width and notifies resize subscribers. */
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(globalThis.window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  globalThis.window.dispatchEvent(new Event("resize"));
+};
+
 describe("EndedParticipationDrop", () => {
   beforeEach(() => {
     mockUseIsMobileDevice.mockReturnValue(true);
+    setViewportWidth(390);
     WaveDropContentMock.mockClear();
     WaveDropMobileMenuMock.mockClear();
     WaveDropMetadataMock.mockClear();
@@ -108,6 +125,7 @@ describe("EndedParticipationDrop", () => {
 
   it("renders desktop actions outside the clipped card", () => {
     mockUseIsMobileDevice.mockReturnValue(false);
+    setViewportWidth(1440);
 
     render(
       <EndedParticipationDrop

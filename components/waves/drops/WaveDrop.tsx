@@ -13,12 +13,12 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createBreakpoint } from "react-use";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -40,8 +40,6 @@ import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
-
-const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
 const HOVER_INPUT_MEDIA_QUERIES = [
   "(any-hover: hover)",
@@ -756,9 +754,9 @@ const WaveDrop = ({
   const hasHoverInput = useHasHoverInput();
   const hasTouch =
     isMobile || isTouchOnlyDevice || (hasTouchInput && !hasHoverInput);
-  const breakpoint = useBreakpoint();
-  const isMdUp = breakpoint === "MD";
-  const allowLongPress = showInteractions && hasTouch && !isMdUp;
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const canUseMobileDropMenu = hasTouch && isMobileLayoutViewport;
+  const allowLongPress = showInteractions && canUseMobileDropMenu;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -770,7 +768,7 @@ const WaveDrop = ({
   });
   const showActionsButton = shouldShowTouchActionsButton({
     showInteractions,
-    hasTouch,
+    hasTouch: canUseMobileDropMenu,
     showReplyAndQuote,
     isEditing,
     identityMode,
@@ -987,7 +985,7 @@ const WaveDrop = ({
   }, []);
 
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing;
+  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseMobileDropMenu;
 
   const dropClasses = getDropClasses(
     isActiveDrop,

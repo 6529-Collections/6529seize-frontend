@@ -5,6 +5,7 @@ import type { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
@@ -107,7 +108,9 @@ const DefaultWinnerDrop = ({
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const isTouchDevice = useIsTouchDevice();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
@@ -301,7 +304,7 @@ const DefaultWinnerDrop = ({
       {showInteractions && (
         <WaveDropMobileMenu
           drop={drop}
-          isOpen={isSlideUp}
+          isOpen={isSlideUp && hasTouch}
           longPressTriggered={longPressTriggered}
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}

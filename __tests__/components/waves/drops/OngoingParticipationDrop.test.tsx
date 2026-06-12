@@ -121,6 +121,17 @@ const drop: ExtendedDrop = {
   wave: { id: "w1", submission_type: null } as any,
 } as any;
 
+/** Sets the jsdom viewport width and notifies resize subscribers. */
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(globalThis.window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  globalThis.window.dispatchEvent(new Event("resize"));
+};
+
+/** Renders an ongoing participation drop in the requested layout mode. */
 const renderComp = ({
   mobile = false,
   dropOverride = drop,
@@ -134,6 +145,7 @@ const renderComp = ({
 } = {}) => {
   const onReply = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
+  setViewportWidth(mobile ? 390 : 1440);
   const view = render(
     <OngoingParticipationDrop
       drop={dropOverride}
@@ -155,6 +167,7 @@ describe("OngoingParticipationDrop", () => {
     ParticipationDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
     footerProps = undefined;
+    setViewportWidth(1440);
   });
 
   it("shows actions on desktop", () => {
