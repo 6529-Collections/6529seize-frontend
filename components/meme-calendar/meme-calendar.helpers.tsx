@@ -707,12 +707,32 @@ function createIcsDataUrl(
   return `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
 }
 
+type CalendarInviteLabels = {
+  readonly addToCalendar: string;
+  readonly addToGoogleCalendar: string;
+};
+
+const DEFAULT_CALENDAR_INVITE_LABELS: CalendarInviteLabels = {
+  addToCalendar: "Add to Calendar",
+  addToGoogleCalendar: "Add to Google Calendar",
+};
+
+function escapeHtmlAttribute(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 // Accept either a UTC day (mint day) or an instant; always emit timed links at the correct mint instant
 export function printCalendarInvites(
   dateOrInstant: Date,
   mintNumber: number,
   fontColor: string = "#fff",
-  size: number = 22
+  size: number = 22,
+  labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS
 ): string {
   // Normalize to mint instant in UTC
   const utcDay = startOfUtcDay(dateOrInstant);
@@ -729,14 +749,19 @@ export function printCalendarInvites(
 
   const gUrl = createGoogleCalendarUrl(mintStartUtc, mintEndUtc, title, desc);
   const icsUrl = createIcsDataUrl(mintStartUtc, mintEndUtc, title, desc);
+  const addToCalendarLabel = escapeHtmlAttribute(labels.addToCalendar);
+  const addToGoogleCalendarLabel = escapeHtmlAttribute(
+    labels.addToGoogleCalendar
+  );
+  const safeFontColor = escapeHtmlAttribute(fontColor);
 
   return `
     <div style="display:flex; gap:15px; align-items:center;">
-      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" title="Add to Calendar" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${fontColor};">
-        <img src="/calendar-ics.png" style="width:${size}px;height:${size}px" />
+      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" title="${addToCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
+        <img src="/calendar-ics.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
       </a>
-      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" title="Add to Google Calendar" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${fontColor};">
-        <img src="/calendar-google.png" style="width:${size}px;height:${size}px" />
+      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" title="${addToGoogleCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
+        <img src="/calendar-google.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
       </a>
     </div>`;
 }

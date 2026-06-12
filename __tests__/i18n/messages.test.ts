@@ -119,6 +119,24 @@ describe("frontend i18n helpers", () => {
         season: 1,
       })
     );
+    expect(t("es-ES", "memeCalendar.timezone.showLocal")).toBe(
+      t("en-US", "memeCalendar.timezone.showLocal")
+    );
+    expect(
+      t("de-DE", "memeCalendar.overview.upcoming.currentSeason", {
+        season: 14,
+      })
+    ).toBe(
+      t("en-US", "memeCalendar.overview.upcoming.currentSeason", {
+        season: 14,
+      })
+    );
+    expect(t("fr-FR", "memeCalendar.invites.addToCalendar")).toBe(
+      t("en-US", "memeCalendar.invites.addToCalendar")
+    );
+    expect(t("es-ES", "memeCalendar.overview.upcoming.mintTime")).toBe(
+      t("en-US", "memeCalendar.overview.upcoming.mintTime")
+    );
     const timelineMediaParams = {
       label: t("en-US", "timeline.fields.addedImage"),
     };
