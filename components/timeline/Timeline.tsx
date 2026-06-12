@@ -126,7 +126,12 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <Col className="d-flex align-items-start flex-column gap-1">
         <b>{label}:</b>
-        <TimelineMediaComponent type={MediaType.IMAGE} url={value} />
+        <TimelineMediaComponent
+          type={MediaType.IMAGE}
+          url={value}
+          label={label}
+          locale={locale}
+        />
       </Col>
     );
   }
@@ -152,7 +157,12 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <Col className="d-flex align-items-start flex-column gap-1">
         <b>{label}:</b>
-        <TimelineMediaComponent type={getType()} url={value} />
+        <TimelineMediaComponent
+          type={getType()}
+          url={value}
+          label={label}
+          locale={locale}
+        />
       </Col>
     );
   }

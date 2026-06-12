@@ -1,8 +1,13 @@
 import styles from "./Timeline.module.scss";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import Image from "next/image";
 
 interface Props {
   type: MediaType;
   url: string;
+  label?: string;
+  locale?: SupportedLocale;
 }
 
 export enum MediaType {
@@ -12,28 +17,41 @@ export enum MediaType {
 }
 
 export default function TimelineMediaComponent(props: Readonly<Props>) {
+  const locale = props.locale ?? DEFAULT_LOCALE;
+  const label = props.label ?? t(locale, "timeline.media.defaultLabel");
+
   if (props.type === MediaType.VIDEO) {
     return (
       <video
+        aria-label={t(locale, "timeline.media.videoAriaLabel", { label })}
         autoPlay
         muted
         controls
         loop
         playsInline
         className={styles["timelineMediaImage"]}
-        src={props.url}></video>
+        src={props.url}
+      ></video>
     );
   }
   if (props.type === MediaType.HTML) {
     return (
-      <iframe className={styles["timelineMediaImage"]} src={props.url}></iframe>
+      <iframe
+        className={styles["timelineMediaImage"]}
+        src={props.url}
+        title={t(locale, "timeline.media.htmlTitle", { label })}
+      ></iframe>
     );
   }
   return (
-    <img
+    <Image
       src={props.url}
       className={styles["timelineMediaImage"]}
-      alt={props.url}
+      alt={t(locale, "timeline.media.imageAlt", { label })}
+      width={600}
+      height={600}
+      sizes="(max-width: 768px) 100vw, 50vw"
+      unoptimized
     />
   );
 }
