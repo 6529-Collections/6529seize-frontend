@@ -451,3 +451,5 @@
   text and descriptions, refresh button accessible name and 24px minimum target,
   locale-preserving ReMeme links, no horizontal overflow, no mobile page errors,
   and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2619 against PR #2618. Per workstream policy,
+  do not merge PR #2619 without human approval.

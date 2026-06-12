@@ -26,9 +26,8 @@ page migration PRs for safe media surfaces.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
 - Current implementation surface: The Memes References tab, stacked on PR
-  #2618. The branch is `codex/the-memes-references-a11y-i18n`; local
-  validation passed and PR publication is next. The PR must be review-ready
-  only.
+  #2618. The branch is `codex/the-memes-references-a11y-i18n`; PR #2619 is
+  open and must be review-ready only.
 - Scope includes passing the active detail-page locale into References,
   routing Meme Lab/ReMemes descriptions, logo alt text, sort trigger/options,
   refresh labels, empty state, ReMeme card accessible names, locale-preserving
@@ -40,7 +39,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open a stacked review-ready PR against PR #2618 and trigger available bots.
+1. Trigger available review bots on PR #2619.
 2. Iterate on actionable CodeRabbit/Claude/CI feedback.
 3. Keep page implementation PRs review-ready only; do not merge without human
    approval.
