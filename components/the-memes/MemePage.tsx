@@ -548,7 +548,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           )}
         {activeTab === MEME_FOCUS.HISTORY &&
           activeHistoryTab === MEME_HISTORY_TAB.TIMELINE && (
-            <MemePageTimeline show={true} nft={nft} />
+            <MemePageTimeline show={true} nft={nft} locale={locale} />
           )}
       </>
     );

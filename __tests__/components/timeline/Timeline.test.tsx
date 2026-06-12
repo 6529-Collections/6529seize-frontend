@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import Timeline from "@/components/timeline/Timeline";
 import { MediaType } from "@/components/timeline/TimelineMedia";
+import { t } from "@/i18n/messages";
 
 jest.mock("@/components/timeline/Timeline.module.scss", () => ({
   timeline: "timeline",
@@ -36,7 +37,7 @@ const makeStep = (changeKey: string, from: any, to: any) =>
       event: "Minted",
       changes: [{ key: changeKey, from, to }],
     },
-  } as any);
+  }) as any;
 
 beforeEach(() => {
   mediaProps = [];
@@ -45,8 +46,32 @@ beforeEach(() => {
 describe("Timeline", () => {
   it("formats date header and displays key label", () => {
     render(<Timeline nft={baseNft} steps={[makeStep("some_key", "a", "b")]} />);
-    expect(screen.getByText("2024/05/02 - 07:08 UTC")).toBeInTheDocument();
+    expect(screen.getByText("05/02/2024, 07:08 UTC")).toBeInTheDocument();
     expect(screen.getByText("Some Key")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: t("en-US", "timeline.links.uriAriaLabel"),
+      })
+    ).toHaveAttribute("href", "https://example.com");
+    expect(
+      screen.getByRole("link", {
+        name: t("en-US", "timeline.links.txnAriaLabel"),
+      })
+    ).toHaveAttribute("href", "https://etherscan.io/tx/0xabc");
+  });
+
+  it("formats timeline dates with the selected locale", () => {
+    render(
+      <Timeline
+        nft={baseNft}
+        steps={[makeStep("some_key", "a", undefined)]}
+        locale="de-DE"
+      />
+    );
+    expect(screen.getByText("02.05.2024, 07:08 UTC")).toBeInTheDocument();
+    expect(
+      screen.getByText(`${t("de-DE", "timeline.fields.removedValue")}:`)
+    ).toBeInTheDocument();
   });
 
   it("passes image type for image changes", () => {

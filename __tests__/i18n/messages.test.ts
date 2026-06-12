@@ -77,6 +77,12 @@ describe("frontend i18n helpers", () => {
     ).toBe(
       t("en-US", "theMemes.detail.activity.table.caption", { tokenId: 1 })
     );
+    expect(t("de-DE", "theMemes.detail.timeline.region")).toBe(
+      t("en-US", "theMemes.detail.timeline.region")
+    );
+    expect(t("fr-FR", "timeline.links.uriAriaLabel")).toBe(
+      t("en-US", "timeline.links.uriAriaLabel")
+    );
     expect(
       t("de-DE", "rememes.detail.documentTitle", {
         name: "Meme",
