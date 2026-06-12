@@ -391,3 +391,5 @@
   and no Next.js runtime session errors. A strict mobile-user-agent smoke only
   rendered the compact route shell in this local setup, so target Art controls
   were verified with the 390px viewport instead.
+- Opened review-ready stacked PR #2617 against PR #2616. Per workstream policy,
+  do not merge PR #2617 without human approval.
