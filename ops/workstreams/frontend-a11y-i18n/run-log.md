@@ -220,3 +220,5 @@
   `has_distribution=true` (`/meme-lab/26?locale=de-DE`) preserves locale in the
   `Distribution Plan` href:
   `/meme-lab/26/distribution?locale=de-DE`.
+- Opened review-ready stacked PR #2612 against PR #2611. Per workstream policy,
+  do not merge PR #2612 without human approval.

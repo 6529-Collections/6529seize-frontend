@@ -35,8 +35,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open review-ready PR stacked on PR #2611.
-2. Observe CodeRabbit, Claude if available, Snyk, SonarCloud, DCO, and CodeQL
+1. Observe PR #2612: CodeRabbit, Claude if available, Snyk, SonarCloud, DCO, and CodeQL
    if triggered.
-3. Address valid bot/CI feedback with focused signed follow-up commits.
-4. Do not merge the distribution page PR without human approval.
+2. Address valid bot/CI feedback with focused signed follow-up commits.
+3. Do not merge the distribution page PR without human approval.
