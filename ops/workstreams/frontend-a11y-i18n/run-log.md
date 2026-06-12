@@ -584,10 +584,11 @@
   do not merge PR #2623 without human approval.
 - Addressed SonarCloud's new-code duplication gate on PR #2623 by extracting
   the repeated lower-calendar drilldown button markup into a shared
-  `DrilldownCard` component. Re-ran the focused calendar/i18n Jest suites,
-  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and desktop/mobile
-  browser smoke on `/meme-calendar`; all remained green apart from the known
-  React Doctor follow-up diagnostics.
+  `DrilldownCard` component and the repeated SZN1 launch-period branch into
+  `HistoricalLaunchDrilldownCard`. Re-ran the focused calendar/i18n Jest
+  suites, `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and
+  desktop/mobile browser smoke on `/meme-calendar`; all remained green apart
+  from the known React Doctor follow-up diagnostics.
 - Addressed CodeRabbit's non-blocking cleanup notes on PR #2623 by
   consolidating mint-range number formatting on `formatInteger` and renaming
   drilldown card data from `label` to `mints`. Re-ran the focused

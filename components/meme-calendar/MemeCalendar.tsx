@@ -314,6 +314,38 @@ function DrilldownCard({
   );
 }
 
+interface HistoricalLaunchDrilldownCardProps {
+  readonly title: string;
+  readonly isCurrent: boolean;
+  readonly onClick: () => void;
+  readonly locale: SupportedLocale;
+}
+
+function HistoricalLaunchDrilldownCard({
+  title,
+  isCurrent,
+  onClick,
+  locale,
+}: HistoricalLaunchDrilldownCardProps) {
+  const start = new Date(SZN1_RANGE.start);
+  const end = new Date(SZN1_RANGE.end);
+  const range = getDateRangeLabel(locale, start, end);
+  const mints = getMemeRangeLabel(locale, 1, 47);
+
+  return (
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
+      <DrilldownCard
+        title={title}
+        range={range}
+        mints={mints}
+        isCurrent={isCurrent}
+        locale={locale}
+        onClick={onClick}
+      />
+    </div>
+  );
+}
+
 // Props types
 interface MonthProps {
   readonly date: Date;
@@ -807,28 +839,18 @@ function YearView({
   // ⭐ Special case: Year 0 (2022) shows a single SZN1 card (Jun–Dec 2022)
   const displayedYear = displayedYearNumberFromIndex(seasonIndex);
   if (displayedYear === 0) {
-    const start = new Date(SZN1_RANGE.start); // Jun 1, 2022
-    const end = new Date(SZN1_RANGE.end); // Dec 31, 2022
-    const sIdx = SZN1_SEASON_INDEX; // our SZN1 bucket
-    const isCurrent = currentIdx === sIdx;
     const title = getDivisionTitle(locale, "szn", 1);
-    const range = getDateRangeLabel(locale, start, end);
-    const mints = getMemeRangeLabel(locale, 1, 47);
 
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <DrilldownCard
-          title={title}
-          range={range}
-          mints={mints}
-          isCurrent={isCurrent}
-          locale={locale}
-          onClick={() => {
-            onSelectSeason(sIdx);
-            onZoomToSeason();
-          }}
-        />
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectSeason(SZN1_SEASON_INDEX);
+          onZoomToSeason();
+        }}
+      />
     );
   }
   // 👇 existing code for other years stays the same
@@ -884,29 +906,19 @@ function EpochView({
 
   if (epochNumber === 0) {
     // Special case: SZN1 epoch, single card for Year #0 (SZN1)
-    const sIdx = SZN1_SEASON_INDEX; // SZN1
-    // Highlight if currentIdx is within SZN1 range
-    const isCurrent = currentIdx === sIdx;
-    const start = new Date(SZN1_RANGE.start);
-    const end = new Date(SZN1_RANGE.end);
     const title = getDivisionTitleWithGregorianYear(locale, "year", 0, 2022);
-    const range = getDateRangeLabel(locale, start, end);
-    const mints = getMemeRangeLabel(locale, 1, 47);
+
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <DrilldownCard
-          title={title}
-          range={range}
-          mints={mints}
-          isCurrent={isCurrent}
-          locale={locale}
-          onClick={() => {
-            onSelectSeason(sIdx);
-            onSelectYear(0);
-            onZoomToYear();
-          }}
-        />
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectSeason(SZN1_SEASON_INDEX);
+          onSelectYear(0);
+          onZoomToYear();
+        }}
+      />
     );
   } else {
     // For epochNumber >= 1, show 4 years, starting with Jan 1 of year 2023 + 4*(epochNumber-1)
@@ -973,27 +985,18 @@ function PeriodView({
   const periodNumber = displayedPeriodNumberFromIndex(seasonIndex);
 
   if (periodNumber === 0) {
-    const sIdx = SZN1_SEASON_INDEX; // SZN1
-    const isCurrent = currentIdx === sIdx;
-    const start = new Date(SZN1_RANGE.start);
-    const end = new Date(SZN1_RANGE.end);
     const title = getDivisionTitleWithGregorianYear(locale, "epoch", 0, 2022);
-    const range = getDateRangeLabel(locale, start, end);
-    const mints = getMemeRangeLabel(locale, 1, 47);
+
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <DrilldownCard
-          title={title}
-          range={range}
-          mints={mints}
-          isCurrent={isCurrent}
-          locale={locale}
-          onClick={() => {
-            onSelectEpoch(0);
-            onZoomToEpoch();
-          }}
-        />
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectEpoch(0);
+          onZoomToEpoch();
+        }}
+      />
     );
   } else {
     // For periodNumber >= 1, show 5 epochs, starting with epochNumber = 1 + 5*(periodNumber-1)
@@ -1061,27 +1064,17 @@ function EraView({
 
   // Era #0 – special (SZN1 only)
   if (eraNumber === 0) {
-    const sIdx = SZN1_SEASON_INDEX; // SZN1 bucket
-    const isCurrent = currentIdx === sIdx;
-    const start = new Date(SZN1_RANGE.start);
-    const end = new Date(SZN1_RANGE.end);
     const title = getDivisionTitleWithGregorianYear(locale, "period", 0, 2022);
-    const range = getDateRangeLabel(locale, start, end);
-    const mints = getMemeRangeLabel(locale, 1, 47);
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <DrilldownCard
-          title={title}
-          range={range}
-          mints={mints}
-          isCurrent={isCurrent}
-          locale={locale}
-          onClick={() => {
-            onSelectPeriod(0);
-            onZoomToPeriod();
-          }}
-        />
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectPeriod(0);
+          onZoomToPeriod();
+        }}
+      />
     );
   }
 
@@ -1148,27 +1141,17 @@ function EonView({
 
   // Eon #0 – special (SZN1 only)
   if (eonNumber === 0) {
-    const sIdx = SZN1_SEASON_INDEX;
-    const isCurrent = currentIdx === sIdx;
-    const start = new Date(SZN1_RANGE.start);
-    const end = new Date(SZN1_RANGE.end);
     const title = getDivisionTitleWithGregorianYear(locale, "era", 0, 2022);
-    const range = getDateRangeLabel(locale, start, end);
-    const mints = getMemeRangeLabel(locale, 1, 47);
     return (
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <DrilldownCard
-          title={title}
-          range={range}
-          mints={mints}
-          isCurrent={isCurrent}
-          locale={locale}
-          onClick={() => {
-            onSelectEra(0);
-            onZoomToEra();
-          }}
-        />
-      </div>
+      <HistoricalLaunchDrilldownCard
+        title={title}
+        isCurrent={currentIdx === SZN1_SEASON_INDEX}
+        locale={locale}
+        onClick={() => {
+          onSelectEra(0);
+          onZoomToEra();
+        }}
+      />
     );
   }
 
