@@ -515,6 +515,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             nftMeta={nftMeta}
             nftBalance={nftBalance}
             defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
+            locale={locale}
           />
           <MemePageReferencesSubMenu
             show={activeTab === MEME_FOCUS.REFERENCES}
@@ -533,6 +534,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             show={activeTab === MEME_FOCUS.COLLECTORS}
             nft={nft}
             nftMeta={nftMeta}
+            locale={locale}
           />
         </div>
         {activeTab === MEME_FOCUS.HISTORY &&

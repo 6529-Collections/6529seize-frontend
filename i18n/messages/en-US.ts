@@ -110,6 +110,41 @@ const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [
   ["notFound.label", "DISTRIBUTION"],
 ] as const);
 
+const THE_MEMES_DETAIL_LIVE_MESSAGES = namespaceMessages(
+  "theMemes.detail.live",
+  [
+    ["collectors.collectors", "Collectors"],
+    ["collectors.museum", "6529 museum"],
+    ["collectors.unique", "% Unique"],
+    ["collectors.uniqueExBurnt", "% Unique ex. burnt"],
+    ["collectors.uniqueExMuseum", "% Unique ex. 6529 museum"],
+    ["collectors.uniqueExBurntAndMuseum", "% Unique ex. burnt and 6529 museum"],
+    [
+      "collectors.uniqueTooltip",
+      "Unique % represents collectors diversity. Higher percentage means more different collectors.",
+    ],
+    ["edition.editionSize", "Edition size"],
+    ["edition.burnt", "burnt"],
+    ["edition.exBurnt", "ex. burnt"],
+    ["edition.exMuseum", "ex. 6529 museum"],
+    ["edition.exBurntAndMuseum", "ex. burnt and 6529 museum"],
+    ["rank", "Rank {rank}/{total}"],
+    ["artwork.createdBy", "Created by"],
+    ["artwork.mintDate", "Mint date"],
+    ["artwork.notAvailable", "not available"],
+    ["artwork.artistAvatarAlt", "{artist} avatar"],
+    ["market.title", "Market Overview"],
+    ["market.mintPrice", "Mint price"],
+    ["market.floorPrice", "Floor price"],
+    ["market.marketCap", "Market cap"],
+    ["market.tdhRate", "TDH rate"],
+    ["market.highestOffer", "Highest offer"],
+    ["market.unavailable", "N/A"],
+    ["market.ethUnit", "ETH"],
+    ["additionalDetails", "Additional details"],
+  ] as const
+);
+
 export const EN_US_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.title": "The Memes",
@@ -152,6 +187,7 @@ export const EN_US_MESSAGES = {
   "theMemes.detail.tabs.cardActivity": "Card Activity",
   "theMemes.detail.tabs.timeline": "Timeline",
   "theMemes.detail.tabs.yourTransactions": "Your Transactions",
+  ...THE_MEMES_DETAIL_LIVE_MESSAGES,
   "theMemes.sort.age": "Age",
   "theMemes.sort.editionSize": "Edition Size",
   "theMemes.sort.meme": "Meme",

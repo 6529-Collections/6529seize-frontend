@@ -60,6 +60,15 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "rememes.refresh.ariaLabel")).toBe(
       "Refresh ReMemes results"
     );
+    expect(t("de-DE", "theMemes.detail.live.market.title")).toBe(
+      t("en-US", "theMemes.detail.live.market.title")
+    );
+    expect(
+      t("fr-FR", "theMemes.detail.live.rank", {
+        rank: "1",
+        total: "100",
+      })
+    ).toBe("Rank 1/100");
     expect(
       t("de-DE", "rememes.detail.documentTitle", {
         name: "Meme",
