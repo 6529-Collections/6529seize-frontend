@@ -48,8 +48,12 @@
 4. If `focus` is missing or unsupported, the route opens `Overview`.
 5. Switching tabs updates `focus` with `router.replace`, so the route does not do a full-page navigation.
 6. Previous/next arrows move to adjacent card IDs and keep the full query string.
-7. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted for later tab switches.
-8. If a numeric card id is unresolved, the route removes `focus`, hides tab content, and shows the shared next-mint fallback panel.
+7. The `Overview` live stats use the active supported `locale` for source
+   copy fallbacks, mint dates, counts, ranks, percentages, and market numbers.
+8. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
+   for later tab switches.
+9. If a numeric card id is unresolved, the route removes `focus`, hides tab
+   content, and shows the shared next-mint fallback panel.
 
 ## Route States
 
@@ -99,6 +103,9 @@
 - During component-level migration, the optional `locale` query parameter can be
   used to smoke-test supported locales on this detail route. Missing or
   unsupported `locale` values fall back to `en-US`.
+- Overview live-stat labels, creator labels, additional-details controls, mint
+  dates, counts, ranks, percentages, and market numbers are routed through the
+  progressive i18n helpers.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the

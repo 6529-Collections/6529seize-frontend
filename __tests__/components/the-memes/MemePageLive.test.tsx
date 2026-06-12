@@ -3,8 +3,16 @@ import {
   MemePageLiveRightMenu,
   MemePageLiveSubMenu,
 } from "@/components/the-memes/MemePageLive";
+import { MemeCollectorsStats } from "@/components/the-memes/MemePageLiveStats";
 import { MemePageReferencesSubMenu } from "@/components/the-memes/MemePageReferences";
 import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import {
+  formatDate,
+  formatInteger,
+  formatNumber,
+  formatPercent,
+} from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -341,6 +349,78 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
     ).toHaveClass("tw-flex", "tw-flex-wrap");
+  });
+
+  it("formats live stats with the selected locale", () => {
+    const nft = createNft({
+      mint_date: new Date("2024-01-02T00:00:00.000Z"),
+      mint_price: 1234.5,
+      floor_price: 1.2345,
+      market_cap: 9876.54,
+      highest_offer: 2.5,
+      hodl_rate: 12.345,
+    });
+    const nftMeta = {
+      ...createMeta(),
+      collection_size: 1200,
+      edition_size: 1234,
+      edition_size_cleaned: 1200,
+      edition_size_cleaned_rank: 12,
+      hodlers: 5678,
+      hodlers_rank: 987,
+      percent_unique: 0.1234,
+      percent_unique_cleaned: 0.4567,
+    };
+
+    render(
+      <MemePageLiveRightMenu show nft={nft} nftMeta={nftMeta} locale="de-DE" />
+    );
+
+    expect(
+      screen.getByText(
+        formatDate("de-DE", nft.mint_date, {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        })
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(formatInteger("de-DE", nftMeta.edition_size)).length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText(formatInteger("de-DE", nftMeta.hodlers))
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        t("de-DE", "theMemes.detail.live.rank", {
+          rank: formatInteger("de-DE", nftMeta.hodlers_rank),
+          total: formatInteger("de-DE", nftMeta.collection_size),
+        })
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        formatNumber("de-DE", nft.market_cap, { maximumFractionDigits: 2 })
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(t("de-DE", "theMemes.detail.live.market.title"))
+    ).toBeInTheDocument();
+
+    render(<MemeCollectorsStats nftMeta={nftMeta} locale="de-DE" />);
+
+    const expectedPercent = formatPercent(
+      "de-DE",
+      nftMeta.percent_unique,
+      1
+    ).replace(/\s/g, " ");
+    expect(
+      screen.getByText(
+        (content) => content.replace(/\s/g, " ") === expectedPercent
+      )
+    ).toBeInTheDocument();
   });
 
   it("shows distribution plan link", async () => {
