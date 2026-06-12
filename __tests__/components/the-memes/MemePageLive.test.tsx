@@ -170,7 +170,7 @@ function createMeta(): MemesExtendedData {
   } as MemesExtendedData;
 }
 
-function createRememe(name: string): Rememe {
+function createRememe(name: string, overrides: Partial<Rememe> = {}): Rememe {
   return {
     created_at: new Date(),
     updated_at: new Date(),
@@ -198,6 +198,7 @@ function createRememe(name: string): Rememe {
     replicas: [],
     source: "",
     added_by: "",
+    ...overrides,
   } as Rememe;
 }
 
@@ -246,20 +247,85 @@ describe("MemePageReferencesSubMenu sorting", () => {
       .mockResolvedValueOnce({ data: firstData, count: 21 })
       .mockResolvedValueOnce({ data: refreshed, count: 21 });
 
-    const { container } = render(<MemePageReferencesSubMenu show nft={nft} />);
+    render(<MemePageReferencesSubMenu show nft={nft} />);
 
     await waitFor(() =>
       expect(screen.getByText(/Random1/)).toBeInTheDocument()
     );
 
-    const refreshIcon = container.querySelector(
-      'svg[data-icon="arrows-rotate"]'
-    ) as Element;
-    expect(refreshIcon).toBeInTheDocument();
-    fireEvent.click(refreshIcon);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: t("en-US", "theMemes.detail.references.refresh.ariaLabel"),
+      })
+    );
 
     await waitFor(() =>
       expect(screen.getByText(/Random2/)).toBeInTheDocument()
+    );
+  });
+
+  it("renders references labels and links with the active locale", async () => {
+    const nft = createNft();
+    const firstData = [
+      createRememe("Locale Rememe", {
+        contract: "0xabc",
+        id: "42",
+        replicas: [1, 2],
+      }),
+    ];
+
+    mockFetchUrl
+      .mockResolvedValueOnce({ data: [], count: 0 })
+      .mockResolvedValueOnce({ data: firstData, count: 21 });
+
+    render(<MemePageReferencesSubMenu show nft={nft} locale="de-DE" />);
+
+    expect(
+      screen.getByAltText(
+        t("de-DE", "theMemes.detail.references.memeLab.logoAlt")
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        t("de-DE", "theMemes.detail.references.memeLab.description")
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByAltText(
+        t("de-DE", "theMemes.detail.references.rememes.logoAlt")
+      )
+    ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.getByText("Locale Rememe")).toBeInTheDocument()
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.references.sort.trigger", {
+          sort: t("de-DE", "rememes.sort.random"),
+        }),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.references.refresh.ariaLabel"),
+      })
+    ).toBeInTheDocument();
+    const rememeLink = screen.getByRole("link", {
+      name: t("de-DE", "rememes.card.linkAriaLabel", {
+        name: "Locale Rememe",
+        tokenId: "42",
+      }),
+    });
+    expect(rememeLink).toHaveAttribute(
+      "href",
+      "/rememes/0xabc/42?locale=de-DE"
+    );
+    expect(rememeLink).toHaveTextContent(
+      t("de-DE", "rememes.card.replicaCount", {
+        count: formatInteger("de-DE", 2),
+      })
     );
   });
 });
