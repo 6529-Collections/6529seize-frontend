@@ -25,7 +25,7 @@ function assertUnhandled(value: never, label: string): never {
   throw new Error(`Unhandled ${label}: ${String(value)}`);
 }
 
-function isMemeFocus(focus: string): focus is MEME_FOCUS {
+export function isMemeFocus(focus: string): focus is MEME_FOCUS {
   return MEME_FOCUS_VALUES.includes(focus);
 }
 
@@ -58,34 +58,18 @@ export function getMemeFocusLabel(
 }
 
 export const MEME_TABS: MemeTab[] = [
-  { focus: MEME_FOCUS.LIVE, title: getMemeFocusLabel(MEME_FOCUS.LIVE) },
-  {
-    focus: MEME_FOCUS.YOUR_CARDS,
-    title: getMemeFocusLabel(MEME_FOCUS.YOUR_CARDS),
-  },
-  { focus: MEME_FOCUS.THE_ART, title: getMemeFocusLabel(MEME_FOCUS.THE_ART) },
-  {
-    focus: MEME_FOCUS.REFERENCES,
-    title: getMemeFocusLabel(MEME_FOCUS.REFERENCES),
-  },
-  {
-    focus: MEME_FOCUS.COLLECTORS,
-    title: getMemeFocusLabel(MEME_FOCUS.COLLECTORS),
-  },
-  { focus: MEME_FOCUS.HISTORY, title: getMemeFocusLabel(MEME_FOCUS.HISTORY) },
-  {
-    focus: MEME_FOCUS.ACTIVITY,
-    title: getMemeFocusLabel(MEME_FOCUS.ACTIVITY),
-  },
-  {
-    focus: MEME_FOCUS.TIMELINE,
-    title: getMemeFocusLabel(MEME_FOCUS.TIMELINE),
-  },
+  { focus: MEME_FOCUS.LIVE },
+  { focus: MEME_FOCUS.YOUR_CARDS },
+  { focus: MEME_FOCUS.THE_ART },
+  { focus: MEME_FOCUS.REFERENCES },
+  { focus: MEME_FOCUS.COLLECTORS },
+  { focus: MEME_FOCUS.HISTORY },
+  { focus: MEME_FOCUS.ACTIVITY },
+  { focus: MEME_FOCUS.TIMELINE },
 ];
 
 interface MemeTab {
   focus: MEME_FOCUS;
-  title: string;
 }
 
 async function getMetadataProps(

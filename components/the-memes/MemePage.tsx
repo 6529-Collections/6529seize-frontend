@@ -41,6 +41,7 @@ import {
 import {
   getMemeFocusLabel,
   getMemeTabTitle,
+  isMemeFocus,
   MEME_FOCUS,
   MEME_TABS,
 } from "./MemeShared";
@@ -78,7 +79,6 @@ const MEME_HISTORY_TABS: {
   { focus: MEME_HISTORY_TAB.TIMELINE },
 ];
 
-const MEME_FOCUS_VALUES: readonly string[] = Object.values(MEME_FOCUS);
 const MEME_TAB_BUTTON_BASE_CLASS_NAME =
   "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
@@ -130,11 +130,11 @@ function MemePageTabButton({
 }
 
 function parseMemeFocus(focus: string | null): MEME_FOCUS | undefined {
-  if (focus === null || !MEME_FOCUS_VALUES.includes(focus)) {
+  if (focus === null || !isMemeFocus(focus)) {
     return undefined;
   }
 
-  return focus as MEME_FOCUS;
+  return focus;
 }
 
 function getHistoryTabForFocus(
