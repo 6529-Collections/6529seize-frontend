@@ -29,7 +29,6 @@ describe("Meme Lab Distribution Page", () => {
 
   it("passes default locale to the distribution component", async () => {
     const page = await MemeDistributionPage({
-      params: Promise.resolve({ id: "123" }),
       searchParams: Promise.resolve({}),
     });
 
@@ -43,7 +42,6 @@ describe("Meme Lab Distribution Page", () => {
 
   it("passes supported locale to the distribution component", async () => {
     const page = await MemeDistributionPage({
-      params: Promise.resolve({ id: "123" }),
       searchParams: Promise.resolve({ locale: "de-DE" }),
     });
 

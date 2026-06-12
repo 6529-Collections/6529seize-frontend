@@ -475,7 +475,7 @@ export function MemeNftLivePanel({
   locale = DEFAULT_LOCALE,
 }: {
   readonly nft: NFT;
-  readonly locale?: SupportedLocale;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   return (
     <section className="tw-pt-6 md:tw-pt-8">

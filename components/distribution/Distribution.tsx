@@ -331,9 +331,9 @@ export default function DistributionPage(props: Readonly<Props>) {
                         {d.minted === 0 ? "-" : formatInteger(locale, d.minted)}
                       </td>
                       <td className="text-center">
-                        {!d.total_count
-                          ? "-"
-                          : formatInteger(locale, d.total_count)}
+                        {d.total_count
+                          ? formatInteger(locale, d.total_count)
+                          : "-"}
                       </td>
                     </tr>
                   ))}
@@ -431,7 +431,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                       collection: props.header,
                       tokenId: formatInteger(
                         locale,
-                        Number.parseInt(nftId, 10)
+                        Number.parseInt(nftId ?? "0", 10)
                       ),
                     })}
                   </h1>

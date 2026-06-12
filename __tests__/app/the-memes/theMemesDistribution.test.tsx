@@ -29,7 +29,6 @@ describe("Meme Distribution Page", () => {
 
   it("renders distribution component", () => {
     return MemeDistributionPage({
-      params: Promise.resolve({ id: "123" }),
       searchParams: Promise.resolve({}),
     }).then((page) => {
       render(page);
@@ -43,7 +42,6 @@ describe("Meme Distribution Page", () => {
 
   it("passes supported locale to the distribution component", async () => {
     const page = await MemeDistributionPage({
-      params: Promise.resolve({ id: "123" }),
       searchParams: Promise.resolve({ locale: "de-DE" }),
     });
 

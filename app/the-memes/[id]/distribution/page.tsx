@@ -13,8 +13,11 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { Metadata } from "next";
 
 type MemeDistributionPageProps = {
-  readonly params: Promise<{ id: string }>;
   readonly searchParams: Promise<DistributionSearchParams>;
+};
+
+type MemeDistributionMetadataProps = MemeDistributionPageProps & {
+  readonly params: Promise<{ id: string }>;
 };
 
 export default async function MemeDistributionPage({
@@ -37,7 +40,7 @@ export default async function MemeDistributionPage({
 export async function generateMetadata({
   params,
   searchParams,
-}: MemeDistributionPageProps): Promise<Metadata> {
+}: MemeDistributionMetadataProps): Promise<Metadata> {
   const [{ id }, resolvedSearchParams] = await Promise.all([
     params,
     searchParams,
