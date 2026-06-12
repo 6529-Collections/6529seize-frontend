@@ -367,3 +367,5 @@
   timeline image alt text (`From preview image`, `To preview image`), no
   horizontal overflow, and no Next.js runtime session errors. Shared local
   API/resource requests still log unrelated browser console failures.
+- Opened review-ready stacked PR #2616 against PR #2615. Per workstream policy,
+  do not merge PR #2616 without human approval.
