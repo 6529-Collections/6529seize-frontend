@@ -27,8 +27,8 @@ page migration PRs for safe media surfaces.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
 - Current implementation surface: The Memes Overview live stats/details panel,
   stacked on the bot-happy distribution PR. PR #2612 is bot-happy and
-  review-ready only. PR #2613 is open for the live-stats slice and must not be
-  merged without human approval.
+  review-ready only. PR #2613 is bot-happy and review-ready only, and must not
+  be merged without human approval.
 - Scope includes message-backed live-stat labels, locale-aware creator/mint date
   labels, counts, ranks, percentages, market numbers, additional-details control
   copy, and locale threading through the shared Collectors stats component.
@@ -36,7 +36,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Observe PR #2613: CodeRabbit, Claude if available, Snyk, SonarCloud, DCO,
-   and CodeQL if triggered.
-2. Address valid bot/CI feedback with focused signed follow-up commits.
-3. Do not merge the live-stats page PR without human approval.
+1. Start the next safe media-surface PR stacked on PR #2613.
+2. Keep page implementation PRs review-ready only; do not merge without human
+   approval.
+3. Preserve the unrelated dirty EmojiContext and bootstrap style files.
