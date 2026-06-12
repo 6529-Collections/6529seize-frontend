@@ -50,4 +50,16 @@ describe('WaveSmallLeaderboardItemOutcomes', () => {
     const { container } = render(<WaveSmallLeaderboardItemOutcomes drop={drop} />);
     expect(container.querySelector('.tw-animate-pulse')).toBeInTheDocument();
   });
+
+  it('does not mount reward hook when outcomes are hidden', () => {
+    const { container } = render(
+      <WaveSmallLeaderboardItemOutcomes
+        drop={drop}
+        outcomesVisible={false}
+      />
+    );
+
+    expect(container.firstChild).toBeNull();
+    expect(mockUseWaveRankReward).not.toHaveBeenCalled();
+  });
 });

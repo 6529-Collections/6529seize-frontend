@@ -541,6 +541,27 @@ describe("BrainMobileViewContent", () => {
     }
   );
 
+  it("does not render outcome content when outcomes are hidden", () => {
+    const { container } = render(
+      <BrainMobileViewContent
+        activeView={BrainView.OUTCOME}
+        activeWaveId="1"
+        isCurationWave={false}
+        isMemesWave={false}
+        isRankWave={true}
+        outcomesVisible={false}
+        onDropClick={jest.fn()}
+        onOpenQuickVote={jest.fn()}
+        wave={{ id: "wave-1" } as any}
+      >
+        <div>child</div>
+      </BrainMobileViewContent>
+    );
+
+    expect(container.firstChild).toBeNull();
+    expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
+  });
+
   it("renders faq for approve memes waves", () => {
     const wave = { id: "wave-1" } as any;
 

@@ -27,4 +27,18 @@ describe('WaveWinnersDropOutcome', () => {
     expect(screen.getByText('420')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
   });
+
+  it('returns null when outcomes are hidden', () => {
+    const winner = {
+      awards: [
+        { credit: ApiWaveOutcomeCredit.Cic, amount: 420, type: ApiWaveOutcomeType.Automatic },
+      ],
+    } as any;
+
+    const { container } = render(
+      <WaveWinnersDropOutcome winner={winner} outcomesVisible={false} />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
 });

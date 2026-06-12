@@ -23,6 +23,7 @@ interface MemesSingleWaveDropInfoPanelProps {
   readonly onClose?: (() => void) | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 export const MemesSingleWaveDropInfoPanel = ({
@@ -31,6 +32,7 @@ export const MemesSingleWaveDropInfoPanel = ({
   onClose,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  outcomesVisible = true,
 }: MemesSingleWaveDropInfoPanelProps) => {
   const isMobileScreen = useIsMobileScreen();
   const { isWinner, canDelete, canShowVote, isVotingEnded } =
@@ -47,8 +49,11 @@ export const MemesSingleWaveDropInfoPanel = ({
   const { nicTotal, repTotal, manualOutcomes } = useWaveRankReward({
     waveId: drop.wave.id,
     rank: drop.rank,
-    enabled: true,
+    enabled: outcomesVisible,
   });
+  const visibleNicTotal = outcomesVisible ? nicTotal : 0;
+  const visibleRepTotal = outcomesVisible ? repTotal : 0;
+  const visibleManualOutcomes = outcomesVisible ? manualOutcomes : [];
 
   const title = useMemo(
     () =>
@@ -122,9 +127,9 @@ export const MemesSingleWaveDropInfoPanel = ({
           isWinner={isWinner}
           isVotingEnded={shouldShowVotingEndedSummary}
           canShowVote={canShowVotingAction}
-          manualOutcomes={manualOutcomes}
-          nicTotal={nicTotal}
-          repTotal={repTotal}
+          manualOutcomes={visibleManualOutcomes}
+          nicTotal={visibleNicTotal}
+          repTotal={visibleRepTotal}
           onVoteClick={handleOpenVoting}
         />
 

@@ -13,6 +13,7 @@ import { useWave } from "@/hooks/useWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveWinnersApprovalError } from "./WaveWinnersApprovalError";
 import { getApprovedWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
+import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
@@ -28,6 +29,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
     isQuorumWave,
   } = useWave(wave);
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
 
   // Use layout context for container style
   const { winnersViewStyle } = useLayout();
@@ -81,6 +83,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           isApprovalWave={true}
           emptyMessage="No drops approved yet"
           contentPresentation={contentPresentation}
+          outcomesVisible={outcomesVisible}
         />
       </div>
     );
@@ -92,6 +95,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
         wave={wave}
         isLoading={isDecisionsLoading}
         contentPresentation={contentPresentation}
+        outcomesVisible={outcomesVisible}
       />
     );
   } else {
@@ -101,6 +105,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           onDropClick={onDropClick}
           winners={decisionPoints[0]?.winners ?? []}
           isLoading={isDecisionsLoading}
+          outcomesVisible={outcomesVisible}
         />
         <WaveWinnersDrops
           wave={wave}
@@ -108,6 +113,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           winners={decisionPoints[0]?.winners ?? []}
           isLoading={isDecisionsLoading}
           contentPresentation={contentPresentation}
+          outcomesVisible={outcomesVisible}
         />
       </div>
     );

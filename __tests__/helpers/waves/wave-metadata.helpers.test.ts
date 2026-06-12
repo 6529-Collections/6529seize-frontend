@@ -5,14 +5,31 @@ import {
   getApproveWaveDisplayMetadataUpdate,
   getApproveWaveTabLabelsFromMetadata,
   getCreateWaveDisplayMetadataRequests,
+  getWaveOutcomeVisibilityFromMetadata,
+  getWaveOutcomeVisibilityMetadataUpdate,
 } from "@/helpers/waves/wave-metadata.helpers";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 describe("wave-metadata.helpers", () => {
+  const defaultDisplay = {
+    outcomesVisible: true,
+    approve: {
+      approvalsTabLabel: "",
+      approvedTabLabel: "",
+    },
+  };
+
   it("does not create metadata for default or empty labels", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
-        approvalsTabLabel: "",
-        approvedTabLabel: DEFAULT_APPROVE_WAVE_TAB_LABELS.approved,
+        waveType: ApiWaveType.Approve,
+        display: {
+          ...defaultDisplay,
+          approve: {
+            approvalsTabLabel: "",
+            approvedTabLabel: DEFAULT_APPROVE_WAVE_TAB_LABELS.approved,
+          },
+        },
       })
     ).toEqual([]);
   });
@@ -20,8 +37,14 @@ describe("wave-metadata.helpers", () => {
   it("creates metadata requests for changed labels and trims values", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
-        approvalsTabLabel: " Candidates ",
-        approvedTabLabel: "Selected",
+        waveType: ApiWaveType.Approve,
+        display: {
+          ...defaultDisplay,
+          approve: {
+            approvalsTabLabel: " Candidates ",
+            approvedTabLabel: "Selected",
+          },
+        },
       })
     ).toEqual([
       {
@@ -33,6 +56,39 @@ describe("wave-metadata.helpers", () => {
         data_value: "Selected",
       },
     ]);
+  });
+
+  it("creates hidden outcome metadata for rank waves only when hidden", () => {
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Rank,
+        display: {
+          ...defaultDisplay,
+          outcomesVisible: false,
+        },
+      })
+    ).toEqual([
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+        data_value: "false",
+      },
+    ]);
+  });
+
+  it("does not create display metadata for chat waves", () => {
+    expect(
+      getCreateWaveDisplayMetadataRequests({
+        waveType: ApiWaveType.Chat,
+        display: {
+          ...defaultDisplay,
+          outcomesVisible: false,
+          approve: {
+            approvalsTabLabel: "Candidates",
+            approvedTabLabel: "Selected",
+          },
+        },
+      })
+    ).toEqual([]);
   });
 
   it("extracts editable draft values from latest metadata", () => {
@@ -214,6 +270,94 @@ describe("wave-metadata.helpers", () => {
     expect(labels).toEqual({
       approvals: "Proposals",
       approved: "Approved",
+    });
+  });
+
+  it("defaults outcome visibility to shown when metadata is missing", () => {
+    expect(getWaveOutcomeVisibilityFromMetadata([])).toBe(true);
+  });
+
+  it("hides outcomes when latest metadata value is false", () => {
+    expect(
+      getWaveOutcomeVisibilityFromMetadata([
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "true",
+        },
+        {
+          id: 2,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "false",
+        },
+      ])
+    ).toBe(false);
+  });
+
+  it("defaults outcome visibility to shown for invalid metadata values", () => {
+    expect(
+      getWaveOutcomeVisibilityFromMetadata([
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "hidden",
+        },
+      ])
+    ).toBe(true);
+  });
+
+  it("uses the highest outcome visibility metadata id", () => {
+    expect(
+      getWaveOutcomeVisibilityFromMetadata([
+        {
+          id: 1,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "false",
+        },
+        {
+          id: 2,
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "true",
+        },
+      ])
+    ).toBe(true);
+  });
+
+  it("creates hidden outcome metadata and deletes rows when reset to shown", () => {
+    expect(
+      getWaveOutcomeVisibilityMetadataUpdate({
+        metadata: [],
+        outcomesVisible: false,
+      })
+    ).toEqual({
+      create: [
+        {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "false",
+        },
+      ],
+      deleteIds: [],
+    });
+
+    expect(
+      getWaveOutcomeVisibilityMetadataUpdate({
+        metadata: [
+          {
+            id: 1,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+            data_value: "false",
+          },
+          {
+            id: 2,
+            data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+            data_value: "hidden",
+          },
+        ],
+        outcomesVisible: true,
+      })
+    ).toEqual({
+      create: [],
+      deleteIds: [1, 2],
     });
   });
 });

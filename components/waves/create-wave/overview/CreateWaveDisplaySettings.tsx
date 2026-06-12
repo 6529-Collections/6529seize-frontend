@@ -5,18 +5,25 @@ import {
   DEFAULT_APPROVE_WAVE_TAB_LABELS,
   getEffectiveApproveWaveTabLabels,
 } from "@/helpers/waves/wave-metadata.helpers";
-import type { CreateWaveApproveDisplayConfig } from "@/types/waves.types";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type {
+  CreateWaveApproveDisplayConfig,
+  CreateWaveDisplayConfig,
+} from "@/types/waves.types";
 import type { ChangeEvent } from "react";
 
 export default function CreateWaveDisplaySettings({
   display,
   errors,
   onChange,
+  waveType,
 }: {
-  readonly display: CreateWaveApproveDisplayConfig;
+  readonly display: CreateWaveDisplayConfig;
   readonly errors: readonly CREATE_WAVE_VALIDATION_ERROR[];
-  readonly onChange: (display: CreateWaveApproveDisplayConfig) => void;
+  readonly onChange: (display: CreateWaveDisplayConfig) => void;
+  readonly waveType: ApiWaveType;
 }) {
+  const showApproveTabLabels = waveType === ApiWaveType.Approve;
   const hasLengthError = errors.includes(
     CREATE_WAVE_VALIDATION_ERROR.APPROVE_WAVE_TAB_LABEL_TOO_LONG
   );
@@ -34,14 +41,17 @@ export default function CreateWaveDisplaySettings({
         ? "Labels cannot match existing tabs."
         : null;
   const errorId = "create-wave-display-settings-error";
-  const labels = getEffectiveApproveWaveTabLabels(display);
+  const labels = getEffectiveApproveWaveTabLabels(display.approve);
 
   const onLabelChange =
     (key: keyof CreateWaveApproveDisplayConfig) =>
     (event: ChangeEvent<HTMLInputElement>) => {
       onChange({
         ...display,
-        [key]: event.target.value,
+        approve: {
+          ...display.approve,
+          [key]: event.target.value,
+        },
       });
     };
 
@@ -60,85 +70,109 @@ export default function CreateWaveDisplaySettings({
         <p className="tw-mb-0 tw-text-sm tw-font-semibold tw-text-iron-200">
           Display settings
         </p>
-        <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
-          <div className="tw-space-y-2">
-            <label
-              htmlFor="create-wave-approvals-tab-label"
-              className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
-            >
-              Approvals tab label
-            </label>
-            <input
-              id="create-wave-approvals-tab-label"
-              type="text"
-              autoComplete="off"
-              maxLength={APPROVE_WAVE_TAB_LABEL_MAX_LENGTH}
-              value={display.approvalsTabLabel}
-              onChange={onLabelChange("approvalsTabLabel")}
-              placeholder={DEFAULT_APPROVE_WAVE_TAB_LABELS.approvals}
-              aria-invalid={Boolean(errorMessage)}
-              aria-describedby={errorMessage ? errorId : undefined}
-              className={inputClasses(display.approvalsTabLabel.length > 0)}
-            />
-          </div>
-          <div className="tw-space-y-2">
-            <label
-              htmlFor="create-wave-approved-tab-label"
-              className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
-            >
-              Approved tab label
-            </label>
-            <input
-              id="create-wave-approved-tab-label"
-              type="text"
-              autoComplete="off"
-              maxLength={APPROVE_WAVE_TAB_LABEL_MAX_LENGTH}
-              value={display.approvedTabLabel}
-              onChange={onLabelChange("approvedTabLabel")}
-              placeholder={DEFAULT_APPROVE_WAVE_TAB_LABELS.approved}
-              aria-invalid={Boolean(errorMessage)}
-              aria-describedby={errorMessage ? errorId : undefined}
-              className={inputClasses(display.approvedTabLabel.length > 0)}
-            />
-          </div>
-        </div>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-400">
-          <span className="tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5">
-            Chat
+        <label className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+            Show outcomes
           </span>
-          <span className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-iron-200">
-            {labels.approvals}
-          </span>
-          <span className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-iron-200">
-            {labels.approved}
-          </span>
-        </div>
-        <CommonAnimationHeight>
-          {errorMessage ? (
-            <div
-              id={errorId}
-              className="tw-relative tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
-            >
-              <svg
-                className="tw-size-4 tw-flex-shrink-0 tw-text-error"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+          <input
+            type="checkbox"
+            checked={display.outcomesVisible}
+            onChange={(event) =>
+              onChange({
+                ...display,
+                outcomesVisible: event.target.checked,
+              })
+            }
+            className="tw-form-checkbox tw-size-5 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+          />
+        </label>
+        {showApproveTabLabels ? (
+          <>
+            <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2">
+              <div className="tw-space-y-2">
+                <label
+                  htmlFor="create-wave-approvals-tab-label"
+                  className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+                >
+                  Approvals tab label
+                </label>
+                <input
+                  id="create-wave-approvals-tab-label"
+                  type="text"
+                  autoComplete="off"
+                  maxLength={APPROVE_WAVE_TAB_LABEL_MAX_LENGTH}
+                  value={display.approve.approvalsTabLabel}
+                  onChange={onLabelChange("approvalsTabLabel")}
+                  placeholder={DEFAULT_APPROVE_WAVE_TAB_LABELS.approvals}
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? errorId : undefined}
+                  className={inputClasses(
+                    display.approve.approvalsTabLabel.length > 0
+                  )}
                 />
-              </svg>
-              <div className="tw-relative tw-z-10 tw-text-xs tw-font-medium tw-text-error">
-                {errorMessage}
+              </div>
+              <div className="tw-space-y-2">
+                <label
+                  htmlFor="create-wave-approved-tab-label"
+                  className="tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+                >
+                  Approved tab label
+                </label>
+                <input
+                  id="create-wave-approved-tab-label"
+                  type="text"
+                  autoComplete="off"
+                  maxLength={APPROVE_WAVE_TAB_LABEL_MAX_LENGTH}
+                  value={display.approve.approvedTabLabel}
+                  onChange={onLabelChange("approvedTabLabel")}
+                  placeholder={DEFAULT_APPROVE_WAVE_TAB_LABELS.approved}
+                  aria-invalid={Boolean(errorMessage)}
+                  aria-describedby={errorMessage ? errorId : undefined}
+                  className={inputClasses(
+                    display.approve.approvedTabLabel.length > 0
+                  )}
+                />
               </div>
             </div>
-          ) : null}
-        </CommonAnimationHeight>
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-400">
+              <span className="tw-rounded-md tw-bg-iron-900 tw-px-3 tw-py-1.5">
+                Chat
+              </span>
+              <span className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-iron-200">
+                {labels.approvals}
+              </span>
+              <span className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1.5 tw-text-iron-200">
+                {labels.approved}
+              </span>
+            </div>
+            <CommonAnimationHeight>
+              {errorMessage ? (
+                <div
+                  id={errorId}
+                  className="tw-relative tw-flex tw-items-center tw-gap-x-2 tw-pt-1.5"
+                >
+                  <svg
+                    className="tw-size-4 tw-flex-shrink-0 tw-text-error"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 8V12M12 16H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div className="tw-relative tw-z-10 tw-text-xs tw-font-medium tw-text-error">
+                    {errorMessage}
+                  </div>
+                </div>
+              ) : null}
+            </CommonAnimationHeight>
+          </>
+        ) : null}
       </div>
     </div>
   );
