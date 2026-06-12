@@ -4,11 +4,14 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import TheMemesComponent from "@/components/the-memes/TheMemes";
 import { publicEnv } from "@/config/env";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export default function TheMemesPage() {
   return (
     <main className={styles["main"]}>
-      <TheMemesComponent />
+      <Suspense fallback={null}>
+        <TheMemesComponent />
+      </Suspense>
     </main>
   );
 }

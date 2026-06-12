@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/frontend-a11y-i18n-standards`
+`codex/the-memes-card-a11y-i18n`
 
 ## Constraints
 
@@ -31,7 +31,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Publish and merge standards PR if allowed.
-2. Create first implementation branch for The Memes list card.
-3. Bootstrap local services before UI verification.
-4. Iterate implementation PRs with bots and leave them review-ready.
+1. Open implementation PR for The Memes list card.
+2. Iterate with CodeRabbit, Claude if available, and CI.
+3. Leave implementation PR review-ready only; do not merge it.
+4. Prepare The Memes detail tabs/focus-links follow-up after PR 1 is bot-happy.
