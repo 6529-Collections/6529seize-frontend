@@ -106,7 +106,7 @@ async function getMetadataProps(
       name = `${name} | ${getMemeFocusLabel(focus, locale)}`;
     }
   } else if (isDistribution) {
-    name = `${name} | Distribution`;
+    name = `${name} | ${t(locale, "distribution.title")}`;
   }
 
   return {

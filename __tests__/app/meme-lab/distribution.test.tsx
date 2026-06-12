@@ -3,9 +3,9 @@ import { render, screen } from "@testing-library/react";
 
 import MemeDistributionPage, {
   generateMetadata,
-} from "@/app/the-memes/[id]/distribution/page";
+} from "@/app/meme-lab/[id]/distribution/page";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
-import { MEMES_CONTRACT } from "@/constants/constants";
+import { MEMELAB_CONTRACT } from "@/constants/constants";
 
 jest.mock("@/components/distribution/Distribution", () => ({
   __esModule: true,
@@ -22,22 +22,22 @@ jest.mock("@/components/the-memes/MemeShared", () => ({
 const mockShared = require("@/components/the-memes/MemeShared")
   .getSharedAppServerSideProps as jest.Mock;
 
-describe("Meme Distribution Page", () => {
+describe("Meme Lab Distribution Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("renders distribution component", () => {
-    return MemeDistributionPage({
+  it("passes default locale to the distribution component", async () => {
+    const page = await MemeDistributionPage({
       searchParams: Promise.resolve({}),
-    }).then((page) => {
-      render(page);
-      expect(screen.getByTestId("distribution")).toBeInTheDocument();
-      expect(screen.getByTestId("distribution")).toHaveAttribute(
-        "locale",
-        "en-US"
-      );
     });
+
+    render(page);
+
+    expect(screen.getByTestId("distribution")).toHaveAttribute(
+      "locale",
+      "en-US"
+    );
   });
 
   it("passes supported locale to the distribution component", async () => {
@@ -66,7 +66,7 @@ describe("Meme Distribution Page", () => {
     );
   });
 
-  it("delegates generateMetadata", async () => {
+  it("delegates generateMetadata with locale", async () => {
     mockShared.mockResolvedValue({ title: "My Title" });
 
     const res = await generateMetadata({
@@ -75,7 +75,7 @@ describe("Meme Distribution Page", () => {
     });
 
     expect(mockShared).toHaveBeenCalledWith(
-      MEMES_CONTRACT,
+      MEMELAB_CONTRACT,
       "123",
       MEME_FOCUS.LIVE,
       true,

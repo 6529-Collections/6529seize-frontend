@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/meme-lab-detail-a11y-i18n`
+`codex/meme-lab-distribution-a11y-i18n`
 
 ## Constraints
 
@@ -25,14 +25,17 @@ page migration PRs for safe media surfaces.
 - WCAG target: WCAG 2.2 AA.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
-- Current implementation surface: Meme Lab detail route tabs, detail metadata,
-  reference links, collectors metrics, and locale-preserving tab/back links,
-  stacked on the bot-happy Rememe detail PR.
+- Current implementation surface: Meme Lab distribution route and shared
+  distribution UI, stacked on the bot-happy Meme Lab detail PR.
+- Scope includes optional locale parsing for `/meme-lab/{id}/distribution` and
+  `/the-memes/{id}/distribution`, message-backed distribution copy, locale-aware
+  table counts, meaningful distribution photo alt text, scoped wallet table
+  headers, and locale-preserving distribution links from detail pages.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Observe PR #2611 bot/check results: CodeRabbit, Claude if available, Snyk,
-   SonarCloud, DCO, and CodeQL if triggered.
+1. Observe PR #2612: CodeRabbit, Claude if available, Snyk, SonarCloud, DCO, and CodeQL
+   if triggered.
 2. Address valid bot/CI feedback with focused signed follow-up commits.
-3. Leave the Meme Lab detail PR review-ready only; do not merge it.
+3. Do not merge the distribution page PR without human approval.

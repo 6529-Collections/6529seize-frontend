@@ -185,3 +185,52 @@
   do not merge PR #2611 without human approval.
 - Addressed CodeRabbit feedback on PR #2611 by updating the remaining Meme Lab
   distribution-route doc reference from `Live` to `Overview`.
+- Confirmed PR #2611 became bot-happy on latest head: CodeRabbit completed with
+  no actionable comments, Snyk passed, SonarCloud passed, DCO passed, and Claude
+  remained skipped by the organization code review spending cap. Per workstream
+  policy, do not merge PR #2611 without human approval.
+- Started stacked branch `codex/meme-lab-distribution-a11y-i18n` from PR #2611
+  for the next safe distribution-route media surface.
+- Implemented the initial Meme Lab distribution accessibility and i18n pass:
+  server-side `locale` parsing for Meme Lab and The Memes distribution route
+  pages, message-backed distribution page copy and metadata title text,
+  locale-aware table counts and phase sorting, meaningful distribution photo alt
+  text, decorative empty-state icon alt cleanup, scoped wallet table headers,
+  a hidden table caption, and locale-preserving `Distribution Plan` links from
+  Meme Lab and The Memes detail pages.
+- Focused validation passed for the distribution slice: targeted Jest suites
+  for distribution route params, Meme Lab distribution route, The Memes
+  distribution route, shared Distribution component, The Memes live-panel link
+  preservation, and i18n messages; focused Prettier check; `lint:changed`; and
+  `typecheck:changed`.
+- React Doctor exited 0 at 92/100. Remaining diagnostics are the unrelated
+  dirty `contexts/EmojiContext.tsx` fetch-in-effect error, existing large/stateful
+  media detail and distribution component warnings, existing `useSearchParams`
+  Suspense warnings covered by route page wrappers, a pre-existing distribution
+  useEffect-shape warning, and test-only `next/image` mock warnings.
+- Browser smoke passed on desktop and mobile for
+  `/meme-lab/1/distribution?locale=de-DE`. The local API snapshot returned the
+  empty distribution state, so the route/empty-state path was verified in
+  browser while the table path is covered by component tests. Verified document
+  title, heading, empty-state copy, decorative SummerGlasses alt cleanup,
+  `@6529Collections` accessible name, 390px no-overflow mobile layout, and no
+  Next.js runtime session errors. Shared local-dev waves/emoji requests still
+  log API/403 errors unrelated to this route change.
+- Browser smoke also confirmed a real local Meme Lab detail card with
+  `has_distribution=true` (`/meme-lab/26?locale=de-DE`) preserves locale in the
+  `Distribution Plan` href:
+  `/meme-lab/26/distribution?locale=de-DE`.
+- Opened review-ready stacked PR #2612 against PR #2611. Per workstream policy,
+  do not merge PR #2612 without human approval.
+- Addressed valid CodeRabbit feedback on PR #2612 by adding the
+  `/the-memes/{id}/distribution` route to the status board, deriving
+  distribution phase columns from current data plus locale instead of storing a
+  separately sorted state value, covering unsupported locale fallback on both
+  distribution route pages, asserting the message-backed table caption, and
+  comparing distribution fallback messages to the `en-US` source dictionary.
+- Validation for the PR #2612 bot-feedback follow-up passed: focused
+  distribution/i18n Jest suites (4 suites, 41 tests), focused Prettier,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  exited 0 at 95/100 with only the unrelated dirty EmojiContext diagnostic,
+  known Distribution component size/state/useEffect warnings, and test-only
+  mock warnings.

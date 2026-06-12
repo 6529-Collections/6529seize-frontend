@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import type { MemesExtendedData, NFT } from "@/entities/INFT";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
+import type { SupportedLocale } from "@/i18n/locales";
 import {
   ChevronDownIcon,
   InformationCircleIcon,
@@ -23,13 +24,14 @@ export function MemePageLiveRightMenu(props: {
   show: boolean;
   nft: NFT | undefined;
   nftMeta?: MemesExtendedData | undefined;
+  locale?: SupportedLocale;
 }) {
   if (props.show && props.nft) {
     return (
       <div className="tw-w-full">
         <MemeArtworkDetails nft={props.nft} />
         {props.nftMeta && <MemeEditionSizeStats nftMeta={props.nftMeta} />}
-        <MemeNftLivePanel nft={props.nft} />
+        <MemeNftLivePanel nft={props.nft} locale={props.locale} />
       </div>
     );
   }

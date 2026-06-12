@@ -78,6 +78,38 @@ const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["activity.transactionType", "Transaction Type"],
 ] as const);
 
+const DISTRIBUTION_MESSAGES = namespaceMessages("distribution", [
+  ["title", "Distribution"],
+  ["documentTitle", "{collection} #{tokenId} | Distribution"],
+  ["planLink", "Distribution Plan"],
+  ["heading", "{collection} Card #{tokenId} Distribution"],
+  [
+    "photos.alt",
+    "{collection} Card #{tokenId} distribution photo {photoNumber}",
+  ],
+  [
+    "table.caption",
+    "{collection} Card #{tokenId} distribution wallet allocations",
+  ],
+  ["table.walletDetails", "Wallet details"],
+  ["table.allowlistSpots", "ALLOWLIST SPOTS"],
+  ["table.actual", "ACTUAL"],
+  ["table.wallet", "Wallet"],
+  ["table.walletCount", "x{count}"],
+  ["table.minted", "Minted"],
+  ["table.total", "Total"],
+  [
+    "table.note",
+    "* Note: Each column shows the total allowlist spots for that phase. The breakdown next to it displays: airdrops from subscriptions | allowlist spots for mint.",
+  ],
+  ["empty.soon", "The Distribution Plan will be made available soon!"],
+  ["empty.checkBack", "Please check back later."],
+  ["empty.dropUpdates", "Drop updates:"],
+  ["empty.xLink.ariaLabel", "Open @6529Collections on X for drop updates"],
+  ["empty.noResults", "No results found for the search criteria."],
+  ["notFound.label", "DISTRIBUTION"],
+] as const);
+
 export const EN_US_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.title": "The Memes",
@@ -180,6 +212,7 @@ export const EN_US_MESSAGES = {
   "memeLab.sort.volume": "Volume",
   "memeLab.sort.highestOffer": "Highest Offer",
   ...MEME_LAB_DETAIL_MESSAGES,
+  ...DISTRIBUTION_MESSAGES,
   "rememes.documentTitle": "ReMemes | Collections",
   "rememes.title": "ReMemes",
   "rememes.description.collections": "Collections",
