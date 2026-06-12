@@ -25,7 +25,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { getRememeSortLabel, getRememeTokenTypeLabel } from "./rememesI18n";
-import { getRememesBrowseQuery } from "./rememesRouteParams";
+import {
+  getRememeDetailHref,
+  getRememesBrowseQuery,
+} from "./rememesRouteParams";
 import { RememeSort, TokenType } from "./rememesTypes";
 
 const PAGE_SIZE = 40;
@@ -224,7 +227,11 @@ export default function Rememes({
     return (
       <Link
         key={`${rememe.contract}-${rememe.id}`}
-        href={`/rememes/${rememe.contract}/${rememe.id}`}
+        href={getRememeDetailHref({
+          contract: rememe.contract,
+          id: rememe.id,
+          locale,
+        })}
         aria-label={t(locale, "rememes.card.linkAriaLabel", {
           name: title,
           tokenId,

@@ -108,3 +108,30 @@
   formatting, loaded state, and no Next/browser runtime errors.
 - Opened review-ready stacked PR #2609 against PR #2608. Per workstream policy,
   do not merge PR #2609 without human approval.
+- Confirmed PR #2609 became CodeRabbit green with no review threads; Snyk and
+  SonarCloud were already passing. Claude review remains unavailable because
+  the organization code review spending cap has been reached.
+- Started stacked branch `codex/rememe-detail-a11y-i18n` from PR #2609 for the
+  next read-only media detail surface.
+- Implemented the Rememe detail accessibility and i18n pass: server-side
+  `locale` parsing for page and metadata, message-backed detail labels, tab
+  labels, heading/back-link accessible names, `aria-pressed` tab state, visible
+  focus styling on detail links/tabs, locale-preserving browse/detail/replica
+  and reference links, and locale-aware replica counts.
+- Fixed the Rememe reference cards to avoid nested links when
+  `ArtistProfileHandle` renders an internal profile link; browser smoke
+  confirmed `nestedAnchorCount: 0` after opening the References tab.
+- Focused validation passed for the Rememe detail slice: targeted Jest suites
+  for the route, detail component, reference helper, route params, browse card
+  link preservation, and i18n messages; focused Prettier check;
+  `lint:changed`; and `typecheck:changed`.
+- React Doctor exited 0 at 96/100. Remaining diagnostics are the pre-existing
+  unrelated `contexts/EmojiContext.tsx` fetch-in-effect error and existing
+  Rememes component size/state warnings.
+- Browser smoke passed on desktop and mobile for
+  `/rememes/0x83a079036879f878f438e8df79a76dbd98ec23cf/15?locale=de-DE`.
+  Verified document title, heading accessible name, logo alt text, back-link
+  locale preservation, References tab selected state, reference-card accessible
+  name, reference-card locale preservation, and no nested-anchor/hydration
+  errors from the changed surface. Shared local-dev waves/identity/emoji
+  requests still log API/403 errors unrelated to this route change.

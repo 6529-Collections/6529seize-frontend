@@ -8,7 +8,9 @@
   handoff.
 - Browse is progressively i18n-ready for labels, accessible names, metadata,
   logo alt text, loading text, and count formatting.
-- Detail uses in-page tabs: `Live`, `Metadata`, and `References`.
+- Detail is progressively i18n-ready for document metadata, labels, accessible
+  names, tab labels, reference-card labels, and locale-preserving navigation.
+- Detail uses in-page tabs: `Overview`, `Metadata`, and `References`.
 
 ## Location in the Site
 
@@ -45,9 +47,9 @@
 ### Detail Route `/rememes/{contract}/{id}`
 
 1. Open the route directly or from a browse card.
-2. On `Live`, review artwork, collection/contract label, creator/added-by
+2. On `Overview`, review artwork, collection/contract label, creator/added-by
    fields (when shown), and external links.
-3. Use `Live` replica chips (when shown) to open sibling token IDs.
+3. Use `Overview` replica chips (when shown) to open sibling token IDs.
 4. Open `Metadata` to review token URI, token type, parsed metadata, and
    attributes.
 5. Open `References` to view linked `The Memes` cards and open
@@ -63,6 +65,7 @@
 ## URL and Query Behavior
 
 - Browse reads `meme_id` and `locale`.
+- Detail reads `locale`.
 - Changing `Meme Reference` updates the URL to `?meme_id={id}` (or clears it
   for `All`) and preserves non-default `locale` values.
 - Supported locale query values are `en-US`, `en-GB`, `fr-FR`, `es-ES`, and
@@ -70,10 +73,12 @@
 - Non-numeric `meme_id` values are cleared back to `/rememes`.
 - Count formatting follows the active locale; visible token IDs remain stable
   identifiers.
+- Browse card, detail back, replica, and reference-card links preserve
+  non-default `locale` values.
 - Sort, token type, and page are in-memory state and reset on reload.
 - Changing sort/token type/meme filter resets pagination to page 1.
-- Detail tabs (`Live`, `Metadata`, `References`) are in-page state only and do
-  not use URL query keys.
+- Detail tabs (`Overview`, `Metadata`, `References`) are in-page state only and
+  do not use URL query keys.
 
 ## Loading, Empty, and Error States
 
@@ -121,8 +126,8 @@
 - Filter state is not fully shareable by URL (`meme_id` only).
 - Detail tabs are not deep-linkable by URL.
 - Marketplace behavior is documented canonically in NFT marketplace docs.
-- Non-`en-US` Rememes browse translations currently fall back to `en-US` while
-  the route-level migration pattern is reviewed.
+- Non-`en-US` Rememes browse/detail translations currently fall back to
+  `en-US` while the route-level migration pattern is reviewed.
 
 ## Related Pages
 

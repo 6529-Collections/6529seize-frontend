@@ -60,6 +60,11 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "rememes.refresh.ariaLabel")).toBe(
       "Refresh ReMemes results"
     );
+    expect(
+      t("de-DE", "rememes.detail.documentTitle", {
+        name: "Meme",
+      })
+    ).toBe("Meme | ReMemes");
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {
