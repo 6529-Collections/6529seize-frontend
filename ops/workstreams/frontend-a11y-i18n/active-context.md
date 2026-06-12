@@ -28,7 +28,8 @@ page migration PRs for safe media surfaces.
 - PR #2623 is bot-happy on the latest head and remains review-ready only.
 - Current implementation surface: `/rememes` browse-card follow-up, stacked on
   PR #2623. The branch is
-  `codex/rememes-browse-card-followup-a11y-i18n`.
+  `codex/rememes-browse-card-followup-a11y-i18n`; PR #2624 is open and
+  review-ready only.
 - Scope includes labelled results-list semantics for browse cards,
   locale-preserving Add ReMeme navigation, and missing-image fallback hardening
   for Rememe cards.
@@ -38,9 +39,9 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Finish validation for the `/rememes` browse-card follow-up.
-2. Open a review-ready stacked PR against PR #2623.
-3. Iterate on actionable CodeRabbit/Claude/CI feedback.
+1. Confirm PR #2624 checks and bot feedback after the latest push.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback.
+3. Keep PR #2624 review-ready only; do not merge without human approval.
 4. Keep page implementation PRs review-ready only; do not merge without human
    approval.
 5. Preserve the unrelated dirty EmojiContext and bootstrap style files.

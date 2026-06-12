@@ -21,4 +21,4 @@
 | Meme calendar overview   | `codex/meme-calendar-overview-a11y-i18n`       | #2621 | Open, review-ready only |
 | Meme calendar grid       | `codex/meme-calendar-grid-a11y-i18n`           | #2622 | Open, review-ready only |
 | Meme calendar drilldowns | `codex/meme-calendar-drilldown-a11y-i18n`      | #2623 | Open, review-ready only |
-| Rememes browse follow-up | `codex/rememes-browse-card-followup-a11y-i18n` | TBD   | In progress             |
+| Rememes browse follow-up | `codex/rememes-browse-card-followup-a11y-i18n` | #2624 | Open, review-ready only |

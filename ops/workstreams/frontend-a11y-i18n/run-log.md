@@ -622,3 +622,5 @@
   locale-preserving href, no horizontal overflow, and no Next.js runtime
   session errors. Remaining browser console errors were shared backend waves,
   blocked emoji feed, or third-party media resource loads.
+- Opened review-ready stacked PR #2624 against PR #2623. Per workstream policy,
+  do not merge PR #2624 without human approval.
