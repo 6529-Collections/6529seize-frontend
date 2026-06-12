@@ -106,3 +106,5 @@
   `/rememes?locale=de-DE&meme_id=1`. Verified add link, card accessible names,
   logo alt text, refresh accessible name, filter accessible names, count
   formatting, loaded state, and no Next/browser runtime errors.
+- Opened review-ready stacked PR #2609 against PR #2608. Per workstream policy,
+  do not merge PR #2609 without human approval.

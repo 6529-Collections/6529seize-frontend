@@ -31,8 +31,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Finish focused validation for the Rememes browse card implementation.
-2. Browser-smoke `/rememes?locale=de-DE` on desktop and mobile.
-3. Open a review-ready stacked Rememes PR against PR #2608.
+1. Re-check CodeRabbit, Snyk, and SonarCloud on PR #2609.
+2. Address valid bot/CI feedback on PR #2609.
+3. Leave PR #2609 review-ready only; do not merge it.
 4. Iterate with CodeRabbit, Claude if available, and CI feedback without
    merging page-change PRs.
