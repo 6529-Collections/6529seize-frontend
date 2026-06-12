@@ -18,3 +18,4 @@
 | `/the-memes/{id}` art viewer actions   | PR open              | PR open           | PR #2617; stacked on PR #2616; do not merge yet                    |
 | `/the-memes/{id}` art details rows     | PR open              | PR open           | PR #2618; review-ready only; stacked on PR #2617; do not merge yet |
 | `/the-memes/{id}` references tab       | PR open              | PR open           | PR #2619; review-ready only; stacked on PR #2618; do not merge yet |
+| `/the-memes/{id}` calendar periods     | PR open              | PR open           | PR #2620; review-ready only; stacked on PR #2619; do not merge yet |

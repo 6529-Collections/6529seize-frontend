@@ -107,6 +107,18 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "timeline.links.uriAriaLabel")).toBe(
       t("en-US", "timeline.links.uriAriaLabel")
     );
+    expect(t("de-DE", "memeCalendar.periods.positionLabel")).toBe(
+      t("en-US", "memeCalendar.periods.positionLabel")
+    );
+    expect(
+      t("fr-FR", "memeCalendar.periods.seasonLinkAriaLabel", {
+        season: 1,
+      })
+    ).toBe(
+      t("en-US", "memeCalendar.periods.seasonLinkAriaLabel", {
+        season: 1,
+      })
+    );
     const timelineMediaParams = {
       label: t("en-US", "timeline.fields.addedImage"),
     };
