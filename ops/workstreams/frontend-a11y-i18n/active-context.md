@@ -32,9 +32,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Finish the Meme Lab detail branch validation and open a review-ready stacked
-   PR against `codex/rememe-detail-a11y-i18n`.
-2. Observe bot/check results: CodeRabbit, Claude if available, Snyk, SonarCloud,
-   DCO, and CodeQL if triggered.
-3. Address valid bot/CI feedback with focused signed follow-up commits.
-4. Leave the Meme Lab detail PR review-ready only; do not merge it.
+1. Observe PR #2611 bot/check results: CodeRabbit, Claude if available, Snyk,
+   SonarCloud, DCO, and CodeQL if triggered.
+2. Address valid bot/CI feedback with focused signed follow-up commits.
+3. Leave the Meme Lab detail PR review-ready only; do not merge it.

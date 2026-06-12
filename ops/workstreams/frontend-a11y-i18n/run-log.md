@@ -181,3 +181,5 @@
   navigation, collectors/reference/history landmarks, 390px no-overflow mobile
   layout, and practical tap target sizes. Shared local-dev waves/emoji requests
   still log API/403 errors unrelated to this route change.
+- Opened review-ready stacked PR #2611 against PR #2610. Per workstream policy,
+  do not merge PR #2611 without human approval.
