@@ -3,6 +3,7 @@ import {
   SKIPPED_MINT_UTC_DAYS,
 } from "./meme-calendar.overrides";
 import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -786,8 +787,8 @@ export function getRangeLabel(
   const startMint = getMintNumberForMintDate(startMintDate);
   const endMint = getMintNumberForMintDate(endMintDate);
   return t(locale, "memeCalendar.grid.memeRange", {
-    start: startMint.toLocaleString(locale),
-    end: endMint.toLocaleString(locale),
+    start: formatInteger(locale, startMint),
+    end: formatInteger(locale, endMint),
   });
 }
 

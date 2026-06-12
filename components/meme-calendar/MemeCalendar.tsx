@@ -842,8 +842,8 @@ function YearView({
       displayedSeasonNumberFromIndex(sIdx)
     );
     const range = getDateRangeLabel(locale, start, end);
-    const label = getRangeLabel(start, end, locale);
-    return { sIdx, start, end, label, range, title };
+    const mints = getRangeLabel(start, end, locale);
+    return { sIdx, start, end, mints, range, title };
   });
 
   return (
@@ -855,7 +855,7 @@ function YearView({
             key={s.sIdx}
             title={s.title}
             range={s.range}
-            mints={s.label}
+            mints={s.mints}
             isCurrent={isCurrent}
             locale={locale}
             onClick={() => {
@@ -924,7 +924,7 @@ function EpochView({
         start,
         end,
         seasonIndex: yearSeasonIndex,
-        label: getRangeLabel(start, end, locale),
+        mints: getRangeLabel(start, end, locale),
         range: getDateRangeLabel(locale, start, end),
         title: getDivisionTitleWithGregorianYear(
           locale,
@@ -945,7 +945,7 @@ function EpochView({
               key={toISO(y.start)}
               title={y.title}
               range={y.range}
-              mints={y.label}
+              mints={y.mints}
               isCurrent={isCurrent}
               locale={locale}
               onClick={() => {
@@ -1011,7 +1011,7 @@ function PeriodView({
         start,
         end,
         seasonIndex: seasonIndexForEpoch,
-        label: getRangeLabel(start, end, locale),
+        mints: getRangeLabel(start, end, locale),
         range: getDateRangeLabel(locale, start, end),
         title: getDivisionTitleWithGregorianYear(
           locale,
@@ -1032,7 +1032,7 @@ function PeriodView({
               key={toISO(ep.start)}
               title={ep.title}
               range={ep.range}
-              mints={ep.label}
+              mints={ep.mints}
               isCurrent={isCurrent}
               locale={locale}
               onClick={() => {
@@ -1098,7 +1098,7 @@ function EraView({
       start,
       end,
       seasonIndex: seasonIndexForPeriod,
-      label: getRangeLabel(start, end, locale),
+      mints: getRangeLabel(start, end, locale),
       range: getDateRangeLabel(locale, start, end),
       title: getDivisionTitleWithGregorianYear(
         locale,
@@ -1120,7 +1120,7 @@ function EraView({
             key={toISO(p.start)}
             title={p.title}
             range={p.range}
-            mints={p.label}
+            mints={p.mints}
             isCurrent={isCurrent}
             locale={locale}
             onClick={() => {
@@ -1185,7 +1185,7 @@ function EonView({
       start,
       end,
       seasonIndex: seasonIndexForEra,
-      label: getRangeLabel(start, end, locale),
+      mints: getRangeLabel(start, end, locale),
       range: getDateRangeLabel(locale, start, end),
       title: getDivisionTitleWithGregorianYear(
         locale,
@@ -1207,7 +1207,7 @@ function EonView({
             key={toISO(er.start)}
             title={er.title}
             range={er.range}
-            mints={er.label}
+            mints={er.mints}
             isCurrent={isCurrent}
             locale={locale}
             onClick={() => {
