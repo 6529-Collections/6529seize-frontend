@@ -522,3 +522,8 @@
   `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and a live browser
   smoke on `/meme-calendar?locale=de-DE`; all passed except the unchanged
   unrelated React Doctor diagnostic in `contexts/EmojiContext.tsx`.
+- Addressed CodeRabbit's defensive `printCalendarInvites` note by escaping the
+  generated `fontColor` style attribute and adding regression coverage for
+  quote/apostrophe/color escaping. Re-ran targeted calendar/i18n tests,
+  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and a live browser
+  smoke on `/meme-calendar?locale=de-DE`.

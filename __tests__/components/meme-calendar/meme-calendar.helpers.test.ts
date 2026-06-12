@@ -111,6 +111,28 @@ describe("printCalendarInvites", () => {
     expect(html).toContain("DTEND%3A20231027T140000Z");
   });
 
+  it("escapes generated calendar link attributes", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const mintNumber = getMintNumberForMintDate(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      mintNumber,
+      'red";background:url(test)',
+      22,
+      {
+        addToCalendar: `Add "ICS" calendar's event`,
+        addToGoogleCalendar: "Add <Google> calendar",
+      }
+    );
+
+    expect(html).toContain(
+      'aria-label="Add &quot;ICS&quot; calendar&#39;s event"'
+    );
+    expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
+    expect(html).toContain("color:red&quot;;background:url(test);");
+  });
+
   it("accepts escaped accessible labels for calendar links", () => {
     const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
     const mintInstant = mintStartInstantUtcForMintDay(mintDay);

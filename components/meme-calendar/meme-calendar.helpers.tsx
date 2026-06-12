@@ -721,6 +721,7 @@ function escapeHtmlAttribute(value: string): string {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 }
@@ -752,13 +753,14 @@ export function printCalendarInvites(
   const addToGoogleCalendarLabel = escapeHtmlAttribute(
     labels.addToGoogleCalendar
   );
+  const safeFontColor = escapeHtmlAttribute(fontColor);
 
   return `
     <div style="display:flex; gap:15px; align-items:center;">
-      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" title="${addToCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${fontColor};">
+      <a href="${icsUrl}" download="meme-${mintNumber}-minting.ics" aria-label="${addToCalendarLabel}" title="${addToCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
         <img src="/calendar-ics.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
       </a>
-      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" title="${addToGoogleCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${fontColor};">
+      <a href="${gUrl}" target="_blank" rel="noopener noreferrer" aria-label="${addToGoogleCalendarLabel}" title="${addToGoogleCalendarLabel}" style="display:flex; align-items:center; gap:5px; text-decoration:none; color:${safeFontColor};">
         <img src="/calendar-google.png" alt="" aria-hidden="true" style="width:${size}px;height:${size}px" />
       </a>
     </div>`;
