@@ -32,8 +32,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Commit and open a review-ready Rememe detail PR stacked on PR #2609.
-2. Trigger/observe CodeRabbit, Claude if available, Snyk, and SonarCloud.
-3. Address valid bot/CI feedback.
-4. Leave the Rememe detail PR review-ready only; do not merge it.
-5. Continue safe media surfaces only after bot feedback is settled.
+1. Observe PR #2610 bot/check results: CodeRabbit, Claude if available, Snyk,
+   SonarCloud, DCO, and CodeQL if triggered.
+2. Address valid bot/CI feedback with focused signed follow-up commits.
+3. Leave the Rememe detail PR review-ready only; do not merge it.
+4. Continue safe media surfaces only after bot feedback is settled.

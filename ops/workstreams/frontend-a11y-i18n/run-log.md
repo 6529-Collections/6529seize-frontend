@@ -135,3 +135,5 @@
   name, reference-card locale preservation, and no nested-anchor/hydration
   errors from the changed surface. Shared local-dev waves/identity/emoji
   requests still log API/403 errors unrelated to this route change.
+- Opened review-ready stacked PR #2610 against PR #2609. Per workstream policy,
+  do not merge PR #2610 without human approval.
