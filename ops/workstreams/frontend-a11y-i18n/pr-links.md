@@ -19,3 +19,4 @@
 | The Memes references   | `codex/the-memes-references-a11y-i18n`   | #2619 | Open, review-ready only |
 | Meme calendar periods  | `codex/meme-calendar-periods-a11y-i18n`  | #2620 | Open, review-ready only |
 | Meme calendar overview | `codex/meme-calendar-overview-a11y-i18n` | #2621 | Open, review-ready only |
+| Meme calendar grid     | `codex/meme-calendar-grid-a11y-i18n`     | #2622 | Open, review-ready only |
