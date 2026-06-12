@@ -22,3 +22,28 @@
 - Fixed `react-doctor:diff` wrapper execution on Windows by resolving Git for
   Windows and invoking the `react-doctor.cmd` shim through the shell; the command
   now runs and reports only the pre-existing unrelated EmojiContext diagnostic.
+
+## 2026-06-12
+
+- Started stacked implementation branch `codex/the-memes-detail-a11y-i18n`
+  from `codex/the-memes-card-a11y-i18n`.
+- Implemented The Memes detail tab/focus-link accessibility and i18n readiness:
+  message-backed primary/history labels, heading and back-link accessible names,
+  primary tab `aria-pressed`, and visible focus styling on primary and shared
+  history tabs.
+- Updated the Memes focus-link docs for current grouped History tab behavior and
+  progressive `en-US` fallback debt.
+- Validation passed: focused Prettier check, focused ESLint, targeted Jest
+  suites for `MemePage`, `MemeShared`, and i18n messages, `typecheck:changed`,
+  `lint:changed`, Next MCP runtime check, and desktop/mobile browser smoke on
+  `/the-memes/1?focus=history`.
+- `react-doctor:diff` exited 0 and continued to report only the pre-existing
+  unrelated `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Opened review-ready stacked PR #2607 against PR #2604. Per workstream policy,
+  do not merge PR #2607 without human approval.
+- Addressed CodeRabbit cleanup feedback on PR #2607 by removing dead
+  `MemeTab.title` data and reusing the shared `isMemeFocus` guard in
+  `MemePage`.
+- Addressed follow-up CodeRabbit feedback on PR #2607 by threading a normalized
+  optional `locale` query parameter through the detail UI and metadata path, and
+  by documenting focus-key to visible-tab mappings.

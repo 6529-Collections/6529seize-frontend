@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/the-memes-card-a11y-i18n`
+`codex/the-memes-detail-a11y-i18n`
 
 ## Constraints
 
@@ -31,7 +31,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open implementation PR for The Memes list card.
-2. Iterate with CodeRabbit, Claude if available, and CI.
-3. Leave implementation PR review-ready only; do not merge it.
-4. Prepare The Memes detail tabs/focus-links follow-up after PR 1 is bot-happy.
+1. Monitor PR #2607 for CodeRabbit, Claude if available, and CI feedback.
+2. Fix valid bot or CI findings on PR #2607.
+3. Leave PR #2607 review-ready only; do not merge it.
+4. Start adjacent safe media-card work only after PR #2604 and PR #2607 are
+   bot-happy.

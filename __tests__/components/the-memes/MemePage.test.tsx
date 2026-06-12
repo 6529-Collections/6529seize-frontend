@@ -344,7 +344,7 @@ describe("MemePage search params handling", () => {
     });
 
     const navigation = screen.getByTestId("nft-navigation");
-    const title = screen.getByRole("heading", { name: "Card 1 — Meme" });
+    const title = screen.getByRole("heading", { name: "Card 1 - Meme" });
     const nftName = within(title).getByText("Meme");
 
     expect(
@@ -593,7 +593,7 @@ describe("MemePage loading states", () => {
     renderPage();
 
     // Should render basic navigation structure even while loading
-    const backLink = screen.getByRole("link", { name: "The Memes" });
+    const backLink = screen.getByRole("link", { name: "Back to The Memes" });
     expect(backLink).toHaveAttribute("href", "/the-memes");
     expect(backLink).not.toHaveClass("tw-uppercase");
     expect(backLink).not.toHaveClass("tw-border");
@@ -622,7 +622,7 @@ describe("MemePage loading states", () => {
       () => {
         expect(
           screen.getByRole("button", { name: "Overview" })
-        ).toBeInTheDocument();
+        ).toHaveAttribute("aria-pressed", "true");
       },
       { timeout: 3000 }
     );
@@ -645,18 +645,46 @@ describe("MemePage navigation integration", () => {
         expect(within(calendarPosition).getAllByText("/")).toHaveLength(4);
         expect(screen.getByText(/Card 1/)).toBeInTheDocument();
         expect(
-          screen.getByRole("heading", { level: 1, name: "Card 1 — Meme" })
+          screen.getByRole("heading", { level: 1, name: "Card 1 - Meme" })
         ).toHaveTextContent("Meme");
         expect(screen.getByTestId("nft-navigation")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "The Memes" })).toHaveAttribute(
-          "href",
-          "/the-memes"
-        );
+        expect(
+          screen.getByRole("link", { name: "Back to The Memes" })
+        ).toHaveAttribute("href", "/the-memes");
         expect(
           screen.getByRole("link", { name: "View SZN 1 cards" })
         ).toHaveAttribute("href", "/the-memes?szn=1&sort=age&sort_dir=ASC");
       },
       { timeout: 5000 }
     );
+  });
+});
+
+describe("MemePage accessibility labels", () => {
+  it("marks selected primary and history tabs for assistive technology", async () => {
+    const page = renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    });
+
+    const collectorsButton = screen.getByRole("button", { name: "Collectors" });
+    expect(collectorsButton).toHaveAttribute("aria-pressed", "false");
+    expect(collectorsButton).toHaveClass("focus-visible:tw-outline");
+
+    await userEvent.click(screen.getByRole("button", { name: "History" }));
+    page.rerenderPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("tablist", { name: "Meme history sections" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("tab", { name: "Card Activity", selected: true })
+      ).toBeInTheDocument();
+    });
   });
 });

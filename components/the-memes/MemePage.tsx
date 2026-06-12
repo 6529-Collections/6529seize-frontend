@@ -18,6 +18,9 @@ import type { MemesExtendedData, NFT, NftRank, NftTDH } from "@/entities/INFT";
 import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import NftNavigation from "../nft-navigation/NftNavigation";
@@ -35,7 +38,13 @@ import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
-import { getMemeTabTitle, MEME_FOCUS, MEME_TABS } from "./MemeShared";
+import {
+  getMemeFocusLabel,
+  getMemeTabTitle,
+  isMemeFocus,
+  MEME_FOCUS,
+  MEME_TABS,
+} from "./MemeShared";
 import styles from "./TheMemes.module.scss";
 import UpcomingMemePage from "./UpcomingMemePage";
 
@@ -64,16 +73,32 @@ enum MEME_HISTORY_TAB {
 
 const MEME_HISTORY_TABS: {
   readonly focus: MEME_HISTORY_TAB;
-  readonly title: string;
 }[] = [
-  { focus: MEME_HISTORY_TAB.ACTIVITY, title: "Card Activity" },
-  { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS, title: "Your Transactions" },
-  { focus: MEME_HISTORY_TAB.TIMELINE, title: "Timeline" },
+  { focus: MEME_HISTORY_TAB.ACTIVITY },
+  { focus: MEME_HISTORY_TAB.YOUR_TRANSACTIONS },
+  { focus: MEME_HISTORY_TAB.TIMELINE },
 ];
 
-const MEME_FOCUS_VALUES: readonly string[] = Object.values(MEME_FOCUS);
 const MEME_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out";
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+
+function getMemeHistoryTabLabel(
+  tab: MEME_HISTORY_TAB,
+  locale: SupportedLocale
+): string {
+  switch (tab) {
+    case MEME_HISTORY_TAB.ACTIVITY:
+      return t(locale, "theMemes.detail.tabs.cardActivity");
+    case MEME_HISTORY_TAB.YOUR_TRANSACTIONS:
+      return t(locale, "theMemes.detail.tabs.yourTransactions");
+    case MEME_HISTORY_TAB.TIMELINE:
+      return t(locale, "theMemes.detail.tabs.timeline");
+    default: {
+      const unhandled: never = tab;
+      throw new Error(`Unhandled MEME_HISTORY_TAB: ${String(unhandled)}`);
+    }
+  }
+}
 
 function getMemePageTabButtonClassName(isActive: boolean) {
   return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
@@ -96,6 +121,7 @@ function MemePageTabButton({
     <button
       type="button"
       className={getMemePageTabButtonClassName(isActive)}
+      aria-pressed={isActive}
       onClick={onClick}
     >
       {title}
@@ -104,11 +130,11 @@ function MemePageTabButton({
 }
 
 function parseMemeFocus(focus: string | null): MEME_FOCUS | undefined {
-  if (focus === null || !MEME_FOCUS_VALUES.includes(focus)) {
+  if (focus === null || !isMemeFocus(focus)) {
     return undefined;
   }
 
-  return focus as MEME_FOCUS;
+  return focus;
 }
 
 function getHistoryTabForFocus(
@@ -149,6 +175,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const locale = normalizeLocale(searchParams.get("locale"));
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
@@ -221,17 +248,25 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     () =>
       visibleHistoryTabs.map((tab) => ({
         key: tab.focus,
-        label: tab.title,
+        label: getMemeHistoryTabLabel(tab.focus, locale),
         value: tab.focus,
       })),
-    [visibleHistoryTabs]
+    [locale, visibleHistoryTabs]
   );
 
   const routeFocus = getRouteFocus(activeTab, activeHistoryTab);
 
   useEffect(() => {
-    setTitle(getMemeTabTitle(`The Memes`, nftId, nft, routeFocus));
-  }, [nft, nftId, routeFocus, setTitle]);
+    setTitle(
+      getMemeTabTitle(
+        t(locale, "theMemes.title"),
+        nftId,
+        nft,
+        routeFocus,
+        locale
+      )
+    );
+  }, [locale, nft, nftId, routeFocus, setTitle]);
 
   function replaceRouteFocus(nextFocus: MEME_FOCUS) {
     const params = new URLSearchParams(searchParamsString);
@@ -423,7 +458,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
 
     return (
       <nav
-        aria-label="Meme page sections"
+        aria-label={t(locale, "theMemes.detail.sections.ariaLabel")}
         className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
@@ -431,7 +466,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             {VISIBLE_MEME_TABS.map((tab) => (
               <MemePageTabButton
                 key={`${nft.id}-${tab.focus}-tab`}
-                title={tab.title}
+                title={getMemeFocusLabel(tab.focus, locale)}
                 isActive={activeTab === tab.focus}
                 onClick={() => setActiveMemeTab(tab.focus)}
               />
@@ -448,12 +483,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
     }
 
     return (
-      <nav aria-label="Meme history sections" className="tw-pb-8">
+      <nav
+        aria-label={t(locale, "theMemes.detail.history.ariaLabel")}
+        className="tw-pb-8"
+      >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_HISTORY_TAB>
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
-            filterLabel="Meme history sections"
+            filterLabel={t(locale, "theMemes.detail.history.ariaLabel")}
             setSelected={setActiveHistoryMemeTab}
             fill={false}
           />
@@ -520,13 +558,14 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
                   href="/the-memes"
+                  aria-label={t(locale, "theMemes.detail.backLink.ariaLabel")}
                   className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
                     className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
                   />
-                  The Memes
+                  {t(locale, "theMemes.title")}
                 </Link>
               </div>
               {nftMeta && nft && (
@@ -553,10 +592,15 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
                     className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
-                    aria-label={`Card ${nft.id} — ${nft.name}`}
+                    aria-label={t(locale, "theMemes.detail.heading.ariaLabel", {
+                      tokenId: formatInteger(locale, nft.id),
+                      name: nft.name,
+                    })}
                   >
                     <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
-                      Card {nft.id}
+                      {t(locale, "theMemes.detail.heading.card", {
+                        tokenId: formatInteger(locale, nft.id),
+                      })}
                     </span>
                     <span
                       aria-hidden="true"
