@@ -301,3 +301,10 @@
   waves/emoji requests still log API/403 errors unrelated to this route change.
 - Opened review-ready stacked PR #2614 against PR #2613. Per workstream policy,
   do not merge PR #2614 without human approval.
+- Addressed SonarCloud feedback on PR #2614 by replacing the Card Activity
+  loading state's explicit `role="status"` wrapper with native `<output>` while
+  preserving the translated accessible name.
+- Validation for the SonarCloud follow-up passed: focused Card Activity and
+  i18n Jest suites (2 suites, 22 tests), focused Prettier, `lint:changed`,
+  `typecheck:changed`, and `react-doctor:diff`. React Doctor exited 0 at
+  99/100 with only the unrelated dirty EmojiContext fetch-in-effect diagnostic.

@@ -234,13 +234,12 @@ export function MemePageActivity(
 
     if (activityLoading) {
       return (
-        <div
-          role="status"
+        <output
           aria-label={t(locale, "theMemes.detail.activity.loading")}
           className="tw-flex tw-items-center tw-justify-center tw-py-4"
         >
           <CircleLoader size={CircleLoaderSize.LARGE} />
-        </div>
+        </output>
       );
     }
 

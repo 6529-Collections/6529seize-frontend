@@ -160,6 +160,17 @@ describe("MemePageActivity", () => {
       expect(fetchUrlMock).not.toHaveBeenCalled();
     });
 
+    it("renders a translated loading output while activity is pending", () => {
+      fetchUrlMock.mockReturnValueOnce(new Promise(() => {}));
+
+      render(<MemePageActivity show nft={nft} pageSize={10} locale="de-DE" />);
+
+      expect(
+        screen.getByLabelText(t("de-DE", "theMemes.detail.activity.loading"))
+          .tagName
+      ).toBe("OUTPUT");
+    });
+
     it("fetches activity with correct base url", async () => {
       render(<MemePageActivity show nft={nft} pageSize={10} />);
 
