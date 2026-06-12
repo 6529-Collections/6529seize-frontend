@@ -44,3 +44,6 @@
 - Addressed CodeRabbit cleanup feedback on PR #2607 by removing dead
   `MemeTab.title` data and reusing the shared `isMemeFocus` guard in
   `MemePage`.
+- Addressed follow-up CodeRabbit feedback on PR #2607 by threading a normalized
+  optional `locale` query parameter through the detail UI and metadata path, and
+  by documenting focus-key to visible-tab mappings.

@@ -76,7 +76,8 @@ async function getMetadataProps(
   contract: string,
   id: string,
   focus: string,
-  isDistribution: boolean = false
+  isDistribution: boolean = false,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   let urlPath = "nfts";
   const idDisplay = idStringToDisplay(id);
@@ -102,7 +103,7 @@ async function getMetadataProps(
 
   if (focus && focus !== MEME_FOCUS.LIVE) {
     if (isMemeFocus(focus)) {
-      name = `${name} | ${getMemeFocusLabel(focus)}`;
+      name = `${name} | ${getMemeFocusLabel(focus, locale)}`;
     }
   } else if (isDistribution) {
     name = `${name} | Distribution`;
@@ -119,13 +120,15 @@ export async function getSharedAppServerSideProps(
   contract: string,
   id: string,
   focus: string,
-  isDistribution: boolean = false
+  isDistribution: boolean = false,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   const { title, description, ogImage } = await getMetadataProps(
     contract,
     id,
     focus,
-    isDistribution
+    isDistribution,
+    locale
   );
 
   return getAppMetadata({

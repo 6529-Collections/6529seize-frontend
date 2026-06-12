@@ -22,12 +22,23 @@
 
 ## Focus Keys
 
-- Supported `focus` values: `live`, `your-cards`, `the-art`, `references`,
-  `collectors`, `history`, `your-transactions`, `activity`, `timeline`.
-- User-visible primary tabs: `Overview`, `Collectors`, `History`,
-  `References`.
-- User-visible History tabs: `Card Activity`, `Your Transactions` when the
-  connected wallet has card transactions, and `Timeline`.
+- Supported `focus` values map to the visible detail UI as follows:
+
+| Focus Value         | User-Visible Area                                  |
+| ------------------- | -------------------------------------------------- |
+| `live`              | `Overview` primary tab                             |
+| `your-cards`        | `History` primary tab, `Your Transactions` sub-tab |
+| `the-art`           | `Overview` primary tab, art details opened         |
+| `references`        | `References` primary tab                           |
+| `collectors`        | `Collectors` primary tab                           |
+| `history`           | `History` primary tab, default history sub-tab     |
+| `your-transactions` | `History` primary tab, `Your Transactions` sub-tab |
+| `activity`          | `History` primary tab, `Card Activity` sub-tab     |
+| `timeline`          | `History` primary tab, `Timeline` sub-tab          |
+
+- Missing or invalid `focus` opens `Overview`.
+- `Your Transactions` appears only when the connected wallet has transactions
+  for the card; otherwise the route falls back to `Card Activity`.
 
 ## User Journey
 
@@ -85,6 +96,9 @@
 - Tab changes use in-place URL replacement, so browser Back skips prior tab changes.
 - Primary tab labels, history tab labels, heading accessible names, and the
   back link accessible name are message-backed for progressive localization.
+- During component-level migration, the optional `locale` query parameter can be
+  used to smoke-test supported locales on this detail route. Missing or
+  unsupported `locale` values fall back to `en-US`.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the

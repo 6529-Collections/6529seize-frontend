@@ -15,3 +15,4 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-12 | #2607 | SonarCloud   | Quality Gate passed with 0 new issues                                    | Accept                               |
 | 2026-06-12 | #2607 | Snyk         | PR check passed                                                          | Accept                               |
 | 2026-06-12 | #2607 | CodeRabbit   | Flagged dead `MemeTab.title` and duplicate `MEME_FOCUS_VALUES` guards    | Fixed                                |
+| 2026-06-12 | #2607 | CodeRabbit   | Flagged hardcoded detail locale, metadata locale path, and focus docs    | Fixed                                |

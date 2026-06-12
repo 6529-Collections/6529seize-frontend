@@ -19,7 +19,7 @@ import type { ConsolidatedTDH } from "@/entities/ITDH";
 import type { Transaction } from "@/entities/ITransaction";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -175,7 +175,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const locale = DEFAULT_LOCALE;
+  const locale = normalizeLocale(searchParams.get("locale"));
   const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
