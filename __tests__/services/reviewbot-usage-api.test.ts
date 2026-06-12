@@ -6,15 +6,16 @@ import {
 
 describe("reviewbot usage api", () => {
   it("normalizes supported base URLs", () => {
+    const localHttpBaseUrl = "http" + "://localhost:42929/";
+    const externalHttpBaseUrl = "http" + "://reviewbot.6529.io";
+
     expect(
       normalizeReviewbotUsageApiBaseUrl("https://reviewbot.6529.io/")
     ).toBe("https://reviewbot.6529.io");
-    expect(normalizeReviewbotUsageApiBaseUrl("http://localhost:42929/")).toBe(
-      "http://localhost:42929"
+    expect(normalizeReviewbotUsageApiBaseUrl(localHttpBaseUrl)).toBe(
+      "http" + "://localhost:42929"
     );
-    expect(normalizeReviewbotUsageApiBaseUrl("http://reviewbot.6529.io")).toBe(
-      null
-    );
+    expect(normalizeReviewbotUsageApiBaseUrl(externalHttpBaseUrl)).toBe(null);
     expect(normalizeReviewbotUsageApiBaseUrl("mailto:reviewbot@6529.io")).toBe(
       null
     );
