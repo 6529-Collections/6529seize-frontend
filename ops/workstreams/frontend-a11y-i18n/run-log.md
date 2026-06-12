@@ -582,3 +582,9 @@
   backend waves endpoints and blocked emoji feed.
 - Opened review-ready stacked PR #2623 against PR #2622. Per workstream policy,
   do not merge PR #2623 without human approval.
+- Addressed SonarCloud's new-code duplication gate on PR #2623 by extracting
+  the repeated lower-calendar drilldown button markup into a shared
+  `DrilldownCard` component. Re-ran the focused calendar/i18n Jest suites,
+  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and desktop/mobile
+  browser smoke on `/meme-calendar`; all remained green apart from the known
+  React Doctor follow-up diagnostics.

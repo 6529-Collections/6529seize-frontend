@@ -279,6 +279,41 @@ function getCalendarInviteLabels(locale: SupportedLocale) {
 const DRILLDOWN_CARD_CLASS =
   "tw-cursor-pointer tw-rounded-md tw-border tw-border-solid tw-border-[#222222] tw-bg-black tw-p-3 hover:tw-bg-[#eee] hover:tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
+interface DrilldownCardProps {
+  readonly title: string;
+  readonly range: string;
+  readonly mints: string;
+  readonly isCurrent: boolean;
+  readonly onClick: () => void;
+  readonly locale: SupportedLocale;
+}
+
+function DrilldownCard({
+  title,
+  range,
+  mints,
+  isCurrent,
+  onClick,
+  locale,
+}: DrilldownCardProps) {
+  return (
+    <button
+      type="button"
+      aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
+      className={DRILLDOWN_CARD_CLASS}
+      style={{
+        borderColor: isCurrent ? "#20fa59" : "#222222",
+        borderWidth: isCurrent ? "2px" : "1px",
+      }}
+      onClick={onClick}
+    >
+      <div className="tw-font-semibold">{title}</div>
+      <div className="tw-text-xs tw-text-gray-500">{range}</div>
+      <div className="tw-mt-1 tw-text-sm">{mints}</div>
+    </button>
+  );
+}
+
 // Props types
 interface MonthProps {
   readonly date: Date;
@@ -782,24 +817,17 @@ function YearView({
 
     return (
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
-          className={DRILLDOWN_CARD_CLASS}
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
+        <DrilldownCard
+          title={title}
+          range={range}
+          mints={mints}
+          isCurrent={isCurrent}
+          locale={locale}
           onClick={() => {
             onSelectSeason(sIdx);
             onZoomToSeason();
           }}
-        >
-          <div className="tw-font-semibold">{title}</div>
-          <div className="tw-text-xs tw-text-gray-500">{range}</div>
-          <div className="tw-mt-1 tw-text-sm">{mints}</div>
-        </button>
+        />
       </div>
     );
   }
@@ -823,29 +851,18 @@ function YearView({
       {seasons.map((s) => {
         const isCurrent = currentIdx === s.sIdx;
         return (
-          <button
-            type="button"
+          <DrilldownCard
             key={s.sIdx}
-            aria-label={getDrilldownCardAriaLabel(
-              locale,
-              s.title,
-              s.range,
-              s.label
-            )}
-            className={DRILLDOWN_CARD_CLASS}
-            style={{
-              borderColor: isCurrent ? "#20fa59" : "#222222",
-              borderWidth: isCurrent ? "2px" : "1px",
-            }}
+            title={s.title}
+            range={s.range}
+            mints={s.label}
+            isCurrent={isCurrent}
+            locale={locale}
             onClick={() => {
               onSelectSeason(s.sIdx);
               onZoomToSeason();
             }}
-          >
-            <div className="tw-font-semibold">{s.title}</div>
-            <div className="tw-text-xs tw-text-gray-500">{s.range}</div>
-            <div className="tw-mt-1 tw-text-sm">{s.label}</div>
-          </button>
+          />
         );
       })}
     </div>
@@ -877,25 +894,18 @@ function EpochView({
     const mints = getMemeRangeLabel(locale, 1, 47);
     return (
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
-          className={DRILLDOWN_CARD_CLASS}
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
+        <DrilldownCard
+          title={title}
+          range={range}
+          mints={mints}
+          isCurrent={isCurrent}
+          locale={locale}
           onClick={() => {
             onSelectSeason(sIdx);
             onSelectYear(0);
             onZoomToYear();
           }}
-        >
-          <div className="tw-font-semibold">{title}</div>
-          <div className="tw-text-xs tw-text-gray-500">{range}</div>
-          <div className="tw-mt-1 tw-text-sm">{mints}</div>
-        </button>
+        />
       </div>
     );
   } else {
@@ -931,29 +941,18 @@ function EpochView({
             currentIdx >= y.seasonIndex &&
             currentIdx < y.seasonIndex + SEASONS_PER_YEAR;
           return (
-            <button
-              type="button"
+            <DrilldownCard
               key={toISO(y.start)}
-              aria-label={getDrilldownCardAriaLabel(
-                locale,
-                y.title,
-                y.range,
-                y.label
-              )}
-              className={DRILLDOWN_CARD_CLASS}
-              style={{
-                borderColor: isCurrent ? "#20fa59" : "#222222",
-                borderWidth: isCurrent ? "2px" : "1px",
-              }}
+              title={y.title}
+              range={y.range}
+              mints={y.label}
+              isCurrent={isCurrent}
+              locale={locale}
               onClick={() => {
                 onSelectYear(y.yearNumber);
                 onZoomToYear();
               }}
-            >
-              <div className="tw-font-semibold">{y.title}</div>
-              <div className="tw-text-xs tw-text-gray-500">{y.range}</div>
-              <div className="tw-mt-1 tw-text-sm">{y.label}</div>
-            </button>
+            />
           );
         })}
       </div>
@@ -983,24 +982,17 @@ function PeriodView({
     const mints = getMemeRangeLabel(locale, 1, 47);
     return (
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
-          className={DRILLDOWN_CARD_CLASS}
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
+        <DrilldownCard
+          title={title}
+          range={range}
+          mints={mints}
+          isCurrent={isCurrent}
+          locale={locale}
           onClick={() => {
             onSelectEpoch(0);
             onZoomToEpoch();
           }}
-        >
-          <div className="tw-font-semibold">{title}</div>
-          <div className="tw-text-xs tw-text-gray-500">{range}</div>
-          <div className="tw-mt-1 tw-text-sm">{mints}</div>
-        </button>
+        />
       </div>
     );
   } else {
@@ -1036,29 +1028,18 @@ function PeriodView({
             currentIdx >= ep.seasonIndex &&
             currentIdx < ep.seasonIndex + SEASONS_PER_EPOCH;
           return (
-            <button
-              type="button"
+            <DrilldownCard
               key={toISO(ep.start)}
-              aria-label={getDrilldownCardAriaLabel(
-                locale,
-                ep.title,
-                ep.range,
-                ep.label
-              )}
-              className={DRILLDOWN_CARD_CLASS}
-              style={{
-                borderColor: isCurrent ? "#20fa59" : "#222222",
-                borderWidth: isCurrent ? "2px" : "1px",
-              }}
+              title={ep.title}
+              range={ep.range}
+              mints={ep.label}
+              isCurrent={isCurrent}
+              locale={locale}
               onClick={() => {
                 onSelectEpoch(ep.epochNumber);
                 onZoomToEpoch();
               }}
-            >
-              <div className="tw-font-semibold">{ep.title}</div>
-              <div className="tw-text-xs tw-text-gray-500">{ep.range}</div>
-              <div className="tw-mt-1 tw-text-sm">{ep.label}</div>
-            </button>
+            />
           );
         })}
       </div>
@@ -1089,24 +1070,17 @@ function EraView({
     const mints = getMemeRangeLabel(locale, 1, 47);
     return (
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
-          className={DRILLDOWN_CARD_CLASS}
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
+        <DrilldownCard
+          title={title}
+          range={range}
+          mints={mints}
+          isCurrent={isCurrent}
+          locale={locale}
           onClick={() => {
             onSelectPeriod(0);
             onZoomToPeriod();
           }}
-        >
-          <div className="tw-font-semibold">{title}</div>
-          <div className="tw-text-xs tw-text-gray-500">{range}</div>
-          <div className="tw-mt-1 tw-text-sm">{mints}</div>
-        </button>
+        />
       </div>
     );
   }
@@ -1142,29 +1116,18 @@ function EraView({
           currentIdx >= p.seasonIndex &&
           currentIdx < p.seasonIndex + SEASONS_PER_PERIOD;
         return (
-          <button
-            type="button"
+          <DrilldownCard
             key={toISO(p.start)}
-            aria-label={getDrilldownCardAriaLabel(
-              locale,
-              p.title,
-              p.range,
-              p.label
-            )}
-            className={DRILLDOWN_CARD_CLASS}
-            style={{
-              borderColor: isCurrent ? "#20fa59" : "#222222",
-              borderWidth: isCurrent ? "2px" : "1px",
-            }}
+            title={p.title}
+            range={p.range}
+            mints={p.label}
+            isCurrent={isCurrent}
+            locale={locale}
             onClick={() => {
               onSelectPeriod(p.periodNumber);
               onZoomToPeriod();
             }}
-          >
-            <div className="tw-font-semibold">{p.title}</div>
-            <div className="tw-text-xs tw-text-gray-500">{p.range}</div>
-            <div className="tw-mt-1 tw-text-sm">{p.label}</div>
-          </button>
+          />
         );
       })}
     </div>
@@ -1194,24 +1157,17 @@ function EonView({
     const mints = getMemeRangeLabel(locale, 1, 47);
     return (
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 tw-gap-4">
-        <button
-          type="button"
-          key={sIdx}
-          aria-label={getDrilldownCardAriaLabel(locale, title, range, mints)}
-          className={DRILLDOWN_CARD_CLASS}
-          style={{
-            borderColor: isCurrent ? "#20fa59" : "#222222",
-            borderWidth: isCurrent ? "2px" : "1px",
-          }}
+        <DrilldownCard
+          title={title}
+          range={range}
+          mints={mints}
+          isCurrent={isCurrent}
+          locale={locale}
           onClick={() => {
             onSelectEra(0);
             onZoomToEra();
           }}
-        >
-          <div className="tw-font-semibold">{title}</div>
-          <div className="tw-text-xs tw-text-gray-500">{range}</div>
-          <div className="tw-mt-1 tw-text-sm">{mints}</div>
-        </button>
+        />
       </div>
     );
   }
@@ -1247,29 +1203,18 @@ function EonView({
           currentIdx >= er.seasonIndex &&
           currentIdx < er.seasonIndex + SEASONS_PER_ERA;
         return (
-          <button
-            type="button"
+          <DrilldownCard
             key={toISO(er.start)}
-            aria-label={getDrilldownCardAriaLabel(
-              locale,
-              er.title,
-              er.range,
-              er.label
-            )}
-            className={DRILLDOWN_CARD_CLASS}
-            style={{
-              borderColor: isCurrent ? "#20fa59" : "#222222",
-              borderWidth: isCurrent ? "2px" : "1px",
-            }}
+            title={er.title}
+            range={er.range}
+            mints={er.label}
+            isCurrent={isCurrent}
+            locale={locale}
             onClick={() => {
               onSelectEra(er.eraNumber);
               onZoomToEra();
             }}
-          >
-            <div className="tw-font-semibold">{er.title}</div>
-            <div className="tw-text-xs tw-text-gray-500">{er.range}</div>
-            <div className="tw-mt-1 tw-text-sm">{er.label}</div>
-          </button>
+          />
         );
       })}
     </div>
