@@ -57,4 +57,27 @@ describe("MemeCalendar controls", () => {
       screen.getAllByRole("button", { name: /mint$/i }).length
     ).toBeGreaterThan(0);
   });
+
+  it("names drilldown cards with titles, ranges, and mint counts", () => {
+    render(<MemeCalendar displayTz="utc" locale="de-DE" />);
+
+    const rangeGroup = screen.getByRole("group", { name: "Calendar range" });
+    fireEvent.click(within(rangeGroup).getByRole("button", { name: "Year 4" }));
+
+    expect(
+      screen.getByRole("button", {
+        name: /Open SZN #14: .+2026 - .+2026; Memes #/i,
+      })
+    ).toHaveTextContent("SZN #14");
+
+    fireEvent.click(
+      within(rangeGroup).getByRole("button", { name: "Epoch 1" })
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: /Open Year #4 \(2026\): .+2026 - .+2026; Memes #/i,
+      })
+    ).toHaveTextContent("Year #4 (2026)");
+  });
 });

@@ -140,6 +140,19 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "memeCalendar.grid.previous", { division: "SZN" })).toBe(
       t("en-US", "memeCalendar.grid.previous", { division: "SZN" })
     );
+    expect(
+      t("fr-FR", "memeCalendar.grid.cardAriaLabel", {
+        title: "SZN #14",
+        range: "Jan 2026 - Mar 2026",
+        mints: "Memes #123 - #456",
+      })
+    ).toBe(
+      t("en-US", "memeCalendar.grid.cardAriaLabel", {
+        title: "SZN #14",
+        range: "Jan 2026 - Mar 2026",
+        mints: "Memes #123 - #456",
+      })
+    );
     const timelineMediaParams = {
       label: t("en-US", "timeline.fields.addedImage"),
     };
