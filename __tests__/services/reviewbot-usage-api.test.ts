@@ -7,6 +7,7 @@ import {
 describe("reviewbot usage api", () => {
   it("normalizes supported base URLs", () => {
     const localHttpBaseUrl = "http" + "://localhost:42929/";
+    const localIpv6HttpBaseUrl = "http" + "://[::1]:42929/";
     const externalHttpBaseUrl = "http" + "://reviewbot.6529.io";
 
     expect(
@@ -14,6 +15,9 @@ describe("reviewbot usage api", () => {
     ).toBe("https://reviewbot.6529.io");
     expect(normalizeReviewbotUsageApiBaseUrl(localHttpBaseUrl)).toBe(
       "http" + "://localhost:42929"
+    );
+    expect(normalizeReviewbotUsageApiBaseUrl(localIpv6HttpBaseUrl)).toBe(
+      "http" + "://[::1]:42929"
     );
     expect(normalizeReviewbotUsageApiBaseUrl(externalHttpBaseUrl)).toBe(null);
     expect(normalizeReviewbotUsageApiBaseUrl("mailto:reviewbot@6529.io")).toBe(
@@ -107,6 +111,32 @@ describe("reviewbot usage api", () => {
           accept: "application/json",
         },
       })
+    );
+  });
+
+  it("preserves base URL subpaths when loading summaries", async () => {
+    const fetchImpl = jest.fn(
+      async () =>
+        ({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            ok: true,
+          }),
+        }) as Response
+    );
+
+    await getReviewbotPublicUsageSummary({
+      env: {
+        REVIEWBOT_USAGE_API_BASE_URL: "https://reviewbot.6529.io/v1",
+        REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH: "/api/public/usage/summary",
+      },
+      fetchImpl,
+    });
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      new URL("https://reviewbot.6529.io/v1/api/public/usage/summary?days=30"),
+      expect.any(Object)
     );
   });
 

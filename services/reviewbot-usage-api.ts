@@ -98,7 +98,7 @@ export async function getReviewbotPublicUsageSummary(
   const summaryPath = normalizeReviewbotUsageSummaryPath(
     env["REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH"]
   );
-  const url = new URL(summaryPath, `${apiBaseUrl}/`);
+  const url = new URL(summaryPath.replace(/^\/+/, ""), `${apiBaseUrl}/`);
   url.searchParams.set("days", String(days));
 
   const controller = new AbortController();
@@ -153,7 +153,8 @@ export function normalizeReviewbotUsageApiBaseUrl(
 
   try {
     const url = new URL(raw);
-    if (url.protocol === "http:" && LOCAL_API_HOSTS.has(url.hostname)) {
+    const normalizedHost = url.hostname.replace(/^\[|\]$/g, "");
+    if (url.protocol === "http:" && LOCAL_API_HOSTS.has(normalizedHost)) {
       return url.toString().replace(/\/$/, "");
     }
     if (url.protocol !== "https:") {
