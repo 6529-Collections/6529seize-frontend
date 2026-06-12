@@ -516,3 +516,9 @@
   shared backend/emoji feed.
 - Opened review-ready stacked PR #2621 against PR #2620. Per workstream policy,
   do not merge PR #2621 without human approval.
+- Addressed SonarCloud issue `typescript:S6819` on PR #2621 by replacing the
+  timezone toggle's generic `role="group"` wrapper with native
+  `fieldset`/`legend` semantics. Re-ran targeted calendar/i18n tests,
+  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and a live browser
+  smoke on `/meme-calendar?locale=de-DE`; all passed except the unchanged
+  unrelated React Doctor diagnostic in `contexts/EmojiContext.tsx`.

@@ -40,7 +40,7 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Trigger available review bots on PR #2621.
+1. Confirm PR #2621 checks and bot feedback after the latest push.
 2. Iterate on actionable CodeRabbit/Claude/CI feedback.
 3. Keep page implementation PRs review-ready only; do not merge without human
    approval.

@@ -26,11 +26,10 @@ export default function MemesMintingCalendar({
     <div className="tw-flex tw-flex-col tw-gap-3">
       {/* Global Local/UTC toggle */}
       <div className="tw-flex tw-justify-end">
-        <div
-          aria-label={t(locale, "memeCalendar.timezone.regionLabel")}
-          className="tw-inline-flex"
-          role="group"
-        >
+        <fieldset className="tw-m-0 tw-inline-flex tw-border-0 tw-p-0">
+          <legend className="tw-sr-only">
+            {t(locale, "memeCalendar.timezone.regionLabel")}
+          </legend>
           <button
             className={`${baseBtn} ${
               displayTz === "local" ? activeBtn : inactiveBtn
@@ -55,7 +54,7 @@ export default function MemesMintingCalendar({
           >
             {t(locale, "memeCalendar.timezone.utc")}
           </button>
-        </div>
+        </fieldset>
       </div>
 
       <div className="tw-flex tw-flex-wrap tw-gap-8">
