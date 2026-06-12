@@ -32,6 +32,10 @@ type MemeLabReferencesState = {
   readonly nfts: NFT[];
 };
 
+type MemeLabReferencesAction =
+  | { readonly type: "loadSuccess"; readonly nfts: NFT[] }
+  | { readonly type: "loadError" };
+
 type RememesReferencesState = {
   readonly totalResults: number;
   readonly page: number;
@@ -67,12 +71,26 @@ const INITIAL_REMEMES_REFERENCES_STATE: RememesReferencesState = {
 
 function memeLabReferencesReducer(
   _state: MemeLabReferencesState,
-  nfts: NFT[]
+  action: MemeLabReferencesAction
 ): MemeLabReferencesState {
-  return {
-    loaded: true,
-    nfts,
-  };
+  switch (action.type) {
+    case "loadSuccess":
+      return {
+        loaded: true,
+        nfts: action.nfts,
+      };
+    case "loadError":
+      return {
+        loaded: true,
+        nfts: [],
+      };
+    default: {
+      const unhandled: never = action;
+      throw new Error(
+        `Unhandled MemeLabReferencesAction: ${String(unhandled)}`
+      );
+    }
+  }
 }
 
 function rememesReferencesReducer(
@@ -179,10 +197,13 @@ export function MemePageReferencesSubMenu(props: {
         `${publicEnv.API_ENDPOINT}/api/nfts_memelab?sort_direction=asc&meme_id=${props.nft.id}`
       )
         .then((response: DBResponse) => {
-          setMemeLabNfts(response.data);
+          setMemeLabNfts({
+            type: "loadSuccess",
+            nfts: response.data,
+          });
         })
         .catch(() => {
-          setMemeLabNfts([]);
+          setMemeLabNfts({ type: "loadError" });
         });
     }
   }, [props.show, props.nft]);
