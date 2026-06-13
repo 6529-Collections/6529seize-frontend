@@ -861,3 +861,23 @@
   SonarCloud passed, CodeRabbit manual review passed, there are no review
   threads, and Claude remained configured for manual review only. Per
   workstream policy, do not merge PR #2633 without human approval.
+- Started stacked branch `codex/user-collected-boost-breakdown-a11y-i18n` from
+  PR #2633 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Boost Breakdown
+  heading, TDH version link, table caption, columns, row labels, season labels,
+  and total boost tooltip copy. Added a screen-reader table caption, promoted
+  touched row labels to row headers, moved boost numeric values through the
+  repo i18n formatting helper, and made info tooltip triggers keyboard
+  focusable with accessible names.
+- Validation passed for the Boost Breakdown follow-up: focused boost
+  breakdown/i18n Jest suites (3 suites, 8 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and `git diff --check`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified `Details` opens, Boost
+  Breakdown renders with a screen-reader table caption, scoped column headers,
+  row headers, keyboard-focusable tooltip buttons with accessible names, no
+  page-level mobile overflow, and no Next.js runtime session errors. Console
+  resource errors were shared backend wave endpoints and blocked emoji feed
+  noise.

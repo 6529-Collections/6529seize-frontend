@@ -126,6 +126,18 @@ describe("frontend i18n helpers", () => {
         total: "2",
       })
     ).toBe("1 / 2");
+    expect(
+      t("de-DE", "user.collected.stats.boostBreakdown.versionLink", {
+        version: "1.4",
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.boostBreakdown.versionLink", {
+        version: "1.4",
+      })
+    );
+    expect(t("fr-FR", "user.collected.stats.boostBreakdown.tableCaption")).toBe(
+      t("en-US", "user.collected.stats.boostBreakdown.tableCaption")
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
