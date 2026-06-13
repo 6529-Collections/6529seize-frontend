@@ -58,6 +58,9 @@ describe("frontend i18n helpers", () => {
         tokenId: 1,
       })
     ).toBe("View ReMeme, ReMeme #1");
+    expect(t("es-ES", "rememes.results.gridLabel")).toBe(
+      t("en-US", "rememes.results.gridLabel")
+    );
     expect(t("de-DE", "rememes.refresh.ariaLabel")).toBe(
       "Refresh ReMemes results"
     );

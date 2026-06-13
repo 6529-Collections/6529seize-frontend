@@ -19,3 +19,5 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-12 | #2622 | SonarCloud   | Flagged guide `role="region"` and month-cell cognitive complexity         | Fixed                                |
 | 2026-06-12 | #2623 | SonarCloud   | Flagged 10.4% duplication on new code                                     | Fixed                                |
 | 2026-06-12 | #2623 | CodeRabbit   | Suggested consolidating mint formatting and renaming card mint range data | Fixed                                |
+| 2026-06-12 | #2624 | SonarCloud   | Flagged optional chaining, redundant list role, and placeholder img role  | Fixed                                |
+| 2026-06-12 | #2624 | CodeRabbit   | Flagged missing top-level `nft.animation` video fallback                  | Fixed                                |

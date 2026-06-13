@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/meme-calendar-drilldown-a11y-i18n`
+`codex/rememes-browse-card-followup-a11y-i18n`
 
 ## Constraints
 
@@ -25,21 +25,23 @@ page migration PRs for safe media surfaces.
 - WCAG target: WCAG 2.2 AA.
 - Source locale: `en-US`.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
-- Current implementation surface: `/meme-calendar` lower drilldown card pass,
-  stacked on PR #2622. The branch is
-  `codex/meme-calendar-drilldown-a11y-i18n`; PR #2623 is open and
+- PR #2623 is bot-happy on the latest head and remains review-ready only.
+- Current implementation surface: `/rememes` browse-card follow-up, stacked on
+  PR #2623. The branch is
+  `codex/rememes-browse-card-followup-a11y-i18n`; PR #2624 is open and
   review-ready only.
-- Scope includes higher-level lower-calendar drilldown card titles, date
-  ranges, mint ranges, accessible button names, and focus-visible behavior for
-  `Year`, `Epoch`, `Period`, `Era`, and `Eon` views.
+- Scope includes labelled results-list semantics for browse cards,
+  locale-preserving Add ReMeme navigation, and missing-image fallback hardening
+  for Rememe cards.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Confirm PR #2623 checks and bot feedback after the latest push.
+1. Confirm PR #2624 checks and bot feedback after the latest push.
 2. Iterate on actionable CodeRabbit/Claude/CI feedback.
-3. Keep page implementation PRs review-ready only; do not merge without human
+3. Keep PR #2624 review-ready only; do not merge without human approval.
+4. Keep page implementation PRs review-ready only; do not merge without human
    approval.
-4. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+5. Preserve the unrelated dirty EmojiContext and bootstrap style files.
