@@ -1069,3 +1069,5 @@
   profile links, avatar alt text, close button on mobile, and no Next.js
   runtime session errors; browser console errors were local API/resource
   responses unrelated to the followers modal change.
+- Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
+  do not merge PR #2641.
