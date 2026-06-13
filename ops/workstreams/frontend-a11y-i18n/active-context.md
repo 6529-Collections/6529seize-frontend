@@ -32,24 +32,22 @@ page migration PRs for safe media surfaces.
 - PR #2626 is bot-happy on the latest head and remains review-ready only.
 - PR #2627 remains review-ready only with a bot-happy latest head.
 - PR #2628 is bot-happy on the latest head and remains review-ready only.
-- Current implementation surface: profile collected filter and sort controls,
-  stacked on PR #2628. The branch is
-  `codex/user-collected-sort-controls-a11y-i18n`; PR #2629 is open and
-  review-ready only.
-- Scope includes message-backed view, collection, sort, seized, unknown-network
-  collection, and filter-scroll labels while preserving existing filter
-  behavior.
+- PR #2629 is bot-happy on the latest head and remains review-ready only.
+- Current implementation surface: profile collected filter and sort controls is
+  complete and bot-happy on PR #2629. The branch is
+  `codex/user-collected-sort-controls-a11y-i18n`.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate on actionable CodeRabbit/Claude/CI feedback for PR #2629.
-2. Keep PR #2629 review-ready only; do not merge without human approval.
-3. Keep PR #2628 review-ready only; do not merge without human approval.
-4. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
+1. Start the next low-risk read-only profile/media surface from PR #2629.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback for the next PR.
+3. Keep PR #2629 review-ready only; do not merge without human approval.
+4. Keep PR #2628 review-ready only; do not merge without human approval.
+5. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
    approval.
-5. Keep page implementation PRs review-ready only; do not merge without human
+6. Keep page implementation PRs review-ready only; do not merge without human
    approval.
-6. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+7. Preserve the unrelated dirty EmojiContext and bootstrap style files.
