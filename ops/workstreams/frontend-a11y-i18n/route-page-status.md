@@ -23,3 +23,4 @@
 | `/meme-calendar` lower grid controls   | PR open              | PR open           | PR #2622; review-ready only; stacked on PR #2621; do not merge yet |
 | `/meme-calendar` drilldown cards       | PR open              | PR open           | PR #2623; review-ready only; stacked on PR #2622; do not merge yet |
 | `/rememes` browse-card follow-up       | PR open              | PR open           | PR #2624; review-ready only; stacked on PR #2623; do not merge yet |
+| `/meme-lab` browse-card follow-up      | PR open              | PR open           | PR #2625; review-ready only; stacked on PR #2624; do not merge yet |
