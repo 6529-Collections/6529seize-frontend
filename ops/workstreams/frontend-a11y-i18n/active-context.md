@@ -7,11 +7,12 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-collected-sort-controls-a11y-i18n`
+`codex/user-collected-season-strip-a11y-i18n`
 
 ## Constraints
 
 - Preserve unrelated dirty files:
+  - `__tests__/components/nft-image/RememeImage.test.tsx`
   - `contexts/EmojiContext.tsx`
   - `__tests__/contexts/EmojiContext.test.tsx`
   - `styles/seize-bootstrap.scss`
@@ -33,17 +34,17 @@ page migration PRs for safe media surfaces.
 - PR #2627 remains review-ready only with a bot-happy latest head.
 - PR #2628 is bot-happy on the latest head and remains review-ready only.
 - PR #2629 is bot-happy on the latest head and remains review-ready only.
-- Current implementation surface: profile collected filter and sort controls is
-  complete and bot-happy on PR #2629. The branch is
-  `codex/user-collected-sort-controls-a11y-i18n`.
+- Current implementation surface: profile collected season strip is in
+  progress on branch `codex/user-collected-season-strip-a11y-i18n`, stacked on
+  PR #2629. Review-ready only once opened; do not merge without human approval.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Start the next low-risk read-only profile/media surface from PR #2629.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback for the next PR.
+1. Publish the season-strip branch as the next review-ready stacked PR.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback for the season-strip PR.
 3. Keep PR #2629 review-ready only; do not merge without human approval.
 4. Keep PR #2628 review-ready only; do not merge without human approval.
 5. Keep PR #2626 and PR #2627 review-ready only; do not merge without human

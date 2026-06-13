@@ -82,6 +82,17 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "user.collected.filters.sortBy")).toBe(
       t("en-US", "user.collected.filters.sortBy")
     );
+    expect(
+      t("de-DE", "user.collected.stats.seasons.startedCount", {
+        started: 2,
+        total: 3,
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.seasons.startedCount", {
+        started: 2,
+        total: 3,
+      })
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );

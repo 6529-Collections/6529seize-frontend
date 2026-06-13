@@ -655,7 +655,9 @@ describe("UserPageCollectedStats", () => {
 
     await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
 
-    expect(screen.getByRole("button", { name: "Hide Details" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Hide Details" })
+    ).toBeInTheDocument();
     expect(screen.getByTestId("details")).toBeInTheDocument();
   });
 
