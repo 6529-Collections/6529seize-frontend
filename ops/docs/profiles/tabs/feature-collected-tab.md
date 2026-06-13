@@ -6,6 +6,7 @@ The `Collected` tab at `/{user}/collected` combines profile holdings browsing
 with an integrated stats summary and an expandable details panel.
 
 It has two top-level views:
+
 - `Native`: profile card holdings for The Memes, Gradients, NextGen, and Meme Lab.
 - `Network`: xTDH token holdings by contract.
 
@@ -83,6 +84,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 7. Apply sort and browse pages.
 8. In native view (outside transfer mode), open token routes from cards:
    - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.
+   - Native card results render as a labelled `Collected cards` list with one
+     list item per card for assistive technologies.
 9. If transfer is available, click `Transfer`:
    - cards switch from links to selection controls
    - ERC-1155 cards support quantity selection
