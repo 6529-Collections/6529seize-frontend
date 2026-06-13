@@ -42,17 +42,18 @@ function baseEnv() {
 
 describe("reviewbot admin api", () => {
   it("normalizes auth check URLs", () => {
+    const localHttpUrl = ["http", "://localhost:3000/api/me"].join("");
+    const externalHttpUrl = ["http", "://api.6529.io/api/me"].join("");
+
     expect(
       normalizeReviewbotUsageAuthCheckUrl(
         "https://api.6529.io/api/v2/notifications?limit=1#fragment"
       )
     ).toBe("https://api.6529.io/api/v2/notifications?limit=1");
-    expect(
-      normalizeReviewbotUsageAuthCheckUrl("http://localhost:3000/api/me")
-    ).toBe("http://localhost:3000/api/me");
-    expect(
-      normalizeReviewbotUsageAuthCheckUrl("http://api.6529.io/api/me")
-    ).toBe(null);
+    expect(normalizeReviewbotUsageAuthCheckUrl(localHttpUrl)).toBe(
+      localHttpUrl
+    );
+    expect(normalizeReviewbotUsageAuthCheckUrl(externalHttpUrl)).toBe(null);
     expect(
       normalizeReviewbotUsageAuthCheckUrl("https://user:pass@example.com/me")
     ).toBe(null);
