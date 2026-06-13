@@ -939,3 +939,8 @@
   emoji feed noise.
 - Opened review-ready stacked PR #2636 against PR #2635. Per workstream policy,
   do not merge PR #2636.
+- Confirmed PR #2636 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed after tightening the
+  page-PR merge policy wording, the prior review thread is resolved/outdated,
+  and Claude remained configured for manual review only. Per workstream policy,
+  do not merge PR #2636.
