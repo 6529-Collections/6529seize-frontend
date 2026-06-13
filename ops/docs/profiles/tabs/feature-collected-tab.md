@@ -83,6 +83,9 @@ Transfer mode is part of the Native collected view (not a separate route).
    - `Activity Overview`
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
    - `Boost Breakdown`
+   - Boost Breakdown static labels and table headings are message-backed from
+     the source locale; the table exposes a screen-reader caption, row
+     headers, and keyboard-focusable info triggers.
 5. Choose `View`:
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.

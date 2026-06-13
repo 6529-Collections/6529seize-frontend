@@ -115,6 +115,28 @@ const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
+  "user.collected.stats.boostBreakdown",
+  {
+    title: "Boost Breakdown",
+    versionLink: "TDH Version: {version}",
+    tableCaption: "TDH boost breakdown by source",
+    "columns.type": "Type",
+    "columns.potential": "Potential Boost",
+    "columns.actual": "Actual Boost",
+    "groups.memes": "Memes",
+    "rows.fullCollectionSet": "Full Collection Set",
+    "rows.genesisSet": "Genesis Set",
+    "rows.nakamoto": "Nakamoto",
+    "rows.gradients": "Gradients",
+    "rows.total": "TOTAL BOOST",
+    seasonLabel: "SZN{seasonNumber}",
+    "info.totalPotential": "Total Potential Boost",
+    "info.totalActual": "Total Actual Boost",
+    "info.ariaLabel": "Show boost detail",
+  } as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -620,6 +642,7 @@ export const EN_US_MESSAGES = {
   "user.collected.filters.scrollRight": "Scroll filters right",
   ...USER_COLLECTED_STATS_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
+  ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",
