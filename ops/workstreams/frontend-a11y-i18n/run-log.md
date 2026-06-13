@@ -1022,3 +1022,5 @@
   headings, canvas accessible names, and no Next.js runtime session errors; the
   remaining browser console errors were the known local shared API wave 500s and
   blocked emoji-list request.
+- Opened review-ready stacked PR #2639 against PR #2638. Per workstream policy,
+  do not merge PR #2639.

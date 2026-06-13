@@ -35,3 +35,4 @@
 | Profile activity tabs     | `codex/user-collected-activity-tabs-a11y-i18n`          | #2636 | Open, review-ready only |
 | Profile wallet activity   | `codex/user-collected-wallet-activity-filter-a11y-i18n` | #2637 | Open, review-ready only |
 | Profile distributions     | `codex/user-collected-distributions-a11y-i18n`          | #2638 | Open, review-ready only |
+| Profile TDH history       | `codex/user-collected-tdh-history-a11y-i18n`            | #2639 | Open, review-ready only |

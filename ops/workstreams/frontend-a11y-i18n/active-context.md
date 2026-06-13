@@ -42,18 +42,18 @@ page migration PRs for safe media surfaces.
 - PR #2636 is bot-happy on the latest head and remains review-ready only.
 - PR #2637 is bot-happy on the latest head and remains review-ready only.
 - PR #2638 is bot-happy on the latest head and remains review-ready only.
-- The current branch covers profile collected TDH History heading, loading and
-  empty states, chart labels, chart accessible names, locale-formatted chart
-  date/value labels, and stable chart keys. It is stacked from PR #2638 and
-  must not be merged once opened.
+- PR #2639 is open and review-ready only. It covers profile collected TDH
+  History heading, loading and empty states, chart labels, chart accessible
+  names, locale-formatted chart date/value labels, and stable chart keys. It is
+  stacked from PR #2638 and must not be merged.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Commit and open the TDH History stacked PR against PR #2638.
-2. Iterate on the TDH History PR with available bots/checks without merging.
+1. Iterate on PR #2639 with available bots/checks without merging.
+2. Keep PR #2639 review-ready only; do not merge.
 3. Maintain PRs #2638, #2637, #2636, and earlier page PRs as review-ready only;
    do not merge.
 4. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
