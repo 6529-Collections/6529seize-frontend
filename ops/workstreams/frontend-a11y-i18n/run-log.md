@@ -970,3 +970,8 @@
   state. Updated the empty state wrapper to `<output>` and reran focused wallet
   filter/table/i18n Jest suites, targeted eslint for the touched wrapper file,
   `typecheck:changed`, and `git diff --check`.
+- Confirmed PR #2637 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with zero open issues after the `<output>` fix, CodeRabbit
+  manual review passed, no review threads are open, and Claude remains
+  configured for manual review only. Per workstream policy, do not merge PR
+  #2637.

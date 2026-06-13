@@ -40,16 +40,15 @@ page migration PRs for safe media surfaces.
 - PR #2634 is bot-happy on the latest head and remains review-ready only.
 - PR #2635 is bot-happy on the latest head and remains review-ready only.
 - PR #2636 is bot-happy on the latest head and remains review-ready only.
-- PR #2637 is open and review-ready only. It covers profile collected Wallet
-  Activity heading, filter, empty states, and table caption under the expanded
-  stats panel. It is stacked from PR #2636 and must not be merged.
+- PR #2637 is bot-happy on the latest head and remains review-ready only.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate on PR #2637 with available bots/checks without merging.
+1. Start the next low-risk `/{user}/collected` Details-panel follow-up stacked
+   from PR #2637; keep it review-ready only.
 2. Maintain PRs #2635, #2634, #2633, #2631, #2630, #2629, and #2628 as review-ready only;
    do not merge.
 3. Maintain PRs #2626 and #2627 as review-ready only; do not merge.
