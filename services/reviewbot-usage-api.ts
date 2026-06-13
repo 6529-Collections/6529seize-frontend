@@ -12,7 +12,7 @@ const LOCAL_API_HOSTS = new Set(["127.0.0.1", "::1", "localhost"]);
 const safeNumberSchema = z.coerce.number().finite().catch(0);
 const safeIntegerSchema = z.coerce.number().int().nonnegative().catch(0);
 
-const usageGroupSchema = z.object({
+export const usageGroupSchema = z.object({
   key: z.string().catch("unknown"),
   reviewRuns: safeIntegerSchema,
   costUsd: safeNumberSchema,
@@ -20,20 +20,20 @@ const usageGroupSchema = z.object({
   budgetSkippedRuns: safeIntegerSchema,
 });
 
-const usageTotalsSchema = z.object({
+export const usageTotalsSchema = z.object({
   reviewRuns: safeIntegerSchema,
   costUsd: safeNumberSchema,
   totalTokens: safeIntegerSchema,
   budgetSkippedRuns: safeIntegerSchema,
 });
 
-const usageRangeSchema = z.object({
+export const usageRangeSchema = z.object({
   days: safeIntegerSchema.optional(),
   from: z.string().optional(),
   to: z.string().optional(),
 });
 
-const usageSummarySchema = z.object({
+export const usageSummarySchema = z.object({
   ok: z.literal(true),
   visibility: z.enum(["public", "admin"]).optional(),
   kind: z.string().optional(),
@@ -95,8 +95,9 @@ export async function getReviewbotPublicUsageSummary(
 
   const fetchImpl = options.fetchImpl ?? fetch;
   const days = normalizeDays(options.days ?? DEFAULT_SUMMARY_DAYS);
-  const summaryPath = normalizeReviewbotUsageSummaryPath(
-    env["REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH"]
+  const summaryPath = normalizeReviewbotUsagePath(
+    env["REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH"],
+    DEFAULT_PUBLIC_SUMMARY_PATH
   );
   const url = new URL(summaryPath.replace(/^\/+/, ""), `${apiBaseUrl}/`);
   url.searchParams.set("days", String(days));
@@ -169,20 +170,27 @@ export function normalizeReviewbotUsageApiBaseUrl(
 export function normalizeReviewbotUsageSummaryPath(
   value: string | undefined
 ): string {
+  return normalizeReviewbotUsagePath(value, DEFAULT_PUBLIC_SUMMARY_PATH);
+}
+
+export function normalizeReviewbotUsagePath(
+  value: string | undefined,
+  fallback: string
+): string {
   const raw = value?.trim();
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
-    return DEFAULT_PUBLIC_SUMMARY_PATH;
+    return fallback;
   }
 
   try {
     const url = new URL(raw, "https://reviewbot.local");
     url.hash = "";
     if (url.origin !== "https://reviewbot.local") {
-      return DEFAULT_PUBLIC_SUMMARY_PATH;
+      return fallback;
     }
     return `${url.pathname}${url.search}`;
   } catch {
-    return DEFAULT_PUBLIC_SUMMARY_PATH;
+    return fallback;
   }
 }
 

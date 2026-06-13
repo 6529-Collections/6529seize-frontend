@@ -58,3 +58,4 @@ Open Data docs cover dataset download routes under `/open-data/*`.
 - [Docs Home](../README.md)
 - [Sidebar Navigation](../navigation/feature-sidebar-navigation.md)
 - [Network Index](../network/README.md)
+- [6529bot Admin](../api-tool/feature-6529bot-admin.md)

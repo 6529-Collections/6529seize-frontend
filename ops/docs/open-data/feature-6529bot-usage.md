@@ -55,10 +55,11 @@ is being rolled out.
   secrets, or provider keys.
 - `6529.io` does not query Aurora directly.
 - Admin-level usage data belongs behind the existing `6529.io` auth system and
-  should call the bot backend through an authorized server-side path.
+  is handled by the direct-only `/tools/6529bot/admin` route.
 
 ## Related Pages
 
 - [Open Data Hub](feature-open-data-hub.md)
 - [Open Data Hub to Dataset Routes](flow-open-data-hub-to-download-routes.md)
 - [Open Data Routes and Download States](troubleshooting-open-data-routes-and-downloads.md)
+- [6529bot Admin](../api-tool/feature-6529bot-admin.md)
