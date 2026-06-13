@@ -36,8 +36,10 @@ page migration PRs for safe media surfaces.
 - PR #2629 is bot-happy on the latest head and remains review-ready only.
 - PR #2630 is bot-happy on the latest head and remains review-ready only.
 - PR #2631 is bot-happy on the latest head and remains review-ready only.
+- PR #2633 is open for profile collected details tables and remains
+  review-ready only.
 - Current implementation surface: profile collected details tables under the
-  expanded stats panel. The branch is
+  expanded stats panel are complete in PR #2633. The branch is
   `codex/user-collected-details-tables-a11y-i18n`, stacked from PR #2631.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
@@ -45,7 +47,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Validate and open the profile collected details-table PR against PR #2631.
+1. Iterate PR #2633 with available bots/checks, but do not merge without human
+   approval.
 2. Keep PR #2631 review-ready only; do not merge without human approval.
 3. Keep PR #2630 review-ready only; do not merge without human approval.
 4. Keep PR #2629 review-ready only; do not merge without human approval.
