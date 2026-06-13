@@ -170,6 +170,31 @@ const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
+  "user.collected.stats.walletActivity",
+  {
+    title: "Wallet Activity",
+    filterButtonLabel: "Wallet activity filter: {filter}",
+    filterOptionsLabel: "Wallet activity filter options",
+    optionAriaLabel: "Show {filter} wallet activity",
+    tableCaption: "Wallet activity transactions",
+    "filters.all": "All",
+    "filters.airdrops": "Airdrops",
+    "filters.mints": "Mints",
+    "filters.sales": "Sales",
+    "filters.purchases": "Purchases",
+    "filters.transfers": "Transfers",
+    "filters.burns": "Burns",
+    "empty.all": "No transactions",
+    "empty.airdrops": "No airdrops",
+    "empty.mints": "No mints",
+    "empty.sales": "No sales",
+    "empty.purchases": "No purchases",
+    "empty.transfers": "No transfers",
+    "empty.burns": "No burns",
+  } as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -678,6 +703,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
+  ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",

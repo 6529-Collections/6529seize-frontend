@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-collected-activity-tabs-a11y-i18n`
+`codex/user-collected-wallet-activity-filter-a11y-i18n`
 
 ## Constraints
 
@@ -40,14 +40,19 @@ page migration PRs for safe media surfaces.
 - PR #2634 is bot-happy on the latest head and remains review-ready only.
 - PR #2635 is bot-happy on the latest head and remains review-ready only.
 - PR #2636 is bot-happy on the latest head and remains review-ready only.
+- Current implementation surface: profile collected Wallet Activity heading,
+  filter, empty states, and table caption under the expanded stats panel are in
+  progress. The branch is
+  `codex/user-collected-wallet-activity-filter-a11y-i18n`, stacked from PR
+  #2636.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Start the next low-risk `/{user}/collected` follow-up stacked from the
-   activity-tabs PR #2636.
+1. Open the Wallet Activity filter branch as a review-ready stacked PR, then
+   iterate with available bots/checks without merging.
 2. Maintain PRs #2635, #2634, #2633, #2631, #2630, #2629, and #2628 as review-ready only;
    do not merge.
 3. Maintain PRs #2626 and #2627 as review-ready only; do not merge.

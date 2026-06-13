@@ -7,6 +7,7 @@ import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
+import { getWalletActivityEmptyMessage } from "../wallet-activity.messages";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
@@ -37,19 +38,6 @@ export default function UserPageStatsActivityWalletTableWrapper({
     filter: UserPageStatsActivityWalletFilterType
   ) => void;
 }) {
-  const FILTER_TO_NO_DATA: Record<
-    UserPageStatsActivityWalletFilterType,
-    string
-  > = {
-    [UserPageStatsActivityWalletFilterType.ALL]: "No transactions",
-    [UserPageStatsActivityWalletFilterType.AIRDROPS]: "No airdrops",
-    [UserPageStatsActivityWalletFilterType.MINTS]: "No mints",
-    [UserPageStatsActivityWalletFilterType.SALES]: "No sales",
-    [UserPageStatsActivityWalletFilterType.PURCHASES]: "No purchases",
-    [UserPageStatsActivityWalletFilterType.TRANSFERS]: "No transfers",
-    [UserPageStatsActivityWalletFilterType.BURNS]: "No burns",
-  };
-
   if (isFirstLoading) {
     return (
       <div className="tw-mt-2 tw-h-96 tw-w-full sm:tw-mt-4">
@@ -89,8 +77,11 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <div className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
-            {FILTER_TO_NO_DATA[filter]}
+          <div
+            role="status"
+            className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base"
+          >
+            {getWalletActivityEmptyMessage(filter)}
           </div>
         )}
       </div>

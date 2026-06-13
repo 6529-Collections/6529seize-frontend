@@ -944,3 +944,22 @@
   page-PR merge policy wording, the prior review thread is resolved/outdated,
   and Claude remained configured for manual review only. Per workstream policy,
   do not merge PR #2636.
+- Started stacked branch
+  `codex/user-collected-wallet-activity-filter-a11y-i18n` from PR #2636 for the
+  next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Wallet Activity
+  heading, filter trigger/options, empty states, and transaction table caption.
+  Added accessible filter trigger/option names, `aria-expanded`,
+  `aria-controls`, option pressed state, status semantics for empty states, and
+  a screen-reader table caption. Swapped the touched framer-motion dropdown
+  usage to `LazyMotion`/`m`.
+- Validation passed for the Wallet Activity filter follow-up so far: focused
+  wallet filter/table/i18n Jest suites (5 suites, 10 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and browser smoke on
+  `/punk6529/collected?activity=wallet-activity`. React Doctor still reports
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic
+  and the `useSearchParams` Suspense warning for the touched wallet component,
+  which is rendered under the activity wrapper Suspense boundary from PR #2636.
+  Browser smoke verified the Wallet Activity heading, filter trigger accessible
+  name, option list labels, pressed state, Wallet Activity table caption,
+  `Mints` selection/query update, and no Next.js runtime session errors.
