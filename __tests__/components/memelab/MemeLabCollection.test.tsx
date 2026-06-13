@@ -62,12 +62,12 @@ function renderComponent(locale?: "en-US" | "de-DE") {
   );
 }
 
-function renderMemeLab(
-  props: ComponentProps<typeof MemeLabComponent> = {
+function renderMemeLab(props?: ComponentProps<typeof MemeLabComponent>) {
+  const componentProps = props ?? {
     initialSort: null,
     initialSortDirection: null,
-  }
-) {
+  };
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -77,7 +77,7 @@ function renderMemeLab(
   return render(
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
-        <MemeLabComponent {...props} />
+        <MemeLabComponent {...componentProps} />
       </AuthContext.Provider>
     </QueryClientProvider>
   );
