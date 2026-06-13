@@ -156,6 +156,17 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "user.collected.stats.activityTabs.listLabel")).toBe(
       t("en-US", "user.collected.stats.activityTabs.listLabel")
     );
+    expect(t("fr-FR", "user.collected.stats.walletActivity.title")).toBe(
+      t("en-US", "user.collected.stats.walletActivity.title")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.walletActivity.filterButtonLabel", {
+        filter: "All",
+      })
+    ).toBe("Wallet activity filter: All");
+    expect(t("es-ES", "user.collected.stats.walletActivity.empty.mints")).toBe(
+      t("en-US", "user.collected.stats.walletActivity.empty.mints")
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );

@@ -90,6 +90,10 @@ Transfer mode is part of the Native collected view (not a separate route).
        message-backed from the source locale
      - lower Activity tabs expose tab/panel relationships and support keyboard
        arrow, Home, and End navigation
+   - `Wallet Activity`
+     - Wallet Activity heading, filter labels, filter accessible names, empty
+       states, and transaction table caption are message-backed from the source
+       locale
    - `Boost Breakdown`
    - Boost Breakdown static labels and table headings are message-backed from
      the source locale; the table exposes a screen-reader caption, row

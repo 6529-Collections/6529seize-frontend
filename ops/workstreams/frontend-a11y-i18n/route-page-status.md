@@ -34,3 +34,4 @@
 | `/{user}/collected` boost breakdown    | PR open              | PR open           | PR #2634; review-ready only; stacked on PR #2633; do not merge yet |
 | `/{user}/collected` activity overview  | PR open              | PR open           | PR #2635; review-ready only; stacked on PR #2634; do not merge yet |
 | `/{user}/collected` activity tabs      | PR open              | PR open           | PR #2636; review-ready only; stacked on PR #2635; do not merge yet |
+| `/{user}/collected` wallet activity    | PR open              | PR open           | PR #2637; review-ready only; stacked on PR #2636; do not merge yet |
