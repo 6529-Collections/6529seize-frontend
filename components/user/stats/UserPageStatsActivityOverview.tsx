@@ -23,196 +23,187 @@ type ActivityOverviewMessageKey = Extract<
   `user.collected.stats.activityOverview.${string}`
 >;
 
-type AggregatedActivityField = keyof AggregatedActivity;
-type AggregatedActivityMemesField = keyof AggregatedActivityMemes;
+type NumericAggregatedActivityField = {
+  [Field in keyof AggregatedActivity]: AggregatedActivity[Field] extends number
+    ? Field
+    : never;
+}[keyof AggregatedActivity];
+type NumericAggregatedActivityMemesField = {
+  [Field in keyof AggregatedActivityMemes]: AggregatedActivityMemes[Field] extends number
+    ? Field
+    : never;
+}[keyof AggregatedActivityMemes];
 type ActivityValueType = "integer" | "eth";
+type OverviewFieldRoot =
+  | "airdrops"
+  | "transfers_in"
+  | "primary_purchases_count"
+  | "primary_purchases_value"
+  | "secondary_purchases_count"
+  | "secondary_purchases_value"
+  | "transfers_out"
+  | "burns"
+  | "sales_count"
+  | "sales_value";
 
 interface OverviewRowConfig {
   readonly labelKey: ActivityOverviewMessageKey;
   readonly valueType: ActivityValueType;
   readonly fields: readonly [
-    AggregatedActivityField,
-    AggregatedActivityField,
-    AggregatedActivityField,
-    AggregatedActivityField,
-    AggregatedActivityField,
+    NumericAggregatedActivityField,
+    NumericAggregatedActivityField,
+    NumericAggregatedActivityField,
+    NumericAggregatedActivityField,
+    NumericAggregatedActivityField,
   ];
 }
 
 interface SeasonColumnConfig {
   readonly labelKey: ActivityOverviewMessageKey;
   readonly valueType: ActivityValueType;
-  readonly field: AggregatedActivityMemesField;
+  readonly field: NumericAggregatedActivityMemesField;
+}
+
+const COLLECTION_FIELD_SUFFIXES = [
+  "",
+  "_memes",
+  "_nextgen",
+  "_gradients",
+  "_memelab",
+] as const;
+
+function collectionFields(
+  root: OverviewFieldRoot
+): OverviewRowConfig["fields"] {
+  return COLLECTION_FIELD_SUFFIXES.map(
+    (suffix) => `${root}${suffix}`
+  ) as unknown as OverviewRowConfig["fields"];
+}
+
+function overviewRow(
+  labelKey: ActivityOverviewMessageKey,
+  valueType: ActivityValueType,
+  root: OverviewFieldRoot
+): OverviewRowConfig {
+  return { labelKey, valueType, fields: collectionFields(root) };
+}
+
+function seasonColumn(
+  labelKey: ActivityOverviewMessageKey,
+  valueType: ActivityValueType,
+  field: NumericAggregatedActivityMemesField
+): SeasonColumnConfig {
+  return { labelKey, valueType, field };
 }
 
 const OVERVIEW_ROW_GROUPS: readonly (readonly OverviewRowConfig[])[] = [
   [
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.airdrops",
-      valueType: "integer",
-      fields: [
-        "airdrops",
-        "airdrops_memes",
-        "airdrops_nextgen",
-        "airdrops_gradients",
-        "airdrops_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.transfersIn",
-      valueType: "integer",
-      fields: [
-        "transfers_in",
-        "transfers_in_memes",
-        "transfers_in_nextgen",
-        "transfers_in_gradients",
-        "transfers_in_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.mints",
-      valueType: "integer",
-      fields: [
-        "primary_purchases_count",
-        "primary_purchases_count_memes",
-        "primary_purchases_count_nextgen",
-        "primary_purchases_count_gradients",
-        "primary_purchases_count_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.mintsEth",
-      valueType: "eth",
-      fields: [
-        "primary_purchases_value",
-        "primary_purchases_value_memes",
-        "primary_purchases_value_nextgen",
-        "primary_purchases_value_gradients",
-        "primary_purchases_value_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.purchases",
-      valueType: "integer",
-      fields: [
-        "secondary_purchases_count",
-        "secondary_purchases_count_memes",
-        "secondary_purchases_count_nextgen",
-        "secondary_purchases_count_gradients",
-        "secondary_purchases_count_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.purchasesEth",
-      valueType: "eth",
-      fields: [
-        "secondary_purchases_value",
-        "secondary_purchases_value_memes",
-        "secondary_purchases_value_nextgen",
-        "secondary_purchases_value_gradients",
-        "secondary_purchases_value_memelab",
-      ],
-    },
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.airdrops",
+      "integer",
+      "airdrops"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.transfersIn",
+      "integer",
+      "transfers_in"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.mints",
+      "integer",
+      "primary_purchases_count"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.mintsEth",
+      "eth",
+      "primary_purchases_value"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.purchases",
+      "integer",
+      "secondary_purchases_count"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.purchasesEth",
+      "eth",
+      "secondary_purchases_value"
+    ),
   ],
   [
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.transfersOut",
-      valueType: "integer",
-      fields: [
-        "transfers_out",
-        "transfers_out_memes",
-        "transfers_out_nextgen",
-        "transfers_out_gradients",
-        "transfers_out_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.burns",
-      valueType: "integer",
-      fields: [
-        "burns",
-        "burns_memes",
-        "burns_nextgen",
-        "burns_gradients",
-        "burns_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.sales",
-      valueType: "integer",
-      fields: [
-        "sales_count",
-        "sales_count_memes",
-        "sales_count_nextgen",
-        "sales_count_gradients",
-        "sales_count_memelab",
-      ],
-    },
-    {
-      labelKey: "user.collected.stats.activityOverview.rows.salesEth",
-      valueType: "eth",
-      fields: [
-        "sales_value",
-        "sales_value_memes",
-        "sales_value_nextgen",
-        "sales_value_gradients",
-        "sales_value_memelab",
-      ],
-    },
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.transfersOut",
+      "integer",
+      "transfers_out"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.burns",
+      "integer",
+      "burns"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.sales",
+      "integer",
+      "sales_count"
+    ),
+    overviewRow(
+      "user.collected.stats.activityOverview.rows.salesEth",
+      "eth",
+      "sales_value"
+    ),
   ],
 ];
 
 const SEASON_ACTIVITY_COLUMNS: readonly SeasonColumnConfig[] = [
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.transfersIn",
-    valueType: "integer",
-    field: "transfers_in",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.airdrops",
-    valueType: "integer",
-    field: "airdrops",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.mints",
-    valueType: "integer",
-    field: "primary_purchases_count",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.mintsEth",
-    valueType: "eth",
-    field: "primary_purchases_value",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.purchases",
-    valueType: "integer",
-    field: "secondary_purchases_count",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.purchasesEth",
-    valueType: "eth",
-    field: "secondary_purchases_value",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.transfersOut",
-    valueType: "integer",
-    field: "transfers_out",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.burns",
-    valueType: "integer",
-    field: "burns",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.sales",
-    valueType: "integer",
-    field: "sales_count",
-  },
-  {
-    labelKey: "user.collected.stats.activityOverview.rows.salesEth",
-    valueType: "eth",
-    field: "sales_value",
-  },
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.transfersIn",
+    "integer",
+    "transfers_in"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.airdrops",
+    "integer",
+    "airdrops"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.mints",
+    "integer",
+    "primary_purchases_count"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.mintsEth",
+    "eth",
+    "primary_purchases_value"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.purchases",
+    "integer",
+    "secondary_purchases_count"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.purchasesEth",
+    "eth",
+    "secondary_purchases_value"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.transfersOut",
+    "integer",
+    "transfers_out"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.burns",
+    "integer",
+    "burns"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.sales",
+    "integer",
+    "sales_count"
+  ),
+  seasonColumn(
+    "user.collected.stats.activityOverview.rows.salesEth",
+    "eth",
+    "sales_value"
+  ),
 ];
 
 function activityMessage(
