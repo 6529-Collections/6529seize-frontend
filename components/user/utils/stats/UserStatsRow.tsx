@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { formatNumberWithCommas, formatStatFloor } from "@/helpers/Helpers";
+import { formatStatFloor } from "@/helpers/Helpers";
+import {
+  formatUserStatsRowInteger,
+  getUserStatsRowMessage,
+} from "./user-stats-row.messages";
 
 export enum UserStatsRowSize {
   SMALL = "SMALL",
@@ -51,21 +55,50 @@ export default function UserStatsRow({
 }: UserStatsRowProps) {
   const routeHandle = encodeURIComponent(handle.toLowerCase());
   const count = followersCount ?? 0;
-  const followerLabel = count === 1 ? "Follower" : "Followers";
+  const followerLabel = getUserStatsRowMessage(
+    count === 1
+      ? "user.statsRow.labels.followers.one"
+      : "user.statsRow.labels.followers.many"
+  );
   const classes = SIZE_CLASSES[size];
+  const tdhValue = formatStatFloor(tdh);
+  const tdhRateValue = formatStatFloor(tdh_rate);
+  const xtdhValue = formatStatFloor(xtdh);
+  const xtdhRateValue = formatStatFloor(xtdh_rate);
+  const nicValue = formatStatFloor(cic);
+  const repValue = formatStatFloor(rep);
+  const followersValue = formatUserStatsRowInteger(count);
+  const tdhLinkLabel = getUserStatsRowMessage(
+    tdh_rate > 0
+      ? "user.statsRow.links.tdhWithRate"
+      : "user.statsRow.links.tdh",
+    { handle, value: tdhValue, rate: tdhRateValue }
+  );
+  const xtdhLinkLabel = getUserStatsRowMessage(
+    xtdh_rate > 0
+      ? "user.statsRow.links.xtdhWithRate"
+      : "user.statsRow.links.xtdh",
+    { handle, value: xtdhValue, rate: xtdhRateValue }
+  );
+  const followersActionLabel = {
+    handle,
+    value: followersValue,
+    followersLabel: followerLabel,
+  };
 
   return (
     <div className={`@container ${className}`}>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-1 sm:tw-gap-y-0.5 tw-gap-x-4 lg:tw-gap-x-6">
         <Link
           href={`/${routeHandle}/collected`}
+          aria-label={tdhLinkLabel}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {formatStatFloor(tdh)}
+            {tdhValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            TDH
+            {getUserStatsRowMessage("user.statsRow.labels.tdh")}
           </span>
           {tdh_rate > 0 && (
             <>
@@ -73,7 +106,7 @@ export default function UserStatsRow({
               <span
                 className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
               >
-                +{formatStatFloor(tdh_rate)}
+                +{tdhRateValue}
               </span>
             </>
           )}
@@ -81,13 +114,14 @@ export default function UserStatsRow({
 
         <Link
           href={`/${routeHandle}/xtdh`}
+          aria-label={xtdhLinkLabel}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {formatStatFloor(xtdh)}
+            {xtdhValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            xTDH
+            {getUserStatsRowMessage("user.statsRow.labels.xtdh")}
           </span>
           {xtdh_rate > 0 && (
             <>
@@ -95,7 +129,7 @@ export default function UserStatsRow({
               <span
                 className={`${classes.rate} tw-font-semibold tw-text-emerald-500`}
               >
-                +{formatStatFloor(xtdh_rate)}
+                +{xtdhRateValue}
               </span>
             </>
           )}
@@ -103,25 +137,33 @@ export default function UserStatsRow({
 
         <Link
           href={`/${routeHandle}`}
+          aria-label={getUserStatsRowMessage("user.statsRow.links.nic", {
+            handle,
+            value: nicValue,
+          })}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {formatStatFloor(cic)}
+            {nicValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            NIC
+            {getUserStatsRowMessage("user.statsRow.labels.nic")}
           </span>
         </Link>
 
         <Link
           href={`/${routeHandle}`}
+          aria-label={getUserStatsRowMessage("user.statsRow.links.rep", {
+            handle,
+            value: repValue,
+          })}
           className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
         >
           <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-            {formatStatFloor(rep)}
+            {repValue}
           </span>{" "}
           <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            Rep
+            {getUserStatsRowMessage("user.statsRow.labels.rep")}
           </span>
         </Link>
 
@@ -129,10 +171,14 @@ export default function UserStatsRow({
           <button
             type="button"
             onClick={onFollowersClick}
+            aria-label={getUserStatsRowMessage(
+              "user.statsRow.buttons.followers",
+              followersActionLabel
+            )}
             className="tw-bg-transparent tw-border-none tw-p-0 tw-cursor-pointer tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
           >
             <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-              {formatNumberWithCommas(count)}
+              {followersValue}
             </span>{" "}
             <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
               {followerLabel}
@@ -141,10 +187,14 @@ export default function UserStatsRow({
         ) : (
           <Link
             href={`/${routeHandle}`}
+            aria-label={getUserStatsRowMessage(
+              "user.statsRow.links.followers",
+              followersActionLabel
+            )}
             className="tw-no-underline desktop-hover:hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
           >
             <span className={`${classes.text} tw-font-semibold tw-text-iron-300`}>
-              {formatNumberWithCommas(count)}
+              {followersValue}
             </span>{" "}
             <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
               {followerLabel}

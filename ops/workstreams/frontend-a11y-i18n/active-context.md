@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-followers-modal-a11y-i18n`
+`codex/user-header-stats-a11y-i18n`
 
 ## Constraints
 
@@ -47,18 +47,22 @@ page migration PRs for safe media surfaces.
   covers profile shell tab titles, beta badge text, navigation landmark labels,
   scroll button labels, and active-page semantics. It is stacked from PR #2639
   and must not be merged.
-- PR #2641 is open and review-ready only. It covers the profile followers modal
-  title, follower list label, loading status, follower profile link names,
+- PR #2641 is bot-happy on the latest head and remains review-ready only. It
+  covers the profile followers modal title, follower list label, loading
+  status, nullable follower handle fallback, follower profile link names,
   avatar alt text, and semantic list structure. It is stacked from PR #2640 and
   must not be merged.
+- PR #2642 is bot-happy on the latest head and remains review-ready only. It
+  covers the user profile header stats row labels, accessible names, and
+  follower-count formatting. It is stacked from PR #2641 and must not be
+  merged.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate on PR #2641 with available bots/checks without
-   merging.
+1. Keep PR #2642 review-ready only; do not merge.
 2. Keep PR #2641 review-ready only; do not merge.
 3. Keep PR #2640 review-ready only; do not merge.
 4. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;

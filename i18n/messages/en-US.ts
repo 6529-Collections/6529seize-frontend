@@ -257,6 +257,23 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
+const USER_STATS_ROW_MESSAGES = objectMessages("user.statsRow", {
+  "labels.tdh": "TDH",
+  "labels.xtdh": "xTDH",
+  "labels.nic": "NIC",
+  "labels.rep": "Rep",
+  "labels.followers.one": "Follower",
+  "labels.followers.many": "Followers",
+  "links.tdh": "View {handle}'s collected TDH: {value}",
+  "links.tdhWithRate": "View {handle}'s collected TDH: {value}, +{rate}",
+  "links.xtdh": "View {handle}'s xTDH: {value}",
+  "links.xtdhWithRate": "View {handle}'s xTDH: {value}, +{rate}",
+  "links.nic": "View {handle}'s NIC: {value}",
+  "links.rep": "View {handle}'s Rep: {value}",
+  "links.followers": "View {handle}'s followers: {value} {followersLabel}",
+  "buttons.followers": "Open {handle}'s followers: {value} {followersLabel}",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -778,6 +795,7 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...USER_STATS_ROW_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 

@@ -196,6 +196,20 @@ describe("frontend i18n helpers", () => {
         handle: "alice",
       })
     ).toBe("View alice's profile");
+    expect(
+      t("fr-FR", "user.statsRow.links.tdhWithRate", {
+        handle: "alice",
+        value: "1,000",
+        rate: "5",
+      })
+    ).toBe("View alice's collected TDH: 1,000, +5");
+    expect(
+      t("es-ES", "user.statsRow.buttons.followers", {
+        handle: "alice",
+        value: "1",
+        followersLabel: "Follower",
+      })
+    ).toBe("Open alice's followers: 1 Follower");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );

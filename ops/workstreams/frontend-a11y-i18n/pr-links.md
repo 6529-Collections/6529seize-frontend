@@ -38,3 +38,4 @@
 | Profile TDH history       | `codex/user-collected-tdh-history-a11y-i18n`            | #2639 | Open, review-ready only |
 | Profile tabs shell        | `codex/user-profile-tabs-a11y-i18n`                     | #2640 | Open, review-ready only |
 | Profile followers modal   | `codex/user-followers-modal-a11y-i18n`                  | #2641 | Open, review-ready only |
+| Profile stats row         | `codex/user-header-stats-a11y-i18n`                     | #2642 | Open, review-ready only |
