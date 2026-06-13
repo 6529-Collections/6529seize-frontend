@@ -658,3 +658,28 @@
   links, no horizontal overflow, and no Next.js runtime session errors.
 - Opened review-ready stacked PR #2625 against PR #2624. Per workstream policy,
   do not merge PR #2625 without human approval.
+- Addressed SonarCloud's PR #2625 test-helper issue by hoisting the default
+  Meme Lab props object into a stable module constant. Re-ran the focused Meme
+  Lab card-grid test, Prettier check, `lint:changed`, and
+  `typecheck:changed`; results remained green.
+- Confirmed PR #2625 is bot-happy on the latest head: Snyk passed,
+  CodeRabbit passed with no open review threads, and SonarCloud reported 0 new
+  issues. Claude remained configured for manual review and did not leave an
+  actionable review. Per workstream policy, do not merge PR #2625 without human
+  approval.
+- Started stacked branch `codex/user-collected-cards-a11y-i18n` from PR #2625
+  for a low-risk `/{user}/collected` native card-grid follow-up.
+- Implemented labelled list/listitem semantics for profile native collected
+  card results. Added source message key `user.collected.cards.gridLabel`,
+  fallback coverage, component assertions for list semantics and empty-state
+  behavior, and Collected-tab feature docs.
+- Validation passed for the profile collected card-grid follow-up: focused
+  collected-card/i18n Jest suites (2 suites, 6 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty EmojiContext diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified one labelled `Collected cards`
+  list, 24 direct list items, no horizontal overflow, and no Next.js runtime
+  session errors. Console resource errors were shared backend/resource noise.
+- Opened review-ready stacked PR #2626 against PR #2625. Per workstream policy,
+  do not merge PR #2626 without human approval.
