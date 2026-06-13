@@ -42,3 +42,4 @@
 | User profile header stats row          | PR open              | PR open            | PR #2642; review-ready only; stacked on PR #2641; do not merge yet |
 | User profile header identity/media     | PR open              | PR open            | PR #2643; review-ready only; stacked on PR #2642; do not merge yet |
 | User profile header About statement    | PR open              | PR open            | PR #2644; review-ready only; stacked on PR #2643; do not merge yet |
+| User profile About edit form           | PR open              | PR open            | PR #2645; review-ready only; stacked on PR #2644; do not merge yet |
