@@ -22,6 +22,8 @@ const COLLECTED_CARDS_LIST_LABEL = translate(
   DEFAULT_LOCALE,
   "user.collected.cards.listLabel"
 );
+// CSS marker removal can cause Safari/VoiceOver to drop native list semantics.
+const COLLECTED_CARDS_LIST_ROLE = "list";
 
 export default function UserPageCollectedCards({
   cards,
@@ -50,9 +52,7 @@ export default function UserPageCollectedCards({
       {cards.length ? (
         <div className="tw-flow-root">
           <ul
-            role={
-              "list" /* NOSONAR: preserves list semantics for Safari/VoiceOver when markers are removed */
-            }
+            role={COLLECTED_CARDS_LIST_ROLE}
             aria-label={COLLECTED_CARDS_LIST_LABEL}
             className={COLLECTED_CARDS_LIST_CLASS}
           >
