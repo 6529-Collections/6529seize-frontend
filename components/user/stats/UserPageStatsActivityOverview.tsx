@@ -1,26 +1,236 @@
 "use client";
 
 import type {
-    AggregatedActivity,
-    AggregatedActivityMemes,
+  AggregatedActivity,
+  AggregatedActivityMemes,
 } from "@/entities/IAggregatedActivity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { numberWithCommas } from "@/helpers/Helpers";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Fragment, useEffect, useState } from "react";
 import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
 import { getStatsPath } from "./userPageStats.helpers";
 import styles from "./UserPageStats.module.scss";
 import {
-    UserPageStatsTableHead,
-    UserPageStatsTableHr,
+  UserPageStatsTableHead,
+  UserPageStatsTableHr,
 } from "./UserPageStatsTableShared";
 
-function printEthValue(value: number | undefined) {
-  if (value === undefined) {
-    return "-";
+type ActivityOverviewMessageKey = Extract<
+  MessageKey,
+  `user.collected.stats.activityOverview.${string}`
+>;
+
+type AggregatedActivityField = keyof AggregatedActivity;
+type AggregatedActivityMemesField = keyof AggregatedActivityMemes;
+type ActivityValueType = "integer" | "eth";
+
+interface OverviewRowConfig {
+  readonly labelKey: ActivityOverviewMessageKey;
+  readonly valueType: ActivityValueType;
+  readonly fields: readonly [
+    AggregatedActivityField,
+    AggregatedActivityField,
+    AggregatedActivityField,
+    AggregatedActivityField,
+    AggregatedActivityField,
+  ];
+}
+
+interface SeasonColumnConfig {
+  readonly labelKey: ActivityOverviewMessageKey;
+  readonly valueType: ActivityValueType;
+  readonly field: AggregatedActivityMemesField;
+}
+
+const OVERVIEW_ROW_GROUPS: readonly (readonly OverviewRowConfig[])[] = [
+  [
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.airdrops",
+      valueType: "integer",
+      fields: [
+        "airdrops",
+        "airdrops_memes",
+        "airdrops_nextgen",
+        "airdrops_gradients",
+        "airdrops_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.transfersIn",
+      valueType: "integer",
+      fields: [
+        "transfers_in",
+        "transfers_in_memes",
+        "transfers_in_nextgen",
+        "transfers_in_gradients",
+        "transfers_in_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.mints",
+      valueType: "integer",
+      fields: [
+        "primary_purchases_count",
+        "primary_purchases_count_memes",
+        "primary_purchases_count_nextgen",
+        "primary_purchases_count_gradients",
+        "primary_purchases_count_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.mintsEth",
+      valueType: "eth",
+      fields: [
+        "primary_purchases_value",
+        "primary_purchases_value_memes",
+        "primary_purchases_value_nextgen",
+        "primary_purchases_value_gradients",
+        "primary_purchases_value_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.purchases",
+      valueType: "integer",
+      fields: [
+        "secondary_purchases_count",
+        "secondary_purchases_count_memes",
+        "secondary_purchases_count_nextgen",
+        "secondary_purchases_count_gradients",
+        "secondary_purchases_count_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.purchasesEth",
+      valueType: "eth",
+      fields: [
+        "secondary_purchases_value",
+        "secondary_purchases_value_memes",
+        "secondary_purchases_value_nextgen",
+        "secondary_purchases_value_gradients",
+        "secondary_purchases_value_memelab",
+      ],
+    },
+  ],
+  [
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.transfersOut",
+      valueType: "integer",
+      fields: [
+        "transfers_out",
+        "transfers_out_memes",
+        "transfers_out_nextgen",
+        "transfers_out_gradients",
+        "transfers_out_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.burns",
+      valueType: "integer",
+      fields: [
+        "burns",
+        "burns_memes",
+        "burns_nextgen",
+        "burns_gradients",
+        "burns_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.sales",
+      valueType: "integer",
+      fields: [
+        "sales_count",
+        "sales_count_memes",
+        "sales_count_nextgen",
+        "sales_count_gradients",
+        "sales_count_memelab",
+      ],
+    },
+    {
+      labelKey: "user.collected.stats.activityOverview.rows.salesEth",
+      valueType: "eth",
+      fields: [
+        "sales_value",
+        "sales_value_memes",
+        "sales_value_nextgen",
+        "sales_value_gradients",
+        "sales_value_memelab",
+      ],
+    },
+  ],
+];
+
+const SEASON_ACTIVITY_COLUMNS: readonly SeasonColumnConfig[] = [
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.transfersIn",
+    valueType: "integer",
+    field: "transfers_in",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.airdrops",
+    valueType: "integer",
+    field: "airdrops",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.mints",
+    valueType: "integer",
+    field: "primary_purchases_count",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.mintsEth",
+    valueType: "eth",
+    field: "primary_purchases_value",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.purchases",
+    valueType: "integer",
+    field: "secondary_purchases_count",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.purchasesEth",
+    valueType: "eth",
+    field: "secondary_purchases_value",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.transfersOut",
+    valueType: "integer",
+    field: "transfers_out",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.burns",
+    valueType: "integer",
+    field: "burns",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.sales",
+    valueType: "integer",
+    field: "sales_count",
+  },
+  {
+    labelKey: "user.collected.stats.activityOverview.rows.salesEth",
+    valueType: "eth",
+    field: "sales_value",
+  },
+];
+
+function activityMessage(
+  key: ActivityOverviewMessageKey,
+  params: Record<string, string | number> = {}
+): string {
+  return t(DEFAULT_LOCALE, key, params);
+}
+
+function formatActivityValue(
+  value: number | undefined,
+  valueType: ActivityValueType
+): string {
+  if (valueType === "eth") {
+    return formatNumber(DEFAULT_LOCALE, value, { maximumFractionDigits: 2 });
   }
-  return numberWithCommas(Math.round(value * 100) / 100);
+
+  return formatInteger(DEFAULT_LOCALE, value);
 }
 
 export default function UserPageStatsActivityOverview({
@@ -70,9 +280,9 @@ export default function UserPageStatsActivityOverview({
 
   return (
     <div className="pt-2 pb-2">
-      <div className="tw-flex pt-2 pb-2">
+      <div className="pt-2 pb-2 tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Activity Overview
+          {activityMessage("user.collected.stats.activityOverview.title")}
         </h3>
       </div>
       <div className="pt-2 pb-2">
@@ -85,7 +295,6 @@ export default function UserPageStatsActivityOverview({
   );
 }
 
-
 function UserPageStatsActivityOverviewTotals({
   activity,
 }: {
@@ -95,247 +304,33 @@ function UserPageStatsActivityOverviewTotals({
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button className={styles["collectedAccordionButton"]}>
-          <b>Overview</b>
+          <b>
+            {activityMessage("user.collected.stats.activityOverview.overview")}
+          </b>
         </Accordion.Button>
         <Accordion.Body className={styles["collectedAccordionBody"]}>
           <Container>
             <Row className={`pt-2 pb-2 ${styles["scrollContainer"]}`}>
               <Col>
                 <Table className={styles["collectedAccordionTable"]}>
-                  <UserPageStatsTableHead />
+                  <UserPageStatsTableHead
+                    caption={activityMessage(
+                      "user.collected.stats.activityOverview.tables.overviewCaption"
+                    )}
+                  />
                   <tbody>
-                    <UserPageStatsTableHr span={6} />
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Airdrops</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.airdrops)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.airdrops_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.airdrops_nextgen)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.airdrops_gradients)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.airdrops_memelab)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Transfers In</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_in)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_in_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_in_nextgen)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_in_gradients)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_in_memelab)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Mints</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.primary_purchases_count)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.primary_purchases_count_memes
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.primary_purchases_count_nextgen
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.primary_purchases_count_gradients
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.primary_purchases_count_memelab
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Mints (ETH)</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.primary_purchases_value)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.primary_purchases_value_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.primary_purchases_value_nextgen
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.primary_purchases_value_gradients
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.primary_purchases_value_memelab
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Purchases</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.secondary_purchases_count)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.secondary_purchases_count_memes
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.secondary_purchases_count_nextgen
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.secondary_purchases_count_gradients
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(
-                          activity?.secondary_purchases_count_memelab
-                        )}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Purchases (ETH)</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.secondary_purchases_value)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.secondary_purchases_value_memes
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.secondary_purchases_value_nextgen
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.secondary_purchases_value_gradients
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(
-                          activity?.secondary_purchases_value_memelab
-                        )}
-                      </td>
-                    </tr>
-                    <UserPageStatsTableHr span={6} />
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Transfers Out</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_out)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_out_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_out_nextgen)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_out_gradients)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.transfers_out_memelab)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Burns</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.burns)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.burns_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.burns_nextgen)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.burns_gradients)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.burns_memelab)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Sales</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.sales_count)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.sales_count_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.sales_count_nextgen)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.sales_count_gradients)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {numberWithCommas(activity?.sales_count_memelab)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="!tw-text-[#93939f]">
-                        <b>Sales (ETH)</b>
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.sales_value)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.sales_value_memes)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.sales_value_nextgen)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.sales_value_gradients)}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {printEthValue(activity?.sales_value_memelab)}
-                      </td>
-                    </tr>
+                    {OVERVIEW_ROW_GROUPS.map((group, groupIndex) => (
+                      <Fragment key={`activity-overview-group-${groupIndex}`}>
+                        <UserPageStatsTableHr span={6} />
+                        {group.map((row) => (
+                          <ActivityOverviewRow
+                            key={row.labelKey}
+                            row={row}
+                            activity={activity}
+                          />
+                        ))}
+                      </Fragment>
+                    ))}
                   </tbody>
                 </Table>
               </Col>
@@ -344,6 +339,27 @@ function UserPageStatsActivityOverviewTotals({
         </Accordion.Body>
       </Accordion.Item>
     </Accordion>
+  );
+}
+
+function ActivityOverviewRow({
+  row,
+  activity,
+}: {
+  readonly row: OverviewRowConfig;
+  readonly activity: AggregatedActivity | undefined;
+}) {
+  return (
+    <tr>
+      <th scope="row" className="!tw-text-[#93939f]">
+        <b>{activityMessage(row.labelKey)}</b>
+      </th>
+      {row.fields.map((field) => (
+        <td key={field} className="tw-text-right !tw-text-[#fff]">
+          {formatActivityValue(activity?.[field], row.valueType)}
+        </td>
+      ))}
+    </tr>
   );
 }
 
@@ -356,7 +372,11 @@ function UserPageStatsActivityOverviewMemes({
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button className={styles["collectedAccordionButton"]}>
-          <b>Memes Breakdown By Season</b>
+          <b>
+            {activityMessage(
+              "user.collected.stats.activityOverview.memesBySeason"
+            )}
+          </b>
         </Accordion.Button>
         <Accordion.Body className={styles["collectedAccordionBody"]}>
           <Container>
@@ -364,80 +384,49 @@ function UserPageStatsActivityOverviewMemes({
               <Col>
                 {activity && (
                   <Table className={styles["collectedAccordionTable"]}>
+                    <caption className="tw-sr-only">
+                      {activityMessage(
+                        "user.collected.stats.activityOverview.tables.memesBySeasonCaption"
+                      )}
+                    </caption>
                     <thead>
                       <tr>
-                        <th colSpan={1}></th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Transfers In
-                        </th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Airdrops
-                        </th>
-                        <th className="text-right !tw-text-[#93939f]">Mints</th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Mints (ETH)
-                        </th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Purchases
-                        </th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Purchases (ETH)
-                        </th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Transfers Out
-                        </th>
-                        <th className="text-right !tw-text-[#93939f]">Burns</th>
-                        <th className="text-right !tw-text-[#93939f]">Sales</th>
-                        <th className="text-right !tw-text-[#93939f]">
-                          Sales (ETH)
-                        </th>
+                        <th aria-hidden="true"></th>
+                        {SEASON_ACTIVITY_COLUMNS.map((column) => (
+                          <th
+                            key={column.field}
+                            scope="col"
+                            className="text-right !tw-text-[#93939f]"
+                          >
+                            {activityMessage(column.labelKey)}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {activity.map((activity) => (
                         <Fragment
-                          key={`stats-activity-memes-${activity.season}`}>
+                          key={`stats-activity-memes-${activity.season}`}
+                        >
                           <UserPageStatsTableHr span={11} />
                           <tr>
-                            <td className="!tw-text-[#93939f]">
-                              Season {activity.season}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(activity.transfers_in)}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(activity.airdrops)}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(
-                                activity.primary_purchases_count
+                            <th scope="row" className="!tw-text-[#93939f]">
+                              {activityMessage(
+                                "user.collected.stats.activityOverview.seasonLabel",
+                                { seasonNumber: activity.season }
                               )}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {printEthValue(activity.primary_purchases_value)}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(
-                                activity.secondary_purchases_count
-                              )}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {printEthValue(
-                                activity.secondary_purchases_value
-                              )}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(activity.transfers_out)}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(activity.burns)}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {numberWithCommas(activity.sales_count)}
-                            </td>
-                            <td className="tw-text-right !tw-text-[#fff]">
-                              {printEthValue(activity.sales_value)}
-                            </td>
+                            </th>
+                            {SEASON_ACTIVITY_COLUMNS.map((column) => (
+                              <td
+                                key={column.field}
+                                className="tw-text-right !tw-text-[#fff]"
+                              >
+                                {formatActivityValue(
+                                  activity[column.field],
+                                  column.valueType
+                                )}
+                              </td>
+                            ))}
                           </tr>
                         </Fragment>
                       ))}

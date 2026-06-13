@@ -137,6 +137,29 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
+  "user.collected.stats.activityOverview",
+  {
+    title: "Activity Overview",
+    overview: "Overview",
+    memesBySeason: "Memes Breakdown By Season",
+    "tables.overviewCaption": "Collected activity summary by collection",
+    "tables.memesBySeasonCaption":
+      "Collected Meme activity breakdown by season",
+    "rows.airdrops": "Airdrops",
+    "rows.transfersIn": "Transfers In",
+    "rows.mints": "Mints",
+    "rows.mintsEth": "Mints (ETH)",
+    "rows.purchases": "Purchases",
+    "rows.purchasesEth": "Purchases (ETH)",
+    "rows.transfersOut": "Transfers Out",
+    "rows.burns": "Burns",
+    "rows.sales": "Sales",
+    "rows.salesEth": "Sales (ETH)",
+    seasonLabel: "Season {seasonNumber}",
+  } as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -643,6 +666,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_MESSAGES,
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
+  ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",

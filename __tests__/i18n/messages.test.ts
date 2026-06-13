@@ -138,6 +138,18 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "user.collected.stats.boostBreakdown.tableCaption")).toBe(
       t("en-US", "user.collected.stats.boostBreakdown.tableCaption")
     );
+    expect(t("es-ES", "user.collected.stats.activityOverview.title")).toBe(
+      t("en-US", "user.collected.stats.activityOverview.title")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.activityOverview.seasonLabel", {
+        seasonNumber: 1,
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.activityOverview.seasonLabel", {
+        seasonNumber: 1,
+      })
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );

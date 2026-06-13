@@ -883,3 +883,26 @@
   noise.
 - Opened review-ready stacked PR #2634 against PR #2633. Per workstream policy,
   do not merge PR #2634 without human approval.
+- Confirmed PR #2634 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, there are no review
+  threads, and Claude remained configured for manual review only. Per
+  workstream policy, do not merge PR #2634 without human approval.
+- Started stacked branch `codex/user-collected-activity-overview-a11y-i18n`
+  from PR #2634 for the next low-risk `/{user}/collected` Details-panel
+  follow-up.
+- Implemented message-backed source-locale labels for the Activity Overview
+  heading, accordion headings, table captions, columns, row labels, season
+  labels, and numeric/ETH values. Refactored repeated overview and per-season
+  activity rows into typed row/column configs, added screen-reader table
+  captions, and promoted touched row labels to row headers.
+- Validation passed for the Activity Overview follow-up: focused activity
+  overview/i18n Jest suites (2 suites, 5 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and `git diff --check`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified `Details` opens, Activity
+  Overview tables render with screen-reader captions, scoped column headers,
+  row headers, message-backed labels, horizontal scrollers containing wide
+  tables on mobile, and no Next.js runtime session errors. Console resource
+  errors were shared backend wave endpoints and blocked emoji feed noise.

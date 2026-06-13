@@ -81,6 +81,10 @@ Transfer mode is part of the Native collected view (not a separate route).
      - collected details tables include screen-reader captions and row headers
        for assistive technologies
    - `Activity Overview`
+   - Activity Overview heading, table headings, row labels, and per-season
+     labels are message-backed from the source locale
+   - Activity Overview tables include screen-reader captions and row headers
+     for assistive technologies
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
    - `Boost Breakdown`
    - Boost Breakdown static labels and table headings are message-backed from
