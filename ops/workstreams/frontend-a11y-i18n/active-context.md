@@ -48,13 +48,10 @@ page migration PRs for safe media surfaces.
 
 1. Start the next low-risk profile/media surface from PR #2633 after confirming
    the target component boundaries.
-2. Keep PR #2633 review-ready only; do not merge without human approval.
-3. Keep PR #2631 review-ready only; do not merge without human approval.
-4. Keep PR #2630 review-ready only; do not merge without human approval.
-5. Keep PR #2629 review-ready only; do not merge without human approval.
-6. Keep PR #2628 review-ready only; do not merge without human approval.
-7. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
-   approval.
-8. Keep page implementation PRs review-ready only; do not merge without human
-   approval.
-9. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+2. Maintain PRs #2633, #2631, #2630, #2629, and #2628 as review-ready only;
+   do not merge without human approval.
+3. Maintain PRs #2626 and #2627 as review-ready only; do not merge without
+   human approval.
+4. Keep all page implementation PRs review-ready only; do not merge without
+   human approval.
+5. Preserve the unrelated dirty EmojiContext and bootstrap style files.
