@@ -789,3 +789,5 @@
   runtime session errors. Mobile horizontal overflow came from existing
   scrollable strips, including the season carousel. Console resource errors
   were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2630 against PR #2629. Per workstream policy,
+  do not merge PR #2630 without human approval.
