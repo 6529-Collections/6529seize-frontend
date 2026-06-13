@@ -906,3 +906,5 @@
   row headers, message-backed labels, horizontal scrollers containing wide
   tables on mobile, and no Next.js runtime session errors. Console resource
   errors were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2635 against PR #2634. Per workstream policy,
+  do not merge PR #2635 without human approval.
