@@ -156,9 +156,11 @@ Transfer mode is part of the Native collected view (not a separate route).
 
 - Initial load shows skeleton placeholders.
 - If native collected data fails, the tab falls back to empty-state copy
-  (for example `No cards to display`).
+  (for example `No cards to display`). Empty-state copy is message-backed from
+  the source locale and announced as status text for assistive technologies.
 - If network token data fails, network cards can fall back to
-  `No network tokens found`.
+  `No network tokens found`. This copy follows the same message-backed status
+  pattern as the native collected view.
 - Inside `Details`:
   - Wallet Activity empty states are filter-specific (`No transactions`,
     `No sales`, `No burns`, and similar).
