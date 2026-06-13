@@ -32,8 +32,8 @@ page migration PRs for safe media surfaces.
 - PR #2626 is bot-happy on the latest head and remains review-ready only.
 - PR #2627 is bot-happy on the latest head and remains review-ready only.
 - Current implementation surface: profile collected empty states, stacked on PR
-  #2627. The branch is `codex/user-collected-empty-states-a11y-i18n`; PR is
-  pending.
+  #2627. The branch is `codex/user-collected-empty-states-a11y-i18n`; PR #2628
+  is open and review-ready only.
 - Scope includes message-backed native collected empty-state copy and status
   semantics for `/{user}/collected`, while preserving existing filter behavior.
 - Non-source locales currently fall back to `en-US` until reviewed
@@ -42,8 +42,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open the profile collected empty-states PR against PR #2627.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback for the empty-states PR.
+1. Iterate on actionable CodeRabbit/Claude/CI feedback for PR #2628.
+2. Keep PR #2628 review-ready only; do not merge without human approval.
 3. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
    approval.
 4. Keep page implementation PRs review-ready only; do not merge without human

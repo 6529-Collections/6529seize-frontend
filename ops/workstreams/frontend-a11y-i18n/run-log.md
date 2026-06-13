@@ -737,3 +737,5 @@
   region is covered by component tests. Verified no horizontal overflow and no
   Next.js runtime session errors. Console errors were shared backend wave
   endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2628 against PR #2627. Per workstream policy,
+  do not merge PR #2628 without human approval.
