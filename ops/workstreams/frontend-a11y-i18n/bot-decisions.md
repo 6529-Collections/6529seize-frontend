@@ -51,3 +51,8 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2631 | SonarCloud   | Quality Gate passed with 0 new issues and 0.0% duplication after fix      | Accept                               |
 | 2026-06-13 | #2631 | Snyk         | No manifest changes detected                                              | Accept                               |
 | 2026-06-13 | #2631 | CodeRabbit   | Latest head passed with no review threads                                 | Accept                               |
+| 2026-06-13 | #2638 | CodeRabbit   | Flagged Distributions loading text remaining in the accessibility tree    | Fixed                                |
+| 2026-06-13 | #2638 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2638 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
+| 2026-06-13 | #2638 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2638 | CodeRabbit   | Latest head passed with the loading-label thread resolved                 | Accept                               |

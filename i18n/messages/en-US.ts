@@ -216,6 +216,25 @@ const USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
+  "user.collected.stats.tdhHistory",
+  {
+    title: "TDH History",
+    empty: "No TDH history found",
+    loading: "Loading TDH history",
+    chartListLabel: "TDH history charts",
+    chartAriaLabel: "{title} chart",
+    "charts.totalTdh.title": "Total TDH",
+    "charts.totalTdh.totalBoosted": "Total Boosted TDH",
+    "charts.netDailyChange.title": "Net TDH Daily Change",
+    "charts.netDailyChange.netBoosted": "Net Boosted TDH",
+    "charts.createdDailyChange.title": "Created TDH Daily Change",
+    "charts.createdDailyChange.createdBoosted": "Created Boosted TDH",
+    "charts.destroyedDailyChange.title": "Destroyed TDH Daily Change",
+    "charts.destroyedDailyChange.destroyedBoosted": "Destroyed Boosted TDH",
+  } as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -726,6 +745,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
   ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES,
+  ...USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",

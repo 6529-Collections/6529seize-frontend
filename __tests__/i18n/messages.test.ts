@@ -176,6 +176,14 @@ describe("frontend i18n helpers", () => {
         tokenId: 1,
       })
     ).toBe("View The Memes token #1");
+    expect(t("fr-FR", "user.collected.stats.tdhHistory.title")).toBe(
+      t("en-US", "user.collected.stats.tdhHistory.title")
+    );
+    expect(
+      t("es-ES", "user.collected.stats.tdhHistory.chartAriaLabel", {
+        title: "Total TDH",
+      })
+    ).toBe("Total TDH chart");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
