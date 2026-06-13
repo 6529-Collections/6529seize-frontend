@@ -93,6 +93,18 @@ describe("frontend i18n helpers", () => {
         total: 3,
       })
     );
+    expect(t("fr-FR", "user.collected.stats.details.unavailable")).toBe(
+      t("en-US", "user.collected.stats.details.unavailable")
+    );
+    expect(
+      t("es-ES", "user.collected.stats.metrics.unique", {
+        value: "465",
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.metrics.unique", {
+        value: "465",
+      })
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
