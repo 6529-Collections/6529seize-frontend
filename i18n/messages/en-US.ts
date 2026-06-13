@@ -249,6 +249,14 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
   "badges.beta": "Beta",
 } as const);
 
+const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "modal.title": "Followers",
+  "list.label": "Followers",
+  "list.loading": "Loading followers",
+  "profile.linkAriaLabel": "View {handle}'s profile",
+  "profile.avatarAlt": "{handle}'s profile image",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -769,6 +777,7 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   ...USER_PROFILE_TABS_MESSAGES,
+  ...FOLLOWERS_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 

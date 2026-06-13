@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-profile-tabs-a11y-i18n`
+`codex/user-followers-modal-a11y-i18n`
 
 ## Constraints
 
@@ -43,18 +43,24 @@ page migration PRs for safe media surfaces.
 - PR #2637 is bot-happy on the latest head and remains review-ready only.
 - PR #2638 is bot-happy on the latest head and remains review-ready only.
 - PR #2639 is bot-happy on the latest head and remains review-ready only.
-- PR #2640 is open and review-ready only. It covers profile shell tab titles,
-  beta badge text, navigation landmark labels, scroll button labels, and
-  active-page semantics. It is stacked from PR #2639 and must not be merged.
+- PR #2640 is bot-happy on the latest head and remains review-ready only. It
+  covers profile shell tab titles, beta badge text, navigation landmark labels,
+  scroll button labels, and active-page semantics. It is stacked from PR #2639
+  and must not be merged.
+- Current local branch `codex/user-followers-modal-a11y-i18n` is stacked from
+  PR #2640 for the next profile followers modal/list follow-up.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate on PR #2640 with available bots/checks without merging.
-2. Keep PR #2640 review-ready only; do not merge.
-3. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;
+1. Open the followers modal/list follow-up PR against PR #2640 after final diff
+   review.
+2. Iterate on the followers modal/list PR with available bots/checks without
+   merging.
+3. Keep PR #2640 review-ready only; do not merge.
+4. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;
    do not merge.
-4. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
+5. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
    style files.
