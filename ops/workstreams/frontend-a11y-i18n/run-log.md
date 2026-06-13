@@ -851,3 +851,9 @@
   `typecheck:changed`, `react-doctor:diff`, `git diff --check`, and a live
   browser DOM smoke; results remained green apart from the known unrelated
   EmojiContext diagnostic and shared backend/emoji console noise.
+- Narrowed the remaining PR #2633 SonarCloud duplication finding to the new
+  source-locale message entries and moved the collected details message group
+  to an object-backed helper while preserving all public message keys. Re-ran
+  focused collected stats/shared-table/i18n Jest suites, `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and `git diff --check`; results
+  remained green apart from the known unrelated EmojiContext diagnostic.

@@ -16,6 +16,21 @@ function namespaceMessages<
   ) as NamespacedMessages<Prefix, Entries>;
 }
 
+type MessageMap = Record<string, string>;
+
+type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
+  readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
+};
+
+function objectMessages<Prefix extends string, Entries extends MessageMap>(
+  prefix: Prefix,
+  entries: Entries
+): ObjectMessages<Prefix, Entries> {
+  return Object.fromEntries(
+    Object.entries(entries).map(([key, value]) => [`${prefix}.${key}`, value])
+  ) as ObjectMessages<Prefix, Entries>;
+}
+
 const REMEMES_DETAIL_MESSAGES = namespaceMessages("rememes.detail", [
   ["documentTitle", "{name} | ReMemes"],
   ["browserTitle", "{name} | ReMemes | 6529.io"],
@@ -72,32 +87,32 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasonTile.label", "SZN{seasonNumber}"],
     ["seasonTile.toNextSet", "{held}/{total} to set {setNumber}"],
     ["seasonTile.setComplete", "Set {count} complete"],
-    ["details.collected.title", "Collected"],
-    ["details.overview", "Overview"],
-    [
-      "details.tables.overviewCaption",
-      "Collected holdings summary by collection",
-    ],
-    ["details.tables.column.total", "Total"],
-    ["details.tables.column.memes", "Memes"],
-    ["details.tables.column.nextGen", "NextGen"],
-    ["details.tables.column.gradient", "Gradient"],
-    ["details.tables.column.memeLab", "Meme Lab"],
-    ["details.rows.cards", "Cards"],
-    ["details.rows.rank", "Rank"],
-    ["details.rows.tdh", "TDH"],
-    ["details.rows.noTdh", "* No TDH"],
-    ["details.memesBySeason", "Memes Breakdown By Season"],
-    [
-      "details.tables.memesBySeasonCaption",
-      "Collected Memes breakdown by season",
-    ],
-    ["details.tables.column.unique", "Unique"],
-    ["details.tables.column.sets", "Sets"],
-    ["details.seasonLabel", "Season {seasonNumber}"],
-    ["details.uniqueProgress", "{held} / {total}"],
-    ["details.uniqueProgressPercent", "({percent})"],
   ] as const
+);
+
+const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
+  "user.collected.stats.details",
+  {
+    "collected.title": "Collected",
+    overview: "Overview",
+    "tables.overviewCaption": "Collected holdings summary by collection",
+    "tables.column.total": "Total",
+    "tables.column.memes": "Memes",
+    "tables.column.nextGen": "NextGen",
+    "tables.column.gradient": "Gradient",
+    "tables.column.memeLab": "Meme Lab",
+    "rows.cards": "Cards",
+    "rows.rank": "Rank",
+    "rows.tdh": "TDH",
+    "rows.noTdh": "* No TDH",
+    memesBySeason: "Memes Breakdown By Season",
+    "tables.memesBySeasonCaption": "Collected Memes breakdown by season",
+    "tables.column.unique": "Unique",
+    "tables.column.sets": "Sets",
+    seasonLabel: "Season {seasonNumber}",
+    uniqueProgress: "{held} / {total}",
+    uniqueProgressPercent: "({percent})",
+  } as const
 );
 
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
@@ -604,6 +619,7 @@ export const EN_US_MESSAGES = {
   "user.collected.filters.scrollLeft": "Scroll filters left",
   "user.collected.filters.scrollRight": "Scroll filters right",
   ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",
