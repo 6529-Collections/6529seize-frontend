@@ -37,4 +37,4 @@
 | `/{user}/collected` wallet activity    | PR open              | PR open           | PR #2637; review-ready only; stacked on PR #2636; do not merge yet |
 | `/{user}/collected` distributions      | PR open              | PR open           | PR #2638; review-ready only; stacked on PR #2637; do not merge yet |
 | `/{user}/collected` TDH history        | PR open              | PR open           | PR #2639; review-ready only; stacked on PR #2638; do not merge yet |
-| User profile tabs shell                | In progress          | In progress       | Branch `codex/user-profile-tabs-a11y-i18n`; stacked on PR #2639    |
+| User profile tabs shell                | PR open              | PR open           | PR #2640; review-ready only; stacked on PR #2639; do not merge yet |

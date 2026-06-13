@@ -1046,3 +1046,5 @@
   explicit `xTDH Beta` link name, `aria-current="page"` on Collected, and no
   Next.js runtime session errors; remaining browser console errors were the
   known local shared API wave 500s and blocked emoji-list request.
+- Opened review-ready stacked PR #2640 against PR #2639. Per workstream policy,
+  do not merge PR #2640.

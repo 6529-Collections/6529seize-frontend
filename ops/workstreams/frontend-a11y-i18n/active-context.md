@@ -43,17 +43,17 @@ page migration PRs for safe media surfaces.
 - PR #2637 is bot-happy on the latest head and remains review-ready only.
 - PR #2638 is bot-happy on the latest head and remains review-ready only.
 - PR #2639 is bot-happy on the latest head and remains review-ready only.
-- The current branch covers profile shell tab titles, beta badge text,
-  navigation landmark labels, scroll button labels, and active-page semantics.
-  It is stacked from PR #2639 and must not be merged once opened.
+- PR #2640 is open and review-ready only. It covers profile shell tab titles,
+  beta badge text, navigation landmark labels, scroll button labels, and
+  active-page semantics. It is stacked from PR #2639 and must not be merged.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Commit and open the profile tabs stacked PR against PR #2639.
-2. Iterate on the profile tabs PR with available bots/checks without merging.
+1. Iterate on PR #2640 with available bots/checks without merging.
+2. Keep PR #2640 review-ready only; do not merge.
 3. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;
    do not merge.
 4. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
