@@ -1024,3 +1024,25 @@
   blocked emoji-list request.
 - Opened review-ready stacked PR #2639 against PR #2638. Per workstream policy,
   do not merge PR #2639.
+- Confirmed PR #2639 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, and no review threads are
+  open. Per workstream policy, do not merge PR #2639.
+- Started stacked branch `codex/user-profile-tabs-a11y-i18n` from PR #2639 for
+  the next low-risk profile shell follow-up.
+- Implemented message-backed source-locale labels for profile tab titles, beta
+  badge text, profile-section navigation landmark text, and tab-scroll button
+  labels. Added `aria-current="page"` to the active profile tab link, wrapped
+  the search-param-driven tab tree in a documented Suspense boundary, and made
+  the horizontal tab scroll listener passive.
+- Validation passed for the profile tabs follow-up so far: focused
+  layout-tabs/i18n Jest suites (4 suites, 20 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=tdh-history`. React Doctor
+  still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic, still flags `useSearchParams` in the touched
+  profile tab files despite the `UserPageLayout` Suspense boundary, and still
+  flags the existing `router.replace()` redirect effect. Browser smoke verified
+  the `Profile sections` navigation landmark, message-backed tab labels, the
+  explicit `xTDH Beta` link name, `aria-current="page"` on Collected, and no
+  Next.js runtime session errors; remaining browser console errors were the
+  known local shared API wave 500s and blocked emoji-list request.

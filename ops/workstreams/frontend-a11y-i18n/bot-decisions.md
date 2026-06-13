@@ -56,3 +56,7 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2638 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
 | 2026-06-13 | #2638 | Snyk         | No manifest changes detected                                              | Accept                               |
 | 2026-06-13 | #2638 | CodeRabbit   | Latest head passed with the loading-label thread resolved                 | Accept                               |
+| 2026-06-13 | #2639 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2639 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
+| 2026-06-13 | #2639 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2639 | CodeRabbit   | Latest head passed with no review threads                                 | Accept                               |
