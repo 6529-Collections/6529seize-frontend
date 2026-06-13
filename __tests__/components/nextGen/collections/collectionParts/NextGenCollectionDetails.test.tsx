@@ -40,6 +40,19 @@ describe("NextGenCollectionDetails", () => {
     expect(screen.getByText("Collection Overview")).toBeInTheDocument();
   });
 
+  it("renders artist signature markup as text", () => {
+    const artistSignature = '<img src=x onerror="alert(1)">0xsignature';
+    const { container } = render(
+      <NextGenCollectionDetails
+        collection={{ ...collection, artist_signature: artistSignature }}
+        view={NextgenCollectionView.OVERVIEW}
+      />
+    );
+
+    expect(screen.getByText(artistSignature)).toBeInTheDocument();
+    expect(container.querySelector("img")).toBeNull();
+  });
+
   it("renders trait sets view", () => {
     render(
       <NextGenCollectionDetails
