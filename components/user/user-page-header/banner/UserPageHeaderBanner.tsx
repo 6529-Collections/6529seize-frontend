@@ -11,21 +11,20 @@ import {
   getBannerImageUrl,
 } from "@/helpers/profile-banner.helpers";
 import UserPageHeaderEditBanner from "./UserPageHeaderEditBanner";
-import {
-  getUserProfileHeaderDisplayName,
-  getUserProfileHeaderMessage,
-} from "../user-page-header.messages";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderBanner({
   profile,
   defaultBanner1,
   defaultBanner2,
   canEdit,
+  profileLabel,
 }: {
   readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
   readonly canEdit: boolean;
+  readonly profileLabel: string;
 }) {
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const bannerImageUrl = getBannerImageUrl(profile.banner1);
@@ -34,7 +33,6 @@ export default function UserPageHeaderBanner({
     : null;
   const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
-  const profileLabel = getUserProfileHeaderDisplayName(profile, "profile");
 
   return (
     <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40">

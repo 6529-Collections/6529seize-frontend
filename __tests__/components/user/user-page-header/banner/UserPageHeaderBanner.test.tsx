@@ -55,6 +55,7 @@ describe("UserPageHeaderBanner", () => {
         defaultBanner1="#000"
         defaultBanner2="#fff"
         canEdit={true}
+        profileLabel="alice"
       />
     );
 
@@ -74,6 +75,7 @@ describe("UserPageHeaderBanner", () => {
         defaultBanner1="#000"
         defaultBanner2="#fff"
         canEdit={false}
+        profileLabel="alice"
       />
     );
 

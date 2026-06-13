@@ -170,6 +170,7 @@ export default function UserPageHeaderClient({
             defaultBanner1={banner1Color}
             defaultBanner2={banner2Color}
             canEdit={canEdit}
+            profileLabel={profileLabel}
           />
         </div>
 

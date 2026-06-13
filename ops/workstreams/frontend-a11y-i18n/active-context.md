@@ -56,7 +56,7 @@ page migration PRs for safe media surfaces.
   covers the user profile header stats row labels, accessible names, and
   follower-count formatting. It is stacked from PR #2641 and must not be
   merged.
-- PR #2643 is open and review-ready only. It covers the user profile header
+- PR #2643 is open and under bot iteration. It covers the user profile header
   identity/name/media labels, profile-enabled date formatting, and read-only
   wrapper semantics. It is stacked from PR #2642 and must not be merged.
 - Non-source locales currently fall back to `en-US` until reviewed
@@ -65,7 +65,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Iterate on PR #2643 with available bots/checks without merging.
+1. Confirm PR #2643 checks after the Sonar/CodeRabbit follow-up fixes without
+   merging.
 2. Keep PR #2642 review-ready only; do not merge.
 3. Keep PR #2641 review-ready only; do not merge.
 4. Keep PR #2640 review-ready only; do not merge.
