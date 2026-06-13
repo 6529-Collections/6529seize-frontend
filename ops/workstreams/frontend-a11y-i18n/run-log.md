@@ -937,3 +937,5 @@
   updates, and Next.js runtime diagnostics reported no config or session
   errors. Console resource errors were shared backend wave endpoints and blocked
   emoji feed noise.
+- Opened review-ready stacked PR #2636 against PR #2635. Per workstream policy,
+  do not merge PR #2636 without human approval.
