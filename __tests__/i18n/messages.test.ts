@@ -225,6 +225,9 @@ describe("frontend i18n helpers", () => {
         date: "January 2024",
       })
     ).toBe("Profile enabled: January 2024");
+    expect(t("de-DE", "user.profileHeader.about.empty")).toBe(
+      "Click to add an About statement"
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
