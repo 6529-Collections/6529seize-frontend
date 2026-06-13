@@ -40,4 +40,4 @@
 | User profile tabs shell                | PR open              | PR open           | PR #2640; review-ready only; stacked on PR #2639; do not merge yet |
 | User followers modal/list              | PR open              | PR open           | PR #2641; review-ready only; stacked on PR #2640; do not merge yet |
 | User profile header stats row          | PR open              | PR open            | PR #2642; review-ready only; stacked on PR #2641; do not merge yet |
-| User profile header identity/media     | Branch in progress   | Branch in progress | Stacked on PR #2642; publish review-ready PR; do not merge yet     |
+| User profile header identity/media     | PR open              | PR open            | PR #2643; review-ready only; stacked on PR #2642; do not merge yet |

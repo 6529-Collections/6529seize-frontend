@@ -1115,3 +1115,5 @@
   Next MCP runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`.
   React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
   fetch-in-effect diagnostic and a test-only `next/image` mock warning.
+- Opened review-ready stacked PR #2643 against PR #2642. Per workstream policy,
+  do not merge PR #2643.
