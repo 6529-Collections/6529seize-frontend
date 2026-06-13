@@ -6,6 +6,7 @@ import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { PlayIcon } from "@heroicons/react/24/solid";
+import clsx from "clsx";
 import { InlineMediaActions } from "./MediaActionToolbar";
 import { useMediaActions } from "./useMediaActions";
 
@@ -13,12 +14,14 @@ interface Props {
   readonly src: string;
   readonly mimeType?: string | undefined;
   readonly showControls?: boolean | undefined;
+  readonly fillContainer?: boolean | undefined;
 }
 
 const MediaDisplayVideo: React.FC<Props> = ({
   src,
   mimeType,
   showControls = false,
+  fillContainer = false,
 }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
@@ -123,7 +126,12 @@ const MediaDisplayVideo: React.FC<Props> = ({
   return (
     <div
       ref={wrapperRef}
-      className="tw-relative tw-max-h-64 tw-min-h-[200px] tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black"
+      className={clsx(
+        "tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl tw-bg-black",
+        fillContainer
+          ? "tw-flex tw-h-full tw-max-h-full tw-items-center tw-justify-center"
+          : "tw-max-h-64 tw-min-h-[200px]"
+      )}
     >
       <video
         ref={videoRef}
@@ -134,7 +142,10 @@ const MediaDisplayVideo: React.FC<Props> = ({
           }
           handleVideoClick();
         }}
-        className="tw-h-auto tw-max-h-64 tw-w-full tw-rounded-xl tw-object-contain"
+        className={clsx(
+          "tw-w-full tw-rounded-xl tw-object-contain",
+          fillContainer ? "tw-h-full tw-max-h-full" : "tw-h-auto tw-max-h-64"
+        )}
         muted
         loop
         controls={showNativeControls}

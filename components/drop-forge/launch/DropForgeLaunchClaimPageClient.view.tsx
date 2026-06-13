@@ -647,6 +647,7 @@ function DropForgeLaunchClaimMediaDisplayContent({
       <MediaDisplay
         media_mime_type={animationMimeType}
         media_url={claim.animation_url ?? ""}
+        fillVideoContainer
       />
     );
   }
