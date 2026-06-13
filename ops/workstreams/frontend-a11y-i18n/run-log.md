@@ -772,3 +772,26 @@
   SonarCloud passed with 0 new issues, CodeRabbit passed with no review threads,
   and Claude remained configured for manual review only. Per workstream policy,
   do not merge PR #2629 without human approval.
+- Started stacked branch `codex/user-collected-season-strip-a11y-i18n` from PR
+  #2629 for a low-risk `/{user}/collected` season-strip follow-up.
+- Implemented message-backed source-locale labels for the collected season
+  strip: `Seasons`, started count, desktop show more/less controls, unseized
+  label, and season tile set-count plural labels. Extracted the tile renderer
+  into a stable `SeasonTiles` component to avoid React Doctor render-helper
+  warnings.
+- Validation passed for the season-strip follow-up: focused season/i18n Jest
+  suites (3 suites, 26 tests), focused Prettier check, `lint:changed`,
+  `typecheck:changed`, and `react-doctor:diff`. React Doctor still reports only
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified message-backed season heading
+  and started count, button season tiles, no page errors, and no Next.js
+  runtime session errors. Mobile horizontal overflow came from existing
+  scrollable strips, including the season carousel. Console resource errors
+  were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2630 against PR #2629. Per workstream policy,
+  do not merge PR #2630 without human approval.
+- Confirmed PR #2630 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed with no
+  review threads, and Claude remained configured for manual review only. Per
+  workstream policy, do not merge PR #2630 without human approval.

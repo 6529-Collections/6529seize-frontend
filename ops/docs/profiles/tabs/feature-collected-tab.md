@@ -64,6 +64,8 @@ Transfer mode is part of the Native collected view (not a separate route).
      full set; it shows the lowest full-set count across those seasons
    - `Seasons` tiles show started Meme seasons, complete-set counts, and
      progress toward the next set
+   - `Seasons` heading/count text, show more/less controls, unseized labels,
+     and tile set-count text are message-backed from the source locale
    - hover/focus previews a season tile's progress text; click applies or
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
