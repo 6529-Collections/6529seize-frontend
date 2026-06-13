@@ -766,3 +766,5 @@
   filter accessible names, no horizontal overflow, no page errors, and no
   Next.js runtime session errors. Console errors were shared backend wave
   endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2629 against PR #2628. Per workstream policy,
+  do not merge PR #2629 without human approval.

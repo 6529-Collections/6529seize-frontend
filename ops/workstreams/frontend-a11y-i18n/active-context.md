@@ -34,7 +34,8 @@ page migration PRs for safe media surfaces.
 - PR #2628 is bot-happy on the latest head and remains review-ready only.
 - Current implementation surface: profile collected filter and sort controls,
   stacked on PR #2628. The branch is
-  `codex/user-collected-sort-controls-a11y-i18n`; PR is pending.
+  `codex/user-collected-sort-controls-a11y-i18n`; PR #2629 is open and
+  review-ready only.
 - Scope includes message-backed view, collection, sort, seized, unknown-network
   collection, and filter-scroll labels while preserving existing filter
   behavior.
@@ -44,8 +45,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Open the profile collected sort/filter controls PR against PR #2628.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback for the controls PR.
+1. Iterate on actionable CodeRabbit/Claude/CI feedback for PR #2629.
+2. Keep PR #2629 review-ready only; do not merge without human approval.
 3. Keep PR #2628 review-ready only; do not merge without human approval.
 4. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
    approval.
