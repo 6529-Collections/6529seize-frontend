@@ -33,7 +33,14 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
 }));
 
 const baseFollower: any = {
-  identity: { id: "1", handle: "alice", level: 5, cic: 0, pfp: "pic.png" },
+  identity: {
+    id: "1",
+    handle: "alice",
+    level: 5,
+    cic: 0,
+    pfp: "pic.png",
+    primary_address: "0xalice",
+  },
 };
 
 const renderWithAuth = (ui: ReactElement, connectedProfile: any = null) =>
@@ -64,9 +71,36 @@ test("renders follower info with image", () => {
   expect(screen.getByTestId("cic")).toHaveTextContent("5");
 });
 
+test("falls back to primary address when follower handle is missing", () => {
+  const follower = {
+    identity: {
+      id: "3",
+      handle: null,
+      level: 2,
+      cic: 0,
+      pfp: "pic.png",
+      primary_address: "0xabc",
+    },
+  } as any;
+
+  render(<Follower follower={follower} />);
+
+  expect(
+    screen.getByRole("link", { name: "View 0xabc's profile" })
+  ).toHaveAttribute("href", "/0xabc");
+  expect(screen.getByAltText("0xabc's profile image")).toBeInTheDocument();
+});
+
 test("shows placeholder when no pfp", () => {
   const follower = {
-    identity: { id: "2", handle: "bob", level: 1, cic: 0, pfp: "" },
+    identity: {
+      id: "2",
+      handle: "bob",
+      level: 1,
+      cic: 0,
+      pfp: "",
+      primary_address: "0xbob",
+    },
   } as any;
   const { container } = render(<Follower follower={follower} />);
   expect(container.querySelector("img")).toBeNull();
