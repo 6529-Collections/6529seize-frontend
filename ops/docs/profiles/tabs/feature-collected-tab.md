@@ -94,6 +94,10 @@ Transfer mode is part of the Native collected view (not a separate route).
      - Wallet Activity heading, filter labels, filter accessible names, empty
        states, and transaction table caption are message-backed from the source
        locale
+   - `Distributions`
+     - Distributions heading, empty state, table caption, table headings,
+       collection names, token link accessible names, and relative time display
+       are message-backed or locale-formatted from the source locale
    - `Boost Breakdown`
    - Boost Breakdown static labels and table headings are message-backed from
      the source locale; the table exposes a screen-reader caption, row

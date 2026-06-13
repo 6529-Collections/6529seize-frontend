@@ -975,3 +975,23 @@
   manual review passed, no review threads are open, and Claude remains
   configured for manual review only. Per workstream policy, do not merge PR
   #2637.
+- Started stacked branch `codex/user-collected-distributions-a11y-i18n` from
+  PR #2637 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Distributions
+  heading, empty state, table caption, table headings, collection labels,
+  token link accessible names, and a loading-only screen-reader label. Replaced
+  the empty state with native `<output>`, switched distribution row numbers to
+  default-locale `Intl` formatting, switched relative time to the repo i18n
+  helper, and replaced phase index keys with stable phase-name keys.
+- Validation passed for the Distributions follow-up so far: focused
+  distributions/i18n Jest suites (5 suites, 10 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=distributions`.
+  `lint:changed` was not rerun for this branch because the long stacked diff
+  expands beyond Windows' command-line limit; the PR-specific eslint run passed.
+  React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and the `useSearchParams` Suspense warning for
+  the touched Distributions component, which is rendered under the activity
+  wrapper Suspense boundary from PR #2636. Browser smoke verified the
+  Distributions tab selection/panel relationship, message-backed heading,
+  native empty-state output, and no Next.js runtime session errors.

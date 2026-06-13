@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-collected-wallet-activity-filter-a11y-i18n`
+`codex/user-collected-distributions-a11y-i18n`
 
 ## Constraints
 
@@ -41,14 +41,18 @@ page migration PRs for safe media surfaces.
 - PR #2635 is bot-happy on the latest head and remains review-ready only.
 - PR #2636 is bot-happy on the latest head and remains review-ready only.
 - PR #2637 is bot-happy on the latest head and remains review-ready only.
+- Current implementation surface: profile collected Distributions heading,
+  empty state, table labels, collection links, and table item formatting under
+  the expanded stats panel are in progress. The branch is
+  `codex/user-collected-distributions-a11y-i18n`, stacked from PR #2637.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Start the next low-risk `/{user}/collected` Details-panel follow-up stacked
-   from PR #2637; keep it review-ready only.
+1. Open the Distributions branch as a review-ready stacked PR, then iterate
+   with available bots/checks without merging.
 2. Maintain PRs #2635, #2634, #2633, #2631, #2630, #2629, and #2628 as review-ready only;
    do not merge.
 3. Maintain PRs #2626 and #2627 as review-ready only; do not merge.

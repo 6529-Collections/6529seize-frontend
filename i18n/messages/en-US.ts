@@ -195,6 +195,27 @@ const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES = objectMessages(
+  "user.collected.stats.distributions",
+  {
+    title: "Distributions",
+    empty: "No distributions found",
+    loading: "Loading distributions",
+    tableCaption: "Profile distribution claims",
+    tokenLinkAriaLabel: "View {collection} token #{tokenId}",
+    "columns.collection": "Collection",
+    "columns.token": "Token",
+    "columns.name": "Name",
+    "columns.wallet": "Wallet",
+    "columns.minted": "Minted",
+    "columns.total": "Total",
+    "collections.memes": "The Memes",
+    "collections.gradients": "6529Gradient",
+    "collections.memeLab": "Meme Lab",
+    "phases.airdrop": "Airdrop",
+  } as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -704,6 +725,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
   ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
+  ...USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",
