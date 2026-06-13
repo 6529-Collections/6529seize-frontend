@@ -31,8 +31,8 @@ page migration PRs for safe media surfaces.
 - PR #2625 is bot-happy on the latest head and remains review-ready only.
 - Current implementation surface: profile collected native card list semantics,
   stacked on PR #2625. The branch is
-  `codex/user-collected-cards-a11y-i18n`; PR #2626 is open and review-ready
-  only.
+  `codex/user-collected-cards-a11y-i18n`; PR #2626 is bot-happy on the latest
+  head and remains review-ready only.
 - Scope includes labelled list/listitem semantics for native
   `/{user}/collected` card results, while preserving transfer-mode behavior.
 - Non-source locales currently fall back to `en-US` until reviewed
@@ -41,8 +41,9 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Confirm PR #2626 checks and bot feedback after the latest push.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback.
+1. Start the next low-risk read-only profile or media card surface from PR
+   #2626.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback for the next PR.
 3. Keep PR #2625 review-ready only; do not merge without human approval.
 4. Keep page implementation PRs review-ready only; do not merge without human
    approval.

@@ -28,3 +28,6 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2626 | CodeRabbit   | Flagged missing explicit list role for Safari/VoiceOver list semantics    | Fixed                                |
 | 2026-06-13 | #2626 | CodeRabbit   | Flagged outdated collected-surface tracker wording                        | Fixed                                |
 | 2026-06-13 | #2626 | SonarCloud   | Flagged explicit list role as redundant after CodeRabbit requested it     | Kept with Safari/VO prop rationale   |
+| 2026-06-13 | #2626 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
+| 2026-06-13 | #2626 | Snyk         | PR check passed                                                           | Accept                               |
+| 2026-06-13 | #2626 | CodeRabbit   | Latest head passed with all review threads resolved                       | Accept                               |

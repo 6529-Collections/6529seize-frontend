@@ -693,3 +693,8 @@
 - Addressed the PR #2626 SonarCloud/CodeRabbit role conflict by keeping the
   explicit `list` role for Safari/VoiceOver compatibility behind a small
   compatibility prop object with a local rationale.
+- Confirmed PR #2626 is bot-happy on the latest head: Snyk passed, CodeRabbit
+  passed with all review threads resolved, and SonarCloud reported 0 new
+  issues. Claude remains configured for manual review and did not leave an
+  actionable review. Per workstream policy, do not merge PR #2626 without human
+  approval.
