@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-collected-activity-overview-a11y-i18n`
+`codex/user-collected-activity-tabs-a11y-i18n`
 
 ## Constraints
 
@@ -28,7 +28,7 @@ page migration PRs for safe media surfaces.
 - Initial supported locales: `en-US`, `en-GB`, `fr-FR`, `es-ES`, `de-DE`.
 - PR #2623 is bot-happy on the latest head and remains review-ready only.
 - PR #2624 is open and review-ready only after the CodeRabbit video-fallback
-  fix; keep it unmerged without human approval.
+  fix; keep it unmerged.
 - PR #2625 is bot-happy on the latest head and remains review-ready only.
 - PR #2626 is bot-happy on the latest head and remains review-ready only.
 - PR #2627 remains review-ready only with a bot-happy latest head.
@@ -38,23 +38,18 @@ page migration PRs for safe media surfaces.
 - PR #2631 is bot-happy on the latest head and remains review-ready only.
 - PR #2633 is bot-happy on the latest head and remains review-ready only.
 - PR #2634 is bot-happy on the latest head and remains review-ready only.
-- PR #2635 is open for the profile collected Activity Overview tables and
-  remains review-ready only.
-- Current implementation surface: profile collected Activity Overview tables
-  under the expanded stats panel are complete in PR #2635. The branch is
-  `codex/user-collected-activity-overview-a11y-i18n`, stacked from PR #2634.
+- PR #2635 is bot-happy on the latest head and remains review-ready only.
+- PR #2636 is bot-happy on the latest head and remains review-ready only.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate PR #2635 with available bots/checks, but do not merge without human
-   approval.
+1. Start the next low-risk `/{user}/collected` follow-up stacked from the
+   activity-tabs PR #2636.
 2. Maintain PRs #2635, #2634, #2633, #2631, #2630, #2629, and #2628 as review-ready only;
-   do not merge without human approval.
-3. Maintain PRs #2626 and #2627 as review-ready only; do not merge without
-   human approval.
-4. Keep all page implementation PRs review-ready only; do not merge without
-   human approval.
+   do not merge.
+3. Maintain PRs #2626 and #2627 as review-ready only; do not merge.
+4. Keep all page implementation PRs review-ready only; do not merge.
 5. Preserve the unrelated dirty EmojiContext and bootstrap style files.

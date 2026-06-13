@@ -150,6 +150,12 @@ describe("frontend i18n helpers", () => {
         seasonNumber: 1,
       })
     );
+    expect(t("fr-FR", "user.collected.stats.activityTabs.walletActivity")).toBe(
+      t("en-US", "user.collected.stats.activityTabs.walletActivity")
+    );
+    expect(t("de-DE", "user.collected.stats.activityTabs.listLabel")).toBe(
+      t("en-US", "user.collected.stats.activityTabs.listLabel")
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
