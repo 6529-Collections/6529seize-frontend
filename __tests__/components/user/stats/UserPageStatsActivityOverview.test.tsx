@@ -90,13 +90,13 @@ describe("UserPageStatsActivityOverview", () => {
     ).toBeInTheDocument();
     expect(within(overviewTable).getByText("1,000")).toBeInTheDocument();
 
-    const seasonTable = screen.getByRole("table", {
+    const seasonTable = await screen.findByRole("table", {
       name: activityText(
         "user.collected.stats.activityOverview.tables.memesBySeasonCaption"
       ),
     });
     expect(
-      within(seasonTable).getByRole("rowheader", {
+      await within(seasonTable).findByRole("rowheader", {
         name: activityText(
           "user.collected.stats.activityOverview.seasonLabel",
           { seasonNumber: 1 }
