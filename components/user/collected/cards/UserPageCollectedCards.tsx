@@ -16,11 +16,11 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 import type { ContractType } from "@/types/enums";
 
-const COLLECTED_CARDS_GRID_CLASS =
+const COLLECTED_CARDS_LIST_CLASS =
   "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
-const COLLECTED_CARDS_GRID_LABEL = translate(
+const COLLECTED_CARDS_LIST_LABEL = translate(
   DEFAULT_LOCALE,
-  "user.collected.cards.gridLabel"
+  "user.collected.cards.listLabel"
 );
 
 export default function UserPageCollectedCards({
@@ -51,8 +51,8 @@ export default function UserPageCollectedCards({
         <div className="tw-flow-root">
           <ul
             role="list"
-            aria-label={COLLECTED_CARDS_GRID_LABEL}
-            className={COLLECTED_CARDS_GRID_CLASS}
+            aria-label={COLLECTED_CARDS_LIST_LABEL}
+            className={COLLECTED_CARDS_LIST_CLASS}
           >
             {cards.map((card) => {
               const selKey = buildTransferKey({

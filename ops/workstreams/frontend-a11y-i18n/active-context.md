@@ -29,7 +29,7 @@ page migration PRs for safe media surfaces.
 - PR #2624 is open and review-ready only after the CodeRabbit video-fallback
   fix; keep it unmerged without human approval.
 - PR #2625 is bot-happy on the latest head and remains review-ready only.
-- Current implementation surface: profile collected native card grid semantics,
+- Current implementation surface: profile collected native card list semantics,
   stacked on PR #2625. The branch is
   `codex/user-collected-cards-a11y-i18n`; PR #2626 is open and review-ready
   only.

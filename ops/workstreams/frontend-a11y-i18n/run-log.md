@@ -668,12 +668,12 @@
   actionable review. Per workstream policy, do not merge PR #2625 without human
   approval.
 - Started stacked branch `codex/user-collected-cards-a11y-i18n` from PR #2625
-  for a low-risk `/{user}/collected` native card-grid follow-up.
+  for a low-risk `/{user}/collected` native card list follow-up.
 - Implemented labelled list/listitem semantics for profile native collected
-  card results. Added source message key `user.collected.cards.gridLabel`,
+  card results. Added source message key `user.collected.cards.listLabel`,
   fallback coverage, component assertions for list semantics and empty-state
   behavior, and Collected-tab feature docs.
-- Validation passed for the profile collected card-grid follow-up: focused
+- Validation passed for the profile collected card list follow-up: focused
   collected-card/i18n Jest suites (2 suites, 6 tests), focused Prettier check,
   `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
   still reports only the unrelated dirty EmojiContext diagnostic.
@@ -688,3 +688,5 @@
   static list label. Re-ran the focused collected-card/i18n Jest suites,
   Prettier check, `lint:changed`, and `typecheck:changed`; results remained
   green.
+- Addressed CodeRabbit's PR #2626 tracker wording finding by updating the
+  outdated collected-surface status to collected card list wording.

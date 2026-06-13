@@ -26,3 +26,4 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2625 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
 | 2026-06-13 | #2625 | Snyk         | PR check passed                                                           | Accept                               |
 | 2026-06-13 | #2626 | CodeRabbit   | Flagged missing explicit list role for Safari/VoiceOver list semantics    | Fixed                                |
+| 2026-06-13 | #2626 | CodeRabbit   | Flagged outdated collected-surface tracker wording                        | Fixed                                |

@@ -73,8 +73,8 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "rememes.refresh.ariaLabel")).toBe(
       "Refresh ReMemes results"
     );
-    expect(t("fr-FR", "user.collected.cards.gridLabel")).toBe(
-      t("en-US", "user.collected.cards.gridLabel")
+    expect(t("fr-FR", "user.collected.cards.listLabel")).toBe(
+      t("en-US", "user.collected.cards.listLabel")
     );
     expect(t("de-DE", "theMemes.detail.live.market.title")).toBe(
       t("en-US", "theMemes.detail.live.market.title")
