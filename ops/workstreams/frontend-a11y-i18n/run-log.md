@@ -1128,3 +1128,21 @@
   source files, `typecheck:changed`, `react-doctor:diff`, and `git diff
   --check`. React Doctor still reports only the unrelated dirty
   `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Confirmed PR #2643 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
+  review threads are open, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2643.
+- Started stacked branch `codex/user-header-about-a11y-i18n` from PR #2643 for
+  the next low-risk profile header follow-up.
+- Implemented message-backed source-locale labels for the profile header About
+  placeholder, add/edit actions, and mobile expand/collapse control. Split the
+  existing statement edit affordance so long statements can keep their own
+  expand button without being nested inside a parent edit button. The public
+  read-only profile continues to render no hidden About edit controls.
+- Validation passed for the About statement follow-up so far: focused about/i18n
+  Jest suites (3 suites, 10 tests), targeted ESLint for touched source files,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, Next MCP runtime
+  diagnostics, and desktop/mobile browser smoke on `/punk6529`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic; the local browser console still shows known shared
+  API/emoji resource errors.

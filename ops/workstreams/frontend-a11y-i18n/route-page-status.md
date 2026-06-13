@@ -41,3 +41,4 @@
 | User followers modal/list              | PR open              | PR open           | PR #2641; review-ready only; stacked on PR #2640; do not merge yet |
 | User profile header stats row          | PR open              | PR open            | PR #2642; review-ready only; stacked on PR #2641; do not merge yet |
 | User profile header identity/media     | PR open              | PR open            | PR #2643; review-ready only; stacked on PR #2642; do not merge yet |
+| User profile header About statement    | Branch ready         | Branch ready       | Pending PR; stacked on PR #2643; do not merge page PRs             |

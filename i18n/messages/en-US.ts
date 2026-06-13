@@ -280,6 +280,11 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "pfp.alt": "{name}'s profile picture",
   "pfp.edit": "Edit {name}'s profile picture",
   "banner.edit": "Edit {name}'s profile banner",
+  "about.add": "Add About statement",
+  "about.edit": "Edit About statement",
+  "about.empty": "Click to add an About statement",
+  "about.expand": "See more",
+  "about.collapse": "See less",
 } as const);
 
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [

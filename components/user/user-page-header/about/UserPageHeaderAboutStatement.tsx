@@ -2,6 +2,7 @@
 
 import type { CicStatement } from "@/entities/IProfile";
 import { useState } from "react";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderAboutStatement({
   statement,
@@ -12,7 +13,7 @@ export default function UserPageHeaderAboutStatement({
   if (!statement) {
     return (
       <div className="tw-text-sm tw-italic tw-text-white/40 tw-transition tw-duration-200 group-focus-within:tw-text-white/70 group-hover:tw-text-white/70">
-        Click to add an About statement
+        {getUserProfileHeaderMessage("user.profileHeader.about.empty")}
       </div>
     );
   }
@@ -36,9 +37,14 @@ export default function UserPageHeaderAboutStatement({
             event.stopPropagation();
             setExpanded((prev) => !prev);
           }}
+          aria-expanded={expanded}
           className="tw-border-0 tw-bg-transparent tw-px-1 tw-py-1 tw-text-sm tw-font-semibold tw-text-white/80 tw-transition tw-duration-200 tw-ease-out hover:tw-text-white md:tw-hidden"
         >
-          {expanded ? "See less" : "See more"}
+          {getUserProfileHeaderMessage(
+            expanded
+              ? "user.profileHeader.about.collapse"
+              : "user.profileHeader.about.expand"
+          )}
         </button>
       )}
     </div>
