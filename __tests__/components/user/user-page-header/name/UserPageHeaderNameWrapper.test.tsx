@@ -16,15 +16,17 @@ jest.mock(
   "@/components/utils/animation/CommonAnimationOpacity",
   () =>
     ({ children, onClicked }: any) => (
-      <div data-testid="opacity" onClick={onClicked}>
+      <button data-testid="opacity" type="button" onClick={onClicked}>
         {children}
-      </div>
+      </button>
     )
 );
 
 jest.mock(
   "@/components/user/user-page-header/name/UserPageHeaderEditName",
-  () => (props: any) => <div data-testid="edit" onClick={props.onClose} />
+  () => (props: any) => (
+    <button data-testid="edit" type="button" onClick={props.onClose} />
+  )
 );
 
 describe("UserPageHeaderNameWrapper", () => {

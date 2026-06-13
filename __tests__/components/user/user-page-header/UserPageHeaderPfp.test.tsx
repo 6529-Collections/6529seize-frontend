@@ -1,10 +1,12 @@
 import { render, screen } from "@testing-library/react";
+import { createElement } from "react";
 
 import UserPageHeaderPfp from "@/components/user/user-page-header/pfp/UserPageHeaderPfp";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) =>
+    createElement("img", { ...props, alt: props.alt ?? "" }),
 }));
 
 describe("UserPageHeaderPfp", () => {

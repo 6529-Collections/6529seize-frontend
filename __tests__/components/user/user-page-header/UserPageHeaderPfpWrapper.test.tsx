@@ -8,7 +8,9 @@ jest.mock("@/components/utils/icons/PencilIcon", () => () => (
 ));
 jest.mock(
   "@/components/user/user-page-header/pfp/UserPageHeaderEditPfp",
-  () => (props: any) => <div data-testid="edit" onClick={props.onClose} />
+  () => (props: any) => (
+    <button data-testid="edit" type="button" onClick={props.onClose} />
+  )
 );
 
 jest.mock(
@@ -20,9 +22,9 @@ jest.mock(
   "@/components/utils/animation/CommonAnimationOpacity",
   () =>
     ({ children, onClicked }: any) => (
-      <div data-testid="opacity" onClick={onClicked}>
+      <button data-testid="opacity" type="button" onClick={onClicked}>
         {children}
-      </div>
+      </button>
     )
 );
 
