@@ -857,3 +857,7 @@
   focused collected stats/shared-table/i18n Jest suites, `lint:changed`,
   `typecheck:changed`, `react-doctor:diff`, and `git diff --check`; results
   remained green apart from the known unrelated EmojiContext diagnostic.
+- Confirmed PR #2633 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, there are no review
+  threads, and Claude remained configured for manual review only. Per
+  workstream policy, do not merge PR #2633 without human approval.

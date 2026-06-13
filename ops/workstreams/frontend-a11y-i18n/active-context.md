@@ -36,8 +36,7 @@ page migration PRs for safe media surfaces.
 - PR #2629 is bot-happy on the latest head and remains review-ready only.
 - PR #2630 is bot-happy on the latest head and remains review-ready only.
 - PR #2631 is bot-happy on the latest head and remains review-ready only.
-- PR #2633 is open for profile collected details tables and remains
-  review-ready only.
+- PR #2633 is bot-happy on the latest head and remains review-ready only.
 - Current implementation surface: profile collected details tables under the
   expanded stats panel are complete in PR #2633. The branch is
   `codex/user-collected-details-tables-a11y-i18n`, stacked from PR #2631.
@@ -47,14 +46,15 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Iterate PR #2633 with available bots/checks, but do not merge without human
+1. Start the next low-risk profile/media surface from PR #2633 after confirming
+   the target component boundaries.
+2. Keep PR #2633 review-ready only; do not merge without human approval.
+3. Keep PR #2631 review-ready only; do not merge without human approval.
+4. Keep PR #2630 review-ready only; do not merge without human approval.
+5. Keep PR #2629 review-ready only; do not merge without human approval.
+6. Keep PR #2628 review-ready only; do not merge without human approval.
+7. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
    approval.
-2. Keep PR #2631 review-ready only; do not merge without human approval.
-3. Keep PR #2630 review-ready only; do not merge without human approval.
-4. Keep PR #2629 review-ready only; do not merge without human approval.
-5. Keep PR #2628 review-ready only; do not merge without human approval.
-6. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
+8. Keep page implementation PRs review-ready only; do not merge without human
    approval.
-7. Keep page implementation PRs review-ready only; do not merge without human
-   approval.
-8. Preserve the unrelated dirty EmojiContext and bootstrap style files.
+9. Preserve the unrelated dirty EmojiContext and bootstrap style files.
