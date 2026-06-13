@@ -18,6 +18,10 @@ import type { ContractType } from "@/types/enums";
 
 const COLLECTED_CARDS_GRID_CLASS =
   "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
+const COLLECTED_CARDS_GRID_LABEL = translate(
+  DEFAULT_LOCALE,
+  "user.collected.cards.gridLabel"
+);
 
 export default function UserPageCollectedCards({
   cards,
@@ -46,10 +50,8 @@ export default function UserPageCollectedCards({
       {cards.length ? (
         <div className="tw-flow-root">
           <ul
-            aria-label={translate(
-              DEFAULT_LOCALE,
-              "user.collected.cards.gridLabel"
-            )}
+            role="list"
+            aria-label={COLLECTED_CARDS_GRID_LABEL}
             className={COLLECTED_CARDS_GRID_CLASS}
           >
             {cards.map((card) => {

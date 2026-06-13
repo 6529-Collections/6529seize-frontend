@@ -683,3 +683,8 @@
   session errors. Console resource errors were shared backend/resource noise.
 - Opened review-ready stacked PR #2626 against PR #2625. Per workstream policy,
   do not merge PR #2626 without human approval.
+- Addressed CodeRabbit's PR #2626 Safari/VoiceOver list-semantics finding by
+  adding an explicit `role="list"` to the collected cards `ul` and hoisting the
+  static list label. Re-ran the focused collected-card/i18n Jest suites,
+  Prettier check, `lint:changed`, and `typecheck:changed`; results remained
+  green.
