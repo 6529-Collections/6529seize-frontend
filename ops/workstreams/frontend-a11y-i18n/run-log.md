@@ -963,3 +963,5 @@
   Browser smoke verified the Wallet Activity heading, filter trigger accessible
   name, option list labels, pressed state, Wallet Activity table caption,
   `Mints` selection/query update, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2637 against PR #2636. Per workstream policy,
+  do not merge PR #2637.

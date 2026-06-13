@@ -33,4 +33,4 @@
 | Profile boost breakdown   | `codex/user-collected-boost-breakdown-a11y-i18n`        | #2634 | Open, review-ready only |
 | Profile activity overview | `codex/user-collected-activity-overview-a11y-i18n`      | #2635 | Open, review-ready only |
 | Profile activity tabs     | `codex/user-collected-activity-tabs-a11y-i18n`          | #2636 | Open, review-ready only |
-| Profile wallet activity   | `codex/user-collected-wallet-activity-filter-a11y-i18n` | TBD   | In progress             |
+| Profile wallet activity   | `codex/user-collected-wallet-activity-filter-a11y-i18n` | #2637 | Open, review-ready only |
