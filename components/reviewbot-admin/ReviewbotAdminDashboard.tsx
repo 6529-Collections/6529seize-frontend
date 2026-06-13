@@ -121,12 +121,12 @@ function AdminGateState({
   readonly message: string;
   readonly status: "unconfigured" | "unauthenticated" | "forbidden";
 }) {
-  const title =
-    status === "unconfigured"
-      ? "Admin Not Configured"
-      : status === "forbidden"
-        ? "Admin Access Restricted"
-        : "Operator Sign-In Required";
+  let title = "Operator Sign-In Required";
+  if (status === "unconfigured") {
+    title = "Admin Not Configured";
+  } else if (status === "forbidden") {
+    title = "Admin Access Restricted";
+  }
 
   return (
     <div className="tw-container tw-mx-auto tw-px-4 tw-py-4 sm:tw-px-6 lg:tw-px-8">

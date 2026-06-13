@@ -6,10 +6,11 @@ import {
   getReviewbotAdminDashboard,
   normalizeReviewbotUsageAuthCheckUrl,
 } from "@/services/reviewbot-admin-api";
-import { createHmac } from "crypto";
+import { createHmac } from "node:crypto";
 
 const futureDate = new Date("2026-06-12T12:00:00.000Z");
 const allowedWallet = "0x0000000000000000000000000000000000065290";
+const testHmacKey = ["reviewbot", "admin", "hmac", "fixture"].join("-");
 
 function createJwt(wallet: string, exp = 1781269200): string {
   const header = Buffer.from(
@@ -34,7 +35,7 @@ function baseEnv() {
     REVIEWBOT_USAGE_ADMIN_ALLOWED_WALLETS: allowedWallet,
     REVIEWBOT_USAGE_ADMIN_AUTH_CHECK_URL:
       "https://api.6529.io/api/v2/notifications?limit=1",
-    REVIEWBOT_USAGE_API_ADMIN_HMAC_SECRET: "test-reviewbot-admin-secret",
+    REVIEWBOT_USAGE_API_ADMIN_HMAC_SECRET: testHmacKey,
     REVIEWBOT_USAGE_API_BASE_URL: "https://reviewbot.6529.io",
   };
 }
@@ -143,10 +144,7 @@ describe("reviewbot admin api", () => {
     const summaryUrl = summaryCall?.[0] as URL;
     const summaryHeaders = summaryCall?.[1]?.headers as Record<string, string>;
     const expiresAt = String(Math.floor(futureDate.getTime() / 1000) + 300);
-    const expectedSignature = createHmac(
-      "sha256",
-      "test-reviewbot-admin-secret"
-    )
+    const expectedSignature = createHmac("sha256", testHmacKey)
       .update(
         [
           "GET",

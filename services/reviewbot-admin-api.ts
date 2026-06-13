@@ -12,7 +12,7 @@ import {
   type ReviewbotUsageEnv,
 } from "@/config/reviewbotUsageEnv";
 import { cookies } from "next/headers";
-import { createHmac } from "crypto";
+import { createHmac } from "node:crypto";
 import { jwtDecode } from "jwt-decode";
 import { z } from "zod";
 
