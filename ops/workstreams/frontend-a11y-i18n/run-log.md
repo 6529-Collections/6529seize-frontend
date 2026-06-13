@@ -995,3 +995,5 @@
   wrapper Suspense boundary from PR #2636. Browser smoke verified the
   Distributions tab selection/panel relationship, message-backed heading,
   native empty-state output, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2638 against PR #2637. Per workstream policy,
+  do not merge PR #2638.
