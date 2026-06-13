@@ -56,11 +56,8 @@ export default function UserPageCollectedCardsNoCards({
   const msg = getNoCardsMessage(filters);
 
   return (
-    <div
-      role="status"
-      className="tw-py-4 tw-text-sm tw-italic tw-text-iron-500"
-    >
+    <output className="tw-block tw-py-4 tw-text-sm tw-italic tw-text-iron-500">
       {msg}
-    </div>
+    </output>
   );
 }

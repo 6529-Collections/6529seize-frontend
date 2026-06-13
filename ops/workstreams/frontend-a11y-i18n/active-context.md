@@ -30,7 +30,7 @@ page migration PRs for safe media surfaces.
   fix; keep it unmerged without human approval.
 - PR #2625 is bot-happy on the latest head and remains review-ready only.
 - PR #2626 is bot-happy on the latest head and remains review-ready only.
-- PR #2627 is bot-happy on the latest head and remains review-ready only.
+- PR #2627 remains review-ready only with a bot-happy latest head.
 - Current implementation surface: profile collected empty states, stacked on PR
   #2627. The branch is `codex/user-collected-empty-states-a11y-i18n`; PR #2628
   is open and review-ready only.
