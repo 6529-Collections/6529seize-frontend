@@ -285,6 +285,27 @@ const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
   "about.empty": "Click to add an About statement",
   "about.expand": "See more",
   "about.collapse": "See less",
+  "aboutEdit.textareaLabel": "About statement",
+  "aboutEdit.placeholder": "Write an About statement",
+  "aboutEdit.characterCount": "{count}/{max}",
+  "aboutEdit.cancel": "Cancel",
+  "aboutEdit.save": "Save",
+  "aboutEdit.success": "About statement added.",
+  "aboutEdit.errors.close": "Dismiss About statement error",
+  "aboutEdit.errors.unknown.title": "Unknown Error",
+  "aboutEdit.errors.hateSpeech.title": "Error: Hate Speech",
+  "aboutEdit.errors.hateSpeech.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially containing hate speech. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+  "aboutEdit.errors.personalInsults.title": "Error: Personal Insults",
+  "aboutEdit.errors.personalInsults.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially containing a personal insult. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+  "aboutEdit.errors.inappropriateLanguage.title":
+    "Error: Inappropriate Language",
+  "aboutEdit.errors.inappropriateLanguage.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially containing inappropriate language that may make others uncomfortable. We want to keep seize a welcoming place! We'd appreciate it if you adjusted your text.",
+  "aboutEdit.errors.doxxing.title": "Error: Doxxing of Another Person",
+  "aboutEdit.errors.doxxing.value":
+    "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system. We have a strong cultural value around respecting pseudonymity, so we'd appreciate it if you adjusted your text.",
 } as const);
 
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [

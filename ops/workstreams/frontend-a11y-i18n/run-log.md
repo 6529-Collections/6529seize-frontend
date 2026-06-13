@@ -1148,3 +1148,20 @@
   API/emoji resource errors.
 - Opened review-ready stacked PR #2644 against PR #2643. Per workstream policy,
   do not merge PR #2644.
+- Confirmed PR #2644 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
+  review threads are open, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2644.
+- Started stacked branch `codex/user-about-edit-a11y-i18n` from PR #2644 for the
+  next adjacent profile About follow-up.
+- Implemented message-backed source-locale labels for the profile About edit
+  form textarea, placeholder, character count, cancel/save controls, success
+  toast, moderation error copy, unknown-error title, and error-dismiss action.
+  The moderation error container now uses `role="alert"` so errors are announced.
+- Validation passed for the About edit-form follow-up so far: focused edit
+  form/error/i18n Jest suites (3 suites, 7 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, `git diff --check`,
+  Next MCP runtime diagnostics, and desktop browser smoke on `/punk6529`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic; the local browser console still shows known shared
+  API/emoji resource errors.

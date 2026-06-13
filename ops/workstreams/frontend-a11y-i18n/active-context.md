@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-header-about-a11y-i18n`
+`codex/user-about-edit-a11y-i18n`
 
 ## Constraints
 
@@ -60,22 +60,24 @@ page migration PRs for safe media surfaces.
   covers the user profile header identity/name/media labels, profile-enabled
   date formatting, and read-only wrapper semantics. It is stacked from PR #2642
   and must not be merged.
-- PR #2644 is open and review-ready only. It covers the user profile header
-  About statement placeholder, add/edit controls, mobile expand/collapse toggle,
-  and nested-interactive-control cleanup. It is stacked from PR #2643 and must
-  not be merged.
+- PR #2644 is bot-happy on the latest head and remains review-ready only. It
+  covers the user profile header About statement placeholder, add/edit controls,
+  mobile expand/collapse toggle, and nested-interactive-control cleanup. It is
+  stacked from PR #2643 and must not be merged.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate on PR #2644 with available bots/checks without merging.
-2. Keep PR #2643 review-ready only; do not merge.
-3. Keep PR #2642 review-ready only; do not merge.
-4. Keep PR #2641 review-ready only; do not merge.
-5. Keep PR #2640 review-ready only; do not merge.
-6. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;
+1. Open the profile About edit form PR from `codex/user-about-edit-a11y-i18n`,
+   then iterate with available bots/checks without merging.
+2. Keep PR #2644 review-ready only; do not merge.
+3. Keep PR #2643 review-ready only; do not merge.
+4. Keep PR #2642 review-ready only; do not merge.
+5. Keep PR #2641 review-ready only; do not merge.
+6. Keep PR #2640 review-ready only; do not merge.
+7. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;
    do not merge.
-7. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
+8. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
    style files.
