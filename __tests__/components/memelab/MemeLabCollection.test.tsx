@@ -46,6 +46,11 @@ beforeEach(() => {
 
 const collectionName = "Cool Collection";
 
+const DEFAULT_MEME_LAB_PROPS: ComponentProps<typeof MemeLabComponent> = {
+  initialSort: null,
+  initialSortDirection: null,
+};
+
 function renderComponent(locale?: "en-US" | "de-DE") {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -63,10 +68,7 @@ function renderComponent(locale?: "en-US" | "de-DE") {
 }
 
 function renderMemeLab(props?: ComponentProps<typeof MemeLabComponent>) {
-  const componentProps = props ?? {
-    initialSort: null,
-    initialSortDirection: null,
-  };
+  const componentProps = props ?? DEFAULT_MEME_LAB_PROPS;
 
   const queryClient = new QueryClient({
     defaultOptions: {
