@@ -32,8 +32,8 @@ page migration PRs for safe media surfaces.
 - PR #2626 is bot-happy on the latest head and remains review-ready only.
 - Current implementation surface: profile collected network card list
   semantics, stacked on PR #2626. The branch is
-  `codex/user-collected-network-cards-a11y-i18n`; PR #2627 is open and
-  review-ready only.
+  `codex/user-collected-network-cards-a11y-i18n`; PR #2627 is bot-happy on the
+  latest head and remains review-ready only.
 - Scope includes labelled list/listitem semantics, message-backed copy, and
   message-backed image alternatives for network `/{user}/collected` card
   results, while preserving pagination behavior.
@@ -43,9 +43,11 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Confirm PR #2627 checks and bot feedback after the latest push.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback for PR #2627.
-3. Keep PR #2626 review-ready only; do not merge without human approval.
+1. Start the next low-risk read-only profile or media card surface from PR
+   #2627.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback for the next PR.
+3. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
+   approval.
 4. Keep page implementation PRs review-ready only; do not merge without human
    approval.
 5. Preserve the unrelated dirty EmojiContext and bootstrap style files.
