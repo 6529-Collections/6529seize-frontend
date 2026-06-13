@@ -167,6 +167,15 @@ describe("frontend i18n helpers", () => {
     expect(t("es-ES", "user.collected.stats.walletActivity.empty.mints")).toBe(
       t("en-US", "user.collected.stats.walletActivity.empty.mints")
     );
+    expect(t("fr-FR", "user.collected.stats.distributions.title")).toBe(
+      t("en-US", "user.collected.stats.distributions.title")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.distributions.tokenLinkAriaLabel", {
+        collection: "The Memes",
+        tokenId: 1,
+      })
+    ).toBe("View The Memes token #1");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
