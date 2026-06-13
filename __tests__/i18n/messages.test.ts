@@ -105,6 +105,27 @@ describe("frontend i18n helpers", () => {
         value: "465",
       })
     );
+    expect(t("fr-FR", "user.collected.stats.details.overview")).toBe(
+      t("en-US", "user.collected.stats.details.overview")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.details.tables.overviewCaption")
+    ).toBe(t("en-US", "user.collected.stats.details.tables.overviewCaption"));
+    expect(
+      t("es-ES", "user.collected.stats.details.seasonLabel", {
+        seasonNumber: 1,
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.details.seasonLabel", {
+        seasonNumber: 1,
+      })
+    );
+    expect(
+      t("fr-FR", "user.collected.stats.details.uniqueProgress", {
+        held: "1",
+        total: "2",
+      })
+    ).toBe("1 / 2");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );

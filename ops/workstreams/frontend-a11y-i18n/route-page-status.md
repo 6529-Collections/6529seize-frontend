@@ -30,3 +30,4 @@
 | `/{user}/collected` filter controls    | PR open              | PR open           | PR #2629; review-ready only; stacked on PR #2628; do not merge yet |
 | `/{user}/collected` season strip       | PR open              | PR open           | PR #2630; review-ready only; stacked on PR #2629; do not merge yet |
 | `/{user}/collected` stats summary      | PR open              | PR open           | PR #2631; review-ready only; stacked on PR #2630; do not merge yet |
+| `/{user}/collected` details tables     | PR open              | PR open           | PR #2633; review-ready only; stacked on PR #2631; do not merge yet |
