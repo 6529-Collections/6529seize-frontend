@@ -68,4 +68,24 @@ test("renders rows, phase headers, and a named table", () => {
       )
     )
   ).toBeInTheDocument();
+  expect(
+    screen.queryByText(
+      getDistributionsMessage("user.collected.stats.distributions.loading")
+    )
+  ).not.toBeInTheDocument();
+});
+
+test("renders the loading label only while loading", () => {
+  render(
+    <UserPageStatsActivityDistributionsTable
+      items={items}
+      profile={profile}
+      loading={true}
+    />
+  );
+  expect(
+    screen.getByText(
+      getDistributionsMessage("user.collected.stats.distributions.loading")
+    )
+  ).toBeInTheDocument();
 });

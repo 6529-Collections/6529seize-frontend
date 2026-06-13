@@ -167,14 +167,16 @@ export default function UserPageStatsActivityDistributionsTable({
             scope="col"
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
-            <div className={loading ? "tw-opacity-100" : "tw-opacity-0"}>
-              <span className="tw-sr-only">
-                {getDistributionsMessage(
-                  "user.collected.stats.distributions.loading"
-                )}
-              </span>
-              <CircleLoader />
-            </div>
+            {loading ? (
+              <div>
+                <span className="tw-sr-only">
+                  {getDistributionsMessage(
+                    "user.collected.stats.distributions.loading"
+                  )}
+                </span>
+                <CircleLoader />
+              </div>
+            ) : null}
           </th>
         </tr>
       </thead>

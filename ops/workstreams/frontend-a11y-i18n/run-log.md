@@ -997,3 +997,6 @@
   native empty-state output, and no Next.js runtime session errors.
 - Opened review-ready stacked PR #2638 against PR #2637. Per workstream policy,
   do not merge PR #2638.
+- CodeRabbit flagged that the Distributions loading label remained in the
+  accessibility tree when visually hidden by opacity. Fixed the loader subtree
+  to render only while loading and added a focused regression assertion.
