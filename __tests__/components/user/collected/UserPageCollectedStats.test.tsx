@@ -640,6 +640,33 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByTestId("details")).toBeInTheDocument();
   });
 
+  it("uses source-locale copy when stats details are unavailable", async () => {
+    const user = userEvent.setup();
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={
+          {
+            handle: "",
+            wallets: [],
+            consolidation_key: "",
+          } as any
+        }
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: undefined,
+        })}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Details" }));
+
+    expect(
+      screen.getByText("Stats are unavailable for this profile.")
+    ).toBeInTheDocument();
+    expect(apiMock).not.toHaveBeenCalled();
+  });
+
   it("starts with details open when an activity query param is present", async () => {
     useSearchParamsMock.mockReturnValue({
       get: (key: string) => (key === "activity" ? "distributions" : null),

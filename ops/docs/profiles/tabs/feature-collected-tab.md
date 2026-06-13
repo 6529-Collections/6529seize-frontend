@@ -56,6 +56,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 2. Review the top stats block:
    - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
      `Gradients`, and `Boost`
+   - headline metric labels, multiplier values, unique-count copy, and the
+     `Details` toggle are message-backed from the source locale
    - collection-backed metrics (`NextGen`, `Meme Sets`, `Memes`, `Gradients`)
      act as shortcuts into that collection; clicking the active metric clears
      that collection filter
@@ -66,6 +68,8 @@ Transfer mode is part of the Native collected view (not a separate route).
      progress toward the next set
    - `Seasons` heading/count text, show more/less controls, unseized labels,
      and tile set-count text are message-backed from the source locale
+   - season tile labels and progress detail copy are message-backed from the
+     source locale
    - hover/focus previews a season tile's progress text; click applies or
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips

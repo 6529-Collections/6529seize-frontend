@@ -795,3 +795,32 @@
   SonarCloud passed with 0 new issues, CodeRabbit manual review passed with no
   review threads, and Claude remained configured for manual review only. Per
   workstream policy, do not merge PR #2630 without human approval.
+- Started stacked branch `codex/user-collected-stats-summary-a11y-i18n` from
+  PR #2630 for a low-risk `/{user}/collected` stats-summary follow-up.
+- Implemented message-backed source-locale copy for collected header metric
+  labels, multiplier values, unique-count copy, the `Details`/`Hide Details`
+  toggle, the stats-unavailable message, and remaining season tile label/detail
+  copy. Marked the Details icon decorative for assistive technologies.
+- Validation passed for the stats-summary follow-up: focused stats/season/i18n
+  Jest suites (3 suites, 27 tests), focused Prettier write/check during the
+  edit loop, `lint:changed`, `typecheck:changed`, and `react-doctor:diff`.
+  React Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified source-message metric labels,
+  season tile detail text, Details/Hide Details toggle text, `aria-expanded`
+  state changes, no page errors, and no Next.js runtime session errors. Mobile
+  horizontal overflow came from existing scrollable strips. Console resource
+  errors were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2631 against PR #2630. Per workstream policy,
+  do not merge PR #2631 without human approval.
+- Addressed SonarCloud's PR #2631 new-code duplication gate by moving the
+  collected stats message keys into a typed `namespaceMessages` block while
+  preserving the same public message keys. Re-ran focused stats/season/i18n
+  Jest suites, `lint:changed`, `typecheck:changed`, and `react-doctor:diff`;
+  results remained green apart from the known unrelated EmojiContext diagnostic.
+- Confirmed PR #2631 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues and 0.0% duplication, CodeRabbit manual
+  review passed with no review threads, and Claude remained configured for
+  manual review only. Per workstream policy, do not merge PR #2631 without
+  human approval.

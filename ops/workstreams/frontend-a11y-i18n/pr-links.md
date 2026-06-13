@@ -28,3 +28,4 @@
 | Profile empty states      | `codex/user-collected-empty-states-a11y-i18n`  | #2628 | Open, review-ready only |
 | Profile filter controls   | `codex/user-collected-sort-controls-a11y-i18n` | #2629 | Open, review-ready only |
 | Profile season strip      | `codex/user-collected-season-strip-a11y-i18n`  | #2630 | Open, review-ready only |
+| Profile stats summary     | `codex/user-collected-stats-summary-a11y-i18n` | #2631 | Open, review-ready only |
