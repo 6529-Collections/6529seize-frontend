@@ -34,3 +34,8 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2627 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
 | 2026-06-13 | #2627 | Snyk         | PR check passed                                                           | Accept                               |
 | 2026-06-13 | #2627 | CodeRabbit   | Latest head passed with no review threads                                 | Accept                               |
+| 2026-06-13 | #2628 | SonarCloud   | Flagged explicit `status` role in favor of native `<output>`              | Fixed                                |
+| 2026-06-13 | #2628 | CodeRabbit   | Flagged repetitive active-context wording                                 | Fixed                                |
+| 2026-06-13 | #2628 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
+| 2026-06-13 | #2628 | Snyk         | PR check passed                                                           | Accept                               |
+| 2026-06-13 | #2628 | CodeRabbit   | Latest head passed with no review threads                                 | Accept                               |

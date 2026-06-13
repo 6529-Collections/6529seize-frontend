@@ -739,3 +739,13 @@
   endpoints and blocked emoji feed noise.
 - Opened review-ready stacked PR #2628 against PR #2627. Per workstream policy,
   do not merge PR #2628 without human approval.
+- Addressed SonarCloud's PR #2628 native-status finding by replacing explicit
+  `role="status"` with `<output>`, then addressed CodeRabbit's active-context
+  wording nit. Re-ran focused empty-state/i18n tests, focused Prettier check,
+  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and
+  `git diff --check`; results remained green apart from the known unrelated
+  EmojiContext React Doctor diagnostic.
+- Confirmed PR #2628 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit passed with no review threads,
+  and Claude remained configured for manual review only. Per workstream policy,
+  do not merge PR #2628 without human approval.
