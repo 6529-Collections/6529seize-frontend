@@ -77,12 +77,9 @@ export default function UserPageStatsActivityWalletTableWrapper({
             )}
           </div>
         ) : (
-          <div
-            role="status"
-            className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base"
-          >
+          <output className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
             {getWalletActivityEmptyMessage(filter)}
-          </div>
+          </output>
         )}
       </div>
     </div>

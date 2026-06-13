@@ -965,3 +965,8 @@
   `Mints` selection/query update, and no Next.js runtime session errors.
 - Opened review-ready stacked PR #2637 against PR #2636. Per workstream policy,
   do not merge PR #2637.
+- SonarCloud reported one non-blocking accessibility code smell on PR #2637:
+  prefer native `<output>` over `role="status"` for the Wallet Activity empty
+  state. Updated the empty state wrapper to `<output>` and reran focused wallet
+  filter/table/i18n Jest suites, targeted eslint for the touched wrapper file,
+  `typecheck:changed`, and `git diff --check`.
