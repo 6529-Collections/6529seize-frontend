@@ -52,16 +52,16 @@ page migration PRs for safe media surfaces.
   status, nullable follower handle fallback, follower profile link names,
   avatar alt text, and semantic list structure. It is stacked from PR #2640 and
   must not be merged.
-- Current branch is stacked from PR #2641 and covers the user profile header
-  stats row labels, accessible names, and follower-count formatting.
+- PR #2642 is open and review-ready only. It covers the user profile header
+  stats row labels, accessible names, and follower-count formatting. It is
+  stacked from PR #2641 and must not be merged.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Publish the profile stats-row PR against PR #2641, then iterate with
-   available bots/checks without merging.
+1. Iterate on PR #2642 with available bots/checks without merging.
 2. Keep PR #2641 review-ready only; do not merge.
 3. Keep PR #2640 review-ready only; do not merge.
 4. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;

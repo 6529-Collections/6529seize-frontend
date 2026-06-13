@@ -1092,3 +1092,5 @@
   runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`. React
   Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
   fetch-in-effect diagnostic.
+- Opened review-ready stacked PR #2642 against PR #2641. Per workstream policy,
+  do not merge PR #2642.
