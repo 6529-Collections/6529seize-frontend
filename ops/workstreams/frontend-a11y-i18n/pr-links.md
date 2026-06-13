@@ -23,3 +23,4 @@
 | Meme calendar drilldowns  | `codex/meme-calendar-drilldown-a11y-i18n`      | #2623 | Open, review-ready only |
 | Rememes browse follow-up  | `codex/rememes-browse-card-followup-a11y-i18n` | #2624 | Open, review-ready only |
 | Meme Lab browse follow-up | `codex/memelab-browse-card-a11y-i18n-followup` | #2625 | Open, review-ready only |
+| Profile collected cards   | `codex/user-collected-cards-a11y-i18n`         | #2626 | Open, review-ready only |

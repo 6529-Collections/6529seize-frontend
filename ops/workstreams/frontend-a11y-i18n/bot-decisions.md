@@ -21,3 +21,13 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-12 | #2623 | CodeRabbit   | Suggested consolidating mint formatting and renaming card mint range data | Fixed                                |
 | 2026-06-12 | #2624 | SonarCloud   | Flagged optional chaining, redundant list role, and placeholder img role  | Fixed                                |
 | 2026-06-12 | #2624 | CodeRabbit   | Flagged missing top-level `nft.animation` video fallback                  | Fixed                                |
+| 2026-06-13 | #2625 | CodeRabbit   | Manual review found no issues                                             | Accept                               |
+| 2026-06-13 | #2625 | SonarCloud   | Flagged object literal fallback in Meme Lab test helper                   | Fixed                                |
+| 2026-06-13 | #2625 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
+| 2026-06-13 | #2625 | Snyk         | PR check passed                                                           | Accept                               |
+| 2026-06-13 | #2626 | CodeRabbit   | Flagged missing explicit list role for Safari/VoiceOver list semantics    | Fixed                                |
+| 2026-06-13 | #2626 | CodeRabbit   | Flagged outdated collected-surface tracker wording                        | Fixed                                |
+| 2026-06-13 | #2626 | SonarCloud   | Flagged explicit list role as redundant after CodeRabbit requested it     | Kept with Safari/VO prop rationale   |
+| 2026-06-13 | #2626 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
+| 2026-06-13 | #2626 | Snyk         | PR check passed                                                           | Accept                               |
+| 2026-06-13 | #2626 | CodeRabbit   | Latest head passed with all review threads resolved                       | Accept                               |

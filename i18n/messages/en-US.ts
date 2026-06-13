@@ -512,6 +512,7 @@ export const EN_US_MESSAGES = {
   "rememes.card.linkAriaLabel": "View {name}, ReMeme #{tokenId}",
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
+  "user.collected.cards.listLabel": "Collected cards",
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 
