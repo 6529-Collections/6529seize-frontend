@@ -691,5 +691,5 @@
 - Addressed CodeRabbit's PR #2626 tracker wording finding by updating the
   outdated collected-surface status to collected card list wording.
 - Addressed the PR #2626 SonarCloud/CodeRabbit role conflict by keeping the
-  explicit `list` role for Safari/VoiceOver compatibility behind a named
-  constant with a local rationale.
+  explicit `list` role for Safari/VoiceOver compatibility behind a small
+  compatibility prop object with a local rationale.
