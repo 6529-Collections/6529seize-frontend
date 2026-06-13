@@ -907,12 +907,12 @@
   tables on mobile, and no Next.js runtime session errors. Console resource
   errors were shared backend wave endpoints and blocked emoji feed noise.
 - Opened review-ready stacked PR #2635 against PR #2634. Per workstream policy,
-  do not merge PR #2635 without human approval.
+  do not merge PR #2635.
 - Confirmed PR #2635 is bot-happy on the latest head: DCO passed, Snyk passed,
   SonarCloud passed after reducing the row-config duplication, CodeRabbit
   manual review passed after the async test assertion fix, the stale review
   thread is resolved/outdated, and Claude remained configured for manual review
-  only. Per workstream policy, do not merge PR #2635 without human approval.
+  only. Per workstream policy, do not merge PR #2635.
 - Started stacked branch `codex/user-collected-activity-tabs-a11y-i18n` from
   PR #2635 for the next low-risk `/{user}/collected` Details-panel follow-up.
 - Implemented message-backed source-locale labels for the lower Activity tab
@@ -938,4 +938,4 @@
   errors. Console resource errors were shared backend wave endpoints and blocked
   emoji feed noise.
 - Opened review-ready stacked PR #2636 against PR #2635. Per workstream policy,
-  do not merge PR #2636 without human approval.
+  do not merge PR #2636.
