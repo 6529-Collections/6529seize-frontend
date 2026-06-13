@@ -11,6 +11,10 @@ import {
   getBannerImageUrl,
 } from "@/helpers/profile-banner.helpers";
 import UserPageHeaderEditBanner from "./UserPageHeaderEditBanner";
+import {
+  getUserProfileHeaderDisplayName,
+  getUserProfileHeaderMessage,
+} from "../user-page-header.messages";
 
 export default function UserPageHeaderBanner({
   profile,
@@ -30,6 +34,7 @@ export default function UserPageHeaderBanner({
     : null;
   const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
+  const profileLabel = getUserProfileHeaderDisplayName(profile, "profile");
 
   return (
     <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40">
@@ -54,12 +59,19 @@ export default function UserPageHeaderBanner({
 
       {canEdit && (
         <button
+          type="button"
           onClick={() => setIsEditOpen(true)}
           className="tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-border-none tw-bg-transparent tw-p-0"
-          aria-label="Edit banner"
+          aria-label={getUserProfileHeaderMessage(
+            "user.profileHeader.banner.edit",
+            { name: profileLabel }
+          )}
         >
           <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
-            <div className="tw-absolute tw-bottom-4 tw-right-4">
+            <div
+              aria-hidden="true"
+              className="tw-absolute tw-bottom-4 tw-right-4"
+            >
               <PencilIcon />
             </div>
           </div>

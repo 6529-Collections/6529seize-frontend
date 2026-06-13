@@ -210,6 +210,16 @@ describe("frontend i18n helpers", () => {
         followersLabel: "Follower",
       })
     ).toBe("Open alice's followers: 1 Follower");
+    expect(
+      t("de-DE", "user.profileHeader.pfp.alt", {
+        name: "alice",
+      })
+    ).toBe("alice's profile picture");
+    expect(
+      t("fr-FR", "user.profileHeader.name.profileEnabled", {
+        date: "January 2024",
+      })
+    ).toBe("Profile enabled: January 2024");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
