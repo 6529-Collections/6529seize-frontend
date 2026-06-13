@@ -76,6 +76,9 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "user.collected.cards.listLabel")).toBe(
       t("en-US", "user.collected.cards.listLabel")
     );
+    expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
+      t("en-US", "user.collected.networkCards.empty")
+    );
     expect(t("de-DE", "theMemes.detail.live.market.title")).toBe(
       t("en-US", "theMemes.detail.live.market.title")
     );

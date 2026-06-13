@@ -698,3 +698,19 @@
   issues. Claude remains configured for manual review and did not leave an
   actionable review. Per workstream policy, do not merge PR #2626 without human
   approval.
+- Started stacked branch `codex/user-collected-network-cards-a11y-i18n` from
+  PR #2626 for a low-risk `/{user}/collected` network card-list follow-up.
+- Implemented labelled list/listitem semantics for profile network collected
+  card results. Added source message keys for the list label, empty state,
+  fallback token/collection names, image alt text, token number label, and xTDH
+  labels, plus focused component and fallback-message coverage.
+- Validation passed for the profile collected network-card follow-up: focused
+  network-card/i18n Jest suites (2 suites, 5 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty EmojiContext diagnostic.
+- Browser smoke passed on the live local frontend for
+  `/punk6529/collected?collection=network`. The local seed data returns the
+  network empty state, so non-empty list semantics are covered by component
+  tests. Verified localized `No network tokens found` copy, no horizontal
+  overflow, and no Next.js runtime session errors. Console errors were shared
+  backend wave endpoints and blocked emoji feed noise.
