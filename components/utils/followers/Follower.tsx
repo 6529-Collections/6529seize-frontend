@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ApiIdentityAndSubscriptionActions } from "@/generated/models/ApiIdentityAndSubscriptionActions";
 import UserCICAndLevel, {
@@ -8,6 +9,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
+import { getFollowersMessage } from "./followers.messages";
 
 const FOLLOW_STATUS_PREFETCH_MARGIN = "360px";
 
@@ -20,7 +22,7 @@ export default function Follower({
   readonly showFollowButton?: boolean | undefined;
   readonly mutedBackground?: boolean | undefined;
 }) {
-  const rowRef = useRef<HTMLDivElement>(null);
+  const rowRef = useRef<HTMLLIElement>(null);
   const [shouldLoadFollowButton, setShouldLoadFollowButton] = useState(false);
   const { connectedProfile } = useContext(AuthContext);
   const followerHandle = follower.identity.handle;
@@ -34,6 +36,12 @@ export default function Follower({
       normalizedFollowerHandle !== normalizedConnectedHandle)
   );
   const backgroundClass = mutedBackground ? "tw-bg-white/[0.01]" : "";
+  const profileLabel = getFollowersMessage("followers.profile.linkAriaLabel", {
+    handle: followerHandle,
+  });
+  const profileImageAlt = getFollowersMessage("followers.profile.avatarAlt", {
+    handle: followerHandle,
+  });
 
   useEffect(() => {
     if (!shouldShowFollowButton || shouldLoadFollowButton) {
@@ -63,18 +71,22 @@ export default function Follower({
   }, [shouldShowFollowButton, shouldLoadFollowButton]);
 
   return (
-    <div ref={rowRef} className={`${backgroundClass} tw-py-3`}>
+    <li ref={rowRef} className={`${backgroundClass} tw-py-3`}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-4 sm:tw-px-6">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3">
           <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800">
             <div className="tw-h-full tw-w-full tw-rounded-lg">
               <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/5">
-                <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
+                <div className="tw-relative tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
                   {follower.identity.pfp ? (
-                    <img
+                    // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
+                    <Image
                       src={follower.identity.pfp}
-                      alt={`${follower.identity.handle}'s profile`}
-                      className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain"
+                      alt={profileImageAlt}
+                      fill
+                      unoptimized
+                      sizes="40px"
+                      className="tw-bg-transparent tw-object-contain"
                     />
                   ) : (
                     <div className="tw-mx-auto tw-h-auto tw-max-h-full tw-w-auto tw-max-w-full tw-bg-transparent tw-object-contain" />
@@ -89,6 +101,7 @@ export default function Follower({
                 <p className="tw-mb-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50">
                   <Link
                     href={`/${follower.identity.handle}`}
+                    aria-label={profileLabel}
                     className="tw-block tw-truncate tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 hover:tw-underline"
                   >
                     {follower.identity.handle}
@@ -115,6 +128,6 @@ export default function Follower({
           </div>
         )}
       </div>
-    </div>
+    </li>
   );
 }
