@@ -7,7 +7,7 @@ page migration PRs for safe media surfaces.
 
 ## Current Branch
 
-`codex/user-collected-empty-states-a11y-i18n`
+`codex/user-collected-sort-controls-a11y-i18n`
 
 ## Constraints
 
@@ -32,17 +32,20 @@ page migration PRs for safe media surfaces.
 - PR #2626 is bot-happy on the latest head and remains review-ready only.
 - PR #2627 remains review-ready only with a bot-happy latest head.
 - PR #2628 is bot-happy on the latest head and remains review-ready only.
-- Current implementation surface: profile collected empty states is complete
-  and bot-happy on PR #2628. The branch is
-  `codex/user-collected-empty-states-a11y-i18n`.
+- Current implementation surface: profile collected filter and sort controls,
+  stacked on PR #2628. The branch is
+  `codex/user-collected-sort-controls-a11y-i18n`; PR is pending.
+- Scope includes message-backed view, collection, sort, seized, unknown-network
+  collection, and filter-scroll labels while preserving existing filter
+  behavior.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Start the next low-risk read-only profile/media surface from PR #2628.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback for the next PR.
+1. Open the profile collected sort/filter controls PR against PR #2628.
+2. Iterate on actionable CodeRabbit/Claude/CI feedback for the controls PR.
 3. Keep PR #2628 review-ready only; do not merge without human approval.
 4. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
    approval.

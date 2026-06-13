@@ -749,3 +749,20 @@
   SonarCloud passed with 0 new issues, CodeRabbit passed with no review threads,
   and Claude remained configured for manual review only. Per workstream policy,
   do not merge PR #2628 without human approval.
+- Started stacked branch `codex/user-collected-sort-controls-a11y-i18n` from
+  PR #2628 for a low-risk `/{user}/collected` filter-control follow-up.
+- Implemented message-backed collected filter labels for View, Native/Network,
+  Collection, All/All Collections, Unknown Collection, Sort By, collection sort
+  options, Seized filter options, and horizontal filter-scroll buttons. Removed
+  derived sort-item state in favor of memoized source-label items and made the
+  touched filter-strip scroll listener passive.
+- Focused validation passed for the filter-control follow-up: collected filter
+  and i18n Jest suites (6 suites, 17 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified source-message filter labels,
+  filter accessible names, no horizontal overflow, no page errors, and no
+  Next.js runtime session errors. Console errors were shared backend wave
+  endpoints and blocked emoji feed noise.
