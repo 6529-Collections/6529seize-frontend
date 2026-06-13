@@ -824,3 +824,21 @@
   review passed with no review threads, and Claude remained configured for
   manual review only. Per workstream policy, do not merge PR #2631 without
   human approval.
+- Started stacked branch `codex/user-collected-details-tables-a11y-i18n` from
+  PR #2631 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the expanded collected
+  details tables, added screen-reader table captions, promoted touched row
+  labels to table row headers, added column scopes, and moved touched collected
+  table counts/percent copy through the repo i18n formatting helpers. Hid the
+  visual separator rows from assistive technologies.
+- Validation passed for the details-table follow-up: focused collected
+  stats/shared-table/i18n Jest suites (3 suites, 6 tests), focused Prettier
+  write/check during the edit loop, `lint:changed`, `typecheck:changed`,
+  `react-doctor:diff`, and `git diff --check`. React Doctor still reports only
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and 390px mobile viewport. Verified `Details` opens, collected table
+  captions, scoped column headers, row headers, hidden separator rows, no
+  desktop or mobile page overflow, and no Next.js runtime session errors.
+  Console resource errors were shared backend wave endpoints and blocked emoji
+  feed noise.

@@ -72,6 +72,31 @@ const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
     ["seasonTile.label", "SZN{seasonNumber}"],
     ["seasonTile.toNextSet", "{held}/{total} to set {setNumber}"],
     ["seasonTile.setComplete", "Set {count} complete"],
+    ["details.collected.title", "Collected"],
+    ["details.overview", "Overview"],
+    [
+      "details.tables.overviewCaption",
+      "Collected holdings summary by collection",
+    ],
+    ["details.tables.column.total", "Total"],
+    ["details.tables.column.memes", "Memes"],
+    ["details.tables.column.nextGen", "NextGen"],
+    ["details.tables.column.gradient", "Gradient"],
+    ["details.tables.column.memeLab", "Meme Lab"],
+    ["details.rows.cards", "Cards"],
+    ["details.rows.rank", "Rank"],
+    ["details.rows.tdh", "TDH"],
+    ["details.rows.noTdh", "* No TDH"],
+    ["details.memesBySeason", "Memes Breakdown By Season"],
+    [
+      "details.tables.memesBySeasonCaption",
+      "Collected Memes breakdown by season",
+    ],
+    ["details.tables.column.unique", "Unique"],
+    ["details.tables.column.sets", "Sets"],
+    ["details.seasonLabel", "Season {seasonNumber}"],
+    ["details.uniqueProgress", "{held} / {total}"],
+    ["details.uniqueProgressPercent", "({percent})"],
   ] as const
 );
 

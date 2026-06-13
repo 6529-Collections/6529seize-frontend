@@ -76,6 +76,10 @@ Transfer mode is part of the Native collected view (not a separate route).
 3. Click `Details` to expand the integrated stats panel.
 4. In `Details`, review:
    - `Collected` totals and per-season Meme tables
+     - collected details headings, table headers, row labels, and per-season
+       labels are message-backed from the source locale
+     - collected details tables include screen-reader captions and row headers
+       for assistive technologies
    - `Activity Overview`
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
    - `Boost Breakdown`
