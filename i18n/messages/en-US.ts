@@ -513,6 +513,18 @@ export const EN_US_MESSAGES = {
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.empty.noCards": "No cards to display",
+  "user.collected.empty.fullSetter": "Congratulations, full setter!",
+  "user.collected.empty.memesFullSetter":
+    "Congratulations, The Memes full setter!",
+  "user.collected.empty.seasonFullSetter":
+    "Congratulations, {season} full setter!",
+  "user.collected.empty.gradientFullSetter":
+    "Congratulations, Gradient full setter!",
+  "user.collected.empty.memeLabFullSetter":
+    "Congratulations, Meme Lab full setter!",
+  "user.collected.empty.nextGenFullSetter":
+    "Congratulations, Next Gen full setter!",
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",

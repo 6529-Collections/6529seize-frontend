@@ -25,3 +25,4 @@
 | Meme Lab browse follow-up | `codex/memelab-browse-card-a11y-i18n-followup` | #2625 | Open, review-ready only |
 | Profile collected cards   | `codex/user-collected-cards-a11y-i18n`         | #2626 | Open, review-ready only |
 | Profile network cards     | `codex/user-collected-network-cards-a11y-i18n` | #2627 | Open, review-ready only |
+| Profile empty states      | `codex/user-collected-empty-states-a11y-i18n`  | TBD   | Branch in progress      |

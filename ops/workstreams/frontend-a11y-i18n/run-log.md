@@ -721,3 +721,19 @@
   issues. Claude remains configured for manual review and did not leave an
   actionable review. Per workstream policy, do not merge PR #2627 without human
   approval.
+- Started stacked branch `codex/user-collected-empty-states-a11y-i18n` from
+  PR #2627 for a low-risk `/{user}/collected` empty-state follow-up.
+- Implemented message-backed native collected empty-state copy and `role=status`
+  semantics while preserving existing filter and full-set behavior. Reused the
+  network empty-state message from PR #2627.
+- Validation passed for the empty-state follow-up: focused collected empty-state
+  and i18n Jest suites (2 suites, 8 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for
+  `/punk6529/collected?collection=memes&seized=seized`. Local seed data returned
+  the non-empty collected list rather than the empty-state branch, so the status
+  region is covered by component tests. Verified no horizontal overflow and no
+  Next.js runtime session errors. Console errors were shared backend wave
+  endpoints and blocked emoji feed noise.
