@@ -714,3 +714,5 @@
   tests. Verified localized `No network tokens found` copy, no horizontal
   overflow, and no Next.js runtime session errors. Console errors were shared
   backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2627 against PR #2626. Per workstream policy,
+  do not merge PR #2627 without human approval.
