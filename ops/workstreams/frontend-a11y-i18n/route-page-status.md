@@ -25,3 +25,4 @@
 | `/rememes` browse-card follow-up       | PR open              | PR open           | PR #2624; review-ready only; stacked on PR #2623; do not merge yet |
 | `/meme-lab` browse-card follow-up      | PR open              | PR open           | PR #2625; review-ready only; stacked on PR #2624; do not merge yet |
 | `/{user}/collected` native card list   | PR open              | PR open           | PR #2626; review-ready only; stacked on PR #2625; do not merge yet |
+| `/{user}/collected` network card list  | PR open              | PR open           | PR #2627; review-ready only; stacked on PR #2626; do not merge yet |

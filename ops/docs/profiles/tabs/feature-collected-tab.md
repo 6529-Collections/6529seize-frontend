@@ -86,11 +86,18 @@ Transfer mode is part of the Native collected view (not a separate route).
    - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.
    - Native card results render as a labelled `Collected cards` list with one
      list item per card for assistive technologies.
-9. If transfer is available, click `Transfer`:
-   - cards switch from links to selection controls
-   - ERC-1155 cards support quantity selection
-   - ERC-721 cards are single-select
-10. Use the sticky transfer panel to review selection and continue.
+9. In network view, review xTDH token holdings:
+   - Network card results render as a labelled `Collected network cards` list
+     with one list item per token for assistive technologies.
+   - Network card copy and image alternatives are message-backed from the
+     source locale.
+10. If transfer is available, click `Transfer`:
+
+- cards switch from links to selection controls
+- ERC-1155 cards support quantity selection
+- ERC-721 cards are single-select
+
+11. Use the sticky transfer panel to review selection and continue.
 
 ## Common Scenarios
 
@@ -150,7 +157,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 - Initial load shows skeleton placeholders.
 - If native collected data fails, the tab falls back to empty-state copy
   (for example `No cards to display`).
-- If network token data fails, network cards can fall back to `No tokens found`.
+- If network token data fails, network cards can fall back to
+  `No network tokens found`.
 - Inside `Details`:
   - Wallet Activity empty states are filter-specific (`No transactions`,
     `No sales`, `No burns`, and similar).

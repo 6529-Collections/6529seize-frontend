@@ -513,6 +513,14 @@ export const EN_US_MESSAGES = {
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
   "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.networkCards.listLabel": "Collected network cards",
+  "user.collected.networkCards.empty": "No network tokens found",
+  "user.collected.networkCards.defaultCollection": "Network",
+  "user.collected.networkCards.defaultTokenName": "Token #{tokenId}",
+  "user.collected.networkCards.imageAlt": "Network token image for {name}",
+  "user.collected.networkCards.tokenLabel": "#{tokenId}",
+  "user.collected.networkCards.xtdh": "xTDH",
+  "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 
