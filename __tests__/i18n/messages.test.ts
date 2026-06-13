@@ -6,6 +6,11 @@ import {
   formatRelativeTime,
 } from "@/i18n/format";
 import {
+  formatUserProfileHeaderMonthYear,
+  getUserProfileHeaderDisplayName,
+  getUserProfileHeaderMessage,
+} from "@/components/user/user-page-header/user-page-header.messages";
+import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   isSupportedLocale,
@@ -210,6 +215,16 @@ describe("frontend i18n helpers", () => {
         followersLabel: "Follower",
       })
     ).toBe("Open alice's followers: 1 Follower");
+    expect(
+      t("de-DE", "user.profileHeader.pfp.alt", {
+        name: "alice",
+      })
+    ).toBe("alice's profile picture");
+    expect(
+      t("fr-FR", "user.profileHeader.name.profileEnabled", {
+        date: "January 2024",
+      })
+    ).toBe("Profile enabled: January 2024");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
@@ -337,6 +352,58 @@ describe("frontend i18n helpers", () => {
     expect(t("es-ES", "distribution.photos.alt", distributionPhotoParams)).toBe(
       t("en-US", "distribution.photos.alt", distributionPhotoParams)
     );
+  });
+
+  it("formats profile header helper messages with en-US defaults", () => {
+    expect(
+      getUserProfileHeaderMessage("user.profileHeader.pfp.alt", {
+        name: "alice",
+      })
+    ).toBe("alice's profile picture");
+    expect(formatUserProfileHeaderMonthYear(new Date(2024, 0, 15))).toBe(
+      "January 2024"
+    );
+
+    expect(
+      getUserProfileHeaderDisplayName(
+        {
+          handle: "alice",
+          display: "Alice Display",
+          primary_wallet: "0x123",
+        } as any,
+        "fallback"
+      )
+    ).toBe("alice");
+    expect(
+      getUserProfileHeaderDisplayName(
+        {
+          handle: null,
+          display: "Alice Display",
+          primary_wallet: "0x123",
+        } as any,
+        "fallback"
+      )
+    ).toBe("Alice Display");
+    expect(
+      getUserProfileHeaderDisplayName(
+        {
+          handle: null,
+          display: null,
+          primary_wallet: "0x123",
+        } as any,
+        "fallback"
+      )
+    ).toBe("0x123");
+    expect(
+      getUserProfileHeaderDisplayName(
+        {
+          handle: null,
+          display: null,
+          primary_wallet: null,
+        } as any,
+        "fallback"
+      )
+    ).toBe("fallback");
   });
 
   it("formats locale-sensitive values through Intl helpers", () => {

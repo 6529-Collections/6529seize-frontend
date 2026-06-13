@@ -39,3 +39,4 @@
 | Profile tabs shell        | `codex/user-profile-tabs-a11y-i18n`                     | #2640 | Open, review-ready only |
 | Profile followers modal   | `codex/user-followers-modal-a11y-i18n`                  | #2641 | Open, review-ready only |
 | Profile stats row         | `codex/user-header-stats-a11y-i18n`                     | #2642 | Open, review-ready only |
+| Profile header identity   | `codex/user-header-identity-a11y-i18n`                  | #2643 | Open, review-ready only |

@@ -5,22 +5,20 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
 import { createPortal } from "react-dom";
 import UserPageHeaderEditPfp from "./UserPageHeaderEditPfp";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderPfpWrapper({
   profile,
   canEdit,
+  profileLabel,
   children,
 }: {
   readonly profile: ApiIdentity;
   readonly canEdit: boolean;
+  readonly profileLabel: string;
   readonly children: React.ReactNode;
 }) {
   const [isEditPfpOpen, setIsEditPfpOpen] = useState<boolean>(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!isEditPfpOpen || typeof document === "undefined") {
@@ -41,26 +39,33 @@ export default function UserPageHeaderPfpWrapper({
     };
   }, [isEditPfpOpen]);
 
+  if (!canEdit) {
+    return <div className="tw-inline-flex tw-w-fit">{children}</div>;
+  }
+
   return (
     <div className="tw-inline-flex tw-w-fit">
       <button
+        type="button"
         onClick={() => setIsEditPfpOpen(true)}
-        disabled={!canEdit}
         className="tw-group tw-relative tw-inline-flex tw-w-fit tw-rounded-xl tw-border-none tw-bg-transparent tw-p-0"
-        aria-label={canEdit ? "Edit profile picture" : "Profile picture"}
+        aria-label={getUserProfileHeaderMessage("user.profileHeader.pfp.edit", {
+          name: profileLabel,
+        })}
       >
         {children}
 
-        {canEdit && (
-          <div className="edit-profile tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-bg-black tw-bg-black/50 tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out">
-            <div className="tw-absolute tw-bottom-2 tw-right-2">
-              <PencilIcon />
-            </div>
+        <div
+          aria-hidden="true"
+          className="edit-profile tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-bg-black tw-bg-black/50 tw-bg-opacity-50 tw-transition tw-duration-300 tw-ease-out"
+        >
+          <div className="tw-absolute tw-bottom-2 tw-right-2">
+            <PencilIcon />
           </div>
-        )}
+        </div>
       </button>
-      {isMounted &&
-        isEditPfpOpen &&
+      {isEditPfpOpen &&
+        typeof document !== "undefined" &&
         createPortal(
           <UserPageHeaderEditPfp
             profile={profile}

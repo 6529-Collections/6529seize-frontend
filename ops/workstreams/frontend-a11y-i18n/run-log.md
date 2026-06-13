@@ -1101,3 +1101,30 @@
   coverage warning was deferred because the touched helpers are self-explanatory
   and repo style avoids low-value comments. Per workstream policy, do not merge
   PR #2642.
+- Started stacked branch `codex/user-header-identity-a11y-i18n` from PR #2642
+  for the next low-risk profile header follow-up.
+- Implemented message-backed source-locale labels for the profile header name
+  edit action, profile picture alt/edit labels, banner edit label, and
+  profile-enabled date line. Removed disabled edit buttons from read-only name
+  and profile-picture wrappers so the public profile header uses plain
+  non-interactive containers when editing is unavailable. The profile-enabled
+  month/year now uses the repo i18n date formatting helper.
+- Validation passed for the header identity/media follow-up so far: focused
+  header/i18n Jest suites (6 suites, 18 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, `git diff --check`,
+  Next MCP runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`.
+  React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and a test-only `next/image` mock warning.
+- Opened review-ready stacked PR #2643 against PR #2642. Per workstream policy,
+  do not merge PR #2643.
+- Fixed PR #2643 bot feedback: SonarCloud reported accessibility findings in
+  test mocks, so the affected mocks now use semantic buttons and a
+  `next/image` mock with explicit alt text. CodeRabbit requested direct profile
+  header helper coverage and single-source profile label derivation for the
+  banner; added focused helper assertions and threaded the client-computed
+  `profileLabel` into `UserPageHeaderBanner`.
+- Validation after the PR #2643 bot-feedback fixes passed for the focused
+  header/i18n Jest suites (6 suites, 19 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, and `git diff
+  --check`. React Doctor still reports only the unrelated dirty
+  `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.

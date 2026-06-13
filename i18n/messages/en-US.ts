@@ -274,6 +274,14 @@ const USER_STATS_ROW_MESSAGES = objectMessages("user.statsRow", {
   "buttons.followers": "Open {handle}'s followers: {value} {followersLabel}",
 } as const);
 
+const USER_PROFILE_HEADER_MESSAGES = objectMessages("user.profileHeader", {
+  "name.edit": "Edit {name}'s profile name",
+  "name.profileEnabled": "Profile enabled: {date}",
+  "pfp.alt": "{name}'s profile picture",
+  "pfp.edit": "Edit {name}'s profile picture",
+  "banner.edit": "Edit {name}'s profile banner",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -796,6 +804,7 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...USER_STATS_ROW_MESSAGES,
+  ...USER_PROFILE_HEADER_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 
