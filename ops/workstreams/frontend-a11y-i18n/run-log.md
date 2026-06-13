@@ -631,3 +631,10 @@
   `typecheck:changed`, `react-doctor:diff`, and a live browser smoke on
   `/rememes?locale=de-DE`; results remained green apart from the known React
   Doctor follow-up diagnostics.
+- Addressed CodeRabbit's PR #2624 video fallback finding by including the
+  top-level `nft.animation` URL in Rememe video fallback candidates and adding
+  regression coverage for top-level animation with empty metadata animation.
+  Re-ran the focused Rememes/image/i18n Jest suites (4 suites, 18 tests),
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`; results
+  remained green apart from the unrelated dirty EmojiContext React Doctor
+  diagnostic.

@@ -78,10 +78,11 @@ export default function RememeImage(props: Readonly<Props>) {
     const urls: string[] = [];
     const image = getText(props.nft.image);
 
-    if (image.endsWith(".mp4")) {
+    if (image.toLowerCase().endsWith(".mp4")) {
       addParsedFallbackUrls(urls, image, false);
     }
 
+    addParsedFallbackUrls(urls, props.nft.animation, false);
     addParsedFallbackUrls(urls, props.nft.metadata?.animation, false);
 
     return urls;

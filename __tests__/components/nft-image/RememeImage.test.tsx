@@ -39,6 +39,29 @@ describe("RememeImage", () => {
     expect(video).toHaveAttribute("src", expect.stringContaining("parsed-"));
   });
 
+  it("uses top-level animation as a video fallback when metadata animation is empty", () => {
+    const nft = {
+      ...nftBase,
+      image: "ipfs://poster.jpg",
+      animation: "ipfs://top-level-animation.mp4",
+      metadata: {
+        ...nftBase.metadata,
+        animation: "",
+        animation_details: { format: "MP4" },
+      },
+    };
+
+    const { container } = render(
+      <RememeImage nft={nft} animation height={300} />
+    );
+
+    const video = container.querySelector("video");
+    expect(video).toHaveAttribute(
+      "src",
+      "parsed-ipfs://top-level-animation.mp4"
+    );
+  });
+
   it("renders still image with first fallback", () => {
     const nft = { ...nftBase };
     render(<RememeImage nft={nft} animation={false} height={300} />);
