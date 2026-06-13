@@ -812,3 +812,5 @@
   state changes, no page errors, and no Next.js runtime session errors. Mobile
   horizontal overflow came from existing scrollable strips. Console resource
   errors were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2631 against PR #2630. Per workstream policy,
+  do not merge PR #2631 without human approval.

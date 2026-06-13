@@ -35,18 +35,18 @@ page migration PRs for safe media surfaces.
 - PR #2628 is bot-happy on the latest head and remains review-ready only.
 - PR #2629 is bot-happy on the latest head and remains review-ready only.
 - PR #2630 is bot-happy on the latest head and remains review-ready only.
-- Current implementation surface: profile collected stats summary is in
-  progress on branch `codex/user-collected-stats-summary-a11y-i18n`, stacked on
-  PR #2630. Review-ready only once opened; do not merge without human approval.
+- Current implementation surface: profile collected stats summary is open as
+  PR #2631 on branch `codex/user-collected-stats-summary-a11y-i18n`, stacked on
+  PR #2630. Review-ready only; do not merge without human approval.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Publish the stats-summary branch as the next review-ready stacked PR.
-2. Iterate on actionable CodeRabbit/Claude/CI feedback for the stats-summary
-   PR.
+1. Iterate on actionable CodeRabbit/Claude/CI feedback for PR #2631.
+2. Update the workstream bot-decision log when PR #2631 is bot-happy or when
+   valid feedback is fixed.
 3. Keep PR #2630 review-ready only; do not merge without human approval.
 4. Keep PR #2629 review-ready only; do not merge without human approval.
 5. Keep PR #2628 review-ready only; do not merge without human approval.
