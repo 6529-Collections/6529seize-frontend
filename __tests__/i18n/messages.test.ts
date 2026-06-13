@@ -53,6 +53,15 @@ describe("frontend i18n helpers", () => {
     ).toBe("View Meme Lab NFT, Meme Lab card #1");
     expect(t("de-DE", "memeLab.sorting.sortBy")).toBe("Sort by");
     expect(
+      t("fr-FR", "memeLab.results.collectionGridLabel", {
+        collectionName: "6529 Intern JPGs",
+      })
+    ).toBe(
+      t("en-US", "memeLab.results.collectionGridLabel", {
+        collectionName: "6529 Intern JPGs",
+      })
+    );
+    expect(
       t("en-US", "rememes.card.linkAriaLabel", {
         name: "ReMeme",
         tokenId: 1,
