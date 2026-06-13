@@ -64,14 +64,17 @@ page migration PRs for safe media surfaces.
   covers the user profile header About statement placeholder, add/edit controls,
   mobile expand/collapse toggle, and nested-interactive-control cleanup. It is
   stacked from PR #2643 and must not be merged.
+- PR #2645 is open and review-ready only. It covers the user profile About edit
+  form labels, placeholder, character count, actions, success toast, moderation
+  errors, alert semantics, and error-dismiss name. It is stacked from PR #2644
+  and must not be merged.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Open the profile About edit form PR from `codex/user-about-edit-a11y-i18n`,
-   then iterate with available bots/checks without merging.
+1. Iterate on PR #2645 with available bots/checks without merging.
 2. Keep PR #2644 review-ready only; do not merge.
 3. Keep PR #2643 review-ready only; do not merge.
 4. Keep PR #2642 review-ready only; do not merge.
