@@ -81,6 +81,8 @@ Transfer mode is part of the Native collected view (not a separate route).
    - Network collection: contract list from current xTDH collections.
    - Memes-only filters: `Seized` and `Season`.
    - Address filter (`All Addresses` or one wallet) is available in native view.
+   - View, collection, sort, seized, and filter-scroll control names are
+     message-backed from the source locale.
 7. Apply sort and browse pages.
 8. In native view (outside transfer mode), open token routes from cards:
    - `/the-memes/{id}`, `/6529-gradient/{id}`, `/nextgen/token/{id}`, `/meme-lab/{id}`.

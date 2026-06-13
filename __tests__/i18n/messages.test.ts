@@ -79,6 +79,9 @@ describe("frontend i18n helpers", () => {
     expect(t("de-DE", "user.collected.empty.noCards")).toBe(
       t("en-US", "user.collected.empty.noCards")
     );
+    expect(t("fr-FR", "user.collected.filters.sortBy")).toBe(
+      t("en-US", "user.collected.filters.sortBy")
+    );
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
