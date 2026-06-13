@@ -46,8 +46,8 @@ page migration PRs for safe media surfaces.
 
 ## Next Actions
 
-1. Start the next low-risk `/{user}/collected` Details-panel follow-up from
-   PR #2636.
+1. Start the next low-risk `/{user}/collected` follow-up stacked from the
+   activity-tabs PR #2636.
 2. Maintain PRs #2635, #2634, #2633, #2631, #2630, #2629, and #2628 as review-ready only;
    do not merge.
 3. Maintain PRs #2626 and #2627 as review-ready only; do not merge.
