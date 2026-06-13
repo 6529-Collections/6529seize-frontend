@@ -33,6 +33,13 @@ export function UserPageStatsTableHead({
   caption?: string;
 }> = {}) {
   const labels = getTableColumnLabels();
+  const columns = [
+    labels.total,
+    labels.memes,
+    labels.nextGen,
+    labels.gradient,
+    labels.memeLab,
+  ];
 
   return (
     <>
@@ -40,21 +47,15 @@ export function UserPageStatsTableHead({
       <thead>
         <tr>
           <th aria-hidden="true"></th>
-          <th scope="col" className="text-right !tw-text-[#93939f]">
-            {labels.total}
-          </th>
-          <th scope="col" className="text-right !tw-text-[#93939f]">
-            {labels.memes}
-          </th>
-          <th scope="col" className="text-right !tw-text-[#93939f]">
-            {labels.nextGen}
-          </th>
-          <th scope="col" className="text-right !tw-text-[#93939f]">
-            {labels.gradient}
-          </th>
-          <th scope="col" className="text-right !tw-text-[#93939f]">
-            {labels.memeLab}
-          </th>
+          {columns.map((label) => (
+            <th
+              key={label}
+              scope="col"
+              className="text-right !tw-text-[#93939f]"
+            >
+              {label}
+            </th>
+          ))}
         </tr>
       </thead>
     </>

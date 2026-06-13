@@ -3,7 +3,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Accordion, Col, Container, Row, Table } from "react-bootstrap";
 import styles from "./UserPageStats.module.scss";
 import {
@@ -16,6 +16,42 @@ function getRankDisplay(balance: number | undefined, rank: number | undefined) {
     return "-";
   }
   return `#${formatInteger(DEFAULT_LOCALE, rank)}`;
+}
+
+const VALUE_CELL_CLASS = "tw-text-right !tw-text-[#fff]";
+const MUTED_VALUE_CELL_CLASS = "text-right !tw-text-[#93939f]";
+const ROW_HEADER_CLASS = "!tw-text-[#93939f]";
+
+function NumberCell({ value }: { readonly value: number | null | undefined }) {
+  return (
+    <td className={VALUE_CELL_CLASS}>{formatInteger(DEFAULT_LOCALE, value)}</td>
+  );
+}
+
+function RankCell({
+  balance,
+  rank,
+}: {
+  readonly balance: number | undefined;
+  readonly rank: number | undefined;
+}) {
+  return <td className={VALUE_CELL_CLASS}>{getRankDisplay(balance, rank)}</td>;
+}
+
+function MutedCell({ children }: { readonly children: ReactNode }) {
+  return <td className={MUTED_VALUE_CELL_CLASS}>{children}</td>;
+}
+
+function RowHeader({ children }: { readonly children: ReactNode }) {
+  return (
+    <th scope="row" className={ROW_HEADER_CLASS}>
+      <b>{children}</b>
+    </th>
+  );
+}
+
+function roundedTdhValue(value: number | undefined, hasOwnerBalance: boolean) {
+  return hasOwnerBalance ? Math.round(value ?? Number.NaN) : undefined;
 }
 
 export default function UserPageStatsCollected({
@@ -52,6 +88,49 @@ function UserPageStatsCollectedTotals({
 }: {
   readonly ownerBalance: OwnerBalance | undefined;
 }) {
+  const totalColumns = [
+    {
+      key: "total",
+      balance: ownerBalance?.total_balance,
+      balanceRank: ownerBalance?.total_balance_rank,
+      tdh: ownerBalance?.boosted_tdh,
+      tdhRank: ownerBalance?.boosted_tdh_rank,
+      hasTdh: true,
+    },
+    {
+      key: "memes",
+      balance: ownerBalance?.memes_balance,
+      balanceRank: ownerBalance?.memes_balance_rank,
+      tdh: ownerBalance?.boosted_memes_tdh,
+      tdhRank: ownerBalance?.boosted_memes_tdh_rank,
+      hasTdh: true,
+    },
+    {
+      key: "nextgen",
+      balance: ownerBalance?.nextgen_balance,
+      balanceRank: ownerBalance?.nextgen_balance_rank,
+      tdh: ownerBalance?.boosted_nextgen_tdh,
+      tdhRank: ownerBalance?.boosted_nextgen_tdh_rank,
+      hasTdh: true,
+    },
+    {
+      key: "gradients",
+      balance: ownerBalance?.gradients_balance,
+      balanceRank: ownerBalance?.gradients_balance_rank,
+      tdh: ownerBalance?.boosted_gradients_tdh,
+      tdhRank: ownerBalance?.boosted_gradients_tdh_rank,
+      hasTdh: true,
+    },
+    {
+      key: "memelab",
+      balance: ownerBalance?.memelab_balance,
+      balanceRank: ownerBalance?.memelab_balance_rank,
+      tdh: undefined,
+      tdhRank: undefined,
+      hasTdh: false,
+    },
+  ];
+
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
@@ -72,168 +151,73 @@ function UserPageStatsCollectedTotals({
                   <tbody>
                     <UserPageStatsTableHr span={6} />
                     <tr>
-                      <th scope="row" className="!tw-text-[#93939f]">
-                        <b>
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.rows.cards"
-                          )}
-                        </b>
-                      </th>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {formatInteger(
+                      <RowHeader>
+                        {t(
                           DEFAULT_LOCALE,
-                          ownerBalance?.total_balance
+                          "user.collected.stats.details.rows.cards"
                         )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {formatInteger(
-                          DEFAULT_LOCALE,
-                          ownerBalance?.memes_balance
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {formatInteger(
-                          DEFAULT_LOCALE,
-                          ownerBalance?.nextgen_balance
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {formatInteger(
-                          DEFAULT_LOCALE,
-                          ownerBalance?.gradients_balance
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {formatInteger(
-                          DEFAULT_LOCALE,
-                          ownerBalance?.memelab_balance
-                        )}
-                      </td>
+                      </RowHeader>
+                      {totalColumns.map((column) => (
+                        <NumberCell key={column.key} value={column.balance} />
+                      ))}
                     </tr>
                     <tr>
-                      <th scope="row" className="!tw-text-[#93939f]">
-                        <b>
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.rows.rank"
-                          )}
-                        </b>
-                      </th>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.total_balance,
-                          ownerBalance?.total_balance_rank
+                      <RowHeader>
+                        {t(
+                          DEFAULT_LOCALE,
+                          "user.collected.stats.details.rows.rank"
                         )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.memes_balance,
-                          ownerBalance?.memes_balance_rank
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.nextgen_balance,
-                          ownerBalance?.nextgen_balance_rank
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.gradients_balance,
-                          ownerBalance?.gradients_balance_rank
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.memelab_balance,
-                          ownerBalance?.memelab_balance_rank
-                        )}
-                      </td>
+                      </RowHeader>
+                      {totalColumns.map((column) => (
+                        <RankCell
+                          key={column.key}
+                          balance={column.balance}
+                          rank={column.balanceRank}
+                        />
+                      ))}
                     </tr>
                     <UserPageStatsTableHr span={6} />
                     <tr>
-                      <th scope="row" className="!tw-text-[#93939f]">
-                        <b>
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.rows.tdh"
-                          )}
-                        </b>
-                      </th>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {ownerBalance
-                          ? formatInteger(
-                              DEFAULT_LOCALE,
-                              Math.round(ownerBalance.boosted_tdh)
-                            )
-                          : "-"}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {ownerBalance
-                          ? formatInteger(
-                              DEFAULT_LOCALE,
-                              Math.round(ownerBalance?.boosted_memes_tdh)
-                            )
-                          : "-"}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {ownerBalance
-                          ? formatInteger(
-                              DEFAULT_LOCALE,
-                              Math.round(ownerBalance?.boosted_nextgen_tdh)
-                            )
-                          : "-"}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {ownerBalance
-                          ? formatInteger(
-                              DEFAULT_LOCALE,
-                              Math.round(ownerBalance?.boosted_gradients_tdh)
-                            )
-                          : "-"}
-                      </td>
-                      <td className="text-right !tw-text-[#93939f]">*</td>
-                    </tr>
-                    <tr>
-                      <th scope="row" className="!tw-text-[#93939f]">
-                        <b>
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.rows.rank"
-                          )}
-                        </b>
-                      </th>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.boosted_tdh,
-                          ownerBalance?.boosted_tdh_rank
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.boosted_memes_tdh,
-                          ownerBalance?.boosted_memes_tdh_rank
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.boosted_nextgen_tdh,
-                          ownerBalance?.boosted_nextgen_tdh_rank
-                        )}
-                      </td>
-                      <td className="tw-text-right !tw-text-[#fff]">
-                        {getRankDisplay(
-                          ownerBalance?.boosted_gradients_tdh,
-                          ownerBalance?.boosted_gradients_tdh_rank
-                        )}
-                      </td>
-                      <td className="text-right !tw-text-[#93939f]">
+                      <RowHeader>
                         {t(
                           DEFAULT_LOCALE,
-                          "user.collected.stats.details.rows.noTdh"
+                          "user.collected.stats.details.rows.tdh"
                         )}
-                      </td>
+                      </RowHeader>
+                      {totalColumns.map((column) =>
+                        column.hasTdh ? (
+                          <NumberCell
+                            key={column.key}
+                            value={roundedTdhValue(column.tdh, !!ownerBalance)}
+                          />
+                        ) : (
+                          <MutedCell key={column.key}>*</MutedCell>
+                        )
+                      )}
+                    </tr>
+                    <tr>
+                      <RowHeader>
+                        {t(
+                          DEFAULT_LOCALE,
+                          "user.collected.stats.details.rows.rank"
+                        )}
+                      </RowHeader>
+                      {totalColumns.map((column) =>
+                        column.hasTdh ? (
+                          <RankCell
+                            key={column.key}
+                            balance={column.tdh}
+                            rank={column.tdhRank}
+                          />
+                        ) : (
+                          <MutedCell key={column.key}>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "user.collected.stats.details.rows.noTdh"
+                            )}
+                          </MutedCell>
+                        )
+                      )}
                     </tr>
                   </tbody>
                 </Table>
@@ -253,6 +237,13 @@ function UserPageStatsCollectedMemes({
   readonly balanceMemes: OwnerBalanceMemes[];
   readonly seasons: MemeSeason[];
 }) {
+  const memeColumns = [
+    t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.total"),
+    t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.unique"),
+    t(DEFAULT_LOCALE, "user.collected.stats.details.tables.column.sets"),
+    t(DEFAULT_LOCALE, "user.collected.stats.details.rows.tdh"),
+  ];
+
   function getDisplayWithValueAndRank(value: number, rank: number) {
     if (!value) {
       return "-";
@@ -326,42 +317,15 @@ function UserPageStatsCollectedMemes({
                     <thead>
                       <tr>
                         <th colSpan={2} aria-hidden="true"></th>
-                        <th
-                          scope="col"
-                          className="text-right !tw-text-[#93939f]"
-                        >
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.tables.column.total"
-                          )}
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-right !tw-text-[#93939f]"
-                        >
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.tables.column.unique"
-                          )}
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-right !tw-text-[#93939f]"
-                        >
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.tables.column.sets"
-                          )}
-                        </th>
-                        <th
-                          scope="col"
-                          className="text-right !tw-text-[#93939f]"
-                        >
-                          {t(
-                            DEFAULT_LOCALE,
-                            "user.collected.stats.details.rows.tdh"
-                          )}
-                        </th>
+                        {memeColumns.map((label) => (
+                          <th
+                            key={label}
+                            scope="col"
+                            className="text-right !tw-text-[#93939f]"
+                          >
+                            {label}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>

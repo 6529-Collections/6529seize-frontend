@@ -844,3 +844,10 @@
   feed noise.
 - Opened review-ready stacked PR #2633 against PR #2631. Per workstream policy,
   do not merge PR #2633 without human approval.
+- Addressed SonarCloud's PR #2633 new-code duplication gate by refactoring the
+  collected details table headers/rows into mapped column definitions and
+  small reusable cells while preserving the rendered table semantics. Re-ran
+  focused collected stats/shared-table/i18n Jest suites, `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, and a live
+  browser DOM smoke; results remained green apart from the known unrelated
+  EmojiContext diagnostic and shared backend/emoji console noise.
