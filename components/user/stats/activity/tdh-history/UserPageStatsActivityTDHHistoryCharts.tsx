@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import type { TDHHistory } from "@/entities/ITDH";
 import UserPageStatsActivityTDHHistoryChart from "./UserPageStatsActivityTDHHistoryChart";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
+import {
+  formatTdhHistoryDate,
+  getTdhHistoryMessage,
+} from "./tdh-history.messages";
 
 interface ChartData {
   readonly label: string;
@@ -12,58 +15,70 @@ interface ChartData {
   readonly borderColor: string;
 }
 export interface ChartProps {
+  readonly id: string;
   readonly title: string;
-  readonly labels: Date[];
+  readonly ariaLabel: string;
+  readonly labels: string[];
   readonly datasets: ChartData[];
 }
 
 interface ChartConfigDataset {
-  readonly label: string;
+  readonly labelKey: Parameters<typeof getTdhHistoryMessage>[0];
   readonly field: keyof TDHHistory;
   readonly color: string;
 }
 
 interface ChartConfig {
-  readonly title: string;
+  readonly id: string;
+  readonly titleKey: Parameters<typeof getTdhHistoryMessage>[0];
   readonly datasets: ChartConfigDataset[];
 }
 
 const CHART_CONFIGS: ChartConfig[] = [
   {
-    title: "Total TDH",
+    id: "total-tdh",
+    titleKey: "user.collected.stats.tdhHistory.charts.totalTdh.title",
     datasets: [
       {
-        label: "Total Boosted TDH",
+        labelKey:
+          "user.collected.stats.tdhHistory.charts.totalTdh.totalBoosted",
         field: "boosted_tdh",
         color: "#00DC21",
       },
     ],
   },
   {
-    title: "Net TDH Daily Change",
+    id: "net-daily-change",
+    titleKey: "user.collected.stats.tdhHistory.charts.netDailyChange.title",
     datasets: [
       {
-        label: "Net Boosted TDH",
+        labelKey:
+          "user.collected.stats.tdhHistory.charts.netDailyChange.netBoosted",
         field: "net_boosted_tdh",
         color: "#00DC21",
       },
     ],
   },
   {
-    title: "Created TDH Daily Change",
+    id: "created-daily-change",
+    titleKey: "user.collected.stats.tdhHistory.charts.createdDailyChange.title",
     datasets: [
       {
-        label: "Created Boosted TDH",
+        labelKey:
+          "user.collected.stats.tdhHistory.charts.createdDailyChange.createdBoosted",
         field: "created_boosted_tdh",
         color: "#00DC21",
       },
     ],
   },
   {
-    title: "Destroyed TDH Daily Change",
+    id: "destroyed-daily-change",
+    titleKey:
+      "user.collected.stats.tdhHistory.charts.destroyedDailyChange.title",
     datasets: [
       {
-        label: "Destroyed Boosted TDH",
+        labelKey:
+          "user.collected.stats.tdhHistory.charts.destroyedDailyChange.destroyedBoosted",
         field: "destroyed_boosted_tdh",
         color: "#00DC21",
       },
@@ -82,15 +97,15 @@ export default function UserPageStatsActivityTDHHistoryCharts({
 
   const getData = ({
     tdh,
-    labels,
+    dates,
     field,
   }: {
     tdh: TDHHistory[];
-    labels: Date[];
+    dates: TDHHistory["date"][];
     field: keyof TDHHistory;
   }): number[] => {
-    return labels.map((l) => {
-      const tdhItem = tdh.find((t) => t.date === l);
+    return dates.map((date) => {
+      const tdhItem = tdh.find((t) => t.date === date);
       if (!tdhItem) {
         return 0;
       }
@@ -101,18 +116,26 @@ export default function UserPageStatsActivityTDHHistoryCharts({
 
   const getDataSets = ({
     tdh,
-    labels,
+    dates,
   }: {
     tdh: TDHHistory[];
-    labels: Date[];
+    dates: TDHHistory["date"][];
   }): ChartProps[] => {
+    const labels = dates.map(formatTdhHistoryDate);
+
     return CHART_CONFIGS.map((config) => {
+      const title = getTdhHistoryMessage(config.titleKey);
       return {
-        title: config.title,
+        id: config.id,
+        title,
+        ariaLabel: getTdhHistoryMessage(
+          "user.collected.stats.tdhHistory.chartAriaLabel",
+          { title }
+        ),
         labels,
         datasets: config.datasets.map((d) => ({
-          label: d.label,
-          data: getData({ tdh, labels, field: d.field }),
+          label: getTdhHistoryMessage(d.labelKey),
+          data: getData({ tdh, dates, field: d.field }),
           backgroundColor: d.color,
           borderColor: d.color,
         })),
@@ -127,17 +150,20 @@ export default function UserPageStatsActivityTDHHistoryCharts({
     }
 
     const tdhHistoryReversed = tdhHistory.toReversed();
-    const tdhLabels = tdhHistoryReversed.map((t) => t.date);
-    setDataSets(getDataSets({ tdh: tdhHistoryReversed, labels: tdhLabels }));
+    const tdhDates = tdhHistoryReversed.map((t) => t.date);
+    setDataSets(getDataSets({ tdh: tdhHistoryReversed, dates: tdhDates }));
   }, [tdhHistory]);
 
   return (
-    <div className="tw-mt-2 sm:tw-mt-4 tw-flex tw-flex-col tw-gap-y-6 md:tw-gap-y-8">
+    <div
+      aria-label={getTdhHistoryMessage(
+        "user.collected.stats.tdhHistory.chartListLabel"
+      )}
+      className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-6 sm:tw-mt-4 md:tw-gap-y-8"
+      role="list"
+    >
       {dataSets.map((dataSet) => (
-        <UserPageStatsActivityTDHHistoryChart
-          key={getRandomObjectId()}
-          data={dataSet}
-        />
+        <UserPageStatsActivityTDHHistoryChart key={dataSet.id} data={dataSet} />
       ))}
     </div>
   );

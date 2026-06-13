@@ -1000,3 +1000,25 @@
 - CodeRabbit flagged that the Distributions loading label remained in the
   accessibility tree when visually hidden by opacity. Fixed the loader subtree
   to render only while loading and added a focused regression assertion.
+- Confirmed PR #2638 is bot-happy on the latest head after the loading-label
+  follow-up: DCO passed, Snyk passed, SonarCloud passed with zero new issues,
+  CodeRabbit manual review passed, and the prior loading-label review thread is
+  resolved/outdated. Per workstream policy, do not merge PR #2638.
+- Started stacked branch `codex/user-collected-tdh-history-a11y-i18n` from PR
+  #2638 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the TDH History heading,
+  loading label, empty state, chart list label, chart titles, dataset labels,
+  and chart accessible names. Replaced the empty state with native `<output>`,
+  switched chart date and axis labels through the repo i18n helpers, and
+  replaced random chart keys with stable chart IDs.
+- Validation passed for the TDH History follow-up so far: focused TDH
+  History/i18n Jest suites (3 suites, 8 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=tdh-history`. React Doctor
+  still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and the pre-existing heavy Chart.js import warning
+  in the touched TDH chart component. Browser smoke verified the TDH History tab
+  selection/panel relationship, message-backed heading, chart list label, chart
+  headings, canvas accessible names, and no Next.js runtime session errors; the
+  remaining browser console errors were the known local shared API wave 500s and
+  blocked emoji-list request.
