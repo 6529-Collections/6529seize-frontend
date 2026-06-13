@@ -160,6 +160,16 @@ const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
+  "user.collected.stats.activityTabs",
+  {
+    listLabel: "Activity details sections",
+    walletActivity: "Wallet Activity",
+    distributions: "Distributions",
+    tdhHistory: "TDH History",
+  } as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -667,6 +677,7 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
+  ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",

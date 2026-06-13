@@ -908,3 +908,32 @@
   errors were shared backend wave endpoints and blocked emoji feed noise.
 - Opened review-ready stacked PR #2635 against PR #2634. Per workstream policy,
   do not merge PR #2635 without human approval.
+- Confirmed PR #2635 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed after reducing the row-config duplication, CodeRabbit
+  manual review passed after the async test assertion fix, the stale review
+  thread is resolved/outdated, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2635 without human approval.
+- Started stacked branch `codex/user-collected-activity-tabs-a11y-i18n` from
+  PR #2635 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the lower Activity tab
+  list and tabs, added a tab-list accessible name, connected tabs to the active
+  tabpanel, added roving tab focus with Arrow/Home/End keyboard switching, and
+  exposed active state via `aria-selected` while preserving the existing
+  query-param tab switching.
+- Validation passed for the Activity tabs follow-up: focused activity
+  tab/wrapper/i18n Jest suites (4 suites, 8 tests), `lint:changed`,
+  `typecheck:changed`, and `git diff --check`. `react-doctor:diff` exits 0 and
+  still reports the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect
+  diagnostic plus a `useSearchParams` Suspense warning for
+  `UserPageActivityWrapper.tsx`; the wrapper now owns a local Suspense boundary
+  around the hook content, and the remaining warning appears to be analyzer
+  follow-up rather than a missing local boundary.
+- Browser smoke passed on the live local frontend for
+  `/punk6529/collected?activity=wallet-activity`. Verified the lower Activity
+  tab group exposes a named tablist, tabs expose `role="tab"`,
+  `aria-selected`, roving tab indexes, `aria-controls`, and stable IDs, the
+  active panel exposes `role="tabpanel"` and `aria-labelledby`, ArrowRight moves
+  focus/selection from `Wallet Activity` to `Distributions`, the query string
+  updates, and Next.js runtime diagnostics reported no config or session
+  errors. Console resource errors were shared backend wave endpoints and blocked
+  emoji feed noise.

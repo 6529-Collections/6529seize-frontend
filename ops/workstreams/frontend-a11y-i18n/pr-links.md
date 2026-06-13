@@ -32,3 +32,4 @@
 | Profile details tables    | `codex/user-collected-details-tables-a11y-i18n`    | #2633 | Open, review-ready only |
 | Profile boost breakdown   | `codex/user-collected-boost-breakdown-a11y-i18n`   | #2634 | Open, review-ready only |
 | Profile activity overview | `codex/user-collected-activity-overview-a11y-i18n` | #2635 | Open, review-ready only |
+| Profile activity tabs     | `codex/user-collected-activity-tabs-a11y-i18n`     | TBD   | In progress             |
