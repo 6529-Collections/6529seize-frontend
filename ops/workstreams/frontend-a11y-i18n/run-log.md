@@ -1071,3 +1071,24 @@
   responses unrelated to the followers modal change.
 - Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
   do not merge PR #2641.
+- Fixed a PR #2641 typecheck issue for followers without handles by falling
+  back to the follower's primary address for profile routes and accessible
+  labels. Validation passed for the focused followers/i18n Jest suites,
+  targeted ESLint, `typecheck:changed`, `react-doctor:diff`, `git diff
+  --check`, and desktop/mobile browser smoke on `/punk6529`.
+- Confirmed PR #2641 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit passed with no review threads, and Claude
+  remained configured for manual review only. Per workstream policy, do not
+  merge PR #2641.
+- Started stacked branch `codex/user-header-stats-a11y-i18n` from PR #2641 for
+  the next low-risk user profile header follow-up.
+- Implemented message-backed source-locale labels and accessible names for the
+  profile header stats row. The TDH, xTDH, NIC, Rep, and follower controls now
+  expose explicit action labels that include the handle and current values, and
+  follower counts use the repo i18n integer formatting helper.
+- Validation passed for the stats-row follow-up so far: focused stats/i18n Jest
+  suites (3 suites, 8 tests), targeted ESLint for the touched source files,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, Next MCP
+  runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.

@@ -39,3 +39,4 @@
 | `/{user}/collected` TDH history        | PR open              | PR open           | PR #2639; review-ready only; stacked on PR #2638; do not merge yet |
 | User profile tabs shell                | PR open              | PR open           | PR #2640; review-ready only; stacked on PR #2639; do not merge yet |
 | User followers modal/list              | PR open              | PR open           | PR #2641; review-ready only; stacked on PR #2640; do not merge yet |
+| User profile header stats row          | Branch in progress   | Branch in progress | Stacked on PR #2641; publish review-ready PR; do not merge yet     |
