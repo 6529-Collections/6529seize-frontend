@@ -1146,3 +1146,5 @@
   still reports only the unrelated dirty `contexts/EmojiContext.tsx`
   fetch-in-effect diagnostic; the local browser console still shows known shared
   API/emoji resource errors.
+- Opened review-ready stacked PR #2644 against PR #2643. Per workstream policy,
+  do not merge PR #2644.
