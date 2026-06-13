@@ -68,3 +68,9 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2641 | DCO          | Signed commits check passed                                               | Accept                               |
 | 2026-06-13 | #2641 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
 | 2026-06-13 | #2641 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2642 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2642 | SonarCloud   | Quality Gate passed with 0 new issues and 0.0% duplication                | Accept                               |
+| 2026-06-13 | #2642 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2642 | CodeRabbit   | Manual review completed with no actionable comments or review threads     | Accept                               |
+| 2026-06-13 | #2642 | CodeRabbit   | Generic docstring coverage warning for simple helper functions            | Defer; repo style avoids noise       |
+| 2026-06-13 | #2642 | Claude       | PR configured for manual review only                                      | Treat as unavailable, not actionable |
