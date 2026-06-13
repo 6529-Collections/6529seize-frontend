@@ -690,3 +690,6 @@
   green.
 - Addressed CodeRabbit's PR #2626 tracker wording finding by updating the
   outdated collected-surface status to collected card list wording.
+- Addressed the PR #2626 SonarCloud/CodeRabbit role conflict by keeping the
+  explicit `list` role for Safari/VoiceOver compatibility and adding a narrow
+  `NOSONAR` rationale on that role.

@@ -50,7 +50,9 @@ export default function UserPageCollectedCards({
       {cards.length ? (
         <div className="tw-flow-root">
           <ul
-            role="list"
+            role={
+              "list" /* NOSONAR: preserves list semantics for Safari/VoiceOver when markers are removed */
+            }
             aria-label={COLLECTED_CARDS_LIST_LABEL}
             className={COLLECTED_CARDS_LIST_CLASS}
           >
