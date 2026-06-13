@@ -31,4 +31,4 @@
 | `/{user}/collected` season strip       | PR open              | PR open           | PR #2630; review-ready only; stacked on PR #2629; do not merge yet |
 | `/{user}/collected` stats summary      | PR open              | PR open           | PR #2631; review-ready only; stacked on PR #2630; do not merge yet |
 | `/{user}/collected` details tables     | PR open              | PR open           | PR #2633; review-ready only; stacked on PR #2631; do not merge yet |
-| `/{user}/collected` boost breakdown    | In progress          | In progress       | PR TBD; stacked on PR #2633; do not merge yet                      |
+| `/{user}/collected` boost breakdown    | PR open              | PR open           | PR #2634; review-ready only; stacked on PR #2633; do not merge yet |

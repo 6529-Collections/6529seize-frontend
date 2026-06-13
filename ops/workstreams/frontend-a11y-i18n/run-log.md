@@ -881,3 +881,5 @@
   page-level mobile overflow, and no Next.js runtime session errors. Console
   resource errors were shared backend wave endpoints and blocked emoji feed
   noise.
+- Opened review-ready stacked PR #2634 against PR #2633. Per workstream policy,
+  do not merge PR #2634 without human approval.

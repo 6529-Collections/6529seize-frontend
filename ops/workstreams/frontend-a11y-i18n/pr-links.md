@@ -30,4 +30,4 @@
 | Profile season strip      | `codex/user-collected-season-strip-a11y-i18n`    | #2630 | Open, review-ready only |
 | Profile stats summary     | `codex/user-collected-stats-summary-a11y-i18n`   | #2631 | Open, review-ready only |
 | Profile details tables    | `codex/user-collected-details-tables-a11y-i18n`  | #2633 | Open, review-ready only |
-| Profile boost breakdown   | `codex/user-collected-boost-breakdown-a11y-i18n` | TBD   | In progress             |
+| Profile boost breakdown   | `codex/user-collected-boost-breakdown-a11y-i18n` | #2634 | Open, review-ready only |
