@@ -34,18 +34,18 @@ page migration PRs for safe media surfaces.
 - PR #2627 remains review-ready only with a bot-happy latest head.
 - PR #2628 is bot-happy on the latest head and remains review-ready only.
 - PR #2629 is bot-happy on the latest head and remains review-ready only.
-- Current implementation surface: profile collected season strip is open as PR
-  #2630 on branch `codex/user-collected-season-strip-a11y-i18n`, stacked on PR
-  #2629. Review-ready only; do not merge without human approval.
+- PR #2630 is bot-happy on the latest head and remains review-ready only.
+- Current implementation surface: profile collected season strip is complete
+  and bot-happy on PR #2630. The branch is
+  `codex/user-collected-season-strip-a11y-i18n`.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
 
 ## Next Actions
 
-1. Iterate on actionable CodeRabbit/Claude/CI feedback for PR #2630.
-2. Update the workstream bot-decision log when PR #2630 is bot-happy or when
-   valid feedback is fixed.
+1. Start the next low-risk read-only profile/media surface from PR #2630.
+2. Keep PR #2630 review-ready only; do not merge without human approval.
 3. Keep PR #2629 review-ready only; do not merge without human approval.
 4. Keep PR #2628 review-ready only; do not merge without human approval.
 5. Keep PR #2626 and PR #2627 review-ready only; do not merge without human
