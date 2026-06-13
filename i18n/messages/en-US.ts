@@ -47,6 +47,34 @@ const REMEMES_DETAIL_MESSAGES = namespaceMessages("rememes.detail", [
   ["references.artistProfile", "Artist Profile:"],
 ] as const);
 
+const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
+  "user.collected.stats",
+  [
+    ["metrics.nextGen", "NextGen"],
+    ["metrics.memeSets", "Meme Sets"],
+    ["metrics.memes", "Memes"],
+    ["metrics.gradients", "Gradients"],
+    ["metrics.boost", "Boost"],
+    ["metrics.unique", "unique x{value}"],
+    ["metric.value", "x{value}"],
+    ["details.show", "Details"],
+    ["details.hide", "Hide Details"],
+    ["details.unavailable", "Stats are unavailable for this profile."],
+    ["seasons.title", "Seasons"],
+    ["seasons.startedCount", "{started}/{total} started"],
+    ["seasons.showLess", "Show less"],
+    ["seasons.showMore", "+{count} more"],
+    ["seasons.showMoreAriaLabel", "Show {count} more started seasons"],
+    ["seasons.unseized", "Unseized"],
+    ["seasonTile.sets.zero", "0 sets"],
+    ["seasonTile.sets.one", "{count} set"],
+    ["seasonTile.sets.many", "{count} sets"],
+    ["seasonTile.label", "SZN{seasonNumber}"],
+    ["seasonTile.toNextSet", "{held}/{total} to set {setNumber}"],
+    ["seasonTile.setComplete", "Set {count} complete"],
+  ] as const
+);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -550,31 +578,7 @@ export const EN_US_MESSAGES = {
   "user.collected.filters.seized.notSeized": "Not Seized",
   "user.collected.filters.scrollLeft": "Scroll filters left",
   "user.collected.filters.scrollRight": "Scroll filters right",
-  "user.collected.stats.metrics.nextGen": "NextGen",
-  "user.collected.stats.metrics.memeSets": "Meme Sets",
-  "user.collected.stats.metrics.memes": "Memes",
-  "user.collected.stats.metrics.gradients": "Gradients",
-  "user.collected.stats.metrics.boost": "Boost",
-  "user.collected.stats.metrics.unique": "unique x{value}",
-  "user.collected.stats.metric.value": "x{value}",
-  "user.collected.stats.details.show": "Details",
-  "user.collected.stats.details.hide": "Hide Details",
-  "user.collected.stats.details.unavailable":
-    "Stats are unavailable for this profile.",
-  "user.collected.stats.seasons.title": "Seasons",
-  "user.collected.stats.seasons.startedCount": "{started}/{total} started",
-  "user.collected.stats.seasons.showLess": "Show less",
-  "user.collected.stats.seasons.showMore": "+{count} more",
-  "user.collected.stats.seasons.showMoreAriaLabel":
-    "Show {count} more started seasons",
-  "user.collected.stats.seasons.unseized": "Unseized",
-  "user.collected.stats.seasonTile.sets.zero": "0 sets",
-  "user.collected.stats.seasonTile.sets.one": "{count} set",
-  "user.collected.stats.seasonTile.sets.many": "{count} sets",
-  "user.collected.stats.seasonTile.label": "SZN{seasonNumber}",
-  "user.collected.stats.seasonTile.toNextSet":
-    "{held}/{total} to set {setNumber}",
-  "user.collected.stats.seasonTile.setComplete": "Set {count} complete",
+  ...USER_COLLECTED_STATS_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",

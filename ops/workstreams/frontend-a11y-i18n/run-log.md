@@ -814,3 +814,8 @@
   errors were shared backend wave endpoints and blocked emoji feed noise.
 - Opened review-ready stacked PR #2631 against PR #2630. Per workstream policy,
   do not merge PR #2631 without human approval.
+- Addressed SonarCloud's PR #2631 new-code duplication gate by moving the
+  collected stats message keys into a typed `namespaceMessages` block while
+  preserving the same public message keys. Re-ran focused stats/season/i18n
+  Jest suites, `lint:changed`, `typecheck:changed`, and `react-doctor:diff`;
+  results remained green apart from the known unrelated EmojiContext diagnostic.

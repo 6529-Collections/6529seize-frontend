@@ -46,3 +46,4 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2630 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
 | 2026-06-13 | #2630 | Snyk         | No manifest changes detected                                              | Accept                               |
 | 2026-06-13 | #2630 | CodeRabbit   | Manual review completed with no review threads                            | Accept                               |
+| 2026-06-13 | #2631 | SonarCloud   | Flagged 13.8% duplication on new message dictionary lines                 | Fixed                                |
