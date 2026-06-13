@@ -22,6 +22,54 @@ const VALUE_CELL_CLASS = "tw-text-right !tw-text-[#fff]";
 const MUTED_VALUE_CELL_CLASS = "text-right !tw-text-[#93939f]";
 const ROW_HEADER_CLASS = "!tw-text-[#93939f]";
 
+type TotalsColumnConfig = readonly [
+  key: string,
+  balanceKey: keyof OwnerBalance,
+  balanceRankKey: keyof OwnerBalance,
+  tdhKey: keyof OwnerBalance | undefined,
+  tdhRankKey: keyof OwnerBalance | undefined,
+];
+
+const TOTALS_COLUMN_CONFIG = [
+  [
+    "total",
+    "total_balance",
+    "total_balance_rank",
+    "boosted_tdh",
+    "boosted_tdh_rank",
+  ],
+  [
+    "memes",
+    "memes_balance",
+    "memes_balance_rank",
+    "boosted_memes_tdh",
+    "boosted_memes_tdh_rank",
+  ],
+  [
+    "nextgen",
+    "nextgen_balance",
+    "nextgen_balance_rank",
+    "boosted_nextgen_tdh",
+    "boosted_nextgen_tdh_rank",
+  ],
+  [
+    "gradients",
+    "gradients_balance",
+    "gradients_balance_rank",
+    "boosted_gradients_tdh",
+    "boosted_gradients_tdh_rank",
+  ],
+  ["memelab", "memelab_balance", "memelab_balance_rank", undefined, undefined],
+] as const satisfies readonly TotalsColumnConfig[];
+
+function getOwnerBalanceNumber(
+  ownerBalance: OwnerBalance | undefined,
+  key: keyof OwnerBalance | undefined
+) {
+  const value = key ? ownerBalance?.[key] : undefined;
+  return typeof value === "number" ? value : undefined;
+}
+
 function NumberCell({ value }: { readonly value: number | null | undefined }) {
   return (
     <td className={VALUE_CELL_CLASS}>{formatInteger(DEFAULT_LOCALE, value)}</td>
@@ -88,48 +136,16 @@ function UserPageStatsCollectedTotals({
 }: {
   readonly ownerBalance: OwnerBalance | undefined;
 }) {
-  const totalColumns = [
-    {
-      key: "total",
-      balance: ownerBalance?.total_balance,
-      balanceRank: ownerBalance?.total_balance_rank,
-      tdh: ownerBalance?.boosted_tdh,
-      tdhRank: ownerBalance?.boosted_tdh_rank,
-      hasTdh: true,
-    },
-    {
-      key: "memes",
-      balance: ownerBalance?.memes_balance,
-      balanceRank: ownerBalance?.memes_balance_rank,
-      tdh: ownerBalance?.boosted_memes_tdh,
-      tdhRank: ownerBalance?.boosted_memes_tdh_rank,
-      hasTdh: true,
-    },
-    {
-      key: "nextgen",
-      balance: ownerBalance?.nextgen_balance,
-      balanceRank: ownerBalance?.nextgen_balance_rank,
-      tdh: ownerBalance?.boosted_nextgen_tdh,
-      tdhRank: ownerBalance?.boosted_nextgen_tdh_rank,
-      hasTdh: true,
-    },
-    {
-      key: "gradients",
-      balance: ownerBalance?.gradients_balance,
-      balanceRank: ownerBalance?.gradients_balance_rank,
-      tdh: ownerBalance?.boosted_gradients_tdh,
-      tdhRank: ownerBalance?.boosted_gradients_tdh_rank,
-      hasTdh: true,
-    },
-    {
-      key: "memelab",
-      balance: ownerBalance?.memelab_balance,
-      balanceRank: ownerBalance?.memelab_balance_rank,
-      tdh: undefined,
-      tdhRank: undefined,
-      hasTdh: false,
-    },
-  ];
+  const totalColumns = TOTALS_COLUMN_CONFIG.map(
+    ([key, balanceKey, balanceRankKey, tdhKey, tdhRankKey]) => ({
+      key,
+      balance: getOwnerBalanceNumber(ownerBalance, balanceKey),
+      balanceRank: getOwnerBalanceNumber(ownerBalance, balanceRankKey),
+      tdh: getOwnerBalanceNumber(ownerBalance, tdhKey),
+      tdhRank: getOwnerBalanceNumber(ownerBalance, tdhRankKey),
+      hasTdh: tdhKey !== undefined,
+    })
+  );
 
   return (
     <Accordion>
