@@ -26,6 +26,9 @@ export default function Follower({
   const [shouldLoadFollowButton, setShouldLoadFollowButton] = useState(false);
   const { connectedProfile } = useContext(AuthContext);
   const followerHandle = follower.identity.handle;
+  const followerProfileRoute =
+    followerHandle ?? follower.identity.primary_address;
+  const followerProfileName = followerHandle ?? follower.identity.primary_address;
   const normalizedFollowerHandle = followerHandle?.toLowerCase() ?? null;
   const normalizedConnectedHandle =
     connectedProfile?.handle?.toLowerCase() ?? null;
@@ -37,10 +40,10 @@ export default function Follower({
   );
   const backgroundClass = mutedBackground ? "tw-bg-white/[0.01]" : "";
   const profileLabel = getFollowersMessage("followers.profile.linkAriaLabel", {
-    handle: followerHandle,
+    handle: followerProfileName,
   });
   const profileImageAlt = getFollowersMessage("followers.profile.avatarAlt", {
-    handle: followerHandle,
+    handle: followerProfileName,
   });
 
   useEffect(() => {
@@ -100,11 +103,11 @@ export default function Follower({
               <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-2">
                 <p className="tw-mb-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-none tw-text-iron-50">
                   <Link
-                    href={`/${follower.identity.handle}`}
+                    href={`/${followerProfileRoute}`}
                     aria-label={profileLabel}
                     className="tw-block tw-truncate tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 hover:tw-underline"
                   >
-                    {follower.identity.handle}
+                    {followerProfileName}
                   </Link>
                 </p>
                 <UserCICAndLevel
