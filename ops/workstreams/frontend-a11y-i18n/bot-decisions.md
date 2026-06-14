@@ -12,6 +12,9 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-11 | #2604 | Claude       | Review skipped because organization monthly code review cap was reached   | Treat as unavailable, not actionable |
 | 2026-06-11 | #2604 | SonarCloud   | Flagged i18n default object parameters and interpolation character class  | Fixed                                |
 | 2026-06-11 | #2604 | CodeRabbit   | Flagged Suspense, title i18n, locale matching, and exhaustive guards      | Fixed                                |
+| 2026-06-14 | #2604 | React Doctor | Flagged non-passive scroll listener during PR-diff review                 | Fixed                                |
+| 2026-06-14 | #2604 | CodeRabbit   | Latest one-file incremental review was rate-limited                       | Treat as unavailable until reset     |
+| 2026-06-14 | #2604 | GitHub checks | Latest visible rollup passed on head `23d119e`                            | Accept                               |
 | 2026-06-12 | #2607 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
 | 2026-06-12 | #2607 | Snyk         | PR check passed                                                           | Accept                               |
 | 2026-06-12 | #2607 | CodeRabbit   | Flagged dead `MemeTab.title` and duplicate `MEME_FOCUS_VALUES` guards     | Fixed                                |

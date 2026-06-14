@@ -2,8 +2,9 @@
 
 ## Current Goal
 
-Deliver the standards and repo-local skill foundation, then start review-ready
-page migration PRs for safe media surfaces.
+Maintain the existing review-ready WCAG/i18n implementation stack, harden it
+bottom-up where safe, and build durable inventory for the next stack. Do not
+merge page implementation PRs.
 
 ## Current Branch
 
@@ -71,16 +72,27 @@ page migration PRs for safe media surfaces.
 - Non-source locales currently fall back to `en-US` until reviewed
   translations are added.
 - Full locale-prefixed routing is deferred.
+- 2026-06-13 stack audit: PR #2604 and PRs #2607-#2645 are open, non-draft,
+  mergeable, and green on the visible GitHub check rollup.
+- Related-looking open PR #2597 is older OG metadata work, not part of this
+  WCAG/i18n stack.
+- Open PR #2632 is separate 6529bot admin dashboard work, not part of this
+  WCAG/i18n stack.
+- 2026-06-14 bottom-stack pass: PR #2604 received a passive scroll listener
+  hardening commit (`23d119e`) and local validation/browser smoke passed.
+  GitHub's visible latest-head rollup is green and a validation snapshot was
+  posted on the PR. CodeRabbit's new incremental review was rate-limited, but
+  prior actionable CodeRabbit findings are already fixed in the current code.
+- 2026-06-14 audit inventory: `audit-inventory.md` records candidate hotspots
+  for static copy, interaction semantics, locale formatting, image alt review,
+  and i18n helper adoption.
 
 ## Next Actions
 
-1. Iterate on PR #2645 with available bots/checks without merging.
-2. Keep PR #2644 review-ready only; do not merge.
-3. Keep PR #2643 review-ready only; do not merge.
-4. Keep PR #2642 review-ready only; do not merge.
-5. Keep PR #2641 review-ready only; do not merge.
-6. Keep PR #2640 review-ready only; do not merge.
-7. Maintain PRs #2639, #2638, #2637, and earlier page PRs as review-ready only;
-   do not merge.
-8. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
+1. Hold new page PR creation until the existing stack is reviewed.
+2. Keep PR #2604 and PRs #2607-#2645 review-ready only; do not merge without
+   human approval.
+3. If asked to advance the stack, continue bottom-up from PR #2607 after the
+   #2604 validation snapshot.
+4. Preserve the unrelated dirty EmojiContext, RememeImage test, and bootstrap
    style files.

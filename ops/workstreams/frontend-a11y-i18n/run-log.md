@@ -1167,3 +1167,42 @@
   API/emoji resource errors.
 - Opened review-ready stacked PR #2645 against PR #2644. Per workstream policy,
   do not merge PR #2645.
+
+## 2026-06-13
+
+- Audited the open WCAG/i18n PR stack after user concern about the number of
+  related PRs. Confirmed PR #2604 and PRs #2607-#2645 are expected workstream
+  implementation PRs, are open, non-draft, mergeable, and green on the visible
+  GitHub check rollup. Recorded the stack snapshot in `stack-audit.md`.
+- Confirmed related-looking PR #2597 is older OG metadata work and PR #2632 is
+  separate 6529bot admin dashboard work; neither is part of this WCAG/i18n
+  migration stack.
+- Updated active context to pause new page PR creation until the current stack
+  is reviewed or a new scope is chosen.
+
+## 2026-06-14
+
+- Rechecked the bottom of the WCAG/i18n stack and used a clean temp worktree for
+  PR #2604.
+- Pushed signed hardening commit `23d119e` to PR #2604, making the The Memes
+  scroll listener passive.
+- Validation passed for PR #2604: changed-file lint, changed-file typecheck,
+  targeted The Memes card and i18n Jest suites, React Doctor PR-diff review,
+  `git diff --check`, and desktop/mobile browser smoke on
+  `/the-memes?locale=de-DE`.
+- Browser smoke used a local-only Bootstrap import fix that is already present
+  on current `main`; this verification-only tweak was not committed to #2604.
+- Confirmed stale CodeRabbit findings on #2604 are already handled in current
+  code: localized document title, case-insensitive locale normalization, and
+  exhaustive enum label guards.
+- Recorded the latest CodeRabbit caveat: the visible status context is green,
+  but the new incremental review was rate-limited, so treat new bot review as
+  unavailable until the limit resets.
+- Rechecked PR #2604 after CodeQL completed. The latest visible GitHub rollup
+  passed for head `23d119e`: CodeQL, DCO, SonarCloud, Snyk, and CodeRabbit
+  status context.
+- Posted a PR validation snapshot comment documenting the local checks, browser
+  smoke, green rollup, and CodeRabbit rate-limit caveat.
+- Added `audit-inventory.md` with candidate hotspots for static copy,
+  interaction semantics, locale formatting, image alt review, and i18n helper
+  adoption to guide the next safe stack.

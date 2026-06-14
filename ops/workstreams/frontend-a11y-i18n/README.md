@@ -13,7 +13,9 @@ page surfaces one PR at a time.
 3. `ops/skills/write-prs/SKILL.md`
 4. `ops/standards/README.md`
 5. `active-context.md`
-6. `run-log.md`
+6. `stack-audit.md`
+7. `audit-inventory.md`
+8. `run-log.md`
 
 ## Owned Paths
 
