@@ -316,7 +316,7 @@ export default function TheMemesComponent() {
       }, 200);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       if (throttleTimeout !== null) {
