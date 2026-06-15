@@ -6,6 +6,14 @@ import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/A
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { render, screen } from "@testing-library/react";
 
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 jest.mock("@/components/waves/specs/WaveTypeIcon", () => () => (
   <div data-testid="wave-type-icon" />
 ));
@@ -21,6 +29,7 @@ const makeWave = (
     readonly waveType?: ApiWaveType | undefined;
     readonly creditScope?: ApiWaveCreditScope | undefined;
     readonly submissionStrategy?: any;
+    readonly parentWave?: { readonly id: string; readonly name?: string };
   } = {}
 ): any => ({
   id: "wave-1",
@@ -69,6 +78,7 @@ const makeWave = (
     authenticated_user_eligible_for_admin: false,
   },
   metrics: { your_participation_drops_count: 0 },
+  parent_wave: overrides.parentWave,
 });
 
 describe("WaveSpecs", () => {
@@ -108,6 +118,28 @@ describe("WaveSpecs", () => {
 
     expect(screen.getByText("Voting power")).toBeInTheDocument();
     expect(screen.getByText("Each drop")).toBeInTheDocument();
+  });
+
+  it("shows linked parent wave row for subwaves", () => {
+    render(
+      <WaveSpecs
+        wave={makeWave({
+          parentWave: { id: "parent-wave", name: "Parent Wave" },
+        })}
+      />
+    );
+
+    expect(screen.getByText("Parent wave")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Parent Wave" })).toHaveAttribute(
+      "href",
+      "/waves/parent-wave"
+    );
+  });
+
+  it("hides parent wave row for root waves", () => {
+    render(<WaveSpecs wave={makeWave()} />);
+
+    expect(screen.queryByText("Parent wave")).toBeNull();
   });
 
   it("keeps approve edit settings out of overview", () => {
