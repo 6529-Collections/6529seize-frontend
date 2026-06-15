@@ -1,5 +1,6 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import FollowersListWrapper from "@/components/utils/followers/FollowersListWrapper";
+import { getFollowersMessage } from "@/components/utils/followers/followers.messages";
 import useFollowersList from "@/hooks/useFollowersList";
 
 export default function UserPageFollowersModal({
@@ -18,7 +19,7 @@ export default function UserPageFollowersModal({
 
   return (
     <MobileWrapperDialog
-      title="Followers"
+      title={getFollowersMessage("followers.modal.title")}
       isOpen={isOpen}
       onClose={onClose}
       tall

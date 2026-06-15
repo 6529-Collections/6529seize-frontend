@@ -1048,3 +1048,26 @@
   known local shared API wave 500s and blocked emoji-list request.
 - Opened review-ready stacked PR #2640 against PR #2639. Per workstream policy,
   do not merge PR #2640.
+- Confirmed PR #2640 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, and no review threads are
+  open. Per workstream policy, do not merge PR #2640.
+- Started stacked branch `codex/user-followers-modal-a11y-i18n` from PR #2640
+  for the next low-risk profile modal/list follow-up.
+- Implemented message-backed source-locale labels for the profile followers
+  modal title, follower list label, loading status label, follower profile link
+  names, and follower avatar alt text. Converted the follower collection to a
+  semantic list/listitem structure, added `aria-busy` plus a polite loading
+  status, and switched follower avatars to `next/image` with `unoptimized` for
+  arbitrary remote profile hosts.
+- Validation passed for the followers modal/list follow-up so far: focused
+  followers/i18n Jest suites (5 suites, 11 tests), targeted eslint for the
+  PR-specific source files, `typecheck:changed`, `react-doctor:diff`, and live
+  browser smoke on `/punk6529` at desktop and 390px mobile widths. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic. Browser smoke verified the `Followers` dialog
+  title, modal `aria-modal`, `Followers` list label, two list items, labeled
+  profile links, avatar alt text, close button on mobile, and no Next.js
+  runtime session errors; browser console errors were local API/resource
+  responses unrelated to the followers modal change.
+- Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
+  do not merge PR #2641.
