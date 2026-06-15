@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 type MetadataSourceGuardrail = {
@@ -6,6 +6,7 @@ type MetadataSourceGuardrail = {
   readonly routePath: string;
 };
 
+// Manually enrolled routes: add new standardized metadata surfaces here.
 const standardizedMetadataSources: readonly MetadataSourceGuardrail[] = [
   {
     routePath: "app/the-memes/page.tsx",
@@ -97,12 +98,23 @@ const standardizedMetadataSources: readonly MetadataSourceGuardrail[] = [
   },
 ];
 
+// Heuristics for the most common drift patterns, not exhaustive source parsing.
 const manualLargeTwitterCard = /twitterCard\s*:\s*["']summary_large_image["']/;
 const directBaseEndpointOgImage =
   /ogImage\s*:\s*`[^`]*\$\{publicEnv\.BASE_ENDPOINT\}/;
 
-const readSource = (routePath: string): string =>
-  readFileSync(path.join(process.cwd(), routePath), "utf8");
+const readSource = (routePath: string): string => {
+  const absoluteRoutePath = path.join(process.cwd(), routePath);
+
+  if (!existsSync(absoluteRoutePath)) {
+    throw new Error(
+      `Expected guardrailed metadata route "${routePath}" to exist. ` +
+        "If this route moved or was renamed, update standardizedMetadataSources."
+    );
+  }
+
+  return readFileSync(absoluteRoutePath, "utf8");
+};
 
 describe("standardized social-card metadata route guardrails", () => {
   it.each(standardizedMetadataSources)(
