@@ -13,6 +13,7 @@ interface GithubPreviewStatusBadgeProps {
   readonly href: string;
   readonly initialPreview?: GithubPreviewResponse | null | undefined;
   readonly compact?: boolean | undefined;
+  readonly placement?: "absolute" | "inline" | undefined;
 }
 
 type BadgeTone = "green" | "purple" | "red" | "gray" | "amber";
@@ -221,6 +222,7 @@ export default function GithubPreviewStatusBadge({
   href,
   initialPreview,
   compact = false,
+  placement = "absolute",
 }: GithubPreviewStatusBadgeProps) {
   const githubInfo = useMemo(() => parseGithubPreviewUrlInfo(href), [href]);
   const badgeRef = useRef<HTMLSpanElement | null>(null);
@@ -343,10 +345,14 @@ export default function GithubPreviewStatusBadge({
     viewModel,
     issueAssigneeLabels?.desktop ?? detail
   );
+  const placementClasses =
+    placement === "absolute"
+      ? "tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-max-w-[calc(100%-1rem)]"
+      : "tw-relative tw-max-w-full";
   const badge = (
     <span
       ref={badgeRef}
-      className={`tw-pointer-events-auto tw-absolute tw-right-2 tw-top-2 tw-z-20 tw-inline-flex tw-max-w-[calc(100%-1rem)] tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-shadow-lg tw-backdrop-blur-md ${TONE_CLASSES[viewModel.tone]}`}
+      className={`tw-pointer-events-auto tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-shadow-lg tw-backdrop-blur-md ${placementClasses} ${TONE_CLASSES[viewModel.tone]}`}
       data-testid="github-preview-status-badge"
       aria-label={title}
     >

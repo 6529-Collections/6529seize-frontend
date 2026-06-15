@@ -4,6 +4,7 @@ import { createCompoundHandler } from "./compound";
 import { createEnsHandler } from "./ens";
 import { createFarcasterHandler } from "./farcaster";
 import { createGifHandler } from "./gif";
+import { createGithubHandler } from "./github";
 import { createGoogleWorkspaceHandler } from "./googleWorkspace";
 import { createNftMarketplacesHandler } from "./nftMarketplaces";
 import { createPepeHandler } from "./pepe";
@@ -17,6 +18,7 @@ export const createLinkHandlers = (options?: {
   readonly linkPreviewVariant?: LinkPreviewVariant;
   readonly fullWidthLinkPreviews?: boolean | undefined;
 }): LinkHandler[] => [
+  createGithubHandler(),
   createYoutubeHandler(),
   createTikTokHandler(),
   createGoogleWorkspaceHandler(),
