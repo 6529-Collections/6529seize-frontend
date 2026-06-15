@@ -148,7 +148,6 @@ describe("SingleWaveDropVoteSlider", () => {
       <SingleWaveDropVoteSlider
         {...defaultProps}
         voteValue={50}
-        rank={1}
         size={SingleWaveDropVoteSize.MINI}
       />
     );
@@ -161,7 +160,6 @@ describe("SingleWaveDropVoteSlider", () => {
       <SingleWaveDropVoteSlider
         {...defaultProps}
         voteValue={-50}
-        rank={1}
         size={SingleWaveDropVoteSize.MINI}
       />
     );
@@ -174,7 +172,6 @@ describe("SingleWaveDropVoteSlider", () => {
       <SingleWaveDropVoteSlider
         {...defaultProps}
         voteValue={0}
-        rank={1}
         size={SingleWaveDropVoteSize.MINI}
       />
     );

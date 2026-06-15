@@ -20,19 +20,21 @@ const MEMETIC_VALUES: number[] = [
 
 const QUICK_PERCENTAGES: number[] = [-100, -50, 50, 100];
 
+const getCurrentTimeMs = (): number => Date.now();
+
 const getInputShellClasses = (
   isPositiveVote: boolean,
   isNegativeVote: boolean
 ): string => {
   if (isPositiveVote) {
-    return "tw-border-emerald-500/40 focus-within:tw-border-emerald-500/60";
+    return "tw-border-emerald-500/40 focus:tw-border-emerald-500/70 focus:tw-ring-1 focus:tw-ring-emerald-500/35 focus-within:tw-border-emerald-500/70 focus-within:tw-ring-1 focus-within:tw-ring-emerald-500/35";
   }
 
   if (isNegativeVote) {
-    return "tw-border-rose-500/40 focus-within:tw-border-rose-500/60";
+    return "tw-border-rose-500/40 focus:tw-border-rose-500/70 focus:tw-ring-1 focus:tw-ring-rose-500/35 focus-within:tw-border-rose-500/70 focus-within:tw-ring-1 focus-within:tw-ring-rose-500/35";
   }
 
-  return "tw-border-[#26272B] focus-within:tw-border-[#37373E]";
+  return "tw-border-[#26272B] focus:tw-border-primary-400/60 focus:tw-ring-1 focus:tw-ring-primary-400/40 focus-within:tw-border-primary-400/60 focus-within:tw-ring-1 focus-within:tw-ring-primary-400/40";
 };
 
 const getInputTextClasses = (
@@ -48,6 +50,21 @@ const getInputTextClasses = (
   }
 
   return "tw-text-iron-50";
+};
+
+const getInputCaretClasses = (
+  isPositiveVote: boolean,
+  isNegativeVote: boolean
+): string => {
+  if (isPositiveVote) {
+    return "tw-caret-emerald-400";
+  }
+
+  if (isNegativeVote) {
+    return "tw-caret-rose-400";
+  }
+
+  return "tw-caret-primary-400";
 };
 
 const getInputLabelClasses = (
@@ -100,6 +117,10 @@ export const SingleWaveDropVoteInput: React.FC<
     isNegativeVote
   );
   const inputTextClasses = getInputTextClasses(isPositiveVote, isNegativeVote);
+  const inputCaretClasses = getInputCaretClasses(
+    isPositiveVote,
+    isNegativeVote
+  );
   const inputLabelClasses = getInputLabelClasses(
     isPositiveVote,
     isNegativeVote
@@ -107,6 +128,11 @@ export const SingleWaveDropVoteInput: React.FC<
 
   const clampValue = (value: number) =>
     Math.min(Math.max(value, minValue), maxValue);
+
+  const commitVoteValue = (nextValue: number | string) => {
+    voteValueRef.current = nextValue;
+    setVoteValue(nextValue);
+  };
 
   const clearTimers = () => {
     if (intervalRef.current) {
@@ -147,7 +173,7 @@ export const SingleWaveDropVoteInput: React.FC<
     increment: boolean
   ) => {
     const currentValue = typeof previousValue === "string" ? 0 : previousValue;
-    const now = Date.now();
+    const now = getCurrentTimeMs();
     const elapsedSeconds = (now - (pressStartTime.current ?? now)) / 1000;
     const delta = calculateDelta(elapsedSeconds);
     const newValue = increment ? currentValue + delta : currentValue - delta;
@@ -186,8 +212,7 @@ export const SingleWaveDropVoteInput: React.FC<
       increment
     );
 
-    voteValueRef.current = nextValue;
-    setVoteValue(nextValue);
+    commitVoteValue(nextValue);
 
     if (crossedMemetic) {
       handleMemeticPause(increment);
@@ -199,31 +224,31 @@ export const SingleWaveDropVoteInput: React.FC<
       percentage < 0
         ? (Math.abs(percentage) / 100) * minValue
         : (percentage / 100) * maxValue;
-    setVoteValue(Math.round(value));
+    commitVoteValue(Math.round(value));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
 
     if (inputValue === "") {
-      setVoteValue(inputValue);
+      commitVoteValue(inputValue);
       return;
     }
 
     if (inputValue === "-") {
-      setVoteValue(inputValue);
+      commitVoteValue(inputValue);
       return;
     }
 
     const value = parseInt(inputValue);
     if (isNaN(value)) return;
-    setVoteValue(clampValue(value));
+    commitVoteValue(clampValue(value));
   };
 
   const startPress = (increment: boolean) => {
     clearTimers();
     isPressed.current = true;
-    pressStartTime.current = Date.now();
+    pressStartTime.current = getCurrentTimeMs();
 
     updateValue(increment);
 
@@ -265,7 +290,7 @@ export const SingleWaveDropVoteInput: React.FC<
             type="text"
             pattern={inputPattern}
             inputMode="numeric"
-            className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-[#0d0d10] tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out focus:tw-ring-1 focus:tw-ring-primary-400/40 ${inputShellClasses} ${inputTextClasses}`}
+            className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-[#0d0d10] tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out ${inputShellClasses} ${inputTextClasses} ${inputCaretClasses}`}
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -302,7 +327,7 @@ export const SingleWaveDropVoteInput: React.FC<
             type="text"
             pattern={inputPattern}
             inputMode="numeric"
-            className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses}`}
+            className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}

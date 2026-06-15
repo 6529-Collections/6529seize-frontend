@@ -17,7 +17,6 @@ interface WaveDropVoteSliderProps {
   readonly maxValue: number;
   readonly setVoteValue: Dispatch<SetStateAction<string | number>>;
   readonly onValueAccepted?: ((value: number) => void) | undefined;
-  readonly rank?: number | null | undefined;
   readonly label: string;
   readonly size?: SingleWaveDropVoteSize | undefined;
 }
