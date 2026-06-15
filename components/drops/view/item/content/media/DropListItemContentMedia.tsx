@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { hasCsvFileExtension } from "@/helpers/file.helpers";
 import DropListItemContentMediaAudio from "./DropListItemContentMediaAudio";
 import { ImageScale } from "@/helpers/image.helpers";
 
@@ -75,7 +76,7 @@ export default function DropListItemContentMedia({
     if (media_mime_type === "text/html") {
       return MediaType.HTML;
     }
-    if (media_mime_type === "text/csv") {
+    if (media_mime_type === "text/csv" || hasCsvFileExtension(media_url)) {
       return MediaType.CSV;
     }
     return MediaType.UNKNOWN;
@@ -134,10 +135,7 @@ export default function DropListItemContentMedia({
       );
     case MediaType.CSV:
       return (
-        <DropMediaAttachmentCard
-          src={media_url}
-          mimeType={media_mime_type}
-        />
+        <DropMediaAttachmentCard src={media_url} mimeType={media_mime_type} />
       );
     case MediaType.UNKNOWN:
       return <></>;

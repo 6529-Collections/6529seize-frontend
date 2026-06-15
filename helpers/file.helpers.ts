@@ -26,3 +26,25 @@ export const getFileInfoFromUrl = (
     return null;
   }
 };
+
+export const hasFileExtension = (
+  value: string | undefined,
+  extension: string
+): boolean => {
+  if (!value || !extension) {
+    return false;
+  }
+
+  const normalizedExtension = extension.toLowerCase().replace(/^\./, "");
+
+  try {
+    const pathname = new URL(value, "https://6529.io").pathname;
+    return pathname.toLowerCase().endsWith(`.${normalizedExtension}`);
+  } catch {
+    const pathname = value.split(/[?#]/, 1)[0];
+    return pathname.toLowerCase().endsWith(`.${normalizedExtension}`);
+  }
+};
+
+export const hasCsvFileExtension = (value: string | undefined): boolean =>
+  hasFileExtension(value, "csv");

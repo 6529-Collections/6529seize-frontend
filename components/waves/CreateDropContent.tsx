@@ -66,6 +66,7 @@ import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import type { DropMutationBody } from "./CreateDrop";
 import { generateMetadataId, useDropMetadata } from "./hooks/useDropMetadata";
 import { convertMetadataToDropMetadata } from "./utils/convertMetadataToDropMetadata";
+import { getAcceptedCreateDropFiles } from "./utils/createDropFileAcceptance";
 import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
@@ -138,9 +139,6 @@ const isMetadataValuePresent = (value: string | number | null): boolean => {
 
 const hasMetadataContent = (metadata: CreateDropMetadataType[]): boolean =>
   metadata.some((item) => isMetadataValuePresent(item.value));
-
-const isCsvFile = (file: File): boolean =>
-  file.type === "text/csv" || file.name.toLowerCase().endsWith(".csv");
 
 const hasSubmissionContent = ({
   markdown,
@@ -969,17 +967,16 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   }, [activeDrop, isApp, focusMobileInput]);
 
   const handleFileChange = (newFiles: File[]) => {
-    let acceptedFiles = [...newFiles];
+    const { acceptedFiles, rejectedCsvFiles } = getAcceptedCreateDropFiles({
+      files: newFiles,
+      isDropMode,
+    });
 
-    if (isDropMode) {
-      const rejectedCsvFiles = acceptedFiles.filter(isCsvFile);
-      if (rejectedCsvFiles.length) {
-        setToast({
-          message: "CSV attachments are only supported on chat drops.",
-          type: "error",
-        });
-        acceptedFiles = acceptedFiles.filter((file) => !isCsvFile(file));
-      }
+    if (rejectedCsvFiles.length) {
+      setToast({
+        message: "CSV attachments are only supported on chat drops.",
+        type: "error",
+      });
     }
 
     if (!acceptedFiles.length) {

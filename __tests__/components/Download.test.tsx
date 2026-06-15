@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import Download from '@/components/download/Download';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Download from "@/components/download/Download";
 
 const mockDownload = jest.fn();
 const mockCancel = jest.fn();
@@ -14,12 +14,12 @@ const mockUseDownloader = jest.fn(() => ({
   isInProgress: false,
 }));
 
-jest.mock('react-use-downloader', () => ({
+jest.mock("react-use-downloader", () => ({
   __esModule: true,
   default: () => mockUseDownloader(),
 }));
 
-describe('Download', () => {
+describe("Download", () => {
   beforeEach(() => {
     mockDownload.mockClear();
     mockCancel.mockClear();
@@ -35,14 +35,21 @@ describe('Download', () => {
     });
   });
 
-  it('starts download on icon click when not in progress', async () => {
+  it("starts download on icon click when not in progress", async () => {
     render(<Download href="/file" name="test" extension="txt" />);
-    const icon = screen.getByRole('img', { hidden: true });
+    const icon = screen.getByRole("img", { hidden: true });
     await userEvent.click(icon);
-    expect(mockDownload).toHaveBeenCalledWith('/file', 'test.txt');
+    expect(mockDownload).toHaveBeenCalledWith("/file", "test.txt");
   });
 
-  it('shows progress and cancels when in progress', async () => {
+  it("starts download without a trailing dot when extension is empty", async () => {
+    render(<Download href="/file" name="attachment" extension="" />);
+    const button = screen.getByRole("button", { name: "Download file" });
+    await userEvent.click(button);
+    expect(mockDownload).toHaveBeenCalledWith("/file", "attachment");
+  });
+
+  it("shows progress and cancels when in progress", async () => {
     mockUseDownloader.mockReturnValueOnce({
       size: 0,
       elapsed: 0,
@@ -55,7 +62,7 @@ describe('Download', () => {
     render(<Download href="/file" name="test" extension="txt" />);
     expect(screen.getByText(/Downloading 55/)).toBeInTheDocument();
     // The cancel button is an X icon, not text
-    const cancelButton = screen.getByRole('img', { hidden: true });
+    const cancelButton = screen.getByRole("img", { hidden: true });
     await userEvent.click(cancelButton);
     expect(mockCancel).toHaveBeenCalled();
   });
