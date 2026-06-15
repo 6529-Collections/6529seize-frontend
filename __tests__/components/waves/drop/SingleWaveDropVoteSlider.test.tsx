@@ -143,63 +143,43 @@ describe("SingleWaveDropVoteSlider", () => {
     expect(onValueAccepted).toHaveBeenLastCalledWith(100);
   });
 
-  it("applies golden theme for rank 1", () => {
+  it("uses semantic progress color for the mini slider", () => {
     const { container } = render(
       <SingleWaveDropVoteSlider
         {...defaultProps}
+        voteValue={50}
         rank={1}
         size={SingleWaveDropVoteSize.MINI}
       />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-\\[\\#E8D48A\\]\\/90"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-emerald-500")).toBeInTheDocument();
   });
 
-  it("applies silver theme for rank 2", () => {
+  it("uses negative semantic progress color for the mini slider", () => {
     const { container } = render(
       <SingleWaveDropVoteSlider
         {...defaultProps}
-        rank={2}
+        voteValue={-50}
+        rank={1}
         size={SingleWaveDropVoteSize.MINI}
       />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-\\[\\#DDDDDD\\]\\/90"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-rose-500")).toBeInTheDocument();
   });
 
-  it("applies bronze theme for rank 3", () => {
+  it("uses neutral semantic progress color for the mini slider", () => {
     const { container } = render(
       <SingleWaveDropVoteSlider
         {...defaultProps}
-        rank={3}
+        voteValue={0}
+        rank={1}
         size={SingleWaveDropVoteSize.MINI}
       />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-\\[\\#CD7F32\\]\\/90"
-    );
-    expect(progressBar).toBeInTheDocument();
-  });
-
-  it("applies default mini theme for no rank", () => {
-    const { container } = render(
-      <SingleWaveDropVoteSlider
-        {...defaultProps}
-        size={SingleWaveDropVoteSize.MINI}
-      />
-    );
-
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-primary-500.tw-via-primary-400"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-iron-400")).toBeInTheDocument();
   });
 
   it("uses semantic progress color for the normal slider", () => {

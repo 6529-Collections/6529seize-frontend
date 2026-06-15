@@ -1,10 +1,6 @@
 "use client";
 
-import type {
-  Dispatch,
-  FC,
-  SetStateAction,
-} from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
 import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
@@ -94,9 +90,7 @@ const getInitialVoteMode = (
   return "slider";
 };
 
-const getNextVoteMode = (
-  isSliderMode: boolean
-): SingleWaveDropVoteMode => {
+const getNextVoteMode = (isSliderMode: boolean): SingleWaveDropVoteMode => {
   if (isSliderMode) {
     return "numeric";
   }
@@ -229,20 +223,19 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-      <fieldset
-        className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1.5"
-      >
+      <fieldset className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-[#26272B] tw-bg-[#131316] tw-px-2 tw-py-1.5">
         <legend className="tw-sr-only">Vote controls</legend>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
+            type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
-            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-font-medium tw-transition-all desktop-hover:hover:tw-bg-iron-600"
+            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-[#37373E] tw-bg-[#26272B] tw-font-medium tw-text-iron-100 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-white/40 desktop-hover:hover:tw-border-[#4C4C55] desktop-hover:hover:tw-bg-[#37373E] desktop-hover:hover:tw-text-white"
             title={getSwitchModeTitle(isSliderMode)}
             aria-label={getSwitchModeAriaLabel(isSliderMode)}
           >
             <FontAwesomeIcon
               icon={faExchange}
-              className="tw-size-3 tw-flex-shrink-0 tw-text-white"
+              className="tw-size-3 tw-flex-shrink-0 tw-text-current"
               flip={getExchangeIconFlip(isSliderMode)}
             />
           </button>
@@ -291,9 +284,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   }
 
   return (
-    <fieldset
-      className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0"
-    >
+    <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0">
       <legend className="tw-sr-only">Vote controls</legend>
       <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
         <VoteModeField
@@ -325,6 +316,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         />
         {showInternalVoteModeControl && (
           <button
+            type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             className="tw-flex-shrink-0 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
             title="Switch mode"

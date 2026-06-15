@@ -80,6 +80,7 @@ export const SingleWaveDropVoteInput: React.FC<
   const pauseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressStartTime = useRef<number | null>(null);
   const isPressed = useRef<boolean>(false);
+  const voteValueRef = useRef<number | string>(voteValue);
   const allowsNegativeValues = minValue < 0;
   const quickPercentages = allowsNegativeValues
     ? QUICK_PERCENTAGES
@@ -98,10 +99,7 @@ export const SingleWaveDropVoteInput: React.FC<
     isPositiveVote,
     isNegativeVote
   );
-  const inputTextClasses = getInputTextClasses(
-    isPositiveVote,
-    isNegativeVote
-  );
+  const inputTextClasses = getInputTextClasses(isPositiveVote, isNegativeVote);
   const inputLabelClasses = getInputLabelClasses(
     isPositiveVote,
     isNegativeVote
@@ -183,16 +181,13 @@ export const SingleWaveDropVoteInput: React.FC<
   };
 
   const updateValue = (increment: boolean) => {
-    let crossedMemetic = false;
+    const { nextValue, crossedMemetic } = computeNextVoteValue(
+      voteValueRef.current,
+      increment
+    );
 
-    setVoteValue((previousValue) => {
-      const { nextValue, crossedMemetic: hasCrossed } = computeNextVoteValue(
-        previousValue,
-        increment
-      );
-      crossedMemetic = hasCrossed;
-      return nextValue!;
-    });
+    voteValueRef.current = nextValue;
+    setVoteValue(nextValue);
 
     if (crossedMemetic) {
       handleMemeticPause(increment);
@@ -244,6 +239,10 @@ export const SingleWaveDropVoteInput: React.FC<
   };
 
   useEffect(() => {
+    voteValueRef.current = voteValue;
+  }, [voteValue]);
+
+  useEffect(() => {
     return () => {
       clearTimers();
     };
@@ -266,12 +265,14 @@ export const SingleWaveDropVoteInput: React.FC<
             type="text"
             pattern={inputPattern}
             inputMode="numeric"
-            className="tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-pr-12 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-transition-all tw-duration-300 tw-ease-out focus:tw-border-primary-400 focus:tw-bg-iron-950 desktop-hover:hover:tw-border-primary-400"
+            className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-[#0d0d10] tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out focus:tw-ring-1 focus:tw-ring-primary-400/40 ${inputShellClasses} ${inputTextClasses}`}
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
-          <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-text-iron-400">
+          <div
+            className={`tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-transition-colors ${inputLabelClasses}`}
+          >
             {label}
           </div>
         </div>
