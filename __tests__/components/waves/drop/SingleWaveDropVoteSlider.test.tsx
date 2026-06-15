@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import SingleWaveDropVoteSlider from "@/components/waves/drop/SingleWaveDropVoteSlider";
+import { SingleWaveDropVoteSize } from "@/components/waves/drop/SingleWaveDropVote.types";
 
 // Mock framer-motion
 jest.mock("framer-motion", () => {
@@ -54,33 +55,33 @@ describe("SingleWaveDropVoteSlider", () => {
     jest.clearAllMocks();
   });
 
+  const expectTooltipValue = (value: string) => {
+    const values = screen.getAllByText((content, element) => {
+      return (
+        content === value || element?.textContent?.replace(/\s+/g, "") === value
+      );
+    });
+    expect(values.length).toBeGreaterThan(0);
+  };
+
   it("renders slider with basic elements", () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} />);
 
     const sliders = screen.getAllByRole("slider");
     expect(sliders.length).toBeGreaterThan(0);
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "50 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0); // Vote value in tooltip
+    expectTooltipValue("50");
   });
 
   it("displays vote value in tooltip", () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue={75} />);
 
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "75 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0);
+    expectTooltipValue("75");
   });
 
   it("handles string vote value by defaulting to 0", () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue="invalid" />);
 
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "0 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0);
+    expectTooltipValue("0");
   });
 
   it("calls setVoteValue when slider changes", () => {
@@ -142,48 +143,48 @@ describe("SingleWaveDropVoteSlider", () => {
     expect(onValueAccepted).toHaveBeenLastCalledWith(100);
   });
 
-  it("applies golden theme for rank 1", () => {
+  it("uses semantic progress color for the mini slider", () => {
     const { container } = render(
-      <SingleWaveDropVoteSlider {...defaultProps} rank={1} />
+      <SingleWaveDropVoteSlider
+        {...defaultProps}
+        voteValue={50}
+        size={SingleWaveDropVoteSize.MINI}
+      />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-\\[\\#E8D48A\\]\\/90"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-emerald-500")).toBeInTheDocument();
   });
 
-  it("applies silver theme for rank 2", () => {
+  it("uses negative semantic progress color for the mini slider", () => {
     const { container } = render(
-      <SingleWaveDropVoteSlider {...defaultProps} rank={2} />
+      <SingleWaveDropVoteSlider
+        {...defaultProps}
+        voteValue={-50}
+        size={SingleWaveDropVoteSize.MINI}
+      />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-\\[\\#DDDDDD\\]\\/90"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-rose-500")).toBeInTheDocument();
   });
 
-  it("applies bronze theme for rank 3", () => {
+  it("uses neutral semantic progress color for the mini slider", () => {
     const { container } = render(
-      <SingleWaveDropVoteSlider {...defaultProps} rank={3} />
+      <SingleWaveDropVoteSlider
+        {...defaultProps}
+        voteValue={0}
+        size={SingleWaveDropVoteSize.MINI}
+      />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-\\[\\#CD7F32\\]\\/90"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-iron-400")).toBeInTheDocument();
   });
 
-  it("applies default theme for no rank", () => {
+  it("uses semantic progress color for the normal slider", () => {
     const { container } = render(
-      <SingleWaveDropVoteSlider {...defaultProps} />
+      <SingleWaveDropVoteSlider {...defaultProps} voteValue={50} />
     );
 
-    const progressBar = container.querySelector(
-      ".tw-bg-gradient-to-r.tw-from-primary-500.tw-via-primary-400"
-    );
-    expect(progressBar).toBeInTheDocument();
+    expect(container.querySelector(".tw-bg-emerald-500")).toBeInTheDocument();
   });
 
   it("handles zero range case", () => {
@@ -196,34 +197,25 @@ describe("SingleWaveDropVoteSlider", () => {
       />
     );
 
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "0 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0);
+    expectTooltipValue("0");
   });
 
   it("handles negative vote values", () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue={-25} />);
 
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "-25 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0);
+    expectTooltipValue("-25");
   });
 
-  it("has click handler on container to stop propagation", () => {
-    const { container } = render(
-      <SingleWaveDropVoteSlider {...defaultProps} />
-    );
+  it("stops click propagation from the range input", () => {
+    render(<SingleWaveDropVoteSlider {...defaultProps} />);
 
-    const sliderContainer = container.querySelector(".tw-h-9");
-    expect(sliderContainer).toBeInTheDocument();
+    const slider = screen.getAllByRole("slider")[0];
+    const clickEvent = new MouseEvent("click", { bubbles: true });
+    const stopPropagation = jest.spyOn(clickEvent, "stopPropagation");
 
-    // Verify the container doesn't crash when clicked
-    fireEvent.click(sliderContainer!);
+    slider.dispatchEvent(clickEvent);
 
-    // The test passes if no errors are thrown and the component remains rendered
-    expect(sliderContainer).toBeInTheDocument();
+    expect(stopPropagation).toHaveBeenCalled();
   });
 
   it("handles mouse events for dragging state", () => {
@@ -249,10 +241,7 @@ describe("SingleWaveDropVoteSlider", () => {
   it("displays correct credit type in tooltip", () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} label="Rep" />);
 
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "50 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0);
+    expect(screen.getByText("Rep")).toBeInTheDocument();
   });
 
   it("handles edge case where all values are zero", () => {
@@ -266,10 +255,7 @@ describe("SingleWaveDropVoteSlider", () => {
     );
 
     // Should render without crashing and show 0 value
-    const tooltips = screen.getAllByText((content, element) => {
-      return element?.textContent === "0 Rep";
-    });
-    expect(tooltips.length).toBeGreaterThan(0);
+    expectTooltipValue("0");
   });
 
   it("formats large numbers with commas in tooltip", () => {

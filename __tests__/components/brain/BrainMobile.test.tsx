@@ -122,6 +122,14 @@ jest.mock("@/components/brain/mobile/BrainMobileTabs", () => ({
   },
 }));
 
+const mockMobileWaveSubwavesBar = jest.fn(() => (
+  <div data-testid="mobile-subwaves-bar" />
+));
+jest.mock("@/components/brain/mobile/MobileWaveSubwavesBar", () => ({
+  __esModule: true,
+  default: (props: any) => mockMobileWaveSubwavesBar(props),
+}));
+
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
   __esModule: true,
   default: () => <div data-testid="about" />,
@@ -296,6 +304,7 @@ describe("BrainMobile", () => {
     mockDialogMountCount = 0;
     mockCreateWaveModal.mockClear();
     mockCreateDirectMessageModal.mockClear();
+    mockMobileWaveSubwavesBar.mockClear();
     globalThis.history.replaceState(null, "", "/");
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice" },
@@ -372,6 +381,10 @@ describe("BrainMobile", () => {
     expect(screen.queryByTestId("waves")).toBeNull();
     expect(screen.queryByTestId("quick-vote-dialog")).toBeNull();
     expect(mockDialogMountCount).toBe(0);
+    expect(screen.getByTestId("mobile-subwaves-bar")).toBeInTheDocument();
+    expect(mockMobileWaveSubwavesBar).toHaveBeenCalledWith({
+      wave: waveData,
+    });
   });
 
   it("keeps My Votes unavailable for guests on memes waves", async () => {

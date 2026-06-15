@@ -123,7 +123,7 @@ describe("increaseWavesOverviewDropsCount", () => {
     expect(result.pageParams).toEqual([undefined, 1]);
   });
 
-  it("updates v2 overview and pinned caches", async () => {
+  it("updates v2 overview, pinned, official, and subwave caches", async () => {
     jest.spyOn(Date, "now").mockReturnValue(4321);
     const client = new QueryClient();
     const waveOne = createSidebarWave("w1");
@@ -146,6 +146,10 @@ describe("increaseWavesOverviewDropsCount", () => {
       QueryKey.OFFICIAL_WAVES,
       { viewer_identity: "0xabc:primary" },
     ];
+    const subwavesKey = [
+      QueryKey.WAVE_SUBWAVES,
+      { parent_wave_id: "parent", page: 1, page_size: 100 },
+    ];
 
     client.setQueryData(overviewKey, {
       pages: [
@@ -156,12 +160,14 @@ describe("increaseWavesOverviewDropsCount", () => {
     });
     client.setQueryData(pinnedKey, [waveOne]);
     client.setQueryData(officialKey, [waveOne]);
+    client.setQueryData(subwavesKey, [waveOne, waveTwo]);
 
     await increaseWavesOverviewDropsCount(client, "w1");
 
     const overviewResult: any = client.getQueryData(overviewKey);
     const pinnedResult: any = client.getQueryData(pinnedKey);
     const officialResult: any = client.getQueryData(officialKey);
+    const subwavesResult: any = client.getQueryData(subwavesKey);
 
     expect(overviewResult.pages[0].waves[0].totalDropsCount).toBe(1);
     expect(overviewResult.pages[0].waves[0].latestDropTimestamp).toBe(4321);
@@ -171,6 +177,9 @@ describe("increaseWavesOverviewDropsCount", () => {
     expect(pinnedResult[0].latestDropTimestamp).toBe(4321);
     expect(officialResult[0].totalDropsCount).toBe(1);
     expect(officialResult[0].latestDropTimestamp).toBe(4321);
+    expect(subwavesResult[0].totalDropsCount).toBe(1);
+    expect(subwavesResult[0].latestDropTimestamp).toBe(4321);
+    expect(subwavesResult[1]).toEqual(waveTwo);
   });
 
   it("leaves unrelated overview caches untouched", async () => {
@@ -184,6 +193,24 @@ describe("increaseWavesOverviewDropsCount", () => {
       },
     ];
     const data = { pages: [[createWave("other")]], pageParams: [undefined] };
+    client.setQueryData(key, data);
+    const cancelSpy = jest.spyOn(client, "cancelQueries");
+    const setQueryDataSpy = jest.spyOn(client, "setQueryData");
+
+    await increaseWavesOverviewDropsCount(client, "missing");
+
+    expect(cancelSpy).not.toHaveBeenCalled();
+    expect(setQueryDataSpy).not.toHaveBeenCalled();
+    expect(client.getQueryData(key)).toBe(data);
+  });
+
+  it("leaves unrelated subwave caches untouched", async () => {
+    const client = new QueryClient();
+    const key = [
+      QueryKey.WAVE_SUBWAVES,
+      { parent_wave_id: "parent", page: 1, page_size: 100 },
+    ];
+    const data = [createSidebarWave("other")];
     client.setQueryData(key, data);
     const cancelSpy = jest.spyOn(client, "cancelQueries");
     const setQueryDataSpy = jest.spyOn(client, "setQueryData");

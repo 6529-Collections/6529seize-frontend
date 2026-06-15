@@ -103,10 +103,13 @@ function createWave(overrides: Partial<SidebarWave> = {}): SidebarWave {
     id: "wave-1",
     name: "Wave One",
     type: ApiWaveType.Chat,
+    createdAt: 0,
     picture: null,
     contributors: [],
     isDirectMessage: false,
     hasCompetition: false,
+    parentWaveId: null,
+    hasSubwaves: false,
     descriptionDrop: {
       contents: "Description preview",
       media: [],

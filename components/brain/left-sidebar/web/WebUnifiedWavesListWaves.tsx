@@ -7,35 +7,34 @@ import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
+import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import SectionHeader from "../waves/SectionHeader";
 import WavesFilterToggle from "../waves/WavesFilterToggle";
+import { SidebarWaveTreeRowTransition } from "../waves/SidebarWaveTreeRowTransition";
 import WebBrainLeftSidebarWave from "./WebBrainLeftSidebarWave";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
-
-function isValidWave(wave: unknown): wave is MinimalWave {
-  if (wave === null || wave === undefined || typeof wave !== "object") {
-    return false;
-  }
-
-  const w = wave as MinimalWave;
-  return (
-    typeof w.id === "string" &&
-    w.id.length > 0 &&
-    typeof w.name === "string" &&
-    typeof w.isPinned === "boolean"
-  );
-}
+import {
+  useSidebarWaveTree,
+  type SidebarWaveTreeRow,
+} from "@/hooks/useSidebarWaveTree";
+import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
+import {
+  groupSidebarWaves,
+  hasExpandableTopLevelRows,
+  isValidSidebarWave,
+} from "../waves/sidebarWaveListUtils";
 
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
 const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
+const SUBWAVE_ROW_HEIGHT = 54 as const;
 const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 const PROFILE_FEED_LABEL = "Profile Waves Feed";
 const TOOLTIP_STYLE = {
@@ -119,12 +118,85 @@ function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
   );
 }
 
+function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
+  return (
+    <div
+      data-tooltip-id="create-wave-tooltip"
+      data-tooltip-content="Create wave"
+    >
+      <PrimaryButton
+        onClicked={onClick}
+        loading={false}
+        disabled={false}
+        padding="tw-p-2.5"
+      >
+        <FontAwesomeIcon icon={faPlus} className="tw-size-4 tw-flex-shrink-0" />
+      </PrimaryButton>
+    </div>
+  );
+}
+
+function WebWavesListHeader({
+  headerPaddingClassName,
+  isCollapsed,
+  onCreateWave,
+  showCreateWaveButton,
+}: {
+  readonly headerPaddingClassName: string;
+  readonly isCollapsed: boolean;
+  readonly onCreateWave: () => void;
+  readonly showCreateWaveButton: boolean;
+}) {
+  if (isCollapsed) {
+    if (!showCreateWaveButton) {
+      return null;
+    }
+
+    return (
+      <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
+        <CreateWaveButton onClick={onCreateWave} />
+      </div>
+    );
+  }
+
+  return (
+    <SectionHeader
+      label="Waves"
+      paddingClassName={headerPaddingClassName}
+      rightContent={
+        showCreateWaveButton ? (
+          <CreateWaveButton onClick={onCreateWave} />
+        ) : undefined
+      }
+    />
+  );
+}
+
+const isVisibleSectionRow = ({
+  row,
+  sectionName,
+}: {
+  readonly row: SidebarWaveTreeRow;
+  readonly sectionName: string;
+}) => {
+  const wave = row.wave;
+
+  if (isValidSidebarWave(wave)) {
+    return true;
+  }
+
+  console.warn(`Invalid ${sectionName} wave object`, wave);
+  return false;
+};
+
 function WebProfileFeedShortcut({
   basePath,
   isCollapsed,
+  reserveExpandControlSpace,
 }: {
   readonly basePath: string;
   readonly isCollapsed: boolean;
+  readonly reserveExpandControlSpace: boolean;
 }) {
   const { activeWave } = useMyStream();
   const isActive = activeWave.id === null;
@@ -165,7 +237,9 @@ function WebProfileFeedShortcut({
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
+        reserveExpandControlSpace ? "tw-pl-10 tw-pr-5 md:tw-pl-7" : "tw-px-5"
+      } ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
@@ -208,102 +282,135 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
   const seizeSettings = useSeizeSettingsOptional();
+  const { activeWave, waves: streamWaves } = useMyStream();
+  const { topLevelWaves, getRows, toggleParent } = useSidebarWaveTree({
+    waves,
+    activeWaveId: activeWave.id,
+    activeParentWaveId: activeWave.parentWaveId,
+    onParentExpand: streamWaves.loadSubwavesForParent,
+    showExpandedSubwaves: !isCollapsed,
+  });
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
 
   const { announcementWaves, officialWaves, pinnedWaves, regularWaves } =
-    useMemo(() => {
-      const announcements: MinimalWave[] = [];
-      const official: MinimalWave[] = [];
-      const pinned: MinimalWave[] = [];
-      const regular: MinimalWave[] = [];
+    useMemo(
+      () =>
+        groupSidebarWaves({
+          isAnnouncementsWave:
+            seizeSettings === null
+              ? undefined
+              : (waveId) => seizeSettings.isAnnouncementsWave(waveId),
+          waves: topLevelWaves,
+        }),
+      [topLevelWaves, seizeSettings]
+    );
 
-      for (const wave of waves) {
-        if (seizeSettings?.isAnnouncementsWave(wave.id)) {
-          announcements.push(wave);
-        } else if (wave.isOfficial) {
-          official.push(wave);
-        } else if (wave.isPinned) {
-          pinned.push(wave);
-        } else {
-          regular.push(wave);
-        }
-      }
-
-      return {
-        announcementWaves: announcements,
-        officialWaves: official,
-        pinnedWaves: pinned,
-        regularWaves: regular,
-      };
-    }, [waves, seizeSettings]);
+  const announcementRows = useMemo(
+    () => getRows(announcementWaves),
+    [announcementWaves, getRows]
+  );
+  const officialRows = useMemo(
+    () => getRows(officialWaves),
+    [officialWaves, getRows]
+  );
+  const pinnedRows = useMemo(
+    () => getRows(pinnedWaves),
+    [pinnedWaves, getRows]
+  );
+  const regularRows = useMemo(
+    () => getRows(regularWaves),
+    [regularWaves, getRows]
+  );
+  const rowAnimationOptions = useMemo(
+    () => ({ keepExitingRows: !isCollapsed }),
+    [isCollapsed]
+  );
+  const animatedAnnouncementRows = useAnimatedSidebarWaveRows(
+    announcementRows,
+    rowAnimationOptions
+  );
+  const animatedOfficialRows = useAnimatedSidebarWaveRows(
+    officialRows,
+    rowAnimationOptions
+  );
+  const animatedPinnedRows = useAnimatedSidebarWaveRows(
+    pinnedRows,
+    rowAnimationOptions
+  );
+  const animatedRegularRows = useAnimatedSidebarWaveRows(
+    regularRows,
+    rowAnimationOptions
+  );
+  const hasAnnouncementRows = animatedAnnouncementRows.length > 0;
+  const hasOfficialRows = animatedOfficialRows.length > 0;
+  const hasPinnedRows = animatedPinnedRows.length > 0;
+  const hasRegularRows = animatedRegularRows.length > 0;
+  const reserveExpandControlSpace =
+    !isCollapsed &&
+    [announcementRows, officialRows, pinnedRows, regularRows].some(
+      hasExpandableTopLevelRows
+    );
+  const headerPaddingClassName = reserveExpandControlSpace
+    ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
+    : "tw-px-4";
+  const filterPaddingClassName = reserveExpandControlSpace
+    ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
+    : "tw-px-4";
+  const sectionClassName = isCollapsed
+    ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
+    : "tw-flex tw-flex-col";
 
   const rowHeight = isCollapsed
     ? WAVE_ROW_HEIGHT_COLLAPSED
     : WAVE_ROW_HEIGHT_DEFAULT;
+  const getSidebarRowHeight = useCallback(
+    (row: SidebarWaveTreeRow) =>
+      row.depth === 1 ? SUBWAVE_ROW_HEIGHT : rowHeight,
+    [rowHeight]
+  );
 
-  const virtual = useVirtualizedWaves<MinimalWave>(
-    regularWaves,
-    "web-unified-waves-regular",
-    scrollContainerRef ?? listContainerRef,
+  const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
+    items: animatedRegularRows,
+    key: "web-unified-waves-regular",
+    scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
-    rowHeight,
-    5
+    rowHeight: getSidebarRowHeight,
+    overscan: 5,
+  });
+
+  const renderWaveRow = (row: SidebarWaveTreeRow, showPin: boolean) => (
+    <WebBrainLeftSidebarWave
+      wave={row.wave}
+      onHover={onHover}
+      showPin={showPin && row.depth === 0}
+      basePath={basePath}
+      collapsed={isCollapsed}
+      depth={row.depth}
+      canExpand={row.canExpand && !isCollapsed}
+      reserveExpandControlSpace={reserveExpandControlSpace}
+      isExpanded={row.isExpanded}
+      hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
+      isLastSubwave={row.isLastSubwave}
+      onToggleExpand={toggleParent}
+      onPrefetchSubwaves={streamWaves.prefetchSubwavesForParent}
+    />
   );
 
   return (
     <>
       <div className="tw-flex tw-flex-col">
-        {!hideHeaders &&
-          (isCollapsed ? (
-            showCreateWaveButton && (
-              <div className="tw-mb-3.5 tw-flex tw-justify-center tw-px-2">
-                <div
-                  data-tooltip-id="create-wave-tooltip"
-                  data-tooltip-content="Create wave"
-                >
-                  <PrimaryButton
-                    onClicked={openWave}
-                    loading={false}
-                    disabled={false}
-                    padding="tw-p-2.5"
-                  >
-                    <FontAwesomeIcon
-                      icon={faPlus}
-                      className="tw-size-4 tw-flex-shrink-0"
-                    />
-                  </PrimaryButton>
-                </div>
-              </div>
-            )
-          ) : (
-            <SectionHeader
-              label="Waves"
-              rightContent={
-                showCreateWaveButton ? (
-                  <div
-                    data-tooltip-id="create-wave-tooltip"
-                    data-tooltip-content="Create wave"
-                  >
-                    <PrimaryButton
-                      onClicked={openWave}
-                      loading={false}
-                      disabled={false}
-                      padding="tw-p-2.5"
-                    >
-                      <FontAwesomeIcon
-                        icon={faPlus}
-                        className="tw-size-4 tw-flex-shrink-0"
-                      />
-                    </PrimaryButton>
-                  </div>
-                ) : undefined
-              }
-            />
-          ))}
+        {!hideHeaders && (
+          <WebWavesListHeader
+            headerPaddingClassName={headerPaddingClassName}
+            isCollapsed={isCollapsed}
+            onCreateWave={openWave}
+            showCreateWaveButton={showCreateWaveButton}
+          />
+        )}
         {!hideHeaders && !hideToggle && !isCollapsed && (
-          <div className="tw-mt-4 tw-flex tw-px-4 tw-pb-3">
+          <div className={`tw-mt-4 tw-flex tw-pb-3 ${filterPaddingClassName}`}>
             <WavesFilterToggle />
           </div>
         )}
@@ -311,112 +418,69 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           <WebProfileFeedShortcut
             basePath={basePath}
             isCollapsed={isCollapsed}
+            reserveExpandControlSpace={reserveExpandControlSpace}
           />
         )}
 
         <div>
-          {announcementWaves.length > 0 && (
-            <section
-              className={`tw-flex tw-flex-col ${
-                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-              }`}
-              aria-label="Announcement waves"
-            >
-              {announcementWaves
-                .filter((wave): wave is MinimalWave => {
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid announcement wave object", wave);
-                    return false;
-                  }
-                  return true;
-                })
-                .map((wave) => (
-                  <div key={wave.id} className="tw-w-full">
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin && !isCollapsed && wave.isPinned}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
-                ))}
-            </section>
+          {hasAnnouncementRows && (
+            <SidebarWaveRowsSection
+              ariaLabel="Announcement waves"
+              className={sectionClassName}
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleSectionRow({ row, sectionName: "announcement" })
+              }
+              renderRow={(row) =>
+                renderWaveRow(
+                  row,
+                  !hidePin && !isCollapsed && row.wave.isPinned
+                )
+              }
+              rows={animatedAnnouncementRows}
+              transitionClassName="tw-w-full"
+            />
           )}
-          {announcementWaves.length > 0 &&
+          {hasAnnouncementRows &&
             !hideHeaders &&
-            (officialWaves.length > 0 ||
-              pinnedWaves.length > 0 ||
-              regularWaves.length > 0) && (
+            (hasOfficialRows || hasPinnedRows || hasRegularRows) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {officialWaves.length > 0 && (
-            <section
-              className={`tw-flex tw-flex-col ${
-                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-              }`}
-              aria-label="Official waves"
-            >
-              {officialWaves
-                .filter((wave): wave is MinimalWave => {
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid official wave object", wave);
-                    return false;
-                  }
-                  return true;
-                })
-                .map((wave) => (
-                  <div key={wave.id} className="tw-w-full">
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={false}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
-                ))}
-            </section>
+          {hasOfficialRows && (
+            <SidebarWaveRowsSection
+              ariaLabel="Official waves"
+              className={sectionClassName}
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleSectionRow({ row, sectionName: "official" })
+              }
+              renderRow={(row) => renderWaveRow(row, false)}
+              rows={animatedOfficialRows}
+              transitionClassName="tw-w-full"
+            />
           )}
-          {officialWaves.length > 0 &&
+          {hasOfficialRows &&
             !hideHeaders &&
-            (pinnedWaves.length > 0 || regularWaves.length > 0) && (
+            (hasPinnedRows || hasRegularRows) && (
               <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
             )}
-          {!hideHeaders && pinnedWaves.length > 0 && (
-            <section
-              className={`tw-flex tw-flex-col ${
-                isCollapsed ? "tw-items-center tw-gap-y-2" : ""
-              }`}
-              aria-label="Pinned waves"
-            >
-              {pinnedWaves
-                .filter((wave): wave is MinimalWave => {
-                  if (!isValidWave(wave)) {
-                    console.warn("Invalid pinned wave object", wave);
-                    return false;
-                  }
-                  return true;
-                })
-                .map((wave) => (
-                  <div key={wave.id} className="tw-w-full">
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin && !isCollapsed}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
-                ))}
-            </section>
+          {!hideHeaders && hasPinnedRows && (
+            <SidebarWaveRowsSection
+              ariaLabel="Pinned waves"
+              className={sectionClassName}
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleSectionRow({ row, sectionName: "pinned" })
+              }
+              renderRow={(row) => renderWaveRow(row, !hidePin && !isCollapsed)}
+              rows={animatedPinnedRows}
+              transitionClassName="tw-w-full"
+            />
           )}
-          {!hideHeaders &&
-            pinnedWaves.length > 0 &&
-            regularWaves.length > 0 && (
-              <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-            )}
-          {regularWaves.length > 0 ? (
+          {!hideHeaders && hasPinnedRows && hasRegularRows && (
+            <div className="tw-my-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+          )}
+          {hasRegularRows ? (
             <section
               ref={listContainerRef}
               style={{
@@ -426,7 +490,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               aria-label="Regular waves list"
             >
               {virtual.virtualItems.map((v: VirtualItem) => {
-                if (v.index === regularWaves.length) {
+                if (v.index === animatedRegularRows.length) {
                   return (
                     <div
                       key="sentinel"
@@ -440,14 +504,20 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     />
                   );
                 }
-                const wave = regularWaves[v.index];
-                if (!isValidWave(wave)) {
-                  console.warn("Invalid wave object at index", v.index, wave);
+                const row = animatedRegularRows[v.index];
+                if (!row || !isValidSidebarWave(row.wave)) {
+                  console.warn(
+                    "Invalid wave object at index",
+                    v.index,
+                    row?.wave
+                  );
                   return null;
                 }
                 return (
-                  <div
-                    key={wave.id}
+                  <SidebarWaveTreeRowTransition
+                    key={row.key}
+                    row={row}
+                    rowHeight={getSidebarRowHeight(row)}
                     style={{
                       position: "absolute",
                       width: "100%",
@@ -455,14 +525,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                       height: v.size,
                     }}
                   >
-                    <WebBrainLeftSidebarWave
-                      wave={wave}
-                      onHover={onHover}
-                      showPin={!hidePin && !isCollapsed}
-                      basePath={basePath}
-                      collapsed={isCollapsed}
-                    />
-                  </div>
+                    {renderWaveRow(row, !hidePin && !isCollapsed)}
+                  </SidebarWaveTreeRowTransition>
                 );
               })}
             </section>

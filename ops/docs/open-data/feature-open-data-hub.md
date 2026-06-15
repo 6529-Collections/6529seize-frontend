@@ -27,6 +27,7 @@ dataset routes.
 1. Open `/open-data`.
 2. Pick a dataset card:
    - Network Metrics
+   - 6529bot Usage
    - Meme Subscriptions (conditional visibility)
    - Rememes
    - Team
@@ -51,6 +52,7 @@ Native app menu navigation links only to `/open-data`.
 ## States on the Hub
 
 - The hub does not request dataset APIs.
+- The `6529bot Usage` card opens a server-fetched aggregate dashboard.
 - The hub does not show dataset loading, empty, or error banners.
 - Download-state behavior is handled on each dataset route.
 

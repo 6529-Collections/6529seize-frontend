@@ -12,6 +12,7 @@ download link.
 - Hub route: `/open-data`
 - Dataset routes:
   - `/open-data/network-metrics`
+  - `/open-data/6529bot`
   - `/open-data/meme-subscriptions`
   - `/open-data/rememes`
   - `/open-data/team`
@@ -31,6 +32,7 @@ download link.
 1. Open `/open-data`.
 2. Pick a hub card:
    - `Network Metrics`
+   - `6529bot Usage`
    - `Meme Subscriptions` (can be hidden on native iOS outside US)
    - `Rememes`
    - `Team`
@@ -49,6 +51,9 @@ download link.
 - `Meme Subscriptions`:
   - first request has no inline loading or error banner (can look heading-only)
   - empty success: `Nothing here yet`
+- `6529bot Usage`:
+  - server-fetched aggregate dashboard
+  - unavailable state when the bot API base URL is missing or unreachable
 - `Team`:
   - fixed links table
   - no API fetch, no loading banner, and no API error banner
@@ -58,12 +63,14 @@ download link.
 - API-backed routes show pagination only when total results are greater than 25:
   `/open-data/network-metrics`, `/open-data/meme-subscriptions`,
   `/open-data/rememes`, and `/open-data/royalties`.
+- `/open-data/6529bot` shows aggregate tables, not dataset pagination.
 - `/open-data/team` does not show pagination.
 
 ## Route Variants
 
 - Direct dataset URLs:
   - `/open-data/network-metrics`
+  - `/open-data/6529bot`
   - `/open-data/meme-subscriptions`
   - `/open-data/rememes`
   - `/open-data/team`
@@ -86,6 +93,7 @@ download link.
 ## Related Pages
 
 - [Open Data Hub](feature-open-data-hub.md)
+- [6529bot Usage](feature-6529bot-usage.md)
 - [Open Data Routes and Download States](troubleshooting-open-data-routes-and-downloads.md)
 - [Consolidated Network Metrics Downloads](feature-network-metrics-downloads.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
