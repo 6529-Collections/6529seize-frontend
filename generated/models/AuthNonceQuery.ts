@@ -13,6 +13,7 @@
 
 import { AuthNonceStructuredQuery } from '../models/AuthNonceStructuredQuery';
 import { AuthNonceUnstructuredQuery } from '../models/AuthNonceUnstructuredQuery';
+import { HttpFile } from '../http/http';
 
 /**
  * @type AuthNonceQuery

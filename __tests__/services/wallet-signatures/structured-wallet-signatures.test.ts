@@ -6,6 +6,8 @@ import {
   buildNextgenAdminSignatureMessage,
   buildStructuredWalletSignatureMessage,
   canonicalJSONStringify,
+  getWalletSignatureAudience,
+  getWalletSignatureClientOrigin,
   getWalletSignatureDomain,
   hashStructuredWalletSignaturePayload,
   isStructuredSignaturesEnabled,
@@ -14,15 +16,18 @@ import { DropHasher } from "@/utils/drop-hasher";
 
 describe("structured wallet signatures", () => {
   const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
+  const originalApiEndpoint = publicEnv.API_ENDPOINT;
   const originalStructuredFlag = publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED;
 
   beforeEach(() => {
     publicEnv.BASE_ENDPOINT = "https://www.6529.io";
+    publicEnv.API_ENDPOINT = "https://api.6529.io";
     publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = undefined;
   });
 
   afterEach(() => {
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint;
+    publicEnv.API_ENDPOINT = originalApiEndpoint;
     publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = originalStructuredFlag;
   });
 
@@ -40,7 +45,10 @@ describe("structured wallet signatures", () => {
       address: "0x1111111111111111111111111111111111111111",
       action: "nextgen_admin",
       purpose: "Sign this message to perform a 6529 NextGen admin action.",
+      audience: "api.6529.io",
       domain: "example.com",
+      clientOrigin: "https://example.com",
+      sessionType: "external_client",
       chainId: 1,
       nonce: "nonce-12345",
       issuedAt: new Date("2026-06-10T00:00:00.000Z"),
@@ -52,7 +60,10 @@ describe("structured wallet signatures", () => {
       [
         "6529 Action",
         "Version: 2",
+        "Audience: api.6529.io",
         "Domain: example.com",
+        "Client Origin: https://example.com",
+        "Session Type: external_client",
         "Wallet: 0x1111111111111111111111111111111111111111",
         "Chain ID: 1",
         "Issued At: 2026-06-10T00:00:00.000Z",
@@ -80,6 +91,21 @@ describe("structured wallet signatures", () => {
         : "www.6529.io";
 
     expect(getWalletSignatureDomain()).toBe(expectedDomain);
+  });
+
+  it("derives the signing audience from the API endpoint", () => {
+    publicEnv.API_ENDPOINT = "https://api.6529.io/api";
+
+    expect(getWalletSignatureAudience()).toBe("api.6529.io");
+  });
+
+  it("derives the client origin from the current runtime", () => {
+    const expectedOrigin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin.toLowerCase()
+        : "https://www.6529.io";
+
+    expect(getWalletSignatureClientOrigin()).toBe(expectedOrigin);
   });
 
   it("builds drop payload hashes without signature fields", () => {

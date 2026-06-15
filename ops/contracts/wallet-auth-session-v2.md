@@ -49,6 +49,7 @@ All flags default to legacy-safe behavior until explicitly enabled in the target
 - Browser JS may hold short-lived access JWTs in memory.
 - During compatibility rollout only, the existing `wallet-auth` JS-readable cookie may continue to mirror the access JWT.
 - Browser localStorage must not store v2 refresh tokens.
+- Cookie-based web sessions are for first-party or explicitly registered browser origins. Unknown third-party browser frontends must not depend on these cookies because credentialed CORS requires an explicit allowed origin and cannot use wildcard `Access-Control-Allow-Origin: *`.
 
 ### Native Mobile
 
@@ -80,6 +81,8 @@ Response:
 - Always returns a short-lived `access_token`.
 - For `web`, sets `6529_session` and does not return a refresh token.
 - For `native`, returns a rotated `native_refresh_token`.
+- V2 session login requires a structured authentication challenge: `web` requires `Session Type: first_party_web`, and `native` requires `Session Type: native`.
+- `Session Type: external_client` uses non-cookie bearer-token/API-client auth and must not create a v2 wallet session.
 
 ### POST `/api/auth/session-refresh`
 
@@ -149,7 +152,10 @@ Every signed message must include:
 
 - `6529 Authentication` or `6529 Action`
 - `Version: 2`
-- `Domain: <expected frontend host>`
+- `Audience: <expected API host>`
+- `Domain: <signing client host>`
+- `Client Origin: <signing client origin>` when a browser or native runtime has a stable origin
+- `Session Type: <first_party_web | external_client | native>` for authentication messages
 - `Wallet: <0x address>`
 - `Chain ID: <chain id or 1>`
 - `Issued At: <ISO timestamp>`
@@ -162,7 +168,11 @@ Every signed message must include:
 Backend verification:
 
 - Reconstructs or parses the structured message.
-- Verifies domain allowlist, expiry, nonce uniqueness, address, role rules, and payload hash.
+- Verifies API audience, expiry, nonce uniqueness, address, role rules, and payload hash.
+- Enforces the frontend domain allowlist only for `Session Type: first_party_web`.
+- Treats `external_client` and `native` as audience-based flows; community clients and server integrations do not need domain registration for baseline structured-signature auth.
+- Allows `/auth/session-login` only for `first_party_web` web sessions and `native` native sessions; `external_client` uses non-cookie auth.
+- When a browser request supplies `client_origin`, it must match the request `Origin` header if both are present.
 - EOAs verify by recovered signer.
 - Contract wallets verify with EIP-1271 against the signing address.
 - `wallet_kind_hint` and frontend Safe detection are never authority.
@@ -171,6 +181,16 @@ Legacy signatures remain accepted only while `AUTH_STRUCTURED_SIGNATURES_REQUIRE
 During rollout, action endpoints that previously accepted only `signature` must also
 accept request-only `signature_message` so the backend can verify the exact text
 the wallet signed. Servers must not persist `signature_message`.
+
+External integration model:
+
+- `Audience: api.6529.io` binds signatures to the 6529 API, not to a registry of client domains.
+- Client IDs or registered domains may be added later for higher-trust features, quotas, analytics, or abuse controls, but they are not required for baseline community integrations.
+- Server-side integrations may omit `Client Origin` when there is no browser origin.
+- Audience-based structured signatures do not make cookie-based v2 web sessions available to arbitrary browser origins.
+- Unknown community browser frontends use non-cookie bearer-token/API-client auth through `/auth/login` or dedicated API-client auth.
+- Cookie-based v2 web sessions are only for first-party web or browser integrations whose origins are explicitly registered for credentialed CORS.
+- If structured signatures are required, external integrations use this audience-based structured message with non-cookie bearer/API-client auth; domain registration remains only a cookie-session/CORS trust boundary.
 
 ## WebSocket Auth Contract
 
