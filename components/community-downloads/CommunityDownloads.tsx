@@ -6,6 +6,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import {
   BellIcon,
   ChartBarIcon,
+  CpuChipIcon,
   CurrencyDollarIcon,
   SparklesIcon,
   UserGroupIcon,
@@ -23,9 +24,10 @@ function DownloadCard({ href, title, icon }: DownloadCardProps) {
   return (
     <Link
       href={href}
-      className="tw-group tw-relative tw-flex tw-items-center tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-gradient-to-br tw-from-iron-950 tw-to-iron-900/50 tw-px-6 tw-py-4 tw-h-24 tw-w-full sm:tw-max-w-2xl sm:tw-mx-auto tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out tw-no-underline desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-2px] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500">
+      className="tw-group tw-relative tw-flex tw-h-24 tw-w-full tw-items-center tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-gradient-to-br tw-from-iron-950 tw-to-iron-900/50 tw-px-6 tw-py-4 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500 desktop-hover:hover:tw-translate-y-[-2px] desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 sm:tw-mx-auto sm:tw-max-w-2xl"
+    >
       <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-bg-gradient-to-br tw-from-white/0 tw-to-white/0 tw-transition-opacity tw-duration-300 desktop-hover:group-hover:tw-from-white/5 desktop-hover:group-hover:tw-to-white/0" />
-      <div className="tw-relative tw-flex tw-items-center tw-justify-center tw-w-10 tw-h-10 tw-text-white desktop-hover:group-hover:tw-scale-110 tw-transition-transform tw-duration-300">
+      <div className="tw-relative tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-text-white tw-transition-transform tw-duration-300 desktop-hover:group-hover:tw-scale-110">
         {icon}
       </div>
       <span className="tw-relative tw-text-lg tw-font-semibold tw-text-white tw-transition-colors tw-duration-300 desktop-hover:group-hover:tw-text-iron-100">
@@ -44,31 +46,36 @@ export default function CommunityDownloads() {
     {
       href: "/open-data/network-metrics",
       title: "Network Metrics",
-      icon: <ChartBarIcon className="tw-w-full tw-h-full" />,
+      icon: <ChartBarIcon className="tw-h-full tw-w-full" />,
+    },
+    {
+      href: "/open-data/6529bot",
+      title: "6529bot Usage",
+      icon: <CpuChipIcon className="tw-h-full tw-w-full" />,
     },
     ...(!capacitor.isIos || country === "US"
       ? [
           {
             href: "/open-data/meme-subscriptions",
             title: "Meme Subscriptions",
-            icon: <BellIcon className="tw-w-full tw-h-full" />,
+            icon: <BellIcon className="tw-h-full tw-w-full" />,
           },
         ]
       : []),
     {
       href: "/open-data/rememes",
       title: "Rememes",
-      icon: <SparklesIcon className="tw-w-full tw-h-full" />,
+      icon: <SparklesIcon className="tw-h-full tw-w-full" />,
     },
     {
       href: "/open-data/team",
       title: "Team",
-      icon: <UserGroupIcon className="tw-w-full tw-h-full" />,
+      icon: <UserGroupIcon className="tw-h-full tw-w-full" />,
     },
     {
       href: "/open-data/royalties",
       title: "Royalties",
-      icon: <CurrencyDollarIcon className="tw-w-full tw-h-full" />,
+      icon: <CurrencyDollarIcon className="tw-h-full tw-w-full" />,
     },
   ];
 

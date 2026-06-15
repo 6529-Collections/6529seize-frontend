@@ -751,26 +751,20 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("current-rating")).toHaveTextContent("0");
   });
 
-  it("stops event propagation on container click", () => {
+  it("renders vote controls as a native group", () => {
     const drop = createMockDrop();
-    const parentClickHandler = jest.fn();
 
     render(
-      <div onClick={parentClickHandler}>
-        <SingleWaveDropVoteContent
-          drop={drop}
-          size={SingleWaveDropVoteSize.NORMAL}
-          onVoteSuccess={mockOnVoteSuccess}
-        />
-      </div>
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
     );
 
-    const container = screen
-      .getByTestId("vote-slider")
-      .closest(".tw-space-y-6");
-    fireEvent.click(container!);
-
-    expect(parentClickHandler).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("group", { name: "Vote controls" })
+    ).toBeInTheDocument();
   });
 
   it("shows correct icon flip based on mode", () => {

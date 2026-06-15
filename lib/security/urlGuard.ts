@@ -1,6 +1,10 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+import type { LookupAddress } from "node:dns";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 import { toASCII } from "node:punycode";
+import { Agent, fetch as undiciFetch } from "undici";
+import type { RequestInit as UndiciRequestInit } from "undici";
 
 type UrlGuardErrorKind =
   | "missing-url"
@@ -72,6 +76,30 @@ export interface FetchPublicUrlOptions extends UrlGuardOptions {
   readonly revalidateFinalUrl?: boolean | undefined;
 }
 
+interface ValidatedAddress {
+  readonly address: string;
+  readonly family: number;
+}
+
+interface ValidatedPublicUrl {
+  readonly hostname: string;
+  readonly addresses: readonly ValidatedAddress[];
+}
+
+type LookupCallback = (
+  error: NodeJS.ErrnoException | null,
+  address: string | LookupAddress[],
+  family?: number
+) => void;
+
+type LookupOptions = {
+  readonly all?: boolean | undefined;
+};
+
+type RequestInitWithDuplex = RequestInit & {
+  readonly duplex?: UndiciRequestInit["duplex"] | undefined;
+};
+
 const DEFAULT_PROTOCOLS = ["http:", "https:"];
 const DEFAULT_REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 const DISALLOWED_HOST_PATTERNS: ReadonlySet<string> = new Set([
@@ -96,6 +124,13 @@ const PRIVATE_IPV4_RANGES: ReadonlyArray<[number, number]> = [
   [ipv4ToInt("224.0.0.0"), ipv4ToInt("239.255.255.255")],
   [ipv4ToInt("240.0.0.0"), ipv4ToInt("255.255.255.255")],
 ];
+
+const pinnedLookupContext = new AsyncLocalStorage<ValidatedPublicUrl>();
+const publicUrlFetchDispatcher = new Agent({
+  connect: {
+    lookup: pinnedPublicUrlLookup,
+  },
+});
 
 function ipv4ToInt(ip: string): number {
   const segments = ip.split(".").map((segment) => Number.parseInt(segment, 10));
@@ -232,6 +267,44 @@ function emitBlockedHook(
   }
 }
 
+function pinnedPublicUrlLookup(
+  hostname: string,
+  options: LookupOptions,
+  callback: LookupCallback
+): void {
+  const validated = pinnedLookupContext.getStore();
+  const normalizedHostname = normalizeHostname(hostname);
+
+  if (normalizedHostname !== validated?.hostname) {
+    const error = new Error(
+      "Resolved host does not match validated URL host."
+    ) as NodeJS.ErrnoException;
+    error.code = "ERR_URL_GUARD_LOOKUP_MISMATCH";
+    callback(error, "", 0);
+    return;
+  }
+
+  const firstAddress = validated.addresses[0];
+  if (!firstAddress) {
+    const error = new Error(
+      "Validated URL host has no pinned addresses."
+    ) as NodeJS.ErrnoException;
+    error.code = "ERR_URL_GUARD_LOOKUP_EMPTY";
+    callback(error, "", 0);
+    return;
+  }
+
+  if (options.all) {
+    callback(
+      null,
+      validated.addresses.map(({ address, family }) => ({ address, family }))
+    );
+    return;
+  }
+
+  callback(null, firstAddress.address, firstAddress.family);
+}
+
 function checkHostPolicy(
   hostname: string,
   url: URL,
@@ -317,10 +390,10 @@ export function parsePublicUrl(
   return parsed;
 }
 
-export async function assertPublicUrl(
+async function validatePublicUrl(
   url: URL,
   options: UrlGuardOptions = {}
-): Promise<void> {
+): Promise<ValidatedPublicUrl> {
   let hostname = url.hostname;
 
   if (!hostname) {
@@ -346,9 +419,13 @@ export async function assertPublicUrl(
 
   checkHostPolicy(lowerHost, url, options.policy, options.hooks);
 
-  if (isIP(hostname) !== 0) {
+  const ipFamily = isIP(hostname);
+  if (ipFamily !== 0) {
     if (options.allowIpAddresses) {
-      return;
+      return {
+        hostname,
+        addresses: [{ address: hostname, family: ipFamily }],
+      };
     }
 
     if (isForbiddenAddress(hostname)) {
@@ -356,7 +433,10 @@ export async function assertPublicUrl(
       emitBlockedHook(url, "ip-not-allowed", message, options.hooks);
       throw new UrlGuardError(message, "ip-not-allowed");
     }
-    return;
+    return {
+      hostname,
+      addresses: [{ address: hostname, family: ipFamily }],
+    };
   }
 
   let lookupResults: readonly { address: string; family: number }[];
@@ -376,16 +456,113 @@ export async function assertPublicUrl(
     throw new UrlGuardError(message, "dns-lookup-failed");
   }
 
-  const hasForbiddenAddress = lookupResults.some(({ address }) => {
-    const resolvedAddress = address.toLowerCase();
-    return isForbiddenAddress(resolvedAddress);
-  });
+  const resolvedAddresses = lookupResults.map(({ address, family }) => ({
+    address: address.toLowerCase(),
+    family,
+  }));
+
+  const hasForbiddenAddress = resolvedAddresses.some(({ address }) =>
+    isForbiddenAddress(address)
+  );
 
   if (hasForbiddenAddress) {
     const message = "Resolved host is not reachable.";
     emitBlockedHook(url, "ip-not-allowed", message, options.hooks);
     throw new UrlGuardError(message, "ip-not-allowed");
   }
+
+  return {
+    hostname,
+    addresses: resolvedAddresses,
+  };
+}
+
+export async function assertPublicUrl(
+  url: URL,
+  options: UrlGuardOptions = {}
+): Promise<void> {
+  await validatePublicUrl(url, options);
+}
+
+function toUndiciRequestInit(init: RequestInit): UndiciRequestInit {
+  const undiciInit: UndiciRequestInit = {
+    dispatcher: publicUrlFetchDispatcher,
+  };
+  const initWithDuplex = init as RequestInitWithDuplex;
+
+  if (init.body !== undefined) {
+    undiciInit.body = init.body as Exclude<
+      UndiciRequestInit["body"],
+      undefined
+    >;
+  }
+  if (init.cache !== undefined) {
+    undiciInit.cache = init.cache;
+  }
+  if (init.credentials !== undefined) {
+    undiciInit.credentials = init.credentials;
+  }
+  if (initWithDuplex.duplex !== undefined) {
+    undiciInit.duplex = initWithDuplex.duplex;
+  }
+  if (init.headers !== undefined) {
+    undiciInit.headers = init.headers as Exclude<
+      UndiciRequestInit["headers"],
+      undefined
+    >;
+  }
+  if (init.integrity !== undefined) {
+    undiciInit.integrity = init.integrity;
+  }
+  if (init.keepalive !== undefined) {
+    undiciInit.keepalive = init.keepalive;
+  }
+  if (init.method !== undefined) {
+    undiciInit.method = init.method;
+  }
+  if (init.mode !== undefined) {
+    undiciInit.mode = init.mode;
+  }
+  if (init.redirect !== undefined) {
+    undiciInit.redirect = init.redirect;
+  }
+  if (init.referrer !== undefined) {
+    undiciInit.referrer = init.referrer;
+  }
+  if (init.referrerPolicy !== undefined) {
+    undiciInit.referrerPolicy = init.referrerPolicy;
+  }
+  if (init.signal !== undefined) {
+    undiciInit.signal = init.signal;
+  }
+  if (init.window !== undefined) {
+    undiciInit.window = init.window;
+  }
+
+  return undiciInit;
+}
+
+function fetchWithValidatedAddresses(
+  url: URL,
+  init: RequestInit,
+  validated: ValidatedPublicUrl,
+  fetchImpl?: typeof fetch | undefined
+): Promise<Response> {
+  // SECURITY: custom fetch implementations bypass the pinned DNS dispatcher.
+  // Keep fetchImpl limited to tests or trusted callers that do not need SSRF
+  // rebinding protection.
+  if (fetchImpl) {
+    return fetchImpl(url.toString(), init);
+  }
+
+  return pinnedLookupContext.run(
+    validated,
+    () =>
+      undiciFetch(
+        url.toString(),
+        toUndiciRequestInit(init)
+      ) as unknown as Promise<Response>
+  );
 }
 
 export async function fetchPublicUrl(
@@ -393,7 +570,7 @@ export async function fetchPublicUrl(
   init: RequestInit = {},
   options: FetchPublicUrlOptions = {}
 ): Promise<Response> {
-  const fetchImpl = options.fetchImpl ?? fetch;
+  const fetchImpl = options.fetchImpl;
   const maxRedirects = options.maxRedirects ?? 5;
   const redirectStatusCodes =
     options.redirectStatusCodes ?? DEFAULT_REDIRECT_STATUS_CODES;
@@ -412,7 +589,7 @@ export async function fetchPublicUrl(
   let redirectCount = 0;
 
   while (true) {
-    await assertPublicUrl(currentUrl, options);
+    const validatedUrl = await validatePublicUrl(currentUrl, options);
 
     const headers = new Headers(init.headers);
     if (options.userAgent && !headers.has("user-agent")) {
@@ -449,12 +626,17 @@ export async function fetchPublicUrl(
 
     let response: Response;
     try {
-      response = await fetchImpl(currentUrl.toString(), {
-        ...init,
-        redirect: "manual",
-        headers,
-        signal: controller.signal,
-      });
+      response = await fetchWithValidatedAddresses(
+        currentUrl,
+        {
+          ...init,
+          redirect: "manual",
+          headers,
+          signal: controller.signal,
+        },
+        validatedUrl,
+        fetchImpl
+      );
     } catch (error) {
       if (abortedByTimeout) {
         throw new UrlGuardError("Request timed out.", "timeout", 504, {

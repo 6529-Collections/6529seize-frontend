@@ -107,6 +107,19 @@ All project commands must go through the repo-local `6529` wrapper.
 - If generated files, lockfiles, package metadata, or docs change unexpectedly,
   stop and understand why before committing.
 
+## Frontend Standards
+
+- New and touched user-facing UI should follow
+  `ops/standards/frontend-accessibility-wcag-22-aa.md`.
+- New and touched user-facing copy, accessible names, dates, numbers, and
+  locale-sensitive sorting should follow
+  `ops/standards/frontend-i18n-localization.md`.
+- Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
+- Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
+  work.
+- If a touched page is not fully migrated yet, make the touched UI compliant and
+  record remaining debt.
+
 ## Next.js 16 And App Router
 
 Read the version-matched Next docs before any Next.js change. When the Next MCP

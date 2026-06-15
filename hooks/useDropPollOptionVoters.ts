@@ -5,15 +5,10 @@ import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/que
 import type { ApiDropPollVotersPage } from "@/generated/models/ApiDropPollVotersPage";
 import type { ApiIdentityOverview } from "@/generated/models/ApiIdentityOverview";
 import { fetchDropPollOptionVotersV2 } from "@/services/api/wave-drops-v2-api";
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 const DROP_POLL_OPTION_VOTERS_PAGE_SIZE = 20;
-export const DROP_POLL_OPTION_VOTER_PREVIEW_PAGE_SIZE = 3;
 const DROP_POLL_OPTION_VOTERS_STALE_TIME_MS = 60_000;
 
 interface UseDropPollOptionVotersProps {
@@ -77,58 +72,6 @@ const fetchDropPollOptionVotersPage = async ({
     signal,
   });
 };
-
-export function usePrefetchDropPollOptionVoters() {
-  const queryClient = useQueryClient();
-
-  return useCallback(
-    ({
-      dropId,
-      optionNo,
-      enabled = true,
-      pageSize = DROP_POLL_OPTION_VOTERS_PAGE_SIZE,
-    }: DropPollOptionVotersParams & {
-      readonly enabled?: boolean | undefined;
-    }) => {
-      const normalizedDropId = dropId.trim();
-      if (
-        !enabled ||
-        normalizedDropId.length === 0 ||
-        typeof optionNo !== "number"
-      ) {
-        return;
-      }
-
-      queryClient
-        .prefetchInfiniteQuery({
-          queryKey: getDropPollOptionVotersQueryKey({
-            dropId: normalizedDropId,
-            optionNo,
-          pageSize,}),
-          queryFn: ({
-            pageParam,
-            signal,
-          }: {
-            pageParam: number;
-            signal?: AbortSignal | undefined;
-          }) =>
-            fetchDropPollOptionVotersPage({
-              dropId: normalizedDropId,
-              optionNo,
-              pageParam,pageSize,
-              signal,
-            }),
-          initialPageParam: 1,
-          getNextPageParam: getNextDropPollOptionVotersPageParam,
-          pages: 1,
-          staleTime: DROP_POLL_OPTION_VOTERS_STALE_TIME_MS,
-          ...getDefaultQueryRetry(),
-        })
-        .catch(() => undefined);
-    },
-    [queryClient]
-  );
-}
 
 export function useDropPollOptionVoters({
   dropId,

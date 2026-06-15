@@ -11,6 +11,7 @@ interface CreateWaveModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly profile: ApiIdentity;
+  readonly parentWaveId?: string | null | undefined;
 }
 
 const subscribeToClientMount = () => () => {};
@@ -21,6 +22,7 @@ export default function CreateWaveModal({
   isOpen,
   onClose,
   profile,
+  parentWaveId,
 }: CreateWaveModalProps) {
   const mounted = useSyncExternalStore(
     subscribeToClientMount,
@@ -49,7 +51,7 @@ export default function CreateWaveModal({
           >
             <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/[0.06] tw-bg-transparent tw-px-8 tw-py-5">
               <h2 className="tw-mb-0 tw-text-[17px] tw-font-bold tw-tracking-wide tw-text-white">
-                Create Wave
+                {parentWaveId ? "Create subwave" : "Create Wave"}
               </h2>
               <button
                 onClick={onClose}
@@ -69,6 +71,7 @@ export default function CreateWaveModal({
                 profile={profile}
                 onBack={onClose}
                 onSuccess={onClose}
+                parentWaveId={parentWaveId}
               />
             </div>
           </motion.div>

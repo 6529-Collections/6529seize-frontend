@@ -14,6 +14,7 @@ or a download link does not open.
   `/open-data/network-metrics`, `/open-data/rememes`, `/open-data/royalties`
 - API route without inline loading/error banners:
   `/open-data/meme-subscriptions`
+- Server-fetched aggregate route: `/open-data/6529bot`
 - Static links route (no API fetch): `/open-data/team`
 
 ## `Meme Subscriptions` card is missing on `/open-data` (native iOS)
@@ -82,10 +83,23 @@ or a download link does not open.
   1. If links are visible, this is expected behavior.
   2. If a link does not open, allow new tabs/popups and retry.
 
+## `/open-data/6529bot` shows usage data unavailable
+
+- Meaning: the public bot usage API is not configured, reachable, or returning
+  the expected summary shape.
+- Note: private spend, budget, alert, and worker-health checks belong on
+  `/tools/6529bot/admin`, not the public Open Data route.
+- What to check:
+  1. `REVIEWBOT_USAGE_API_BASE_URL` is set server-side.
+  2. `REVIEWBOT_USAGE_API_PUBLIC_SUMMARY_PATH` matches the bot deployment.
+  3. The bot backend can serve `GET /api/public/usage/summary?days=30`.
+
 ## Related Pages
 
 - [Open Data Index](README.md)
 - [Open Data Hub](feature-open-data-hub.md)
+- [6529bot Usage](feature-6529bot-usage.md)
+- [6529bot Admin](../api-tool/feature-6529bot-admin.md)
 - [Open Data Hub to Dataset Routes](flow-open-data-hub-to-download-routes.md)
 - [Meme Subscriptions](feature-meme-subscriptions.md)
 - [Team Downloads](feature-team-downloads.md)

@@ -104,6 +104,7 @@ describe("cached drop websocket updates", () => {
               ],
               voted: [2],
               multichoice: false,
+              anonymous: false,
               closing_time: 1000,
               is_open: true,
             },
@@ -125,6 +126,7 @@ describe("cached drop websocket updates", () => {
           ],
           voted: [1],
           multichoice: false,
+          anonymous: false,
           closing_time: 1000,
           is_open: true,
         },
@@ -142,6 +144,7 @@ describe("cached drop websocket updates", () => {
       ],
       voted: [2],
       multichoice: false,
+      anonymous: false,
       closing_time: 1000,
       is_open: true,
     });

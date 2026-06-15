@@ -480,6 +480,7 @@ export default defineConfig([
       "config/env.ts",
       "config/serverEnv.ts",
       "config/alchemyEnv.ts",
+      "config/reviewbotUsageEnv.ts",
       "__tests__/config/env.base-endpoint.test.ts",
       "**/playwright.config.ts",
       "tests/**",
