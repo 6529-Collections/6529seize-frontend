@@ -168,6 +168,33 @@ describe("Rememes component", () => {
     );
   });
 
+  it("preserves unrelated query params when changing the selected meme", async () => {
+    mockRememesApi([{ id: 1, name: "6529Seizing" }]);
+    renderRememes({
+      locale: "de-DE",
+      searchParams: {
+        locale: "de-DE",
+        utm_source: "newsletter",
+        view: "compact",
+      },
+    });
+    const memeReferenceButton = await screen.findByRole("button", {
+      name: "Meme Reference: All",
+    });
+
+    await userEvent.click(memeReferenceButton);
+    await userEvent.click(screen.getByText("#1 - 6529Seizing"));
+
+    await waitFor(() =>
+      expect(mockRouterReplace).toHaveBeenLastCalledWith(
+        "/rememes?utm_source=newsletter&view=compact&meme_id=1&locale=de-DE",
+        {
+          scroll: false,
+        }
+      )
+    );
+  });
+
   it("renders the total count as secondary header metadata", async () => {
     renderRememes();
 
@@ -210,5 +237,40 @@ describe("Rememes component", () => {
       ).length
     ).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Sort: Random" })).toBeTruthy();
+  });
+
+  it("syncs the selected meme when the initial meme id prop changes", async () => {
+    mockRememesApi([{ id: 1, name: "6529Seizing" }]);
+    const { rerender } = renderRememes({ initialMemeId: 42 });
+
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=42",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
+    expect(
+      await screen.findByRole("button", { name: "Meme Reference: 42" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <TitleProvider>
+        <Rememes initialMemeId={1} />
+      </TitleProvider>
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", {
+          name: "Meme Reference: #1 - 6529Seizing",
+        })
+      ).toBeInTheDocument()
+    );
+    await waitFor(() =>
+      expect(fetchUrl).toHaveBeenLastCalledWith(
+        "https://api.test.6529.io/api/rememes?page_size=40&page=1&meme_id=1",
+        expect.objectContaining({ signal: expect.any(Object) })
+      )
+    );
   });
 });

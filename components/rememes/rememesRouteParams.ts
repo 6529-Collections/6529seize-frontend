@@ -7,6 +7,7 @@ import {
 export type SearchParamValue = string | string[] | undefined;
 
 export type RememesSearchParams = {
+  readonly [key: string]: SearchParamValue;
   readonly meme_id?: SearchParamValue;
   readonly locale?: SearchParamValue;
 };
@@ -37,7 +38,7 @@ export function getInitialRememesMemeId({
     return 0;
   }
 
-  const parsedValue = Number.parseInt(value);
+  const parsedValue = Number.parseInt(value, 10);
   return Number.isFinite(parsedValue) ? parsedValue : 0;
 }
 
@@ -55,17 +56,32 @@ export function shouldNormalizeRememesMemeId({
     return true;
   }
 
-  return !Number.isFinite(Number.parseInt(value));
+  return !Number.isFinite(Number.parseInt(value, 10));
 }
 
 export function getRememesBrowseQuery({
   locale,
   memeId,
+  searchParams,
 }: {
   readonly locale: SupportedLocale;
   readonly memeId: number;
+  readonly searchParams?: RememesSearchParams | undefined;
 }): string {
   const query = new URLSearchParams();
+
+  Object.entries(searchParams ?? {}).forEach(([key, value]) => {
+    if (key === "meme_id" || key === "locale") {
+      return;
+    }
+
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((paramValue) => {
+      if (paramValue !== undefined) {
+        query.append(key, paramValue);
+      }
+    });
+  });
 
   if (memeId) {
     query.set("meme_id", memeId.toString());
