@@ -6,12 +6,12 @@ import { SignalSlashIcon } from "@heroicons/react/24/outline";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import {
   fetchGithubPreview,
-  type GithubPreviewResponse,
+  type GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
 
 interface GithubPreviewStatusBadgeProps {
   readonly href: string;
-  readonly initialPreview?: GithubPreviewResponse | null | undefined;
+  readonly initialPreview?: GithubStatusPreviewResponse | null | undefined;
   readonly compact?: boolean | undefined;
   readonly placement?: "absolute" | "inline" | undefined;
 }
@@ -69,7 +69,9 @@ const parseGithubPreviewUrlInfo = (
   return null;
 };
 
-const getBadgeViewModel = (preview: GithubPreviewResponse): BadgeViewModel => {
+const getBadgeViewModel = (
+  preview: GithubStatusPreviewResponse
+): BadgeViewModel => {
   if (preview.type === "github.issue") {
     switch (preview.state) {
       case "open":
@@ -130,7 +132,7 @@ const VISIBLE_REFRESH_INTERVAL_MS = 30 * 1000;
 type GithubStatusState =
   | { readonly type: "idle" }
   | { readonly type: "loading" }
-  | { readonly type: "success"; readonly preview: GithubPreviewResponse }
+  | { readonly type: "success"; readonly preview: GithubStatusPreviewResponse }
   | { readonly type: "error"; readonly message: string };
 
 const getErrorMessage = (error: unknown): string => {
@@ -175,7 +177,7 @@ interface IssueAssigneeLabels {
 }
 
 const getIssueAssigneeLabels = (
-  preview: GithubPreviewResponse
+  preview: GithubStatusPreviewResponse
 ): IssueAssigneeLabels | null => {
   if (preview.type !== "github.issue") {
     return null;
@@ -280,7 +282,14 @@ export default function GithubPreviewStatusBadge({
     fetchGithubPreview(githubInfo.url.toString())
       .then((response) => {
         if (active) {
-          setStatus({ type: "success", preview: response });
+          if (
+            response.type === "github.issue" ||
+            response.type === "github.pull_request"
+          ) {
+            setStatus({ type: "success", preview: response });
+          } else {
+            setStatus({ type: "idle" });
+          }
         }
       })
       .catch((error: unknown) => {
@@ -308,7 +317,14 @@ export default function GithubPreviewStatusBadge({
       fetchGithubPreview(githubInfo.url.toString(), { bypassCache: true })
         .then((response) => {
           if (active) {
-            setStatus({ type: "success", preview: response });
+            if (
+              response.type === "github.issue" ||
+              response.type === "github.pull_request"
+            ) {
+              setStatus({ type: "success", preview: response });
+            } else {
+              setStatus({ type: "idle" });
+            }
           }
         })
         .catch((error: unknown) => {

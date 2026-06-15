@@ -81,6 +81,28 @@ describe("GithubLinkPreview", () => {
         repo: "6529Stream",
       })
     );
+
+    expect(
+      parseGithubLink(
+        "https://github.com/6529-Collections/6529Stream/blob/main/src/app.ts"
+      )
+    ).toEqual(
+      expect.objectContaining({
+        kind: "file",
+        pathLabel: "main/src/app.ts",
+      })
+    );
+
+    expect(
+      parseGithubLink(
+        "https://github.com/6529-Collections/6529Stream/tree/main/src"
+      )
+    ).toEqual(
+      expect.objectContaining({
+        kind: "directory",
+        pathLabel: "main/src",
+      })
+    );
   });
 
   it("renders a compact PR card with inline status and no OpenGraph image", async () => {
@@ -161,14 +183,65 @@ describe("GithubLinkPreview", () => {
     ).toHaveLength(0);
   });
 
-  it("renders repository links without fetching PR or issue status", () => {
+  it("renders enriched repository links", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.repository",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      title: "6529-Collections/6529Stream",
+      description: "Streaming API and bots",
+      defaultBranch: "main",
+      language: "TypeScript",
+      stars: 1200,
+      forks: 34,
+      openIssues: 9,
+      visibility: "public",
+      archived: false,
+      url: "https://github.com/6529-Collections/6529Stream",
+    });
+
     render(
       <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream" />
     );
 
     expect(screen.getByText("Repository")).toBeInTheDocument();
-    expect(screen.getAllByText("6529-Collections/6529Stream")).toHaveLength(2);
-    expect(mockedFetchGithubPreview).not.toHaveBeenCalled();
+    expect(mockedFetchGithubPreview).toHaveBeenCalledWith(
+      "https://github.com/6529-Collections/6529Stream"
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/Streaming API and bots/)).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/TypeScript/)).toBeInTheDocument();
+    expect(screen.queryByTestId("github-preview-status-badge")).toBeNull();
+  });
+
+  it("renders enriched file links", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.file",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      title: "app.ts",
+      path: "src/app.ts",
+      ref: "main",
+      size: 2048,
+      itemCount: null,
+      url: "https://github.com/6529-Collections/6529Stream/blob/main/src/app.ts",
+    });
+
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/blob/main/src/app.ts" />
+    );
+
+    expect(screen.getByText("File")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText("app.ts")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/src\/app\.ts/)).toBeInTheDocument();
+    expect(screen.getByText(/2 KB/)).toBeInTheDocument();
   });
 
   it("keeps an issue card useful when status metadata fails", async () => {

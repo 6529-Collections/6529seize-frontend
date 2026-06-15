@@ -10,6 +10,7 @@ import GithubPreviewStatusBadge from "@/components/waves/GithubPreviewStatusBadg
 import {
   fetchGithubPreview,
   type GithubPreviewResponse,
+  type GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
 
 interface GithubLinkPreviewProps {
@@ -20,7 +21,8 @@ type GithubLinkKind =
   | "pull"
   | "issue"
   | "repository"
-  | "code"
+  | "file"
+  | "directory"
   | "commit"
   | "release"
   | "actions"
@@ -68,9 +70,13 @@ const getRepositoryPathLabel = (
   switch (segment) {
     case undefined:
       return { kind: "repository" };
-    case "tree":
     case "blob":
-      return { kind: "code", label: rest.length > 0 ? rest.join("/") : "Code" };
+      return { kind: "file", label: rest.length > 0 ? rest.join("/") : "File" };
+    case "tree":
+      return {
+        kind: "directory",
+        label: rest.length > 0 ? rest.join("/") : "Directory",
+      };
     case "commit":
       return {
         kind: "commit",
@@ -79,7 +85,8 @@ const getRepositoryPathLabel = (
     case "releases":
       return {
         kind: "release",
-        label: rest[0] === "tag" && rest[1] ? rest[1] : "Releases",
+        label:
+          rest[0] === "tag" && rest[1] ? rest.slice(1).join("/") : "Releases",
       };
     case "actions":
       return { kind: "actions", label: "Actions" };
@@ -158,11 +165,70 @@ export const parseGithubLink = (href: string): ParsedGithubLink | null => {
   };
 };
 
-const shouldFetchGithubPreview = (link: ParsedGithubLink): boolean => {
-  // The GitHub metadata endpoint currently returns rich state for PRs/issues;
-  // repository, code, commit, and release cards intentionally use local labels.
-  return link.kind === "pull" || link.kind === "issue";
+const shouldFetchGithubPreview = (link: ParsedGithubLink): boolean =>
+  link.kind !== "github";
+
+const isStatusPreview = (
+  preview: GithubPreviewResponse | null
+): preview is GithubStatusPreviewResponse =>
+  preview?.type === "github.issue" || preview?.type === "github.pull_request";
+
+const formatCompactNumber = (
+  value: number | null | undefined
+): string | null =>
+  typeof value === "number"
+    ? new Intl.NumberFormat(undefined, {
+        notation: "compact",
+        maximumFractionDigits: 1,
+      }).format(value)
+    : null;
+
+const formatInteger = (value: number | null | undefined): string | null =>
+  typeof value === "number" ? new Intl.NumberFormat().format(value) : null;
+
+const formatBytes = (value: number | null | undefined): string | null => {
+  if (typeof value !== "number") {
+    return null;
+  }
+
+  const units = ["B", "KB", "MB", "GB"] as const;
+  let size = value;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+
+  return `${new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: unitIndex === 0 ? 0 : 1,
+  }).format(size)} ${units[unitIndex]}`;
 };
+
+const formatDate = (value: string | null | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+};
+
+const normalizeStatusText = (
+  value: string | null | undefined
+): string | null => (value ? value.replaceAll("_", " ") : null);
+
+const joinDetailParts = (
+  parts: readonly (string | null | undefined)[]
+): string => parts.filter((part): part is string => Boolean(part)).join(" - ");
 
 const getKindLabel = (
   link: ParsedGithubLink,
@@ -180,8 +246,10 @@ const getKindLabel = (
       return "Pull request";
     case "issue":
       return "Issue";
-    case "code":
-      return "Code";
+    case "file":
+      return "File";
+    case "directory":
+      return "Directory";
     case "commit":
       return "Commit";
     case "release":
@@ -197,6 +265,33 @@ const getKindLabel = (
   }
 };
 
+const getKindLabelFromPreview = (
+  preview: GithubPreviewResponse | null
+): string | null => {
+  switch (preview?.type) {
+    case "github.issue":
+      return "Issue";
+    case "github.pull_request":
+      return "Pull request";
+    case "github.repository":
+      return "Repository";
+    case "github.file":
+      return "File";
+    case "github.directory":
+      return "Directory";
+    case "github.commit":
+      return "Commit";
+    case "github.release":
+      return "Release";
+    case "github.actions":
+      return "Actions";
+    case "github.discussion":
+      return "Discussion";
+    case undefined:
+      return null;
+  }
+};
+
 const getFallbackTitle = (link: ParsedGithubLink): string => {
   switch (link.kind) {
     case "pull":
@@ -205,8 +300,10 @@ const getFallbackTitle = (link: ParsedGithubLink): string => {
       return `Issue #${link.number}`;
     case "repository":
       return `${link.owner}/${link.repo}`;
-    case "code":
-      return link.pathLabel ?? "Code";
+    case "file":
+      return link.pathLabel ?? "File";
+    case "directory":
+      return link.pathLabel ?? "Directory";
     case "commit":
       return `Commit ${link.pathLabel ?? ""}`.trim();
     case "release":
@@ -242,6 +339,72 @@ const getDetailText = (
     return `${repoLabel} - issue #${preview.number}`;
   }
 
+  if (preview?.type === "github.repository") {
+    return joinDetailParts([
+      repoLabel,
+      preview.description,
+      preview.language,
+      preview.archived ? "archived" : null,
+      preview.stars !== null
+        ? `${formatCompactNumber(preview.stars)} stars`
+        : null,
+      preview.forks !== null
+        ? `${formatCompactNumber(preview.forks)} forks`
+        : null,
+    ]);
+  }
+
+  if (preview?.type === "github.file" || preview?.type === "github.directory") {
+    return joinDetailParts([
+      repoLabel,
+      preview.path,
+      preview.ref,
+      preview.type === "github.file" ? formatBytes(preview.size) : null,
+      preview.type === "github.directory" && preview.itemCount !== null
+        ? `${formatInteger(preview.itemCount)} items`
+        : null,
+    ]);
+  }
+
+  if (preview?.type === "github.commit") {
+    return joinDetailParts([
+      repoLabel,
+      preview.shortSha,
+      preview.author ? `@${preview.author}` : null,
+      formatDate(preview.committedAt),
+    ]);
+  }
+
+  if (preview?.type === "github.release") {
+    return joinDetailParts([
+      repoLabel,
+      preview.tagName,
+      preview.state,
+      formatDate(preview.publishedAt),
+    ]);
+  }
+
+  if (preview?.type === "github.actions") {
+    return joinDetailParts([
+      repoLabel,
+      preview.runNumber ? `run #${formatInteger(preview.runNumber)}` : null,
+      normalizeStatusText(preview.conclusion ?? preview.status),
+      preview.event,
+    ]);
+  }
+
+  if (preview?.type === "github.discussion") {
+    return joinDetailParts([
+      repoLabel,
+      preview.number ? `discussion #${preview.number}` : null,
+      preview.category,
+      normalizeStatusText(preview.state),
+      preview.comments !== null
+        ? `${formatInteger(preview.comments)} comments`
+        : null,
+    ]);
+  }
+
   if (link.kind === "pull" && link.number) {
     return `${repoLabel} - PR #${link.number}`;
   }
@@ -261,7 +424,9 @@ const getAriaLabel = (
   link: ParsedGithubLink,
   preview: GithubPreviewResponse | null
 ): string => {
-  const kindLabel = getKindLabel(link, preview).toLowerCase();
+  const kindLabel = (
+    getKindLabelFromPreview(preview) ?? getKindLabel(link, preview)
+  ).toLowerCase();
   const title = getCardTitle(link, preview);
   return `Open GitHub ${kindLabel}: ${title} (opens in a new tab)`;
 };
@@ -315,7 +480,8 @@ export default function GithubLinkPreview({ href }: GithubLinkPreviewProps) {
 
   const preview = state.type === "success" ? state.preview : null;
   const title = getCardTitle(link, preview);
-  const kindLabel = getKindLabel(link, preview);
+  const kindLabel =
+    getKindLabelFromPreview(preview) ?? getKindLabel(link, preview);
   const detailText = getDetailText(link, preview);
 
   return (
@@ -352,7 +518,7 @@ export default function GithubLinkPreview({ href }: GithubLinkPreviewProps) {
               </span>
               {state.type === "loading" && <LoadingStatus />}
               {state.type === "error" && <UnavailableStatus />}
-              {preview && (
+              {isStatusPreview(preview) && (
                 <GithubPreviewStatusBadge
                   href={href}
                   initialPreview={preview}
