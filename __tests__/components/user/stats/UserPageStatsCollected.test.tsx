@@ -113,3 +113,39 @@ test("renders collected stats", () => {
   // check rank formatting
   expect(screen.getAllByText("#1").length).toBeGreaterThan(0);
 });
+
+test("renders placeholders for sparse collected stats without NaN", () => {
+  const sparseOwnerBalance = {
+    total_balance: 1,
+    total_balance_rank: 1,
+  } as any;
+  const sparseBalanceMemes = [
+    {
+      season: 1,
+      consolidation_key: "1",
+      balance: 1,
+      unique: 0,
+      sets: undefined,
+      rank: undefined,
+      boosted_tdh: undefined,
+      tdh_rank: undefined,
+    },
+  ] as any;
+
+  const { container } = render(
+    <UserPageStatsCollected
+      ownerBalance={sparseOwnerBalance}
+      balanceMemes={sparseBalanceMemes}
+      seasons={seasons}
+    />
+  );
+
+  expect(container).not.toHaveTextContent("NaN");
+  expect(screen.getAllByText("-").length).toBeGreaterThan(0);
+  expect(
+    screen.getByText(
+      (_, node) =>
+        node?.textContent?.replace(/\s+/g, " ").trim() === "0 / 2 (0%)"
+    )
+  ).toBeInTheDocument();
+});

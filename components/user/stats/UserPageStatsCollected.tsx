@@ -99,7 +99,7 @@ function RowHeader({ children }: { readonly children: ReactNode }) {
 }
 
 function roundedTdhValue(value: number | undefined, hasOwnerBalance: boolean) {
-  return hasOwnerBalance ? Math.round(value ?? Number.NaN) : undefined;
+  return hasOwnerBalance && value !== undefined ? Math.round(value) : undefined;
 }
 
 export default function UserPageStatsCollected({
@@ -260,11 +260,14 @@ function UserPageStatsCollectedMemes({
     t(DEFAULT_LOCALE, "user.collected.stats.details.rows.tdh"),
   ];
 
-  function getDisplayWithValueAndRank(value: number, rank: number) {
-    if (!value) {
+  function getDisplayWithValueAndRank(
+    value: number | null | undefined,
+    rank: number | null | undefined
+  ) {
+    if (!value || !Number.isFinite(value)) {
       return "-";
     }
-    if (!rank) {
+    if (!rank || !Number.isFinite(rank)) {
       return formatInteger(DEFAULT_LOCALE, value);
     }
 
