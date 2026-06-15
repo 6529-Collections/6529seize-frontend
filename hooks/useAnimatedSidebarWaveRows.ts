@@ -121,6 +121,10 @@ export function useAnimatedSidebarWaveRows(
     const nextKeys = new Set(rowKeys);
 
     setAnimatedRows((previousRows) => {
+      if (previousRows.length === 0) {
+        return currentRows.length === 0 ? previousRows : currentRows;
+      }
+
       const previousRowsByKey = new Map(
         previousRows.map((row) => [row.key, row])
       );
@@ -166,7 +170,12 @@ export function useAnimatedSidebarWaveRows(
       cancelAfterPaint(enterFrame);
       globalThis.clearTimeout(exitTimer);
     };
-  }, [keepExitingRows, rowKeySignature, rowKeys, rows]);
+  }, [currentRows, keepExitingRows, rowKeySignature, rowKeys, rows]);
 
-  return keepExitingRows ? animatedRows : currentRows;
+  const rowsForInitialHydration =
+    animatedRows.length === 0 && currentRows.length > 0
+      ? currentRows
+      : animatedRows;
+
+  return keepExitingRows ? rowsForInitialHydration : currentRows;
 }

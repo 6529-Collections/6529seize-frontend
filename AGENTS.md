@@ -47,6 +47,14 @@ Fight entropy. Leave the codebase better than you found it.
 - Useful commands include `6529 run lint:changed`, `6529 run typecheck:changed`, `6529 run check:changed`, and targeted `6529 run test -- <pattern>` runs.
 - Use `6529 run build` when changes touch build-time behavior, generated API models, Next.js config, routing, or deployment-sensitive code.
 
+## Frontend Standards
+
+- New and touched user-facing UI should follow `ops/standards/frontend-accessibility-wcag-22-aa.md`.
+- New and touched user-facing copy, accessible names, dates, numbers, and locale-sensitive sorting should follow `ops/standards/frontend-i18n-localization.md`.
+- Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
+- Use `ops/skills/i18n-localization/SKILL.md` for progressive localization work.
+- If a touched page is not fully migrated yet, make the touched UI compliant and record remaining debt.
+
 ## Next.js App Router
 
 - Before using `useSearchParams`, read `node_modules/next/dist/docs/01-app/03-api-reference/04-functions/use-search-params.md`.

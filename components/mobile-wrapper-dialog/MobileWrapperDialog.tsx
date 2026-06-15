@@ -51,20 +51,27 @@ function DialogHeader({
   showDesktopCloseButton,
   onClose,
   className,
+  headerActions,
 }: {
   readonly title: string | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
   readonly className?: string | undefined;
+  readonly headerActions?: React.ReactNode;
 }) {
   return (
     <div className={clsx("tw-px-4 sm:tw-px-6", className)}>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
-        {title && (
-          <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
-            {title}
-          </DialogTitle>
-        )}
+        <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-2">
+          {title && (
+            <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
+              {title}
+            </DialogTitle>
+          )}
+          {headerActions !== undefined && headerActions !== null && (
+            <div className="tw-flex tw-items-center">{headerActions}</div>
+          )}
+        </div>
         {showDesktopCloseButton && (
           <DialogCloseButton
             onClick={onClose}
@@ -133,6 +140,7 @@ export default function MobileWrapperDialog({
   maxWidthClass,
   zIndexClassName = "tw-z-[1010]",
   headerClassName,
+  headerActions,
   mobileCloseButtonClassName,
   dismissible = true,
 }: {
@@ -151,6 +159,7 @@ export default function MobileWrapperDialog({
   readonly maxWidthClass?: string | undefined;
   readonly zIndexClassName?: string | undefined;
   readonly headerClassName?: string | undefined;
+  readonly headerActions?: React.ReactNode;
   readonly mobileCloseButtonClassName?: string | undefined;
   readonly dismissible?: boolean | undefined;
 }) {
@@ -279,6 +288,7 @@ export default function MobileWrapperDialog({
                         showDesktopCloseButton={showDesktopHeaderCloseButton}
                         onClose={handleClose}
                         className={headerClassName}
+                        headerActions={headerActions}
                       />
                       {children}
                     </div>

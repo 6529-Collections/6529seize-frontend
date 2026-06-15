@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 
 interface SingleWaveDropVoteInputProps {
@@ -19,8 +18,52 @@ const MEMETIC_VALUES: number[] = [
   -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
 ];
 
-const QUICK_PERCENTAGES: number[] = [-100, -75, -50, -25, 25, 50, 75, 100];
-const MOBILE_QUICK_PERCENTAGES: number[] = [-75, -50, -25, 25, 50, 75];
+const QUICK_PERCENTAGES: number[] = [-100, -50, 50, 100];
+
+const getInputShellClasses = (
+  isPositiveVote: boolean,
+  isNegativeVote: boolean
+): string => {
+  if (isPositiveVote) {
+    return "tw-border-emerald-500/40 focus-within:tw-border-emerald-500/60";
+  }
+
+  if (isNegativeVote) {
+    return "tw-border-rose-500/40 focus-within:tw-border-rose-500/60";
+  }
+
+  return "tw-border-[#26272B] focus-within:tw-border-[#37373E]";
+};
+
+const getInputTextClasses = (
+  isPositiveVote: boolean,
+  isNegativeVote: boolean
+): string => {
+  if (isPositiveVote) {
+    return "tw-text-emerald-400";
+  }
+
+  if (isNegativeVote) {
+    return "tw-text-rose-400";
+  }
+
+  return "tw-text-iron-50";
+};
+
+const getInputLabelClasses = (
+  isPositiveVote: boolean,
+  isNegativeVote: boolean
+): string => {
+  if (isPositiveVote) {
+    return "tw-text-emerald-500/70";
+  }
+
+  if (isNegativeVote) {
+    return "tw-text-rose-500/70";
+  }
+
+  return "tw-text-iron-500";
+};
 
 export const SingleWaveDropVoteInput: React.FC<
   SingleWaveDropVoteInputProps
@@ -41,10 +84,28 @@ export const SingleWaveDropVoteInput: React.FC<
   const quickPercentages = allowsNegativeValues
     ? QUICK_PERCENTAGES
     : QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
-  const mobileQuickPercentages = allowsNegativeValues
-    ? MOBILE_QUICK_PERCENTAGES
-    : MOBILE_QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
+  const mobileQuickPercentages = quickPercentages;
   const inputPattern = allowsNegativeValues ? "-?[0-9]*" : "[0-9]*";
+  const numericVoteValue =
+    typeof voteValue === "number" && Number.isFinite(voteValue)
+      ? voteValue
+      : Number(voteValue);
+  const isPositiveVote =
+    Number.isFinite(numericVoteValue) && numericVoteValue > 0;
+  const isNegativeVote =
+    Number.isFinite(numericVoteValue) && numericVoteValue < 0;
+  const inputShellClasses = getInputShellClasses(
+    isPositiveVote,
+    isNegativeVote
+  );
+  const inputTextClasses = getInputTextClasses(
+    isPositiveVote,
+    isNegativeVote
+  );
+  const inputLabelClasses = getInputLabelClasses(
+    isPositiveVote,
+    isNegativeVote
+  );
 
   const clampValue = (value: number) =>
     Math.min(Math.max(value, minValue), maxValue);
@@ -188,29 +249,8 @@ export const SingleWaveDropVoteInput: React.FC<
     };
   }, []);
 
-  const getQuickPercentageButtonClass = (
-    percentage: number,
-    currentVoteValue: number | string
-  ) => {
-    const targetValue = Math.round(
-      percentage < 0
-        ? (Math.abs(percentage) / 100) * minValue
-        : (percentage / 100) * maxValue
-    );
-
-    const isSelected = Number(currentVoteValue) === targetValue;
-    const isNegative = percentage < 0;
-
-    if (isSelected) {
-      return isNegative
-        ? "tw-bg-rose-500/10 tw-text-rose-400"
-        : "tw-bg-emerald-500/10 tw-text-emerald-400";
-    }
-
-    return isNegative
-      ? "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-rose-400 desktop-hover:hover:tw-bg-rose-500/5"
-      : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-emerald-400 desktop-hover:hover:tw-bg-emerald-500/5";
-  };
+  const quickPercentageButtonClasses =
+    "tw-text-[#93939F] desktop-hover:hover:tw-text-[#EFEFF1]";
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -241,62 +281,58 @@ export const SingleWaveDropVoteInput: React.FC<
 
   return (
     <div className="tw-flex tw-flex-col">
-      <div className="tw-flex tw-items-center tw-gap-2">
-        <div className="tw-relative tw-w-full xl:tw-max-w-xs">
+      <div
+        className={`tw-flex tw-h-11 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-bg-[#0d0d10] tw-transition-colors ${inputShellClasses}`}
+      >
+        <button
+          onMouseDown={() => startPress(false)}
+          onMouseUp={stopPress}
+          onMouseLeave={stopPress}
+          onTouchStart={() => startPress(false)}
+          onTouchEnd={stopPress}
+          aria-label="Decrease vote"
+          className="tw-flex tw-h-full tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-[#26272B] tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors active:tw-bg-rose-500/10 active:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/5 desktop-hover:hover:tw-text-rose-300"
+        >
+          <ArrowDownIcon className="tw-size-[15px] tw-flex-shrink-0" />
+        </button>
+
+        <div className="tw-relative tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center">
           <input
             type="text"
             pattern={inputPattern}
             inputMode="numeric"
-            className="tw-h-10 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-pr-24 tw-text-base tw-font-medium tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none tw-ring-1 tw-ring-iron-800 tw-transition-all focus:tw-bg-iron-950/80 focus:tw-ring-primary-400/50 desktop-hover:hover:tw-bg-iron-950/60 desktop-hover:hover:tw-ring-primary-400/30"
+            className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses}`}
             value={voteValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
-          <div className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400">
+          <div
+            className={`tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-transition-colors ${inputLabelClasses}`}
+          >
             {label}
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <button
-            onMouseDown={() => startPress(true)}
-            onMouseUp={stopPress}
-            onMouseLeave={stopPress}
-            onTouchStart={() => startPress(true)}
-            onTouchEnd={stopPress}
-            className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-emerald-400 tw-ring-1 tw-ring-iron-800 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-ring-emerald-400/50"
-          >
-            <FontAwesomeIcon
-              icon={faArrowUp}
-              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-            />
-          </button>
-          <button
-            onMouseDown={() => startPress(false)}
-            onMouseUp={stopPress}
-            onMouseLeave={stopPress}
-            onTouchStart={() => startPress(false)}
-            onTouchEnd={stopPress}
-            className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-rose-400 tw-ring-1 tw-ring-iron-800 tw-transition-all tw-duration-300 active:tw-scale-95 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 desktop-hover:hover:tw-text-rose-300 desktop-hover:hover:tw-ring-rose-400/50"
-          >
-            <FontAwesomeIcon
-              icon={faArrowDown}
-              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-            />
-          </button>
-        </div>
+        <button
+          onMouseDown={() => startPress(true)}
+          onMouseUp={stopPress}
+          onMouseLeave={stopPress}
+          onTouchStart={() => startPress(true)}
+          onTouchEnd={stopPress}
+          aria-label="Increase vote"
+          className="tw-flex tw-h-full tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-[#26272B] tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors active:tw-bg-emerald-500/10 active:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/5 desktop-hover:hover:tw-text-emerald-300"
+        >
+          <ArrowUpIcon className="tw-size-[15px] tw-flex-shrink-0" />
+        </button>
       </div>
 
-      <div className="tw-mt-2 tw-flex tw-gap-1.5 tw-overflow-x-auto tw-scrollbar-none">
-        <div className="tw-flex tw-gap-1.5 sm:tw-hidden">
+      <div className="tw-mt-2 tw-w-full">
+        <div className="tw-flex tw-w-full tw-gap-1.5 sm:tw-hidden">
           {mobileQuickPercentages.map((percentage) => (
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-flex-shrink-0 tw-rounded tw-border-0 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${getQuickPercentageButtonClass(
-                percentage,
-                voteValue
-              )}`}
+              className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border-0 tw-bg-[#26272B] tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-[#4C4C55] desktop-hover:hover:tw-bg-[#37373E] ${quickPercentageButtonClasses}`}
             >
               {percentage > 0 ? "+" : ""}
               {percentage}%
@@ -304,15 +340,12 @@ export const SingleWaveDropVoteInput: React.FC<
           ))}
         </div>
 
-        <div className="tw-hidden tw-gap-1.5 sm:tw-flex">
+        <div className="tw-hidden tw-w-full tw-gap-1.5 sm:tw-flex">
           {quickPercentages.map((percentage) => (
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-flex-shrink-0 tw-rounded tw-border-0 tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-transition-colors tw-duration-200 ${getQuickPercentageButtonClass(
-                percentage,
-                voteValue
-              )}`}
+              className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border-0 tw-bg-[#26272B] tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-[#4C4C55] desktop-hover:hover:tw-bg-[#37373E] ${quickPercentageButtonClasses}`}
             >
               {percentage > 0 ? "+" : ""}
               {percentage}%
