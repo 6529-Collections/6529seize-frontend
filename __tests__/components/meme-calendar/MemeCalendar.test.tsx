@@ -53,8 +53,16 @@ describe("MemeCalendar controls", () => {
     render(<MemeCalendar displayTz="utc" locale="de-DE" />);
 
     expect(screen.getByText("Januar 2026")).toBeInTheDocument();
-    expect(
-      screen.getAllByRole("button", { name: /mint$/i }).length
-    ).toBeGreaterThan(0);
+    const mintButton = screen.getByRole("button", {
+      name: /Fr\., 2\. Jan\. 2026: #439 mint/i,
+    });
+    expect(mintButton).toHaveAttribute(
+      "data-tooltip-html",
+      expect.stringContaining("Meme #439")
+    );
+    expect(mintButton).toHaveAttribute(
+      "data-tooltip-html",
+      expect.stringContaining("Fr., 2. Jan. 2026")
+    );
   });
 });

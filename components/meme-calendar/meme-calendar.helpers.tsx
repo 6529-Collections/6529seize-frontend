@@ -573,7 +573,7 @@ export function getMonthWeeks(
   const weeks: (number | null)[][] = [];
   let week: (number | null)[] = [];
 
-  // ⭐ Monday-first: convert Sunday(0) to 7, then pad (dow-1) nulls
+  // Monday-first: convert Sunday(0) to 7, then pad (dow - 1) nulls.
   const dow = firstDay.getUTCDay();
   const monFirstIndex = dow === 0 ? 7 : dow; // 1..7 (Mon..Sun)
   for (let i = 1; i < monFirstIndex; i++) week.push(null);

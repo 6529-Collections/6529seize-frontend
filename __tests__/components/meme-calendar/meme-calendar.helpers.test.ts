@@ -4,6 +4,7 @@ import {
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
   getMintTimelineDetails,
+  getMonthWeeks,
   getNextMintStart,
   getRangeDatesByZoom,
   getSeasonIndexForDate,
@@ -307,5 +308,18 @@ describe("meme-calendar helpers", () => {
       new Date(Date.UTC(2023, 0, 2))
     );
     expect(yearRemaining).toBeGreaterThanOrEqual(earlySeason);
+  });
+
+  it("pads month grids for Monday-first weekday headers", () => {
+    expect(getMonthWeeks(2022, 5)[0]).toEqual([null, null, 1, 2, 3, 4, 5]);
+    expect(getMonthWeeks(2022, 4)[0]).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      1,
+    ]);
   });
 });
