@@ -113,7 +113,7 @@ describe("branded OG card renderers", () => {
     );
   });
 
-  it("proxies protocol-relative card art URLs", () => {
+  it("proxies protocol-relative public HTTPS card art URLs", () => {
     const element = renderBrandedNftOgImage({
       contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
       id: "6529",
@@ -129,6 +129,61 @@ describe("branded OG card renderers", () => {
     );
   });
 
+  it("renders the placeholder for non-HTTPS external card art URLs", () => {
+    const element = renderBrandedNftOgImage({
+      collection: "The Memes",
+      contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      id: "6529",
+      imageUrl: "http://cdn.test/meme.png",
+      origin: "http://localhost:3001",
+      title: "HTTP art",
+    });
+
+    expect(collectImageSrcs(element)).not.toEqual(
+      expect.arrayContaining([
+        "http://localhost:3001/api/og-metadata/image?url=http%3A%2F%2Fcdn.test%2Fmeme.png&w=538",
+      ])
+    );
+    expect(collectTextNodes(element)).toEqual(
+      expect.arrayContaining(["6529", "The Memes"])
+    );
+  });
+
+  it("renders the placeholder for disallowed external card art hosts", () => {
+    const element = renderBrandedNftOgImage({
+      collection: "The Memes",
+      contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      id: "6529",
+      imageUrl: "//localhost/secret.png",
+      origin: "http://localhost:3001",
+      title: "Localhost art",
+    });
+
+    expect(collectImageSrcs(element)).not.toEqual(
+      expect.arrayContaining([
+        "http://localhost:3001/api/og-metadata/image?url=https%3A%2F%2Flocalhost%2Fsecret.png&w=538",
+      ])
+    );
+    expect(collectTextNodes(element)).toEqual(
+      expect.arrayContaining(["6529", "The Memes"])
+    );
+  });
+
+  it("renders the placeholder for local paths that resolve off origin", () => {
+    const element = renderBrandedCollectionOgImage({
+      imageUrl: "/\\evil.test/meme.png",
+      slug: "the-memes",
+      title: "The Memes",
+    });
+
+    expect(collectImageSrcs(element)).not.toContain(
+      "https://evil.test/meme.png"
+    );
+    expect(collectTextNodes(element)).toEqual(
+      expect.arrayContaining(["6529", "The Memes"])
+    );
+  });
+
   it("does not treat bare relative card art URLs as local assets", () => {
     const element = renderBrandedCollectionOgImage({
       imageUrl: "memes-preview.png",
@@ -139,5 +194,15 @@ describe("branded OG card renderers", () => {
     expect(collectImageSrcs(element)).not.toContain(
       "https://6529.test/memes-preview.png"
     );
+  });
+
+  it("keeps non-decimal NFT ids unformatted", () => {
+    const element = renderBrandedNftOgImage({
+      contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      id: " 5 ",
+      title: "Spaced id",
+    });
+
+    expect(collectTextNodes(element)).toEqual(expect.arrayContaining(["# 5 "]));
   });
 });

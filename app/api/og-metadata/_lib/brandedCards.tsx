@@ -7,6 +7,7 @@ import {
   shortenAddress,
   truncateText,
 } from "@/app/api/og-metadata/_lib/imageUtils";
+import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 630;
@@ -72,23 +73,24 @@ const getDisplayImageUrl = ({
     return null;
   }
 
-  if (normalizedImageUrl.startsWith("//")) {
-    return getMediaProxyUrl({
-      sourceUrl: `https:${normalizedImageUrl}`,
-      origin,
-      width,
-    });
-  }
-
-  try {
-    const url = new URL(normalizedImageUrl);
-    return url.protocol === "https:"
+  const getProxiedPublicHttpsUrl = (sourceUrl: string): string | null =>
+    isAllowedOgImageSourceUrl(sourceUrl)
       ? getMediaProxyUrl({
-          sourceUrl: url.toString(),
+          sourceUrl,
           origin,
           width,
         })
       : null;
+
+  // Query-supplied external media must be public HTTPS and go through the
+  // normal OG image proxy. Local static assets may only resolve to BASE_ENDPOINT.
+  if (normalizedImageUrl.startsWith("//")) {
+    return getProxiedPublicHttpsUrl(`https:${normalizedImageUrl}`);
+  }
+
+  try {
+    const url = new URL(normalizedImageUrl);
+    return getProxiedPublicHttpsUrl(url.toString());
   } catch {
     if (!normalizedImageUrl.startsWith("/")) {
       return null;
@@ -337,9 +339,8 @@ export const renderBrandedNftOgImage = ({
 }: BrandedNftOgImageModel) => {
   const resolvedCollection = getUsableText(collection) ?? "NFT";
   const resolvedBadge = getUsableText(badge) ?? resolvedCollection;
-  const resolvedTitle = getUsableText(title) ?? `${resolvedCollection} #${id}`;
   const titleLines = getTitleLines({
-    value: resolvedTitle,
+    value: title,
     fontSize: TITLE_FONT_SIZE,
     maxLines: TITLE_MAX_LINES,
   });
@@ -350,9 +351,11 @@ export const renderBrandedNftOgImage = ({
     width: MEDIA_SIZE,
   });
   const artistLabel = getUsableText(artist);
-  const idLabel = Number.isFinite(Number(id))
-    ? `#${formatInteger(Number(id)) ?? id}`
-    : `#${id}`;
+  const numericId = /^(0|[1-9]\d*)$/.test(id) ? Number(id) : null;
+  const idLabel =
+    numericId !== null && Number.isSafeInteger(numericId)
+      ? `#${formatInteger(numericId) ?? id}`
+      : `#${id}`;
 
   return (
     <div
