@@ -84,12 +84,13 @@ export default function useDropActionInteractionMode(): DropActionInteractionMod
   const hasHoverActionInput = useHasHoverInput();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const hasTouchActionInput = isMobileDevice || isTouchDevice || hasTouchInput;
+  const canUseTouchActionSheet =
+    hasTouchActionInput && (isMobileLayoutViewport || !hasHoverActionInput);
 
   return {
     hasTouchActionInput,
     hasHoverActionInput,
-    canUseDesktopHoverActions: hasHoverActionInput,
-    canUseTouchActionSheet:
-      hasTouchActionInput && (isMobileLayoutViewport || !hasHoverActionInput),
+    canUseDesktopHoverActions: hasHoverActionInput && !canUseTouchActionSheet,
+    canUseTouchActionSheet,
   };
 }

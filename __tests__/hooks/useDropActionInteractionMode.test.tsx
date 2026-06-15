@@ -36,7 +36,6 @@ const setViewportWidth = (width: number) => {
 /** Mocks hover media queries used by drop action interaction mode. */
 const setHoverSupport = (hasHover: boolean) => {
   Object.defineProperty(globalThis, "matchMedia", {
-    configurable: true,
     writable: true,
     value: jest.fn((query: string) => ({
       matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
@@ -86,6 +85,21 @@ describe("useDropActionInteractionMode", () => {
       expect.objectContaining({
         canUseDesktopHoverActions: true,
         canUseTouchActionSheet: false,
+      })
+    );
+  });
+
+  it("uses the touch sheet instead of desktop actions on compact touch devices with hover", () => {
+    hasTouchInputMock.mockReturnValue(true);
+    setViewportWidth(800);
+    setHoverSupport(true);
+
+    const { result } = renderHook(() => useDropActionInteractionMode());
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        canUseDesktopHoverActions: false,
+        canUseTouchActionSheet: true,
       })
     );
   });

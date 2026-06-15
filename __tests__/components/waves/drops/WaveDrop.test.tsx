@@ -345,6 +345,7 @@ describe("WaveDrop", () => {
       />
     );
 
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
     expect(getLastMockProps(mockWaveDropHeader)).toEqual(
       expect.objectContaining({ showActionsButton: true })
     );

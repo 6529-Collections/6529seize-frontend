@@ -24,6 +24,8 @@ Use the touch drop menu to run drop actions without leaving the thread.
 
 - Touch drops in compact mobile/tablet layouts: press and hold for about
   `500ms`.
+- Compact touch layouts use the touch sheet even when the browser also reports
+  hover support.
 - Chat drops in compact mobile/tablet layouts can also expose `Open drop
 actions` in the drop header.
 - Desktop-width layouts with hover support use desktop drop action controls
