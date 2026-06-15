@@ -25,4 +25,13 @@ describe("getMemeTabTitle", () => {
       getMemeTabTitle("The Memes", "3", undefined, MEME_FOCUS.YOUR_TRANSACTIONS)
     ).toBe("The Memes #3 | Your Transactions");
   });
+
+  it("documents en-US fallback for non-English detail labels", () => {
+    expect(getMemeFocusLabel(MEME_FOCUS.COLLECTORS, "fr-FR")).toBe(
+      "Collectors"
+    );
+    expect(
+      getMemeTabTitle("The Memes", "3", undefined, MEME_FOCUS.HISTORY, "fr-FR")
+    ).toBe("The Memes #3 | History");
+  });
 });

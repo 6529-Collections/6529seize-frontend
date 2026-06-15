@@ -13,6 +13,14 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
 }));
 
+jest.mock(
+  "@heroicons/react/20/solid",
+  () => ({
+    ArrowLeftIcon: () => null,
+  }),
+  { virtual: true }
+);
+
 jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
   fetchAllPages: jest.fn(() => Promise.resolve([])),
@@ -422,6 +430,25 @@ describe("MemePage search params handling", () => {
       { scroll: false }
     );
   });
+
+  it("does not replace the route when the active primary tab is activated", async () => {
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
+    );
+
+    const overviewButton = screen.getByRole("button", { name: "Overview" });
+    expect(overviewButton).toBeDisabled();
+    expect(overviewButton).toHaveAttribute("aria-current", "page");
+
+    mockReplace.mockClear();
+    overviewButton.focus();
+    await userEvent.keyboard("{Enter}");
+    await userEvent.click(overviewButton);
+
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
 });
 
 describe("MemePage API interactions", () => {
@@ -620,9 +647,11 @@ describe("MemePage loading states", () => {
     // Wait for data to load and content to render
     await waitFor(
       () => {
-        expect(
-          screen.getByRole("button", { name: "Overview" })
-        ).toHaveAttribute("aria-pressed", "true");
+        const overviewButton = screen.getByRole("button", {
+          name: "Overview",
+        });
+        expect(overviewButton).toBeDisabled();
+        expect(overviewButton).toHaveAttribute("aria-current", "page");
       },
       { timeout: 3000 }
     );
@@ -665,14 +694,14 @@ describe("MemePage accessibility labels", () => {
     const page = renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
+      const overviewButton = screen.getByRole("button", { name: "Overview" });
+      expect(overviewButton).toBeDisabled();
+      expect(overviewButton).toHaveAttribute("aria-current", "page");
     });
 
     const collectorsButton = screen.getByRole("button", { name: "Collectors" });
-    expect(collectorsButton).toHaveAttribute("aria-pressed", "false");
+    expect(collectorsButton).not.toBeDisabled();
+    expect(collectorsButton).not.toHaveAttribute("aria-current");
     expect(collectorsButton).toHaveClass("focus-visible:tw-outline");
 
     await userEvent.click(screen.getByRole("button", { name: "History" }));

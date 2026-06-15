@@ -103,7 +103,7 @@ function getMemeHistoryTabLabel(
 function getMemePageTabButtonClassName(isActive: boolean) {
   return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
     isActive
-      ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
+      ? "tw-cursor-default tw-border-primary-400 tw-text-iron-100 disabled:tw-opacity-100"
       : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
   }`;
 }
@@ -121,7 +121,8 @@ function MemePageTabButton({
     <button
       type="button"
       className={getMemePageTabButtonClassName(isActive)}
-      aria-pressed={isActive}
+      aria-current={isActive ? "page" : undefined}
+      disabled={isActive}
       onClick={onClick}
     >
       {title}
@@ -278,6 +279,10 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
   }
 
   function setActiveMemeTab(nextTab: MEME_FOCUS) {
+    if (nextTab === activeTab) {
+      return;
+    }
+
     if (nextTab === MEME_FOCUS.HISTORY) {
       replaceRouteFocus(getRouteFocus(MEME_FOCUS.HISTORY, activeHistoryTab));
       return;

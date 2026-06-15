@@ -1,5 +1,6 @@
 import MemePageComponent from "@/components/the-memes/MemePage";
 import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
+import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { normalizeLocale } from "@/i18n/locales";
 import type { Metadata } from "next";
@@ -22,11 +23,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const { focus, locale } = await searchParams;
-  return getSharedAppServerSideProps(
+  const metadata = await getSharedAppServerSideProps(
     MEMES_CONTRACT,
     id,
     focus ?? "",
     false,
     normalizeLocale(locale)
   );
+
+  return {
+    ...metadata,
+    alternates: {
+      ...(metadata.alternates ?? {}),
+      canonical: `${publicEnv.BASE_ENDPOINT}/the-memes/${encodeURIComponent(
+        id
+      )}`,
+    },
+  };
 }
