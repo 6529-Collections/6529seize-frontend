@@ -207,6 +207,11 @@ describe("OpenGraphPreview", () => {
         image: "https://example.com/preview.png",
       })
     ).toBeNull();
+    expect(
+      getFirstPartyOpenGraphPreviewKind({
+        image: "https://evil.example.com/api/og-metadata/profiles/x",
+      })
+    ).toBeNull();
   });
 
   it("handles external links and image arrays", () => {

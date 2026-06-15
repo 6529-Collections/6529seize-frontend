@@ -77,6 +77,14 @@ const FIRST_PARTY_OG_KIND_LABELS: Record<
   wave: "Wave",
 };
 
+function isFirstParty6529Hostname(hostname: string): boolean {
+  const normalizedHostname = hostname.toLowerCase();
+  return (
+    normalizedHostname === "6529.io" ||
+    normalizedHostname.endsWith(".6529.io")
+  );
+}
+
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
   keys: readonly string[]
@@ -175,6 +183,9 @@ function getFirstPartyOgKindFromImageUrl(
   }
 
   const pathname = parsed.pathname.toLowerCase();
+  if (!isFirstParty6529Hostname(parsed.hostname)) {
+    return null;
+  }
 
   if (pathname.startsWith("/api/og-metadata/profiles/")) {
     return "profile";
@@ -520,7 +531,7 @@ export default function OpenGraphPreview({
   const domain = deriveDomain(href, preview);
   const githubPreview = extractGithubPreview(preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
-  const firstPartyKind = getFirstPartyOpenGraphPreviewKind(preview);
+  const firstPartyKind = getFirstPartyOgKindFromImageUrl(imageUrl);
 
   if (imageOnly && imageUrl) {
     return (
