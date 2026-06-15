@@ -110,6 +110,42 @@ describe("interactive media security helpers", () => {
     ).toBeNull();
   });
 
+  it("rejects gateway IPFS paths with encoded dot traversal before URL normalization", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/%2e%2e/secret`
+      )
+    ).toBeNull();
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/%2e%2e/${CID_V0}/pendulums_mint_script.html`
+      )
+    ).toBeNull();
+  });
+
+  it("rejects gateway IPFS paths with encoded separators", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/%2fsecret.html`
+      )
+    ).toBeNull();
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/%5csecret.html`
+      )
+    ).toBeNull();
+  });
+
+  it("allows encoded characters in interactive media query params", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=a%2Fb%5Cc`
+      )
+    ).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=a%2Fb%5Cc`
+    );
+  });
+
   it("preserves URL hashes on media resolver interactive URLs", () => {
     expect(
       canonicalizeInteractiveMediaUrl(

@@ -31,15 +31,20 @@ const ARWEAVE_TX_ID_PATTERN = /^[a-zA-Z0-9_-]{43,87}$/;
 const IPFS_PATH_PATTERN = /^\/ipfs\/([^/]+)(?:\/(.*))?$/;
 const ARWEAVE_PATH_PATTERN = /^\/([^/]+)$/;
 const IPFS_HTML_PATH_PATTERN = /\.html?$/i;
+const ENCODED_PATH_ESCAPE_PATTERN = /%(?:2e|2f|5c)/i;
 
-const getUrlSuffix = (value: string): string => {
+const getUrlSuffixStart = (value: string): number | undefined => {
   const queryIndex = value.indexOf("?");
   const hashIndex = value.indexOf("#");
   const indexes = [queryIndex, hashIndex]
     .filter((index) => index >= 0)
     .sort((a, b) => a - b);
-  const suffixStart = indexes[0];
 
+  return indexes[0];
+};
+
+const getUrlSuffix = (value: string): string => {
+  const suffixStart = getUrlSuffixStart(value);
   return suffixStart === undefined ? "" : value.slice(suffixStart);
 };
 
@@ -48,6 +53,14 @@ const appendUrlSuffix = (
   search: string,
   hash: string
 ): string => `${url}${search}${hash}`;
+
+const hasEncodedPathEscape = (value: string): boolean => {
+  const suffixStart = getUrlSuffixStart(value);
+  const pathValue =
+    suffixStart === undefined ? value : value.slice(0, suffixStart);
+
+  return ENCODED_PATH_ESCAPE_PATTERN.test(pathValue);
+};
 
 export const canonicalizeInteractiveMediaHostname = (
   hostname: string
@@ -302,7 +315,7 @@ const canonicalizeParsedInteractiveMediaUrl = (
 };
 
 export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
-  if (/%2e|%2f|%5c/i.test(src)) {
+  if (hasEncodedPathEscape(src)) {
     return null;
   }
 
