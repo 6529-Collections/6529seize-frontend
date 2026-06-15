@@ -89,6 +89,7 @@ describe("UserPageStatsActivityOverview", () => {
       })
     ).toBeInTheDocument();
     expect(within(overviewTable).getByText("1,000")).toBeInTheDocument();
+    expect(within(overviewTable).getByText("1.23")).toBeInTheDocument();
 
     const seasonTable = await screen.findByRole("table", {
       name: activityText(
@@ -110,5 +111,42 @@ describe("UserPageStatsActivityOverview", () => {
         ),
       })
     ).toBeInTheDocument();
+  });
+
+  it("shows an empty state instead of an empty season table", async () => {
+    (commonApiFetch as jest.Mock)
+      .mockReset()
+      .mockResolvedValueOnce({
+        airdrops: 0,
+        transfers_in: 0,
+        primary_purchases_count: 0,
+        primary_purchases_value: 0,
+        secondary_purchases_count: 0,
+        secondary_purchases_value: 0,
+        transfers_out: 0,
+        burns: 0,
+        sales_count: 0,
+        sales_value: 0,
+      })
+      .mockResolvedValueOnce([]);
+
+    render(
+      <UserPageStatsActivityOverview profile={profile} activeAddress={null} />
+    );
+
+    expect(
+      await screen.findByText(
+        activityText(
+          "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"
+        )
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("table", {
+        name: activityText(
+          "user.collected.stats.activityOverview.tables.memesBySeasonCaption"
+        ),
+      })
+    ).not.toBeInTheDocument();
   });
 });

@@ -146,6 +146,7 @@ const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
     "tables.overviewCaption": "Collected activity summary by collection",
     "tables.memesBySeasonCaption":
       "Collected Meme activity breakdown by season",
+    "tables.memesBySeasonEmpty": "No Meme activity by season yet.",
     "rows.airdrops": "Airdrops",
     "rows.transfersIn": "Transfers In",
     "rows.mints": "Mints",

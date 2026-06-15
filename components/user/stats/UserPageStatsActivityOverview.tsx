@@ -373,7 +373,7 @@ function UserPageStatsActivityOverviewMemes({
           <Container>
             <Row className={`pt-2 pb-2 ${styles["scrollContainer"]}`}>
               <Col>
-                {activity && (
+                {activity.length > 0 ? (
                   <Table className={styles["collectedAccordionTable"]}>
                     <caption className="tw-sr-only">
                       {activityMessage(
@@ -423,6 +423,12 @@ function UserPageStatsActivityOverviewMemes({
                       ))}
                     </tbody>
                   </Table>
+                ) : (
+                  <p className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300">
+                    {activityMessage(
+                      "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"
+                    )}
+                  </p>
                 )}
               </Col>
             </Row>
