@@ -123,12 +123,24 @@ function getUpdateType(fromVersion, toVersion) {
     return fromVersion === toVersion ? "unchanged" : "mixed";
   }
 
+  if (to.major < from.major) {
+    return "downgrade";
+  }
+
   if (to.major !== from.major) {
     return "major";
   }
 
+  if (to.minor < from.minor) {
+    return "downgrade";
+  }
+
   if (to.minor !== from.minor) {
     return "minor";
+  }
+
+  if (to.patch < from.patch) {
+    return "downgrade";
   }
 
   if (to.patch !== from.patch) {
@@ -360,7 +372,17 @@ async function fetchRegistryPackageInfo(name, version) {
     };
   }
 
-  const metadata = await response.json();
+  let metadata;
+  try {
+    metadata = await response.json();
+  } catch (error) {
+    return {
+      publishedAt: null,
+      scripts: {},
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+
   const versionMetadata = metadata.versions?.[version] ?? {};
   const publishedAt = metadata.time?.[version]
     ? new Date(metadata.time[version])
@@ -457,6 +479,7 @@ function collectEligibilityBlockers(context) {
     directChanges,
     productionChanges,
     nonPatchChanges,
+    downgradeChanges,
     highRiskChanges,
     newDirectChanges,
     addedTransitivePackageEntries,
@@ -482,6 +505,11 @@ function collectEligibilityBlockers(context) {
   if (nonPatchChanges.length > 0) {
     eligibilityBlockers.push(
       `Non-patch dependency change detected: ${formatChangeList(nonPatchChanges)}.`
+    );
+  }
+  if (downgradeChanges.length > 0) {
+    eligibilityBlockers.push(
+      `Dependency downgrade detected: ${formatChangeList(downgradeChanges)}.`
     );
   }
   if (highRiskChanges.length > 0) {
@@ -532,6 +560,7 @@ function collectEligibilityBlockers(context) {
 function getRiskLevel(context) {
   const {
     majorChanges,
+    downgradeChanges,
     highRiskChanges,
     installScriptPackageNames,
     productionChanges,
@@ -544,8 +573,10 @@ function getRiskLevel(context) {
 
   if (
     majorChanges.length > 0 ||
+    downgradeChanges.length > 0 ||
     highRiskChanges.length > 0 ||
-    installScriptPackageNames.size > 0
+    installScriptPackageNames.size > 0 ||
+    unknownAgePackages.length > 0
   ) {
     return "high";
   }
@@ -555,8 +586,7 @@ function getRiskLevel(context) {
     newDirectChanges.length > 0 ||
     addedTransitivePackageEntries.length > 0 ||
     nonPatchChanges.length > 0 ||
-    tooNewPackages.length > 0 ||
-    unknownAgePackages.length > 0
+    tooNewPackages.length > 0
   ) {
     return "medium";
   }
@@ -659,6 +689,9 @@ async function analyzeDependencyRisk(options) {
   const majorChanges = directChanges.filter(
     (change) => change.updateType === "major"
   );
+  const downgradeChanges = directChanges.filter(
+    (change) => change.updateType === "downgrade"
+  );
   const nonPatchChanges = directChanges.filter(
     (change) => change.updateType !== "patch"
   );
@@ -710,6 +743,7 @@ async function analyzeDependencyRisk(options) {
     developmentChanges,
     newDirectChanges,
     majorChanges,
+    downgradeChanges,
     nonPatchChanges,
     highRiskChanges,
     addedTransitivePackageEntries,

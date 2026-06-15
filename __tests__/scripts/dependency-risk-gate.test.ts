@@ -20,7 +20,7 @@ type AnalyzeDependencyRisk = (options: {
   now: string;
   minimumReleaseAgeMinutes: number;
   isDependabot: boolean;
-  fetchPackageInfo: FetchPackageInfo;
+  fetchPackageInfo?: FetchPackageInfo;
 }) => Promise<{
   riskLevel: string;
   autoMergeEligible: boolean;
@@ -118,6 +118,24 @@ describe("dependency-risk-gate", () => {
         "deps:patch",
         "auto-merge:candidate",
       ])
+    );
+  });
+
+  it("blocks dependency downgrades", async () => {
+    const result = await analyze({
+      basePackageJson: packageJson({}, { prettier: "3.8.2" }),
+      headPackageJson: packageJson({}, { prettier: "3.8.1" }),
+      baseLockfileText: lockfile(["prettier@3.8.2"]),
+      headLockfileText: lockfile(["prettier@3.8.1"]),
+    });
+
+    expect(result.riskLevel).toBe("high");
+    expect(result.autoMergeEligible).toBe(false);
+    expect(result.labels).toEqual(
+      expect.arrayContaining(["risk:high", "deps:mixed", "auto-merge:blocked"])
+    );
+    expect(result.eligibilityBlockers.join("\n")).toContain(
+      "Dependency downgrade detected: prettier 3.8.2 -> 3.8.1."
     );
   });
 
@@ -232,5 +250,60 @@ describe("dependency-risk-gate", () => {
     expect(result.eligibilityBlockers.join("\n")).toContain(
       "younger than 10080 minutes"
     );
+  });
+
+  it("blocks when package info fetch rejects", async () => {
+    const result = await analyze({
+      basePackageJson: packageJson({}, { prettier: "3.8.1" }),
+      headPackageJson: packageJson({}, { prettier: "3.8.2" }),
+      baseLockfileText: lockfile(["prettier@3.8.1"]),
+      headLockfileText: lockfile(["prettier@3.8.2"]),
+      fetchPackageInfo: jest.fn(async () => {
+        throw new Error("registry unavailable");
+      }),
+    });
+
+    expect(result.riskLevel).toBe("high");
+    expect(result.autoMergeEligible).toBe(false);
+    expect(result.labels).toEqual(
+      expect.arrayContaining(["risk:high", "auto-merge:blocked"])
+    );
+    expect(result.eligibilityBlockers.join("\n")).toContain(
+      "Package publish age could not be confirmed: prettier."
+    );
+  });
+
+  it("blocks when registry JSON cannot be parsed", async () => {
+    const originalFetch = globalThis.fetch;
+    const fetchMock = jest.fn(async () => ({
+      ok: true,
+      json: async () => {
+        throw new Error("malformed registry response");
+      },
+    })) as jest.MockedFunction<typeof fetch>;
+    globalThis.fetch = fetchMock;
+
+    try {
+      const result = await analyzeDependencyRisk({
+        now: NOW,
+        minimumReleaseAgeMinutes: MINIMUM_RELEASE_AGE_MINUTES,
+        isDependabot: true,
+        basePackageJson: packageJson({}, { prettier: "3.8.1" }),
+        headPackageJson: packageJson({}, { prettier: "3.8.2" }),
+        baseLockfileText: lockfile(["prettier@3.8.1"]),
+        headLockfileText: lockfile(["prettier@3.8.2"]),
+      });
+
+      expect(result.riskLevel).toBe("high");
+      expect(result.autoMergeEligible).toBe(false);
+      expect(result.labels).toEqual(
+        expect.arrayContaining(["risk:high", "auto-merge:blocked"])
+      );
+      expect(result.eligibilityBlockers.join("\n")).toContain(
+        "Package publish age could not be confirmed: prettier."
+      );
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });

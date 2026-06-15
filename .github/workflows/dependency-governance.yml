@@ -103,6 +103,7 @@ jobs:
         run: ./bin/6529 run build
 
       - name: Sync dependency labels
+        # Dependabot PRs are same-repo; fork PRs intentionally skip label writes because GITHUB_TOKEN cannot safely mutate them.
         if: always() && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
@@ -119,6 +120,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Keep fallback labels in sync with MANAGED_LABELS in scripts/dependency-risk-gate.cjs.
           labels="${RISK_LABELS:-risk:high,deps:mixed,auto-merge:blocked}"
           checks_failed="0"
           for outcome in \
