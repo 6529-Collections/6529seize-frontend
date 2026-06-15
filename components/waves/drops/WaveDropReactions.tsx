@@ -41,8 +41,6 @@ interface WaveDropReactionsProps {
 const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
   const [dialogReaction, setDialogReaction] = useState<string | null>(null);
   const { enableLongPress, enableHoverUI } = useInteractionMode();
-  const isTouchDevice = enableLongPress;
-  const showHoverTooltip = enableHoverUI;
 
   const handleOpenDialog = useCallback((reactionKey: string) => {
     setDialogReaction(reactionKey);
@@ -60,8 +58,8 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           drop={drop}
           reaction={reaction}
           onOpenDetailDialog={handleOpenDialog}
-          isTouchDevice={isTouchDevice}
-          showHoverTooltip={showHoverTooltip}
+          enableLongPress={enableLongPress}
+          showHoverTooltip={enableHoverUI}
         />
       ))}
       <WaveDropReactionsDetailDialog
@@ -78,13 +76,13 @@ function WaveDropReaction({
   drop,
   reaction,
   onOpenDetailDialog,
-  isTouchDevice,
+  enableLongPress,
   showHoverTooltip,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
-  readonly isTouchDevice: boolean;
+  readonly enableLongPress: boolean;
   readonly showHoverTooltip: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
@@ -97,7 +95,7 @@ function WaveDropReaction({
   }, [onOpenDetailDialog, reaction.reaction]);
 
   const { longPressTriggered, touchHandlers } = useLongPressInteraction({
-    hasTouchScreen: isTouchDevice,
+    hasTouchScreen: enableLongPress,
     onInteractionStart: handleLongPressStart,
     longPressDuration: 400,
     // Allow the native click to fire on tap; we only need preventDefault when the long press actually triggers

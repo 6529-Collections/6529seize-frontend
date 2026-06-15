@@ -70,7 +70,7 @@ const WebUnifiedWavesListWaves = forwardRef<
     const sentinelRef = useRef<HTMLDivElement>(null);
     const { connectedProfile } = useAuth();
     const { openWave, isApp } = useCreateModalState();
-    const { enableLongPress: isTouchDevice } = useInteractionMode();
+    const { enableHoverUI } = useInteractionMode();
 
     useImperativeHandle(ref, () => ({
       sentinelRef,
@@ -255,7 +255,7 @@ const WebUnifiedWavesListWaves = forwardRef<
           </div>
         </div>
 
-        {!isTouchDevice && (
+        {enableHoverUI && (
           <ReactTooltip
             id="create-wave-tooltip"
             place="bottom"

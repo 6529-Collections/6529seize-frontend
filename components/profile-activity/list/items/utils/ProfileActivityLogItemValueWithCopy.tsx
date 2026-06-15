@@ -14,12 +14,9 @@ export default function ProfileActivityLogItemValueWithCopy({
   readonly title: string;
   readonly value: string;
 }) {
-  const { enableHoverUI } = useInteractionMode();
-  const hasTouchCapability =
-    typeof navigator !== "undefined" &&
-    (navigator.maxTouchPoints > 0 ||
-      "ontouchstart" in (typeof window !== "undefined" ? window : ({} as Window)));
-  const isTouchScreen = !enableHoverUI || hasTouchCapability;
+  const { enableHoverUI, enableLongPress } = useInteractionMode();
+  const shouldShowCopyButton = !enableHoverUI || enableLongPress;
+  const shouldShowCopyTooltip = enableHoverUI;
 
   const [_, copyToClipboard] = useCopyToClipboard();
 
@@ -41,7 +38,7 @@ export default function ProfileActivityLogItemValueWithCopy({
         <button
           onClick={handleCopy}
           className={`${
-            isTouchScreen
+            shouldShowCopyButton
               ? "tw-block"
               : "tw-opacity-0 group-hover:tw-opacity-100"
           } tw-mx-1 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-text-sm tw-font-semibold tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-200 focus:tw-outline-none`}
@@ -51,7 +48,7 @@ export default function ProfileActivityLogItemValueWithCopy({
             <CopyIcon />
           </div>
         </button>
-        {!isTouchScreen && (
+        {shouldShowCopyTooltip && (
           <Tooltip
             id={`copy-activity-${value}`}
             place="top"

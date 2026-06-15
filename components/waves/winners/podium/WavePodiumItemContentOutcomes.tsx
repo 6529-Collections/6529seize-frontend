@@ -1,6 +1,6 @@
 "use client";
 
-import useInteractionMode from "@/src/interaction/useInteractionMode";
+import useWaveOutcomeTooltipInteraction from "@/components/waves/outcome/useWaveOutcomeTooltipInteraction";
 import React, { useMemo } from "react";
 import { Tooltip } from "react-tooltip";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
@@ -15,10 +15,16 @@ interface WavePodiumItemContentOutcomesProps {
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
 > = ({ winner }) => {
-  const { enableLongPress: isTouchInteraction } = useInteractionMode();
+  const {
+    useClickActivation,
+    tooltipOpenEvents,
+    tooltipCloseEvents,
+    tooltipGlobalCloseEvents,
+  } = useWaveOutcomeTooltipInteraction();
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isTouchInteraction) {
+    if (useClickActivation) {
+      e.preventDefault();
       e.stopPropagation();
     }
   };
@@ -173,11 +179,7 @@ export const WavePodiumItemContentOutcomes: React.FC<
   return (
     <>
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleClick(e);
-        }}
+        onClick={handleClick}
         className="tw-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/20 tw-bg-iron-800/40 tw-px-3 tw-py-1.5 tw-backdrop-blur-sm tw-transition-all tw-duration-200 hover:tw-border-iron-700/40 hover:tw-bg-iron-800/60 hover:tw-shadow-lg"
         data-tooltip-id={`outcome-${winner.place}-${winner.drop.id}`}
       >
@@ -243,6 +245,9 @@ export const WavePodiumItemContentOutcomes: React.FC<
         id={`outcome-${winner.place}-${winner.drop.id}`}
         place="left"
         delayShow={200}
+        openEvents={tooltipOpenEvents}
+        closeEvents={tooltipCloseEvents}
+        globalCloseEvents={tooltipGlobalCloseEvents}
         style={{
           backgroundColor: "#1F2937",
           color: "white",

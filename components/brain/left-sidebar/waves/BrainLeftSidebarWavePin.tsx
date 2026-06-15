@@ -25,7 +25,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   const { pinnedIds, isOperationInProgress } = usePinnedWavesServer();
   const { setToast } = useAuth();
   const { enableHoverUI } = useInteractionMode();
-  const isTouchDevice = !enableHoverUI;
+  const shouldRevealWithoutHover = !enableHoverUI;
   const [showMaxLimitTooltip, setShowMaxLimitTooltip] = useState(false);
 
   // Check if this specific wave operation is in progress
@@ -58,8 +58,6 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     const timer = setTimeout(() => setShowMaxLimitTooltip(false), 3000);
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
-
-
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -98,7 +96,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
 
   // Apply visibility logic: always show pinned waves on desktop, hide unpinned until hover
   const getOpacityClass = () => {
-    if (isTouchDevice) return "tw-opacity-100";
+    if (shouldRevealWithoutHover) return "tw-opacity-100";
     if (isPinned) return "tw-opacity-100";
     return "tw-opacity-0 group-hover:tw-opacity-100";
   };

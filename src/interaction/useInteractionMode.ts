@@ -4,16 +4,31 @@ import { useEffect, useState } from "react";
 
 export type PointerType = "mouse" | "touch" | "pen" | null;
 
-interface InteractionModeState {
+export interface InteractionModeState {
   readonly canHover: boolean;
   readonly hasFinePointer: boolean;
+  readonly hasCoarsePointer: boolean;
   readonly hoverNone: boolean;
   readonly lastPointerType: PointerType;
+}
+
+export interface InteractionMode extends InteractionModeState {
+  /**
+   * Use for hover-revealed UI and desktop hover tooltips. This can stay true
+   * on hybrid devices even after touch input is observed.
+   */
+  readonly enableHoverUI: boolean;
+  /**
+   * Use for touch/tap/long-press activation paths. This can overlap with
+   * enableHoverUI on hybrid devices when the last pointer was touch.
+   */
+  readonly enableLongPress: boolean;
 }
 
 const DEFAULT_STATE: InteractionModeState = {
   canHover: false,
   hasFinePointer: false,
+  hasCoarsePointer: false,
   hoverNone: false,
   lastPointerType: null,
 };
@@ -26,15 +41,22 @@ let handlePointerDownRef: ((event: PointerEvent) => void) | null = null;
 let handlePointerMoveRef: ((event: PointerEvent) => void) | null = null;
 
 const getMediaMatch = (query: string): boolean => {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.matchMedia !== "function"
+  ) {
     return false;
   }
   return window.matchMedia(query).matches;
 };
 
-const getCapabilityState = (): Pick<InteractionModeState, "canHover" | "hasFinePointer" | "hoverNone"> => ({
+const getCapabilityState = (): Pick<
+  InteractionModeState,
+  "canHover" | "hasFinePointer" | "hasCoarsePointer" | "hoverNone"
+> => ({
   canHover: getMediaMatch("(any-hover: hover)"),
   hasFinePointer: getMediaMatch("(any-pointer: fine)"),
+  hasCoarsePointer: getMediaMatch("(pointer: coarse)"),
   hoverNone: getMediaMatch("(hover: none)"),
 });
 
@@ -50,7 +72,11 @@ const updateCapabilities = () => {
 };
 
 const updatePointerType = (pointerType: string) => {
-  if (pointerType !== "mouse" && pointerType !== "touch" && pointerType !== "pen") {
+  if (
+    pointerType !== "mouse" &&
+    pointerType !== "touch" &&
+    pointerType !== "pen"
+  ) {
     return;
   }
   if (cachedState.lastPointerType === pointerType) {
@@ -60,17 +86,27 @@ const updatePointerType = (pointerType: string) => {
 };
 
 function teardown() {
-  if (typeof window === "undefined" || !mediaQueriesRef || !handlePointerDownRef || !handlePointerMoveRef) {
+  if (
+    typeof window === "undefined" ||
+    !mediaQueriesRef ||
+    !handlePointerDownRef ||
+    !handlePointerMoveRef
+  ) {
     return;
   }
   mediaQueriesRef.forEach((query) => {
     query.removeEventListener("change", updateCapabilities);
   });
-  window.removeEventListener("pointerdown", handlePointerDownRef, { passive: true } as EventListenerOptions);
-  window.removeEventListener("pointermove", handlePointerMoveRef, { passive: true } as EventListenerOptions);
+  window.removeEventListener("pointerdown", handlePointerDownRef, {
+    passive: true,
+  } as EventListenerOptions);
+  window.removeEventListener("pointermove", handlePointerMoveRef, {
+    passive: true,
+  } as EventListenerOptions);
   mediaQueriesRef = null;
   handlePointerDownRef = null;
   handlePointerMoveRef = null;
+  cachedState = DEFAULT_STATE;
   initialized = false;
 }
 
@@ -82,15 +118,21 @@ const init = () => {
   initialized = true;
   cachedState = { ...cachedState, ...getCapabilityState() };
 
-  const mediaQueries = [
-    window.matchMedia("(any-hover: hover)"),
-    window.matchMedia("(any-pointer: fine)"),
-    window.matchMedia("(hover: none)"),
-  ];
+  const mediaQueries =
+    typeof window.matchMedia === "function"
+      ? [
+          window.matchMedia("(any-hover: hover)"),
+          window.matchMedia("(any-pointer: fine)"),
+          window.matchMedia("(pointer: coarse)"),
+          window.matchMedia("(hover: none)"),
+        ]
+      : [];
   mediaQueriesRef = mediaQueries;
 
-  const handlePointerDown = (event: PointerEvent) => updatePointerType(event.pointerType);
-  const handlePointerMove = (event: PointerEvent) => updatePointerType(event.pointerType);
+  const handlePointerDown = (event: PointerEvent) =>
+    updatePointerType(event.pointerType);
+  const handlePointerMove = (event: PointerEvent) =>
+    updatePointerType(event.pointerType);
   handlePointerDownRef = handlePointerDown;
   handlePointerMoveRef = handlePointerMove;
 
@@ -102,7 +144,19 @@ const init = () => {
   window.addEventListener("pointermove", handlePointerMove, { passive: true });
 };
 
-export default function useInteractionMode() {
+export const deriveInteractionMode = (
+  state: InteractionModeState
+): InteractionMode => {
+  const { canHover, hasFinePointer, hoverNone, lastPointerType } = state;
+
+  return {
+    ...state,
+    enableHoverUI: canHover || hasFinePointer,
+    enableLongPress: hoverNone || lastPointerType === "touch",
+  };
+};
+
+export default function useInteractionMode(): InteractionMode {
   const [state, setState] = useState<InteractionModeState>(() => cachedState);
 
   useEffect(() => {
@@ -119,14 +173,5 @@ export default function useInteractionMode() {
     };
   }, []);
 
-  const { canHover, hasFinePointer, hoverNone, lastPointerType } = state;
-
-  return {
-    canHover,
-    hasFinePointer,
-    hoverNone,
-    lastPointerType,
-    enableHoverUI: canHover || hasFinePointer,
-    enableLongPress: hoverNone || lastPointerType === "touch",
-  };
+  return deriveInteractionMode(state);
 }

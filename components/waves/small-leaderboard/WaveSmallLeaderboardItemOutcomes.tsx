@@ -1,6 +1,6 @@
 "use client";
 
-import useInteractionMode from "@/src/interaction/useInteractionMode";
+import useWaveOutcomeTooltipInteraction from "@/components/waves/outcome/useWaveOutcomeTooltipInteraction";
 import React from "react";
 import { Tooltip } from "react-tooltip";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,10 +17,15 @@ interface WaveSmallLeaderboardItemOutcomesProps {
 export const WaveSmallLeaderboardItemOutcomes: React.FC<
   WaveSmallLeaderboardItemOutcomesProps
 > = ({ drop, isMobile: _isMobile = false }) => {
-  const { enableHoverUI: isHoverEnabled } = useInteractionMode();
+  const {
+    useClickActivation,
+    tooltipOpenEvents,
+    tooltipCloseEvents,
+    tooltipGlobalCloseEvents,
+  } = useWaveOutcomeTooltipInteraction();
 
   const handleClick = (e: React.MouseEvent) => {
-    if (!isHoverEnabled) {
+    if (useClickActivation) {
       e.stopPropagation();
     }
   };
@@ -109,7 +114,7 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
     <>
       <button
         onClick={handleClick}
-        className={`tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-backdrop-blur-sm tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-iron-600/50 desktop-hover:hover:tw-bg-iron-800/60 ${!isHoverEnabled ? "tw-cursor-pointer" : ""}`}
+        className={`tw-flex tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-bg-iron-900/60 tw-px-3 tw-py-1.5 tw-backdrop-blur-sm tw-transition-colors tw-duration-200 desktop-hover:hover:tw-border-iron-600/50 desktop-hover:hover:tw-bg-iron-800/60 ${useClickActivation ? "tw-cursor-pointer" : ""}`}
         data-tooltip-id={`wave-outcomes-${drop.id}`}
       >
         <span className="tw-text-xs tw-font-medium tw-text-iron-400">
@@ -130,9 +135,9 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           zIndex: 50,
         }}
         clickable={true}
-        openEvents={isHoverEnabled ? { mouseenter: true } : { click: true }}
-        closeEvents={isHoverEnabled ? { mouseleave: true } : { click: true }}
-        globalCloseEvents={isHoverEnabled ? {} : { clickOutsideAnchor: true }}
+        openEvents={tooltipOpenEvents}
+        closeEvents={tooltipCloseEvents}
+        globalCloseEvents={tooltipGlobalCloseEvents}
       >
         {tooltipContent}
       </Tooltip>

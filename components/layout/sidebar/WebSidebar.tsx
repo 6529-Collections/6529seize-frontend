@@ -48,7 +48,6 @@ function WebSidebar({
   }, [connectedProfile?.handle, address]);
 
   const { enableHoverUI } = useInteractionMode();
-  const isTouchScreen = !enableHoverUI;
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);
@@ -164,7 +163,7 @@ function WebSidebar({
           </div>
         </div>
       </div>
-      {!isTouchScreen && (
+      {enableHoverUI && (
         <ReactTooltip
           id="sidebar-tooltip"
           place="right"

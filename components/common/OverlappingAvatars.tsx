@@ -66,7 +66,7 @@ function AvatarContent({
       sizes="28px"
       unoptimized
       onError={() => setImgError(true)}
-      className={`tw-object-cover tw-rounded-full ${avatarRing}`}
+      className={`tw-rounded-full tw-object-cover ${avatarRing}`}
     />
   );
 }
@@ -107,8 +107,13 @@ export default function OverlappingAvatars({
           />
         );
 
+        const hasTooltipContent =
+          item.tooltipContent !== undefined &&
+          item.tooltipContent !== null &&
+          item.tooltipContent !== "";
+        const hasTitle = item.title !== undefined && item.title !== "";
         const showTooltipForItem =
-          showTooltip && item.title !== undefined && item.title !== "";
+          showTooltip && (hasTooltipContent || hasTitle);
         const tooltipId = showTooltipForItem ? `${baseId}-${index}` : undefined;
         const wrapper = (
           <div

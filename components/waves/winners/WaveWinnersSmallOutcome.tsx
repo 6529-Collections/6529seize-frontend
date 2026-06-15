@@ -1,6 +1,6 @@
 "use client";
 
-import useInteractionMode from "@/src/interaction/useInteractionMode";
+import useWaveOutcomeTooltipInteraction from "@/components/waves/outcome/useWaveOutcomeTooltipInteraction";
 import React from "react";
 import { Tooltip } from "react-tooltip";
 import { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -14,16 +14,18 @@ interface WaveWinnersSmallOutcomeProps {
 export const WaveWinnersSmallOutcome: React.FC<
   WaveWinnersSmallOutcomeProps
 > = ({ drop }) => {
-  const { enableLongPress: isTouch } = useInteractionMode();
+  const {
+    useClickActivation,
+    tooltipOpenEvents,
+    tooltipCloseEvents,
+    tooltipGlobalCloseEvents,
+  } = useWaveOutcomeTooltipInteraction();
 
   const handleClick = (e: React.MouseEvent) => {
-    if (isTouch) {
+    if (useClickActivation) {
       e.stopPropagation();
     }
   };
-  const tooltipOpenEvents = isTouch ? { click: true } : { mouseenter: true };
-  const tooltipCloseEvents = isTouch ? { click: true } : { mouseleave: true };
-  const tooltipGlobalCloseEvents = isTouch ? { clickOutsideAnchor: true } : {};
 
   const { nicTotal, repTotal, manualOutcomes } = useWaveRankReward({
     waveId: drop.wave.id,
@@ -125,10 +127,7 @@ export const WaveWinnersSmallOutcome: React.FC<
   return (
     <>
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleClick(e);
-        }}
+        onClick={handleClick}
         className="tw-flex tw-min-w-6 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2 tw-py-1.5 tw-ring-1 tw-ring-iron-700"
         data-tooltip-id={`outcome-small-${drop.id}`}
       >

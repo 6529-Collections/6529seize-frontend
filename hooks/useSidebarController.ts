@@ -33,27 +33,35 @@ const getBrowserWindow = () => {
  *   by the sidebar component, not this hook.
  */
 export function useSidebarController() {
-  const createMediaQuery = useCallback((query: string): MediaQueryList | null => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
-      return null;
-    }
-    return browserWindow.matchMedia(query);
-  }, []);
+  const createMediaQuery = useCallback(
+    (query: string): MediaQueryList | null => {
+      const browserWindow = getBrowserWindow();
+      if (
+        browserWindow === undefined ||
+        typeof browserWindow.matchMedia !== "function"
+      ) {
+        return null;
+      }
+      return browserWindow.matchMedia(query);
+    },
+    []
+  );
 
   const narrowMql = useMemo(
     () => createMediaQuery(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
   const mobileWidthMql = useMemo(
-    () => createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
+    () =>
+      createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
 
   const [isNarrow, setIsNarrow] = useState(() => narrowMql?.matches ?? false);
-  const [isMobileWidth, setIsMobileWidth] = useState(() => mobileWidthMql?.matches ?? false);
-  const { enableHoverUI } = useInteractionMode();
-  const isTouchScreen = !enableHoverUI;
+  const [isMobileWidth, setIsMobileWidth] = useState(
+    () => mobileWidthMql?.matches ?? false
+  );
+  const { hasCoarsePointer } = useInteractionMode();
 
   const lastIsNarrowRef = useRef(isNarrow);
 
@@ -70,23 +78,29 @@ export function useSidebarController() {
     }
   });
 
-  const persistDesktopCollapsed = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
-    setIsDesktopCollapsed((prev: boolean) => {
-      const newValue = typeof value === "function" ? value(prev) : value;
-      try {
-        safeSessionStorage.setItem("sidebarCollapsed", JSON.stringify(newValue));
-      } catch (e) {
-        console.warn("Failed to save sidebar preference:", e);
-      }
-      return newValue;
-    });
-  }, []);
+  const persistDesktopCollapsed = useCallback(
+    (value: boolean | ((prev: boolean) => boolean)) => {
+      setIsDesktopCollapsed((prev: boolean) => {
+        const newValue = typeof value === "function" ? value(prev) : value;
+        try {
+          safeSessionStorage.setItem(
+            "sidebarCollapsed",
+            JSON.stringify(newValue)
+          );
+        } catch (e) {
+          console.warn("Failed to save sidebar preference:", e);
+        }
+        return newValue;
+      });
+    },
+    []
+  );
 
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
   const isMobile = useMemo(
-    () => isMobileWidth && isTouchScreen,
-    [isMobileWidth, isTouchScreen]
+    () => isMobileWidth && hasCoarsePointer,
+    [isMobileWidth, hasCoarsePointer]
   );
 
   const isOffcanvasMode = useMemo(
@@ -108,7 +122,8 @@ export function useSidebarController() {
     if (!narrowMql) {
       return;
     }
-    const handleChange = (event: MediaQueryListEvent) => setIsNarrow(event.matches);
+    const handleChange = (event: MediaQueryListEvent) =>
+      setIsNarrow(event.matches);
     setIsNarrow(narrowMql.matches);
     narrowMql.addEventListener("change", handleChange);
     return () => narrowMql.removeEventListener("change", handleChange);
@@ -118,7 +133,8 @@ export function useSidebarController() {
     if (!mobileWidthMql) {
       return;
     }
-    const handleChange = (event: MediaQueryListEvent) => setIsMobileWidth(event.matches);
+    const handleChange = (event: MediaQueryListEvent) =>
+      setIsMobileWidth(event.matches);
     setIsMobileWidth(mobileWidthMql.matches);
     mobileWidthMql.addEventListener("change", handleChange);
     return () => mobileWidthMql.removeEventListener("change", handleChange);
@@ -147,9 +163,9 @@ export function useSidebarController() {
 
   const toggleCollapsed = useCallback(() => {
     if (isOffcanvasMode) {
-      setIsOffcanvasOpen(prev => !prev);
+      setIsOffcanvasOpen((prev) => !prev);
     } else {
-      persistDesktopCollapsed(prev => !prev);
+      persistDesktopCollapsed((prev) => !prev);
     }
   }, [isOffcanvasMode, persistDesktopCollapsed]);
 

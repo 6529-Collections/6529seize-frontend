@@ -1,55 +1,49 @@
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useInteractionMode from "@/src/interaction/useInteractionMode";
 import { act, renderHook } from "@testing-library/react";
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: jest.fn(() => ({ isCapacitor: false })),
 }));
+
+jest.mock("@/src/interaction/useInteractionMode");
+
 const capacitorMock = require("@/hooks/useCapacitor").default as jest.Mock;
+const useInteractionModeMock = useInteractionMode as jest.Mock;
 
-let touchStartHandler: EventListener | null = null;
+function setInteractionMode({
+  enableLongPress = false,
+  hasCoarsePointer = false,
+}: {
+  readonly enableLongPress?: boolean | undefined;
+  readonly hasCoarsePointer?: boolean | undefined;
+} = {}) {
+  useInteractionModeMock.mockReturnValue({
+    enableLongPress,
+    hasCoarsePointer,
+  });
+}
 
-function defineMatchMedia(pointerFine = true, width = false) {
+function defineMatchMedia(width = false) {
   Object.defineProperty(globalThis, "matchMedia", {
     writable: true,
-    value: jest.fn((query: string) => {
-      if (query === "(pointer: fine)") {
-        return {
-          matches: pointerFine,
-          addEventListener: jest.fn(),
-          removeEventListener: jest.fn(),
-        };
-      }
-      if (query === "(max-width: 768px)") {
-        return {
-          matches: width,
-          addEventListener: jest.fn(),
-          removeEventListener: jest.fn(),
-        };
-      }
-      return {
-        matches: false,
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-      };
-    }),
+    value: jest.fn((query: string) => ({
+      matches: query === "(max-width: 768px)" ? width : false,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    })),
   });
 }
 
 describe("useDeviceInfo", () => {
   beforeEach(() => {
-    jest
-      .spyOn(globalThis, "addEventListener")
-      .mockImplementation((event, handler) => {
-        if (event === "touchstart") {
-          touchStartHandler = handler as EventListener;
-        }
-      });
-    jest.spyOn(globalThis, "removeEventListener");
+    setInteractionMode();
+    jest.spyOn(globalThis, "addEventListener").mockImplementation(jest.fn());
+    jest.spyOn(globalThis, "removeEventListener").mockImplementation(jest.fn());
   });
 
   afterEach(() => {
-    touchStartHandler = null;
     jest.restoreAllMocks();
     capacitorMock.mockReturnValue({ isCapacitor: false });
   });
@@ -59,12 +53,11 @@ describe("useDeviceInfo", () => {
       value: "iPhone",
       configurable: true,
     });
-    Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
-      value: 5,
-      configurable: true,
-    });
-    defineMatchMedia(false, false);
+    setInteractionMode({ enableLongPress: true, hasCoarsePointer: true });
+    defineMatchMedia(false);
+
     const { result } = renderHook(() => useDeviceInfo());
+
     expect(result.current.isMobileDevice).toBe(true);
     expect(result.current.isAppleMobile).toBe(true);
     expect(result.current.isApp).toBe(false);
@@ -77,71 +70,49 @@ describe("useDeviceInfo", () => {
       value: "Macintosh",
       configurable: true,
     });
-    Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
-      value: 5,
-      configurable: true,
-    });
-    defineMatchMedia(false, true);
+    setInteractionMode({ enableLongPress: true, hasCoarsePointer: true });
+    defineMatchMedia(true);
+
     const { result } = renderHook(() => useDeviceInfo());
+
     expect(result.current.isMobileDevice).toBe(true);
     expect(result.current.isApp).toBe(true);
     expect(result.current.isAppleMobile).toBe(true);
     expect(result.current.hasTouchScreen).toBe(true);
   });
 
-  it("returns false for desktop without touch", () => {
+  it("returns false for desktop without touch activation", () => {
     capacitorMock.mockReturnValue({ isCapacitor: false });
     Object.defineProperty(globalThis.navigator, "userAgent", {
       value: "Mozilla/5.0",
       configurable: true,
     });
-    Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
-      value: 0,
-      configurable: true,
-    });
-    defineMatchMedia(true, false);
+    setInteractionMode({ enableLongPress: false, hasCoarsePointer: false });
+    defineMatchMedia(false);
+
     const { result } = renderHook(() => useDeviceInfo());
+
     expect(result.current.isMobileDevice).toBe(false);
     expect(result.current.hasTouchScreen).toBe(false);
     expect(result.current.isAppleMobile).toBe(false);
   });
 
-  it("hasTouchScreen becomes true on hybrid device after touch even with fine pointer", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
+  it("updates hasTouchScreen from centralized interaction mode", () => {
     Object.defineProperty(globalThis.navigator, "userAgent", {
       value: "Mozilla/5.0",
       configurable: true,
     });
-    Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
-      value: 0,
-      configurable: true,
-    });
-    defineMatchMedia(true, false);
-    const { result } = renderHook(() => useDeviceInfo());
+    setInteractionMode({ enableLongPress: false, hasCoarsePointer: true });
+    defineMatchMedia(false);
 
+    const { result, rerender } = renderHook(() => useDeviceInfo());
     expect(result.current.hasTouchScreen).toBe(false);
 
     act(() => {
-      if (touchStartHandler) {
-        touchStartHandler(new Event("touchstart"));
-      }
+      setInteractionMode({ enableLongPress: true, hasCoarsePointer: true });
+      rerender();
     });
 
-    expect(result.current.hasTouchScreen).toBe(true);
-  });
-
-  it("hasTouchScreen is true when maxTouchPoints > 0 even without touch event", () => {
-    capacitorMock.mockReturnValue({ isCapacitor: false });
-    Object.defineProperty(globalThis.navigator, "userAgent", {
-      value: "Mozilla/5.0",
-      configurable: true,
-    });
-    Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
-      value: 5,
-      configurable: true,
-    });
-    defineMatchMedia(true, false);
-    const { result } = renderHook(() => useDeviceInfo());
     expect(result.current.hasTouchScreen).toBe(true);
   });
 });
