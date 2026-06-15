@@ -23,7 +23,7 @@ export type SliderVisualState = {
 type SliderThumbProps = {
   readonly isMini: boolean;
   readonly isDragging: boolean;
-  readonly scale: MotionValue<number>;
+  readonly scale: MotionValue<number> | number;
   readonly numericVoteValue: number;
   readonly label: string;
   readonly visualState: SliderVisualState;
@@ -59,7 +59,7 @@ const getThumbBoxShadow = (
 
 const getMiniThumbScale = (
   isDragging: boolean,
-  scale: MotionValue<number>
+  scale: MotionValue<number> | number
 ): number | MotionValue<number> => {
   if (isDragging) {
     return 1.1;
@@ -70,7 +70,7 @@ const getMiniThumbScale = (
 
 const getNormalThumbScale = (
   isDragging: boolean,
-  scale: MotionValue<number>
+  scale: MotionValue<number> | number
 ): number | MotionValue<number> => {
   if (isDragging) {
     return 1.08;
@@ -107,6 +107,10 @@ export const SliderThumb: FC<SliderThumbProps> = ({
   tooltipOffset,
 }) => {
   const boxShadow = getThumbBoxShadow(isDragging, visualState);
+  const thumbScale = isMini
+    ? getMiniThumbScale(isDragging, scale)
+    : getNormalThumbScale(isDragging, scale);
+  const tapScale = isMini ? 0.95 : 0.97;
 
   return (
     <div className={visualState.thumbVisualBoxClasses}>
@@ -129,35 +133,20 @@ export const SliderThumb: FC<SliderThumbProps> = ({
         )}
       </div>
 
-      {isMini ? (
-        <m.div
-          className={`tw-rounded-full tw-transition-shadow ${visualState.thumbClasses}`}
-          style={{
-            scale: getMiniThumbScale(isDragging, scale),
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
-            boxShadow,
-          }}
-          transition={{ duration: 0.2 }}
-        />
-      ) : (
-        <m.div
-          className={visualState.thumbOuterClasses}
-          style={{
-            scale: getNormalThumbScale(isDragging, scale),
-          }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
-          animate={{
-            boxShadow,
-          }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className={visualState.thumbClasses} />
-        </m.div>
-      )}
+      <m.div
+        className={visualState.thumbOuterClasses}
+        style={{
+          scale: thumbScale,
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: tapScale }}
+        animate={{
+          boxShadow,
+        }}
+        transition={{ duration: 0.2 }}
+      >
+        <div className={visualState.thumbClasses} />
+      </m.div>
     </div>
   );
 };
