@@ -19,6 +19,7 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
       aria-label="menu"
       data-testid="menu"
       data-open={props.isOpen}
+      data-long-press-triggered={props.longPressTriggered}
       onClick={() => props.onReply()}
     />
   ),
@@ -28,6 +29,10 @@ const drop = { id: "drop", type: DropSize.FULL } as any;
 
 const isMobileMock = useIsMobileDevice as jest.Mock;
 const isTouchDeviceMock = useIsTouchDevice as jest.Mock;
+const HOVER_INPUT_MEDIA_QUERIES = new Set([
+  "(any-hover: hover)",
+  "(hover: hover)",
+]);
 
 /** Sets the jsdom viewport width and notifies resize subscribers. */
 const setViewportWidth = (width: number) => {
@@ -39,10 +44,29 @@ const setViewportWidth = (width: number) => {
   globalThis.window.dispatchEvent(new Event("resize"));
 };
 
+/** Mocks hover media queries used by drop action interaction mode. */
+const setHoverSupport = (hasHover: boolean) => {
+  Object.defineProperty(globalThis, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: jest.fn((query: string) => ({
+      matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+};
+
 beforeEach(() => {
   isMobileMock.mockReturnValue(false);
   isTouchDeviceMock.mockReturnValue(true);
   setViewportWidth(390);
+  setHoverSupport(false);
 });
 
 afterEach(() => {
@@ -73,9 +97,10 @@ test("opens menu on long press", () => {
   expect(menu.dataset.open).toBe("false");
 });
 
-test("does not open menu on desktop-width touch devices", () => {
+test("does not open menu on desktop-width touch devices with hover", () => {
   jest.useFakeTimers();
   setViewportWidth(1440);
+  setHoverSupport(true);
 
   const { getByTestId } = render(
     <DropMobileMenuHandler
@@ -96,4 +121,5 @@ test("does not open menu on desktop-width touch devices", () => {
   });
 
   expect(getByTestId("menu").dataset.open).toBe("false");
+  expect(getByTestId("menu").dataset.longPressTriggered).toBe("false");
 });

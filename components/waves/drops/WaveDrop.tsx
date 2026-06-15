@@ -11,10 +11,7 @@ import type { ApiUpdateDropRequest } from "@/generated/models/ApiUpdateDropReque
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useHasTouchInput from "@/hooks/useHasTouchInput";
-import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -40,71 +37,6 @@ import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
-
-const HOVER_INPUT_MEDIA_QUERIES = [
-  "(any-hover: hover)",
-  "(hover: hover)",
-] as const;
-
-const getHasHoverInput = (): boolean => {
-  const win = globalThis as typeof globalThis & {
-    matchMedia?: (query: string) => MediaQueryList;
-  };
-
-  return HOVER_INPUT_MEDIA_QUERIES.some(
-    (query) => win.matchMedia?.(query)?.matches ?? false
-  );
-};
-
-const useHasHoverInput = (): boolean => {
-  const [hasHoverInput, setHasHoverInput] = useState(getHasHoverInput);
-
-  useEffect(() => {
-    const win = globalThis as typeof globalThis & {
-      matchMedia?: (query: string) => MediaQueryList;
-    };
-
-    const matchMedia = win.matchMedia;
-
-    if (!matchMedia) {
-      setHasHoverInput(false);
-      return;
-    }
-
-    const mediaQueries = HOVER_INPUT_MEDIA_QUERIES.map((query) =>
-      matchMedia(query)
-    );
-    const updateHasHoverInput = () => setHasHoverInput(getHasHoverInput());
-
-    updateHasHoverInput();
-
-    mediaQueries.forEach((mediaQuery) => {
-      if (typeof mediaQuery.addEventListener === "function") {
-        mediaQuery.addEventListener("change", updateHasHoverInput);
-        return;
-      }
-
-      if (typeof mediaQuery.addListener === "function") {
-        mediaQuery.addListener(updateHasHoverInput);
-      }
-    });
-
-    return () => {
-      mediaQueries.forEach((mediaQuery) => {
-        if (typeof mediaQuery.removeEventListener === "function") {
-          mediaQuery.removeEventListener("change", updateHasHoverInput);
-          return;
-        }
-
-        if (typeof mediaQuery.removeListener === "function") {
-          mediaQuery.removeListener(updateHasHoverInput);
-        }
-      });
-    };
-  }, []);
-
-  return hasHoverInput;
-};
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -514,7 +446,7 @@ const getContentBlock = ({
   handleEditCancel,
   allowLongPress,
   handleLinkCardActionsActiveChange,
-  isMobile,
+  canUseDesktopHoverActions,
   showInteractions,
   showReplyAndQuote,
   handleOnReply,
@@ -557,7 +489,7 @@ const getContentBlock = ({
     actionId: string,
     active: boolean
   ) => void;
-  readonly isMobile: boolean;
+  readonly canUseDesktopHoverActions: boolean;
   readonly showInteractions: boolean;
   readonly showReplyAndQuote: boolean;
   readonly handleOnReply: () => void;
@@ -648,15 +580,18 @@ const getContentBlock = ({
         </div>
       </div>
     </div>
-    {!isMobile && showInteractions && showReplyAndQuote && !isEditing && (
-      <WaveDropActions
-        drop={drop}
-        activePartIndex={activePartIndex}
-        onReply={handleOnReply}
-        onEdit={handleOnEdit}
-        suppressed={hasActiveLinkCardActions}
-      />
-    )}
+    {canUseDesktopHoverActions &&
+      showInteractions &&
+      showReplyAndQuote &&
+      !isEditing && (
+        <WaveDropActions
+          drop={drop}
+          activePartIndex={activePartIndex}
+          onReply={handleOnReply}
+          onEdit={handleOnEdit}
+          suppressed={hasActiveLinkCardActions}
+        />
+      )}
   </>
 );
 
@@ -748,15 +683,9 @@ const WaveDrop = ({
     otherDrop: nextDrop,
   });
 
-  const isMobile = useIsMobileDevice();
-  const isTouchOnlyDevice = useIsTouchDevice();
-  const hasTouchInput = useHasTouchInput();
-  const hasHoverInput = useHasHoverInput();
-  const hasTouch =
-    isMobile || isTouchOnlyDevice || (hasTouchInput && !hasHoverInput);
-  const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const canUseMobileDropMenu = hasTouch && isMobileLayoutViewport;
-  const allowLongPress = showInteractions && canUseMobileDropMenu;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
+  const allowLongPress = showInteractions && canUseTouchActionSheet;
   const compact = useCompactMode();
   const hasActiveLinkCardActions = activeLinkCardActionIds.length > 0;
 
@@ -768,7 +697,7 @@ const WaveDrop = ({
   });
   const showActionsButton = shouldShowTouchActionsButton({
     showInteractions,
-    hasTouch: canUseMobileDropMenu,
+    hasTouch: canUseTouchActionSheet,
     showReplyAndQuote,
     isEditing,
     identityMode,
@@ -985,7 +914,7 @@ const WaveDrop = ({
   }, []);
 
   // Derive effective menu state - menu can't be open while editing
-  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseMobileDropMenu;
+  const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
 
   const dropClasses = getDropClasses(
     isActiveDrop,
@@ -1016,7 +945,7 @@ const WaveDrop = ({
     handleEditCancel,
     allowLongPress,
     handleLinkCardActionsActiveChange,
-    isMobile,
+    canUseDesktopHoverActions,
     showInteractions,
     showReplyAndQuote,
     handleOnReply,

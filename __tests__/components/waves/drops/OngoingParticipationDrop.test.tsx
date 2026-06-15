@@ -11,6 +11,16 @@ jest.mock("@/hooks/isMobileDevice", () => ({
   __esModule: true,
   default: (...args: any[]) => useIsMobileDevice(...args),
 }));
+const useHasTouchInput = jest.fn();
+jest.mock("@/hooks/useHasTouchInput", () => ({
+  __esModule: true,
+  default: (...args: any[]) => useHasTouchInput(...args),
+}));
+const useIsTouchDevice = jest.fn();
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: (...args: any[]) => useIsTouchDevice(...args),
+}));
 jest.mock("@/hooks/isMobileScreen", () => ({
   __esModule: true,
   default: () => false,
@@ -121,6 +131,11 @@ const drop: ExtendedDrop = {
   wave: { id: "w1", submission_type: null } as any,
 } as any;
 
+const HOVER_INPUT_MEDIA_QUERIES = new Set([
+  "(any-hover: hover)",
+  "(hover: hover)",
+]);
+
 /** Sets the jsdom viewport width and notifies resize subscribers. */
 const setViewportWidth = (width: number) => {
   Object.defineProperty(globalThis.window, "innerWidth", {
@@ -129,6 +144,24 @@ const setViewportWidth = (width: number) => {
     value: width,
   });
   globalThis.window.dispatchEvent(new Event("resize"));
+};
+
+/** Mocks hover media queries used by drop action interaction mode. */
+const setHoverSupport = (hasHover: boolean) => {
+  Object.defineProperty(globalThis, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: jest.fn((query: string) => ({
+      matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 };
 
 /** Renders an ongoing participation drop in the requested layout mode. */
@@ -167,10 +200,15 @@ describe("OngoingParticipationDrop", () => {
     ParticipationDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
     footerProps = undefined;
+    useHasTouchInput.mockReturnValue(false);
+    useIsTouchDevice.mockReturnValue(false);
     setViewportWidth(1440);
+    setHoverSupport(false);
   });
 
   it("shows actions on desktop", () => {
+    setHoverSupport(true);
+
     renderComp();
     expect(screen.getByTestId("actions")).toBeInTheDocument();
   });
@@ -184,6 +222,22 @@ describe("OngoingParticipationDrop", () => {
     mobileMenuProps.onReply();
     expect(onReply).toHaveBeenCalledWith({ drop, partId: "p1" });
     expect(mobileMenuProps.setOpen).toBeDefined();
+  });
+
+  it("opens mobile menu on wide touch-only viewports without hover", async () => {
+    const user = userEvent.setup();
+    useHasTouchInput.mockReturnValue(true);
+    useIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    renderComp();
+
+    expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId("content"));
+
+    expect(mobileMenuProps.isOpen).toBe(true);
   });
 
   it("hides voting in the mobile menu when voting is closed", () => {

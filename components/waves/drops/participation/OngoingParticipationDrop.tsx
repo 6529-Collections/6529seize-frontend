@@ -10,9 +10,8 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useCallback, useState } from "react";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
-import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -22,7 +21,6 @@ import ParticipationDropHeader from "./ParticipationDropHeader";
 import ParticipationDropContent from "./ParticipationDropContent";
 import ParticipationDropMetadata from "./ParticipationDropMetadata";
 import ParticipationDropFooter from "./ParticipationDropFooter";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
 import {
   getParticipationIdentityProfile,
@@ -94,11 +92,9 @@ export default function OngoingParticipationDrop({
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const { canShowVote } = useDropInteractionRules(drop);
-  const isMobile = useIsMobileDevice();
   const isMobileScreen = useIsMobileScreen();
-  const isTouchDevice = useIsTouchDevice();
-  const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
   const identityProfile = getParticipationIdentityProfile({
     wave: drop.wave,
     metadata: drop.metadata,
@@ -126,10 +122,10 @@ export default function OngoingParticipationDrop({
   } = useVotingModalState(isVotingActionLocked);
 
   const handleLongPress = useCallback(() => {
-    if (!showInteractions || !hasTouch) return;
+    if (!showInteractions || !canUseTouchActionSheet) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch, showInteractions]);
+  }, [canUseTouchActionSheet, showInteractions]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -158,7 +154,7 @@ export default function OngoingParticipationDrop({
       onQuoteClick={onQuoteClick}
       setLongPressTriggered={setLongPressTriggered}
       isCompetitionDrop={true}
-      hasTouch={hasTouch}
+      hasTouch={canUseTouchActionSheet}
       mediaImageScale={mediaImageScale}
       fullWidthMedia={fullWidthMedia}
       fullWidthLinkPreviews={fullWidthLinkPreviews}
@@ -180,7 +176,7 @@ export default function OngoingParticipationDrop({
         !(typeof winningThreshold === "number" && winningThreshold > 0)
       }
       floatingActions={
-        !isMobile && showInteractions && showReplyAndQuote ? (
+        canUseDesktopHoverActions && showInteractions && showReplyAndQuote ? (
           <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
@@ -298,7 +294,7 @@ export default function OngoingParticipationDrop({
       {showInteractions && (
         <WaveDropMobileMenu
           drop={drop}
-          isOpen={isSlideUp && hasTouch}
+          isOpen={isSlideUp && canUseTouchActionSheet}
           longPressTriggered={longPressTriggered}
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}

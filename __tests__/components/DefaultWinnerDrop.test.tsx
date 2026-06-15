@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DefaultWinnerDrop from "@/components/waves/drops/winner/DefaultWinnerDrop";
 import React from "react";
@@ -36,8 +36,55 @@ jest.mock("@/components/waves/drops/WaveDropMetadata", () => (props: any) => {
 jest.mock("@/components/waves/winners/identity/WaveWinnerIdentity", () => ({
   WaveWinnerIdentity: () => <div data-testid="identity" />,
 }));
-jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => () => <div />);
+let mobileMenuProps: any;
+jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
+  mobileMenuProps = props;
+  return <div data-testid="mobile-menu" data-open={String(props.isOpen)} />;
+});
 jest.mock("@/hooks/isMobileDevice", () => () => false);
+const mockUseHasTouchInput = jest.fn(() => false);
+jest.mock("@/hooks/useHasTouchInput", () => ({
+  __esModule: true,
+  default: (...args: any[]) => mockUseHasTouchInput(...args),
+}));
+const mockUseIsTouchDevice = jest.fn(() => false);
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: (...args: any[]) => mockUseIsTouchDevice(...args),
+}));
+
+const HOVER_INPUT_MEDIA_QUERIES = new Set([
+  "(any-hover: hover)",
+  "(hover: hover)",
+]);
+
+/** Sets the jsdom viewport width and notifies resize subscribers. */
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(globalThis.window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  globalThis.window.dispatchEvent(new Event("resize"));
+};
+
+/** Mocks hover media queries used by drop action interaction mode. */
+const setHoverSupport = (hasHover: boolean) => {
+  Object.defineProperty(globalThis, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: jest.fn((query: string) => ({
+      matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
+};
 
 describe("DefaultWinnerDrop", () => {
   const drop: any = {
@@ -52,11 +99,18 @@ describe("DefaultWinnerDrop", () => {
   beforeEach(() => {
     WaveDropMetadataMock.mockClear();
     mockWaveDropContent.mockClear();
+    mobileMenuProps = undefined;
+    mockUseHasTouchInput.mockReturnValue(false);
+    mockUseIsTouchDevice.mockReturnValue(false);
+    setViewportWidth(1440);
+    setHoverSupport(false);
   });
 
   it("calls reply handler", async () => {
     const user = userEvent.setup();
     const onReply = jest.fn();
+    setHoverSupport(true);
+
     render(
       <DefaultWinnerDrop
         drop={drop}
@@ -166,5 +220,53 @@ describe("DefaultWinnerDrop", () => {
     expect(mockWaveDropContent).toHaveBeenLastCalledWith(
       expect.objectContaining(guardProps)
     );
+  });
+
+  it("opens mobile menu on wide touch-only viewports without hover", () => {
+    mockUseHasTouchInput.mockReturnValue(true);
+    mockUseIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    const { rerender } = render(
+      <DefaultWinnerDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        dropViewDropId={null}
+        location={0 as any}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("reply")).not.toBeInTheDocument();
+
+    const onLongPress = mockWaveDropContent.mock.calls[0][0]?.onLongPress;
+    act(() => {
+      onLongPress();
+    });
+
+    rerender(
+      <DefaultWinnerDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        dropViewDropId={null}
+        location={0 as any}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mobileMenuProps.isOpen).toBe(true);
   });
 });

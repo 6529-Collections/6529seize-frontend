@@ -3,9 +3,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;
@@ -26,28 +24,23 @@ export default function DropMobileMenuHandler({
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
-  const isMobile = useIsMobileDevice();
-  const isTouchDevice = useIsTouchDevice();
-  const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
+  const { canUseTouchActionSheet } = useDropActionInteractionMode();
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
 
   const handleLongPress = useCallback(() => {
-    if (!hasTouch) return;
+    if (!canUseTouchActionSheet) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch]);
+  }, [canUseTouchActionSheet]);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (isTemporaryDrop) return;
+    if (isTemporaryDrop || !canUseTouchActionSheet) return;
 
     // Prevent text selection highlighting during long press
-    if (hasTouch) {
-      e.preventDefault();
-    }
+    e.preventDefault();
 
     touchStartX.current = e.touches[0]!.clientX;
     touchStartY.current = e.touches[0]!.clientY;
@@ -60,7 +53,7 @@ export default function DropMobileMenuHandler({
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     // Prevent scrolling/selection during long press detection
-    if (hasTouch && longPressTimeout.current) {
+    if (canUseTouchActionSheet && longPressTimeout.current) {
       e.preventDefault();
     }
 
@@ -106,7 +99,7 @@ export default function DropMobileMenuHandler({
       {children} {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
-        isOpen={isSlideUp && hasTouch}
+        isOpen={isSlideUp && canUseTouchActionSheet}
         longPressTriggered={longPressTriggered}
         showReplyAndQuote={showReplyAndQuote}
         setOpen={setIsSlideUp}

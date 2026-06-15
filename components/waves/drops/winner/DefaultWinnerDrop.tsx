@@ -4,9 +4,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { memo, useCallback, useState } from "react";
@@ -107,10 +105,8 @@ const DefaultWinnerDrop = ({
 
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
-  const isMobile = useIsMobileDevice();
-  const isTouchDevice = useIsTouchDevice();
-  const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const hasTouch = (isTouchDevice || isMobile) && isMobileLayoutViewport;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
 
@@ -130,10 +126,10 @@ const DefaultWinnerDrop = ({
     : getBackgroundColorClass(location);
 
   const handleLongPress = useCallback(() => {
-    if (!showInteractions || !hasTouch) return;
+    if (!showInteractions || !canUseTouchActionSheet) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch, showInteractions]);
+  }, [canUseTouchActionSheet, showInteractions]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -256,7 +252,7 @@ const DefaultWinnerDrop = ({
                 mediaImageScale={mediaImageScale}
                 fullWidthMedia={fullWidthMedia}
                 fullWidthLinkPreviews={fullWidthLinkPreviews}
-                hasTouch={hasTouch}
+                hasTouch={canUseTouchActionSheet}
                 embedPath={embedPath}
                 quotePath={quotePath}
                 embedDepth={embedDepth}
@@ -265,7 +261,7 @@ const DefaultWinnerDrop = ({
             </div>
           </div>
         </div>
-        {!isMobile && showInteractions && showReplyAndQuote && (
+        {canUseDesktopHoverActions && showInteractions && showReplyAndQuote && (
           <div className="tw-absolute tw-right-0 tw-top-1">
             <WaveDropActions
               drop={drop}
@@ -304,7 +300,7 @@ const DefaultWinnerDrop = ({
       {showInteractions && (
         <WaveDropMobileMenu
           drop={drop}
-          isOpen={isSlideUp && hasTouch}
+          isOpen={isSlideUp && canUseTouchActionSheet}
           longPressTriggered={longPressTriggered}
           showReplyAndQuote={showReplyAndQuote}
           setOpen={setIsSlideUp}

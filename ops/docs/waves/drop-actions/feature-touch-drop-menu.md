@@ -26,10 +26,12 @@ Use the touch drop menu to run drop actions without leaving the thread.
   `500ms`.
 - Chat drops in compact mobile/tablet layouts can also expose `Open drop
 actions` in the drop header.
-- Desktop-width layouts use desktop drop action controls instead of the touch
-  sheet, even when the hardware reports a touchscreen.
-- Hybrid touchscreen desktops/laptops use the desktop drop action controls
-  instead of the touch sheet whenever they are in the desktop-width layout.
+- Desktop-width layouts with hover support use desktop drop action controls
+  instead of the touch sheet, even when the hardware reports a touchscreen.
+- Desktop-width touch surfaces without hover support keep the touch sheet so
+  drop actions remain reachable.
+- Hybrid touchscreen desktops/laptops use desktop drop action controls when
+  their browser reports hover support.
 - If a chat drop is in edit mode, touch-menu entry is blocked for that drop.
 
 ## What the Menu Can Show
@@ -77,7 +79,7 @@ actions` in the drop header.
 - Chat drops on compact mobile/tablet layouts can use `Open drop actions`
   instead of long-press.
 - Winner and participation drops support touch long-press in compact
-  mobile/tablet layouts.
+  mobile/tablet layouts and on touch-only desktop-width surfaces without hover.
 - Leaderboard list cards keep vertical scrolling responsive until the hold
   completes, then show the compact action sheet.
 - Wave admins can use the same touch sheet to change the wave's pinned
@@ -103,8 +105,8 @@ actions` in the drop header.
 
 - Menu composition differs by drop type and current user/session state.
 - Touchscreen laptops and desktops are treated as desktop interaction surfaces
-  at desktop-width viewports, regardless of whether browser touch APIs report
-  touch support.
+  at desktop-width viewports when hover controls are available. Touch-only
+  desktop-width surfaces keep the touch sheet fallback.
 - Link preview visibility actions are not in this menu. Use preview-card
   controls to hide previews, and use the desktop `More` menu to restore them
   after they are hidden.
