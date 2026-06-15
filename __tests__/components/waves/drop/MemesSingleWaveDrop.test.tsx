@@ -34,6 +34,10 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
   useApprovalWaveStatus: (args: any) => mockApprovalStatus(args),
 }));
 
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => true,
+}));
+
 describe("MemesSingleWaveDrop", () => {
   beforeEach(() => {
     mockWrapperProps = undefined;
