@@ -125,17 +125,6 @@ export default function CreateWave({
     if (haveDrop) setShowDropError(false);
   };
 
-  const onMainStepSelect = (targetStep: CreateWaveStep) => {
-    onStep({
-      step: targetStep,
-      direction: getCreateWaveStepDirection({
-        currentStep: step,
-        targetStep,
-        waveType: config.overview.type,
-      }),
-    });
-  };
-
   const onInlineGroupCreate = async (
     payload: ApiCreateGroup
   ): Promise<ApiGroupFull | null> => {
@@ -341,7 +330,16 @@ export default function CreateWave({
           <CreateWavesMainSteps
             activeStep={step}
             waveType={config.overview.type}
-            onStep={onMainStepSelect}
+            onStep={(targetStep) =>
+              onStep({
+                step: targetStep,
+                direction: getCreateWaveStepDirection({
+                  currentStep: step,
+                  targetStep,
+                  waveType: config.overview.type,
+                }),
+              })
+            }
           />
         </div>
         <div
