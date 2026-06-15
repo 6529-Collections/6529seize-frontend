@@ -124,8 +124,15 @@ describe("WaveRepRatingModal", () => {
     jest.useRealTimers();
   });
 
-  it("does not overwrite an edited amount while the category text is settling", async () => {
+  it("keeps an edited amount while category text settles and round-trips", async () => {
     jest.useFakeTimers();
+    let qualityRating = 10;
+    useWaveRepAllocationMock.mockImplementation(
+      ({ category }: { readonly category: string | null }) => ({
+        ...allocationFor(category),
+        currentRating: category === "quality" ? qualityRating : 2,
+      })
+    );
     renderModal();
     const amountInput = await changeAmount("15");
 
@@ -143,7 +150,23 @@ describe("WaveRepRatingModal", () => {
     act(() => {
       jest.advanceTimersByTime(1);
     });
-    await waitFor(() => expect(amountInput).toHaveValue("2"));
+    await waitFor(() => expect(amountInput).toHaveValue("15"));
+
+    fireEvent.change(screen.getByLabelText("Category"), {
+      target: { value: "quality" },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(350);
+    });
+    await waitFor(() => expect(amountInput).toHaveValue("15"));
+
+    qualityRating = 12;
+    fireEvent.change(screen.getByLabelText("Category"), {
+      target: { value: "quality " },
+    });
+
+    await waitFor(() => expect(amountInput).toHaveValue("15"));
   });
 
   it("does not post when authentication is rejected", async () => {

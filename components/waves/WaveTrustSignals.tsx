@@ -94,6 +94,11 @@ const getChipClasses = (
     toneClasses,
   ].join(" ");
 
+const getChipLabelClasses = (variant: WaveTrustSignalsVariant) =>
+  variant === "sidebar"
+    ? "tw-text-[9px] tw-font-semibold"
+    : "tw-text-[10px] tw-font-semibold sm:tw-text-[11px]";
+
 export function WaveTrustSignals({
   waveRep,
   waveScore,
@@ -130,6 +135,7 @@ export function WaveTrustSignals({
           aria-label={`Visibility score ${visibilityScore} out of 100`}
         >
           <ShieldCheckIcon className="tw-size-3.5" aria-hidden="true" />
+          <span className={getChipLabelClasses(variant)}>Score</span>
           <span>{visibilityScore}</span>
         </span>
       )}
@@ -142,6 +148,7 @@ export function WaveTrustSignals({
           aria-label={`Hotness score ${hotnessScore} out of 100`}
         >
           <FireIcon className="tw-size-3.5" aria-hidden="true" />
+          <span className={getChipLabelClasses(variant)}>Hot</span>
           <span>{hotnessScore}</span>
         </span>
       )}
@@ -151,6 +158,7 @@ export function WaveTrustSignals({
           aria-label={repLabel ?? undefined}
         >
           <ScaleIcon className="tw-size-3.5" aria-hidden="true" />
+          <span className={getChipLabelClasses(variant)}>REP</span>
           <span>{repScore}</span>
         </span>
       )}

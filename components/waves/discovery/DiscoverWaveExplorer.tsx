@@ -51,6 +51,7 @@ const FILTER_OPTIONS: readonly DiscoverFilterOption[] = [
 
 const parseSort = (value: string | null): ApiWaveScoreSort => {
   switch (value) {
+    case ApiWaveScoreSort.Balanced:
     case ApiWaveScoreSort.Quality:
     case ApiWaveScoreSort.Hotness:
     case ApiWaveScoreSort.Rep:
@@ -71,31 +72,18 @@ const parseFilter = (value: string | null): DiscoverScoreFilter => {
   }
 };
 
-const getFilterScores = (
-  filter: DiscoverScoreFilter,
-  sort: ApiWaveScoreSort
-): DiscoverFilterScores => {
-  let scores: DiscoverFilterScores;
-
+const getFilterScores = (filter: DiscoverScoreFilter): DiscoverFilterScores => {
   switch (filter) {
     case "SCORE_50":
-      scores = { minVisibilityScore: 50 };
-      break;
+      return { minVisibilityScore: 50 };
     case "HOT_60":
-      scores = { minHotnessScore: 60 };
-      break;
+      return { minHotnessScore: 60 };
     case "REP_60":
-      scores = { minRepSortScore: 60 };
-      break;
+      return { minRepSortScore: 60 };
     case "ALL":
     default:
-      scores = {};
-      break;
+      return {};
   }
-
-  return sort === ApiWaveScoreSort.Quality
-    ? { ...scores, minQualityScore: 50 }
-    : scores;
 };
 
 function focusRadioByValue(container: HTMLElement | null, value: string): void {
@@ -273,8 +261,8 @@ export function DiscoverWaveExplorer() {
   const activeSort = parseSort(searchParams?.get(SORT_PARAM) ?? null);
   const activeFilter = parseFilter(searchParams?.get(FILTER_PARAM) ?? null);
   const filterScores = useMemo(
-    () => getFilterScores(activeFilter, activeSort),
-    [activeFilter, activeSort]
+    () => getFilterScores(activeFilter),
+    [activeFilter]
   );
   const activeSortLabel =
     SORT_OPTIONS.find((option) => option.value === activeSort)?.label ??
@@ -323,6 +311,8 @@ export function DiscoverWaveExplorer() {
       minHotnessScore={filterScores.minHotnessScore}
       minRepSortScore={filterScores.minRepSortScore}
       statusLabel={`${activeSortLabel} waves`}
+      showEmptyState={true}
+      emptyStateLabel="No waves match these filters."
       headerControls={
         <DiscoverWaveControls
           activeFilter={activeFilter}

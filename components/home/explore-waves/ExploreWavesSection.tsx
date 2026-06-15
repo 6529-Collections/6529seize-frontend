@@ -32,6 +32,8 @@ interface ExploreWavesSectionProps {
   readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
   readonly statusLabel?: string | undefined;
   readonly headerControls?: ReactNode | undefined;
+  readonly showEmptyState?: boolean | undefined;
+  readonly emptyStateLabel?: string | undefined;
 }
 
 export function ExploreWavesSection({
@@ -50,6 +52,8 @@ export function ExploreWavesSection({
   visibilityTier,
   statusLabel = "waves",
   headerControls,
+  showEmptyState = false,
+  emptyStateLabel,
 }: ExploreWavesSectionProps) {
   const { connectedProfile } = useAuth();
   const userScope =
@@ -101,13 +105,17 @@ export function ExploreWavesSection({
     return null;
   }
 
-  if (!isLoading && (!waves || waves.length === 0)) {
+  const hasNoWaves = !isLoading && (!waves || waves.length === 0);
+
+  if (hasNoWaves && !showEmptyState) {
     return null;
   }
 
   const resultStatus = isLoading
     ? `Loading ${statusLabel}`
-    : `Showing ${waves?.length ?? 0} ${statusLabel}`;
+    : hasNoWaves
+      ? (emptyStateLabel ?? `No ${statusLabel}`)
+      : `Showing ${waves?.length ?? 0} ${statusLabel}`;
 
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
@@ -129,19 +137,28 @@ export function ExploreWavesSection({
           {resultStatus}
         </p>
 
-        <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
-          {isLoading
-            ? Array.from({ length: limit }).map((_, index) => (
-                <div key={`skeleton-${index}`} className="tw-w-full">
-                  <ExploreWaveCardSkeleton />
-                </div>
-              ))
-            : waves?.map((wave) => (
-                <div key={wave.id} className="tw-w-full">
-                  <ExploreWaveCard wave={wave} />
-                </div>
-              ))}
-        </div>
+        {hasNoWaves ? (
+          <div
+            role="status"
+            className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-8 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400"
+          >
+            {emptyStateLabel ?? `No ${statusLabel}`}
+          </div>
+        ) : (
+          <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
+            {isLoading
+              ? Array.from({ length: limit }).map((_, index) => (
+                  <div key={`skeleton-${index}`} className="tw-w-full">
+                    <ExploreWaveCardSkeleton />
+                  </div>
+                ))
+              : waves?.map((wave) => (
+                  <div key={wave.id} className="tw-w-full">
+                    <ExploreWaveCard wave={wave} />
+                  </div>
+                ))}
+          </div>
+        )}
 
         {viewAllHref && (
           <div className="tw-mt-8 tw-flex tw-justify-center md:tw-mt-10">

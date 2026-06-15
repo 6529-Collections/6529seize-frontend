@@ -52,13 +52,16 @@ export default function WaveHeader({
   }
 
   const connectedHandle = connectedProfile?.handle;
+  const normalizedConnectedHandle = connectedHandle?.toLowerCase() ?? null;
   const waveAuthorHandle = wave.author?.handle ?? null;
   const normalizedWaveAuthorHandle = waveAuthorHandle?.toLowerCase() ?? null;
-  const canUseWaveActions = !!connectedHandle && !activeProfileProxy;
+  const canUseWaveActions =
+    normalizedConnectedHandle !== null && !activeProfileProxy;
   const showNotificationSettings =
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
-    canUseWaveActions && connectedHandle === waveAuthorHandle;
+    canUseWaveActions &&
+    normalizedConnectedHandle === normalizedWaveAuthorHandle;
   const showCreateSubwaveOption =
     canUseWaveActions &&
     !isDirectMessage &&
@@ -68,7 +71,7 @@ export default function WaveHeader({
     canUseWaveActions &&
     !isDirectMessage &&
     normalizedWaveAuthorHandle !== null &&
-    connectedHandle.toLowerCase() !== normalizedWaveAuthorHandle;
+    normalizedConnectedHandle !== normalizedWaveAuthorHandle;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
 

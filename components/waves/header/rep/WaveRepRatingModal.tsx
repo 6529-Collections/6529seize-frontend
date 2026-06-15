@@ -95,8 +95,9 @@ export default function WaveRepRatingModal({
 
     if (lastSettledCategoryRef.current !== settledCategory) {
       lastSettledCategoryRef.current = settledCategory;
-      setAmountDirty(false);
-      setAmountStr(`${currentRating}`);
+      if (!amountDirty) {
+        setAmountStr(`${currentRating}`);
+      }
       return;
     }
 
@@ -146,7 +147,6 @@ export default function WaveRepRatingModal({
       queryClient.invalidateQueries({
         queryKey: [QueryKey.WAVE_SUBWAVES],
       });
-      onClose();
     },
     onError: (error) => {
       setToast({
@@ -155,9 +155,6 @@ export default function WaveRepRatingModal({
         description: "Please try again.",
         details: getToastErrorDetails(error),
       });
-    },
-    onSettled: () => {
-      setMutating(false);
     },
   });
 
@@ -176,6 +173,7 @@ export default function WaveRepRatingModal({
     }
     setMutating(true);
     let mutationStarted = false;
+    let shouldClose = false;
     try {
       const { success } = await requestAuth();
       if (!success) {
@@ -190,6 +188,7 @@ export default function WaveRepRatingModal({
         amount: nextAmount,
         category: trimmedCategory,
       });
+      shouldClose = true;
     } catch (error) {
       if (!mutationStarted) {
         setToast({
@@ -201,6 +200,7 @@ export default function WaveRepRatingModal({
       }
     } finally {
       setMutating(false);
+      if (shouldClose) onClose();
     }
   };
 
