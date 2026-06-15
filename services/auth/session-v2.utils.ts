@@ -15,11 +15,10 @@ interface SessionLoginRequest {
   readonly client_type: AuthSessionClientType;
   readonly server_signature: string;
   readonly client_signature: string;
-  readonly is_safe_wallet: boolean;
   readonly client_address: string;
   readonly role?: string | null;
   readonly wallet_kind_hint?: "eoa" | "contract" | "unknown" | null;
-  readonly version?: number;
+  readonly signature_version?: number;
 }
 
 interface SessionWebResponse {
@@ -134,11 +133,10 @@ export async function loginWithSessionV2({
       client_type: getSessionClientType(),
       server_signature: serverSignature,
       client_signature: clientSignature,
-      is_safe_wallet: isSafeWallet,
       client_address: signerAddress,
       ...(role != null ? { role } : {}),
       wallet_kind_hint: isSafeWallet ? "contract" : "eoa",
-      version: 2,
+      signature_version: 2,
     },
     credentials: "include",
   });

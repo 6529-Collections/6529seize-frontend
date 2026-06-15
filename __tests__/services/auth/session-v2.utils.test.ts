@@ -9,6 +9,7 @@ import {
   setNativeRefreshToken,
 } from "@/services/auth/native-refresh-token-storage";
 import {
+  loginWithSessionV2,
   logoutSessionV2,
   persistSessionResponse,
   refreshSessionV2,
@@ -83,6 +84,40 @@ describe("session-v2.utils", () => {
       parseJson: false,
     });
     expect(removeNativeRefreshToken).toHaveBeenCalledWith("0xabc");
+  });
+
+  it("posts the strict session-login request contract", async () => {
+    const sessionResponse = {
+      client_type: "web",
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+    };
+    (commonApiPost as jest.Mock).mockResolvedValueOnce(sessionResponse);
+
+    await expect(
+      loginWithSessionV2({
+        serverSignature: "server-signature",
+        clientSignature: "client-signature",
+        signerAddress: "0xabc",
+        role: null,
+        isSafeWallet: true,
+      })
+    ).resolves.toBe(sessionResponse);
+
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "auth/session-login",
+      body: {
+        client_type: "web",
+        server_signature: "server-signature",
+        client_signature: "client-signature",
+        client_address: "0xabc",
+        wallet_kind_hint: "contract",
+        signature_version: 2,
+      },
+      credentials: "include",
+    });
   });
 
   it("revokes a web session cookie when auth persistence fails", async () => {
