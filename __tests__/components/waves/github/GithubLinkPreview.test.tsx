@@ -153,6 +153,7 @@ describe("GithubLinkPreview", () => {
     });
 
     const card = screen.getByTestId("github-link-preview-card");
+    expect(document.body.querySelectorAll("a")).toHaveLength(1);
     expect(
       card.querySelectorAll(
         'a, button, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])'
