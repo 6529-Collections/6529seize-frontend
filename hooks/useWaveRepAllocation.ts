@@ -23,44 +23,51 @@ export function useWaveRepAllocation({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const connectedHandle = connectedProfile?.handle;
   const trimmedCategory = category?.trim() || null;
+  const enabled = !!connectedHandle && !activeProfileProxy;
 
-  const { data: credit, isFetching: isFetchingCredit } =
-    useQuery<ApiAvailableRatingCredit>({
-      queryKey: [
-        QueryKey.WAVE_REP_CREDIT,
-        {
-          rater: connectedHandle?.toLowerCase(),
+  const {
+    data: credit,
+    isFetching: isFetchingCredit,
+    isPending: isPendingCredit,
+  } = useQuery<ApiAvailableRatingCredit>({
+    queryKey: [
+      QueryKey.WAVE_REP_CREDIT,
+      {
+        rater: connectedHandle?.toLowerCase(),
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiAvailableRatingCredit>({
+        endpoint: "ratings/credit",
+        params: {
+          rater: connectedHandle ?? "",
         },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiAvailableRatingCredit>({
-          endpoint: "ratings/credit",
-          params: {
-            rater: connectedHandle ?? "",
-          },
-        }),
-      enabled: !!connectedHandle && !activeProfileProxy,
-    });
+      }),
+    enabled,
+  });
 
-  const { data: rating, isFetching: isFetchingRating } =
-    useQuery<ApiWaveRepRating>({
-      queryKey: [
-        QueryKey.WAVE_REP_RATING,
-        {
-          waveId,
-          rater: connectedHandle?.toLowerCase(),
-          category: trimmedCategory,
+  const {
+    data: rating,
+    isFetching: isFetchingRating,
+    isPending: isPendingRating,
+  } = useQuery<ApiWaveRepRating>({
+    queryKey: [
+      QueryKey.WAVE_REP_RATING,
+      {
+        waveId,
+        rater: connectedHandle?.toLowerCase(),
+        category: trimmedCategory,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<ApiWaveRepRating>({
+        endpoint: `waves/${waveId}/rep/rating`,
+        params: {
+          category: trimmedCategory ?? "",
         },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiWaveRepRating>({
-          endpoint: `waves/${waveId}/rep/rating`,
-          params: {
-            category: trimmedCategory ?? "",
-          },
-        }),
-      enabled: !!connectedHandle && !activeProfileProxy && !!trimmedCategory,
-    });
+      }),
+    enabled: enabled && !!trimmedCategory,
+  });
 
   const currentRating = rating?.rating ?? 0;
   const availableWaveRep = credit?.wave_rep_credit ?? 0;
@@ -77,6 +84,10 @@ export function useWaveRepAllocation({
     currentRating,
     availableWaveRep,
     minMaxValues,
-    isLoading: isFetchingCredit || isFetchingRating,
+    isLoading:
+      (enabled && isPendingCredit) ||
+      (!!trimmedCategory && enabled && isPendingRating) ||
+      isFetchingCredit ||
+      isFetchingRating,
   };
 }

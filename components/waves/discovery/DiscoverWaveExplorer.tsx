@@ -10,6 +10,7 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { KeyboardEvent } from "react";
 import { useCallback, useMemo } from "react";
 
 type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
@@ -49,42 +50,120 @@ const FILTER_OPTIONS: readonly DiscoverFilterOption[] = [
 ];
 
 const parseSort = (value: string | null): ApiWaveScoreSort => {
-  if (
-    value === ApiWaveScoreSort.Quality ||
-    value === ApiWaveScoreSort.Hotness ||
-    value === ApiWaveScoreSort.Rep
-  ) {
-    return value;
+  switch (value) {
+    case ApiWaveScoreSort.Quality:
+    case ApiWaveScoreSort.Hotness:
+    case ApiWaveScoreSort.Rep:
+      return value;
+    default:
+      return WAVE_SCORE_DISCOVERY_PARAMS.scoreSort;
   }
-
-  return WAVE_SCORE_DISCOVERY_PARAMS.scoreSort;
 };
 
 const parseFilter = (value: string | null): DiscoverScoreFilter => {
-  if (value === "SCORE_50" || value === "HOT_60" || value === "REP_60") {
-    return value;
+  switch (value) {
+    case "SCORE_50":
+    case "HOT_60":
+    case "REP_60":
+      return value;
+    default:
+      return "ALL";
   }
-
-  return "ALL";
 };
 
 const getFilterScores = (
   filter: DiscoverScoreFilter,
   sort: ApiWaveScoreSort
 ): DiscoverFilterScores => {
-  const scores =
-    filter === "SCORE_50"
-      ? { minVisibilityScore: 50 }
-      : filter === "HOT_60"
-        ? { minHotnessScore: 60 }
-        : filter === "REP_60"
-          ? { minRepSortScore: 60 }
-          : {};
+  let scores: DiscoverFilterScores;
+
+  switch (filter) {
+    case "SCORE_50":
+      scores = { minVisibilityScore: 50 };
+      break;
+    case "HOT_60":
+      scores = { minHotnessScore: 60 };
+      break;
+    case "REP_60":
+      scores = { minRepSortScore: 60 };
+      break;
+    case "ALL":
+    default:
+      scores = {};
+      break;
+  }
 
   return sort === ApiWaveScoreSort.Quality
     ? { ...scores, minQualityScore: 50 }
     : scores;
 };
+
+function focusRadioByValue(container: HTMLElement | null, value: string): void {
+  container
+    ?.querySelector<HTMLElement>(`[data-radio-value="${CSS.escape(value)}"]`)
+    ?.focus();
+}
+
+function getNextIndex({
+  currentIndex,
+  key,
+  optionsLength,
+}: {
+  readonly currentIndex: number;
+  readonly key: string;
+  readonly optionsLength: number;
+}): number | null {
+  switch (key) {
+    case "ArrowRight":
+    case "ArrowDown":
+      return (currentIndex + 1) % optionsLength;
+    case "ArrowLeft":
+    case "ArrowUp":
+      return (currentIndex - 1 + optionsLength) % optionsLength;
+    case "Home":
+      return 0;
+    case "End":
+      return optionsLength - 1;
+    default:
+      return null;
+  }
+}
+
+function onRadioKeyDown<T extends string>({
+  activeValue,
+  event,
+  onChange,
+  options,
+}: {
+  readonly activeValue: T;
+  readonly event: KeyboardEvent<HTMLButtonElement>;
+  readonly onChange: (value: T) => void;
+  readonly options: readonly { readonly value: T }[];
+}) {
+  const currentIndex = options.findIndex(
+    (option) => option.value === activeValue
+  );
+  const nextIndex = getNextIndex({
+    currentIndex: currentIndex < 0 ? 0 : currentIndex,
+    key: event.key,
+    optionsLength: options.length,
+  });
+
+  if (nextIndex === null) {
+    return;
+  }
+
+  event.preventDefault();
+  const nextValue = options[nextIndex]?.value;
+  if (!nextValue) {
+    return;
+  }
+
+  onChange(nextValue);
+  requestAnimationFrame(() =>
+    focusRadioByValue(event.currentTarget.parentElement, nextValue)
+  );
+}
 
 function ScoreSortIcon({ sort }: { readonly sort: ApiWaveScoreSort }) {
   switch (sort) {
@@ -113,7 +192,7 @@ function DiscoverWaveControls({
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 md:tw-w-auto md:tw-items-end">
       <div
-        role="group"
+        role="radiogroup"
         className="tw-grid tw-w-full tw-grid-cols-4 tw-gap-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/10 md:tw-w-auto"
         aria-label="Wave score sort"
       >
@@ -123,8 +202,19 @@ function DiscoverWaveControls({
             <button
               key={option.value}
               type="button"
-              aria-pressed={selected}
+              role="radio"
+              aria-checked={selected}
+              tabIndex={selected ? 0 : -1}
+              data-radio-value={option.value}
               onClick={() => onSortChange(option.value)}
+              onKeyDown={(event) =>
+                onRadioKeyDown({
+                  activeValue: activeSort,
+                  event,
+                  onChange: onSortChange,
+                  options: SORT_OPTIONS,
+                })
+              }
               className={`tw-inline-flex tw-h-9 tw-min-w-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs tw-font-medium tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                 selected
                   ? "tw-bg-iron-700 tw-text-white"
@@ -138,7 +228,7 @@ function DiscoverWaveControls({
         })}
       </div>
       <div
-        role="group"
+        role="radiogroup"
         className="tw-flex tw-w-full tw-flex-wrap tw-gap-1.5 md:tw-justify-end"
         aria-label="Wave score filters"
       >
@@ -148,8 +238,19 @@ function DiscoverWaveControls({
             <button
               key={option.value}
               type="button"
-              aria-pressed={selected}
+              role="radio"
+              aria-checked={selected}
+              tabIndex={selected ? 0 : -1}
+              data-radio-value={option.value}
               onClick={() => onFilterChange(option.value)}
+              onKeyDown={(event) =>
+                onRadioKeyDown({
+                  activeValue: activeFilter,
+                  event,
+                  onChange: onFilterChange,
+                  options: FILTER_OPTIONS,
+                })
+              }
               className={`tw-h-8 tw-rounded-md tw-border-0 tw-px-2.5 tw-text-xs tw-font-medium tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                 selected
                   ? "tw-text-primary-100 tw-bg-primary-500/20 tw-ring-1 tw-ring-inset tw-ring-primary-400/40"

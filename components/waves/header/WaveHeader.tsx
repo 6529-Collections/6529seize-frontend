@@ -67,6 +67,7 @@ export default function WaveHeader({
   const showWaveRepAction =
     canUseWaveActions &&
     !isDirectMessage &&
+    normalizedWaveAuthorHandle !== null &&
     connectedHandle.toLowerCase() !== normalizedWaveAuthorHandle;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";

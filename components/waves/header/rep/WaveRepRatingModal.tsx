@@ -12,6 +12,7 @@ import {
   getStringAsNumberOrZero,
 } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useWaveRepAllocation } from "@/hooks/useWaveRepAllocation";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -19,7 +20,8 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,."() ]{1,100}$/u;
+const WAVE_REP_CATEGORY_PATTERN = /^[\p{L}\p{N}?!,.'() ]{1,100}$/u;
+const CATEGORY_SETTLE_DELAY_MS = 350;
 
 function getInitialCategory(wave: ApiWave): string {
   return wave.wave_rep?.categories?.[0]?.category ?? "quality";
@@ -43,14 +45,19 @@ export default function WaveRepRatingModal({
   const [isMounted, setIsMounted] = useState(false);
   const [category, setCategory] = useState(getInitialCategory(wave));
   const trimmedCategory = category.trim();
+  const debouncedCategory = useDebouncedValue(
+    trimmedCategory,
+    CATEGORY_SETTLE_DELAY_MS
+  );
+  const [settledCategory, setSettledCategory] = useState(trimmedCategory);
   const [amountStr, setAmountStr] = useState("0");
   const [amountDirty, setAmountDirty] = useState(false);
   const [mutating, setMutating] = useState(false);
-  const lastCategoryRef = useRef(trimmedCategory);
+  const lastSettledCategoryRef = useRef(settledCategory);
   const { currentRating, availableWaveRep, minMaxValues, isLoading } =
     useWaveRepAllocation({
       waveId: wave.id,
-      category: trimmedCategory || null,
+      category: settledCategory || null,
     });
 
   useEffect(() => {
@@ -72,23 +79,37 @@ export default function WaveRepRatingModal({
   }, [isMounted]);
 
   useEffect(() => {
-    if (lastCategoryRef.current !== trimmedCategory) {
-      lastCategoryRef.current = trimmedCategory;
+    if (WAVE_REP_CATEGORY_PATTERN.test(debouncedCategory)) {
+      setSettledCategory(debouncedCategory);
+    }
+  }, [debouncedCategory]);
+
+  const categoryValid = WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory);
+  const categorySettled = trimmedCategory === settledCategory;
+  const allocationReady = categoryValid && categorySettled && !isLoading;
+
+  useEffect(() => {
+    if (!allocationReady) {
+      return;
+    }
+
+    if (lastSettledCategoryRef.current !== settledCategory) {
+      lastSettledCategoryRef.current = settledCategory;
       setAmountDirty(false);
       setAmountStr(`${currentRating}`);
       return;
     }
+
     if (!amountDirty) {
       setAmountStr(`${currentRating}`);
     }
-  }, [amountDirty, currentRating, trimmedCategory]);
+  }, [allocationReady, amountDirty, currentRating, settledCategory]);
 
   const amount = getStringAsNumberOrZero(amountStr);
-  const categoryValid = WAVE_REP_CATEGORY_PATTERN.test(trimmedCategory);
   const amountValid = amount >= minMaxValues.min && amount <= minMaxValues.max;
   const haveChanged = amount !== currentRating;
   const isSaveDisabled =
-    mutating || isLoading || !categoryValid || !amountValid || !haveChanged;
+    mutating || !allocationReady || !amountValid || !haveChanged;
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -142,7 +163,15 @@ export default function WaveRepRatingModal({
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (isSaveDisabled) {
+    const nextAmount = getStringAsNumberOrZero(amountStr);
+    const nextAmountValid =
+      nextAmount >= minMaxValues.min && nextAmount <= minMaxValues.max;
+    if (
+      mutating ||
+      !allocationReady ||
+      !nextAmountValid ||
+      nextAmount === currentRating
+    ) {
       return;
     }
     setMutating(true);
@@ -158,7 +187,7 @@ export default function WaveRepRatingModal({
       }
       mutationStarted = true;
       await mutation.mutateAsync({
-        amount,
+        amount: nextAmount,
         category: trimmedCategory,
       });
     } catch (error) {
@@ -241,21 +270,23 @@ export default function WaveRepRatingModal({
               type="text"
               required
               autoComplete="off"
-              aria-describedby={categoryValid ? undefined : categoryErrorId}
+              aria-describedby={categoryErrorId}
               aria-invalid={!categoryValid}
               value={category}
               onChange={(event) => setCategory(event.currentTarget.value)}
               className="tw-mt-1.5 tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition focus:tw-border-primary-400 focus:tw-outline-none"
             />
-            {!categoryValid && (
-              <p
-                id={categoryErrorId}
-                role="alert"
-                className="tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-text-red"
-              >
-                Use 1-100 letters, numbers, spaces, or basic punctuation.
-              </p>
-            )}
+            <p
+              id={categoryErrorId}
+              role="alert"
+              className={`tw-mb-0 tw-mt-2 tw-text-xs tw-font-medium tw-text-red ${
+                categoryValid ? "tw-sr-only" : ""
+              }`}
+            >
+              {categoryValid
+                ? ""
+                : "Use 1-100 letters, numbers, spaces, apostrophes, or basic punctuation."}
+            </p>
           </div>
 
           <div className="tw-mt-5">
