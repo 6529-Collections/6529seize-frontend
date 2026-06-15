@@ -9,7 +9,11 @@ import type {
   ReviewbotRuntimeStatus,
   ReviewbotAdminUsageSummary,
 } from "@/services/reviewbot-admin-api";
-import type { ReviewbotUsageGroup } from "@/services/reviewbot-usage-api";
+import type {
+  ReviewbotUsageAnalysis,
+  ReviewbotUsageGroup,
+  ReviewbotUsagePrGroup,
+} from "@/services/reviewbot-usage-api";
 import {
   BellAlertIcon,
   ChartBarIcon,
@@ -17,6 +21,7 @@ import {
   ClockIcon,
   CpuChipIcon,
   CurrencyDollarIcon,
+  DocumentTextIcon,
   ExclamationTriangleIcon,
   LockClosedIcon,
   ShieldCheckIcon,
@@ -40,6 +45,15 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 const percentFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
   style: "percent",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  month: "short",
+  timeZone: "UTC",
+  year: "numeric",
 });
 
 export default function ReviewbotAdminDashboard({
@@ -66,7 +80,7 @@ export default function ReviewbotAdminDashboard({
         </p>
       </div>
 
-      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
         <MetricCard
           icon={<ChartBarIcon className="tw-h-6 tw-w-6" />}
           label="Review Runs"
@@ -74,10 +88,28 @@ export default function ReviewbotAdminDashboard({
           value={formatInteger(dashboard.totals.reviewRuns)}
         />
         <MetricCard
+          icon={<DocumentTextIcon className="tw-h-6 tw-w-6" />}
+          label="Unique PRs"
+          tone="tw-text-primary-300"
+          value={formatInteger(dashboard.totals.uniquePrs)}
+        />
+        <MetricCard
           icon={<CurrencyDollarIcon className="tw-h-6 tw-w-6" />}
           label="Spend"
           tone="tw-text-success"
           value={formatCurrency(dashboard.totals.costUsd)}
+        />
+        <MetricCard
+          icon={<CurrencyDollarIcon className="tw-h-6 tw-w-6" />}
+          label="Avg / Run"
+          tone="tw-text-success"
+          value={formatCurrency(dashboard.totals.averageCostPerReviewRunUsd)}
+        />
+        <MetricCard
+          icon={<CurrencyDollarIcon className="tw-h-6 tw-w-6" />}
+          label="Avg / PR"
+          tone="tw-text-success"
+          value={formatCurrency(dashboard.totals.averageCostPerPrUsd)}
         />
         <MetricCard
           icon={<CpuChipIcon className="tw-h-6 tw-w-6" />}
@@ -308,6 +340,12 @@ function AdminSummaryTables({
         keyHeader="Requestor"
         title="Requestors"
       />
+      <UsageAnalysisPanel analysis={summary.analysis} />
+      <UsageSection
+        groups={summary.byPrAuthor}
+        keyHeader="PR Author"
+        title="PR Authors"
+      />
       <UsageSection
         groups={summary.byRepo}
         keyHeader="Repository"
@@ -318,12 +356,45 @@ function AdminSummaryTables({
         keyHeader="Provider and Model"
         title="Providers and Models"
       />
-      <UsageSection
-        groups={summary.byPr}
-        keyHeader="Pull Request"
-        title="Pull Requests"
-      />
+      <PrUsageSection groups={summary.byPr} title="Pull Requests" />
     </>
+  );
+}
+
+function UsageAnalysisPanel({
+  analysis,
+}: {
+  readonly analysis: ReviewbotUsageAnalysis;
+}) {
+  return (
+    <section className="tw-mt-10 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5">
+      <h2 className="tw-mb-4 tw-text-xl tw-font-semibold tw-text-white">
+        Cost Analysis
+      </h2>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+        <MetricPair
+          label="Budget Skip Rate"
+          value={formatPercentValue(analysis.budgetSkipRate)}
+        />
+        <MetricPair
+          label="Avg Tokens / Run"
+          value={formatInteger(analysis.averageTokensPerReviewRun)}
+        />
+        <MetricPair
+          label="Avg Tokens / PR"
+          value={formatInteger(analysis.averageTokensPerPr)}
+        />
+        <MetricPair
+          label="Top Requestor"
+          value={formatTopCost(analysis.topCostRequestor)}
+        />
+        <MetricPair
+          label="Top PR Author"
+          value={formatTopCost(analysis.topCostPrAuthor)}
+        />
+        <MetricPair label="Top PR" value={formatTopCost(analysis.topCostPr)} />
+      </div>
+    </section>
   );
 }
 
@@ -488,6 +559,9 @@ function UsageSection({
                   Spend
                 </th>
                 <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Avg
+                </th>
+                <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
                   Tokens
                 </th>
                 <th className="tw-py-3 tw-pl-6 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
@@ -511,10 +585,99 @@ function UsageSection({
                     {formatCurrency(group.costUsd)}
                   </td>
                   <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
+                    {formatCurrency(group.averageCostUsd)}
+                  </td>
+                  <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
                     {formatInteger(group.totalTokens)}
                   </td>
                   <td className="tw-py-4 tw-pl-6 tw-text-right tw-text-sm tw-text-iron-200">
                     {formatInteger(group.budgetSkippedRuns)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="tw-mb-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-4 tw-text-sm tw-text-iron-400">
+          No rows found.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function PrUsageSection({
+  groups,
+  title,
+}: {
+  readonly groups: readonly ReviewbotUsagePrGroup[];
+  readonly title: string;
+}) {
+  return (
+    <section className="tw-mt-10">
+      <div className="tw-mb-4 tw-flex tw-items-baseline tw-justify-between tw-gap-4">
+        <h2 className="tw-mb-0 tw-text-2xl tw-font-semibold tw-text-white">
+          {title}
+        </h2>
+        <span className="tw-text-sm tw-text-iron-400">
+          {groups.length} rows
+        </span>
+      </div>
+      {groups.length > 0 ? (
+        <div className="tw-overflow-x-auto">
+          <table className="tw-min-w-full tw-border-collapse">
+            <thead>
+              <tr className="tw-border-b tw-border-solid tw-border-white/10">
+                <th className="tw-py-3 tw-pr-6 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Pull Request
+                </th>
+                <th className="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Author
+                </th>
+                <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Runs
+                </th>
+                <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Spend
+                </th>
+                <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Avg
+                </th>
+                <th className="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Latest Head
+                </th>
+                <th className="tw-py-3 tw-pl-6 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+                  Last Review
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <tr
+                  className="tw-border-b tw-border-solid tw-border-white/5"
+                  key={group.key}
+                >
+                  <td className="tw-py-4 tw-pr-6 tw-text-sm tw-font-medium tw-text-white">
+                    {group.key}
+                  </td>
+                  <td className="tw-px-6 tw-py-4 tw-text-sm tw-text-iron-200">
+                    {group.prAuthor || "unknown"}
+                  </td>
+                  <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
+                    {formatInteger(group.reviewRuns)}
+                  </td>
+                  <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
+                    {formatCurrency(group.costUsd)}
+                  </td>
+                  <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
+                    {formatCurrency(group.averageCostUsd)}
+                  </td>
+                  <td className="tw-px-6 tw-py-4 tw-font-mono tw-text-xs tw-text-iron-300">
+                    {formatSha(group.latestHeadSha)}
+                  </td>
+                  <td className="tw-py-4 tw-pl-6 tw-text-sm tw-text-iron-200">
+                    {formatDateTime(group.lastReviewAt)}
                   </td>
                 </tr>
               ))}
@@ -586,4 +749,37 @@ function formatInteger(value: number): string {
 
 function formatPercent(value: number): string {
   return percentFormatter.format(value / 100);
+}
+
+function formatPercentValue(value: number): string {
+  return `${value.toFixed(1)}%`;
+}
+
+function formatSha(value: string): string {
+  return value ? value.slice(0, 12) : "unknown";
+}
+
+function formatDateTime(value: string): string {
+  if (!value) {
+    return "unknown";
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "unknown"
+    : dateTimeFormatter.format(date);
+}
+
+function formatTopCost(
+  group:
+    | ReviewbotUsageAnalysis["topCostRepo"]
+    | ReviewbotUsageAnalysis["topCostRequestor"]
+    | ReviewbotUsageAnalysis["topCostPr"]
+    | undefined
+): string {
+  if (!group) {
+    return "None";
+  }
+  return `${group.key} (${formatCurrency(group.costUsd)}, ${formatPercentValue(
+    group.costSharePercent
+  )})`;
 }
