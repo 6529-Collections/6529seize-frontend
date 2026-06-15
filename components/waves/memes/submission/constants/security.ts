@@ -48,11 +48,9 @@ const getUrlSuffix = (value: string): string => {
   return suffixStart === undefined ? "" : value.slice(suffixStart);
 };
 
-const appendUrlSuffix = (
-  url: string,
-  search: string,
-  hash: string
-): string => `${url}${search}${hash}`;
+const appendUrlSuffix = (url: string, search: string, hash: string): string =>
+  // Preserve URL state for seeded generative scripts routed through the resolver.
+  `${url}${search}${hash}`;
 
 const hasEncodedPathEscape = (value: string): boolean => {
   const suffixStart = getUrlSuffixStart(value);
