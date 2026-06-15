@@ -67,12 +67,32 @@ describe("reviewbot usage api", () => {
               costUsd: 1.25,
               totalTokens: 1000,
               budgetSkippedRuns: 1,
+              uniquePrs: 2,
+              averageCostPerReviewRunUsd: 0.625,
+              averageCostPerPrUsd: 0.625,
+            },
+            analysis: {
+              budgetSkipRate: 50,
+              averageTokensPerReviewRun: 500,
+              averageTokensPerPr: 500,
+              topCostRepo: {
+                key: "6529-Collections/example",
+                reviewRuns: 2,
+                costUsd: 1.25,
+                averageCostUsd: 0.625,
+                totalTokens: 1000,
+                budgetSkippedRuns: 1,
+                costSharePercent: 100,
+              },
+              topCostProviderModel: null,
+              topCostReviewKind: null,
             },
             byDay: [
               {
                 key: "2026-06-11",
                 reviewRuns: 2,
                 costUsd: 1.25,
+                averageCostUsd: 0.625,
                 totalTokens: 1000,
                 budgetSkippedRuns: 1,
               },
@@ -100,6 +120,15 @@ describe("reviewbot usage api", () => {
           costUsd: 1.25,
           totalTokens: 1000,
           budgetSkippedRuns: 1,
+          uniquePrs: 2,
+          averageCostPerReviewRunUsd: 0.625,
+          averageCostPerPrUsd: 0.625,
+        },
+        analysis: {
+          budgetSkipRate: 50,
+          topCostRepo: {
+            costSharePercent: 100,
+          },
         },
       },
     });
