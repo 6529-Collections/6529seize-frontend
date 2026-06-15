@@ -7,6 +7,7 @@ import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
 import { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
+import { publicEnv } from "@/config/env";
 
 jest.mock("react-toastify", () => ({
   toast: jest.fn(),
@@ -258,6 +259,7 @@ describe("Auth component", () => {
     sessionV2.loginWithSessionV2.mockReset();
     sessionV2.persistSessionResponse.mockReset();
     sessionV2.persistSessionResponse.mockResolvedValue(true);
+    publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = undefined;
 
     // Reset useIdentity mock
     mockUseIdentity.mockReturnValue({ profile: null, isLoading: false });
@@ -341,6 +343,7 @@ describe("Auth component", () => {
         server_signature: "server-signature",
       });
       const sessionV2 = require("@/services/auth/session-v2.utils");
+      const walletSignatures = require("@/services/wallet-signatures/structured-wallet-signatures");
       const sessionResponse = {
         client_type: "web",
         address: validAddress,
@@ -349,6 +352,10 @@ describe("Auth component", () => {
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
       };
       sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = "true";
+      jest
+        .spyOn(walletSignatures, "getWalletSignatureDomain")
+        .mockReturnValue("app.6529.io");
       sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
       sessionV2.persistSessionResponse.mockResolvedValue(true);
       const user = userEvent.setup();
@@ -380,6 +387,138 @@ describe("Auth component", () => {
       expect(mockCommonApiPost).not.toHaveBeenCalled();
     });
 
+    it("uses native session v2 when native structured auth is enabled", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      mockCommonApiFetch.mockResolvedValue({
+        nonce: "sign this nonce",
+        server_signature: "server-signature",
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const sessionResponse = {
+        client_type: "native",
+        address: validAddress,
+        role: null,
+        access_token: "session-access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+        native_refresh_token: "native-refresh-token",
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      };
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.getSessionClientType.mockReturnValue("native");
+      publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = "true";
+      sessionV2.loginWithSessionV2.mockResolvedValue(sessionResponse);
+      sessionV2.persistSessionResponse.mockResolvedValue(true);
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      await waitFor(() =>
+        expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
+          serverSignature: "server-signature",
+          clientSignature: "0xsignature",
+          signerAddress: validAddress,
+          role: null,
+          isSafeWallet: false,
+        })
+      );
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
+    it("keeps web clients on non-cookie auth until structured auth is enabled", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      mockCommonApiFetch.mockResolvedValue({
+        nonce: "sign this nonce",
+        server_signature: "server-signature",
+      });
+      mockCommonApiPost.mockResolvedValue({
+        token: "legacy-access-token",
+        refresh_token: "legacy-refresh-token",
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      const walletSignatures = require("@/services/wallet-signatures/structured-wallet-signatures");
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.getSessionClientType.mockReturnValue("web");
+      jest
+        .spyOn(walletSignatures, "getWalletSignatureDomain")
+        .mockReturnValue("app.6529.io");
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      await waitFor(() =>
+        expect(mockCommonApiPost).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: "auth/login",
+          })
+        )
+      );
+    });
+
+    it("keeps localhost clients on non-cookie auth when session v2 is enabled", async () => {
+      const validAddress = "0x1111111111111111111111111111111111111111";
+      walletAddress = validAddress;
+      connectedAccountsOverride = [];
+      mockCommonApiFetch.mockResolvedValue({
+        nonce: "sign this nonce",
+        server_signature: "server-signature",
+      });
+      mockCommonApiPost.mockResolvedValue({
+        token: "legacy-access-token",
+        refresh_token: "legacy-refresh-token",
+      });
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
+      sessionV2.getSessionClientType.mockReturnValue("web");
+      publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = "true";
+      const user = userEvent.setup();
+
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={{ invalidateAll: jest.fn() } as any}
+        >
+          <Auth>
+            <RequestAuthButton />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+      await user.click(screen.getByTestId("req"));
+
+      expect(sessionV2.loginWithSessionV2).not.toHaveBeenCalled();
+      await waitFor(() =>
+        expect(mockCommonApiPost).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: "auth/login",
+          })
+        )
+      );
+    });
+
     it("blocks adding a second web account when session v2 uses a single cookie", async () => {
       const existingAddress = "0x1111111111111111111111111111111111111111";
       const nextAddress = "0x2222222222222222222222222222222222222222";
@@ -395,8 +534,13 @@ describe("Auth component", () => {
       const authUtils = require("@/services/auth/auth.utils");
       authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
       const sessionV2 = require("@/services/auth/session-v2.utils");
+      const walletSignatures = require("@/services/wallet-signatures/structured-wallet-signatures");
       sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
       sessionV2.getSessionClientType.mockReturnValue("web");
+      publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED = "true";
+      jest
+        .spyOn(walletSignatures, "getWalletSignatureDomain")
+        .mockReturnValue("app.6529.io");
       const toast = require("react-toastify").toast;
       const user = userEvent.setup();
 

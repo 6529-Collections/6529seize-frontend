@@ -552,7 +552,7 @@ import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCre
 import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
-import { ApiCreateDropRequest                } from '../models/ApiCreateDropRequest';
+import { ApiCreateDropRequest                 } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
 import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
@@ -921,7 +921,7 @@ import { ApiXTdhStats } from '../models/ApiXTdhStats';
 import { ApiXTdhToken } from '../models/ApiXTdhToken';
 import { ApiXTdhTokensPage } from '../models/ApiXTdhTokensPage';
 import { AuthNonceQueryClass } from '../models/AuthNonceQuery';
-import { AuthNonceStructuredQuery } from '../models/AuthNonceStructuredQuery';
+import { AuthNonceStructuredQuery      , AuthNonceStructuredQuerySessionTypeEnum    } from '../models/AuthNonceStructuredQuery';
 import { AuthNonceUnstructuredQuery } from '../models/AuthNonceUnstructuredQuery';
 import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { DistributionNormalized } from '../models/DistributionNormalized';
@@ -1061,6 +1061,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWavesV2ListType",
     "ApiXTdhGrantStatus",
     "ApiXTdhGrantTargetChain",
+    "AuthNonceQuerySessionTypeEnum",
+    "AuthNonceStructuredQuerySessionTypeEnum",
     "MintingClaimAnimationDetailsFormatEnum",
     "MintingClaimAnimationDetailsGlbFormatEnum",
     "MintingClaimAnimationDetailsHtmlFormatEnum",

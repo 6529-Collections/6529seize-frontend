@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: 6529 Wallet Auth Session V2
   version: 0.1.0
-  description: Contract for browser sessions, native refresh tokens, transfer-code login, and websocket auth migration.
+  description: Contract for browser sessions, native refresh tokens, transfer-code login, and websocket auth.
 servers:
   - url: https://api.6529.io/api
     description: Production API
@@ -10,6 +10,7 @@ paths:
   /auth/session-login:
     post:
       summary: Start a v2 wallet session
+      description: V2 session login requires a structured authentication challenge. Web cookie sessions require Session Type first_party_web; native refresh-token sessions require Session Type native. External clients use non-cookie bearer-token/API-client auth instead.
       operationId: startWalletSessionV2
       tags:
         - auth
@@ -171,6 +172,75 @@ components:
         - eoa
         - contract
         - unknown
+    StructuredSignatureSessionType:
+      type: string
+      enum:
+        - first_party_web
+        - external_client
+        - native
+      description: first_party_web requires a registered frontend domain and, for browser cookie sessions, a credentialed-CORS origin; external_client and native are audience-based and do not imply cookie-session eligibility.
+    StructuredSignatureChallenge:
+      type: object
+      additionalProperties: false
+      required:
+        - header
+        - version
+        - audience
+        - domain
+        - wallet
+        - chain_id
+        - issued_at
+        - expiration_time
+        - nonce
+        - action
+        - purpose
+      properties:
+        header:
+          type: string
+          enum:
+            - 6529 Authentication
+            - 6529 Action
+        version:
+          type: integer
+          enum:
+            - 2
+        audience:
+          type: string
+          description: API host that must accept the signature, for example api.6529.io.
+        domain:
+          type: string
+          description: Signing client host shown to the wallet.
+        client_origin:
+          type: string
+          description: Optional browser or native origin shown to the wallet.
+        session_type:
+          $ref: "#/components/schemas/StructuredSignatureSessionType"
+        wallet:
+          $ref: "#/components/schemas/EthereumAddress"
+        chain_id:
+          type: integer
+          minimum: 1
+        issued_at:
+          $ref: "#/components/schemas/IsoDateTime"
+        expiration_time:
+          $ref: "#/components/schemas/IsoDateTime"
+        nonce:
+          type: string
+          minLength: 8
+          maxLength: 128
+        action:
+          type: string
+          enum:
+            - login
+            - create_drop
+            - add_rememe
+            - nextgen_admin
+        payload_hash:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        purpose:
+          type: string
+          minLength: 1
     EthereumAddress:
       type: string
       pattern: "^0x[a-fA-F0-9]{40}$"
@@ -195,6 +265,7 @@ components:
         server_signature:
           type: string
           minLength: 1
+          description: Server-signed structured challenge token. Structured challenges bind to an API audience; only first_party_web challenges require the frontend domain allowlist. /auth/session-login accepts first_party_web for web cookie sessions and native for native refresh-token sessions; external_client uses non-cookie bearer-token/API-client auth.
         client_signature:
           type: string
           minLength: 1

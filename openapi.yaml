@@ -178,7 +178,9 @@ paths:
             default: false
           description: >-
             If true, the nonce is returned as a structured wallet signature
-            message and domain is required.
+            message and domain is required. The message includes an API
+            audience so external clients do not need pre-registered domains for
+            signing.
         - name: domain
           in: query
           required: false
@@ -186,6 +188,38 @@ paths:
             type: string
             minLength: 1
           description: Required when structured_signature is true.
+        - name: audience
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+          description: >-
+            API audience embedded in the structured message. Defaults to the
+            configured 6529 API host.
+        - name: client_origin
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+          description: >-
+            Optional visible client origin embedded in the structured message.
+            Browser requests must match the Origin header when both are present.
+        - name: session_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - first_party_web
+              - external_client
+              - native
+            default: external_client
+          description: >-
+            first_party_web keeps strict first-party domain validation and
+            cookie sessions still require registered credentialed-CORS origins;
+            external_client and native are audience-based for signing.
         - name: chain_id
           in: query
           required: false
@@ -14930,11 +14964,34 @@ components:
             - true
           description: >-
             Returns the nonce as a structured wallet signature message with
-            domain, wallet, expiry, nonce, and action fields.
+            audience, domain, wallet, expiry, nonce, and action fields.
         domain:
           type: string
           minLength: 1
           description: Required when structured_signature is true.
+        audience:
+          type: string
+          minLength: 1
+          description: >-
+            API audience embedded in the structured message. Defaults to the
+            configured 6529 API host.
+        client_origin:
+          type: string
+          format: uri
+          description: >-
+            Optional visible client origin embedded in the structured message.
+            Browser requests must match the Origin header when both are present.
+        session_type:
+          type: string
+          enum:
+            - first_party_web
+            - external_client
+            - native
+          default: external_client
+          description: >-
+            first_party_web keeps strict first-party domain validation and
+            cookie sessions still require registered credentialed-CORS origins;
+            external_client and native are audience-based for signing.
         chain_id:
           type: integer
           minimum: 1

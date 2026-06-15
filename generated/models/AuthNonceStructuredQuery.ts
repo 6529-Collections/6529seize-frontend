@@ -11,6 +11,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class AuthNonceStructuredQuery {
     /**
     * Your wallet address
@@ -21,13 +23,25 @@ export class AuthNonceStructuredQuery {
     */
     'short_nonce'?: boolean;
     /**
-    * Returns the nonce as a structured wallet signature message with domain, wallet, expiry, nonce, and action fields.
+    * Returns the nonce as a structured wallet signature message with audience, domain, wallet, expiry, nonce, and action fields.
     */
     'structured_signature': boolean;
     /**
     * Required when structured_signature is true.
     */
     'domain': string;
+    /**
+    * API audience embedded in the structured message. Defaults to the configured 6529 API host.
+    */
+    'audience'?: string;
+    /**
+    * Optional visible client origin embedded in the structured message. Browser requests must match the Origin header when both are present.
+    */
+    'client_origin'?: string;
+    /**
+    * first_party_web keeps strict first-party domain validation and cookie sessions still require registered credentialed-CORS origins; external_client and native are audience-based for signing.
+    */
+    'session_type'?: AuthNonceStructuredQuerySessionTypeEnum;
     /**
     * Chain id embedded in structured signatures.
     */
@@ -63,6 +77,24 @@ export class AuthNonceStructuredQuery {
             "format": ""
         },
         {
+            "name": "audience",
+            "baseName": "audience",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "client_origin",
+            "baseName": "client_origin",
+            "type": "string",
+            "format": "uri"
+        },
+        {
+            "name": "session_type",
+            "baseName": "session_type",
+            "type": "AuthNonceStructuredQuerySessionTypeEnum",
+            "format": ""
+        },
+        {
             "name": "chain_id",
             "baseName": "chain_id",
             "type": "number",
@@ -75,4 +107,10 @@ export class AuthNonceStructuredQuery {
 
     public constructor() {
     }
+}
+
+export enum AuthNonceStructuredQuerySessionTypeEnum {
+    FirstPartyWeb = 'first_party_web',
+    ExternalClient = 'external_client',
+    Native = 'native'
 }

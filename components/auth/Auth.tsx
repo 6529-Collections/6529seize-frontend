@@ -59,8 +59,11 @@ import {
   persistSessionResponse,
 } from "@/services/auth/session-v2.utils";
 import {
+  getWalletSignatureAudience,
+  getWalletSignatureClientOrigin,
   getWalletSignatureDomain,
   isStructuredSignaturesEnabled,
+  type StructuredWalletSignatureSessionType,
 } from "@/services/wallet-signatures/structured-wallet-signatures";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
@@ -100,6 +103,34 @@ class NonceResponseValidationError extends Error {
     this.name = "NonceResponseValidationError";
   }
 }
+
+const getStructuredWalletSignatureSessionType =
+  (): StructuredWalletSignatureSessionType => {
+    if (getSessionClientType() === "native") {
+      return "native";
+    }
+    const signingDomain = getWalletSignatureDomain();
+    if (
+      signingDomain.startsWith("localhost") ||
+      signingDomain.startsWith("127.0.0.1")
+    ) {
+      return "external_client";
+    }
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.userAgent.toLowerCase().includes("electron")
+    ) {
+      return "external_client";
+    }
+    return "first_party_web";
+  };
+
+const isWalletAuthSessionV2LoginAllowed = (
+  sessionType: StructuredWalletSignatureSessionType
+): boolean =>
+  isWalletAuthSessionV2Enabled() &&
+  isStructuredSignaturesEnabled() &&
+  sessionType !== "external_client";
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
@@ -419,8 +450,14 @@ export default function Auth({
         signer_address: signerAddress,
       };
       if (isStructuredSignaturesEnabled()) {
+        const clientOrigin = getWalletSignatureClientOrigin();
         params["structured_signature"] = "true";
+        params["audience"] = getWalletSignatureAudience();
         params["domain"] = getWalletSignatureDomain();
+        if (clientOrigin) {
+          params["client_origin"] = clientOrigin;
+        }
+        params["session_type"] = getStructuredWalletSignatureSessionType();
         params["chain_id"] = "1";
       }
       const response = await commonApiFetch<ApiNonceResponse>({
@@ -544,8 +581,12 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
+      const structuredSessionType = getStructuredWalletSignatureSessionType();
+      const useWalletAuthSessionV2 = isWalletAuthSessionV2LoginAllowed(
+        structuredSessionType
+      );
       const isSingleWebSessionV2 =
-        isWalletAuthSessionV2Enabled() && getSessionClientType() === "web";
+        useWalletAuthSessionV2 && structuredSessionType === "first_party_web";
       if (
         !canStoreAnotherWalletAccount(signerAddress, {
           allowAdditionalAccounts: !isSingleWebSessionV2,
@@ -580,7 +621,7 @@ export default function Auth({
         return { success: false };
       }
 
-      const isPersisted = isWalletAuthSessionV2Enabled()
+      const isPersisted = useWalletAuthSessionV2
         ? await loginWithSessionV2({
             serverSignature: server_signature,
             clientSignature: clientSignature.signature,

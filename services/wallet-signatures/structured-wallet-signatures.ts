@@ -15,6 +15,11 @@ export type StructuredWalletSignatureAction =
 
 export type StructuredWalletSignatureKind = "authentication" | "action";
 
+export type StructuredWalletSignatureSessionType =
+  | "first_party_web"
+  | "external_client"
+  | "native";
+
 export interface StructuredWalletSignatureResult {
   readonly message: string;
   readonly nonce: string;
@@ -29,7 +34,10 @@ interface BuildStructuredWalletSignatureMessageParams {
   readonly action: StructuredWalletSignatureAction;
   readonly purpose: string;
   readonly payloadHash?: string | null | undefined;
+  readonly audience?: string | undefined;
   readonly domain?: string | undefined;
+  readonly clientOrigin?: string | null | undefined;
+  readonly sessionType?: StructuredWalletSignatureSessionType | null | undefined;
   readonly chainId?: number | undefined;
   readonly nonce?: string | undefined;
   readonly issuedAt?: Date | undefined;
@@ -40,11 +48,23 @@ export function isStructuredSignaturesEnabled(): boolean {
   return publicEnv.AUTH_STRUCTURED_SIGNATURES_ENABLED === "true";
 }
 
+export function getWalletSignatureAudience(): string {
+  return new URL(publicEnv.API_ENDPOINT).host.toLowerCase();
+}
+
 export function getWalletSignatureDomain(): string {
   if (typeof window !== "undefined" && window.location.host) {
     return window.location.host.toLowerCase();
   }
   return new URL(publicEnv.BASE_ENDPOINT).host.toLowerCase();
+}
+
+export function getWalletSignatureClientOrigin(): string | null {
+  if (typeof window !== "undefined" && window.location.origin) {
+    const origin = window.location.origin.toLowerCase();
+    return origin === "null" ? null : origin;
+  }
+  return new URL(publicEnv.BASE_ENDPOINT).origin.toLowerCase();
 }
 
 export function buildStructuredWalletSignatureMessage({
@@ -53,7 +73,10 @@ export function buildStructuredWalletSignatureMessage({
   action,
   purpose,
   payloadHash,
+  audience = getWalletSignatureAudience(),
   domain = getWalletSignatureDomain(),
+  clientOrigin = getWalletSignatureClientOrigin(),
+  sessionType,
   chainId = 1,
   nonce = uuidv4(),
   issuedAt = new Date(),
@@ -61,17 +84,29 @@ export function buildStructuredWalletSignatureMessage({
     issuedAt.getTime() + STRUCTURED_WALLET_SIGNATURE_TTL_SECONDS * 1000
   ),
 }: BuildStructuredWalletSignatureMessageParams): StructuredWalletSignatureResult {
-  const lines = [
+  const lines: string[] = [
     kind === "authentication" ? "6529 Authentication" : "6529 Action",
     `Version: ${STRUCTURED_WALLET_SIGNATURE_VERSION}`,
+    `Audience: ${audience}`,
     `Domain: ${domain}`,
+  ];
+
+  if (clientOrigin) {
+    lines.push(`Client Origin: ${clientOrigin}`);
+  }
+
+  if (sessionType) {
+    lines.push(`Session Type: ${sessionType}`);
+  }
+
+  lines.push(
     `Wallet: ${address}`,
     `Chain ID: ${chainId}`,
     `Issued At: ${issuedAt.toISOString()}`,
     `Expiration Time: ${expirationTime.toISOString()}`,
     `Nonce: ${nonce}`,
-    `Action: ${action}`,
-  ];
+    `Action: ${action}`
+  );
 
   if (payloadHash) {
     lines.push(`Payload Hash: ${payloadHash}`);
