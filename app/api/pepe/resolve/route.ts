@@ -364,10 +364,6 @@ async function tryExtractImageFromDescription(
       continue;
     }
 
-    if (trimmed.startsWith("ipfs://")) {
-      return decentralizedMediaToHttp(trimmed);
-    }
-
     if (/\.(json|js)(?:\?.*)?$/i.test(trimmed) || /json/i.test(trimmed)) {
       const metadata = await fetchJson<Record<string, unknown>>(trimmed, 2500);
       if (metadata) {

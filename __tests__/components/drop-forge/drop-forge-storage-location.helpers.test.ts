@@ -134,6 +134,14 @@ describe("getDropForgeStorageLocationInfo", () => {
     });
   });
 
+  it("keeps bare CIDv1 values as IPFS even though they match the Arweave length range", () => {
+    expect(
+      getDropForgeStorageLocationInfo(
+        "bafybeifnoqgl2rnnredlcwqhujosdwbpufoqkvbgoeohcnepq5yexlt6wa"
+      )?.provider
+    ).toBe("ipfs");
+  });
+
   it("recognizes ipfs gateway urls and extracts the cid for display", () => {
     expect(
       getDropForgeStorageLocationInfo(

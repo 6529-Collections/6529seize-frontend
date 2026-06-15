@@ -77,6 +77,8 @@ export function getDropForgeStorageLocationInfo(
     return buildLocationInfo(trimmedValue, parsed);
   }
 
+  // CIDv1 base32 strings also satisfy the broad Arweave tx-id shape below.
+  // Keep the bare IPFS CID check first so bare CIDs stay IPFS locations.
   if (isBareIpfsCid(trimmedValue)) {
     return buildLocationInfo(trimmedValue, {
       protocol: "ipfs",

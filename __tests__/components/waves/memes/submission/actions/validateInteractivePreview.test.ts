@@ -154,7 +154,7 @@ describe("validateInteractivePreview", () => {
   });
 
   it("propagates network failures as validation errors", async () => {
-    (globalThis.fetch as jest.Mock).mockRejectedValueOnce(new Error("offline"));
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("offline"));
 
     const result = await validateInteractivePreview({
       provider: "ipfs",
