@@ -66,7 +66,13 @@ five minutes even if a larger value is supplied in deployment config.
 The route shows:
 
 - 30-day admin usage totals;
-- requestor, repository, provider/model, and pull-request usage tables;
+- unique PR count, average spend per review run, average spend per PR, budget
+  skip rate, and token averages;
+- top-cost requestor, PR author, and PR analysis with spend-share percentages;
+- requestor, PR-author, repository, provider/model, review-kind, and
+  pull-request usage tables;
+- pull-request rows with PR author, latest head SHA, latest review timestamp,
+  total spend, and average spend per review run;
 - budget policy status;
 - alert configuration status;
 - model price catalog health;

@@ -1,6 +1,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
@@ -39,8 +40,10 @@ export function useWaveMuteSettings(wave: ApiWave) {
         ? "Unable to unmute wave"
         : "Unable to mute wave";
       setToast({
-        message: getErrorMessage(error, defaultMessage),
         type: "error",
+        title: isMuted ? "Couldn't unmute this wave." : "Couldn't mute this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, getErrorMessage(error, defaultMessage)),
       });
     } finally {
       setMuteLoading(false);

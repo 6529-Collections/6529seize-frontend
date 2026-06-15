@@ -1,10 +1,6 @@
 "use client";
 
-import type {
-  Dispatch,
-  FC,
-  SetStateAction,
-} from "react";
+import type { Dispatch, FC, SetStateAction } from "react";
 import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
@@ -50,7 +46,6 @@ interface VoteModeFieldProps {
   readonly setVoteValue: Dispatch<SetStateAction<string | number>>;
   readonly onValueAccepted: (value: number) => void;
   readonly onSubmit: () => void;
-  readonly rank?: number | null | undefined;
   readonly size?: SingleWaveDropVoteSize | undefined;
 }
 
@@ -94,9 +89,7 @@ const getInitialVoteMode = (
   return "slider";
 };
 
-const getNextVoteMode = (
-  isSliderMode: boolean
-): SingleWaveDropVoteMode => {
+const getNextVoteMode = (isSliderMode: boolean): SingleWaveDropVoteMode => {
   if (isSliderMode) {
     return "numeric";
   }
@@ -139,7 +132,6 @@ const VoteModeField: FC<VoteModeFieldProps> = ({
   setVoteValue,
   onValueAccepted,
   onSubmit,
-  rank,
   size,
 }) => {
   if (isSliderMode) {
@@ -151,7 +143,6 @@ const VoteModeField: FC<VoteModeFieldProps> = ({
         label={label}
         setVoteValue={setVoteValue}
         onValueAccepted={onValueAccepted}
-        rank={rank}
         size={size}
       />
     );
@@ -229,20 +220,19 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
 
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-      <fieldset
-        className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2 tw-py-1.5"
-      >
+      <fieldset className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#1A1A1F] tw-px-2 tw-py-1.5">
         <legend className="tw-sr-only">Vote controls</legend>
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <button
+            type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
-            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-font-medium tw-transition-all desktop-hover:hover:tw-bg-iron-600"
+            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.06] tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-white/25 desktop-hover:hover:tw-bg-white/[0.1] desktop-hover:hover:tw-text-white"
             title={getSwitchModeTitle(isSliderMode)}
             aria-label={getSwitchModeAriaLabel(isSliderMode)}
           >
             <FontAwesomeIcon
               icon={faExchange}
-              className="tw-size-3 tw-flex-shrink-0 tw-text-white"
+              className="tw-size-3 tw-flex-shrink-0 tw-text-current"
               flip={getExchangeIconFlip(isSliderMode)}
             />
           </button>
@@ -257,7 +247,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               setVoteValue={setVoteValue}
               onValueAccepted={handleSliderValueAccepted}
               onSubmit={handleSubmit}
-              rank={displayDrop.rank}
               size={size}
             />
           </div>
@@ -284,6 +273,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             maxRating={maxRating}
             label={voteLabel}
             creditScope={creditScope}
+            subtle={true}
           />
         </div>
       </fieldset>
@@ -291,9 +281,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   }
 
   return (
-    <fieldset
-      className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0"
-    >
+    <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0">
       <legend className="tw-sr-only">Vote controls</legend>
       <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
         <VoteModeField
@@ -304,7 +292,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           setVoteValue={setVoteValue}
           onValueAccepted={handleSliderValueAccepted}
           onSubmit={handleSubmit}
-          rank={displayDrop.rank}
           label={voteLabel}
         />
       </div>
@@ -325,6 +312,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         />
         {showInternalVoteModeControl && (
           <button
+            type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             className="tw-flex-shrink-0 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
             title="Switch mode"

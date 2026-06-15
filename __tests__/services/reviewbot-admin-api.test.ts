@@ -181,4 +181,136 @@ describe("reviewbot admin api", () => {
 
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
+
+  it("parses enriched admin usage analysis and PR author rows", async () => {
+    const fetchImpl = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/v2/notifications")) {
+        return jsonResponse({ ok: true });
+      }
+      if (url.includes("/api/admin/usage/summary")) {
+        return jsonResponse({
+          ok: true,
+          visibility: "admin",
+          kind: "usage_summary",
+          range: { days: 30 },
+          totals: {
+            reviewRuns: 4,
+            costUsd: 12,
+            totalTokens: 6000,
+            budgetSkippedRuns: 1,
+            uniquePrs: 3,
+            averageCostPerReviewRunUsd: 3,
+            averageCostPerPrUsd: 4,
+          },
+          analysis: {
+            budgetSkipRate: 25,
+            averageTokensPerReviewRun: 1500,
+            averageTokensPerPr: 2000,
+            topCostRepo: null,
+            topCostProviderModel: null,
+            topCostReviewKind: null,
+            topCostRequestor: {
+              key: "punk6529",
+              reviewRuns: 3,
+              costUsd: 9,
+              averageCostUsd: 3,
+              totalTokens: 4500,
+              budgetSkippedRuns: 0,
+              costSharePercent: 75,
+            },
+            topCostPrAuthor: {
+              key: "ragnep",
+              reviewRuns: 2,
+              costUsd: 8,
+              averageCostUsd: 4,
+              totalTokens: 4000,
+              budgetSkippedRuns: 0,
+              costSharePercent: 66.67,
+            },
+            topCostPr: {
+              key: "6529-Collections/6529seize-frontend#2700",
+              repoFullName: "6529-Collections/6529seize-frontend",
+              prNumber: 2700,
+              prAuthor: "ragnep",
+              latestHeadSha: "abcdef1234567890",
+              lastReviewAt: "2026-06-15T08:00:00.000Z",
+              reviewRuns: 2,
+              costUsd: 8,
+              averageCostUsd: 4,
+              totalTokens: 4000,
+              budgetSkippedRuns: 0,
+              costSharePercent: 66.67,
+            },
+          },
+          byDay: [],
+          byRepo: [],
+          byProviderModel: [],
+          byReviewKind: [],
+          byRequestor: [],
+          byPrAuthor: [
+            {
+              key: "ragnep",
+              reviewRuns: 2,
+              costUsd: 8,
+              averageCostUsd: 4,
+              totalTokens: 4000,
+              budgetSkippedRuns: 0,
+            },
+          ],
+          byPr: [
+            {
+              key: "6529-Collections/6529seize-frontend#2700",
+              repoFullName: "6529-Collections/6529seize-frontend",
+              prNumber: 2700,
+              prAuthor: "ragnep",
+              latestHeadSha: "abcdef1234567890",
+              lastReviewAt: "2026-06-15T08:00:00.000Z",
+              reviewRuns: 2,
+              costUsd: 8,
+              averageCostUsd: 4,
+              totalTokens: 4000,
+              budgetSkippedRuns: 0,
+            },
+          ],
+        });
+      }
+      return jsonResponse({ ok: true });
+    });
+
+    const result = await getReviewbotAdminDashboard({
+      env: baseEnv(),
+      fetchImpl,
+      now: futureDate,
+      walletAuthJwt: createJwt(allowedWallet),
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      dashboard: {
+        totals: {
+          uniquePrs: 3,
+          averageCostPerPrUsd: 4,
+        },
+        summary: {
+          status: "ok",
+          data: {
+            analysis: {
+              budgetSkipRate: 25,
+              topCostPr: {
+                prAuthor: "ragnep",
+                costSharePercent: 66.67,
+              },
+            },
+            byPrAuthor: [{ key: "ragnep" }],
+            byPr: [
+              {
+                latestHeadSha: "abcdef1234567890",
+              },
+            ],
+          },
+        },
+      },
+    });
+  });
 });

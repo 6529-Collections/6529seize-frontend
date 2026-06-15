@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import {
   commonApiDelete,
@@ -114,15 +115,14 @@ export const useDropCurationMutation = (): UseDropCurationMutationReturn => {
       rollbackRef.current = null;
       pendingDropIdRef.current = null;
 
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
       setToast({
-        message:
-          action === "curate"
-            ? `Failed to curate drop: ${errorMessage}`
-            : `Failed to remove curation: ${errorMessage}`,
         type: "error",
+        title:
+          action === "curate"
+            ? "Couldn't curate this drop."
+            : "Couldn't remove this curation.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
   });
@@ -131,7 +131,7 @@ export const useDropCurationMutation = (): UseDropCurationMutationReturn => {
     (target: DropCurationTarget) => {
       if (!connectedProfile) {
         setToast({
-          message: "Please connect your wallet to curate drops",
+          message: "Connect your wallet to curate drops.",
           type: "warning",
         });
         return false;

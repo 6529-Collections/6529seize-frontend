@@ -16,6 +16,7 @@ export const usageGroupSchema = z.object({
   key: z.string().catch("unknown"),
   reviewRuns: safeIntegerSchema,
   costUsd: safeNumberSchema,
+  averageCostUsd: safeNumberSchema,
   totalTokens: safeIntegerSchema,
   budgetSkippedRuns: safeIntegerSchema,
 });
@@ -25,6 +26,39 @@ export const usageTotalsSchema = z.object({
   costUsd: safeNumberSchema,
   totalTokens: safeIntegerSchema,
   budgetSkippedRuns: safeIntegerSchema,
+  uniquePrs: safeIntegerSchema,
+  averageCostPerReviewRunUsd: safeNumberSchema,
+  averageCostPerPrUsd: safeNumberSchema,
+});
+
+export const usagePrGroupSchema = usageGroupSchema.extend({
+  repoFullName: z.string().catch(""),
+  prNumber: z
+    .union([z.coerce.number().int().nonnegative(), z.null()])
+    .catch(null),
+  prAuthor: z.string().catch(""),
+  latestHeadSha: z.string().catch(""),
+  lastReviewAt: z.string().catch(""),
+});
+
+export const usageAnalysisGroupSchema = usageGroupSchema.extend({
+  costSharePercent: safeNumberSchema,
+});
+
+export const usageAnalysisPrGroupSchema = usagePrGroupSchema.extend({
+  costSharePercent: safeNumberSchema,
+});
+
+export const usageAnalysisSchema = z.object({
+  budgetSkipRate: safeNumberSchema,
+  averageTokensPerReviewRun: safeIntegerSchema,
+  averageTokensPerPr: safeIntegerSchema,
+  topCostRepo: usageAnalysisGroupSchema.nullable().catch(null),
+  topCostProviderModel: usageAnalysisGroupSchema.nullable().catch(null),
+  topCostReviewKind: usageAnalysisGroupSchema.nullable().catch(null),
+  topCostRequestor: usageAnalysisGroupSchema.nullable().optional(),
+  topCostPrAuthor: usageAnalysisGroupSchema.nullable().optional(),
+  topCostPr: usageAnalysisPrGroupSchema.nullable().optional(),
 });
 
 export const usageRangeSchema = z.object({
@@ -43,6 +77,17 @@ export const usageSummarySchema = z.object({
     costUsd: 0,
     totalTokens: 0,
     budgetSkippedRuns: 0,
+    uniquePrs: 0,
+    averageCostPerReviewRunUsd: 0,
+    averageCostPerPrUsd: 0,
+  }),
+  analysis: usageAnalysisSchema.default({
+    budgetSkipRate: 0,
+    averageTokensPerReviewRun: 0,
+    averageTokensPerPr: 0,
+    topCostRepo: null,
+    topCostProviderModel: null,
+    topCostReviewKind: null,
   }),
   byDay: z.array(usageGroupSchema).default([]),
   byRepo: z.array(usageGroupSchema).default([]),
@@ -51,6 +96,8 @@ export const usageSummarySchema = z.object({
 });
 
 export type ReviewbotUsageGroup = z.infer<typeof usageGroupSchema>;
+export type ReviewbotUsagePrGroup = z.infer<typeof usagePrGroupSchema>;
+export type ReviewbotUsageAnalysis = z.infer<typeof usageAnalysisSchema>;
 export type ReviewbotUsageSummary = z.infer<typeof usageSummarySchema>;
 
 export type ReviewbotUsageResult =

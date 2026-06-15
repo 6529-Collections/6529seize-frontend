@@ -1,16 +1,8 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { useEffect, useState } from "react";
-import { getSliderTheme } from "./types/slider.types";
-import {
-  domAnimation,
-  LazyMotion,
-  m,
-  useMotionValue,
-  useSpring,
-  useTransform,
-} from "framer-motion";
+import { useState } from "react";
+import { domAnimation, LazyMotion, m } from "framer-motion";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import {
   SliderScaleLabels,
@@ -25,7 +17,6 @@ interface WaveDropVoteSliderProps {
   readonly maxValue: number;
   readonly setVoteValue: Dispatch<SetStateAction<string | number>>;
   readonly onValueAccepted?: ((value: number) => void) | undefined;
-  readonly rank?: number | null | undefined;
   readonly label: string;
   readonly size?: SingleWaveDropVoteSize | undefined;
 }
@@ -34,8 +25,6 @@ type ProgressBarStyle = {
   left: string;
   width: string;
 };
-
-type SliderTheme = ReturnType<typeof getSliderTheme>;
 
 type SliderVoteState = {
   readonly numericVoteValue: number;
@@ -190,9 +179,7 @@ const getSliderRangeState = ({
   );
   const isFixedRange = minValue === maxValue;
   const rangeSize = maxValue - minValue;
-  const zeroPercentage = isFixedRange
-    ? 50
-    : ((0 - minValue) / rangeSize) * 100;
+  const zeroPercentage = isFixedRange ? 50 : ((0 - minValue) / rangeSize) * 100;
   const currentPercentage = isFixedRange
     ? 50
     : ((logValue - minValue) / rangeSize) * 100;
@@ -218,32 +205,21 @@ const getSliderRangeState = ({
   };
 };
 
-const getTrackClasses = (
-  isMini: boolean,
-  theme: SliderTheme
-): string => {
+const getTrackClasses = (isMini: boolean): string => {
   if (isMini) {
-    return `${theme.track.background} ${theme.track.hover} tw-shadow-inner`;
+    return "tw-bg-[#26272B] tw-shadow-inner group-hover:tw-bg-[#37373E]";
   }
 
   return "tw-bg-[#26272B]";
 };
 
 const getProgressClasses = ({
-  isMini,
   isPositiveVote,
   isNegativeVote,
-  theme,
 }: {
-  readonly isMini: boolean;
   readonly isPositiveVote: boolean;
   readonly isNegativeVote: boolean;
-  readonly theme: SliderTheme;
 }): string => {
-  if (isMini) {
-    return `${theme.progress.background} ${theme.progress.glow} tw-backdrop-blur-sm`;
-  }
-
   if (isPositiveVote) {
     return "tw-bg-emerald-500";
   }
@@ -259,43 +235,33 @@ const getTooltipClasses = ({
   isMini,
   isPositiveVote,
   isNegativeVote,
-  theme,
 }: {
   readonly isMini: boolean;
   readonly isPositiveVote: boolean;
   readonly isNegativeVote: boolean;
-  readonly theme: SliderTheme;
 }): string => {
-  if (isMini) {
-    return `${theme.tooltip.background} ${theme.tooltip.text} tw-min-w-[120px] tw-rounded-lg tw-border-gray-600/20 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-shadow-lg`;
-  }
+  const sizeClasses = isMini
+    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px]"
+    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px]";
 
   if (isPositiveVote) {
-    return "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded tw-border-dashed tw-border-emerald-500/40 tw-bg-[#0d0d10] tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-text-emerald-500";
+    return `${sizeClasses} tw-border-dashed tw-border-emerald-500/40 tw-bg-[#0d0d10] tw-text-emerald-500`;
   }
 
   if (isNegativeVote) {
-    return "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded tw-border-dashed tw-border-rose-500/40 tw-bg-[#0d0d10] tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-text-rose-500";
+    return `${sizeClasses} tw-border-dashed tw-border-rose-500/40 tw-bg-[#0d0d10] tw-text-rose-500`;
   }
 
-  return "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded tw-border-dashed tw-border-[#37373E] tw-bg-[#0d0d10] tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-text-[#848490]";
+  return `${sizeClasses} tw-border-dashed tw-border-[#37373E] tw-bg-[#0d0d10] tw-text-[#848490]`;
 };
 
 const getTooltipArrowClasses = ({
-  isMini,
   isPositiveVote,
   isNegativeVote,
-  theme,
 }: {
-  readonly isMini: boolean;
   readonly isPositiveVote: boolean;
   readonly isNegativeVote: boolean;
-  readonly theme: SliderTheme;
 }): string => {
-  if (isMini) {
-    return `${theme.tooltip.background} tw-border-gray-600/20`;
-  }
-
   if (isPositiveVote) {
     return "tw-border-emerald-500/40 tw-bg-[#0d0d10]";
   }
@@ -308,20 +274,12 @@ const getTooltipArrowClasses = ({
 };
 
 const getThumbClasses = ({
-  isMini,
   isPositiveVote,
   isNegativeVote,
-  theme,
 }: {
-  readonly isMini: boolean;
   readonly isPositiveVote: boolean;
   readonly isNegativeVote: boolean;
-  readonly theme: SliderTheme;
 }): string => {
-  if (isMini) {
-    return `tw-h-5 tw-w-5 ${theme.thumb.background} tw-border-2 ${theme.thumb.border} tw-shadow-lg after:tw-absolute after:tw-inset-0 after:tw-rounded-full after:tw-transition-all after:tw-duration-200 after:tw-content-[''] ${theme.thumb.glow} ${theme.thumb.hover}`;
-  }
-
   if (isPositiveVote) {
     return "tw-size-[11px] tw-rounded-full tw-bg-emerald-500";
   }
@@ -338,29 +296,23 @@ const getThumbOuterClasses = (
   isNegativeVote: boolean
 ): string => {
   if (isPositiveVote) {
-    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-emerald-500 tw-bg-[#131316]";
+    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-emerald-500 tw-bg-[#131316] tw-transition-shadow";
   }
 
   if (isNegativeVote) {
-    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-rose-500 tw-bg-[#131316]";
+    return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-rose-500 tw-bg-[#131316] tw-transition-shadow";
   }
 
-  return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-[#4C4C55] tw-bg-[#131316]";
+  return "tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-full tw-border-2 tw-border-solid tw-border-[#4C4C55] tw-bg-[#131316] tw-transition-shadow";
 };
 
 const getThumbIdleShadow = ({
-  isMini,
   isPositiveVote,
   isNegativeVote,
 }: {
-  readonly isMini: boolean;
   readonly isPositiveVote: boolean;
   readonly isNegativeVote: boolean;
 }): string => {
-  if (isMini) {
-    return "0 0 0 rgba(255,255,255,0)";
-  }
-
   if (isPositiveVote) {
     return "0 0 0 1px rgba(16,185,129,0.28)";
   }
@@ -373,18 +325,12 @@ const getThumbIdleShadow = ({
 };
 
 const getThumbDraggingShadow = ({
-  isMini,
   isPositiveVote,
   isNegativeVote,
 }: {
-  readonly isMini: boolean;
   readonly isPositiveVote: boolean;
   readonly isNegativeVote: boolean;
 }): string => {
-  if (isMini) {
-    return "0 0 15px rgba(255,255,255,0.2)";
-  }
-
   if (isPositiveVote) {
     return "0 0 0 3px rgba(16,185,129,0.22)";
   }
@@ -466,53 +412,42 @@ const getShowZeroScaleMarker = ({
 
 const getSliderVisualState = ({
   isMini,
-  theme,
   voteState,
   minValue,
   maxValue,
 }: {
   readonly isMini: boolean;
-  readonly theme: SliderTheme;
   readonly voteState: SliderVoteState;
   readonly minValue: number;
   readonly maxValue: number;
 }): SliderVisualState => ({
-  trackClasses: getTrackClasses(isMini, theme),
+  trackClasses: getTrackClasses(isMini),
   progressClasses: getProgressClasses({
-    isMini,
     isPositiveVote: voteState.isPositiveVote,
     isNegativeVote: voteState.isNegativeVote,
-    theme,
   }),
   tooltipClasses: getTooltipClasses({
     isMini,
     isPositiveVote: voteState.isPositiveVote,
     isNegativeVote: voteState.isNegativeVote,
-    theme,
   }),
   tooltipArrowClasses: getTooltipArrowClasses({
-    isMini,
     isPositiveVote: voteState.isPositiveVote,
     isNegativeVote: voteState.isNegativeVote,
-    theme,
   }),
   thumbClasses: getThumbClasses({
-    isMini,
     isPositiveVote: voteState.isPositiveVote,
     isNegativeVote: voteState.isNegativeVote,
-    theme,
   }),
   thumbOuterClasses: getThumbOuterClasses(
     voteState.isPositiveVote,
     voteState.isNegativeVote
   ),
   thumbIdleShadow: getThumbIdleShadow({
-    isMini,
     isPositiveVote: voteState.isPositiveVote,
     isNegativeVote: voteState.isNegativeVote,
   }),
   thumbDraggingShadow: getThumbDraggingShadow({
-    isMini,
     isPositiveVote: voteState.isPositiveVote,
     isNegativeVote: voteState.isNegativeVote,
   }),
@@ -531,20 +466,22 @@ const getThumbContainerScale = (isDragging: boolean): number => {
   return 1;
 };
 
+const getThumbScale = (currentPercentage: number): number => {
+  return 0.95 + (currentPercentage / 100) * 0.1;
+};
+
 export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
   onValueAccepted,
   minValue,
   maxValue,
-  rank = null,
   label,
   size = SingleWaveDropVoteSize.NORMAL,
 }: WaveDropVoteSliderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const isMini = size === SingleWaveDropVoteSize.MINI;
   const geometry = getSliderGeometry(isMini);
-  const theme = getSliderTheme(rank);
 
   const getAcceptedVoteValue = (newValue: number) => {
     const transformedValue = transformFromLog(newValue, minValue, maxValue);
@@ -562,7 +499,6 @@ export default function WaveDropVoteSlider({
   const voteState = getSliderVoteState(voteValue);
   const visualState = getSliderVisualState({
     isMini,
-    theme,
     voteState,
     minValue,
     maxValue,
@@ -574,13 +510,7 @@ export default function WaveDropVoteSlider({
     isMini,
   });
 
-  const x = useMotionValue(rangeState.currentPercentage);
-  const xSmooth = useSpring(x, { damping: 20, stiffness: 300 });
-  const scale = useTransform(xSmooth, [0, 100], [0.95, 1.05]);
-
-  useEffect(() => {
-    x.set(rangeState.currentPercentage);
-  }, [rangeState.currentPercentage, x]);
+  const thumbScale = getThumbScale(rangeState.currentPercentage);
 
   return (
     <LazyMotion features={domAnimation}>
@@ -691,7 +621,7 @@ export default function WaveDropVoteSlider({
               <SliderThumb
                 isMini={isMini}
                 isDragging={isDragging}
-                scale={scale}
+                scale={thumbScale}
                 numericVoteValue={voteState.numericVoteValue}
                 label={label}
                 visualState={visualState}

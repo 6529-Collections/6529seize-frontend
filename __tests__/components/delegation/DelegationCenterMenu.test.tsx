@@ -1,6 +1,5 @@
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -68,30 +67,5 @@ describe("DelegationCenterMenu links", () => {
     expect(props.setActiveSection).toHaveBeenCalledWith(
       DelegationCenterSection.CHECKER
     );
-  });
-});
-
-describe("DelegationToast", () => {
-  it("closes when clicking outside or close button", async () => {
-    const mod = await import("@/components/delegation/DelegationCenterMenu");
-    const DelegationToast = mod.DelegationToast;
-    const setShow = jest.fn();
-    const ref = React.createRef<HTMLDivElement>();
-    const { container } = render(
-      <DelegationToast
-        toastRef={ref}
-        toast={{ title: "t" }}
-        showToast={true}
-        setShowToast={setShow}
-      />
-    );
-    fireEvent.click(container.firstChild!);
-    expect(setShow).toHaveBeenCalledWith(false);
-    setShow.mockClear();
-    const btn = container.querySelector("button");
-    if (btn) {
-      fireEvent.click(btn);
-      expect(setShow).toHaveBeenCalledWith(false);
-    }
   });
 });

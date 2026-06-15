@@ -73,7 +73,7 @@ describe("useDropSignature", () => {
     });
     expect(res).toEqual({ success: false });
     expect(mockSetToast).toHaveBeenCalledWith({
-      message: "Signature rejected",
+      message: "Signature request was canceled in your wallet.",
       type: "error",
     });
   });

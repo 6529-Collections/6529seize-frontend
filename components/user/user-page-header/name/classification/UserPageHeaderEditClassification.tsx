@@ -7,6 +7,7 @@ import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -57,8 +58,10 @@ export default function UserPageHeaderEditClassification({
     },
     onError: (error: unknown) => {
       setToast({
-        message: error as string,
         type: "error",
+        title: "Couldn't update this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -75,7 +78,7 @@ export default function UserPageHeaderEditClassification({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in to save settings",
+        message: "Log in to save settings.",
         type: "error",
       });
       return;

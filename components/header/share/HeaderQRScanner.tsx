@@ -93,7 +93,7 @@ export default function HeaderQRScanner({
         handleQRCode(result.ScanResult);
       } else {
         setToast({
-          message: "Invalid QR code",
+          message: "This QR code is not valid.",
           type: "error",
         });
       }
@@ -149,7 +149,7 @@ export default function HeaderQRScanner({
           default:
             console.warn("Unknown Deep Link Scope", scope);
             setToast({
-              message: "Invalid QR code",
+              message: "This QR code is not valid.",
               type: "error",
             });
             return;
@@ -163,14 +163,14 @@ export default function HeaderQRScanner({
         router.push(routerPath);
       } else {
         setToast({
-          message: "Invalid QR code",
+          message: "This QR code is not valid.",
           type: "error",
         });
       }
     } catch (error) {
       console.error("Error parsing QR code:", error);
       setToast({
-        message: "Invalid QR code",
+        message: "This QR code is not valid.",
         type: "error",
       });
     }

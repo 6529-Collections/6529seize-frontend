@@ -5,6 +5,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
@@ -56,20 +57,20 @@ export default function UserPageSubscriptionsEditionPreference(
       });
       const responseAllEditions = response.subscribe_all_editions;
       setIsAllEditions(responseAllEditions);
-      const message = `Edition Preference set to ${
-        responseAllEditions ? `All eligible editions` : `One edition`
-      }`;
       setToast({
-        message: message,
         type: "success",
+        title: "Edition preference updated.",
+        description: responseAllEditions
+          ? "All eligible editions are included."
+          : "One edition is included.",
       });
       props.refresh();
     } catch (e: any) {
-      const errorMessage =
-        e?.message || String(e) || "Failed to set edition preference";
       setToast({
-        message: errorMessage,
         type: "error",
+        title: "Couldn't update edition preference.",
+        description: "Please try again.",
+        details: getToastErrorDetails(e, "Could not set edition preference."),
       });
     } finally {
       setIsUpdatingAllEditions(false);

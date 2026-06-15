@@ -2,12 +2,13 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
+import { showAppToast } from "@/components/utils/toast/AppToast";
 import { DelegationCenterSection } from "@/types/enums";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { Col, Container, Row, Toast, ToastContainer } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
@@ -46,23 +47,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     chainId: 1,
   });
 
-  const toastRef = useRef<HTMLDivElement>(null);
-  const [toast, setToast] = useState<
-    { title: string; message: string } | undefined
-  >(undefined);
-  const [showToast, setShowToast] = useState(false);
-
-  useEffect(() => {
-    if (!showToast) {
-      setToast(undefined);
-    }
-  }, [showToast]);
-
-  useEffect(() => {
-    if (toast) {
-      setShowToast(true);
-    }
-  }, [toast]);
+  const onSetToast = (toast: AppToastInput) => {
+    showAppToast(toast);
+  };
 
   function printContent() {
     switch (props.section) {
@@ -84,12 +71,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={(toast: any) => {
-              setToast({
-                title: toast.title,
-                message: toast.message,
-              });
-            }}
+            onSetToast={onSetToast}
           />
         );
       case DelegationCenterSection.REGISTER_SUB_DELEGATION:
@@ -100,12 +82,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={(toast: any) => {
-              setToast({
-                title: toast.title,
-                message: toast.message,
-              });
-            }}
+            onSetToast={onSetToast}
           />
         );
       case DelegationCenterSection.REGISTER_CONSOLIDATION:
@@ -116,12 +93,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={(toast: any) => {
-              setToast({
-                title: toast.title,
-                message: toast.message,
-              });
-            }}
+            onSetToast={onSetToast}
           />
         );
       case DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS:
@@ -132,12 +104,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
             onHide={() => {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
-            onSetToast={(toast: any) => {
-              setToast({
-                title: toast.title,
-                message: toast.message,
-              });
-            }}
+            onSetToast={onSetToast}
             new_primary_address_query={props.address_query}
             setNewPrimaryAddressQuery={props.setAddressQuery}
           />
@@ -400,18 +367,9 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           </Container>
         </Col>
       </Row>
-      {toast && (
-        <DelegationToast
-          toastRef={toastRef}
-          toast={toast}
-          showToast={showToast}
-          setShowToast={setShowToast}
-        />
-      )}
     </Container>
   );
 }
-
 function EtherscanLink() {
   return (
     <Link
@@ -453,44 +411,5 @@ function GithubLink() {
       />
       <span>Github</span>
     </Link>
-  );
-}
-
-export function DelegationToast(
-  props: Readonly<{
-    toastRef: React.RefObject<HTMLDivElement | null>;
-    toast: { title: string; message?: string | undefined };
-    showToast: boolean;
-    setShowToast: (show: boolean) => void;
-  }>
-) {
-  return (
-    <div
-      className={styles["toastWrapper"]}
-      onClick={(e) => {
-        if (!props.toastRef.current?.contains(e.target as Node)) {
-          props.setShowToast(false);
-        }
-      }}
-    >
-      <ToastContainer
-        position={"top-center"}
-        className={styles["toast"]}
-        ref={props.toastRef}
-      >
-        <Toast onClose={() => props.setShowToast(false)} show={props.showToast}>
-          <Toast.Header>
-            <span className="me-auto">{props.toast.title}</span>
-          </Toast.Header>
-          {props.toast.message && (
-            <Toast.Body
-              dangerouslySetInnerHTML={{
-                __html: props.toast.message,
-              }}
-            ></Toast.Body>
-          )}
-        </Toast>
-      </ToastContainer>
-    </div>
   );
 }

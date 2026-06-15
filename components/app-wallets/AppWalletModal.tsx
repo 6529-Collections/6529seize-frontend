@@ -79,12 +79,13 @@ export function CreateAppWalletModal(
     const success = await createAppWallet(walletName, walletPass);
     if (!success) {
       setToast({
-        message: `Error creating wallet`,
+        message: `Couldn't create this wallet. Check the details and try again.`,
         type: "error",
       });
     } else {
       setToast({
-        message: `Wallet '${walletName}' created successfully - Download Recovery File immediately!`,
+        title: "Wallet created.",
+        description: `Download the recovery file now to keep access to ${walletName}.`,
         type: "success",
       });
       handleHide(true);
@@ -117,11 +118,11 @@ export function CreateAppWalletModal(
     );
     if (!success) {
       setToast({
-        message: `Error importing wallet`,
+        message: `Couldn't import this wallet. Check the file and try again.`,
         type: "error",
       });
     } else {
-      setToast({ message: "Wallet imported successfully!", type: "success" });
+      setToast({ message: "Wallet imported.", type: "success" });
       handleHide(true);
     }
     setIsAdding(false);

@@ -11,6 +11,7 @@ import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
@@ -142,13 +143,11 @@ export default function UserPageHeaderClient({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
-      const errorMessage =
-        error instanceof Error
-          ? `Failed to create direct message: ${error.message}`
-          : "Failed to create direct message. Please try again.";
       setToast({
-        message: errorMessage,
         type: "error",
+        title: "Couldn't create this direct message.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setDirectMessageLoading(false);
