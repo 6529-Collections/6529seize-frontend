@@ -5,6 +5,8 @@ import { useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import UserPageBrainSidebarWaveItem from "./UserPageBrainSidebarWaveItem";
 
+const DEFAULT_VISIBLE_CREATED_WAVES = 3;
+
 interface UserPageBrainSidebarCreatedProps {
   readonly identity: string;
   readonly waves: ApiWave[];
@@ -18,8 +20,13 @@ export default function UserPageBrainSidebarCreated({
 }: UserPageBrainSidebarCreatedProps) {
   const [expandedIdentity, setExpandedIdentity] = useState<string | null>(null);
   const showAllWaves = expandedIdentity === identity;
-  const visibleWaves = showAllWaves ? waves : waves.slice(0, 1);
-  const remainingWavesCount = Math.max(waves.length - 1, 0);
+  const visibleWaves = showAllWaves
+    ? waves
+    : waves.slice(0, DEFAULT_VISIBLE_CREATED_WAVES);
+  const remainingWavesCount = Math.max(
+    waves.length - DEFAULT_VISIBLE_CREATED_WAVES,
+    0
+  );
   const showMoreLabel =
     remainingWavesCount === 1
       ? "Show 1 more"
@@ -59,7 +66,7 @@ export default function UserPageBrainSidebarCreated({
             {visibleWaves.map((wave) => (
               <UserPageBrainSidebarWaveItem key={wave.id} wave={wave} />
             ))}
-            {waves.length > 1 && (
+            {waves.length > DEFAULT_VISIBLE_CREATED_WAVES && (
               <button
                 type="button"
                 onClick={() =>
