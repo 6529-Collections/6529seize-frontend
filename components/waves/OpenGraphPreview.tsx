@@ -7,6 +7,7 @@ import { removeBaseEndpoint } from "@/helpers/Helpers";
 import type {
   GithubPreviewEnvelope,
   GithubPreviewResponse,
+  GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import GithubPreviewStatusBadge from "./GithubPreviewStatusBadge";
@@ -238,7 +239,17 @@ function isGithubPreviewResponse(
   }
 
   const type = (value as { readonly type?: unknown }).type;
-  return type === "github.issue" || type === "github.pull_request";
+  return (
+    type === "github.issue" ||
+    type === "github.pull_request" ||
+    type === "github.repository" ||
+    type === "github.file" ||
+    type === "github.directory" ||
+    type === "github.commit" ||
+    type === "github.release" ||
+    type === "github.actions" ||
+    type === "github.discussion"
+  );
 }
 
 function extractGithubPreview(
@@ -247,6 +258,14 @@ function extractGithubPreview(
   const githubPreview = (preview as GithubPreviewEnvelope | null | undefined)
     ?.githubPreview;
   return isGithubPreviewResponse(githubPreview) ? githubPreview : null;
+}
+
+function isGithubStatusPreviewResponse(
+  preview: GithubPreviewResponse | null
+): preview is GithubStatusPreviewResponse {
+  return (
+    preview?.type === "github.issue" || preview?.type === "github.pull_request"
+  );
 }
 
 function getRelativeHref(href: string): string | undefined {
@@ -483,11 +502,13 @@ export default function OpenGraphPreview({
           className="tw-relative tw-block tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
           data-testid="og-preview-card"
         >
-          <GithubPreviewStatusBadge
-            href={href}
-            initialPreview={githubPreview}
-            compact
-          />
+          {isGithubStatusPreviewResponse(githubPreview) && (
+            <GithubPreviewStatusBadge
+              href={href}
+              initialPreview={githubPreview}
+              compact
+            />
+          )}
           {imageUrl && (
             <Image
               src={imageUrl}
@@ -523,10 +544,12 @@ export default function OpenGraphPreview({
           className="tw-relative tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
           data-testid="og-preview-card"
         >
-          <GithubPreviewStatusBadge
-            href={href}
-            initialPreview={githubPreview}
-          />
+          {isGithubStatusPreviewResponse(githubPreview) && (
+            <GithubPreviewStatusBadge
+              href={href}
+              initialPreview={githubPreview}
+            />
+          )}
           <div
             className={
               imageUrl
