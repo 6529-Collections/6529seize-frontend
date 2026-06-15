@@ -1,27 +1,16 @@
 import { renderHook } from "@testing-library/react";
 import useWaveOutcomeTooltipInteraction from "@/components/waves/outcome/useWaveOutcomeTooltipInteraction";
 import useInteractionMode from "@/src/interaction/useInteractionMode";
-import type { InteractionMode } from "@/src/interaction/useInteractionMode";
+import { createInteractionMode } from "@/__tests__/utils/interactionMode";
 
 jest.mock("@/src/interaction/useInteractionMode");
 
 const useInteractionModeMock = useInteractionMode as jest.Mock;
 
-const DEFAULT_INTERACTION_MODE: InteractionMode = {
-  canHover: false,
-  hasFinePointer: false,
-  hasCoarsePointer: false,
-  hoverNone: false,
-  lastPointerType: null,
-  enableHoverUI: false,
-  enableLongPress: false,
-};
-
-function setInteractionMode(overrides: Partial<InteractionMode> = {}) {
-  useInteractionModeMock.mockReturnValue({
-    ...DEFAULT_INTERACTION_MODE,
-    ...overrides,
-  });
+function setInteractionMode(
+  overrides: Parameters<typeof createInteractionMode>[0] = {}
+) {
+  useInteractionModeMock.mockReturnValue(createInteractionMode(overrides));
 }
 
 describe("useWaveOutcomeTooltipInteraction", () => {

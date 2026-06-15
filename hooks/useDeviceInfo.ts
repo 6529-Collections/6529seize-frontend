@@ -13,7 +13,10 @@ interface DeviceInfo {
 
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
-  const { enableLongPress, hasCoarsePointer } = useInteractionMode();
+  const {
+    enableLongPress: hasTouchScreen,
+    hasCoarsePointer,
+  } = useInteractionMode();
 
   const getInfo = useCallback((): DeviceInfo => {
     if (typeof globalThis === "undefined" || typeof navigator === "undefined") {
@@ -47,11 +50,11 @@ export default function useDeviceInfo(): DeviceInfo {
 
     return {
       isMobileDevice,
-      hasTouchScreen: enableLongPress,
+      hasTouchScreen,
       isApp: isCapacitor,
       isAppleMobile: appleMobile,
     };
-  }, [enableLongPress, hasCoarsePointer, isCapacitor]);
+  }, [hasTouchScreen, hasCoarsePointer, isCapacitor]);
 
   const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
 
