@@ -1,3 +1,5 @@
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
+
 enum AboutEditError {
   HATE_SPEECH = "HATE_SPEECH",
   PERSONAL_INSULTS = "PERSONAL_INSULTS",
@@ -22,24 +24,36 @@ const ERROR_TEXT: {
   };
 } = {
   [AboutEditError.HATE_SPEECH]: {
-    title: "Error: Hate Speech",
-    value:
-      "Your About text was not accepted because our automated checks flagged it for potentially containing hate speech.  We want to keep seize a welcoming place!  We'd appreciate it if you adjusted your text.",
+    title: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.hateSpeech.title"
+    ),
+    value: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.hateSpeech.value"
+    ),
   },
   [AboutEditError.PERSONAL_INSULTS]: {
-    title: "Error: Personal Insults",
-    value:
-      "Your About text was not accepted because our automated checks flagged it for potentially containing a personal insult.  We want to keep seize a welcoming place!.   We'd appreciate it if you adjusted your text.",
+    title: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.personalInsults.title"
+    ),
+    value: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.personalInsults.value"
+    ),
   },
   [AboutEditError.INAPPROPRIATE_LANGUAGE]: {
-    title: "Error: Inappropriate Language",
-    value:
-      "Your About text was not accepted because our automated checks flagged it for potentially containing inappropriate language that may make others uncomfortable.   We want to keep seize a welcoming place!  We'd appreciate it if you adjusted your text.",
+    title: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.inappropriateLanguage.title"
+    ),
+    value: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.inappropriateLanguage.value"
+    ),
   },
   [AboutEditError.DOXXING]: {
-    title: "Error: Doxxing of Another Person",
-    value:
-      "Your About text was not accepted because our automated checks flagged it for potentially doxxing another user of the system.   We have a strong cultural value towards respecting pseudonymity so we'd appreciate if if you adjusted your text.",
+    title: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.doxxing.title"
+    ),
+    value: getUserProfileHeaderMessage(
+      "user.profileHeader.aboutEdit.errors.doxxing.value"
+    ),
   },
 };
 
@@ -64,20 +78,29 @@ export default function UserPageHeaderAboutEditError({
   const errorText =
     errorType === AboutEditError.UNKNOWN
       ? {
-          title: "Unknown Error",
+          title: getUserProfileHeaderMessage(
+            "user.profileHeader.aboutEdit.errors.unknown.title"
+          ),
           value: msg,
         }
       : ERROR_TEXT[errorType];
 
   return (
     <div>
-      <div className="tw-relative tw-inline-flex tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/5 tw-p-4 lg:tw-max-w-xl">
+      <div
+        role="alert"
+        className="tw-relative tw-inline-flex tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-red/30 tw-bg-red/5 tw-p-4 lg:tw-max-w-xl"
+      >
         <div className="tw-absolute tw-right-2 tw-top-2">
           <button
             onClick={closeError}
             type="button"
-            title="Close"
-            aria-label="Close"
+            title={getUserProfileHeaderMessage(
+              "user.profileHeader.aboutEdit.errors.close"
+            )}
+            aria-label={getUserProfileHeaderMessage(
+              "user.profileHeader.aboutEdit.errors.close"
+            )}
             className="tw-group tw-inline-flex tw-rounded-md tw-border-none tw-bg-transparent focus:tw-outline-none"
           >
             <svg
