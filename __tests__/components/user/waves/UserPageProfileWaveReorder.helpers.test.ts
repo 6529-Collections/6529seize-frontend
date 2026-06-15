@@ -1,61 +1,34 @@
 import { getProfileWaveReorderGate } from "@/components/user/waves/userPageProfileWaveReorder.helpers";
 
-const gate = (
-  overrides: Partial<Parameters<typeof getProfileWaveReorderGate>[0]> = {}
-) =>
-  getProfileWaveReorderGate({
-    canClear: true,
-    canManageCuration: true,
-    dropCount: 2,
-    hasProfileCuration: true,
-    isDropsFetching: false,
-    isPermissionLoading: false,
-    ...overrides,
-  });
+type GateInput = Parameters<typeof getProfileWaveReorderGate>[0];
+
+const baseGate: GateInput = {
+  canClear: true,
+  canManageCuration: true,
+  dropCount: 2,
+  hasProfileCuration: true,
+  isDropsFetching: false,
+  isPermissionLoading: false,
+};
+
+const closed = { canReorder: false, isLoading: false, shouldShowButton: false };
+const loading = { canReorder: false, isLoading: true, shouldShowButton: true };
 
 describe("userPageProfileWaveReorder helpers", () => {
-  it("allows reorder only after curation management is confirmed for multiple drops", () => {
-    expect(gate()).toEqual({
-      canReorder: true,
-      isLoading: false,
-      shouldShowButton: true,
-    });
-
-    expect(gate({ canManageCuration: false })).toEqual({
-      canReorder: false,
-      isLoading: false,
-      shouldShowButton: false,
-    });
-
-    expect(gate({ dropCount: 1 })).toEqual({
-      canReorder: false,
-      isLoading: false,
-      shouldShowButton: false,
-    });
-  });
-
-  it("shows a disabled loading gate while drops or permission are unresolved", () => {
-    expect(
-      gate({
-        canManageCuration: false,
-        dropCount: 0,
-        isDropsFetching: true,
-      })
-    ).toEqual({
-      canReorder: false,
-      isLoading: true,
-      shouldShowButton: true,
-    });
-
-    expect(
-      gate({
-        canManageCuration: false,
-        isPermissionLoading: true,
-      })
-    ).toEqual({
-      canReorder: false,
-      isLoading: true,
-      shouldShowButton: true,
-    });
+  it.each([
+    [{}, { canReorder: true, isLoading: false, shouldShowButton: true }],
+    [{ canManageCuration: false }, closed],
+    [{ dropCount: 1 }, closed],
+    [
+      { canManageCuration: false, dropCount: 0, isDropsFetching: true },
+      loading,
+    ],
+    [{ canManageCuration: false, isPermissionLoading: true }, loading],
+  ] satisfies Array<
+    [Partial<GateInput>, ReturnType<typeof getProfileWaveReorderGate>]
+  >)("returns the expected reorder gate for %o", (overrides, expected) => {
+    expect(getProfileWaveReorderGate({ ...baseGate, ...overrides })).toEqual(
+      expected
+    );
   });
 });
