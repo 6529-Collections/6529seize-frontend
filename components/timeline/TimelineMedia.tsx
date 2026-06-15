@@ -1,7 +1,6 @@
 import styles from "./Timeline.module.scss";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import Image from "next/image";
 
 interface Props {
   type: MediaType;
@@ -44,14 +43,11 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
     );
   }
   return (
-    <Image
+    // Native img is intentional: timeline media hosts come from arbitrary NFT metadata.
+    <img
       src={props.url}
       className={styles["timelineMediaImage"]}
       alt={t(locale, "timeline.media.imageAlt", { label })}
-      width={600}
-      height={600}
-      sizes="(max-width: 768px) 100vw, 50vw"
-      unoptimized
     />
   );
 }

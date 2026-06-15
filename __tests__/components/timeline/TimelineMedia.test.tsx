@@ -1,26 +1,30 @@
 import { render, screen } from "@testing-library/react";
 import TimelineMedia, { MediaType } from "@/components/timeline/TimelineMedia";
 import { t } from "@/i18n/messages";
-import { createElement } from "react";
-
-jest.mock("next/image", () => ({
-  __esModule: true,
-  default: (props: any) => createElement("img", props),
-}));
 
 jest.mock("@/components/timeline/Timeline.module.scss", () => ({
   timelineMediaImage: "media",
 }));
 
 describe("TimelineMedia", () => {
-  it("renders image element with accessible preview text", () => {
+  it("renders native image with accessible preview text", () => {
     render(
-      <TimelineMedia url="img.png" type={MediaType.IMAGE} label="Added Image" />
+      <TimelineMedia
+        url="https://arbitrary.example/media/non-square.png"
+        type={MediaType.IMAGE}
+        label="Added Image"
+      />
     );
     const img = screen.getByRole("img", {
       name: t("en-US", "timeline.media.imageAlt", { label: "Added Image" }),
     });
-    expect(img).toHaveAttribute("src", "img.png");
+    expect(img.tagName).toBe("IMG");
+    expect(img).toHaveAttribute(
+      "src",
+      "https://arbitrary.example/media/non-square.png"
+    );
+    expect(img).not.toHaveAttribute("width");
+    expect(img).not.toHaveAttribute("height");
     expect(img).toHaveClass("media");
   });
 
