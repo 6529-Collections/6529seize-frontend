@@ -23,7 +23,7 @@ export default function CreateWaveInlineGroupActions({
   readonly onUseExistingGroup: () => void;
 }) {
   return (
-    <div className="tw-flex tw-flex-wrap tw-gap-1.5 md:tw-absolute md:tw-right-0 md:tw-top-0 md:tw-justify-end">
+    <div className="tw-flex tw-flex-wrap tw-gap-1.5 md:tw-shrink-0 md:tw-justify-end">
       <ActionButton
         icon={
           <UserPlusIcon

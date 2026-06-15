@@ -109,10 +109,8 @@ export default function CreateWaveGroupInlinePanel({
   };
 
   useClickAway(panelRef, (event) => {
-    if (
-      hasBuilderStateInProgress ||
-      isKnownPortaledChildTarget(event.target)
-    ) {
+    // Outside clicks must never discard an active draft or portaled child UI.
+    if (hasBuilderStateInProgress || isKnownPortaledChildTarget(event.target)) {
       return;
     }
 
@@ -299,16 +297,18 @@ export default function CreateWaveGroupInlinePanel({
       }`}
     >
       <div className="tw-relative tw-flex tw-flex-col tw-gap-5">
-        <CreateWaveInlineGroupHeader currentStateLabel={currentStateLabel} />
-        <CreateWaveInlineGroupActions
-          disabled={disabled}
-          identityActive={isIdentityPanel}
-          ruleActive={isRulePanel}
-          searchActive={isSearchPanel}
-          onAddIdentity={() => togglePanel(PANEL_IDENTITY, isIdentityPanel)}
-          onAddRule={() => togglePanel(PANEL_RULE_LIST, isRulePanel)}
-          onUseExistingGroup={() => togglePanel(PANEL_SEARCH, isSearchPanel)}
-        />
+        <div className="tw-flex tw-flex-col tw-gap-4 md:tw-flex-row md:tw-items-start md:tw-justify-between">
+          <CreateWaveInlineGroupHeader currentStateLabel={currentStateLabel} />
+          <CreateWaveInlineGroupActions
+            disabled={disabled}
+            identityActive={isIdentityPanel}
+            ruleActive={isRulePanel}
+            searchActive={isSearchPanel}
+            onAddIdentity={() => togglePanel(PANEL_IDENTITY, isIdentityPanel)}
+            onAddRule={() => togglePanel(PANEL_RULE_LIST, isRulePanel)}
+            onUseExistingGroup={() => togglePanel(PANEL_SEARCH, isSearchPanel)}
+          />
+        </div>
 
         {displayedBuilder.panel === PANEL_IDENTITY &&
           renderExpandedPanel(

@@ -4,7 +4,7 @@ export default function CreateWaveInlineGroupHeader({
   readonly currentStateLabel: string;
 }) {
   return (
-    <div className="tw-min-w-0 md:tw-pr-[31rem]">
+    <div className="tw-min-w-0">
       <p className="tw-mb-1 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
         Current state
       </p>
