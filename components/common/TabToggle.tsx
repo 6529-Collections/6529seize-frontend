@@ -1,8 +1,10 @@
 import React from "react";
+import { TabCountBadge } from "./TabCountBadge";
 
 interface TabOption {
   readonly key: string;
   readonly label: string;
+  readonly badgeCount?: number | null | undefined;
   readonly leadingIcon?: React.ReactNode | undefined;
   readonly hasIndicator?: boolean | undefined;
   readonly panelId: string;
@@ -45,6 +47,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
       <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
         {option.leadingIcon}
         <span className="tw-leading-5">{option.label}</span>
+        <TabCountBadge count={option.badgeCount} />
       </span>
       {option.hasIndicator && (
         <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>

@@ -17,9 +17,15 @@ jest.mock("@/components/waves/header/WaveHeaderFollow", () => ({
     MEDIUM: "MEDIUM",
   },
 }));
-jest.mock("@/components/waves/header/options/WaveHeaderOptions", () => () => (
-  <div data-testid="wave-header-options" />
-));
+jest.mock(
+  "@/components/waves/header/options/WaveHeaderOptions",
+  () => (props: any) => (
+    <div
+      data-testid="wave-header-options"
+      data-show-owner={String(props.showOwnerActions)}
+    />
+  )
+);
 jest.mock("@/components/waves/header/name/WaveHeaderName", () => () => (
   <div data-testid="name" />
 ));
@@ -99,6 +105,78 @@ describe("WaveHeader", () => {
       chat: { scope: { group: { is_direct_message: true } } },
     });
     expect(screen.queryByLabelText("Edit wave picture")).toBeNull();
+  });
+
+  it("shows pin action for root waves", () => {
+    wrapper({ ...baseWave, subscribed_actions: ["drop_created"] });
+
+    expect(screen.getByTestId("wave-header-pin")).toBeInTheDocument();
+  });
+
+  it("hides pin action for subwaves", () => {
+    wrapper(
+      {
+        ...baseWave,
+        parent_wave: { id: "parent-wave" },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
+    expect(screen.queryByTestId("wave-header-pin")).toBeNull();
+  });
+
+  it("only mounts create-subwave options for eligible top-level waves", () => {
+    wrapper(
+      {
+        ...baseWave,
+        wave: {
+          ...baseWave.wave,
+          authenticated_user_eligible_for_admin: true,
+        },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
+    expect(screen.getByTestId("wave-header-options")).toHaveAttribute(
+      "data-show-owner",
+      "false"
+    );
+  });
+
+  it("does not mount create-subwave options for eligible subwaves", () => {
+    wrapper(
+      {
+        ...baseWave,
+        parent_wave: { id: "parent-wave" },
+        wave: {
+          ...baseWave.wave,
+          authenticated_user_eligible_for_admin: true,
+        },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
+    expect(screen.queryByTestId("wave-header-options")).toBeNull();
+  });
+
+  it("shows owner options for subwaves without showing pin", () => {
+    wrapper(
+      {
+        ...baseWave,
+        parent_wave: { id: "parent-wave" },
+      },
+      undefined,
+      { connectedProfile: { handle: "a" } }
+    );
+
+    expect(screen.getByTestId("wave-header-options")).toHaveAttribute(
+      "data-show-owner",
+      "true"
+    );
+    expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 
   it("places owner options next to the pin action", () => {

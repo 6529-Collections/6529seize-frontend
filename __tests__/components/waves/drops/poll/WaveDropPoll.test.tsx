@@ -1,4 +1,5 @@
 import WaveDropPoll from "@/components/waves/drops/poll/WaveDropPoll";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
@@ -35,6 +36,10 @@ jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
   ),
 }));
 
+jest.mock("@/components/ipfs/IPFSContext", () => ({
+  resolveIpfsUrlSync: (url: string) => url,
+}));
+
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
   voteDropPollV2: jest.fn(),
   fetchDropPollOptionVotersV2: jest.fn(),
@@ -64,6 +69,7 @@ const createPoll = (overrides: Partial<ApiDropPoll> = {}): ApiDropPoll => ({
   ],
   voted: [],
   multichoice: false,
+  anonymous: false,
   closing_time: Date.now() + 60_000,
   is_open: true,
   ...overrides,
@@ -96,6 +102,7 @@ const renderPoll = (poll: ApiDropPoll) => {
 
   return {
     ...renderResult,
+    queryClient,
     rerenderPoll: (nextPoll: ApiDropPoll) =>
       renderResult.rerender(
         <QueryClientProvider client={queryClient}>
@@ -121,12 +128,12 @@ describe("WaveDropPoll", () => {
     renderPoll(createPoll());
 
     expect(screen.getByLabelText("First")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Results" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Submit vote" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Results" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Submit vote" })).toBeNull();
   });
 
-  it("shows results before voting and expands voters for an option", async () => {
-    fetchDropPollOptionVotersV2Mock.mockResolvedValueOnce({
+  it("shows results without fetching voters until an option expands", async () => {
+    fetchDropPollOptionVotersV2Mock.mockResolvedValue({
       data: [
         {
           id: "identity-1",
@@ -135,6 +142,7 @@ describe("WaveDropPoll", () => {
           level: 1,
           classification: ApiProfileClassification.Pseudonym,
           badges: {},
+          pfp: "https://example.com/alice.png",
         },
       ],
       count: 1,
@@ -142,18 +150,58 @@ describe("WaveDropPoll", () => {
       next: false,
     });
 
-    renderPoll(createPoll());
+    renderPoll(
+      createPoll({
+        is_open: false,
+        closing_time: Date.now() - 60_000,
+      })
+    );
 
-    await userEvent.click(screen.getByRole("button", { name: "Results" }));
-    await userEvent.click(screen.getByRole("button", { name: /First/ }));
-
-    expect(fetchDropPollOptionVotersV2Mock).toHaveBeenCalledWith({
-      dropId: "drop-1",
-      optionNo: 1,
-      page: 1,
-      pageSize: 20,
+    const firstOption = screen.getByRole("button", {
+      name: /View voters for First/,
     });
+
+    expect(screen.getByText("2 votes")).toBeInTheDocument();
+    expect(screen.getByText("67%")).toBeInTheDocument();
+    expect(screen.getByText("1 vote")).toBeInTheDocument();
+    expect(screen.getByText("33%")).toBeInTheDocument();
+    expect(fetchDropPollOptionVotersV2Mock).not.toHaveBeenCalled();
+
+    await userEvent.hover(firstOption);
+    firstOption.focus();
+
+    expect(fetchDropPollOptionVotersV2Mock).not.toHaveBeenCalled();
+
+    await userEvent.click(firstOption);
+
+    expect(fetchDropPollOptionVotersV2Mock).toHaveBeenCalledTimes(1);
+    expect(fetchDropPollOptionVotersV2Mock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dropId: "drop-1",
+        optionNo: 1,
+        page: 1,
+        pageSize: 20,
+      })
+    );
     expect(await screen.findByText("alice")).toBeInTheDocument();
+    expect(await screen.findByAltText("alice's avatar")).toBeInTheDocument();
+  });
+
+  it("does not expose voter expansion for anonymous polls", () => {
+    renderPoll(
+      createPoll({
+        anonymous: true,
+        is_open: false,
+        closing_time: Date.now() - 60_000,
+      })
+    );
+
+    expect(screen.getByText("2 votes")).toBeInTheDocument();
+    expect(screen.getByText("67%")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /View voters for First/ })
+    ).not.toBeInTheDocument();
+    expect(fetchDropPollOptionVotersV2Mock).not.toHaveBeenCalled();
   });
 
   it("submits a vote and switches to results", async () => {
@@ -161,16 +209,19 @@ describe("WaveDropPoll", () => {
     const updatedPoll = createPoll({ voted: [2] });
     voteDropPollV2Mock.mockResolvedValueOnce(createDrop(updatedPoll));
 
-    renderPoll(poll);
+    const { queryClient } = renderPoll(poll);
+    const invalidateQueriesSpy = jest.spyOn(queryClient, "invalidateQueries");
 
     await userEvent.click(screen.getByLabelText("Second"));
-    await userEvent.click(screen.getByRole("button", { name: "Submit vote" }));
 
     await waitFor(() => {
       expect(voteDropPollV2Mock).toHaveBeenCalledWith({
         drop: createDrop(poll),
         options: [2],
       });
+    });
+    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_POLLS],
     });
     expect(
       await screen.findByRole("button", { name: "Change vote" })

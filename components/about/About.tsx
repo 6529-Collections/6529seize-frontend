@@ -3,7 +3,7 @@
 import { useSetTitle } from "@/contexts/TitleContext";
 import useCapacitor from "@/hooks/useCapacitor";
 import { AboutSection } from "@/types/enums";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 // Section components
@@ -28,16 +28,12 @@ import AboutPrimaryAddress from "./AboutPrimaryAddress";
 import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
+import AboutTech from "./tech/AboutTech";
 import AboutTermsOfService from "./AboutTermsOfService";
 
 export default function About({ section }: { readonly section: AboutSection }) {
-  const router = useRouter();
   const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
   useSetTitle(`${sectionTitle} | About`);
-
-  const setNewSection = (newSection: AboutSection) => {
-    router.push(`/about/${newSection}`);
-  };
 
   const renderSection = () => {
     switch (section) {
@@ -57,6 +53,8 @@ export default function About({ section }: { readonly section: AboutSection }) {
         return <AboutContactUs />;
       case AboutSection.RELEASE_NOTES:
         return <AboutReleaseNotes />;
+      case AboutSection.TECH:
+        return <AboutTech />;
       case AboutSection.TERMS_OF_SERVICE:
         return <AboutTermsOfService />;
       case AboutSection.PRIVACY_POLICY:
@@ -94,13 +92,13 @@ export default function About({ section }: { readonly section: AboutSection }) {
         <Col>
           <div className="tw-flex tw-flex-col md:tw-flex-row">
             <div className="tw-hidden tw-w-1/5 md:tw-block">
-              <AboutMenu currentSection={section} setSection={setNewSection} />
+              <AboutMenu currentSection={section} />
             </div>
             <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
           </div>
 
           <div className="tw-mt-6 tw-block tw-text-center md:tw-hidden">
-            <AboutMenu currentSection={section} setSection={setNewSection} />
+            <AboutMenu currentSection={section} />
           </div>
         </Col>
       </Row>
@@ -108,12 +106,10 @@ export default function About({ section }: { readonly section: AboutSection }) {
   );
 }
 
-function AboutMenu({
+export function AboutMenu({
   currentSection,
-  setSection,
 }: {
   readonly currentSection: AboutSection | undefined;
-  readonly setSection: (section: AboutSection) => void;
 }) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -124,27 +120,23 @@ function AboutMenu({
       <MenuItem
         section={AboutSection.MEMES}
         title="The Memes"
-        setSection={setSection}
         currentSection={currentSection}
       />
       {(!capacitor.isIos || country === "US") && (
         <MenuItem
           section={AboutSection.SUBSCRIPTIONS}
           title="Subscriptions"
-          setSection={setSection}
           currentSection={currentSection}
         />
       )}
       <MenuItem
         section={AboutSection.MEME_LAB}
         title="Meme Lab"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.GRADIENTS}
         title="Gradient"
-        setSection={setSection}
         currentSection={currentSection}
       />
 
@@ -153,19 +145,16 @@ function AboutMenu({
       <MenuItem
         section={AboutSection.GDRC1}
         title="GDRC1"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.NFT_DELEGATION}
         title="NFT Delegation"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.PRIMARY_ADDRESS}
         title="Primary Address"
-        setSection={setSection}
         currentSection={currentSection}
       />
 
@@ -174,31 +163,26 @@ function AboutMenu({
       <MenuItem
         section={AboutSection.FAQ}
         title="FAQ"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.ENS}
         title="ENS"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.MINTING}
         title="Minting"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.NAKAMOTO_THRESHOLD}
         title="Nakamoto Threshold"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.LICENSE}
         title="License"
-        setSection={setSection}
         currentSection={currentSection}
       />
 
@@ -207,25 +191,26 @@ function AboutMenu({
       <MenuItem
         section={AboutSection.APPLY}
         title="Apply"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.CONTACT_US}
         title="Contact Us"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.RELEASE_NOTES}
         title="Release Notes"
-        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.TECH}
+        title="Tech"
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.DATA_DECENTR}
         title="Data Decentralization"
-        setSection={setSection}
         currentSection={currentSection}
       />
 
@@ -234,25 +219,21 @@ function AboutMenu({
       <MenuItem
         section={AboutSection.TERMS_OF_SERVICE}
         title="Terms of Service"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.PRIVACY_POLICY}
         title="Privacy Policy"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.COPYRIGHT}
         title="Copyright"
-        setSection={setSection}
         currentSection={currentSection}
       />
       <MenuItem
         section={AboutSection.COOKIE_POLICY}
         title="Cookie Policy"
-        setSection={setSection}
         currentSection={currentSection}
       />
     </div>
@@ -262,25 +243,23 @@ function AboutMenu({
 function MenuItem({
   title,
   section,
-  setSection,
   currentSection,
 }: {
   readonly title: string;
   readonly section: AboutSection;
-  readonly setSection: (section: AboutSection) => void;
   readonly currentSection?: AboutSection | undefined;
 }) {
   return (
     <div className="tw-py-1">
-      <button
-        onClick={() => setSection(section)}
+      <Link
+        href={`/about/${section}`}
         className="btn-link tw-font-medium tw-no-underline hover:tw-text-gray-400"
         style={{
           borderBottom: currentSection === section ? "1px solid" : "none",
         }}
       >
         {title}
-      </button>
+      </Link>
     </div>
   );
 }

@@ -51,6 +51,7 @@ type StandaloneWavePollFields = Pick<
   | "options"
   | "voted"
   | "multichoice"
+  | "anonymous"
   | "closing_time"
   | "is_open"
 >;
@@ -107,6 +108,7 @@ const hasStandalonePollFields = (
   Array.isArray(row.options) &&
   Array.isArray(row.voted) &&
   typeof row.multichoice === "boolean" &&
+  typeof row.anonymous === "boolean" &&
   typeof row.closing_time === "number" &&
   typeof row.is_open === "boolean";
 
@@ -117,6 +119,7 @@ const mapWavePollToDropPoll = (
   options: poll.options,
   voted: poll.voted,
   multichoice: poll.multichoice,
+  anonymous: poll.anonymous,
   closing_time: poll.closing_time,
   is_open: poll.is_open,
 });
@@ -137,6 +140,7 @@ const getWavePollRowPoll = (row: ApiWavePollDropRow): ApiDropPoll | null => {
     options: row.options,
     voted: row.voted,
     multichoice: row.multichoice,
+    anonymous: row.anonymous,
     closing_time: row.closing_time,
     is_open: row.is_open,
   };

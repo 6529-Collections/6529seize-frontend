@@ -23,7 +23,7 @@ jest.mock("@/hooks/useAlchemyNftQueries", () => ({
 }));
 
 jest.mock("@/hooks/useVirtualizedWaves", () => ({
-  useVirtualizedWaves: (items: readonly unknown[]) => ({
+  useVirtualizedWaves: ({ items }: { readonly items: readonly unknown[] }) => ({
     virtualItems: [
       ...items.map((_, index) => ({
         index,
