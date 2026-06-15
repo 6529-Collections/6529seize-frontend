@@ -5,6 +5,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import {
@@ -21,6 +23,12 @@ interface UseWavesV2Props {
   readonly viewerIdentityKey?: string | null | undefined;
   readonly directMessage?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly scoreSort?: ApiWaveScoreSort | undefined;
+  readonly minVisibilityScore?: number | undefined;
+  readonly minQualityScore?: number | undefined;
+  readonly minHotnessScore?: number | undefined;
+  readonly minRepSortScore?: number | undefined;
+  readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
   readonly refetchInterval?: number | undefined;
   readonly refetchIntervalInBackground?: boolean | undefined;
 }
@@ -32,6 +40,12 @@ export const useWavesV2 = ({
   viewerIdentityKey,
   directMessage,
   pinned,
+  scoreSort,
+  minVisibilityScore,
+  minQualityScore,
+  minHotnessScore,
+  minRepSortScore,
+  visibilityTier,
   refetchInterval = Infinity,
   refetchIntervalInBackground = false,
 }: UseWavesV2Props) => {
@@ -43,6 +57,12 @@ export const useWavesV2 = ({
         following,
         directMessage,
         pinned,
+        scoreSort,
+        minVisibilityScore,
+        minQualityScore,
+        minHotnessScore,
+        minRepSortScore,
+        visibilityTier,
         viewerIdentityKey,
       }),
     [
@@ -51,6 +71,12 @@ export const useWavesV2 = ({
       following,
       directMessage,
       pinned,
+      scoreSort,
+      minVisibilityScore,
+      minQualityScore,
+      minHotnessScore,
+      minRepSortScore,
+      visibilityTier,
       viewerIdentityKey,
     ]
   );
@@ -72,6 +98,12 @@ export const useWavesV2 = ({
         following,
         directMessage,
         pinned,
+        scoreSort,
+        minVisibilityScore,
+        minQualityScore,
+        minHotnessScore,
+        minRepSortScore,
+        visibilityTier,
       }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),

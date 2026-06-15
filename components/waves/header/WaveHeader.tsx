@@ -15,6 +15,7 @@ import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
+import WaveRepButton from "./rep/WaveRepButton";
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
@@ -51,16 +52,22 @@ export default function WaveHeader({
   }
 
   const connectedHandle = connectedProfile?.handle;
+  const waveAuthorHandle = wave.author?.handle ?? null;
+  const normalizedWaveAuthorHandle = waveAuthorHandle?.toLowerCase() ?? null;
   const canUseWaveActions = !!connectedHandle && !activeProfileProxy;
   const showNotificationSettings =
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
-    canUseWaveActions && connectedHandle === wave.author.handle;
+    canUseWaveActions && connectedHandle === waveAuthorHandle;
   const showCreateSubwaveOption =
     canUseWaveActions &&
     !isDirectMessage &&
     !isSubwave &&
     wave.wave.authenticated_user_eligible_for_admin === true;
+  const showWaveRepAction =
+    canUseWaveActions &&
+    !isDirectMessage &&
+    connectedHandle.toLowerCase() !== normalizedWaveAuthorHandle;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
 
@@ -78,7 +85,7 @@ export default function WaveHeader({
         <div
           className="tw-relative tw-h-16 tw-w-full tw-object-cover"
           style={{
-            background: `linear-gradient(135deg, ${wave.author.banner1_color ?? "#1f2937"} 0%, ${wave.author.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
+            background: `linear-gradient(135deg, ${wave.author?.banner1_color ?? "#1f2937"} 0%, ${wave.author?.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
             boxShadow: "inset 0 -22px 34px rgba(0,0,0,0.42)",
           }}
         >
@@ -136,6 +143,11 @@ export default function WaveHeader({
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
+              {showWaveRepAction && (
+                <div className="tw-shrink-0">
+                  <WaveRepButton wave={wave} />
+                </div>
+              )}
             </div>
           )}
         </div>

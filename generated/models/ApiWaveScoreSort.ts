@@ -13,8 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiWavesOverviewType {
-    MostSubscribed = 'MOST_SUBSCRIBED',
-    RecentlyDroppedTo = 'RECENTLY_DROPPED_TO',
-    ScoredRecentlyDroppedTo = 'SCORED_RECENTLY_DROPPED_TO'
+export enum ApiWaveScoreSort {
+    Balanced = 'BALANCED',
+    Quality = 'QUALITY',
+    Hotness = 'HOTNESS',
+    Rep = 'REP'
 }

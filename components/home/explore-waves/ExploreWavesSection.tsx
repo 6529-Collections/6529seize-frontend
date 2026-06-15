@@ -1,11 +1,16 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
+import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
+import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ExploreWaveCard } from "./ExploreWaveCard";
 import { ExploreWaveCardSkeleton } from "./ExploreWaveCardSkeleton";
 
@@ -17,6 +22,16 @@ interface ExploreWavesSectionProps {
   readonly limit?: number | undefined;
   readonly viewAllHref?: string | null | undefined;
   readonly excludeFollowed?: boolean | undefined;
+  readonly view?: ApiWavesV2ListType | undefined;
+  readonly overviewType?: ApiWavesOverviewType | undefined;
+  readonly scoreSort?: ApiWaveScoreSort | undefined;
+  readonly minVisibilityScore?: number | undefined;
+  readonly minQualityScore?: number | undefined;
+  readonly minHotnessScore?: number | undefined;
+  readonly minRepSortScore?: number | undefined;
+  readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
+  readonly statusLabel?: string | undefined;
+  readonly headerControls?: ReactNode | undefined;
 }
 
 export function ExploreWavesSection({
@@ -25,6 +40,16 @@ export function ExploreWavesSection({
   limit = DEFAULT_WAVES_LIMIT,
   viewAllHref = "/waves",
   excludeFollowed = false,
+  view = ApiWavesV2ListType.Overview,
+  overviewType = WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
+  scoreSort = WAVE_SCORE_DISCOVERY_PARAMS.scoreSort,
+  minVisibilityScore,
+  minQualityScore,
+  minHotnessScore,
+  minRepSortScore,
+  visibilityTier,
+  statusLabel = "waves",
+  headerControls,
 }: ExploreWavesSectionProps) {
   const { connectedProfile } = useAuth();
   const userScope =
@@ -40,17 +65,31 @@ export function ExploreWavesSection({
   } = useQuery({
     queryKey: [
       "explore-waves",
-      ApiWavesV2ListType.Hot,
+      view,
+      overviewType,
+      scoreSort,
+      minVisibilityScore,
+      minQualityScore,
+      minHotnessScore,
+      minRepSortScore,
+      visibilityTier,
       limit,
       excludeFollowed,
       userScope,
     ],
     queryFn: async () => {
       const page = await fetchWavesV2Page({
-        view: ApiWavesV2ListType.Hot,
+        view,
+        overviewType,
         page: 1,
         pageSize: limit,
         excludeFollowed,
+        scoreSort,
+        minVisibilityScore,
+        minQualityScore,
+        minHotnessScore,
+        minRepSortScore,
+        visibilityTier,
       });
       return page.waves;
     },
@@ -66,6 +105,10 @@ export function ExploreWavesSection({
     return null;
   }
 
+  const resultStatus = isLoading
+    ? `Loading ${statusLabel}`
+    : `Showing ${waves?.length ?? 0} ${statusLabel}`;
+
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
       <div>
@@ -80,7 +123,11 @@ export function ExploreWavesSection({
               </p>
             )}
           </div>
+          {headerControls}
         </div>
+        <p role="status" className="tw-sr-only">
+          {resultStatus}
+        </p>
 
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
           {isLoading

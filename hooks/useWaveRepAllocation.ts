@@ -1,0 +1,82 @@
+"use client";
+
+import { AuthContext } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiAvailableRatingCredit } from "@/generated/models/ApiAvailableRatingCredit";
+import type { ApiWaveRepRating } from "@/generated/models/ApiWaveRepRating";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useQuery } from "@tanstack/react-query";
+import { useContext, useMemo } from "react";
+
+export function useWaveRepAllocation({
+  waveId,
+  category,
+}: {
+  readonly waveId: string;
+  readonly category: string | null;
+}): {
+  readonly currentRating: number;
+  readonly availableWaveRep: number;
+  readonly minMaxValues: { readonly min: number; readonly max: number };
+  readonly isLoading: boolean;
+} {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const connectedHandle = connectedProfile?.handle;
+  const trimmedCategory = category?.trim() || null;
+
+  const { data: credit, isFetching: isFetchingCredit } =
+    useQuery<ApiAvailableRatingCredit>({
+      queryKey: [
+        QueryKey.WAVE_REP_CREDIT,
+        {
+          rater: connectedHandle?.toLowerCase(),
+        },
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ApiAvailableRatingCredit>({
+          endpoint: "ratings/credit",
+          params: {
+            rater: connectedHandle ?? "",
+          },
+        }),
+      enabled: !!connectedHandle && !activeProfileProxy,
+    });
+
+  const { data: rating, isFetching: isFetchingRating } =
+    useQuery<ApiWaveRepRating>({
+      queryKey: [
+        QueryKey.WAVE_REP_RATING,
+        {
+          waveId,
+          rater: connectedHandle?.toLowerCase(),
+          category: trimmedCategory,
+        },
+      ],
+      queryFn: async () =>
+        await commonApiFetch<ApiWaveRepRating>({
+          endpoint: `waves/${waveId}/rep/rating`,
+          params: {
+            category: trimmedCategory ?? "",
+          },
+        }),
+      enabled: !!connectedHandle && !activeProfileProxy && !!trimmedCategory,
+    });
+
+  const currentRating = rating?.rating ?? 0;
+  const availableWaveRep = credit?.wave_rep_credit ?? 0;
+
+  const minMaxValues = useMemo(() => {
+    const absoluteCurrentRating = Math.abs(currentRating);
+    return {
+      min: 0 - (absoluteCurrentRating + availableWaveRep),
+      max: absoluteCurrentRating + availableWaveRep,
+    };
+  }, [availableWaveRep, currentRating]);
+
+  return {
+    currentRating,
+    availableWaveRep,
+    minMaxValues,
+    isLoading: isFetchingCredit || isFetchingRating,
+  };
+}

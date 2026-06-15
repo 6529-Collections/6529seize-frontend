@@ -13,10 +13,10 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiWaveRepCategorySummary {
+    'category': string;
+    'total_rep': number;
+    'contributor_count': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +24,26 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
+            "name": "category",
+            "baseName": "category",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "total_rep",
+            "baseName": "total_rep",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
+            "name": "contributor_count",
+            "baseName": "contributor_count",
             "type": "number",
             "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiWaveRepCategorySummary.attributeTypeMap;
     }
 
     public constructor() {

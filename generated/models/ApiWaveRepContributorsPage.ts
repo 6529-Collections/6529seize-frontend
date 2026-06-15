@@ -11,12 +11,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveRepContributor } from '../models/ApiWaveRepContributor';
 import { HttpFile } from '../http/http';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiWaveRepContributorsPage {
+    'data': Array<ApiWaveRepContributor>;
+    'page': number;
+    'next': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +25,26 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiWaveRepContributor>",
+            "format": ""
+        },
+        {
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
-            "type": "number",
-            "format": "int64"
+            "name": "next",
+            "baseName": "next",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiWaveRepContributorsPage.attributeTypeMap;
     }
 
     public constructor() {

@@ -4,13 +4,19 @@ import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import type { ApiWaveOverviewPage } from "@/generated/models/ApiWaveOverviewPage";
+import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import type { SidebarWave, SidebarWavesPage } from "@/types/waves.types";
-import { commonApiDelete, commonApiFetch, commonApiPost } from "./common-api";
+import {
+  commonApiDelete,
+  commonApiFetch,
+  commonApiPost,
+} from "@/services/api/common-api";
 
 interface FetchWavesV2PageProps {
   readonly page: number;
@@ -22,6 +28,12 @@ interface FetchWavesV2PageProps {
   readonly pinned?: ApiWavesPinFilter | undefined;
   readonly excludeFollowed?: boolean | undefined;
   readonly identity?: string | undefined;
+  readonly scoreSort?: ApiWaveScoreSort | undefined;
+  readonly minVisibilityScore?: number | undefined;
+  readonly minQualityScore?: number | undefined;
+  readonly minHotnessScore?: number | undefined;
+  readonly minRepSortScore?: number | undefined;
+  readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
   readonly headers?: Record<string, string> | undefined;
 }
 
@@ -47,6 +59,12 @@ export interface WavesV2OverviewQueryKeyParams {
   readonly only_waves_followed_by_authenticated_user: boolean;
   readonly direct_message?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly score_sort?: ApiWaveScoreSort | undefined;
+  readonly min_visibility_score?: number | undefined;
+  readonly min_quality_score?: number | undefined;
+  readonly min_hotness_score?: number | undefined;
+  readonly min_rep_sort_score?: number | undefined;
+  readonly visibility_tier?: ApiWaveVisibilityTier | undefined;
   readonly viewer_identity?: string | undefined;
 }
 
@@ -56,6 +74,12 @@ export function getWavesV2OverviewQueryKeyParams({
   following = false,
   directMessage,
   pinned,
+  scoreSort,
+  minVisibilityScore,
+  minQualityScore,
+  minHotnessScore,
+  minRepSortScore,
+  visibilityTier,
   viewerIdentityKey,
 }: {
   readonly overviewType: ApiWavesOverviewType;
@@ -63,6 +87,12 @@ export function getWavesV2OverviewQueryKeyParams({
   readonly following?: boolean | undefined;
   readonly directMessage?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly scoreSort?: ApiWaveScoreSort | undefined;
+  readonly minVisibilityScore?: number | undefined;
+  readonly minQualityScore?: number | undefined;
+  readonly minHotnessScore?: number | undefined;
+  readonly minRepSortScore?: number | undefined;
+  readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
   readonly viewerIdentityKey?: string | null | undefined;
 }): WavesV2OverviewQueryKeyParams {
   const normalizedViewerIdentityKey =
@@ -75,6 +105,22 @@ export function getWavesV2OverviewQueryKeyParams({
     only_waves_followed_by_authenticated_user: following,
     ...(directMessage === undefined ? {} : { direct_message: directMessage }),
     ...(pinned === undefined ? {} : { pinned }),
+    ...(scoreSort === undefined ? {} : { score_sort: scoreSort }),
+    ...(minVisibilityScore === undefined
+      ? {}
+      : { min_visibility_score: minVisibilityScore }),
+    ...(minQualityScore === undefined
+      ? {}
+      : { min_quality_score: minQualityScore }),
+    ...(minHotnessScore === undefined
+      ? {}
+      : { min_hotness_score: minHotnessScore }),
+    ...(minRepSortScore === undefined
+      ? {}
+      : { min_rep_sort_score: minRepSortScore }),
+    ...(visibilityTier === undefined
+      ? {}
+      : { visibility_tier: visibilityTier }),
     ...(normalizedViewerIdentityKey
       ? { viewer_identity: normalizedViewerIdentityKey }
       : {}),
@@ -93,6 +139,7 @@ const mapApiWaveOverviewToSidebarWave = (
     id: wave.id,
     name: wave.name,
     createdAt: wave.created_at,
+    creator: wave.creator,
     type: wave.has_competition ? ApiWaveType.Rank : ApiWaveType.Chat,
     picture: wave.pfp ?? null,
     contributors:
@@ -117,6 +164,8 @@ const mapApiWaveOverviewToSidebarWave = (
     pinned: context?.pinned ?? false,
     muted: context?.muted ?? false,
     subscribed: context?.subscribed ?? false,
+    waveRep: wave.wave_rep ?? null,
+    waveScore: wave.wave_score ?? null,
   };
 };
 
@@ -145,6 +194,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     id: wave.id,
     name: wave.name,
     createdAt: wave.created_at,
+    creator: null,
     type: wave.wave.type,
     picture: wave.picture,
     contributors: wave.contributors_overview.map((contributor) => ({
@@ -165,6 +215,8 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     pinned: wave.pinned,
     muted: wave.metrics.muted,
     subscribed: wave.subscribed_actions.length > 0,
+    waveRep: wave.wave_rep ?? null,
+    waveScore: wave.wave_score ?? null,
   };
 };
 
@@ -178,6 +230,12 @@ export async function fetchWavesV2Page({
   pinned,
   excludeFollowed,
   identity,
+  scoreSort,
+  minVisibilityScore,
+  minQualityScore,
+  minHotnessScore,
+  minRepSortScore,
+  visibilityTier,
   headers,
 }: FetchWavesV2PageProps): Promise<SidebarWavesPage> {
   const params: Record<string, string> = {
@@ -205,6 +263,30 @@ export async function fetchWavesV2Page({
 
   if (identity !== undefined) {
     params["identity"] = identity;
+  }
+
+  if (scoreSort !== undefined) {
+    params["score_sort"] = scoreSort;
+  }
+
+  if (minVisibilityScore !== undefined) {
+    params["min_visibility_score"] = `${minVisibilityScore}`;
+  }
+
+  if (minQualityScore !== undefined) {
+    params["min_quality_score"] = `${minQualityScore}`;
+  }
+
+  if (minHotnessScore !== undefined) {
+    params["min_hotness_score"] = `${minHotnessScore}`;
+  }
+
+  if (minRepSortScore !== undefined) {
+    params["min_rep_sort_score"] = `${minRepSortScore}`;
+  }
+
+  if (visibilityTier !== undefined) {
+    params["visibility_tier"] = visibilityTier;
   }
 
   const response = await commonApiFetch<ApiWaveOverviewPage>({

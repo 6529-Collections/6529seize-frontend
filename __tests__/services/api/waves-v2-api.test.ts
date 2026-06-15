@@ -1,15 +1,19 @@
 import { ApiSubwavesSort } from "@/generated/models/ApiSubwavesSort";
+import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import {
+  createWaveMetadata,
+  deleteWaveMetadata,
+  fetchWaveMetadata,
+  fetchWavesV2Page,
+  fetchWaveSubwavesPage,
+} from "@/services/api/waves-v2-api";
 import {
   commonApiDelete,
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
-import {
-  createWaveMetadata,
-  deleteWaveMetadata,
-  fetchWaveMetadata,
-  fetchWaveSubwavesPage,
-} from "@/services/api/waves-v2-api";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiDelete: jest.fn(),
@@ -17,19 +21,13 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
-const commonApiDeleteMock = commonApiDelete as jest.MockedFunction<
-  typeof commonApiDelete
->;
-const commonApiFetchMock = commonApiFetch as jest.MockedFunction<
-  typeof commonApiFetch
->;
-const commonApiPostMock = commonApiPost as jest.MockedFunction<
-  typeof commonApiPost
->;
+const commonApiDeleteMock = commonApiDelete as jest.Mock;
+const commonApiFetchMock = commonApiFetch as jest.Mock;
+const commonApiPostMock = commonApiPost as jest.Mock;
 
 describe("waves-v2-api", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it("fetches subwaves with created-time sort and maps parent metadata", async () => {
@@ -93,6 +91,104 @@ describe("waves-v2-api", () => {
           subscribed: true,
         },
       ],
+    });
+  });
+
+  it("fetches scored overview waves and maps score fields", async () => {
+    const waveScore = {
+      score_version: "wave-score-v1",
+      visibility_tier: ApiWaveVisibilityTier.TrustedVisible,
+      quality_score: 71.2,
+      hotness_score: 44.8,
+      rep_sort_score: 58.4,
+      visibility_score: 62.3,
+      components: {
+        creator_score: 0.5,
+        level_weighted_participation_score: 0.7,
+        trusted_diversity_score: 0.4,
+        wave_rep_component_score: 0.58,
+        trusted_subscription_score: 0.3,
+        recent_trusted_activity_score: 0.2,
+      },
+      penalties: {
+        single_actor_penalty: 1,
+        low_trust_flood_penalty: 1,
+        cross_post_pressure: 0,
+        cross_post_penalty: 1,
+        negative_rep_penalty: 1,
+        safety_multiplier: 1,
+      },
+      calculated_at: 12345,
+    };
+    const waveRep = {
+      total_rep: 100,
+      positive_rep: 100,
+      negative_rep: 0,
+      contributor_count: 2,
+      positive_contributor_count: 2,
+      negative_contributor_count: 0,
+      authenticated_user_contribution: null,
+      categories: [],
+    };
+    commonApiFetchMock.mockResolvedValue({
+      page: 1,
+      next: false,
+      data: [
+        {
+          id: "wave-1",
+          name: "Wave 1",
+          created_at: 123,
+          creator: { id: "profile-1", handle: "creator" },
+          has_competition: false,
+          pfp: null,
+          contributors: [],
+          is_dm_wave: false,
+          parent_wave: null,
+          has_subwaves: false,
+          description_drop: {
+            contents: null,
+            media: [],
+          },
+          total_drops_count: 3,
+          is_private: false,
+          last_drop_time: 456,
+          context_profile_context: undefined,
+          wave_rep: waveRep,
+          wave_score: waveScore,
+        },
+      ],
+    });
+
+    const result = await fetchWavesV2Page({
+      page: 1,
+      pageSize: 20,
+      overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+      scoreSort: ApiWaveScoreSort.Hotness,
+      minVisibilityScore: 50,
+      minHotnessScore: 60,
+      visibilityTier: ApiWaveVisibilityTier.TrustedVisible,
+    });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves",
+      params: {
+        view: "OVERVIEW",
+        page: "1",
+        page_size: "20",
+        overview_type: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+        only_waves_followed_by_authenticated_user: "false",
+        score_sort: ApiWaveScoreSort.Hotness,
+        min_visibility_score: "50",
+        min_hotness_score: "60",
+        visibility_tier: ApiWaveVisibilityTier.TrustedVisible,
+      },
+      headers: undefined,
+    });
+    expect(result.waves[0]).toMatchObject({
+      id: "wave-1",
+      creator: { id: "profile-1", handle: "creator" },
+      waveRep,
+      waveScore,
     });
   });
 
