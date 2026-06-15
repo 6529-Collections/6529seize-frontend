@@ -329,12 +329,20 @@ const parseGithubResource = (rawUrl: string | null): GithubResource => {
       }
       throw new Error("Only github.com repository URLs are supported.");
     case "blob":
+      if (rest.length < 2) {
+        throw new Error("Only github.com repository URLs are supported.");
+      }
+      return { ...base, kind: "content", mode: kindSegment, segments: rest };
     case "tree":
+      if (rest.length < 1) {
+        throw new Error("Only github.com repository URLs are supported.");
+      }
       return { ...base, kind: "content", mode: kindSegment, segments: rest };
     case "commit":
-      return rest[0]
-        ? { ...base, kind: "commit", ref: rest[0] }
-        : { ...base, kind: "repository" };
+      if (!rest[0]) {
+        throw new Error("Only github.com repository URLs are supported.");
+      }
+      return { ...base, kind: "commit", ref: rest[0] };
     case "releases":
       return {
         ...base,
@@ -351,7 +359,67 @@ const parseGithubResource = (rawUrl: string | null): GithubResource => {
     case "discussions":
       return { ...base, kind: "discussion", number };
     default:
-      return { ...base, kind: "repository" };
+      throw new Error("Only github.com repository URLs are supported.");
+  }
+};
+
+const getResourceCacheKey = (resource: GithubResource): string => {
+  const base = [resource.owner, resource.repo];
+
+  switch (resource.kind) {
+    case "repository":
+      return JSON.stringify(["github-preview", "repository", ...base]);
+    case "issue":
+      return JSON.stringify([
+        "github-preview",
+        "issue",
+        ...base,
+        resource.number,
+      ]);
+    case "pull":
+      return JSON.stringify([
+        "github-preview",
+        "pull",
+        ...base,
+        resource.number,
+      ]);
+    case "content":
+      return JSON.stringify([
+        "github-preview",
+        "content",
+        ...base,
+        resource.mode,
+        ...resource.segments,
+      ]);
+    case "commit":
+      return JSON.stringify([
+        "github-preview",
+        "commit",
+        ...base,
+        resource.ref,
+      ]);
+    case "release":
+      return JSON.stringify([
+        "github-preview",
+        "release",
+        ...base,
+        resource.tag,
+      ]);
+    case "actions":
+      return JSON.stringify([
+        "github-preview",
+        "actions",
+        ...base,
+        resource.runId,
+        resource.workflowId,
+      ]);
+    case "discussion":
+      return JSON.stringify([
+        "github-preview",
+        "discussion",
+        ...base,
+        resource.number,
+      ]);
   }
 };
 
@@ -767,17 +835,7 @@ const resolveContentPreview = async (
   resource: GithubContentResource
 ): Promise<GithubContentPreviewResponse> => {
   if (resource.segments.length === 0) {
-    return {
-      type: "github.directory",
-      owner: resource.owner,
-      repo: resource.repo,
-      title: resource.repo,
-      path: null,
-      ref: null,
-      size: null,
-      itemCount: null,
-      url: resource.href,
-    };
+    throw new Error("Only github.com repository URLs are supported.");
   }
 
   let lastNotFound: Error | null = null;
@@ -874,7 +932,11 @@ const buildReleasePreview = (
     url:
       release.html_url ??
       (tagName
-        ? `https://github.com/${resource.owner}/${resource.repo}/releases/tag/${tagName}`
+        ? `https://github.com/${encodeURIComponent(
+            resource.owner
+          )}/${encodeURIComponent(resource.repo)}/releases/tag/${encodeGithubPath(
+            tagName
+          )}`
         : resource.href),
   };
 };
@@ -1103,7 +1165,7 @@ export const resolveGithubPreview = async (
   options?: { readonly bypassCache?: boolean | undefined }
 ): Promise<GithubPreviewResponse> => {
   const resource = parseGithubResource(rawUrl);
-  const cacheKey = resource.href;
+  const cacheKey = getResourceCacheKey(resource);
   const bypassCache = options?.bypassCache === true;
   const cached = bypassCache ? undefined : cache.get(cacheKey);
 

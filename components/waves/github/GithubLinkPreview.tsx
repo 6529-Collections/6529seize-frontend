@@ -165,6 +165,8 @@ export const parseGithubLink = (href: string): ParsedGithubLink | null => {
   };
 };
 
+// Rich previews fetch only for known GitHub resource shapes. Unknown subroutes
+// keep local labels to avoid broad fan-out through the server API route.
 const shouldFetchGithubPreview = (link: ParsedGithubLink): boolean =>
   link.kind !== "github";
 
@@ -313,6 +315,7 @@ const getFallbackTitle = (link: ParsedGithubLink): string => {
     case "discussion":
       return `Discussion ${link.pathLabel ?? ""}`.trim();
     case "github":
+      // Unknown GitHub subroutes intentionally skip metadata fetching.
       return link.pathLabel ?? `${link.owner}/${link.repo}`;
   }
 };

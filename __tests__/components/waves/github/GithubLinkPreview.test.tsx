@@ -103,6 +103,15 @@ describe("GithubLinkPreview", () => {
         pathLabel: "main/src",
       })
     );
+
+    expect(
+      parseGithubLink("https://github.com/6529-Collections/6529Stream/settings")
+    ).toEqual(
+      expect.objectContaining({
+        kind: "github",
+        pathLabel: "settings",
+      })
+    );
   });
 
   it("renders a compact PR card with inline status and no OpenGraph image", async () => {
@@ -242,6 +251,16 @@ describe("GithubLinkPreview", () => {
 
     expect(screen.getByText(/src\/app\.ts/)).toBeInTheDocument();
     expect(screen.getByText(/2 KB/)).toBeInTheDocument();
+  });
+
+  it("does not fetch rich metadata for unsupported GitHub subroutes", () => {
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/settings" />
+    );
+
+    expect(screen.getAllByText("GitHub")).not.toHaveLength(0);
+    expect(screen.getByText("settings")).toBeInTheDocument();
+    expect(mockedFetchGithubPreview).not.toHaveBeenCalled();
   });
 
   it("keeps an issue card useful when status metadata fails", async () => {

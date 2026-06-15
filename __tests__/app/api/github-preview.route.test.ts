@@ -141,6 +141,29 @@ describe("github-preview API route", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("rejects unsupported GitHub repository subpaths before fetching", async () => {
+    const response = await GET(requestFor("https://github.com/o/r/settings"));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "Only github.com repository URLs are supported.",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed GitHub content links before fetching", async () => {
+    const bareBlob = await GET(requestFor("https://github.com/o/r/blob"));
+    const blobWithoutPath = await GET(
+      requestFor("https://github.com/o/r/blob/main")
+    );
+    const bareTree = await GET(requestFor("https://github.com/o/r/tree"));
+
+    expect(bareBlob.status).toBe(400);
+    expect(blobWithoutPath.status).toBe(400);
+    expect(bareTree.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("maps repository links", async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse({
@@ -387,6 +410,28 @@ describe("github-preview API route", () => {
       GET(requestFor("https://github.com/o/r/issues/11")),
       GET(requestFor("https://github.com/o/r/issues/11")),
     ]);
+
+    await expect(first.json()).resolves.toMatchObject({ state: "open" });
+    await expect(second.json()).resolves.toMatchObject({ state: "open" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("normalizes cache keys across query and fragment variants", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        html_url: "https://github.com/o/r/issues/12",
+        title: "Cached issue",
+        state: "open",
+        state_reason: null,
+      })
+    );
+
+    const first = await GET(
+      requestFor("https://github.com/o/r/issues/12?utm_source=a#first")
+    );
+    const second = await GET(
+      requestFor("https://github.com/o/r/issues/12?utm_source=b#second")
+    );
 
     await expect(first.json()).resolves.toMatchObject({ state: "open" });
     await expect(second.json()).resolves.toMatchObject({ state: "open" });
