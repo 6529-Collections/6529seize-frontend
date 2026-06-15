@@ -394,11 +394,24 @@ describe("CreateWaveGroupInlinePanel", () => {
     ).toBeInTheDocument();
   });
 
-  it("preserves an inline draft when clicking outside the panel", async () => {
+  it("preserves in-progress builder state when clicking outside the panel", async () => {
     const user = userEvent.setup();
     renderInlinePanel();
+    const portalButton = document.createElement("button");
+    portalButton.type = "button";
+    portalButton.dataset.createWaveInlineGroupPortal = "true";
+    portalButton.textContent = "portal action";
+    document.body.appendChild(portalButton);
 
     await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(document.body);
+
+    expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+
+    await user.click(portalButton);
+
+    expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "add identity" }));
     await user.click(document.body);
 
@@ -407,6 +420,8 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getByText("Ready to create this inline group")
     ).toBeInTheDocument();
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
+
+    portalButton.remove();
   });
 
   it("opens configured rules from the draft chips", async () => {

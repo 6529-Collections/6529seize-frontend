@@ -33,6 +33,17 @@ const PANEL_IDENTITY: CreateWaveInlineGroupPanel = "identity";
 const PANEL_RULE_LIST: CreateWaveInlineGroupPanel = "rule-list";
 const PANEL_RULE_EDITOR: CreateWaveInlineGroupPanel = "rule-editor";
 const PANEL_SEARCH: CreateWaveInlineGroupPanel = "search";
+const CLICK_AWAY_PORTAL_SELECTOR = [
+  "[data-create-wave-inline-group-portal]",
+  "[data-headlessui-portal]",
+  "#headlessui-portal-root",
+  "[role='dialog']",
+  "[role='listbox']",
+].join(",");
+
+const isKnownPortaledChildTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element &&
+  target.closest(CLICK_AWAY_PORTAL_SELECTOR) !== null;
 
 export default function CreateWaveGroupInlinePanel({
   suggestedName,
@@ -84,6 +95,12 @@ export default function CreateWaveGroupInlinePanel({
   const isSearchPanel = displayedBuilder.panel === PANEL_SEARCH;
   const isCustomDraft = !!draftSummary || isIdentityPanel || isRulePanel;
   const isExpandedPanel = displayedBuilder.panel !== PANEL_ACTIONS;
+  const hasBuilderStateInProgress =
+    builder.panel !== PANEL_ACTIONS ||
+    builder.activeRule !== null ||
+    builder.identities.length > 0 ||
+    draftSummary !== null ||
+    isCreating;
   const currentStateLabel =
     selectedGroup?.name ?? (isCustomDraft ? "Custom" : defaultLabel);
 
@@ -91,10 +108,15 @@ export default function CreateWaveGroupInlinePanel({
     setBuilder(createInitialInlineGroupBuilderState());
   };
 
-  useClickAway(panelRef, () => {
-    if (builder.panel !== PANEL_ACTIONS && !draftSummary) {
-      resetBuilder();
+  useClickAway(panelRef, (event) => {
+    if (
+      hasBuilderStateInProgress ||
+      isKnownPortaledChildTarget(event.target)
+    ) {
+      return;
     }
+
+    resetBuilder();
   });
 
   const setPanel = (panel: CreateWaveInlineGroupPanel) => {
@@ -259,7 +281,6 @@ export default function CreateWaveGroupInlinePanel({
         <button
           type="button"
           onClick={onCancelPanel}
-          aria-label="Cancel inline group setup"
           className={`tw-flex-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-border-transparent tw-bg-transparent tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-500 tw-transition tw-duration-200 desktop-hover:hover:tw-text-iron-100 ${cancelClassName}`}
         >
           Cancel
