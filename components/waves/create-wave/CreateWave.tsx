@@ -126,13 +126,14 @@ export default function CreateWave({
   };
 
   const onMainStepSelect = (targetStep: CreateWaveStep) => {
-    const direction = getCreateWaveStepDirection({
-      currentStep: step,
-      targetStep,
-      waveType: config.overview.type,
+    onStep({
+      step: targetStep,
+      direction: getCreateWaveStepDirection({
+        currentStep: step,
+        targetStep,
+        waveType: config.overview.type,
+      }),
     });
-
-    onStep({ step: targetStep, direction });
   };
 
   const onInlineGroupCreate = async (
