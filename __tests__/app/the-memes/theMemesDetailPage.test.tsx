@@ -7,9 +7,14 @@ jest.mock("@/components/the-memes/MemePage", () => ({
   default: jest.fn(() => null),
 }));
 
-jest.mock("@/components/the-memes/MemeShared", () => ({
-  getSharedAppServerSideProps: jest.fn(),
-}));
+jest.mock("@/components/the-memes/MemeShared", () => {
+  const actual = jest.requireActual("@/components/the-memes/MemeShared");
+
+  return {
+    ...actual,
+    getSharedAppServerSideProps: jest.fn(),
+  };
+});
 
 jest.mock("@/config/env", () => ({
   publicEnv: {
@@ -24,7 +29,7 @@ describe("The Memes detail generateMetadata", () => {
     jest.clearAllMocks();
   });
 
-  it("canonicalizes locale query variants to the base card URL", async () => {
+  it("canonicalizes locale query variants to the focused tab URL", async () => {
     mockShared.mockResolvedValue({
       title: "Meme",
       alternates: {
@@ -50,10 +55,46 @@ describe("The Memes detail generateMetadata", () => {
       "fr-FR"
     );
     expect(metadata.alternates).toMatchObject({
-      canonical: "https://6529.io/the-memes/123",
+      canonical: "https://6529.io/the-memes/123?focus=history",
       languages: {
         "en-US": "https://6529.io/the-memes/123",
       },
+    });
+  });
+
+  it("drops locale and invalid focus variants from the canonical URL", async () => {
+    mockShared.mockResolvedValue({
+      title: "Meme",
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "123" }),
+      searchParams: Promise.resolve({
+        focus: "not-a-tab",
+        locale: "fr-FR",
+      }),
+    });
+
+    expect(metadata.alternates).toMatchObject({
+      canonical: "https://6529.io/the-memes/123",
+    });
+  });
+
+  it("uses the base card URL for the default live focus", async () => {
+    mockShared.mockResolvedValue({
+      title: "Meme",
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "123" }),
+      searchParams: Promise.resolve({
+        focus: "live",
+        locale: "fr-FR",
+      }),
+    });
+
+    expect(metadata.alternates).toMatchObject({
+      canonical: "https://6529.io/the-memes/123",
     });
   });
 });

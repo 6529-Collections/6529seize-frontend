@@ -1,9 +1,36 @@
 import MemePageComponent from "@/components/the-memes/MemePage";
-import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
+import {
+  getSharedAppServerSideProps,
+  isMemeFocus,
+  MEME_FOCUS,
+} from "@/components/the-memes/MemeShared";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { normalizeLocale } from "@/i18n/locales";
 import type { Metadata } from "next";
+
+type SearchParamValue = string | string[] | undefined;
+
+function getSearchParamValue(value: SearchParamValue): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function getMemePageCanonicalUrl(
+  id: string,
+  focus: string | undefined
+): string {
+  const canonicalUrl = new URL(
+    `/the-memes/${encodeURIComponent(id)}`,
+    publicEnv.BASE_ENDPOINT
+  );
+
+  // Locale is fallback-only today, but non-default focus tabs render distinct primary content.
+  if (focus && focus !== MEME_FOCUS.LIVE && isMemeFocus(focus)) {
+    canonicalUrl.searchParams.set("focus", focus);
+  }
+
+  return canonicalUrl.toString();
+}
 
 export default async function MemePage({
   params,
@@ -19,10 +46,15 @@ export async function generateMetadata({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ focus?: string; locale?: string }>;
+  searchParams: Promise<{
+    focus?: SearchParamValue;
+    locale?: SearchParamValue;
+  }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const { focus, locale } = await searchParams;
+  const { focus: rawFocus, locale: rawLocale } = await searchParams;
+  const focus = getSearchParamValue(rawFocus);
+  const locale = getSearchParamValue(rawLocale);
   const metadata = await getSharedAppServerSideProps(
     MEMES_CONTRACT,
     id,
@@ -35,9 +67,7 @@ export async function generateMetadata({
     ...metadata,
     alternates: {
       ...(metadata.alternates ?? {}),
-      canonical: `${publicEnv.BASE_ENDPOINT}/the-memes/${encodeURIComponent(
-        id
-      )}`,
+      canonical: getMemePageCanonicalUrl(id, focus),
     },
   };
 }
