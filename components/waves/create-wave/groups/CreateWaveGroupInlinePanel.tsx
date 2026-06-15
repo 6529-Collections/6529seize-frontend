@@ -92,7 +92,7 @@ export default function CreateWaveGroupInlinePanel({
   };
 
   useClickAway(panelRef, () => {
-    if (builder.panel !== PANEL_ACTIONS) {
+    if (builder.panel !== PANEL_ACTIONS && !draftSummary) {
       resetBuilder();
     }
   });

@@ -14,7 +14,10 @@ import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveActions from "./utils/CreateWaveActions";
 import type { CreateWaveDescriptionHandles } from "./description/CreateWaveDescription";
 import CreateWaveDescription from "./description/CreateWaveDescription";
-import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
+import {
+  getCreateNewWaveBody,
+  getCreateWaveStepDirection,
+} from "@/helpers/waves/create-wave.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
@@ -328,7 +331,14 @@ export default function CreateWave({
             activeStep={step}
             waveType={config.overview.type}
             onStep={(targetStep) =>
-              onStep({ step: targetStep, direction: "backward" })
+              onStep({
+                step: targetStep,
+                direction: getCreateWaveStepDirection({
+                  currentStep: step,
+                  targetStep,
+                  waveType: config.overview.type,
+                }),
+              })
             }
           />
         </div>

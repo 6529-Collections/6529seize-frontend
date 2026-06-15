@@ -379,7 +379,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "TDH" }));
     await user.click(screen.getByRole("button", { name: "set invalid tdh" }));
     expect(screen.getByRole("button", { name: "Create + use" })).toBeDisabled();
-    const startOverButton = screen.getByRole("button", { name: "Start over" });
+    const startOverButton = screen.getByRole("button", { name: "Clear all" });
     expect(startOverButton).toBeEnabled();
 
     await user.click(startOverButton);
@@ -392,6 +392,21 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(
       screen.getByRole("button", { name: "Add identity" })
     ).toBeInTheDocument();
+  });
+
+  it("preserves an inline draft when clicking outside the panel", async () => {
+    const user = userEvent.setup();
+    renderInlinePanel();
+
+    await user.click(screen.getByRole("button", { name: "Add identity" }));
+    await user.click(screen.getByRole("button", { name: "add identity" }));
+    await user.click(document.body);
+
+    expect(screen.getByText("Custom")).toBeInTheDocument();
+    expect(
+      screen.getByText("Ready to create this inline group")
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
   });
 
   it("opens configured rules from the draft chips", async () => {

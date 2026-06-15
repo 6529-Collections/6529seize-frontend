@@ -1,6 +1,7 @@
 import {
   getCreateWaveNextStep,
   getCreateWavePreviousStep,
+  getCreateWaveStepDirection,
   calculateLastDecisionTime,
 } from "@/helpers/waves/create-wave.helpers";
 import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from "@/generated/models/ApiWaveParticipationIdentitySubmissionAllowDuplicates";
@@ -54,6 +55,35 @@ describe("create-wave.helpers", () => {
           waveType: ApiWaveType.Approve,
         })
       ).toBe(CreateWaveStep.APPROVAL);
+    });
+  });
+
+  describe("getCreateWaveStepDirection", () => {
+    it("returns forward for jump-forward navigation", () => {
+      expect(
+        getCreateWaveStepDirection({
+          currentStep: CreateWaveStep.GROUPS,
+          targetStep: CreateWaveStep.DROPS,
+          waveType: ApiWaveType.Rank,
+        })
+      ).toBe("forward");
+    });
+
+    it("returns backward for previous or current step navigation", () => {
+      expect(
+        getCreateWaveStepDirection({
+          currentStep: CreateWaveStep.DROPS,
+          targetStep: CreateWaveStep.GROUPS,
+          waveType: ApiWaveType.Rank,
+        })
+      ).toBe("backward");
+      expect(
+        getCreateWaveStepDirection({
+          currentStep: CreateWaveStep.GROUPS,
+          targetStep: CreateWaveStep.GROUPS,
+          waveType: ApiWaveType.Rank,
+        })
+      ).toBe("backward");
     });
   });
 

@@ -7,6 +7,7 @@ import { ApiWaveOutcomeCredit } from "@/generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "@/generated/models/ApiWaveOutcomeSubType";
 import { ApiWaveOutcomeType } from "@/generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { CREATE_WAVE_MAIN_STEPS } from "./waves.constants";
 import type {
   CreateWaveConfig,
   CreateWaveDatesConfig,
@@ -15,6 +16,8 @@ import type {
 import { CreateWaveOutcomeType, CreateWaveStep } from "@/types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import type { ApiCreateWaveOutcome } from "@/generated/models/ApiCreateWaveOutcome";
+
+export type CreateWaveStepDirection = "forward" | "backward";
 
 /**
  * Converts time-weighted voting settings to milliseconds, ensuring it's within acceptable range
@@ -120,6 +123,26 @@ export const getCreateWavePreviousStep = ({
       assertUnreachable(step);
       return null;
   }
+};
+
+export const getCreateWaveStepDirection = ({
+  currentStep,
+  targetStep,
+  waveType,
+}: {
+  readonly currentStep: CreateWaveStep;
+  readonly targetStep: CreateWaveStep;
+  readonly waveType: ApiWaveType;
+}): CreateWaveStepDirection => {
+  const steps = CREATE_WAVE_MAIN_STEPS[waveType];
+  const currentIndex = steps.indexOf(currentStep);
+  const targetIndex = steps.indexOf(targetStep);
+
+  if (currentIndex === -1 || targetIndex === -1) {
+    return "backward";
+  }
+
+  return targetIndex > currentIndex ? "forward" : "backward";
 };
 
 const getWinningThreshold = ({
