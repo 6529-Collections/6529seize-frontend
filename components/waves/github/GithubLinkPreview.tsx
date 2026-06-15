@@ -163,12 +163,12 @@ const getKindLabel = (
   link: ParsedGithubLink,
   preview: GithubPreviewResponse | null
 ): string => {
-  const effectiveKind =
-    preview?.type === "github.pull_request"
-      ? "pull"
-      : preview?.type === "github.issue"
-        ? "issue"
-        : link.kind;
+  let effectiveKind = link.kind;
+  if (preview?.type === "github.pull_request") {
+    effectiveKind = "pull";
+  } else if (preview?.type === "github.issue") {
+    effectiveKind = "issue";
+  }
 
   switch (effectiveKind) {
     case "pull":
@@ -264,7 +264,7 @@ const getAriaLabel = (
 const LoadingStatus = () => (
   <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-iron-600/50 tw-bg-iron-950/80 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-iron-200 tw-shadow-lg tw-shadow-black/30">
     <span className="tw-h-2 tw-w-2 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-current tw-border-r-transparent" />
-    Loading
+    <span>Loading</span>
   </span>
 );
 
