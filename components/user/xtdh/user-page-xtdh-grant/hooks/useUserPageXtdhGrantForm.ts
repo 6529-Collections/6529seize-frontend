@@ -109,14 +109,16 @@ export function useUserPageXtdhGrantForm(): UserPageXtdhGrantForm {
       try {
         const { success } = await requestAuth();
         if (!success) {
-          setSubmitError("Authentication failed. Please try again.");
+          setSubmitError(
+            "Couldn't authenticate. Reconnect your wallet and try again."
+          );
           return;
         }
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
-            : "Authentication failed. Please try again.";
+            : "Couldn't authenticate. Reconnect your wallet and try again.";
         setSubmitError(message);
         setToast({ type: "error", message });
         return;

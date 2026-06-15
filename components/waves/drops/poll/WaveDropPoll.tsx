@@ -7,6 +7,7 @@ import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUp
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropPoll } from "@/generated/models/ApiDropPoll";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
 import { CheckIcon } from "@heroicons/react/24/outline";
@@ -206,8 +207,10 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
     onError: (error) => {
       clearUpdatedVoteStatus();
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit your poll vote.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
   });

@@ -13,6 +13,7 @@ import {
 } from "@/constants/constants";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { getTransactionLink } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
@@ -159,7 +160,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         );
         setToast({
           type: "success",
-          message: "Primary address set successfully",
+          message: "Primary address set.",
         });
       } else if (waitWriteDelegation.error) {
         setStatusMessage(
@@ -169,9 +170,12 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
         );
         setToast({
           type: "error",
-          message: `Error setting primary address: ${getError(
-            waitWriteDelegation.error
-          )}`,
+          title: "Couldn't set the primary address.",
+          description: "Please try again.",
+          details: getToastErrorDetails(
+            waitWriteDelegation.error,
+            getError(waitWriteDelegation.error)
+          ),
         });
       }
     } else {

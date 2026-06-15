@@ -35,7 +35,7 @@ export default function SelectSnapshot({
   const onAddSnapshot = async () => {
     if (!selectedSnapshot) {
       setToasts({
-        messages: ["Please select a snapshot."],
+        messages: ["Select a snapshot."],
         type: "error",
       });
       return;

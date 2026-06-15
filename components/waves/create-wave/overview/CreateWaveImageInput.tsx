@@ -35,12 +35,12 @@ export default function CreateWaveImageInput({
     if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
       setToast({
         type: "error",
-        message: "Invalid file type",
+        message: "This file type is not supported.",
       });
     } else if (file.size > FILE_SIZE_LIMIT) {
       setToast({
         type: "error",
-        message: "File size must be less than 10MB",
+        message: "Use a file smaller than 10 MB.",
       });
     } else {
       setFile(file);

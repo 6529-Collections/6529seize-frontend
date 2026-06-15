@@ -147,7 +147,7 @@ function AppWalletImportMnemonic() {
                         } else {
                           setToast({
                             message:
-                              "Mnemonic word can only contain lowercase alphabet characters",
+                              "Mnemonic words can only use lowercase letters.",
                             type: "error",
                           });
                         }
