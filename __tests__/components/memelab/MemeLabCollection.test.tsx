@@ -1,8 +1,9 @@
 import { AuthContext } from "@/components/auth/Auth";
 import LabCollection from "@/components/memelab/MemeLabCollection";
+import { VolumeType } from "@/entities/INFT";
 import { fetchAllPages } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 
 jest.mock("next/navigation", () => ({
@@ -22,6 +23,23 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 jest.mock("@/components/nothingHereYet/NothingHereYetSummer", () => () => (
   <div data-testid="nothing" />
 ));
+jest.mock("@/components/memelab/MemeLabSortControls", () => {
+  const { VolumeType: ActualVolumeType } =
+    jest.requireActual("@/entities/INFT");
+
+  return {
+    __esModule: true,
+    default: ({ setVolumeType, volumeType }: any) => (
+      <button
+        type="button"
+        data-testid="volume-type-control"
+        onClick={() => setVolumeType(ActualVolumeType.DAYS_7)}
+      >
+        {volumeType}
+      </button>
+    ),
+  };
+});
 
 const routerReplace = jest.fn();
 
@@ -34,7 +52,13 @@ beforeEach(() => {
 
 const collectionName = "Cool Collection";
 
-function renderComponent() {
+function renderComponent({
+  initialSort,
+  initialSortDirection,
+}: {
+  readonly initialSort?: string | undefined;
+  readonly initialSortDirection?: string | undefined;
+} = {}) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -44,10 +68,20 @@ function renderComponent() {
   return render(
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
-        <LabCollection collectionName={collectionName} />
+        <LabCollection
+          collectionName={collectionName}
+          initialSort={initialSort}
+          initialSortDirection={initialSortDirection}
+        />
       </AuthContext.Provider>
     </QueryClientProvider>
   );
+}
+
+function getRenderedNftIds() {
+  return screen
+    .getAllByTestId(/^nft-/)
+    .map((element) => element.getAttribute("data-testid"));
 }
 
 describe("MemeLabCollection", () => {
@@ -69,6 +103,51 @@ describe("MemeLabCollection", () => {
     expect(screen.getByRole("link", { name: "example.com" })).toHaveAttribute(
       "href",
       "https://example.com"
+    );
+  });
+
+  it("re-sorts by volume when the volume window changes", async () => {
+    (fetchAllPages as jest.Mock)
+      .mockResolvedValueOnce([
+        { id: 1, website: "", name: "meta 1" },
+        { id: 2, website: "", name: "meta 2" },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 2,
+          contract: "0x",
+          name: "NFT Two",
+          total_volume_last_24_hours: 5,
+          total_volume_last_7_days: 20,
+        },
+        {
+          id: 1,
+          contract: "0x",
+          name: "NFT One",
+          total_volume_last_24_hours: 10,
+          total_volume_last_7_days: 1,
+        },
+      ]);
+
+    renderComponent({
+      initialSort: "volume",
+      initialSortDirection: "desc",
+    });
+
+    await waitFor(() =>
+      expect(getRenderedNftIds()).toEqual(["nft-1", "nft-2"])
+    );
+    expect(screen.getByTestId("volume-type-control")).toHaveTextContent(
+      VolumeType.HOURS_24
+    );
+
+    fireEvent.click(screen.getByTestId("volume-type-control"));
+
+    await waitFor(() =>
+      expect(getRenderedNftIds()).toEqual(["nft-2", "nft-1"])
+    );
+    expect(screen.getByTestId("volume-type-control")).toHaveTextContent(
+      VolumeType.DAYS_7
     );
   });
 

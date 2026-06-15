@@ -87,6 +87,7 @@ export const EN_US_MESSAGES = {
   "memeLab.card.metric.marketCap": "Market Cap: {value}",
   "memeLab.card.metric.marketCapUnavailable": "Market Cap: N/A",
   "memeLab.card.metric.volume": "Volume ({volumeType}): {value}",
+  "memeLab.card.metric.volumeUnavailable": "Volume ({volumeType}): N/A",
   "memeLab.card.metric.ethValue": "{value} ETH",
   "memeLab.sort.age": "Age",
   "memeLab.sort.editionSize": "Edition Size",
