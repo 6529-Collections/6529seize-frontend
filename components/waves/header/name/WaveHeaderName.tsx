@@ -5,19 +5,8 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useContext } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveHeaderNameEdit from "./WaveHeaderNameEdit";
-import { canEditWave } from "@/helpers/waves/waves.helpers";
+import { canEditWave, getParentWaveName } from "@/helpers/waves/waves.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
-
-function getParentWaveName(
-  parentWave: ApiWave["parent_wave"]
-): string | undefined {
-  if (!parentWave) {
-    return undefined;
-  }
-
-  const trimmedName = parentWave.name.trim();
-  return trimmedName.length > 0 ? trimmedName : parentWave.id;
-}
 
 export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);

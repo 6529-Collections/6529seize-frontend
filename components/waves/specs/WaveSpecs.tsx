@@ -8,22 +8,12 @@ import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
 import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
+import { getParentWaveName } from "@/helpers/waves/waves.helpers";
 
 const CREDIT_SCOPE_LABELS: Record<ApiWaveCreditScope, string> = {
   [ApiWaveCreditScope.Wave]: "Whole wave",
   [ApiWaveCreditScope.Drop]: "Each drop",
 };
-
-function getParentWaveName(
-  parentWave: ApiWave["parent_wave"]
-): string | undefined {
-  if (!parentWave) {
-    return undefined;
-  }
-
-  const trimmedName = parentWave.name.trim();
-  return trimmedName.length > 0 ? trimmedName : parentWave.id;
-}
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;

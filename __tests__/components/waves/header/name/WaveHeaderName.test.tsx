@@ -16,7 +16,10 @@ jest.mock(
   () => (props: any) => <div data-testid="edit" />
 );
 
-jest.mock("@/helpers/waves/waves.helpers", () => ({ canEditWave: jest.fn() }));
+jest.mock("@/helpers/waves/waves.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/waves.helpers"),
+  canEditWave: jest.fn(),
+}));
 
 const { canEditWave } = require("@/helpers/waves/waves.helpers");
 
