@@ -99,10 +99,7 @@ const getInteractiveMediaProviderForHost = (
 
 export const isInteractiveMediaAllowedHost = (hostname: string): boolean =>
   canonicalizeInteractiveMediaHostname(hostname) === MEDIA_RESOLVER_HOST ||
-  getInteractiveMediaProviderForHost(hostname) !== null ||
-  parseDecentralizedMediaRef(
-    `https://${canonicalizeInteractiveMediaHostname(hostname)}`
-  ) !== null;
+  getInteractiveMediaProviderForHost(hostname) !== null;
 
 const isValidIpfsCid = (cid: string): boolean =>
   CIDV0_PATTERN.test(cid) || CIDV1_PATTERN.test(cid);

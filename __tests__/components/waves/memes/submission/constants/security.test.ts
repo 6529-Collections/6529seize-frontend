@@ -74,14 +74,12 @@ describe("interactive media security helpers", () => {
     ).toBe(`https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html`);
   });
 
-  it("allows recognized IPFS subdomain gateways", () => {
+  it("rejects recognized IPFS subdomain gateways as interactive iframe sources", () => {
     expect(
       canonicalizeInteractiveMediaUrl(
         `https://${CID_SUBDOMAIN}.ipfs.nftstorage.link/pendulums_mint_script.html`
       )
-    ).toBe(
-      `https://media.6529.io/ipfs/${CID_SUBDOMAIN}/pendulums_mint_script.html`
-    );
+    ).toBeNull();
   });
 
   it("rejects nested non-HTML IPFS paths", () => {
