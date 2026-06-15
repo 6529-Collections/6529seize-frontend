@@ -21,7 +21,6 @@ export function sharedConfig(
     productionBrowserSourceMaps: true,
     sassOptions: {
       quietDeps: true,
-      includePaths: sassLoadPaths,
       loadPaths: sassLoadPaths,
     },
     allowedDevOrigins: ["172.20.10.3", "192.168.1.77"],
