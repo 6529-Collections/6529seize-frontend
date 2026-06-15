@@ -235,6 +235,20 @@ const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
+  navigationLabel: "Profile sections",
+  scrollLeft: "Scroll profile sections left",
+  scrollRight: "Scroll profile sections right",
+  identity: "Identity",
+  brain: "Brain",
+  curation: "Curation",
+  collected: "Collected",
+  xtdh: "xTDH",
+  subscriptions: "Subscriptions",
+  proxy: "Proxy",
+  "badges.beta": "Beta",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -754,6 +768,7 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  ...USER_PROFILE_TABS_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 
