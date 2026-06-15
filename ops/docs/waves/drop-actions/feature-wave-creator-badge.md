@@ -8,8 +8,10 @@ as a square profile-wave picture badge.
 
 Selecting the compact water-drop button opens the shared created-waves viewer
 (`Waves by {profile}`), so users can jump into waves that author created.
-Selecting the chat-feed profile-wave badge opens that author's profile wave
-directly.
+Selecting the chat-feed profile-wave badge opens that author's profile-wave
+preview. The preview keeps `Open profile wave` as the primary action and adds
+`Show all waves` as a quieter secondary path to the author's `/{user}/brain`
+surface, where their other created and active waves are discoverable.
 
 ## Location in the Site
 
@@ -28,7 +30,9 @@ directly.
   author-status badges.
 - Select the water-drop button, or the profile-wave badge in the chat feed.
 - On non-mobile layouts, hover tooltip text is `View created waves` for the
-  compact button and `{wave}` for the chat-feed profile-wave badge.
+  compact button and `{wave}` for the chat-feed profile-wave badge; the
+  profile-wave hover card includes `Open profile wave` and `Show all waves`
+  links.
 
 ## User Journey
 
@@ -37,11 +41,11 @@ directly.
 2. If the author is a wave creator, the water-drop badge or profile-wave badge
    appears in the author identity row.
 3. Select the badge.
-4. The shared `Waves by {profile}` viewer opens, or the profile wave opens
-   directly from the chat-feed badge.
+4. The shared `Waves by {profile}` viewer opens, or the profile-wave preview
+   lets the user open the featured wave or select `Show all waves`.
 5. If the viewer opened, review created-wave rows, then select a row to open
-   that wave at `/waves/{waveId}`; if the profile wave opened directly, skip
-   this step.
+   that wave at `/waves/{waveId}`. If `Show all waves` is selected, the profile
+   Brain tab opens at `/{user}/brain`.
 
 ## Common Scenarios
 
@@ -50,6 +54,8 @@ directly.
   instead of forcing horizontal overflow.
 - The opened viewer uses the same created-waves surface as the Profile Brain
   tab overflow flow.
+- The profile-wave preview deprioritizes non-promoted waves by linking to the
+  profile Brain tab instead of listing every wave in the preview card.
 - Viewer rows show a wave picture when available, otherwise a wave/chat icon
   fallback.
 - Viewer title uses the profile handle when available, or a shortened wallet

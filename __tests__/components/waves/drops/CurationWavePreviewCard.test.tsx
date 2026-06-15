@@ -35,15 +35,14 @@ jest.mock("@/components/common/FallbackImage", () => ({
     readonly alt: string;
     readonly fallbackSrc: string;
     readonly primarySrc: string;
-  }) => (
-    <img
-      alt={alt}
-      src={primarySrc || fallbackSrc}
-      data-testid="fallback-image"
-      data-fallback-src={fallbackSrc}
-      data-primary-src={primarySrc}
-    />
-  ),
+  }) =>
+    React.createElement("img", {
+      alt,
+      src: primarySrc || fallbackSrc,
+      "data-testid": "fallback-image",
+      "data-fallback-src": fallbackSrc,
+      "data-primary-src": primarySrc,
+    }),
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
@@ -59,7 +58,9 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 }));
 
 jest.mock("@heroicons/react/24/outline", () => ({
-  ArrowRightIcon: () => <span aria-hidden="true" />,
+  ArrowRightIcon: () => (
+    <span aria-hidden="true" data-testid="arrow-right-icon" />
+  ),
   LinkIcon: () => <span aria-hidden="true" />,
   PlayIcon: () => <span aria-hidden="true" data-testid="video-play-icon" />,
 }));
@@ -246,7 +247,29 @@ describe("CurationWavePreviewCard", () => {
       "https://example.com/wave.png",
       ImageScale.W_AUTO_H_50
     );
-    expect(screen.getByRole("link", { name: /open wave/i })).toBeVisible();
+    expect(
+      screen.queryByText("Profile wave", { selector: "span" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open profile wave" })
+    ).toBeVisible();
+  });
+
+  it("links to the profile brain view for other waves without another arrow", () => {
+    render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
+
+    expect(
+      screen.getByRole("link", { name: "Show all waves" })
+    ).toHaveAttribute("href", "/alice/brain");
+    expect(screen.getAllByTestId("arrow-right-icon")).toHaveLength(1);
+  });
+
+  it("omits the all-waves link without a profile identity", () => {
+    render(<CurationWavePreviewCard waveId="wave-1" />);
+
+    expect(
+      screen.queryByRole("link", { name: "Show all waves" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders image preview media as an image tile", () => {
