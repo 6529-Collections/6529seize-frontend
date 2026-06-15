@@ -129,6 +129,37 @@ describe("GithubLinkPreview", () => {
     );
   });
 
+  it("does not render nested interactive descendants inside the card link", async () => {
+    mockedFetchGithubPreview.mockResolvedValue({
+      type: "github.pull_request",
+      owner: "6529-Collections",
+      repo: "6529Stream",
+      number: 355,
+      title: "[codex] Hydrate command reviews and expose PR costs",
+      state: "open",
+      reviewState: "none",
+      mergeableState: "clean",
+      merged: false,
+      draft: false,
+      url: "https://github.com/6529-Collections/6529Stream/pull/355",
+    });
+
+    render(
+      <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream/pull/355" />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Open")).toBeInTheDocument();
+    });
+
+    const card = screen.getByTestId("github-link-preview-card");
+    expect(
+      card.querySelectorAll(
+        'a, button, input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])'
+      )
+    ).toHaveLength(0);
+  });
+
   it("renders repository links without fetching PR or issue status", () => {
     render(
       <GithubLinkPreview href="https://github.com/6529-Collections/6529Stream" />

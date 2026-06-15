@@ -142,6 +142,8 @@ export const parseGithubLink = (href: string): ParsedGithubLink | null => {
     };
   }
 
+  // Non-PR/issue GitHub routes keep the segment after the repo as part of the
+  // display path, e.g. /commit/<sha> exposes the sha as numberSegment here.
   const repositoryPath = getRepositoryPathLabel(
     kindSegment,
     [numberSegment, ...rest].filter((value): value is string => Boolean(value))
@@ -156,8 +158,11 @@ export const parseGithubLink = (href: string): ParsedGithubLink | null => {
   };
 };
 
-const shouldFetchGithubPreview = (link: ParsedGithubLink): boolean =>
-  link.kind === "pull" || link.kind === "issue";
+const shouldFetchGithubPreview = (link: ParsedGithubLink): boolean => {
+  // The GitHub metadata endpoint currently returns rich state for PRs/issues;
+  // repository, code, commit, and release cards intentionally use local labels.
+  return link.kind === "pull" || link.kind === "issue";
+};
 
 const getKindLabel = (
   link: ParsedGithubLink,

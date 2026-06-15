@@ -408,6 +408,10 @@ export default function GithubPreviewStatusBadge({
     return badge;
   }
 
+  if (placement === "inline") {
+    return badge;
+  }
+
   return (
     <CustomTooltip content="Status unavailable" placement="top" delayShow={200}>
       {badge}
