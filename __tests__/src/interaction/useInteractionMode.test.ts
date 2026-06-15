@@ -12,6 +12,13 @@ const DEFAULT_STATE: InteractionModeState = {
   lastPointerType: null,
 };
 
+const INTERACTION_MEDIA_QUERIES = [
+  "(any-hover: hover)",
+  "(any-pointer: fine)",
+  "(pointer: coarse)",
+  "(hover: none)",
+];
+
 type ChangeListener = (event: MediaQueryListEvent) => void;
 
 function createPointerEvent(pointerType: string): Event {
@@ -179,16 +186,23 @@ describe("useInteractionMode", () => {
 
     first.unmount();
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      "pointerdown",
-      expect.any(Function),
-      expect.any(Object)
-    );
     expect(
-      firstMedia.mediaQueries.filter(
-        (query) => query.removeEventListener.mock.calls.length > 0
+      removeEventListenerSpy.mock.calls.some(
+        ([eventName]) => eventName === "pointerdown"
       )
-    ).toHaveLength(4);
+    ).toBe(true);
+    expect(
+      removeEventListenerSpy.mock.calls.some(
+        ([eventName]) => eventName === "pointermove"
+      )
+    ).toBe(true);
+    expect(
+      new Set(
+        firstMedia.mediaQueries
+          .filter((query) => query.removeEventListener.mock.calls.length > 0)
+          .map((query) => query.media)
+      )
+    ).toEqual(new Set(INTERACTION_MEDIA_QUERIES));
 
     const secondMedia = installMatchMedia({
       "(any-hover: hover)": false,
@@ -202,12 +216,23 @@ describe("useInteractionMode", () => {
     expect(second.result.current.enableHoverUI).toBe(false);
     expect(second.result.current.enableLongPress).toBe(true);
     expect(second.result.current.hasCoarsePointer).toBe(true);
-    expect(secondMedia.mediaQueries).toHaveLength(8);
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      "pointerdown",
-      expect.any(Function),
-      expect.any(Object)
-    );
+    expect(
+      new Set(
+        secondMedia.mediaQueries
+          .filter((query) => query.addEventListener.mock.calls.length > 0)
+          .map((query) => query.media)
+      )
+    ).toEqual(new Set(INTERACTION_MEDIA_QUERIES));
+    expect(
+      addEventListenerSpy.mock.calls.some(
+        ([eventName]) => eventName === "pointerdown"
+      )
+    ).toBe(true);
+    expect(
+      addEventListenerSpy.mock.calls.some(
+        ([eventName]) => eventName === "pointermove"
+      )
+    ).toBe(true);
 
     second.unmount();
   });

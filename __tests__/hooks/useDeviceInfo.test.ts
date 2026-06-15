@@ -1,5 +1,6 @@
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useInteractionMode from "@/src/interaction/useInteractionMode";
+import type { InteractionMode } from "@/src/interaction/useInteractionMode";
 import { act, renderHook } from "@testing-library/react";
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -12,16 +13,20 @@ jest.mock("@/src/interaction/useInteractionMode");
 const capacitorMock = require("@/hooks/useCapacitor").default as jest.Mock;
 const useInteractionModeMock = useInteractionMode as jest.Mock;
 
-function setInteractionMode({
-  enableLongPress = false,
-  hasCoarsePointer = false,
-}: {
-  readonly enableLongPress?: boolean | undefined;
-  readonly hasCoarsePointer?: boolean | undefined;
-} = {}) {
+const DEFAULT_INTERACTION_MODE: InteractionMode = {
+  canHover: false,
+  hasFinePointer: false,
+  hasCoarsePointer: false,
+  hoverNone: false,
+  lastPointerType: null,
+  enableHoverUI: false,
+  enableLongPress: false,
+};
+
+function setInteractionMode(overrides: Partial<InteractionMode> = {}) {
   useInteractionModeMock.mockReturnValue({
-    enableLongPress,
-    hasCoarsePointer,
+    ...DEFAULT_INTERACTION_MODE,
+    ...overrides,
   });
 }
 
@@ -114,5 +119,25 @@ describe("useDeviceInfo", () => {
     });
 
     expect(result.current.hasTouchScreen).toBe(true);
+  });
+
+  it("ignores navigator maxTouchPoints in favor of centralized interaction mode", () => {
+    capacitorMock.mockReturnValue({ isCapacitor: false });
+    Object.defineProperty(globalThis.navigator, "userAgent", {
+      value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+      configurable: true,
+    });
+    Object.defineProperty(globalThis.navigator, "maxTouchPoints", {
+      value: 5,
+      configurable: true,
+    });
+    setInteractionMode({ enableLongPress: false, hasCoarsePointer: false });
+    defineMatchMedia(false);
+
+    const { result } = renderHook(() => useDeviceInfo());
+
+    expect(result.current.hasTouchScreen).toBe(false);
+    expect(result.current.isAppleMobile).toBe(false);
+    expect(result.current.isMobileDevice).toBe(false);
   });
 });
