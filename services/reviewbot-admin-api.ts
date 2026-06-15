@@ -3,6 +3,7 @@ import {
   normalizeReviewbotUsageApiBaseUrl,
   normalizeReviewbotUsagePath,
   usageGroupSchema,
+  usagePrGroupSchema,
   usageRangeSchema,
   usageSummarySchema,
   usageTotalsSchema,
@@ -47,7 +48,8 @@ const nullableNumberSchema = z
 
 const adminUsageSummarySchema = usageSummarySchema.extend({
   visibility: z.enum(["public", "admin"]).optional(),
-  byPr: z.array(usageGroupSchema).default([]),
+  byPr: z.array(usagePrGroupSchema).default([]),
+  byPrAuthor: z.array(usageGroupSchema).default([]),
   byRequestor: z.array(usageGroupSchema).default([]),
 });
 
@@ -528,8 +530,11 @@ async function buildDashboardData({
       usageTotalsSchema.parse({
         budgetSkippedRuns: 0,
         costUsd: 0,
+        averageCostPerPrUsd: 0,
+        averageCostPerReviewRunUsd: 0,
         reviewRuns: 0,
         totalTokens: 0,
+        uniquePrs: 0,
       }),
   };
 }
