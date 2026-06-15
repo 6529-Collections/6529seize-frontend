@@ -258,7 +258,7 @@ export const CurationWavePreviewCard: React.FC<
           prefetch={false}
           className="tw-group/open-wave tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-bold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
         >
-          Open wave
+          Open profile wave
           <ArrowRightIcon
             className="tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/open-wave:tw-translate-x-0.5"
             aria-hidden="true"
@@ -268,13 +268,9 @@ export const CurationWavePreviewCard: React.FC<
           <Link
             href={profileBrainHref}
             prefetch={false}
-            className="tw-group/show-all-waves tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
+            className="tw-inline-flex tw-items-center tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-no-underline tw-decoration-iron-500/70 tw-underline-offset-4 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100 desktop-hover:hover:tw-underline"
           >
             Show all waves
-            <ArrowRightIcon
-              className="tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/show-all-waves:tw-translate-x-0.5"
-              aria-hidden="true"
-            />
           </Link>
         )}
       </div>

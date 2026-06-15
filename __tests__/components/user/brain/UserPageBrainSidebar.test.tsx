@@ -1,3 +1,4 @@
+import React from "react";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import UserPageBrainSidebar from "@/components/user/brain/UserPageBrainSidebar";
 import { useFavouriteWavesOfIdentity } from "@/hooks/useFavouriteWavesOfIdentity";
@@ -5,9 +6,8 @@ import { useWaves } from "@/hooks/useWaves";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ alt, fill, unoptimized, ...props }: any) => (
-    <img alt={alt ?? ""} {...props} />
-  ),
+  default: ({ alt, fill, unoptimized, ...props }: any) =>
+    React.createElement("img", { alt: alt ?? "", ...props }),
 }));
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -245,6 +245,7 @@ describe("UserPageBrainSidebar", () => {
   });
 
   it("expands and collapses the created waves list", () => {
+    const hiddenWaveName = "Hidden Wave";
     mockedUseWaves.mockReturnValue({
       waves: [
         makeWave(),
@@ -254,6 +255,24 @@ describe("UserPageBrainSidebar", () => {
           metrics: {
             drops_count: 8,
             subscribers_count: 10,
+            latest_drop_timestamp: Date.now(),
+          },
+        }),
+        makeWave({
+          id: "wave-3",
+          name: "Elsewhere Event",
+          metrics: {
+            drops_count: 14,
+            subscribers_count: 18,
+            latest_drop_timestamp: Date.now(),
+          },
+        }),
+        makeWave({
+          id: "wave-4",
+          name: hiddenWaveName,
+          metrics: {
+            drops_count: 3,
+            subscribers_count: 4,
             latest_drop_timestamp: Date.now(),
           },
         }),
@@ -271,16 +290,28 @@ describe("UserPageBrainSidebar", () => {
     const desktopSidebar = screen.getByTestId("brain-sidebar-desktop");
 
     expect(within(desktopSidebar).getByText("Show 1 more")).toBeInTheDocument();
-    expect(within(desktopSidebar).queryByText("Meme Card Curation")).toBeNull();
+    expect(
+      within(desktopSidebar).getByText("Meme Card Curation")
+    ).toBeInTheDocument();
+    expect(
+      within(desktopSidebar).getByText("Elsewhere Event")
+    ).toBeInTheDocument();
+    expect(within(desktopSidebar).queryByText(hiddenWaveName)).toBeNull();
 
     fireEvent.click(within(desktopSidebar).getByText("Show 1 more"));
     expect(
-      within(desktopSidebar).getByText("Meme Card Curation")
+      within(desktopSidebar).getByText(hiddenWaveName)
     ).toBeInTheDocument();
     expect(within(desktopSidebar).getByText("Show less")).toBeInTheDocument();
 
     fireEvent.click(within(desktopSidebar).getByText("Show less"));
-    expect(within(desktopSidebar).queryByText("Meme Card Curation")).toBeNull();
+    expect(within(desktopSidebar).queryByText(hiddenWaveName)).toBeNull();
+    expect(
+      within(desktopSidebar).getByText("Meme Card Curation")
+    ).toBeInTheDocument();
+    expect(
+      within(desktopSidebar).getByText("Elsewhere Event")
+    ).toBeInTheDocument();
   });
 
   it("opens the created waves modal from the compact strip overflow chip", () => {

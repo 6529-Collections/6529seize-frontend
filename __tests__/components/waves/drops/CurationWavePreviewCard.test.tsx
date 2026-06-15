@@ -58,7 +58,9 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 }));
 
 jest.mock("@heroicons/react/24/outline", () => ({
-  ArrowRightIcon: () => <span aria-hidden="true" />,
+  ArrowRightIcon: () => (
+    <span aria-hidden="true" data-testid="arrow-right-icon" />
+  ),
   LinkIcon: () => <span aria-hidden="true" />,
   PlayIcon: () => <span aria-hidden="true" data-testid="video-play-icon" />,
 }));
@@ -245,15 +247,21 @@ describe("CurationWavePreviewCard", () => {
       "https://example.com/wave.png",
       ImageScale.W_AUTO_H_50
     );
-    expect(screen.getByRole("link", { name: /open wave/i })).toBeVisible();
+    expect(
+      screen.queryByText("Profile wave", { selector: "span" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open profile wave" })
+    ).toBeVisible();
   });
 
-  it("links to the profile brain view for other waves", () => {
+  it("links to the profile brain view for other waves without another arrow", () => {
     render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
 
     expect(
       screen.getByRole("link", { name: "Show all waves" })
     ).toHaveAttribute("href", "/alice/brain");
+    expect(screen.getAllByTestId("arrow-right-icon")).toHaveLength(1);
   });
 
   it("omits the all-waves link without a profile identity", () => {
