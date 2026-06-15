@@ -298,6 +298,7 @@ function LoadedProfileWaveState({
   const { drops: curationDrops } = useWaveCurationDrops({
     wave,
     curationId: activeCurationId,
+    pageSize: 2,
     enabled: canClear && !!profileCuration,
   });
   const canManageProfileCuration = useCurationManagementPermission({
@@ -337,8 +338,15 @@ function LoadedProfileWaveState({
   }
 
   async function confirmClearProfileWave() {
-    await clearSelectedProfileWave();
-    setIsClearConfirmOpen(false);
+    try {
+      const updatedProfile = await clearSelectedProfileWave();
+
+      if (updatedProfile) {
+        setIsClearConfirmOpen(false);
+      }
+    } catch {
+      // Keep the confirmation open; the mutation hook owns the error toast.
+    }
   }
 
   function toggleReorderMode() {
@@ -556,8 +564,15 @@ export default function UserPageProfileWave({
   }
 
   async function confirmUnavailableClearProfileWave() {
-    await clearSelectedProfileWave();
-    setIsUnavailableClearConfirmOpen(false);
+    try {
+      const updatedProfile = await clearSelectedProfileWave();
+
+      if (updatedProfile) {
+        setIsUnavailableClearConfirmOpen(false);
+      }
+    } catch {
+      // Keep the confirmation open; the mutation hook owns the error toast.
+    }
   }
 
   if (!profileWaveId) {

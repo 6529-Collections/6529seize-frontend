@@ -4,7 +4,7 @@ import { publicEnv } from "@/config/env";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 
 const getDropCurationEndpoint = (dropId: string): string =>
-  `${publicEnv.API_ENDPOINT}/api/drops/${dropId}/curations`;
+  `${publicEnv.API_ENDPOINT}/api/drops/${encodeURIComponent(dropId)}/curations`;
 
 const getDropCurationHeaders = (): Record<string, string> => {
   const apiAuth = getStagingAuth();
@@ -72,7 +72,7 @@ export const deleteDropCuration = async ({
   readonly body: ApiDropCurationRequest;
 }): Promise<void> => {
   await commonApiDeleteWithBody<ApiDropCurationRequest, void>({
-    endpoint: `drops/${dropId}/curations`,
+    endpoint: `drops/${encodeURIComponent(dropId)}/curations`,
     body,
   });
 };

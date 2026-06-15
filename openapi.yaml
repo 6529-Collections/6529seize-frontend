@@ -974,22 +974,6 @@ paths:
           description: By default this endpoint orders things newer first, but if you set it to true then it starts from older drops.
           schema:
             type: boolean
-        - name: min_serial_no
-          in: query
-          required: false
-          description: Oldest message if null
-          schema:
-            type: integer
-            format: int64
-            minimum: 1
-        - name: older_first
-          in: query
-          required: false
-          description: >-
-            By default this endpoint orders things newer first, but if you set
-            it to true then it starts from older drops.
-          schema:
-            type: boolean
         - name: wave_id
           in: query
           description: Drops in wave with given ID

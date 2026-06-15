@@ -11,6 +11,13 @@ import {
   SortableUserPageProfileWaveMasonryCard,
   UserPageProfileWaveMasonryCard,
 } from "@/components/user/waves/UserPageProfileWaveMasonryCard";
+import {
+  applyDropOrderIds,
+  areDropOrdersEqual,
+  getDropOrderIds,
+  getDropOrderUpdates,
+  getRollbackOrderIds,
+} from "@/components/user/waves/userPageProfileWaveMasonryOrder.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropCurationOrderMutation } from "@/hooks/drops/useDropCurationOrderMutation";
@@ -33,7 +40,14 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface UserPageProfileWaveMasonryProps {
   readonly wave: ApiWave;
@@ -51,44 +65,6 @@ interface UserPageProfileWaveMasonryProps {
 const MASONRY_COLUMN_WIDTH = 300;
 const MASONRY_GUTTER = 16;
 const REORDER_PAGE_SIZE = 100;
-
-const getDropOrderIds = (drops: readonly ExtendedDrop[]): string[] =>
-  drops.map((drop) => drop.id);
-
-const areDropOrdersEqual = (
-  left: readonly string[],
-  right: readonly string[]
-): boolean =>
-  left.length === right.length &&
-  left.every((id, index) => id === right[index]);
-
-const applyDropOrderIds = (
-  drops: readonly ExtendedDrop[],
-  orderIds: readonly string[]
-): ExtendedDrop[] => {
-  const dropsById = new Map(drops.map((drop) => [drop.id, drop]));
-  return orderIds
-    .map((id) => dropsById.get(id) ?? null)
-    .filter((drop): drop is ExtendedDrop => drop !== null);
-};
-
-const getDropOrderUpdates = ({
-  drops,
-  persistedOrderIds,
-}: {
-  readonly drops: readonly ExtendedDrop[];
-  readonly persistedOrderIds: readonly string[];
-}) =>
-  drops.flatMap((drop, index) =>
-    persistedOrderIds[index] === drop.id
-      ? []
-      : [
-          {
-            dropId: drop.id,
-            priorityOrder: index + 1,
-          },
-        ]
-  );
 
 const buildProfileMasonryColumns = <T,>(
   items: readonly T[],
@@ -265,15 +241,16 @@ export default function UserPageProfileWaveMasonry({
 
       const nextOrderIds = getDropOrderIds(nextDrops);
       const persistedOrderIds = persistedOrderIdsRef.current;
+      const rollbackOrderIds = getRollbackOrderIds({
+        currentDrops,
+        persistedOrderIds,
+      });
 
       if (areDropOrdersEqual(nextOrderIds, persistedOrderIds)) {
         return;
       }
 
-      const updates = getDropOrderUpdates({
-        drops: nextDrops,
-        persistedOrderIds,
-      });
+      const updates = getDropOrderUpdates(nextDrops);
 
       if (updates.length === 0) {
         persistedOrderIdsRef.current = nextOrderIds;
@@ -293,9 +270,7 @@ export default function UserPageProfileWaveMasonry({
           persistedOrderIdsRef.current = getDropOrderIds(authoritativeDrops);
           updateReorderDrops(authoritativeDrops);
         } catch {
-          updateReorderDrops(
-            applyDropOrderIds(currentDrops, persistedOrderIdsRef.current)
-          );
+          updateReorderDrops(applyDropOrderIds(currentDrops, rollbackOrderIds));
         }
       }
     },

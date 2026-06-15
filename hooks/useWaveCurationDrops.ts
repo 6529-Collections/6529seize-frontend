@@ -22,6 +22,7 @@ import { useDebouncedQueryRefetch } from "./useDebouncedQueryRefetch";
 
 const DEFAULT_CURATION_DROPS_PAGE_SIZE = 20;
 const MAX_CURATION_DROPS_PAGE_SIZE = 100;
+const MAX_CURATION_DROPS_PAGES = 100;
 
 const getWaveMin = (wave: ApiWave): ApiWaveMin => ({
   id: wave.id,
@@ -123,16 +124,27 @@ export const fetchAllWaveCurationDrops = async ({
   wave,
   curationId,
   pageSize = MAX_CURATION_DROPS_PAGE_SIZE,
+  maxPages = MAX_CURATION_DROPS_PAGES,
 }: {
   readonly wave: ApiWave;
   readonly curationId: string;
   readonly pageSize?: number | undefined;
+  readonly maxPages?: number | undefined;
 }): Promise<ExtendedDrop[]> => {
+  const normalizedMaxPages = Math.max(1, maxPages);
   const pages: ApiCurationDropsPage[] = [];
   let nextPage = 1;
   let hasNextPage = true;
 
   while (hasNextPage) {
+    if (pages.length >= normalizedMaxPages) {
+      throw new Error(
+        `Unable to load more than ${
+          normalizedMaxPages * pageSize
+        } curation drops.`
+      );
+    }
+
     const page = await fetchWaveCurationDropsPage({
       waveId: wave.id,
       curationId,
