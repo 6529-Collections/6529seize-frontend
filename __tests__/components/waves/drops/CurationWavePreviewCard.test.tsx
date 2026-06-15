@@ -35,15 +35,14 @@ jest.mock("@/components/common/FallbackImage", () => ({
     readonly alt: string;
     readonly fallbackSrc: string;
     readonly primarySrc: string;
-  }) => (
-    <img
-      alt={alt}
-      src={primarySrc || fallbackSrc}
-      data-testid="fallback-image"
-      data-fallback-src={fallbackSrc}
-      data-primary-src={primarySrc}
-    />
-  ),
+  }) =>
+    React.createElement("img", {
+      alt,
+      src: primarySrc || fallbackSrc,
+      "data-testid": "fallback-image",
+      "data-fallback-src": fallbackSrc,
+      "data-primary-src": primarySrc,
+    }),
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
@@ -247,6 +246,22 @@ describe("CurationWavePreviewCard", () => {
       ImageScale.W_AUTO_H_50
     );
     expect(screen.getByRole("link", { name: /open wave/i })).toBeVisible();
+  });
+
+  it("links to the profile brain view for other waves", () => {
+    render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
+
+    expect(
+      screen.getByRole("link", { name: "Show all waves" })
+    ).toHaveAttribute("href", "/alice/brain");
+  });
+
+  it("omits the all-waves link without a profile identity", () => {
+    render(<CurationWavePreviewCard waveId="wave-1" />);
+
+    expect(
+      screen.queryByRole("link", { name: "Show all waves" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders image preview media as an image tile", () => {
