@@ -68,7 +68,11 @@ const baseProfile: ApiIdentity = {
   is_wave_creator: false,
 };
 
-function renderComponent(profile: Partial<ApiIdentity>, mainAddress = "0xabc") {
+function renderComponent(
+  profile: Partial<ApiIdentity>,
+  mainAddress = "0xabc",
+  profileEnabledAt: string | null = null
+) {
   const combined = { ...baseProfile, ...profile } as ApiIdentity;
   return render(
     <UserPageHeaderName
@@ -76,7 +80,7 @@ function renderComponent(profile: Partial<ApiIdentity>, mainAddress = "0xabc") {
       canEdit={false}
       mainAddress={mainAddress}
       level={combined.level}
-      profileEnabledAt={null}
+      profileEnabledAt={profileEnabledAt}
     />
   );
 }
@@ -133,5 +137,13 @@ describe("UserPageHeaderName", () => {
       "data-profile-wave-id",
       "featured-wave"
     );
+  });
+
+  it("renders the message-backed profile-enabled date", () => {
+    renderComponent({ handle: "Alice" }, "0x123", "2024-01-01T00:00:00.000Z");
+
+    expect(
+      screen.getByText("Profile enabled: January 2024")
+    ).toBeInTheDocument();
   });
 });

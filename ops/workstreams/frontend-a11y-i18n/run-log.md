@@ -1101,3 +1101,108 @@
   coverage warning was deferred because the touched helpers are self-explanatory
   and repo style avoids low-value comments. Per workstream policy, do not merge
   PR #2642.
+- Started stacked branch `codex/user-header-identity-a11y-i18n` from PR #2642
+  for the next low-risk profile header follow-up.
+- Implemented message-backed source-locale labels for the profile header name
+  edit action, profile picture alt/edit labels, banner edit label, and
+  profile-enabled date line. Removed disabled edit buttons from read-only name
+  and profile-picture wrappers so the public profile header uses plain
+  non-interactive containers when editing is unavailable. The profile-enabled
+  month/year now uses the repo i18n date formatting helper.
+- Validation passed for the header identity/media follow-up so far: focused
+  header/i18n Jest suites (6 suites, 18 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, `git diff --check`,
+  Next MCP runtime diagnostics, and desktop/mobile browser smoke on `/punk6529`.
+  React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and a test-only `next/image` mock warning.
+- Opened review-ready stacked PR #2643 against PR #2642. Per workstream policy,
+  do not merge PR #2643.
+- Fixed PR #2643 bot feedback: SonarCloud reported accessibility findings in
+  test mocks, so the affected mocks now use semantic buttons and a
+  `next/image` mock with explicit alt text. CodeRabbit requested direct profile
+  header helper coverage and single-source profile label derivation for the
+  banner; added focused helper assertions and threaded the client-computed
+  `profileLabel` into `UserPageHeaderBanner`.
+- Validation after the PR #2643 bot-feedback fixes passed for the focused
+  header/i18n Jest suites (6 suites, 19 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, and `git diff
+  --check`. React Doctor still reports only the unrelated dirty
+  `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Confirmed PR #2643 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
+  review threads are open, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2643.
+- Started stacked branch `codex/user-header-about-a11y-i18n` from PR #2643 for
+  the next low-risk profile header follow-up.
+- Implemented message-backed source-locale labels for the profile header About
+  placeholder, add/edit actions, and mobile expand/collapse control. Split the
+  existing statement edit affordance so long statements can keep their own
+  expand button without being nested inside a parent edit button. The public
+  read-only profile continues to render no hidden About edit controls.
+- Validation passed for the About statement follow-up so far: focused about/i18n
+  Jest suites (3 suites, 10 tests), targeted ESLint for touched source files,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, Next MCP runtime
+  diagnostics, and desktop/mobile browser smoke on `/punk6529`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic; the local browser console still shows known shared
+  API/emoji resource errors.
+- Opened review-ready stacked PR #2644 against PR #2643. Per workstream policy,
+  do not merge PR #2644.
+- Confirmed PR #2644 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed, no
+  review threads are open, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2644.
+- Started stacked branch `codex/user-about-edit-a11y-i18n` from PR #2644 for the
+  next adjacent profile About follow-up.
+- Implemented message-backed source-locale labels for the profile About edit
+  form textarea, placeholder, character count, cancel/save controls, success
+  toast, moderation error copy, unknown-error title, and error-dismiss action.
+  The moderation error container now uses `role="alert"` so errors are announced.
+- Validation passed for the About edit-form follow-up so far: focused edit
+  form/error/i18n Jest suites (3 suites, 7 tests), targeted ESLint for touched
+  source files, `typecheck:changed`, `react-doctor:diff`, `git diff --check`,
+  Next MCP runtime diagnostics, and desktop browser smoke on `/punk6529`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic; the local browser console still shows known shared
+  API/emoji resource errors.
+- Opened review-ready stacked PR #2645 against PR #2644. Per workstream policy,
+  do not merge PR #2645.
+
+## 2026-06-13
+
+- Audited the open WCAG/i18n PR stack after user concern about the number of
+  related PRs. Confirmed PR #2604 and PRs #2607-#2645 are expected workstream
+  implementation PRs, are open, non-draft, mergeable, and green on the visible
+  GitHub check rollup. Recorded the stack snapshot in `stack-audit.md`.
+- Confirmed related-looking PR #2597 is older OG metadata work and PR #2632 is
+  separate 6529bot admin dashboard work; neither is part of this WCAG/i18n
+  migration stack.
+- Updated active context to pause new page PR creation until the current stack
+  is reviewed or a new scope is chosen.
+
+## 2026-06-14
+
+- Rechecked the bottom of the WCAG/i18n stack and used a clean temp worktree for
+  PR #2604.
+- Pushed signed hardening commit `23d119e` to PR #2604, making the The Memes
+  scroll listener passive.
+- Validation passed for PR #2604: changed-file lint, changed-file typecheck,
+  targeted The Memes card and i18n Jest suites, React Doctor PR-diff review,
+  `git diff --check`, and desktop/mobile browser smoke on
+  `/the-memes?locale=de-DE`.
+- Browser smoke used a local-only Bootstrap import fix that is already present
+  on current `main`; this verification-only tweak was not committed to #2604.
+- Confirmed stale CodeRabbit findings on #2604 are already handled in current
+  code: localized document title, case-insensitive locale normalization, and
+  exhaustive enum label guards.
+- Recorded the latest CodeRabbit caveat: the visible status context is green,
+  but the new incremental review was rate-limited, so treat new bot review as
+  unavailable until the limit resets.
+- Rechecked PR #2604 after CodeQL completed. The latest visible GitHub rollup
+  passed for head `23d119e`: CodeQL, DCO, SonarCloud, Snyk, and CodeRabbit
+  status context.
+- Posted a PR validation snapshot comment documenting the local checks, browser
+  smoke, green rollup, and CodeRabbit rate-limit caveat.
+- Added `audit-inventory.md` with candidate hotspots for static copy,
+  interaction semantics, locale formatting, image alt review, and i18n helper
+  adoption to guide the next safe stack.

@@ -1,13 +1,16 @@
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import Image from "next/image";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { getUserProfileHeaderMessage } from "../user-page-header.messages";
 
 export default function UserPageHeaderPfp({
   profile,
+  profileLabel,
   defaultBanner1,
   defaultBanner2,
 }: {
   readonly profile: ApiIdentity;
+  readonly profileLabel: string;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
 }) {
@@ -20,7 +23,9 @@ export default function UserPageHeaderPfp({
         <Image
           unoptimized
           src={getScaledImageUri(profile.pfp, ImageScale.W_200_H_200)}
-          alt="Profile picture"
+          alt={getUserProfileHeaderMessage("user.profileHeader.pfp.alt", {
+            name: profileLabel,
+          })}
           width="144"
           height="144"
           className="tw-h-20 tw-w-auto tw-max-w-20 tw-rounded-xl tw-bg-iron-800 tw-object-contain sm:tw-h-28 sm:tw-max-w-28"
@@ -32,6 +37,7 @@ export default function UserPageHeaderPfp({
   return (
     <div className={glassWrapperClass}>
       <div
+        aria-hidden="true"
         className="tw-h-20 tw-w-20 tw-rounded-xl sm:tw-h-28 sm:tw-w-28"
         style={{
           background: `linear-gradient(45deg, ${defaultBanner1} 0%, ${defaultBanner2} 100%)`,
