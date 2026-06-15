@@ -176,6 +176,26 @@ describe("frontend i18n helpers", () => {
         tokenId: 1,
       })
     ).toBe("View The Memes token #1");
+    expect(t("fr-FR", "user.collected.stats.tdhHistory.title")).toBe(
+      t("en-US", "user.collected.stats.tdhHistory.title")
+    );
+    expect(
+      t("es-ES", "user.collected.stats.tdhHistory.chartAriaLabel", {
+        title: "Total TDH",
+      })
+    ).toBe("Total TDH chart");
+    expect(t("fr-FR", "user.profile.tabs.navigationLabel")).toBe(
+      t("en-US", "user.profile.tabs.navigationLabel")
+    );
+    expect(t("de-DE", "user.profile.tabs.badges.beta")).toBe("Beta");
+    expect(t("fr-FR", "followers.modal.title")).toBe(
+      t("en-US", "followers.modal.title")
+    );
+    expect(
+      t("de-DE", "followers.profile.linkAriaLabel", {
+        handle: "alice",
+      })
+    ).toBe("View alice's profile");
     expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
       t("en-US", "user.collected.networkCards.empty")
     );
