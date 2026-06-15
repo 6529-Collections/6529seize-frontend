@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import OpenGraphPreview from "@/components/waves/OpenGraphPreview";
+import OpenGraphPreview, {
+  getFirstPartyOpenGraphPreviewKind,
+} from "@/components/waves/OpenGraphPreview";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -139,6 +141,72 @@ describe("OpenGraphPreview", () => {
     expect(image.parentElement).not.toHaveClass("tw-aspect-[16/9]");
     expect(screen.getByText("An example description")).toBeInTheDocument();
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
+  });
+
+  it("preserves generated 6529 profile cards instead of cropping them", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/punk6529bot");
+
+    render(
+      <OpenGraphPreview
+        href="https://6529.io/punk6529bot"
+        preview={{
+          title: "punk6529bot",
+          description: "Identity | 6529.io",
+          siteName: "6529.io",
+          image: {
+            url: "https://6529.io/api/og-metadata/profiles/punk6529bot",
+          },
+        }}
+      />
+    );
+
+    const card = screen.getByTestId("og-preview-card");
+    expect(card).toHaveAttribute("data-og-kind", "profile");
+    expect(screen.getByText("Profile")).toBeInTheDocument();
+
+    const mediaLink = screen.getAllByRole("link", {
+      name: "punk6529bot",
+    })[0];
+    expect(mediaLink).toHaveClass(
+      "tw-h-28",
+      "lg:tw-h-full",
+      "lg:tw-w-72",
+      "xl:tw-w-80"
+    );
+
+    const image = screen.getByAltText("punk6529bot");
+    expect(image).toHaveAttribute(
+      "src",
+      "https://6529.io/api/og-metadata/profiles/punk6529bot"
+    );
+    expect(image).toHaveClass("tw-object-contain");
+    expect(image).toHaveAttribute(
+      "sizes",
+      "(max-width: 640px) 100vw, (max-width: 768px) 14rem, (max-width: 1024px) 18rem, 20rem"
+    );
+  });
+
+  it("identifies generated first-party OpenGraph metadata", () => {
+    expect(
+      getFirstPartyOpenGraphPreviewKind({
+        image: "https://6529.io/api/og-metadata/profiles/punk6529",
+      })
+    ).toBe("profile");
+    expect(
+      getFirstPartyOpenGraphPreviewKind({
+        image: "https://staging.6529.io/api/og-metadata/drops/123",
+      })
+    ).toBe("drop");
+    expect(
+      getFirstPartyOpenGraphPreviewKind({
+        image: "https://6529.io/api/og-metadata/waves/wave-id",
+      })
+    ).toBe("wave");
+    expect(
+      getFirstPartyOpenGraphPreviewKind({
+        image: "https://example.com/preview.png",
+      })
+    ).toBeNull();
   });
 
   it("handles external links and image arrays", () => {
