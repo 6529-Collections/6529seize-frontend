@@ -26,12 +26,16 @@ function boostMessage(
   return t(DEFAULT_LOCALE, key, params);
 }
 
-function formatBoostValue(value: number | undefined): string {
-  if (!value) {
+function formatBoostValue(value: number | undefined | null): string {
+  if (value == null) {
     return "-";
   }
 
   return formatNumber(DEFAULT_LOCALE, value, BOOST_VALUE_FORMAT_OPTIONS);
+}
+
+function hasBoostValue(value: number | undefined | null): value is number {
+  return value != null;
 }
 
 export default function UserPageStatsBoostBreakdown({
@@ -53,7 +57,7 @@ export default function UserPageStatsBoostBreakdown({
           {name}
         </th>
         <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-          {breakdown?.available ? (
+          {hasBoostValue(breakdown?.available) ? (
             <span className="d-flex align-items-center justify-content-center gap-2">
               {formatBoostValue(breakdown.available)}
               <BoostBreakdownInfo info={breakdown.available_info} />
@@ -63,7 +67,7 @@ export default function UserPageStatsBoostBreakdown({
           )}
         </td>
         <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-          {breakdown?.acquired ? (
+          {hasBoostValue(breakdown?.acquired) ? (
             <span className="d-flex align-items-center justify-content-center gap-2">
               {formatBoostValue(breakdown.acquired)}
               <BoostBreakdownInfo info={breakdown.acquired_info} />
@@ -153,7 +157,7 @@ export default function UserPageStatsBoostBreakdown({
             {name}
           </th>
           <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-            {breakdown.available ? (
+            {hasBoostValue(breakdown.available) ? (
               <span className="d-flex align-items-center justify-content-center gap-2">
                 {formatBoostValue(breakdown.available)}
                 <BoostBreakdownInfo info={breakdown.available_info} />
@@ -163,7 +167,7 @@ export default function UserPageStatsBoostBreakdown({
             )}
           </td>
           <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
-            {breakdown.acquired ? (
+            {hasBoostValue(breakdown.acquired) ? (
               <span className="d-flex align-items-center justify-content-center gap-2">
                 {formatBoostValue(breakdown.acquired)}
                 <BoostBreakdownInfo info={breakdown.acquired_info} />
@@ -256,8 +260,9 @@ export default function UserPageStatsBoostBreakdown({
                         {tdh?.boost ? (
                           <span className="d-flex align-items-center justify-content-center gap-2">
                             {formatBoostValue(
-                              tdh.boost_breakdown.memes_card_sets.available +
-                                tdh.boost_breakdown.gradients.available
+                              (tdh.boost_breakdown.memes_card_sets?.available ??
+                                0) +
+                                (tdh.boost_breakdown.gradients?.available ?? 0)
                             )}
                             <BoostBreakdownInfo
                               info={[

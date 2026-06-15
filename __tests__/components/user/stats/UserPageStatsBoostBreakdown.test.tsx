@@ -111,4 +111,59 @@ describe("UserPageStatsBoostBreakdown", () => {
       })
     ).toBeInTheDocument();
   });
+
+  it("renders zero boost values and total row numbers", () => {
+    const tdh: ConsolidatedTDH = {
+      boost: 1.25,
+      boost_breakdown: {
+        memes_card_sets: {
+          available: 0,
+          acquired: 0,
+          available_info: [],
+          acquired_info: [],
+        },
+        gradients: {
+          available: 1.5,
+          acquired: 0,
+          available_info: [],
+          acquired_info: [],
+        },
+      },
+    } as any;
+
+    render(<UserPageStatsBoostBreakdown tdh={tdh} />);
+
+    const table = screen.getByRole("table", {
+      name: boostText("user.collected.stats.boostBreakdown.tableCaption"),
+    });
+    expect(within(table).getAllByText("0.00").length).toBeGreaterThanOrEqual(3);
+    expect(within(table).getAllByText("1.50").length).toBeGreaterThanOrEqual(2);
+    expect(within(table).getByText("0.25")).toBeInTheDocument();
+  });
+
+  it("does not throw when optional boost breakdown sections are absent", () => {
+    const tdh: ConsolidatedTDH = {
+      boost: 1,
+      boost_breakdown: {
+        memes_card_sets: {
+          available: 0,
+          acquired: 0,
+          available_info: [],
+          acquired_info: [],
+        },
+      },
+    } as any;
+
+    render(<UserPageStatsBoostBreakdown tdh={tdh} />);
+
+    const table = screen.getByRole("table", {
+      name: boostText("user.collected.stats.boostBreakdown.tableCaption"),
+    });
+    expect(
+      within(table).getByRole("rowheader", {
+        name: boostText("user.collected.stats.boostBreakdown.rows.total"),
+      })
+    ).toBeInTheDocument();
+    expect(within(table).getAllByText("0.00").length).toBeGreaterThan(0);
+  });
 });
