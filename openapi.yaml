@@ -6032,7 +6032,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveCuration"
-  /waves/{id}/curations/{curation_id}/drops:
+  /waves/{id}/curations/{curationId}/drops:
     get:
       tags:
         - Waves
@@ -6044,7 +6044,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: curation_id
+        - name: curationId
           in: path
           required: true
           schema:

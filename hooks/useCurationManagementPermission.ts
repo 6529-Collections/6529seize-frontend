@@ -11,13 +11,22 @@ export function useCurationManagementPermission({
   readonly probeDropId: string;
   readonly enabled?: boolean | undefined;
 }) {
-  const { data: probeCurations = [] } = useDropCurations({
+  const isProbeReady = Boolean(probeDropId);
+  const isEnabled = enabled && isProbeReady;
+  const {
+    data: probeCurations,
+    isFetching,
+    isPending,
+  } = useDropCurations({
     dropId: probeDropId,
-    enabled: enabled && Boolean(probeDropId),
+    enabled: isEnabled,
   });
+  const canManageCuration =
+    probeCurations?.find((curation) => curation.id === curationId)
+      ?.authenticated_user_can_curate ?? false;
 
-  return (
-    probeCurations.find((curation) => curation.id === curationId)
-      ?.authenticated_user_can_curate ?? false
-  );
+  return {
+    canManageCuration,
+    isLoading: enabled && (!isProbeReady || (isPending && isFetching)),
+  };
 }

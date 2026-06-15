@@ -54,6 +54,7 @@ interface UserPageProfileWaveMasonryProps {
   readonly curationId: string;
   readonly curationName?: string | null | undefined;
   readonly canManageProfileWave?: boolean | undefined;
+  readonly canReorderDrops?: boolean | undefined;
   readonly showIdentity?: boolean | undefined;
   readonly profileIdentity?: ProfileIdentitySummary | undefined;
   readonly isReorderMode?: boolean | undefined;
@@ -140,6 +141,7 @@ export default function UserPageProfileWaveMasonry({
   curationId,
   curationName,
   canManageProfileWave = false,
+  canReorderDrops,
   showIdentity = false,
   profileIdentity,
   isReorderMode = false,
@@ -167,7 +169,8 @@ export default function UserPageProfileWaveMasonry({
     reorderDropsRef.current = nextDrops;
     setReorderDrops(nextDrops);
   }, []);
-  const canEnterReorder = canManageActiveCuration && drops.length > 1;
+  const canEnterReorder =
+    canReorderDrops ?? (canManageActiveCuration && drops.length > 1);
   const isReorderContentLoading =
     isReorderMode && (isPreparingReorder || reorderDrops.length === 0);
   const columnCount = Math.max(

@@ -7,6 +7,7 @@ import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import MoveIcon from "@/components/utils/icons/MoveIcon";
 import CommonConfirmationModal from "@/components/utils/modal/CommonConfirmationModal";
 import UserPageProfileWaveMasonry from "@/components/user/waves/UserPageProfileWaveMasonry";
+import { getProfileWaveReorderGate } from "@/components/user/waves/userPageProfileWaveReorder.helpers";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
@@ -185,6 +186,7 @@ function ProfileCurationBody({
   areCurationsFetching,
   areCurationsLoading,
   canManageProfileWave,
+  canReorderDrops,
   hasLoadedCurations,
   isReorderMode,
   onReorderModeChange,
@@ -197,6 +199,7 @@ function ProfileCurationBody({
   readonly areCurationsFetching: boolean;
   readonly areCurationsLoading: boolean;
   readonly canManageProfileWave: boolean;
+  readonly canReorderDrops: boolean;
   readonly hasLoadedCurations: boolean;
   readonly isReorderMode: boolean;
   readonly onReorderModeChange: (nextIsReorderMode: boolean) => void;
@@ -249,6 +252,7 @@ function ProfileCurationBody({
       curationId={profileCuration.id}
       curationName={profileCuration.name}
       canManageProfileWave={canManageProfileWave}
+      canReorderDrops={canReorderDrops}
       showIdentity={false}
       profileIdentity={profileIdentity}
       isReorderMode={isReorderMode}
@@ -295,25 +299,46 @@ function LoadedProfileWaveState({
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
   const activeCurationId = profileCuration?.id ?? "";
-  const { drops: curationDrops } = useWaveCurationDrops({
-    wave,
-    curationId: activeCurationId,
-    pageSize: 2,
-    enabled: canClear && !!profileCuration,
-  });
-  const canManageProfileCuration = useCurationManagementPermission({
+  const { drops: curationDrops, isFetching: areCurationDropsFetching } =
+    useWaveCurationDrops({
+      wave,
+      curationId: activeCurationId,
+      enabled: canClear && !!profileCuration,
+    });
+  const {
+    canManageCuration: canManageProfileCuration,
+    isLoading: isPermissionLoading,
+  } = useCurationManagementPermission({
     curationId: activeCurationId,
     probeDropId: curationDrops[0]?.id ?? "",
-    enabled: canClear && !!profileCuration,
+    enabled: canClear && !!profileCuration && curationDrops.length > 0,
   });
   const canManageProfileWave = canClear && canManageProfileCuration;
-  const canReorder = canManageProfileWave && curationDrops.length > 1;
+  const {
+    canReorder,
+    isLoading: isReorderGateLoading,
+    shouldShowButton: shouldShowReorderButton,
+  } = getProfileWaveReorderGate({
+    canClear,
+    canManageCuration: canManageProfileCuration,
+    dropCount: curationDrops.length,
+    hasProfileCuration: !!profileCuration,
+    isDropsFetching: areCurationDropsFetching,
+    isPermissionLoading,
+  });
   const isReorderModeActive = isReorderMode && canReorder;
   const isClearPending = isPending && pendingAction === "clear";
   const reorderButtonClassName = isReorderModeActive
     ? "tw-border-primary-400/50 tw-bg-primary-500/25 tw-text-primary-50 tw-ring-primary-400/40 hover:tw-border-primary-300/55 hover:tw-bg-primary-500/30 hover:tw-ring-primary-300/45"
-    : "tw-border-iron-950 tw-bg-iron-950 tw-text-iron-300 tw-ring-iron-800 hover:tw-border-iron-800 hover:tw-bg-iron-800 hover:tw-ring-iron-700";
-  const reorderButtonContent = isReorderModeActive ? (
+    : isReorderGateLoading
+      ? "tw-cursor-not-allowed tw-border-iron-950 tw-bg-iron-950 tw-text-iron-600 tw-ring-iron-900"
+      : "tw-border-iron-950 tw-bg-iron-950 tw-text-iron-300 tw-ring-iron-800 hover:tw-border-iron-800 hover:tw-bg-iron-800 hover:tw-ring-iron-700";
+  const reorderButtonContent = isReorderGateLoading ? (
+    <>
+      <CircleLoader />
+      <span>Reorder</span>
+    </>
+  ) : isReorderModeActive ? (
     <>
       <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
       <span>Done</span>
@@ -365,11 +390,18 @@ function LoadedProfileWaveState({
             </div>
 
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 sm:tw-justify-end">
-              {canReorder && (
+              {shouldShowReorderButton && (
                 <button
                   type="button"
                   onClick={toggleReorderMode}
-                  aria-label={isReorderModeActive ? "Done" : "Reorder"}
+                  disabled={isReorderGateLoading}
+                  aria-label={
+                    isReorderGateLoading
+                      ? "Loading reorder permissions"
+                      : isReorderModeActive
+                        ? "Done"
+                        : "Reorder"
+                  }
                   className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-shadow-sm tw-ring-1 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 ${reorderButtonClassName}`}
                 >
                   {reorderButtonContent}
@@ -414,6 +446,7 @@ function LoadedProfileWaveState({
                 areCurationsFetching={areCurationsFetching}
                 areCurationsLoading={areCurationsLoading}
                 canManageProfileWave={canManageProfileWave}
+                canReorderDrops={canReorder}
                 hasLoadedCurations={hasLoadedCurations}
                 isReorderMode={isReorderModeActive}
                 onReorderModeChange={setIsReorderMode}
