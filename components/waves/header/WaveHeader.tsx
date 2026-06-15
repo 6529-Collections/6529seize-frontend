@@ -62,6 +62,7 @@ export default function WaveHeader({
     !isSubwave &&
     wave.wave.authenticated_user_eligible_for_admin === true;
   const showOptions = showOwnerOptions || showCreateSubwaveOption;
+  const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
 
   return (
     <div
@@ -144,7 +145,9 @@ export default function WaveHeader({
             <WaveHeaderName wave={wave} />
           </div>
           {(showOptions || !isSubwave) && (
-            <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-1.5">
+            <div
+              className={`tw-flex tw-shrink-0 tw-items-center tw-justify-end tw-gap-1.5 ${titleActionAlignmentClass}`}
+            >
               {showOptions && (
                 <WaveHeaderOptions
                   wave={wave}

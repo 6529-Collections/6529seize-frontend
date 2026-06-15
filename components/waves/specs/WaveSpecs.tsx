@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
@@ -6,6 +7,8 @@ import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
 import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
+import { getWavePathRoute } from "@/helpers/navigation.helpers";
+import { getParentWaveName } from "@/helpers/waves/waves.helpers";
 
 const CREDIT_SCOPE_LABELS: Record<ApiWaveCreditScope, string> = {
   [ApiWaveCreditScope.Wave]: "Whole wave",
@@ -22,10 +25,7 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
     : "";
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
-  const creditScope = wave.voting.credit_scope ?? ApiWaveCreditScope.Wave;
-  const creditScopeLabel =
-    CREDIT_SCOPE_LABELS[creditScope] ??
-    CREDIT_SCOPE_LABELS[ApiWaveCreditScope.Wave];
+  const creditScopeLabel = CREDIT_SCOPE_LABELS[wave.voting.credit_scope];
   const hasVotingDetails =
     wave.voting.credit_type === ApiWaveCreditType.CardSetTdh ||
     !!wave.voting.credit_category ||
@@ -33,6 +33,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
   const votingRowAlignmentClass = hasVotingDetails
     ? "tw-items-start"
     : "tw-items-center";
+  const parentWave = wave.parent_wave;
+  const parentWaveName = getParentWaveName(parentWave);
 
   return (
     <div
@@ -52,6 +54,20 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
               <WaveTypeIcon waveType={wave.wave.type} />
             </div>
           </div>
+
+          {parentWave && parentWaveName && (
+            <div className="tw-group tw-flex tw-min-h-8 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-2 tw-py-1 tw-text-sm">
+              <span className="tw-shrink-0 tw-font-normal tw-text-iron-500">
+                Parent wave
+              </span>
+              <Link
+                href={getWavePathRoute(parentWave.id)}
+                className="tw-block tw-min-w-0 tw-truncate tw-text-right tw-font-medium tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 tw-ease-out hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+              >
+                {parentWaveName}
+              </Link>
+            </div>
+          )}
 
           {!isChatWave && (
             <>
