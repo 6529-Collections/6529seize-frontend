@@ -37,6 +37,7 @@ import {
 } from "./userTabs.config";
 import { shouldHideSubscriptions } from "./userPageVisibility";
 import { shouldDelayUserPageBrainRedirect } from "./userPageBrainAccess";
+import { getUserProfileTabsMessage } from "./user-tabs.messages";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
 const subscribeToClientRender = () => () => undefined;
@@ -245,7 +246,7 @@ export default function UserPageTabs({
     if (!container) return;
 
     checkScroll();
-    container.addEventListener("scroll", checkScroll);
+    container.addEventListener("scroll", checkScroll, { passive: true });
     window.addEventListener("resize", checkScroll);
 
     let resizeObserver: ResizeObserver | null = null;
@@ -290,16 +291,19 @@ export default function UserPageTabs({
   };
 
   return (
-    <div className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700">
+    <nav
+      aria-label={getUserProfileTabsMessage(
+        "user.profile.tabs.navigationLabel"
+      )}
+      className="tw-relative tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-700"
+    >
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden"
-        aria-label="Tabs"
       >
         <div
           ref={contentContainerRef}
           className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
-          aria-label="Tabs"
         >
           {visibleTabs.map((tabConfig) => (
             <UserPageTab
@@ -316,7 +320,9 @@ export default function UserPageTabs({
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollLeft}
-            aria-label="Scroll tabs left"
+            aria-label={getUserProfileTabsMessage(
+              "user.profile.tabs.scrollLeft"
+            )}
             className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
           >
             <FontAwesomeIcon
@@ -331,7 +337,9 @@ export default function UserPageTabs({
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
             onClick={scrollRight}
-            aria-label="Scroll tabs right"
+            aria-label={getUserProfileTabsMessage(
+              "user.profile.tabs.scrollRight"
+            )}
             className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
           >
             <FontAwesomeIcon
@@ -341,6 +349,6 @@ export default function UserPageTabs({
           </button>
         </>
       )}
-    </div>
+    </nav>
   );
 }
