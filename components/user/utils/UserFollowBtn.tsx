@@ -8,6 +8,7 @@ import {
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   commonApiDeleteWithBody,
   commonApiFetch,
@@ -113,8 +114,10 @@ export default function UserFollowBtn({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't follow this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -141,8 +144,10 @@ export default function UserFollowBtn({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't unfollow this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

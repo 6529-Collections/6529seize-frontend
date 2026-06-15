@@ -3,6 +3,7 @@
 import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
+import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
 import { SingleWaveDropWrapper } from "./SingleWaveDropWrapper";
 import { useSingleWaveDropData } from "./useSingleWaveDropData";
@@ -20,6 +21,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
     initialDrop,
     onClose
   );
+  const outcomesVisible = useWaveOutcomeVisibility(wave);
   const {
     winningThreshold,
     winningThresholdMinDurationMs,
@@ -49,6 +51,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
         onClose={onClose}
         isVotingClosed={isVotingClosed}
         isVotingControlsLocked={isVotingControlsLocked}
+        outcomesVisible={outcomesVisible}
       />
     </SingleWaveDropWrapper>
   );

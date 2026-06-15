@@ -9,6 +9,7 @@ import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
 } from "@/hooks/usePinnedWavesServer";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 interface WaveHeaderPinButtonProps {
   readonly waveId: string;
@@ -46,13 +47,6 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   const hideTooltip = useCallback(() => setShowMaxLimitTooltip(false), []);
 
   // Helper function to show error toast
-  const showErrorToast = useCallback(
-    (message: string) => {
-      setToast({ type: "error", message });
-    },
-    [setToast]
-  );
-
   // Memoize tooltip content to prevent unnecessary re-calculations
   const tooltipContent = useMemo(() => {
     if (isPinned) return PIN_ACTIONS.UNPIN;
@@ -124,7 +118,11 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
       if (!canPinWave(waveId)) {
         setShowMaxLimitTooltip(true);
-        showErrorToast(`Maximum ${MAX_PINNED_WAVES} pinned waves allowed`);
+        setToast({
+          type: "error",
+          title: `Maximum ${MAX_PINNED_WAVES} pinned waves reached.`,
+          description: "Unpin another wave first.",
+        });
         return;
       }
 
@@ -132,10 +130,14 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     } catch (error) {
       console.error("Error updating wave pin status:", error);
 
-      const errorMessage =
-        error instanceof Error ? error.message : "Something went wrong";
-      const action = isPinned ? "unpin" : "pin";
-      showErrorToast(`Failed to ${action} wave: ${errorMessage}`);
+      setToast({
+        type: "error",
+        title: isPinned
+          ? "Couldn't unpin this wave."
+          : "Couldn't pin this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
+      });
     }
   };
 

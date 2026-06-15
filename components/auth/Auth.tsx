@@ -1,6 +1,4 @@
 "use client";
-
-import "react-toastify/dist/ReactToastify.css";
 import { useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -13,8 +11,12 @@ import {
   useState,
 } from "react";
 import { Button, Modal } from "react-bootstrap";
-import { Slide, toast, ToastContainer } from "react-toastify";
 import { isAddress } from "viem";
+import type { AppToastInput } from "@/components/utils/toast/AppToast";
+import {
+  AppToastContainer,
+  showAppToast,
+} from "@/components/utils/toast/AppToast";
 import { ProfileConnectedStatus } from "@/entities/IProfile";
 import {
   InvalidRoleStateError,
@@ -28,7 +30,7 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
-import { getToastAutoClose } from "@/helpers/toast.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import {
   ConnectionMismatchError,
@@ -63,10 +65,7 @@ import {
   isStructuredSignaturesEnabled,
   type StructuredWalletSignatureSessionType,
 } from "@/services/wallet-signatures/structured-wallet-signatures";
-import {
-  logErrorSecurely,
-  sanitizeErrorForUser,
-} from "@/utils/error-sanitizer";
+import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
 import DotLoader from "../dotLoader/DotLoader";
@@ -76,7 +75,6 @@ import {
 } from "../react-query-wrapper/ReactQueryWrapper";
 import styles from "./Auth.module.scss";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
-import type { TypeOptions } from "react-toastify";
 
 // Custom error classes for authentication failures
 class AuthenticationNonceError extends Error {
@@ -142,13 +140,7 @@ type AuthContextType = {
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly showWaves: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
-  readonly setToast: ({
-    message,
-    type,
-  }: {
-    message: string | React.ReactNode;
-    type: TypeOptions;
-  }) => void;
+  readonly setToast: (toast: AppToastInput) => void;
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
   ) => Promise<void>;
@@ -521,23 +513,8 @@ export default function Auth({
     }
   };
 
-  const setToast = ({
-    message,
-    type,
-  }: {
-    message: string | React.ReactNode;
-    type: TypeOptions;
-  }) => {
-    toast(message, {
-      position: "top-right",
-      autoClose: getToastAutoClose(type),
-      hideProgressBar: false,
-      draggable: false,
-      closeOnClick: true,
-      transition: Slide,
-      theme: "dark",
-      type,
-    });
+  const setToast = (toast: AppToastInput) => {
+    showAppToast(toast);
   };
 
   const getSignature = async ({
@@ -556,20 +533,22 @@ export default function Auth({
         if (result.error instanceof ConnectionMismatchError) {
           setToast({
             message:
-              "Wallet address mismatch. Please disconnect and reconnect your wallet.",
+              "Wallet address mismatch. Disconnect and reconnect the correct wallet.",
             type: "error",
           });
         } else if (result.error instanceof SigningProviderError) {
           setToast({
             message:
-              "Wallet provider error. Please reconnect your wallet and try again.",
+              "Wallet provider error. Reconnect your wallet and try again.",
             type: "error",
           });
         } else if (result.error instanceof MobileSigningError) {
           // Show mobile-specific error messages
           setToast({
-            message: result.error.message,
             type: "error",
+            title: "Couldn't sign in with this wallet.",
+            description: "Check your wallet and try again.",
+            details: getToastErrorDetails(result.error),
           });
         }
       }
@@ -582,8 +561,10 @@ export default function Auth({
       // Fallback error handling with secure logging
       logErrorSecurely("getSignature", error);
       setToast({
-        message: sanitizeErrorForUser(error),
         type: "error",
+        title: "Couldn't sign in with this wallet.",
+        description: "Check your wallet and try again.",
+        details: getToastErrorDetails(error),
       });
       return {
         signature: null,
@@ -614,7 +595,7 @@ export default function Auth({
         setToast({
           message: isSingleWebSessionV2
             ? "Disconnect the current profile before connecting another profile"
-            : "Maximum connected profiles reached",
+            : "You've reached the connected profile limit.",
           type: "error",
         });
         return { success: false };
@@ -626,7 +607,7 @@ export default function Auth({
       const clientSignature = await getSignature({ message: nonce });
       if (clientSignature.userRejected) {
         setToast({
-          message: "Authentication rejected",
+          message: "Authentication was canceled in your wallet.",
           type: "error",
         });
         return { success: false };
@@ -667,7 +648,7 @@ export default function Auth({
           );
       if (!isPersisted) {
         setToast({
-          message: "Failed to persist connected profile",
+          message: "Couldn't save this connected profile. Please try again.",
           type: "error",
         });
         return { success: false };
@@ -678,25 +659,29 @@ export default function Auth({
       // Handle specific authentication nonce errors with detailed messages
       if (error instanceof InvalidSignerAddressError) {
         setToast({
-          message: "Invalid wallet address format",
+          message: "Enter a valid wallet address.",
           type: "error",
         });
       } else if (error instanceof NonceResponseValidationError) {
         setToast({
-          message: "Authentication server error, please try again",
+          message:
+            "Couldn't verify the authentication response. Please try again.",
           type: "error",
         });
       } else if (error instanceof AuthenticationNonceError) {
         setToast({
-          message: "Failed to connect to authentication server",
+          message:
+            "Couldn't reach the authentication service. Please try again.",
           type: "error",
         });
       } else {
         // Handle other errors (login API errors, etc.)
         logErrorSecurely("requestSignIn", error);
         setToast({
-          message: sanitizeErrorForUser(error),
           type: "error",
+          title: "Couldn't authenticate.",
+          description: "Reconnect your wallet and try again.",
+          details: getToastErrorDetails(error),
         });
       }
       return { success: false };
@@ -725,7 +710,7 @@ export default function Auth({
     }
 
     setToast({
-      message: "Please connect your wallet",
+      message: "Connect your wallet to continue.",
       type: "error",
     });
     return null;
@@ -858,7 +843,7 @@ export default function Auth({
       if (error instanceof InvalidRoleStateError) {
         logErrorSecurely("onActiveProfileProxy_invalid_role_state", error);
         setToast({
-          message: "Invalid profile role state. Please select a valid profile.",
+          message: "Select a valid profile and try again.",
           type: "error",
         });
         // Reset to null state to force user to select valid profile
@@ -870,7 +855,8 @@ export default function Auth({
       if (error instanceof MissingActiveProfileError) {
         logErrorSecurely("onActiveProfileProxy_missing_profile", error);
         setToast({
-          message: "Profile authentication failed. Please select a profile.",
+          message:
+            "Couldn't authenticate this profile. Select a profile and try again.",
           type: "error",
         });
         setActiveProfileProxy(null);
@@ -970,7 +956,7 @@ export default function Auth({
       }}
     >
       {children}
-      <ToastContainer style={{ zIndex: 100000 }} />
+      <AppToastContainer />
       {enableWalletAuthentication && (
         <Modal
           show={shouldShowSignModal}

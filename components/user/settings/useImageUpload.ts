@@ -27,7 +27,7 @@ export function useImageUpload({
       if (!isValidImageType(file)) {
         setToast({
           type: "error",
-          message: "Invalid file type",
+          message: "This file type is not supported.",
         });
         return;
       }

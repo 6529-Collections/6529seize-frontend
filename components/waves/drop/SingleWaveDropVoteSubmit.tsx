@@ -17,6 +17,7 @@ import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
@@ -128,8 +129,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
       },
       onError: (error) => {
         setToast({
-          message: error as unknown as string,
           type: "error",
+          title: "Couldn't submit your vote.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
         });
       },
     });

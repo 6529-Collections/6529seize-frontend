@@ -4,6 +4,7 @@ import { useState, useContext } from "react";
 import { useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { DropHasher } from "@/utils/drop-hasher";
 import { AuthContext } from "@/components/auth/Auth";
 import {
@@ -69,7 +70,7 @@ export const useDropSignature = () => {
 
       if (clientSignature.userRejected) {
         setToast({
-          message: "Signature rejected",
+          message: "Signature request was canceled in your wallet.",
           type: "error",
         });
         return { success: false };
@@ -90,8 +91,10 @@ export const useDropSignature = () => {
       };
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't sign this drop.",
+        description: "Check your wallet and try again.",
+        details: getToastErrorDetails(error),
       });
       return { success: false };
     } finally {

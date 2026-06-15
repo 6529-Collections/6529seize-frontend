@@ -1,4 +1,5 @@
 import type {
+  ReviewbotUsageAnalysis,
   ReviewbotUsageGroup,
   ReviewbotUsageResult,
 } from "@/services/reviewbot-usage-api";
@@ -6,6 +7,7 @@ import {
   ChartBarIcon,
   CpuChipIcon,
   CurrencyDollarIcon,
+  DocumentTextIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
@@ -38,8 +40,11 @@ export default function ReviewbotUsageDashboard({
   const totals = summary?.totals ?? {
     budgetSkippedRuns: 0,
     costUsd: 0,
+    averageCostPerPrUsd: 0,
+    averageCostPerReviewRunUsd: 0,
     reviewRuns: 0,
     totalTokens: 0,
+    uniquePrs: 0,
   };
   const unavailableMessage = result.status === "ok" ? "" : result.message;
 
@@ -55,7 +60,7 @@ export default function ReviewbotUsageDashboard({
         </p>
       </div>
 
-      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-4">
+      <div className="tw-mt-8 tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
         <MetricCard
           icon={<ChartBarIcon className="tw-h-6 tw-w-6" />}
           label="Review Runs"
@@ -63,10 +68,28 @@ export default function ReviewbotUsageDashboard({
           value={formatInteger(totals.reviewRuns)}
         />
         <MetricCard
+          icon={<DocumentTextIcon className="tw-h-6 tw-w-6" />}
+          label="Unique PRs"
+          tone="tw-text-primary-300"
+          value={formatInteger(totals.uniquePrs)}
+        />
+        <MetricCard
           icon={<CurrencyDollarIcon className="tw-h-6 tw-w-6" />}
           label="Estimated Spend"
           tone="tw-text-success"
           value={formatCurrency(totals.costUsd)}
+        />
+        <MetricCard
+          icon={<CurrencyDollarIcon className="tw-h-6 tw-w-6" />}
+          label="Avg / Run"
+          tone="tw-text-success"
+          value={formatCurrency(totals.averageCostPerReviewRunUsd)}
+        />
+        <MetricCard
+          icon={<CurrencyDollarIcon className="tw-h-6 tw-w-6" />}
+          label="Avg / PR"
+          tone="tw-text-success"
+          value={formatCurrency(totals.averageCostPerPrUsd)}
         />
         <MetricCard
           icon={<CpuChipIcon className="tw-h-6 tw-w-6" />}
@@ -81,6 +104,8 @@ export default function ReviewbotUsageDashboard({
           value={formatInteger(totals.budgetSkippedRuns)}
         />
       </div>
+
+      {summary ? <AnalysisHighlights analysis={summary.analysis} /> : null}
 
       {summary ? (
         <>
@@ -120,6 +145,46 @@ export default function ReviewbotUsageDashboard({
         </div>
       )}
     </div>
+  );
+}
+
+function AnalysisHighlights({
+  analysis,
+}: {
+  readonly analysis: ReviewbotUsageAnalysis;
+}) {
+  return (
+    <section className="tw-mt-8 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-5">
+      <h2 className="tw-mb-4 tw-text-xl tw-font-semibold tw-text-white">
+        Cost Analysis
+      </h2>
+      <dl className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 xl:tw-grid-cols-3">
+        <MetricPair
+          label="Budget Skip Rate"
+          value={formatPercent(analysis.budgetSkipRate)}
+        />
+        <MetricPair
+          label="Avg Tokens / Run"
+          value={formatInteger(analysis.averageTokensPerReviewRun)}
+        />
+        <MetricPair
+          label="Avg Tokens / PR"
+          value={formatInteger(analysis.averageTokensPerPr)}
+        />
+        <MetricPair
+          label="Top Repo"
+          value={formatTopCost(analysis.topCostRepo)}
+        />
+        <MetricPair
+          label="Top Provider"
+          value={formatTopCost(analysis.topCostProviderModel)}
+        />
+        <MetricPair
+          label="Top Review Type"
+          value={formatTopCost(analysis.topCostReviewKind)}
+        />
+      </dl>
+    </section>
   );
 }
 
@@ -183,6 +248,10 @@ function UsageSection({
                   <MetricPair
                     label="Spend"
                     value={formatCurrency(group.costUsd)}
+                  />
+                  <MetricPair
+                    label="Avg"
+                    value={formatCurrency(group.averageCostUsd)}
                   />
                   <MetricPair
                     label="Tokens"
@@ -250,6 +319,9 @@ function UsageTable({
               Spend
             </th>
             <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
+              Avg
+            </th>
+            <th className="tw-px-6 tw-py-3 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
               Tokens
             </th>
             <th className="tw-py-3 tw-pl-6 tw-text-right tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400">
@@ -271,6 +343,9 @@ function UsageTable({
               </td>
               <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
                 {formatCurrency(group.costUsd)}
+              </td>
+              <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
+                {formatCurrency(group.averageCostUsd)}
               </td>
               <td className="tw-px-6 tw-py-4 tw-text-right tw-text-sm tw-text-iron-200">
                 {formatInteger(group.totalTokens)}
@@ -303,4 +378,17 @@ function formatDate(value: string | undefined): string {
 
 function formatInteger(value: number): string {
   return compactNumberFormatter.format(value);
+}
+
+function formatPercent(value: number): string {
+  return `${value.toFixed(1)}%`;
+}
+
+function formatTopCost(group: ReviewbotUsageAnalysis["topCostRepo"]): string {
+  if (!group) {
+    return "None";
+  }
+  return `${group.key} (${formatCurrency(group.costUsd)}, ${formatPercent(
+    group.costSharePercent
+  )})`;
 }

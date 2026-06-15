@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { useContext, useEffect, useState } from "react";
 import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -97,8 +98,10 @@ export default function UserPageIdentityHeaderCICRate({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't update this NIC rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -198,7 +201,7 @@ export default function UserPageIdentityHeaderCICRate({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in.",
+        message: "Log in to continue.",
         type: "error",
       });
       return;

@@ -62,7 +62,7 @@ export function UserPageXtdhGrantListItem({
     onSuccess: () => {
       setToast({
         type: "success",
-        message: "Grant stopped successfully.",
+        message: "Grant stopped.",
       });
       queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
       const identity = grant.grantor.handle ?? grant.grantor.primary_address;
@@ -74,7 +74,7 @@ export function UserPageXtdhGrantListItem({
     onError: () => {
       setToast({
         type: "error",
-        message: "Failed to stop grant.",
+        message: "Couldn't stop this grant. Please try again.",
       });
     },
   });
@@ -91,7 +91,7 @@ export function UserPageXtdhGrantListItem({
     onSuccess: () => {
       setToast({
         type: "success",
-        message: "Grant revoked successfully.",
+        message: "Grant revoked.",
       });
       queryClient.invalidateQueries({ queryKey: [QueryKey.TDH_GRANTS] });
       const identity = grant.grantor.handle ?? grant.grantor.primary_address;
@@ -103,7 +103,7 @@ export function UserPageXtdhGrantListItem({
     onError: () => {
       setToast({
         type: "error",
-        message: "Failed to revoke grant.",
+        message: "Couldn't revoke this grant. Please try again.",
       });
     },
   });

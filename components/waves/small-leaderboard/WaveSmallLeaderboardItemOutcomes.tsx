@@ -9,9 +9,10 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 interface WaveSmallLeaderboardItemOutcomesProps {
   readonly drop: ApiDrop;
   readonly isMobile?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
-export const WaveSmallLeaderboardItemOutcomes: React.FC<
+const WaveSmallLeaderboardItemOutcomesContent: React.FC<
   WaveSmallLeaderboardItemOutcomesProps
 > = ({ drop, isMobile: _isMobile = false }) => {
   const [isTouch] = useState(
@@ -115,4 +116,14 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
       </Tooltip>
     </>
   );
+};
+
+export const WaveSmallLeaderboardItemOutcomes: React.FC<
+  WaveSmallLeaderboardItemOutcomesProps
+> = ({ outcomesVisible = true, ...props }) => {
+  if (!outcomesVisible) {
+    return null;
+  }
+
+  return <WaveSmallLeaderboardItemOutcomesContent {...props} />;
 };

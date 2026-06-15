@@ -161,7 +161,7 @@ export default function CreateCustomSnapshotForm() {
       const tokenChunks = chunkTokens(tokensWithResolvedEns);
       if (!tokenChunks.length) {
         setToasts({
-          messages: ["No valid wallets found after resolving ENS"],
+          messages: ["No valid wallets were found after resolving ENS."],
           type: "error",
         });
         throw new Error("No valid wallets after resolving ENS");
@@ -188,13 +188,13 @@ export default function CreateCustomSnapshotForm() {
           },
         });
 
-        if (!success) {
-          setToasts({
-            messages: [
-              `Failed to create snapshot "${snapshotName}". Please try again.`,
-            ],
-            type: "error",
-          });
+      if (!success) {
+        setToasts({
+          messages: [
+            `Couldn't create snapshot "${snapshotName}". Please try again.`,
+          ],
+          type: "error",
+        });
           throw new Error(`Failed to create snapshot "${snapshotName}"`);
         }
 
@@ -237,7 +237,7 @@ export default function CreateCustomSnapshotForm() {
       return null;
     }
     if (!tokens.length) {
-      setToasts({ messages: ["No tokens provided"], type: "error" });
+      setToasts({ messages: ["Add at least one token."], type: "error" });
       return null;
     }
     if (tokens.length > MAX_CUSTOM_SNAPSHOT_ROWS) {
@@ -251,7 +251,7 @@ export default function CreateCustomSnapshotForm() {
     }
     const trimmedName = formValues.name.trim();
     if (!trimmedName) {
-      setToasts({ messages: ["Name is required"], type: "error" });
+      setToasts({ messages: ["Enter a name."], type: "error" });
       return null;
     }
 
@@ -292,7 +292,7 @@ export default function CreateCustomSnapshotForm() {
   const addManualWallet = () => {
     if (!manualWallet?.length || !isCorrectManualWallet) {
       setToasts({
-        messages: ["Invalid wallet address"],
+        messages: ["Enter a valid wallet address."],
         type: "error",
       });
       return;
@@ -324,7 +324,7 @@ export default function CreateCustomSnapshotForm() {
   ): boolean => {
     if (!uploadedTokens.length) {
       setToasts({
-        messages: ["No wallets found in the uploaded file"],
+        messages: ["No wallets were found in the uploaded file."],
         type: "error",
       });
       return false;

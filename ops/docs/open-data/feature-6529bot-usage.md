@@ -34,6 +34,10 @@ production bot API path.
 The bot backend returns:
 
 - totals for review runs, estimated spend, token usage, and budget skips;
+- unique PR count, average spend per review run, and average spend per PR;
+- cost analysis for budget skip rate, average tokens per review run, average
+  tokens per PR, and the highest-cost visible repository, provider/model, and
+  review kind;
 - daily aggregates;
 - repository aggregates;
 - provider/model aggregates;

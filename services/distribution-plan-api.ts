@@ -13,7 +13,7 @@ const handleResponse = async <T>(
     await Promise.resolve(removeAuthJwt()).catch((error: unknown) => {
       console.error("Failed to remove auth JWT after 401", error);
     });
-    makeErrorToast("Unauthorized");
+    makeErrorToast("Please reconnect your wallet.");
     return {
       success: false,
       data: null,
@@ -55,7 +55,7 @@ export async function distributionPlanApiFetch<T>(endpoint: string): Promise<{
 
     return await handleResponse<T>(res);
   } catch {
-    makeErrorToast("Something went wrong, try again");
+    makeErrorToast("Couldn't complete this request. Please try again.");
     return {
       success: false,
       data: null,
@@ -89,7 +89,7 @@ export const distributionPlanApiPost = async <T>({
 
     return await handleResponse<T>(res);
   } catch {
-    makeErrorToast("Something went wrong, try again");
+    makeErrorToast("Couldn't complete this request. Please try again.");
     return {
       success: false,
       data: null,
@@ -126,7 +126,7 @@ export const distributionPlanApiDelete = async <T>({
           data: null,
         };
       } else {
-        makeErrorToast("Something went wrong, try again");
+        makeErrorToast("Couldn't complete this request. Please try again.");
         return {
           success: false,
           data: null,
@@ -134,7 +134,7 @@ export const distributionPlanApiDelete = async <T>({
       }
     }
   } catch {
-    makeErrorToast("Something went wrong, try again");
+    makeErrorToast("Couldn't complete this request. Please try again.");
     return {
       success: false,
       data: null,

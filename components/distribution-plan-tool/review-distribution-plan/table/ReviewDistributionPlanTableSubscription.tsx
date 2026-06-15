@@ -9,6 +9,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import { ReviewDistributionPlanTableItemType } from "./ReviewDistributionPlanTable";
@@ -63,13 +64,19 @@ export function SubscriptionLinks(
       );
       setToast({
         type: downloadResponse.success ? "success" : "error",
-        message: downloadResponse.message,
+        title: downloadResponse.success
+          ? "Download ready."
+          : "Couldn't download subscriptions.",
+        description: downloadResponse.success ? downloadResponse.message : "Please try again.",
+        details: downloadResponse.success ? undefined : downloadResponse.message,
       });
     } catch (error) {
       console.error("Download failed", error);
       setToast({
         type: "error",
-        message: "Something went wrong.",
+        title: "Couldn't download subscriptions.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setDownloading(false);
@@ -120,13 +127,13 @@ const download = async (
       processResults(phaseName, response);
       return {
         success: true,
-        message: "Download successful",
+        message: "Subscription lists downloaded.",
       };
     })
     .catch((error) => {
       return {
         success: false,
-        message: `Download failed: ${error}`,
+        message: getToastErrorDetails(error) ?? "Download failed.",
       };
     });
 };

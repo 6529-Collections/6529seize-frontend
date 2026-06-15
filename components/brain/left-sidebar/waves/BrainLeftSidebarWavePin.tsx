@@ -10,6 +10,7 @@ import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
 } from "@/hooks/usePinnedWavesServer";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
@@ -106,12 +107,13 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     } catch (error) {
       console.error("Error updating wave pin status:", error);
 
-      // Show user-friendly error message
-      const errorMessage =
-        error instanceof Error ? error.message : "Something went wrong";
       setToast({
         type: "error",
-        message: `Failed to ${isPinned ? "unpin" : "pin"} wave: ${errorMessage}`,
+        title: isPinned
+          ? "Couldn't unpin this wave."
+          : "Couldn't pin this wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     }
   };

@@ -11,6 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 export default function ProxyCreateAction({
   profileProxy,
@@ -49,8 +50,10 @@ export default function ProxyCreateAction({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't create this proxy action.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
