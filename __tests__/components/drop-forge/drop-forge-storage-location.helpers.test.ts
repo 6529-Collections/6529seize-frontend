@@ -26,6 +26,18 @@ describe("getDropForgeStorageLocationInfo", () => {
     });
   });
 
+  it("does not fabricate arweave resolver URLs for unrecognized raw values", () => {
+    expect(getDropForgeStorageLocationInfo("not-a-valid-location")).toEqual({
+      rawValue: "not-a-valid-location",
+      displayValue: "not-a-valid-location",
+      displayTitle: "not-a-valid-location",
+      provider: null,
+      providerBadgeLabel: null,
+      openUrl: null,
+      copyValue: "not-a-valid-location",
+    });
+  });
+
   it("treats ar:// locations as arweave locations", () => {
     expect(
       getDropForgeStorageLocationInfo(

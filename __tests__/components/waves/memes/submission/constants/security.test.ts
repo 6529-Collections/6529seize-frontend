@@ -36,12 +36,34 @@ describe("interactive media security helpers", () => {
     ).toBe(true);
   });
 
-  it("strips query params when canonicalizing interactive media URLs", () => {
+  it("preserves query params when canonicalizing interactive media URLs", () => {
     expect(
       canonicalizeInteractiveMediaUrl(
         `https://ipfs.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294`
       )
-    ).toBe(`https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html`);
+    ).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294`
+    );
+  });
+
+  it("preserves URL hashes when canonicalizing interactive media URLs", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294#preview`
+      )
+    ).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294#preview`
+    );
+  });
+
+  it("preserves query and hash for native interactive media URLs", () => {
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `ipfs://${CID_V0}/pendulums_mint_script.html?seed=374131294#preview`
+      )
+    ).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html?seed=374131294#preview`
+    );
   });
 
   it("allows media resolver interactive URLs", () => {
@@ -88,9 +110,13 @@ describe("interactive media security helpers", () => {
     ).toBeNull();
   });
 
-  it("still rejects URL hashes", () => {
+  it("preserves URL hashes on media resolver interactive URLs", () => {
     expect(
-      canonicalizeInteractiveMediaUrl(`https://ipfs.io/ipfs/${CID_V0}#hash`)
-    ).toBeNull();
+      canonicalizeInteractiveMediaUrl(
+        `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html#render`
+      )
+    ).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/pendulums_mint_script.html#render`
+    );
   });
 });

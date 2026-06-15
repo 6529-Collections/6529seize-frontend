@@ -11,7 +11,7 @@ interface DropForgeStorageLocationInfo {
   readonly rawValue: string;
   readonly displayValue: string;
   readonly displayTitle: string;
-  readonly provider: DropForgeStorageProvider;
+  readonly provider: DropForgeStorageProvider | null;
   readonly providerBadgeLabel: string | null;
   readonly openUrl: string | null;
   readonly copyValue: string | null;
@@ -50,6 +50,18 @@ const buildLocationInfo = (
     copyValue: openUrl,
   };
 };
+
+const buildRawLocationInfo = (
+  rawValue: string
+): DropForgeStorageLocationInfo => ({
+  rawValue,
+  displayValue: rawValue,
+  displayTitle: rawValue,
+  provider: null,
+  providerBadgeLabel: null,
+  openUrl: null,
+  copyValue: rawValue,
+});
 
 export function getDropForgeStorageLocationInfo(
   location: string | null | undefined
@@ -93,9 +105,5 @@ export function getDropForgeStorageLocationInfo(
     };
   }
 
-  return buildLocationInfo(trimmedValue, {
-    protocol: "arweave",
-    id: trimmedValue,
-    path: "",
-  });
+  return buildRawLocationInfo(trimmedValue);
 }

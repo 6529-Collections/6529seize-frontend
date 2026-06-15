@@ -32,6 +32,23 @@ const IPFS_PATH_PATTERN = /^\/ipfs\/([^/]+)(?:\/(.*))?$/;
 const ARWEAVE_PATH_PATTERN = /^\/([^/]+)$/;
 const IPFS_HTML_PATH_PATTERN = /\.html?$/i;
 
+const getUrlSuffix = (value: string): string => {
+  const queryIndex = value.indexOf("?");
+  const hashIndex = value.indexOf("#");
+  const indexes = [queryIndex, hashIndex]
+    .filter((index) => index >= 0)
+    .sort((a, b) => a - b);
+  const suffixStart = indexes[0];
+
+  return suffixStart === undefined ? "" : value.slice(suffixStart);
+};
+
+const appendUrlSuffix = (
+  url: string,
+  search: string,
+  hash: string
+): string => `${url}${search}${hash}`;
+
 export const canonicalizeInteractiveMediaHostname = (
   hostname: string
 ): string => {
@@ -219,7 +236,10 @@ const canonicalizeNativeInteractiveMediaUrl = (
 
   const nativeRef = parseDecentralizedMediaRef(src);
   if (nativeRef?.protocol === "ipfs" || nativeRef?.protocol === "arweave") {
-    return to6529ResolverUrl(nativeRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
+    return `${to6529ResolverUrl(
+      nativeRef,
+      DEFAULT_MEDIA_RESOLVER_ENDPOINT
+    )}${getUrlSuffix(src)}`;
   }
 
   return null;
@@ -271,7 +291,11 @@ const canonicalizeParsedInteractiveMediaUrl = (
 ): string | null => {
   const decentralizedRef = parseDecentralizedMediaRef(parsedUrl.toString());
   if (decentralizedRef) {
-    return to6529ResolverUrl(decentralizedRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT);
+    return appendUrlSuffix(
+      to6529ResolverUrl(decentralizedRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT),
+      parsedUrl.search,
+      parsedUrl.hash
+    );
   }
 
   return parsedUrl.toString();
@@ -289,10 +313,6 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
   if (!parsedUrl) return null;
 
   if (parsedUrl.username || parsedUrl.password) {
-    return null;
-  }
-
-  if (parsedUrl.hash) {
     return null;
   }
 
@@ -315,7 +335,6 @@ export const canonicalizeInteractiveMediaUrl = (src: string): string | null => {
 
   parsedUrl.username = "";
   parsedUrl.password = "";
-  parsedUrl.hash = "";
 
   return canonicalizeParsedInteractiveMediaUrl(parsedUrl);
 };
