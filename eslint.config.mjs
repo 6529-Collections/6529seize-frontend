@@ -33,6 +33,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const nextCoreWebVitalsPlugins =
   nextCoreWebVitals.find((config) => config.plugins)?.plugins ?? {};
+const nextReactPlugin = nextCoreWebVitalsPlugins.react;
+
+if (!nextReactPlugin) {
+  throw new Error(
+    "eslint-config-next/core-web-vitals did not expose the react plugin; react rule overrides would be inert."
+  );
+}
 
 const deepFreezeRuleConfig = (value, seen = new WeakSet()) => {
   if (!value || typeof value !== "object" || Object.isFrozen(value)) {
@@ -69,9 +76,7 @@ export const basePlugins = Object.freeze({
   "unused-imports": unusedImports,
   "react-hooks": reactHooks,
   "@typescript-eslint": tseslint.plugin,
-  ...(nextCoreWebVitalsPlugins.react
-    ? { react: nextCoreWebVitalsPlugins.react }
-    : {}),
+  react: nextReactPlugin,
   import: importPlugin,
   sonarjs: sonarjs,
   security: security,
