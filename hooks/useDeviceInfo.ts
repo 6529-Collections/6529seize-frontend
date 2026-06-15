@@ -13,10 +13,8 @@ interface DeviceInfo {
 
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
-  const {
-    enableLongPress: hasTouchScreen,
-    hasCoarsePointer,
-  } = useInteractionMode();
+  const { enableLongPress, hasCoarsePointer } = useInteractionMode();
+  const hasTouchScreen = enableLongPress;
 
   const getInfo = useCallback((): DeviceInfo => {
     if (typeof globalThis === "undefined" || typeof navigator === "undefined") {

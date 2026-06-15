@@ -136,4 +136,24 @@ describe("WaveSmallLeaderboardItemOutcomes", () => {
       JSON.stringify({ clickOutsideAnchor: true })
     );
   });
+
+  it("lets clicks bubble when hover tooltip mode is active", () => {
+    const parentClickHandler = jest.fn();
+    mockUseWaveRankReward.mockReturnValue({
+      nicTotal: 10,
+      repTotal: 0,
+      manualOutcomes: [],
+      isLoading: false,
+    });
+
+    render(
+      <div onClick={parentClickHandler}>
+        <WaveSmallLeaderboardItemOutcomes drop={drop} />
+      </div>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Outcome" }));
+
+    expect(parentClickHandler).toHaveBeenCalledTimes(1);
+  });
 });
