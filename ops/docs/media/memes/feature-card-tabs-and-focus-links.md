@@ -53,9 +53,24 @@
 8. `Card Activity` uses the active supported `locale` for volume labels and
    ETH numbers, activity headings, the transaction-type dropdown label/options,
    loading and empty states, and the hidden activity-table caption.
-9. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
-   for later tab switches.
-10. If a numeric card id is unresolved, the route removes `focus`, hides tab
+9. `Timeline` uses the active supported `locale` for its region label, UTC date
+   formatting, URI/TXN link labels, change field labels, and timeline media
+   accessible names.
+10. `References` uses the active supported `locale` for Meme Lab/ReMemes
+    descriptions, logo alt text, sort labels, refresh labels, ReMeme empty
+    state, ReMeme card accessible names, ReMeme link locale preservation, and
+    replica counts.
+11. The header calendar period strip uses the active supported `locale` for
+    period labels, season-link accessible text, locale-preserving season
+    links, and period number formatting.
+12. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
+    for later tab switches.
+13. The header Art Viewer uses the active supported `locale` for media action
+    accessible names and save dialog titles.
+14. The Art additional-details rows use the active supported `locale` for
+    section headings, metric labels, empty states, open/download labels, and
+    TDH/rank number formatting.
+15. If a numeric card id is unresolved, the route removes `focus`, hides tab
     content, and shows the shared next-mint fallback panel.
 
 ## Route States
@@ -114,6 +129,30 @@
   through the progressive i18n helpers.
 - Shared activity-row copy, pagination copy, and transaction-specific date and
   amount formatting remain deferred activity-surface debt.
+- Header Art Viewer fullscreen/open/download/downloading/close controls,
+  previous/next media buttons, and save dialog titles are routed through the
+  progressive i18n helpers.
+- The Art additional-details section headings, metric labels, empty states,
+  open/download labels, and TDH/rank number formatting are routed through the
+  progressive i18n helpers. Property trait names/values and media URLs remain
+  source-data copy.
+- References tab Meme Lab/ReMemes descriptions, logo alt text, sort labels,
+  refresh labels, ReMeme empty state, ReMeme card accessible names, ReMeme link
+  locale preservation, and replica counts are routed through the progressive
+  i18n helpers. ReMeme names, collection names, token IDs, and source NFT
+  metadata remain source-data copy.
+- The References refresh action is keyboard reachable with a semantic button.
+- The header calendar period strip has message-backed period labels and
+  accessible names, locale-aware number formatting, locale-preserving season
+  links, a labelled group for the secondary period cluster, and a 24px minimum
+  target on the season link.
+- Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
+  change field labels are routed through the progressive i18n helpers.
+- Timeline image alt text, video accessible labels, and HTML iframe titles use
+  message-backed text based on the localized change label.
+- Timeline metadata values render as plain text with preserved line breaks;
+  event text remains source-data copy and deeper media semantics remain
+  deferred shared-timeline debt.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the
