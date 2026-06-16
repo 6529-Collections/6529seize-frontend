@@ -267,7 +267,9 @@ function parseWaveIdFromInput(input: string): string | null {
 }
 
 function getWaveDisplayHandle(wave: ApiWave): string {
-  return wave.author?.handle ?? wave.author?.primary_address ?? "Unknown";
+  return (
+    wave.author?.handle ?? wave.author?.primary_address ?? "Unknown creator"
+  );
 }
 
 function getWaveHref(wave: ApiWave): string {
@@ -707,7 +709,12 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
         toNumber(formula.visibility_component_weights.gated_hotness_score)
   );
   const waveRepTotal = wave.wave_rep?.total_rep ?? 0;
-  const formulaSource = score.formula ? "API formula metadata" : "v1 fallback";
+  const hasFormulaMetadata = Boolean(score.formula && score.quality_gate);
+  const formulaSource = hasFormulaMetadata
+    ? "API formula metadata"
+    : "v1 fallback";
+  const fallbackReconciliationDetail =
+    "API score shown; no formula metadata returned";
 
   return (
     <section className="tw-space-y-5" aria-live="polite">
@@ -798,7 +805,11 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             <MiniEquation
               label="Quality"
               value={score.quality_score}
-              detail={`Computed ${formatScore(computedQuality)}`}
+              detail={
+                hasFormulaMetadata
+                  ? `Computed ${formatScore(computedQuality)}`
+                  : fallbackReconciliationDetail
+              }
             />
           </div>
         </div>
@@ -869,9 +880,15 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               detail: "applied again",
             },
           ]}
-          footer={`Base ${formatScore(hotnessBeforeSafety)} -> hotness ${formatScore(
-            score.hotness_score
-          )}. Computed ${formatScore(computedHotness)}.`}
+          footer={
+            hasFormulaMetadata
+              ? `Base ${formatScore(
+                  hotnessBeforeSafety
+                )} -> hotness ${formatScore(
+                  score.hotness_score
+                )}. Computed ${formatScore(computedHotness)}.`
+              : "API hotness is shown without client reconciliation because this response did not include formula metadata."
+          }
         />
 
         <FormulaResultPanel
@@ -925,9 +942,13 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               detail: score.visibility_tier,
             },
           ]}
-          footer={`Final visibility ${formatScore(
-            score.visibility_score
-          )}. Computed ${formatScore(computedVisibility)}.`}
+          footer={
+            hasFormulaMetadata
+              ? `Final visibility ${formatScore(
+                  score.visibility_score
+                )}. Computed ${formatScore(computedVisibility)}.`
+              : "API visibility is shown without client reconciliation because this response did not include formula metadata."
+          }
         />
       </div>
 

@@ -393,15 +393,15 @@ export async function searchWavesByName({
   readonly pageSize?: number | undefined;
   readonly headers?: Record<string, string> | undefined;
 }): Promise<SidebarWave[]> {
-  let failedSearches = 0;
+  let completedSearches = 0;
 
   try {
     const waves = await searchWavesV2ByName({ name, pageSize, headers });
+    completedSearches += 1;
     if (waves.length > 0) {
       return waves;
     }
   } catch {
-    failedSearches += 1;
     // Fall back while older API deployments still reject v2 SEARCH by name.
   }
 
@@ -412,26 +412,28 @@ export async function searchWavesByName({
       pageSize,
       headers,
     });
+    completedSearches += 1;
     if (waves.length > 0) {
       return waves;
     }
   } catch {
-    failedSearches += 1;
     // Public search is the last fallback for unauthenticated sessions.
   }
 
   try {
-    return await searchLegacyWavesByName({
+    const waves = await searchLegacyWavesByName({
       endpoint: "waves-public",
       name,
       pageSize,
       headers,
     });
+    completedSearches += 1;
+    return waves;
   } catch {
-    failedSearches += 1;
+    // If every search endpoint fails, show an availability error.
   }
 
-  if (failedSearches >= 3) {
+  if (completedSearches === 0) {
     throw new Error("Wave search is unavailable. Try a wave URL or id.");
   }
 
