@@ -1,5 +1,5 @@
 import { formatRelativeTime } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { DistributionCollection } from "./distributions.types";
 
@@ -25,37 +25,47 @@ const RELATIVE_TIME_UNITS = [
 
 export function getDistributionsMessage(
   key: DistributionsMessageKey,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
-  return t(DEFAULT_LOCALE, key as MessageKey, params);
+  return t(locale, key as MessageKey, params);
 }
 
 export function getDistributionCollectionLabel(
-  collection: DistributionCollection
+  collection: DistributionCollection,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
-  return t(DEFAULT_LOCALE, COLLECTION_LABEL_KEYS[collection]);
+  return t(locale, COLLECTION_LABEL_KEYS[collection]);
 }
 
 export function getDistributionTokenLinkLabel({
   collection,
   tokenId,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly collection: DistributionCollection;
   readonly tokenId: number;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   return getDistributionsMessage(
     "user.collected.stats.distributions.tokenLinkAriaLabel",
     {
-      collection: getDistributionCollectionLabel(collection),
+      collection: getDistributionCollectionLabel(collection, locale),
       tokenId,
-    }
+    },
+    locale
   );
 }
 
-export function getDistributionPhaseLabel(phase: string) {
+export function getDistributionPhaseLabel(
+  phase: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
+) {
   if (phase.toUpperCase() === "AIRDROP") {
     return getDistributionsMessage(
-      "user.collected.stats.distributions.phases.airdrop"
+      "user.collected.stats.distributions.phases.airdrop",
+      undefined,
+      locale
     );
   }
 
@@ -65,7 +75,11 @@ export function getDistributionPhaseLabel(phase: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export function formatDistributionRelativeTime(date: string, now = Date.now()) {
+export function formatDistributionRelativeTime(
+  date: string,
+  now = Date.now(),
+  locale: SupportedLocale = DEFAULT_LOCALE
+) {
   const timestamp = new Date(date).getTime();
   if (!Number.isFinite(timestamp)) {
     return "-";
@@ -77,12 +91,12 @@ export function formatDistributionRelativeTime(date: string, now = Date.now()) {
   for (const { unit, milliseconds } of RELATIVE_TIME_UNITS) {
     if (absoluteElapsed >= milliseconds) {
       return formatRelativeTime(
-        DEFAULT_LOCALE,
+        locale,
         Math.round(elapsed / milliseconds),
         unit
       );
     }
   }
 
-  return formatRelativeTime(DEFAULT_LOCALE, 0, "second");
+  return formatRelativeTime(locale, 0, "second");
 }

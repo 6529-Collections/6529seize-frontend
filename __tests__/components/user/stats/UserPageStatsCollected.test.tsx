@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import UserPageStatsCollected from "@/components/user/stats/UserPageStatsCollected";
+import { formatInteger, formatPercent } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -146,6 +147,54 @@ test("renders placeholders for sparse collected stats without NaN", () => {
     screen.getByText(
       (_, node) =>
         node?.textContent?.replace(/\s+/g, " ").trim() === "0 / 2 (0%)"
+    )
+  ).toBeInTheDocument();
+});
+
+test("formats collected stats with the active locale", () => {
+  const locale = "de-DE";
+  const localizedOwnerBalance = {
+    ...ownerBalance,
+    total_balance: 1234,
+    total_balance_rank: 1234,
+  };
+  const localizedBalanceMemes = [
+    {
+      ...balanceMemes[0],
+      balance: 1234,
+      unique: 1,
+      sets: 1234,
+      rank: 1234,
+    },
+  ];
+  const expectedUniqueProgress = `${formatInteger(
+    locale,
+    1
+  )} / ${formatInteger(locale, 2)} (${formatPercent(locale, 0.5, 0).replace(
+    /\s+/g,
+    " "
+  )})`;
+
+  render(
+    <UserPageStatsCollected
+      ownerBalance={localizedOwnerBalance}
+      balanceMemes={localizedBalanceMemes}
+      seasons={seasons}
+      locale={locale}
+    />
+  );
+
+  expect(
+    screen.getAllByText(formatInteger(locale, 1234)).length
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getAllByText(`#${formatInteger(locale, 1234)}`).length
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getByText(
+      (_, node) =>
+        node?.textContent?.replace(/\s+/g, " ").trim() ===
+        expectedUniqueProgress
     )
   ).toBeInTheDocument();
 });

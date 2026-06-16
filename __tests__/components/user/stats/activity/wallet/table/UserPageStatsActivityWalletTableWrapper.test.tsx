@@ -6,13 +6,17 @@ import { getWalletActivityEmptyMessage } from "@/components/user/stats/activity/
 jest.mock(
   "@/components/user/stats/activity/wallet/filter/UserPageStatsActivityWalletFilter",
   () => (props: any) => (
-    <div data-testid="filter" data-active={props.activeFilter} />
+    <div
+      data-testid="filter"
+      data-active={props.activeFilter}
+      data-locale={props.locale}
+    />
   )
 );
 
 jest.mock(
   "@/components/user/stats/activity/wallet/table/UserPageStatsActivityWalletTable",
-  () => () => <div data-testid="table" />
+  () => (props: any) => <div data-testid="table" data-locale={props.locale} />
 );
 
 jest.mock(
@@ -76,14 +80,23 @@ describe("UserPageStatsActivityWalletTableWrapper", () => {
         loading={true}
         setPage={jest.fn()}
         onActiveFilter={jest.fn()}
+        locale="de-DE"
       />
     );
     expect(screen.getByTestId("filter")).toHaveAttribute(
       "data-active",
       UserPageStatsActivityWalletFilterType.ALL
     );
+    expect(screen.getByTestId("filter")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
     expect(screen.getByTestId("loader")).toBeInTheDocument();
     expect(screen.getByTestId("table")).toBeInTheDocument();
+    expect(screen.getByTestId("table")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
     expect(screen.getByTestId("pagination")).toHaveAttribute("data-total", "2");
   });
 
@@ -102,10 +115,14 @@ describe("UserPageStatsActivityWalletTableWrapper", () => {
         loading={false}
         setPage={jest.fn()}
         onActiveFilter={jest.fn()}
+        locale="de-DE"
       />
     );
     expect(screen.getByRole("status")).toHaveTextContent(
-      getWalletActivityEmptyMessage(UserPageStatsActivityWalletFilterType.MINTS)
+      getWalletActivityEmptyMessage(
+        UserPageStatsActivityWalletFilterType.MINTS,
+        "de-DE"
+      )
     );
   });
 });

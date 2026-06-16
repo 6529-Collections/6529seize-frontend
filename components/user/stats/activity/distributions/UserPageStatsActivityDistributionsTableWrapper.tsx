@@ -1,5 +1,6 @@
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import CommonTablePagination from "@/components/utils/table/paginator/CommonTablePagination";
 import CommonCardSkeleton from "@/components/utils/animation/CommonCardSkeleton";
 import { getDistributionsMessage } from "./distributions.messages";
@@ -13,6 +14,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
   page,
   totalPages,
   setPage,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly data: Distribution[];
   readonly profile: ApiIdentity;
@@ -21,6 +23,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
   readonly page: number;
   readonly totalPages: number;
   readonly setPage: (page: number) => void;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   if (isFirstLoading) {
     return (
@@ -38,6 +41,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
             items={data}
             profile={profile}
             loading={loading}
+            locale={locale}
           />
           {totalPages > 1 && (
             <CommonTablePagination
@@ -52,7 +56,11 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
         </div>
       ) : (
         <output className="tw-p-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6">
-          {getDistributionsMessage("user.collected.stats.distributions.empty")}
+          {getDistributionsMessage(
+            "user.collected.stats.distributions.empty",
+            undefined,
+            locale
+          )}
         </output>
       )}
     </div>

@@ -106,6 +106,7 @@ function UserPageActivityContent({
           <UserPageStatsActivityWallet
             profile={profile}
             activeAddress={activeAddress}
+            locale={locale}
           />
         </section>
       )}
@@ -121,6 +122,7 @@ function UserPageActivityContent({
           <UserPageStatsActivityDistributions
             profile={profile}
             activeAddress={activeAddress}
+            locale={locale}
           />
         </section>
       )}
@@ -131,7 +133,10 @@ function UserPageActivityContent({
           aria-labelledby={getActivityTabId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)}
           tabIndex={0}
         >
-          <UserPageStatsActivityTDHHistory profile={profile} />
+          <UserPageStatsActivityTDHHistory
+            profile={profile}
+            locale={locale}
+          />
         </section>
       )}
     </div>

@@ -5,7 +5,7 @@ import { getDistributionsMessage } from "@/components/user/stats/activity/distri
 jest.mock(
   "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableItem",
   () => (props: any) => (
-    <tr data-testid="item">
+    <tr data-testid="item" data-locale={props.locale}>
       <td>{props.item.name}</td>
     </tr>
   )
@@ -88,4 +88,20 @@ test("renders the loading label only while loading", () => {
       getDistributionsMessage("user.collected.stats.distributions.loading")
     )
   ).toBeInTheDocument();
+});
+
+test("passes active locale to distribution table items", () => {
+  render(
+    <UserPageStatsActivityDistributionsTable
+      items={items}
+      profile={profile}
+      loading={false}
+      locale="de-DE"
+    />
+  );
+
+  expect(screen.getAllByTestId("item")[0]).toHaveAttribute(
+    "data-locale",
+    "de-DE"
+  );
 });

@@ -7,6 +7,7 @@ import {
   m,
   useAnimate,
 } from "framer-motion";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
@@ -22,11 +23,13 @@ const FILTER_LIST_ID = "wallet-activity-filter-options";
 export default function UserPageStatsActivityWalletFilter({
   activeFilter,
   setActiveFilter,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly activeFilter: UserPageStatsActivityWalletFilterType;
   readonly setActiveFilter: (
     filter: UserPageStatsActivityWalletFilterType
   ) => void;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -46,7 +49,7 @@ export default function UserPageStatsActivityWalletFilter({
     setActiveFilter(filter);
     setIsOpen(false);
   };
-  const activeFilterLabel = getWalletActivityFilterLabel(activeFilter);
+  const activeFilterLabel = getWalletActivityFilterLabel(activeFilter, locale);
 
   return (
     <div className="tw-w-full sm:tw-max-w-xs" ref={listRef}>
@@ -58,7 +61,8 @@ export default function UserPageStatsActivityWalletFilter({
           aria-controls={FILTER_LIST_ID}
           aria-label={getWalletActivityMessage(
             "user.collected.stats.walletActivity.filterButtonLabel",
-            { filter: activeFilterLabel }
+            { filter: activeFilterLabel },
+            locale
           )}
           className="tw-relative tw-flex tw-w-full tw-items-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3.5 tw-py-2.5 tw-text-base tw-font-medium tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-transparent focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 sm:tw-leading-6"
         >
@@ -97,7 +101,9 @@ export default function UserPageStatsActivityWalletFilter({
                     <ul
                       id={FILTER_LIST_ID}
                       aria-label={getWalletActivityMessage(
-                        "user.collected.stats.walletActivity.filterOptionsLabel"
+                        "user.collected.stats.walletActivity.filterOptionsLabel",
+                        undefined,
+                        locale
                       )}
                       className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-px-2"
                     >
@@ -106,9 +112,13 @@ export default function UserPageStatsActivityWalletFilter({
                           <UserPageStatsActivityWalletFilterItem
                             key={`nft-activity-${filter}`}
                             filter={filter}
-                            title={getWalletActivityFilterLabel(filter)}
+                            title={getWalletActivityFilterLabel(
+                              filter,
+                              locale
+                            )}
                             ariaLabel={getWalletActivityFilterOptionLabel(
-                              filter
+                              filter,
+                              locale
                             )}
                             activeFilter={activeFilter}
                             onFilter={onFilter}

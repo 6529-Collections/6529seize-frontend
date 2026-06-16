@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatDistributionRelativeTime,
   getDistributionCollectionLabel,
@@ -12,16 +13,21 @@ import { useEffect, useState } from "react";
 export default function UserPageStatsActivityDistributionsTableItem({
   item,
   formatNumber,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly item: DistributionTableItem;
   readonly formatNumber: (value: number) => string;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const [timeAgo, setTimeAgo] = useState<string>("");
   useEffect(() => {
-    setTimeAgo(formatDistributionRelativeTime(item.date));
-  }, [item.date]);
+    setTimeAgo(formatDistributionRelativeTime(item.date, Date.now(), locale));
+  }, [item.date, locale]);
 
-  const collectionLabel = getDistributionCollectionLabel(item.collection);
+  const collectionLabel = getDistributionCollectionLabel(
+    item.collection,
+    locale
+  );
 
   return (
     <tr className="even:tw-bg-iron-900">
@@ -33,6 +39,7 @@ export default function UserPageStatsActivityDistributionsTableItem({
           aria-label={getDistributionTokenLinkLabel({
             collection: item.collection,
             tokenId: item.tokenId,
+            locale,
           })}
           className="tw-text-iron-50 tw-no-underline hover:tw-underline"
           href={`${getCollectionPath(item.collection)}/${item.tokenId}`}

@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import UserPageStatsActivityOverview from "@/components/user/stats/UserPageStatsActivityOverview";
+import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -12,8 +13,9 @@ const profile: any = { wallets: [{ wallet: "0xabc" }] };
 
 const activityText = (
   key: Parameters<typeof t>[1],
-  params?: Parameters<typeof t>[2]
-) => t(DEFAULT_LOCALE, key, params);
+  params?: Parameters<typeof t>[2],
+  locale: Parameters<typeof t>[0] = DEFAULT_LOCALE
+) => t(locale, key, params);
 
 function mockActivityResponses() {
   (commonApiFetch as jest.Mock)
@@ -110,6 +112,34 @@ describe("UserPageStatsActivityOverview", () => {
           "user.collected.stats.activityOverview.rows.transfersIn"
         ),
       })
+    ).toBeInTheDocument();
+  });
+
+  it("formats activity overview values with the active locale", async () => {
+    const locale = "de-DE";
+    render(
+      <UserPageStatsActivityOverview
+        profile={profile}
+        activeAddress={null}
+        locale={locale}
+      />
+    );
+
+    const overviewTable = await screen.findByRole("table", {
+      name: activityText(
+        "user.collected.stats.activityOverview.tables.overviewCaption",
+        undefined,
+        locale
+      ),
+    });
+
+    expect(
+      within(overviewTable).getByText(formatInteger(locale, 1000))
+    ).toBeInTheDocument();
+    expect(
+      within(overviewTable).getByText(
+        formatNumber(locale, 1.234, { maximumFractionDigits: 2 })
+      )
     ).toBeInTheDocument();
   });
 

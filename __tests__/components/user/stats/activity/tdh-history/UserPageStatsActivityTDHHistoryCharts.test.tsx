@@ -2,13 +2,18 @@ import { render, screen } from "@testing-library/react";
 import UserPageStatsActivityTDHHistoryCharts from "@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryCharts";
 import { getTdhHistoryMessage } from "@/components/user/stats/activity/tdh-history/tdh-history.messages";
 import type { TDHHistory } from "@/entities/ITDH";
+import { formatDate } from "@/i18n/format";
 
 jest.mock(
   "@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistoryChart",
   () => ({
     __esModule: true,
     default: (props: any) => (
-      <div aria-label={props.data.ariaLabel} data-testid="chart">
+      <div
+        aria-label={props.data.ariaLabel}
+        data-testid="chart"
+        data-locale={props.locale}
+      >
         {props.data.title}:{props.data.datasets[0].label}:
         {props.data.labels.join("|")}
       </div>
@@ -46,26 +51,48 @@ describe("UserPageStatsActivityTDHHistoryCharts", () => {
         destroyed_boosted_tdh: 5,
       } as TDHHistory,
     ];
-    render(<UserPageStatsActivityTDHHistoryCharts tdhHistory={history} />);
+    const locale = "de-DE";
+    render(
+      <UserPageStatsActivityTDHHistoryCharts
+        tdhHistory={history}
+        locale={locale}
+      />
+    );
     const charts = screen.getAllByTestId("chart");
     expect(charts).toHaveLength(4);
+    expect(charts[0]).toHaveAttribute("data-locale", locale);
     expect(charts[0]).toHaveTextContent(
       getTdhHistoryMessage(
-        "user.collected.stats.tdhHistory.charts.totalTdh.title"
+        "user.collected.stats.tdhHistory.charts.totalTdh.title",
+        undefined,
+        locale
       )
     );
     expect(charts[0]).toHaveTextContent(
       getTdhHistoryMessage(
-        "user.collected.stats.tdhHistory.charts.totalTdh.totalBoosted"
+        "user.collected.stats.tdhHistory.charts.totalTdh.totalBoosted",
+        undefined,
+        locale
       )
     );
     expect(charts[0]).toHaveAccessibleName(
-      getTdhHistoryMessage("user.collected.stats.tdhHistory.chartAriaLabel", {
-        title: getTdhHistoryMessage(
-          "user.collected.stats.tdhHistory.charts.totalTdh.title"
-        ),
-      })
+      getTdhHistoryMessage(
+        "user.collected.stats.tdhHistory.chartAriaLabel",
+        {
+          title: getTdhHistoryMessage(
+            "user.collected.stats.tdhHistory.charts.totalTdh.title",
+            undefined,
+            locale
+          ),
+        },
+        locale
+      )
     );
-    expect(charts[0]).toHaveTextContent("Jan 2, 2024|Jan 1, 2024");
+    expect(charts[0]).toHaveTextContent(
+      `${formatDate(locale, history[1]!.date)}|${formatDate(
+        locale,
+        history[0]!.date
+      )}`
+    );
   });
 });

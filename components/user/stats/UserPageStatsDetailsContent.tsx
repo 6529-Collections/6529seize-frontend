@@ -33,11 +33,13 @@ export default function UserPageStatsDetailsContent({
         ownerBalance={ownerBalance}
         balanceMemes={balanceMemes}
         seasons={seasons}
+        locale={locale}
       />
 
       <UserPageStatsActivityOverview
         profile={profile}
         activeAddress={activeAddress}
+        locale={locale}
       />
 
       <UserPageActivityWrapper

@@ -14,7 +14,11 @@ jest.mock(
 jest.mock(
   "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTable",
   () => (props: any) => (
-    <div data-testid="table" data-count={props.items.length} />
+    <div
+      data-testid="table"
+      data-count={props.items.length}
+      data-locale={props.locale}
+    />
   )
 );
 
@@ -47,9 +51,14 @@ describe("UserPageStatsActivityDistributionsTableWrapper", () => {
         page={1}
         totalPages={2}
         setPage={jest.fn()}
+        locale="de-DE"
       />
     );
     expect(screen.getByTestId("table")).toHaveAttribute("data-count", "1");
+    expect(screen.getByTestId("table")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
     expect(screen.getByTestId("pagination")).toHaveAttribute("data-page", "1");
   });
 
@@ -63,10 +72,15 @@ describe("UserPageStatsActivityDistributionsTableWrapper", () => {
         page={1}
         totalPages={1}
         setPage={jest.fn()}
+        locale="de-DE"
       />
     );
     expect(screen.getByRole("status")).toHaveTextContent(
-      getDistributionsMessage("user.collected.stats.distributions.empty")
+      getDistributionsMessage(
+        "user.collected.stats.distributions.empty",
+        undefined,
+        "de-DE"
+      )
     );
   });
 });

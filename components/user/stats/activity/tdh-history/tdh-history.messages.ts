@@ -1,5 +1,5 @@
 import { formatDate, formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 
 type TdhHistoryMessageKey = Extract<
@@ -11,17 +11,22 @@ type MessageParams = Record<string, string | number>;
 
 export function getTdhHistoryMessage(
   key: TdhHistoryMessageKey,
-  params: MessageParams = {}
+  params?: MessageParams,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): string {
-  return t(DEFAULT_LOCALE, key, params);
+  return t(locale, key, params);
 }
 
-export function formatTdhHistoryDate(date: Date | string | number): string {
-  return formatDate(DEFAULT_LOCALE, date);
+export function formatTdhHistoryDate(
+  date: Date | string | number,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
+  return formatDate(locale, date);
 }
 
 export function formatTdhHistoryValue(
-  value: number | null | undefined
+  value: number | null | undefined,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): string {
-  return formatInteger(DEFAULT_LOCALE, value);
+  return formatInteger(locale, value);
 }

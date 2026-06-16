@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import type { TDHHistory } from "@/entities/ITDH";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import UserPageStatsActivityTDHHistoryChart from "./UserPageStatsActivityTDHHistoryChart";
 import {
   formatTdhHistoryDate,
@@ -86,84 +87,92 @@ const CHART_CONFIGS: ChartConfig[] = [
   },
 ];
 
+const isNumber = (n: unknown): n is number => typeof n === "number";
+
+function getData({
+  tdh,
+  dates,
+  field,
+}: {
+  readonly tdh: TDHHistory[];
+  readonly dates: TDHHistory["date"][];
+  readonly field: keyof TDHHistory;
+}): number[] {
+  return dates.map((date) => {
+    const tdhItem = tdh.find((t) => t.date === date);
+    if (!tdhItem) {
+      return 0;
+    }
+    const value = tdhItem[field];
+    return isNumber(value) ? value : 0;
+  });
+}
+
+function getDataSets({
+  tdh,
+  dates,
+  locale,
+}: {
+  readonly tdh: TDHHistory[];
+  readonly dates: TDHHistory["date"][];
+  readonly locale: SupportedLocale;
+}): ChartProps[] {
+  const labels = dates.map((date) => formatTdhHistoryDate(date, locale));
+
+  return CHART_CONFIGS.map((config) => {
+    const title = getTdhHistoryMessage(config.titleKey, undefined, locale);
+    return {
+      id: config.id,
+      title,
+      ariaLabel: getTdhHistoryMessage(
+        "user.collected.stats.tdhHistory.chartAriaLabel",
+        { title },
+        locale
+      ),
+      labels,
+      datasets: config.datasets.map((d) => ({
+        label: getTdhHistoryMessage(d.labelKey, undefined, locale),
+        data: getData({ tdh, dates, field: d.field }),
+        backgroundColor: d.color,
+        borderColor: d.color,
+      })),
+    };
+  }).filter((c) => c.datasets.some((d) => d.data.some((n) => n > 0)));
+}
+
 export default function UserPageStatsActivityTDHHistoryCharts({
   tdhHistory,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly tdhHistory: TDHHistory[];
+  readonly locale?: SupportedLocale | undefined;
 }) {
-  const [dataSets, setDataSets] = useState<ChartProps[]>([]);
-
-  const isNumber = (n: any): n is number => typeof n === "number";
-
-  const getData = ({
-    tdh,
-    dates,
-    field,
-  }: {
-    tdh: TDHHistory[];
-    dates: TDHHistory["date"][];
-    field: keyof TDHHistory;
-  }): number[] => {
-    return dates.map((date) => {
-      const tdhItem = tdh.find((t) => t.date === date);
-      if (!tdhItem) {
-        return 0;
-      }
-      const value = tdhItem[field];
-      return tdhItem && isNumber(value) ? value : 0;
-    });
-  };
-
-  const getDataSets = ({
-    tdh,
-    dates,
-  }: {
-    tdh: TDHHistory[];
-    dates: TDHHistory["date"][];
-  }): ChartProps[] => {
-    const labels = dates.map(formatTdhHistoryDate);
-
-    return CHART_CONFIGS.map((config) => {
-      const title = getTdhHistoryMessage(config.titleKey);
-      return {
-        id: config.id,
-        title,
-        ariaLabel: getTdhHistoryMessage(
-          "user.collected.stats.tdhHistory.chartAriaLabel",
-          { title }
-        ),
-        labels,
-        datasets: config.datasets.map((d) => ({
-          label: getTdhHistoryMessage(d.labelKey),
-          data: getData({ tdh, dates, field: d.field }),
-          backgroundColor: d.color,
-          borderColor: d.color,
-        })),
-      };
-    }).filter((c) => c.datasets.some((d) => d.data.some((n) => n > 0)));
-  };
-
-  useEffect(() => {
+  const dataSets = useMemo(() => {
     if (!tdhHistory.length) {
-      setDataSets([]);
-      return;
+      return [];
     }
 
     const tdhHistoryReversed = tdhHistory.toReversed();
     const tdhDates = tdhHistoryReversed.map((t) => t.date);
-    setDataSets(getDataSets({ tdh: tdhHistoryReversed, dates: tdhDates }));
-  }, [tdhHistory]);
+    return getDataSets({ tdh: tdhHistoryReversed, dates: tdhDates, locale });
+  }, [tdhHistory, locale]);
 
   return (
     <div
       aria-label={getTdhHistoryMessage(
-        "user.collected.stats.tdhHistory.chartListLabel"
+        "user.collected.stats.tdhHistory.chartListLabel",
+        undefined,
+        locale
       )}
       className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-6 sm:tw-mt-4 md:tw-gap-y-8"
       role="list"
     >
       {dataSets.map((dataSet) => (
-        <UserPageStatsActivityTDHHistoryChart key={dataSet.id} data={dataSet} />
+        <UserPageStatsActivityTDHHistoryChart
+          key={dataSet.id}
+          data={dataSet}
+          locale={locale}
+        />
       ))}
     </div>
   );

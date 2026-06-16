@@ -5,6 +5,7 @@ import CommonTablePagination from "@/components/utils/table/paginator/CommonTabl
 import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWalletFilter";
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet.types";
 import { getWalletActivityEmptyMessage } from "../wallet-activity.messages";
@@ -22,6 +23,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   loading,
   setPage,
   onActiveFilter,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly filter: UserPageStatsActivityWalletFilterType;
   readonly profile: ApiIdentity;
@@ -37,6 +39,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   readonly onActiveFilter: (
     filter: UserPageStatsActivityWalletFilterType
   ) => void;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   if (isFirstLoading) {
     return (
@@ -52,6 +55,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
         <UserPageStatsActivityWalletFilter
           activeFilter={filter}
           setActiveFilter={onActiveFilter}
+          locale={locale}
         />
         {loading && <CircleLoader />}
       </div>
@@ -64,6 +68,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
               memes={memes}
               memeLab={memeLab}
               nextgenCollections={nextgenCollections}
+              locale={locale}
             />
             {totalPages > 1 && (
               <CommonTablePagination
@@ -78,7 +83,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
           </div>
         ) : (
           <output className="tw-px-4 tw-py-4 tw-text-sm tw-italic tw-text-iron-500 sm:tw-px-6 sm:tw-text-base">
-            {getWalletActivityEmptyMessage(filter)}
+            {getWalletActivityEmptyMessage(filter, locale)}
           </output>
         )}
       </div>

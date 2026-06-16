@@ -38,15 +38,21 @@ jest.mock(
 
 jest.mock(
   "@/components/user/stats/activity/wallet/UserPageStatsActivityWallet",
-  () => () => <div data-testid="wallet" />
+  () => (props: { locale: string }) => (
+    <div data-testid="wallet" data-locale={props.locale} />
+  )
 );
 jest.mock(
   "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributions",
-  () => () => <div data-testid="dist" />
+  () => (props: { locale: string }) => (
+    <div data-testid="dist" data-locale={props.locale} />
+  )
 );
 jest.mock(
   "@/components/user/stats/activity/tdh-history/UserPageStatsActivityTDHHistory",
-  () => () => <div data-testid="tdh" />
+  () => (props: { locale: string }) => (
+    <div data-testid="tdh" data-locale={props.locale} />
+  )
 );
 
 const profile = { wallets: [] } as any;
@@ -75,6 +81,7 @@ test("hydrates the active tab from query params and updates the url on change", 
   );
 
   expect(screen.getByTestId("tdh")).toBeInTheDocument();
+  expect(screen.getByTestId("tdh")).toHaveAttribute("data-locale", "de-DE");
   expect(screen.getByTestId("tab")).toHaveAttribute("data-locale", "de-DE");
   const activePanel = screen.getByRole("tabpanel");
   expect(activePanel).toHaveAttribute(
@@ -88,10 +95,27 @@ test("hydrates the active tab from query params and updates the url on change", 
 
   await user.click(screen.getByTestId("tab"));
 
+  expect(screen.getByTestId("dist")).toHaveAttribute("data-locale", "de-DE");
+
   expect(replace).toHaveBeenCalledWith(
     "/profile?activity=distributions&page=2&locale=de-DE",
     {
       scroll: false,
     }
+  );
+});
+
+test("passes locale to the default wallet panel", () => {
+  render(
+    <UserPageActivityWrapper
+      profile={profile}
+      activeAddress={null}
+      locale="de-DE"
+    />
+  );
+
+  expect(screen.getByTestId("wallet")).toHaveAttribute(
+    "data-locale",
+    "de-DE"
   );
 });

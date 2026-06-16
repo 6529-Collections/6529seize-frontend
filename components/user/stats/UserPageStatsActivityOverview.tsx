@@ -6,7 +6,7 @@ import type {
 } from "@/entities/IAggregatedActivity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatInteger, formatNumber } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { Fragment, useEffect, useState } from "react";
@@ -207,29 +207,33 @@ const SEASON_ACTIVITY_COLUMNS: readonly SeasonColumnConfig[] = [
 ];
 
 function activityMessage(
+  locale: SupportedLocale,
   key: ActivityOverviewMessageKey,
   params: Record<string, string | number> = {}
 ): string {
-  return t(DEFAULT_LOCALE, key, params);
+  return t(locale, key, params);
 }
 
 function formatActivityValue(
+  locale: SupportedLocale,
   value: number | undefined,
   valueType: ActivityValueType
 ): string {
   if (valueType === "eth") {
-    return formatNumber(DEFAULT_LOCALE, value, { maximumFractionDigits: 2 });
+    return formatNumber(locale, value, { maximumFractionDigits: 2 });
   }
 
-  return formatInteger(DEFAULT_LOCALE, value);
+  return formatInteger(locale, value);
 }
 
 export default function UserPageStatsActivityOverview({
   profile,
   activeAddress,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const [activity, setActivity] = useState<AggregatedActivity | undefined>();
   const [activityMemes, setActivityMemes] = useState<AggregatedActivityMemes[]>(
@@ -273,14 +277,23 @@ export default function UserPageStatsActivityOverview({
     <div className="pt-2 pb-2">
       <div className="pt-2 pb-2 tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          {activityMessage("user.collected.stats.activityOverview.title")}
+          {activityMessage(
+            locale,
+            "user.collected.stats.activityOverview.title"
+          )}
         </h3>
       </div>
       <div className="pt-2 pb-2">
-        <UserPageStatsActivityOverviewTotals activity={activity} />
+        <UserPageStatsActivityOverviewTotals
+          activity={activity}
+          locale={locale}
+        />
       </div>
       <div className="pt-2 pb-2">
-        <UserPageStatsActivityOverviewMemes activity={activityMemes} />
+        <UserPageStatsActivityOverviewMemes
+          activity={activityMemes}
+          locale={locale}
+        />
       </div>
     </div>
   );
@@ -288,15 +301,20 @@ export default function UserPageStatsActivityOverview({
 
 function UserPageStatsActivityOverviewTotals({
   activity,
+  locale,
 }: {
   readonly activity: AggregatedActivity | undefined;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
         <Accordion.Button className={styles["collectedAccordionButton"]}>
           <b>
-            {activityMessage("user.collected.stats.activityOverview.overview")}
+            {activityMessage(
+              locale,
+              "user.collected.stats.activityOverview.overview"
+            )}
           </b>
         </Accordion.Button>
         <Accordion.Body className={styles["collectedAccordionBody"]}>
@@ -305,7 +323,9 @@ function UserPageStatsActivityOverviewTotals({
               <Col>
                 <Table className={styles["collectedAccordionTable"]}>
                   <UserPageStatsTableHead
+                    locale={locale}
                     caption={activityMessage(
+                      locale,
                       "user.collected.stats.activityOverview.tables.overviewCaption"
                     )}
                   />
@@ -318,6 +338,7 @@ function UserPageStatsActivityOverviewTotals({
                             key={row.labelKey}
                             row={row}
                             activity={activity}
+                            locale={locale}
                           />
                         ))}
                       </Fragment>
@@ -336,18 +357,20 @@ function UserPageStatsActivityOverviewTotals({
 function ActivityOverviewRow({
   row,
   activity,
+  locale,
 }: {
   readonly row: OverviewRowConfig;
   readonly activity: AggregatedActivity | undefined;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <tr>
       <th scope="row" className="!tw-text-[#93939f]">
-        <b>{activityMessage(row.labelKey)}</b>
+        <b>{activityMessage(locale, row.labelKey)}</b>
       </th>
       {row.fields.map((field) => (
         <td key={field} className="tw-text-right !tw-text-[#fff]">
-          {formatActivityValue(activity?.[field], row.valueType)}
+          {formatActivityValue(locale, activity?.[field], row.valueType)}
         </td>
       ))}
     </tr>
@@ -356,8 +379,10 @@ function ActivityOverviewRow({
 
 function UserPageStatsActivityOverviewMemes({
   activity,
+  locale,
 }: {
   readonly activity: AggregatedActivityMemes[];
+  readonly locale: SupportedLocale;
 }) {
   return (
     <Accordion>
@@ -365,6 +390,7 @@ function UserPageStatsActivityOverviewMemes({
         <Accordion.Button className={styles["collectedAccordionButton"]}>
           <b>
             {activityMessage(
+              locale,
               "user.collected.stats.activityOverview.memesBySeason"
             )}
           </b>
@@ -377,6 +403,7 @@ function UserPageStatsActivityOverviewMemes({
                   <Table className={styles["collectedAccordionTable"]}>
                     <caption className="tw-sr-only">
                       {activityMessage(
+                        locale,
                         "user.collected.stats.activityOverview.tables.memesBySeasonCaption"
                       )}
                     </caption>
@@ -389,7 +416,7 @@ function UserPageStatsActivityOverviewMemes({
                             scope="col"
                             className="text-right !tw-text-[#93939f]"
                           >
-                            {activityMessage(column.labelKey)}
+                            {activityMessage(locale, column.labelKey)}
                           </th>
                         ))}
                       </tr>
@@ -403,6 +430,7 @@ function UserPageStatsActivityOverviewMemes({
                           <tr>
                             <th scope="row" className="!tw-text-[#93939f]">
                               {activityMessage(
+                                locale,
                                 "user.collected.stats.activityOverview.seasonLabel",
                                 { seasonNumber: activity.season }
                               )}
@@ -413,6 +441,7 @@ function UserPageStatsActivityOverviewMemes({
                                 className="tw-text-right !tw-text-[#fff]"
                               >
                                 {formatActivityValue(
+                                  locale,
                                   activity[column.field],
                                   column.valueType
                                 )}
@@ -426,6 +455,7 @@ function UserPageStatsActivityOverviewMemes({
                 ) : (
                   <p className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300">
                     {activityMessage(
+                      locale,
                       "user.collected.stats.activityOverview.tables.memesBySeasonEmpty"
                     )}
                   </p>

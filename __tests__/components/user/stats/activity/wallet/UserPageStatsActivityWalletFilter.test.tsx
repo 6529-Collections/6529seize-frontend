@@ -26,10 +26,12 @@ describe("UserPageStatsActivityWalletFilter", () => {
   it("opens list and selects filter", async () => {
     const user = userEvent.setup();
     const setActive = jest.fn();
+    const locale = "de-DE";
     render(
       <UserPageStatsActivityWalletFilter
         activeFilter={UserPageStatsActivityWalletFilterType.ALL}
         setActiveFilter={setActive}
+        locale={locale}
       />
     );
     const trigger = screen.getByRole("button", {
@@ -37,9 +39,11 @@ describe("UserPageStatsActivityWalletFilter", () => {
         "user.collected.stats.walletActivity.filterButtonLabel",
         {
           filter: getWalletActivityFilterLabel(
-            UserPageStatsActivityWalletFilterType.ALL
+            UserPageStatsActivityWalletFilterType.ALL,
+            locale
           ),
-        }
+        },
+        locale
       ),
     });
 
@@ -49,7 +53,9 @@ describe("UserPageStatsActivityWalletFilter", () => {
     expect(
       screen.getByRole("list", {
         name: getWalletActivityMessage(
-          "user.collected.stats.walletActivity.filterOptionsLabel"
+          "user.collected.stats.walletActivity.filterOptionsLabel",
+          undefined,
+          locale
         ),
       })
     ).toBeInTheDocument();
@@ -57,7 +63,8 @@ describe("UserPageStatsActivityWalletFilter", () => {
     await user.click(
       screen.getByRole("button", {
         name: getWalletActivityFilterOptionLabel(
-          UserPageStatsActivityWalletFilterType.AIRDROPS
+          UserPageStatsActivityWalletFilterType.AIRDROPS,
+          locale
         ),
       })
     );

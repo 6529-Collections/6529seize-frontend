@@ -1,5 +1,6 @@
 import { Line } from "react-chartjs-2";
 
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { formatTdhHistoryValue } from "./tdh-history.messages";
 import {
   BarElement,
@@ -11,6 +12,7 @@ import {
   PointElement,
   Tooltip,
 } from "chart.js";
+import { useMemo } from "react";
 import type { ChartProps } from "./UserPageStatsActivityTDHHistoryCharts";
 
 ChartJS.register(
@@ -23,42 +25,49 @@ ChartJS.register(
   BarElement
 );
 
-const GRAPH_OPTIONS = {
-  scales: {
-    x: {
-      grid: {
-        color: "rgb(45, 45, 45)",
+function getGraphOptions(locale: SupportedLocale) {
+  return {
+    scales: {
+      x: {
+        grid: {
+          color: "rgb(45, 45, 45)",
+        },
+        ticks: {
+          color: "rgb(154, 154, 154)",
+        },
       },
-      ticks: {
-        color: "rgb(154, 154, 154)",
-      },
-    },
-    y: {
-      grid: {
-        color: "rgb(45, 45, 45)",
-      },
-      ticks: {
-        color: "rgb(154, 154, 154)",
-        callback: (value: string | number) =>
-          typeof value === "number" ? formatTdhHistoryValue(value) : value,
-      },
-    },
-  },
-  plugins: {
-    legend: {
-      labels: {
-        color: "rgb(200, 200, 200)",
+      y: {
+        grid: {
+          color: "rgb(45, 45, 45)",
+        },
+        ticks: {
+          color: "rgb(154, 154, 154)",
+          callback: (value: string | number) =>
+            typeof value === "number"
+              ? formatTdhHistoryValue(value, locale)
+              : value,
+        },
       },
     },
-  },
-};
+    plugins: {
+      legend: {
+        labels: {
+          color: "rgb(200, 200, 200)",
+        },
+      },
+    },
+  };
+}
 
 export default function UserPageStatsActivityTDHHistoryChart({
   data,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly data: ChartProps;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const headingId = `tdh-history-chart-${data.id}`;
+  const graphOptions = useMemo(() => getGraphOptions(locale), [locale]);
 
   return (
     <div
@@ -78,7 +87,7 @@ export default function UserPageStatsActivityTDHHistoryChart({
         <Line
           aria-label={data.ariaLabel}
           data={data}
-          options={GRAPH_OPTIONS}
+          options={graphOptions}
           role="img"
         />
       </div>

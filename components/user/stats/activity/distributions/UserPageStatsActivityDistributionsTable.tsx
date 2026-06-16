@@ -9,7 +9,7 @@ import {
 import type { Distribution } from "@/entities/IDistribution";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatInteger } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useMemo } from "react";
 import {
@@ -67,10 +67,12 @@ export default function UserPageStatsActivityDistributionsTable({
   items,
   profile,
   loading,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly items: Distribution[];
   readonly profile: ApiIdentity;
   readonly loading: boolean;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const availablePhases = useMemo(() => getAvailablePhases(items), [items]);
   const results = useMemo<DistributionTableItem[]>(
@@ -100,7 +102,9 @@ export default function UserPageStatsActivityDistributionsTable({
     <table className="tw-min-w-full tw-divide-y tw-divide-iron-700">
       <caption className="tw-sr-only">
         {getDistributionsMessage(
-          "user.collected.stats.distributions.tableCaption"
+          "user.collected.stats.distributions.tableCaption",
+          undefined,
+          locale
         )}
       </caption>
       <thead className="tw-bg-iron-900">
@@ -110,7 +114,9 @@ export default function UserPageStatsActivityDistributionsTable({
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
           >
             {getDistributionsMessage(
-              "user.collected.stats.distributions.columns.collection"
+              "user.collected.stats.distributions.columns.collection",
+              undefined,
+              locale
             )}
           </th>
           <th
@@ -118,7 +124,9 @@ export default function UserPageStatsActivityDistributionsTable({
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
             {getDistributionsMessage(
-              "user.collected.stats.distributions.columns.token"
+              "user.collected.stats.distributions.columns.token",
+              undefined,
+              locale
             )}
           </th>
           <th
@@ -126,7 +134,9 @@ export default function UserPageStatsActivityDistributionsTable({
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
             {getDistributionsMessage(
-              "user.collected.stats.distributions.columns.name"
+              "user.collected.stats.distributions.columns.name",
+              undefined,
+              locale
             )}
           </th>
 
@@ -135,7 +145,9 @@ export default function UserPageStatsActivityDistributionsTable({
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
             {getDistributionsMessage(
-              "user.collected.stats.distributions.columns.wallet"
+              "user.collected.stats.distributions.columns.wallet",
+              undefined,
+              locale
             )}
           </th>
           {availablePhases.map((phase) => (
@@ -144,7 +156,7 @@ export default function UserPageStatsActivityDistributionsTable({
               scope="col"
               className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
             >
-              {getDistributionPhaseLabel(phase)}
+              {getDistributionPhaseLabel(phase, locale)}
             </th>
           ))}
           <th
@@ -152,7 +164,9 @@ export default function UserPageStatsActivityDistributionsTable({
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
             {getDistributionsMessage(
-              "user.collected.stats.distributions.columns.minted"
+              "user.collected.stats.distributions.columns.minted",
+              undefined,
+              locale
             )}
           </th>
           <th
@@ -160,7 +174,9 @@ export default function UserPageStatsActivityDistributionsTable({
             className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pl-4"
           >
             {getDistributionsMessage(
-              "user.collected.stats.distributions.columns.total"
+              "user.collected.stats.distributions.columns.total",
+              undefined,
+              locale
             )}
           </th>
           <th
@@ -171,7 +187,9 @@ export default function UserPageStatsActivityDistributionsTable({
               <div>
                 <span className="tw-sr-only">
                   {getDistributionsMessage(
-                    "user.collected.stats.distributions.loading"
+                    "user.collected.stats.distributions.loading",
+                    undefined,
+                    locale
                   )}
                 </span>
                 <CircleLoader />
@@ -185,7 +203,8 @@ export default function UserPageStatsActivityDistributionsTable({
           <UserPageStatsActivityDistributionsTableItem
             key={`${item.collection}-${item.tokenId}-${item.wallet}`}
             item={item}
-            formatNumber={(value) => formatInteger(DEFAULT_LOCALE, value)}
+            formatNumber={(value) => formatInteger(locale, value)}
+            locale={locale}
           />
         ))}
       </tbody>

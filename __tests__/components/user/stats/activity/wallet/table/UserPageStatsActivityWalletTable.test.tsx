@@ -63,6 +63,7 @@ describe("UserPageStatsActivityWalletTable", () => {
       },
     ];
     const profile = { handle: "alice" } as ApiIdentity;
+    const locale = "de-DE";
     render(
       <UserPageStatsActivityWalletTable
         transactions={transactions}
@@ -70,13 +71,16 @@ describe("UserPageStatsActivityWalletTable", () => {
         memes={[]}
         memeLab={[]}
         nextgenCollections={[]}
+        locale={locale}
       />
     );
 
     expect(
       screen.getByRole("table", {
         name: getWalletActivityMessage(
-          "user.collected.stats.walletActivity.tableCaption"
+          "user.collected.stats.walletActivity.tableCaption",
+          undefined,
+          locale
         ),
       })
     ).toBeInTheDocument();

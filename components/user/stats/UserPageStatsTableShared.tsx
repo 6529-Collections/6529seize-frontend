@@ -1,38 +1,25 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import styles from "./UserPageStats.module.scss";
 
-function getTableColumnLabels() {
+function getTableColumnLabels(locale: SupportedLocale) {
   return {
-    total: t(
-      DEFAULT_LOCALE,
-      "user.collected.stats.details.tables.column.total"
-    ),
-    memes: t(
-      DEFAULT_LOCALE,
-      "user.collected.stats.details.tables.column.memes"
-    ),
-    nextGen: t(
-      DEFAULT_LOCALE,
-      "user.collected.stats.details.tables.column.nextGen"
-    ),
-    gradient: t(
-      DEFAULT_LOCALE,
-      "user.collected.stats.details.tables.column.gradient"
-    ),
-    memeLab: t(
-      DEFAULT_LOCALE,
-      "user.collected.stats.details.tables.column.memeLab"
-    ),
+    total: t(locale, "user.collected.stats.details.tables.column.total"),
+    memes: t(locale, "user.collected.stats.details.tables.column.memes"),
+    nextGen: t(locale, "user.collected.stats.details.tables.column.nextGen"),
+    gradient: t(locale, "user.collected.stats.details.tables.column.gradient"),
+    memeLab: t(locale, "user.collected.stats.details.tables.column.memeLab"),
   };
 }
 
 export function UserPageStatsTableHead({
   caption,
+  locale = DEFAULT_LOCALE,
 }: Readonly<{
   caption?: string;
+  locale?: SupportedLocale | undefined;
 }> = {}) {
-  const labels = getTableColumnLabels();
+  const labels = getTableColumnLabels(locale);
   const columns = [
     labels.total,
     labels.memes,

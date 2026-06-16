@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { UserPageStatsActivityWalletFilterType } from "./UserPageStatsActivityWallet.types";
 
@@ -49,23 +49,28 @@ const EMPTY_MESSAGE_KEYS: Record<
 
 export const getWalletActivityMessage = (
   key: WalletActivityMessageKey,
-  params?: Parameters<typeof t>[2]
-) => t(DEFAULT_LOCALE, key, params);
+  params?: Parameters<typeof t>[2],
+  locale: SupportedLocale = DEFAULT_LOCALE
+) => t(locale, key, params);
 
 export const getWalletActivityFilterLabel = (
-  filter: UserPageStatsActivityWalletFilterType
-) => getWalletActivityMessage(FILTER_LABEL_KEYS[filter]);
+  filter: UserPageStatsActivityWalletFilterType,
+  locale: SupportedLocale = DEFAULT_LOCALE
+) => getWalletActivityMessage(FILTER_LABEL_KEYS[filter], undefined, locale);
 
 export const getWalletActivityFilterOptionLabel = (
-  filter: UserPageStatsActivityWalletFilterType
+  filter: UserPageStatsActivityWalletFilterType,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) =>
   getWalletActivityMessage(
     "user.collected.stats.walletActivity.optionAriaLabel",
     {
-      filter: getWalletActivityFilterLabel(filter),
-    }
+      filter: getWalletActivityFilterLabel(filter, locale),
+    },
+    locale
   );
 
 export const getWalletActivityEmptyMessage = (
-  filter: UserPageStatsActivityWalletFilterType
-) => getWalletActivityMessage(EMPTY_MESSAGE_KEYS[filter]);
+  filter: UserPageStatsActivityWalletFilterType,
+  locale: SupportedLocale = DEFAULT_LOCALE
+) => getWalletActivityMessage(EMPTY_MESSAGE_KEYS[filter], undefined, locale);
