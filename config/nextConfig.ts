@@ -16,7 +16,7 @@ export function sharedConfig(
     reactStrictMode: false,
     htmlLimitedBots: HTML_LIMITED_METADATA_BOTS,
     compress: true,
-    sassOptions: { quietDeps: true },
+    sassOptions: { loadPaths: ["node_modules"], quietDeps: true },
     allowedDevOrigins: ["172.20.10.3", "192.168.1.77"],
     images: {
       loader: "default",

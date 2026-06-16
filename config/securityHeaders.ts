@@ -118,7 +118,6 @@ export function createSecurityHeaders(
     configuredIpfsGatewaySource,
     "https://cf-ipfs.com/ipfs/*",
     "https://*.twimg.com",
-    "https://video.twimg.com",
     "https://artblocks.io",
     "https://*.artblocks.io",
   ];
