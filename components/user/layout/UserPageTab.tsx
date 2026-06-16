@@ -33,6 +33,16 @@ export default function UserPageTab({
 
   const ref = useRef<HTMLAnchorElement>(null);
   const linkLabel = tab.badge ? `${tab.title} ${tab.badge}` : tab.title;
+  const tabQuery: Record<string, string> = {};
+  const addressParam = searchParams?.get("address");
+  const localeParam = searchParams?.get("locale");
+
+  if (addressParam) {
+    tabQuery.address = addressParam;
+  }
+  if (localeParam) {
+    tabQuery.locale = localeParam;
+  }
 
   const isVisibleInViewportSide = () => {
     if (!parentRef.current || !ref.current) {
@@ -62,9 +72,7 @@ export default function UserPageTab({
       ref={ref}
       href={{
         pathname: path,
-        query: searchParams?.get("address")
-          ? { address: searchParams.get("address")! }
-          : {},
+        query: tabQuery,
       }}
       className={`${
         isActive ? "tw-pointer-events-none" : ""

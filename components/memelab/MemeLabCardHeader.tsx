@@ -2,6 +2,7 @@
 
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
+import { getMemeLabCollectionHref } from "@/components/memelab/memeLabRouteParams";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
 import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
 import { MemeArtworkDetails } from "@/components/the-memes/MemePageLiveStats";
@@ -219,12 +220,12 @@ function MemeLabLiveDetails({
 }) {
   return (
     <div className="tw-w-full">
-      <MemeArtworkDetails nft={nft} layout="aligned" />
+      <MemeArtworkDetails nft={nft} layout="aligned" locale={locale} />
       <section
         aria-label="Card details"
         className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8"
       >
-        <MemeLabCardDetailsStats nftMeta={nftMeta} />
+        <MemeLabCardDetailsStats nftMeta={nftMeta} locale={locale} />
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
         <h3 className={MEME_LAB_SECTION_TITLE_CLASS}>Market Overview</h3>
@@ -266,8 +267,10 @@ function MemeLabLiveDetails({
 
 function MemeLabCardDetailsStats({
   nftMeta,
+  locale,
 }: {
   readonly nftMeta: LabExtendedData;
+  readonly locale: SupportedLocale;
 }) {
   const websiteUrls = getMemeLabWebsiteUrls(nftMeta.website);
 
@@ -307,9 +310,10 @@ function MemeLabCardDetailsStats({
       />
       <MemeLabInfoItem label="Collection">
         <Link
-          href={`/meme-lab/collection/${encodeURIComponent(
-            nftMeta.metadata_collection.replaceAll(" ", "-")
-          )}`}
+          href={getMemeLabCollectionHref({
+            collectionName: nftMeta.metadata_collection,
+            locale,
+          })}
           className="tw-text-white tw-no-underline hover:tw-text-iron-300"
         >
           {nftMeta.metadata_collection}

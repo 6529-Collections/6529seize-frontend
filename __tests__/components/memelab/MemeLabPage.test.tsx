@@ -208,6 +208,13 @@ const expectAbortSignalOptions = expect.objectContaining({
   signal: expect.objectContaining({ aborted: false }),
 });
 
+const MEME_LAB_TEST_MINT_DATE_FORMAT = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+} satisfies Intl.DateTimeFormatOptions;
+
 function mockSearchParamsWithFocus(
   focus: MEME_FOCUS | null = null,
   locale?: string
@@ -1142,6 +1149,20 @@ describe("MemeLabPageComponent", () => {
       expect(
         screen.getByRole("link", { name: "Back to Meme Lab" })
       ).toHaveAttribute("href", "/meme-lab?locale=de-DE");
+      expect(
+        screen.getByText(
+          new Intl.DateTimeFormat(
+            "de-DE",
+            MEME_LAB_TEST_MINT_DATE_FORMAT
+          ).format(new Date("2023-01-01"))
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Test Collection" })
+      ).toHaveAttribute(
+        "href",
+        "/meme-lab/collection/Test-Collection?locale=de-DE"
+      );
 
       await act(async () => {
         screen.getByRole("button", { name: "Collectors" }).click();

@@ -10,26 +10,41 @@ jest.mock("next/navigation", () => ({
   useParams: jest.fn(),
   useSearchParams: jest.fn(),
 }));
-jest.mock("next/link", () => (props: any) => (
-  <a
-    data-testid="link"
-    href={
-      props.href.pathname +
-      (props.href.query ? "?address=" + props.href.query.address : "")
-    }
-    className={props.className}
-    aria-current={props["aria-current"]}
-    aria-label={props["aria-label"]}
-  >
-    {props.children}
-  </a>
-));
+jest.mock("next/link", () => (props: any) => {
+  const queryString = props.href.query
+    ? new URLSearchParams(props.href.query).toString()
+    : "";
+  const href =
+    typeof props.href === "string"
+      ? props.href
+      : `${props.href.pathname}${queryString ? `?${queryString}` : ""}`;
+
+  return (
+    <a
+      data-testid="link"
+      href={href}
+      className={props.className}
+      aria-current={props["aria-current"]}
+      aria-label={props["aria-label"]}
+    >
+      {props.children}
+    </a>
+  );
+});
 
 describe("UserPageTab", () => {
   beforeEach(() => {
     (useParams as jest.Mock).mockReturnValue({ user: "bob" });
+    const searchParams = new URLSearchParams({
+      address: "0x1",
+      locale: "DE-de",
+      collection: "Test Collection",
+      page: "2",
+      szn: "1",
+      "sort-by": "date",
+    });
     (useSearchParams as jest.Mock).mockReturnValue({
-      get: (k: string) => (k === "address" ? "0x1" : null),
+      get: (k: string) => searchParams.get(k),
     });
   });
 
@@ -43,7 +58,7 @@ describe("UserPageTab", () => {
       />
     );
     const link = screen.getByTestId("link");
-    expect(link).toHaveAttribute("href", "/bob/?address=0x1");
+    expect(link).toHaveAttribute("href", "/bob/?address=0x1&locale=DE-de");
     expect(link).toHaveAttribute("aria-label", "Identity");
     expect(link).toHaveClass("tw-pointer-events-none");
     expect(link).toHaveAttribute("aria-current", "page");
