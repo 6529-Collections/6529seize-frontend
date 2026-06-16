@@ -86,6 +86,18 @@ Transfer mode is part of the Native collected view (not a separate route).
    - Activity Overview tables include screen-reader captions and row headers
      for assistive technologies
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
+     - lower Activity tab labels and the tab-list accessible name are
+       message-backed from the source locale
+     - lower Activity tabs expose tab/panel relationships and support keyboard
+       arrow, Home, and End navigation
+   - `Wallet Activity`
+     - Wallet Activity heading, filter labels, filter accessible names, empty
+       states, and transaction table caption are message-backed from the source
+       locale
+   - `Distributions`
+     - Distributions heading, empty state, table caption, table headings,
+       collection names, token link accessible names, and relative time display
+       are message-backed or locale-formatted from the source locale
    - `Boost Breakdown`
    - Boost Breakdown static labels and table headings are message-backed from
      the source locale; the table exposes a screen-reader caption, row

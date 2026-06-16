@@ -161,6 +161,103 @@ const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   } as const
 );
 
+const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
+  "user.collected.stats.activityTabs",
+  {
+    listLabel: "Activity details sections",
+    walletActivity: "Wallet Activity",
+    distributions: "Distributions",
+    tdhHistory: "TDH History",
+  } as const
+);
+
+const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
+  "user.collected.stats.walletActivity",
+  {
+    title: "Wallet Activity",
+    filterButtonLabel: "Wallet activity filter: {filter}",
+    filterOptionsLabel: "Wallet activity filter options",
+    optionAriaLabel: "Show {filter} wallet activity",
+    tableCaption: "Wallet activity transactions",
+    "filters.all": "All",
+    "filters.airdrops": "Airdrops",
+    "filters.mints": "Mints",
+    "filters.sales": "Sales",
+    "filters.purchases": "Purchases",
+    "filters.transfers": "Transfers",
+    "filters.burns": "Burns",
+    "empty.all": "No transactions",
+    "empty.airdrops": "No airdrops",
+    "empty.mints": "No mints",
+    "empty.sales": "No sales",
+    "empty.purchases": "No purchases",
+    "empty.transfers": "No transfers",
+    "empty.burns": "No burns",
+  } as const
+);
+
+const USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES = objectMessages(
+  "user.collected.stats.distributions",
+  {
+    title: "Distributions",
+    empty: "No distributions found",
+    loading: "Loading distributions",
+    tableCaption: "Profile distribution claims",
+    tokenLinkAriaLabel: "View {collection} token #{tokenId}",
+    "columns.collection": "Collection",
+    "columns.token": "Token",
+    "columns.name": "Name",
+    "columns.wallet": "Wallet",
+    "columns.minted": "Minted",
+    "columns.total": "Total",
+    "collections.memes": "The Memes",
+    "collections.gradients": "6529Gradient",
+    "collections.memeLab": "Meme Lab",
+    "phases.airdrop": "Airdrop",
+  } as const
+);
+
+const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
+  "user.collected.stats.tdhHistory",
+  {
+    title: "TDH History",
+    empty: "No TDH history found",
+    loading: "Loading TDH history",
+    chartListLabel: "TDH history charts",
+    chartAriaLabel: "{title} chart",
+    "charts.totalTdh.title": "Total TDH",
+    "charts.totalTdh.totalBoosted": "Total Boosted TDH",
+    "charts.netDailyChange.title": "Net TDH Daily Change",
+    "charts.netDailyChange.netBoosted": "Net Boosted TDH",
+    "charts.createdDailyChange.title": "Created TDH Daily Change",
+    "charts.createdDailyChange.createdBoosted": "Created Boosted TDH",
+    "charts.destroyedDailyChange.title": "Destroyed TDH Daily Change",
+    "charts.destroyedDailyChange.destroyedBoosted": "Destroyed Boosted TDH",
+  } as const
+);
+
+const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
+  navigationLabel: "Profile sections",
+  scrollLeft: "Scroll profile sections left",
+  scrollRight: "Scroll profile sections right",
+  identity: "Identity",
+  brain: "Brain",
+  curation: "Curation",
+  collected: "Collected",
+  xtdh: "xTDH",
+  subscriptions: "Subscriptions",
+  proxy: "Proxy",
+  "badges.beta": "Beta",
+} as const);
+
+const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "modal.title": "Followers",
+  "list.label": "Followers",
+  "list.loading": "Loading followers",
+  "profile.linkAriaLabel": "View {handle}'s profile",
+  "profile.avatarAlt": "{handle}'s profile image",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -668,6 +765,10 @@ export const EN_US_MESSAGES = {
   ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
   ...USER_COLLECTED_STATS_BOOST_MESSAGES,
   ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
+  ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
+  ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
+  ...USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES,
+  ...USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES,
   "user.collected.networkCards.listLabel": "Collected network cards",
   "user.collected.networkCards.empty": "No network tokens found",
   "user.collected.networkCards.defaultCollection": "Network",
@@ -676,6 +777,8 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.tokenLabel": "#{tokenId}",
   "user.collected.networkCards.xtdh": "xTDH",
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  ...USER_PROFILE_TABS_MESSAGES,
+  ...FOLLOWERS_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 
