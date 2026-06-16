@@ -7,6 +7,7 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import { getMemesSortLabel } from "@/components/the-memes/theMemesI18n";
+import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
 import { publicEnv } from "@/config/env";
@@ -148,8 +149,11 @@ function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
   return found === undefined ? sort.toLowerCase() : found[0].toLowerCase();
 }
 
-export default function TheMemesComponent() {
-  const locale = DEFAULT_LOCALE;
+export default function TheMemesComponent({
+  locale = DEFAULT_LOCALE,
+}: Readonly<{
+  locale?: SupportedLocale;
+}> = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -206,15 +210,15 @@ export default function TheMemesComponent() {
   useEffect(() => {
     if (!routerLoaded) return;
 
-    let queryString = `sort=${getSortQueryParam(
-      sort,
-      volumeType
-    )}&sort_dir=${sortDir.toLowerCase()}`;
-    if (seasonId !== null) {
-      queryString += `&szn=${seasonId}`;
-    }
-    router.push(`the-memes?${queryString}`);
-  }, [sort, sortDir, seasonId, volumeType, router, routerLoaded]);
+    router.push(
+      getTheMemesBrowseHref({
+        locale,
+        seasonId,
+        sort: getSortQueryParam(sort, volumeType),
+        sortDir: sortDir.toLowerCase(),
+      })
+    );
+  }, [locale, sort, sortDir, seasonId, volumeType, router, routerLoaded]);
 
   useEffect(() => {
     const memesMap = new Map<

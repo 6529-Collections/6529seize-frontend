@@ -724,6 +724,9 @@ describe("MemePage navigation integration", () => {
     await waitFor(
       () => {
         expect(
+          screen.getByRole("link", { name: "Back to The Memes" })
+        ).toHaveAttribute("href", "/the-memes?locale=de-DE");
+        expect(
           screen.getByRole("link", { name: "View SZN 1 cards" })
         ).toHaveAttribute(
           "href",

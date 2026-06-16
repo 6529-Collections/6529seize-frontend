@@ -3,6 +3,7 @@
 import CollectionCardMetadataRow from "@/components/collection-page/CollectionCardMetadataRow";
 import CollectionCardMetricLine from "@/components/collection-page/CollectionCardMetricLine";
 import NFTImage from "@/components/nft-image/NFTImage";
+import { getTheMemesDetailHref } from "@/components/the-memes/theMemesRouteParams";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
@@ -138,7 +139,7 @@ export default function TheMemesCard({
 
   return (
     <Link
-      href={`/the-memes/${nft.id}`}
+      href={getTheMemesDetailHref({ id: nft.id, locale: resolvedLocale })}
       aria-label={t(resolvedLocale, "theMemes.card.linkAriaLabel", {
         name: nft.name,
         tokenId,

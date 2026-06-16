@@ -235,7 +235,7 @@ describe("TheMemesCard", () => {
 
     expect(
       screen.getByRole("link", { name: "Test Meme, Karte #6.529 ansehen" })
-    ).toHaveAttribute("href", "/the-memes/6529");
+    ).toHaveAttribute("href", "/the-memes/6529?locale=de-DE");
     expect(screen.getByText("Editionsgröße:")).toBeInTheDocument();
     expect(screen.getByText("1.000")).toHaveClass("tw-text-iron-200");
   });

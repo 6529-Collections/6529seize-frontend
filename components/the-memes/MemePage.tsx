@@ -10,6 +10,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
+import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
@@ -572,7 +573,10 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
-                  href="/the-memes"
+                  href={getTheMemesRouteHrefWithLocale({
+                    href: "/the-memes",
+                    locale,
+                  })}
                   aria-label={t(locale, "theMemes.detail.backLink.ariaLabel")}
                   className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >

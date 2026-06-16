@@ -8,7 +8,7 @@ import {
   displayedYearNumberFromIndex,
   getSeasonIndexForDate,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import { getRouteHrefWithLocale } from "@/components/rememes/rememesRouteParams";
+import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -80,7 +80,7 @@ export default function MemeCalendarPeriods({
   const seasonLinkHref =
     seasonHref === undefined
       ? undefined
-      : getRouteHrefWithLocale({ href: seasonHref, locale });
+      : getTheMemesRouteHrefWithLocale({ href: seasonHref, locale });
 
   return (
     <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
