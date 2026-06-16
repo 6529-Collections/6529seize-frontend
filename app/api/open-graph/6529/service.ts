@@ -28,7 +28,7 @@ import type {
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
-const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 
 type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -547,25 +547,6 @@ async function resolveProfileHref(
   return handle ? `/${handle.replace(/^@/, "")}` : undefined;
 }
 
-function shouldUseExtendedEditionSize(
-  nft: NftRecord,
-  extendedEditionSize: number | undefined
-): boolean {
-  if (extendedEditionSize === undefined) {
-    return false;
-  }
-
-  const supply = readNumber(nft.supply);
-  const mintDate = new Date(readString(nft.mint_date) ?? "");
-  const looksLikeFreshLiveMintCount =
-    supply !== undefined &&
-    extendedEditionSize === supply &&
-    !Number.isNaN(mintDate.getTime()) &&
-    Date.now() - mintDate.getTime() < LIVE_MINT_FALLBACK_WINDOW_MS;
-
-  return !looksLikeFreshLiveMintCount;
-}
-
 function readMemeSeason(
   nft: MemesRecord,
   metadata: Record<string, unknown> | null
@@ -615,14 +596,8 @@ async function fetchTheMemesPreview(
   const claimEditionSize = readPositiveNumber(claim?.edition_size);
   const mintStatEditionSize = readPositiveNumber(mintStat?.total_count);
   const extendedEditionSize = readPositiveNumber(extended?.edition_size);
-  const fallbackEditionSize = shouldUseExtendedEditionSize(
-    source,
-    extendedEditionSize
-  )
-    ? extendedEditionSize
-    : undefined;
   const editionSize =
-    claimEditionSize ?? mintStatEditionSize ?? fallbackEditionSize;
+    claimEditionSize ?? mintStatEditionSize ?? extendedEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRate = readPositiveNumber(source.hodl_rate);
   const mintDate = formatMintDate(source.mint_date);
@@ -811,18 +786,71 @@ function sortNextGenTraits(
     });
 }
 
-async function fetchNextGenPreview(
+async function fetchNextGenToken(
   tokenId: string,
-  requestUrl: URL,
   context?: ApiContext
-): Promise<SeizeCollectionLinkPreview> {
+): Promise<NextGenToken | null> {
   const token = await fetchOptionalApiJson<NextGenToken>(
     `nextgen/tokens/${tokenId}`,
     undefined,
     context
   );
 
-  if (!token || token.pending) {
+  return token && !token.pending ? token : null;
+}
+
+async function fetchNextGenCollections(
+  context?: ApiContext
+): Promise<readonly NextGenCollection[]> {
+  const page = await fetchOptionalApiJson<ApiPage<NextGenCollection>>(
+    "nextgen/collections",
+    { page_size: 100 },
+    context
+  );
+
+  return page?.data ?? [];
+}
+
+async function resolveNextGenToken(
+  tokenId: string,
+  context?: ApiContext
+): Promise<NextGenToken | null> {
+  const directToken = await fetchNextGenToken(tokenId, context);
+  if (directToken) {
+    return directToken;
+  }
+
+  const normalizedTokenId = readNumber(tokenId);
+  if (
+    normalizedTokenId === undefined ||
+    !Number.isInteger(normalizedTokenId) ||
+    normalizedTokenId < 0 ||
+    normalizedTokenId >= NEXTGEN_TOKEN_ID_MULTIPLIER
+  ) {
+    return null;
+  }
+
+  const collections = await fetchNextGenCollections(context);
+  for (const collection of collections) {
+    const expandedTokenId =
+      collection.id * NEXTGEN_TOKEN_ID_MULTIPLIER + normalizedTokenId;
+    const token = await fetchNextGenToken(String(expandedTokenId), context);
+    if (token?.normalised_id === normalizedTokenId) {
+      return token;
+    }
+  }
+
+  return null;
+}
+
+async function fetchNextGenPreview(
+  tokenId: string,
+  requestUrl: URL,
+  context?: ApiContext
+): Promise<SeizeCollectionLinkPreview> {
+  const token = await resolveNextGenToken(tokenId, context);
+
+  if (!token) {
     throw new Error("NextGen token was not found.");
   }
 

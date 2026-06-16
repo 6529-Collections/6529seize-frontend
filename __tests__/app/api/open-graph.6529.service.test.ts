@@ -173,6 +173,63 @@ describe("createFirstParty6529Plan", () => {
     expect(stagingPlan?.cacheKey).toBe("6529:staging:the-memes:/the-memes/509");
   });
 
+  it("uses public extended data for The Memes edition size when claim data is unavailable", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nfts") {
+        return jsonResponse({
+          data: [
+            {
+              id: 509,
+              name: "The Collective Synapse",
+              supply: 173,
+              artist: "elnaz555",
+              artist_seize_handle: "elnaz555",
+              hodl_rate: 22.7803,
+              mint_date: "2026-06-15T00:00:00.000Z",
+              thumbnail: "https://cdn.6529.io/memes/509.png",
+              metadata: {
+                attributes: [{ trait_type: "Type - Season", value: 15 }],
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/memes_extended_data") {
+        return jsonResponse({
+          data: [{ id: 509, edition_size: 173, season: 15 }],
+        });
+      }
+
+      if (
+        url.pathname ===
+        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
+      ) {
+        return jsonResponse("Unauthorized", 401);
+      }
+
+      if (url.pathname === "/api/memes-mint-stats/509") {
+        return jsonResponse({}, 404);
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "173" },
+      { label: "TDH rate", value: "22.78" },
+      { label: "Season", value: "15" },
+      { label: "Mint date", value: "15 Jun 2026" },
+    ]);
+  });
+
   it("only matches exact 6529 hosts and subdomains", () => {
     expect(
       createFirstParty6529Plan(new URL("https://6529.io/the-memes/509"))
@@ -405,9 +462,27 @@ describe("createFirstParty6529Plan", () => {
     mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
       const url = readFetchUrl(input);
 
+      if (url.pathname === "/api/nextgen/tokens/514") {
+        return jsonResponse({}, 404);
+      }
+
+      if (url.pathname === "/api/nextgen/collections") {
+        return jsonResponse({
+          data: [
+            {
+              id: 1,
+              name: "Pebbles",
+              artist: "Zeblocks",
+              total_supply: 1000,
+            },
+          ],
+        });
+      }
+
       if (url.pathname === "/api/nextgen/tokens/10000000514") {
         return jsonResponse({
           id: 10000000514,
+          normalised_id: 514,
           pending: false,
           name: "Pebbles #514",
           collection_id: 1,
@@ -475,7 +550,7 @@ describe("createFirstParty6529Plan", () => {
     });
 
     const plan = createFirstParty6529Plan(
-      new URL("https://6529.io/nextgen/token/10000000514")
+      new URL("https://6529.io/nextgen/token/514")
     );
 
     expect(plan).not.toBeNull();
@@ -498,5 +573,14 @@ describe("createFirstParty6529Plan", () => {
       { label: "Mint Type", value: "Public" },
       { label: "Color Density", value: "Sparse" },
     ]);
+    expect(
+      mockFetch.mock.calls.map((call) => readFetchUrl(call[0]).toString())
+    ).toEqual(
+      expect.arrayContaining([
+        "https://api.test/api/nextgen/tokens/514",
+        "https://api.test/api/nextgen/collections?page_size=100",
+        "https://api.test/api/nextgen/tokens/10000000514",
+      ])
+    );
   });
 });
