@@ -16,6 +16,21 @@ function namespaceMessages<
   ) as NamespacedMessages<Prefix, Entries>;
 }
 
+type MessageMap = Record<string, string>;
+
+type ObjectMessages<Prefix extends string, Entries extends MessageMap> = {
+  readonly [Entry in keyof Entries as `${Prefix}.${Entry & string}`]: Entries[Entry];
+};
+
+function objectMessages<Prefix extends string, Entries extends MessageMap>(
+  prefix: Prefix,
+  entries: Entries
+): ObjectMessages<Prefix, Entries> {
+  return Object.fromEntries(
+    Object.entries(entries).map(([key, value]) => [`${prefix}.${key}`, value])
+  ) as ObjectMessages<Prefix, Entries>;
+}
+
 const REMEMES_DETAIL_MESSAGES = namespaceMessages("rememes.detail", [
   ["documentTitle", "{name} | ReMemes"],
   ["browserTitle", "{name} | ReMemes | 6529.io"],
@@ -46,6 +61,202 @@ const REMEMES_DETAIL_MESSAGES = namespaceMessages("rememes.detail", [
   ["references.artistName", "Artist Name: {artist}"],
   ["references.artistProfile", "Artist Profile:"],
 ] as const);
+
+const USER_COLLECTED_STATS_MESSAGES = namespaceMessages(
+  "user.collected.stats",
+  [
+    ["metrics.nextGen", "NextGen"],
+    ["metrics.memeSets", "Meme Sets"],
+    ["metrics.memes", "Memes"],
+    ["metrics.gradients", "Gradients"],
+    ["metrics.boost", "Boost"],
+    ["metrics.unique", "unique x{value}"],
+    ["metric.value", "x{value}"],
+    ["details.show", "Details"],
+    ["details.hide", "Hide Details"],
+    ["details.unavailable", "Stats are unavailable for this profile."],
+    ["seasons.title", "Seasons"],
+    ["seasons.startedCount", "{started}/{total} started"],
+    ["seasons.showLess", "Show less"],
+    ["seasons.showMore", "+{count} more"],
+    ["seasons.showMoreAriaLabel", "Show {count} more started seasons"],
+    ["seasons.unseized", "Unseized"],
+    ["seasonTile.sets.zero", "0 sets"],
+    ["seasonTile.sets.one", "{count} set"],
+    ["seasonTile.sets.many", "{count} sets"],
+    ["seasonTile.label", "SZN{seasonNumber}"],
+    ["seasonTile.toNextSet", "{held}/{total} to set {setNumber}"],
+    ["seasonTile.setComplete", "Set {count} complete"],
+  ] as const
+);
+
+const USER_COLLECTED_STATS_DETAILS_MESSAGES = objectMessages(
+  "user.collected.stats.details",
+  {
+    "collected.title": "Collected",
+    overview: "Overview",
+    "tables.overviewCaption": "Collected holdings summary by collection",
+    "tables.column.total": "Total",
+    "tables.column.memes": "Memes",
+    "tables.column.nextGen": "NextGen",
+    "tables.column.gradient": "Gradient",
+    "tables.column.memeLab": "Meme Lab",
+    "rows.cards": "Cards",
+    "rows.rank": "Rank",
+    "rows.tdh": "TDH",
+    "rows.noTdh": "* No TDH",
+    memesBySeason: "Memes Breakdown By Season",
+    "tables.memesBySeasonCaption": "Collected Memes breakdown by season",
+    "tables.column.unique": "Unique",
+    "tables.column.sets": "Sets",
+    seasonLabel: "Season {seasonNumber}",
+    uniqueProgress: "{held} / {total}",
+    uniqueProgressPercent: "({percent})",
+  } as const
+);
+
+const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
+  "user.collected.stats.boostBreakdown",
+  {
+    title: "Boost Breakdown",
+    versionLink: "TDH Version: {version}",
+    tableCaption: "TDH boost breakdown by source",
+    "columns.type": "Type",
+    "columns.potential": "Potential Boost",
+    "columns.actual": "Actual Boost",
+    "groups.memes": "Memes",
+    "rows.fullCollectionSet": "Full Collection Set",
+    "rows.genesisSet": "Genesis Set",
+    "rows.nakamoto": "Nakamoto",
+    "rows.gradients": "Gradients",
+    "rows.total": "TOTAL BOOST",
+    seasonLabel: "SZN{seasonNumber}",
+    "info.totalPotential": "Total Potential Boost",
+    "info.totalActual": "Total Actual Boost",
+    "info.ariaLabel": "Show boost detail",
+  } as const
+);
+
+const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
+  "user.collected.stats.activityOverview",
+  {
+    title: "Activity Overview",
+    overview: "Overview",
+    memesBySeason: "Memes Breakdown By Season",
+    "tables.overviewCaption": "Collected activity summary by collection",
+    "tables.memesBySeasonCaption":
+      "Collected Meme activity breakdown by season",
+    "tables.memesBySeasonEmpty": "No Meme activity by season yet.",
+    "rows.airdrops": "Airdrops",
+    "rows.transfersIn": "Transfers In",
+    "rows.mints": "Mints",
+    "rows.mintsEth": "Mints (ETH)",
+    "rows.purchases": "Purchases",
+    "rows.purchasesEth": "Purchases (ETH)",
+    "rows.transfersOut": "Transfers Out",
+    "rows.burns": "Burns",
+    "rows.sales": "Sales",
+    "rows.salesEth": "Sales (ETH)",
+    seasonLabel: "Season {seasonNumber}",
+  } as const
+);
+
+const USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES = objectMessages(
+  "user.collected.stats.activityTabs",
+  {
+    listLabel: "Activity details sections",
+    walletActivity: "Wallet Activity",
+    distributions: "Distributions",
+    tdhHistory: "TDH History",
+  } as const
+);
+
+const USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES = objectMessages(
+  "user.collected.stats.walletActivity",
+  {
+    title: "Wallet Activity",
+    filterButtonLabel: "Wallet activity filter: {filter}",
+    filterOptionsLabel: "Wallet activity filter options",
+    optionAriaLabel: "Show {filter} wallet activity",
+    tableCaption: "Wallet activity transactions",
+    "filters.all": "All",
+    "filters.airdrops": "Airdrops",
+    "filters.mints": "Mints",
+    "filters.sales": "Sales",
+    "filters.purchases": "Purchases",
+    "filters.transfers": "Transfers",
+    "filters.burns": "Burns",
+    "empty.all": "No transactions",
+    "empty.airdrops": "No airdrops",
+    "empty.mints": "No mints",
+    "empty.sales": "No sales",
+    "empty.purchases": "No purchases",
+    "empty.transfers": "No transfers",
+    "empty.burns": "No burns",
+  } as const
+);
+
+const USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES = objectMessages(
+  "user.collected.stats.distributions",
+  {
+    title: "Distributions",
+    empty: "No distributions found",
+    loading: "Loading distributions",
+    tableCaption: "Profile distribution claims",
+    tokenLinkAriaLabel: "View {collection} token #{tokenId}",
+    "columns.collection": "Collection",
+    "columns.token": "Token",
+    "columns.name": "Name",
+    "columns.wallet": "Wallet",
+    "columns.minted": "Minted",
+    "columns.total": "Total",
+    "collections.memes": "The Memes",
+    "collections.gradients": "6529Gradient",
+    "collections.memeLab": "Meme Lab",
+    "phases.airdrop": "Airdrop",
+  } as const
+);
+
+const USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES = objectMessages(
+  "user.collected.stats.tdhHistory",
+  {
+    title: "TDH History",
+    empty: "No TDH history found",
+    loading: "Loading TDH history",
+    chartListLabel: "TDH history charts",
+    chartAriaLabel: "{title} chart",
+    "charts.totalTdh.title": "Total TDH",
+    "charts.totalTdh.totalBoosted": "Total Boosted TDH",
+    "charts.netDailyChange.title": "Net TDH Daily Change",
+    "charts.netDailyChange.netBoosted": "Net Boosted TDH",
+    "charts.createdDailyChange.title": "Created TDH Daily Change",
+    "charts.createdDailyChange.createdBoosted": "Created Boosted TDH",
+    "charts.destroyedDailyChange.title": "Destroyed TDH Daily Change",
+    "charts.destroyedDailyChange.destroyedBoosted": "Destroyed Boosted TDH",
+  } as const
+);
+
+const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
+  navigationLabel: "Profile sections",
+  scrollLeft: "Scroll profile sections left",
+  scrollRight: "Scroll profile sections right",
+  identity: "Identity",
+  brain: "Brain",
+  curation: "Curation",
+  collected: "Collected",
+  xtdh: "xTDH",
+  subscriptions: "Subscriptions",
+  proxy: "Proxy",
+  "badges.beta": "Beta",
+} as const);
+
+const FOLLOWERS_MESSAGES = objectMessages("followers", {
+  "modal.title": "Followers",
+  "list.label": "Followers",
+  "list.loading": "Loading followers",
+  "profile.linkAriaLabel": "View {handle}'s profile",
+  "profile.avatarAlt": "{handle}'s profile image",
+} as const);
 
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
@@ -457,6 +668,9 @@ export const EN_US_MESSAGES = {
   "memeLab.sorting.descendingLabel": "Sort descending",
   "memeLab.sorting.sortButtonLabel": "Sort by {sort}",
   "memeLab.loading.fetching": "Fetching",
+  "memeLab.results.gridLabel": "Meme Lab cards",
+  "memeLab.results.artistGridLabel": "Meme Lab cards by {artistName}",
+  "memeLab.results.collectionGridLabel": "Meme Lab cards in {collectionName}",
   "memeLab.collection.view": "view",
   "memeLab.collection.viewAriaLabel": "View {collectionName} collection",
   "memeLab.card.linkAriaLabel": "View {name}, Meme Lab card #{tokenId}",
@@ -493,6 +707,7 @@ export const EN_US_MESSAGES = {
   "rememes.logoAlt": "ReMemes",
   "rememes.actions.add": "Add ReMeme",
   "rememes.results.count": "(x{count})",
+  "rememes.results.gridLabel": "ReMemes results",
   "rememes.sorting.filterLabel": "Sort",
   "rememes.sort.random": "Random",
   "rememes.sort.recentlyAdded": "Recently Added",
@@ -508,6 +723,62 @@ export const EN_US_MESSAGES = {
   "rememes.card.linkAriaLabel": "View {name}, ReMeme #{tokenId}",
   "rememes.card.tokenAriaLabel": "Token #{tokenId}",
   "rememes.card.replicaCount": "(x{count})",
+  "user.collected.cards.listLabel": "Collected cards",
+  "user.collected.empty.noCards": "No cards to display",
+  "user.collected.empty.fullSetter": "Congratulations, full setter!",
+  "user.collected.empty.memesFullSetter":
+    "Congratulations, The Memes full setter!",
+  "user.collected.empty.seasonFullSetter":
+    "Congratulations, {season} full setter!",
+  "user.collected.empty.gradientFullSetter":
+    "Congratulations, Gradient full setter!",
+  "user.collected.empty.memeLabFullSetter":
+    "Congratulations, Meme Lab full setter!",
+  "user.collected.empty.nextGenFullSetter":
+    "Congratulations, Next Gen full setter!",
+  "user.collected.filters.view": "View",
+  "user.collected.filters.view.native": "Native",
+  "user.collected.filters.view.network": "Network",
+  "user.collected.filters.collection": "Collection",
+  "user.collected.filters.collection.all": "All",
+  "user.collected.filters.collection.allCollections": "All Collections",
+  "user.collected.filters.collection.unknown": "Unknown Collection",
+  "user.collected.filters.collection.memes": "The Memes",
+  "user.collected.filters.collection.nextgen": "NextGen",
+  "user.collected.filters.collection.gradients": "Gradients",
+  "user.collected.filters.collection.memeLab": "Meme Lab",
+  "user.collected.filters.collection.network": "Network",
+  "user.collected.filters.sortBy": "Sort By",
+  "user.collected.filters.sort.tokenId": "Token ID",
+  "user.collected.filters.sort.tdh": "TDH",
+  "user.collected.filters.sort.rank": "Rank",
+  "user.collected.filters.sort.xtdh": "xTDH",
+  "user.collected.filters.sort.xtdhDay": "xTDH/day",
+  "user.collected.filters.seized": "Seized",
+  "user.collected.filters.seized.all": "All",
+  "user.collected.filters.seized.allCards": "All Cards",
+  "user.collected.filters.seized.seized": "Seized",
+  "user.collected.filters.seized.notSeized": "Not Seized",
+  "user.collected.filters.scrollLeft": "Scroll filters left",
+  "user.collected.filters.scrollRight": "Scroll filters right",
+  ...USER_COLLECTED_STATS_MESSAGES,
+  ...USER_COLLECTED_STATS_DETAILS_MESSAGES,
+  ...USER_COLLECTED_STATS_BOOST_MESSAGES,
+  ...USER_COLLECTED_STATS_ACTIVITY_MESSAGES,
+  ...USER_COLLECTED_STATS_ACTIVITY_TABS_MESSAGES,
+  ...USER_COLLECTED_STATS_WALLET_ACTIVITY_MESSAGES,
+  ...USER_COLLECTED_STATS_DISTRIBUTIONS_MESSAGES,
+  ...USER_COLLECTED_STATS_TDH_HISTORY_MESSAGES,
+  "user.collected.networkCards.listLabel": "Collected network cards",
+  "user.collected.networkCards.empty": "No network tokens found",
+  "user.collected.networkCards.defaultCollection": "Network",
+  "user.collected.networkCards.defaultTokenName": "Token #{tokenId}",
+  "user.collected.networkCards.imageAlt": "Network token image for {name}",
+  "user.collected.networkCards.tokenLabel": "#{tokenId}",
+  "user.collected.networkCards.xtdh": "xTDH",
+  "user.collected.networkCards.xtdhPerDay": "xTDH/day",
+  ...USER_PROFILE_TABS_MESSAGES,
+  ...FOLLOWERS_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 

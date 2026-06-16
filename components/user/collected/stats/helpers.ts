@@ -7,6 +7,8 @@ import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
 import type { ApiCollectedStatsSeason } from "@/generated/models/ApiCollectedStatsSeason";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import type {
   CollectedHeaderMetric,
   CollectedStatsViewModel,
@@ -39,7 +41,9 @@ export const getSafeCollectedStatsIdentityKey = (
 };
 
 const formatMetricValue = (value: number | undefined) =>
-  `x${formatNumberWithCommasOrDash(value ?? 0)}`;
+  translate(DEFAULT_LOCALE, "user.collected.stats.metric.value", {
+    value: formatNumberWithCommasOrDash(value ?? 0),
+  });
 
 const parseSeasonNumber = (season: string) => {
   const trimmed = season.trim();
@@ -77,7 +81,7 @@ const buildMainMetrics = (
   if (collectedStats.nextgen_balance) {
     metrics.push({
       id: "nextgen",
-      label: "NextGen",
+      label: translate(DEFAULT_LOCALE, "user.collected.stats.metrics.nextGen"),
       val: formatMetricValue(collectedStats.nextgen_balance),
       collection: CollectedCollectionType.NEXTGEN,
     });
@@ -86,7 +90,7 @@ const buildMainMetrics = (
   if (memeSets > 0) {
     metrics.push({
       id: "memes_sets",
-      label: "Meme Sets",
+      label: translate(DEFAULT_LOCALE, "user.collected.stats.metrics.memeSets"),
       val: formatMetricValue(memeSets),
       collection: CollectedCollectionType.MEMES,
     });
@@ -96,11 +100,13 @@ const buildMainMetrics = (
     const uniqueSub =
       collectedStats.unique_memes === collectedStats.memes_balance
         ? undefined
-        : `unique x${formatNumberWithCommasOrDash(collectedStats.unique_memes)}`;
+        : translate(DEFAULT_LOCALE, "user.collected.stats.metrics.unique", {
+            value: formatNumberWithCommasOrDash(collectedStats.unique_memes),
+          });
 
     metrics.push({
       id: "memes",
-      label: "Memes",
+      label: translate(DEFAULT_LOCALE, "user.collected.stats.metrics.memes"),
       val: formatMetricValue(collectedStats.memes_balance),
       collection: CollectedCollectionType.MEMES,
       ...(uniqueSub ? { sub: uniqueSub } : {}),
@@ -110,7 +116,10 @@ const buildMainMetrics = (
   if (collectedStats.gradients_balance) {
     metrics.push({
       id: "gradients",
-      label: "Gradients",
+      label: translate(
+        DEFAULT_LOCALE,
+        "user.collected.stats.metrics.gradients"
+      ),
       val: formatMetricValue(collectedStats.gradients_balance),
       collection: CollectedCollectionType.GRADIENTS,
     });
@@ -119,7 +128,7 @@ const buildMainMetrics = (
   if (collectedStats.boost) {
     metrics.push({
       id: "boost",
-      label: "Boost",
+      label: translate(DEFAULT_LOCALE, "user.collected.stats.metrics.boost"),
       val: formatMetricValue(
         Number.parseFloat(collectedStats.boost.toFixed(2))
       ),
@@ -150,17 +159,29 @@ const buildDisplaySeason = (
   let detailText: string | null = null;
   if (isStarted) {
     if (nextSetCards > 0) {
-      detailText = `${formatNumberWithCommasOrDash(
-        nextSetCards
-      )}/${formatNumberWithCommasOrDash(totalCards)} to set ${setsHeld + 1}`;
+      detailText = translate(
+        DEFAULT_LOCALE,
+        "user.collected.stats.seasonTile.toNextSet",
+        {
+          held: formatNumberWithCommasOrDash(nextSetCards),
+          total: formatNumberWithCommasOrDash(totalCards),
+          setNumber: setsHeld + 1,
+        }
+      );
     } else if (setsHeld > 0) {
-      detailText = `Set ${formatNumberWithCommasOrDash(setsHeld)} complete`;
+      detailText = translate(
+        DEFAULT_LOCALE,
+        "user.collected.stats.seasonTile.setComplete",
+        { count: formatNumberWithCommasOrDash(setsHeld) }
+      );
     }
   }
 
   return {
     id: season.season,
-    label: `SZN${seasonNumber}`,
+    label: translate(DEFAULT_LOCALE, "user.collected.stats.seasonTile.label", {
+      seasonNumber,
+    }),
     seasonNumber,
     totalCards,
     setsHeld,
