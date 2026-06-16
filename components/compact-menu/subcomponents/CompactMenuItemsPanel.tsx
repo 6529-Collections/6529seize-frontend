@@ -10,11 +10,21 @@ interface CompactMenuItemsPanelProps {
   readonly onItemSelect?: CompactMenuProps["onItemSelect"] | undefined;
   readonly close: () => void;
   readonly closeOnSelect: boolean;
+  readonly header?: CompactMenuProps["header"] | undefined;
+  readonly headerClassName?: CompactMenuProps["headerClassName"] | undefined;
   readonly itemClassName?: CompactMenuProps["itemClassName"] | undefined;
-  readonly activeItemClassName?: CompactMenuProps["activeItemClassName"] | undefined;
-  readonly inactiveItemClassName?: CompactMenuProps["inactiveItemClassName"] | undefined;
-  readonly focusItemClassName?: CompactMenuProps["focusItemClassName"] | undefined;
-  readonly itemsWrapperClassName?: CompactMenuProps["itemsWrapperClassName"] | undefined;
+  readonly activeItemClassName?:
+    | CompactMenuProps["activeItemClassName"]
+    | undefined;
+  readonly inactiveItemClassName?:
+    | CompactMenuProps["inactiveItemClassName"]
+    | undefined;
+  readonly focusItemClassName?:
+    | CompactMenuProps["focusItemClassName"]
+    | undefined;
+  readonly itemsWrapperClassName?:
+    | CompactMenuProps["itemsWrapperClassName"]
+    | undefined;
   readonly unstyledItems?: boolean | undefined;
 }
 
@@ -24,6 +34,8 @@ export function CompactMenuItemsPanel({
   onItemSelect,
   close,
   closeOnSelect,
+  header,
+  headerClassName,
   itemClassName,
   activeItemClassName,
   inactiveItemClassName,
@@ -42,21 +54,24 @@ export function CompactMenuItemsPanel({
       item.onSelect?.();
       onItemSelect?.(item.id);
     },
-    [close, closeOnSelect, onItemSelect],
+    [close, closeOnSelect, onItemSelect]
   );
 
   return (
     <div className={clsx("tw-flex tw-flex-col", itemsWrapperClassName)}>
+      {header !== undefined && header !== null && (
+        <div className={headerClassName}>{header}</div>
+      )}
       {items.map((item) => {
         const isActive = item.active ?? activeItemId === item.id;
 
         return (
           <MenuItem key={item.id} as={Fragment} disabled={!!item.disabled}>
-            {({ active }) => (
+            {({ focus }) => (
               <CompactMenuItemButton
                 item={item}
                 isActive={isActive}
-                menuActive={active}
+                menuActive={focus}
                 onClick={() => handleItemClick(item)}
                 itemClassName={itemClassName}
                 activeItemClassName={activeItemClassName}

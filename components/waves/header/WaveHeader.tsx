@@ -60,8 +60,7 @@ export default function WaveHeader({
   const showNotificationSettings =
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
-    canUseWaveActions &&
-    normalizedConnectedHandle === normalizedWaveAuthorHandle;
+    canUseWaveActions && normalizedConnectedHandle === normalizedWaveAuthorHandle;
   const showCreateSubwaveOption =
     canUseWaveActions &&
     !isDirectMessage &&

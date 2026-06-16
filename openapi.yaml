@@ -9906,6 +9906,9 @@ components:
         anonymous:
           type: boolean
           default: false
+        only_droppers_can_respond:
+          type: boolean
+          default: false
         closing_time:
           type: integer
           format: int64
@@ -10999,6 +11002,7 @@ components:
         - voted
         - multichoice
         - anonymous
+        - only_droppers_can_respond
         - closing_time
         - is_open
       properties:
@@ -11018,6 +11022,8 @@ components:
         multichoice:
           type: boolean
         anonymous:
+          type: boolean
+        only_droppers_can_respond:
           type: boolean
         closing_time:
           type: integer
@@ -15540,6 +15546,7 @@ components:
         - voted
         - multichoice
         - anonymous
+        - only_droppers_can_respond
         - closing_time
         - is_open
       properties:
@@ -15566,6 +15573,8 @@ components:
         multichoice:
           type: boolean
         anonymous:
+          type: boolean
+        only_droppers_can_respond:
           type: boolean
         closing_time:
           type: integer
