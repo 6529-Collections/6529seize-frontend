@@ -71,7 +71,11 @@
   for `All`) and preserves non-default `locale` values.
 - Supported locale query values are `en-US`, `en-GB`, `fr-FR`, `es-ES`, and
   `de-DE`; unsupported locale values fall back to `en-US`.
-- Non-numeric `meme_id` values are cleared back to `/rememes`.
+- Malformed, non-positive, unsafe, and non-canonical `meme_id` values are
+  normalized before browse renders. Invalid values are removed from the URL
+  while unrelated params and supported non-default locales are preserved;
+  leading-zero positive values such as `0042` redirect to canonical
+  `?meme_id=42`.
 - Count formatting follows the active locale; visible token IDs remain stable
   identifiers.
 - Browse exposes the card grid as a labelled results list for assistive
@@ -107,8 +111,8 @@
 - `NFT Marketplace Links` are hidden on iOS unless detected country is `US`.
 - On mobile/tablet (`< xl`), collection switching appears in a dropdown above
   filters.
-- Numeric `meme_id` values that are not in the loaded meme list still apply as
-  a filter and can return empty results.
+- Valid positive numeric `meme_id` values that are not in the loaded meme list
+  still apply as a filter and can return empty results.
 
 ## Failure and Recovery
 

@@ -17,20 +17,36 @@ describe("Rememes route params", () => {
     expect(getRememesRouteLocale({ locale: "en-UK" })).toBe("en-US");
   });
 
-  it("parses the initial meme id with explicit decimal parseInt behavior", () => {
+  it("parses only positive safe decimal meme ids", () => {
+    const unsafeInteger = (Number.MAX_SAFE_INTEGER + 1).toString();
+
     expect(getInitialRememesMemeId({ meme_id: "42" })).toBe(42);
-    expect(getInitialRememesMemeId({ meme_id: "42abc" })).toBe(42);
+    expect(getInitialRememesMemeId({ meme_id: "0042" })).toBe(42);
+    expect(getInitialRememesMemeId({ meme_id: "42abc" })).toBe(0);
     expect(getInitialRememesMemeId({ meme_id: "0x10" })).toBe(0);
     expect(getInitialRememesMemeId({ meme_id: "abc" })).toBe(0);
+    expect(getInitialRememesMemeId({ meme_id: "" })).toBe(0);
+    expect(getInitialRememesMemeId({ meme_id: "0" })).toBe(0);
+    expect(getInitialRememesMemeId({ meme_id: "-1" })).toBe(0);
+    expect(getInitialRememesMemeId({ meme_id: "1.5" })).toBe(0);
+    expect(getInitialRememesMemeId({ meme_id: unsafeInteger })).toBe(0);
     expect(getInitialRememesMemeId({ meme_id: undefined })).toBe(0);
   });
 
-  it("detects invalid meme id query values that should be normalized away", () => {
+  it("detects non-canonical meme id query values that should be normalized", () => {
+    const unsafeInteger = (Number.MAX_SAFE_INTEGER + 1).toString();
+
     expect(shouldNormalizeRememesMemeId({ meme_id: undefined })).toBe(false);
     expect(shouldNormalizeRememesMemeId({ meme_id: "42" })).toBe(false);
-    expect(shouldNormalizeRememesMemeId({ meme_id: "0x10" })).toBe(false);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "0042" })).toBe(true);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "42abc" })).toBe(true);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "0x10" })).toBe(true);
     expect(shouldNormalizeRememesMemeId({ meme_id: "" })).toBe(true);
     expect(shouldNormalizeRememesMemeId({ meme_id: "abc" })).toBe(true);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "0" })).toBe(true);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "-1" })).toBe(true);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "1.5" })).toBe(true);
+    expect(shouldNormalizeRememesMemeId({ meme_id: unsafeInteger })).toBe(true);
   });
 
   it("builds browse queries that preserve non-default locales", () => {

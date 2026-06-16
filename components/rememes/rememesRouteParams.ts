@@ -28,18 +28,23 @@ export function getRememesRouteLocale({
   return normalizeLocale(getSearchParamValue(locale));
 }
 
+const REMEMES_MEME_ID_PATTERN = /^\d+$/;
+
+function parseRememesMemeId(value: string | null): number {
+  if (value === null || value === "" || !REMEMES_MEME_ID_PATTERN.test(value)) {
+    return 0;
+  }
+
+  const parsedValue = Number(value);
+  return Number.isSafeInteger(parsedValue) && parsedValue > 0 ? parsedValue : 0;
+}
+
 export function getInitialRememesMemeId({
   meme_id,
 }: {
   readonly meme_id?: SearchParamValue;
 }): number {
-  const value = getSearchParamValue(meme_id);
-  if (!value) {
-    return 0;
-  }
-
-  const parsedValue = Number.parseInt(value, 10);
-  return Number.isFinite(parsedValue) ? parsedValue : 0;
+  return parseRememesMemeId(getSearchParamValue(meme_id));
 }
 
 export function shouldNormalizeRememesMemeId({
@@ -52,11 +57,8 @@ export function shouldNormalizeRememesMemeId({
     return false;
   }
 
-  if (!value) {
-    return true;
-  }
-
-  return !Number.isFinite(Number.parseInt(value, 10));
+  const parsedValue = parseRememesMemeId(value);
+  return parsedValue === 0 || value !== parsedValue.toString();
 }
 
 export function getRememesBrowseQuery({
