@@ -123,12 +123,14 @@ export function useWaves({
   }, [enabled, authQuery.data, publicQuery.data, usePublicWaves]);
 
   const activeQuery = usePublicWaves ? publicQuery : authQuery;
+  const lastPageSize = activeQuery.data?.pages.at(-1)?.length ?? 0;
 
   return {
     waves,
     isFetching: activeQuery.isFetching,
     isFetchingNextPage: activeQuery.isFetchingNextPage,
     hasNextPage: activeQuery.hasNextPage,
+    lastPageSize,
     fetchNextPage: activeQuery.fetchNextPage,
     status: activeQuery.status,
     error: activeQuery.error,
