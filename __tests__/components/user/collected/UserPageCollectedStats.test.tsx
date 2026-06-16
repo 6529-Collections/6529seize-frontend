@@ -640,6 +640,33 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByTestId("details")).toBeInTheDocument();
   });
 
+  it("uses source-locale copy when stats details are unavailable", async () => {
+    const user = userEvent.setup();
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={
+          {
+            handle: "",
+            wallets: [],
+            consolidation_key: "",
+          } as any
+        }
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: undefined,
+        })}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Details" }));
+
+    expect(
+      screen.getByText("Stats are unavailable for this profile.")
+    ).toBeInTheDocument();
+    expect(apiMock).not.toHaveBeenCalled();
+  });
+
   it("starts with details open when an activity query param is present", async () => {
     useSearchParamsMock.mockReturnValue({
       get: (key: string) => (key === "activity" ? "distributions" : null),
@@ -659,6 +686,50 @@ describe("UserPageCollectedStats", () => {
       screen.getByRole("button", { name: "Hide Details" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("details")).toBeInTheDocument();
+  });
+
+  it("uses non-undefined fallbacks when detail stats fetches fail", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    apiMock.mockRejectedValue(new Error("Network request failed"));
+    useSearchParamsMock.mockReturnValue({
+      get: (key: string) => (key === "activity" ? "tdh-history" : null),
+    });
+
+    try {
+      renderWithQueryClient(
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      );
+
+      await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
+
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-seasons",
+        "0"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-tdh",
+        "false"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-owner-balance",
+        "false"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-balance-memes",
+        "0"
+      );
+      expect(consoleErrorSpy.mock.calls.join("\n")).not.toContain(
+        "Query data cannot be undefined"
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 
   it("clears previous detail stats while the next address detail queries are in flight", async () => {

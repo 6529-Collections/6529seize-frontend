@@ -46,3 +46,21 @@ Record review-bot and CI decisions here for this workstream.
 | 2026-06-13 | #2630 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
 | 2026-06-13 | #2630 | Snyk         | No manifest changes detected                                              | Accept                               |
 | 2026-06-13 | #2630 | CodeRabbit   | Manual review completed with no review threads                            | Accept                               |
+| 2026-06-13 | #2631 | SonarCloud   | Flagged 13.8% duplication on new message dictionary lines                 | Fixed                                |
+| 2026-06-13 | #2631 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2631 | SonarCloud   | Quality Gate passed with 0 new issues and 0.0% duplication after fix      | Accept                               |
+| 2026-06-13 | #2631 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2631 | CodeRabbit   | Latest head passed with no review threads                                 | Accept                               |
+| 2026-06-13 | #2638 | CodeRabbit   | Flagged Distributions loading text remaining in the accessibility tree    | Fixed                                |
+| 2026-06-13 | #2638 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2638 | SonarCloud   | Quality Gate passed with 0 new issues after follow-up                     | Accept                               |
+| 2026-06-13 | #2638 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2638 | CodeRabbit   | Latest head passed with the loading-label thread resolved                 | Accept                               |
+| 2026-06-13 | #2639 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2639 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
+| 2026-06-13 | #2639 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2639 | CodeRabbit   | Latest head passed with no review threads                                 | Accept                               |
+| 2026-06-13 | #2640 | DCO          | Signed commits check passed                                               | Accept                               |
+| 2026-06-13 | #2640 | SonarCloud   | Quality Gate passed with 0 new issues                                     | Accept                               |
+| 2026-06-13 | #2640 | Snyk         | No manifest changes detected                                              | Accept                               |
+| 2026-06-13 | #2640 | CodeRabbit   | Manual review completed with no review threads                            | Accept                               |

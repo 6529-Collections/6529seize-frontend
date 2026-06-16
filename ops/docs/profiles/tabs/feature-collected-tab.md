@@ -56,6 +56,8 @@ Transfer mode is part of the Native collected view (not a separate route).
 2. Review the top stats block:
    - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
      `Gradients`, and `Boost`
+   - headline metric labels, multiplier values, unique-count copy, and the
+     `Details` toggle are message-backed from the source locale
    - collection-backed metrics (`NextGen`, `Meme Sets`, `Memes`, `Gradients`)
      act as shortcuts into that collection; clicking the active metric clears
      that collection filter
@@ -66,15 +68,40 @@ Transfer mode is part of the Native collected view (not a separate route).
      progress toward the next set
    - `Seasons` heading/count text, show more/less controls, unseized labels,
      and tile set-count text are message-backed from the source locale
+   - season tile labels and progress detail copy are message-backed from the
+     source locale
    - hover/focus previews a season tile's progress text; click applies or
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
 3. Click `Details` to expand the integrated stats panel.
 4. In `Details`, review:
    - `Collected` totals and per-season Meme tables
+     - collected details headings, table headers, row labels, and per-season
+       labels are message-backed from the source locale
+     - collected details tables include screen-reader captions and row headers
+       for assistive technologies
    - `Activity Overview`
+   - Activity Overview heading, table headings, row labels, and per-season
+     labels are message-backed from the source locale
+   - Activity Overview tables include screen-reader captions and row headers
+     for assistive technologies
    - lower section tabs: `Wallet Activity`, `Distributions`, `TDH History`
+     - lower Activity tab labels and the tab-list accessible name are
+       message-backed from the source locale
+     - lower Activity tabs expose tab/panel relationships and support keyboard
+       arrow, Home, and End navigation
+   - `Wallet Activity`
+     - Wallet Activity heading, filter labels, filter accessible names, empty
+       states, and transaction table caption are message-backed from the source
+       locale
+   - `Distributions`
+     - Distributions heading, empty state, table caption, table headings,
+       collection names, token link accessible names, and relative time display
+       are message-backed or locale-formatted from the source locale
    - `Boost Breakdown`
+   - Boost Breakdown static labels and table headings are message-backed from
+     the source locale; the table exposes a screen-reader caption, row
+     headers, and keyboard-focusable info triggers.
 5. Choose `View`:
    - `Native` for profile card holdings.
    - `Network` for xTDH token holdings.

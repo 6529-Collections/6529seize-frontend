@@ -29,3 +29,13 @@
 | `/{user}/collected` empty states       | PR open              | PR open           | PR #2628; review-ready only; stacked on PR #2627; do not merge yet |
 | `/{user}/collected` filter controls    | PR open              | PR open           | PR #2629; review-ready only; stacked on PR #2628; do not merge yet |
 | `/{user}/collected` season strip       | PR open              | PR open           | PR #2630; review-ready only; stacked on PR #2629; do not merge yet |
+| `/{user}/collected` stats summary      | PR open              | PR open           | PR #2631; review-ready only; stacked on PR #2630; do not merge yet |
+| `/{user}/collected` details tables     | PR open              | PR open           | PR #2633; review-ready only; stacked on PR #2631; do not merge yet |
+| `/{user}/collected` boost breakdown    | PR open              | PR open           | PR #2634; review-ready only; stacked on PR #2633; do not merge yet |
+| `/{user}/collected` activity overview  | PR open              | PR open           | PR #2635; review-ready only; stacked on PR #2634; do not merge yet |
+| `/{user}/collected` activity tabs      | PR open              | PR open           | PR #2636; review-ready only; stacked on PR #2635; do not merge yet |
+| `/{user}/collected` wallet activity    | PR open              | PR open           | PR #2637; review-ready only; stacked on PR #2636; do not merge yet |
+| `/{user}/collected` distributions      | PR open              | PR open           | PR #2638; review-ready only; stacked on PR #2637; do not merge yet |
+| `/{user}/collected` TDH history        | PR open              | PR open           | PR #2639; review-ready only; stacked on PR #2638; do not merge yet |
+| User profile tabs shell                | PR open              | PR open           | PR #2640; review-ready only; stacked on PR #2639; do not merge yet |
+| User followers modal/list              | PR open              | PR open           | PR #2641; review-ready only; stacked on PR #2640; do not merge yet |
