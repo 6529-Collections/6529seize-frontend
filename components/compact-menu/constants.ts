@@ -16,4 +16,5 @@ export const DEFAULT_INACTIVE_ITEM_CLASSES =
 
 export const DEFAULT_FOCUS_ITEM_CLASSES = "tw-bg-iron-800 tw-text-iron-50";
 
-export const DEFAULT_ANCHOR: MenuItemsProps["anchor"] = "bottom end";
+export const DEFAULT_ANCHOR: NonNullable<MenuItemsProps["anchor"]> =
+  "bottom end";

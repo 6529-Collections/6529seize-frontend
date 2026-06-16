@@ -92,7 +92,7 @@ function CompactMenuContent({
   activeItemClassName,
   inactiveItemClassName,
   focusItemClassName,
-  anchor = DEFAULT_ANCHOR,
+  anchor,
   menuWidthClassName = "tw-w-40",
   disabled = false,
   activeItemId,
@@ -103,6 +103,7 @@ function CompactMenuContent({
   close,
 }: Readonly<CompactMenuContentProps>) {
   const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(isOpen);
+  const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
   return (
     <>
@@ -127,7 +128,7 @@ function CompactMenuContent({
       >
         <MenuItems
           ref={menuItemsRef}
-          anchor={anchor}
+          anchor={menuAnchor}
           className={clsx(
             unstyledMenu ? undefined : DEFAULT_MENU_CLASSES,
             menuWidthClassName,
