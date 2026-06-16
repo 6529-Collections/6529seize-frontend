@@ -37,6 +37,7 @@ import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
+const SUPPRESS_CLICK_AFTER_LONG_PRESS_MS = 750;
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -665,6 +666,8 @@ const WaveDrop = ({
   const editingDropId = useSelector(selectEditingDropId);
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const suppressClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldSuppressNextClickRef = useRef(false);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const dropUpdateMutation = useDropUpdateMutation();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
@@ -716,15 +719,38 @@ const WaveDrop = ({
     previousDrop,
   });
 
+  const clearSuppressNextClick = useCallback(() => {
+    if (suppressClickTimeoutRef.current) {
+      clearTimeout(suppressClickTimeoutRef.current);
+      suppressClickTimeoutRef.current = null;
+    }
+
+    shouldSuppressNextClickRef.current = false;
+  }, []);
+
+  const markSuppressNextClick = useCallback(() => {
+    shouldSuppressNextClickRef.current = true;
+
+    if (suppressClickTimeoutRef.current) {
+      clearTimeout(suppressClickTimeoutRef.current);
+    }
+
+    suppressClickTimeoutRef.current = setTimeout(() => {
+      shouldSuppressNextClickRef.current = false;
+      suppressClickTimeoutRef.current = null;
+    }, SUPPRESS_CLICK_AFTER_LONG_PRESS_MS);
+  }, []);
+
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
+    markSuppressNextClick();
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [allowLongPress, editingDropId, dispatch]);
+  }, [allowLongPress, editingDropId, dispatch, markSuppressNextClick]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -757,6 +783,17 @@ const WaveDrop = ({
       });
     },
     [allowLongPress]
+  );
+
+  const handleClickCapture = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!shouldSuppressNextClickRef.current) return;
+
+      clearSuppressNextClick();
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    [clearSuppressNextClick]
   );
 
   const handleOnReply = useCallback(() => {
@@ -910,8 +947,9 @@ const WaveDrop = ({
   useEffect(() => {
     return () => {
       clearLongPressTimeout({ longPressTimeoutRef });
+      clearSuppressNextClick();
     };
-  }, []);
+  }, [clearSuppressNextClick]);
 
   // Derive effective menu state - menu can't be open while editing
   const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
@@ -1003,6 +1041,7 @@ const WaveDrop = ({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        onClickCapture={handleClickCapture}
       >
         {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
         {reactionsRow}

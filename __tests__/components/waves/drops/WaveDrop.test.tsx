@@ -29,9 +29,10 @@ jest.mock("@/components/waves/drops/WaveDropContent", () => {
         <button
           type="button"
           data-testid="content"
-          onClick={() =>
-            props.onLinkCardActionsActiveChange?.("https://example.com", true)
-          }
+          onClick={() => {
+            props.onDropContentClick?.(props.drop);
+            props.onLinkCardActionsActiveChange?.("https://example.com", true);
+          }}
         />
         <button
           type="button"
@@ -224,6 +225,10 @@ describe("WaveDrop", () => {
     isTouchDeviceMock.mockReturnValue(false);
     setHoverSupport(false);
     setViewportWidth(1440);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("shows actions on desktop", () => {
@@ -447,6 +452,82 @@ describe("WaveDrop", () => {
     expect(getLastMockProps(mockWaveDropContent)).toEqual(
       expect.objectContaining({ hasTouch: true })
     );
+  });
+
+  it("suppresses the synthetic click after touch long press opens the sheet", () => {
+    jest.useFakeTimers();
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(800);
+    const onDropContentClick = jest.fn();
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    fireEvent.touchStart(screen.getByTestId("content"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    act(() => {
+      jest.advanceTimersByTime(600);
+    });
+    fireEvent.touchEnd(screen.getByTestId("content"));
+    fireEvent.click(screen.getByTestId("content"));
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+    expect(onDropContentClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps normal short clicks on touch layouts", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(true);
+    setHoverSupport(false);
+    setViewportWidth(800);
+    const onDropContentClick = jest.fn();
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={onDropContentClick}
+      />
+    );
+
+    fireEvent.touchStart(screen.getByTestId("content"), {
+      touches: [{ clientX: 0, clientY: 0 }],
+    });
+    fireEvent.touchEnd(screen.getByTestId("content"));
+    fireEvent.click(screen.getByTestId("content"));
+
+    expect(onDropContentClick).toHaveBeenCalledTimes(1);
+    expect(onDropContentClick).toHaveBeenCalledWith(drop);
   });
 
   it("hides actions on mobile", () => {
