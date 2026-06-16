@@ -50,10 +50,10 @@ such as `158/328`.
   - `Season {x}`
   - `Mint date {date}` when available
 
-Edition size should prefer claim edition size, then mint stats, then public
-extended edition size only when it does not look like a fresh live mint count.
-The card does not render live mint progress fractions such as `158/328`, and it
-does not label current minted supply as final edition size.
+Edition size should prefer claim edition size, then guarded mint stats, then
+guarded public extended edition size. The card does not render live mint
+progress fractions such as `158/328`, and it does not label current minted
+supply as final edition size.
 
 ### Meme Lab
 

@@ -58,6 +58,7 @@ type MintingClaimRecord = {
 };
 
 type MemesMintStatRecord = {
+  readonly mint_date?: string | null | undefined;
   readonly total_count?: number | null | undefined;
 };
 
@@ -568,6 +569,27 @@ function shouldUseExtendedEditionSize(
   return !looksLikeFreshLiveMintCount;
 }
 
+function shouldUseMintStatEditionSize(
+  nft: NftRecord,
+  mintStat: MemesMintStatRecord | null | undefined,
+  mintStatEditionSize: number | undefined
+): boolean {
+  if (mintStatEditionSize === undefined) {
+    return false;
+  }
+
+  const supply = readNumber(nft.supply);
+  const mintDate = new Date(
+    readString(mintStat?.mint_date) ?? readString(nft.mint_date) ?? ""
+  );
+  const looksLikeFreshLiveMintCount =
+    !Number.isNaN(mintDate.getTime()) &&
+    Date.now() - mintDate.getTime() < LIVE_MINT_FALLBACK_WINDOW_MS &&
+    (supply === undefined || mintStatEditionSize <= supply);
+
+  return !looksLikeFreshLiveMintCount;
+}
+
 function readMemeSeason(
   nft: MemesRecord,
   metadata: Record<string, unknown> | null
@@ -616,6 +638,13 @@ async function fetchTheMemesPreview(
   const title = firstNonEmptyString(claim?.name, source.name, `The Memes #${id}`)!;
   const claimEditionSize = readPositiveNumber(claim?.edition_size);
   const mintStatEditionSize = readPositiveNumber(mintStat?.total_count);
+  const guardedMintStatEditionSize = shouldUseMintStatEditionSize(
+    source,
+    mintStat,
+    mintStatEditionSize
+  )
+    ? mintStatEditionSize
+    : undefined;
   const extendedEditionSize = readPositiveNumber(extended?.edition_size);
   const fallbackEditionSize = shouldUseExtendedEditionSize(
     source,
@@ -624,7 +653,7 @@ async function fetchTheMemesPreview(
     ? extendedEditionSize
     : undefined;
   const editionSize =
-    claimEditionSize ?? mintStatEditionSize ?? fallbackEditionSize;
+    claimEditionSize ?? guardedMintStatEditionSize ?? fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRate = readPositiveNumber(source.hodl_rate);
   const mintDate = formatMintDate(source.mint_date);

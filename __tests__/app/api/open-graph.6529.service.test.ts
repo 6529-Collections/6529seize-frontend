@@ -104,7 +104,10 @@ describe("createFirstParty6529Plan", () => {
       }
 
       if (url.pathname === "/api/memes-mint-stats/509") {
-        return jsonResponse({}, 404);
+        return jsonResponse({
+          mint_date: new Date().toISOString(),
+          total_count: 94,
+        });
       }
 
       return jsonResponse({}, 404);
