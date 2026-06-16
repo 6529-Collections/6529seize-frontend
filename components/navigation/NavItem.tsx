@@ -14,7 +14,7 @@ import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { isNavItemActive } from "./isNavItemActive";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
-import type { NavIconColor, NavItem as NavItemData } from "./navTypes";
+import type { NavIconColor, NavItem as NavItemData, ViewKey } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
@@ -30,14 +30,17 @@ const getIconSlotClass = ({
 }: {
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
-}) =>
-  variant === "fixed"
-    ? "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center"
-    : `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-        compact
-          ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
-          : "tw-h-8 tw-scale-[0.9]"
-      }`;
+}) => {
+  if (variant === "fixed") {
+    return "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
+  }
+
+  const compactClassName = compact
+    ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
+    : "tw-h-8 tw-scale-[0.9]";
+
+  return `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
+};
 
 const ActiveNavIndicator = ({
   compact,
@@ -64,14 +67,17 @@ const getPendingIndicatorClassName = ({
 }: {
   readonly compact: boolean;
   readonly variant: "floating" | "fixed";
-}) =>
-  variant === "fixed"
-    ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60"
-    : `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-        compact
-          ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
-          : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
-      }`;
+}) => {
+  if (variant === "fixed") {
+    return "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60";
+  }
+
+  const compactClassName = compact
+    ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
+    : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]";
+
+  return `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compactClassName}`;
+};
 
 const getHomeIconSizeClass = ({
   compact,
@@ -126,6 +132,60 @@ const getIconTextColorClass = ({
   return isActive
     ? "tw-text-black"
     : getInactiveIconTextColorClass(isHighlighted);
+};
+
+const getDisabledButtonClassName = (variant: "floating" | "fixed") => {
+  const layoutClassName =
+    variant === "fixed"
+      ? "tw-justify-start"
+      : "tw-justify-center tw-rounded-full";
+
+  return `tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${layoutClassName}`;
+};
+
+const getResolvedProfileState = ({
+  activeView,
+  isCurrentWaveDm,
+  item,
+  pathname,
+  profileHref,
+  searchParams,
+}: {
+  readonly activeView: ViewKey | null;
+  readonly isCurrentWaveDm: boolean;
+  readonly item: NavItemData;
+  readonly pathname: string;
+  readonly profileHref: string | null;
+  readonly searchParams: ReturnType<typeof useSearchParams>;
+}) => {
+  const isProfileItem = item.kind === "route" && item.name === "Profile";
+  const normalizedPathname = pathname.toLowerCase();
+
+  if (isProfileItem && profileHref !== null) {
+    const isProfileActive =
+      activeView === null &&
+      (normalizedPathname === profileHref ||
+        normalizedPathname.startsWith(`${profileHref}/`));
+
+    return {
+      isActive: isProfileActive,
+      resolvedItem: {
+        ...item,
+        href: profileHref,
+      },
+    };
+  }
+
+  return {
+    isActive: isNavItemActive(
+      item,
+      pathname,
+      searchParams,
+      activeView,
+      isCurrentWaveDm
+    ),
+    resolvedItem: item,
+  };
 };
 
 const NavItemLinkContent = ({
@@ -269,11 +329,7 @@ const NavItemContent = ({
         aria-label={name}
         aria-disabled="true"
         disabled
-        className={`tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${
-          variant === "fixed"
-            ? "tw-justify-start"
-            : "tw-justify-center tw-rounded-full"
-        }`}
+        className={getDisabledButtonClassName(variant)}
       >
         <div className={getIconSlotClass({ compact, variant })}>
           {item.iconComponent ? (
@@ -298,33 +354,14 @@ const NavItemContent = ({
   }
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
-
-  const isProfileItem = item.kind === "route" && item.name === "Profile";
-  const normalizedPathname = pathname.toLowerCase();
-  const isProfileActive =
-    isProfileItem &&
-    activeView === null &&
-    profileHref !== null &&
-    (normalizedPathname === profileHref ||
-      normalizedPathname.startsWith(`${profileHref}/`));
-
-  const isActive = isProfileItem
-    ? isProfileActive
-    : isNavItemActive(
-        item,
-        pathname,
-        searchParams,
-        activeView,
-        isCurrentWaveDm
-      );
-
-  const resolvedItem =
-    isProfileItem && profileHref !== null
-      ? {
-          ...item,
-          href: profileHref,
-        }
-      : item;
+  const { isActive, resolvedItem } = getResolvedProfileState({
+    activeView,
+    isCurrentWaveDm,
+    item,
+    pathname,
+    profileHref,
+    searchParams,
+  });
   const href = getNavHref(resolvedItem);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {

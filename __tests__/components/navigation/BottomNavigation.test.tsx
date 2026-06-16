@@ -44,7 +44,10 @@ beforeEach(() => {
     "scrollY"
   );
   let animationFrameId = 0;
-  const animationFrameTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
+  const animationFrameTimeouts = new Map<
+    number,
+    ReturnType<typeof setTimeout>
+  >();
   jest
     .spyOn(globalThis, "requestAnimationFrame")
     .mockImplementation((callback: FrameRequestCallback) => {

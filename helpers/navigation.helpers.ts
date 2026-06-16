@@ -34,8 +34,7 @@ export const usesFixedMobileBottomNavigation = ({
     pathname.startsWith("/waves/") ||
     pathname === "/messages" ||
     pathname.startsWith("/messages/") ||
-    (pathname === "/" &&
-      (activeView === "waves" || activeView === "messages"))
+    (pathname === "/" && (activeView === "waves" || activeView === "messages"))
   );
 };
 
