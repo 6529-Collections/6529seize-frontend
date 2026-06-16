@@ -7,6 +7,9 @@ import {
 import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildCollectionPageJsonLd } from "@/lib/structured-data/nft";
+import { CC0_LICENSE_URL } from "@/lib/structured-data/utils";
 import styles from "@/styles/Home.module.scss";
 import type { Metadata } from "next";
 
@@ -20,6 +23,16 @@ export default async function MemeLab({
 
   return (
     <main className={styles["main"]}>
+      <JsonLdScript
+        data={buildCollectionPageJsonLd({
+          path: "/meme-lab",
+          name: "Meme Lab",
+          description:
+            "Meme Lab is a 6529 NFT collection connected to The Memes.",
+          image: `${publicEnv.BASE_ENDPOINT}/meme-lab.jpg`,
+          license: CC0_LICENSE_URL,
+        })}
+      />
       <MemeLabComponent
         initialSort={getSearchParamValue(resolvedSearchParams.sort)}
         initialSortDirection={getSearchParamValue(

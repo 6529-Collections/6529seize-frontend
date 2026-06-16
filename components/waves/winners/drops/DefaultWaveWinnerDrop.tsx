@@ -29,6 +29,7 @@ interface DefaultWaveWinnersDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly isApprovalWave?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly outcomesVisible?: boolean | undefined;
 }
 
 const getRankHoverClass = (place: number | null): string => {
@@ -46,6 +47,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   onDropClick,
   isApprovalWave = false,
   contentPresentation = "default",
+  outcomesVisible = true,
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
@@ -170,7 +172,10 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
                 <WaveWinnersDropHeaderVoters winner={winner} />
               </div>
               <div>
-                <WaveWinnersDropOutcome winner={winner} />
+                <WaveWinnersDropOutcome
+                  winner={winner}
+                  outcomesVisible={outcomesVisible}
+                />
               </div>
             </div>
 

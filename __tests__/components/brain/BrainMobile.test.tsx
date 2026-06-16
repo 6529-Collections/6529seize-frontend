@@ -100,6 +100,11 @@ jest.mock("@/hooks/useWaveTimers", () => ({
   }),
 }));
 
+let mockOutcomesVisible = true;
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => mockOutcomesVisible,
+}));
+
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
 }));
@@ -300,6 +305,7 @@ describe("BrainMobile", () => {
     isApp = true;
     mockIsCompleted = false;
     mockFirstDecisionDone = true;
+    mockOutcomesVisible = true;
     latestTabsProps = null;
     mockDialogMountCount = 0;
     mockCreateWaveModal.mockClear();

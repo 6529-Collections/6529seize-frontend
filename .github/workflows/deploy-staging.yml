@@ -215,6 +215,10 @@ jobs:
             exit 1
           fi
 
+          echo "Resetting deploy checkout before switching to $BRANCH"
+          git reset --hard HEAD
+          git clean -fd generated
+
           git checkout -B "$BRANCH" FETCH_HEAD
           git config "branch.$BRANCH.remote" origin
           git config "branch.$BRANCH.merge" "refs/heads/$BRANCH"

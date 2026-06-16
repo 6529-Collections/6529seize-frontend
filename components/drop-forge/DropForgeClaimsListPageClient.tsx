@@ -143,7 +143,12 @@ export default function DropForgeClaimsListPageClient({
         const msg = e instanceof Error ? e.message : "Failed to load claims";
         setError(msg);
         if (msg.toLowerCase() !== "not authorized") {
-          setToast({ message: msg, type: "error" });
+          setToast({
+            type: "error",
+            title: "Couldn't load claims.",
+            description: "Please try again.",
+            details: msg,
+          });
         }
       } finally {
         if (requestId === latestRequestId.current) {

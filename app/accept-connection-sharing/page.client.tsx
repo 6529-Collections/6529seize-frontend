@@ -59,14 +59,14 @@ function AcceptConnectionSharing(
         !!redeemResponse.token &&
         areEqualAddresses(redeemResponse.address, address);
       if (!hasValidRedeemResponse) {
-        setToast({ message: "Invalid connection response", type: "error" });
+        setToast({ message: "This connection response is not valid.", type: "error" });
         setAcceptingConnection(false);
         return;
       }
 
       if (!canStoreAnotherWalletAccount(redeemResponse.address)) {
         setToast({
-          message: "Maximum connected profiles reached",
+          message: "You've reached the connected profile limit.",
           type: "error",
         });
         setAcceptingConnection(false);
@@ -81,7 +81,7 @@ function AcceptConnectionSharing(
       );
       if (!didPersistJwt) {
         setToast({
-          message: "Failed to store connected profile",
+          message: "Couldn't save this connected profile. Please try again.",
           type: "error",
         });
         setAcceptingConnection(false);
@@ -92,7 +92,7 @@ function AcceptConnectionSharing(
       router.push("/");
     } catch (error) {
       console.error(error);
-      setToast({ message: "Failed to accept connection", type: "error" });
+      setToast({ message: "Couldn't accept this connection. Please try again.", type: "error" });
       setAcceptingConnection(false);
     }
   };

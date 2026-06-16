@@ -6,6 +6,7 @@ import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
 import UserSettingsUsername from "@/components/user/settings/UserSettingsUsername";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -62,8 +63,10 @@ export default function UserPageHeaderEditName({
     },
     onError: (error: unknown) => {
       setToast({
-        message: error as string,
         type: "error",
+        title: "Couldn't update this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -81,7 +84,7 @@ export default function UserPageHeaderEditName({
     const { success } = await requestAuth();
     if (!success) {
       setToast({
-        message: "You must be logged in to save settings",
+        message: "Log in to save settings.",
         type: "error",
       });
       return;

@@ -11,6 +11,9 @@ jest.mock("@/hooks/waves/useWaveDecisions", () => ({
   useWaveDecisions: jest.fn(),
 }));
 jest.mock("@/hooks/useWave");
+jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveOutcomeVisibility: () => mockOutcomesVisible,
+}));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ winnersViewStyle: {} }),
 }));
@@ -30,10 +33,12 @@ jest.mock("@/components/waves/winners/drops/WaveWinnersDrops", () => ({
 }));
 
 const wave = { id: "w1", wave: { type: ApiWaveType.Rank } } as any;
+let mockOutcomesVisible = true;
 
 describe("WaveWinners", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOutcomesVisible = true;
   });
 
   it("renders timeline when multi decision", () => {
@@ -204,6 +209,36 @@ describe("WaveWinners", () => {
     expect(Drops).toHaveBeenCalledWith(
       expect.objectContaining({
         contentPresentation: "quorumCompact",
+      })
+    );
+  });
+
+  it("passes hidden outcome visibility to podium and drops", () => {
+    mockOutcomesVisible = false;
+    (useWave as jest.Mock).mockReturnValue({
+      decisions: { multiDecision: false },
+      isQuorumWave: false,
+    });
+    (useWaveDecisions as jest.Mock).mockReturnValue({
+      decisionPoints: [
+        {
+          winners: [{ drop: { id: "d1" }, place: 1 }],
+        },
+      ],
+      isFetching: false,
+      isLoadingAllPages: false,
+    });
+
+    render(<WaveWinners wave={wave} onDropClick={jest.fn()} />);
+
+    expect(Podium).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcomesVisible: false,
+      })
+    );
+    expect(Drops).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcomesVisible: false,
       })
     );
   });

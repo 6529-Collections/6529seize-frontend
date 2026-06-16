@@ -1,7 +1,7 @@
 "use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
-import "react-toastify/dist/ReactToastify.css";
+
 export default function DistributionPlanToolWrapper({
   children,
 }: {

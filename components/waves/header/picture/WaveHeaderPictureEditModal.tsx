@@ -8,6 +8,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiUpdateWaveRequest } from "@/generated/models/ApiUpdateWaveRequest";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { convertWaveToUpdateWave } from "@/helpers/waves/waves.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { multiPartUpload } from "../../create-wave/services/multiPartUpload";
@@ -75,25 +76,35 @@ export default function WaveHeaderPictureEditModal({
     if (!success) {
       setToast({
         type: "error",
-        message: "Failed to authenticate",
+        message: "Couldn't authenticate. Reconnect your wallet and try again.",
       });
       setMutating(false);
       return;
     }
 
+    let uploaded: Awaited<ReturnType<typeof multiPartUpload>>;
     try {
-      const uploaded = await multiPartUpload({ file, path: "wave" });
-      const body = {
-        ...convertWaveToUpdateWave(wave),
-        picture: uploaded.url,
-      };
-      await editPictureMutation.mutateAsync(body);
+      uploaded = await multiPartUpload({ file, path: "wave" });
     } catch (error) {
       setToast({
         type: "error",
-        message: (error as any)?.message ?? "Failed to update wave picture",
+        title: "Couldn't update the wave picture.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
       setMutating(false);
+      return;
+    }
+
+    const body = {
+      ...convertWaveToUpdateWave(wave),
+      picture: uploaded.url,
+    };
+
+    try {
+      await editPictureMutation.mutateAsync(body);
+    } catch {
+      // editPictureMutation.onError owns the toast for API failures.
     }
   };
 

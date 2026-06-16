@@ -15,7 +15,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   SingleWaveDropVoteSize,
   SingleWaveDropVoteSubmissionMode,
@@ -59,6 +61,7 @@ const BACKGROUND_MODAL_CLOSE_BUFFER_MS = 150;
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
+  readonly voteLabel: string;
   readonly onVoteApplied?: ((drop: ApiDrop) => void) | undefined;
   readonly onVoteSuccess?: (() => void) | undefined;
   readonly onVoteRequestStarted?: (() => void) | undefined;
@@ -75,6 +78,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     {
       drop,
       newRating,
+      voteLabel,
       onVoteApplied,
       onVoteSuccess,
       onVoteRequestStarted,
@@ -125,8 +129,10 @@ const SingleWaveDropVoteSubmit = forwardRef<
       },
       onError: (error) => {
         setToast({
-          message: error as unknown as string,
           type: "error",
+          title: "Couldn't submit your vote.",
+          description: "Please try again.",
+          details: getToastErrorDetails(error),
         });
       },
     });
@@ -398,9 +404,8 @@ const SingleWaveDropVoteSubmit = forwardRef<
       }, 1000);
       timeoutsRef.current.push(successTimeout);
 
-      const successDisplayFinished = await delayWhileMounted(
-        totalParticlesTime
-      );
+      const successDisplayFinished =
+        await delayWhileMounted(totalParticlesTime);
       if (!successDisplayFinished) {
         return;
       }
@@ -472,6 +477,32 @@ const SingleWaveDropVoteSubmit = forwardRef<
       handleClick,
     }));
 
+    let voteDirectionClass = "";
+    if (size !== SingleWaveDropVoteSize.MINI) {
+      if (newRating > 0) {
+        voteDirectionClass = styles["voteButtonPositive"] ?? "";
+      } else if (newRating < 0) {
+        voteDirectionClass = styles["voteButtonNegative"] ?? "";
+      } else {
+        voteDirectionClass = styles["voteButtonNeutral"] ?? "";
+      }
+    }
+
+    const showVoteAmount =
+      size !== SingleWaveDropVoteSize.MINI &&
+      Number.isFinite(newRating) &&
+      newRating !== 0;
+    let voteAmountLabel: string | null = null;
+    if (showVoteAmount) {
+      const voteSign = newRating > 0 ? "+" : "";
+      voteAmountLabel = `${voteSign}${formatNumberWithCommas(
+        newRating
+      )} ${voteLabel}`;
+    }
+
+    const idleButtonLabel =
+      voteAmountLabel === null ? "Vote" : `Vote ${voteAmountLabel}`;
+
     const getButtonContent = () => {
       return (
         <div className={styles["buttonContent"]}>
@@ -481,7 +512,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
                 isTextExiting ? styles["exit"] : styles["enter"]
               }`}
             >
-              {showSuccess ? "Voted" : "Vote"}
+              {showSuccess ? "Voted" : idleButtonLabel}
             </span>
           )}
           {loading && (
@@ -507,7 +538,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
             size === SingleWaveDropVoteSize.MINI
               ? styles["voteButtonMini"]
               : styles["voteButton"]
-          } ${isProcessing ? styles["processing"] : ""}`}
+          } ${voteDirectionClass} ${isProcessing ? styles["processing"] : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             void handleClick();

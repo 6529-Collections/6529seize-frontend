@@ -32,6 +32,7 @@ interface WaveSmallLeaderboardDropRendererProps {
   readonly isApproveWave?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly isVotingControlsLocked?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly onDropClick: () => void;
 }
 
