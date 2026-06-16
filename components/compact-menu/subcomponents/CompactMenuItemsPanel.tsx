@@ -60,9 +60,7 @@ export function CompactMenuItemsPanel({
   return (
     <div className={clsx("tw-flex tw-flex-col", itemsWrapperClassName)}>
       {header !== undefined && header !== null && (
-        <div role="presentation" className={headerClassName}>
-          {header}
-        </div>
+        <div className={headerClassName}>{header}</div>
       )}
       {items.map((item) => {
         const isActive = item.active ?? activeItemId === item.id;
