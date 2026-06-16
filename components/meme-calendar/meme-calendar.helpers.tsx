@@ -3,6 +3,9 @@ import {
   SKIPPED_MINT_UTC_DAYS,
 } from "./meme-calendar.overrides";
 import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Constants for division sizes
 export const SEASONS_PER_YEAR = 4;
@@ -776,15 +779,17 @@ export function printCalendarInvites(
 export function getRangeLabel(
   start: Date,
   end: Date,
-  locale = "en-US"
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): string {
   const startMintDate = nextMintDateOnOrAfter(start);
   const endMintDate = prevMintDateOnOrBefore(end);
   if (startMintDate.getTime() > endMintDate.getTime()) return "—";
-  const startMint =
-    getMintNumberForMintDate(startMintDate).toLocaleString(locale);
-  const endMint = getMintNumberForMintDate(endMintDate).toLocaleString(locale);
-  return `Memes #${startMint} - #${endMint}`;
+  const startMint = getMintNumberForMintDate(startMintDate);
+  const endMint = getMintNumberForMintDate(endMintDate);
+  return t(locale, "memeCalendar.grid.memeRange", {
+    start: formatInteger(locale, startMint),
+    end: formatInteger(locale, endMint),
+  });
 }
 
 export function formatToFullDivision(d: Date): React.ReactNode {
