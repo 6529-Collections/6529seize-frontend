@@ -15,6 +15,7 @@ import {
   getActivityWalletsParam,
   WALLET_DISTRIBUTION_PAGE_PARAM,
 } from "../activity.helpers";
+import { getDistributionsMessage } from "./distributions.messages";
 import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActivityDistributionsTableWrapper";
 
 export default function UserPageStatsActivityDistributions({
@@ -105,7 +106,7 @@ export default function UserPageStatsActivityDistributions({
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Distributions
+          {getDistributionsMessage("user.collected.stats.distributions.title")}
         </h3>
       </div>
       <UserPageStatsActivityDistributionsTableWrapper

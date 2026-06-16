@@ -638,3 +638,436 @@
   `lint:changed`, `typecheck:changed`, and `react-doctor:diff`; results
   remained green apart from the unrelated dirty EmojiContext React Doctor
   diagnostic.
+- Started stacked branch `codex/memelab-browse-card-a11y-i18n-followup` from
+  PR #2624 for a small Meme Lab browse/collection card follow-up.
+- Implemented labelled list/listitem semantics for Meme Lab ungrouped,
+  artist-grouped, collection-grouped, and collection-route card grids. Added
+  message-backed list labels, locale-preserving grouped collection `view`
+  links, and regression coverage for grouped list labels, list items, collection
+  href preservation, collection-route card href preservation, and fallback
+  messages.
+- Validation passed for the Meme Lab browse follow-up: focused Meme Lab,
+  Rememe image, and i18n Jest suites (4 suites, 15 tests), focused Prettier
+  check, `lint:changed`, `typecheck:changed`, and `react-doctor:diff`.
+  React Doctor still reports the unrelated dirty EmojiContext diagnostic plus
+  existing Meme Lab state/refactor warnings.
+- Browser smoke passed on the live local frontend for
+  `/meme-lab?sort=collections&locale=de-DE` at desktop and
+  `/meme-lab/collection/6529-Intern-JPGs?locale=fr-FR` at a 390px mobile
+  viewport. Verified labelled card lists, locale-preserving collection/card
+  links, no horizontal overflow, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2625 against PR #2624. Per workstream policy,
+  do not merge PR #2625 without human approval.
+- Addressed SonarCloud's PR #2625 test-helper issue by hoisting the default
+  Meme Lab props object into a stable module constant. Re-ran the focused Meme
+  Lab card-grid test, Prettier check, `lint:changed`, and
+  `typecheck:changed`; results remained green.
+- Confirmed PR #2625 is bot-happy on the latest head: Snyk passed,
+  CodeRabbit passed with no open review threads, and SonarCloud reported 0 new
+  issues. Claude remained configured for manual review and did not leave an
+  actionable review. Per workstream policy, do not merge PR #2625 without human
+  approval.
+- Started stacked branch `codex/user-collected-cards-a11y-i18n` from PR #2625
+  for a low-risk `/{user}/collected` native card list follow-up.
+- Implemented labelled list/listitem semantics for profile native collected
+  card results. Added source message key `user.collected.cards.listLabel`,
+  fallback coverage, component assertions for list semantics and empty-state
+  behavior, and Collected-tab feature docs.
+- Validation passed for the profile collected card list follow-up: focused
+  collected-card/i18n Jest suites (2 suites, 6 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty EmojiContext diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified one labelled `Collected cards`
+  list, 24 direct list items, no horizontal overflow, and no Next.js runtime
+  session errors. Console resource errors were shared backend/resource noise.
+- Opened review-ready stacked PR #2626 against PR #2625. Per workstream policy,
+  do not merge PR #2626 without human approval.
+- Addressed CodeRabbit's PR #2626 Safari/VoiceOver list-semantics finding by
+  adding an explicit `role="list"` to the collected cards `ul` and hoisting the
+  static list label. Re-ran the focused collected-card/i18n Jest suites,
+  Prettier check, `lint:changed`, and `typecheck:changed`; results remained
+  green.
+- Addressed CodeRabbit's PR #2626 tracker wording finding by updating the
+  outdated collected-surface status to collected card list wording.
+- Addressed the PR #2626 SonarCloud/CodeRabbit role conflict by keeping the
+  explicit `list` role for Safari/VoiceOver compatibility behind a small
+  compatibility prop object with a local rationale.
+- Confirmed PR #2626 is bot-happy on the latest head: Snyk passed, CodeRabbit
+  passed with all review threads resolved, and SonarCloud reported 0 new
+  issues. Claude remains configured for manual review and did not leave an
+  actionable review. Per workstream policy, do not merge PR #2626 without human
+  approval.
+- Started stacked branch `codex/user-collected-network-cards-a11y-i18n` from
+  PR #2626 for a low-risk `/{user}/collected` network card-list follow-up.
+- Implemented labelled list/listitem semantics for profile network collected
+  card results. Added source message keys for the list label, empty state,
+  fallback token/collection names, image alt text, token number label, and xTDH
+  labels, plus focused component and fallback-message coverage.
+- Validation passed for the profile collected network-card follow-up: focused
+  network-card/i18n Jest suites (2 suites, 5 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty EmojiContext diagnostic.
+- Browser smoke passed on the live local frontend for
+  `/punk6529/collected?collection=network`. The local seed data returns the
+  network empty state, so non-empty list semantics are covered by component
+  tests. Verified localized `No network tokens found` copy, no horizontal
+  overflow, and no Next.js runtime session errors. Console errors were shared
+  backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2627 against PR #2626. Per workstream policy,
+  do not merge PR #2627 without human approval.
+- Confirmed PR #2627 is bot-happy on the latest head: DCO passed, Snyk passed,
+  CodeRabbit passed with no review threads, and SonarCloud reported 0 new
+  issues. Claude remains configured for manual review and did not leave an
+  actionable review. Per workstream policy, do not merge PR #2627 without human
+  approval.
+- Started stacked branch `codex/user-collected-empty-states-a11y-i18n` from
+  PR #2627 for a low-risk `/{user}/collected` empty-state follow-up.
+- Implemented message-backed native collected empty-state copy and native
+  `<output>` status semantics while preserving existing filter and full-set
+  behavior. Reused the network empty-state message from PR #2627.
+- Validation passed for the empty-state follow-up: focused collected empty-state
+  and i18n Jest suites (2 suites, 8 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for
+  `/punk6529/collected?collection=memes&seized=seized`. Local seed data returned
+  the non-empty collected list rather than the empty-state branch, so the status
+  region is covered by component tests. Verified no horizontal overflow and no
+  Next.js runtime session errors. Console errors were shared backend wave
+  endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2628 against PR #2627. Per workstream policy,
+  do not merge PR #2628 without human approval.
+- Addressed SonarCloud's PR #2628 native-status finding by replacing explicit
+  `role="status"` with `<output>`, then addressed CodeRabbit's active-context
+  wording nit. Re-ran focused empty-state/i18n tests, focused Prettier check,
+  `lint:changed`, `typecheck:changed`, `react-doctor:diff`, and
+  `git diff --check`; results remained green apart from the known unrelated
+  EmojiContext React Doctor diagnostic.
+- Confirmed PR #2628 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit passed with no review threads,
+  and Claude remained configured for manual review only. Per workstream policy,
+  do not merge PR #2628 without human approval.
+- Started stacked branch `codex/user-collected-sort-controls-a11y-i18n` from
+  PR #2628 for a low-risk `/{user}/collected` filter-control follow-up.
+- Implemented message-backed collected filter labels for View, Native/Network,
+  Collection, All/All Collections, Unknown Collection, Sort By, collection sort
+  options, Seized filter options, and horizontal filter-scroll buttons. Removed
+  derived sort-item state in favor of memoized source-label items and made the
+  touched filter-strip scroll listener passive.
+- Focused validation passed for the filter-control follow-up: collected filter
+  and i18n Jest suites (6 suites, 17 tests), focused Prettier check,
+  `lint:changed`, `typecheck:changed`, and `react-doctor:diff`. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified source-message filter labels,
+  filter accessible names, no horizontal overflow, no page errors, and no
+  Next.js runtime session errors. Console errors were shared backend wave
+  endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2629 against PR #2628. Per workstream policy,
+  do not merge PR #2629 without human approval.
+- Confirmed PR #2629 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit passed with no review threads,
+  and Claude remained configured for manual review only. Per workstream policy,
+  do not merge PR #2629 without human approval.
+- Started stacked branch `codex/user-collected-season-strip-a11y-i18n` from PR
+  #2629 for a low-risk `/{user}/collected` season-strip follow-up.
+- Implemented message-backed source-locale labels for the collected season
+  strip: `Seasons`, started count, desktop show more/less controls, unseized
+  label, and season tile set-count plural labels. Extracted the tile renderer
+  into a stable `SeasonTiles` component to avoid React Doctor render-helper
+  warnings.
+- Validation passed for the season-strip follow-up: focused season/i18n Jest
+  suites (3 suites, 26 tests), focused Prettier check, `lint:changed`,
+  `typecheck:changed`, and `react-doctor:diff`. React Doctor still reports only
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified message-backed season heading
+  and started count, button season tiles, no page errors, and no Next.js
+  runtime session errors. Mobile horizontal overflow came from existing
+  scrollable strips, including the season carousel. Console resource errors
+  were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2630 against PR #2629. Per workstream policy,
+  do not merge PR #2630 without human approval.
+- Confirmed PR #2630 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues, CodeRabbit manual review passed with no
+  review threads, and Claude remained configured for manual review only. Per
+  workstream policy, do not merge PR #2630 without human approval.
+- Started stacked branch `codex/user-collected-stats-summary-a11y-i18n` from
+  PR #2630 for a low-risk `/{user}/collected` stats-summary follow-up.
+- Implemented message-backed source-locale copy for collected header metric
+  labels, multiplier values, unique-count copy, the `Details`/`Hide Details`
+  toggle, the stats-unavailable message, and remaining season tile label/detail
+  copy. Marked the Details icon decorative for assistive technologies.
+- Validation passed for the stats-summary follow-up: focused stats/season/i18n
+  Jest suites (3 suites, 27 tests), focused Prettier write/check during the
+  edit loop, `lint:changed`, `typecheck:changed`, and `react-doctor:diff`.
+  React Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified source-message metric labels,
+  season tile detail text, Details/Hide Details toggle text, `aria-expanded`
+  state changes, no page errors, and no Next.js runtime session errors. Mobile
+  horizontal overflow came from existing scrollable strips. Console resource
+  errors were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2631 against PR #2630. Per workstream policy,
+  do not merge PR #2631 without human approval.
+- Addressed SonarCloud's PR #2631 new-code duplication gate by moving the
+  collected stats message keys into a typed `namespaceMessages` block while
+  preserving the same public message keys. Re-ran focused stats/season/i18n
+  Jest suites, `lint:changed`, `typecheck:changed`, and `react-doctor:diff`;
+  results remained green apart from the known unrelated EmojiContext diagnostic.
+- Confirmed PR #2631 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with 0 new issues and 0.0% duplication, CodeRabbit manual
+  review passed with no review threads, and Claude remained configured for
+  manual review only. Per workstream policy, do not merge PR #2631 without
+  human approval.
+- Started stacked branch `codex/user-collected-details-tables-a11y-i18n` from
+  PR #2631 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the expanded collected
+  details tables, added screen-reader table captions, promoted touched row
+  labels to table row headers, added column scopes, and moved touched collected
+  table counts/percent copy through the repo i18n formatting helpers. Hid the
+  visual separator rows from assistive technologies.
+- Validation passed for the details-table follow-up: focused collected
+  stats/shared-table/i18n Jest suites (3 suites, 6 tests), focused Prettier
+  write/check during the edit loop, `lint:changed`, `typecheck:changed`,
+  `react-doctor:diff`, and `git diff --check`. React Doctor still reports only
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and 390px mobile viewport. Verified `Details` opens, collected table
+  captions, scoped column headers, row headers, hidden separator rows, no
+  desktop or mobile page overflow, and no Next.js runtime session errors.
+  Console resource errors were shared backend wave endpoints and blocked emoji
+  feed noise.
+- Opened review-ready stacked PR #2633 against PR #2631. Per workstream policy,
+  do not merge PR #2633 without human approval.
+- Addressed SonarCloud's PR #2633 new-code duplication gate by refactoring the
+  collected details table headers/rows into mapped column definitions and
+  small reusable cells while preserving the rendered table semantics. Re-ran
+  focused collected stats/shared-table/i18n Jest suites, `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, `git diff --check`, and a live
+  browser DOM smoke; results remained green apart from the known unrelated
+  EmojiContext diagnostic and shared backend/emoji console noise.
+- Narrowed the remaining PR #2633 SonarCloud duplication finding to the new
+  source-locale message entries and moved the collected details message group
+  to an object-backed helper while preserving all public message keys. Re-ran
+  focused collected stats/shared-table/i18n Jest suites, `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and `git diff --check`; results
+  remained green apart from the known unrelated EmojiContext diagnostic.
+- Confirmed PR #2633 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, there are no review
+  threads, and Claude remained configured for manual review only. Per
+  workstream policy, do not merge PR #2633 without human approval.
+- Started stacked branch `codex/user-collected-boost-breakdown-a11y-i18n` from
+  PR #2633 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Boost Breakdown
+  heading, TDH version link, table caption, columns, row labels, season labels,
+  and total boost tooltip copy. Added a screen-reader table caption, promoted
+  touched row labels to row headers, moved boost numeric values through the
+  repo i18n formatting helper, and made info tooltip triggers keyboard
+  focusable with accessible names.
+- Validation passed for the Boost Breakdown follow-up: focused boost
+  breakdown/i18n Jest suites (3 suites, 8 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and `git diff --check`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified `Details` opens, Boost
+  Breakdown renders with a screen-reader table caption, scoped column headers,
+  row headers, keyboard-focusable tooltip buttons with accessible names, no
+  page-level mobile overflow, and no Next.js runtime session errors. Console
+  resource errors were shared backend wave endpoints and blocked emoji feed
+  noise.
+- Opened review-ready stacked PR #2634 against PR #2633. Per workstream policy,
+  do not merge PR #2634 without human approval.
+- Confirmed PR #2634 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, there are no review
+  threads, and Claude remained configured for manual review only. Per
+  workstream policy, do not merge PR #2634 without human approval.
+- Started stacked branch `codex/user-collected-activity-overview-a11y-i18n`
+  from PR #2634 for the next low-risk `/{user}/collected` Details-panel
+  follow-up.
+- Implemented message-backed source-locale labels for the Activity Overview
+  heading, accordion headings, table captions, columns, row labels, season
+  labels, and numeric/ETH values. Refactored repeated overview and per-season
+  activity rows into typed row/column configs, added screen-reader table
+  captions, and promoted touched row labels to row headers.
+- Validation passed for the Activity Overview follow-up: focused activity
+  overview/i18n Jest suites (2 suites, 5 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and `git diff --check`. React
+  Doctor still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic.
+- Browser smoke passed on the live local frontend for `/punk6529/collected` at
+  desktop and a 390px mobile viewport. Verified `Details` opens, Activity
+  Overview tables render with screen-reader captions, scoped column headers,
+  row headers, message-backed labels, horizontal scrollers containing wide
+  tables on mobile, and no Next.js runtime session errors. Console resource
+  errors were shared backend wave endpoints and blocked emoji feed noise.
+- Opened review-ready stacked PR #2635 against PR #2634. Per workstream policy,
+  do not merge PR #2635.
+- Confirmed PR #2635 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed after reducing the row-config duplication, CodeRabbit
+  manual review passed after the async test assertion fix, the stale review
+  thread is resolved/outdated, and Claude remained configured for manual review
+  only. Per workstream policy, do not merge PR #2635.
+- Started stacked branch `codex/user-collected-activity-tabs-a11y-i18n` from
+  PR #2635 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the lower Activity tab
+  list and tabs, added a tab-list accessible name, connected tabs to the active
+  tabpanel, added roving tab focus with Arrow/Home/End keyboard switching, and
+  exposed active state via `aria-selected` while preserving the existing
+  query-param tab switching.
+- Validation passed for the Activity tabs follow-up: focused activity
+  tab/wrapper/i18n Jest suites (4 suites, 8 tests), `lint:changed`,
+  `typecheck:changed`, and `git diff --check`. `react-doctor:diff` exits 0 and
+  still reports the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect
+  diagnostic plus a `useSearchParams` Suspense warning for
+  `UserPageActivityWrapper.tsx`; the wrapper now owns a local Suspense boundary
+  around the hook content, and the remaining warning appears to be analyzer
+  follow-up rather than a missing local boundary.
+- Browser smoke passed on the live local frontend for
+  `/punk6529/collected?activity=wallet-activity`. Verified the lower Activity
+  tab group exposes a named tablist, tabs expose `role="tab"`,
+  `aria-selected`, roving tab indexes, `aria-controls`, and stable IDs, the
+  active panel exposes `role="tabpanel"` and `aria-labelledby`, ArrowRight moves
+  focus/selection from `Wallet Activity` to `Distributions`, the query string
+  updates, and Next.js runtime diagnostics reported no config or session
+  errors. Console resource errors were shared backend wave endpoints and blocked
+  emoji feed noise.
+- Opened review-ready stacked PR #2636 against PR #2635. Per workstream policy,
+  do not merge PR #2636.
+- Confirmed PR #2636 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed after tightening the
+  page-PR merge policy wording, the prior review thread is resolved/outdated,
+  and Claude remained configured for manual review only. Per workstream policy,
+  do not merge PR #2636.
+- Started stacked branch
+  `codex/user-collected-wallet-activity-filter-a11y-i18n` from PR #2636 for the
+  next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Wallet Activity
+  heading, filter trigger/options, empty states, and transaction table caption.
+  Added accessible filter trigger/option names, `aria-expanded`,
+  `aria-controls`, option pressed state, status semantics for empty states, and
+  a screen-reader table caption. Swapped the touched framer-motion dropdown
+  usage to `LazyMotion`/`m`.
+- Validation passed for the Wallet Activity filter follow-up so far: focused
+  wallet filter/table/i18n Jest suites (5 suites, 10 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and browser smoke on
+  `/punk6529/collected?activity=wallet-activity`. React Doctor still reports
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic
+  and the `useSearchParams` Suspense warning for the touched wallet component,
+  which is rendered under the activity wrapper Suspense boundary from PR #2636.
+  Browser smoke verified the Wallet Activity heading, filter trigger accessible
+  name, option list labels, pressed state, Wallet Activity table caption,
+  `Mints` selection/query update, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2637 against PR #2636. Per workstream policy,
+  do not merge PR #2637.
+- SonarCloud reported one non-blocking accessibility code smell on PR #2637:
+  prefer native `<output>` over `role="status"` for the Wallet Activity empty
+  state. Updated the empty state wrapper to `<output>` and reran focused wallet
+  filter/table/i18n Jest suites, targeted eslint for the touched wrapper file,
+  `typecheck:changed`, and `git diff --check`.
+- Confirmed PR #2637 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with zero open issues after the `<output>` fix, CodeRabbit
+  manual review passed, no review threads are open, and Claude remains
+  configured for manual review only. Per workstream policy, do not merge PR
+  #2637.
+- Started stacked branch `codex/user-collected-distributions-a11y-i18n` from
+  PR #2637 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Distributions
+  heading, empty state, table caption, table headings, collection labels,
+  token link accessible names, and a loading-only screen-reader label. Replaced
+  the empty state with native `<output>`, switched distribution row numbers to
+  default-locale `Intl` formatting, switched relative time to the repo i18n
+  helper, and replaced phase index keys with stable phase-name keys.
+- Validation passed for the Distributions follow-up so far: focused
+  distributions/i18n Jest suites (5 suites, 10 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=distributions`.
+  `lint:changed` was not rerun for this branch because the long stacked diff
+  expands beyond Windows' command-line limit; the PR-specific eslint run passed.
+  React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and the `useSearchParams` Suspense warning for
+  the touched Distributions component, which is rendered under the activity
+  wrapper Suspense boundary from PR #2636. Browser smoke verified the
+  Distributions tab selection/panel relationship, message-backed heading,
+  native empty-state output, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2638 against PR #2637. Per workstream policy,
+  do not merge PR #2638.
+- CodeRabbit flagged that the Distributions loading label remained in the
+  accessibility tree when visually hidden by opacity. Fixed the loader subtree
+  to render only while loading and added a focused regression assertion.
+- Confirmed PR #2638 is bot-happy on the latest head after the loading-label
+  follow-up: DCO passed, Snyk passed, SonarCloud passed with zero new issues,
+  CodeRabbit manual review passed, and the prior loading-label review thread is
+  resolved/outdated. Per workstream policy, do not merge PR #2638.
+- Started stacked branch `codex/user-collected-tdh-history-a11y-i18n` from PR
+  #2638 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the TDH History heading,
+  loading label, empty state, chart list label, chart titles, dataset labels,
+  and chart accessible names. Replaced the empty state with native `<output>`,
+  switched chart date and axis labels through the repo i18n helpers, and
+  replaced random chart keys with stable chart IDs.
+- Validation passed for the TDH History follow-up so far: focused TDH
+  History/i18n Jest suites (3 suites, 8 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=tdh-history`. React Doctor
+  still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and the pre-existing heavy Chart.js import warning
+  in the touched TDH chart component. Browser smoke verified the TDH History tab
+  selection/panel relationship, message-backed heading, chart list label, chart
+  headings, canvas accessible names, and no Next.js runtime session errors; the
+  remaining browser console errors were the known local shared API wave 500s and
+  blocked emoji-list request.
+- Opened review-ready stacked PR #2639 against PR #2638. Per workstream policy,
+  do not merge PR #2639.
+- Confirmed PR #2639 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, and no review threads are
+  open. Per workstream policy, do not merge PR #2639.
+- Started stacked branch `codex/user-profile-tabs-a11y-i18n` from PR #2639 for
+  the next low-risk profile shell follow-up.
+- Implemented message-backed source-locale labels for profile tab titles, beta
+  badge text, profile-section navigation landmark text, and tab-scroll button
+  labels. Added `aria-current="page"` to the active profile tab link, wrapped
+  the search-param-driven tab tree in a documented Suspense boundary, and made
+  the horizontal tab scroll listener passive.
+- Validation passed for the profile tabs follow-up so far: focused
+  layout-tabs/i18n Jest suites (4 suites, 20 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=tdh-history`. React Doctor
+  still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic, still flags `useSearchParams` in the touched
+  profile tab files despite the `UserPageLayout` Suspense boundary, and still
+  flags the existing `router.replace()` redirect effect. Browser smoke verified
+  the `Profile sections` navigation landmark, message-backed tab labels, the
+  explicit `xTDH Beta` link name, `aria-current="page"` on Collected, and no
+  Next.js runtime session errors; remaining browser console errors were the
+  known local shared API wave 500s and blocked emoji-list request.
+- Opened review-ready stacked PR #2640 against PR #2639. Per workstream policy,
+  do not merge PR #2640.
+- Confirmed PR #2640 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, and no review threads are
+  open. Per workstream policy, do not merge PR #2640.
+- Started stacked branch `codex/user-followers-modal-a11y-i18n` from PR #2640
+  for the next low-risk profile modal/list follow-up.
+- Implemented message-backed source-locale labels for the profile followers
+  modal title, follower list label, loading status label, follower profile link
+  names, and follower avatar alt text. Converted the follower collection to a
+  semantic list/listitem structure, added `aria-busy` plus a polite loading
+  status, and switched follower avatars to `next/image` with `unoptimized` for
+  arbitrary remote profile hosts.
+- Validation passed for the followers modal/list follow-up so far: focused
+  followers/i18n Jest suites (5 suites, 11 tests), targeted eslint for the
+  PR-specific source files, `typecheck:changed`, `react-doctor:diff`, and live
+  browser smoke on `/punk6529` at desktop and 390px mobile widths. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic. Browser smoke verified the `Followers` dialog
+  title, modal `aria-modal`, `Followers` list label, two list items, labeled
+  profile links, avatar alt text, close button on mobile, and no Next.js
+  runtime session errors; browser console errors were local API/resource
+  responses unrelated to the followers modal change.
+- Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
+  do not merge PR #2641.
