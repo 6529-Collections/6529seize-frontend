@@ -5,12 +5,18 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
-import { useParams, usePathname, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
   useParams: jest.fn(),
   usePathname: jest.fn(),
+  useRouter: jest.fn(),
 }));
 jest.mock(
   "@/components/user/user-page-header/UserPageHeader",
@@ -35,12 +41,14 @@ const mockAuthContext = {} as any;
 const mockReactQueryContext = { setProfile: jest.fn() } as any;
 const mockUseParams = useParams as jest.Mock;
 const mockUsePathname = usePathname as jest.Mock;
+const mockUseRouter = useRouter as jest.Mock;
 const mockUseSearchParams = useSearchParams as jest.Mock;
 
 describe("UserPageLayout", () => {
   beforeEach(() => {
     mockUseParams.mockReturnValue({ user: "testuser" });
     mockUsePathname.mockReturnValue("/testuser");
+    mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
     mockUseSearchParams.mockReturnValue(new URLSearchParams());
   });
 
@@ -53,10 +61,7 @@ describe("UserPageLayout", () => {
         <QueryClientProvider client={queryClient}>
           <AuthContext.Provider value={mockAuthContext}>
             <ReactQueryWrapperContext.Provider value={mockReactQueryContext}>
-              <UserPageLayout
-                profile={mockProfile}
-                handleOrWallet="testuser"
-              >
+              <UserPageLayout profile={mockProfile} handleOrWallet="testuser">
                 <div>Content</div>
               </UserPageLayout>
             </ReactQueryWrapperContext.Provider>
@@ -76,9 +81,7 @@ describe("UserPageLayout", () => {
   it("sets profile in context when not cached", async () => {
     renderComponent();
     await waitFor(() =>
-      expect(mockReactQueryContext.setProfile).toHaveBeenCalledWith(
-        mockProfile
-      )
+      expect(mockReactQueryContext.setProfile).toHaveBeenCalledWith(mockProfile)
     );
   });
 });
