@@ -51,9 +51,9 @@ such as `158/328`.
   - `Mint date {date}` when available
 
 Edition size should prefer claim edition size, then mint stats, then public
-extended edition size. The card does not render live mint progress fractions
-such as `158/328`; when the public API only exposes an extended edition size for
-a fresh mint, the card uses that value rather than omitting the fact.
+extended edition size only when it does not look like a fresh live mint count.
+The card does not render live mint progress fractions such as `158/328`, and it
+does not label current minted supply as final edition size.
 
 ### Meme Lab
 

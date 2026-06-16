@@ -173,7 +173,7 @@ describe("createFirstParty6529Plan", () => {
     expect(stagingPlan?.cacheKey).toBe("6529:staging:the-memes:/the-memes/509");
   });
 
-  it("uses public extended data for The Memes edition size when claim data is unavailable", async () => {
+  it("does not label fresh public supply as The Memes edition size", async () => {
     mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
       const url = readFetchUrl(input);
 
@@ -187,7 +187,7 @@ describe("createFirstParty6529Plan", () => {
               artist: "elnaz555",
               artist_seize_handle: "elnaz555",
               hodl_rate: 22.7803,
-              mint_date: "2026-06-15T00:00:00.000Z",
+              mint_date: new Date().toISOString(),
               thumbnail: "https://cdn.6529.io/memes/509.png",
               metadata: {
                 attributes: [{ trait_type: "Type - Season", value: 15 }],
@@ -223,10 +223,17 @@ describe("createFirstParty6529Plan", () => {
     const { data } = await plan!.execute();
 
     expect(data.facts).toEqual([
-      { label: "Edition size", value: "173" },
       { label: "TDH rate", value: "22.78" },
       { label: "Season", value: "15" },
-      { label: "Mint date", value: "15 Jun 2026" },
+      {
+        label: "Mint date",
+        value: new Intl.DateTimeFormat("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        }).format(new Date()),
+      },
     ]);
   });
 

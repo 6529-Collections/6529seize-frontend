@@ -28,6 +28,7 @@ import type {
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
+const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
 
@@ -548,6 +549,25 @@ async function resolveProfileHref(
   return handle ? `/${handle.replace(/^@/, "")}` : undefined;
 }
 
+function shouldUseExtendedEditionSize(
+  nft: NftRecord,
+  extendedEditionSize: number | undefined
+): boolean {
+  if (extendedEditionSize === undefined) {
+    return false;
+  }
+
+  const supply = readNumber(nft.supply);
+  const mintDate = new Date(readString(nft.mint_date) ?? "");
+  const looksLikeFreshLiveMintCount =
+    supply !== undefined &&
+    extendedEditionSize === supply &&
+    !Number.isNaN(mintDate.getTime()) &&
+    Date.now() - mintDate.getTime() < LIVE_MINT_FALLBACK_WINDOW_MS;
+
+  return !looksLikeFreshLiveMintCount;
+}
+
 function readMemeSeason(
   nft: MemesRecord,
   metadata: Record<string, unknown> | null
@@ -597,8 +617,14 @@ async function fetchTheMemesPreview(
   const claimEditionSize = readPositiveNumber(claim?.edition_size);
   const mintStatEditionSize = readPositiveNumber(mintStat?.total_count);
   const extendedEditionSize = readPositiveNumber(extended?.edition_size);
+  const fallbackEditionSize = shouldUseExtendedEditionSize(
+    source,
+    extendedEditionSize
+  )
+    ? extendedEditionSize
+    : undefined;
   const editionSize =
-    claimEditionSize ?? mintStatEditionSize ?? extendedEditionSize;
+    claimEditionSize ?? mintStatEditionSize ?? fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRate = readPositiveNumber(source.hodl_rate);
   const mintDate = formatMintDate(source.mint_date);
