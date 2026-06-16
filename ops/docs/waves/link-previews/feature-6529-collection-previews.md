@@ -90,6 +90,10 @@ supply as final edition size.
   - hide `Collection Name` and `None`
   - render as `{trait}: {value}`
 
+Short token URLs such as `/nextgen/token/514` should resolve through the API
+and render the canonical preview URL `/nextgen/token/{full token id}` so opening
+the card lands on the real token page.
+
 ### ReMemes
 
 - Title: token metadata name

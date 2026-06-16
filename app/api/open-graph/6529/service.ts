@@ -933,10 +933,14 @@ async function fetchNextGenPreview(
   const rarityRank = readPositiveNumber(token.rarity_score_rank);
   const mintDate = formatMintDate(token.mint_date);
   const artistHref = await resolveProfileHref(collection?.artist, context);
+  const canonicalRequestUrl = new URL(
+    `/nextgen/token/${token.id}`,
+    requestUrl.origin
+  );
 
   return buildPreview({
     kind: "nextgen-token",
-    requestUrl,
+    requestUrl: canonicalRequestUrl,
     title: firstNonEmptyString(token.name, `NextGen #${tokenId}`)!,
     kicker: `NextGen \u00b7 ${firstNonEmptyString(collection?.name, token.collection_name, "Collection")}`,
     people: compactPeople([

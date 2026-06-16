@@ -572,6 +572,8 @@ describe("createFirstParty6529Plan", () => {
       kind: "nextgen-token",
       title: "Pebbles #514",
       kicker: "NextGen \u00b7 Pebbles",
+      requestUrl: "https://6529.io/nextgen/token/10000000514",
+      url: "https://6529.io/nextgen/token/10000000514",
       people: [{ label: "by", name: "Zeblocks", href: "/zeblocks" }],
     });
     expect(data.facts).toEqual([
