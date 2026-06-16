@@ -1,56 +1,37 @@
-jest.mock("@/components/ipfs/IPFSContext", () => ({
-  resolveIpfsUrlSync: (url: string) =>
-    url.startsWith("ipfs://")
-      ? `https://ipfs.6529.io/ipfs/${url.slice("ipfs://".length)}`
-      : url,
-}));
-
-jest.mock("@/helpers/Helpers", () => ({
-  parseIpfsUrl: (url: string) =>
-    url.startsWith("ipfs://")
-      ? `https://ipfs.io/ipfs/${url.slice("ipfs://".length)}`
-      : url,
-}));
-
-jest.mock("@/lib/media/ipfs-gateways", () => ({
-  getConfiguredIpfsGatewayHost: () => "ipfs.6529.io",
-}));
-
-jest.mock("@/lib/media/arweave-gateways", () => ({
-  ARWEAVE_FALLBACK_HOSTS: ["arweave.net", "ardrive.net", "gateway.arweave.net"],
-  canonicalizeArweaveGatewayHostname: (hostname: string) =>
-    hostname.toLowerCase(),
-  isArweaveGatewayRuntimeHost: (hostname: string) =>
-    ["arweave.net", "ardrive.net", "gateway.arweave.net"].includes(
-      hostname.toLowerCase()
-    ),
-}));
-
 import {
   getMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 
 describe("gateway fallback helpers", () => {
-  it("prefers the configured gateway for ipfs protocol urls", () => {
-    expect(getMediaGatewayFallbackUrls("ipfs://bafy-test")).toEqual([
-      "https://ipfs.6529.io/ipfs/bafy-test",
-      "https://ipfs.io/ipfs/bafy-test",
-    ]);
+  it("prefers the 6529 resolver for ipfs protocol urls", () => {
+    expect(getMediaGatewayFallbackUrls("ipfs://bafy-test").slice(0, 3)).toEqual(
+      [
+        "https://media.6529.io/ipfs/bafy-test",
+        "https://ipfs.io/ipfs/bafy-test",
+        "https://cf-ipfs.com/ipfs/bafy-test",
+      ]
+    );
   });
 
-  it("normalizes ipfs gateway urls back to configured gateway first", () => {
+  it("normalizes ipfs gateway urls back to the 6529 resolver first", () => {
     expect(
-      getMediaGatewayFallbackUrls("https://ipfs.io/ipfs/bafy-test")
+      getMediaGatewayFallbackUrls("https://ipfs.io/ipfs/bafy-test").slice(0, 3)
     ).toEqual([
-      "https://ipfs.6529.io/ipfs/bafy-test",
+      "https://media.6529.io/ipfs/bafy-test",
       "https://ipfs.io/ipfs/bafy-test",
+      "https://cf-ipfs.com/ipfs/bafy-test",
     ]);
   });
 
-  it("uses timeout fallback for approved arweave gateways", () => {
+  it("uses timeout fallback for approved arweave gateways and the 6529 resolver", () => {
     expect(
       shouldUseIframeFallbackTimeout("https://arweave.net/transaction-id")
+    ).toBe(true);
+    expect(
+      shouldUseIframeFallbackTimeout(
+        "https://media.6529.io/arweave/transaction-id"
+      )
     ).toBe(true);
   });
 

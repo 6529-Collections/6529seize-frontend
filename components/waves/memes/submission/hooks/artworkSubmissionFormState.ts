@@ -1,4 +1,8 @@
 import { getInitialTraitsValues } from "@/components/waves/memes/traits/schema";
+import {
+  parseDecentralizedMediaRef,
+  toNativeUri,
+} from "@/lib/media/decentralized-media";
 import { stripArweaveGatewayUrlPrefix } from "@/lib/media/arweave-gateways";
 import type {
   InteractiveMediaMimeType,
@@ -103,6 +107,18 @@ const sanitizeInteractiveHash = (
   }
 
   let value = input.trim();
+  const parsed = parseDecentralizedMediaRef(value);
+  if (
+    parsed &&
+    ((provider === "ipfs" && parsed.protocol === "ipfs") ||
+      (provider === "arweave" && parsed.protocol === "arweave"))
+  ) {
+    if (provider === "ipfs") {
+      return parsed.id;
+    }
+
+    return parsed.path ? `${parsed.id}/${parsed.path}` : parsed.id;
+  }
 
   if (provider === "ipfs") {
     value = value.replace(/^ipfs:\/\//i, "");
@@ -267,7 +283,11 @@ const buildExternalMediaUrls = (
   }
 
   const previewUrl = `${INTERACTIVE_MEDIA_GATEWAY_BASE_URL[provider]}${sanitizedHash}`;
-  const url = provider === "arweave" ? previewUrl : `ipfs://${sanitizedHash}`;
+  const url = toNativeUri({
+    protocol: provider === "arweave" ? "arweave" : "ipfs",
+    id: sanitizedHash,
+    path: "",
+  });
 
   return { previewUrl, url };
 };
