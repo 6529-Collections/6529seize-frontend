@@ -271,7 +271,40 @@ describe("waves-v2-api", () => {
     });
   });
 
-  it("surfaces unavailable search only when every wave search endpoint fails", async () => {
+  it("returns no matches when every wave search endpoint completes empty", async () => {
+    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "v2/waves") {
+        return {
+          page: 1,
+          next: false,
+          data: [],
+        };
+      }
+      return [];
+    });
+
+    await expect(searchWavesByName({ name: "missing" })).resolves.toEqual([]);
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("surfaces unavailable search when empty results are followed by fallback failures", async () => {
+    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "v2/waves") {
+        return {
+          page: 1,
+          next: false,
+          data: [],
+        };
+      }
+      throw new Error("search failed");
+    });
+
+    await expect(searchWavesByName({ name: "missing" })).rejects.toThrow(
+      "Wave search is unavailable. Try a wave URL or id."
+    );
+  });
+
+  it("surfaces unavailable search when every wave search endpoint fails", async () => {
     commonApiFetchMock.mockRejectedValue(new Error("search failed"));
 
     await expect(searchWavesByName({ name: "missing" })).rejects.toThrow(
