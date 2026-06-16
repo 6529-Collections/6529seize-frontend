@@ -23,6 +23,7 @@ describe("UserPageCollectedCardsNoCards messages", () => {
       collection: null,
       szn: null,
     });
+    expect(screen.getByRole("status")).toHaveTextContent("No cards to display");
     expect(screen.getByText("No cards to display")).toBeInTheDocument();
   });
 
@@ -32,6 +33,9 @@ describe("UserPageCollectedCardsNoCards messages", () => {
       collection: null,
       szn: null,
     });
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Congratulations, full setter!"
+    );
     expect(
       screen.getByText("Congratulations, full setter!")
     ).toBeInTheDocument();
@@ -46,6 +50,17 @@ describe("UserPageCollectedCardsNoCards messages", () => {
     expect(
       screen.getByText("Congratulations, SZN 4 full setter!")
     ).toBeInTheDocument();
+  });
+
+  it("shows source-locale network empty state", () => {
+    renderComponent({
+      seized: CollectionSeized.NOT_SEIZED,
+      collection: CollectedCollectionType.NETWORK,
+      szn: null,
+    });
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "No network tokens found"
+    );
   });
 
   it("shows gradient message", () => {
