@@ -21,6 +21,7 @@ import {
 } from "../activity.helpers";
 import { UserPageStatsActivityWalletFilterType } from "./UserPageStatsActivityWallet.types";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
+import { getWalletActivityMessage } from "./wallet-activity.messages";
 
 const ENUM_AND_PATH: {
   type: UserPageStatsActivityWalletFilterType;
@@ -212,7 +213,9 @@ export default function UserPageStatsActivityWallet({
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Wallet Activity
+          {getWalletActivityMessage(
+            "user.collected.stats.walletActivity.title"
+          )}
         </h3>
       </div>
       <UserPageStatsActivityWalletTableWrapper

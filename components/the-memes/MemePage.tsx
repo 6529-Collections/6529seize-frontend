@@ -521,6 +521,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
           <MemePageReferencesSubMenu
             show={activeTab === MEME_FOCUS.REFERENCES}
             nft={nft}
+            locale={locale}
           />
           {userLoaded && (
             <MemePageYourCardsSubMenu
@@ -581,6 +582,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center md:tw-ml-0">
                   <MemeCalendarPeriods
                     id={nft.id}
+                    locale={locale}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
                     showOnlySeasonOnMobile
                   />

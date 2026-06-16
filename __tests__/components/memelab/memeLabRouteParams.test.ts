@@ -1,4 +1,5 @@
 import {
+  getMemeLabCollectionHref,
   getMemeLabCollectionName,
   getMemeLabCollectionPath,
   getMemeLabDetailHref,
@@ -58,5 +59,17 @@ describe("Meme Lab route params", () => {
     expect(getMemeLabDetailHref({ id: "token#1", locale: "de-DE" })).toBe(
       "/meme-lab/token%231?locale=de-DE"
     );
+    expect(
+      getMemeLabCollectionHref({
+        collectionName: "6529 Intern JPGs",
+        locale: "en-US",
+      })
+    ).toBe("/meme-lab/collection/6529-Intern-JPGs");
+    expect(
+      getMemeLabCollectionHref({
+        collectionName: "6529 Intern JPGs",
+        locale: "de-DE",
+      })
+    ).toBe("/meme-lab/collection/6529-Intern-JPGs?locale=de-DE");
   });
 });
