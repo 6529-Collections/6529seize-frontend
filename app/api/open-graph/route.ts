@@ -10,6 +10,7 @@ import {
   readLimitedJson,
   readLimitedText,
 } from "@/lib/fetch/limitedBody";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import {
   UrlGuardError,
   assertPublicUrl,
@@ -30,6 +31,7 @@ import { createCompoundPlan, type PreviewPlan } from "./compound/service";
 import { createFoundationPlan } from "./foundation/service";
 import { createManifoldPlan } from "./manifold/service";
 import { createOpenSeaPlan } from "./opensea/service";
+import { createFirstParty6529Plan } from "./6529/service";
 import { createTransientPlan } from "./transient/service";
 import { detectEnsTarget, fetchEnsPreview, EnsPreviewError } from "./ens";
 
@@ -73,6 +75,10 @@ type HostOverrides = {
   readonly domain: string;
   readonly headers?: HeaderOverrides | undefined;
   readonly userAgent?: string | undefined;
+};
+
+type PreviewContext = {
+  readonly apiAuth?: string | null | undefined;
 };
 
 const HOST_OVERRIDES: readonly HostOverrides[] = [
@@ -415,8 +421,26 @@ function createGenericPlan(url: URL): PreviewPlan {
   };
 }
 
+function getRequestApiAuth(request: NextRequest): string | null {
+  const cookieStore = (
+    request as {
+      readonly cookies?: {
+        get: (name: string) => { readonly value?: string } | undefined;
+      };
+    }
+  ).cookies;
+  const headers = (request as { readonly headers?: Headers }).headers;
+
+  return (
+    cookieStore?.get(API_AUTH_COOKIE)?.value ??
+    headers?.get(API_AUTH_COOKIE) ??
+    null
+  );
+}
+
 async function resolveLinkPreview(
-  rawUrl: string | null
+  rawUrl: string | null,
+  context?: PreviewContext
 ): Promise<LinkPreviewResponse> {
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
@@ -424,29 +448,30 @@ async function resolveLinkPreview(
   }
 
   const targetUrl = parsePublicUrl(rawUrl);
-  await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+  const firstParty6529Plan = createFirstParty6529Plan(targetUrl, context);
 
-  const manifoldPlan = createManifoldPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const foundationPlan = createFoundationPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const openSeaPlan = createOpenSeaPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
-  const transientPlan = createTransientPlan(targetUrl, {
-    fetchHtml,
-    assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-  });
+  if (!firstParty6529Plan) {
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
+  }
+
   const plan =
-    manifoldPlan ??
-    foundationPlan ??
-    openSeaPlan ??
-    transientPlan ??
+    firstParty6529Plan ??
+    createManifoldPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createFoundationPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createOpenSeaPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
+    createTransientPlan(targetUrl, {
+      fetchHtml,
+      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+    }) ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 
@@ -466,7 +491,9 @@ export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get("url");
 
   try {
-    const preview = await resolveLinkPreview(rawUrl);
+    const preview = await resolveLinkPreview(rawUrl, {
+      apiAuth: getRequestApiAuth(request),
+    });
     return NextResponse.json(preview);
   } catch (error) {
     return handlePreviewError(error);
@@ -520,9 +547,12 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
-async function resolveBatchUrl(url: string): Promise<BatchResult> {
+async function resolveBatchUrl(
+  url: string,
+  context?: PreviewContext
+): Promise<BatchResult> {
   try {
-    const data = await resolveLinkPreview(url);
+    const data = await resolveLinkPreview(url, context);
     return { url, data };
   } catch (error) {
     return { url, error: getErrorMessage(error) };
@@ -563,10 +593,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const context: PreviewContext = {
+    apiAuth: getRequestApiAuth(request),
+  };
   const batchResults = await mapWithConcurrency(
     urls,
     BATCH_CONCURRENCY,
-    resolveBatchUrl
+    (url) => resolveBatchUrl(url, context)
   );
   const results: Record<string, LinkPreviewResponse> = {};
   const errors: Record<string, string> = {};

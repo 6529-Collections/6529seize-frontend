@@ -36,6 +36,12 @@ const CHAT_STABLE_FRAME_CLASSES =
   "tw-h-[10rem] tw-min-h-[10rem] tw-max-h-[10rem] tw-w-full md:tw-h-[11rem] md:tw-min-h-[11rem] md:tw-max-h-[11rem]";
 const CHAT_FIRST_PARTY_FRAME_CLASSES =
   "tw-h-[15rem] tw-min-h-[15rem] tw-max-h-[15rem] tw-w-full lg:tw-h-[11rem] lg:tw-min-h-[11rem] lg:tw-max-h-[11rem]";
+const CHAT_COLLECTION_FRAME_CLASSES =
+  "tw-min-h-[11rem] tw-w-full md:tw-min-h-[12rem]";
+
+const isSeizeCollectionPreview = (
+  preview: OpenGraphPreviewData | null | undefined
+): boolean => preview?.["type"] === "6529.collection";
 
 const toPreviewData = (
   response: Awaited<ReturnType<typeof fetchLinkPreview>>
@@ -159,12 +165,14 @@ export default function LinkPreviewCard({
     return content;
   }
 
-  const stableFrameClasses =
-    isCurrent &&
-    state.type === "success" &&
-    getFirstPartyOpenGraphPreviewKind(state.data)
-      ? CHAT_FIRST_PARTY_FRAME_CLASSES
-      : CHAT_STABLE_FRAME_CLASSES;
+  let stableFrameClasses = CHAT_STABLE_FRAME_CLASSES;
+  if (isCurrent && state.type === "success") {
+    if (getFirstPartyOpenGraphPreviewKind(state.data)) {
+      stableFrameClasses = CHAT_FIRST_PARTY_FRAME_CLASSES;
+    } else if (isSeizeCollectionPreview(state.data)) {
+      stableFrameClasses = CHAT_COLLECTION_FRAME_CLASSES;
+    }
+  }
 
   return (
     <div
