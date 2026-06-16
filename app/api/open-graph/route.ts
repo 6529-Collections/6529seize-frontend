@@ -469,16 +469,11 @@ async function resolveLinkPreview(
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 
-  const cached = cache.get(plan.cacheKey);
-
-  if (cached) {
-    return cached;
+  if (firstParty6529Plan) {
+    return executeFirstParty6529Plan(firstParty6529Plan, targetUrl);
   }
 
-  const { data, ttl } = await plan.execute();
-  cache.set(plan.cacheKey, data, ttl);
-
-  return data;
+  return executePlan(plan);
 }
 
 export async function GET(request: NextRequest) {
@@ -550,6 +545,33 @@ async function resolveBatchUrl(
     return { url, data };
   } catch (error) {
     return { url, error: getErrorMessage(error) };
+  }
+}
+
+async function executePlan(plan: PreviewPlan): Promise<LinkPreviewResponse> {
+  const cached = cache.get(plan.cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const { data, ttl } = await plan.execute();
+  cache.set(plan.cacheKey, data, ttl);
+
+  return data;
+}
+
+async function executeFirstParty6529Plan(
+  plan: PreviewPlan,
+  targetUrl: URL
+): Promise<LinkPreviewResponse> {
+  try {
+    return await executePlan(plan);
+  } catch {
+    const fallbackPlan = createGenericPlan(targetUrl);
+    const fallback = await executePlan(fallbackPlan);
+    cache.set(plan.cacheKey, fallback, CACHE_TTL_MS);
+    return fallback;
   }
 }
 

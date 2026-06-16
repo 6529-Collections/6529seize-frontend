@@ -448,6 +448,66 @@ describe("open-graph API route", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
+  it("falls back to generic metadata when first-party 6529 enrichment fails", async () => {
+    const html =
+      "<html><head><title>The Collective Synapse</title></head><body></body></html>";
+    const fallbackData = {
+      requestUrl: "https://6529.io/the-memes/509",
+      url: "https://6529.io/the-memes/509",
+      title: "The Collective Synapse",
+      description: "The Memes #509 | Collections | 6529.io",
+      siteName: "6529.io",
+      image: {
+        url: "https://cdn.6529.io/memes/509.png",
+        secureUrl: "https://cdn.6529.io/memes/509.png",
+      },
+      images: [],
+    };
+    const execute = jest.fn(async () => {
+      throw new Error("The Memes card was not found.");
+    });
+    const fetchResponse = createResponse(200, {
+      headers: { "content-type": "text/html" },
+      body: html,
+      url: "https://6529.io/the-memes/509",
+    });
+
+    firstParty6529.createFirstParty6529Plan.mockReturnValue({
+      cacheKey: "6529:staging:the-memes:/the-memes/509",
+      execute,
+    });
+    mockFetch.mockResolvedValueOnce(fetchResponse);
+    mockFetchPublicUrl.mockImplementationOnce(
+      async (url, init = {}, options = {}) => {
+        expect(url).toEqual(new URL("https://6529.io/the-memes/509"));
+        const result = await options.fetchImpl?.(url, init);
+        return (result ?? fetchResponse) as any;
+      }
+    );
+    utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
+    utils.buildResponse.mockReturnValue(fallbackData);
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://6529.io/the-memes/509"
+      ),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(fallbackData);
+    expect(execute).toHaveBeenCalledTimes(1);
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(utils.buildResponse).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      html,
+      "text/html",
+      "https://6529.io/the-memes/509"
+    );
+  });
+
   it("does not trust caller-supplied auth headers for first-party 6529 plans", async () => {
     const firstPartyData = {
       type: "6529.collection",
