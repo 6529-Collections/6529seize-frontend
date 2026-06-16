@@ -2,7 +2,6 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
-import { MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT } from "@/constants/mobile-dock.constants";
 
 jest.mock("@/hooks/scroll/useIntersectionObserver");
 
@@ -63,36 +62,6 @@ describe("WaveDropsReverseContainer", () => {
       writable: true,
     });
     expect(() => fireEvent.scroll(scrollDiv)).not.toThrow();
-  });
-
-  it("announces mobile dock scroll source changes", () => {
-    const dispatchSpy = jest.spyOn(globalThis, "dispatchEvent");
-
-    const { unmount } = render(
-      <WaveDropsReverseContainer
-        onTopIntersection={jest.fn()}
-        isFetchingNextPage={false}
-        hasNextPage={true}
-        scrollSourceName="notifications"
-      >
-        <div>child</div>
-      </WaveDropsReverseContainer>
-    );
-
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
-      })
-    );
-
-    dispatchSpy.mockClear();
-    unmount();
-
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
-      })
-    );
   });
 
   it("keeps callback ref stable across rerenders and only detaches on unmount", () => {

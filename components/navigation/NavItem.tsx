@@ -90,6 +90,20 @@ const getHomeIconSizeClass = ({
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
+const getHomeIconToneClass = ({
+  isHighlighted,
+  variant,
+}: {
+  readonly isHighlighted: boolean;
+  readonly variant: "floating" | "fixed";
+}) => {
+  if (variant === "fixed" && !isHighlighted) {
+    return "tw-opacity-55";
+  }
+
+  return "";
+};
+
 const getIconTextColorClass = ({
   isActive,
   isHighlighted,
@@ -148,6 +162,10 @@ const NavItemLinkContent = ({
     item.name === "Home"
       ? getHomeIconSizeClass({ compact, variant })
       : iconSizeClass;
+  const homeIconToneClass = getHomeIconToneClass({
+    isHighlighted,
+    variant,
+  });
 
   return (
     <div className={getIconSlotClass({ compact, variant })}>
@@ -161,7 +179,7 @@ const NavItemLinkContent = ({
       )}
       {IconComponent ? (
         <IconComponent
-          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
+          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass} ${homeIconToneClass}`}
           color={activeIconColor}
         />
       ) : (
@@ -171,7 +189,7 @@ const NavItemLinkContent = ({
           width={24}
           height={24}
           unoptimized
-          className={`tw-relative tw-z-10 ${resolvedIconSizeClass}`}
+          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${homeIconToneClass}`}
         />
       )}
       {item.name === "Notifications" && haveUnreadNotifications && (

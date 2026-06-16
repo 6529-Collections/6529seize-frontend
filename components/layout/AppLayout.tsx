@@ -18,7 +18,10 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useAndroidKeyboard } from "@/hooks/useAndroidKeyboard";
 import useCapacitor from "@/hooks/useCapacitor";
 import PullToRefresh from "../providers/PullToRefresh";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  usesFixedMobileBottomNavigation,
+} from "@/helpers/navigation.helpers";
 import { useMemesQuickVoteDialogController } from "@/hooks/useMemesQuickVoteDialogController";
 import MemesQuickVoteDialog from "../brain/left-sidebar/waves/memes-quick-vote/MemesQuickVoteDialog";
 
@@ -93,18 +96,13 @@ function AppLayoutContent({ children }: Props) {
     activeWaveId: waveParam,
     searchParams,
   });
-  const viewParam = searchParams.get("view");
   const hasWaveParam = Boolean(waveParam);
-  const isViewingWavesOrMessages =
-    viewParam === "waves" || viewParam === "messages";
-  const isWavesRoute = pathname === "/waves" || pathname.startsWith("/waves/");
-  const isMessagesRoute =
-    pathname === "/messages" || pathname.startsWith("/messages/");
+  const usesFixedBottomNavigation = usesFixedMobileBottomNavigation({
+    pathname,
+    activeView,
+  });
   const isStreamRoute =
-    isWavesRoute ||
-    isMessagesRoute ||
-    pathname === "/notifications" ||
-    (pathname === "/" && (hasWaveParam || isViewingWavesOrMessages));
+    usesFixedBottomNavigation || (pathname === "/" && hasWaveParam);
   const editingDropId = useSelector(selectEditingDropId);
   const { isApp } = useDeviceInfo();
   const { isVisible: isAndroidKeyboardVisible, isAndroid } =

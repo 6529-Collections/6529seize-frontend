@@ -96,7 +96,6 @@ export default function Notifications({
           onTopIntersection={handleTopIntersection}
           isFetchingNextPage={isFetchingNextPage}
           hasNextPage={pagination.hasNextPage}
-          scrollSourceName="notifications"
           containerClassName="tw-bg-transparent"
         >
           <NotificationsContent

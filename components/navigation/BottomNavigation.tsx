@@ -13,6 +13,7 @@ import React, {
 import {
   getActiveWaveIdFromUrl,
   getNotificationsRoute,
+  usesFixedMobileBottomNavigation,
 } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
@@ -26,10 +27,6 @@ import LogoIcon from "../common/icons/LogoIcon";
 import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
-import {
-  MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
-  MOBILE_DOCK_SCROLL_SOURCE_SELECTOR,
-} from "@/constants/mobile-dock.constants";
 import NavItem from "./NavItem";
 import type { NavItem as NavItemData } from "./navTypes";
 
@@ -94,7 +91,6 @@ interface BottomNavigationProps {
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
 
-type DockScrollTarget = Window | HTMLElement;
 type BottomNavVariant = "floating" | "fixed";
 
 const getHiddenStyle = (hidden: boolean) =>
@@ -114,69 +110,10 @@ const getWindowScrollY = () => {
   );
 };
 
-const getDockScrollTop = (scrollTarget: DockScrollTarget) => {
-  if (scrollTarget instanceof Window) {
-    return getWindowScrollY();
-  }
-
-  return scrollTarget.scrollTop;
-};
-
-const getDockScrollTarget = (
-  useNotificationsScrollTarget: boolean
-): DockScrollTarget | null => {
-  const browserWindow = globalThis.window;
-
-  if (browserWindow === undefined) {
-    return null;
-  }
-
-  if (!useNotificationsScrollTarget) {
-    return browserWindow;
-  }
-
-  return (
-    globalThis.document?.querySelector<HTMLElement>(
-      MOBILE_DOCK_SCROLL_SOURCE_SELECTOR
-    ) ?? null
-  );
-};
-
-const useCompactDock = (
-  hidden: boolean,
-  reverseScrollDirection: boolean = false,
-  useNotificationsScrollTarget: boolean = false
-) => {
+const useCompactDock = (hidden: boolean) => {
   const [compact, setCompact] = useState(false);
-  const [scrollTargetVersion, setScrollTargetVersion] = useState(0);
   const previousScrollYRef = useRef(0);
   const frameRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!useNotificationsScrollTarget) {
-      return;
-    }
-
-    const browserWindow = globalThis.window;
-    if (browserWindow === undefined) {
-      return;
-    }
-
-    const handleScrollSourceChange = () => {
-      setScrollTargetVersion((version) => version + 1);
-    };
-
-    browserWindow.addEventListener(
-      MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
-      handleScrollSourceChange
-    );
-
-    return () =>
-      browserWindow.removeEventListener(
-        MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
-        handleScrollSourceChange
-      );
-  }, [useNotificationsScrollTarget]);
 
   useEffect(() => {
     if (hidden) {
@@ -188,28 +125,19 @@ const useCompactDock = (
       return;
     }
 
-    const scrollTarget = getDockScrollTarget(useNotificationsScrollTarget);
-    if (scrollTarget === null) {
-      setCompact(false);
-      return;
-    }
-
-    previousScrollYRef.current = getDockScrollTop(scrollTarget);
+    previousScrollYRef.current = getWindowScrollY();
 
     const syncCompactState = () => {
-      const currentScrollY = getDockScrollTop(scrollTarget);
+      const currentScrollY = getWindowScrollY();
       const delta = currentScrollY - previousScrollYRef.current;
-      const effectiveDelta = reverseScrollDirection ? -delta : delta;
-      const isAtRestPosition = reverseScrollDirection
-        ? Math.abs(currentScrollY) <= EXPANDED_TOP_THRESHOLD_PX
-        : currentScrollY <= EXPANDED_TOP_THRESHOLD_PX;
+      const isAtRestPosition = currentScrollY <= EXPANDED_TOP_THRESHOLD_PX;
       let nextCompact: boolean | null = null;
 
       if (isAtRestPosition) {
         nextCompact = false;
-      } else if (effectiveDelta > COMPACT_SCROLL_DELTA_PX) {
+      } else if (delta > COMPACT_SCROLL_DELTA_PX) {
         nextCompact = true;
-      } else if (effectiveDelta < -COMPACT_SCROLL_DELTA_PX) {
+      } else if (delta < -COMPACT_SCROLL_DELTA_PX) {
         nextCompact = false;
       }
 
@@ -229,21 +157,16 @@ const useCompactDock = (
       frameRef.current = globalThis.requestAnimationFrame(syncCompactState);
     };
 
-    scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
+    browserWindow.addEventListener("scroll", handleScroll, { passive: true });
     syncCompactState();
 
     return () => {
-      scrollTarget.removeEventListener("scroll", handleScroll);
+      browserWindow.removeEventListener("scroll", handleScroll);
       if (frameRef.current !== null) {
         globalThis.cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [
-    hidden,
-    reverseScrollDirection,
-    scrollTargetVersion,
-    useNotificationsScrollTarget,
-  ]);
+  }, [hidden]);
 
   return hidden ? false : compact;
 };
@@ -278,22 +201,6 @@ const getFloatingNavListClassName = (compact: boolean) =>
     compact ? "tw-gap-0 tw-px-1.5" : "tw-gap-0.5 tw-px-2"
   }`;
 
-const isFixedDockRoute = ({
-  activeView,
-  pathname,
-}: {
-  readonly activeView: string | null;
-  readonly pathname: string;
-}) =>
-  pathname === "/notifications" ||
-  pathname.startsWith("/notifications/") ||
-  pathname === "/waves" ||
-  pathname.startsWith("/waves/") ||
-  pathname === "/messages" ||
-  pathname.startsWith("/messages/") ||
-  (pathname === "/" &&
-    (activeView === "waves" || activeView === "messages"));
-
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
@@ -321,7 +228,7 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = searchParams.get("view");
-  const variant: BottomNavVariant = isFixedDockRoute({
+  const variant: BottomNavVariant = usesFixedMobileBottomNavigation({
     activeView,
     pathname,
   })

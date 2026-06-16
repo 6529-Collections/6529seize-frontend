@@ -2,7 +2,6 @@
 
 import React, { forwardRef, useCallback, useRef, useState } from "react";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
-import { MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT } from "@/constants/mobile-dock.constants";
 
 const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";
 
@@ -13,7 +12,6 @@ interface WaveDropsReverseContainerProps {
   readonly hasNextPage: boolean;
   readonly bottomPaddingClassName?: string | undefined;
   readonly containerClassName?: string | undefined;
-  readonly scrollSourceName?: string | undefined;
 }
 
 export const WaveDropsReverseContainer = forwardRef<
@@ -28,7 +26,6 @@ export const WaveDropsReverseContainer = forwardRef<
       hasNextPage,
       bottomPaddingClassName,
       containerClassName,
-      scrollSourceName,
     },
     ref
   ) => {
@@ -56,14 +53,8 @@ export const WaveDropsReverseContainer = forwardRef<
         } else if (ref) {
           ref.current = node;
         }
-
-        if (scrollSourceName && globalThis.window !== undefined) {
-          globalThis.window.dispatchEvent(
-            new CustomEvent(MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT)
-          );
-        }
       },
-      [ref, scrollSourceName]
+      [ref]
     );
 
     useIntersectionObserver(
@@ -80,7 +71,6 @@ export const WaveDropsReverseContainer = forwardRef<
     return (
       <div
         ref={handleScrollContainerRef}
-        data-mobile-dock-scroll-source={scrollSourceName}
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
         } no-scrollbar tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-bg-iron-950 tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
