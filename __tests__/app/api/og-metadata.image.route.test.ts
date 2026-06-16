@@ -1,3 +1,8 @@
+jest.mock("undici", () => ({
+  Agent: jest.fn().mockImplementation(() => ({})),
+  fetch: jest.fn(),
+}));
+
 jest.mock("@/lib/security/urlGuard", () => {
   const actual = jest.requireActual("@/lib/security/urlGuard");
   return {
@@ -56,6 +61,10 @@ const PNG_1X1 = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
   "base64"
 );
+const GIF_2_FRAME = Buffer.from(
+  "R0lGODlhAgACAPAAAP8AAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQAAAAAACwAAAAAAgACAAACAoRRACH5BAAKAAAALAAAAAACAAIAgAAA/wAAAAIChFEAOw==",
+  "base64"
+);
 
 const createRequest = (sourceUrl: string): NextRequest =>
   ({
@@ -90,7 +99,8 @@ const createHeaders = (values: Record<string, string>) => ({
 const mockImageResponse = (
   contentLength: number,
   contentType = "image/png",
-  body = PNG_1X1
+  body = PNG_1X1,
+  status = 200
 ): void => {
   mockFetchPublicUrl.mockResolvedValueOnce({
     body: createReadableBody(body),
@@ -100,8 +110,8 @@ const mockImageResponse = (
         "content-type": contentType,
       }).get,
     },
-    ok: true,
-    status: 200,
+    ok: status >= 200 && status < 300,
+    status,
   });
 };
 
@@ -136,7 +146,7 @@ describe("/api/og-metadata/image", () => {
 
   it("uses a bounded range request for oversized GIF previews", async () => {
     mockImageResponse(108 * 1024 * 1024, "image/gif");
-    mockImageResponse(PNG_1X1.byteLength, "image/gif");
+    mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME, 206);
 
     const response = await GET(
       createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
@@ -150,6 +160,21 @@ describe("/api/og-metadata/image", () => {
         range: "bytes=0-8388607",
       }),
     });
+  });
+
+  it("rejects oversized GIF range responses when the upstream ignores Range", async () => {
+    mockImageResponse(108 * 1024 * 1024, "image/gif");
+    mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME, 200);
+
+    const response = await GET(
+      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({
+      error: "Failed to normalize image",
+    });
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
   });
 
   it("keeps invalid media urls as JSON errors", async () => {

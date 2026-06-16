@@ -173,6 +173,37 @@ describe("renderDropOgImage", () => {
     );
   });
 
+  it("renders trailing ellipsis on segmented content lines", () => {
+    const element = renderDropOgImage({
+      id: "6413",
+      origin: "http://localhost:3001",
+      author: undefined,
+      wave: undefined,
+      drop: {
+        id: "drop-1",
+        serial_no: 6413,
+        drop_type: "CHAT" as any,
+        content: [
+          "one",
+          "two",
+          "three",
+          "four",
+          "five",
+          "six",
+          "seven",
+          "@[eight]",
+          "nine",
+        ].join("\n"),
+      },
+    });
+
+    const textNodes = collectTextNodes(element);
+
+    expect(textNodes).toContain("@eight...");
+    expect(textNodes).not.toContain("@eight");
+    expect(textNodes).not.toContain("nine");
+  });
+
   it("renders submission drops with winner, media type, visual image, and votes", () => {
     const element = renderDropOgImage({
       id: "5905",

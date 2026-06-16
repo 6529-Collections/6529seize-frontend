@@ -169,7 +169,10 @@ const mapErrorToResponse = (error: unknown): NextResponse => {
   return jsonError("Failed to normalize image", 502);
 };
 
-const readImageResponseBuffer = async (response: Response): Promise<Buffer> => {
+const readImageResponseBuffer = async (
+  response: Response,
+  maxBytes = OG_IMAGE_PROXY_MAX_BYTES
+): Promise<Buffer> => {
   if (!response.body) {
     throw new Error("Image response did not include a readable body.");
   }
@@ -187,9 +190,9 @@ const readImageResponseBuffer = async (response: Response): Promise<Buffer> => {
 
       const chunk = Buffer.from(value);
       totalBytes += chunk.byteLength;
-      if (totalBytes > OG_IMAGE_PROXY_MAX_BYTES) {
+      if (totalBytes > maxBytes) {
         await reader.cancel("Image response exceeded maximum size.");
-        ensureAllowedImageSize(totalBytes);
+        throw new Error("Image response exceeded maximum size.");
       }
       chunks.push(chunk);
     }
@@ -241,7 +244,7 @@ const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
     FETCH_OPTIONS
   );
 
-  if (!response.ok && response.status !== 206) {
+  if (response.status !== 206) {
     throw new Error(`Image range request failed: ${response.status}`);
   }
 
@@ -250,8 +253,14 @@ const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
     ensureAllowedGifPreviewSize(contentLength);
   }
 
-  const buffer = await readImageResponseBuffer(response);
+  const buffer = await readImageResponseBuffer(
+    response,
+    OVERSIZED_GIF_PREVIEW_MAX_BYTES
+  );
   ensureAllowedGifPreviewSize(buffer.byteLength);
+  if (detectContentType(buffer) !== GIF_CONTENT_TYPE) {
+    throw new Error("GIF range response is not a GIF.");
+  }
   return buffer;
 };
 
@@ -300,16 +309,8 @@ const normalizeImageToPng = async ({
     .toBuffer();
 };
 
-const getGifPreviewPage = (pages: number | undefined): number => {
-  if (!pages || pages < 2) {
-    return 0;
-  }
-
-  return Math.min(pages - 1, Math.floor(pages / 2));
-};
-
 const createGifPreviewImage = async (buffer: Buffer): Promise<sharp.Sharp> => {
-  const metadata = await sharp(buffer, {
+  await sharp(buffer, {
     animated: true,
     limitInputPixels: false,
     sequentialRead: true,
@@ -317,7 +318,7 @@ const createGifPreviewImage = async (buffer: Buffer): Promise<sharp.Sharp> => {
 
   return sharp(buffer, {
     limitInputPixels: false,
-    page: getGifPreviewPage(metadata.pages),
+    page: 0,
     pages: 1,
     sequentialRead: true,
   });

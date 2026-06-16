@@ -329,10 +329,50 @@ const addTrailingContentEllipsis = (lines: DropContentLine[]): void => {
     return;
   }
 
+  const text = appendContentEllipsis(lastLine.text);
+  const segments = lastLine.segments
+    ? getSegmentsForLineText(lastLine.segments, text)
+    : undefined;
+
   lines.splice(-1, 1, {
     ...lastLine,
-    text: appendContentEllipsis(lastLine.text),
+    ...(segments ? { segments } : {}),
+    text,
   });
+};
+
+const getSegmentsForLineText = (
+  segments: readonly DropContentLineSegment[],
+  text: string
+): readonly DropContentLineSegment[] => {
+  const nextSegments: DropContentLineSegment[] = [];
+  let cursor = 0;
+
+  for (const segment of segments) {
+    if (cursor >= text.length) {
+      break;
+    }
+
+    const nextCursor = Math.min(cursor + segment.text.length, text.length);
+    nextSegments.push({
+      ...segment,
+      text: text.slice(cursor, nextCursor),
+    });
+    cursor = nextCursor;
+  }
+
+  if (cursor < text.length) {
+    const remainingText = text.slice(cursor);
+    const lastSegment = nextSegments.at(-1);
+    if (lastSegment) {
+      nextSegments.splice(-1, 1, {
+        ...lastSegment,
+        text: `${lastSegment.text}${remainingText}`,
+      });
+    }
+  }
+
+  return nextSegments;
 };
 
 const isUrlToken = (value: string): boolean => URL_TOKEN_PATTERN.test(value);
@@ -1912,7 +1952,7 @@ const DropContentLines = ({
           {line.segments
             ? getContentLineSegments(line).map((segment, segmentIndex) => (
                 <span
-                  key={`${line.text}-${segmentIndex}`}
+                  key={`${key}-${segmentIndex}`}
                   style={{ color: getContentSegmentColor(segment) }}
                 >
                   {segment.text}
