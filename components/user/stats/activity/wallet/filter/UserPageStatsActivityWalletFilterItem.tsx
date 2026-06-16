@@ -3,17 +3,23 @@ import type { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActi
 export default function UserPageStatsActivityWalletFilterItem({
   filter,
   title,
+  ariaLabel,
   activeFilter,
   onFilter,
 }: {
   readonly filter: UserPageStatsActivityWalletFilterType;
   readonly title: string;
+  readonly ariaLabel: string;
   readonly activeFilter: UserPageStatsActivityWalletFilterType;
   readonly onFilter: (filter: UserPageStatsActivityWalletFilterType) => void;
 }) {
+  const isActive = filter === activeFilter;
   return (
     <li>
       <button
+        type="button"
+        aria-label={ariaLabel}
+        aria-pressed={isActive}
         className="tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-p-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700"
         onClick={() => onFilter(filter)}
       >
@@ -21,8 +27,9 @@ export default function UserPageStatsActivityWalletFilterItem({
           <span className="tw-text-sm tw-font-medium tw-text-white">
             {title}
           </span>
-          {filter === activeFilter && (
+          {isActive && (
             <svg
+              aria-hidden="true"
               className="tw-ml-2 tw-h-5 tw-w-5 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"

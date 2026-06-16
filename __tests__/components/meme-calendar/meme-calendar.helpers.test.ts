@@ -4,6 +4,7 @@ import {
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
   getMintTimelineDetails,
+  getMonthWeeks,
   getNextMintStart,
   getRangeDatesByZoom,
   getSeasonIndexForDate,
@@ -144,6 +145,21 @@ describe("printCalendarInvites", () => {
 
     expect(html).toContain('aria-label="Add &quot;ICS&quot; calendar"');
     expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
+  });
+
+  it("formats calendar event titles with the active locale", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2026, 0, 2)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      1234,
+      "#fff",
+      22,
+      undefined,
+      "de-DE"
+    );
+
+    expect(decodeURIComponent(html)).toContain("SUMMARY:Meme #1.234 Minting");
   });
 });
 
@@ -292,5 +308,18 @@ describe("meme-calendar helpers", () => {
       new Date(Date.UTC(2023, 0, 2))
     );
     expect(yearRemaining).toBeGreaterThanOrEqual(earlySeason);
+  });
+
+  it("pads month grids for Monday-first weekday headers", () => {
+    expect(getMonthWeeks(2022, 5)[0]).toEqual([null, null, 1, 2, 3, 4, 5]);
+    expect(getMonthWeeks(2022, 4)[0]).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      1,
+    ]);
   });
 });

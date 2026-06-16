@@ -3,6 +3,9 @@ import {
   SKIPPED_MINT_UTC_DAYS,
 } from "./meme-calendar.overrides";
 import { HISTORICAL_MINTS } from "./meme-calendar.szn1";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Constants for division sizes
 export const SEASONS_PER_YEAR = 4;
@@ -573,7 +576,7 @@ export function getMonthWeeks(
   const weeks: (number | null)[][] = [];
   let week: (number | null)[] = [];
 
-  // ⭐ Monday-first: convert Sunday(0) to 7, then pad (dow-1) nulls
+  // Monday-first: convert Sunday(0) to 7, then pad (dow - 1) nulls.
   const dow = firstDay.getUTCDay();
   const monFirstIndex = dow === 0 ? 7 : dow; // 1..7 (Mon..Sun)
   for (let i = 1; i < monFirstIndex; i++) week.push(null);
@@ -609,8 +612,8 @@ export function ymd(d: Date): string {
 // Display timezone toggle type
 export type DisplayTz = "local" | "utc";
 
-export function formatMint(n: number): string {
-  return `#${n.toLocaleString()}`;
+export function formatMint(n: number, locale = "en-US"): string {
+  return `#${n.toLocaleString(locale)}`;
 }
 
 export function formatUtcMonth(
@@ -632,8 +635,12 @@ export function formatUtcMonthYear(
   return `${formatUtcMonth(d, style, locale)} ${d.getUTCFullYear()}`;
 }
 
-export function formatFullDate(d: Date, mode: DisplayTz = "local"): string {
-  return d.toLocaleDateString(undefined, {
+export function formatFullDate(
+  d: Date,
+  mode: DisplayTz = "local",
+  locale = "en-US"
+): string {
+  return d.toLocaleDateString(locale, {
     weekday: "short",
     year: "numeric",
     month: "short",
@@ -643,9 +650,10 @@ export function formatFullDate(d: Date, mode: DisplayTz = "local"): string {
 }
 export const formatFullDateTime = (
   d: Date,
-  mode: DisplayTz = "local"
+  mode: DisplayTz = "local",
+  locale = "en-US"
 ): string => {
-  const s = d.toLocaleString(undefined, {
+  const s = d.toLocaleString(locale, {
     weekday: "short",
     year: "numeric",
     month: "short",
@@ -732,7 +740,8 @@ export function printCalendarInvites(
   mintNumber: number,
   fontColor: string = "#fff",
   size: number = 22,
-  labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS
+  labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS,
+  locale = "en-US"
 ): string {
   // Normalize to mint instant in UTC
   const utcDay = startOfUtcDay(dateOrInstant);
@@ -742,9 +751,9 @@ export function printCalendarInvites(
     : new Date(dateOrInstant);
   const mintEndUtc = mintEndInstantUtcForMintDay(utcDay);
 
-  const title = `Meme ${formatMint(mintNumber)}`;
-  const fullLocal = formatFullDateTime(mintStartUtc, "local");
-  const fullUtc = formatFullDateTime(mintStartUtc, "utc");
+  const title = `Meme ${formatMint(mintNumber, locale)}`;
+  const fullLocal = formatFullDateTime(mintStartUtc, "local", locale);
+  const fullUtc = formatFullDateTime(mintStartUtc, "utc", locale);
   const desc = `${title} — ${fullLocal} / ${fullUtc}\n\nhttps://6529.io/the-memes/mint`;
 
   const gUrl = createGoogleCalendarUrl(mintStartUtc, mintEndUtc, title, desc);
@@ -767,13 +776,20 @@ export function printCalendarInvites(
 }
 
 // Helper: get label for a date range using mint numbers (locale formatted)
-export function getRangeLabel(start: Date, end: Date): string {
+export function getRangeLabel(
+  start: Date,
+  end: Date,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): string {
   const startMintDate = nextMintDateOnOrAfter(start);
   const endMintDate = prevMintDateOnOrBefore(end);
   if (startMintDate.getTime() > endMintDate.getTime()) return "—";
-  const startMint = getMintNumberForMintDate(startMintDate).toLocaleString();
-  const endMint = getMintNumberForMintDate(endMintDate).toLocaleString();
-  return `Memes #${startMint} - #${endMint}`;
+  const startMint = getMintNumberForMintDate(startMintDate);
+  const endMint = getMintNumberForMintDate(endMintDate);
+  return t(locale, "memeCalendar.grid.memeRange", {
+    start: formatInteger(locale, startMint),
+    end: formatInteger(locale, endMint),
+  });
 }
 
 export function formatToFullDivision(d: Date): React.ReactNode {

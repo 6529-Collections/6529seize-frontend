@@ -76,6 +76,19 @@ export function getMemeLabDetailHref({
   });
 }
 
+export function getMemeLabCollectionHref({
+  collectionName,
+  locale,
+}: {
+  readonly collectionName: string;
+  readonly locale: SupportedLocale;
+}): string {
+  return getMemeLabRouteHrefWithLocale({
+    href: getMemeLabCollectionPath(collectionName),
+    locale,
+  });
+}
+
 export function getMemeLabCollectionName(collectionParam: string): string {
   try {
     return decodeURIComponent(collectionParam)

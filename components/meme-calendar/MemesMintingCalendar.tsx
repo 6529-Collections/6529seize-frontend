@@ -62,7 +62,7 @@ export default function MemesMintingCalendar({
           <MemeCalendarOverview displayTz={displayTz} locale={locale} />
         </div>
         <div className="tw-w-full">
-          <MemeCalendar displayTz={displayTz} />
+          <MemeCalendar displayTz={displayTz} locale={locale} />
         </div>
       </div>
     </div>
