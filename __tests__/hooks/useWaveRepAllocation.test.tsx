@@ -16,7 +16,7 @@ const auth = {
 } as any;
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
 });
 
 test("Wave REP allocation prefix invalidation refetches rating and credit", async () => {
@@ -113,4 +113,29 @@ test("Wave REP allocation waits for connected profile before fetching rating", a
       },
     })
   );
+});
+
+test("Wave REP allocation does not fetch while acting as proxy", () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const wrapper = ({ children }: any) => (
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider
+        value={{
+          activeProfileProxy: { id: "proxy-1" },
+          connectedProfile: { handle: "Tester" },
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  );
+
+  renderHook(
+    () => useWaveRepAllocation({ waveId: "wave-1", category: "quality" }),
+    { wrapper }
+  );
+
+  expect(api).not.toHaveBeenCalled();
 });

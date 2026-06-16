@@ -267,17 +267,15 @@ function parseWaveIdFromInput(input: string): string | null {
 }
 
 function getWaveDisplayHandle(wave: ApiWave): string {
-  const author = wave.author;
-  if (!author) {
-    return "Unknown creator";
-  }
-  return author.handle ?? author.primary_address ?? "Unknown creator";
+  return (
+    wave.author?.handle ?? wave.author?.primary_address ?? "Unknown creator"
+  );
 }
 
 function getWaveHref(wave: ApiWave): string {
   const isDirectMessage =
     wave.wave.type === ApiWaveType.Chat &&
-    Boolean(wave.chat.scope?.group?.is_direct_message);
+    Boolean(wave.chat?.scope?.group?.is_direct_message);
   return getWaveRoute({
     waveId: wave.id,
     isDirectMessage,

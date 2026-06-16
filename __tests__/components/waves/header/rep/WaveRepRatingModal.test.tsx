@@ -55,10 +55,12 @@ function renderModal({
   onClose = jest.fn(),
   requestAuth = jest.fn().mockResolvedValue({ success: true }),
   setToast = jest.fn(),
+  activeProfileProxy = null,
 }: {
   readonly onClose?: jest.Mock;
   readonly requestAuth?: jest.Mock;
   readonly setToast?: jest.Mock;
+  readonly activeProfileProxy?: unknown;
 } = {}) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -73,7 +75,7 @@ function renderModal({
       <AuthContext.Provider
         value={
           {
-            activeProfileProxy: null,
+            activeProfileProxy,
             connectedProfile: { handle: "tester" },
             connectionStatus: "CONNECTED",
             fetchingProfile: false,
@@ -182,6 +184,19 @@ describe("WaveRepRatingModal", () => {
         type: "error",
       })
     );
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+  });
+
+  it("does not post while acting as proxy", async () => {
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    renderModal({ activeProfileProxy: { id: "proxy-1" }, requestAuth });
+    await changeAmount("15");
+
+    const saveButton = screen.getByRole("button", { name: "Save Wave REP" });
+    expect(saveButton).toBeDisabled();
+    fireEvent.click(saveButton);
+
+    expect(requestAuth).not.toHaveBeenCalled();
     expect(commonApiPostMock).not.toHaveBeenCalled();
   });
 

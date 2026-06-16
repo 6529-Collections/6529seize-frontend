@@ -35,7 +35,7 @@ export default function WaveRepRatingModal({
   readonly onClose: () => void;
 }) {
   const queryClient = useQueryClient();
-  const { requestAuth, setToast } = useContext(AuthContext);
+  const { activeProfileProxy, requestAuth, setToast } = useContext(AuthContext);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogTitleId = useId();
@@ -109,8 +109,9 @@ export default function WaveRepRatingModal({
   const amount = getStringAsNumberOrZero(amountStr);
   const amountValid = amount >= minMaxValues.min && amount <= minMaxValues.max;
   const haveChanged = amount !== currentRating;
+  const isProxyMode = Boolean(activeProfileProxy);
   const isSaveDisabled =
-    mutating || !allocationReady || !amountValid || !haveChanged;
+    isProxyMode || mutating || !allocationReady || !amountValid || !haveChanged;
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -160,6 +161,13 @@ export default function WaveRepRatingModal({
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isProxyMode) {
+      setToast({
+        message: "Wave REP can't be changed while acting as proxy.",
+        type: "error",
+      });
+      return;
+    }
     const nextAmount = getStringAsNumberOrZero(amountStr);
     const nextAmountValid =
       nextAmount >= minMaxValues.min && nextAmount <= minMaxValues.max;
