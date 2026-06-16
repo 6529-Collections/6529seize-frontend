@@ -18,35 +18,74 @@ import type { NavIconColor, NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
+  readonly variant?: "floating" | "fixed";
   readonly compact?: boolean | undefined;
   readonly isCurrentWaveDm?: boolean;
   readonly fullPrefetch?: boolean;
 }
 
-const getIconSlotClass = (compact: boolean) =>
-  `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-    compact
-      ? "tw-h-8 tw-scale-[0.74] sm:tw-scale-[0.82]"
-      : "tw-h-8 tw-scale-[0.92]"
-  }`;
+const getIconSlotClass = ({
+  compact,
+  variant,
+}: {
+  readonly compact: boolean;
+  readonly variant: "floating" | "fixed";
+}) =>
+  variant === "fixed"
+    ? "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center"
+    : `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+        compact
+          ? "tw-h-8 tw-scale-[0.82] sm:tw-h-9 sm:tw-scale-[0.88]"
+          : "tw-h-8 tw-scale-[0.9]"
+      }`;
 
-const ActiveNavIndicator = ({ compact }: { readonly compact: boolean }) => (
-  <div
-    className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.88] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-      compact
-        ? "tw-h-10 tw-w-14 sm:tw-h-11 sm:tw-w-16"
-        : "tw-h-11 tw-w-14 sm:tw-w-16"
-    }`}
-  />
-);
+const ActiveNavIndicator = ({
+  compact,
+  variant,
+}: {
+  readonly compact: boolean;
+  readonly variant: "floating" | "fixed";
+}) =>
+  variant === "fixed" ? (
+    <div className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white" />
+  ) : (
+    <div
+      className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.9] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+        compact
+          ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
+          : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
+      }`}
+    />
+  );
 
-const getNavIndicatorSizeClass = (compact: boolean) =>
-  compact
-    ? "tw-h-10 tw-w-14 sm:tw-h-11 sm:tw-w-16"
-    : "tw-h-11 tw-w-14 sm:tw-w-16";
+const getPendingIndicatorClassName = ({
+  compact,
+  variant,
+}: {
+  readonly compact: boolean;
+  readonly variant: "floating" | "fixed";
+}) =>
+  variant === "fixed"
+    ? "tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60"
+    : `tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+        compact
+          ? "tw-h-10 tw-w-[3.75rem] sm:tw-h-11 sm:tw-w-[4.25rem]"
+          : "tw-h-11 tw-w-[3.9rem] sm:tw-w-[4.35rem]"
+      }`;
 
-const getHomeIconSizeClass = (compact: boolean) =>
-  compact ? "tw-size-7 sm:tw-size-8" : "tw-size-8";
+const getHomeIconSizeClass = ({
+  compact,
+  variant,
+}: {
+  readonly compact: boolean;
+  readonly variant: "floating" | "fixed";
+}) => {
+  if (variant === "fixed") {
+    return "tw-size-9";
+  }
+
+  return compact ? "tw-size-8 sm:tw-size-[2.1rem]" : "tw-size-8";
+};
 
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
@@ -55,13 +94,19 @@ const getIconTextColorClass = ({
   isActive,
   isHighlighted,
   item,
+  variant,
 }: {
   readonly isActive: boolean;
   readonly isHighlighted: boolean;
   readonly item: NavItemData;
+  readonly variant: "floating" | "fixed";
 }) => {
   if (item.name === "Home") {
     return "";
+  }
+
+  if (variant === "fixed") {
+    return isHighlighted ? "tw-text-white" : "tw-text-iron-500";
   }
 
   return isActive
@@ -77,6 +122,7 @@ const NavItemLinkContent = ({
   isActive,
   item,
   compact,
+  variant,
 }: {
   readonly hasUnreadMessages: boolean;
   readonly haveUnreadNotifications: boolean;
@@ -85,27 +131,32 @@ const NavItemLinkContent = ({
   readonly isActive: boolean;
   readonly item: NavItemData;
   readonly compact: boolean;
+  readonly variant: "floating" | "fixed";
 }) => {
   const { pending } = useLinkStatus();
   const isHighlighted = isActive || pending;
   const IconComponent = item.iconComponent;
-  const activeIconColor: NavIconColor = isActive ? "black" : "white";
+  const activeIconColor: NavIconColor =
+    isActive && variant === "floating" ? "black" : "white";
   const iconTextColorClass = getIconTextColorClass({
     isActive,
     isHighlighted,
     item,
+    variant,
   });
   const resolvedIconSizeClass =
-    item.name === "Home" ? getHomeIconSizeClass(compact) : iconSizeClass;
+    item.name === "Home"
+      ? getHomeIconSizeClass({ compact, variant })
+      : iconSizeClass;
 
   return (
-    <div className={getIconSlotClass(compact)}>
-      {isActive && <ActiveNavIndicator compact={compact} />}
+    <div className={getIconSlotClass({ compact, variant })}>
+      {isActive && <ActiveNavIndicator compact={compact} variant={variant} />}
       {pending && !isActive && (
         <div
           aria-hidden="true"
           data-testid="nav-item-pending-indicator"
-          className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${getNavIndicatorSizeClass(compact)}`}
+          className={getPendingIndicatorClassName({ compact, variant })}
         />
       )}
       {IconComponent ? (
@@ -135,6 +186,7 @@ const NavItemLinkContent = ({
 
 const NavItemContent = ({
   item,
+  variant = "floating",
   compact = false,
   isCurrentWaveDm = false,
   fullPrefetch = false,
@@ -200,9 +252,13 @@ const NavItemContent = ({
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
+        className={`tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none ${
+          variant === "fixed"
+            ? "tw-justify-start"
+            : "tw-justify-center tw-rounded-full"
+        }`}
       >
-        <div className={getIconSlotClass(compact)}>
+        <div className={getIconSlotClass({ compact, variant })}>
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -273,11 +329,14 @@ const NavItemContent = ({
       iconSizeClass={iconSizeClass}
       isActive={isActive}
       item={item}
+      variant={variant}
     />
   );
 
   const linkClassName =
-    "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-white/35";
+    variant === "fixed"
+      ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      : "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-white/35";
 
   if (fullPrefetch) {
     return (

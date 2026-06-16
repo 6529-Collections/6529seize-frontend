@@ -95,6 +95,7 @@ const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
 
 type DockScrollTarget = Window | HTMLElement;
+type BottomNavVariant = "floating" | "fixed";
 
 const getHiddenStyle = (hidden: boolean) =>
   hidden
@@ -247,30 +248,62 @@ const useCompactDock = (
   return hidden ? false : compact;
 };
 
-const getNavClassName = (hidden: boolean) =>
-  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-3 tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+const getNavClassName = ({
+  hidden,
+  variant,
+}: {
+  readonly hidden: boolean;
+  readonly variant: BottomNavVariant;
+}) =>
+  variant === "fixed"
+    ? `${getHiddenStyle(hidden)} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-[85px] tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75`
+    : `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[env(safe-area-inset-bottom,0px)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
 
 const getDockClassName = (compact: boolean) =>
   `tw-pointer-events-auto tw-relative tw-overflow-hidden tw-border tw-border-white/[0.13] tw-bg-black/76 tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
     compact
-      ? "tw-h-[48px] tw-w-[min(calc(100vw-6.5rem),23rem)] tw-rounded-[1.5rem] sm:tw-h-[52px] sm:tw-w-[min(calc(100vw-8rem),30rem)] md:tw-w-[min(calc(100vw-12rem),34rem)]"
-      : "tw-h-[62px] tw-w-[min(calc(100vw-3rem),38rem)] tw-rounded-[1.75rem] sm:tw-w-[min(calc(100vw-6rem),42rem)]"
+      ? "tw-h-[50px] tw-w-[min(calc(100vw-5.5rem),25rem)] tw-rounded-[1.5rem] sm:tw-h-[54px] sm:tw-w-[min(calc(100vw-6.75rem),31rem)] md:tw-w-[min(calc(100vw-10rem),35rem)]"
+      : "tw-h-[58px] tw-w-[min(calc(100vw-4rem),35rem)] tw-rounded-[1.75rem] sm:tw-h-[60px] sm:tw-w-[min(calc(100vw-5.5rem),38rem)]"
   }`;
 
-const navInnerClassName = "tw-relative tw-h-full";
+const fixedNavInnerClassName =
+  "tw-relative tw-h-full before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-iron-900 before:tw-content-['']";
+const floatingNavInnerClassName = "tw-relative tw-h-full";
 
-const getNavListClassName = (compact: boolean) =>
+const fixedNavListClassName =
+  "tw-mx-auto tw-flex tw-h-full tw-pl-[env(safe-area-inset-left,0px)] tw-pr-[env(safe-area-inset-right,0px)] md:tw-max-w-2xl";
+
+const getFloatingNavListClassName = (compact: boolean) =>
   `tw-flex tw-h-full tw-items-center ${
-    compact ? "tw-gap-0 tw-px-1" : "tw-gap-0.5 tw-px-1.5"
+    compact ? "tw-gap-0 tw-px-1.5" : "tw-gap-0.5 tw-px-2"
   }`;
+
+const isFixedDockRoute = ({
+  activeView,
+  pathname,
+}: {
+  readonly activeView: string | null;
+  readonly pathname: string;
+}) =>
+  pathname === "/notifications" ||
+  pathname.startsWith("/notifications/") ||
+  pathname === "/waves" ||
+  pathname.startsWith("/waves/") ||
+  pathname === "/messages" ||
+  pathname.startsWith("/messages/") ||
+  (pathname === "/" &&
+    (activeView === "waves" || activeView === "messages"));
 
 const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   hidden = false,
 }) => (
-  <nav aria-hidden="true" className={getNavClassName(hidden)}>
+  <nav
+    aria-hidden="true"
+    className={getNavClassName({ hidden, variant: "floating" })}
+  >
     <div className={getDockClassName(false)}>
-      <div className={navInnerClassName}>
-        <ul className={getNavListClassName(false)} />
+      <div className={floatingNavInnerClassName}>
+        <ul className={getFloatingNavListClassName(false)} />
       </div>
     </div>
   </nav>
@@ -286,14 +319,15 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
-  const shouldReverseDockScroll =
-    pathname === "/notifications" || pathname.startsWith("/notifications/");
-  const compact = useCompactDock(
-    hidden,
-    shouldReverseDockScroll,
-    shouldReverseDockScroll
-  );
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
+  const activeView = searchParams.get("view");
+  const variant: BottomNavVariant = isFixedDockRoute({
+    activeView,
+    pathname,
+  })
+    ? "fixed"
+    : "floating";
+  const compact = useCompactDock(hidden || variant === "fixed");
   const { data: waveData } = useWaveData({
     waveId: waveIdFromQuery,
     onWaveNotFound: () => {},
@@ -326,12 +360,12 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
       ref={setMobileNavRef}
       aria-hidden={hidden ? "true" : undefined}
       aria-label={BOTTOM_NAVIGATION_MESSAGES.primaryNavigationLabel}
-      className={getNavClassName(hidden)}
+      className={getNavClassName({ hidden, variant })}
       inert={hidden}
     >
-      <div className={getDockClassName(compact)}>
-        <div className={navInnerClassName}>
-          <ul className={getNavListClassName(compact)}>
+      {variant === "fixed" ? (
+        <div className={fixedNavInnerClassName}>
+          <ul className={fixedNavListClassName}>
             <LayoutGroup id="bottom-navigation">
               {navItems.map((item) => (
                 <li
@@ -339,7 +373,7 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
                   className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
                 >
                   <NavItem
-                    compact={compact}
+                    variant="fixed"
                     item={item}
                     isCurrentWaveDm={isCurrentWaveDm}
                     fullPrefetch={isApp && item.kind === "view"}
@@ -349,7 +383,30 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
             </LayoutGroup>
           </ul>
         </div>
-      </div>
+      ) : (
+        <div className={getDockClassName(compact)}>
+          <div className={floatingNavInnerClassName}>
+            <ul className={getFloatingNavListClassName(compact)}>
+              <LayoutGroup id="bottom-navigation">
+                {navItems.map((item) => (
+                  <li
+                    key={item.name}
+                    className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center"
+                  >
+                    <NavItem
+                      variant="floating"
+                      compact={compact}
+                      item={item}
+                      isCurrentWaveDm={isCurrentWaveDm}
+                      fullPrefetch={isApp && item.kind === "view"}
+                    />
+                  </li>
+                ))}
+              </LayoutGroup>
+            </ul>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
