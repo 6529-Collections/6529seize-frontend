@@ -192,6 +192,40 @@ describe("LinkPreviewCard", () => {
     assertStableFrame();
   });
 
+  it("lets 6529 collection previews grow beyond the generic fixed frame", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "6529.collection",
+      title: "Pebbles #514",
+      url: "https://6529.io/nextgen/token/514",
+      facts: [{ label: "Rarity", value: "#86 / 1,000" }],
+      traits: [
+        { label: "Palette", value: "Electric Blue" },
+        { label: "Mint Type", value: "Airdrop" },
+        { label: "Color Density", value: "Sparse" },
+      ],
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://6529.io/nextgen/token/514"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "6529.collection" }),
+        })
+      )
+    );
+
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass("tw-min-h-[11rem]", "md:tw-min-h-[12rem]");
+    expect(frame.className).not.toContain("tw-max-h-[11rem]");
+    expect(frame.className).not.toContain("tw-max-h-[12rem]");
+  });
+
   it("does not enforce chat stable frame for home variant", async () => {
     fetchLinkPreview.mockResolvedValue({});
 
