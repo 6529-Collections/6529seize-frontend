@@ -23,13 +23,21 @@ export default async function ReMemesPage({
   const initialMemeId = getInitialRememesMemeId(resolvedSearchParams);
 
   if (shouldNormalizeRememesMemeId(resolvedSearchParams)) {
-    const nextQuery = getRememesBrowseQuery({ locale, memeId: initialMemeId });
+    const nextQuery = getRememesBrowseQuery({
+      locale,
+      memeId: initialMemeId,
+      searchParams: resolvedSearchParams,
+    });
     redirect(nextQuery ? `/rememes?${nextQuery}` : "/rememes");
   }
 
   return (
     <main className={styles["main"]}>
-      <Rememes initialMemeId={initialMemeId} locale={locale} />
+      <Rememes
+        initialMemeId={initialMemeId}
+        locale={locale}
+        searchParams={resolvedSearchParams}
+      />
     </main>
   );
 }

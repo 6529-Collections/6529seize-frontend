@@ -17,9 +17,10 @@ describe("Rememes route params", () => {
     expect(getRememesRouteLocale({ locale: "en-UK" })).toBe("en-US");
   });
 
-  it("parses the initial meme id with legacy parseInt behavior", () => {
+  it("parses the initial meme id with explicit decimal parseInt behavior", () => {
     expect(getInitialRememesMemeId({ meme_id: "42" })).toBe(42);
     expect(getInitialRememesMemeId({ meme_id: "42abc" })).toBe(42);
+    expect(getInitialRememesMemeId({ meme_id: "0x10" })).toBe(0);
     expect(getInitialRememesMemeId({ meme_id: "abc" })).toBe(0);
     expect(getInitialRememesMemeId({ meme_id: undefined })).toBe(0);
   });
@@ -27,6 +28,7 @@ describe("Rememes route params", () => {
   it("detects invalid meme id query values that should be normalized away", () => {
     expect(shouldNormalizeRememesMemeId({ meme_id: undefined })).toBe(false);
     expect(shouldNormalizeRememesMemeId({ meme_id: "42" })).toBe(false);
+    expect(shouldNormalizeRememesMemeId({ meme_id: "0x10" })).toBe(false);
     expect(shouldNormalizeRememesMemeId({ meme_id: "" })).toBe(true);
     expect(shouldNormalizeRememesMemeId({ meme_id: "abc" })).toBe(true);
   });
@@ -39,6 +41,18 @@ describe("Rememes route params", () => {
     expect(getRememesBrowseQuery({ locale: "de-DE", memeId: 42 })).toBe(
       "meme_id=42&locale=de-DE"
     );
+    expect(
+      getRememesBrowseQuery({
+        locale: "de-DE",
+        memeId: 42,
+        searchParams: {
+          locale: "en-US",
+          meme_id: "7",
+          utm_source: "newsletter",
+          tag: ["one", "two"],
+        },
+      })
+    ).toBe("utm_source=newsletter&tag=one&tag=two&meme_id=42&locale=de-DE");
   });
 
   it("builds locale-preserving detail hrefs", () => {

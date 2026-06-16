@@ -29,6 +29,7 @@ import {
   getRememesAddHref,
   getRememeDetailHref,
   getRememesBrowseQuery,
+  type RememesSearchParams,
 } from "./rememesRouteParams";
 import { RememeSort, TokenType } from "./rememesTypes";
 
@@ -68,9 +69,11 @@ function getRememeTitle(rememe: Rememe) {
 export default function Rememes({
   initialMemeId = 0,
   locale = DEFAULT_LOCALE,
+  searchParams,
 }: {
   readonly initialMemeId?: number | undefined;
   readonly locale?: SupportedLocale | undefined;
+  readonly searchParams?: RememesSearchParams | undefined;
 }) {
   useSetTitle(t(locale, "rememes.documentTitle"));
   const router = useRouter();
@@ -88,6 +91,10 @@ export default function Rememes({
   );
 
   const [selectedMeme, setSelectedMeme] = useState<number>(() => initialMemeId);
+
+  useEffect(() => {
+    setSelectedMeme(initialMemeId);
+  }, [initialMemeId]);
 
   const [selectedSorting, setSelectedSorting] = useState<RememeSort>(
     RememeSort.RANDOM
@@ -186,6 +193,7 @@ export default function Rememes({
     const nextQuery = getRememesBrowseQuery({
       locale,
       memeId: nextMemeId,
+      searchParams,
     });
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, {
       scroll: false,
