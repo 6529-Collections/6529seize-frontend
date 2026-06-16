@@ -272,10 +272,10 @@
 
 .evidenceHeader button,
 .miniButton {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #202a35;
+  border: 1px solid #3a4654;
   border-radius: 8px;
-  color: #dbe2ea;
+  color: #f5f7fb;
   font-size: 0.78rem;
   font-weight: 800;
   min-height: 30px;
@@ -340,8 +340,8 @@
 }
 
 .actionRow button:disabled {
-  background: rgba(255, 255, 255, 0.1);
-  color: #7f8a98;
+  background: #22303d;
+  color: #d4dde7;
 }
 
 .dialogLayer {
@@ -442,8 +442,8 @@
 }
 
 .secondaryAction {
-  background: rgba(255, 255, 255, 0.06);
-  color: #f5f7fb;
+  background: #202a35;
+  color: #ffffff;
 }
 
 .publishStatus {
@@ -456,13 +456,13 @@
 }
 
 .publishStatusSuccess {
-  background: rgba(157, 248, 113, 0.1);
-  color: #c9f8ba;
+  background: #102b19;
+  color: #d8ffd0;
 }
 
 .publishStatusError {
-  background: rgba(255, 117, 117, 0.1);
-  color: #ffb4b4;
+  background: #341619;
+  color: #ffd7d7;
 }
 
 @media (max-width: 1080px) {

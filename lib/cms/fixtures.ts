@@ -314,7 +314,7 @@ export const cmsFixtureSlugs = Object.keys(
 ) as CmsFixtureSlug[];
 
 function isCmsFixtureSlug(slug: string): slug is CmsFixtureSlug {
-  return Object.prototype.hasOwnProperty.call(cmsFixturePackages, slug);
+  return Object.hasOwn(cmsFixturePackages, slug);
 }
 
 export function getCmsFixturePackage(slug: string): CmsPublishedPackage | null {

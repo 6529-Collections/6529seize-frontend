@@ -121,7 +121,19 @@ function getWalletErrors(wallets: readonly string[]): string[] {
 }
 
 function getProfileHandlePath(value: string): string {
-  return value.trim().replace(/^\/+|\/+$/g, "") || "profile";
+  const trimmed = value.trim();
+  let start = 0;
+  let end = trimmed.length;
+
+  while (start < end && trimmed[start] === "/") {
+    start += 1;
+  }
+
+  while (end > start && trimmed[end - 1] === "/") {
+    end -= 1;
+  }
+
+  return trimmed.slice(start, end) || "profile";
 }
 
 function getStorage(storageTarget: StorageTarget) {

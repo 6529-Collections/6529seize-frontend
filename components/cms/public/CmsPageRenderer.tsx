@@ -107,7 +107,13 @@ function MediaImage({
 }
 
 function HeadingBlock({ block }: { readonly block: CmsHeadingBlock }) {
-  const HeadingTag = `h${block.level}` as "h1" | "h2" | "h3";
+  const headingTags: Record<CmsHeadingBlock["level"], "h1" | "h2" | "h3"> = {
+    1: "h1",
+    2: "h2",
+    3: "h3",
+  };
+  const HeadingTag = headingTags[block.level];
+
   return (
     <section className={css.section}>
       {block.eyebrow ? <p className={css.eyebrow}>{block.eyebrow}</p> : null}
