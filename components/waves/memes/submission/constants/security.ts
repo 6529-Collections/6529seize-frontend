@@ -165,6 +165,12 @@ export const isInteractiveMediaContentPathAllowed = (
   pathname: string
 ): boolean => {
   const normalizedHostname = canonicalizeInteractiveMediaHostname(hostname);
+  const provider = getInteractiveMediaProviderForHost(normalizedHostname);
+  const isMediaResolverHost = normalizedHostname === MEDIA_RESOLVER_HOST;
+  if (!isMediaResolverHost && !provider) {
+    return false;
+  }
+
   const parsedMedia = parseDecentralizedMediaRef(
     `https://${normalizedHostname}${pathname}`
   );
@@ -182,7 +188,6 @@ export const isInteractiveMediaContentPathAllowed = (
     );
   }
 
-  const provider = getInteractiveMediaProviderForHost(hostname);
   if (!provider) {
     return false;
   }

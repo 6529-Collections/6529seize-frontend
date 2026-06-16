@@ -1,5 +1,6 @@
 import {
   canonicalizeInteractiveMediaUrl,
+  isInteractiveMediaAllowedHost,
   isInteractiveMediaContentPathAllowed,
 } from "@/components/waves/memes/submission/constants/security";
 
@@ -80,6 +81,36 @@ describe("interactive media security helpers", () => {
         `https://${CID_SUBDOMAIN}.ipfs.nftstorage.link/pendulums_mint_script.html`
       )
     ).toBeNull();
+  });
+
+  it("rejects recognized gateway paths when the host is outside the interactive allowlist", () => {
+    expect(isInteractiveMediaAllowedHost("cloudflare-ipfs.com")).toBe(false);
+    expect(
+      isInteractiveMediaContentPathAllowed(
+        "cloudflare-ipfs.com",
+        `/ipfs/${CID_V0}/pendulums_mint_script.html`
+      )
+    ).toBe(false);
+
+    expect(isInteractiveMediaAllowedHost("gateway.pinata.cloud")).toBe(false);
+    expect(
+      isInteractiveMediaContentPathAllowed(
+        "gateway.pinata.cloud",
+        `/ipfs/${CID_V0}/pendulums_mint_script.html`
+      )
+    ).toBe(false);
+  });
+
+  it("rejects recognized IPFS subdomain gateway paths in direct path validation", () => {
+    expect(
+      isInteractiveMediaAllowedHost(`${CID_SUBDOMAIN}.ipfs.nftstorage.link`)
+    ).toBe(false);
+    expect(
+      isInteractiveMediaContentPathAllowed(
+        `${CID_SUBDOMAIN}.ipfs.nftstorage.link`,
+        "/pendulums_mint_script.html"
+      )
+    ).toBe(false);
   });
 
   it("rejects nested non-HTML IPFS paths", () => {
