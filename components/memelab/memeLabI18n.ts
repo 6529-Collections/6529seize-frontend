@@ -1,5 +1,3 @@
-"use client";
-
 import { type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MemeLabSort } from "@/types/enums";
