@@ -1,10 +1,9 @@
 "use client";
 
-import { LazyMotion, domMax, m } from "framer-motion";
 import Image from "next/image";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { MouseEvent } from "react";
+import type { ComponentType, MouseEvent } from "react";
 import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
@@ -17,22 +16,31 @@ import { isNavItemActive } from "./isNavItemActive";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 
+type NavIconColor = "white" | "black";
+
 interface Props {
   readonly item: NavItemData;
+  readonly compact?: boolean | undefined;
   readonly isCurrentWaveDm?: boolean;
   readonly fullPrefetch?: boolean;
 }
 
-const iconSlotClass =
-  "tw-mt-4 tw-flex tw-h-9 tw-items-center tw-justify-center";
+type NavIconComponent = ComponentType<{
+  readonly className?: string | undefined;
+  readonly color?: NavIconColor | undefined;
+}>;
 
-const ActiveNavIndicator = () => (
-  <LazyMotion features={domMax}>
-    <m.div
-      layoutId="nav-indicator"
-      className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white"
-    />
-  </LazyMotion>
+const getIconSlotClass = (compact: boolean) =>
+  `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+    compact ? "tw-h-9 tw-scale-[0.78] sm:tw-scale-[0.86]" : "tw-h-9 tw-scale-100"
+  }`;
+
+const ActiveNavIndicator = ({ compact }: { readonly compact: boolean }) => (
+  <div
+    className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.88] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+      compact ? "tw-h-11 tw-w-[4.5rem] sm:tw-h-12 sm:tw-w-20" : "tw-h-12 tw-w-16 sm:tw-w-20"
+    }`}
+  />
 );
 
 const NavItemLinkContent = ({
@@ -42,6 +50,7 @@ const NavItemLinkContent = ({
   iconSizeClass,
   isActive,
   item,
+  compact,
 }: {
   readonly hasUnreadMessages: boolean;
   readonly haveUnreadNotifications: boolean;
@@ -49,26 +58,38 @@ const NavItemLinkContent = ({
   readonly iconSizeClass: string;
   readonly isActive: boolean;
   readonly item: NavItemData;
+  readonly compact: boolean;
 }) => {
   const { pending } = useLinkStatus();
   const isHighlighted = isActive || pending;
+  const IconComponent = item.iconComponent as NavIconComponent | undefined;
+  const activeIconColor: NavIconColor = isActive ? "black" : "white";
+  const resolvedIconSizeClass =
+    compact && item.name === "Home" ? "tw-size-8 sm:tw-size-9" : iconSizeClass;
 
   return (
     <>
-      {isActive && <ActiveNavIndicator />}
-      {pending && !isActive && (
-        <div
-          aria-hidden="true"
-          data-testid="nav-item-pending-indicator"
-          className="tw-absolute tw-left-0 tw-top-0 tw-h-0.5 tw-w-full tw-rounded-full tw-bg-white/60"
-        />
-      )}
-      <div className={`tw-relative ${iconSlotClass}`}>
-        {item.iconComponent ? (
-          <item.iconComponent
-            className={`${iconSizeClass} ${
-              isHighlighted ? "tw-text-white" : "tw-text-iron-500"
+      <div className={getIconSlotClass(compact)}>
+        {isActive && <ActiveNavIndicator compact={compact} />}
+        {pending && !isActive && (
+          <div
+            aria-hidden="true"
+            data-testid="nav-item-pending-indicator"
+            className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+              compact ? "tw-h-10 tw-w-14 sm:tw-w-16" : "tw-h-12 tw-w-16 sm:tw-w-20"
             }`}
+          />
+        )}
+        {IconComponent ? (
+          <IconComponent
+            className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${
+              isActive
+                ? "tw-text-black"
+                : isHighlighted
+                  ? "tw-text-white"
+                  : "tw-text-iron-300"
+            }`}
+            color={activeIconColor}
           />
         ) : (
           <Image
@@ -77,7 +98,7 @@ const NavItemLinkContent = ({
             width={24}
             height={24}
             unoptimized
-            className={iconSizeClass}
+            className={`tw-relative tw-z-10 ${resolvedIconSizeClass}`}
           />
         )}
         {item.name === "Notifications" && haveUnreadNotifications && (
@@ -93,6 +114,7 @@ const NavItemLinkContent = ({
 
 const NavItemContent = ({
   item,
+  compact = false,
   isCurrentWaveDm = false,
   fullPrefetch = false,
 }: Props) => {
@@ -159,7 +181,7 @@ const NavItemContent = ({
         disabled
         className="tw-pointer-events-none tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-opacity-40 tw-transition-colors focus:tw-outline-none"
       >
-        <div className={iconSlotClass}>
+        <div className={getIconSlotClass(compact)}>
           {item.iconComponent ? (
             <item.iconComponent
               className={`${
@@ -223,6 +245,7 @@ const NavItemContent = ({
 
   const linkContent = (
     <NavItemLinkContent
+      compact={compact}
       hasUnreadMessages={hasUnreadMessages}
       haveUnreadNotifications={haveUnreadNotifications}
       icon={icon}
@@ -233,7 +256,7 @@ const NavItemContent = ({
   );
 
   const linkClassName =
-    "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none";
+    "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-white/35";
 
   if (fullPrefetch) {
     return (
