@@ -5,6 +5,7 @@ import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity
 import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { useSearchParams } from "next/navigation";
 import { useId, useMemo, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
@@ -53,6 +54,7 @@ interface UserPageCollectedStatsProps {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
   readonly initialStatsData: UserPageStatsInitialData;
+  readonly locale?: SupportedLocale | undefined;
   readonly activeCollection?: CollectedCollectionType | null | undefined;
   readonly activeSeasonNumber?: number | null | undefined;
   readonly onCollectionShortcut?:
@@ -70,6 +72,7 @@ export default function UserPageCollectedStats({
   profile,
   activeAddress,
   initialStatsData,
+  locale = DEFAULT_LOCALE,
   activeCollection = null,
   activeSeasonNumber = null,
   onCollectionShortcut,
@@ -201,6 +204,7 @@ export default function UserPageCollectedStats({
         tdh={tdh}
         ownerBalance={ownerBalance}
         balanceMemes={balanceMemes}
+        locale={locale}
       />
     </section>
   );

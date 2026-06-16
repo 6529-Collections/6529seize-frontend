@@ -4,7 +4,7 @@ import type { OwnerBalance, OwnerBalanceMemes } from "@/entities/IBalances";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ConsolidatedTDH, TDH } from "@/entities/ITDH";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 
 interface CollectedStatsDetailsPanelProps {
@@ -17,6 +17,7 @@ interface CollectedStatsDetailsPanelProps {
   readonly tdh: ConsolidatedTDH | TDH | undefined;
   readonly ownerBalance: OwnerBalance | undefined;
   readonly balanceMemes: OwnerBalanceMemes[];
+  readonly locale: SupportedLocale;
 }
 
 export function CollectedStatsDetailsPanel({
@@ -29,9 +30,10 @@ export function CollectedStatsDetailsPanel({
   tdh,
   ownerBalance,
   balanceMemes,
+  locale,
 }: Readonly<CollectedStatsDetailsPanelProps>) {
   const unavailableMessage = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.details.unavailable"
   );
 
@@ -52,6 +54,7 @@ export function CollectedStatsDetailsPanel({
                 tdh={tdh}
                 ownerBalance={ownerBalance}
                 balanceMemes={balanceMemes}
+                locale={locale}
               />
             )}
           </div>

@@ -22,9 +22,13 @@ jest.mock("next/navigation", () => ({
 
 jest.mock(
   "@/components/user/stats/activity/tabs/UserPageActivityTabs",
-  () => (props: { setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void }) => (
+  () => (props: {
+    locale: string;
+    setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
+  }) => (
     <button
       data-testid="tab"
+      data-locale={props.locale}
       onClick={() => props.setActiveTab(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS)}
     >
       tab
@@ -60,10 +64,18 @@ test("hydrates the active tab from query params and updates the url on change", 
   search.set("wallet-activity-page", "2");
   search.set("distribution-page", "3");
   search.set("page", "2");
+  search.set("locale", "de-DE");
 
-  render(<UserPageActivityWrapper profile={profile} activeAddress={null} />);
+  render(
+    <UserPageActivityWrapper
+      profile={profile}
+      activeAddress={null}
+      locale="de-DE"
+    />
+  );
 
   expect(screen.getByTestId("tdh")).toBeInTheDocument();
+  expect(screen.getByTestId("tab")).toHaveAttribute("data-locale", "de-DE");
   const activePanel = screen.getByRole("tabpanel");
   expect(activePanel).toHaveAttribute(
     "id",
@@ -77,7 +89,7 @@ test("hydrates the active tab from query params and updates the url on change", 
   await user.click(screen.getByTestId("tab"));
 
   expect(replace).toHaveBeenCalledWith(
-    "/profile?activity=distributions&page=2",
+    "/profile?activity=distributions&page=2&locale=de-DE",
     {
       scroll: false,
     }

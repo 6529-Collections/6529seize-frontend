@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from "react";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import {
@@ -29,9 +29,11 @@ const focusActivityTab = (tab: USER_PAGE_ACTIVITY_TAB) => {
 export default function UserPageActivityTabs({
   activeTab,
   setActiveTab,
+  locale,
 }: {
   readonly activeTab: USER_PAGE_ACTIVITY_TAB;
   readonly setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
+  readonly locale: SupportedLocale;
 }) {
   const selectTabFromKeyboard = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -57,10 +59,7 @@ export default function UserPageActivityTabs({
   return (
     <div
       role="tablist"
-      aria-label={t(
-        DEFAULT_LOCALE,
-        "user.collected.stats.activityTabs.listLabel"
-      )}
+      aria-label={t(locale, "user.collected.stats.activityTabs.listLabel")}
       className="tw-inline-flex tw-overflow-hidden tw-rounded-lg"
     >
       {USER_PAGE_ACTIVITY_TABS.map((tab) => (
@@ -69,6 +68,7 @@ export default function UserPageActivityTabs({
           tab={tab}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
+          locale={locale}
           onKeyDown={(event) => selectTabFromKeyboard(event, tab)}
         />
       ))}

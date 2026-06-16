@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { SupportedLocale } from "@/i18n/locales";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import {
@@ -38,15 +39,18 @@ const pathToEnum = (path: string): USER_PAGE_ACTIVITY_TAB => {
 export default function UserPageActivityWrapper({
   profile,
   activeAddress,
+  locale,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
+  readonly locale: SupportedLocale;
 }) {
   return (
     <Suspense fallback={null}>
       <UserPageActivityContent
         profile={profile}
         activeAddress={activeAddress}
+        locale={locale}
       />
     </Suspense>
   );
@@ -55,9 +59,11 @@ export default function UserPageActivityWrapper({
 function UserPageActivityContent({
   profile,
   activeAddress,
+  locale,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
+  readonly locale: SupportedLocale;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -83,7 +89,11 @@ function UserPageActivityContent({
 
   return (
     <div className="tw-mt-7 lg:tw-mt-9">
-      <UserPageActivityTabs activeTab={activeTab} setActiveTab={onActiveTab} />
+      <UserPageActivityTabs
+        activeTab={activeTab}
+        setActiveTab={onActiveTab}
+        locale={locale}
+      />
       {activeTab === USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY && (
         <section
           role="tabpanel"

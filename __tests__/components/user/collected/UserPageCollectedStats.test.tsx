@@ -16,6 +16,7 @@ jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
     tdh: unknown;
     ownerBalance: unknown;
     balanceMemes: unknown[];
+    locale: string;
   }) => (
     <div
       data-testid="details"
@@ -23,6 +24,7 @@ jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
       data-has-tdh={String(Boolean(props.tdh))}
       data-has-owner-balance={String(Boolean(props.ownerBalance))}
       data-balance-memes={props.balanceMemes.length}
+      data-locale={props.locale}
     />
   ),
 }));
@@ -621,6 +623,7 @@ describe("UserPageCollectedStats", () => {
         profile={profile}
         activeAddress={null}
         initialStatsData={buildInitialStatsData()}
+        locale="de-DE"
       />
     );
 
@@ -637,7 +640,10 @@ describe("UserPageCollectedStats", () => {
       "owners-balances/consolidation/key",
       "owners-balances/consolidation/key/memes",
     ]);
-    expect(screen.getByTestId("details")).toBeInTheDocument();
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
   });
 
   it("uses source-locale copy when stats details are unavailable", async () => {
@@ -677,6 +683,7 @@ describe("UserPageCollectedStats", () => {
         profile={profile}
         activeAddress={null}
         initialStatsData={buildInitialStatsData()}
+        locale="de-DE"
       />
     );
 
@@ -685,7 +692,10 @@ describe("UserPageCollectedStats", () => {
     expect(
       screen.getByRole("button", { name: "Hide Details" })
     ).toBeInTheDocument();
-    expect(screen.getByTestId("details")).toBeInTheDocument();
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
   });
 
   it("uses non-undefined fallbacks when detail stats fetches fail", async () => {

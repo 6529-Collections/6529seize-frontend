@@ -89,33 +89,36 @@ jest.mock(
     }
 );
 
+const mockUserPageCollectedStats = jest.fn((props: any) => (
+  <div
+    data-testid="stats-summary"
+    data-active-collection={String(props.activeCollection ?? "")}
+    data-active-season-number={String(props.activeSeasonNumber ?? "")}
+    data-locale={props.locale}
+  >
+    <button
+      data-testid="stats-collection-shortcut"
+      onClick={() =>
+        props.onCollectionShortcut?.(CollectedCollectionType.NEXTGEN)
+      }
+    >
+      NextGen shortcut
+    </button>
+    <button
+      data-testid="stats-season-shortcut"
+      onClick={() => props.onSeasonShortcut?.(2)}
+    >
+      SZN2 shortcut
+    </button>
+  </div>
+));
+
 jest.mock(
   "@/components/user/collected/UserPageCollectedStats",
-  () =>
-    function MockCollectedStats(props: any) {
-      return (
-        <div
-          data-testid="stats-summary"
-          data-active-collection={String(props.activeCollection ?? "")}
-          data-active-season-number={String(props.activeSeasonNumber ?? "")}
-        >
-          <button
-            data-testid="stats-collection-shortcut"
-            onClick={() =>
-              props.onCollectionShortcut?.(CollectedCollectionType.NEXTGEN)
-            }
-          >
-            NextGen shortcut
-          </button>
-          <button
-            data-testid="stats-season-shortcut"
-            onClick={() => props.onSeasonShortcut?.(2)}
-          >
-            SZN2 shortcut
-          </button>
-        </div>
-      );
-    }
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockUserPageCollectedStats(props),
+  })
 );
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -521,7 +524,14 @@ describe("UserPageCollected", () => {
       "data-locale",
       "de-DE"
     );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
     expect(mockUserPageCollectedNetworkCards).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
+    );
+    expect(mockUserPageCollectedStats).toHaveBeenCalledWith(
       expect.objectContaining({ locale: "de-DE" })
     );
   });

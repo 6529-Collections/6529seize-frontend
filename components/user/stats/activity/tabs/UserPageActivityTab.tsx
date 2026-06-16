@@ -1,5 +1,5 @@
 import type { KeyboardEventHandler } from "react";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import { getActivityPanelId, getActivityTabId } from "./activity-tabs.helpers";
@@ -23,11 +23,13 @@ export default function UserPageActivityTab({
   tab,
   activeTab,
   setActiveTab,
+  locale,
   onKeyDown,
 }: {
   readonly tab: USER_PAGE_ACTIVITY_TAB;
   readonly activeTab: USER_PAGE_ACTIVITY_TAB;
   readonly setActiveTab: (tab: USER_PAGE_ACTIVITY_TAB) => void;
+  readonly locale: SupportedLocale;
   readonly onKeyDown: KeyboardEventHandler<HTMLButtonElement>;
 }) {
   const isActive = tab === activeTab;
@@ -54,7 +56,7 @@ export default function UserPageActivityTab({
       onClick={() => setActiveTab(tab)}
       onKeyDown={onKeyDown}
     >
-      {t(DEFAULT_LOCALE, TAB_TO_LABEL_KEY[tab])}
+      {t(locale, TAB_TO_LABEL_KEY[tab])}
     </button>
   );
 }

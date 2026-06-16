@@ -862,6 +862,7 @@ export default function UserPageCollected({
           filters.accountForConsolidations ? null : filters.handleOrWallet
         }
         initialStatsData={initialStatsData}
+        locale={locale}
         activeCollection={filters.collection}
         activeSeasonNumber={effectiveSeasonId}
         onCollectionShortcut={setCollectionShortcut}
