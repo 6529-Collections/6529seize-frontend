@@ -2,6 +2,7 @@ import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
+import { MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT } from "@/constants/mobile-dock.constants";
 
 jest.mock("@/hooks/scroll/useIntersectionObserver");
 
@@ -65,7 +66,7 @@ describe("WaveDropsReverseContainer", () => {
   });
 
   it("announces mobile dock scroll source changes", () => {
-    const dispatchSpy = jest.spyOn(window, "dispatchEvent");
+    const dispatchSpy = jest.spyOn(globalThis, "dispatchEvent");
 
     const { unmount } = render(
       <WaveDropsReverseContainer
@@ -80,7 +81,7 @@ describe("WaveDropsReverseContainer", () => {
 
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: "mobile-dock-scroll-source-change",
+        type: MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
       })
     );
 
@@ -89,7 +90,7 @@ describe("WaveDropsReverseContainer", () => {
 
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: "mobile-dock-scroll-source-change",
+        type: MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
       })
     );
   });

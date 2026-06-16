@@ -35,10 +35,12 @@ export interface SidebarSection {
   name: string;
   icon: React.ComponentType<{ className?: string | undefined }>;
   items: SidebarNavItem[];
-  subsections?: {
-    name: string;
-    items: SidebarNavItem[];
-  }[] | undefined;
+  subsections?:
+    | {
+        name: string;
+        items: SidebarNavItem[];
+      }[]
+    | undefined;
 }
 
 interface SidebarNavItem {

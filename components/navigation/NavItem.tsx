@@ -45,8 +45,29 @@ const getNavIndicatorSizeClass = (compact: boolean) =>
     ? "tw-h-10 tw-w-14 sm:tw-h-11 sm:tw-w-16"
     : "tw-h-11 tw-w-14 sm:tw-w-16";
 
+const getHomeIconSizeClass = (compact: boolean) =>
+  compact ? "tw-size-7 sm:tw-size-8" : "tw-size-8";
+
 const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
   isHighlighted ? "tw-text-white" : "tw-text-iron-300";
+
+const getIconTextColorClass = ({
+  isActive,
+  isHighlighted,
+  item,
+}: {
+  readonly isActive: boolean;
+  readonly isHighlighted: boolean;
+  readonly item: NavItemData;
+}) => {
+  if (item.name === "Home") {
+    return "";
+  }
+
+  return isActive
+    ? "tw-text-black"
+    : getInactiveIconTextColorClass(isHighlighted);
+};
 
 const NavItemLinkContent = ({
   hasUnreadMessages,
@@ -69,15 +90,13 @@ const NavItemLinkContent = ({
   const isHighlighted = isActive || pending;
   const IconComponent = item.iconComponent;
   const activeIconColor: NavIconColor = isActive ? "black" : "white";
-  const iconTextColorClass = isActive
-    ? "tw-text-black"
-    : getInactiveIconTextColorClass(isHighlighted);
+  const iconTextColorClass = getIconTextColorClass({
+    isActive,
+    isHighlighted,
+    item,
+  });
   const resolvedIconSizeClass =
-    item.name === "Home"
-      ? compact
-        ? "tw-size-7 sm:tw-size-8"
-        : "tw-size-8"
-      : iconSizeClass;
+    item.name === "Home" ? getHomeIconSizeClass(compact) : iconSizeClass;
 
   return (
     <div className={getIconSlotClass(compact)}>

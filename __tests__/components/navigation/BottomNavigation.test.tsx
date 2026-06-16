@@ -6,6 +6,12 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
 import { getNotificationsRoute } from "@/helpers/navigation.helpers";
+import {
+  MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
+  MOBILE_DOCK_SCROLL_SOURCE_DATASET_KEY,
+  MOBILE_DOCK_SCROLL_SOURCE_NAME,
+  MOBILE_DOCK_SCROLL_SOURCE_SELECTOR,
+} from "@/constants/mobile-dock.constants";
 
 jest.mock("@/components/navigation/NavItem", () => ({
   __esModule: true,
@@ -39,13 +45,13 @@ beforeEach(() => {
   jest.clearAllMocks();
   let animationFrameId = 0;
   jest
-    .spyOn(window, "requestAnimationFrame")
+    .spyOn(globalThis, "requestAnimationFrame")
     .mockImplementation((callback: FrameRequestCallback) => {
       const frameId = ++animationFrameId;
       setTimeout(() => callback(0), 0);
       return frameId;
     });
-  jest.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+  jest.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => {});
   (useLayout as jest.Mock).mockReturnValue({ registerRef });
   (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
   (useWaveData as jest.Mock).mockReturnValue({ data: null });
@@ -56,7 +62,7 @@ beforeEach(() => {
 
 afterEach(() => {
   document
-    .querySelectorAll("[data-mobile-dock-scroll-source='notifications']")
+    .querySelectorAll(MOBILE_DOCK_SCROLL_SOURCE_SELECTOR)
     .forEach((element) => element.remove());
   jest.restoreAllMocks();
 });
@@ -115,10 +121,8 @@ describe("BottomNavigation", () => {
     (usePathname as jest.Mock).mockReturnValue("/notifications");
 
     const firstScrollSource = document.createElement("div");
-    firstScrollSource.setAttribute(
-      "data-mobile-dock-scroll-source",
-      "notifications"
-    );
+    firstScrollSource.dataset[MOBILE_DOCK_SCROLL_SOURCE_DATASET_KEY] =
+      MOBILE_DOCK_SCROLL_SOURCE_NAME;
     Object.defineProperty(firstScrollSource, "scrollTop", {
       value: 0,
       writable: true,
@@ -141,10 +145,8 @@ describe("BottomNavigation", () => {
     });
 
     const secondScrollSource = document.createElement("div");
-    secondScrollSource.setAttribute(
-      "data-mobile-dock-scroll-source",
-      "notifications"
-    );
+    secondScrollSource.dataset[MOBILE_DOCK_SCROLL_SOURCE_DATASET_KEY] =
+      MOBILE_DOCK_SCROLL_SOURCE_NAME;
     Object.defineProperty(secondScrollSource, "scrollTop", {
       value: 0,
       writable: true,
@@ -156,9 +158,13 @@ describe("BottomNavigation", () => {
 
     act(() => {
       firstScrollSource.remove();
-      window.dispatchEvent(new CustomEvent("mobile-dock-scroll-source-change"));
+      globalThis.dispatchEvent(
+        new CustomEvent(MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT)
+      );
       document.body.appendChild(secondScrollSource);
-      window.dispatchEvent(new CustomEvent("mobile-dock-scroll-source-change"));
+      globalThis.dispatchEvent(
+        new CustomEvent(MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT)
+      );
     });
 
     await waitFor(() => {
@@ -172,6 +178,34 @@ describe("BottomNavigation", () => {
     act(() => {
       secondScrollSource.scrollTop = 20;
       fireEvent.scroll(secondScrollSource);
+    });
+
+    await waitFor(() => {
+      expect(
+        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+          return props.compact === false;
+        })
+      ).toBe(true);
+    });
+
+    act(() => {
+      secondScrollSource.scrollTop = -20;
+      fireEvent.scroll(secondScrollSource);
+    });
+
+    await waitFor(() => {
+      expect(
+        (NavItem as jest.Mock).mock.calls.slice(-7).every(([props]) => {
+          return props.compact === true;
+        })
+      ).toBe(true);
+    });
+
+    act(() => {
+      secondScrollSource.remove();
+      globalThis.dispatchEvent(
+        new CustomEvent(MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT)
+      );
     });
 
     await waitFor(() => {

@@ -26,6 +26,10 @@ import LogoIcon from "../common/icons/LogoIcon";
 import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
+import {
+  MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
+  MOBILE_DOCK_SCROLL_SOURCE_SELECTOR,
+} from "@/constants/mobile-dock.constants";
 import NavItem from "./NavItem";
 import type { NavItem as NavItemData } from "./navTypes";
 
@@ -89,9 +93,6 @@ interface BottomNavigationProps {
 
 const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
-const NOTIFICATIONS_DOCK_SCROLL_SOURCE_SELECTOR =
-  "[data-mobile-dock-scroll-source='notifications']";
-const DOCK_SCROLL_SOURCE_CHANGE_EVENT = "mobile-dock-scroll-source-change";
 
 type DockScrollTarget = Window | HTMLElement;
 
@@ -135,7 +136,7 @@ const getDockScrollTarget = (
 
   return (
     globalThis.document?.querySelector<HTMLElement>(
-      NOTIFICATIONS_DOCK_SCROLL_SOURCE_SELECTOR
+      MOBILE_DOCK_SCROLL_SOURCE_SELECTOR
     ) ?? null
   );
 };
@@ -165,13 +166,13 @@ const useCompactDock = (
     };
 
     browserWindow.addEventListener(
-      DOCK_SCROLL_SOURCE_CHANGE_EVENT,
+      MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
       handleScrollSourceChange
     );
 
     return () =>
       browserWindow.removeEventListener(
-        DOCK_SCROLL_SOURCE_CHANGE_EVENT,
+        MOBILE_DOCK_SCROLL_SOURCE_CHANGE_EVENT,
         handleScrollSourceChange
       );
   }, [useNotificationsScrollTarget]);
@@ -188,6 +189,7 @@ const useCompactDock = (
 
     const scrollTarget = getDockScrollTarget(useNotificationsScrollTarget);
     if (scrollTarget === null) {
+      setCompact(false);
       return;
     }
 
