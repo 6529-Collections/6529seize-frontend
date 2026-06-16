@@ -164,6 +164,10 @@ export const isInteractiveMediaContentPathAllowed = (
   hostname: string,
   pathname: string
 ): boolean => {
+  if (hasEncodedPathEscape(pathname)) {
+    return false;
+  }
+
   const normalizedHostname = canonicalizeInteractiveMediaHostname(hostname);
   const provider = getInteractiveMediaProviderForHost(normalizedHostname);
   const isMediaResolverHost = normalizedHostname === MEDIA_RESOLVER_HOST;

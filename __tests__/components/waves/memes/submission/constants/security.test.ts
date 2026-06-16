@@ -133,6 +133,12 @@ describe("interactive media security helpers", () => {
 
   it("rejects IPFS paths with encoded traversal", () => {
     expect(
+      isInteractiveMediaContentPathAllowed(
+        "ipfs.io",
+        `/ipfs/${CID_V0}/%2e%2e/index.html`
+      )
+    ).toBe(false);
+    expect(
       canonicalizeInteractiveMediaUrl(
         `https://ipfs.io/ipfs/${CID_V0}/%2e%2e/index.html`
       )
@@ -153,6 +159,18 @@ describe("interactive media security helpers", () => {
   });
 
   it("rejects gateway IPFS paths with encoded separators", () => {
+    expect(
+      isInteractiveMediaContentPathAllowed(
+        "ipfs.io",
+        `/ipfs/${CID_V0}/%2fsecret.html`
+      )
+    ).toBe(false);
+    expect(
+      isInteractiveMediaContentPathAllowed(
+        "ipfs.io",
+        `/ipfs/${CID_V0}/%5csecret.html`
+      )
+    ).toBe(false);
     expect(
       canonicalizeInteractiveMediaUrl(
         `https://ipfs.io/ipfs/${CID_V0}/%2fsecret.html`
