@@ -1,6 +1,10 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import { findCmsAsset, resolveCmsMediaUrl } from "@/lib/cms/media";
+import {
+  findCmsAsset,
+  getSafeCmsMediaUrl,
+  resolveCmsLinkUrl,
+} from "@/lib/cms/media";
 import type {
   CmsAsset,
   CmsBlock,
@@ -97,7 +101,7 @@ function MediaImage({
     // normal image element instead of coupling to Next image host allowlists.
     <img
       className={className ?? css.mediaImage}
-      src={resolveCmsMediaUrl(asset.src)}
+      src={getSafeCmsMediaUrl(asset.src)}
       alt={asset.alt}
       width={asset.width}
       height={asset.height}
@@ -174,9 +178,10 @@ function GalleryBlock({
               </div>
             </>
           );
-          if (item.href) {
+          const itemHref = item.href ? resolveCmsLinkUrl(item.href) : null;
+          if (itemHref) {
             return (
-              <a className={css.itemCard} href={item.href} key={item.asset_id}>
+              <a className={css.itemCard} href={itemHref} key={item.asset_id}>
                 {body}
               </a>
             );
@@ -214,9 +219,17 @@ function ButtonLinkBlock({
   href,
   children,
 }: {
-  readonly href: string;
+  readonly href: string | null;
   readonly children: ReactNode;
 }) {
+  if (!href) {
+    return (
+      <span aria-disabled="true" className={css.buttonLink}>
+        {children}
+      </span>
+    );
+  }
+
   return (
     <a className={css.buttonLink} href={href}>
       {children}
@@ -359,11 +372,14 @@ function WalletGalleryBlock({
               </div>
             </>
           );
-          if (collection.href) {
+          const collectionHref = collection.href
+            ? resolveCmsLinkUrl(collection.href)
+            : null;
+          if (collectionHref) {
             return (
               <a
                 className={css.itemCard}
-                href={collection.href}
+                href={collectionHref}
                 key={collection.title}
               >
                 {card}
@@ -416,7 +432,11 @@ function RenderBlock({
     case "callout":
       return <CalloutBlock block={block} />;
     case "button_link":
-      return <ButtonLinkBlock href={block.href}>{block.label}</ButtonLinkBlock>;
+      return (
+        <ButtonLinkBlock href={resolveCmsLinkUrl(block.href)}>
+          {block.label}
+        </ButtonLinkBlock>
+      );
     case "nft_reference":
       return <NftReferenceBlock block={block} assets={assets} />;
     case "collection_reference":

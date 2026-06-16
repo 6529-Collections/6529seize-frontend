@@ -1,5 +1,6 @@
 import CmsPageRenderer from "@/components/cms/public/CmsPageRenderer";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getSafeCmsMediaUrl } from "@/lib/cms/media";
 import { getPublishedPrimaryCmsSiteForProfileIdentifier } from "@/lib/cms/profile-sites";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -27,7 +28,7 @@ export async function generateMetadata({
   return getAppMetadata({
     title: social.title,
     description: social.description,
-    ogImage: social.open_graph_image.url,
+    ogImage: getSafeCmsMediaUrl(social.open_graph_image.url),
     ogImageAlt: social.open_graph_image.alt,
     ogImageHeight: social.open_graph_image.height,
     ogImageWidth: social.open_graph_image.width,
