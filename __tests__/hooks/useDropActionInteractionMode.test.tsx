@@ -1,4 +1,6 @@
 import { renderHook } from "@testing-library/react";
+import React from "react";
+import { renderToString } from "react-dom/server";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -36,6 +38,7 @@ const setViewportWidth = (width: number) => {
 /** Mocks hover media queries used by drop action interaction mode. */
 const setHoverSupport = (hasHover: boolean) => {
   Object.defineProperty(globalThis, "matchMedia", {
+    configurable: true,
     writable: true,
     value: jest.fn((query: string) => ({
       matches: hasHover && HOVER_INPUT_MEDIA_QUERIES.has(query),
@@ -141,6 +144,33 @@ describe("useDropActionInteractionMode", () => {
 
     const { result } = renderHook(() => useDropActionInteractionMode());
 
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        canUseDesktopHoverActions: true,
+        canUseTouchActionSheet: false,
+      })
+    );
+  });
+
+  it("uses a server-stable hover snapshot before client updates", () => {
+    isMobileMock.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(true);
+
+    const ModeProbe = () => {
+      const mode = useDropActionInteractionMode();
+      return (
+        <span
+          data-mode={`${String(mode.canUseDesktopHoverActions)}:${String(
+            mode.canUseTouchActionSheet
+          )}`}
+        />
+      );
+    };
+
+    expect(renderToString(<ModeProbe />)).toContain('data-mode="false:true"');
+
+    const { result } = renderHook(() => useDropActionInteractionMode());
     expect(result.current).toEqual(
       expect.objectContaining({
         canUseDesktopHoverActions: true,

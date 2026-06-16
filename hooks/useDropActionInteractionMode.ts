@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useHasTouchInput from "@/hooks/useHasTouchInput";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -28,54 +28,53 @@ const getHasHoverInput = (): boolean => {
   );
 };
 
-const useHasHoverInput = (): boolean => {
-  const [hasHoverInput, setHasHoverInput] = useState(getHasHoverInput);
+const subscribeToHoverInput = (onStoreChange: () => void) => {
+  const win = globalThis as typeof globalThis & {
+    matchMedia?: (query: string) => MediaQueryList;
+  };
 
-  useEffect(() => {
-    const win = globalThis as typeof globalThis & {
-      matchMedia?: (query: string) => MediaQueryList;
-    };
+  const matchMedia = win.matchMedia;
+  if (!matchMedia) {
+    return () => undefined;
+  }
 
-    const matchMedia = win.matchMedia;
-    if (!matchMedia) {
-      setHasHoverInput(false);
+  const mediaQueries = HOVER_INPUT_MEDIA_QUERIES.map((query) =>
+    matchMedia(query)
+  );
+
+  mediaQueries.forEach((mediaQuery) => {
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", onStoreChange);
       return;
     }
 
-    const mediaQueries = HOVER_INPUT_MEDIA_QUERIES.map((query) =>
-      matchMedia(query)
-    );
-    const updateHasHoverInput = () => setHasHoverInput(getHasHoverInput());
+    if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(onStoreChange);
+    }
+  });
 
-    updateHasHoverInput();
-
+  return () => {
     mediaQueries.forEach((mediaQuery) => {
-      if (typeof mediaQuery.addEventListener === "function") {
-        mediaQuery.addEventListener("change", updateHasHoverInput);
+      if (typeof mediaQuery.removeEventListener === "function") {
+        mediaQuery.removeEventListener("change", onStoreChange);
         return;
       }
 
-      if (typeof mediaQuery.addListener === "function") {
-        mediaQuery.addListener(updateHasHoverInput);
+      if (typeof mediaQuery.removeListener === "function") {
+        mediaQuery.removeListener(onStoreChange);
       }
     });
-
-    return () => {
-      mediaQueries.forEach((mediaQuery) => {
-        if (typeof mediaQuery.removeEventListener === "function") {
-          mediaQuery.removeEventListener("change", updateHasHoverInput);
-          return;
-        }
-
-        if (typeof mediaQuery.removeListener === "function") {
-          mediaQuery.removeListener(updateHasHoverInput);
-        }
-      });
-    };
-  }, []);
-
-  return hasHoverInput;
+  };
 };
+
+const getServerHoverInputSnapshot = () => false;
+
+const useHasHoverInput = (): boolean =>
+  useSyncExternalStore(
+    subscribeToHoverInput,
+    getHasHoverInput,
+    getServerHoverInputSnapshot
+  );
 
 export default function useDropActionInteractionMode(): DropActionInteractionMode {
   const isMobileDevice = useIsMobileDevice();
