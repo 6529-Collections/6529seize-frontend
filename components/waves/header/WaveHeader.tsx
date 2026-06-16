@@ -56,12 +56,7 @@ export default function WaveHeader({
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
     canUseWaveActions && connectedHandle === wave.author.handle;
-  const showCreateSubwaveOption =
-    canUseWaveActions &&
-    !isDirectMessage &&
-    !isSubwave &&
-    wave.wave.authenticated_user_eligible_for_admin === true;
-  const showOptions = showOwnerOptions || showCreateSubwaveOption;
+  const showOptions = showOwnerOptions;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
 
   return (
