@@ -1,4 +1,4 @@
-import { render, fireEvent, act } from "@testing-library/react";
+import { render, fireEvent, act, createEvent } from "@testing-library/react";
 import React from "react";
 import DropMobileMenuHandler from "@/components/waves/drops/DropMobileMenuHandler";
 import { DropSize } from "@/helpers/waves/drop.helpers";
@@ -93,8 +93,86 @@ test("opens menu on long press", () => {
   });
   const menu = getByTestId("menu");
   expect(menu.dataset.open).toBe("true");
-  fireEvent.click(menu);
-  expect(menu.dataset.open).toBe("false");
+  fireEvent.click(getByTestId("child"));
+});
+
+test("does not prevent default on short touch start", () => {
+  jest.useFakeTimers();
+  const { getByTestId } = render(
+    <DropMobileMenuHandler
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    >
+      <button type="button" data-testid="child" />
+    </DropMobileMenuHandler>
+  );
+  const child = getByTestId("child");
+  const touchStart = createEvent.touchStart(child, {
+    touches: [{ clientX: 0, clientY: 0 }],
+  });
+  const preventDefault = jest.fn();
+  Object.defineProperty(touchStart, "preventDefault", {
+    configurable: true,
+    value: preventDefault,
+  });
+
+  fireEvent(child, touchStart);
+  fireEvent.touchEnd(child);
+
+  expect(preventDefault).not.toHaveBeenCalled();
+});
+
+test("lets short touch taps click child controls", () => {
+  jest.useFakeTimers();
+  const onChildClick = jest.fn();
+  const { getByTestId } = render(
+    <DropMobileMenuHandler
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    >
+      <button type="button" data-testid="child" onClick={onChildClick} />
+    </DropMobileMenuHandler>
+  );
+  const child = getByTestId("child");
+
+  fireEvent.touchStart(child, {
+    touches: [{ clientX: 0, clientY: 0 }],
+  });
+  fireEvent.touchEnd(child);
+  fireEvent.click(child);
+
+  expect(onChildClick).toHaveBeenCalledTimes(1);
+});
+
+test("suppresses the child click after long press opens the menu", () => {
+  jest.useFakeTimers();
+  const onChildClick = jest.fn();
+  const { getByTestId } = render(
+    <DropMobileMenuHandler
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    >
+      <button type="button" data-testid="child" onClick={onChildClick} />
+    </DropMobileMenuHandler>
+  );
+  const child = getByTestId("child");
+
+  fireEvent.touchStart(child, {
+    touches: [{ clientX: 0, clientY: 0 }],
+  });
+  act(() => {
+    jest.advanceTimersByTime(600);
+  });
+  fireEvent.click(child);
+
+  expect(getByTestId("menu").dataset.open).toBe("true");
+  expect(onChildClick).not.toHaveBeenCalled();
 });
 
 test("does not open menu on desktop-width touch devices with hover", () => {
