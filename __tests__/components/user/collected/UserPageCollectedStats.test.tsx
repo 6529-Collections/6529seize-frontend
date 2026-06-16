@@ -167,6 +167,49 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
   });
 
+  it("formats collected summary metrics and season details with the active locale", () => {
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: {
+            ...collectedStats,
+            nextgen_balance: 1200,
+            memes_balance: 3107,
+            unique_memes: 1465,
+            boost: 1.76,
+            seasons: [
+              {
+                season: "Season 1",
+                total_cards_in_season: 1234,
+                sets_held: 0,
+                partial_set_unique_cards_held: 1000,
+                total_cards_held: 1000,
+              },
+              {
+                season: "Season 2",
+                total_cards_in_season: 39,
+                sets_held: 1,
+                partial_set_unique_cards_held: 0,
+                total_cards_held: 39,
+              },
+            ],
+          } as any,
+        })}
+        locale="de-DE"
+      />
+    );
+
+    expect(screen.getByText("NextGen")).toBeInTheDocument();
+    expect(screen.getByText("x1.200")).toBeInTheDocument();
+    expect(screen.getByText("Memes")).toBeInTheDocument();
+    expect(screen.getByText("x3.107")).toBeInTheDocument();
+    expect(screen.getByText("unique x1.465")).toBeInTheDocument();
+    expect(screen.getByText("x1,76")).toBeInTheDocument();
+    expect(screen.getByText("1.000/1.234 to set 1")).toBeInTheDocument();
+  });
+
   it("uses collection shortcuts for collection-backed metrics and keeps boost informational", async () => {
     const user = userEvent.setup();
     const onCollectionShortcut = jest.fn();

@@ -263,5 +263,19 @@ describe("CollectedStatsSeasonTile", () => {
     );
 
     expect(screen.getByText("3 sets")).toBeInTheDocument();
+
+    rerender(
+      <CollectedStatsSeasonTile
+        season={buildSeason({ setsHeld: 3000 })}
+        isSelected={false}
+        showDetailText={false}
+        locale="de-DE"
+        hasTouchScreen={false}
+        shouldAnimateProgressOnMount
+        onPreview={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("3.000 sets")).toBeInTheDocument();
   });
 });

@@ -12,16 +12,12 @@ import {
   buildTransferKey,
   useTransfer,
 } from "@/components/nft-transfer/TransferState";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 import type { ContractType } from "@/types/enums";
 
 const COLLECTED_CARDS_LIST_CLASS =
   "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
-const COLLECTED_CARDS_LIST_LABEL = translate(
-  DEFAULT_LOCALE,
-  "user.collected.cards.listLabel"
-);
 // CSS marker removal can cause Safari/VoiceOver to drop native list semantics.
 const COLLECTED_CARDS_LIST_COMPATIBILITY_PROPS = {
   role: "list",
@@ -36,6 +32,7 @@ export default function UserPageCollectedCards({
   setPage,
   dataTransfer,
   isTransferLoading = false,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly cards: CollectedCard[];
   readonly totalPages: number;
@@ -45,9 +42,11 @@ export default function UserPageCollectedCards({
   readonly setPage: (page: number) => void;
   readonly dataTransfer: CollectedCard[];
   readonly isTransferLoading?: boolean | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const transfer = useTransfer();
   const isTransferEnabled = transfer.enabled;
+  const listLabel = translate(locale, "user.collected.cards.listLabel");
 
   return (
     <div>
@@ -55,7 +54,7 @@ export default function UserPageCollectedCards({
         <div className="tw-flow-root">
           <ul
             {...COLLECTED_CARDS_LIST_COMPATIBILITY_PROPS}
-            aria-label={COLLECTED_CARDS_LIST_LABEL}
+            aria-label={listLabel}
             className={COLLECTED_CARDS_LIST_CLASS}
           >
             {cards.map((card) => {
@@ -124,7 +123,7 @@ export default function UserPageCollectedCards({
           )}
         </div>
       ) : (
-        <UserPageCollectedCardsNoCards filters={filters} />
+        <UserPageCollectedCardsNoCards filters={filters} locale={locale} />
       )}
     </div>
   );

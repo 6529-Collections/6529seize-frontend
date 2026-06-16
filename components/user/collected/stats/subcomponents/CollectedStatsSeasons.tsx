@@ -1,4 +1,5 @@
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 import type { RefObject } from "react";
 import type { DisplaySeason } from "../types";
@@ -12,6 +13,7 @@ interface CollectedStatsSeasonsProps {
   readonly notStartedSeasons: DisplaySeason[];
   readonly activeSeasonId: string | null;
   readonly activeSeasonNumber: number | null;
+  readonly locale?: SupportedLocale | undefined;
   readonly hasTouchScreen: boolean;
   readonly isDesktopLayout: boolean;
   readonly isDesktopSeasonListExpanded: boolean;
@@ -25,6 +27,7 @@ interface SeasonTilesProps {
   readonly seasons: DisplaySeason[];
   readonly activeSeasonId: string | null;
   readonly activeSeasonNumber: number | null;
+  readonly locale: SupportedLocale;
   readonly hasTouchScreen: boolean;
   readonly shouldAnimateProgressOnMount: boolean;
   readonly onActivateSeason: (seasonId: string) => void;
@@ -35,6 +38,7 @@ function SeasonTiles({
   seasons,
   activeSeasonId,
   activeSeasonNumber,
+  locale,
   hasTouchScreen,
   shouldAnimateProgressOnMount,
   onActivateSeason,
@@ -48,6 +52,7 @@ function SeasonTiles({
           season={season}
           isSelected={season.seasonNumber === activeSeasonNumber}
           showDetailText={hasTouchScreen || season.id === activeSeasonId}
+          locale={locale}
           hasTouchScreen={hasTouchScreen}
           shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
           onPreview={() => onActivateSeason(season.id)}
@@ -70,6 +75,7 @@ export function CollectedStatsSeasons({
   notStartedSeasons,
   activeSeasonId,
   activeSeasonNumber,
+  locale = DEFAULT_LOCALE,
   hasTouchScreen,
   isDesktopLayout,
   isDesktopSeasonListExpanded,
@@ -87,31 +93,37 @@ export function CollectedStatsSeasons({
     return null;
   }
 
-  const title = translate(DEFAULT_LOCALE, "user.collected.stats.seasons.title");
+  const title = translate(locale, "user.collected.stats.seasons.title");
+  const startedCountValue = formatInteger(locale, startedSeasons.length);
+  const allSeasonCountValue = formatInteger(locale, allSeasonCount);
+  const hiddenStartedSeasonCountValue = formatInteger(
+    locale,
+    hiddenStartedSeasonCount
+  );
   const startedCount = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.seasons.startedCount",
     {
-      started: startedSeasons.length,
-      total: allSeasonCount,
+      started: startedCountValue,
+      total: allSeasonCountValue,
     }
   );
   const showLess = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.seasons.showLess"
   );
   const showMore = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.seasons.showMore",
-    { count: hiddenStartedSeasonCount }
+    { count: hiddenStartedSeasonCountValue }
   );
   const showMoreAriaLabel = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.seasons.showMoreAriaLabel",
-    { count: hiddenStartedSeasonCount }
+    { count: hiddenStartedSeasonCountValue }
   );
   const unseizedLabel = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.seasons.unseized"
   );
 
@@ -135,6 +147,7 @@ export function CollectedStatsSeasons({
                   seasons={visibleStartedSeasons}
                   activeSeasonId={activeSeasonId}
                   activeSeasonNumber={activeSeasonNumber}
+                  locale={locale}
                   hasTouchScreen={hasTouchScreen}
                   shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
                   onActivateSeason={onActivateSeason}
@@ -176,6 +189,7 @@ export function CollectedStatsSeasons({
                 seasons={startedSeasons}
                 activeSeasonId={activeSeasonId}
                 activeSeasonNumber={activeSeasonNumber}
+                locale={locale}
                 hasTouchScreen={hasTouchScreen}
                 shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
                 onActivateSeason={onActivateSeason}

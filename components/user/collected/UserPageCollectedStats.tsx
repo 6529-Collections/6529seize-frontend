@@ -106,8 +106,8 @@ export default function UserPageCollectedStats({
 
   const { mainMetrics, allSeasons, startedSeasons, notStartedSeasons } =
     useMemo(
-      () => buildCollectedStatsViewModel(collectedStats),
-      [collectedStats]
+      () => buildCollectedStatsViewModel(collectedStats, locale),
+      [collectedStats, locale]
     );
   const {
     containerRef: desktopSeasonsRef,
@@ -164,6 +164,7 @@ export default function UserPageCollectedStats({
             activeCollection={activeCollection}
             isDetailsOpen={isDetailsOpen}
             detailsId={detailsId}
+            locale={locale}
             onToggleDetails={() => setIsDetailsOpen((current) => !current)}
             onCollectionShortcut={onCollectionShortcut}
           />
@@ -176,6 +177,7 @@ export default function UserPageCollectedStats({
             notStartedSeasons={notStartedSeasons}
             activeSeasonId={activeSeasonId}
             activeSeasonNumber={activeSeasonNumber}
+            locale={locale}
             hasTouchScreen={hasTouchScreen}
             isDesktopLayout={isDesktopSeasonsLayout}
             isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}

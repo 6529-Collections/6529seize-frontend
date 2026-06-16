@@ -3,7 +3,7 @@ import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatNumber, roundTo } from "@/i18n/format";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
@@ -20,18 +20,22 @@ type BoostMessageKey = Extract<
 >;
 
 function boostMessage(
+  locale: SupportedLocale,
   key: BoostMessageKey,
   params: Record<string, string | number> = {}
 ): string {
-  return t(DEFAULT_LOCALE, key, params);
+  return t(locale, key, params);
 }
 
-function formatBoostValue(value: number | undefined | null): string {
+function formatBoostValue(
+  locale: SupportedLocale,
+  value: number | undefined | null
+): string {
   if (value == null) {
     return "-";
   }
 
-  return formatNumber(DEFAULT_LOCALE, value, BOOST_VALUE_FORMAT_OPTIONS);
+  return formatNumber(locale, value, BOOST_VALUE_FORMAT_OPTIONS);
 }
 
 function hasBoostValue(value: number | undefined | null): value is number {
@@ -40,8 +44,10 @@ function hasBoostValue(value: number | undefined | null): value is number {
 
 export default function UserPageStatsBoostBreakdown({
   tdh,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly tdh: ConsolidatedTDH | TDH | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   if (!tdh?.boost_breakdown || !tdh.boost) {
     return <></>;
@@ -59,8 +65,11 @@ export default function UserPageStatsBoostBreakdown({
         <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
           {hasBoostValue(breakdown?.available) ? (
             <span className="d-flex align-items-center justify-content-center gap-2">
-              {formatBoostValue(breakdown.available)}
-              <BoostBreakdownInfo info={breakdown.available_info} />
+              {formatBoostValue(locale, breakdown.available)}
+              <BoostBreakdownInfo
+                info={breakdown.available_info}
+                locale={locale}
+              />
             </span>
           ) : (
             "-"
@@ -69,8 +78,11 @@ export default function UserPageStatsBoostBreakdown({
         <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
           {hasBoostValue(breakdown?.acquired) ? (
             <span className="d-flex align-items-center justify-content-center gap-2">
-              {formatBoostValue(breakdown.acquired)}
-              <BoostBreakdownInfo info={breakdown.acquired_info} />
+              {formatBoostValue(locale, breakdown.acquired)}
+              <BoostBreakdownInfo
+                info={breakdown.acquired_info}
+                locale={locale}
+              />
             </span>
           ) : (
             "-"
@@ -88,7 +100,10 @@ export default function UserPageStatsBoostBreakdown({
           colSpan={3}
           className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-px-4 tw-pt-3 tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
         >
-          {boostMessage("user.collected.stats.boostBreakdown.groups.memes")}
+          {boostMessage(
+            locale,
+            "user.collected.stats.boostBreakdown.groups.memes"
+          )}
         </th>
       </tr>
     );
@@ -100,6 +115,7 @@ export default function UserPageStatsBoostBreakdown({
       headerRow,
       getMemeRow(
         boostMessage(
+          locale,
           "user.collected.stats.boostBreakdown.rows.fullCollectionSet"
         ),
         bb.memes_card_sets
@@ -122,20 +138,30 @@ export default function UserPageStatsBoostBreakdown({
       const sznNum = key.replace("memes_szn", "");
       const rows = [
         getMemeRow(
-          boostMessage("user.collected.stats.boostBreakdown.seasonLabel", {
-            seasonNumber: sznNum,
-          }),
+          boostMessage(
+            locale,
+            "user.collected.stats.boostBreakdown.seasonLabel",
+            {
+              seasonNumber: sznNum,
+            }
+          ),
           bb[key]
         ),
       ];
       if (key === "memes_szn1" && !bb[key]?.acquired) {
         rows.push(
           getMemeRow(
-            boostMessage("user.collected.stats.boostBreakdown.rows.genesisSet"),
+            boostMessage(
+              locale,
+              "user.collected.stats.boostBreakdown.rows.genesisSet"
+            ),
             bb.memes_genesis
           ),
           getMemeRow(
-            boostMessage("user.collected.stats.boostBreakdown.rows.nakamoto"),
+            boostMessage(
+              locale,
+              "user.collected.stats.boostBreakdown.rows.nakamoto"
+            ),
             bb.memes_nakamoto
           )
         );
@@ -159,8 +185,11 @@ export default function UserPageStatsBoostBreakdown({
           <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
             {hasBoostValue(breakdown.available) ? (
               <span className="d-flex align-items-center justify-content-center gap-2">
-                {formatBoostValue(breakdown.available)}
-                <BoostBreakdownInfo info={breakdown.available_info} />
+                {formatBoostValue(locale, breakdown.available)}
+                <BoostBreakdownInfo
+                  info={breakdown.available_info}
+                  locale={locale}
+                />
               </span>
             ) : (
               "-"
@@ -169,8 +198,11 @@ export default function UserPageStatsBoostBreakdown({
           <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
             {hasBoostValue(breakdown.acquired) ? (
               <span className="d-flex align-items-center justify-content-center gap-2">
-                {formatBoostValue(breakdown.acquired)}
-                <BoostBreakdownInfo info={breakdown.acquired_info} />
+                {formatBoostValue(locale, breakdown.acquired)}
+                <BoostBreakdownInfo
+                  info={breakdown.acquired_info}
+                  locale={locale}
+                />
               </span>
             ) : (
               "-"
@@ -187,16 +219,20 @@ export default function UserPageStatsBoostBreakdown({
     <div className="tw-mt-6 lg:tw-mt-8">
       <div className="tw-flex tw-items-center tw-justify-between">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          {boostMessage("user.collected.stats.boostBreakdown.title")}
+          {boostMessage(locale, "user.collected.stats.boostBreakdown.title")}
         </h3>
         <span>
           <Link
             href="/network/tdh#tdh-1-4"
             className="decoration-hover-underline tw-text-sm"
           >
-            {boostMessage("user.collected.stats.boostBreakdown.versionLink", {
-              version: BOOST_VERSION,
-            })}
+            {boostMessage(
+              locale,
+              "user.collected.stats.boostBreakdown.versionLink",
+              {
+                version: BOOST_VERSION,
+              }
+            )}
           </Link>
         </span>
       </div>
@@ -206,6 +242,7 @@ export default function UserPageStatsBoostBreakdown({
             <table className="tw-min-w-full">
               <caption className="tw-sr-only">
                 {boostMessage(
+                  locale,
                   "user.collected.stats.boostBreakdown.tableCaption"
                 )}
               </caption>
@@ -216,6 +253,7 @@ export default function UserPageStatsBoostBreakdown({
                     className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
                   >
                     {boostMessage(
+                      locale,
                       "user.collected.stats.boostBreakdown.columns.type"
                     )}
                   </th>
@@ -224,6 +262,7 @@ export default function UserPageStatsBoostBreakdown({
                     className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
                   >
                     {boostMessage(
+                      locale,
                       "user.collected.stats.boostBreakdown.columns.potential"
                     )}
                   </th>
@@ -232,6 +271,7 @@ export default function UserPageStatsBoostBreakdown({
                     className="tw-group tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400 sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
                   >
                     {boostMessage(
+                      locale,
                       "user.collected.stats.boostBreakdown.columns.actual"
                     )}
                   </th>
@@ -243,6 +283,7 @@ export default function UserPageStatsBoostBreakdown({
                     {getMemesRows()}
                     {getBaseBoostRow(
                       boostMessage(
+                        locale,
                         "user.collected.stats.boostBreakdown.rows.gradients"
                       ),
                       tdh?.boost_breakdown.gradients
@@ -253,6 +294,7 @@ export default function UserPageStatsBoostBreakdown({
                         className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold sm:tw-px-6 sm:tw-text-md lg:tw-pr-4"
                       >
                         {boostMessage(
+                          locale,
                           "user.collected.stats.boostBreakdown.rows.total"
                         )}
                       </th>
@@ -260,6 +302,7 @@ export default function UserPageStatsBoostBreakdown({
                         {tdh?.boost ? (
                           <span className="d-flex align-items-center justify-content-center gap-2">
                             {formatBoostValue(
+                              locale,
                               (tdh.boost_breakdown.memes_card_sets?.available ??
                                 0) +
                                 (tdh.boost_breakdown.gradients?.available ?? 0)
@@ -267,9 +310,11 @@ export default function UserPageStatsBoostBreakdown({
                             <BoostBreakdownInfo
                               info={[
                                 boostMessage(
+                                  locale,
                                   "user.collected.stats.boostBreakdown.info.totalPotential"
                                 ),
                               ]}
+                              locale={locale}
                             />
                           </span>
                         ) : (
@@ -279,13 +324,18 @@ export default function UserPageStatsBoostBreakdown({
                       <td className="tw-text-white-400 tw-group tw-whitespace-nowrap tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-px-4 tw-py-3 tw-text-center tw-text-sm tw-font-medium sm:tw-px-6 sm:tw-text-md lg:tw-pr-4">
                         {tdh?.boost ? (
                           <span className="d-flex align-items-center justify-content-center gap-2">
-                            {formatBoostValue(roundTo(tdh.boost - 1, 2))}
+                            {formatBoostValue(
+                              locale,
+                              roundTo(tdh.boost - 1, 2)
+                            )}
                             <BoostBreakdownInfo
                               info={[
                                 boostMessage(
+                                  locale,
                                   "user.collected.stats.boostBreakdown.info.totalActual"
                                 ),
                               ]}
+                              locale={locale}
                             />
                           </span>
                         ) : (
@@ -304,7 +354,13 @@ export default function UserPageStatsBoostBreakdown({
   );
 }
 
-function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
+function BoostBreakdownInfo({
+  info,
+  locale,
+}: {
+  readonly info: string[];
+  readonly locale: SupportedLocale;
+}) {
   if (!info || info.length === 0) {
     return <></>;
   }
@@ -317,6 +373,7 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
         type="button"
         className="tw-inline-flex tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         aria-label={boostMessage(
+          locale,
           "user.collected.stats.boostBreakdown.info.ariaLabel"
         )}
         data-tooltip-id={tooltipId}

@@ -46,7 +46,7 @@ export default function UserPageStatsDetailsContent({
         locale={locale}
       />
 
-      <UserPageStatsBoostBreakdown tdh={tdh} />
+      <UserPageStatsBoostBreakdown tdh={tdh} locale={locale} />
     </div>
   );
 }

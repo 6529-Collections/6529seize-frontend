@@ -4,6 +4,15 @@ import type { ConsolidatedTDH } from "@/entities/ITDH";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
+jest.mock("@/i18n/messages", () => {
+  const actual =
+    jest.requireActual<typeof import("@/i18n/messages")>("@/i18n/messages");
+  return {
+    ...actual,
+    t: jest.fn(actual.t),
+  };
+});
+
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <svg data-testid="icon" />,
 }));
@@ -13,7 +22,13 @@ const boostText = (
   params?: Parameters<typeof t>[2]
 ) => t(DEFAULT_LOCALE, key, params);
 
+const translateMock = t as jest.MockedFunction<typeof t>;
+
 describe("UserPageStatsBoostBreakdown", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("renders nothing when boost breakdown missing", () => {
     const { container } = render(
       <UserPageStatsBoostBreakdown tdh={undefined} />
@@ -78,6 +93,49 @@ describe("UserPageStatsBoostBreakdown", () => {
     ).toBeGreaterThan(0);
   });
 
+  it("uses the provided locale for boost labels", () => {
+    const tdh: ConsolidatedTDH = {
+      boost: 2,
+      boost_breakdown: {
+        memes_card_sets: {
+          available: 1,
+          acquired: 1,
+          available_info: ["Card set boost detail"],
+          acquired_info: [],
+        },
+        gradients: {
+          available: 1,
+          acquired: 1,
+          available_info: [],
+          acquired_info: [],
+        },
+      },
+    } as any;
+
+    render(<UserPageStatsBoostBreakdown tdh={tdh} locale="fr-FR" />);
+
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.stats.boostBreakdown.title",
+      {}
+    );
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.stats.boostBreakdown.versionLink",
+      { version: "1.4" }
+    );
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.stats.boostBreakdown.columns.potential",
+      {}
+    );
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.stats.boostBreakdown.info.ariaLabel",
+      {}
+    );
+  });
+
   it("shows season rows when card sets acquired is zero", () => {
     const tdh: ConsolidatedTDH = {
       boost: 2,
@@ -112,7 +170,7 @@ describe("UserPageStatsBoostBreakdown", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders zero boost values and total row numbers", () => {
+  it("renders zero boost values and total row numbers with the active locale", () => {
     const tdh: ConsolidatedTDH = {
       boost: 1.25,
       boost_breakdown: {
@@ -131,14 +189,14 @@ describe("UserPageStatsBoostBreakdown", () => {
       },
     } as any;
 
-    render(<UserPageStatsBoostBreakdown tdh={tdh} />);
+    render(<UserPageStatsBoostBreakdown tdh={tdh} locale="de-DE" />);
 
     const table = screen.getByRole("table", {
       name: boostText("user.collected.stats.boostBreakdown.tableCaption"),
     });
-    expect(within(table).getAllByText("0.00").length).toBeGreaterThanOrEqual(3);
-    expect(within(table).getAllByText("1.50").length).toBeGreaterThanOrEqual(2);
-    expect(within(table).getByText("0.25")).toBeInTheDocument();
+    expect(within(table).getAllByText("0,00").length).toBeGreaterThanOrEqual(3);
+    expect(within(table).getAllByText("1,50").length).toBeGreaterThanOrEqual(2);
+    expect(within(table).getByText("0,25")).toBeInTheDocument();
   });
 
   it("does not throw when optional boost breakdown sections are absent", () => {

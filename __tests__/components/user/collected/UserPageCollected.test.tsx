@@ -49,20 +49,23 @@ jest.mock(
     }
 );
 
+const mockUserPageCollectedCards = jest.fn((props: any) => (
+  <div
+    data-testid="cards"
+    data-cards-count={props.cards.length}
+    data-total-pages={props.totalPages}
+    data-page={props.page}
+    data-show-data-row={props.showDataRow}
+    data-locale={props.locale}
+  />
+));
+
 jest.mock(
   "@/components/user/collected/cards/UserPageCollectedCards",
-  () =>
-    function MockCards(props: any) {
-      return (
-        <div
-          data-testid="cards"
-          data-cards-count={props.cards.length}
-          data-total-pages={props.totalPages}
-          data-page={props.page}
-          data-show-data-row={props.showDataRow}
-        />
-      );
-    }
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockUserPageCollectedCards(props),
+  })
 );
 
 const mockUserPageCollectedNetworkCards = jest.fn((props: any) => (
@@ -529,6 +532,31 @@ describe("UserPageCollected", () => {
       "de-DE"
     );
     expect(mockUserPageCollectedNetworkCards).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
+    );
+    expect(mockUserPageCollectedStats).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
+    );
+  });
+
+  it("passes normalized locale search params to regular cards", () => {
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "locale") return "DE-de";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue("locale=DE-de");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    expect(screen.getByTestId("cards")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.getByTestId("stats-summary")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(mockUserPageCollectedCards).toHaveBeenCalledWith(
       expect.objectContaining({ locale: "de-DE" })
     );
     expect(mockUserPageCollectedStats).toHaveBeenCalledWith(

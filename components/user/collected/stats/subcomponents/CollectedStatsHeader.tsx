@@ -1,6 +1,6 @@
 import { ChartBarIcon } from "@heroicons/react/24/outline";
 import type { CollectedCollectionType } from "@/entities/IProfile";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
 import type { CollectedHeaderMetric } from "../types";
 
@@ -9,6 +9,7 @@ interface CollectedStatsHeaderProps {
   readonly activeCollection: CollectedCollectionType | null;
   readonly isDetailsOpen: boolean;
   readonly detailsId: string;
+  readonly locale?: SupportedLocale | undefined;
   readonly onToggleDetails: () => void;
   readonly onCollectionShortcut?:
     | ((collection: CollectedCollectionType) => void)
@@ -20,15 +21,13 @@ export function CollectedStatsHeader({
   activeCollection,
   isDetailsOpen,
   detailsId,
+  locale = DEFAULT_LOCALE,
   onToggleDetails,
   onCollectionShortcut,
 }: Readonly<CollectedStatsHeaderProps>) {
-  const detailsLabel = translate(
-    DEFAULT_LOCALE,
-    "user.collected.stats.details.show"
-  );
+  const detailsLabel = translate(locale, "user.collected.stats.details.show");
   const hideDetailsLabel = translate(
-    DEFAULT_LOCALE,
+    locale,
     "user.collected.stats.details.hide"
   );
   const detailsButtonLabel = isDetailsOpen ? hideDetailsLabel : detailsLabel;

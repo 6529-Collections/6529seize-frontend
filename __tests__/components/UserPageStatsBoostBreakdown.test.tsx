@@ -54,7 +54,7 @@ describe("UserPageStatsBoostBreakdown", () => {
   });
 
   it("shows boost rows when data present", () => {
-    render(<UserPageStatsBoostBreakdown tdh={makeTDH()} />);
+    render(<UserPageStatsBoostBreakdown tdh={makeTDH()} locale="de-DE" />);
     expect(
       screen.getByText(boostText("user.collected.stats.boostBreakdown.title"))
     ).toBeInTheDocument();
@@ -67,5 +67,7 @@ describe("UserPageStatsBoostBreakdown", () => {
         name: boostText("user.collected.stats.boostBreakdown.rows.total"),
       })
     ).toBeInTheDocument();
+    expect(within(table).getByText("3,00")).toBeInTheDocument();
+    expect(within(table).getAllByText("0,50").length).toBeGreaterThanOrEqual(2);
   });
 });

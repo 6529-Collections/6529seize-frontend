@@ -908,6 +908,7 @@ export default function UserPageCollected({
                 setPage={setPage}
                 dataTransfer={dataTransfer ?? []}
                 isTransferLoading={isFetchingTransfer}
+                locale={locale}
               />
             )}
           </div>
