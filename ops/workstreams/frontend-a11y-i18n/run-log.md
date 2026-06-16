@@ -944,3 +944,130 @@
   page-PR merge policy wording, the prior review thread is resolved/outdated,
   and Claude remained configured for manual review only. Per workstream policy,
   do not merge PR #2636.
+- Started stacked branch
+  `codex/user-collected-wallet-activity-filter-a11y-i18n` from PR #2636 for the
+  next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Wallet Activity
+  heading, filter trigger/options, empty states, and transaction table caption.
+  Added accessible filter trigger/option names, `aria-expanded`,
+  `aria-controls`, option pressed state, status semantics for empty states, and
+  a screen-reader table caption. Swapped the touched framer-motion dropdown
+  usage to `LazyMotion`/`m`.
+- Validation passed for the Wallet Activity filter follow-up so far: focused
+  wallet filter/table/i18n Jest suites (5 suites, 10 tests), `lint:changed`,
+  `typecheck:changed`, `react-doctor:diff`, and browser smoke on
+  `/punk6529/collected?activity=wallet-activity`. React Doctor still reports
+  the unrelated dirty `contexts/EmojiContext.tsx` fetch-in-effect diagnostic
+  and the `useSearchParams` Suspense warning for the touched wallet component,
+  which is rendered under the activity wrapper Suspense boundary from PR #2636.
+  Browser smoke verified the Wallet Activity heading, filter trigger accessible
+  name, option list labels, pressed state, Wallet Activity table caption,
+  `Mints` selection/query update, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2637 against PR #2636. Per workstream policy,
+  do not merge PR #2637.
+- SonarCloud reported one non-blocking accessibility code smell on PR #2637:
+  prefer native `<output>` over `role="status"` for the Wallet Activity empty
+  state. Updated the empty state wrapper to `<output>` and reran focused wallet
+  filter/table/i18n Jest suites, targeted eslint for the touched wrapper file,
+  `typecheck:changed`, and `git diff --check`.
+- Confirmed PR #2637 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed with zero open issues after the `<output>` fix, CodeRabbit
+  manual review passed, no review threads are open, and Claude remains
+  configured for manual review only. Per workstream policy, do not merge PR
+  #2637.
+- Started stacked branch `codex/user-collected-distributions-a11y-i18n` from
+  PR #2637 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the Distributions
+  heading, empty state, table caption, table headings, collection labels,
+  token link accessible names, and a loading-only screen-reader label. Replaced
+  the empty state with native `<output>`, switched distribution row numbers to
+  default-locale `Intl` formatting, switched relative time to the repo i18n
+  helper, and replaced phase index keys with stable phase-name keys.
+- Validation passed for the Distributions follow-up so far: focused
+  distributions/i18n Jest suites (5 suites, 10 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=distributions`.
+  `lint:changed` was not rerun for this branch because the long stacked diff
+  expands beyond Windows' command-line limit; the PR-specific eslint run passed.
+  React Doctor still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and the `useSearchParams` Suspense warning for
+  the touched Distributions component, which is rendered under the activity
+  wrapper Suspense boundary from PR #2636. Browser smoke verified the
+  Distributions tab selection/panel relationship, message-backed heading,
+  native empty-state output, and no Next.js runtime session errors.
+- Opened review-ready stacked PR #2638 against PR #2637. Per workstream policy,
+  do not merge PR #2638.
+- CodeRabbit flagged that the Distributions loading label remained in the
+  accessibility tree when visually hidden by opacity. Fixed the loader subtree
+  to render only while loading and added a focused regression assertion.
+- Confirmed PR #2638 is bot-happy on the latest head after the loading-label
+  follow-up: DCO passed, Snyk passed, SonarCloud passed with zero new issues,
+  CodeRabbit manual review passed, and the prior loading-label review thread is
+  resolved/outdated. Per workstream policy, do not merge PR #2638.
+- Started stacked branch `codex/user-collected-tdh-history-a11y-i18n` from PR
+  #2638 for the next low-risk `/{user}/collected` Details-panel follow-up.
+- Implemented message-backed source-locale labels for the TDH History heading,
+  loading label, empty state, chart list label, chart titles, dataset labels,
+  and chart accessible names. Replaced the empty state with native `<output>`,
+  switched chart date and axis labels through the repo i18n helpers, and
+  replaced random chart keys with stable chart IDs.
+- Validation passed for the TDH History follow-up so far: focused TDH
+  History/i18n Jest suites (3 suites, 8 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=tdh-history`. React Doctor
+  still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic and the pre-existing heavy Chart.js import warning
+  in the touched TDH chart component. Browser smoke verified the TDH History tab
+  selection/panel relationship, message-backed heading, chart list label, chart
+  headings, canvas accessible names, and no Next.js runtime session errors; the
+  remaining browser console errors were the known local shared API wave 500s and
+  blocked emoji-list request.
+- Opened review-ready stacked PR #2639 against PR #2638. Per workstream policy,
+  do not merge PR #2639.
+- Confirmed PR #2639 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, and no review threads are
+  open. Per workstream policy, do not merge PR #2639.
+- Started stacked branch `codex/user-profile-tabs-a11y-i18n` from PR #2639 for
+  the next low-risk profile shell follow-up.
+- Implemented message-backed source-locale labels for profile tab titles, beta
+  badge text, profile-section navigation landmark text, and tab-scroll button
+  labels. Added `aria-current="page"` to the active profile tab link, wrapped
+  the search-param-driven tab tree in a documented Suspense boundary, and made
+  the horizontal tab scroll listener passive.
+- Validation passed for the profile tabs follow-up so far: focused
+  layout-tabs/i18n Jest suites (4 suites, 20 tests), targeted eslint for the
+  PR-specific TypeScript files, `typecheck:changed`, `react-doctor:diff`, and
+  browser smoke on `/punk6529/collected?activity=tdh-history`. React Doctor
+  still reports the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic, still flags `useSearchParams` in the touched
+  profile tab files despite the `UserPageLayout` Suspense boundary, and still
+  flags the existing `router.replace()` redirect effect. Browser smoke verified
+  the `Profile sections` navigation landmark, message-backed tab labels, the
+  explicit `xTDH Beta` link name, `aria-current="page"` on Collected, and no
+  Next.js runtime session errors; remaining browser console errors were the
+  known local shared API wave 500s and blocked emoji-list request.
+- Opened review-ready stacked PR #2640 against PR #2639. Per workstream policy,
+  do not merge PR #2640.
+- Confirmed PR #2640 is bot-happy on the latest head: DCO passed, Snyk passed,
+  SonarCloud passed, CodeRabbit manual review passed, and no review threads are
+  open. Per workstream policy, do not merge PR #2640.
+- Started stacked branch `codex/user-followers-modal-a11y-i18n` from PR #2640
+  for the next low-risk profile modal/list follow-up.
+- Implemented message-backed source-locale labels for the profile followers
+  modal title, follower list label, loading status label, follower profile link
+  names, and follower avatar alt text. Converted the follower collection to a
+  semantic list/listitem structure, added `aria-busy` plus a polite loading
+  status, and switched follower avatars to `next/image` with `unoptimized` for
+  arbitrary remote profile hosts.
+- Validation passed for the followers modal/list follow-up so far: focused
+  followers/i18n Jest suites (5 suites, 11 tests), targeted eslint for the
+  PR-specific source files, `typecheck:changed`, `react-doctor:diff`, and live
+  browser smoke on `/punk6529` at desktop and 390px mobile widths. React Doctor
+  still reports only the unrelated dirty `contexts/EmojiContext.tsx`
+  fetch-in-effect diagnostic. Browser smoke verified the `Followers` dialog
+  title, modal `aria-modal`, `Followers` list label, two list items, labeled
+  profile links, avatar alt text, close button on mobile, and no Next.js
+  runtime session errors; browser console errors were local API/resource
+  responses unrelated to the followers modal change.
+- Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
+  do not merge PR #2641.
