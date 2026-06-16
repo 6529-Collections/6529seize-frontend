@@ -47,8 +47,16 @@ interface FormulaStep {
   readonly toneClasses: string;
 }
 
+interface ScoreReconciliationMismatch {
+  readonly label: string;
+  readonly apiScore: number;
+  readonly computedScore: number;
+}
+
 const UUID_REGEX =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+const SCORE_RECONCILIATION_EPSILON = 0.05;
 
 const DEFAULT_FORMULA: ApiWaveScoreFormula = {
   max_level_raw_for_score: 25000000,
@@ -159,6 +167,25 @@ function roundScore(value: number): number {
 
 function formatScore(value: unknown): string {
   return scoreFormatter.format(roundScore(toNumber(value)));
+}
+
+function getScoreReconciliationMismatches(
+  scores: readonly ScoreReconciliationMismatch[]
+): ScoreReconciliationMismatch[] {
+  return scores.filter(
+    ({ apiScore, computedScore }) =>
+      Math.abs(apiScore - computedScore) > SCORE_RECONCILIATION_EPSILON
+  );
+}
+
+function formatScoreMismatch({
+  label,
+  apiScore,
+  computedScore,
+}: ScoreReconciliationMismatch): string {
+  return `${label}: API ${formatScore(apiScore)}, computed ${formatScore(
+    computedScore
+  )}`;
 }
 
 function formatCompact(value: unknown): string {
@@ -715,6 +742,28 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
     : "v1 fallback";
   const fallbackReconciliationDetail =
     "API score shown; no formula metadata returned";
+  const scoreMismatches = hasFormulaMetadata
+    ? getScoreReconciliationMismatches([
+        {
+          label: "Quality",
+          apiScore: score.quality_score,
+          computedScore: computedQuality,
+        },
+        {
+          label: "Hotness",
+          apiScore: score.hotness_score,
+          computedScore: computedHotness,
+        },
+        {
+          label: "Visibility",
+          apiScore: score.visibility_score,
+          computedScore: computedVisibility,
+        },
+      ])
+    : [];
+  const scoreMismatchDetail = scoreMismatches
+    .map(formatScoreMismatch)
+    .join("; ");
 
   return (
     <section className="tw-space-y-5" aria-live="polite">
@@ -733,6 +782,17 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               Created by {getWaveDisplayHandle(wave)}. Score calculated{" "}
               {formatTimestamp(score.calculated_at)}.
             </p>
+            {scoreMismatches.length > 0 && (
+              <div
+                role="status"
+                className="tw-mt-4 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-text-amber-100 tw-ring-1 tw-ring-inset tw-ring-amber-400/25"
+              >
+                <p className="tw-font-semibold">Formula drift detected</p>
+                <p className="tw-mt-1 tw-text-amber-100/85">
+                  {scoreMismatchDetail}
+                </p>
+              </div>
+            )}
             <WaveTrustSignals
               waveRep={wave.wave_rep ?? null}
               waveScore={score}

@@ -149,10 +149,9 @@ function onRadioKeyDown<T extends string>({
     return;
   }
 
+  const radioGroup = event.currentTarget.parentElement;
   onChange(nextValue);
-  requestAnimationFrame(() =>
-    focusRadioByValue(event.currentTarget.parentElement, nextValue)
-  );
+  requestAnimationFrame(() => focusRadioByValue(radioGroup, nextValue));
 }
 
 function ScoreSortIcon({ sort }: { readonly sort: ApiWaveScoreSort }) {

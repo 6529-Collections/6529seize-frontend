@@ -384,6 +384,16 @@ async function searchLegacyWavesByName({
   return waves.map(mapApiWaveToSidebarWave);
 }
 
+const WAVE_SEARCH_UNAVAILABLE_MESSAGE =
+  "Wave search is unavailable. Try a wave URL or id.";
+
+function createWaveSearchUnavailableError(cause?: unknown): Error {
+  if (cause === undefined) {
+    return new Error(WAVE_SEARCH_UNAVAILABLE_MESSAGE);
+  }
+  return new Error(WAVE_SEARCH_UNAVAILABLE_MESSAGE, { cause });
+}
+
 export async function searchWavesByName({
   name,
   pageSize = 5,
@@ -395,6 +405,8 @@ export async function searchWavesByName({
 }): Promise<SidebarWave[]> {
   let completedSearches = 0;
   let failedSearches = 0;
+  let primarySearchError: unknown;
+  let firstSearchError: unknown;
 
   try {
     const waves = await searchWavesV2ByName({ name, pageSize, headers });
@@ -402,8 +414,10 @@ export async function searchWavesByName({
     if (waves.length > 0) {
       return waves;
     }
-  } catch {
+  } catch (error) {
     failedSearches += 1;
+    primarySearchError = error;
+    firstSearchError ??= error;
     // Fall back while older API deployments still reject v2 SEARCH by name.
   }
 
@@ -418,8 +432,9 @@ export async function searchWavesByName({
     if (waves.length > 0) {
       return waves;
     }
-  } catch {
+  } catch (error) {
     failedSearches += 1;
+    firstSearchError ??= error;
     // Public search is the last fallback for unauthenticated sessions.
   }
 
@@ -431,13 +446,18 @@ export async function searchWavesByName({
       headers,
     });
     completedSearches += 1;
-    return waves;
-  } catch {
+    if (waves.length > 0) {
+      return waves;
+    }
+  } catch (error) {
     failedSearches += 1;
+    firstSearchError ??= error;
   }
 
   if (completedSearches === 0 || failedSearches > 0) {
-    throw new Error("Wave search is unavailable. Try a wave URL or id.");
+    throw createWaveSearchUnavailableError(
+      primarySearchError ?? firstSearchError
+    );
   }
 
   return [];
