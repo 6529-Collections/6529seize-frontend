@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import { useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import type { DisplaySeason } from "../types";
@@ -84,10 +86,25 @@ const getButtonClassName = (isSelected: boolean): string =>
 
 const getSetsHeldLabel = (setsHeld: number): string => {
   if (setsHeld <= 0) {
-    return "0 sets";
+    return translate(
+      DEFAULT_LOCALE,
+      "user.collected.stats.seasonTile.sets.zero"
+    );
   }
 
-  return `${setsHeld} set${setsHeld > 1 ? "s" : ""}`;
+  if (setsHeld === 1) {
+    return translate(
+      DEFAULT_LOCALE,
+      "user.collected.stats.seasonTile.sets.one",
+      { count: setsHeld }
+    );
+  }
+
+  return translate(
+    DEFAULT_LOCALE,
+    "user.collected.stats.seasonTile.sets.many",
+    { count: setsHeld }
+  );
 };
 
 export function CollectedStatsSeasonTile({

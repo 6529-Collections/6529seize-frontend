@@ -154,6 +154,7 @@
 }
 
 .timelineMediaImage {
+  height: auto;
   width: 100%;
   min-width: 150px;
 }
@@ -168,4 +169,9 @@
   margin-bottom: 0;
   font-size: smaller;
   overflow-wrap: anywhere;
+}
+
+.metadataValue {
+  overflow-wrap: anywhere;
+  white-space: pre-line;
 }

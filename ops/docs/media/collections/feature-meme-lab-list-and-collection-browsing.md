@@ -26,6 +26,8 @@
 - On `/meme-lab`, switch to `Collections`, then select `view` for a collection.
 - Open `/meme-lab/collection/{collection}` directly.
 - On mobile and tablet (`< xl`), use the collections dropdown on `/meme-lab`.
+- Browse and collection card grids render as labelled lists so assistive
+  technology can announce grouped card results.
 - Card tiles expose accessible names in the form
   `View {name}, Meme Lab card #{tokenId}`.
 
@@ -44,7 +46,8 @@
 7. If `Volume` is not active, picking a volume window also switches sort to
    `Volume`.
 8. In grouped `Collections`, select `view` to open
-   `/meme-lab/collection/{collection}`.
+   `/meme-lab/collection/{collection}`. During progressive i18n migration, a
+   supported non-default `locale` query is preserved on the collection link.
 9. Open any card tile to go to `/meme-lab/{id}`.
 
 ### Collection Route `/meme-lab/collection/{collection}`
@@ -73,6 +76,7 @@
 - Collection `view` links normalize spaces to hyphenated slugs and the
   collection page decodes older encoded-space URLs such as
   `/meme-lab/collection/6529-Intern%20JPGs`.
+- Collection `view` links preserve supported non-default `locale` query values.
 
 ## Loading, Empty, and Error States
 
@@ -117,10 +121,10 @@
   through each sort change.
 - Card tiles reuse shared NFT rendering, including wallet balance chips when
   signed in.
-- List, collection, sorting, card accessible names, and card metric labels are
-  message-backed for the progressive i18n path. Non-`en-US` dictionaries may
-  still fall back to `en-US` for Meme Lab-specific labels while reviewed
-  translations are pending.
+- List, grouped collection/artist list labels, sorting, card accessible names,
+  and card metric labels are message-backed for the progressive i18n path.
+  Non-`en-US` dictionaries may still fall back to `en-US` for Meme Lab-specific
+  labels while reviewed translations are pending.
 - Card metric dates, numbers, percentages, ETH values, and grouped label
   sorting use the repo `Intl` helpers.
 - Card-level tabs and navigation are documented in

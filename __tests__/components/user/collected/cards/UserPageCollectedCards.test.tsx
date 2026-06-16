@@ -6,7 +6,7 @@ import {
   CollectionSort,
 } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 
 jest.mock("@/components/user/collected/cards/UserPageCollectedCard", () => {
@@ -95,9 +95,12 @@ describe("UserPageCollectedCards", () => {
         showDataRow={true}
         filters={{ ...baseFilters, collection: null }}
         setPage={setPage}
+        dataTransfer={[]}
       />
     );
 
+    const cardsList = screen.getByRole("list", { name: "Collected cards" });
+    expect(within(cardsList).getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getAllByTestId("card")).toHaveLength(2);
     expect(screen.getAllByTestId("card")[0]).toHaveAttribute(
       "data-show-data-row",
@@ -117,6 +120,7 @@ describe("UserPageCollectedCards", () => {
         showDataRow={false}
         filters={{ ...baseFilters, collection: null }}
         setPage={() => {}}
+        dataTransfer={[]}
       />
     );
 
@@ -132,10 +136,12 @@ describe("UserPageCollectedCards", () => {
         showDataRow={false}
         filters={{ ...baseFilters, collection: CollectedCollectionType.MEMES }}
         setPage={() => {}}
+        dataTransfer={[]}
       />
     );
 
     expect(screen.getByTestId("no-cards")).toHaveTextContent("MEMES");
+    expect(screen.queryByRole("list", { name: "Collected cards" })).toBeNull();
     expect(screen.queryByTestId("card")).toBeNull();
   });
 });
