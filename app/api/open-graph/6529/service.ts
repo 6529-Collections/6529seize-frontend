@@ -29,6 +29,7 @@ import type {
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
+const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
 
 type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -804,7 +805,7 @@ async function fetchNextGenCollections(
 ): Promise<readonly NextGenCollection[]> {
   const page = await fetchOptionalApiJson<ApiPage<NextGenCollection>>(
     "nextgen/collections",
-    { page_size: 100 },
+    { page_size: NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS },
     context
   );
 
@@ -830,17 +831,20 @@ async function resolveNextGenToken(
     return null;
   }
 
-  const collections = await fetchNextGenCollections(context);
-  for (const collection of collections) {
-    const expandedTokenId =
-      collection.id * NEXTGEN_TOKEN_ID_MULTIPLIER + normalizedTokenId;
-    const token = await fetchNextGenToken(String(expandedTokenId), context);
-    if (token?.normalised_id === normalizedTokenId) {
-      return token;
-    }
-  }
+  const tokenCandidates = await Promise.all(
+    (await fetchNextGenCollections(context))
+      .slice(0, NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS)
+      .map(async (collection) => {
+        const expandedTokenId =
+          collection.id * NEXTGEN_TOKEN_ID_MULTIPLIER + normalizedTokenId;
+        return fetchNextGenToken(String(expandedTokenId), context);
+      })
+  );
 
-  return null;
+  return (
+    tokenCandidates.find((token) => token?.normalised_id === normalizedTokenId) ??
+    null
+  );
 }
 
 async function fetchNextGenPreview(

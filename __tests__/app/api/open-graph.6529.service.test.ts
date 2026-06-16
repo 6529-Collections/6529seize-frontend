@@ -578,9 +578,63 @@ describe("createFirstParty6529Plan", () => {
     ).toEqual(
       expect.arrayContaining([
         "https://api.test/api/nextgen/tokens/514",
-        "https://api.test/api/nextgen/collections?page_size=100",
+        "https://api.test/api/nextgen/collections?page_size=5",
         "https://api.test/api/nextgen/tokens/10000000514",
       ])
+    );
+  });
+
+  it("caps NextGen normalized-token expansion probes", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nextgen/tokens/42") {
+        return jsonResponse({}, 404);
+      }
+
+      if (url.pathname === "/api/nextgen/collections") {
+        return jsonResponse({
+          data: [
+            { id: 1 },
+            { id: 2 },
+            { id: 3 },
+            { id: 4 },
+            { id: 5 },
+            { id: 6 },
+            { id: 7 },
+          ],
+        });
+      }
+
+      if (url.pathname.startsWith("/api/nextgen/tokens/")) {
+        return jsonResponse({}, 404);
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/nextgen/token/42")
+    );
+
+    await expect(plan!.execute()).rejects.toThrow("NextGen token was not found.");
+
+    const fetchUrls = mockFetch.mock.calls.map((call) =>
+      readFetchUrl(call[0]).toString()
+    );
+    expect(fetchUrls).toEqual(
+      expect.arrayContaining([
+        "https://api.test/api/nextgen/tokens/42",
+        "https://api.test/api/nextgen/collections?page_size=5",
+        "https://api.test/api/nextgen/tokens/10000000042",
+        "https://api.test/api/nextgen/tokens/20000000042",
+        "https://api.test/api/nextgen/tokens/30000000042",
+        "https://api.test/api/nextgen/tokens/40000000042",
+        "https://api.test/api/nextgen/tokens/50000000042",
+      ])
+    );
+    expect(fetchUrls).not.toContain(
+      "https://api.test/api/nextgen/tokens/60000000042"
     );
   });
 });

@@ -50,8 +50,10 @@ such as `158/328`.
   - `Season {x}`
   - `Mint date {date}` when available
 
-Edition size should prefer claim or richer edition-cap data. It should not fall
-back to a fresh live minted count when the token is still near mint.
+Edition size should prefer claim edition size, then mint stats, then public
+extended edition size. The card does not render live mint progress fractions
+such as `158/328`; when the public API only exposes an extended edition size for
+a fresh mint, the card uses that value rather than omitting the fact.
 
 ### Meme Lab
 
@@ -112,6 +114,6 @@ back to a fresh live minted count when the token is still near mint.
 ## Failure Behavior
 
 If a first-party collection URL is recognized but the 6529 API cannot resolve
-the object, the preview request fails and the wave UI falls back to the standard
-link fallback state. Unrecognized 6529 URLs continue through the normal provider
-and generic OpenGraph pipeline.
+the object, the route falls back to guarded generic OpenGraph metadata so wave
+drops still show a useful card. Unrecognized 6529 URLs continue through the
+normal provider and generic OpenGraph pipeline.
