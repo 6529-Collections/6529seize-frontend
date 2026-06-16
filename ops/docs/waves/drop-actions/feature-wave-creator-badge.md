@@ -9,9 +9,10 @@ as a square profile-wave picture badge.
 Selecting the compact water-drop button opens the shared created-waves viewer
 (`Waves by {profile}`), so users can jump into waves that author created.
 Selecting the chat-feed profile-wave badge opens that author's profile-wave
-preview. The preview keeps `Open profile wave` as the primary action and adds
-`Show all waves` as a quieter secondary path to the author's `/{user}/brain`
-surface, where their other created and active waves are discoverable.
+preview. The preview keeps `Open profile wave` as the filled primary action,
+uses `Show all waves` to expand a created-waves list inside the preview, and
+shows `View all on profile` as the explicit link to the author's
+`/{user}/brain` surface.
 
 ## Location in the Site
 
@@ -31,8 +32,8 @@ surface, where their other created and active waves are discoverable.
 - Select the water-drop button, or the profile-wave badge in the chat feed.
 - On non-mobile layouts, hover tooltip text is `View created waves` for the
   compact button and `{wave}` for the chat-feed profile-wave badge; the
-  profile-wave hover card includes `Open profile wave` and `Show all waves`
-  links.
+  profile-wave hover card includes a filled `Open profile wave` action and a
+  primary-colored `Show all waves` disclosure link treatment.
 
 ## User Journey
 
@@ -44,8 +45,10 @@ surface, where their other created and active waves are discoverable.
 4. The shared `Waves by {profile}` viewer opens, or the profile-wave preview
    lets the user open the featured wave or select `Show all waves`.
 5. If the viewer opened, review created-wave rows, then select a row to open
-   that wave at `/waves/{waveId}`. If `Show all waves` is selected, the profile
-   Brain tab opens at `/{user}/brain`.
+   that wave at `/waves/{waveId}`.
+6. If `Show all waves` is selected in the profile-wave preview, the preview
+   expands in place to show created-wave rows. Select a row to open that wave,
+   or select `View all on profile` to open the Brain tab at `/{user}/brain`.
 
 ## Common Scenarios
 
@@ -54,8 +57,13 @@ surface, where their other created and active waves are discoverable.
   instead of forcing horizontal overflow.
 - The opened viewer uses the same created-waves surface as the Profile Brain
   tab overflow flow.
-- The profile-wave preview deprioritizes non-promoted waves by linking to the
-  profile Brain tab instead of listing every wave in the preview card.
+- The profile-wave preview fetches the expanded created-waves list only after
+  the user selects `Show all waves`.
+- On desktop, the hover card expands horizontally into a second panel when
+  space allows. On mobile and touch layouts, the sheet stacks the created-waves
+  panel below the preview.
+- The expanded panel is scrollable for longer created-wave lists and includes
+  `View all on profile` for the full Brain tab.
 - Viewer rows show a wave picture when available, otherwise a wave/chat icon
   fallback.
 - Viewer title uses the profile handle when available, or a shortened wallet
@@ -68,7 +76,7 @@ surface, where their other created and active waves are discoverable.
 - If chat-feed profile-wave picture data is missing or fails to load, the badge
   falls back to the water-drop icon.
 - Touch/mobile layouts do not rely on hover tooltip copy; tapping the badge
-  still opens the viewer.
+  still opens the viewer or the profile-wave preview sheet.
 - The created-waves viewer excludes direct-message threads from authored-wave
   results.
 - If both creator and artist-activity badges are present, each keeps its own
@@ -78,8 +86,10 @@ surface, where their other created and active waves are discoverable.
 
 - If the created-waves request fails, the opened viewer shows
   `Unable to load waves right now. Please try again.`; close and reopen it to
-  retry.
-- If no created waves are returned, the viewer shows `No waves created yet.`.
+  retry. The expanded profile-wave preview panel uses the same failure message;
+  collapse and reopen the panel to retry.
+- If no created waves are returned, the viewer or expanded panel shows
+  `No waves created yet.`.
 
 ## Limitations / Notes
 
