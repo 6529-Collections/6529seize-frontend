@@ -438,10 +438,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
     if (!navAdjustedSpaces.measurementsComplete) return {};
-    return calculateHeightStyle(
-      { ...navAdjustedSpaces, mobileNavSpace: 0 },
-      0
-    );
+    return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
   }, [navAdjustedSpaces]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {

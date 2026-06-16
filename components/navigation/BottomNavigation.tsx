@@ -17,6 +17,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
+import { BOTTOM_NAVIGATION_MESSAGES } from "@/i18n/messages";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import BellIcon from "../common/icons/BellIcon";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
@@ -90,6 +91,7 @@ const COMPACT_SCROLL_DELTA_PX = 10;
 const EXPANDED_TOP_THRESHOLD_PX = 12;
 const NOTIFICATIONS_DOCK_SCROLL_SOURCE_SELECTOR =
   "[data-mobile-dock-scroll-source='notifications']";
+const DOCK_SCROLL_SOURCE_CHANGE_EVENT = "mobile-dock-scroll-source-change";
 
 type DockScrollTarget = Window | HTMLElement;
 
@@ -153,37 +155,34 @@ const useCompactDock = (
       return;
     }
 
-    if (
-      globalThis.document?.querySelector(
-        NOTIFICATIONS_DOCK_SCROLL_SOURCE_SELECTOR
-      )
-    ) {
+    const browserWindow = globalThis.window;
+    if (browserWindow === undefined) {
       return;
     }
 
-    const documentBody = globalThis.document?.body;
-    if (documentBody === undefined || globalThis.MutationObserver === undefined) {
-      return;
-    }
+    const handleScrollSourceChange = () => {
+      setScrollTargetVersion((version) => version + 1);
+    };
 
-    const observer = new MutationObserver(() => {
-      if (
-        globalThis.document?.querySelector(
-          NOTIFICATIONS_DOCK_SCROLL_SOURCE_SELECTOR
-        )
-      ) {
-        setScrollTargetVersion((version) => version + 1);
-        observer.disconnect();
-      }
-    });
+    browserWindow.addEventListener(
+      DOCK_SCROLL_SOURCE_CHANGE_EVENT,
+      handleScrollSourceChange
+    );
 
-    observer.observe(documentBody, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
+    return () =>
+      browserWindow.removeEventListener(
+        DOCK_SCROLL_SOURCE_CHANGE_EVENT,
+        handleScrollSourceChange
+      );
   }, [useNotificationsScrollTarget]);
 
   useEffect(() => {
     if (hidden) {
+      return;
+    }
+
+    const browserWindow = globalThis.window;
+    if (browserWindow === undefined) {
       return;
     }
 
@@ -224,15 +223,16 @@ const useCompactDock = (
         return;
       }
 
-      frameRef.current = window.requestAnimationFrame(syncCompactState);
+      frameRef.current = globalThis.requestAnimationFrame(syncCompactState);
     };
 
     scrollTarget.addEventListener("scroll", handleScroll, { passive: true });
+    syncCompactState();
 
     return () => {
       scrollTarget.removeEventListener("scroll", handleScroll);
       if (frameRef.current !== null) {
-        window.cancelAnimationFrame(frameRef.current);
+        globalThis.cancelAnimationFrame(frameRef.current);
       }
     };
   }, [
@@ -246,13 +246,13 @@ const useCompactDock = (
 };
 
 const getNavClassName = (hidden: boolean) =>
-  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-3 tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+  `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-3 tw-pb-[calc(env(safe-area-inset-bottom,0px)+0.25rem)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
 
 const getDockClassName = (compact: boolean) =>
   `tw-pointer-events-auto tw-relative tw-overflow-hidden tw-border tw-border-white/[0.13] tw-bg-black/76 tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
     compact
-      ? "tw-h-[54px] tw-w-[min(calc(100vw-5.5rem),24.5rem)] tw-rounded-[1.65rem] sm:tw-h-[58px] sm:tw-w-[min(calc(100vw-6rem),32rem)] md:tw-w-[min(calc(100vw-10rem),36rem)]"
-      : "tw-h-[74px] tw-w-[min(calc(100vw-1.5rem),42rem)] tw-rounded-[2rem] sm:tw-w-[min(calc(100vw-4rem),46rem)]"
+      ? "tw-h-[48px] tw-w-[min(calc(100vw-6.5rem),23rem)] tw-rounded-[1.5rem] sm:tw-h-[52px] sm:tw-w-[min(calc(100vw-8rem),30rem)] md:tw-w-[min(calc(100vw-12rem),34rem)]"
+      : "tw-h-[62px] tw-w-[min(calc(100vw-3rem),38rem)] tw-rounded-[1.75rem] sm:tw-w-[min(calc(100vw-6rem),42rem)]"
   }`;
 
 const navInnerClassName = "tw-relative tw-h-full";
@@ -322,8 +322,10 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
   return (
     <nav
       ref={setMobileNavRef}
-      aria-label="Primary"
+      aria-hidden={hidden ? "true" : undefined}
+      aria-label={BOTTOM_NAVIGATION_MESSAGES.primaryNavigationLabel}
       className={getNavClassName(hidden)}
+      inert={hidden}
     >
       <div className={getDockClassName(compact)}>
         <div className={navInnerClassName}>

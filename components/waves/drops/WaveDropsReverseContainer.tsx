@@ -4,6 +4,7 @@ import React, { forwardRef, useCallback, useRef, useState } from "react";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 
 const TOP_SENTINEL_ROOT_MARGIN = "200px 0px 0px 0px";
+const DOCK_SCROLL_SOURCE_CHANGE_EVENT = "mobile-dock-scroll-source-change";
 
 interface WaveDropsReverseContainerProps {
   readonly children: React.ReactNode;
@@ -52,14 +53,17 @@ export const WaveDropsReverseContainer = forwardRef<
 
         if (typeof ref === "function") {
           ref(node);
-          return;
-        }
-
-        if (ref) {
+        } else if (ref) {
           ref.current = node;
         }
+
+        if (scrollSourceName && globalThis.window !== undefined) {
+          globalThis.window.dispatchEvent(
+            new CustomEvent(DOCK_SCROLL_SOURCE_CHANGE_EVENT)
+          );
+        }
       },
-      [ref]
+      [ref, scrollSourceName]
     );
 
     useIntersectionObserver(

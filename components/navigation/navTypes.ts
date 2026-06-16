@@ -1,13 +1,19 @@
 import type React from "react";
 
 export type ViewKey = "waves" | "messages";
+export type NavIconColor = "white" | "black";
+
+type NavIconComponent = React.ComponentType<{
+  className?: string | undefined;
+  color?: NavIconColor | undefined;
+}>;
 
 type RouteNavItem = {
   kind: "route";
   name: string;
   href: string;
   icon: string;
-  iconComponent?: React.ComponentType<{ className?: string | undefined }> | undefined;
+  iconComponent?: NavIconComponent | undefined;
   iconSizeClass?: string | undefined;
   disabled?: boolean | undefined;
 };
@@ -17,7 +23,7 @@ type ViewNavItem = {
   name: string;
   viewKey: ViewKey;
   icon: string;
-  iconComponent?: React.ComponentType<{ className?: string | undefined }> | undefined;
+  iconComponent?: NavIconComponent | undefined;
   iconSizeClass?: string | undefined;
   disabled?: boolean | undefined;
 };

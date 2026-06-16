@@ -64,6 +64,36 @@ describe("WaveDropsReverseContainer", () => {
     expect(() => fireEvent.scroll(scrollDiv)).not.toThrow();
   });
 
+  it("announces mobile dock scroll source changes", () => {
+    const dispatchSpy = jest.spyOn(window, "dispatchEvent");
+
+    const { unmount } = render(
+      <WaveDropsReverseContainer
+        onTopIntersection={jest.fn()}
+        isFetchingNextPage={false}
+        hasNextPage={true}
+        scrollSourceName="notifications"
+      >
+        <div>child</div>
+      </WaveDropsReverseContainer>
+    );
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "mobile-dock-scroll-source-change",
+      })
+    );
+
+    dispatchSpy.mockClear();
+    unmount();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "mobile-dock-scroll-source-change",
+      })
+    );
+  });
+
   it("keeps callback ref stable across rerenders and only detaches on unmount", () => {
     const onTopIntersection = jest.fn();
     const callbackRef = jest.fn();

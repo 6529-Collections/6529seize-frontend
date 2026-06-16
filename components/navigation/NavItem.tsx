@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import type { ComponentType, MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { useEffect } from "react";
 import { useTitle } from "@/contexts/TitleContext";
 import { useUnreadIndicator } from "@/hooks/useUnreadIndicator";
@@ -14,9 +14,7 @@ import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { isNavItemActive } from "./isNavItemActive";
 import { getActiveViewFromUrl, useViewContext } from "./ViewContext";
-import type { NavItem as NavItemData } from "./navTypes";
-
-type NavIconColor = "white" | "black";
+import type { NavIconColor, NavItem as NavItemData } from "./navTypes";
 
 interface Props {
   readonly item: NavItemData;
@@ -25,23 +23,30 @@ interface Props {
   readonly fullPrefetch?: boolean;
 }
 
-type NavIconComponent = ComponentType<{
-  readonly className?: string | undefined;
-  readonly color?: NavIconColor | undefined;
-}>;
-
 const getIconSlotClass = (compact: boolean) =>
   `tw-relative tw-z-10 tw-flex tw-items-center tw-justify-center tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-    compact ? "tw-h-9 tw-scale-[0.78] sm:tw-scale-[0.86]" : "tw-h-9 tw-scale-100"
+    compact
+      ? "tw-h-8 tw-scale-[0.74] sm:tw-scale-[0.82]"
+      : "tw-h-8 tw-scale-[0.92]"
   }`;
 
 const ActiveNavIndicator = ({ compact }: { readonly compact: boolean }) => (
   <div
     className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.88] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_8px_24px_rgba(255,255,255,0.1)] tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-      compact ? "tw-h-11 tw-w-[4.5rem] sm:tw-h-12 sm:tw-w-20" : "tw-h-12 tw-w-16 sm:tw-w-20"
+      compact
+        ? "tw-h-10 tw-w-14 sm:tw-h-11 sm:tw-w-16"
+        : "tw-h-11 tw-w-14 sm:tw-w-16"
     }`}
   />
 );
+
+const getNavIndicatorSizeClass = (compact: boolean) =>
+  compact
+    ? "tw-h-10 tw-w-14 sm:tw-h-11 sm:tw-w-16"
+    : "tw-h-11 tw-w-14 sm:tw-w-16";
+
+const getInactiveIconTextColorClass = (isHighlighted: boolean) =>
+  isHighlighted ? "tw-text-white" : "tw-text-iron-300";
 
 const NavItemLinkContent = ({
   hasUnreadMessages,
@@ -62,53 +67,50 @@ const NavItemLinkContent = ({
 }) => {
   const { pending } = useLinkStatus();
   const isHighlighted = isActive || pending;
-  const IconComponent = item.iconComponent as NavIconComponent | undefined;
+  const IconComponent = item.iconComponent;
   const activeIconColor: NavIconColor = isActive ? "black" : "white";
+  const iconTextColorClass = isActive
+    ? "tw-text-black"
+    : getInactiveIconTextColorClass(isHighlighted);
   const resolvedIconSizeClass =
-    compact && item.name === "Home" ? "tw-size-8 sm:tw-size-9" : iconSizeClass;
+    item.name === "Home"
+      ? compact
+        ? "tw-size-7 sm:tw-size-8"
+        : "tw-size-8"
+      : iconSizeClass;
 
   return (
-    <>
-      <div className={getIconSlotClass(compact)}>
-        {isActive && <ActiveNavIndicator compact={compact} />}
-        {pending && !isActive && (
-          <div
-            aria-hidden="true"
-            data-testid="nav-item-pending-indicator"
-            className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
-              compact ? "tw-h-10 tw-w-14 sm:tw-w-16" : "tw-h-12 tw-w-16 sm:tw-w-20"
-            }`}
-          />
-        )}
-        {IconComponent ? (
-          <IconComponent
-            className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${
-              isActive
-                ? "tw-text-black"
-                : isHighlighted
-                  ? "tw-text-white"
-                  : "tw-text-iron-300"
-            }`}
-            color={activeIconColor}
-          />
-        ) : (
-          <Image
-            src={icon}
-            alt={item.name}
-            width={24}
-            height={24}
-            unoptimized
-            className={`tw-relative tw-z-10 ${resolvedIconSizeClass}`}
-          />
-        )}
-        {item.name === "Notifications" && haveUnreadNotifications && (
-          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-        )}
-        {item.name === "Messages" && hasUnreadMessages && (
-          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
-        )}
-      </div>
-    </>
+    <div className={getIconSlotClass(compact)}>
+      {isActive && <ActiveNavIndicator compact={compact} />}
+      {pending && !isActive && (
+        <div
+          aria-hidden="true"
+          data-testid="nav-item-pending-indicator"
+          className={`tw-absolute tw-left-1/2 tw-top-1/2 tw-z-0 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-white/[0.08] tw-ring-1 tw-ring-white/10 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${getNavIndicatorSizeClass(compact)}`}
+        />
+      )}
+      {IconComponent ? (
+        <IconComponent
+          className={`tw-relative tw-z-10 ${resolvedIconSizeClass} ${iconTextColorClass}`}
+          color={activeIconColor}
+        />
+      ) : (
+        <Image
+          src={icon}
+          alt={item.name}
+          width={24}
+          height={24}
+          unoptimized
+          className={`tw-relative tw-z-10 ${resolvedIconSizeClass}`}
+        />
+      )}
+      {item.name === "Notifications" && haveUnreadNotifications && (
+        <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+      )}
+      {item.name === "Messages" && hasUnreadMessages && (
+        <div className="tw-absolute -tw-right-1 -tw-top-1 tw-h-2.5 tw-w-2.5 tw-rounded-full tw-bg-red"></div>
+      )}
+    </div>
   );
 };
 
