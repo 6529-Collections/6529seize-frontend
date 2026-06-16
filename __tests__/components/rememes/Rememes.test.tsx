@@ -1,7 +1,7 @@
 import Rememes, { RememeSort } from "@/components/rememes/Rememes";
 import { TitleProvider } from "@/contexts/TitleContext";
 import { fetchUrl } from "@/services/6529api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 
@@ -98,6 +98,10 @@ describe("Rememes component", () => {
       expect.objectContaining({ signal: expect.any(Object) })
     );
     expect(screen.getByText("#1")).toBeInTheDocument();
+    const resultsList = screen.getByRole("list", {
+      name: "ReMemes results",
+    });
+    expect(within(resultsList).getAllByRole("listitem")).toHaveLength(1);
     expect(
       screen.getByRole("link", {
         name: "View Example ReMeme, ReMeme #1",
@@ -204,6 +208,10 @@ describe("Rememes component", () => {
       )
     );
     expect(screen.getAllByText("(x1.234)")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Add ReMeme" })).toHaveAttribute(
+      "href",
+      "/rememes/add?locale=de-DE"
+    );
     expect(
       screen.getAllByText(
         (_, element) => element?.textContent?.includes("(x2)") ?? false
