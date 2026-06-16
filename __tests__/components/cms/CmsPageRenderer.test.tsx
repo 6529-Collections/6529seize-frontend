@@ -97,4 +97,72 @@ describe("CmsPageRenderer", () => {
     expect(screen.getByText("Unsafe collection").closest("a")).toBeNull();
     expect(screen.getAllByRole("img")[0]).toHaveAttribute("src", "/6529io.png");
   });
+
+  it("keeps package-authored headings below the page title level", () => {
+    const h1BlockPackage: CmsPublishedPackage = {
+      ...cmsFixturePackages.gallery,
+      payload: {
+        ...cmsFixturePackages.gallery.payload,
+        blocks: [
+          {
+            id: "package-heading",
+            type: "heading",
+            level: 1,
+            text: "Package supplied heading",
+          },
+        ],
+      },
+    };
+
+    render(<CmsPageRenderer cmsPackage={h1BlockPackage} />);
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Package supplied heading",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("renders duplicate rich text, facts, and actions without key collisions", () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const duplicateContentPackage: CmsPublishedPackage = {
+      ...cmsFixturePackages.gallery,
+      payload: {
+        ...cmsFixturePackages.gallery.payload,
+        blocks: [
+          {
+            id: "duplicate-copy",
+            type: "rich_text",
+            paragraphs: ["Repeated", "Repeated"],
+          },
+          {
+            id: "duplicate-actions",
+            type: "transaction_reference",
+            chain_id: 1,
+            hash: "0x6529652965296529652965296529652965296529652965296529652965296529",
+            block_number: 22500000,
+            timestamp: "2026-06-16T00:00:00.000Z",
+            summary: "Duplicate content should still render cleanly.",
+            from: "0x0000000000000000000000000000000000006529",
+            to: "0x0000000000000000000000000000000000000001",
+            value_eth: "0",
+            actions: ["Same action", "Same action"],
+          },
+        ],
+      },
+    };
+
+    render(<CmsPageRenderer cmsPackage={duplicateContentPackage} />);
+
+    expect(screen.getAllByText("Repeated")).toHaveLength(2);
+    expect(screen.getAllByText("Same action")).toHaveLength(2);
+    expect(
+      errorSpy.mock.calls.some(([message]) =>
+        String(message).includes("Encountered two children with the same key")
+      )
+    ).toBe(false);
+    errorSpy.mockRestore();
+  });
 });

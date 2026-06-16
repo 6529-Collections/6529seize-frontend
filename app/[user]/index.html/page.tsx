@@ -11,8 +11,8 @@ type PageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return [{ user: "punk6529" }];
+export function generateStaticParams(): { user: string }[] {
+  return [];
 }
 
 export async function generateMetadata({

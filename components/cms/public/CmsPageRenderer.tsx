@@ -111,8 +111,8 @@ function MediaImage({
 }
 
 function HeadingBlock({ block }: { readonly block: CmsHeadingBlock }) {
-  const headingTags: Record<CmsHeadingBlock["level"], "h1" | "h2" | "h3"> = {
-    1: "h1",
+  const headingTags: Record<CmsHeadingBlock["level"], "h2" | "h3"> = {
+    1: "h2",
     2: "h2",
     3: "h3",
   };
@@ -129,8 +129,8 @@ function HeadingBlock({ block }: { readonly block: CmsHeadingBlock }) {
 function RichTextBlock({ block }: { readonly block: CmsRichTextBlock }) {
   return (
     <section className={css.richText}>
-      {block.paragraphs.map((paragraph) => (
-        <p key={paragraph}>{paragraph}</p>
+      {block.paragraphs.map((paragraph, index) => (
+        <p key={`${block.id}-paragraph-${index}`}>{paragraph}</p>
       ))}
     </section>
   );
@@ -240,8 +240,8 @@ function ButtonLinkBlock({
 function Facts({ rows }: { readonly rows: readonly [string, string][] }) {
   return (
     <div className={css.facts}>
-      {rows.map(([label, value]) => (
-        <div key={label}>
+      {rows.map(([label, value], index) => (
+        <div key={`${label}-${index}`}>
           {label}: {value}
         </div>
       ))}
@@ -321,8 +321,8 @@ function TransactionReferenceBlock({
       <p className={css.eyebrow}>Transaction reference</p>
       <p className={css.transactionSummary}>{block.summary}</p>
       <ol className={css.actionList}>
-        {block.actions.map((action) => (
-          <li key={action}>{action}</li>
+        {block.actions.map((action, index) => (
+          <li key={`${block.id}-action-${index}`}>{action}</li>
         ))}
       </ol>
       <Facts

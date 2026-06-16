@@ -365,6 +365,12 @@
   text-decoration: none;
 }
 
+.buttonLink[aria-disabled="true"] {
+  background: #2f3b46;
+  color: #ffffff;
+  cursor: not-allowed;
+}
+
 .fallback {
   border: 1px dashed rgba(255, 255, 255, 0.28);
   border-radius: 8px;

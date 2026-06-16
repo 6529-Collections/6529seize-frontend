@@ -118,6 +118,8 @@ function getPublishedCmsSiteFromFixtures(
     return null;
   }
 
+  assertCmsPackageHashes(cmsPackage);
+
   return {
     cmsPackage,
     staticPath: cmsPackage.payload.page.static_export_path,

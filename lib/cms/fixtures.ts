@@ -1,4 +1,4 @@
-import { buildCmsPackage } from "./package-utils";
+import { assertCmsPackageHashes, buildCmsPackage } from "./package-utils";
 import {
   CMS_PAYLOAD_SCHEMA,
   type CmsPayload,
@@ -318,5 +318,11 @@ function isCmsFixtureSlug(slug: string): slug is CmsFixtureSlug {
 }
 
 export function getCmsFixturePackage(slug: string): CmsPublishedPackage | null {
-  return isCmsFixtureSlug(slug) ? cmsFixturePackages[slug] : null;
+  if (!isCmsFixtureSlug(slug)) {
+    return null;
+  }
+
+  const cmsPackage = cmsFixturePackages[slug];
+  assertCmsPackageHashes(cmsPackage);
+  return cmsPackage;
 }
