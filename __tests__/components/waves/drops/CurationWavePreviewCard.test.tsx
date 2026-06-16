@@ -80,6 +80,9 @@ jest.mock("@heroicons/react/24/outline", () => ({
   ChevronDownIcon: () => (
     <span aria-hidden="true" data-testid="chevron-down-icon" />
   ),
+  ChevronRightIcon: () => (
+    <span aria-hidden="true" data-testid="chevron-right-icon" />
+  ),
   LinkIcon: () => <span aria-hidden="true" />,
   PlayIcon: () => <span aria-hidden="true" data-testid="video-play-icon" />,
 }));
@@ -336,7 +339,7 @@ describe("CurationWavePreviewCard", () => {
     expect(createdWavesPanel).toHaveAttribute("id", controlsId ?? "");
     expect(
       within(createdWavesPanel).getByRole("link", {
-        name: "View all on profile",
+        name: "Show all brain activity",
       })
     ).toHaveAttribute("href", "/alice/brain");
     expect(

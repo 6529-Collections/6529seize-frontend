@@ -11,6 +11,8 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaves } from "@/hooks/useWaves";
 import { WaveCreatorPreviewItem } from "./WaveCreatorPreviewItem";
 
+const WAVE_CREATOR_PREVIEW_PAGE_SIZE = 20;
+
 interface UseWaveCreatorPreviewWavesParams {
   readonly identity: string;
   readonly enabled: boolean;
@@ -45,12 +47,14 @@ export function useWaveCreatorPreviewWaves({
     isFetching,
     isFetchingNextPage,
     hasNextPage,
+    lastPageSize,
     fetchNextPage,
     status,
     error,
   } = useWaves({
     identity,
     waveName: null,
+    limit: WAVE_CREATOR_PREVIEW_PAGE_SIZE,
     enabled,
     directMessage: false,
   });
@@ -62,14 +66,22 @@ export function useWaveCreatorPreviewWaves({
         status === "pending" ||
         isFetching ||
         isFetchingNextPage ||
-        !hasNextPage
+        !hasNextPage ||
+        lastPageSize < WAVE_CREATOR_PREVIEW_PAGE_SIZE
       ) {
         return;
       }
 
       void fetchNextPage();
     },
-    [fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status]
+    [
+      fetchNextPage,
+      hasNextPage,
+      isFetching,
+      isFetchingNextPage,
+      lastPageSize,
+      status,
+    ]
   );
 
   const isInitialLoading = status === "pending" && waves.length === 0;
@@ -100,17 +112,24 @@ export const WaveCreatorPreviewList: React.FC<WaveCreatorPreviewListProps> = ({
 }) => {
   const isCompact = variant === "compact";
   const hasError = state.error !== null && state.error !== undefined;
+  const showPaginationLoader =
+    !isCompact &&
+    (state.isFetchingNextPage || (state.isFetching && state.waves.length > 0));
 
   if (state.isInitialLoading) {
     return (
       <div
         className={`tw-flex ${
-          isCompact ? "tw-h-40" : "tw-h-64"
+          isCompact ? "tw-h-14" : "tw-h-64"
         } tw-items-center tw-justify-center`}
       >
-        <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
+        <div
+          className={`tw-flex tw-items-center ${
+            isCompact ? "tw-gap-2" : "tw-flex-col tw-gap-3"
+          }`}
+        >
           <CircleLoader
-            size={isCompact ? CircleLoaderSize.MEDIUM : CircleLoaderSize.LARGE}
+            size={isCompact ? CircleLoaderSize.SMALL : CircleLoaderSize.LARGE}
           />
           <span
             className={
@@ -163,8 +182,7 @@ export const WaveCreatorPreviewList: React.FC<WaveCreatorPreviewListProps> = ({
           ))}
         </div>
       )}
-      {(state.isFetchingNextPage ||
-        (state.isFetching && state.waves.length > 0)) && (
+      {showPaginationLoader && (
         <div className="tw-mt-4 tw-flex tw-justify-center">
           <CircleLoader size={CircleLoaderSize.MEDIUM} />
         </div>

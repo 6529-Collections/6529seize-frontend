@@ -3,7 +3,11 @@
 import type React from "react";
 import { useId, useState } from "react";
 import Link from "next/link";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
 import { FallbackImage } from "@/components/common/FallbackImage";
@@ -176,26 +180,48 @@ const WavePreviewHeader: React.FC<{
   );
 };
 
+const CreatedWavesToggleIcon: React.FC<{
+  readonly isExpanded: boolean;
+  readonly variant: CurationWavePreviewCardVariant;
+}> = ({ isExpanded, variant }) => {
+  const Icon = variant === "hovercard" ? ChevronRightIcon : ChevronDownIcon;
+
+  return (
+    <Icon
+      className={`tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out ${
+        isExpanded ? "tw-rotate-180" : ""
+      }`}
+      aria-hidden="true"
+    />
+  );
+};
+
 const PreviewActions: React.FC<{
   readonly waveHref: string;
   readonly canShowCreatedWavesPanel: boolean;
   readonly isCreatedWavesExpanded: boolean;
   readonly createdWavesPanelId: string;
   readonly onToggleCreatedWaves: () => void;
+  readonly variant: CurationWavePreviewCardVariant;
 }> = ({
   waveHref,
   canShowCreatedWavesPanel,
   isCreatedWavesExpanded,
   createdWavesPanelId,
   onToggleCreatedWaves,
+  variant,
 }) => (
   <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-5 tw-py-3">
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-lg tw-bg-primary-500 tw-px-3 tw-text-[13px] tw-font-bold tw-text-white tw-no-underline tw-shadow-sm tw-shadow-primary-500/20 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-bg-primary-400 desktop-hover:hover:tw-text-white"
+      className="tw-group/open-wave tw-inline-flex tw-items-center tw-gap-1.5 tw-text-[13px] tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
     >
       Open profile wave
+      <ArrowRightIcon
+        className="tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out desktop-hover:group-hover/open-wave:tw-translate-x-0.5"
+        aria-hidden="true"
+      />
     </Link>
     {canShowCreatedWavesPanel && (
       <button
@@ -203,17 +229,21 @@ const PreviewActions: React.FC<{
         onClick={onToggleCreatedWaves}
         aria-expanded={isCreatedWavesExpanded}
         aria-controls={createdWavesPanelId}
-        className="tw-group/show-waves tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-bold tw-text-primary-400 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-primary-300"
+        className="tw-group/show-waves tw-inline-flex tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-text-iron-50"
       >
+        {isCreatedWavesExpanded && (
+          <CreatedWavesToggleIcon
+            isExpanded={isCreatedWavesExpanded}
+            variant={variant}
+          />
+        )}
         {isCreatedWavesExpanded ? "Hide waves" : "Show all waves"}
-        <ArrowRightIcon
-          className={`tw-h-3.5 tw-w-3.5 tw-transition-transform tw-duration-300 tw-ease-out ${
-            isCreatedWavesExpanded
-              ? "-tw-rotate-90"
-              : "desktop-hover:group-hover/show-waves:tw-translate-x-0.5"
-          }`}
-          aria-hidden="true"
-        />
+        {!isCreatedWavesExpanded && (
+          <CreatedWavesToggleIcon
+            isExpanded={isCreatedWavesExpanded}
+            variant={variant}
+          />
+        )}
       </button>
     )}
   </div>
@@ -372,6 +402,7 @@ export const CurationWavePreviewCard: React.FC<
             isCreatedWavesExpanded={isCreatedWavesExpanded}
             createdWavesPanelId={createdWavesPanelId}
             onToggleCreatedWaves={onToggleCreatedWaves}
+            variant={variant}
           />
         </div>
         {isCreatedWavesExpanded && (
@@ -411,11 +442,8 @@ const CreatedWavesPanel: React.FC<{
     >
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0">
-          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+          <div className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
             Created waves
-          </div>
-          <div className="tw-mt-1 tw-text-xs tw-text-iron-400">
-            {wavesState.waveCountLabel}
           </div>
         </div>
         <Link
@@ -423,7 +451,7 @@ const CreatedWavesPanel: React.FC<{
           prefetch={false}
           className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
         >
-          View all on profile
+          All brain activity
           <ArrowRightIcon className="tw-h-3 tw-w-3" aria-hidden="true" />
         </Link>
       </div>

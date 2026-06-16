@@ -9,9 +9,9 @@ as a square profile-wave picture badge.
 Selecting the compact water-drop button opens the shared created-waves viewer
 (`Waves by {profile}`), so users can jump into waves that author created.
 Selecting the chat-feed profile-wave badge opens that author's profile-wave
-preview. The preview keeps `Open profile wave` as the filled primary action,
+preview. The preview keeps `Open profile wave` as the primary-colored link,
 uses `Show all waves` to expand a created-waves list inside the preview, and
-shows `View all on profile` as the explicit link to the author's
+shows `Show all brain activity` as the explicit link to the author's
 `/{user}/brain` surface.
 
 ## Location in the Site
@@ -32,8 +32,8 @@ shows `View all on profile` as the explicit link to the author's
 - Select the water-drop button, or the profile-wave badge in the chat feed.
 - On non-mobile layouts, hover tooltip text is `View created waves` for the
   compact button and `{wave}` for the chat-feed profile-wave badge; the
-  profile-wave hover card includes a filled `Open profile wave` action and a
-  primary-colored `Show all waves` disclosure link treatment.
+  profile-wave hover card includes a primary-colored `Open profile wave` link
+  and a neutral `Show all waves` disclosure.
 
 ## User Journey
 
@@ -48,7 +48,8 @@ shows `View all on profile` as the explicit link to the author's
    that wave at `/waves/{waveId}`.
 6. If `Show all waves` is selected in the profile-wave preview, the preview
    expands in place to show created-wave rows. Select a row to open that wave,
-   or select `View all on profile` to open the Brain tab at `/{user}/brain`.
+   or select `Show all brain activity` to open the Brain tab at
+   `/{user}/brain`.
 
 ## Common Scenarios
 
@@ -63,7 +64,7 @@ shows `View all on profile` as the explicit link to the author's
   space allows. On mobile and touch layouts, the sheet stacks the created-waves
   panel below the preview.
 - The expanded panel is scrollable for longer created-wave lists and includes
-  `View all on profile` for the full Brain tab.
+  `Show all brain activity` for the full Brain tab.
 - Viewer rows show a wave picture when available, otherwise a wave/chat icon
   fallback.
 - Viewer title uses the profile handle when available, or a shortened wallet

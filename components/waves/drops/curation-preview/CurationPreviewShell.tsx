@@ -23,7 +23,7 @@ export const CurationPreviewShell: React.FC<{
 
   return (
     <div
-      className={`tailwind-scope -tw-mx-4 -tw-my-3 tw-max-h-[calc(100vh-32px)] ${widthClassName} ${overflowClassName} tw-rounded-xl tw-bg-iron-950 tw-text-iron-50`}
+      className={`tailwind-scope -tw-mx-4 -tw-my-3 tw-max-h-[calc(100vh-32px)] ${widthClassName} ${overflowClassName} tw-rounded-xl tw-bg-iron-950 tw-text-iron-50 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300`}
     >
       {children}
     </div>
