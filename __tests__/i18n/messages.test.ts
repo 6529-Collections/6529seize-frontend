@@ -76,6 +76,129 @@ describe("frontend i18n helpers", () => {
     expect(t("fr-FR", "user.collected.cards.listLabel")).toBe(
       t("en-US", "user.collected.cards.listLabel")
     );
+    expect(t("de-DE", "user.collected.empty.noCards")).toBe(
+      t("en-US", "user.collected.empty.noCards")
+    );
+    expect(t("fr-FR", "user.collected.filters.sortBy")).toBe(
+      t("en-US", "user.collected.filters.sortBy")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.seasons.startedCount", {
+        started: 2,
+        total: 3,
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.seasons.startedCount", {
+        started: 2,
+        total: 3,
+      })
+    );
+    expect(t("fr-FR", "user.collected.stats.details.unavailable")).toBe(
+      t("en-US", "user.collected.stats.details.unavailable")
+    );
+    expect(
+      t("es-ES", "user.collected.stats.metrics.unique", {
+        value: "465",
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.metrics.unique", {
+        value: "465",
+      })
+    );
+    expect(t("fr-FR", "user.collected.stats.details.overview")).toBe(
+      t("en-US", "user.collected.stats.details.overview")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.details.tables.overviewCaption")
+    ).toBe(t("en-US", "user.collected.stats.details.tables.overviewCaption"));
+    expect(
+      t("es-ES", "user.collected.stats.details.seasonLabel", {
+        seasonNumber: 1,
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.details.seasonLabel", {
+        seasonNumber: 1,
+      })
+    );
+    expect(
+      t("fr-FR", "user.collected.stats.details.uniqueProgress", {
+        held: "1",
+        total: "2",
+      })
+    ).toBe("1 / 2");
+    expect(
+      t("de-DE", "user.collected.stats.boostBreakdown.versionLink", {
+        version: "1.4",
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.boostBreakdown.versionLink", {
+        version: "1.4",
+      })
+    );
+    expect(t("fr-FR", "user.collected.stats.boostBreakdown.tableCaption")).toBe(
+      t("en-US", "user.collected.stats.boostBreakdown.tableCaption")
+    );
+    expect(t("es-ES", "user.collected.stats.activityOverview.title")).toBe(
+      t("en-US", "user.collected.stats.activityOverview.title")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.activityOverview.seasonLabel", {
+        seasonNumber: 1,
+      })
+    ).toBe(
+      t("en-US", "user.collected.stats.activityOverview.seasonLabel", {
+        seasonNumber: 1,
+      })
+    );
+    expect(t("fr-FR", "user.collected.stats.activityTabs.walletActivity")).toBe(
+      t("en-US", "user.collected.stats.activityTabs.walletActivity")
+    );
+    expect(t("de-DE", "user.collected.stats.activityTabs.listLabel")).toBe(
+      t("en-US", "user.collected.stats.activityTabs.listLabel")
+    );
+    expect(t("fr-FR", "user.collected.stats.walletActivity.title")).toBe(
+      t("en-US", "user.collected.stats.walletActivity.title")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.walletActivity.filterButtonLabel", {
+        filter: "All",
+      })
+    ).toBe("Wallet activity filter: All");
+    expect(t("es-ES", "user.collected.stats.walletActivity.empty.mints")).toBe(
+      t("en-US", "user.collected.stats.walletActivity.empty.mints")
+    );
+    expect(t("fr-FR", "user.collected.stats.distributions.title")).toBe(
+      t("en-US", "user.collected.stats.distributions.title")
+    );
+    expect(
+      t("de-DE", "user.collected.stats.distributions.tokenLinkAriaLabel", {
+        collection: "The Memes",
+        tokenId: 1,
+      })
+    ).toBe("View The Memes token #1");
+    expect(t("fr-FR", "user.collected.stats.tdhHistory.title")).toBe(
+      t("en-US", "user.collected.stats.tdhHistory.title")
+    );
+    expect(
+      t("es-ES", "user.collected.stats.tdhHistory.chartAriaLabel", {
+        title: "Total TDH",
+      })
+    ).toBe("Total TDH chart");
+    expect(t("fr-FR", "user.profile.tabs.navigationLabel")).toBe(
+      t("en-US", "user.profile.tabs.navigationLabel")
+    );
+    expect(t("de-DE", "user.profile.tabs.badges.beta")).toBe("Beta");
+    expect(t("fr-FR", "followers.modal.title")).toBe(
+      t("en-US", "followers.modal.title")
+    );
+    expect(
+      t("de-DE", "followers.profile.linkAriaLabel", {
+        handle: "alice",
+      })
+    ).toBe("View alice's profile");
+    expect(t("es-ES", "user.collected.networkCards.empty")).toBe(
+      t("en-US", "user.collected.networkCards.empty")
+    );
     expect(t("de-DE", "theMemes.detail.live.market.title")).toBe(
       t("en-US", "theMemes.detail.live.market.title")
     );
