@@ -89,19 +89,37 @@ type IdentityResponse = {
   readonly primary_wallet?: string | null | undefined;
 };
 
+function trimTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === "/") {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+}
+
+function trimLeadingSlashes(value: string): string {
+  let start = 0;
+  while (start < value.length && value[start] === "/") {
+    start += 1;
+  }
+
+  return value.slice(start);
+}
+
 function getApiBase(): string {
   const base = publicEnv.API_ENDPOINT?.trim();
   if (!base) {
     throw new Error("API endpoint is not configured.");
   }
-  return base.replace(/\/+$/, "");
+  return trimTrailingSlashes(base);
 }
 
 function buildApiUrl(
   endpoint: string,
   params?: Record<string, string | number | undefined>
 ): string {
-  const url = new URL(`/api/${endpoint.replace(/^\/+/, "")}`, `${getApiBase()}/`);
+  const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${getApiBase()}/`);
 
   if (params) {
     for (const [key, value] of Object.entries(params)) {
