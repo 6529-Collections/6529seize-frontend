@@ -12,7 +12,9 @@
  */
 
 import { ApiWaveScoreComponents } from '../models/ApiWaveScoreComponents';
+import { ApiWaveScoreFormula } from '../models/ApiWaveScoreFormula';
 import { ApiWaveScorePenalties } from '../models/ApiWaveScorePenalties';
+import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
 import { ApiWaveVisibilityTier } from '../models/ApiWaveVisibilityTier';
 import { HttpFile } from '../http/http';
 
@@ -25,6 +27,8 @@ export class ApiWaveScore {
     'visibility_score': number;
     'components': ApiWaveScoreComponents;
     'penalties': ApiWaveScorePenalties;
+    'quality_gate': ApiWaveScoreQualityGate;
+    'formula': ApiWaveScoreFormula;
     'calculated_at': number;
 
     static readonly discriminator: string | undefined = undefined;
@@ -78,6 +82,18 @@ export class ApiWaveScore {
             "name": "penalties",
             "baseName": "penalties",
             "type": "ApiWaveScorePenalties",
+            "format": ""
+        },
+        {
+            "name": "quality_gate",
+            "baseName": "quality_gate",
+            "type": "ApiWaveScoreQualityGate",
+            "format": ""
+        },
+        {
+            "name": "formula",
+            "baseName": "formula",
+            "type": "ApiWaveScoreFormula",
             "format": ""
         },
         {

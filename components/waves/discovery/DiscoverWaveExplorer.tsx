@@ -4,11 +4,13 @@ import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/ut
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import {
+  CalculatorIcon,
   FireIcon,
   ScaleIcon,
   ShieldCheckIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { KeyboardEvent } from "react";
 import { useCallback, useMemo } from "react";
@@ -179,6 +181,13 @@ function DiscoverWaveControls({
 }) {
   return (
     <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 md:tw-w-auto md:tw-items-end">
+      <Link
+        href="/discover/wave-score"
+        className="tw-inline-flex tw-h-8 tw-items-center tw-justify-center tw-gap-1.5 tw-self-start tw-rounded-md tw-bg-iron-950 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white md:tw-self-end"
+      >
+        <CalculatorIcon className="tw-size-4" aria-hidden="true" />
+        Score formula
+      </Link>
       <div
         role="radiogroup"
         className="tw-grid tw-w-full tw-grid-cols-4 tw-gap-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-white/10 md:tw-w-auto"

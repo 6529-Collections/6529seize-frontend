@@ -34,6 +34,10 @@ interface FetchWavesV2PageProps {
   readonly minHotnessScore?: number | undefined;
   readonly minRepSortScore?: number | undefined;
   readonly visibilityTier?: ApiWaveVisibilityTier | undefined;
+  readonly name?: string | undefined;
+  readonly author?: string | undefined;
+  readonly serialNoLessThan?: number | undefined;
+  readonly groupId?: string | undefined;
   readonly headers?: Record<string, string> | undefined;
 }
 
@@ -236,6 +240,10 @@ export async function fetchWavesV2Page({
   minHotnessScore,
   minRepSortScore,
   visibilityTier,
+  name,
+  author,
+  serialNoLessThan,
+  groupId,
   headers,
 }: FetchWavesV2PageProps): Promise<SidebarWavesPage> {
   const params: Record<string, string> = {
@@ -289,6 +297,22 @@ export async function fetchWavesV2Page({
     params["visibility_tier"] = visibilityTier;
   }
 
+  if (name !== undefined) {
+    params["name"] = name;
+  }
+
+  if (author !== undefined) {
+    params["author"] = author;
+  }
+
+  if (serialNoLessThan !== undefined) {
+    params["serial_no_less_than"] = `${serialNoLessThan}`;
+  }
+
+  if (groupId !== undefined) {
+    params["group_id"] = groupId;
+  }
+
   const response = await commonApiFetch<ApiWaveOverviewPage>({
     endpoint: "v2/waves",
     params,
@@ -300,6 +324,118 @@ export async function fetchWavesV2Page({
     page: response.page,
     next: response.next,
   };
+}
+
+export async function fetchWaveById({
+  waveId,
+  headers,
+}: {
+  readonly waveId: string;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<ApiWave> {
+  return await commonApiFetch<ApiWave>({
+    endpoint: `waves/${waveId}`,
+    headers,
+  });
+}
+
+export async function searchWavesV2ByName({
+  name,
+  pageSize = 5,
+  headers,
+}: {
+  readonly name: string;
+  readonly pageSize?: number | undefined;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<SidebarWave[]> {
+  const page = await fetchWavesV2Page({
+    view: ApiWavesV2ListType.Search,
+    page: 1,
+    pageSize,
+    directMessage: false,
+    name,
+    headers,
+  });
+
+  return page.waves;
+}
+
+async function searchLegacyWavesByName({
+  endpoint,
+  name,
+  pageSize,
+  headers,
+}: {
+  readonly endpoint: "waves" | "waves-public";
+  readonly name: string;
+  readonly pageSize: number;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<SidebarWave[]> {
+  const waves = await commonApiFetch<ApiWave[]>({
+    endpoint,
+    params: {
+      name,
+      limit: `${pageSize}`,
+      direct_message: "false",
+    },
+    headers,
+  });
+
+  return waves.map(mapApiWaveToSidebarWave);
+}
+
+export async function searchWavesByName({
+  name,
+  pageSize = 5,
+  headers,
+}: {
+  readonly name: string;
+  readonly pageSize?: number | undefined;
+  readonly headers?: Record<string, string> | undefined;
+}): Promise<SidebarWave[]> {
+  let failedSearches = 0;
+
+  try {
+    const waves = await searchWavesV2ByName({ name, pageSize, headers });
+    if (waves.length > 0) {
+      return waves;
+    }
+  } catch {
+    failedSearches += 1;
+    // Fall back while older API deployments still reject v2 SEARCH by name.
+  }
+
+  try {
+    const waves = await searchLegacyWavesByName({
+      endpoint: "waves",
+      name,
+      pageSize,
+      headers,
+    });
+    if (waves.length > 0) {
+      return waves;
+    }
+  } catch {
+    failedSearches += 1;
+    // Public search is the last fallback for unauthenticated sessions.
+  }
+
+  try {
+    return await searchLegacyWavesByName({
+      endpoint: "waves-public",
+      name,
+      pageSize,
+      headers,
+    });
+  } catch {
+    failedSearches += 1;
+  }
+
+  if (failedSearches >= 3) {
+    throw new Error("Wave search is unavailable. Try a wave URL or id.");
+  }
+
+  return [];
 }
 
 export async function fetchWaveSubwavesPage({

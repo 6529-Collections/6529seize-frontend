@@ -15751,6 +15751,8 @@ components:
         - visibility_score
         - components
         - penalties
+        - quality_gate
+        - formula
         - calculated_at
       properties:
         score_version:
@@ -15773,6 +15775,10 @@ components:
           $ref: "#/components/schemas/ApiWaveScoreComponents"
         penalties:
           $ref: "#/components/schemas/ApiWaveScorePenalties"
+        quality_gate:
+          $ref: "#/components/schemas/ApiWaveScoreQualityGate"
+        formula:
+          $ref: "#/components/schemas/ApiWaveScoreFormula"
         calculated_at:
           type: integer
           format: int64
@@ -15804,6 +15810,51 @@ components:
         recent_trusted_activity_score:
           type: number
           format: double
+    ApiWaveScoreFormula:
+      type: object
+      required:
+        - max_level_raw_for_score
+        - max_wave_rep_for_score
+        - trusted_level_raw
+        - low_trust_level_raw
+        - recent_activity_window_ms
+        - quality_component_weights
+        - hotness_component_weights
+        - visibility_component_weights
+      properties:
+        max_level_raw_for_score:
+          type: integer
+          format: int64
+        max_wave_rep_for_score:
+          type: integer
+          format: int64
+        trusted_level_raw:
+          type: integer
+          format: int64
+        low_trust_level_raw:
+          type: integer
+          format: int64
+        recent_activity_window_ms:
+          type: integer
+          format: int64
+        quality_component_weights:
+          $ref: "#/components/schemas/ApiWaveScoreQualityComponentWeights"
+        hotness_component_weights:
+          $ref: "#/components/schemas/ApiWaveScoreHotnessComponentWeights"
+        visibility_component_weights:
+          $ref: "#/components/schemas/ApiWaveScoreVisibilityComponentWeights"
+    ApiWaveScoreHotnessComponentWeights:
+      type: object
+      required:
+        - recent_trusted_activity_score
+        - quality_score
+      properties:
+        recent_trusted_activity_score:
+          type: number
+          format: double
+        quality_score:
+          type: number
+          format: double
     ApiWaveScorePenalties:
       type: object
       required:
@@ -15832,6 +15883,46 @@ components:
         safety_multiplier:
           type: number
           format: double
+    ApiWaveScoreQualityComponentWeights:
+      type: object
+      required:
+        - creator_score
+        - level_weighted_participation_score
+        - trusted_diversity_score
+        - trusted_subscription_score
+        - wave_rep_component_score
+      properties:
+        creator_score:
+          type: number
+          format: double
+        level_weighted_participation_score:
+          type: number
+          format: double
+        trusted_diversity_score:
+          type: number
+          format: double
+        trusted_subscription_score:
+          type: number
+          format: double
+        wave_rep_component_score:
+          type: number
+          format: double
+    ApiWaveScoreQualityGate:
+      type: object
+      required:
+        - threshold
+        - multiplier
+        - gated_hotness_score
+      properties:
+        threshold:
+          type: number
+          format: double
+        multiplier:
+          type: number
+          format: double
+        gated_hotness_score:
+          type: number
+          format: double
     ApiWaveScoreSort:
       type: string
       enum:
@@ -15839,6 +15930,18 @@ components:
         - QUALITY
         - HOTNESS
         - REP
+    ApiWaveScoreVisibilityComponentWeights:
+      type: object
+      required:
+        - quality_score
+        - gated_hotness_score
+      properties:
+        quality_score:
+          type: number
+          format: double
+        gated_hotness_score:
+          type: number
+          format: double
     ApiWavesOverviewType:
       type: string
       enum:

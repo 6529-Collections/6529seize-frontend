@@ -325,8 +325,13 @@ export * from '../models/ApiWaveRequiredMetadata';
 export * from '../models/ApiWaveScope';
 export * from '../models/ApiWaveScore';
 export * from '../models/ApiWaveScoreComponents';
+export * from '../models/ApiWaveScoreFormula';
+export * from '../models/ApiWaveScoreHotnessComponentWeights';
 export * from '../models/ApiWaveScorePenalties';
+export * from '../models/ApiWaveScoreQualityComponentWeights';
+export * from '../models/ApiWaveScoreQualityGate';
 export * from '../models/ApiWaveScoreSort';
+export * from '../models/ApiWaveScoreVisibilityComponentWeights';
 export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
@@ -728,10 +733,15 @@ import { ApiWaveRepRating } from '../models/ApiWaveRepRating';
 import { ApiWaveRepSummary } from '../models/ApiWaveRepSummary';
 import { ApiWaveRequiredMetadata   } from '../models/ApiWaveRequiredMetadata';
 import { ApiWaveScope } from '../models/ApiWaveScope';
-import { ApiWaveScore          } from '../models/ApiWaveScore';
+import { ApiWaveScore            } from '../models/ApiWaveScore';
 import { ApiWaveScoreComponents } from '../models/ApiWaveScoreComponents';
+import { ApiWaveScoreFormula } from '../models/ApiWaveScoreFormula';
+import { ApiWaveScoreHotnessComponentWeights } from '../models/ApiWaveScoreHotnessComponentWeights';
 import { ApiWaveScorePenalties } from '../models/ApiWaveScorePenalties';
+import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQualityComponentWeights';
+import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
 import { ApiWaveScoreSort } from '../models/ApiWaveScoreSort';
+import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
@@ -1168,7 +1178,12 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveScope": ApiWaveScope,
     "ApiWaveScore": ApiWaveScore,
     "ApiWaveScoreComponents": ApiWaveScoreComponents,
+    "ApiWaveScoreFormula": ApiWaveScoreFormula,
+    "ApiWaveScoreHotnessComponentWeights": ApiWaveScoreHotnessComponentWeights,
     "ApiWaveScorePenalties": ApiWaveScorePenalties,
+    "ApiWaveScoreQualityComponentWeights": ApiWaveScoreQualityComponentWeights,
+    "ApiWaveScoreQualityGate": ApiWaveScoreQualityGate,
+    "ApiWaveScoreVisibilityComponentWeights": ApiWaveScoreVisibilityComponentWeights,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
     "ApiWaveVisibilityConfig": ApiWaveVisibilityConfig,
     "ApiWaveVoter": ApiWaveVoter,
