@@ -9,6 +9,7 @@ type MockNFTImageProps = {
   readonly animation: boolean;
   readonly id?: string | undefined;
   readonly showOriginal?: boolean | undefined;
+  readonly useDropVideoPlayer?: boolean | undefined;
 };
 
 const mockNFTImage = jest.fn(({ animation, id }: MockNFTImageProps) => (
@@ -250,10 +251,28 @@ describe("MemePageArtViewer", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders inline media actions for the active artwork", async () => {
+  it("uses the drop video player for video artwork without duplicate outer actions", () => {
+    render(<MemePageArtViewer nft={baseNft as any} />);
+
+    expect(getLatestNFTImageProps(true).useDropVideoPlayer).toBe(true);
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open in new tab" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Download media" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders inline media actions for image artwork", async () => {
     const user = userEvent.setup();
 
     render(<MemePageArtViewer nft={baseNft as any} />);
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
 
     expect(
       screen.getByRole("button", { name: "Full screen" })
@@ -271,7 +290,7 @@ describe("MemePageArtViewer", () => {
     await user.click(screen.getByRole("button", { name: "Full screen" }));
 
     expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
-      "the-art-fullscreen-animation"
+      "the-art-fullscreen-img"
     );
   });
 
@@ -319,13 +338,17 @@ describe("MemePageArtViewer", () => {
     render(<MemePageArtViewer nft={baseNft as any} />);
 
     expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
 
     await user.click(screen.getByRole("button", { name: "Full screen" }));
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
-    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
+    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+    expect(getLatestNFTImageProps(false).showOriginal).toBe(true);
     expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
-      "the-art-fullscreen-animation"
+      "the-art-fullscreen-img"
     );
 
     await act(async () => {
@@ -333,13 +356,13 @@ describe("MemePageArtViewer", () => {
       await fullscreenRequest.promise;
     });
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+    expect(getLatestNFTImageProps(false).showOriginal).toBe(true);
 
     act(() => {
       document.dispatchEvent(new Event("fullscreenchange"));
     });
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
   });
 
   it("clears original media when fullscreen request reports failure", async () => {
@@ -348,33 +371,39 @@ describe("MemePageArtViewer", () => {
     mockHelpers.enterArtFullScreen.mockReturnValue(fullscreenRequest.promise);
 
     render(<MemePageArtViewer nft={baseNft as any} />);
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
 
     await user.click(screen.getByRole("button", { name: "Full screen" }));
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+    expect(getLatestNFTImageProps(false).showOriginal).toBe(true);
 
     await act(async () => {
       fullscreenRequest.resolve(false);
       await fullscreenRequest.promise;
     });
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
   });
 
   it("clears original media on prefixed fullscreen exit events", async () => {
     const user = userEvent.setup();
 
     render(<MemePageArtViewer nft={baseNft as any} />);
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
 
     await user.click(screen.getByRole("button", { name: "Full screen" }));
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+    expect(getLatestNFTImageProps(false).showOriginal).toBe(true);
 
     act(() => {
       document.dispatchEvent(new Event("webkitfullscreenchange"));
     });
 
-    expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+    expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
   });
 
   it("clears original media on fullscreen error events", async () => {
@@ -387,6 +416,9 @@ describe("MemePageArtViewer", () => {
     ];
 
     render(<MemePageArtViewer nft={baseNft as any} />);
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
 
     for (const eventName of fullscreenErrorEvents) {
       const fullscreenRequest = createDeferred<boolean>();
@@ -396,13 +428,13 @@ describe("MemePageArtViewer", () => {
 
       await user.click(screen.getByRole("button", { name: "Full screen" }));
 
-      expect(getLatestNFTImageProps(true).showOriginal).toBe(true);
+      expect(getLatestNFTImageProps(false).showOriginal).toBe(true);
 
       act(() => {
         document.dispatchEvent(new Event(eventName));
       });
 
-      expect(getLatestNFTImageProps(true).showOriginal).toBeFalsy();
+      expect(getLatestNFTImageProps(false).showOriginal).toBeFalsy();
 
       await act(async () => {
         fullscreenRequest.resolve(true);
@@ -415,25 +447,6 @@ describe("MemePageArtViewer", () => {
     const user = userEvent.setup();
 
     render(<MemePageArtViewer nft={baseNft as any} />);
-
-    await user.click(screen.getByRole("button", { name: "Open in new tab" }));
-    expect(window.open).toHaveBeenLastCalledWith(
-      "https://media.example/animation.mp4",
-      "_blank",
-      "noopener,noreferrer"
-    );
-
-    await user.click(screen.getByRole("button", { name: "Download media" }));
-    await waitFor(() => {
-      expect(mockDownloadMediaUrl).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          dialogTitle: "Save animation",
-          fileName: "animation.mp4",
-          url: "https://media.example/animation.mp4",
-        })
-      );
-    });
-
     await user.click(
       screen.getByRole("button", { name: "Show next artwork media" })
     );
@@ -457,7 +470,7 @@ describe("MemePageArtViewer", () => {
     });
   });
 
-  it("uses restricted-open media behavior from useMediaActions", () => {
+  it("lets the drop video player own restricted video media actions", () => {
     render(
       <MemePageArtViewer
         nft={
@@ -475,12 +488,13 @@ describe("MemePageArtViewer", () => {
       />
     );
 
+    expect(getLatestNFTImageProps(true).useDropVideoPlayer).toBe(true);
     expect(
-      screen.getByRole("button", { name: "Full screen" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Download media" })
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Download media" })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Open in new tab" })
     ).not.toBeInTheDocument();

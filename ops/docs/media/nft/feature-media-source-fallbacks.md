@@ -112,6 +112,9 @@
   surfaces; larger surfaces are eager with high fetch priority.
 - ReMeme image renderer is eager on both `300` and `650` surfaces.
 - Standard NFT video renderer preloads media (`preload="auto"`).
+- `/the-memes/{id}` `The Art` video artwork, home `Latest Drop` video artwork,
+  and `/the-memes/mint` full-height video artwork use the inline shorts-style
+  video player instead of native browser controls.
 - ReMeme video renderer does not set a specific preload mode.
 
 ## Common Scenarios

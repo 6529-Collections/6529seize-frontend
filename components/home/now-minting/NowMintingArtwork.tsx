@@ -14,17 +14,32 @@ interface NowMintingArtworkProps {
 export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
   const { hasTouchScreen } = useDeviceInfo();
   const isHtml = useMemo(() => getMediaType(nft, true) === "html", [nft]);
-  const [hasMounted, setHasMounted] = useState(false);
   const shouldGate = hasTouchScreen && isHtml;
+
+  return (
+    <NowMintingArtworkContent
+      key={`${nft.id}-${shouldGate ? "gated" : "ungated"}`}
+      nft={nft}
+      isHtml={isHtml}
+      shouldGate={shouldGate}
+    />
+  );
+}
+
+function NowMintingArtworkContent({
+  nft,
+  isHtml,
+  shouldGate,
+}: NowMintingArtworkProps & {
+  readonly isHtml: boolean;
+  readonly shouldGate: boolean;
+}) {
+  const [hasMounted, setHasMounted] = useState(false);
   const [interactiveEnabled, setInteractiveEnabled] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  useEffect(() => {
-    setInteractiveEnabled(false);
-  }, [nft.id, shouldGate]);
 
   let shouldAnimate = true;
   if (isHtml) {
@@ -45,6 +60,7 @@ export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
             height={650}
             transparentBG
             showBalance={false}
+            useDropVideoPlayer
           />
         </InteractiveMediaLoadGate>
       ) : (
@@ -55,6 +71,7 @@ export default function NowMintingArtwork({ nft }: NowMintingArtworkProps) {
             height={650}
             transparentBG
             showBalance={false}
+            useDropVideoPlayer
           />
         </div>
       )}

@@ -37,6 +37,7 @@ function DropListItemContentMediaVideo({
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
+  const controlsRef = useRef<HTMLDivElement | null>(null);
   const { isApp } = useDeviceInfo();
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(
     getPrefersReducedMotion
@@ -153,6 +154,44 @@ function DropListItemContentMediaVideo({
     setDuration(Number.isFinite(videoEl.duration) ? videoEl.duration : 0);
   }, [videoRef]);
 
+  const syncControlSurface = useCallback(() => {
+    const videoEl = videoRef.current;
+    const controlsEl = controlsRef.current;
+    if (!videoEl || !controlsEl) {
+      return;
+    }
+
+    const rect = videoEl.getBoundingClientRect();
+    const naturalWidth = videoEl.videoWidth;
+    const naturalHeight = videoEl.videoHeight;
+    if (
+      rect.width <= 0 ||
+      rect.height <= 0 ||
+      naturalWidth <= 0 ||
+      naturalHeight <= 0
+    ) {
+      return;
+    }
+
+    const naturalRatio = naturalWidth / naturalHeight;
+    let visibleWidth = rect.width;
+    let visibleHeight = rect.width / naturalRatio;
+
+    if (visibleHeight > rect.height) {
+      visibleHeight = rect.height;
+      visibleWidth = rect.height * naturalRatio;
+    }
+
+    controlsEl.style.setProperty(
+      "--drop-video-control-width",
+      `${visibleWidth}px`
+    );
+    controlsEl.style.setProperty(
+      "--drop-video-control-height",
+      `${visibleHeight}px`
+    );
+  }, [videoRef]);
+
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl) {
@@ -166,21 +205,36 @@ function DropListItemContentMediaVideo({
     };
     const updateDuration = () => {
       setDuration(Number.isFinite(videoEl.duration) ? videoEl.duration : 0);
+      syncControlSurface();
     };
     const updateMuted = () => setIsMuted(videoEl.muted);
+    const updateControlSurface = () => syncControlSurface();
+    const resizeObserver =
+      typeof ResizeObserver === "function"
+        ? new ResizeObserver(updateControlSurface)
+        : undefined;
 
     syncMediaState();
+    syncControlSurface();
+    resizeObserver?.observe(videoEl);
     videoEl.addEventListener("timeupdate", updateTime);
     videoEl.addEventListener("loadedmetadata", updateDuration);
     videoEl.addEventListener("durationchange", updateDuration);
+    videoEl.addEventListener("resize", updateControlSurface);
     videoEl.addEventListener("volumechange", updateMuted);
+    globalThis.addEventListener("resize", updateControlSurface);
+    document.addEventListener("fullscreenchange", updateControlSurface);
     return () => {
+      resizeObserver?.disconnect();
       videoEl.removeEventListener("timeupdate", updateTime);
       videoEl.removeEventListener("loadedmetadata", updateDuration);
       videoEl.removeEventListener("durationchange", updateDuration);
+      videoEl.removeEventListener("resize", updateControlSurface);
       videoEl.removeEventListener("volumechange", updateMuted);
+      globalThis.removeEventListener("resize", updateControlSurface);
+      document.removeEventListener("fullscreenchange", updateControlSurface);
     };
-  }, [syncMediaState, videoRef, playableUrl]);
+  }, [syncControlSurface, syncMediaState, videoRef, playableUrl]);
 
   const playVideo = useCallback(() => {
     const videoEl = videoRef.current;
@@ -270,6 +324,7 @@ function DropListItemContentMediaVideo({
         ref={fullscreenRef}
         className={clsx(
           "tw-relative tw-flex tw-w-fit tw-max-w-full tw-items-center tw-justify-center",
+          "[&:fullscreen_.drop-video-sound-button]:tw-opacity-100",
           fillContainer ? "tw-h-full tw-max-h-full" : "tw-max-h-64"
         )}
       >
@@ -312,45 +367,48 @@ function DropListItemContentMediaVideo({
           Your browser does not support the video tag.
         </video>
         {!isApp && (
-          <button
-            type="button"
-            aria-label={isMuted ? "Unmute video" : "Mute video"}
-            title={isMuted ? "Unmute video" : "Mute video"}
-            onClick={(event) => {
-              event.stopPropagation();
-              toggleMuted();
-            }}
-            className={clsx(
-              "tw-absolute tw-bottom-5 tw-left-3 tw-z-30 sm:tw-left-4",
-              CONTROL_BUTTON_CLASS,
-              PLAYER_CHROME_VISIBILITY_CLASS
-            )}
+          <div
+            ref={controlsRef}
+            className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-30 tw-h-[var(--drop-video-control-height,100%)] tw-w-[var(--drop-video-control-width,100%)] -tw-translate-x-1/2 -tw-translate-y-1/2"
           >
-            {isMuted ? (
-              <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
-            ) : (
-              <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
-            )}
-          </button>
-        )}
-        {!isApp && (
-          <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-30 tw-h-1 tw-overflow-hidden tw-bg-white/45">
-            <div
-              className="tw-h-full tw-bg-primary-400"
-              style={{ width: `${progressPercent}%` }}
-            />
-            <input
-              type="range"
-              aria-label="Video progress"
-              min={0}
-              max={duration > 0 ? duration : 0}
-              step="0.01"
-              value={Math.min(currentTime, duration || currentTime)}
-              disabled={duration <= 0}
-              onClick={(event) => event.stopPropagation()}
-              onChange={(event) => seekTo(event.currentTarget.value)}
-              className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-6 tw-w-full tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-default"
-            />
+            <button
+              type="button"
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
+              title={isMuted ? "Unmute video" : "Mute video"}
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleMuted();
+              }}
+              className={clsx(
+                "drop-video-sound-button tw-pointer-events-auto tw-absolute tw-bottom-5 tw-left-3 tw-z-30 sm:tw-left-4",
+                CONTROL_BUTTON_CLASS,
+                PLAYER_CHROME_VISIBILITY_CLASS
+              )}
+            >
+              {isMuted ? (
+                <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
+              ) : (
+                <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
+              )}
+            </button>
+            <div className="tw-pointer-events-auto tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-30 tw-h-1 tw-overflow-hidden tw-bg-white/45">
+              <div
+                className="tw-h-full tw-bg-primary-400"
+                style={{ width: `${progressPercent}%` }}
+              />
+              <input
+                type="range"
+                aria-label="Video progress"
+                min={0}
+                max={duration > 0 ? duration : 0}
+                step="0.01"
+                value={Math.min(currentTime, duration || currentTime)}
+                disabled={duration <= 0}
+                onClick={(event) => event.stopPropagation()}
+                onChange={(event) => seekTo(event.currentTarget.value)}
+                className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-6 tw-w-full tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-default"
+              />
+            </div>
           </div>
         )}
       </div>

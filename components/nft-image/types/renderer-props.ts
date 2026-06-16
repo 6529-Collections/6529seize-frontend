@@ -8,6 +8,7 @@ export interface BaseRendererProps {
   readonly id?: string | undefined;
   readonly showOriginal?: boolean | undefined;
   readonly showThumbnail?: boolean | undefined;
+  readonly useDropVideoPlayer?: boolean | undefined;
   readonly heightStyle: string;
   readonly imageStyle: string;
   readonly bgStyle: string;

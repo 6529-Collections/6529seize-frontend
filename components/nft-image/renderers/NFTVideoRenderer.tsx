@@ -1,5 +1,6 @@
 "use client";
 
+import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.scss";
@@ -28,6 +29,12 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
       return undefined;
     }
   })();
+  const videoSrc =
+    !props.showOriginal &&
+    "metadata" in props.nft &&
+    props.nft.compressed_animation
+      ? props.nft.compressed_animation
+      : animationSrc || undefined;
 
   return (
     <NFTMediaContainer
@@ -40,32 +47,36 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
           height={props.height}
         />
       )}
-      <video
-        id={props.id ?? `video-${props.nft.id}`}
-        autoPlay
-        muted
-        controls
-        loop
-        playsInline
-        preload="auto"
-        src={
-          !props.showOriginal &&
-          "metadata" in props.nft &&
-          props.nft.compressed_animation
-            ? props.nft.compressed_animation
-            : animationSrc
-        }
-        className={props.imageStyle}
-        onError={withArweaveFallback(({ currentTarget }) => {
-          if (
-            "metadata" in props.nft &&
-            currentTarget.src === normalizedCompressedAnimationSrc &&
-            animationSrc
-          ) {
-            currentTarget.src = animationSrc;
-          }
-        })}
-      ></video>
+      {props.useDropVideoPlayer ? (
+        <div className={props.imageStyle}>
+          <DropListItemContentMediaVideo
+            src={videoSrc ?? ""}
+            mimeType="video/mp4"
+            fillContainer
+          />
+        </div>
+      ) : (
+        <video
+          id={props.id ?? `video-${props.nft.id}`}
+          autoPlay
+          muted
+          controls
+          loop
+          playsInline
+          preload="auto"
+          src={videoSrc}
+          className={props.imageStyle}
+          onError={withArweaveFallback(({ currentTarget }) => {
+            if (
+              "metadata" in props.nft &&
+              currentTarget.src === normalizedCompressedAnimationSrc &&
+              animationSrc
+            ) {
+              currentTarget.src = animationSrc;
+            }
+          })}
+        ></video>
+      )}
     </NFTMediaContainer>
   );
 }

@@ -21,7 +21,7 @@ import { Carousel, Col, Container, Row } from "react-bootstrap";
 import { flushSync } from "react-dom";
 import styles from "./TheMemes.module.scss";
 
-type InlineMediaVariant = "image" | "html";
+type InlineMediaVariant = "image" | "html" | "video";
 
 const FULLSCREEN_CHANGE_EVENTS = [
   "fullscreenchange",
@@ -64,6 +64,10 @@ function getInlineMediaVariant(
 
   if (normalizedMimeType === "text/html") {
     return "html";
+  }
+
+  if (normalizedMimeType.startsWith("video/")) {
+    return "video";
   }
 
   return "image";
@@ -199,6 +203,10 @@ export function MemePageArtViewer({
       return null;
     }
 
+    if (activeMedia.variant === "video") {
+      return null;
+    }
+
     return (
       <InlineMediaActions
         variant={activeMedia.variant}
@@ -299,6 +307,7 @@ export function MemePageArtViewer({
                       "the-art-fullscreen-animation"
                     }
                     id="the-art-fullscreen-animation"
+                    useDropVideoPlayer
                   />
                 </Carousel.Item>
                 {hasImage && (

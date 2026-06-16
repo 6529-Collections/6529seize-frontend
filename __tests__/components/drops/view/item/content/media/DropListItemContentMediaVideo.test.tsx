@@ -46,6 +46,10 @@ describe("DropListItemContentMediaVideo", () => {
       configurable: true,
       value: jest.fn().mockResolvedValue(undefined),
     });
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
   });
 
   beforeEach(() => {
@@ -264,6 +268,19 @@ describe("DropListItemContentMediaVideo", () => {
       screen.getByRole("button", { name: "Full screen" }).parentElement
         ?.className
     ).toContain("tw-opacity-0");
+  });
+
+  it("wires the mute button to become visible in custom fullscreen", () => {
+    setup({ disableAutoPlay: true });
+
+    const muteButton = screen.getByRole("button", { name: "Unmute video" });
+    const fullscreenTarget = document.querySelector("video")?.parentElement;
+
+    expect(muteButton.className).toContain("tw-opacity-0");
+    expect(muteButton.className).toContain("drop-video-sound-button");
+    expect(fullscreenTarget?.className).toContain(
+      "[&:fullscreen_.drop-video-sound-button]:tw-opacity-100"
+    );
   });
 
   it("hides open action for QuickTime video that browsers download directly", () => {

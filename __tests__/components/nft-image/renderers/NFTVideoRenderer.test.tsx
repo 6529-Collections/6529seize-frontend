@@ -25,6 +25,25 @@ jest.mock("@/components/nft-image/NFTImageBalance", () => {
   };
 });
 
+jest.mock(
+  "@/components/drops/view/item/content/media/DropListItemContentMediaVideo",
+  () => ({
+    __esModule: true,
+    default: (props: {
+      readonly src: string;
+      readonly mimeType?: string;
+      readonly fillContainer?: boolean;
+    }) => (
+      <div
+        data-testid="drop-video-player"
+        data-src={props.src}
+        data-mime-type={props.mimeType}
+        data-fill-container={String(props.fillContainer)}
+      />
+    ),
+  })
+);
+
 // Mock the hooks that NFTImageBalance depends on
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
@@ -118,6 +137,21 @@ describe("NFTVideoRenderer", () => {
         ".tw-flex.tw-justify-center.tw-items-center"
       );
       expect(colElement).toBeInTheDocument();
+    });
+
+    it("uses the drop video player when opted in", () => {
+      const props = createDefaultProps({ useDropVideoPlayer: true });
+      const { container } = render(<NFTVideoRenderer {...props} />);
+
+      expect(screen.getByTestId("drop-video-player")).toHaveAttribute(
+        "data-src",
+        "https://example.com/compressed-video.mp4"
+      );
+      expect(screen.getByTestId("drop-video-player")).toHaveAttribute(
+        "data-fill-container",
+        "true"
+      );
+      expect(container.querySelector("video")).not.toBeInTheDocument();
     });
   });
 
@@ -710,9 +744,9 @@ describe("NFTVideoRenderer", () => {
   describe("Error Resistance and Edge Cases", () => {
     it("handles completely empty NFT animation properties gracefully", () => {
       const nft = createMockNFT({
-        ...(undefined !== undefined ? { animation: undefined } : {}),
+        animation: undefined as any,
         compressed_animation: undefined,
-        ...(undefined !== undefined ? { metadata: undefined } : {}),
+        metadata: undefined as any,
       });
       const props = createDefaultProps({ nft });
 

@@ -28,7 +28,10 @@ jest.mock("@/components/nft-image/renderers/NFTImageRenderer", () => {
 jest.mock("@/components/nft-image/renderers/NFTVideoRenderer", () => {
   return function MockNFTVideoRenderer(props: any) {
     return (
-      <div data-testid="nft-video-renderer">
+      <div
+        data-testid="nft-video-renderer"
+        data-use-drop-video-player={String(Boolean(props.useDropVideoPlayer))}
+      >
         <video src={props.nft.animation} />
         {props.balance > 0 && (
           <span>SEIZED{!props.showOwned ? ` x${props.balance}` : ""}</span>
@@ -266,6 +269,58 @@ describe("Media Type Detection and Renderer Selection", () => {
     render(<NFTImage {...defaultProps} nft={nftWithMP4} animation={true} />);
     expect(screen.getByTestId("nft-video-renderer")).toBeInTheDocument();
     expect(screen.queryByTestId("nft-image-renderer")).not.toBeInTheDocument();
+  });
+
+  it("passes drop video player opt-in to NFTVideoRenderer", () => {
+    const nftWithMP4 = {
+      ...mockNFT,
+      animation: "https://example.com/video.mp4",
+      metadata: {
+        image: "https://example.com/image.png",
+        animation: "https://example.com/video.mp4",
+        animation_details: { format: "MP4" },
+      },
+    };
+
+    render(
+      <NFTImage
+        {...defaultProps}
+        nft={nftWithMP4}
+        animation={true}
+        useDropVideoPlayer
+      />
+    );
+
+    expect(screen.getByTestId("nft-video-renderer")).toHaveAttribute(
+      "data-use-drop-video-player",
+      "true"
+    );
+  });
+
+  it("opts full-height video artwork into the drop video player", () => {
+    const nftWithMP4 = {
+      ...mockNFT,
+      animation: "https://example.com/video.mp4",
+      metadata: {
+        image: "https://example.com/image.png",
+        animation: "https://example.com/video.mp4",
+        animation_details: { format: "MP4" },
+      },
+    };
+
+    render(
+      <NFTImage
+        {...defaultProps}
+        nft={nftWithMP4}
+        animation={true}
+        height="full"
+      />
+    );
+
+    expect(screen.getByTestId("nft-video-renderer")).toHaveAttribute(
+      "data-use-drop-video-player",
+      "true"
+    );
   });
 
   it("renders NFTVideoRenderer for MOV animations", () => {

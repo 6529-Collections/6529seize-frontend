@@ -16,6 +16,7 @@ interface Props {
   showBalance: boolean;
   transparentBG?: boolean | undefined;
   id?: string | undefined;
+  useDropVideoPlayer?: boolean | undefined;
 }
 
 export default function NFTImage(props: Readonly<Props>) {
@@ -41,6 +42,7 @@ export default function NFTImage(props: Readonly<Props>) {
     heightStyle: safeHeightStyle,
     imageStyle: safeImageStyle,
     bgStyle: safeBgStyle,
+    useDropVideoPlayer: props.useDropVideoPlayer || props.height === "full",
   };
 
   switch (mediaType) {

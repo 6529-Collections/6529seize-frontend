@@ -52,6 +52,9 @@ the card’s distribution view.
 - Home latest-drop details:
   - The countdown appears below drop metadata and the stats grid in the same
     panel.
+  - Video artwork in the latest-drop presentation uses the same inline
+    shorts-style player as video drops, with hover/focus controls and an
+    always-visible bottom progress strip.
   - `Edition`, `Status`, `Mint price`, and `Floor` row behavior is documented
     in [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md).
   - The `Edition Details` accordion always includes `Mint date`,
@@ -92,6 +95,8 @@ the card’s distribution view.
   message.
 - On `/the-memes/mint`, the countdown card hides its own `Mint` button because
   the page already includes the mint widget/action flow.
+- On `/the-memes/mint`, video artwork uses the inline shorts-style player used
+  for video drops.
 - On iOS outside the US, the countdown card hides the `Mint` button.
 - On home, if the current mint is ended and next-drop data exists, the latest
   section switches to a `Next Drop` panel only after the drop is actually
