@@ -1,0 +1,438 @@
+.shell {
+  --cms-accent: #36d1dc;
+  min-height: 100dvh;
+  background:
+    linear-gradient(180deg, rgba(8, 12, 16, 0.96), #050505 460px), #050505;
+  color: #f5f7fa;
+  letter-spacing: 0;
+}
+
+.hero {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 72px max(24px, calc((100vw - 1120px) / 2)) 42px;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 410px);
+  gap: 36px;
+  align-items: end;
+}
+
+.eyebrow {
+  color: var(--cms-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.title {
+  font-size: 5.2rem;
+  font-weight: 800;
+  line-height: 0.96;
+  letter-spacing: 0;
+  margin: 0;
+  max-width: 840px;
+}
+
+.titleLong {
+  font-size: 4.25rem;
+  line-height: 1;
+  max-width: 760px;
+}
+
+.description {
+  color: #c8d0da;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  margin: 22px 0 0;
+  max-width: 720px;
+}
+
+.heroPanel {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.hashLabel {
+  color: #9aa7b5;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.hashValue {
+  color: #f4f7fb;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.heroMeta {
+  display: grid;
+  gap: 12px;
+}
+
+.content {
+  display: grid;
+  gap: 34px;
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 42px 24px 72px;
+}
+
+.section {
+  display: grid;
+  gap: 18px;
+}
+
+.section h2,
+.section h3 {
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.section h2 {
+  font-size: 2.6rem;
+  line-height: 1.05;
+}
+
+.section h3 {
+  font-size: 1.8rem;
+  line-height: 1.18;
+}
+
+.richText {
+  color: #dbe2ea;
+  display: grid;
+  gap: 16px;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  max-width: 820px;
+}
+
+.richText p {
+  margin: 0;
+}
+
+.mediaFigure {
+  margin: 0;
+}
+
+.mediaImage {
+  background: #111821;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: block;
+  height: auto;
+  max-height: 720px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.caption {
+  color: #aeb8c5;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+.galleryGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.itemCard,
+.referenceCard,
+.transactionCard,
+.callout,
+.quote,
+.provenance {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.itemCard {
+  color: inherit;
+  display: grid;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.itemCard img {
+  aspect-ratio: 4 / 3;
+  border: 0;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.itemBody {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.itemTitle {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.itemCaption {
+  color: #aeb8c5;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.stats {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.stat {
+  border-left: 3px solid var(--cms-accent);
+  padding: 2px 0 2px 12px;
+}
+
+.statValue {
+  color: #ffffff;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.statLabel {
+  color: #9aa7b5;
+  font-size: 0.82rem;
+  margin-top: 5px;
+}
+
+.referenceCard {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(160px, 300px) minmax(0, 1fr);
+  padding: 18px;
+}
+
+.referenceCard img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.referenceBody {
+  align-content: center;
+  display: grid;
+  gap: 10px;
+}
+
+.referenceTitle {
+  color: #ffffff;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.referenceText {
+  color: #c8d0da;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.facts {
+  color: #aeb8c5;
+  display: grid;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    monospace;
+  font-size: 0.78rem;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+
+.packet {
+  color: #98f1db;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.transactionCard {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+}
+
+.transactionSummary {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 750;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.statusBanner {
+  background: rgba(255, 208, 102, 0.11);
+  border: 1px solid rgba(255, 208, 102, 0.28);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px;
+}
+
+.statusBannerTitle {
+  color: #ffe3a3;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.statusBanner p {
+  color: #f3dfb5;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.actionList {
+  color: #dbe2ea;
+  display: grid;
+  gap: 10px;
+  line-height: 1.55;
+  margin: 0;
+  padding-left: 22px;
+}
+
+.callout {
+  border-left: 4px solid var(--cms-accent);
+  padding: 18px 20px;
+}
+
+.callout h2,
+.callout h3,
+.callout h4 {
+  font-size: 1.1rem;
+  line-height: 1.25;
+  margin: 0 0 8px;
+}
+
+.callout p {
+  color: #c8d0da;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.quote {
+  color: #f4f7fb;
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+  padding: 24px;
+}
+
+.quote figcaption {
+  color: #9aa7b5;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 14px;
+}
+
+.buttonLink {
+  align-items: center;
+  background: var(--cms-accent);
+  border-radius: 8px;
+  color: #001014;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  max-width: max-content;
+  min-height: 44px;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+.fallback {
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  color: #c8d0da;
+  padding: 16px;
+}
+
+.provenance {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.provenanceGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.provenanceTitle {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .hero {
+    padding-top: 44px;
+  }
+
+  .title {
+    font-size: 2.6rem;
+  }
+
+  .titleLong {
+    font-size: 2.35rem;
+  }
+
+  .section h2 {
+    font-size: 1.8rem;
+  }
+
+  .section h3,
+  .quote {
+    font-size: 1.35rem;
+  }
+
+  .heroGrid,
+  .referenceCard {
+    grid-template-columns: 1fr;
+  }
+
+  .heroPanel {
+    padding: 14px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1080px) {
+  .title {
+    font-size: 4rem;
+  }
+
+  .titleLong {
+    font-size: 3.4rem;
+  }
+
+  .section h2 {
+    font-size: 2.2rem;
+  }
+}

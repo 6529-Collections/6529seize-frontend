@@ -6,6 +6,7 @@ import { SortDirection } from "@/entities/ISort";
 import type { CountlessPage } from "@/helpers/Types";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { getPublishedPrimaryCmsSiteForProfile } from "@/lib/cms/profile-sites";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import UserPageHeaderClient from "./UserPageHeaderClient";
@@ -88,11 +89,12 @@ export default async function UserPageHeader({
   const headers = await getAppCommonHeaders();
   const normalizedHandle = handleOrWallet.toLowerCase();
 
-  const [statementsResult, profileLogResult, followersResult] =
+  const [statementsResult, profileLogResult, followersResult, cmsSiteResult] =
     await Promise.allSettled([
       fetchStatements(normalizedHandle, headers),
       fetchProfileEnabledLog(normalizedHandle, headers),
       fetchFollowersCount(profile.id, headers),
+      getPublishedPrimaryCmsSiteForProfile(profile),
     ]);
 
   const statements: CicStatement[] =
@@ -115,6 +117,11 @@ export default async function UserPageHeader({
       profileEnabledAt={extractProfileEnabledAt(profileLog)}
       followersCount={
         followersResult.status === "fulfilled" ? followersResult.value : null
+      }
+      primaryCmsSitePath={
+        cmsSiteResult.status === "fulfilled"
+          ? (cmsSiteResult.value?.staticPath ?? null)
+          : null
       }
     />
   );

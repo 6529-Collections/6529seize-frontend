@@ -1,6 +1,8 @@
 "use client";
 
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 
@@ -35,6 +37,7 @@ type Props = {
   readonly initialStatements: CicStatement[];
   readonly profileEnabledAt: string | null;
   readonly followersCount: number | null;
+  readonly primaryCmsSitePath: string | null;
 };
 
 export default function UserPageHeaderClient({
@@ -46,6 +49,7 @@ export default function UserPageHeaderClient({
   initialStatements,
   profileEnabledAt,
   followersCount,
+  primaryCmsSitePath,
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
@@ -201,6 +205,19 @@ export default function UserPageHeaderClient({
               </div>
 
               <div className="tw-order-2 tw-mb-2 tw-mt-2 tw-flex tw-items-center tw-gap-3 tw-self-start md:tw-order-3 md:tw-mb-0">
+                {primaryCmsSitePath ? (
+                  <Link
+                    href={primaryCmsSitePath}
+                    aria-label={`${profile.handle ?? "Profile"} website`}
+                    className="tw-inline-flex tw-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.07] tw-px-3 tw-text-sm tw-font-semibold tw-text-white tw-no-underline tw-transition hover:tw-border-cyan-300/50 hover:tw-bg-cyan-300/10 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-cyan-300"
+                  >
+                    <span>Website</span>
+                    <ArrowTopRightOnSquareIcon
+                      aria-hidden="true"
+                      className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+                    />
+                  </Link>
+                ) : null}
                 {!isMyProfile && profile.handle && connectedProfile?.handle ? (
                   <UserFollowBtn
                     handle={profile.handle}

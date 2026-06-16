@@ -1,0 +1,109 @@
+# Run Log
+
+## 2026-06-16
+
+- User requested autonomous-manager mode for a long-running FE/BE CMS build and PR workstream.
+- Read `ops/skills/6529-autonomous-manager/SKILL.md`.
+- Loaded root frontend `AGENTS.md`.
+- Initialized Next.js DevTools MCP and loaded the Next.js docs index.
+- Confirmed existing primary frontend and backend worktrees are dirty with unrelated changes.
+- Created clean worktrees:
+  - `D:\repos\6529seize-frontend-profile-native-cms`
+  - `D:\repos\6529seize-backend-profile-native-cms`
+- Loaded profile-native CMS build spec from `D:\repos\6529mono`.
+- Built the first frontend CMS substrate:
+  - deterministic CMS package canonicalization/hash helpers,
+  - Zod package validation,
+  - gallery and transaction CMS fixture packages,
+  - public package renderer with provenance/package evidence,
+  - `/cms-fixtures/[fixture]` review route,
+  - `/{profile}/index.html` profile website route,
+  - fixture-backed primary CMS site resolver,
+  - `Website` CTA on the profile header when a primary CMS site exists.
+- Fixed an existing CSS Modules purity issue in `components/waves/drop/VoteButton.module.scss` that blocked webpack dev verification.
+- Local FE checks passed:
+  - `seize run lint:diff`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage -- __tests__/lib/cms/canonicalize.test.ts __tests__/lib/cms/profile-sites.test.ts __tests__/components/cms/CmsPageRenderer.test.tsx`
+  - `seize run format:uncommitted`
+  - `codex-diff-check`
+- Browser/E2E smoke:
+  - dev server on `http://localhost:3120` with webpack,
+  - `/punk6529/index.html` desktop/mobile render one H1, visible package hash/path, no broken local CMS images,
+  - `/cms-fixtures/transaction` renders one H1 and a transaction explainer block,
+  - `/punk6529` exposes `Website` link to `/punk6529/index.html`.
+- Screenshot/report artifacts are in `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens`.
+- Known local-dev noise:
+  - global app providers emit unrelated wave API 500s and emoji CloudFront 403s,
+  - MetaMask optional dependency warning appears in dev,
+  - delayed cookie banner can cover screenshots unless accepted before capture,
+  - `seize-local-dev start-frontend` sets `PORT_SEARCH_LIMIT=0`, but env schema requires positive values; manual webpack dev launch works.
+- Added backend CMS storage/API substrate:
+  - `cms_sites` and `cms_published_packages` TypeORM entities,
+  - OpenAPI CMS schemas/routes and regenerated `ApiCms*` models,
+  - `cmsDb`, `CmsApiService`, and `cms.routes`,
+  - API app mount at `/api/cms`,
+  - service tests for site creation and package publish ownership.
+- Backend checks passed:
+  - `.\node_modules\.bin\tsc.cmd -p tsconfig.json --noEmit`
+  - local eslint invocation equivalent to `npm run lint`
+  - `jest src/api-serverless/src/cms/cms-api-service.test.ts --runInBand`
+- Wired FE resolver to backend-first CMS API lookup with schema/hash validation and fixture fallback.
+- FE checks after API resolver passed:
+  - `seize run lint:diff`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage -- __tests__/lib/cms/canonicalize.test.ts __tests__/lib/cms/profile-sites.test.ts __tests__/components/cms/CmsPageRenderer.test.tsx`
+- Added first-pass Profile CMS Studio at `/tools/profile-cms`:
+  - profile handle/title/description/wallet inputs,
+  - gallery style control for editorial, market grid, and 3D room intent,
+  - IPFS/Arweave/both storage intent,
+  - deterministic package hash/payload hash/route evidence,
+  - copy JSON, export package JSON, and authenticated publish actions.
+- Added Studio publish flow:
+  - uses existing `useAuth().requestAuth()`,
+  - reuses or creates the profile `home` CMS site through `/api/cms/my/sites` and `/api/cms/sites`,
+  - posts the generated package to `/api/cms/sites/{site_id}/published-packages` as the primary package.
+- Studio checks passed:
+  - `seize run format:uncommitted`
+  - `codex-diff-check`
+  - `seize run lint:diff`
+  - `seize run typecheck:changed`
+- Browser/E2E Studio pass:
+  - `/tools/profile-cms` desktop/mobile render one H1, no horizontal overflow, visible package hash, no broken preview images, no page errors,
+  - gallery style and storage controls are interactive,
+  - Export downloads `punk6529-cms-package.json`,
+  - Publish button is present and fits desktop/mobile layouts,
+  - `/punk6529/index.html` regression still renders one H1, package hash/path, and no broken local CMS images.
+- Refreshed screenshots:
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\studio-desktop-polished.png`
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\studio-mobile-polished.png`
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\studio-desktop-publish.png`
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\studio-mobile-publish.png`
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\profile-site-regression-clean.png`
+- Backend final verification pass:
+  - `npx prettier --check src/constants/db-tables.ts src/entities/entities.ts src/entities/ICmsSite.ts src/api-serverless/src/app.ts "src/api-serverless/src/cms/*.ts" src/api-serverless/openapi.yaml`
+  - `.\node_modules\.bin\tsc.cmd -p tsconfig.json --noEmit`
+  - `$env:NODE_OPTIONS='--max-old-space-size=8192'; .\node_modules\.bin\eslint.cmd "src/**/*.ts" --max-warnings=0`
+  - `.\node_modules\.bin\jest.cmd src/api-serverless/src/cms/cms-api-service.test.ts --runInBand`
+- Backend `npm run check:changed` is blocked in this Windows shell because `scripts/check-changed.mjs` calls `spawnSync npm`, which cannot resolve `npm` instead of `npm.cmd`; direct equivalent checks above passed.
+- FE final verification after publish type correction:
+  - `codex-diff-check`
+  - `seize run lint:diff`
+  - `seize run typecheck:changed`
+- Ran second-review pass with Anthropic `claude-opus-4-8` using the Studio desktop/mobile and public site screenshots.
+- Reviewer findings acted on:
+  - added explicit selected state text in the Studio gallery style control,
+  - added per-hash copy buttons and graceful clipboard-denied handling,
+  - added storage tradeoff copy,
+  - added publish confirmation modal with backend-pointer destination and draft signature/storage caveat,
+  - separated Publish as the primary action,
+  - added draft/fixture evidence banner to public package-rendered pages.
+- Post-review FE verification passed:
+  - `seize run format:uncommitted`
+  - `codex-diff-check`
+  - `seize run lint:diff`
+  - `seize run typecheck:changed`
+  - `seize run test:no-coverage -- __tests__/lib/cms/canonicalize.test.ts __tests__/lib/cms/profile-sites.test.ts __tests__/components/cms/CmsPageRenderer.test.tsx --runInBand`
+- Post-review browser evidence:
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\studio-publish-confirm-final.png`
+  - `C:\Users\Administrator\AppData\Local\Temp\profile-native-cms-screens\profile-site-draft-banner-final.png`

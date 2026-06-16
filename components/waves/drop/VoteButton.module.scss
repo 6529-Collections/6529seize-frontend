@@ -169,31 +169,27 @@ $btn-dimension: 72px;
   }
 }
 
-:global(.wave-drop-vote-submit-full) {
+:global(.wave-drop-vote-submit-full) .voteButton {
   width: 100%;
+  height: auto;
+  min-height: 40px;
+  padding: 10px 14px;
+  background: transparent;
+  border-color: #26272b;
+  color: #4c4c55;
+  box-shadow: none;
 
   > div {
     width: 100%;
   }
 
-  .voteButton {
-    width: 100%;
-    height: auto;
-    min-height: 40px;
-    padding: 10px 14px;
-    background: transparent;
-    border-color: #26272b;
-    color: #4c4c55;
-    box-shadow: none;
-
-    &:not(:disabled):hover {
-      background: rgba(255, 255, 255, 0.03);
-      border-color: #37373e;
-      color: #60606c;
-    }
+  &:not(:disabled):hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: #37373e;
+    color: #60606c;
   }
 
-  .voteButtonPositive {
+  &.voteButtonPositive {
     background: #10b981;
     border-color: #10b981;
     color: #fff;
@@ -208,7 +204,7 @@ $btn-dimension: 72px;
     }
   }
 
-  .voteButtonNegative {
+  &.voteButtonNegative {
     background: #f43f5e;
     border-color: #f43f5e;
     color: #fff;
@@ -223,7 +219,7 @@ $btn-dimension: 72px;
     }
   }
 
-  .voteButtonNeutral {
+  &.voteButtonNeutral {
     background: transparent;
     border-color: #26272b;
     color: #4c4c55;
