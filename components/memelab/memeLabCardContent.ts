@@ -51,17 +51,22 @@ function formatVolumeMetric(
   locale: SupportedLocale
 ) {
   const volume = getVolumeForType(nft, volumeType);
-  const value =
-    volume > 0
-      ? t(locale, "memeLab.card.metric.ethValue", {
-          value: formatNumber(locale, roundTo(volume, 2), {
-            maximumFractionDigits: 2,
-          }),
-        })
-      : t(locale, "memeLab.card.metric.unavailable");
+  const volumeTypeLabel = getVolumeTypeLabel(volumeType, locale);
+
+  if (!Number.isFinite(volume) || volume <= 0) {
+    return t(locale, "memeLab.card.metric.volumeUnavailable", {
+      volumeType: volumeTypeLabel,
+    });
+  }
+
+  const value = t(locale, "memeLab.card.metric.ethValue", {
+    value: formatNumber(locale, roundTo(volume, 2), {
+      maximumFractionDigits: 2,
+    }),
+  });
 
   return t(locale, "memeLab.card.metric.volume", {
-    volumeType: getVolumeTypeLabel(volumeType, locale),
+    volumeType: volumeTypeLabel,
     value,
   });
 }

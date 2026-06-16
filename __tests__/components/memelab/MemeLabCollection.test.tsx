@@ -1,9 +1,16 @@
 import { AuthContext } from "@/components/auth/Auth";
 import MemeLabComponent from "@/components/memelab/MemeLab";
 import LabCollection from "@/components/memelab/MemeLabCollection";
+import { VolumeType } from "@/entities/INFT";
 import { fetchAllPages } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import type { ComponentProps } from "react";
 
@@ -34,6 +41,23 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 jest.mock("@/components/nothingHereYet/NothingHereYetSummer", () => () => (
   <div data-testid="nothing" />
 ));
+jest.mock("@/components/memelab/MemeLabSortControls", () => {
+  const { VolumeType: ActualVolumeType } =
+    jest.requireActual("@/entities/INFT");
+
+  return {
+    __esModule: true,
+    default: ({ setVolumeType, volumeType }: any) => (
+      <button
+        type="button"
+        data-testid="volume-type-control"
+        onClick={() => setVolumeType(ActualVolumeType.DAYS_7)}
+      >
+        {volumeType}
+      </button>
+    ),
+  };
+});
 
 const routerReplace = jest.fn();
 
@@ -51,7 +75,16 @@ const DEFAULT_MEME_LAB_PROPS: ComponentProps<typeof MemeLabComponent> = {
   initialSortDirection: null,
 };
 
-function renderComponent(locale?: "en-US" | "de-DE") {
+type RenderLabCollectionOptions = Pick<
+  ComponentProps<typeof LabCollection>,
+  "initialSort" | "initialSortDirection" | "locale"
+>;
+
+function renderComponent({
+  initialSort,
+  initialSortDirection,
+  locale,
+}: RenderLabCollectionOptions = {}) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -61,7 +94,12 @@ function renderComponent(locale?: "en-US" | "de-DE") {
   return render(
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
-        <LabCollection collectionName={collectionName} locale={locale} />
+        <LabCollection
+          collectionName={collectionName}
+          initialSort={initialSort}
+          initialSortDirection={initialSortDirection}
+          locale={locale}
+        />
       </AuthContext.Provider>
     </QueryClientProvider>
   );
@@ -83,6 +121,12 @@ function renderMemeLab(props?: ComponentProps<typeof MemeLabComponent>) {
       </AuthContext.Provider>
     </QueryClientProvider>
   );
+}
+
+function getRenderedNftIds() {
+  return screen
+    .getAllByTestId(/^nft-/)
+    .map((element) => element.getAttribute("data-testid"));
 }
 
 describe("MemeLabCollection", () => {
@@ -151,7 +195,7 @@ describe("MemeLabCollection", () => {
       .mockResolvedValueOnce([
         { id: 1, contract: "0x", name: "NFT", artist: "artist" },
       ]);
-    renderComponent("de-DE");
+    renderComponent({ locale: "de-DE" });
     await waitFor(() => expect(fetchAllPages).toHaveBeenCalledTimes(2));
     expect(
       screen.getByRole("list", { name: "Meme Lab cards in Cool Collection" })
@@ -159,6 +203,51 @@ describe("MemeLabCollection", () => {
     expect(
       screen.getByRole("link", { name: "View NFT, Meme Lab card #1" })
     ).toHaveAttribute("href", "/meme-lab/1?locale=de-DE");
+  });
+
+  it("re-sorts by volume when the volume window changes", async () => {
+    (fetchAllPages as jest.Mock)
+      .mockResolvedValueOnce([
+        { id: 1, website: "", name: "meta 1" },
+        { id: 2, website: "", name: "meta 2" },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 2,
+          contract: "0x",
+          name: "NFT Two",
+          total_volume_last_24_hours: 5,
+          total_volume_last_7_days: 20,
+        },
+        {
+          id: 1,
+          contract: "0x",
+          name: "NFT One",
+          total_volume_last_24_hours: 10,
+          total_volume_last_7_days: 1,
+        },
+      ]);
+
+    renderComponent({
+      initialSort: "volume",
+      initialSortDirection: "desc",
+    });
+
+    await waitFor(() =>
+      expect(getRenderedNftIds()).toEqual(["nft-1", "nft-2"])
+    );
+    expect(screen.getByTestId("volume-type-control")).toHaveTextContent(
+      VolumeType.HOURS_24
+    );
+
+    fireEvent.click(screen.getByTestId("volume-type-control"));
+
+    await waitFor(() =>
+      expect(getRenderedNftIds()).toEqual(["nft-2", "nft-1"])
+    );
+    expect(screen.getByTestId("volume-type-control")).toHaveTextContent(
+      VolumeType.DAYS_7
+    );
   });
 
   it("shows placeholder when no nfts", async () => {

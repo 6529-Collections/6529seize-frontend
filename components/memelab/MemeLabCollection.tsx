@@ -117,7 +117,7 @@ export default function LabCollection({
         locale
       );
     }
-  }, [sort, sortDir, nftsLoaded, locale]);
+  }, [sort, sortDir, nftsLoaded, volumeType, locale]);
 
   function printNft(nft: LabNFT) {
     return (
