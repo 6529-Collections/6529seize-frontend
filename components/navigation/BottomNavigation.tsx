@@ -179,7 +179,7 @@ const getNavClassName = ({
   readonly variant: BottomNavVariant;
 }) =>
   variant === "fixed"
-    ? `${getHiddenStyle(hidden)} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-[85px] tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75`
+    ? `${getHiddenStyle(hidden)} tw-fixed tw-bottom-0 tw-left-0 tw-z-50 tw-h-[85px] tw-w-full tw-bg-black tw-shadow-inner tw-transition-[opacity,transform] tw-duration-75 motion-reduce:tw-transition-none`
     : `${getHiddenStyle(hidden)} tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-50 tw-flex tw-justify-center tw-px-4 tw-pb-[env(safe-area-inset-bottom,0px)] tw-transition-[opacity,transform] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
 
 const getDockClassName = (compact: boolean) =>
@@ -216,18 +216,21 @@ const BottomNavigationFallback: React.FC<BottomNavigationProps> = ({
   </nav>
 );
 
-const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
-  hidden = false,
-}) => {
+interface BottomNavigationResolvedContentProps extends BottomNavigationProps {
+  readonly activeView: string | null;
+  readonly pathname: string;
+}
+
+const BottomNavigationResolvedContent: React.FC<
+  BottomNavigationResolvedContentProps
+> = ({ activeView, hidden = false, pathname }) => {
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
-  const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
 
   const mobileNavRef = useRef<HTMLDivElement | null>(null);
   const waveIdFromQuery = getActiveWaveIdFromUrl({ pathname, searchParams });
-  const activeView = searchParams.get("view");
   const variant: BottomNavVariant = usesFixedMobileBottomNavigation({
     activeView,
     pathname,
@@ -315,6 +318,25 @@ const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
         </div>
       )}
     </nav>
+  );
+};
+
+const BottomNavigationContent: React.FC<BottomNavigationProps> = ({
+  hidden = false,
+}) => {
+  const pathname = usePathname();
+  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
+  const searchParams = useSearchParams();
+  const activeView = searchParams.get("view");
+  const routeStateKey = `${pathname}:${activeView ?? ""}`;
+
+  return (
+    <BottomNavigationResolvedContent
+      key={routeStateKey}
+      activeView={activeView}
+      hidden={hidden}
+      pathname={pathname}
+    />
   );
 };
 

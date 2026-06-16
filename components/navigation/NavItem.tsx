@@ -210,7 +210,6 @@ const NavItemContent = ({
   fullPrefetch = false,
 }: Props) => {
   const pathname = usePathname();
-  // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const activeWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -353,7 +352,7 @@ const NavItemContent = ({
 
   const linkClassName =
     variant === "fixed"
-      ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none"
+      ? "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-start tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-white/35"
       : "tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition-colors focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-3px] focus-visible:tw-outline-white/35";
 
   if (fullPrefetch) {
