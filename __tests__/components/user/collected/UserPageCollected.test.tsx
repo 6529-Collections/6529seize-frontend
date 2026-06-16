@@ -65,6 +65,22 @@ jest.mock(
     }
 );
 
+const mockUserPageCollectedNetworkCards = jest.fn((props: any) => (
+  <div
+    data-testid="network-cards"
+    data-cards-count={props.cards.length}
+    data-locale={props.locale}
+  />
+));
+
+jest.mock(
+  "@/components/user/collected/cards/UserPageCollectedNetworkCards",
+  () => ({
+    __esModule: true,
+    default: (props: any) => mockUserPageCollectedNetworkCards(props),
+  })
+);
+
 jest.mock(
   "@/components/user/collected/UserPageCollectedFirstLoading",
   () =>
@@ -370,12 +386,13 @@ describe("UserPageCollected", () => {
 
     mockSearchParams.get.mockImplementation((key: string) => {
       if (key === "collection") return "network";
+      if (key === "locale") return "DE-de";
       if (key === "sort-by") return "xtdh";
       if (key === "sort-direction") return "desc";
       return null;
     });
     mockSearchParams.toString.mockReturnValue(
-      "collection=network&sort-by=xtdh&sort-direction=desc"
+      "collection=network&locale=DE-de&sort-by=xtdh&sort-direction=desc"
     );
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
@@ -387,6 +404,7 @@ describe("UserPageCollected", () => {
     const params = new URLSearchParams(path?.split("?")[1] ?? "");
 
     expect(params.get("collection")).toBe("nextgen");
+    expect(params.get("locale")).toBe("DE-de");
     expect(params.get("page")).toBeNull();
     expect(params.get("seized")).toBeNull();
     expect(params.get("szn")).toBeNull();
@@ -486,6 +504,25 @@ describe("UserPageCollected", () => {
           "DESC",
         ]),
       })
+    );
+  });
+
+  it("passes normalized locale search params to network cards", () => {
+    mockSearchParams.get.mockImplementation((key: string) => {
+      if (key === "collection") return "network";
+      if (key === "locale") return "DE-de";
+      return null;
+    });
+    mockSearchParams.toString.mockReturnValue("collection=network&locale=DE-de");
+
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+
+    expect(screen.getByTestId("network-cards")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(mockUserPageCollectedNetworkCards).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" })
     );
   });
 

@@ -1,7 +1,18 @@
 import UserPageCollectedNetworkCards from "@/components/user/collected/cards/UserPageCollectedNetworkCards";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
+import { t as translate } from "@/i18n/messages";
 import { render, screen, within } from "@testing-library/react";
 import React from "react";
+
+jest.mock("@/i18n/messages", () => {
+  const actual = jest.requireActual<typeof import("@/i18n/messages")>(
+    "@/i18n/messages"
+  );
+  return {
+    ...actual,
+    t: jest.fn(actual.t),
+  };
+});
 
 jest.mock("next/image", () => ({
   __esModule: true,
@@ -28,6 +39,7 @@ jest.mock("@/hooks/useAlchemyNftQueries", () => ({
 }));
 
 const useTokenMetadataQueryMock = useTokenMetadataQuery as jest.Mock;
+const translateMock = translate as jest.MockedFunction<typeof translate>;
 
 const cards = [
   {
@@ -51,7 +63,7 @@ describe("UserPageCollectedNetworkCards", () => {
     useTokenMetadataQueryMock.mockReturnValue({ data: [] });
   });
 
-  it("renders network cards as a labelled list with localized labels", () => {
+  it("renders network cards as a labelled list with locale-aware fallback labels", () => {
     const setPage = jest.fn();
     useTokenMetadataQueryMock.mockReturnValue({
       data: [
@@ -73,6 +85,7 @@ describe("UserPageCollectedNetworkCards", () => {
         page={2}
         setPage={setPage}
         next={true}
+        locale="fr-FR"
       />
     );
 
@@ -97,6 +110,25 @@ describe("UserPageCollectedNetworkCards", () => {
     expect(screen.getByTestId("pagination")).toHaveTextContent("Page 2 of 3");
     expect(paginationProps.setCurrentPage).toBe(setPage);
     expect(paginationProps.haveNextPage).toBe(true);
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.networkCards.listLabel"
+    );
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.networkCards.defaultTokenName",
+      { tokenId: 202 }
+    );
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.networkCards.imageAlt",
+      { name: "First Token" }
+    );
+    expect(translateMock).toHaveBeenCalledWith(
+      "fr-FR",
+      "user.collected.networkCards.tokenLabel",
+      { tokenId: 202 }
+    );
   });
 
   it("renders localized empty state and disables metadata fetching", () => {
