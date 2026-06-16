@@ -245,12 +245,18 @@ const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
   );
 
   if (response.status !== 206) {
+    await cancelResponseBody(response);
     throw new Error(`Image range request failed: ${response.status}`);
   }
 
   const contentLength = getContentLength(response);
   if (contentLength !== null) {
-    ensureAllowedGifPreviewSize(contentLength);
+    try {
+      ensureAllowedGifPreviewSize(contentLength);
+    } catch (error) {
+      await cancelResponseBody(response);
+      throw error;
+    }
   }
 
   const buffer = await readImageResponseBuffer(

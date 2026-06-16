@@ -77,9 +77,11 @@ const createRequest = (sourceUrl: string): NextRequest =>
 
 const createReadableBody = (buffer: Buffer) => {
   let hasRead = false;
+  const cancel = jest.fn();
   return {
+    cancel,
     getReader: () => ({
-      cancel: jest.fn(),
+      cancel,
       read: jest.fn(async () => {
         if (hasRead) {
           return { done: true, value: undefined };
@@ -101,9 +103,10 @@ const mockImageResponse = (
   contentType = "image/png",
   body = PNG_1X1,
   status = 200
-): void => {
+): jest.Mock => {
+  const responseBody = createReadableBody(body);
   mockFetchPublicUrl.mockResolvedValueOnce({
-    body: createReadableBody(body),
+    body: responseBody,
     headers: {
       get: createHeaders({
         "content-length": `${contentLength}`,
@@ -113,6 +116,7 @@ const mockImageResponse = (
     ok: status >= 200 && status < 300,
     status,
   });
+  return responseBody.cancel;
 };
 
 describe("/api/og-metadata/image", () => {
@@ -164,7 +168,12 @@ describe("/api/og-metadata/image", () => {
 
   it("rejects oversized GIF range responses when the upstream ignores Range", async () => {
     mockImageResponse(108 * 1024 * 1024, "image/gif");
-    mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME, 200);
+    const cancelRangeBody = mockImageResponse(
+      GIF_2_FRAME.byteLength,
+      "image/gif",
+      GIF_2_FRAME,
+      200
+    );
 
     const response = await GET(
       createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
@@ -175,6 +184,28 @@ describe("/api/og-metadata/image", () => {
       error: "Failed to normalize image",
     });
     expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    expect(cancelRangeBody).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels oversized GIF range responses before rejecting their content length", async () => {
+    mockImageResponse(108 * 1024 * 1024, "image/gif");
+    const cancelRangeBody = mockImageResponse(
+      9 * 1024 * 1024,
+      "image/gif",
+      GIF_2_FRAME,
+      206
+    );
+
+    const response = await GET(
+      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({
+      error: "Failed to normalize image",
+    });
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    expect(cancelRangeBody).toHaveBeenCalledTimes(1);
   });
 
   it("keeps invalid media urls as JSON errors", async () => {
