@@ -1,5 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import UserPageStatsBoostBreakdown from "@/components/user/stats/UserPageStatsBoostBreakdown";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
+jest.mock("@fortawesome/react-fontawesome", () => ({
+  FontAwesomeIcon: () => <svg data-testid="icon" />,
+}));
+
+const boostText = (
+  key: Parameters<typeof t>[1],
+  params?: Parameters<typeof t>[2]
+) => t(DEFAULT_LOCALE, key, params);
 
 function makeTDH() {
   return {
@@ -44,7 +55,17 @@ describe("UserPageStatsBoostBreakdown", () => {
 
   it("shows boost rows when data present", () => {
     render(<UserPageStatsBoostBreakdown tdh={makeTDH()} />);
-    expect(screen.getByText("Boost Breakdown")).toBeInTheDocument();
-    expect(screen.getByText("TOTAL BOOST")).toBeInTheDocument();
+    expect(
+      screen.getByText(boostText("user.collected.stats.boostBreakdown.title"))
+    ).toBeInTheDocument();
+
+    const table = screen.getByRole("table", {
+      name: boostText("user.collected.stats.boostBreakdown.tableCaption"),
+    });
+    expect(
+      within(table).getByRole("rowheader", {
+        name: boostText("user.collected.stats.boostBreakdown.rows.total"),
+      })
+    ).toBeInTheDocument();
   });
 });

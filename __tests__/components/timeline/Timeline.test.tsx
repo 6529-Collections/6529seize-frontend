@@ -99,6 +99,8 @@ describe("Timeline", () => {
       />
     );
     expect(mediaProps[0]).toMatchObject({
+      label: t("en-US", "timeline.fields.addedImage"),
+      locale: "en-US",
       type: MediaType.IMAGE,
       url: "img.png",
     });
@@ -112,6 +114,8 @@ describe("Timeline", () => {
       />
     );
     expect(mediaProps[0]).toMatchObject({
+      label: t("en-US", "timeline.fields.addedAnimation"),
+      locale: "en-US",
       type: MediaType.VIDEO,
       url: "vid.mp4",
     });
