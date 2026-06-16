@@ -4,6 +4,7 @@ import {
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
   getMintTimelineDetails,
+  getMonthWeeks,
   getNextMintStart,
   getRangeDatesByZoom,
   getSeasonIndexForDate,
@@ -86,6 +87,9 @@ describe("printCalendarInvites", () => {
 
     expect(html).toContain("dates=20240703T144000Z%2F20240704T140000Z");
     expect(html).toContain("DTEND%3A20240704T140000Z");
+    expect(html).toContain('aria-label="Add to Calendar"');
+    expect(html).toContain('aria-label="Add to Google Calendar"');
+    expect(html).toContain('alt="" aria-hidden="true"');
   });
 
   it("sets a 15:00 UTC end time for winter mints", () => {
@@ -106,6 +110,56 @@ describe("printCalendarInvites", () => {
 
     expect(html).toContain("dates=20231026T144000Z%2F20231027T140000Z");
     expect(html).toContain("DTEND%3A20231027T140000Z");
+  });
+
+  it("escapes generated calendar link attributes", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const mintNumber = getMintNumberForMintDate(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      mintNumber,
+      'red";background:url(test)',
+      22,
+      {
+        addToCalendar: `Add "ICS" calendar's event`,
+        addToGoogleCalendar: "Add <Google> calendar",
+      }
+    );
+
+    expect(html).toContain(
+      'aria-label="Add &quot;ICS&quot; calendar&#39;s event"'
+    );
+    expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
+    expect(html).toContain("color:red&quot;;background:url(test);");
+  });
+
+  it("accepts escaped accessible labels for calendar links", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const mintNumber = getMintNumberForMintDate(mintDay);
+    const html = printCalendarInvites(mintInstant, mintNumber, "#fff", 22, {
+      addToCalendar: 'Add "ICS" calendar',
+      addToGoogleCalendar: "Add <Google> calendar",
+    });
+
+    expect(html).toContain('aria-label="Add &quot;ICS&quot; calendar"');
+    expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
+  });
+
+  it("formats calendar event titles with the active locale", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2026, 0, 2)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      1234,
+      "#fff",
+      22,
+      undefined,
+      "de-DE"
+    );
+
+    expect(decodeURIComponent(html)).toContain("SUMMARY:Meme #1.234 Minting");
   });
 });
 
@@ -254,5 +308,18 @@ describe("meme-calendar helpers", () => {
       new Date(Date.UTC(2023, 0, 2))
     );
     expect(yearRemaining).toBeGreaterThanOrEqual(earlySeason);
+  });
+
+  it("pads month grids for Monday-first weekday headers", () => {
+    expect(getMonthWeeks(2022, 5)[0]).toEqual([null, null, 1, 2, 3, 4, 5]);
+    expect(getMonthWeeks(2022, 4)[0]).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      1,
+    ]);
   });
 });

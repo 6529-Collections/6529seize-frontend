@@ -421,6 +421,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               key={`${nft.contract}-${nft.id}`}
               nft={nft}
               showBalance={true}
+              locale={locale}
             />
           </div>
           {userLoaded && (
@@ -445,7 +446,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               fullWidth
             />
           )}
-          <MemePageLiveRightMenu show={true} nft={nft} nftMeta={nftMeta} />
+          <MemePageLiveRightMenu
+            show={true}
+            nft={nft}
+            nftMeta={nftMeta}
+            locale={locale}
+          />
         </div>
       </div>
     );
@@ -510,10 +516,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             nftMeta={nftMeta}
             nftBalance={nftBalance}
             defaultAdditionalDetailsOpen={focusParam === MEME_FOCUS.THE_ART}
+            locale={locale}
           />
           <MemePageReferencesSubMenu
             show={activeTab === MEME_FOCUS.REFERENCES}
             nft={nft}
+            locale={locale}
           />
           {userLoaded && (
             <MemePageYourCardsSubMenu
@@ -528,6 +536,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
             show={activeTab === MEME_FOCUS.COLLECTORS}
             nft={nft}
             nftMeta={nftMeta}
+            locale={locale}
           />
         </div>
         {activeTab === MEME_FOCUS.HISTORY &&
@@ -536,11 +545,12 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
               show={true}
               nft={nft}
               pageSize={ACTIVITY_PAGE_SIZE}
+              locale={locale}
             />
           )}
         {activeTab === MEME_FOCUS.HISTORY &&
           activeHistoryTab === MEME_HISTORY_TAB.TIMELINE && (
-            <MemePageTimeline show={true} nft={nft} />
+            <MemePageTimeline show={true} nft={nft} locale={locale} />
           )}
       </>
     );
@@ -572,6 +582,7 @@ export default function MemePage({ nftId }: { readonly nftId: string }) {
                 <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center md:tw-ml-0">
                   <MemeCalendarPeriods
                     id={nft.id}
+                    locale={locale}
                     seasonHref={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
                     showOnlySeasonOnMobile
                   />

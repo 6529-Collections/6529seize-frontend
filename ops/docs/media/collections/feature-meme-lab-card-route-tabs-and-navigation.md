@@ -22,7 +22,8 @@ pagination.
 - Open a direct card URL such as `/meme-lab/123`.
 - Open a direct tab URL such as `/meme-lab/123?focus=activity`.
 - Open a progressive locale URL such as `/meme-lab/123?locale=de-DE`.
-- On card `Overview`, use `Distribution Plan` when shown.
+- On card `Overview`, use `Distribution Plan` when shown; supported
+  non-default `locale` values are preserved in the linked distribution URL.
 - Open `/meme-lab/{id}/distribution` directly.
 
 ## User Journey
@@ -53,10 +54,12 @@ pagination.
 1. Open this route from `Distribution Plan` on `Overview`, or open the route
    directly.
 2. The route validates `{id}` as a positive integer.
-3. Review the page header, optional distribution photos, and wallet table.
-4. Use wallet search filters to narrow rows; changing filters resets pagination
+3. The route reads supported `locale` query values for progressive
+   message-backed copy and locale-aware number formatting.
+4. Review the page header, optional distribution photos, and wallet table.
+5. Use wallet search filters to narrow rows; changing filters resets pagination
    to page 1.
-5. Review allowlist-phase columns, minted/total columns, and pagination when
+6. Review allowlist-phase columns, minted/total columns, and pagination when
    enough rows are available.
 
 ## Common Scenarios
@@ -65,8 +68,8 @@ pagination.
 - Preserve a non-default locale while moving between tabs, for example
   `/meme-lab/123?locale=de-DE&focus=collectors`.
 - Stay on the same tab while moving card-to-card with navigation arrows.
-- Open `Distribution Plan`, filter for one or more wallets, then clear filters
-  and return to the card route.
+- Open `Distribution Plan` from a non-default locale URL, keep that locale on
+  the distribution route, filter for one or more wallets, then clear filters.
 
 ## Edge Cases
 
@@ -115,7 +118,8 @@ criteria.` even when unfiltered distribution data exists.
   through prior tab changes.
 - Tab switches preserve supported locale query values.
 - `Distribution Plan` link on card `Overview` is shown only when distribution
-  is available for that card.
+  is available for that card, and preserves supported non-default `locale`
+  query values.
 - Marketplace shortcuts are hidden on iOS unless detected country is `US`.
 - Card and distribution data are API-backed snapshots and can lag briefly.
 - Card-level ownership chips, marketplace details, media fallback, and transfer

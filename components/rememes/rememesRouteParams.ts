@@ -112,3 +112,14 @@ export function getRememeDetailHref({
     locale,
   });
 }
+
+export function getRememesAddHref({
+  locale,
+}: {
+  readonly locale: SupportedLocale;
+}): string {
+  return getRouteHrefWithLocale({
+    href: "/rememes/add",
+    locale,
+  });
+}
