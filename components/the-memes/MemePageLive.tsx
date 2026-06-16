@@ -151,7 +151,12 @@ function MemePageAdditionalDetailsAccordion({
           tabIndex={isOpen ? undefined : -1}
           className={isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"}
         >
-          <MemePageArt show={true} nft={nft} nftMeta={nftMeta} />
+          <MemePageArt
+            show={true}
+            nft={nft}
+            nftMeta={nftMeta}
+            locale={locale}
+          />
         </div>
       </div>
     </section>
