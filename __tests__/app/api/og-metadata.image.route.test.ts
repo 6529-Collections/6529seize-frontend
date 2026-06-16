@@ -87,13 +87,17 @@ const createHeaders = (values: Record<string, string>) => ({
   get: (name: string) => values[name.toLowerCase()] ?? null,
 });
 
-const mockImageResponse = (contentLength: number): void => {
-  mockFetchPublicUrl.mockResolvedValue({
-    body: createReadableBody(PNG_1X1),
+const mockImageResponse = (
+  contentLength: number,
+  contentType = "image/png",
+  body = PNG_1X1
+): void => {
+  mockFetchPublicUrl.mockResolvedValueOnce({
+    body: createReadableBody(body),
     headers: {
       get: createHeaders({
         "content-length": `${contentLength}`,
-        "content-type": "image/png",
+        "content-type": contentType,
       }).get,
     },
     ok: true,
@@ -127,6 +131,24 @@ describe("/api/og-metadata/image", () => {
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({
       error: "Failed to normalize image",
+    });
+  });
+
+  it("uses a bounded range request for oversized GIF previews", async () => {
+    mockImageResponse(108 * 1024 * 1024, "image/gif");
+    mockImageResponse(PNG_1X1.byteLength, "image/gif");
+
+    const response = await GET(
+      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/png");
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+    expect(mockFetchPublicUrl.mock.calls[1]?.[1]).toMatchObject({
+      headers: expect.objectContaining({
+        range: "bytes=0-8388607",
+      }),
     });
   });
 

@@ -13,7 +13,9 @@ export const revalidate = 604800;
 
 const DEFAULT_WIDTH = 1200;
 const MAX_WIDTH = 1200;
+const OVERSIZED_GIF_PREVIEW_MAX_BYTES = 8 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
+const GIF_CONTENT_TYPE = "image/gif";
 const CACHE_CONTROL =
   "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=2592000";
 const IMAGE_ACCEPT_HEADER =
@@ -106,9 +108,43 @@ const getContentLength = (response: Response): number | null => {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 };
 
+const getResponseContentType = (response: Response): string | null => {
+  const contentType = response.headers.get("content-type");
+  return contentType?.split(";")[0]?.trim().toLowerCase() || null;
+};
+
 const ensureAllowedImageSize = (byteLength: number): void => {
   if (byteLength > OG_IMAGE_PROXY_MAX_BYTES) {
     throw new Error("Image response exceeded maximum size.");
+  }
+};
+
+const ensureAllowedGifPreviewSize = (byteLength: number): void => {
+  if (byteLength > OVERSIZED_GIF_PREVIEW_MAX_BYTES) {
+    throw new Error("GIF preview response exceeded maximum size.");
+  }
+};
+
+const isGifUrl = (url: URL): boolean => /\.gif(?:$|[?#])/i.test(url.pathname);
+
+const shouldUseOversizedGifPreview = ({
+  contentLength,
+  contentType,
+  url,
+}: {
+  readonly contentLength: number | null;
+  readonly contentType: string | null;
+  readonly url: URL;
+}): boolean =>
+  contentLength !== null &&
+  contentLength > OG_IMAGE_PROXY_MAX_BYTES &&
+  (contentType === GIF_CONTENT_TYPE || isGifUrl(url));
+
+const cancelResponseBody = async (response: Response): Promise<void> => {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Best-effort cleanup before issuing a bounded range request.
   }
 };
 
@@ -180,11 +216,43 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
   }
 
   const contentLength = getContentLength(response);
+  const contentType = getResponseContentType(response);
+  if (shouldUseOversizedGifPreview({ contentLength, contentType, url })) {
+    await cancelResponseBody(response);
+    return fetchOversizedGifPreviewBuffer(url);
+  }
+
   if (contentLength !== null) {
     ensureAllowedImageSize(contentLength);
   }
 
   return readImageResponseBuffer(response);
+};
+
+const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
+  const response = await fetchPublicUrl(
+    url,
+    {
+      headers: {
+        accept: IMAGE_ACCEPT_HEADER,
+        range: `bytes=0-${OVERSIZED_GIF_PREVIEW_MAX_BYTES - 1}`,
+      },
+    },
+    FETCH_OPTIONS
+  );
+
+  if (!response.ok && response.status !== 206) {
+    throw new Error(`Image range request failed: ${response.status}`);
+  }
+
+  const contentLength = getContentLength(response);
+  if (contentLength !== null) {
+    ensureAllowedGifPreviewSize(contentLength);
+  }
+
+  const buffer = await readImageResponseBuffer(response);
+  ensureAllowedGifPreviewSize(buffer.byteLength);
+  return buffer;
 };
 
 const detectContentType = (buffer: Buffer): string | null => {
@@ -215,16 +283,44 @@ const normalizeImageToPng = async ({
     throw new Error("Upstream response is not an image.");
   }
 
-  return sharp(buffer, {
-    limitInputPixels: false,
-    pages: 1,
-    sequentialRead: true,
-  })
+  const image =
+    detectedContentType === GIF_CONTENT_TYPE
+      ? await createGifPreviewImage(buffer)
+      : sharp(buffer, {
+          limitInputPixels: false,
+          pages: 1,
+          sequentialRead: true,
+        });
+
+  return image
     .timeout({ seconds: 7 })
     .rotate()
     .resize(width, undefined, { withoutEnlargement: true })
     .png({ quality: 100 })
     .toBuffer();
+};
+
+const getGifPreviewPage = (pages: number | undefined): number => {
+  if (!pages || pages < 2) {
+    return 0;
+  }
+
+  return Math.min(pages - 1, Math.floor(pages / 2));
+};
+
+const createGifPreviewImage = async (buffer: Buffer): Promise<sharp.Sharp> => {
+  const metadata = await sharp(buffer, {
+    animated: true,
+    limitInputPixels: false,
+    sequentialRead: true,
+  }).metadata();
+
+  return sharp(buffer, {
+    limitInputPixels: false,
+    page: getGifPreviewPage(metadata.pages),
+    pages: 1,
+    sequentialRead: true,
+  });
 };
 
 const parseImageUrl = (value: string | null): URL => {
