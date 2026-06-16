@@ -498,6 +498,10 @@ describe("open-graph API route", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(fallbackData);
     expect(execute).toHaveBeenCalledTimes(1);
+    expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      expect.any(Object)
+    );
     expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(utils.buildResponse).toHaveBeenCalledWith(

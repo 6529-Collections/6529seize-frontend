@@ -568,10 +568,9 @@ async function executeFirstParty6529Plan(
   try {
     return await executePlan(plan);
   } catch {
+    await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
     const fallbackPlan = createGenericPlan(targetUrl);
-    const fallback = await executePlan(fallbackPlan);
-    cache.set(plan.cacheKey, fallback, CACHE_TTL_MS);
-    return fallback;
+    return executePlan(fallbackPlan);
   }
 }
 
