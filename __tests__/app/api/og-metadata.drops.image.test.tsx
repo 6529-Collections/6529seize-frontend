@@ -143,6 +143,67 @@ describe("renderDropOgImage", () => {
     expect(textNodes).not.toContain("Drop #6411");
   });
 
+  it("renders mention and wave markdown tokens without brackets", () => {
+    const element = renderDropOgImage({
+      id: "6412",
+      origin: "http://localhost:3001",
+      author: undefined,
+      wave: undefined,
+      drop: {
+        id: "drop-1",
+        serial_no: 6412,
+        drop_type: "CHAT" as any,
+        content:
+          "Color refs for @[prxt0] and #[The Memes - Main Stage] inline",
+      },
+    });
+
+    const styles = collectStyles(element);
+    const textNodes = collectTextNodes(element);
+    const renderedText = textNodes.join("");
+
+    expect(renderedText).toContain("@prxt0");
+    expect(renderedText).toContain("#The Memes - Main Stage");
+    expect(renderedText).not.toContain("@[prxt0]");
+    expect(renderedText).not.toContain("#[The Memes - Main Stage]");
+    expect(styles).toContainEqual(
+      expect.objectContaining({
+        color: "#79B8FF",
+      })
+    );
+  });
+
+  it("renders trailing ellipsis on segmented content lines", () => {
+    const element = renderDropOgImage({
+      id: "6413",
+      origin: "http://localhost:3001",
+      author: undefined,
+      wave: undefined,
+      drop: {
+        id: "drop-1",
+        serial_no: 6413,
+        drop_type: "CHAT" as any,
+        content: [
+          "one",
+          "two",
+          "three",
+          "four",
+          "five",
+          "six",
+          "seven",
+          "@[eight]",
+          "nine",
+        ].join("\n"),
+      },
+    });
+
+    const textNodes = collectTextNodes(element);
+
+    expect(textNodes).toContain("@eight...");
+    expect(textNodes).not.toContain("@eight");
+    expect(textNodes).not.toContain("nine");
+  });
+
   it("renders submission drops with winner, media type, visual image, and votes", () => {
     const element = renderDropOgImage({
       id: "5905",

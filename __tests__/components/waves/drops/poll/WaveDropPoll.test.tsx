@@ -29,6 +29,12 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   }),
 }));
 
+jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
+  useWaveEligibility: () => ({
+    getEligibility: () => null,
+  }),
+}));
+
 jest.mock("@/components/utils/tooltip/UserProfileTooltipWrapper", () => ({
   __esModule: true,
   default: ({ children }: { readonly children: ReactElement }) => (
@@ -70,22 +76,31 @@ const createPoll = (overrides: Partial<ApiDropPoll> = {}): ApiDropPoll => ({
   voted: [],
   multichoice: false,
   anonymous: false,
+  only_droppers_can_respond: false,
   closing_time: Date.now() + 60_000,
   is_open: true,
   ...overrides,
 });
 
-const createDrop = (poll: ApiDropPoll): ApiDrop =>
+interface CreateDropOptions {
+  readonly canChat?: boolean;
+}
+
+const createDrop = (
+  poll: ApiDropPoll,
+  { canChat = true }: CreateDropOptions = {}
+): ApiDrop =>
   ({
     id: "drop-1",
     wave: {
       id: "wave-1",
       name: "Wave 1",
+      authenticated_user_eligible_to_chat: canChat,
     },
     poll,
   }) as unknown as ApiDrop;
 
-const renderPoll = (poll: ApiDropPoll) => {
+const renderPoll = (poll: ApiDropPoll, options: CreateDropOptions = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -96,7 +111,7 @@ const renderPoll = (poll: ApiDropPoll) => {
 
   const renderResult = render(
     <QueryClientProvider client={queryClient}>
-      <WaveDropPoll drop={createDrop(poll)} />
+      <WaveDropPoll drop={createDrop(poll, options)} />
     </QueryClientProvider>
   );
 
@@ -106,7 +121,7 @@ const renderPoll = (poll: ApiDropPoll) => {
     rerenderPoll: (nextPoll: ApiDropPoll) =>
       renderResult.rerender(
         <QueryClientProvider client={queryClient}>
-          <WaveDropPoll drop={createDrop(nextPoll)} />
+          <WaveDropPoll drop={createDrop(nextPoll, options)} />
         </QueryClientProvider>
       ),
   };
@@ -130,6 +145,48 @@ describe("WaveDropPoll", () => {
     expect(screen.getByLabelText("First")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Results" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Submit vote" })).toBeNull();
+  });
+
+  it("keeps unrestricted polls voteable when the viewer cannot chat", () => {
+    renderPoll(createPoll(), { canChat: false });
+
+    expect(screen.getByRole("radio", { name: "First" })).toBeInTheDocument();
+    expect(screen.queryByText("2 votes")).not.toBeInTheDocument();
+  });
+
+  it("shows results only for restricted polls when the viewer cannot chat", () => {
+    renderPoll(
+      createPoll({
+        only_droppers_can_respond: true,
+      }),
+      { canChat: false }
+    );
+
+    expect(
+      screen.queryByRole("radio", { name: "First" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /View voters for First/ })
+    ).toBeInTheDocument();
+    expect(voteDropPollV2Mock).not.toHaveBeenCalled();
+  });
+
+  it("does not show change vote for restricted polls when the viewer cannot chat", () => {
+    renderPoll(
+      createPoll({
+        only_droppers_can_respond: true,
+        voted: [1],
+      }),
+      { canChat: false }
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Change vote" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Voted")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /View voters for First.*Your vote/ })
+    ).toBeInTheDocument();
   });
 
   it("shows results without fetching voters until an option expands", async () => {

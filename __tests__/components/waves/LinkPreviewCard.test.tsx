@@ -49,6 +49,18 @@ describe("LinkPreviewCard", () => {
     );
     return frame;
   };
+  const assertFirstPartyFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[15rem]",
+      "tw-min-h-[15rem]",
+      "tw-max-h-[15rem]",
+      "lg:tw-h-[11rem]",
+      "lg:tw-min-h-[11rem]",
+      "lg:tw-max-h-[11rem]"
+    );
+    return frame;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -122,6 +134,37 @@ describe("LinkPreviewCard", () => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
     assertStableFrame();
+  });
+
+  it("uses the richer chat frame for generated first-party previews", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      title: "punk6529bot",
+      description: "Identity | 6529.io",
+      image: {
+        url: "https://6529.io/api/og-metadata/profiles/punk6529bot",
+      },
+      siteName: "6529.io",
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://6529.io/punk6529bot"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    assertStableFrame();
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          href: "https://6529.io/punk6529bot",
+          preview: expect.objectContaining({ title: "punk6529bot" }),
+        })
+      )
+    );
+
+    assertFirstPartyFrame();
   });
 
   it("renders ENS previews when ENS data is returned", async () => {
