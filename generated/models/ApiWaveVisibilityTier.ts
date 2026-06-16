@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export enum ApiWaveVisibilityTier {
     TrustedVisible = 'TRUSTED_VISIBLE',
     ExplorationNeutral = 'EXPLORATION_NEUTRAL',

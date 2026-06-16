@@ -40,7 +40,7 @@ test("Wave REP allocation prefix invalidation refetches rating and credit", asyn
       endpoint: "waves/wave-1/rep/rating",
       params: {
         category: "quality",
-        from_identity: "Tester",
+        from_identity: "tester",
       },
     })
   );

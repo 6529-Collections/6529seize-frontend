@@ -21,9 +21,9 @@ export function useWaveRepAllocation({
   readonly isLoading: boolean;
 } {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const connectedHandle = connectedProfile?.handle;
+  const raterIdentity = connectedProfile?.handle?.trim().toLowerCase() ?? "";
   const trimmedCategory = category?.trim() || null;
-  const enabled = !!connectedHandle && !activeProfileProxy;
+  const enabled = !!raterIdentity && !activeProfileProxy;
 
   const {
     data: credit,
@@ -33,14 +33,14 @@ export function useWaveRepAllocation({
     queryKey: [
       QueryKey.WAVE_REP_CREDIT,
       {
-        rater: connectedHandle?.toLowerCase(),
+        rater: raterIdentity,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiAvailableRatingCredit>({
         endpoint: "ratings/credit",
         params: {
-          rater: connectedHandle ?? "",
+          rater: raterIdentity,
         },
       }),
     enabled,
@@ -55,7 +55,7 @@ export function useWaveRepAllocation({
       QueryKey.WAVE_REP_RATING,
       {
         waveId,
-        rater: connectedHandle?.toLowerCase(),
+        rater: raterIdentity,
         category: trimmedCategory,
       },
     ],
@@ -63,7 +63,7 @@ export function useWaveRepAllocation({
       await commonApiFetch<ApiWaveRepRating>({
         endpoint: `waves/${waveId}/rep/rating`,
         params: {
-          from_identity: connectedHandle ?? "",
+          from_identity: raterIdentity,
           category: trimmedCategory ?? "",
         },
       }),

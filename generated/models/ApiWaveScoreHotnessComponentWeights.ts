@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiWaveScoreHotnessComponentWeights {
     'recent_trusted_activity_score': number;
     'quality_score': number;

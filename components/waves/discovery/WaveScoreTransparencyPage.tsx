@@ -222,11 +222,14 @@ function getCurrentOrigin(): string {
 }
 
 function sanitizeWaveId(value: string | null): string | null {
-  const trimmed = value?.trim();
+  let trimmed = value?.trim();
   if (!trimmed) {
     return null;
   }
-  return trimmed.replace(/\/+$/g, "");
+  while (trimmed.endsWith("/")) {
+    trimmed = trimmed.slice(0, -1);
+  }
+  return trimmed || null;
 }
 
 function parseWaveIdFromInput(input: string): string | null {
@@ -264,13 +267,13 @@ function parseWaveIdFromInput(input: string): string | null {
 }
 
 function getWaveDisplayHandle(wave: ApiWave): string {
-  return wave.author.handle ?? wave.author.primary_address;
+  return wave.author?.handle ?? wave.author?.primary_address ?? "Unknown";
 }
 
 function getWaveHref(wave: ApiWave): string {
   const isDirectMessage =
     wave.wave.type === ApiWaveType.Chat &&
-    Boolean(wave.chat.scope.group?.is_direct_message);
+    Boolean(wave.chat.scope?.group?.is_direct_message);
   return getWaveRoute({
     waveId: wave.id,
     isDirectMessage,
