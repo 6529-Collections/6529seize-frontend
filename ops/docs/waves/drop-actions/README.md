@@ -39,6 +39,7 @@ threads.
 - [Wave Drop Content Display](feature-content-display.md)
 - [Wave Drop Reply Preview Rows](feature-reply-preview-rows.md)
 - [Wave Drop Image Viewer and Scaling](feature-image-viewer-and-scaling.md)
+- [Wave Drop Video Player](feature-video-player.md)
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Wave Drop Quote Link Cards (Same-Origin Serial Links)](feature-quote-link-cards.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)

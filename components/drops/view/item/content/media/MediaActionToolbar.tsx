@@ -55,6 +55,7 @@ export function InlineMediaActions({
   fullscreenTargetAvailable,
   variant,
   position = "top-right",
+  className,
 }: {
   readonly onDownload?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
@@ -64,9 +65,10 @@ export function InlineMediaActions({
   readonly fullscreenTargetAvailable?: boolean | undefined;
   readonly variant: "image" | "video" | "html";
   readonly position?: "top-right" | "bottom-right" | undefined;
+  readonly className?: string | undefined;
 }) {
   const canFullscreen =
-    (variant === "image" || variant === "html") &&
+    (variant === "image" || variant === "html" || variant === "video") &&
     Boolean(onFullscreen) &&
     Boolean(fullscreenTargetAvailable) &&
     fullScreenSupported();
@@ -79,7 +81,8 @@ export function InlineMediaActions({
     <div
       className={clsx(
         "tw-absolute tw-z-30 tw-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-950/90 tw-shadow-lg tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-backdrop-blur",
-        positionClassName
+        positionClassName,
+        className
       )}
     >
       {canFullscreen && (

@@ -78,6 +78,8 @@ describe("WaveDropPartContentMedias", () => {
     expect(video).toBeInTheDocument();
     expect(video).toHaveAttribute("data-fill-video-container", "true");
     expect(video.parentElement).toHaveClass("tw-h-64");
+    expect(video.parentElement).toHaveClass("tw-justify-start");
+    expect(image.parentElement).toHaveClass("tw-justify-center");
     expect(container.querySelector(".tw-grid.tw-grid-cols-1")).toBeNull();
   });
 

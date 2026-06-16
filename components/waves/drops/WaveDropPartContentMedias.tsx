@@ -57,11 +57,13 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
   const mediaStackClassName = clsx(topSpacingClassName, "tw-space-y-3");
   const getMediaContainerClassName = ({
+    alignMediaStart,
     groupedImage,
     reserveMediaHeight,
     useNaturalHeightMedia,
     useCompactLink,
   }: {
+    readonly alignMediaStart: boolean;
     readonly groupedImage: boolean;
     readonly reserveMediaHeight: boolean;
     readonly useNaturalHeightMedia: boolean;
@@ -73,7 +75,8 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
 
     if (reserveMediaHeight) {
       return clsx(
-        "tw-flex tw-w-full tw-items-center tw-justify-center",
+        "tw-flex tw-w-full tw-items-center",
+        alignMediaStart ? "tw-justify-start" : "tw-justify-center",
         groupedImage ? "tw-min-w-0" : "tw-min-w-[min(200px,100%)]",
         mediaContainerHeightClassName
       );
@@ -84,11 +87,15 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     }
 
     if (useNaturalHeightMedia) {
-      return "tw-flex tw-w-full tw-min-w-[min(200px,100%)] tw-max-h-64 tw-items-center tw-justify-center";
+      return clsx(
+        "tw-flex tw-max-h-64 tw-w-full tw-min-w-[min(200px,100%)] tw-items-center",
+        alignMediaStart ? "tw-justify-start" : "tw-justify-center"
+      );
     }
 
     return clsx(
-      "tw-flex tw-min-w-[min(200px,100%)] tw-items-center tw-justify-center",
+      "tw-flex tw-min-w-[min(200px,100%)] tw-items-center",
+      alignMediaStart ? "tw-justify-start" : "tw-justify-center",
       mediaContainerHeightClassName,
       fullWidthMedia && "tw-w-full"
     );
@@ -112,6 +119,7 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       : undefined;
     const useCompactLink = !isRenderableMedia(media.mime_type, media.url);
     const mediaContainerClassName = getMediaContainerClassName({
+      alignMediaStart: media.mime_type.includes("video"),
       groupedImage,
       reserveMediaHeight: useImageReservedHeight || useVideoReservedHeight,
       useNaturalHeightMedia: useNaturalHeightImage || useNaturalHeightVideo,

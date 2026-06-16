@@ -4,9 +4,9 @@ import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
-import { PlayIcon } from "@heroicons/react/24/solid";
+import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { InlineMediaActions } from "./MediaActionToolbar";
 import { useMediaActions } from "./useMediaActions";
 
@@ -17,6 +17,18 @@ interface Props {
   readonly fillContainer?: boolean | undefined;
 }
 
+const CONTROL_BUTTON_CLASS =
+  "tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/85 tw-text-white tw-shadow-lg tw-shadow-black/25 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+const PLAYER_CHROME_VISIBILITY_CLASS =
+  "tw-opacity-0 tw-transition-opacity tw-duration-200 group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100";
+
+function getPrefersReducedMotion(): boolean {
+  return (
+    typeof globalThis.matchMedia === "function" &&
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 function DropListItemContentMediaVideo({
   src,
   mimeType,
@@ -24,7 +36,14 @@ function DropListItemContentMediaVideo({
   fillContainer = false,
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const fullscreenRef = useRef<HTMLDivElement | null>(null);
   const { isApp } = useDeviceInfo();
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    getPrefersReducedMotion
+  );
+  const [isMuted, setIsMuted] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -46,12 +65,12 @@ function DropListItemContentMediaVideo({
     src: playableUrl,
     isHls,
     fallbackSrc: src,
-    autoPlay: inView && !isApp && !disableAutoPlay,
+    autoPlay: inView && !isApp && !disableAutoPlay && !prefersReducedMotion,
   });
-  const showNativeControls = !isApp;
 
   // 3) Play/pause & mute based on scroll visibility
-  const shouldAutoPlay = inView && !isApp && !disableAutoPlay;
+  const shouldAutoPlay =
+    inView && !isApp && !disableAutoPlay && !prefersReducedMotion;
 
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -60,12 +79,35 @@ function DropListItemContentMediaVideo({
     if (shouldAutoPlay) {
       // ensure muted autoplay works
       videoEl.muted = true;
-      if (!isApp) videoEl.play().catch(() => {});
+      setIsMuted(true);
+      if (!isApp) {
+        videoEl.play().catch(() => undefined);
+      }
     } else {
       videoEl.pause();
-      videoEl.muted = true;
+      if (!isApp && disableAutoPlay) {
+        videoEl.muted = true;
+        setIsMuted(true);
+      }
     }
-  }, [shouldAutoPlay, isApp, isLoading, videoRef]);
+  }, [shouldAutoPlay, isApp, disableAutoPlay, isLoading, videoRef]);
+
+  useEffect(() => {
+    if (typeof globalThis.matchMedia !== "function") {
+      return;
+    }
+
+    const mediaQuery = globalThis.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    );
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    handleChange();
+    mediaQuery.addEventListener?.("change", handleChange);
+    return () => {
+      mediaQuery.removeEventListener?.("change", handleChange);
+    };
+  }, []);
 
   // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {
@@ -98,67 +140,229 @@ function DropListItemContentMediaVideo({
     };
   }, [isApp, videoRef]);
 
-  const enterFullscreenAndPlay = () => {
+  const syncMediaState = useCallback(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) {
+      return;
+    }
+
+    setIsMuted(videoEl.muted);
+    setCurrentTime(
+      Number.isFinite(videoEl.currentTime) ? videoEl.currentTime : 0
+    );
+    setDuration(Number.isFinite(videoEl.duration) ? videoEl.duration : 0);
+  }, [videoRef]);
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) {
+      return;
+    }
+
+    const updateTime = () => {
+      setCurrentTime(
+        Number.isFinite(videoEl.currentTime) ? videoEl.currentTime : 0
+      );
+    };
+    const updateDuration = () => {
+      setDuration(Number.isFinite(videoEl.duration) ? videoEl.duration : 0);
+    };
+    const updateMuted = () => setIsMuted(videoEl.muted);
+
+    syncMediaState();
+    videoEl.addEventListener("timeupdate", updateTime);
+    videoEl.addEventListener("loadedmetadata", updateDuration);
+    videoEl.addEventListener("durationchange", updateDuration);
+    videoEl.addEventListener("volumechange", updateMuted);
+    return () => {
+      videoEl.removeEventListener("timeupdate", updateTime);
+      videoEl.removeEventListener("loadedmetadata", updateDuration);
+      videoEl.removeEventListener("durationchange", updateDuration);
+      videoEl.removeEventListener("volumechange", updateMuted);
+    };
+  }, [syncMediaState, videoRef, playableUrl]);
+
+  const playVideo = useCallback(() => {
     const videoEl = videoRef.current;
     if (!videoEl) {
       return;
     }
 
     videoEl.play().catch(() => undefined);
-    videoEl.requestFullscreen().catch(() => undefined);
+  }, [videoRef]);
+
+  const pauseVideo = useCallback(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) {
+      return;
+    }
+
+    videoEl.pause();
+  }, [videoRef]);
+
+  const togglePlayback = useCallback(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) {
+      return;
+    }
+
+    if (videoEl.paused || videoEl.ended) {
+      playVideo();
+      return;
+    }
+
+    pauseVideo();
+  }, [pauseVideo, playVideo, videoRef]);
+
+  const toggleMuted = useCallback(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) {
+      return;
+    }
+
+    videoEl.muted = !videoEl.muted;
+    setIsMuted(videoEl.muted);
+  }, [videoRef]);
+
+  const seekTo = useCallback(
+    (value: string) => {
+      const videoEl = videoRef.current;
+      if (!videoEl) {
+        return;
+      }
+
+      const nextTime = Number.parseFloat(value);
+      if (!Number.isFinite(nextTime)) {
+        return;
+      }
+
+      videoEl.currentTime = nextTime;
+      setCurrentTime(nextTime);
+    },
+    [videoRef]
+  );
+
+  const enterFullscreenAndPlay = () => {
+    const videoEl = videoRef.current;
+    if (!videoEl) {
+      return;
+    }
+
+    playVideo();
+    const fullscreenTarget = isApp ? videoEl : fullscreenRef.current;
+    fullscreenTarget?.requestFullscreen().catch(() => undefined);
   };
+
+  const progressPercent =
+    duration > 0
+      ? Math.min(100, Math.max(0, (currentTime / duration) * 100))
+      : 0;
 
   return (
     <div
       ref={wrapperRef}
       className={clsx(
-        "tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-bg-black",
-        fillContainer
-          ? "tw-h-full tw-max-h-full"
-          : "tw-max-h-64 tw-min-h-[200px]"
+        "tw-group tw-relative tw-flex tw-w-fit tw-max-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl",
+        fillContainer ? "tw-h-full tw-max-h-full" : "tw-max-h-64"
       )}
     >
-      <video
-        ref={videoRef}
-        onClick={() => {
-          if (!isApp) {
-            return;
-          }
-          enterFullscreenAndPlay();
-        }}
-        playsInline
-        controls={showNativeControls}
-        controlsList="nodownload noplaybackrate"
-        autoPlay={false}
-        muted
-        loop
+      <div
+        ref={fullscreenRef}
         className={clsx(
-          "tw-w-full tw-rounded-xl tw-object-contain",
-          fillContainer ? "tw-h-full tw-max-h-full" : "tw-h-auto tw-max-h-64"
+          "tw-relative tw-flex tw-w-fit tw-max-w-full tw-items-center tw-justify-center",
+          fillContainer ? "tw-h-full tw-max-h-full" : "tw-max-h-64"
         )}
       >
-        Your browser does not support the video tag.
-      </video>
-      {isApp && (
-        <button
-          type="button"
-          aria-label="Play video"
-          title="Play video"
-          onClick={(event) => {
-            event.stopPropagation();
-            enterFullscreenAndPlay();
+        <video
+          ref={videoRef}
+          aria-label="Video. Press Enter or Space to play or pause."
+          onClick={() => {
+            if (isApp) {
+              enterFullscreenAndPlay();
+              return;
+            }
+            togglePlayback();
           }}
-          className="tw-absolute tw-left-1/2 tw-top-1/2 tw-z-20 tw-flex tw-size-16 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/75 tw-text-white tw-shadow-lg tw-shadow-black/30 tw-backdrop-blur-sm"
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" && event.key !== " ") {
+              return;
+            }
+
+            event.preventDefault();
+            if (isApp) {
+              enterFullscreenAndPlay();
+              return;
+            }
+            togglePlayback();
+          }}
+          playsInline
+          controls={false}
+          autoPlay={false}
+          muted
+          loop
+          preload="auto"
+          tabIndex={0}
+          className={clsx(
+            "tw-rounded-xl tw-object-contain",
+            fillContainer
+              ? "tw-h-full tw-max-h-full tw-w-auto tw-max-w-full"
+              : "tw-h-auto tw-max-h-64 tw-w-auto tw-max-w-full"
+          )}
         >
-          <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
-        </button>
-      )}
+          Your browser does not support the video tag.
+        </video>
+        {!isApp && (
+          <button
+            type="button"
+            aria-label={isMuted ? "Unmute video" : "Mute video"}
+            title={isMuted ? "Unmute video" : "Mute video"}
+            onClick={(event) => {
+              event.stopPropagation();
+              toggleMuted();
+            }}
+            className={clsx(
+              "tw-absolute tw-bottom-5 tw-left-3 tw-z-30 sm:tw-left-4",
+              CONTROL_BUTTON_CLASS,
+              PLAYER_CHROME_VISIBILITY_CLASS
+            )}
+          >
+            {isMuted ? (
+              <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
+            ) : (
+              <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
+            )}
+          </button>
+        )}
+        {!isApp && (
+          <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-30 tw-h-1 tw-overflow-hidden tw-bg-white/45">
+            <div
+              className="tw-h-full tw-bg-primary-400"
+              style={{ width: `${progressPercent}%` }}
+            />
+            <input
+              type="range"
+              aria-label="Video progress"
+              min={0}
+              max={duration > 0 ? duration : 0}
+              step="0.01"
+              value={Math.min(currentTime, duration || currentTime)}
+              disabled={duration <= 0}
+              onClick={(event) => event.stopPropagation()}
+              onChange={(event) => seekTo(event.currentTarget.value)}
+              className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-6 tw-w-full tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-default"
+            />
+          </div>
+        )}
+      </div>
       <InlineMediaActions
         variant="video"
         onDownload={downloadMedia}
+        onFullscreen={enterFullscreenAndPlay}
         onOpen={openMedia}
         openLabel={openLabel}
         isDownloading={isDownloading}
+        fullscreenTargetAvailable={!isApp}
+        className={PLAYER_CHROME_VISIBILITY_CLASS}
       />
     </div>
   );
