@@ -26,6 +26,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import { getRememeSortLabel, getRememeTokenTypeLabel } from "./rememesI18n";
 import {
+  getRememesAddHref,
+  getRememeDetailHref,
   getRememesBrowseQuery,
   type RememesSearchParams,
 } from "./rememesRouteParams";
@@ -36,7 +38,7 @@ const PAGE_SIZE = 40;
 export { RememeSort, TokenType } from "./rememesTypes";
 
 const REMEMES_GRID_CLASS =
-  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
 const REMEMES_TOTAL_COUNT_CLASS =
   "tw-shrink-0 tw-text-sm tw-font-medium tw-leading-none tw-text-iron-500 sm:tw-text-base";
 const REMEME_SORTING = [RememeSort.RANDOM, RememeSort.CREATED_ASC] as const;
@@ -232,41 +234,46 @@ export default function Rememes({
     const title = getRememeTitle(rememe);
 
     return (
-      <Link
-        key={`${rememe.contract}-${rememe.id}`}
-        href={`/rememes/${rememe.contract}/${rememe.id}`}
-        aria-label={t(locale, "rememes.card.linkAriaLabel", {
-          name: title,
-          tokenId,
-        })}
-        className="tw-group tw-flex tw-h-full tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-      >
-        <div className="tw-bg-iron-900">
-          <RememeImage nft={rememe} animation={false} height={300} />
-        </div>
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
-          <div className="tw-line-clamp-2 tw-w-full tw-max-w-full tw-break-words tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-50 md:tw-text-md">
-            {title}
+      <li key={`${rememe.contract}-${rememe.id}`} className="tw-min-w-0">
+        <Link
+          href={getRememeDetailHref({
+            contract: rememe.contract,
+            id: rememe.id,
+            locale,
+          })}
+          aria-label={t(locale, "rememes.card.linkAriaLabel", {
+            name: title,
+            tokenId,
+          })}
+          className="tw-group tw-flex tw-h-full tw-min-w-0 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-border-white/20 hover:tw-bg-iron-900/50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          <div className="tw-bg-iron-900">
+            <RememeImage nft={rememe} animation={false} height={300} />
           </div>
-          <div className="tw-mt-2 tw-flex tw-min-h-5 tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1.5 tw-gap-y-0.5 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
-            <span className="tw-break-words">
-              {collectionName}
-              {replicaCount > 1 && <>&nbsp;{replicaCountLabel}</>}
-            </span>
-            <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-600">
-              &middot;
-            </span>
-            <span
-              aria-label={t(locale, "rememes.card.tokenAriaLabel", {
-                tokenId,
-              })}
-              className="tw-min-w-0 tw-truncate tw-font-medium"
-            >
-              #{rememe.id}
-            </span>
+          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-center tw-px-2 tw-pb-4 tw-pt-4 tw-text-center md:tw-px-4">
+            <div className="tw-line-clamp-2 tw-w-full tw-max-w-full tw-break-words tw-text-center tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-50 md:tw-text-md">
+              {title}
+            </div>
+            <div className="tw-mt-2 tw-flex tw-min-h-5 tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-center tw-gap-x-1.5 tw-gap-y-0.5 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-500">
+              <span className="tw-break-words">
+                {collectionName}
+                {replicaCount > 1 && <>&nbsp;{replicaCountLabel}</>}
+              </span>
+              <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-600">
+                &middot;
+              </span>
+              <span
+                aria-label={t(locale, "rememes.card.tokenAriaLabel", {
+                  tokenId,
+                })}
+                className="tw-min-w-0 tw-truncate tw-font-medium"
+              >
+                #{rememe.id}
+              </span>
+            </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      </li>
     );
   }
 
@@ -278,7 +285,14 @@ export default function Rememes({
         </div>
       );
     }
-    return <div className={REMEMES_GRID_CLASS}>{rememes.map(printRememe)}</div>;
+    return (
+      <ul
+        aria-label={t(locale, "rememes.results.gridLabel")}
+        className={REMEMES_GRID_CLASS}
+      >
+        {rememes.map(printRememe)}
+      </ul>
+    );
   }
 
   return (
@@ -339,7 +353,7 @@ export default function Rememes({
               <div className="tw-flex tw-w-full tw-items-center sm:tw-w-auto sm:tw-justify-end">
                 <div className="tw-w-full sm:tw-w-auto [&>a]:tw-w-full sm:[&>a]:tw-w-auto">
                   <Link
-                    href="/rememes/add"
+                    href={getRememesAddHref({ locale })}
                     aria-label={t(locale, "rememes.actions.add")}
                     className={ADD_REMEME_LINK_CLASS}
                   >

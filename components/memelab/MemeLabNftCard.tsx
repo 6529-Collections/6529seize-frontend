@@ -12,6 +12,7 @@ import { t } from "@/i18n/messages";
 import { MemeLabSort } from "@/types/enums";
 import Link from "next/link";
 import { printNftContent } from "./memeLabCardContent";
+import { getMemeLabDetailHref } from "./memeLabRouteParams";
 
 export default function MemeLabNftCard({
   nft,
@@ -36,7 +37,7 @@ export default function MemeLabNftCard({
   return (
     <Link
       key={`${nft.contract}-${nft.id}`}
-      href={`/meme-lab/${nft.id}`}
+      href={getMemeLabDetailHref({ id: nft.id, locale })}
       aria-label={t(locale, "memeLab.card.linkAriaLabel", {
         name: nft.name,
         tokenId,

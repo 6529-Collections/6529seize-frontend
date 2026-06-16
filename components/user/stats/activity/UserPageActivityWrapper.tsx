@@ -2,6 +2,7 @@
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import {
   SEARCH_PARAM_ACTIVITY,
   WALLET_ACTIVITY_FILTER_PARAM,
@@ -10,6 +11,10 @@ import {
 } from "./activity.helpers";
 import { USER_PAGE_ACTIVITY_TAB } from "./activity.types";
 import UserPageStatsActivityDistributions from "./distributions/UserPageStatsActivityDistributions";
+import {
+  getActivityPanelId,
+  getActivityTabId,
+} from "./tabs/activity-tabs.helpers";
 import UserPageActivityTabs from "./tabs/UserPageActivityTabs";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";
 import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
@@ -31,6 +36,23 @@ const pathToEnum = (path: string): USER_PAGE_ACTIVITY_TAB => {
 };
 
 export default function UserPageActivityWrapper({
+  profile,
+  activeAddress,
+}: {
+  readonly profile: ApiIdentity;
+  readonly activeAddress: string | null;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <UserPageActivityContent
+        profile={profile}
+        activeAddress={activeAddress}
+      />
+    </Suspense>
+  );
+}
+
+function UserPageActivityContent({
   profile,
   activeAddress,
 }: {
@@ -63,19 +85,44 @@ export default function UserPageActivityWrapper({
     <div className="tw-mt-7 lg:tw-mt-9">
       <UserPageActivityTabs activeTab={activeTab} setActiveTab={onActiveTab} />
       {activeTab === USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY && (
-        <UserPageStatsActivityWallet
-          profile={profile}
-          activeAddress={activeAddress}
-        />
+        <section
+          role="tabpanel"
+          id={getActivityPanelId(USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY)}
+          aria-labelledby={getActivityTabId(
+            USER_PAGE_ACTIVITY_TAB.WALLET_ACTIVITY
+          )}
+          tabIndex={0}
+        >
+          <UserPageStatsActivityWallet
+            profile={profile}
+            activeAddress={activeAddress}
+          />
+        </section>
       )}
       {activeTab === USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS && (
-        <UserPageStatsActivityDistributions
-          profile={profile}
-          activeAddress={activeAddress}
-        />
+        <section
+          role="tabpanel"
+          id={getActivityPanelId(USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS)}
+          aria-labelledby={getActivityTabId(
+            USER_PAGE_ACTIVITY_TAB.DISTRIBUTIONS
+          )}
+          tabIndex={0}
+        >
+          <UserPageStatsActivityDistributions
+            profile={profile}
+            activeAddress={activeAddress}
+          />
+        </section>
       )}
       {activeTab === USER_PAGE_ACTIVITY_TAB.TDH_HISTORY && (
-        <UserPageStatsActivityTDHHistory profile={profile} />
+        <section
+          role="tabpanel"
+          id={getActivityPanelId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)}
+          aria-labelledby={getActivityTabId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)}
+          tabIndex={0}
+        >
+          <UserPageStatsActivityTDHHistory profile={profile} />
+        </section>
       )}
     </div>
   );
