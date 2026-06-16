@@ -1,4 +1,5 @@
 import UserPageStatsActivityDistributions from "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributions";
+import { getDistributionsMessage } from "@/components/user/stats/activity/distributions/distributions.messages";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -68,6 +69,11 @@ test("hydrates the page from query params and updates the url on page change", a
     />
   );
 
+  expect(
+    screen.getByRole("heading", {
+      name: getDistributionsMessage("user.collected.stats.distributions.title"),
+    })
+  ).toBeInTheDocument();
   expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
 
   await userEvent.click(screen.getByTestId("set-page"));
