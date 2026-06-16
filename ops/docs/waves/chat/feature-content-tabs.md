@@ -22,6 +22,8 @@ restores it whenever that wave is opened again and the tab is still available.
 - Open a wave from waves lists, profile wave links, or a shared wave URL.
 - Open a direct message thread with a selected wave.
 - Select a tab from the wave tab strip.
+- Eligible wave admins can use the tab-row `+` menu to create a curation or,
+  on root non-direct-message waves, create a subwave.
 
 ## User Journey
 
