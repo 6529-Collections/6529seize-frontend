@@ -1,5 +1,9 @@
 import UserPageActivityWrapper from "@/components/user/stats/activity/UserPageActivityWrapper";
 import { USER_PAGE_ACTIVITY_TAB } from "@/components/user/stats/activity/activity.types";
+import {
+  getActivityPanelId,
+  getActivityTabId,
+} from "@/components/user/stats/activity/tabs/activity-tabs.helpers";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -60,6 +64,15 @@ test("hydrates the active tab from query params and updates the url on change", 
   render(<UserPageActivityWrapper profile={profile} activeAddress={null} />);
 
   expect(screen.getByTestId("tdh")).toBeInTheDocument();
+  const activePanel = screen.getByRole("tabpanel");
+  expect(activePanel).toHaveAttribute(
+    "id",
+    getActivityPanelId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)
+  );
+  expect(activePanel).toHaveAttribute(
+    "aria-labelledby",
+    getActivityTabId(USER_PAGE_ACTIVITY_TAB.TDH_HISTORY)
+  );
 
   await user.click(screen.getByTestId("tab"));
 
