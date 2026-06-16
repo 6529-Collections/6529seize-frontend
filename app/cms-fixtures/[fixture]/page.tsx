@@ -8,6 +8,7 @@ import {
   getCmsFixturePackage,
   type CmsFixtureSlug,
 } from "@/lib/cms/fixtures";
+import { getSafeCmsMediaUrl } from "@/lib/cms/media";
 
 type CmsFixturePageProps = {
   readonly params: Promise<{
@@ -32,7 +33,7 @@ export async function generateMetadata({
   return getAppMetadata({
     title: social.title,
     description: social.description,
-    ogImage: social.open_graph_image.url,
+    ogImage: getSafeCmsMediaUrl(social.open_graph_image.url),
     ogImageAlt: social.open_graph_image.alt,
     ogImageHeight: social.open_graph_image.height,
     ogImageWidth: social.open_graph_image.width,

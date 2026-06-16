@@ -4,7 +4,7 @@ const IPFS_PROTOCOL = "ipfs://";
 const ARWEAVE_PROTOCOL = "ar://";
 const LOCAL_MEDIA_FALLBACK = "/6529io.png";
 const URL_SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
-const UNSAFE_URL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f\s\\]/;
+const UNSAFE_URL_CHARACTER_PATTERN = /[\u0000-\u0020\u007f\\]/;
 
 function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? trimTrailingSlash(value.slice(0, -1)) : value;
