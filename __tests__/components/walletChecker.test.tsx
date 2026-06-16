@@ -30,22 +30,30 @@ jest.mock(
   "@/components/utils/input/ens-address/EnsAddressInput",
   () =>
     function MockEnsAddressInput(props: {
+      id?: string;
       value?: string;
       placeholder?: string;
       onAddressChange: (address: string) => void;
+      onValueChange?: (value: string) => void;
       disabled?: boolean;
       autoFocus?: boolean;
       className?: string;
+      ariaDescribedBy?: string;
     }) {
       return (
         <input
+          id={props.id}
           data-testid="ens-address-input"
           placeholder={props.placeholder}
           value={props.value ?? ""}
           disabled={props.disabled}
           autoFocus={props.autoFocus}
           className={props.className}
-          onChange={(e) => props.onAddressChange(e.target.value)}
+          aria-describedby={props.ariaDescribedBy}
+          onChange={(e) => {
+            props.onValueChange?.(e.target.value);
+            props.onAddressChange(e.target.value);
+          }}
         />
       );
     }
@@ -79,9 +87,12 @@ describe("WalletChecker", () => {
     fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
       target: { value: "bad" },
     });
-    fireEvent.click(screen.getByText("Check"));
+    fireEvent.click(screen.getByText("Check Wallet"));
     expect(setAddressQuery).not.toHaveBeenCalled();
     expect(mockFetchUrl).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Enter a valid Ethereum address or ENS name.")
+    ).toBeInTheDocument();
   });
 
   it("fetches data for valid address", async () => {
@@ -95,7 +106,7 @@ describe("WalletChecker", () => {
     fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
       target: { value: "0x1111111111111111111111111111111111111111" },
     });
-    fireEvent.click(screen.getByText("Check"));
+    fireEvent.click(screen.getByText("Check Wallet"));
     expect(setAddressQuery).toHaveBeenCalledWith(
       "0x1111111111111111111111111111111111111111"
     );
@@ -118,7 +129,7 @@ describe("WalletChecker extras", () => {
     );
     const input = screen.getByPlaceholderText("0x... or ENS");
     fireEvent.change(input, { target: { value: "bad" } });
-    fireEvent.click(screen.getByText("Check"));
+    fireEvent.click(screen.getByText("Check Wallet"));
     fireEvent.change(input, {
       target: { value: "0x1234567890123456789012345678901234567890" },
     });

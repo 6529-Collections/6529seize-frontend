@@ -21,6 +21,10 @@ const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
 
+beforeAll(() => {
+  Element.prototype.scrollIntoView = jest.fn();
+});
+
 jest.mock("react-use", () => {
   return {
     createBreakpoint: () => () => "MD",
@@ -555,7 +559,7 @@ describe("HeaderSearchModal", () => {
               name: "NFT Delegation",
               items: [
                 {
-                  name: "Delegation FAQs",
+                  name: "Delegation FAQ",
                   href: "/delegation/delegation-faq",
                 },
               ],
@@ -588,7 +592,7 @@ describe("HeaderSearchModal", () => {
 
     const items = await screen.findAllByTestId("item");
     expect(items[0]?.textContent).toContain('"title":"FAQ"');
-    expect(items[1]?.textContent).toContain('"title":"Delegation FAQs"');
+    expect(items[1]?.textContent).toContain('"title":"Delegation FAQ"');
   });
 
   it("renders result categories in deterministic order in All view", async () => {

@@ -27,7 +27,7 @@ delegations for one collection scope.
 2. Review sections:
    - `Delegations`
    - `Consolidations`
-   - `Use A Delegation Manager (For Delegations or Consolidations)`
+   - `Delegation Managers`
    - `Locks`
 3. Use outgoing row actions (`Edit`, `Revoke`) or `Batch Revoke` where offered.
 4. Use manager actions for the selected incoming manager row.
@@ -63,8 +63,9 @@ delegations for one collection scope.
 
 - Accordions auto-open sides with loaded rows; empty sections stay collapsed.
 - While reads are unresolved, tables show `Fetching incoming ...` /
-  `Fetching outgoing ...`.
-- Empty tables show `No incoming ... found` / `No outgoing ... found`.
+  `Fetching outgoing ...` with the current collection scope.
+- Empty tables show `No incoming ... found` / `No outgoing ... found` with the
+  current collection scope.
 - Outgoing-row checkboxes and `Batch Revoke` show only when that outgoing table
   has at least 2 rows.
 - `Batch Revoke` stays disabled until at least 2 rows are selected.

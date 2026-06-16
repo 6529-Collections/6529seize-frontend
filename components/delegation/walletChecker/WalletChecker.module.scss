@@ -11,6 +11,12 @@
   }
 }
 
+.intro,
+.statusText {
+  color: variables.$font-color-h;
+  margin-bottom: 0.75rem;
+}
+
 .checkBtn {
   background-color: variables.$project-blue;
   border: none;

@@ -202,6 +202,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
               validate={validate}
               onHide={onHide}
               onSetToast={onSetToast}
+              submitBtnLabel="Assign Primary Address"
             />
           </Form>
         </Col>

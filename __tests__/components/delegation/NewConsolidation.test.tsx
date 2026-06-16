@@ -4,11 +4,10 @@ import NewConsolidationComponent from '@/components/delegation/NewConsolidation'
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: () => <svg data-testid="icon" /> }));
 
-let submitGroupsMock: jest.Mock;
+const mockSubmitGroups = jest.fn(() => null);
 
 jest.mock('@/components/delegation/DelegationFormParts', () => {
   const React = require('react');
-  submitGroupsMock = jest.fn(() => null);
   return {
     __esModule: true,
     DelegationCloseButton: (props: any) => <button data-testid="close" onClick={props.onHide}>x</button>,
@@ -24,14 +23,14 @@ jest.mock('@/components/delegation/DelegationFormParts', () => {
     DelegationFormDelegateAddressFormGroup: ({ setAddress, title }: any) => (
       <input data-testid="delegate" aria-label={title} onChange={e => setAddress(e.target.value)} />
     ),
-    DelegationSubmitGroups: submitGroupsMock,
+    DelegationSubmitGroups: (props: any) => mockSubmitGroups(props),
   };
 });
 
 const baseProps = { address: '0xabc', ens: null, onHide: jest.fn(), onSetToast: jest.fn() };
 
 beforeEach(() => {
-  submitGroupsMock.mockClear();
+  mockSubmitGroups.mockClear();
 });
 
 describe('NewConsolidationComponent', () => {
@@ -39,7 +38,7 @@ describe('NewConsolidationComponent', () => {
     render(<NewConsolidationComponent {...baseProps} />);
     expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent('Register Consolidation');
     expect(screen.queryByTestId('original')).toBeNull();
-    const params = (submitGroupsMock.mock.calls[0] as any)[0].writeParams;
+    const params = (mockSubmitGroups.mock.calls[0] as any)[0].writeParams;
     expect(params.functionName).toBeUndefined();
   });
 
@@ -58,7 +57,7 @@ describe('NewConsolidationComponent', () => {
     await user.selectOptions(screen.getByTestId('collection'), '1');
     await user.type(screen.getByTestId('delegate'), '0x1111111111111111111111111111111111111111');
 
-    const params = (submitGroupsMock.mock.calls.at(-1) as any)[0].writeParams;
+    const params = (mockSubmitGroups.mock.calls.at(-1) as any)[0].writeParams;
     expect(params.args[0]).toBe('0xdef');
     expect(params.args[1]).toBe('1');
     expect(params.args[2]).toBe('0x1111111111111111111111111111111111111111');
