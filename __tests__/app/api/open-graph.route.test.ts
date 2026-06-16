@@ -448,6 +448,40 @@ describe("open-graph API route", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
+  it("does not trust caller-supplied auth headers for first-party 6529 plans", async () => {
+    const firstPartyData = {
+      type: "6529.collection",
+      kind: "the-memes",
+      title: "The Collective Synapse",
+    };
+    const execute = jest.fn(async () => ({
+      data: firstPartyData,
+      ttl: 45_000,
+    }));
+
+    firstParty6529.createFirstParty6529Plan.mockReturnValue({
+      cacheKey: "6529:public:the-memes:/the-memes/509",
+      execute,
+    });
+
+    const request = {
+      nextUrl: new URL(
+        "https://app.local/api/open-graph?url=https://6529.io/the-memes/509"
+      ),
+      headers: new Headers({ "x-6529-auth": "header-secret" }),
+    } as any;
+
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(firstPartyData);
+    expect(firstParty6529.createFirstParty6529Plan).toHaveBeenCalledWith(
+      new URL("https://6529.io/the-memes/509"),
+      { apiAuth: null }
+    );
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
   it("applies host-specific overrides for facebook", async () => {
     const html = "<html></html>";
     const responsePayload = {

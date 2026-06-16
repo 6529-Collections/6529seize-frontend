@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { publicEnv } from "@/config/env";
@@ -112,11 +114,35 @@ function buildApiUrl(
   return url.toString();
 }
 
+function getCallerApiAuth(context?: ApiContext): string | undefined {
+  const apiAuth = context?.apiAuth?.trim();
+  return apiAuth || undefined;
+}
+
+function getApiAuth(context?: ApiContext): string | undefined {
+  return (
+    getCallerApiAuth(context) ?? publicEnv.STAGING_API_KEY?.trim() ?? undefined
+  );
+}
+
+function hashCacheToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex").slice(0, 24);
+}
+
+function getCacheAuthScope(context?: ApiContext): string {
+  const callerAuth = getCallerApiAuth(context);
+  if (callerAuth) {
+    return `auth:${hashCacheToken(callerAuth)}`;
+  }
+
+  return publicEnv.STAGING_API_KEY?.trim() ? "staging" : "public";
+}
+
 function createApiHeaders(context?: ApiContext): HeadersInit {
   const headers: Record<string, string> = {
     accept: "application/json",
   };
-  const apiAuth = context?.apiAuth?.trim() || publicEnv.STAGING_API_KEY;
+  const apiAuth = getApiAuth(context);
 
   if (apiAuth) {
     headers["x-6529-auth"] = apiAuth;
@@ -370,8 +396,34 @@ function compactFacts(
   );
 }
 
+function normalizeHttpsImageUrl(value: unknown): string | undefined {
+  const url = readString(value);
+  if (!url) {
+    return undefined;
+  }
+
+  try {
+    const parsed = new URL(url, "https://6529.io");
+    return parsed.protocol === "https:" ? parsed.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function selectHttpsImageUrl(...values: readonly unknown[]): string | undefined {
+  for (const value of values) {
+    const url = normalizeHttpsImageUrl(value);
+    if (url) {
+      return url;
+    }
+  }
+
+  return undefined;
+}
+
 function createImageMedia(url: string | undefined): LinkPreviewMedia | null {
-  return url ? { url, secureUrl: url } : null;
+  const normalizedUrl = normalizeHttpsImageUrl(url);
+  return normalizedUrl ? { url: normalizedUrl, secureUrl: normalizedUrl } : null;
 }
 
 function buildPreview(input: PreviewBuildInput): SeizeCollectionLinkPreview {
@@ -586,7 +638,7 @@ async function fetchTheMemesPreview(
       createFact("Season", season !== undefined ? formatInteger(season) : undefined),
       createFact("Mint date", mintDate),
     ]),
-    imageUrl: firstNonEmptyString(
+    imageUrl: selectHttpsImageUrl(
       source.thumbnail,
       source.scaled,
       source.image,
@@ -645,7 +697,7 @@ async function fetchMemeLabPreview(
       ),
       createFact("Mint date", mintDate),
     ]),
-    imageUrl: firstNonEmptyString(
+    imageUrl: selectHttpsImageUrl(
       source.thumbnail,
       source.scaled,
       source.image,
@@ -703,7 +755,7 @@ async function fetchGradientPreview(
       ),
       createFact("Mint date", mintDate),
     ]),
-    imageUrl: firstNonEmptyString(
+    imageUrl: selectHttpsImageUrl(
       nft.thumbnail,
       nft.scaled,
       nft.image,
@@ -801,7 +853,7 @@ async function fetchNextGenPreview(
     traits: sortNextGenTraits(traits ?? [])
       .slice(0, 3)
       .map((trait) => ({ label: trait.trait, value: trait.value })),
-    imageUrl: firstNonEmptyString(
+    imageUrl: selectHttpsImageUrl(
       token.thumbnail_url,
       token.icon_url,
       token.image_url
@@ -892,7 +944,7 @@ async function fetchReMemesPreview(
         replicasCount > 1 ? formatInteger(replicasCount) : undefined
       ),
     ]),
-    imageUrl: firstNonEmptyString(
+    imageUrl: selectHttpsImageUrl(
       rememe.s3_image_thumbnail,
       rememe.s3_image_scaled,
       rememe.s3_image_original,
@@ -932,9 +984,7 @@ export function createFirstParty6529Plan(
   }
 
   return {
-    cacheKey: `6529:${
-      context?.apiAuth?.trim() || publicEnv.STAGING_API_KEY ? "auth" : "public"
-    }:${target.kind}:${url.pathname.toLowerCase()}`,
+    cacheKey: `6529:${getCacheAuthScope(context)}:${target.kind}:${url.pathname.toLowerCase()}`,
     execute: async () => {
       const data = await executeTarget(target, url, context);
       return { data, ttl: CACHE_TTL_MS };

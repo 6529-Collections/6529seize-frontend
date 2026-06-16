@@ -1,5 +1,5 @@
 import { createFirstParty6529Plan } from "@/app/api/open-graph/6529/service";
-import { MEMES_CONTRACT } from "@/constants/constants";
+import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { publicEnv } from "@/config/env";
 
 const originalFetch = global.fetch;
@@ -116,7 +116,9 @@ describe("createFirstParty6529Plan", () => {
     );
 
     expect(plan).not.toBeNull();
-    expect(plan?.cacheKey).toBe("6529:auth:the-memes:/the-memes/509");
+    expect(plan?.cacheKey).toMatch(
+      /^6529:auth:[a-f0-9]{24}:the-memes:\/the-memes\/509$/
+    );
 
     const { data } = await plan!.execute();
 
@@ -148,6 +150,254 @@ describe("createFirstParty6529Plan", () => {
       { label: "TDH rate", value: "25.1" },
       { label: "Season", value: "15" },
       { label: "Mint date", value: "1 Jun 2026" },
+    ]);
+  });
+
+  it("isolates authenticated collection preview cache keys by auth token", () => {
+    const url = new URL("https://6529.io/the-memes/509");
+    const publicPlan = createFirstParty6529Plan(url);
+    const firstAuthPlan = createFirstParty6529Plan(url, { apiAuth: "alpha" });
+    const secondAuthPlan = createFirstParty6529Plan(url, { apiAuth: "beta" });
+
+    publicEnv.STAGING_API_KEY = "staging-secret";
+    const stagingPlan = createFirstParty6529Plan(url);
+
+    expect(publicPlan?.cacheKey).toBe("6529:public:the-memes:/the-memes/509");
+    expect(firstAuthPlan?.cacheKey).toMatch(
+      /^6529:auth:[a-f0-9]{24}:the-memes:\/the-memes\/509$/
+    );
+    expect(secondAuthPlan?.cacheKey).toMatch(
+      /^6529:auth:[a-f0-9]{24}:the-memes:\/the-memes\/509$/
+    );
+    expect(firstAuthPlan?.cacheKey).not.toBe(secondAuthPlan?.cacheKey);
+    expect(stagingPlan?.cacheKey).toBe("6529:staging:the-memes:/the-memes/509");
+  });
+
+  it("only matches exact 6529 hosts and subdomains", () => {
+    expect(
+      createFirstParty6529Plan(new URL("https://6529.io/the-memes/509"))
+    ).not.toBeNull();
+    expect(
+      createFirstParty6529Plan(new URL("https://staging.6529.io/the-memes/509"))
+    ).not.toBeNull();
+    expect(
+      createFirstParty6529Plan(new URL("https://6529.io.evil.com/the-memes/509"))
+    ).toBeNull();
+    expect(
+      createFirstParty6529Plan(new URL("https://evil6529.io/the-memes/509"))
+    ).toBeNull();
+  });
+
+  it("skips unsafe image schemes and uses the next safe image candidate", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nfts") {
+        return jsonResponse({
+          data: [
+            {
+              id: 509,
+              name: "The Collective Synapse",
+              artist_seize_handle: "elnaz555",
+              hodl_rate: 25.1019,
+              mint_date: "2026-06-01T00:00:00.000Z",
+              thumbnail: "javascript:alert(1)",
+              scaled: "https://cdn.6529.io/memes/509-safe.png",
+              metadata: {
+                image: "data:image/svg+xml;base64,PHN2Zy8+",
+                attributes: [{ trait_type: "Type - Season", value: 15 }],
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/memes_extended_data") {
+        return jsonResponse({ data: [] });
+      }
+
+      if (
+        url.pathname ===
+        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
+      ) {
+        return jsonResponse({}, 404);
+      }
+
+      if (url.pathname === "/api/memes-mint-stats/509") {
+        return jsonResponse({}, 404);
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(data.image).toEqual({
+      url: "https://cdn.6529.io/memes/509-safe.png",
+      secureUrl: "https://cdn.6529.io/memes/509-safe.png",
+    });
+    expect(data.images).toEqual([data.image]);
+  });
+
+  it("builds Meme Lab previews with artist and edition size", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nfts_memelab") {
+        return jsonResponse({
+          data: [
+            {
+              id: 71,
+              name: "The Outsiders Companion",
+              artist: "Artist 6529",
+              artist_seize_handle: "artist6529",
+              mint_date: "2025-03-02T00:00:00.000Z",
+              thumbnail: "https://cdn.6529.io/memelab/71.png",
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/lab_extended_data") {
+        return jsonResponse({
+          data: [{ id: 71, edition_size: 420 }],
+        });
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/meme-lab/71")
+    );
+    const { data } = await plan!.execute();
+
+    const fetchUrls = mockFetch.mock.calls.map((call) =>
+      readFetchUrl(call[0]).toString()
+    );
+    expect(fetchUrls).toEqual(
+      expect.arrayContaining([
+        `https://api.test/api/nfts_memelab?contract=${MEMELAB_CONTRACT}&id=71`,
+        "https://api.test/api/lab_extended_data?id=71",
+      ])
+    );
+    expect(data).toMatchObject({
+      type: "6529.collection",
+      kind: "meme-lab",
+      title: "The Outsiders Companion",
+      kicker: "Meme Lab #71",
+      people: [{ label: "by", name: "artist6529", href: "/artist6529" }],
+    });
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "420" },
+      { label: "Mint date", value: "2 Mar 2025" },
+    ]);
+  });
+
+  it("builds Gradient previews with artist, collector, TDH, and mint date", async () => {
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/nfts/gradients") {
+        return jsonResponse({
+          data: [
+            {
+              id: 92,
+              name: "6529 Gradient #92",
+              artist: "6529er",
+              artist_seize_handle: "6529er",
+              owner: "0x000000000000000000000000000000000000dEaD",
+              owner_display: "punk6529",
+              hodl_rate: 13.456,
+              mint_date: "2022-09-10T00:00:00.000Z",
+              thumbnail: "https://cdn.6529.io/gradients/92.png",
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/identities/punk6529") {
+        return jsonResponse({ handle: "punk6529" });
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/6529-gradient/92")
+    );
+    const { data } = await plan!.execute();
+
+    expect(data).toMatchObject({
+      type: "6529.collection",
+      kind: "6529-gradient",
+      title: "6529 Gradient #92",
+      people: [
+        { label: "Artist", name: "6529er", href: "/6529er" },
+        { label: "Collector", name: "punk6529", href: "/punk6529" },
+      ],
+    });
+    expect(data.kicker).toBeNull();
+    expect(data.facts).toEqual([
+      { label: "TDH rate", value: "13.46" },
+      { label: "Mint date", value: "10 Sept 2022" },
+    ]);
+  });
+
+  it("builds ReMemes previews with creator, references, edition size, and replicas", async () => {
+    const contract = "0x1234567890abcdef1234567890abcdef12345678";
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.pathname === "/api/rememes") {
+        return jsonResponse({
+          data: [
+            {
+              contract,
+              id: 1,
+              added_by: "fallback6529",
+              s3_image_thumbnail: "https://cdn.6529.io/rememes/1.png",
+              meme_references: [509],
+              replicas: [{ id: 1 }, { id: 2 }],
+              metadata: {
+                name: "Touch the OM",
+                attributes: [
+                  { trait_type: "SEIZE Artist Profile", value: "artist6529" },
+                  { trait_type: "Edition Size", value: 88 },
+                ],
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/identities/artist6529") {
+        return jsonResponse({ handle: "artist6529" });
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL(`https://6529.io/rememes/${contract}/1`)
+    );
+    const { data } = await plan!.execute();
+
+    expect(data).toMatchObject({
+      type: "6529.collection",
+      kind: "rememes",
+      title: "Touch the OM",
+      kicker: "ReMemes",
+      people: [{ label: "by", name: "artist6529", href: "/artist6529" }],
+    });
+    expect(data.facts).toEqual([
+      { label: "References", value: "The Memes #509" },
+      { label: "Edition size", value: "88" },
+      { label: "Replicas", value: "2" },
     ]);
   });
 

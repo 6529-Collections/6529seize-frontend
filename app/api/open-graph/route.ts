@@ -429,13 +429,7 @@ function getRequestApiAuth(request: NextRequest): string | null {
       };
     }
   ).cookies;
-  const headers = (request as { readonly headers?: Headers }).headers;
-
-  return (
-    cookieStore?.get(API_AUTH_COOKIE)?.value ??
-    headers?.get(API_AUTH_COOKIE) ??
-    null
-  );
+  return cookieStore?.get(API_AUTH_COOKIE)?.value ?? null;
 }
 
 async function resolveLinkPreview(
