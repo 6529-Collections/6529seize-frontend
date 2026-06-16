@@ -348,6 +348,7 @@ describe("CurationWavePreviewCard", () => {
     expect(useWavesMock).toHaveBeenCalledWith({
       identity: "alice",
       waveName: null,
+      limit: 20,
       enabled: true,
       directMessage: false,
     });

@@ -451,7 +451,7 @@ const CreatedWavesPanel: React.FC<{
           prefetch={false}
           className="tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-primary-400 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-primary-300"
         >
-          All brain activity
+          Show all brain activity
           <ArrowRightIcon className="tw-h-3 tw-w-3" aria-hidden="true" />
         </Link>
       </div>

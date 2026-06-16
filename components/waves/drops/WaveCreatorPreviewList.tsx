@@ -72,7 +72,9 @@ export function useWaveCreatorPreviewWaves({
         return;
       }
 
-      void fetchNextPage();
+      fetchNextPage().catch(() => {
+        // React Query surfaces pagination errors through hook state.
+      });
     },
     [
       fetchNextPage,
