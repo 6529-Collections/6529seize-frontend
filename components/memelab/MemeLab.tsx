@@ -21,13 +21,16 @@ import { MemeLabSort } from "@/types/enums";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { getMemeLabCollectionPath } from "./memeLabRouteParams";
+import { getMemeLabCollectionHref } from "./memeLabRouteParams";
 import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
 export { printNftContent } from "./memeLabCardContent";
 
 const COLLECTION_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
+const COLLECTION_GRID_LIST_CLASS = `${COLLECTION_GRID_CLASS} tw-m-0 tw-list-none tw-px-0 tw-pb-0`;
+const GROUP_GRID_LIST_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-m-0 tw-list-none tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5";
 
 export function getInitialRouterValues(
   sortDir: string | null,
@@ -459,20 +462,28 @@ export default function MemeLabComponent({
 
   function printNft(nft: LabNFT) {
     return (
-      <MemeLabNftCard
-        key={`${nft.contract}-${nft.id}`}
-        nft={nft}
-        sort={sort}
-        nftMetas={nftMetas}
-        volumeType={volumeType}
-        hasConnectedProfile={isConnected}
-        locale={locale}
-      />
+      <li key={`${nft.contract}-${nft.id}`} className="tw-min-w-0">
+        <MemeLabNftCard
+          nft={nft}
+          sort={sort}
+          nftMetas={nftMetas}
+          volumeType={volumeType}
+          hasConnectedProfile={isConnected}
+          locale={locale}
+        />
+      </li>
     );
   }
 
   function printNfts() {
-    return <div className={COLLECTION_GRID_CLASS}>{nfts.map(printNft)}</div>;
+    return (
+      <ul
+        aria-label={t(locale, "memeLab.results.gridLabel")}
+        className={COLLECTION_GRID_LIST_CLASS}
+      >
+        {nfts.map(printNft)}
+      </ul>
+    );
   }
 
   function printArtists() {
@@ -483,11 +494,16 @@ export default function MemeLabComponent({
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
             {artist}
           </h2>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+          <ul
+            aria-label={t(locale, "memeLab.results.artistGridLabel", {
+              artistName: artist,
+            })}
+            className={GROUP_GRID_LIST_CLASS}
+          >
             {[...artistNfts]
               .sort((a, b) => a.id - b.id)
               .map((nft: LabNFT) => printNft(nft))}
-          </div>
+          </ul>
         </section>
       );
     });
@@ -509,7 +525,10 @@ export default function MemeLabComponent({
             </h2>
             <Link
               className="hover:tw-text-primary-200 tw-text-sm tw-font-medium tw-text-primary-300 tw-no-underline tw-transition"
-              href={getMemeLabCollectionPath(collection)}
+              href={getMemeLabCollectionHref({
+                collectionName: collection,
+                locale,
+              })}
               aria-label={t(locale, "memeLab.collection.viewAriaLabel", {
                 collectionName: collection,
               })}
@@ -517,11 +536,16 @@ export default function MemeLabComponent({
               {t(locale, "memeLab.collection.view")}
             </Link>
           </div>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
+          <ul
+            aria-label={t(locale, "memeLab.results.collectionGridLabel", {
+              collectionName: collection,
+            })}
+            className={GROUP_GRID_LIST_CLASS}
+          >
             {[...collectionNfts]
               .sort((a, b) => a.id - b.id)
               .map((nft: LabNFT) => printNft(nft))}
-          </div>
+          </ul>
         </section>
       );
     });
