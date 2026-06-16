@@ -12,7 +12,6 @@
  */
 
 import { ApiWaveRepCategorySummary } from '../models/ApiWaveRepCategorySummary';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveRepSummary {
     'total_rep': number;

@@ -35,6 +35,15 @@ test("Wave REP allocation prefix invalidation refetches rating and credit", asyn
     { wrapper }
   );
   await waitFor(() => expect(calls("waves/wave-1/rep/rating")).toBe(1));
+  expect(api).toHaveBeenCalledWith(
+    expect.objectContaining({
+      endpoint: "waves/wave-1/rep/rating",
+      params: {
+        category: "quality",
+        from_identity: "Tester",
+      },
+    })
+  );
 
   await act(async () => {
     await queryClient.invalidateQueries({

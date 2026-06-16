@@ -324,7 +324,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         )}
       </div>
 
-      <div className={`wave-drop-vote-submit-full ${styles.voteSubmitFull}`}>
+      <div className={`wave-drop-vote-submit-full ${styles["voteSubmitFull"]}`}>
         <SingleWaveDropVoteSubmit
           drop={displayDrop}
           newRating={submitVoteValue}

@@ -63,6 +63,7 @@ export function useWaveRepAllocation({
       await commonApiFetch<ApiWaveRepRating>({
         endpoint: `waves/${waveId}/rep/rating`,
         params: {
+          from_identity: connectedHandle ?? "",
           category: trimmedCategory ?? "",
         },
       }),

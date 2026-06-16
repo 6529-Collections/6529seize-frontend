@@ -14,7 +14,6 @@
 import { ApiWaveScoreHotnessComponentWeights } from '../models/ApiWaveScoreHotnessComponentWeights';
 import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQualityComponentWeights';
 import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveScoreFormula {
     'max_level_raw_for_score': number;
@@ -22,6 +21,14 @@ export class ApiWaveScoreFormula {
     'trusted_level_raw': number;
     'low_trust_level_raw': number;
     'recent_activity_window_ms': number;
+    'recent_activity_half_life_ms': number;
+    'participation_saturation_scale': number;
+    'trusted_diversity_saturation_scale': number;
+    'trusted_subscription_saturation_scale': number;
+    'recent_activity_saturation_scale': number;
+    'trusted_visible_min_visibility_score': number;
+    'exploration_neutral_min_visibility_score': number;
+    'demoted_min_visibility_score': number;
     'quality_component_weights': ApiWaveScoreQualityComponentWeights;
     'hotness_component_weights': ApiWaveScoreHotnessComponentWeights;
     'visibility_component_weights': ApiWaveScoreVisibilityComponentWeights;
@@ -60,6 +67,54 @@ export class ApiWaveScoreFormula {
             "baseName": "recent_activity_window_ms",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "recent_activity_half_life_ms",
+            "baseName": "recent_activity_half_life_ms",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "participation_saturation_scale",
+            "baseName": "participation_saturation_scale",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "trusted_diversity_saturation_scale",
+            "baseName": "trusted_diversity_saturation_scale",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "trusted_subscription_saturation_scale",
+            "baseName": "trusted_subscription_saturation_scale",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "recent_activity_saturation_scale",
+            "baseName": "recent_activity_saturation_scale",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "trusted_visible_min_visibility_score",
+            "baseName": "trusted_visible_min_visibility_score",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "exploration_neutral_min_visibility_score",
+            "baseName": "exploration_neutral_min_visibility_score",
+            "type": "number",
+            "format": "double"
+        },
+        {
+            "name": "demoted_min_visibility_score",
+            "baseName": "demoted_min_visibility_score",
+            "type": "number",
+            "format": "double"
         },
         {
             "name": "quality_component_weights",

@@ -6053,6 +6053,7 @@ paths:
             type: string
         - name: from_identity
           in: query
+          description: If omitted, the authenticated profile is used. Anonymous requests without from_identity return 0.
           required: false
           schema:
             type: string
@@ -15818,6 +15819,14 @@ components:
         - trusted_level_raw
         - low_trust_level_raw
         - recent_activity_window_ms
+        - recent_activity_half_life_ms
+        - participation_saturation_scale
+        - trusted_diversity_saturation_scale
+        - trusted_subscription_saturation_scale
+        - recent_activity_saturation_scale
+        - trusted_visible_min_visibility_score
+        - exploration_neutral_min_visibility_score
+        - demoted_min_visibility_score
         - quality_component_weights
         - hotness_component_weights
         - visibility_component_weights
@@ -15837,6 +15846,30 @@ components:
         recent_activity_window_ms:
           type: integer
           format: int64
+        recent_activity_half_life_ms:
+          type: integer
+          format: int64
+        participation_saturation_scale:
+          type: number
+          format: double
+        trusted_diversity_saturation_scale:
+          type: number
+          format: double
+        trusted_subscription_saturation_scale:
+          type: number
+          format: double
+        recent_activity_saturation_scale:
+          type: number
+          format: double
+        trusted_visible_min_visibility_score:
+          type: number
+          format: double
+        exploration_neutral_min_visibility_score:
+          type: number
+          format: double
+        demoted_min_visibility_score:
+          type: number
+          format: double
         quality_component_weights:
           $ref: "#/components/schemas/ApiWaveScoreQualityComponentWeights"
         hotness_component_weights:

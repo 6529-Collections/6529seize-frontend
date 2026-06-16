@@ -56,6 +56,14 @@ const DEFAULT_FORMULA: ApiWaveScoreFormula = {
   trusted_level_raw: 1000,
   low_trust_level_raw: 25,
   recent_activity_window_ms: 7 * 24 * 60 * 60 * 1000,
+  recent_activity_half_life_ms: 2 * 24 * 60 * 60 * 1000,
+  participation_saturation_scale: 600,
+  trusted_diversity_saturation_scale: 8,
+  trusted_subscription_saturation_scale: 30,
+  recent_activity_saturation_scale: 250,
+  trusted_visible_min_visibility_score: 55,
+  exploration_neutral_min_visibility_score: 25,
+  demoted_min_visibility_score: 10,
   quality_component_weights: {
     creator_score: 0.2,
     level_weighted_participation_score: 0.2,
@@ -175,6 +183,12 @@ function formatTimestamp(timestamp: unknown): string {
     return "Not calculated yet";
   }
   return dateTimeFormatter.format(new Date(numericTimestamp));
+}
+
+function formatDaysFromMs(value: unknown): string {
+  const days = toNumber(value) / (24 * 60 * 60 * 1000);
+  const suffix = days === 1 ? "day" : "days";
+  return `${formatScore(days)} ${suffix}`;
 }
 
 function getFormula(score: ApiWaveScore): ApiWaveScoreFormula {
@@ -536,6 +550,7 @@ function CalculatorPanel({
   readonly onSelectMatch: (waveId: string) => void;
 }) {
   const isLoading = status === "loading";
+  const errorId = "wave-score-calculator-error";
 
   return (
     <aside className="tw-rounded-lg tw-bg-iron-950 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-white/10">
@@ -571,6 +586,8 @@ function CalculatorPanel({
               value={input}
               onChange={(event) => onInputChange(event.target.value)}
               placeholder="meme-chat or https://6529.io/waves/..."
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? errorId : undefined}
               className="tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-black/35 tw-px-10 tw-text-sm tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
               autoComplete="off"
             />
@@ -605,6 +622,7 @@ function CalculatorPanel({
         )}
         {error && (
           <p
+            id={errorId}
             role="alert"
             className="tw-rounded-lg tw-bg-rose-500/10 tw-p-3 tw-text-sm tw-text-rose-200 tw-ring-1 tw-ring-inset tw-ring-rose-400/20"
           >
@@ -942,6 +960,60 @@ function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
           />
         </div>
       </div>
+
+      <div className="tw-rounded-lg tw-bg-iron-950/60 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-white/10">
+        <h3 className="tw-text-base tw-font-semibold tw-text-white">
+          Formula constants
+        </h3>
+        <p className="tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+          These API-returned constants explain the curve shapes, recency decay,
+          and visibility tier cutoffs behind the stored scores.
+        </p>
+        <div className="tw-mt-4 tw-grid tw-gap-3 sm:tw-grid-cols-2 lg:tw-grid-cols-4">
+          <ConstantStat
+            label="Recent window"
+            value={formatDaysFromMs(formula.recent_activity_window_ms)}
+            detail="trusted activity considered recent"
+          />
+          <ConstantStat
+            label="Recent half-life"
+            value={formatDaysFromMs(formula.recent_activity_half_life_ms)}
+            detail="recency multiplier decay"
+          />
+          <ConstantStat
+            label="Post saturation"
+            value={formatInteger(formula.participation_saturation_scale)}
+            detail="level-weighted posts"
+          />
+          <ConstantStat
+            label="Activity saturation"
+            value={formatInteger(formula.recent_activity_saturation_scale)}
+            detail="recent trusted activity"
+          />
+          <ConstantStat
+            label="Diversity saturation"
+            value={formatInteger(formula.trusted_diversity_saturation_scale)}
+            detail="trusted authors"
+          />
+          <ConstantStat
+            label="Subscription saturation"
+            value={formatInteger(formula.trusted_subscription_saturation_scale)}
+            detail="trusted subscribers"
+          />
+          <ConstantStat
+            label="Trusted tier"
+            value={formatScore(formula.trusted_visible_min_visibility_score)}
+            detail="minimum visibility score"
+          />
+          <ConstantStat
+            label="Neutral tier"
+            value={formatScore(
+              formula.exploration_neutral_min_visibility_score
+            )}
+            detail="exploration threshold"
+          />
+        </div>
+      </div>
     </section>
   );
 }
@@ -1125,6 +1197,30 @@ function PenaltyStat({
   );
 }
 
+function ConstantStat({
+  label,
+  value,
+  detail,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly detail: string;
+}) {
+  return (
+    <div className="tw-rounded-lg tw-bg-black/25 tw-p-3 tw-ring-1 tw-ring-inset tw-ring-white/10">
+      <div className="tw-text-[10px] tw-font-semibold tw-uppercase tw-text-iron-500">
+        {label}
+      </div>
+      <div className="tw-mt-1 tw-text-lg tw-font-semibold tw-text-white">
+        {value}
+      </div>
+      <div className="tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-500">
+        {detail}
+      </div>
+    </div>
+  );
+}
+
 export function WaveScoreTransparencyPage() {
   useSetTitle("Wave Score | Discovery");
 
@@ -1142,6 +1238,7 @@ export function WaveScoreTransparencyPage() {
   const loadWave = async (waveId: string) => {
     setStatus("loading");
     setError(null);
+    setWave(null);
     try {
       const nextWave = await fetchWaveById({ waveId });
       setWave(nextWave);
@@ -1155,6 +1252,7 @@ export function WaveScoreTransparencyPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedInput = input.trim();
+    setWave(null);
     if (trimmedInput.length < 2) {
       setStatus("error");
       setError("Enter a wave name, wave id, or wave URL.");
