@@ -1,11 +1,9 @@
 "use client";
 
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
-import { useAuth } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
-import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import WaveDelete from "./delete/WaveDelete";
 import WaveMute from "./mute/WaveMute";
 import WaveProfileWaveAction from "./profile-wave/WaveProfileWaveAction";
@@ -17,17 +15,8 @@ export default function WaveHeaderOptions({
   readonly wave: ApiWave;
   readonly showOwnerActions?: boolean | undefined;
 }) {
-  const { connectedProfile, activeProfileProxy } = useAuth();
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [isCreateSubwaveOpen, setIsCreateSubwaveOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
-  const canCreateSubwave =
-    Boolean(connectedProfile) &&
-    !activeProfileProxy &&
-    !isDirectMessage &&
-    !wave.parent_wave &&
-    wave.wave.authenticated_user_eligible_for_admin === true;
 
   return (
     <div className="tw-relative tw-z-20">
@@ -56,21 +45,6 @@ export default function WaveHeaderOptions({
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-0.5 tw-py-1">
-            {canCreateSubwave && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCreateSubwaveOpen(true);
-                  setIsOptionsOpen(false);
-                }}
-                className="tw-flex tw-w-full tw-items-center tw-gap-2 tw-border-none tw-bg-transparent tw-px-3 tw-py-1 tw-text-left tw-text-sm tw-leading-6 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800"
-                role="menuitem"
-                tabIndex={-1}
-              >
-                Create subwave
-              </button>
-            )}
             {showOwnerActions && (
               <WaveProfileWaveAction
                 wave={wave}
@@ -82,14 +56,6 @@ export default function WaveHeaderOptions({
           </div>
         </li>
       </CommonDropdownItemsDefaultWrapper>
-      {connectedProfile && (
-        <CreateWaveModal
-          isOpen={isCreateSubwaveOpen}
-          onClose={() => setIsCreateSubwaveOpen(false)}
-          profile={connectedProfile}
-          parentWaveId={wave.id}
-        />
-      )}
     </div>
   );
 }
