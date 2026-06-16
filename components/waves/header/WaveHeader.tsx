@@ -16,6 +16,7 @@ import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
+import { WaveTrustSignals } from "../WaveTrustSignals";
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
@@ -180,6 +181,12 @@ export default function WaveHeader({
             {Time.millis(wave.created_at).toDate().toLocaleDateString()}
           </span>
         </div>
+
+        <WaveTrustSignals
+          waveRep={wave.wave_rep}
+          waveScore={wave.wave_score}
+          className="tw-mt-3"
+        />
 
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
