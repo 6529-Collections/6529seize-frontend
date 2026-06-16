@@ -312,4 +312,85 @@ describe("OpenGraphPreview", () => {
       "https://cdn.example.com/preview.png"
     );
   });
+
+  it("renders first-party The Memes collection cards without duplicate mint counts", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue("/the-memes/509");
+
+    render(
+      <OpenGraphPreview
+        href="https://6529.io/the-memes/509"
+        preview={{
+          type: "6529.collection",
+          kind: "the-memes",
+          title: "The Collective Synapse",
+          kicker: "The Memes #509",
+          people: [{ label: "by", name: "elnaz555", href: "/elnaz555" }],
+          facts: [
+            { label: "Edition size", value: "328" },
+            { label: "TDH rate", value: "25.1" },
+            { label: "Season", value: "15" },
+            { label: "Mint date", value: "1 Jun 2026" },
+          ],
+          image: { url: "https://cdn.6529.io/memes/509.png" },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
+    expect(screen.getAllByText("The Memes #509")).toHaveLength(1);
+    expect(screen.getByText("The Collective Synapse")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "elnaz555" })).toHaveAttribute(
+      "href",
+      "/elnaz555"
+    );
+    expect(screen.getByText("Edition size")).toBeInTheDocument();
+    expect(screen.getByText("328")).toBeInTheDocument();
+    expect(screen.getByText("TDH rate")).toBeInTheDocument();
+    expect(screen.getByText("25.1")).toBeInTheDocument();
+    expect(screen.getByText("Season")).toBeInTheDocument();
+    expect(screen.getByText("15")).toBeInTheDocument();
+    expect(screen.queryByText("158/328")).toBeNull();
+  });
+
+  it("renders first-party NextGen cards with capped rare trait chips", () => {
+    (removeBaseEndpoint as jest.Mock).mockReturnValue(
+      "/nextgen/token/10000000514"
+    );
+
+    render(
+      <OpenGraphPreview
+        href="https://6529.io/nextgen/token/10000000514"
+        preview={{
+          type: "6529.collection",
+          kind: "nextgen-token",
+          title: "Pebbles #514",
+          kicker: "NextGen \u00b7 Pebbles",
+          people: [{ label: "by", name: "Zeblocks", href: "/zeblocks" }],
+          facts: [
+            { label: "Rarity", value: "#86 / 1,000" },
+            { label: "Mint date", value: "11 Apr 2024" },
+          ],
+          traits: [
+            { label: "Palette", value: "Blueprint" },
+            { label: "Mint Type", value: "Public" },
+            { label: "Color Density", value: "Sparse" },
+          ],
+          image: { url: "https://cdn.6529.io/nextgen/514.png" },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
+    expect(screen.getByText("Pebbles #514")).toBeInTheDocument();
+    expect(screen.getByText("NextGen \u00b7 Pebbles")).toBeInTheDocument();
+    expect(screen.getByText("Rarity")).toBeInTheDocument();
+    expect(screen.getByText("#86 / 1,000")).toBeInTheDocument();
+    expect(screen.getByText("Palette: Blueprint")).toBeInTheDocument();
+    expect(screen.getByText("Mint Type: Public")).toBeInTheDocument();
+    expect(screen.getByText("Color Density: Sparse")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Zeblocks" })).toHaveAttribute(
+      "href",
+      "/zeblocks"
+    );
+  });
 });
