@@ -16,7 +16,6 @@ import { ApiWaveScoreFormula } from '../models/ApiWaveScoreFormula';
 import { ApiWaveScorePenalties } from '../models/ApiWaveScorePenalties';
 import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
 import { ApiWaveVisibilityTier } from '../models/ApiWaveVisibilityTier';
-import { HttpFile } from '../http/http';
 
 export class ApiWaveScore {
     'score_version': string;
