@@ -2,6 +2,10 @@ import type { RefObject } from "react";
 import { CollectionSeized } from "@/entities/IProfile";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import {
+  getCollectedFilterMessage,
+  getCollectedSeizedLabel,
+} from "./user-page-collected-filter-labels";
 
 type SelectedType = CollectionSeized | null;
 
@@ -14,20 +18,17 @@ export default function UserPageCollectedFiltersSeized({
   readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly setSelected: (selected: SelectedType) => void;
 }) {
-  const labels: { [key in CollectionSeized]: string } = {
-    [CollectionSeized.SEIZED]: "Seized",
-    [CollectionSeized.NOT_SEIZED]: "Not Seized",
-  };
-
   const items: CommonSelectItem<SelectedType>[] = [
     {
-      label: "All",
-      mobileLabel: "All Cards",
+      label: getCollectedFilterMessage("user.collected.filters.seized.all"),
+      mobileLabel: getCollectedFilterMessage(
+        "user.collected.filters.seized.allCards"
+      ),
       value: null,
       key: "all",
     },
     ...Object.values(CollectionSeized).map((seized) => ({
-      label: labels[seized],
+      label: getCollectedSeizedLabel(seized),
       value: seized,
       key: seized,
     })),
@@ -37,7 +38,7 @@ export default function UserPageCollectedFiltersSeized({
     <CommonDropdown
       items={items}
       activeItem={selected}
-      filterLabel="Seized"
+      filterLabel={getCollectedFilterMessage("user.collected.filters.seized")}
       containerRef={containerRef}
       setSelected={setSelected}
       size="sm"
