@@ -15,6 +15,10 @@ const auth = {
   connectedProfile: { handle: "Tester" },
 } as any;
 
+beforeEach(() => {
+  jest.resetAllMocks();
+});
+
 test("Wave REP allocation prefix invalidation refetches rating and credit", async () => {
   api.mockImplementation(async ({ endpoint }) =>
     endpoint === "ratings/credit"
@@ -35,6 +39,12 @@ test("Wave REP allocation prefix invalidation refetches rating and credit", asyn
     { wrapper }
   );
   await waitFor(() => expect(calls("waves/wave-1/rep/rating")).toBe(1));
+  expect(
+    queryClient.getQueryData([
+      QueryKey.WAVE_REP_RATING,
+      { waveId: "wave-1", rater: "tester", category: "quality" },
+    ])
+  ).toEqual({ rating: 7 });
   expect(api).toHaveBeenCalledWith(
     expect.objectContaining({
       endpoint: "waves/wave-1/rep/rating",
@@ -59,4 +69,48 @@ test("Wave REP allocation prefix invalidation refetches rating and credit", asyn
     });
   });
   await waitFor(() => expect(calls("ratings/credit")).toBe(2));
+});
+
+test("Wave REP allocation waits for connected profile before fetching rating", async () => {
+  let authValue = {
+    activeProfileProxy: null,
+    connectedProfile: null,
+  } as any;
+  api.mockImplementation(async ({ endpoint }) =>
+    endpoint === "ratings/credit"
+      ? ({ wave_rep_credit: 25 } as any)
+      : ({ rating: 3 } as any)
+  );
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  const wrapper = ({ children }: any) => (
+    <QueryClientProvider client={queryClient}>
+      <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
+    </QueryClientProvider>
+  );
+
+  const { rerender } = renderHook(
+    () => useWaveRepAllocation({ waveId: "wave-1", category: "quality" }),
+    { wrapper }
+  );
+
+  expect(api).not.toHaveBeenCalled();
+
+  authValue = {
+    activeProfileProxy: null,
+    connectedProfile: { handle: " Tester " },
+  } as any;
+  rerender();
+
+  await waitFor(() => expect(calls("waves/wave-1/rep/rating")).toBe(1));
+  expect(api).toHaveBeenCalledWith(
+    expect.objectContaining({
+      endpoint: "waves/wave-1/rep/rating",
+      params: {
+        category: "quality",
+        from_identity: "tester",
+      },
+    })
+  );
 });

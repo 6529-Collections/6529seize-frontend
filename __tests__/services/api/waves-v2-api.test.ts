@@ -8,6 +8,7 @@ import {
   fetchWaveMetadata,
   fetchWavesV2Page,
   fetchWaveSubwavesPage,
+  searchWavesByName,
 } from "@/services/api/waves-v2-api";
 import {
   commonApiDelete,
@@ -201,6 +202,81 @@ describe("waves-v2-api", () => {
       endpoint: "v2/waves/wave-1/metadata",
       headers: undefined,
     });
+  });
+
+  it("falls through to legacy wave search when v2 search returns no matches", async () => {
+    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "v2/waves") {
+        return {
+          page: 1,
+          next: false,
+          data: [],
+        };
+      }
+      if (endpoint === "waves") {
+        return [
+          {
+            id: "legacy-wave",
+            name: "Legacy Wave",
+            created_at: 100,
+            picture: null,
+            contributors_overview: [],
+            wave: { type: "CHAT" },
+            chat: { scope: {} },
+            parent_wave: null,
+            has_subwaves: false,
+            description_drop: { parts: [] },
+            metrics: {
+              drops_count: 1,
+              latest_drop_timestamp: 200,
+              first_unread_drop_serial_no: null,
+              your_unread_drops_count: 0,
+              your_latest_read_timestamp: 0,
+              muted: false,
+            },
+            visibility: { scope: {} },
+            pinned: false,
+            subscribed_actions: [],
+          },
+        ];
+      }
+      return [];
+    });
+
+    const result = await searchWavesByName({ name: "legacy", pageSize: 5 });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves",
+      params: {
+        view: "SEARCH",
+        page: "1",
+        page_size: "5",
+        direct_message: "false",
+        name: "legacy",
+      },
+      headers: undefined,
+    });
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "waves",
+      params: {
+        name: "legacy",
+        limit: "5",
+        direct_message: "false",
+      },
+      headers: undefined,
+    });
+    expect(result[0]).toMatchObject({
+      id: "legacy-wave",
+      name: "Legacy Wave",
+    });
+  });
+
+  it("surfaces unavailable search only when every wave search endpoint fails", async () => {
+    commonApiFetchMock.mockRejectedValue(new Error("search failed"));
+
+    await expect(searchWavesByName({ name: "missing" })).rejects.toThrow(
+      "Wave search is unavailable. Try a wave URL or id."
+    );
   });
 
   it("creates wave metadata", async () => {

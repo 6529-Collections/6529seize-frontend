@@ -267,9 +267,11 @@ function parseWaveIdFromInput(input: string): string | null {
 }
 
 function getWaveDisplayHandle(wave: ApiWave): string {
-  return (
-    wave.author?.handle ?? wave.author?.primary_address ?? "Unknown creator"
-  );
+  const author = wave.author;
+  if (!author) {
+    return "Unknown creator";
+  }
+  return author.handle ?? author.primary_address ?? "Unknown creator";
 }
 
 function getWaveHref(wave: ApiWave): string {
