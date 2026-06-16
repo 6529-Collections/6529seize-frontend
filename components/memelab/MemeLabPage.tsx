@@ -9,6 +9,7 @@ import { ActivityTypeItems } from "@/components/latest-activity/ActivityFilters"
 import LatestActivityRow from "@/components/latest-activity/LatestActivityRow";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import { MemeLabOverviewDetails } from "@/components/memelab/MemeLabAdditionalDetails";
+import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
 import {
   MEME_LAB_STATS_ROW_CLASS,
   MemeLabCardVolumes,
@@ -28,11 +29,7 @@ import {
   MemePageSkeleton,
   MemePageTitleSkeleton,
 } from "@/components/the-memes/MemePageSkeleton";
-import {
-  getMemeTabTitle,
-  MEME_FOCUS,
-  MEME_TABS,
-} from "@/components/the-memes/MemeShared";
+import { MEME_FOCUS, MEME_TABS } from "@/components/the-memes/MemeShared";
 import Timeline from "@/components/timeline/Timeline";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
@@ -42,9 +39,12 @@ import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { LabExtendedData, LabNFT, NFT, NFTHistory } from "@/entities/INFT";
 import type { Transaction } from "@/entities/ITransaction";
-import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
+import { areEqualAddresses } from "@/helpers/Helpers";
 import { TypeFilter } from "@/hooks/useActivityData";
 import useCapacitor from "@/hooks/useCapacitor";
+import { formatInteger, formatPercent } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
@@ -73,14 +73,10 @@ enum MEME_LAB_HISTORY_TAB {
 
 const MEME_LAB_HISTORY_TABS: {
   readonly focus: MEME_LAB_HISTORY_TAB;
-  readonly title: string;
 }[] = [
-  { focus: MEME_LAB_HISTORY_TAB.ACTIVITY, title: "Card Activity" },
-  {
-    focus: MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS,
-    title: "Your Transactions",
-  },
-  { focus: MEME_LAB_HISTORY_TAB.TIMELINE, title: "Timeline" },
+  { focus: MEME_LAB_HISTORY_TAB.ACTIVITY },
+  { focus: MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS },
+  { focus: MEME_LAB_HISTORY_TAB.TIMELINE },
 ];
 
 function parseMemeLabFocus(focus: string | null): MEME_FOCUS | undefined {
@@ -147,7 +143,7 @@ const isAbortError = (error: unknown): boolean => {
 };
 
 const MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME =
-  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out";
+  "tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 function getMemeLabTabButtonClassName(isActive: boolean) {
   return `${MEME_LAB_TAB_BUTTON_BASE_CLASS_NAME} ${
@@ -169,6 +165,7 @@ function MemeLabPageTabButton({
   return (
     <button
       type="button"
+      aria-pressed={isActive}
       className={getMemeLabTabButtonClassName(isActive)}
       onClick={onClick}
     >
@@ -177,14 +174,95 @@ function MemeLabPageTabButton({
   );
 }
 
-function formatMemeLabPercent(value: number) {
-  return `${Math.round(value * 100 * 10) / 10}%`;
+function getMemeLabDetailTabLabel(
+  focus: MEME_FOCUS,
+  locale: SupportedLocale
+): string {
+  switch (focus) {
+    case MEME_FOCUS.LIVE:
+      return t(locale, "memeLab.detail.tabs.overview");
+    case MEME_FOCUS.REFERENCES:
+      return t(locale, "memeLab.detail.tabs.references");
+    case MEME_FOCUS.COLLECTORS:
+      return t(locale, "memeLab.detail.tabs.collectors");
+    case MEME_FOCUS.HISTORY:
+      return t(locale, "memeLab.detail.tabs.history");
+    default:
+      return t(locale, "memeLab.detail.tabs.overview");
+  }
+}
+
+function getMemeLabHistoryTabLabel(
+  focus: MEME_LAB_HISTORY_TAB,
+  locale: SupportedLocale
+): string {
+  switch (focus) {
+    case MEME_LAB_HISTORY_TAB.ACTIVITY:
+      return t(locale, "memeLab.detail.tabs.cardActivity");
+    case MEME_LAB_HISTORY_TAB.YOUR_TRANSACTIONS:
+      return t(locale, "memeLab.detail.tabs.yourTransactions");
+    case MEME_LAB_HISTORY_TAB.TIMELINE:
+      return t(locale, "memeLab.detail.tabs.timeline");
+  }
+}
+
+function getMemeLabRouteFocusLabel(
+  focus: MEME_FOCUS,
+  locale: SupportedLocale
+): string {
+  if (focus === MEME_FOCUS.ACTIVITY) {
+    return t(locale, "memeLab.detail.tabs.cardActivity");
+  }
+
+  if (focus === MEME_FOCUS.YOUR_TRANSACTIONS) {
+    return t(locale, "memeLab.detail.tabs.yourTransactions");
+  }
+
+  if (focus === MEME_FOCUS.TIMELINE) {
+    return t(locale, "memeLab.detail.tabs.timeline");
+  }
+
+  return getMemeLabDetailTabLabel(parseMemeLabFocus(focus) ?? focus, locale);
+}
+
+function getMemeLabBrowserTitle({
+  nft,
+  nftId,
+  routeFocus,
+  locale,
+}: {
+  readonly nft: LabNFT | undefined;
+  readonly nftId: string;
+  readonly routeFocus: MEME_FOCUS;
+  readonly locale: SupportedLocale;
+}): string {
+  const title = nft
+    ? t(locale, "memeLab.detail.browserTitle", {
+        name: nft.name,
+        tokenId: nft.id,
+      })
+    : t(locale, "memeLab.detail.heading.card", { tokenId: nftId });
+
+  if (routeFocus === MEME_FOCUS.LIVE) {
+    return title;
+  }
+
+  return t(locale, "memeLab.detail.browserTitleWithTab", {
+    title,
+    tab: getMemeLabRouteFocusLabel(routeFocus, locale),
+  });
+}
+
+function formatMemeLabPercent(value: number, locale: SupportedLocale) {
+  return formatPercent(locale, value);
 }
 
 export default function MemeLabPageComponent({
   nftId,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly nftId: string;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -246,17 +324,17 @@ export default function MemeLabPageComponent({
           hasUserTransactions
       ).map((tab) => ({
         key: tab.focus,
-        label: tab.title,
+        label: getMemeLabHistoryTabLabel(tab.focus, locale),
         value: tab.focus,
       })),
-    [hasUserTransactions]
+    [hasUserTransactions, locale]
   );
   const routeFocus = getMemeLabRouteFocus(activeTab, activeHistoryTab);
   const isLoadingNft = nftLoading && (!nft || !nftMeta);
 
   useEffect(() => {
-    setTitle(getMemeTabTitle(`Meme Lab`, nftId, nft, routeFocus));
-  }, [nft, nftId, routeFocus, setTitle]);
+    setTitle(getMemeLabBrowserTitle({ nft, nftId, routeFocus, locale }));
+  }, [locale, nft, nftId, routeFocus, setTitle]);
 
   function replaceRouteFocus(nextFocus: MEME_FOCUS) {
     const query = new URLSearchParams(searchParamsString);
@@ -625,12 +703,15 @@ export default function MemeLabPageComponent({
     }
 
     return (
-      <nav aria-label="Meme Lab history sections" className="tw-pb-8">
+      <nav
+        aria-label={t(locale, "memeLab.detail.sections.history")}
+        className="tw-pb-8"
+      >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_LAB_HISTORY_TAB>
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
-            filterLabel="Meme Lab history sections"
+            filterLabel={t(locale, "memeLab.detail.sections.history")}
             setSelected={setActiveHistoryMemeLabTab}
             fill={false}
           />
@@ -690,13 +771,14 @@ export default function MemeLabPageComponent({
           id="meme-lab-references-heading"
           className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
         >
-          The Memes References
+          {t(locale, "memeLab.detail.references.title")}
         </h2>
         {printMemeReferences(
           originalMemes,
           "the-memes",
           originalMemesLoaded,
-          true
+          true,
+          locale
         )}
       </section>
     );
@@ -712,6 +794,7 @@ export default function MemeLabPageComponent({
         nft={nft}
         nftMeta={nftMeta}
         showMarketplaceLinks={!capacitor.isIos || country === "US"}
+        locale={locale}
         artworkFooter={
           hasOwnershipContext ? (
             <MemeLabYourCardsPanel nft={nft} nftBalance={nftBalance} />
@@ -729,36 +812,42 @@ export default function MemeLabPageComponent({
     return (
       <div className={MEME_LAB_STATS_ROW_CLASS}>
         <MemeLabStatMetric
-          label="Collectors"
-          value={numberWithCommas(nftMeta.hodlers)}
+          label={t(locale, "memeLab.detail.collectors.collectors")}
+          value={formatInteger(locale, nftMeta.hodlers)}
           rank={nftMeta.hodlers_rank}
           total={nftMeta.collection_size}
         />
         <MemeLabStatMetric
-          label="6529 Museum"
-          value={numberWithCommas(nftMeta.museum_holdings)}
+          label={t(locale, "memeLab.detail.collectors.museum")}
+          value={formatInteger(locale, nftMeta.museum_holdings)}
           rank={nftMeta.museum_holdings_rank}
           total={nftMeta.collection_size}
         />
         <MemeLabStatMetric
-          label="% Unique"
-          value={formatMemeLabPercent(nftMeta.percent_unique)}
+          label={t(locale, "memeLab.detail.collectors.unique")}
+          value={formatMemeLabPercent(nftMeta.percent_unique, locale)}
           rank={nftMeta.percent_unique_rank}
           total={nftMeta.collection_size}
         />
         {nftMeta.burnt > 0 && (
           <MemeLabStatMetric
-            label="% Unique ex. Burnt"
-            value={formatMemeLabPercent(nftMeta.percent_unique_not_burnt)}
+            label={t(locale, "memeLab.detail.collectors.uniqueExBurnt")}
+            value={formatMemeLabPercent(
+              nftMeta.percent_unique_not_burnt,
+              locale
+            )}
             rank={nftMeta.percent_unique_not_burnt_rank}
             total={nftMeta.collection_size}
           />
         )}
         <MemeLabStatMetric
-          label={`% Unique ex.${
-            nftMeta.burnt > 0 ? " Burnt and" : ""
-          } 6529 Museum`}
-          value={formatMemeLabPercent(nftMeta.percent_unique_cleaned)}
+          label={t(
+            locale,
+            nftMeta.burnt > 0
+              ? "memeLab.detail.collectors.uniqueExBurntAndMuseum"
+              : "memeLab.detail.collectors.uniqueExMuseum"
+          )}
+          value={formatMemeLabPercent(nftMeta.percent_unique_cleaned, locale)}
           rank={nftMeta.percent_unique_cleaned_rank}
           total={nftMeta.collection_size}
         />
@@ -770,7 +859,7 @@ export default function MemeLabPageComponent({
     if (nft && nftId) {
       return (
         <section
-          aria-label="Meme Lab collectors leaderboard"
+          aria-label={t(locale, "memeLab.detail.collectors.leaderboard")}
           className="tw-py-2"
         >
           {printCollectorsStatsMetrics()}
@@ -788,9 +877,12 @@ export default function MemeLabPageComponent({
 
   function printTimeline() {
     return (
-      <section aria-label="Meme Lab timeline" className="tw-pb-5 tw-pt-3">
+      <section
+        aria-label={t(locale, "memeLab.detail.timeline.region")}
+        className="tw-pb-5 tw-pt-3"
+      >
         <div className="tw-mx-auto tw-w-full md:tw-w-10/12">
-          {nft && <Timeline nft={nft} steps={nftHistory} />}
+          {nft && <Timeline nft={nft} steps={nftHistory} locale={locale} />}
         </div>
       </section>
     );
@@ -798,7 +890,10 @@ export default function MemeLabPageComponent({
 
   function printActivity() {
     return (
-      <section aria-label="Meme Lab activity" className="tw-space-y-8 tw-pb-5">
+      <section
+        aria-label={t(locale, "memeLab.detail.activity.region")}
+        className="tw-space-y-8 tw-pb-5"
+      >
         {nft && <MemeLabCardVolumes nft={nft} />}
         <section
           ref={activitySectionRef}
@@ -810,13 +905,16 @@ export default function MemeLabPageComponent({
               id="meme-lab-card-activity-heading"
               className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
             >
-              Card Activity
+              {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
             <div className="tw-w-full tw-shrink-0 md:tw-w-72">
               <CommonDropdown
                 items={ActivityTypeItems}
                 activeItem={activityTypeFilter}
-                filterLabel="Transaction Type"
+                filterLabel={t(
+                  locale,
+                  "memeLab.detail.activity.transactionType"
+                )}
                 setSelected={(filter) => {
                   setActivityPage(1);
                   setActivityTypeFilter(filter);
@@ -848,14 +946,18 @@ export default function MemeLabPageComponent({
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 md:tw-justify-start">
               <div className="tw-mb-0 tw-flex tw-items-center">
                 <Link
-                  href="/meme-lab"
+                  href={getMemeLabRouteHrefWithLocale({
+                    href: "/meme-lab",
+                    locale,
+                  })}
+                  aria-label={t(locale, "memeLab.detail.backLink.ariaLabel")}
                   className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
                   <ArrowLeftIcon
                     aria-hidden="true"
                     className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
                   />
-                  Meme Lab
+                  {t(locale, "memeLab.detail.backLink.label")}
                 </Link>
               </div>
             </div>
@@ -873,10 +975,15 @@ export default function MemeLabPageComponent({
                 <div className="tw-order-1 tw-min-w-0 tw-flex-1 md:tw-order-2">
                   <h1
                     className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
-                    aria-label={`Meme Lab Card ${String(nft.id)} - ${nft.name}`}
+                    aria-label={t(locale, "memeLab.detail.heading.ariaLabel", {
+                      tokenId: nft.id,
+                      name: nft.name,
+                    })}
                   >
                     <span className="tw-mb-0 tw-shrink-0 tw-text-lg tw-font-normal tw-leading-tight tw-text-iron-400 sm:tw-text-2xl">
-                      Card {nft.id}
+                      {t(locale, "memeLab.detail.heading.card", {
+                        tokenId: nft.id,
+                      })}
                     </span>
                     <span
                       aria-hidden="true"
@@ -901,7 +1008,7 @@ export default function MemeLabPageComponent({
                   </div>
                 ) : (
                   <h1 className="tw-mb-0 tw-text-2xl tw-font-semibold tw-leading-tight tw-text-iron-100">
-                    Meme Lab
+                    {t(locale, "memeLab.detail.heading.fallback")}
                   </h1>
                 )}
               </>
@@ -913,7 +1020,7 @@ export default function MemeLabPageComponent({
           <>
             {printStaticCardHeader()}
             <nav
-              aria-label="Meme Lab page sections"
+              aria-label={t(locale, "memeLab.detail.sections.tabs")}
               className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
             >
               <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
@@ -921,7 +1028,7 @@ export default function MemeLabPageComponent({
                   {visibleMemeLabTabs.map((tab) => (
                     <MemeLabPageTabButton
                       key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                      title={tab.title}
+                      title={getMemeLabDetailTabLabel(tab.focus, locale)}
                       isActive={activeTab === tab.focus}
                       onClick={() => setActiveMemeLabTab(tab.focus)}
                     />
