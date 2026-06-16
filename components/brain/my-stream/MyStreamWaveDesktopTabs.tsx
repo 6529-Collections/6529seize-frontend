@@ -42,7 +42,7 @@ import {
   type SetActiveContentTab,
 } from "../ContentTabContext";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
-import MyStreamWaveCreateCurationAction from "./tabs/MyStreamWaveCreateCurationAction";
+import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 
 interface MyStreamWaveDesktopTabsProps {
@@ -51,7 +51,7 @@ interface MyStreamWaveDesktopTabsProps {
   readonly setActiveTab: SetActiveContentTab;
   readonly activeCurationId: string | null;
   readonly onSelectCuration: (curationId: string | null) => void;
-  readonly showCreateCurationAction?: boolean | undefined;
+  readonly showCreateActionsMenu?: boolean | undefined;
 }
 
 interface TabOption {
@@ -325,7 +325,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   setActiveTab,
   activeCurationId,
   onSelectCuration,
-  showCreateCurationAction = true,
+  showCreateActionsMenu = true,
 }) => {
   const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs } = useContentTab();
@@ -695,9 +695,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           </DndContext>
         </div>
       </div>
-      {showCreateCurationAction && (
+      {showCreateActionsMenu && (
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">
-          <MyStreamWaveCreateCurationAction
+          <MyStreamWaveCreateActionsMenu
             wave={wave}
             onCreated={onSelectCuration}
           />
