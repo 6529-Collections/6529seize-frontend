@@ -25,10 +25,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 
@@ -117,7 +117,7 @@ jobs:
           fi
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -127,15 +127,15 @@ jobs:
         run: aws s3 sync target s3://${{ env.AWS_BUCKET }}/web_build/${{ env.COMMIT_SHA }}/
 
       - name: Get commit message
-        run: echo "COMMIT_MESSAGE=$(git show -s --format=%s)" >> $GITHUB_ENV
+        run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s)" >> "$GITHUB_ENV"
 
       - name: Create new ElasticBeanstalk Application Version
         run: |
           aws elasticbeanstalk create-application-version \
-          --application-name "${{ env.BEANSTALK_APP_NAME }}" \
-          --source-bundle S3Bucket="${{ env.AWS_BUCKET }}",S3Key="web_build/${{ env.COMMIT_SHA }}/package.zip" \
-          --version-label "${{ env.COMMIT_SHA }}" \
-          --description "${{ env.COMMIT_MESSAGE }}"
+            --application-name "$BEANSTALK_APP_NAME" \
+            --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=web_build/${COMMIT_SHA}/package.zip" \
+            --version-label "$COMMIT_SHA" \
+            --description "$COMMIT_MESSAGE"
 
       - name: Deploy new Version to ElasticBeanstalk with Runtime Environment Variables
         env:
