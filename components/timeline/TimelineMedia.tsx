@@ -38,6 +38,7 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
       <iframe
         className={styles["timelineMediaImage"]}
         src={props.url}
+        sandbox="allow-scripts"
         title={t(locale, "timeline.media.htmlTitle", { label })}
       ></iframe>
     );

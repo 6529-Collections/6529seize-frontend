@@ -56,6 +56,7 @@ describe("TimelineMedia", () => {
     );
     const frame = container.querySelector("iframe");
     expect(frame).toHaveAttribute("src", "page.html");
+    expect(frame).toHaveAttribute("sandbox", "allow-scripts");
     expect(frame).toHaveAttribute(
       "title",
       t("en-US", "timeline.media.htmlTitle", { label: "Added Animation" })
