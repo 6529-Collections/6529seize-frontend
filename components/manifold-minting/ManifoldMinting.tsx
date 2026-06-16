@@ -675,6 +675,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           height="full"
           showBalance={false}
           transparentBG={true}
+          useDropVideoPlayer
         />
       </div>
     );

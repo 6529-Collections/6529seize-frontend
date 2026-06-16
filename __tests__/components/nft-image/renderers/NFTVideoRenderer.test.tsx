@@ -32,12 +32,14 @@ jest.mock(
     default: (props: {
       readonly src: string;
       readonly mimeType?: string;
+      readonly fallbackSrc?: string;
       readonly fillContainer?: boolean;
     }) => (
       <div
         data-testid="drop-video-player"
         data-src={props.src}
         data-mime-type={props.mimeType}
+        data-fallback-src={props.fallbackSrc}
         data-fill-container={String(props.fillContainer)}
       />
     ),
@@ -151,7 +153,38 @@ describe("NFTVideoRenderer", () => {
         "data-fill-container",
         "true"
       );
+      expect(screen.getByTestId("drop-video-player")).toHaveAttribute(
+        "data-mime-type",
+        "video/mp4"
+      );
+      expect(screen.getByTestId("drop-video-player")).toHaveAttribute(
+        "data-fallback-src",
+        "https://example.com/video.mp4"
+      );
       expect(container.querySelector("video")).not.toBeInTheDocument();
+    });
+
+    it("passes QuickTime MIME type to the drop video player for MOV sources", () => {
+      const nft = createMockNFT({
+        animation: "https://example.com/video.mov",
+        compressed_animation: undefined,
+        metadata: {
+          ...createMockNFT().metadata,
+          animation_details: { format: "MOV" },
+        },
+      });
+      const props = createDefaultProps({ nft, useDropVideoPlayer: true });
+
+      render(<NFTVideoRenderer {...props} />);
+
+      expect(screen.getByTestId("drop-video-player")).toHaveAttribute(
+        "data-src",
+        "https://example.com/video.mov"
+      );
+      expect(screen.getByTestId("drop-video-player")).toHaveAttribute(
+        "data-mime-type",
+        "video/quicktime"
+      );
     });
   });
 

@@ -87,11 +87,13 @@ describe("DropListItemContentMediaVideo", () => {
     inView = true,
     src = "foo.mp4",
     mimeType,
+    fallbackSrc,
     disableAutoPlay = false,
   }: {
     readonly inView?: boolean | undefined;
     readonly src?: string | undefined;
     readonly mimeType?: string | undefined;
+    readonly fallbackSrc?: string | undefined;
     readonly disableAutoPlay?: boolean | undefined;
   } = {}) {
     const ref = {
@@ -107,6 +109,7 @@ describe("DropListItemContentMediaVideo", () => {
       <DropListItemContentMediaVideo
         src={src}
         mimeType={mimeType}
+        fallbackSrc={fallbackSrc}
         disableAutoPlay={disableAutoPlay}
       />
     );
@@ -235,6 +238,28 @@ describe("DropListItemContentMediaVideo", () => {
     expect(progressControl.parentElement?.className).not.toContain(
       "tw-opacity-0"
     );
+  });
+
+  it("keeps progress value in range before metadata loads", () => {
+    setup({ disableAutoPlay: true });
+
+    expect(screen.getByRole("slider", { name: "Video progress" })).toHaveValue(
+      "0"
+    );
+  });
+
+  it("falls back to the original video source when the current source errors", () => {
+    setup({
+      src: "https://example.com/compressed.mp4",
+      fallbackSrc: "https://example.com/original.mov",
+      disableAutoPlay: true,
+    });
+    const video = document.querySelector("video") as HTMLVideoElement;
+
+    fireEvent.error(video);
+
+    expect(video.src).toBe("https://example.com/original.mov");
+    expect(loadMock).toHaveBeenCalled();
   });
 
   it("always shows the inline video media actions", () => {

@@ -4,6 +4,7 @@ import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
+import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -13,6 +14,7 @@ import { useMediaActions } from "./useMediaActions";
 interface Props {
   readonly src: string;
   readonly mimeType?: string | undefined;
+  readonly fallbackSrc?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
 }
@@ -29,9 +31,18 @@ function getPrefersReducedMotion(): boolean {
   );
 }
 
+function resolveMediaHref(src: string): string {
+  try {
+    return new URL(src, globalThis.location.href).href;
+  } catch {
+    return src;
+  }
+}
+
 function DropListItemContentMediaVideo({
   src,
   mimeType,
+  fallbackSrc,
   disableAutoPlay = false,
   fillContainer = false,
 }: Props) {
@@ -65,7 +76,7 @@ function DropListItemContentMediaVideo({
   const { videoRef, isLoading } = useHlsPlayer({
     src: playableUrl,
     isHls,
-    fallbackSrc: src,
+    fallbackSrc: fallbackSrc ?? src,
     autoPlay: inView && !isApp && !disableAutoPlay && !prefersReducedMotion,
   });
 
@@ -208,10 +219,9 @@ function DropListItemContentMediaVideo({
       syncControlSurface();
     };
     const updateMuted = () => setIsMuted(videoEl.muted);
-    const updateControlSurface = () => syncControlSurface();
     const resizeObserver =
       typeof ResizeObserver === "function"
-        ? new ResizeObserver(updateControlSurface)
+        ? new ResizeObserver(syncControlSurface)
         : undefined;
 
     syncMediaState();
@@ -220,19 +230,17 @@ function DropListItemContentMediaVideo({
     videoEl.addEventListener("timeupdate", updateTime);
     videoEl.addEventListener("loadedmetadata", updateDuration);
     videoEl.addEventListener("durationchange", updateDuration);
-    videoEl.addEventListener("resize", updateControlSurface);
     videoEl.addEventListener("volumechange", updateMuted);
-    globalThis.addEventListener("resize", updateControlSurface);
-    document.addEventListener("fullscreenchange", updateControlSurface);
+    globalThis.addEventListener("resize", syncControlSurface);
+    document.addEventListener("fullscreenchange", syncControlSurface);
     return () => {
       resizeObserver?.disconnect();
       videoEl.removeEventListener("timeupdate", updateTime);
       videoEl.removeEventListener("loadedmetadata", updateDuration);
       videoEl.removeEventListener("durationchange", updateDuration);
-      videoEl.removeEventListener("resize", updateControlSurface);
       videoEl.removeEventListener("volumechange", updateMuted);
-      globalThis.removeEventListener("resize", updateControlSurface);
-      document.removeEventListener("fullscreenchange", updateControlSurface);
+      globalThis.removeEventListener("resize", syncControlSurface);
+      document.removeEventListener("fullscreenchange", syncControlSurface);
     };
   }, [syncControlSurface, syncMediaState, videoRef, playableUrl]);
 
@@ -311,6 +319,19 @@ function DropListItemContentMediaVideo({
     duration > 0
       ? Math.min(100, Math.max(0, (currentTime / duration) * 100))
       : 0;
+  const progressValue = duration > 0 ? Math.min(currentTime, duration) : 0;
+  const handleVideoError = withArweaveFallback(({ currentTarget }) => {
+    const videoEl = currentTarget as HTMLVideoElement;
+    if (!fallbackSrc || videoEl.src === resolveMediaHref(fallbackSrc)) {
+      return;
+    }
+
+    videoEl.src = fallbackSrc;
+    videoEl.load();
+    if (shouldAutoPlay) {
+      videoEl.play().catch(() => undefined);
+    }
+  });
 
   return (
     <div
@@ -357,6 +378,7 @@ function DropListItemContentMediaVideo({
           loop
           preload="auto"
           tabIndex={0}
+          onError={handleVideoError}
           className={clsx(
             "tw-rounded-xl tw-object-contain",
             fillContainer
@@ -402,7 +424,7 @@ function DropListItemContentMediaVideo({
                 min={0}
                 max={duration > 0 ? duration : 0}
                 step="0.01"
-                value={Math.min(currentTime, duration || currentTime)}
+                value={progressValue}
                 disabled={duration <= 0}
                 onClick={(event) => event.stopPropagation()}
                 onChange={(event) => seekTo(event.currentTarget.value)}

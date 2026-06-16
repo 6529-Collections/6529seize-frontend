@@ -7,10 +7,28 @@ import styles from "@/components/nft-image/NFTImage.module.scss";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { withArweaveFallback } from "@/components/nft-image/utils/gateway-fallback";
+import {
+  getAnimationMimeTypeFromMetadata,
+  getMimeTypeFromFormat,
+} from "@/helpers/nft.helpers";
 
 const globalScope = globalThis as typeof globalThis & {
   window?: Window | undefined;
 };
+
+function getUrlExtension(url: string | null | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+
+  const clean = url.split("?")[0]?.split("#")[0] ?? "";
+  const parts = clean.split(".");
+  if (parts.length < 2) {
+    return null;
+  }
+
+  return parts.at(-1)?.trim() || null;
+}
 
 export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
   const animationSrc = getResolvedAnimationSrc(props.nft);
@@ -35,6 +53,14 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
     props.nft.compressed_animation
       ? props.nft.compressed_animation
       : animationSrc || undefined;
+  const videoMimeType =
+    getMimeTypeFromFormat(getUrlExtension(videoSrc)) ??
+    ("metadata" in props.nft
+      ? getAnimationMimeTypeFromMetadata(props.nft.metadata)
+      : null) ??
+    undefined;
+  const fallbackSrc =
+    videoSrc !== animationSrc && animationSrc ? animationSrc : undefined;
 
   return (
     <NFTMediaContainer
@@ -51,7 +77,8 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         <div className={props.imageStyle}>
           <DropListItemContentMediaVideo
             src={videoSrc ?? ""}
-            mimeType="video/mp4"
+            mimeType={videoMimeType}
+            fallbackSrc={fallbackSrc}
             fillContainer
           />
         </div>

@@ -42,7 +42,7 @@ export default function NFTImage(props: Readonly<Props>) {
     heightStyle: safeHeightStyle,
     imageStyle: safeImageStyle,
     bgStyle: safeBgStyle,
-    useDropVideoPlayer: props.useDropVideoPlayer || props.height === "full",
+    useDropVideoPlayer: props.useDropVideoPlayer,
   };
 
   switch (mediaType) {

@@ -277,6 +277,10 @@ describe("Component Structure", () => {
 
     // Check that child components are rendered
     expect(screen.getByTestId("image")).toBeInTheDocument();
+    expect(screen.getByTestId("image")).toHaveAttribute(
+      "data-use-drop-video-player",
+      "true"
+    );
     expect(screen.getByTestId("nft-attributes")).toBeInTheDocument();
     expect(screen.getByTestId("widget")).toBeInTheDocument();
   });

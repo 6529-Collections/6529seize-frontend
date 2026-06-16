@@ -297,7 +297,7 @@ describe("Media Type Detection and Renderer Selection", () => {
     );
   });
 
-  it("opts full-height video artwork into the drop video player", () => {
+  it("does not infer drop video player opt-in from full-height layout", () => {
     const nftWithMP4 = {
       ...mockNFT,
       animation: "https://example.com/video.mp4",
@@ -319,7 +319,7 @@ describe("Media Type Detection and Renderer Selection", () => {
 
     expect(screen.getByTestId("nft-video-renderer")).toHaveAttribute(
       "data-use-drop-video-player",
-      "true"
+      "false"
     );
   });
 
