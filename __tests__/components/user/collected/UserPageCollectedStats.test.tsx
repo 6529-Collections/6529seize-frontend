@@ -688,6 +688,50 @@ describe("UserPageCollectedStats", () => {
     expect(screen.getByTestId("details")).toBeInTheDocument();
   });
 
+  it("uses non-undefined fallbacks when detail stats fetches fail", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    apiMock.mockRejectedValue(new Error("Network request failed"));
+    useSearchParamsMock.mockReturnValue({
+      get: (key: string) => (key === "activity" ? "tdh-history" : null),
+    });
+
+    try {
+      renderWithQueryClient(
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      );
+
+      await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
+
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-seasons",
+        "0"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-tdh",
+        "false"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-owner-balance",
+        "false"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-balance-memes",
+        "0"
+      );
+      expect(consoleErrorSpy.mock.calls.join("\n")).not.toContain(
+        "Query data cannot be undefined"
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
   it("clears previous detail stats while the next address detail queries are in flight", async () => {
     const user = userEvent.setup();
     const nextCollectedStatsDeferred = createDeferred<Record<string, never>>();
