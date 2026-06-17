@@ -27,6 +27,8 @@ import {
   isValidSidebarWave,
   validateSidebarWaveDetailed,
 } from "./sidebarWaveListUtils";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 // Height for empty waves placeholder to maintain consistent layout (matches UnifiedWavesListEmpty)
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
@@ -35,6 +37,7 @@ const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 const WAVE_ROW_HEIGHT = 62 as const; // Height of each wave row in pixels
 const SUBWAVE_ROW_HEIGHT = 54 as const;
 const VIRTUALIZATION_OVERSCAN = 5 as const; // Number of extra items to render outside viewport
+const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
 // Common styles for positioned elements
 const listContainerStyle = {
@@ -140,10 +143,10 @@ const UnifiedWavesListWaves = forwardRef<
 
     const {
       announcementWaves,
-      officialWaves,
+      highlyRatedWaves,
       pinnedWaves,
       followingWaves,
-      scoreWaves,
+      allWaves,
     } = useMemo(
       () =>
         groupSidebarWaves({
@@ -160,9 +163,9 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(announcementWaves),
       [announcementWaves, getRows]
     );
-    const officialRows = useMemo(
-      () => getRows(officialWaves),
-      [officialWaves, getRows]
+    const highlyRatedRows = useMemo(
+      () => getRows(highlyRatedWaves),
+      [highlyRatedWaves, getRows]
     );
     const pinnedRows = useMemo(
       () => getRows(pinnedWaves),
@@ -172,21 +175,22 @@ const UnifiedWavesListWaves = forwardRef<
       () => getRows(followingWaves),
       [followingWaves, getRows]
     );
-    const scoreRows = useMemo(() => getRows(scoreWaves), [scoreWaves, getRows]);
+    const allRows = useMemo(() => getRows(allWaves), [allWaves, getRows]);
     const animatedAnnouncementRows =
       useAnimatedSidebarWaveRows(announcementRows);
-    const animatedOfficialRows = useAnimatedSidebarWaveRows(officialRows);
+    const animatedHighlyRatedRows =
+      useAnimatedSidebarWaveRows(highlyRatedRows);
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
     const animatedFollowingRows = useAnimatedSidebarWaveRows(followingRows);
-    const animatedScoreRows = useAnimatedSidebarWaveRows(scoreRows);
+    const animatedAllRows = useAnimatedSidebarWaveRows(allRows);
     const virtualizedRows =
-      animatedScoreRows.length > 0 ? animatedScoreRows : animatedFollowingRows;
+      animatedAllRows.length > 0 ? animatedAllRows : animatedFollowingRows;
     const staticFollowingRows =
-      animatedScoreRows.length > 0 ? animatedFollowingRows : [];
+      animatedAllRows.length > 0 ? animatedFollowingRows : [];
     const virtualizedAriaLabel =
-      animatedScoreRows.length > 0
-        ? "Combined score waves list"
-        : "Following waves list";
+      animatedAllRows.length > 0
+        ? t(SIDEBAR_LOCALE, "waves.sidebar.allQualityRankedAriaLabel")
+        : t(SIDEBAR_LOCALE, "waves.sidebar.followingListAriaLabel");
     const getSidebarRowHeight = useCallback(
       (row: SidebarWaveTreeRow) =>
         row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
@@ -196,8 +200,8 @@ const UnifiedWavesListWaves = forwardRef<
     const virtual = useVirtualizedWaves<SidebarWaveTreeRow>({
       items: virtualizedRows,
       key:
-        animatedScoreRows.length > 0
-          ? "unified-waves-score"
+        animatedAllRows.length > 0
+          ? "unified-waves-all"
           : "unified-waves-following",
       scrollContainerRef,
       listContainerRef,
@@ -258,44 +262,56 @@ const UnifiedWavesListWaves = forwardRef<
 
         {!hideHeaders &&
           announcementRows.length > 0 &&
-          (officialRows.length > 0 ||
+          (highlyRatedRows.length > 0 ||
             pinnedRows.length > 0 ||
             followingRows.length > 0 ||
-            scoreRows.length > 0) && (
+            allRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
-        {officialRows.length > 0 && (
-          <SidebarWaveRowsSection
-            ariaLabel="Official waves"
-            className="tw-flex tw-flex-col"
-            getRowHeight={getSidebarRowHeight}
-            isRowVisible={(row) =>
-              isVisibleStaticRow({
-                detailedLabel: "Official",
-                row,
-                sectionName: "official",
-              })
-            }
-            renderRow={(row) => renderWaveRow(row, false)}
-            rows={animatedOfficialRows}
-          />
+        {highlyRatedRows.length > 0 && (
+          <>
+            {!hideHeaders && (
+              <SidebarCategoryLabel
+                label={t(SIDEBAR_LOCALE, "waves.sidebar.highlyRated")}
+              />
+            )}
+            <SidebarWaveRowsSection
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.highlyRatedAriaLabel"
+              )}
+              className="tw-flex tw-flex-col"
+              getRowHeight={getSidebarRowHeight}
+              isRowVisible={(row) =>
+                isVisibleStaticRow({
+                  detailedLabel: "Highly rated",
+                  row,
+                  sectionName: "highly rated",
+                })
+              }
+              renderRow={(row) => renderWaveRow(row, false)}
+              rows={animatedHighlyRatedRows}
+            />
+          </>
         )}
 
         {!hideHeaders &&
-          officialRows.length > 0 &&
+          highlyRatedRows.length > 0 &&
           (pinnedRows.length > 0 ||
             followingRows.length > 0 ||
-            scoreRows.length > 0) && (
+            allRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {/* Conditionally show pinned section */}
         {!hideHeaders && pinnedRows.length > 0 && (
           <>
-            <SidebarCategoryLabel label="Pinned" />
+            <SidebarCategoryLabel
+              label={t(SIDEBAR_LOCALE, "waves.sidebar.pinned")}
+            />
             <SidebarWaveRowsSection
-              ariaLabel="Pinned waves"
+              ariaLabel={t(SIDEBAR_LOCALE, "waves.sidebar.pinnedAriaLabel")}
               className="tw-flex tw-flex-col"
               getRowHeight={getSidebarRowHeight}
               isRowVisible={(row) =>
@@ -313,15 +329,22 @@ const UnifiedWavesListWaves = forwardRef<
 
         {!hideHeaders &&
           pinnedRows.length > 0 &&
-          (followingRows.length > 0 || scoreRows.length > 0) && (
+          (followingRows.length > 0 || allRows.length > 0) && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
         {staticFollowingRows.length > 0 && (
           <>
-            {!hideHeaders && <SidebarCategoryLabel label="Following" />}
+            {!hideHeaders && (
+              <SidebarCategoryLabel
+                label={t(SIDEBAR_LOCALE, "waves.sidebar.following")}
+              />
+            )}
             <SidebarWaveRowsSection
-              ariaLabel="Following waves"
+              ariaLabel={t(
+                SIDEBAR_LOCALE,
+                "waves.sidebar.followingAriaLabel"
+              )}
               className="tw-flex tw-flex-col"
               getRowHeight={getSidebarRowHeight}
               isRowVisible={(row) =>
@@ -339,12 +362,14 @@ const UnifiedWavesListWaves = forwardRef<
 
         {!hideHeaders &&
           staticFollowingRows.length > 0 &&
-          animatedScoreRows.length > 0 && (
+          animatedAllRows.length > 0 && (
             <div className="tw-my-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
           )}
 
-        {!hideHeaders && animatedScoreRows.length > 0 && (
-          <SidebarCategoryLabel label="Combined Score" />
+        {!hideHeaders && animatedAllRows.length > 0 && (
+          <SidebarCategoryLabel
+            label={t(SIDEBAR_LOCALE, "waves.sidebar.all")}
+          />
         )}
 
         {virtualizedRows.length > 0 ? (

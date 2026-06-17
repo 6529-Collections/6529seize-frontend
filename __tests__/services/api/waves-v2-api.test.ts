@@ -204,7 +204,7 @@ describe("waves-v2-api", () => {
     });
   });
 
-  it("falls through to legacy wave search when v2 search returns no matches", async () => {
+  it("uses v2 wave search as authoritative when it completes empty", async () => {
     commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
       if (endpoint === "v2/waves") {
         return {
@@ -212,6 +212,31 @@ describe("waves-v2-api", () => {
           next: false,
           data: [],
         };
+      }
+      throw new Error("legacy search should not be called");
+    });
+
+    const result = await searchWavesByName({ name: "missing", pageSize: 5 });
+
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "v2/waves",
+      params: {
+        view: "SEARCH",
+        page: "1",
+        page_size: "5",
+        direct_message: "false",
+        name: "missing",
+      },
+      headers: undefined,
+    });
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([]);
+  });
+
+  it("falls back to legacy wave search only when v2 search fails", async () => {
+    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "v2/waves") {
+        throw new Error("v2 search failed");
       }
       if (endpoint === "waves") {
         return [
@@ -246,17 +271,6 @@ describe("waves-v2-api", () => {
     const result = await searchWavesByName({ name: "legacy", pageSize: 5 });
 
     expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "v2/waves",
-      params: {
-        view: "SEARCH",
-        page: "1",
-        page_size: "5",
-        direct_message: "false",
-        name: "legacy",
-      },
-      headers: undefined,
-    });
-    expect(commonApiFetchMock).toHaveBeenCalledWith({
       endpoint: "waves",
       params: {
         name: "legacy",
@@ -269,22 +283,6 @@ describe("waves-v2-api", () => {
       id: "legacy-wave",
       name: "Legacy Wave",
     });
-  });
-
-  it("returns no matches when every wave search endpoint completes empty", async () => {
-    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
-      if (endpoint === "v2/waves") {
-        return {
-          page: 1,
-          next: false,
-          data: [],
-        };
-      }
-      return [];
-    });
-
-    await expect(searchWavesByName({ name: "missing" })).resolves.toEqual([]);
-    expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("surfaces primary search failure when fallback searches complete empty", async () => {
@@ -302,23 +300,6 @@ describe("waves-v2-api", () => {
       cause: primaryError,
     });
     expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
-  });
-
-  it("surfaces unavailable search when empty results are followed by fallback failures", async () => {
-    commonApiFetchMock.mockImplementation(async ({ endpoint }) => {
-      if (endpoint === "v2/waves") {
-        return {
-          page: 1,
-          next: false,
-          data: [],
-        };
-      }
-      throw new Error("search failed");
-    });
-
-    await expect(searchWavesByName({ name: "missing" })).rejects.toThrow(
-      "Wave search is unavailable. Try a wave URL or id."
-    );
   });
 
   it("surfaces unavailable search when every wave search endpoint fails", async () => {

@@ -415,11 +415,7 @@ export async function searchWavesByName({
   let firstSearchError: unknown;
 
   try {
-    const waves = await searchWavesV2ByName({ name, pageSize, headers });
-    completedSearches += 1;
-    if (waves.length > 0) {
-      return waves;
-    }
+    return await searchWavesV2ByName({ name, pageSize, headers });
   } catch (error) {
     failedSearches += 1;
     primarySearchError = error;

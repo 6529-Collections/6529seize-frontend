@@ -258,6 +258,72 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
+const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
+  highlyRated: "Highly Rated",
+  pinned: "Pinned",
+  following: "Following",
+  all: "All",
+  highlyRatedAriaLabel: "Highly rated waves",
+  pinnedAriaLabel: "Pinned waves",
+  followingAriaLabel: "Following waves",
+  followingListAriaLabel: "Following waves list",
+  allQualityRankedAriaLabel: "All quality-ranked waves list",
+} as const);
+
+const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
+  title: "Score",
+  quality: "Quality",
+  hotness: "Hotness",
+  waveRep: "Wave REP",
+  learnMore: "Learn more",
+  detailsAriaLabel: "Wave score details",
+  scoreAria: "Wave score {visibilityScore}",
+  qualityAria: "Quality {qualityScore}, 65% of visibility",
+  hotnessAria: "Hotness {hotnessScore}, gated, 35% of visibility",
+  repRawAndScore: "REP: {rawRep} raw, {repSortScore} score",
+  repRaw: "REP: {rawRep} raw",
+  repScore: "REP score: {repSortScore}",
+  qualityValue: "{qualityScore} / 65%",
+  hotnessValue: "{hotnessScore} / 35% gated",
+  repRawAndScoreValue: "{rawRep} / score {repSortScore}",
+  repScoreValue: "score {repSortScore}",
+} as const);
+
+const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
+  visibilityAria: "Visibility score {visibilityScore} out of 100",
+  hotnessAria: "Hotness score {hotnessScore} out of 100",
+  hotnessTitle: "Hotness score: {hotnessScore}",
+  qualityInput: "Quality input: {qualityScore} (35% of hotness)",
+  recentTrustedActivity: "Recent trusted activity carries the other 65%",
+  hotnessQualityGate: "Hotness is gated by quality before visibility",
+  repRaw: "Wave REP: {rawRep} raw",
+  repScore: "REP score: {repSortScore}",
+  repQualityWeight: "REP contributes 35% of quality",
+  repPositive: "positive {value}",
+  repNegative: "negative {value}",
+  repNeutral: "{value}",
+  repAriaRaw: "Wave REP {value}",
+  repAriaScore: "Wave REP score {repScore} out of 100",
+  scoreLabel: "Score",
+  hotLabel: "Hot",
+  repLabel: "REP",
+} as const);
+
+const WAVE_REP_ACTION_MESSAGES = objectMessages("waves.rep.action", {
+  add: "Add REP",
+  remove: "Remove REP",
+  addAriaLabel: "Add Wave REP to this wave",
+  editRemoveAriaLabel:
+    "Edit or remove your Wave REP for this wave. Current contribution {contribution}",
+} as const);
+
+const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
+  remove: "Remove",
+  removeAriaLabel: "Remove Wave REP",
+  noAvailableCredit:
+    "No available Wave REP credit for this category. You can adjust existing REP when you have a current contribution, or come back when more credit is available.",
+} as const);
+
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
   "metadata.title": "Tech",
   "metadata.description": "About",
@@ -806,6 +872,11 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...WAVES_SIDEBAR_MESSAGES,
+  ...WAVE_SCORE_SUMMARY_MESSAGES,
+  ...WAVE_SCORE_DETAILS_MESSAGES,
+  ...WAVE_REP_ACTION_MESSAGES,
+  ...WAVE_REP_MODAL_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
