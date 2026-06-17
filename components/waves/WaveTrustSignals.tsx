@@ -196,13 +196,13 @@ const getChipClasses = (
     sizeClasses = "tw-h-5 tw-px-1.5 tw-text-[10px]";
   }
 
-  const summaryClasses =
-    mode === "summary" &&
-    (variant === "sidebar" || isInlineSidebarVariant(variant))
-      ? "tw-w-[4.75rem] tw-shrink-0 tw-justify-center"
-      : mode === "summary"
-        ? "tw-shrink-0 tw-justify-center"
-        : "";
+  let summaryClasses = "";
+  if (mode === "summary") {
+    summaryClasses = "tw-shrink-0 tw-justify-center";
+    if (variant === "sidebar" || isInlineSidebarVariant(variant)) {
+      summaryClasses = `${summaryClasses} tw-w-[4.75rem]`;
+    }
+  }
 
   return [
     "tw-inline-flex tw-items-center",
