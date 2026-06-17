@@ -25,10 +25,7 @@ interface AcceptConnectionSharingProps {
 type SharedProfile = ReturnType<typeof useIdentity>["profile"];
 type SetToast = ReturnType<typeof useAuth>["setToast"];
 
-function getSharedProfileName(
-  profile: SharedProfile,
-  address: string
-): string {
+function getSharedProfileName(profile: SharedProfile, address: string): string {
   if (profile?.handle) {
     return profile.handle;
   }
@@ -126,7 +123,9 @@ function CurrentProfileNotice({
     return (
       <p className="tw-text-center tw-text-sm tw-text-neutral-400">
         Your current profile
-        {connectedProfile?.handle ? <> @{connectedProfile.handle}</> : null}{" "}
+        {connectedProfile?.handle ? (
+          <> @{connectedProfile.handle}</>
+        ) : null}{" "}
         will stay available.
         <br />
         You can switch between both after accepting.

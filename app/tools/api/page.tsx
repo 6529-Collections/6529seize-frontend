@@ -62,7 +62,6 @@ export async function loginAndFetchFeed() {
   console.log('Feed:', feed);
 }`;
 
-
   const nodeJsMediaDropExample = `import fetch from "node-fetch";
 import {readFile} from "fs/promises";
 import {extname} from "path";
@@ -241,9 +240,7 @@ run().catch((err) => {
       <Container className="pt-4 pb-4">
         <Row>
           <Col>
-            <h1>
-              6529.io API
-            </h1>
+            <h1>6529.io API</h1>
           </Col>
         </Row>
         <Row className="pt-2">
@@ -259,8 +256,10 @@ run().catch((err) => {
               can find the full reference here:{" "}
               <a
                 href={"https://api.6529.io/docs/"}
-                target="_blank" rel="noopener noreferrer"
-                className="tw-text-blue-500 tw-font-semibold">
+                target="_blank"
+                rel="noopener noreferrer"
+                className="tw-font-semibold tw-text-blue-500"
+              >
                 https://api.6529.io/docs
               </a>
             </p>
@@ -276,7 +275,8 @@ run().catch((err) => {
               style={{
                 backgroundColor: "rgb(26, 26, 26)",
                 border: "1px solid rgb(44, 44, 44)",
-              }}>
+              }}
+            >
               ℹ️ Some routes are still undocumented. We plan to expand the
               documentation over time.
             </div>
@@ -366,7 +366,9 @@ run().catch((err) => {
         </Row>
         <Row className="pt-2">
           <Col>
-            <p className="font-larger font-bolder">Creating drops with embedded media</p>
+            <p className="font-larger font-bolder">
+              Creating drops with embedded media
+            </p>
 
             <p>Current API supports multipart upload</p>
 
@@ -374,13 +376,24 @@ run().catch((err) => {
 
             <ol>
               <li>Read the file</li>
-              <li>Send the file name and mime type (not the file itself) to our API</li>
+              <li>
+                Send the file name and mime type (not the file itself) to our
+                API
+              </li>
               <li>Get back upload ID and temporary S3 key</li>
               <li>Optional: Split the file to chunks/parts.</li>
               <li>Get S3 upload URL for each part from our API</li>
-              <li>Upload each part to S3 using the signed urls gotten from previous steps and keep the ETags from responses</li>
-              <li>When all parts have finished uploading, complete the upload bt supplying the ETags to our API</li>
-              <li>Use the media URL from completion API response to create a drop</li>
+              <li>
+                Upload each part to S3 using the signed urls gotten from
+                previous steps and keep the ETags from responses
+              </li>
+              <li>
+                When all parts have finished uploading, complete the upload bt
+                supplying the ETags to our API
+              </li>
+              <li>
+                Use the media URL from completion API response to create a drop
+              </li>
             </ol>
 
             <p>Here's a full example in Node.js:</p>

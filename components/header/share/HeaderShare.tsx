@@ -465,8 +465,7 @@ export function HeaderQRModal({
           cachedConnectionShareRef.current,
           addressKey
         );
-        const share =
-          cachedShare ?? (await createConnectionShare({ signal }));
+        const share = cachedShare ?? (await createConnectionShare({ signal }));
 
         if (isStaleGeneration()) {
           return;

@@ -160,5 +160,4 @@ describe("structured wallet signatures", () => {
 
     expect(result.message).toContain("Chain ID: 11155111");
   });
-
 });
