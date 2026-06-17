@@ -555,7 +555,7 @@ describe("BoostedDropCardHome", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("opens the card from its explicit open control", () => {
+  it("opens the card from its semantic open control", () => {
     const onClick = jest.fn();
 
     renderWithAuth(
@@ -567,7 +567,11 @@ describe("BoostedDropCardHome", () => {
       />
     );
 
-    fireEvent.click(screen.getByLabelText("Open boosted post from alice"));
+    const openButton = screen.getByRole("button", {
+      name: "Open boosted post from alice",
+    });
+
+    fireEvent.click(openButton);
 
     expect(onClick).toHaveBeenCalledTimes(1);
   });
