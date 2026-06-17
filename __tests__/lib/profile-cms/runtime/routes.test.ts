@@ -29,6 +29,9 @@ describe("profile CMS runtime routes", () => {
       buildProfileCmsPath({ handle: "punk6529", segments: ["index.html"] })
     ).toBe("/punk6529/index.html");
     expect(
+      buildProfileCmsPath({ handle: "punk6529", segments: ["Index.html"] })
+    ).toBe("/punk6529/index.html");
+    expect(
       buildProfileCmsPath({
         handle: "punk6529",
         segments: ["collections", "the-memes", "index.html"],
@@ -75,6 +78,30 @@ describe("profile CMS runtime routes", () => {
       kind: "not_found",
       reason: "unsafe_redirect",
     });
+  });
+
+  it("fails closed for absolute redirect routes", () => {
+    const cmsPackage: CmsPackageV1 = {
+      ...minimalCmsPackage,
+      payload: {
+        ...minimalCmsPackage.payload,
+        routes: [
+          ...minimalCmsPackage.payload.routes,
+          {
+            path: "/punk6529/offsite/index.html",
+            kind: "redirect",
+            target: "https://example.com/phish",
+          },
+        ],
+      },
+    };
+
+    expect(resolveCmsRoute(cmsPackage, "/punk6529/offsite/index.html")).toEqual(
+      {
+        kind: "not_found",
+        reason: "unsafe_redirect",
+      }
+    );
   });
 
   it("returns navigation and page hrefs from the package manifest", () => {

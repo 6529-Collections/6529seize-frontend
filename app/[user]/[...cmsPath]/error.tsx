@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { ProfileCmsState } from "@/components/profile-cms/CmsSiteStates";
 
-export default function Error({
+export default function ProfileCmsRouteError({
   error,
   unstable_retry,
 }: {

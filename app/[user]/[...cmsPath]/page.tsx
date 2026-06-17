@@ -8,7 +8,10 @@ import {
   buildProfileCmsPath,
   resolveCmsRoute,
 } from "@/lib/profile-cms/runtime/routes";
-import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
+import {
+  isSafeCmsRelativeUri,
+  resolveCmsUri,
+} from "@/lib/profile-cms/runtime/uri";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -41,11 +44,13 @@ export default async function ProfileCmsPage({
   );
 
   if (routeResolution.kind === "redirect") {
-    const target = resolveCmsUri(routeResolution.target, {
-      allowRelative: true,
-    });
-    if (target) {
-      redirect(target);
+    if (
+      isProfileOwnedCmsRedirectTarget({
+        handle: context.site.cmsPackage.profile.handle,
+        target: routeResolution.target,
+      })
+    ) {
+      redirect(routeResolution.target);
     }
     return <ProfileCmsEmptyState title="Website route unavailable" />;
   }
@@ -173,24 +178,38 @@ async function getProfileCmsRouteContext(
 }
 
 function isNotFoundError(error: unknown): boolean {
-  const status =
-    typeof error === "object" && error !== null
-      ? ((error as { status?: number | undefined }).status ??
-        (error as { response?: { status?: number | undefined } | undefined })
-          .response?.status)
-      : undefined;
+  const status = getErrorStatus(error);
 
   if (status === 404) {
     return true;
   }
 
-  const message =
-    typeof error === "string"
-      ? error
-      : error instanceof Error
-        ? error.message
-        : "";
+  const message = getErrorMessage(error);
   return /not found|404/i.test(message);
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+  if (typeof error !== "object" || error === null) {
+    return undefined;
+  }
+
+  const apiError = error as {
+    readonly response?: { readonly status?: number | undefined } | undefined;
+    readonly status?: number | undefined;
+  };
+  return apiError.status ?? apiError.response?.status;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "";
 }
 
 function encodeCmsPathSegment(segment: string): string {
@@ -199,4 +218,19 @@ function encodeCmsPathSegment(segment: string): string {
   } catch {
     return encodeURIComponent(segment);
   }
+}
+
+function isProfileOwnedCmsRedirectTarget({
+  handle,
+  target,
+}: {
+  readonly handle: string;
+  readonly target: string;
+}): boolean {
+  if (!isSafeCmsRelativeUri(target)) {
+    return false;
+  }
+
+  const encodedHandle = encodeCmsPathSegment(handle.toLowerCase());
+  return target.toLowerCase().startsWith(`/${encodedHandle}/`);
 }

@@ -119,11 +119,14 @@ export async function fetchProfileCmsPrimarySite({
     throw error;
   }
 
-  return normalizePrimarySiteResponse(response);
+  return normalizePrimarySiteResponse(response, {
+    expectedHandle: normalizedHandle,
+  });
 }
 
 export function normalizePrimarySiteResponse(
-  response: ProfileCmsPrimarySiteApiResponse
+  response: ProfileCmsPrimarySiteApiResponse,
+  options: { readonly expectedHandle?: string | undefined } = {}
 ): ProfileCmsPrimarySite {
   if (allowDirectFixturePackageResponse() && isCmsPackage(response)) {
     return normalizeFixturePackage(response);
@@ -155,6 +158,14 @@ export function normalizePrimarySiteResponse(
         issueSummary ? `: ${issueSummary}` : "."
       }`
     );
+  }
+
+  if (
+    options.expectedHandle &&
+    cmsPackage.profile.handle.toLowerCase() !==
+      options.expectedHandle.toLowerCase()
+  ) {
+    throw new Error("Profile CMS package handle mismatch.");
   }
 
   const packageHash =
@@ -282,24 +293,38 @@ function isNotFoundError(error: unknown): boolean {
     return false;
   }
 
-  const status =
-    typeof error === "object"
-      ? ((error as { status?: number | undefined }).status ??
-        (error as { response?: { status?: number | undefined } | undefined })
-          .response?.status)
-      : undefined;
+  const status = getErrorStatus(error);
 
   if (status === 404) {
     return true;
   }
 
-  const message =
-    typeof error === "string"
-      ? error
-      : error instanceof Error
-        ? error.message
-        : "";
+  const message = getErrorMessage(error);
   return /not found|cannot get|404/i.test(message);
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+  if (typeof error !== "object") {
+    return undefined;
+  }
+
+  const apiError = error as {
+    readonly response?: { readonly status?: number | undefined } | undefined;
+    readonly status?: number | undefined;
+  };
+  return apiError.status ?? apiError.response?.status;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "";
 }
 
 function isApiUnavailableError(error: unknown): boolean {

@@ -78,8 +78,10 @@ export function resolveCmsUri(
   }
 
   return (
-    normalizeDecentralizedMediaUrl(trimmed, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
-    null
+    normalizeDecentralizedMediaUrl(
+      trimmed,
+      publicEnv.MEDIA_RESOLVER_ENDPOINT
+    ) ?? null
   );
 }
 

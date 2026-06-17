@@ -100,4 +100,49 @@ describe("CmsSiteRenderer", () => {
     expect(iframe).toHaveAttribute("sandbox", "allow-scripts");
     expect(iframe).not.toHaveAttribute("srcdoc");
   });
+
+  it("does not iframe arbitrary external html embed origins", () => {
+    const htmlBlock = artPage.blocks.find(
+      (block) => block.block_type === "html_embed"
+    );
+    if (!htmlBlock) {
+      throw new Error("Expected html_embed fixture block.");
+    }
+
+    const cmsPackage: CmsPackageV1 = {
+      ...artCmsPackage,
+      payload: {
+        ...artCmsPackage.payload,
+        assets: [
+          {
+            id: "external-html",
+            kind: "html",
+            uri: "https://example.com/embed.html",
+            roles: ["detail"],
+          },
+        ],
+        pages: [
+          {
+            ...artPage,
+            blocks: [
+              {
+                ...htmlBlock,
+                asset_id: "external-html",
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      <CmsSiteRenderer
+        cmsPackage={cmsPackage}
+        page={cmsPackage.payload.pages[0] ?? artPage}
+      />
+    );
+
+    expect(screen.queryByTitle("Embedded profile website media")).toBeNull();
+    expect(screen.getByText("Embedded media preview")).toBeInTheDocument();
+  });
 });

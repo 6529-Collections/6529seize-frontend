@@ -64,6 +64,20 @@ describe("profile CMS App Router catch-all", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
+  it("does not fetch profile data for non-CMS nested profile paths", async () => {
+    await expect(
+      ProfileCmsPage({
+        params: Promise.resolve({
+          user: "punk6529",
+          cmsPath: ["collected"],
+        }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+
+    expect(getUserProfileMock).not.toHaveBeenCalled();
+    expect(getProfileCmsPrimarySiteMock).not.toHaveBeenCalled();
+  });
+
   it("renders the CMS website at /:handle/index.html", async () => {
     const page = await ProfileCmsPage({
       params: Promise.resolve({

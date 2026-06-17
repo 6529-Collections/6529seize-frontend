@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
+import { publicEnv } from "@/config/env";
 import {
   getCmsNavigationItems,
   getCmsPagePath,
@@ -38,9 +39,7 @@ type RendererContext = {
 
 const SANDBOX_PERMISSION_ALLOWLIST = new Set([
   "allow-forms",
-  "allow-modals",
   "allow-pointer-lock",
-  "allow-popups",
   "allow-presentation",
   "allow-scripts",
 ]);
@@ -262,6 +261,7 @@ function VideoBlock({
   const poster = getAsset(context, getString(block, "poster_asset_id"));
   const assetUrl = resolveAssetUrl(asset);
   const posterUrl = resolveAssetUrl(poster);
+  const captionTrackSrc = getMediaCaptionTrackSrc(asset);
 
   if (!assetUrl) {
     return <UnsupportedBlock label="Video unavailable" />;
@@ -276,6 +276,15 @@ function VideoBlock({
         poster={posterUrl ?? undefined}
       >
         <source src={assetUrl} type={asset?.mime_type} />
+        {captionTrackSrc ? (
+          <track
+            default
+            kind="captions"
+            label="Description"
+            src={captionTrackSrc}
+            srcLang="en"
+          />
+        ) : null}
       </video>
       <MediaCaption asset={asset} />
     </figure>
@@ -291,6 +300,7 @@ function AudioBlock({
 }) {
   const asset = getAsset(context, getString(block, "asset_id"));
   const assetUrl = resolveAssetUrl(asset);
+  const captionTrackSrc = getMediaCaptionTrackSrc(asset);
 
   if (!assetUrl) {
     return <UnsupportedBlock label="Audio unavailable" />;
@@ -300,6 +310,15 @@ function AudioBlock({
     <figure className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4">
       <audio className="tw-w-full" controls preload="metadata">
         <source src={assetUrl} type={asset?.mime_type} />
+        {captionTrackSrc ? (
+          <track
+            default
+            kind="captions"
+            label="Description"
+            src={captionTrackSrc}
+            srcLang="en"
+          />
+        ) : null}
       </audio>
       <MediaCaption asset={asset} />
     </figure>
@@ -538,7 +557,7 @@ function HtmlEmbedBlock({
 }) {
   const policy = block.interactive_policy;
   const asset = getAsset(context, getString(block, "asset_id"));
-  const assetUrl = resolveAssetUrl(asset);
+  const assetUrl = resolveTrustedEmbedAssetUrl(asset);
   const fallbackAsset = getAsset(context, policy?.fallback_asset_id);
 
   if (policy?.hydration === "sandboxed_embed" && assetUrl) {
@@ -649,6 +668,25 @@ function MediaCaption({ asset }: { readonly asset: CmsAssetV1 | undefined }) {
       {asset.alt_text}
     </figcaption>
   );
+}
+
+function getMediaCaptionTrackSrc(
+  asset: CmsAssetV1 | undefined
+): string | undefined {
+  const caption = asset?.alt_text?.trim();
+  if (!caption) {
+    return undefined;
+  }
+
+  const vtt = `WEBVTT\n\n00:00:00.000 --> 99:59:59.000\n${escapeWebVttText(caption)}\n`;
+  return `data:text/vtt;charset=utf-8,${encodeURIComponent(vtt)}`;
+}
+
+function escapeWebVttText(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }
 
 function ReferencePanel({
@@ -793,6 +831,28 @@ function getAsset(
 
 function resolveAssetUrl(asset: CmsAssetV1 | null | undefined): string | null {
   return resolveCmsUri(asset?.uri);
+}
+
+function resolveTrustedEmbedAssetUrl(
+  asset: CmsAssetV1 | null | undefined
+): string | null {
+  const url = resolveAssetUrl(asset);
+  if (!url) {
+    return null;
+  }
+
+  return hasTrustedMediaResolverOrigin(url) ? url : null;
+}
+
+function hasTrustedMediaResolverOrigin(value: string): boolean {
+  try {
+    return (
+      new URL(value).origin ===
+      new URL(publicEnv.MEDIA_RESOLVER_ENDPOINT).origin
+    );
+  } catch {
+    return false;
+  }
 }
 
 function sanitizeSandboxPermissions(

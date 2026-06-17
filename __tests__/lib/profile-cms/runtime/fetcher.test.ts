@@ -90,6 +90,22 @@ describe("profile CMS primary-site fetcher", () => {
     expect(site.updatedAt).toBe("2026-06-17T00:00:00Z");
   });
 
+  it("rejects API packages that do not match the requested handle", () => {
+    const cmsPackage = buildProductionPackage();
+
+    expect(() =>
+      normalizePrimarySiteResponse(
+        {
+          package: cmsPackage,
+          package_hash: cmsPackage.integrity.package_hash,
+          payload_hash: cmsPackage.integrity.payload_hash,
+          updated_at: "2026-06-17T00:00:00Z",
+        },
+        { expectedHandle: "other-handle" }
+      )
+    ).toThrow("handle mismatch");
+  });
+
   it("rejects API envelopes with mismatched hashes", () => {
     const cmsPackage = buildProductionPackage();
 

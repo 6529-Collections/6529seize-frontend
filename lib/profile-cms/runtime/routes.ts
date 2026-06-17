@@ -3,7 +3,7 @@ import type {
   CmsPackageV1,
   CmsPageV1,
 } from "@/lib/profile-cms/protocol/v1";
-import { isSafeCmsUri } from "@/lib/profile-cms/runtime/uri";
+import { isSafeCmsRelativeUri } from "@/lib/profile-cms/runtime/uri";
 
 type CmsRouteV1 = CmsPackageV1["payload"]["routes"][number];
 
@@ -30,7 +30,7 @@ export function isProfileCmsIndexSegments(
     return false;
   }
 
-  const lastSegment = segments[segments.length - 1];
+  const lastSegment = segments.at(-1);
   return lastSegment?.toLowerCase() === "index.html";
 }
 
@@ -45,7 +45,10 @@ export function buildProfileCmsPath({
     return null;
   }
 
-  const pathSegments = [handle, ...segments].map((segment) =>
+  const normalizedSegments = segments.map((segment, index) =>
+    index === segments.length - 1 ? "index.html" : segment
+  );
+  const pathSegments = [handle, ...normalizedSegments].map((segment) =>
     encodeCmsPathSegment(segment.trim())
   );
   return `/${pathSegments.join("/")}`;
@@ -103,7 +106,7 @@ function resolveCmsRouteInternal(
   }
 
   if (route.kind === "redirect") {
-    if (!route.target || !isSafeCmsUri(route.target, { allowRelative: true })) {
+    if (!route.target || !isSafeCmsRelativeUri(route.target)) {
       return { kind: "not_found", reason: "unsafe_redirect" };
     }
     return { kind: "redirect", route, target: route.target };
