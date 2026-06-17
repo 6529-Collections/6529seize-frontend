@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
@@ -21,6 +21,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 }) => {
   // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -59,6 +60,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
     if (!vid || isLoading) return;
     const fullscreenElement = document.fullscreenElement;
     if (fullscreenElement?.contains(vid) ?? false) {
+      wasFullscreenRef.current = true;
       return;
     }
 
@@ -77,11 +79,20 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
     const pauseWhenFullscreenCloses = () => {
       const vid = videoRef.current;
-      if (!vid || document.fullscreenElement) {
+      if (!vid) {
         return;
       }
 
-      vid.pause();
+      const fullscreenElement = document.fullscreenElement;
+      if (fullscreenElement?.contains(vid) ?? false) {
+        wasFullscreenRef.current = true;
+        return;
+      }
+
+      if (wasFullscreenRef.current) {
+        wasFullscreenRef.current = false;
+        vid.pause();
+      }
     };
 
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);

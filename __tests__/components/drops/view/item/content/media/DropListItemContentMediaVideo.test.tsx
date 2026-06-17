@@ -4,12 +4,13 @@ import "@testing-library/jest-dom";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
 
 const downloadMediaUrlMock = jest.fn();
+let mockIsApp = false;
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
 }));
-jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: false }));
+jest.mock("@/hooks/useDeviceInfo", () => () => ({ isApp: mockIsApp }));
 jest.mock("@/hooks/useInView", () => ({ useInView: jest.fn() }));
 jest.mock("@/hooks/useOptimizedVideo", () => ({
   useOptimizedVideo: jest.fn(),
@@ -29,6 +30,7 @@ describe("DropListItemContentMediaVideo", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
+    mockIsApp = false;
     downloadMediaUrlMock.mockClear();
     Object.defineProperty(document, "fullscreenElement", {
       configurable: true,
@@ -119,6 +121,38 @@ describe("DropListItemContentMediaVideo", () => {
     render(<DropListItemContentMediaVideo src="foo.mp4" />);
 
     expect(pauseSpy).not.toHaveBeenCalled();
+  });
+
+  it("pauses an app video after its wrapper fullscreen exits", () => {
+    mockIsApp = true;
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, false]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const pauseSpy = jest.fn();
+    Object.defineProperty(HTMLVideoElement.prototype, "pause", {
+      configurable: true,
+      value: pauseSpy,
+    });
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: document.body,
+    });
+
+    render(<DropListItemContentMediaVideo src="foo.mp4" />);
+
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: null,
+    });
+    document.dispatchEvent(new Event("fullscreenchange"));
+
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
   });
 
   it("always shows the inline video media actions", () => {

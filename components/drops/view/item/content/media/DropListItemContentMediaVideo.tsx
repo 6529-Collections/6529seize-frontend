@@ -5,7 +5,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import clsx from "clsx";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import { useMediaActions } from "./useMediaActions";
 
@@ -14,6 +14,7 @@ interface Props {
   readonly mimeType?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
+  readonly showFullscreen?: boolean | undefined;
 }
 
 function DropListItemContentMediaVideo({
@@ -21,8 +22,10 @@ function DropListItemContentMediaVideo({
   mimeType,
   disableAutoPlay = false,
   fillContainer = false,
+  showFullscreen = true,
 }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const wasFullscreenRef = useRef(false);
   const { isApp } = useDeviceInfo();
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -56,6 +59,7 @@ function DropListItemContentMediaVideo({
     if (!videoEl || isLoading) return;
     const fullscreenElement = document.fullscreenElement;
     if (fullscreenElement?.contains(videoEl) ?? false) {
+      wasFullscreenRef.current = true;
       return;
     }
 
@@ -84,11 +88,20 @@ function DropListItemContentMediaVideo({
 
     const pauseWhenFullscreenCloses = () => {
       const videoEl = videoRef.current;
-      if (!videoEl || document.fullscreenElement) {
+      if (!videoEl) {
         return;
       }
 
-      videoEl.pause();
+      const fullscreenElement = document.fullscreenElement;
+      if (fullscreenElement?.contains(videoEl) ?? false) {
+        wasFullscreenRef.current = true;
+        return;
+      }
+
+      if (wasFullscreenRef.current) {
+        wasFullscreenRef.current = false;
+        videoEl.pause();
+      }
     };
 
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
@@ -112,6 +125,7 @@ function DropListItemContentMediaVideo({
         videoRef={videoRef}
         autoPlay={false}
         layout={fillContainer ? "fill" : "natural"}
+        showFullscreen={showFullscreen}
         onDownload={downloadMedia}
         onOpen={openMedia}
         openLabel={openLabel}

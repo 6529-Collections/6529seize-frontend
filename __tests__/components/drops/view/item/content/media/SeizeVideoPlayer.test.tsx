@@ -6,6 +6,14 @@ import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVi
 describe("SeizeVideoPlayer", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      value: null,
+    });
+    Object.defineProperty(document, "fullscreenEnabled", {
+      configurable: true,
+      value: false,
+    });
     jest
       .spyOn(HTMLMediaElement.prototype, "load")
       .mockImplementation(() => undefined);
@@ -123,6 +131,53 @@ describe("SeizeVideoPlayer", () => {
     await waitFor(() => {
       expect(webkitEnterFullscreen).toHaveBeenCalled();
     });
+  });
+
+  it("uses the mounted player wrapper as its fullscreen target", async () => {
+    const requestFullscreen = jest.fn().mockImplementation(function (
+      this: HTMLElement
+    ) {
+      expect(this).not.toBe(document.documentElement);
+      expect(this).toHaveAttribute("aria-label", "Video player");
+      Object.defineProperty(document, "fullscreenElement", {
+        configurable: true,
+        value: this,
+      });
+      document.dispatchEvent(new Event("fullscreenchange"));
+      return Promise.resolve();
+    });
+    Object.defineProperty(document, "fullscreenEnabled", {
+      configurable: true,
+      value: true,
+    });
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: requestFullscreen,
+    });
+
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
+
+    await waitFor(() => {
+      expect(requestFullscreen).toHaveBeenCalled();
+    });
+    expect(
+      screen.getByRole("button", { name: "Exit full screen" })
+    ).toBeInTheDocument();
+  });
+
+  it("can hide the fullscreen control", () => {
+    render(
+      <SeizeVideoPlayer
+        src="https://example.com/video.mp4"
+        showFullscreen={false}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
   });
 
   it("toggles playback when the video surface is clicked", async () => {

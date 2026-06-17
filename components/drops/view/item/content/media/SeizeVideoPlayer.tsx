@@ -32,6 +32,7 @@ interface SeizeVideoPlayerProps {
   readonly className?: string | undefined;
   readonly videoClassName?: string | undefined;
   readonly showActions?: boolean | undefined;
+  readonly showFullscreen?: boolean | undefined;
   readonly onDownload?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
   readonly openLabel?: string | undefined;
@@ -63,7 +64,7 @@ type FullscreenDocument = Document & {
   msExitFullscreen?: () => Promise<void> | void;
 };
 
-type FullscreenElement = HTMLDivElement & {
+type FullscreenElement = HTMLElement & {
   webkitRequestFullscreen?: () => Promise<void> | void;
   mozRequestFullScreen?: () => Promise<void> | void;
   msRequestFullscreen?: () => Promise<void> | void;
@@ -236,6 +237,7 @@ export default function SeizeVideoPlayer({
   className,
   videoClassName,
   showActions = true,
+  showFullscreen = true,
   onDownload,
   onOpen,
   openLabel,
@@ -444,10 +446,10 @@ export default function SeizeVideoPlayer({
       return;
     }
 
-    const enteredWrapper = await enterFullscreen(
+    const enteredFullscreen = await enterFullscreen(
       wrapper as FullscreenElement
     ).catch(() => false);
-    if (!enteredWrapper) {
+    if (!enteredFullscreen) {
       enterNativeVideoFullscreen(video);
     }
     revealControls();
@@ -679,16 +681,24 @@ export default function SeizeVideoPlayer({
               <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
             </SeizeVideoControlButton>
           )}
-          <SeizeVideoControlButton
-            label={isFullscreen ? "Exit full screen" : "Full screen"}
-            onClick={requestFullscreen}
-          >
-            {isFullscreen ? (
-              <ArrowsPointingInIcon className="tw-size-5" aria-hidden="true" />
-            ) : (
-              <ArrowsPointingOutIcon className="tw-size-5" aria-hidden="true" />
-            )}
-          </SeizeVideoControlButton>
+          {showFullscreen && (
+            <SeizeVideoControlButton
+              label={isFullscreen ? "Exit full screen" : "Full screen"}
+              onClick={requestFullscreen}
+            >
+              {isFullscreen ? (
+                <ArrowsPointingInIcon
+                  className="tw-size-5"
+                  aria-hidden="true"
+                />
+              ) : (
+                <ArrowsPointingOutIcon
+                  className="tw-size-5"
+                  aria-hidden="true"
+                />
+              )}
+            </SeizeVideoControlButton>
+          )}
         </div>
       </div>
 
