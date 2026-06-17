@@ -56,21 +56,17 @@ export function getWalletSignatureAudience(): string {
 }
 
 export function getWalletSignatureDomain(): string {
-  if (
-    typeof globalThis.window !== "undefined" &&
-    globalThis.window.location.host
-  ) {
-    return globalThis.window.location.host.toLowerCase();
+  const currentHost = globalThis.window?.location.host;
+  if (currentHost) {
+    return currentHost.toLowerCase();
   }
   return new URL(publicEnv.BASE_ENDPOINT).host.toLowerCase();
 }
 
 export function getWalletSignatureClientOrigin(): string | null {
-  if (
-    typeof globalThis.window !== "undefined" &&
-    globalThis.window.location.origin
-  ) {
-    const origin = globalThis.window.location.origin.toLowerCase();
+  const currentOrigin = globalThis.window?.location.origin;
+  if (currentOrigin) {
+    const origin = currentOrigin.toLowerCase();
     return origin === "null" ? null : origin;
   }
   return new URL(publicEnv.BASE_ENDPOINT).origin.toLowerCase();

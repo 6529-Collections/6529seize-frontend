@@ -186,18 +186,18 @@ interface ExecuteApiRequestParams {
   readonly credentials?: RequestCredentials | undefined;
 }
 
-const executeApiRequest = async <T>({
-  url,
+type RequestStatus = number | "aborted" | "network_error" | "unknown";
+
+const createRequestInit = ({
   method,
   headers,
   body,
   signal,
-  parseJson = true,
-  errorMode = "legacy-string",
   credentials,
-}: ExecuteApiRequestParams): Promise<T> => {
-  const requestStartedAtMs = getRequestTimingNow();
-  let status: number | "aborted" | "network_error" | "unknown" = "unknown";
+}: Pick<
+  ExecuteApiRequestParams,
+  "method" | "headers" | "body" | "signal" | "credentials"
+>): RequestInit => {
   const requestInit: RequestInit = {
     method,
     headers,
@@ -216,6 +216,99 @@ const executeApiRequest = async <T>({
     requestInit.credentials = credentials;
   }
 
+  return requestInit;
+};
+
+const parseApiResponse = async <T>(
+  res: Response,
+  url: string,
+  parseJson: boolean
+): Promise<T> => {
+  if (!parseJson) {
+    return undefined as T;
+  }
+
+  try {
+    return await res.json();
+  } catch (jsonError) {
+    const errorMessage =
+      jsonError instanceof Error ? jsonError.message : String(jsonError);
+    throw new Error(
+      `Failed to parse response as JSON from ${url}: ${errorMessage}`
+    );
+  }
+};
+
+const getErrorStatus = (
+  currentStatus: RequestStatus,
+  error: unknown
+): RequestStatus => {
+  if (currentStatus !== "unknown") {
+    return currentStatus;
+  }
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return "aborted";
+  }
+  if (error instanceof TypeError) {
+    return "network_error";
+  }
+  return currentStatus;
+};
+
+const getNetworkErrorMessage = (
+  errorMessage: string,
+  originalMessage: string,
+  url: string
+): string | null => {
+  if (
+    errorMessage.includes("load failed") ||
+    errorMessage.includes("failed to fetch")
+  ) {
+    return `Network request failed. Please check your connection and try again. (${url})`;
+  }
+  if (errorMessage.includes("network")) {
+    return `Network error: ${originalMessage} (${url})`;
+  }
+  return null;
+};
+
+const normalizeFetchError = (error: unknown, url: string): unknown => {
+  if (error instanceof DOMException && error.name === "AbortError") {
+    return error;
+  }
+  if (error instanceof TypeError) {
+    const networkErrorMessage = getNetworkErrorMessage(
+      error.message.toLowerCase(),
+      error.message,
+      url
+    );
+    if (networkErrorMessage) {
+      return new Error(networkErrorMessage);
+    }
+  }
+  return error;
+};
+
+const executeApiRequest = async <T>({
+  url,
+  method,
+  headers,
+  body,
+  signal,
+  parseJson = true,
+  errorMode = "legacy-string",
+  credentials,
+}: ExecuteApiRequestParams): Promise<T> => {
+  const requestStartedAtMs = getRequestTimingNow();
+  let status: RequestStatus = "unknown";
+  const requestInit = createRequestInit({
+    method,
+    headers,
+    body,
+    signal,
+    credentials,
+  });
+
   try {
     const res = await fetch(url, requestInit);
     status = res.status;
@@ -224,46 +317,10 @@ const executeApiRequest = async <T>({
       return handleApiError(res, errorMode);
     }
 
-    if (!parseJson) {
-      return undefined as T;
-    }
-
-    try {
-      return await res.json();
-    } catch (jsonError) {
-      throw new Error(
-        `Failed to parse response as JSON from ${url}: ${
-          jsonError instanceof Error ? jsonError.message : String(jsonError)
-        }`
-      );
-    }
+    return await parseApiResponse<T>(res, url, parseJson);
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      if (status === "unknown") {
-        status = "aborted";
-      }
-      throw error;
-    }
-
-    if (error instanceof TypeError) {
-      if (status === "unknown") {
-        status = "network_error";
-      }
-      const errorMessage = error.message.toLowerCase();
-      if (
-        errorMessage.includes("load failed") ||
-        errorMessage.includes("failed to fetch")
-      ) {
-        throw new Error(
-          `Network request failed. Please check your connection and try again. (${url})`
-        );
-      }
-      if (errorMessage.includes("network")) {
-        throw new Error(`Network error: ${error.message} (${url})`);
-      }
-    }
-
-    throw error;
+    status = getErrorStatus(status, error);
+    throw normalizeFetchError(error, url);
   } finally {
     recordMobileLaunchApiRequest({
       endpoint: url,

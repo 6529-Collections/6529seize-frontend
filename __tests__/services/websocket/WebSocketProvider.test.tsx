@@ -18,12 +18,13 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
 }));
 
+let shouldAutoAuthenticate = true;
+
 class MockWebSocket {
   static readonly OPEN = 1;
   static readonly CONNECTING = 0;
   static readonly CLOSING = 2;
   static readonly CLOSED = 3;
-  static autoAuthenticate = true;
 
   readyState = 0; // Start as CONNECTING
   onopen: ((event: Event) => void) | null = null;
@@ -48,7 +49,7 @@ class MockWebSocket {
       this.onopen(new Event("open"));
     }
     if (
-      MockWebSocket.autoAuthenticate &&
+      shouldAutoAuthenticate &&
       this.sent.some((message) => {
         try {
           return JSON.parse(message).type === "AUTHENTICATE";
@@ -101,7 +102,7 @@ describe("WebSocketProvider", () => {
       typeof authUtils.getAuthJwt
     >;
     mockGetAuthJwt.mockReturnValue("fresh-token");
-    MockWebSocket.autoAuthenticate = true;
+    shouldAutoAuthenticate = true;
 
     jest.clearAllMocks();
   });
@@ -166,7 +167,7 @@ describe("WebSocketProvider", () => {
 
     it("uses message-based authentication when a token is provided", () => {
       jest.useFakeTimers();
-      MockWebSocket.autoAuthenticate = false;
+      shouldAutoAuthenticate = false;
       mockGetAuthJwt.mockReturnValue("test-token");
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
@@ -230,7 +231,7 @@ describe("WebSocketProvider", () => {
 
     it("keeps sockets disconnected when message authentication fails", () => {
       jest.useFakeTimers();
-      MockWebSocket.autoAuthenticate = false;
+      shouldAutoAuthenticate = false;
       mockGetAuthJwt.mockReturnValue("bad-token");
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
@@ -273,7 +274,7 @@ describe("WebSocketProvider", () => {
 
     it("closes sockets when message authentication times out", () => {
       jest.useFakeTimers();
-      MockWebSocket.autoAuthenticate = false;
+      shouldAutoAuthenticate = false;
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
@@ -312,7 +313,7 @@ describe("WebSocketProvider", () => {
     });
 
     it("allows reconnect after message authentication fails when the token changes", () => {
-      MockWebSocket.autoAuthenticate = false;
+      shouldAutoAuthenticate = false;
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {
         wrapper,
