@@ -5,21 +5,22 @@ import SmartLinkPreview from "@/components/waves/SmartLinkPreview";
 import TwitterPreviewCard from "@/components/waves/TwitterPreviewCard";
 import type { LinkPreviewVariant } from "@/components/waves/LinkPreviewContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 
-const KNOWN_INTERNAL_LINK_TITLES: Record<string, string> = {
-  "/network/wavescore": "Network: Wave Score",
+const KNOWN_INTERNAL_LINK_TITLE_KEYS: Record<string, MessageKey> = {
+  "/network/wavescore": "home.boostedDrop.internalLinks.networkWaveScoreTitle",
 };
 
-const titleCaseSegment = (segment: string): string =>
-  segment
-    .replace(/[-_]+/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/\bwavescore\b/i, "wave score")
-    .trim()
-    .split(/\s+/)
-    .map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`)
-    .join(" ");
+const getUrlDisplayTitle = ({
+  source,
+  url,
+}: {
+  readonly source: string;
+  readonly url: URL;
+}): string => {
+  const path = url.pathname === "/" ? "" : url.pathname;
+  return `${source}${path}${url.search}${url.hash}`;
+};
 
 const getFallbackPreview = ({
   href,
@@ -35,20 +36,23 @@ const getFallbackPreview = ({
     const host = url.hostname.replace(/^www\./i, "");
     const source = host || href;
     const isInternal6529 = source === "6529.io" || source.endsWith(".6529.io");
-    const knownTitle = KNOWN_INTERNAL_LINK_TITLES[url.pathname.toLowerCase()];
+    const knownTitleKey = isInternal6529
+      ? KNOWN_INTERNAL_LINK_TITLE_KEYS[url.pathname.toLowerCase()]
+      : undefined;
 
-    if (knownTitle) {
-      return { isInternal6529, source, title: knownTitle };
+    if (knownTitleKey) {
+      return {
+        isInternal6529,
+        source,
+        title: t(DEFAULT_LOCALE, knownTitleKey),
+      };
     }
 
-    const pathTitle = url.pathname
-      .split("/")
-      .filter(Boolean)
-      .map(titleCaseSegment)
-      .filter(Boolean)
-      .join(" / ");
-
-    return { isInternal6529, source, title: pathTitle || source };
+    return {
+      isInternal6529,
+      source,
+      title: getUrlDisplayTitle({ source, url }),
+    };
   } catch {
     return { isInternal6529: false, source: href, title: href };
   }

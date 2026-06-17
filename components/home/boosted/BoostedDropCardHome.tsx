@@ -43,23 +43,21 @@ const CLICKABLE_CARD_CLASS = "tw-cursor-pointer";
 const CARD_BORDER_CLASSES =
   "tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl tw-border tw-border-solid tw-border-white/5";
 const HEADER_CLASSES =
-  "tw-absolute tw-left-3 tw-right-3 tw-top-3 tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2";
+  "tw-pointer-events-none tw-absolute tw-left-3 tw-right-3 tw-top-3 tw-z-30 tw-flex tw-flex-nowrap tw-items-center tw-justify-between tw-gap-2";
 const CHAT_HEADER_CLASSES =
-  "tw-relative tw-z-10 tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-bg-iron-950/90 tw-px-4 tw-py-2.5";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-bg-iron-950/90 tw-px-4 tw-py-2.5";
 const HEADER_LEFT_CLASSES =
   "tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-overflow-hidden";
 const PILL_CLASSES =
   "tw-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-black/40 tw-px-2.5 tw-py-1 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-md tw-transition-colors group-hover:tw-bg-black/60";
 const FOOTER_CLASSES =
-  "tw-relative tw-z-10 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/70 tw-px-4 tw-py-3";
-const AUTHOR_LINK_CLASSES =
+  "tw-relative tw-z-30 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-900 tw-bg-black/70 tw-px-4 tw-py-3";
+const PROFILE_LINK_CLASSES =
   "tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-md tw-no-underline tw-transition-opacity desktop-hover:hover:tw-opacity-80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 const WAVE_LINK_CLASSES =
   "tw-group/wave tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 tw-rounded-full tw-bg-white/5 tw-py-1 tw-pl-2.5 tw-pr-1 tw-no-underline tw-transition-all active:tw-scale-95 desktop-hover:hover:tw-bg-white/10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 const OPEN_DROP_BUTTON_CLASSES =
-  "tw-sr-only focus:tw-not-sr-only focus:tw-absolute focus:tw-left-3 focus:tw-top-3 focus:tw-z-40 focus:tw-rounded-md focus:tw-border focus:tw-border-solid focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-px-3 focus:tw-py-1.5 focus:tw-text-xs focus:tw-font-semibold focus:tw-text-iron-50 focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-2 focus:tw-outline-primary-400";
-const CARD_INTERACTIVE_TARGET_SELECTOR =
-  'a, button, input, select, textarea, summary, [role="button"], [role="link"], [contenteditable="true"]';
+  "tw-absolute tw-inset-0 tw-z-20 tw-m-0 tw-block tw-h-full tw-w-full tw-cursor-pointer tw-rounded-[inherit] tw-border-0 tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
 const getBoostLabel = (boosts: number): string =>
   t(
@@ -77,22 +75,6 @@ const getOpenDropLabel = (authorHandle: string | null | undefined): string =>
   t(DEFAULT_LOCALE, "home.boostedDrop.openDrop", {
     author: getAuthorLabel(authorHandle),
   });
-
-const isInteractiveEventTarget = (target: EventTarget | null): boolean =>
-  target instanceof Element &&
-  Boolean(target.closest(CARD_INTERACTIVE_TARGET_SELECTOR));
-
-const useCardClick = (onClick?: () => void) =>
-  useCallback(
-    (event: ReactMouseEvent<HTMLElement>) => {
-      if (!onClick || isInteractiveEventTarget(event.target)) {
-        return;
-      }
-
-      onClick();
-    },
-    [onClick]
-  );
 
 const BoostedDropCardChatBoostButton = memo(
   ({ drop }: { readonly drop: ApiDrop }) => {
@@ -256,7 +238,7 @@ const BoostedDropCardFooter = memo(
       <Link
         href={author.handle ? `/${author.handle}` : "#"}
         onClick={(event) => event.stopPropagation()}
-        className={AUTHOR_LINK_CLASSES}
+        className={PROFILE_LINK_CLASSES}
         aria-label={t(DEFAULT_LOCALE, "home.boostedDrop.viewAuthor", {
           author: getAuthorLabel(author.handle),
         })}
@@ -315,12 +297,9 @@ const BoostedDropCardOpenButton = memo(
       <button
         type="button"
         className={OPEN_DROP_BUTTON_CLASSES}
-        onClick={(event) => {
-          event.stopPropagation();
-          onClick();
-        }}
+        onClick={onClick}
       >
-        {label}
+        <span className="tw-sr-only">{label}</span>
       </button>
     );
   }
@@ -335,7 +314,6 @@ const BoostedDropCardHome = memo(
     const fireIconsToShow = Math.min(boosts, MAX_FIRE_ICONS);
     const remainingBoosts = Math.max(boosts - MAX_FIRE_ICONS, 0);
     const isChatVariant = variant === "chat";
-    const handleCardClick = useCardClick(onClick);
     const openDropLabel = getOpenDropLabel(author.handle);
     const waveHref = getWaveRoute({
       waveId: wave.id,
@@ -345,8 +323,6 @@ const BoostedDropCardHome = memo(
 
     return (
       <article
-        aria-label={openDropLabel}
-        onClick={handleCardClick}
         className={`${isChatVariant ? CHAT_CARD_CLASSES : HOME_CARD_CLASSES} ${
           onClick ? CLICKABLE_CARD_CLASS : ""
         }`}
