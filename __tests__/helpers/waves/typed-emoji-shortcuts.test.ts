@@ -55,13 +55,27 @@ describe("normalizeTypedEmojiShortcuts", () => {
   });
 
   it("does not convert fenced code blocks", () => {
-    expect(
-      normalizeTypedEmojiShortcuts(
-        ["before :D", "```", ":D", "```", "after ;)"].join("\n")
-      )
-    ).toBe(
-      ["before :grinning:", "```", ":D", "```", "after :wink:"].join("\n")
-    );
+    const markdown = [
+      "before :D",
+      "```",
+      ":D",
+      "```not-a-close",
+      ":)",
+      "```",
+      "after ;)",
+    ].join("\n");
+
+    const normalized = [
+      "before :grinning:",
+      "```",
+      ":D",
+      "```not-a-close",
+      ":)",
+      "```",
+      "after :wink:",
+    ].join("\n");
+
+    expect(normalizeTypedEmojiShortcuts(markdown)).toBe(normalized);
   });
 
   it("leaves unsupported shortcuts unchanged", () => {

@@ -34,6 +34,7 @@ const ORDERED_SHORTCUTS = [...TYPED_EMOJI_SHORTCUTS].sort(
   ([left], [right]) => right.length - left.length
 );
 const FENCE_START_PATTERN = /^ {0,3}(`{3,}|~{3,})/;
+const FENCE_CLOSE_PATTERN = /^ {0,3}(`{3,}|~{3,})\s*$/;
 const LEADING_BOUNDARY_PATTERN = /[\s([{]/;
 const TRAILING_BOUNDARY_PATTERN = /[\s.!?,;)\]}]/;
 
@@ -130,8 +131,13 @@ const getFenceDelimiter = (line: string): string | null => {
   return match?.[1] ?? null;
 };
 
+const getClosingFenceDelimiter = (line: string): string | null => {
+  const match = FENCE_CLOSE_PATTERN.exec(line);
+  return match?.[1] ?? null;
+};
+
 const closesFence = (line: string, fenceDelimiter: string): boolean => {
-  const closingDelimiter = getFenceDelimiter(line);
+  const closingDelimiter = getClosingFenceDelimiter(line);
   return (
     closingDelimiter !== null &&
     closingDelimiter.charAt(0) === fenceDelimiter.charAt(0) &&
