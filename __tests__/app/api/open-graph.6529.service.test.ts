@@ -156,6 +156,74 @@ describe("createFirstParty6529Plan", () => {
     ]);
   });
 
+  it("uses The Memes claim edition size when the server can fetch claims", async () => {
+    let claimAuthHeader: string | null = null;
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL, init) => {
+      const url = readFetchUrl(input);
+      const headers = new Headers(init?.headers);
+
+      if (url.pathname === "/api/nfts") {
+        return jsonResponse({
+          data: [
+            {
+              id: 509,
+              name: "The Collective Synapse",
+              supply: 173,
+              artist: "elnaz555",
+              artist_seize_handle: "elnaz555",
+              hodl_rate: 22.7803,
+              mint_date: "2026-06-15T09:23:23.000Z",
+              thumbnail: "https://cdn.6529.io/memes/509.png",
+              metadata: {
+                attributes: [{ trait_type: "Type - Season", value: 15 }],
+              },
+            },
+          ],
+        });
+      }
+
+      if (url.pathname === "/api/memes_extended_data") {
+        return jsonResponse({
+          data: [{ id: 509, edition_size: 173, season: 15 }],
+        });
+      }
+
+      if (
+        url.pathname ===
+        `/api/minting-claims/${MEMES_CONTRACT}/claims/509`
+      ) {
+        claimAuthHeader = headers.get("x-6529-auth");
+        return jsonResponse({
+          name: "The Collective Synapse",
+          edition_size: 328,
+        });
+      }
+
+      if (url.pathname === "/api/memes-mint-stats/509") {
+        return jsonResponse({
+          mint_date: "2026-06-15T09:23:23.000Z",
+          total_count: 94,
+        });
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(claimAuthHeader).toBeNull();
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "328" },
+      { label: "TDH rate", value: "22.78" },
+      { label: "Season", value: "15" },
+      { label: "Mint date", value: "15 Jun 2026" },
+    ]);
+  });
+
   it("isolates authenticated collection preview cache keys by auth token", () => {
     const url = new URL("https://6529.io/the-memes/509");
     const publicPlan = createFirstParty6529Plan(url);
