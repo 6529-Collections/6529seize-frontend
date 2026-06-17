@@ -68,8 +68,10 @@ function splitInsideFirstMultibyteCharacter(bytes: Uint8Array) {
 }
 
 describe("delegationContent", () => {
-  const publishedRootCid =
-    "bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq";
+  const publishedRootCid = delegationContentManifest.canonicalStorage.rootCid;
+  if (!publishedRootCid) {
+    throw new Error("Expected delegation content manifest to define rootCid");
+  }
   const publishedGatewayBaseUrl = `https://ipfs.6529.io/ipfs/${publishedRootCid}`;
 
   it("keeps the reviewed source manifest and public mirror in sync", async () => {
@@ -121,6 +123,14 @@ describe("delegationContent", () => {
       `https://ipfs.io/ipfs/${publishedRootCid}/html/delegation-faq.html`,
       "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
     ]);
+  });
+
+  it("records each article source URI under the canonical CID", () => {
+    for (const article of Object.values(delegationContentManifest.articles)) {
+      expect(article.sourceUri).toBe(
+        `ipfs://${publishedRootCid}/${article.path}`
+      );
+    }
   });
 
   it("prefers the CDN and IPFS gateways when a root CID is configured", () => {

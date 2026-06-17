@@ -9,7 +9,7 @@
   "canonicalStorage": {
     "type": "ipfs",
     "rootCid": "bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq",
-    "note": "Set DELEGATION_DOCS_IPFS_ROOT_CID after the reviewed bundle is published and pinned."
+    "note": "Reviewed delegation docs bundle is published and pinned by immutable IPFS CID."
   },
   "acceleration": {
     "primaryGatewayBaseUrl": "https://ipfs.6529.io/ipfs",
