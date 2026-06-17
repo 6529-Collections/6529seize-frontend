@@ -123,16 +123,19 @@ function SearchModal(props: Readonly<Props>) {
         {props.searchWallets.map((w) => (
           <div key={w} className="pt-1 pb-1">
             <>
-              <FontAwesomeIcon
+              <button
+                aria-label={`Remove ${w} from search`}
                 onClick={() => {
                   props.removeSearchWallet(w);
                 }}
                 className={`${styles["removeWalletBtn"]} ${
                   isDark ? "!tw-text-iron-900 hover:!tw-text-black" : ""
                 }`}
-                icon={faSquareXmark}
                 data-tooltip-id={`remove-wallet-${w}`}
-              />
+                type="button"
+              >
+                <FontAwesomeIcon icon={faSquareXmark} />
+              </button>
               <Tooltip
                 id={`remove-wallet-${w}`}
                 place="top"
@@ -257,14 +260,17 @@ export function SearchWalletsDisplay(
         ))}
       {hasSearchWallets && (
         <>
-          <FontAwesomeIcon
+          <button
+            aria-label="Clear all search wallets"
             onClick={() => setSearchWallets([])}
             className={`${styles["clearSearchBtnIcon"]} ${
               isDark ? "!tw-size-9 tw-rounded-full" : ""
             }`}
-            icon={faTimesCircle}
             data-tooltip-id="clear-all-display"
-          />
+            type="button"
+          >
+            <FontAwesomeIcon icon={faTimesCircle} />
+          </button>
           <Tooltip
             id="clear-all-display"
             place="top"
@@ -280,6 +286,7 @@ export function SearchWalletsDisplay(
         </>
       )}
       <button
+        aria-label="Open search modal"
         onClick={() => setShowSearchModal(true)}
         className={`tw-inline-flex ${
           isDark ? "tw-size-9" : "tw-size-10"

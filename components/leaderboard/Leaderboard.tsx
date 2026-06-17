@@ -87,7 +87,7 @@ export default function Leaderboard(
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
 
   const pathname = usePathname();
-  const isNetworkPage = pathname.includes("network");
+  const isNetworkPage = pathname.startsWith("/network");
   const showViewAll = !isNetworkPage;
 
   const [showSearchModal, setShowSearchModal] = useState(false);
