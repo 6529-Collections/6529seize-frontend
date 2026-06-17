@@ -4,9 +4,9 @@ Last updated: 2026-06-17.
 
 ## Current State
 
-Phase 0 and Phase 1 are now delivered as docs/protocol artifacts in this repo.
-They are ready to seed implementation PRs, but they are not executable product
-code yet.
+Phase 0 and Phase 1 are delivered as docs/protocol artifacts in this repo, and
+Wave 0 now adds an executable frontend protocol bridge under
+`lib/profile-cms/protocol/v1/`.
 
 Available now:
 
@@ -17,6 +17,15 @@ Available now:
 - Phase 1 agent patch and validation-result JSON schemas.
 - Phase 1 valid and invalid fixture corpus.
 - Phase 1 hash/canonicalization vector plan.
+- Executable Zod schema mirror for CMS package, payload, agent patch, and
+  validation-result shapes.
+- Strict canonical JSON and `sha256:<hex>` helpers.
+- Real hash vectors for minimal objects and the minimal profile homepage
+  fixture.
+- Semantic validator for route, namespace, reference, URL, fixture-mode,
+  media, storage, signature, and optional hash checks.
+- Jest tests for canonicalization, hashing, and all valid/invalid Phase 1
+  fixtures.
 - Page types for pages, posts, galleries, collections, NFT/card details, and
   room-style pages.
 - Blocks for headings, rich text, images, galleries, quotes, callouts, button
@@ -37,6 +46,9 @@ Important limits:
 - The broader schema is ahead of any authoring experience.
 - Real IPFS and Arweave upload adapters are still needed.
 - Real wallet signature verification is still needed.
+- The executable validator is currently a Zod mirror plus semantic pass. The
+  JSON Schema files remain the protocol reference; a later shared-package pass
+  should decide whether to add direct AJV execution.
 - Live NFT indexing, full collection pages, full NFT pages, and 3D rooms are
   not implemented yet.
 - There is no general WYSIWYG/block editor yet.
@@ -58,15 +70,18 @@ Important limits:
 
 ## Next Implementation Slice
 
-The highest leverage next slice is Wave 0 implementation from
-`phase-0/pr-wave-plan.md`:
+The highest leverage next slice is Wave 1 from `phase-0/pr-wave-plan.md`:
 
-1. Move or mirror the Phase 1 schemas into executable protocol code under
-   `lib/profile-cms/protocol/v1/` or a shared 6529mono package.
-2. Implement RFC 8785 canonical JSON and SHA-256 vectors.
-3. Add a real schema and semantic validator against the Phase 1 fixtures.
-4. Add FE and BE CI checks that parse and validate the same fixture corpus.
-5. Only then begin route/render/publish/builder/gallery parallel waves.
+1. Decide whether this executable protocol stays in FE temporarily or moves to
+   a shared 6529mono package before BE adoption.
+2. Add backend tests that consume the same Phase 1 fixture corpus and validation
+   result shape.
+3. Start the `/{handle}/index.html` route and native static renderer behind a
+   feature flag.
+4. Add profile-page website button plumbing for profiles with a published CMS
+   pointer.
+5. Only then fan out publish/storage, builder, wallet-gallery generation, art
+   display, 3D rooms, and AI-agent affordances.
 
 ## Decisions To Make Before Coding More
 
@@ -74,6 +89,6 @@ The highest leverage next slice is Wave 0 implementation from
 - Whether public launch should require both IPFS and Arweave receipts instead
   of one required plus one preferred.
 - Exact EIP-712 typed-data domain and user-facing signing copy.
-- Whether Phase 1 executable schema work starts in this FE repo or immediately
-  moves into a shared 6529mono package.
+- Whether the Wave 0 executable protocol moves into a shared 6529mono package
+  before backend implementation, or is copied into BE as a temporary bridge.
 - Exact first institutional migration pilot.

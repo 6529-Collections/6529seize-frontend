@@ -41,7 +41,7 @@ Canonical bytes:
 Expected hash:
 
 ```text
-pending implementation
+sha256:43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777
 ```
 
 ### Vector 2: Unicode String
@@ -55,7 +55,7 @@ Input:
 Expected hash:
 
 ```text
-pending implementation
+sha256:3c518ebe06d42949bc66db07f8ea911d1fbf5f75e06e998df4ef34bbc38f0b81
 ```
 
 ### Vector 3: Minimal Profile Homepage Payload
@@ -67,14 +67,21 @@ Input:
 Expected payload hash:
 
 ```text
-pending implementation
+sha256:ad8d45da7c8810c3b3096cf0290b853a946e39cf579bfa05f7a9d20e30fa7d80
 ```
 
 Expected package hash:
 
 ```text
-pending implementation
+sha256:b8a7cc1340a7e3591c66696efcc7f44c560332bc1a044b7cd124879349607f9b
 ```
+
+Package hash input rule for Wave 0:
+
+- Compute and set `integrity.payload_hash` first.
+- Compute package hash over the package with `integrity.package_hash` omitted.
+- Signatures and storage receipts remain part of that package hash input; the
+  self-referential `package_hash` field is the only omitted field.
 
 ## Validator Requirements
 
@@ -85,4 +92,3 @@ Hash validator must:
 - Reject non-`sha256:` prefixes for V1.
 - Treat CDN delivery URL changes as non-canonical if outside signed package, but
   reject storage receipt mutations inside signed package.
-

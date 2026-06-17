@@ -58,17 +58,24 @@ Valid:
 
 - Minimal profile homepage.
 - Wallet gallery with generated collection and NFT routes.
+- Collection page with a knowledge packet source.
 - NFT detail page with art assets and display variants.
+- Mixed media page with image, video, audio, HTML embed, and 3D model assets.
 - 3D exhibition room with faithful 2D fallback.
+- Legacy institutional route migration package.
 
 Invalid:
 
 - Missing signature.
 - Route collision.
+- Unknown block type.
 
 ## Canonical Hashing
 
-Phase 1 fixtures use placeholder hashes where noted. Implementation must
-replace placeholders with RFC 8785 canonical JSON + SHA-256 vectors before
-Phase 2 renderer/publish work is considered protocol-stable.
+Phase 1 fixture package hashes remain placeholder-shaped where noted, so they
+can document the protocol without pretending publish hashes are final.
 
+Wave 0 implementation now provides executable canonical JSON + SHA-256 helpers
+under `lib/profile-cms/protocol/v1/`, and `hash-test-vectors.md` includes real
+small-object and minimal-homepage vectors. Phase 2 renderer/publish work should
+use those helpers rather than inventing a second hash path.
