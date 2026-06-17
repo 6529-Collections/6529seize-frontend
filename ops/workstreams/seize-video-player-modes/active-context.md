@@ -179,7 +179,8 @@ Validation so far:
   - native/watch videos have a localized default player label
   - paused minimal-control videos use one real center play button
   - Twitter captions pass `srcLang="und"` because Twitter caption language is
-    unknown; the player default remains `en-US` for first-party captions
+    unknown and do not force `default`; the player default remains `en-US` for
+    first-party captions
   - easy Sonar style issues were cleaned up in the reduced-motion helper/tests,
     and the intentional conditional-caption-track rule is marked with a narrow
     `NOSONAR`

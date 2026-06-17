@@ -282,6 +282,127 @@ function SeizeVideoMinimalControls({
   );
 }
 
+function SeizeVideoElement({
+  ariaLabel,
+  captionsDefault,
+  captionsLabel,
+  captionsLang,
+  captionsSrc,
+  dataDisable,
+  dataMime,
+  dataTestId,
+  dataUrl,
+  id,
+  isMuted,
+  isWrapperFullscreen,
+  labels,
+  loop,
+  onClick,
+  onDurationChange,
+  onEnded,
+  onError,
+  onLoadedMetadata,
+  onPause,
+  onPlay,
+  onPointerEnter,
+  onPointerLeave,
+  onPointerMove,
+  onTimeUpdate,
+  onTouchStart,
+  poster,
+  preload,
+  setVideoRef,
+  src,
+  videoAutoPlay,
+  videoClassName,
+  videoControls,
+}: {
+  readonly ariaLabel: string;
+  readonly captionsDefault: boolean;
+  readonly captionsLabel: string;
+  readonly captionsLang: string;
+  readonly captionsSrc?: string | undefined;
+  readonly dataDisable?: string | undefined;
+  readonly dataMime?: string | undefined;
+  readonly dataTestId?: string | undefined;
+  readonly dataUrl?: string | undefined;
+  readonly id?: string | undefined;
+  readonly isMuted: boolean;
+  readonly isWrapperFullscreen: boolean;
+  readonly labels: SeizeVideoLabels;
+  readonly loop: boolean;
+  readonly onClick: React.MouseEventHandler<HTMLVideoElement>;
+  readonly onDurationChange: () => void;
+  readonly onEnded: () => void;
+  readonly onError: React.ReactEventHandler<HTMLVideoElement>;
+  readonly onLoadedMetadata: React.ReactEventHandler<HTMLVideoElement>;
+  readonly onPause: () => void;
+  readonly onPlay: () => void;
+  readonly onPointerEnter?: (() => void) | undefined;
+  readonly onPointerLeave?: (() => void) | undefined;
+  readonly onPointerMove?: (() => void) | undefined;
+  readonly onTimeUpdate: () => void;
+  readonly onTouchStart?: (() => void) | undefined;
+  readonly poster?: string | undefined;
+  readonly preload: "auto" | "metadata" | "none";
+  readonly setVideoRef: (element: HTMLVideoElement | null) => void;
+  readonly src?: string | undefined;
+  readonly videoAutoPlay: boolean;
+  readonly videoClassName?: string | undefined;
+  readonly videoControls: boolean;
+}) {
+  return (
+    <>
+      {/* NOSONAR: render captions only when a real VTT source exists. */}<video
+        id={id}
+        ref={setVideoRef}
+        src={src}
+        autoPlay={videoAutoPlay}
+        muted={isMuted}
+        loop={loop}
+        playsInline
+        preload={preload}
+        poster={poster}
+        controls={videoControls}
+        aria-label={ariaLabel}
+        {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
+        onLoadedMetadata={onLoadedMetadata}
+        onDurationChange={onDurationChange}
+        onTimeUpdate={onTimeUpdate}
+        onPlay={onPlay}
+        onPause={onPause}
+        onEnded={onEnded}
+        onError={onError}
+        onClick={onClick}
+        onPointerEnter={onPointerEnter}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
+        onTouchStart={onTouchStart}
+        className={clsx(
+          "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
+          isWrapperFullscreen && "tw-rounded-none",
+          videoClassName
+        )}
+        data-testid={dataTestId}
+        data-mime={dataMime}
+        data-url={dataUrl}
+        data-disable={dataDisable}
+      >
+        {captionsSrc && (
+          <track
+            kind="captions"
+            src={captionsSrc}
+            srcLang={captionsLang}
+            label={captionsLabel}
+            default={captionsDefault}
+          />
+        )}
+        {labels.unsupported}
+      </video>
+    </>
+  );
+}
+
 export default function SeizeVideoPlayer({
   src,
   videoRef,
@@ -727,7 +848,6 @@ export default function SeizeVideoPlayer({
   const responsiveMediaStyle = getResponsiveMediaStyle();
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
-  const videoSourceProps = directSrc ? { src: directSrc } : {};
   const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
   const labels = useMemo<SeizeVideoLabels>(
     () => ({
@@ -794,52 +914,41 @@ export default function SeizeVideoPlayer({
       )}
       style={responsiveMediaStyle}
     >
-      {/* NOSONAR: render captions only when a real VTT source exists. */}<video
+      <SeizeVideoElement
+        ariaLabel={ariaLabel ?? labels.player}
+        captionsDefault={captionsDefault}
+        captionsLabel={resolvedCaptionsLabel}
+        captionsLang={captionsLang}
+        captionsSrc={captionsSrc}
+        dataDisable={dataDisable}
+        dataMime={dataMime}
+        dataTestId={dataTestId}
+        dataUrl={dataUrl}
         id={id}
-        ref={setVideoRef}
-        {...videoSourceProps}
-        autoPlay={videoAutoPlay}
-        muted={isMuted}
+        isMuted={isMuted}
+        isWrapperFullscreen={isWrapperFullscreen}
+        labels={labels}
         loop={resolvedTemplate.loop}
-        playsInline
-        preload={resolvedTemplate.preload}
-        poster={poster}
-        controls={videoControls}
-        aria-label={ariaLabel ?? labels.player}
-        {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
-        onLoadedMetadata={handleMetadata}
+        onClick={handleVideoClick}
         onDurationChange={updateProgress}
-        onTimeUpdate={updateProgress}
-        onPlay={handlePlay}
-        onPause={handlePause}
         onEnded={handlePause}
         onError={handleError}
-        onClick={handleVideoClick}
+        onLoadedMetadata={handleMetadata}
+        onPause={handlePause}
+        onPlay={handlePlay}
         onPointerEnter={showMinimalControls ? revealControls : undefined}
-        onPointerMove={showMinimalControls ? revealControls : undefined}
         onPointerLeave={showMinimalControls ? hideControlsSoon : undefined}
+        onPointerMove={showMinimalControls ? revealControls : undefined}
+        onTimeUpdate={updateProgress}
         onTouchStart={showMinimalControls ? revealControls : undefined}
-        className={clsx(
-          "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
-          isWrapperFullscreen && "tw-rounded-none",
-          videoClassName
-        )}
-        data-testid={dataTestId}
-        data-mime={dataMime}
-        data-url={dataUrl}
-        data-disable={dataDisable}
-      >
-        {captionsSrc && (
-          <track
-            kind="captions"
-            src={captionsSrc}
-            srcLang={captionsLang}
-            label={resolvedCaptionsLabel}
-            default={captionsDefault}
-          />
-        )}
-        {labels.unsupported}
-      </video>
+        poster={poster}
+        preload={resolvedTemplate.preload}
+        setVideoRef={setVideoRef}
+        src={directSrc}
+        videoAutoPlay={videoAutoPlay}
+        videoClassName={videoClassName}
+        videoControls={videoControls}
+      />
 
       {isPosterGateClosed && (
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">

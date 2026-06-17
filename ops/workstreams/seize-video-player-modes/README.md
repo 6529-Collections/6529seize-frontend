@@ -484,7 +484,8 @@ Add or update tests for:
   playback handlers.
 - Twitter single video does not autoplay by default.
 - Twitter grid video autoplays only after poster play.
-- Twitter captions keep a real label and default state.
+- Twitter captions keep a real label and use `srclang="und"` without forcing
+  `default`.
 - Marketplace video preview does not add nested focusable controls.
 - Upload previews do not autoplay and expose inspection controls.
 - Drop media keeps in-view HLS autoplay/pause behavior.

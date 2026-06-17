@@ -176,7 +176,8 @@
   - paused minimal-control videos use one real center play button, with no
     duplicate bottom-right play button while paused
   - default caption language remains `en-US` for first-party captions, while
-    Twitter explicitly passes `captionsLang="und"` for unknown-language captions
+    Twitter explicitly passes `captionsLang="und"` without forcing `default`
+    for unknown-language captions
   - conditional caption-track rendering is kept, with a narrow `NOSONAR`,
     because fake empty tracks were intentionally removed
   - reduced-motion test helper now uses `globalThis`

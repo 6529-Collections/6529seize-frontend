@@ -175,7 +175,7 @@ describe("TwitterPreviewCard", () => {
       "Captions"
     );
     expect(container.querySelector("track")).toHaveAttribute("srclang", "und");
-    expect(container.querySelector("track")).toHaveAttribute("default");
+    expect(container.querySelector("track")).not.toHaveAttribute("default");
 
     expect(screen.queryByText("1080p")).not.toBeInTheDocument();
     await userEvent.click(
