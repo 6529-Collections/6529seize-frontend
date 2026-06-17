@@ -134,14 +134,14 @@ Publish public release notes after production is deployed and production validat
 
 After production validation passes, post a detailed deployment overview to the `Follow The Repo` wave unless the user explicitly asked to skip repo-facing deploy notes. This is separate from the public `6529 Releases` note: use it for repo watchers who need enough operational detail to understand exactly what shipped.
 
-1. Use any 6529.io posting credential that the current operator legitimately has access to, such as an existing browser session, an approved local helper/API token, or another authenticated 6529.io profile. Do not request raw credentials, expose tokens, or use another person's account unless that access was explicitly approved for this release.
+1. Use any authorized 6529.io account/profile or posting credential that the current operator personally controls or is explicitly approved to use for this release, such as an existing browser session or an approved local helper/API token. Do not request raw credentials, expose tokens, use shared wallets, use another person's account, or use automation keys unless that access was explicitly approved for this release.
 2. Resolve the wave immediately before posting. The current `Follow The Repo` wave is `https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4`; if using the local helper, verify it first:
 
 ```powershell
 punk6529bot waves search --name "follow the repo"
 ```
 
-3. Draft the overview from deployed production reality. Include:
+3. Draft the overview from deployed production reality. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
    - what user-facing and operator-facing changes were deployed
    - frontend and backend PRs, merge SHAs, production deployed SHA/version label, and deploy run links
    - staging and production validation performed, including E2E or smoke results
