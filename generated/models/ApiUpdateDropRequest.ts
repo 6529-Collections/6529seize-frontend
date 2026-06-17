@@ -26,11 +26,11 @@ export class ApiUpdateDropRequest {
     'mentioned_waves'?: Array<ApiCreateMentionedWave>;
     'metadata': Array<ApiDropMetadata>;
     /**
-    * If wave requires drop signatures then this needs to be set. In legacy mode, the signature is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature - signature_message (+ wave.participation.terms if it exists)))). In structured-signature mode, the signature is ethSign(creatorWallet, signature_message), and signature_message\'s payload_hash is derived from that same canonical payload.
+    * If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature - signature_message (+ wave.participation.terms if it exists))))
     */
     'signature': string | null;
     /**
-    * Optional request-only structured wallet signature message containing the exact bytes signed in structured-signature mode. This field is omitted from the payload hash before signature verification.
+    * Optional request-only structured wallet signature message. Present when structured signatures are enabled and omitted from the payload hash before signature verification.
     */
     'signature_message'?: string | null;
     'is_safe_signature'?: boolean;

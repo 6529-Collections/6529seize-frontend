@@ -10,7 +10,7 @@
  * Base class for token refresh errors
  * All token refresh operations should throw subclasses of this error
  */
-export class TokenRefreshError extends Error {
+class TokenRefreshError extends Error {
   constructor(
     message: string,
     public override readonly cause?: unknown
@@ -30,35 +30,6 @@ export class TokenRefreshCancelledError extends TokenRefreshError {
     super(message);
     this.name = "TokenRefreshCancelledError";
     Object.setPrototypeOf(this, TokenRefreshCancelledError.prototype);
-  }
-}
-
-/**
- * Thrown when token refresh fails due to network issues
- * Includes network timeouts, connection failures, DNS issues, etc.
- */
-export class TokenRefreshNetworkError extends TokenRefreshError {
-  constructor(message: string, cause?: unknown) {
-    super(message, cause);
-    this.name = "TokenRefreshNetworkError";
-    Object.setPrototypeOf(this, TokenRefreshNetworkError.prototype);
-  }
-}
-
-/**
- * Thrown when server responds with error status codes or invalid data
- * Includes 4xx/5xx responses, malformed responses, validation failures
- */
-export class TokenRefreshServerError extends TokenRefreshError {
-  constructor(
-    message: string,
-    public readonly statusCode?: number,
-    public readonly serverResponse?: unknown,
-    cause?: unknown
-  ) {
-    super(message, cause);
-    this.name = "TokenRefreshServerError";
-    Object.setPrototypeOf(this, TokenRefreshServerError.prototype);
   }
 }
 

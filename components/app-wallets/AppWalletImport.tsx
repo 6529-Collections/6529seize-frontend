@@ -22,6 +22,10 @@ import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error";
+}
+
 export default function AppWalletImport() {
   const [isMnemonic, setIsMnemonic] = useState(true);
 
@@ -109,8 +113,8 @@ function AppWalletImportMnemonic() {
     try {
       const wallet = ethers.Wallet.fromPhrase(phrase.join(" "));
       setValidatedWallet(wallet);
-    } catch (e: any) {
-      setError(`Error: ${e.message}`);
+    } catch (error: unknown) {
+      setError(`Error: ${getErrorMessage(error)}`);
     }
   };
 
@@ -218,8 +222,8 @@ function AppWalletImportPrivateKey() {
     try {
       const wallet = new ethers.Wallet(privateKey);
       setValidatedWallet(wallet);
-    } catch (e: any) {
-      setError(`Error: ${e.message}`);
+    } catch (error: unknown) {
+      setError(`Error: ${getErrorMessage(error)}`);
     }
   };
 

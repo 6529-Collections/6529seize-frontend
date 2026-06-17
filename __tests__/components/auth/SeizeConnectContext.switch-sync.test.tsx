@@ -71,7 +71,6 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
   getSessionClientType: jest.fn(() => "web"),
-  isWalletAuthSessionV2Enabled: jest.fn(() => false),
   logoutSessionV2: jest.fn(() => Promise.resolve()),
 }));
 

@@ -100,7 +100,7 @@ describe("wagmiAppWalletConnector", () => {
   describe("Capacitor environment tests", () => {
     beforeEach(() => {
       // Mock Capacitor environment
-      (global as any).window = {
+      (globalThis as any).window = {
         Capacitor: {
           isNativePlatform: jest.fn().mockReturnValue(true),
         },
@@ -109,7 +109,7 @@ describe("wagmiAppWalletConnector", () => {
 
     afterEach(() => {
       // Clean up global mock
-      delete (global as any).window;
+      delete (globalThis as any).window;
     });
 
     it("throws InvalidPasswordError when address mismatch in Capacitor", async () => {

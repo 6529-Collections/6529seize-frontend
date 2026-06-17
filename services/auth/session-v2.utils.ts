@@ -1,6 +1,6 @@
 import { Capacitor } from "@capacitor/core";
-import { publicEnv } from "@/config/env";
-import { commonApiPost } from "@/services/api/common-api";
+import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
@@ -17,8 +17,6 @@ interface SessionLoginRequest {
   readonly client_signature: string;
   readonly client_address: string;
   readonly role?: string | null;
-  readonly wallet_kind_hint?: "eoa" | "contract" | "unknown" | null;
-  readonly signature_version?: number;
 }
 
 interface SessionWebResponse {
@@ -49,8 +47,8 @@ type ApiStatusError = {
   };
 };
 
-interface CreateConnectionTransferResponse {
-  readonly transfer_code: string;
+interface CreateConnectionShareResponse {
+  readonly connection_share_code: string;
   readonly expires_at: string;
   readonly address: string;
   readonly role: string | null;
@@ -58,29 +56,13 @@ interface CreateConnectionTransferResponse {
   readonly deep_link_path: string;
 }
 
-interface RedeemConnectionTransferResponse {
+interface RedeemConnectionShareResponse {
   readonly address: string;
   readonly role: string | null;
   readonly access_token: string;
   readonly access_token_expires_at: string;
   readonly native_refresh_token: string;
   readonly refresh_token_expires_at: string;
-}
-
-export function isWalletAuthSessionV2Enabled(): boolean {
-  return publicEnv.AUTH_SESSION_V2_ENABLED === "true";
-}
-
-function isAuthTransferCodesEnabled(): boolean {
-  return publicEnv.AUTH_TRANSFER_CODES_ENABLED === "true";
-}
-
-export function isLegacyRefreshEnabled(): boolean {
-  return publicEnv.AUTH_LEGACY_REFRESH_ENABLED !== "false";
-}
-
-export function isConnectionTransferV2Enabled(): boolean {
-  return isWalletAuthSessionV2Enabled() && isAuthTransferCodesEnabled();
 }
 
 export function getSessionClientType(): AuthSessionClientType {
@@ -114,18 +96,38 @@ async function rollbackUnpersistedSession(
   }
 }
 
+export async function getSessionNonce({
+  signerAddress,
+}: {
+  readonly signerAddress: string;
+}): Promise<ApiSessionNonceResponse> {
+  return await commonApiFetch<
+    ApiSessionNonceResponse,
+    {
+      readonly signer_address: string;
+      readonly client_type: AuthSessionClientType;
+      readonly chain_id: string;
+    }
+  >({
+    endpoint: "auth/session-nonce",
+    params: {
+      signer_address: signerAddress,
+      client_type: getSessionClientType(),
+      chain_id: "1",
+    },
+  });
+}
+
 export async function loginWithSessionV2({
   serverSignature,
   clientSignature,
   signerAddress,
   role,
-  isSafeWallet,
 }: {
   readonly serverSignature: string;
   readonly clientSignature: string;
   readonly signerAddress: string;
   readonly role: string | null;
-  readonly isSafeWallet: boolean;
 }): Promise<SessionLoginResponse> {
   return await commonApiPost<SessionLoginRequest, SessionLoginResponse>({
     endpoint: "auth/session-login",
@@ -135,8 +137,6 @@ export async function loginWithSessionV2({
       client_signature: clientSignature,
       client_address: signerAddress,
       ...(role != null ? { role } : {}),
-      wallet_kind_hint: isSafeWallet ? "contract" : "eoa",
-      signature_version: 2,
     },
     credentials: "include",
   });
@@ -241,24 +241,20 @@ export async function persistSessionResponse(
   return didPersistAuth;
 }
 
-export async function createConnectionTransfer({
-  role,
+export async function createConnectionShare({
   signal,
 }: {
-  readonly role: string | null;
   readonly signal?: AbortSignal | undefined;
-}): Promise<CreateConnectionTransferResponse> {
+}): Promise<CreateConnectionShareResponse> {
   return await commonApiPost<
     {
       readonly target_client_type: "native";
-      readonly role?: string | null;
     },
-    CreateConnectionTransferResponse
+    CreateConnectionShareResponse
   >({
-    endpoint: "auth/connection-transfer",
+    endpoint: "auth/connection-share",
     body: {
       target_client_type: "native",
-      ...(role != null ? { role } : {}),
     },
     credentials: "include",
     signal,
@@ -324,19 +320,19 @@ export async function logoutSessionV2({
   });
 }
 
-export async function redeemConnectionTransfer(
-  transferCode: string
+export async function redeemConnectionShare(
+  connectionShareCode: string
 ): Promise<SessionNativeResponse> {
   const response = await commonApiPost<
     {
-      readonly transfer_code: string;
+      readonly connection_share_code: string;
       readonly target_client_type: "native";
     },
-    RedeemConnectionTransferResponse
+    RedeemConnectionShareResponse
   >({
-    endpoint: "auth/connection-transfer/redeem",
+    endpoint: "auth/connection-share/redeem",
     body: {
-      transfer_code: transferCode,
+      connection_share_code: connectionShareCode,
       target_client_type: "native",
     },
     credentials: "include",

@@ -8,27 +8,18 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { useSetTitle } from "@/contexts/TitleContext";
-import type { ApiRedeemRefreshTokenRequest } from "@/generated/models/ApiRedeemRefreshTokenRequest";
-import type { ApiRedeemRefreshTokenResponse } from "@/generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { commonApiPost } from "@/services/api/common-api";
+import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
 import {
-  canStoreAnotherWalletAccount,
-  setAuthJwt,
-} from "@/services/auth/auth.utils";
-import {
-  isConnectionTransferV2Enabled,
   persistSessionResponse,
-  redeemConnectionTransfer,
+  redeemConnectionShare,
 } from "@/services/auth/session-v2.utils";
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 
 interface AcceptConnectionSharingProps {
-  token: string;
-  transferCode: string;
+  connectionShareCode: string;
   address: string;
-  role?: string | undefined;
 }
 
 function AcceptConnectionSharing(
@@ -39,17 +30,13 @@ function AcceptConnectionSharing(
   const { seizeAcceptConnection, address: connectedAddress } =
     useSeizeConnectContext();
 
-  const { token, transferCode, address, role } = props;
+  const { connectionShareCode, address } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
-  const hasTransferCode = transferCode.trim().length > 0;
-  const hasUnsupportedWebTransferCode =
-    isConnectionTransferV2Enabled() &&
-    hasTransferCode &&
-    !Capacitor.isNativePlatform();
-  const isTransferCodeFlow =
-    isConnectionTransferV2Enabled() &&
-    hasTransferCode &&
-    Capacitor.isNativePlatform();
+  const hasConnectionShareCode = connectionShareCode.trim().length > 0;
+  const hasUnsupportedWebConnectionShare =
+    hasConnectionShareCode && !Capacitor.isNativePlatform();
+  const isConnectionShareFlow =
+    hasConnectionShareCode && Capacitor.isNativePlatform();
 
   const { profile, isLoading: profileLoading } = useIdentity({
     handleOrWallet: address || null,
@@ -60,7 +47,7 @@ function AcceptConnectionSharing(
 
   const acceptConnection = async () => {
     try {
-      if (isTransferCodeFlow) {
+      if (isConnectionShareFlow) {
         if (address && !canStoreAnotherWalletAccount(address)) {
           setToast({
             message: "Maximum connected profiles reached",
@@ -70,7 +57,7 @@ function AcceptConnectionSharing(
           return;
         }
 
-        const redeemResponse = await redeemConnectionTransfer(transferCode);
+        const redeemResponse = await redeemConnectionShare(connectionShareCode);
         const hasValidRedeemResponse =
           !!redeemResponse.address &&
           !!redeemResponse.access_token &&
@@ -104,56 +91,6 @@ function AcceptConnectionSharing(
         router.push("/");
         return;
       }
-
-      const redeemResponse = await commonApiPost<
-        ApiRedeemRefreshTokenRequest,
-        ApiRedeemRefreshTokenResponse
-      >({
-        endpoint: "auth/redeem-refresh-token",
-        body: {
-          address,
-          token,
-        },
-      });
-      const hasValidRedeemResponse =
-        !!redeemResponse.address &&
-        !!redeemResponse.token &&
-        areEqualAddresses(redeemResponse.address, address);
-      if (!hasValidRedeemResponse) {
-        setToast({
-          message: "This connection response is not valid.",
-          type: "error",
-        });
-        setAcceptingConnection(false);
-        return;
-      }
-
-      if (!canStoreAnotherWalletAccount(redeemResponse.address)) {
-        setToast({
-          message: "You've reached the connected profile limit.",
-          type: "error",
-        });
-        setAcceptingConnection(false);
-        return;
-      }
-
-      const didPersistJwt = setAuthJwt(
-        redeemResponse.address,
-        redeemResponse.token,
-        token,
-        role ?? undefined
-      );
-      if (!didPersistJwt) {
-        setToast({
-          message: "Couldn't save this connected profile. Please try again.",
-          type: "error",
-        });
-        setAcceptingConnection(false);
-        return;
-      }
-
-      seizeAcceptConnection(redeemResponse.address);
-      router.push("/");
     } catch (error) {
       console.error(error);
       setToast({
@@ -173,7 +110,7 @@ function AcceptConnectionSharing(
           </h1>
         </header>
 
-        {hasUnsupportedWebTransferCode ? (
+        {hasUnsupportedWebConnectionShare ? (
           <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
             <p className="tw-text-base tw-text-neutral-300">
               Open this connection link in the 6529 mobile app.
@@ -187,8 +124,7 @@ function AcceptConnectionSharing(
               </Link>
             </p>
           </div>
-        ) : (!isTransferCodeFlow && (!token || !address)) ||
-          (isTransferCodeFlow && !address) ? (
+        ) : !isConnectionShareFlow ? (
           <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
             <p className="tw-text-base tw-text-neutral-300">
               Missing required parameters
@@ -220,7 +156,10 @@ function AcceptConnectionSharing(
                 <div className="tw-flex tw-items-center tw-gap-4">
                   <TransferModalPfp
                     src={profile?.pfp ?? null}
-                    alt={profile?.handle ?? profile?.display ?? address}
+                    alt={
+                      (profile?.handle ?? profile?.display ?? address) ||
+                      "Shared connection"
+                    }
                     level={profile?.level ?? 0}
                     size={56}
                   />
@@ -228,7 +167,9 @@ function AcceptConnectionSharing(
                     <div className="tw-truncate tw-text-base tw-font-medium tw-text-white">
                       {profile?.handle ??
                         profile?.display ??
-                        address.slice(0, 6) + "…" + address.slice(-4)}
+                        (address
+                          ? address.slice(0, 6) + "…" + address.slice(-4)
+                          : "Shared connection")}
                     </div>
                     {profile ? (
                       <div className="tw-mt-1 tw-truncate tw-text-sm tw-text-neutral-400">
@@ -236,9 +177,11 @@ function AcceptConnectionSharing(
                         {profile.level ?? 0}
                       </div>
                     ) : null}
-                    <div className="tw-mt-0.5 tw-truncate tw-font-mono tw-text-[11px] tw-text-neutral-500">
-                      {address}
-                    </div>
+                    {address ? (
+                      <div className="tw-mt-0.5 tw-truncate tw-font-mono tw-text-[11px] tw-text-neutral-500">
+                        {address}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               )}
@@ -287,16 +230,12 @@ function AcceptConnectionSharing(
 
 export default function AcceptConnectionSharingPage() {
   const searchParams = useSearchParams();
-  const token = searchParams?.get("token") || "";
-  const transferCode = searchParams?.get("transfer_code") || "";
+  const connectionShareCode = searchParams?.get("connection_share_code") || "";
   const address = searchParams?.get("address") || "";
-  const role = searchParams?.get("role") || undefined;
   return (
     <AcceptConnectionSharing
-      token={token}
-      transferCode={transferCode}
+      connectionShareCode={connectionShareCode}
       address={address}
-      role={role}
     />
   );
 }

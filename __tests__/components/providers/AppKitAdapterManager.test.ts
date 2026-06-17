@@ -109,14 +109,17 @@ describe("AppKitAdapterManager", () => {
         try {
           manager.createAdapter([walletWithPrivateKey] as any);
           fail("Should have thrown error");
-        } catch (error: any) {
-          expect(error.message).not.toContain(
+        } catch (error: unknown) {
+          expect(error).toBeInstanceOf(Error);
+          if (!(error instanceof Error)) {
+            throw error;
+          }
+          const { message } = error;
+          expect(message).not.toContain(
             "SENSITIVE_PRIVATE_KEY_THAT_SHOULD_NEVER_BE_LOGGED"
           );
-          expect(error.message).not.toContain(walletWithPrivateKey.private_key);
-          expect(error.message).toContain(
-            "Wallet missing required address field"
-          );
+          expect(message).not.toContain(walletWithPrivateKey.private_key);
+          expect(message).toContain("Wallet missing required address field");
         }
       });
 
@@ -132,12 +135,15 @@ describe("AppKitAdapterManager", () => {
         try {
           manager.createAdapter([walletWithMnemonic] as any);
           fail("Should have thrown error");
-        } catch (error: any) {
-          expect(error.message).not.toContain("SENSITIVE_PHRASE");
-          expect(error.message).not.toContain(walletWithMnemonic.mnemonic);
-          expect(error.message).toContain(
-            "Wallet missing required address field"
-          );
+        } catch (error: unknown) {
+          expect(error).toBeInstanceOf(Error);
+          if (!(error instanceof Error)) {
+            throw error;
+          }
+          const { message } = error;
+          expect(message).not.toContain("SENSITIVE_PHRASE");
+          expect(message).not.toContain(walletWithMnemonic.mnemonic);
+          expect(message).toContain("Wallet missing required address field");
         }
       });
 
@@ -174,7 +180,9 @@ describe("AppKitAdapterManager", () => {
         ).toThrow(WalletValidationError);
         expect(() =>
           manager.createAdapter([walletWithPlaintextMnemonic] as any)
-        ).toThrow("Wallet security violation: Mnemonic must be stored encrypted");
+        ).toThrow(
+          "Wallet security violation: Mnemonic must be stored encrypted"
+        );
         expect(() =>
           manager.createAdapter([walletWithPlaintextMnemonic] as any)
         ).not.toThrow(walletWithPlaintextMnemonic.mnemonic);
@@ -224,9 +232,7 @@ describe("AppKitAdapterManager", () => {
           private_key: rawPrivateKey,
         } as AppWallet;
 
-        expect(() =>
-          manager.createAdapter([walletWithRawPrivateKey])
-        ).toThrow(
+        expect(() => manager.createAdapter([walletWithRawPrivateKey])).toThrow(
           "Wallet security violation: Private key legacy encrypted payload is invalid"
         );
         expect(() =>
@@ -261,9 +267,9 @@ describe("AppKitAdapterManager", () => {
           private_key: VALID_LEGACY_SECRET,
         } as AppWallet;
 
-        expect(() =>
-          manager.createAdapter([walletWithSpacedMnemonic])
-        ).toThrow("Wallet security violation: Mnemonic must be stored encrypted");
+        expect(() => manager.createAdapter([walletWithSpacedMnemonic])).toThrow(
+          "Wallet security violation: Mnemonic must be stored encrypted"
+        );
       });
 
       it("should safely handle wallets with both valid private key and mnemonic", () => {

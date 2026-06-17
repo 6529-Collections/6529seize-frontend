@@ -32,7 +32,6 @@ import {
 } from "@/services/auth/auth.utils";
 import {
   getSessionClientType,
-  isWalletAuthSessionV2Enabled,
   logoutSessionV2,
 } from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
@@ -1011,8 +1010,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [activeAddress, refreshStoredConnectedAccounts, setConnected]
   );
 
-  const isSingleWebSessionV2 =
-    isWalletAuthSessionV2Enabled() && getSessionClientType() === "web";
+  const isSingleWebSessionV2 = getSessionClientType() === "web";
 
   const canAddConnectedAccount = useMemo(() => {
     if (isSingleWebSessionV2 && storedConnectedAccounts.length > 0) {

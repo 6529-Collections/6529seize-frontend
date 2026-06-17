@@ -103,7 +103,6 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
   getSessionClientType: jest.fn(() => "web"),
-  isWalletAuthSessionV2Enabled: jest.fn(() => false),
   logoutSessionV2: jest.fn(() => Promise.resolve()),
 }));
 
@@ -150,6 +149,12 @@ function LogoutButton() {
   );
 }
 
+function createPendingPromise<T>(): Promise<T> {
+  return new Promise<T>(() => {
+    // Intentionally pending for stale add-flow guard coverage.
+  });
+}
+
 describe("SeizeConnectProvider add-account flow", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -168,8 +173,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     mockAppKitState = { open: false };
     mockDisconnect.mockResolvedValue(undefined);
     const sessionV2 = require("@/services/auth/session-v2.utils");
-    sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(false);
-    sessionV2.getSessionClientType.mockReturnValue("web");
+    sessionV2.getSessionClientType.mockReturnValue("native");
     sessionV2.logoutSessionV2.mockResolvedValue(undefined);
   });
 
@@ -213,7 +217,7 @@ describe("SeizeConnectProvider add-account flow", () => {
   });
 
   it("clears a stale add-flow guard before reopening connect for app-wallet connectors", () => {
-    mockDisconnect.mockImplementation(() => new Promise(() => undefined));
+    mockDisconnect.mockImplementation(() => createPendingPromise<void>());
 
     const { rerender } = render(
       <SeizeConnectProvider>
@@ -312,7 +316,6 @@ describe("SeizeConnectProvider add-account flow", () => {
   it("does not start add-account flow for web session v2 with an existing account", () => {
     const authUtils = require("@/services/auth/auth.utils");
     const sessionV2 = require("@/services/auth/session-v2.utils");
-    sessionV2.isWalletAuthSessionV2Enabled.mockReturnValue(true);
     sessionV2.getSessionClientType.mockReturnValue("web");
     authUtils.canStoreAnotherWalletAccount.mockReturnValue(false);
 

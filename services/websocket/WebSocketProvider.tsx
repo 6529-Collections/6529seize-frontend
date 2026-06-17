@@ -14,7 +14,6 @@ import type {
 import { setWebSocketMessageMetadata, WebSocketStatus } from "./WebSocketTypes";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { getAuthJwt } from "../auth/auth.utils";
-import { isWalletAuthSessionV2Enabled } from "../auth/session-v2.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
@@ -183,8 +182,9 @@ export function WebSocketProvider({
       }
 
       setWebSocketMessageMetadata(message.data, {
-      reason: message.reason,
-    });for (const subscriber of subscribers) {
+        reason: message.reason,
+      });
+      for (const subscriber of subscribers) {
         try {
           subscriber(message.data);
         } catch {
@@ -242,7 +242,7 @@ export function WebSocketProvider({
    */
   const connect = useCallback(
     function connectSocket(token?: string) {
-      const useMessageAuth = !!token && isWalletAuthSessionV2Enabled();
+      const useMessageAuth = !!token;
       const credentialMarker = token ? createCredentialMarker(token) : null;
 
       if (
