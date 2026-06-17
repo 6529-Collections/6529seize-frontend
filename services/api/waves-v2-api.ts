@@ -265,8 +265,8 @@ export async function fetchWavesV2Page({
     params["pinned"] = pinned;
   }
 
-  if (excludeFollowed !== undefined) {
-    params["exclude_followed"] = `${excludeFollowed}`;
+  if (excludeFollowed === true) {
+    params["exclude_followed"] = "true";
   }
 
   if (identity !== undefined) {

@@ -15,12 +15,15 @@ const StormButton: React.FC<StormButtonProps> = ({
   submitting,
   breakIntoStorm,
 }) => {
+  const label = isStormMode ? "Add a part" : "Break into storm";
+
   return (
     <div>
       <button
         onClick={breakIntoStorm}
         disabled={!canAddPart || submitting}
         type="button"
+        aria-label={label}
         className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 lg:tw-size-7 ${
           canAddPart && !submitting
             ? "tw-cursor-pointer tw-bg-iron-700 tw-text-iron-300 desktop-hover:hover:tw-bg-primary-300/20 desktop-hover:hover:tw-text-primary-400"
@@ -54,9 +57,7 @@ const StormButton: React.FC<StormButtonProps> = ({
         positionStrategy="fixed"
         style={TOOLTIP_STYLES}
       >
-        <span className="tw-text-xs">
-          {isStormMode ? "Add a part" : "Break into storm"}
-        </span>
+        <span className="tw-text-xs">{label}</span>
       </Tooltip>
     </div>
   );

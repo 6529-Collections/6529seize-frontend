@@ -740,11 +740,13 @@ import { ApiWaveScoreHotnessComponentWeights } from '../models/ApiWaveScoreHotne
 import { ApiWaveScorePenalties } from '../models/ApiWaveScorePenalties';
 import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQualityComponentWeights';
 import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
+import { ApiWaveScoreSort } from '../models/ApiWaveScoreSort';
 import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
+import { ApiWaveVisibilityTier } from '../models/ApiWaveVisibilityTier';
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig           } from '../models/ApiWaveVotingConfig';

@@ -172,12 +172,27 @@ function createApiHeaders(context?: ApiContext): HeadersInit {
   return headers;
 }
 
+async function getApiFetch(): Promise<typeof fetch> {
+  if (typeof window !== "undefined") {
+    return fetch;
+  }
+
+  try {
+    const { ssrFetch } = await import("@/lib/fetch/ssrFetch");
+    return ssrFetch;
+  } catch {
+    // Preview enrichment should degrade to public API data if server signing is unavailable.
+    return fetch;
+  }
+}
+
 async function fetchApiJson<T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   context?: ApiContext
 ): Promise<T> {
-  const response = await fetch(buildApiUrl(endpoint, params), {
+  const fetchImpl = await getApiFetch();
+  const response = await fetchImpl(buildApiUrl(endpoint, params), {
     headers: createApiHeaders(context),
   });
 
@@ -522,8 +537,8 @@ function compactPeople(
   );
 }
 
-function profileLookupCandidate(value: string | null | undefined): string | null {
-  const normalized = value?.trim().replace(/^@/, "");
+function profileLookupCandidate(value: unknown): string | null {
+  const normalized = readString(value)?.replace(/^@/, "");
   if (!normalized || normalized.includes(",") || normalized.includes(" ")) {
     return null;
   }
@@ -531,8 +546,31 @@ function profileLookupCandidate(value: string | null | undefined): string | null
   return normalized;
 }
 
+function identityProfileHandle(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  return firstNonEmptyString(profile?.handle, profile?.normalised_handle);
+}
+
+function identityProfileHref(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  const handle = identityProfileHandle(profile);
+  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
+}
+
+function identityProfileDisplay(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  return firstNonEmptyString(
+    profile?.display,
+    profile?.handle,
+    profile?.normalised_handle
+  );
+}
+
 async function resolveProfileHref(
-  value: string | null | undefined,
+  value: unknown,
   context?: ApiContext
 ): Promise<string | undefined> {
   const candidate = profileLookupCandidate(value);
@@ -540,14 +578,24 @@ async function resolveProfileHref(
     return undefined;
   }
 
-  const profile = await fetchOptionalApiJson<IdentityResponse>(
+  const profile = await resolveIdentityProfile(candidate, context);
+  return identityProfileHref(profile);
+}
+
+async function resolveIdentityProfile(
+  value: unknown,
+  context?: ApiContext
+): Promise<IdentityResponse | null> {
+  const candidate = profileLookupCandidate(value);
+  if (!candidate) {
+    return null;
+  }
+
+  return await fetchOptionalApiJson<IdentityResponse>(
     `identities/${encodeURIComponent(candidate.toLowerCase())}`,
     undefined,
     context
   );
-  const handle = firstNonEmptyString(profile?.handle, profile?.normalised_handle);
-
-  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
 }
 
 function shouldUseExtendedEditionSize(
@@ -932,7 +980,12 @@ async function fetchNextGenPreview(
   );
   const rarityRank = readPositiveNumber(token.rarity_score_rank);
   const mintDate = formatMintDate(token.mint_date);
-  const artistHref = await resolveProfileHref(collection?.artist, context);
+  const [artistHref, collectorProfile] = await Promise.all([
+    resolveProfileHref(collection?.artist, context),
+    resolveIdentityProfile(readString(token.owner), context),
+  ]);
+  const collectorHref = identityProfileHref(collectorProfile);
+  const collectorDisplay = identityProfileDisplay(collectorProfile);
   const canonicalRequestUrl = new URL(
     `/nextgen/token/${token.id}`,
     requestUrl.origin
@@ -948,6 +1001,11 @@ async function fetchNextGenPreview(
         label: "by",
         name: collection?.artist,
         href: artistHref,
+      }),
+      createPerson({
+        label: "Collector",
+        name: collectorDisplay,
+        href: collectorHref,
       }),
     ]),
     facts: compactFacts([
