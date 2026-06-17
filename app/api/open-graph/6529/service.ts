@@ -678,17 +678,12 @@ function readManifoldClaimTotalMax(data: unknown): number | undefined {
 async function fetchTheMemesManifoldEditionSize(
   id: string
 ): Promise<number | undefined> {
-  let tokenId: bigint;
-
-  try {
-    tokenId = BigInt(id);
-  } catch {
+  const decimalTokenId = readNumericPathSegment(id);
+  if (!decimalTokenId) {
     return undefined;
   }
 
-  if (tokenId < 0n) {
-    return undefined;
-  }
+  const tokenId = BigInt(decimalTokenId);
 
   try {
     const data = await mainnetPublicClient.readContract({
@@ -709,26 +704,24 @@ async function fetchTheMemesPreview(
   requestUrl: URL,
   context?: ApiContext
 ): Promise<SeizeCollectionLinkPreview> {
-  const [nft, extended, claim, mintStat, manifoldEditionSize] =
-    await Promise.all([
-      fetchFirstPageItem<MemesRecord>(
-        "nfts",
-        { contract: MEMES_CONTRACT, id },
-        context
-      ),
-      fetchFirstPageItem<MemesRecord>("memes_extended_data", { id }, context),
-      fetchOptionalApiJson<MintingClaimRecord>(
-        `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}/claims/${id}`,
-        undefined,
-        context
-      ),
-      fetchOptionalApiJson<MemesMintStatRecord>(
-        `memes-mint-stats/${id}`,
-        undefined,
-        context
-      ),
-      fetchTheMemesManifoldEditionSize(id),
-    ]);
+  const [nft, extended, claim, mintStat] = await Promise.all([
+    fetchFirstPageItem<MemesRecord>(
+      "nfts",
+      { contract: MEMES_CONTRACT, id },
+      context
+    ),
+    fetchFirstPageItem<MemesRecord>("memes_extended_data", { id }, context),
+    fetchOptionalApiJson<MintingClaimRecord>(
+      `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}/claims/${id}`,
+      undefined,
+      context
+    ),
+    fetchOptionalApiJson<MemesMintStatRecord>(
+      `memes-mint-stats/${id}`,
+      undefined,
+      context
+    ),
+  ]);
 
   const source = nft ?? extended;
   if (!source) {
@@ -757,6 +750,13 @@ async function fetchTheMemesPreview(
     extendedEditionSize
   )
     ? extendedEditionSize
+    : undefined;
+  const shouldFetchManifoldEditionSize =
+    claimEditionSize === undefined &&
+    guardedMintStatEditionSize === undefined &&
+    fallbackEditionSize === undefined;
+  const manifoldEditionSize = shouldFetchManifoldEditionSize
+    ? await fetchTheMemesManifoldEditionSize(id)
     : undefined;
   const editionSize =
     claimEditionSize ??
