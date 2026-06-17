@@ -4,6 +4,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import Image from "next/image";
+import styles from "./Leaderboard.module.scss";
 
 export function LeaderboardCollector(
   props: Readonly<{
@@ -51,10 +52,12 @@ export function LeaderboardCollector(
         {hasLevel ? (
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 md:tw-gap-2">
             <span className="tw-min-w-0 tw-truncate">{display}</span>
-            <UserCICAndLevel
-              level={props.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
+            <div className={styles["collectorLevel"]}>
+              <UserCICAndLevel
+                level={props.level}
+                size={UserCICAndLevelSize.SMALL}
+              />
+            </div>
           </div>
         ) : (
           <span className="tw-min-w-0 tw-truncate">{display}</span>

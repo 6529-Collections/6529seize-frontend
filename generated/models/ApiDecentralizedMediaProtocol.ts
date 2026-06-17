@@ -13,9 +13,8 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiWaveScoreSort {
-    Balanced = 'BALANCED',
-    Quality = 'QUALITY',
-    Hotness = 'HOTNESS',
-    Rep = 'REP'
+export enum ApiDecentralizedMediaProtocol {
+    Ipfs = 'ipfs',
+    Ipns = 'ipns',
+    Arweave = 'arweave'
 }

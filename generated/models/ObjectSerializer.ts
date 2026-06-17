@@ -43,6 +43,12 @@ export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
 export * from '../models/ApiCompleteMultipartUploadResponse';
 export * from '../models/ApiConsolidatedTdh';
+export * from '../models/ApiConsolidatedTdhMetrics';
+export * from '../models/ApiConsolidatedTdhMetricsCollector';
+export * from '../models/ApiConsolidatedTdhMetricsContent';
+export * from '../models/ApiConsolidatedTdhMetricsPage';
+export * from '../models/ApiConsolidatedTdhMetricsSort';
+export * from '../models/ApiConsolidatedTdhView';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
 export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
 export * from '../models/ApiCreateDropPart';
@@ -78,6 +84,8 @@ export * from '../models/ApiCreateWaveOutcomeDistributionItem';
 export * from '../models/ApiCuratedProfileWaveDropsPage';
 export * from '../models/ApiCurationDrop';
 export * from '../models/ApiCurationDropsPage';
+export * from '../models/ApiDecentralizedMediaProtocol';
+export * from '../models/ApiDecentralizedMediaResolution';
 export * from '../models/ApiDistributionAirdropsCsvUploadRequest';
 export * from '../models/ApiDistributionAirdropsUploadResponse';
 export * from '../models/ApiDrop';
@@ -161,6 +169,8 @@ export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiMarkDropUnreadResponse';
+export * from '../models/ApiMediaResolveRequest';
+export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
 export * from '../models/ApiMemesMintStat';
 export * from '../models/ApiMemesMintStatsPage';
@@ -453,6 +463,12 @@ import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipar
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
 import { ApiConsolidatedTdh } from '../models/ApiConsolidatedTdh';
+import { ApiConsolidatedTdhMetrics                   } from '../models/ApiConsolidatedTdhMetrics';
+import { ApiConsolidatedTdhMetricsCollector } from '../models/ApiConsolidatedTdhMetricsCollector';
+import { ApiConsolidatedTdhMetricsContent } from '../models/ApiConsolidatedTdhMetricsContent';
+import { ApiConsolidatedTdhMetricsPage } from '../models/ApiConsolidatedTdhMetricsPage';
+import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetricsSort';
+import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
@@ -488,6 +504,8 @@ import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOut
 import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
 import { ApiCurationDrop                                 } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
+import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
+import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
 import { ApiDrop                                 } from '../models/ApiDrop';
@@ -571,6 +589,8 @@ import { ApiLightDrop             } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
+import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
+import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
 import { ApiMemesMintStat } from '../models/ApiMemesMintStat';
 import { ApiMemesMintStatsPage } from '../models/ApiMemesMintStatsPage';
@@ -740,11 +760,13 @@ import { ApiWaveScoreHotnessComponentWeights } from '../models/ApiWaveScoreHotne
 import { ApiWaveScorePenalties } from '../models/ApiWaveScorePenalties';
 import { ApiWaveScoreQualityComponentWeights } from '../models/ApiWaveScoreQualityComponentWeights';
 import { ApiWaveScoreQualityGate } from '../models/ApiWaveScoreQualityGate';
+import { ApiWaveScoreSort } from '../models/ApiWaveScoreSort';
 import { ApiWaveScoreVisibilityComponentWeights } from '../models/ApiWaveScoreVisibilityComponentWeights';
 import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions';
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
+import { ApiWaveVisibilityTier } from '../models/ApiWaveVisibilityTier';
 import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig           } from '../models/ApiWaveVotingConfig';
@@ -835,6 +857,11 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiAttachmentStatus",
     "ApiAttachmentUploadMimeType",
     "ApiCommunityMembersSortOption",
+    "ApiConsolidatedTdhMetricsCollector",
+    "ApiConsolidatedTdhMetricsContent",
+    "ApiConsolidatedTdhMetricsSort",
+    "ApiConsolidatedTdhView",
+    "ApiDecentralizedMediaProtocol",
     "ApiDropGroupMention",
     "ApiDropMainType",
     "ApiDropSearchStrategy",
@@ -924,6 +951,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
     "ApiCompleteMultipartUploadResponse": ApiCompleteMultipartUploadResponse,
     "ApiConsolidatedTdh": ApiConsolidatedTdh,
+    "ApiConsolidatedTdhMetrics": ApiConsolidatedTdhMetrics,
+    "ApiConsolidatedTdhMetricsPage": ApiConsolidatedTdhMetricsPage,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
     "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,
     "ApiCreateDropPart": ApiCreateDropPart,
@@ -959,6 +988,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCuratedProfileWaveDropsPage": ApiCuratedProfileWaveDropsPage,
     "ApiCurationDrop": ApiCurationDrop,
     "ApiCurationDropsPage": ApiCurationDropsPage,
+    "ApiDecentralizedMediaResolution": ApiDecentralizedMediaResolution,
     "ApiDistributionAirdropsCsvUploadRequest": ApiDistributionAirdropsCsvUploadRequest,
     "ApiDistributionAirdropsUploadResponse": ApiDistributionAirdropsUploadResponse,
     "ApiDrop": ApiDrop,
@@ -1032,6 +1062,8 @@ let typeMap: {[index: string]: any} = {
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
+    "ApiMediaResolveRequest": ApiMediaResolveRequest,
+    "ApiMediaResolveResponse": ApiMediaResolveResponse,
     "ApiMemesMintStat": ApiMemesMintStat,
     "ApiMemesMintStatsPage": ApiMemesMintStatsPage,
     "ApiMemesMintStatsTotals": ApiMemesMintStatsTotals,

@@ -13,9 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiWaveScoreSort {
-    Balanced = 'BALANCED',
-    Quality = 'QUALITY',
-    Hotness = 'HOTNESS',
-    Rep = 'REP'
+export enum ApiConsolidatedTdhMetricsContent {
+    Memes = 'Memes',
+    Gradient = 'Gradient',
+    MemeLab = 'MemeLab',
+    NextGen = 'NextGen'
 }

@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiConsolidatedTdhMetrics } from '../models/ApiConsolidatedTdhMetrics';
 import { HttpFile } from '../http/http';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiConsolidatedTdhMetricsPage {
+    'data': Array<ApiConsolidatedTdhMetrics>;
+    'count': number;
+    'page': number;
+    'next': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +26,32 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
+            "name": "data",
+            "baseName": "data",
+            "type": "Array<ApiConsolidatedTdhMetrics>",
+            "format": ""
+        },
+        {
+            "name": "count",
+            "baseName": "count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
+            "name": "page",
+            "baseName": "page",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
-            "type": "number",
-            "format": "int64"
+            "name": "next",
+            "baseName": "next",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiConsolidatedTdhMetricsPage.attributeTypeMap;
     }
 
     public constructor() {

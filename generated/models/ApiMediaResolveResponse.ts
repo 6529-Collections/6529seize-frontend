@@ -11,12 +11,11 @@
  * Do not edit the class manually.
  */
 
+import { ApiDecentralizedMediaResolution } from '../models/ApiDecentralizedMediaResolution';
 import { HttpFile } from '../http/http';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiMediaResolveResponse {
+    'items': Array<ApiDecentralizedMediaResolution>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +23,14 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
-            "type": "number",
-            "format": "int64"
+            "name": "items",
+            "baseName": "items",
+            "type": "Array<ApiDecentralizedMediaResolution>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiMediaResolveResponse.attributeTypeMap;
     }
 
     public constructor() {

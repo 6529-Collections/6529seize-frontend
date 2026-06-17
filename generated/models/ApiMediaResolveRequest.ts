@@ -13,10 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiMediaResolveRequest {
+    'inputs': Array<string>;
+    'include_external_fallbacks'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +23,20 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
-            "type": "number",
-            "format": "int64"
+            "name": "inputs",
+            "baseName": "inputs",
+            "type": "Array<string>",
+            "format": ""
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
-            "type": "number",
-            "format": "int64"
+            "name": "include_external_fallbacks",
+            "baseName": "include_external_fallbacks",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiMediaResolveRequest.attributeTypeMap;
     }
 
     public constructor() {

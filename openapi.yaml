@@ -2910,6 +2910,39 @@ paths:
                 $ref: "#/components/schemas/ApiIdentityActivity"
         "404":
           description: Identity not found
+  /media/resolve:
+    post:
+      tags:
+        - Media
+      summary: Resolve decentralized media references
+      description: >-
+        Resolves native IPFS, IPNS, Arweave, 6529 media resolver, and recognized
+        third-party gateway URLs into canonical native URIs, 6529 resolver URLs,
+        and optional external fallback URLs. Unrecognized HTTP(S) URLs are
+        returned as unrecognized items instead of failing the batch.
+      operationId: resolveDecentralizedMedia
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/media/decentralized-media.handlers"
+          name: handleResolveDecentralizedMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMediaResolveRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMediaResolveResponse"
+        "400":
+          description: Invalid request shape
   /memes-mint-stats:
     get:
       tags:
@@ -5705,6 +5738,97 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIncomingIdentitySubscriptionsPage"
+  /tdh/consolidated_metrics:
+    get:
+      tags:
+        - TDH
+      summary: Get consolidated TDH metrics with pagination and sorting.
+      operationId: getConsolidatedTdhMetrics
+      parameters:
+        - name: page_size
+          in: query
+          description: Default is 50
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            default: 50
+        - name: page
+          in: query
+          description: Default is 1
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            default: 1
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiPageSortDirection"
+        - name: sort
+          in: query
+          description: >-
+            Default is level. Use tdh to sort by the selected tdh_view. Use
+            boosted_tdh to sort by boosted TDH regardless of tdh_view.
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiConsolidatedTdhMetricsSort"
+        - name: tdh_view
+          in: query
+          description: >-
+            Selects which TDH value is returned as tdh and used when sort=tdh.
+            Default is boosted.
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiConsolidatedTdhView"
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: content
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiConsolidatedTdhMetricsContent"
+        - name: collector
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ApiConsolidatedTdhMetricsCollector"
+        - name: season
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+        - name: download_page
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: download_all
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiConsolidatedTdhMetricsPage"
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Unsupported sort field or TDH view
   /tdh/consolidation/{identity}:
     get:
       tags:
@@ -6053,7 +6177,9 @@ paths:
             type: string
         - name: from_identity
           in: query
-          description: If omitted, the authenticated profile is used. Anonymous requests without from_identity return 0.
+          description: >-
+            If omitted, the authenticated profile is used. Anonymous requests
+            without from_identity return 0.
           required: false
           schema:
             type: string
@@ -9836,6 +9962,108 @@ components:
             $ref: "#/components/schemas/ApiTokenTdhRank"
         boost_breakdown:
           type: object
+    ApiConsolidatedTdhMetrics:
+      type: object
+      properties:
+        consolidation_key:
+          type: string
+        handle:
+          type: string
+          nullable: true
+        pfp_url:
+          type: string
+          nullable: true
+        rep_score:
+          type: number
+          format: double
+          nullable: true
+        cic_score:
+          type: number
+          format: double
+          nullable: true
+        primary_wallet:
+          type: string
+          nullable: true
+        consolidation_display:
+          type: string
+          nullable: true
+        balance:
+          type: integer
+          format: int64
+        unique_memes:
+          type: integer
+          format: int64
+        unique_memes_total:
+          type: integer
+          format: int64
+        memes_cards_sets:
+          type: integer
+          format: int64
+        level:
+          type: integer
+          format: int64
+        total_tdh:
+          type: integer
+          format: int64
+        tdh:
+          type: integer
+          format: int64
+          description: Selected TDH value for the requested tdh_view.
+        tdh_view:
+          $ref: "#/components/schemas/ApiConsolidatedTdhView"
+        boosted_tdh:
+          type: integer
+          format: int64
+        unboosted_tdh:
+          type: integer
+          format: int64
+        day_change:
+          type: integer
+          format: int64
+          description: Daily TDH change for the requested tdh_view.
+    ApiConsolidatedTdhMetricsCollector:
+      type: string
+      enum:
+        - All
+        - Memes
+        - Meme SZN Set
+        - Genesis Set
+        - Gradient
+        - MemeLab
+        - NextGen
+    ApiConsolidatedTdhMetricsContent:
+      type: string
+      enum:
+        - Memes
+        - Gradient
+        - MemeLab
+        - NextGen
+    ApiConsolidatedTdhMetricsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithNextUriBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiConsolidatedTdhMetrics"
+    ApiConsolidatedTdhMetricsSort:
+      type: string
+      enum:
+        - level
+        - balance
+        - unique_memes
+        - memes_cards_sets
+        - tdh
+        - boosted_tdh
+        - day_change
+    ApiConsolidatedTdhView:
+      type: string
+      enum:
+        - boosted
+        - unboosted
     ApiCreateAttachmentMultipartUploadRequest:
       type: object
       required:
@@ -10533,6 +10761,44 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiCurationDrop"
+    ApiDecentralizedMediaProtocol:
+      type: string
+      enum:
+        - ipfs
+        - ipns
+        - arweave
+    ApiDecentralizedMediaResolution:
+      type: object
+      required:
+        - input
+        - recognized
+        - external_fallback_urls
+        - warnings
+      properties:
+        input:
+          type: string
+        recognized:
+          type: boolean
+        protocol:
+          $ref: "#/components/schemas/ApiDecentralizedMediaProtocol"
+        native_uri:
+          type: string
+        id:
+          type: string
+        path:
+          type: string
+        resolver_url:
+          type: string
+          format: uri
+        external_fallback_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        warnings:
+          type: array
+          items:
+            type: string
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -12176,6 +12442,29 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMediaResolveRequest:
+      type: object
+      required:
+        - inputs
+      properties:
+        inputs:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+        include_external_fallbacks:
+          type: boolean
+          default: true
+    ApiMediaResolveResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDecentralizedMediaResolution"
     ApiMediaUploadMimeType:
       type: string
       enum:

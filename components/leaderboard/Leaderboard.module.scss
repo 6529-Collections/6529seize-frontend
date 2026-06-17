@@ -231,6 +231,10 @@
 }
 
 .collectorLevel {
+  display: inline-flex;
+  flex-shrink: 0;
+  line-height: 1;
+
   span {
     float: none !important;
     margin-top: 0 !important;

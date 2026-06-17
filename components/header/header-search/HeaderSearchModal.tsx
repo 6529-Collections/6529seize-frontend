@@ -19,6 +19,7 @@ import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import DiscoverIcon from "@/components/common/icons/DiscoverIcon";
 import HomeIcon from "@/components/common/icons/HomeIcon";
+import UsersIcon from "@/components/common/icons/UsersIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
@@ -130,6 +131,29 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
     href: "/notifications",
     section: "Main",
     icon: BellIcon,
+  },
+];
+
+const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
+  {
+    name: "Network Nerd",
+    href: "/network/nerd",
+    section: "Network",
+    icon: UsersIcon,
+  },
+  {
+    name: "Network Nerd Cards Collected",
+    href: "/network/nerd/cards-collected",
+    section: "Network",
+    subsection: "Network Nerd",
+    icon: UsersIcon,
+  },
+  {
+    name: "Network Nerd Interactions",
+    href: "/network/nerd/interactions",
+    section: "Network",
+    subsection: "Network Nerd",
+    icon: UsersIcon,
   },
 ];
 
@@ -559,6 +583,25 @@ const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
   [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
   [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
   [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
+  "/network/nerd": [
+    "Network leaderboard",
+    "Collector leaderboard",
+    "TDH leaderboard",
+    "Cards collected leaderboard",
+    "Interactions leaderboard",
+  ],
+  "/network/nerd/cards-collected": [
+    "Network leaderboard",
+    "Collector leaderboard",
+    "TDH leaderboard",
+    "Cards collected leaderboard",
+  ],
+  "/network/nerd/interactions": [
+    "Network leaderboard",
+    "Collector leaderboard",
+    "Interactions leaderboard",
+    "Purchases sales transfers",
+  ],
   "/discover/wave-score": [
     "Wave scoring",
     "Wave score formula",
@@ -958,6 +1001,7 @@ export default function HeaderSearchModal({
     const seen = new Set<string>();
     return [
       ...PRIMARY_NAVIGATION_PAGES,
+      ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,
     ].filter((entry) => {
