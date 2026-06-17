@@ -9,6 +9,7 @@ export const DE_DE_MESSAGES = {
   "media.video.mute": "Video stummschalten",
   "media.video.pause": "Video pausieren",
   "media.video.play": "Video abspielen",
+  "media.video.player": "Videoplayer",
   "media.video.playPreview": "Videovorschau abspielen",
   "media.video.unmute": "Videoton einschalten",
   "media.video.unsupported":

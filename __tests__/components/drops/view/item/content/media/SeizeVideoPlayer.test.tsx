@@ -127,9 +127,7 @@ describe("SeizeVideoPlayer", () => {
   });
 
   it("toggles mute state from the custom control", async () => {
-    const { container } = render(
-      <SeizeVideoPlayer src="https://example.com/video.mp4" />
-    );
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
 
     await userEvent.click(screen.getByRole("button", { name: "Unmute video" }));
 
@@ -186,9 +184,7 @@ describe("SeizeVideoPlayer", () => {
       value: false,
     });
 
-    const { container } = render(
-      <SeizeVideoPlayer src="https://example.com/video.mp4" />
-    );
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
 
     await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
 
@@ -329,8 +325,25 @@ describe("SeizeVideoPlayer", () => {
     );
 
     const track = container.querySelector("track");
-    expect(track).toHaveAttribute("srclang", "en-US");
+    expect(track).toHaveAttribute("srclang", "und");
     expect(track).toHaveAttribute("label", "Captions");
+  });
+
+  it("provides a localized default video player label", () => {
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
+
+    expect(
+      screen.getByLabelText("Video player", { selector: "video" })
+    ).toBeInTheDocument();
+  });
+
+  it("lets the central paused affordance toggle playback", async () => {
+    const playSpy = jest.spyOn(HTMLMediaElement.prototype, "play");
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
+
+    await userEvent.click(screen.getAllByRole("button", { name: "Play video" })[0]);
+
+    expect(playSpy).toHaveBeenCalled();
   });
 
   it("renders no focusable player controls for card previews", () => {

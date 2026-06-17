@@ -110,24 +110,17 @@ export function resolveSeizeVideoTemplate({
 }
 
 function getPrefersReducedMotionSnapshot(): boolean {
-  if (
-    globalThis.window === undefined ||
-    globalThis.window.matchMedia === undefined
-  ) {
-    return false;
-  }
-  return globalThis.window.matchMedia(REDUCED_MOTION_QUERY).matches;
+  return (
+    globalThis.window?.matchMedia?.(REDUCED_MOTION_QUERY).matches ?? false
+  );
 }
 
 function subscribePrefersReducedMotion(onStoreChange: () => void) {
-  if (
-    globalThis.window === undefined ||
-    globalThis.window.matchMedia === undefined
-  ) {
+  const query = globalThis.window?.matchMedia?.(REDUCED_MOTION_QUERY);
+  if (!query) {
     return () => undefined;
   }
 
-  const query = globalThis.window.matchMedia(REDUCED_MOTION_QUERY);
   query.addEventListener("change", onStoreChange);
   return () => {
     query.removeEventListener("change", onStoreChange);

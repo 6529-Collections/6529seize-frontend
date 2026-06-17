@@ -146,7 +146,7 @@
   - added `media.video.*` message keys in the locale dictionaries
   - routed video control labels, poster-gate label, caption default label, and
     fallback video text through `t(locale, ...)`
-  - changed the default caption language to `en-US`
+  - initially changed the default caption language to `en-US`
   - removed the Twitter hardcoded `captionsLabel="Captions"` prop so it uses
     the player default catalog label
 - Bot-feedback validation passed:
@@ -163,17 +163,29 @@
   cleanup:
   - successful imperative native fullscreen entry sets native fullscreen state
     again, with the exit branch still checked before unsupported-wrapper entry
-  - minimal custom controls stay visible instead of auto-hiding behind wrapper
-    mouse/touch handlers
-  - reduced-motion test helper now uses `globalThis`
-  - `usePrefersReducedMotion` now compares globals directly with `undefined`
+  - reduced-motion helper and test helper were adjusted for Sonar style issues
   - regression test now covers native fullscreen state without dispatching the
     vendor begin event
-- Second follow-up validation passed:
-  - focused player/i18n tests: 2 suites, 26 tests
+- 6529bot follow-up review on `613aa04bbb31` and an independent subagent review
+  flagged that always-visible minimal controls regressed ambient media, native
+  videos needed a default accessible label, the paused center play icon should
+  be clickable, and unknown captions should not assert `en-US`. Latest cleanup:
+  - minimal controls auto-hide again while playing, but reveal from native video
+    pointer/touch events and button focus instead of wrapper mouse/touch handlers
+  - native/watch videos have a localized default player label
+  - paused minimal-control videos use one real center play button, with no
+    duplicate bottom-right play button while paused
+  - default caption language is now `und` for unknown-language captions
+  - conditional caption-track rendering is kept, with a narrow `NOSONAR`,
+    because fake empty tracks were intentionally removed
+  - reduced-motion test helper now uses `globalThis`
+  - `usePrefersReducedMotion` now uses optional chaining for matchMedia access
+- Latest follow-up validation passed:
+  - focused player/Twitter/i18n tests: 3 suites, 38 tests
   - `codex-diff-check`
   - `seize run lint:changed`
   - `seize run typecheck:changed` for 20 changed TypeScript files
-  - full focused media+i18n matrix: 14 suites, 153 tests
-  - `seize exec react-doctor . --project 6529seize --verbose --offline
-    --diff=origin/main` with warnings only, score 95/100
+  - `seize run react-doctor:diff` with warnings only, score 98/100
+  - broader media matrix rerun hit unrelated existing failures in
+    `NFTImageRenderer.test.tsx` and `NFTHTMLRenderer.test.tsx`; both fail in
+    isolation and this PR does not touch those renderer files

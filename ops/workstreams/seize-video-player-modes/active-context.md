@@ -133,7 +133,7 @@ Implemented:
     poster identity is stable
   - video control accessible names, caption defaults, and fallback text use the
     repo i18n message catalog
-  - default caption language is `en-US`
+  - default caption language is `und` when the caption language is unknown
   - added focused tests for in-view autoplay, out-of-view pause, reduced-motion
     gating, user-pause persistence, poster-gate source resilience, native
     fullscreen exit reset, and i18n message keys
@@ -172,16 +172,23 @@ Validation so far:
 - After the first follow-up review and SonarCloud pass:
   - native fullscreen state is set again on successful imperative native entry,
     while exit still runs before unsupported-wrapper fallback
-  - minimal custom controls now remain visible instead of relying on wrapper
-    hover/touch handlers
-  - easy Sonar style issues were cleaned up in the reduced-motion helper/tests
-  - focused player/i18n tests passed: 2 suites, 26 tests
+  - minimal custom controls auto-hide again while playing, but reveal from
+    native video pointer/touch events and button focus instead of wrapper
+    mouse/touch handlers
+  - native/watch videos have a localized default player label
+  - paused minimal-control videos use one real center play button
+  - unknown caption languages use `srcLang="und"`
+  - easy Sonar style issues were cleaned up in the reduced-motion helper/tests,
+    and the intentional conditional-caption-track rule is marked with a narrow
+    `NOSONAR`
+  - focused player/Twitter/i18n tests passed: 3 suites, 38 tests
   - `codex-diff-check` passed
   - `seize run lint:changed` passed
   - `seize run typecheck:changed` passed for 20 changed TypeScript files
-  - full focused media+i18n regression matrix passed: 14 suites, 153 tests
-  - `seize exec react-doctor . --project 6529seize --verbose --offline
-    --diff=origin/main` passed with warnings only, score 95/100
+  - `seize run react-doctor:diff` passed with warnings only, score 98/100
+  - broader media matrix rerun hit unrelated existing failures in
+    `NFTImageRenderer.test.tsx` and `NFTHTMLRenderer.test.tsx`; both fail in
+    isolation and this PR does not touch those renderer files
 - Browser verification on `http://localhost:3126/codex-video-harness` passed
   with a temporary local harness route that was removed before commit:
   - initial route load: 0 console errors
@@ -212,7 +219,7 @@ Validation so far:
 
 ## Immediate Next Actions
 
-1. Push the second follow-up fix commit to PR #2718.
+1. Commit and push the latest Sonar/a11y/bot follow-up to PR #2718.
 2. Iterate on CI/review bots until agent-happy and bot-happy.
 3. Merge only when checks/approvals allow.
 4. Deploy to staging, smoke/E2E validate, then deploy to production and

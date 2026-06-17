@@ -9,6 +9,7 @@ export const FR_FR_MESSAGES = {
   "media.video.mute": "Couper le son de la video",
   "media.video.pause": "Mettre la video en pause",
   "media.video.play": "Lire la video",
+  "media.video.player": "Lecteur video",
   "media.video.playPreview": "Lire l'apercu video",
   "media.video.unmute": "Activer le son de la video",
   "media.video.unsupported":

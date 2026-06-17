@@ -9,6 +9,7 @@ export const EN_GB_MESSAGES = {
   "media.video.mute": "Mute video",
   "media.video.pause": "Pause video",
   "media.video.play": "Play video",
+  "media.video.player": "Video player",
   "media.video.playPreview": "Play video preview",
   "media.video.unmute": "Unmute video",
   "media.video.unsupported": "Your browser does not support the video tag.",

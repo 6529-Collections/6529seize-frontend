@@ -57,9 +57,11 @@ Implemented on branch `codex/seize-video-player-templates`:
 - Poster-gated previews render one explicit play button before exposing native
   controls.
 - Caption tracks render only when `captionsSrc` is real, with caller-provided
-  label/lang/default metadata.
+  label/lang/default metadata and `und` as the unknown-language fallback.
 - Player-owned autoplay is muted, visibility-aware, reduced-motion-aware, and
   handles rejected `play()` promises.
+- The video element has a localized default accessible label, and the paused
+  center play affordance is a real button.
 - The player keeps React as the owner of the media element `muted` state; tests
   assert the DOM `video.muted` property instead of relying on direct
   `defaultMuted` mutation.
@@ -263,6 +265,9 @@ Implementation notes:
   the custom overlay controls.
 - Minimal custom controls should keep icon buttons for play/pause, mute,
   fullscreen, open, and download where appropriate.
+- Ambient minimal controls may auto-hide while playing, but reveal/hide behavior
+  should be driven by native media/button events rather than by making the
+  wrapper itself interactive.
 - There is no first-pass `custom` full-player mode. Add one only after custom
   controls cover seek, captions, volume, fullscreen, keyboard behavior, and
   touch behavior.
@@ -273,8 +278,9 @@ Implementation notes:
   fight the player wrapper.
 - Render a caption `<track>` only when there is a real `captionsSrc`, unless a
   caller has a documented reason to render an empty track. A real caption track
-  should get a real label such as "Captions" and may be marked `default` by
-  prop.
+  should get a real label such as "Captions", a real BCP 47 `srcLang`, and may
+  be marked `default` by prop. Use `und` when captions exist but the language is
+  unknown.
 - Always keep `playsInline` on the rendered `<video>`, including native-control
   mode, to preserve iPhone inline playback behavior.
 - Always treat `video.play()` as fallible. Catch rejected promises and keep the
@@ -423,6 +429,8 @@ Migration order:
 - Listen for reduced-motion preference changes and pause player-owned autoplay
   when the user switches to reduced motion.
 - Ensure every visible control is a real `button` with a stable accessible name.
+- Ensure the video element itself has an accessible name even when native
+  controls are used and the caller did not provide a surface-specific label.
 - Ensure keyboard focus order is visual and task ordered.
 - Ensure controls remain reachable on touch and keyboard, not only hover.
 - Avoid focusable player wrappers inside focusable cards.
@@ -459,8 +467,11 @@ Add or update tests for:
   autoplaying player.
 - Missing `captionsSrc` does not render a fake "No captions available" track.
 - Caption props render `kind="captions"`, `src`, `srcLang`, user-readable
-  `label`, and `default` only when requested.
+  `label`, and `default` only when requested; missing language metadata uses
+  `srcLang="und"` rather than inventing `en-US`.
 - Rejected `play()` leaves the player in paused/user-action-needed state.
+- Paused minimal-control video shows a clickable center play button and does not
+  duplicate a second bottom-right play button.
 - User mute/unmute updates both React state and the DOM media element's
   `muted` state.
 - Source changes reset or preserve mute state according to the documented

@@ -41,6 +41,7 @@ describe("frontend i18n helpers", () => {
     ).toBe("Voir Meme, carte n° 1");
     expect(t("de-DE", "theMemes.documentTitle")).toBe("The Memes | Sammlungen");
     expect(t("en-US", "media.video.playPreview")).toBe("Play video preview");
+    expect(t("en-US", "media.video.player")).toBe("Video player");
     expect(t("en-GB", "media.video.exitFullscreen")).toBe("Exit full screen");
     expect(t("fr-FR", "media.video.play")).toBe("Lire la video");
     expect(t("es-ES", "media.video.fullscreen")).toBe("Pantalla completa");
