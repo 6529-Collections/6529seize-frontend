@@ -54,7 +54,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           showBackButton={showBackButton}
           headerActionsTooltipId={headerActionsTooltipId}
           headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-overflow-x-hidden tw-px-2 tw-py-3 sm:tw-gap-x-4 sm:tw-px-4 md:tw-gap-x-8"
-          actionsClassName="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 md:tw-shrink-0"
+          actionsClassName="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 tw-pl-3 sm:tw-pl-4 md:tw-shrink-0"
           rightSidebarButtonBackgroundClassName="tw-bg-iron-700"
           renderLeadingActions={renderHeaderLeadingActions}
         />

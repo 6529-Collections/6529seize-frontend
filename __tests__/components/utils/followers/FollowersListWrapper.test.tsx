@@ -21,6 +21,7 @@ describe('FollowersListWrapper', () => {
     const cb = jest.fn();
     render(<FollowersListWrapper followers={[{ id: '1' } as any]} loading={true} onBottomIntersection={cb} />);
     expect(screen.getByTestId('list').textContent).toBe('1');
+    expect(screen.getByRole('status', { name: 'Loading followers' })).toBeInTheDocument();
     expect(screen.getByTestId('loader')).toBeInTheDocument();
     expect(cb).toHaveBeenCalledWith(true);
   });

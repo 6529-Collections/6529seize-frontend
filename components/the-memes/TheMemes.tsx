@@ -6,6 +6,8 @@ import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
+import { getMemesSortLabel } from "@/components/the-memes/theMemesI18n";
+import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import SeasonsGridDropdown from "@/components/utils/select/dropdown/SeasonsGridDropdown";
 import { publicEnv } from "@/config/env";
@@ -16,8 +18,10 @@ import type { NFTWithMemesExtendedData } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchUrl } from "@/services/6529api";
-import type { MemeLabSort } from "@/types/enums";
 import { MEMES_EXTENDED_SORT, MemesSort } from "@/types/enums";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -145,7 +149,11 @@ function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
   return found === undefined ? sort.toLowerCase() : found[0].toLowerCase();
 }
 
-export default function TheMemesComponent() {
+export default function TheMemesComponent({
+  locale = DEFAULT_LOCALE,
+}: Readonly<{
+  locale?: SupportedLocale;
+}> = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -164,7 +172,7 @@ export default function TheMemesComponent() {
   const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
 
-  useSetTitle("The Memes | Collections");
+  useSetTitle(t(locale, "theMemes.documentTitle"));
 
   useEffect(() => {
     const initialSortDir = getInitialSortDirection(searchParams);
@@ -202,15 +210,15 @@ export default function TheMemesComponent() {
   useEffect(() => {
     if (!routerLoaded) return;
 
-    let queryString = `sort=${getSortQueryParam(
-      sort,
-      volumeType
-    )}&sort_dir=${sortDir.toLowerCase()}`;
-    if (seasonId !== null) {
-      queryString += `&szn=${seasonId}`;
-    }
-    router.push(`the-memes?${queryString}`);
-  }, [sort, sortDir, seasonId, volumeType, router, routerLoaded]);
+    router.push(
+      getTheMemesBrowseHref({
+        locale,
+        seasonId,
+        sort: getSortQueryParam(sort, volumeType),
+        sortDir: sortDir.toLowerCase(),
+      })
+    );
+  }, [locale, sort, sortDir, seasonId, volumeType, router, routerLoaded]);
 
   useEffect(() => {
     const memesMap = new Map<
@@ -312,7 +320,7 @@ export default function TheMemesComponent() {
       }, 200);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       if (throttleTimeout !== null) {
@@ -354,14 +362,36 @@ export default function TheMemesComponent() {
         sort={sort}
         volumeType={volumeType}
         hasConnectedProfile={connectedProfile !== null}
+        locale={locale}
       />
     );
   }
 
   function printNfts() {
+    if (nfts.length === 0) {
+      return null;
+    }
+
     return (
       <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
         {nfts.map((nft) => printNft(nft))}
+      </div>
+    );
+  }
+
+  function printEmptyState() {
+    if (fetching || nfts.length > 0) {
+      return null;
+    }
+
+    return (
+      <div className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-5 tw-text-center">
+        <p className="tw-mb-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+          {t(locale, "theMemes.empty.title")}
+        </p>
+        <p className="tw-mb-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+          {t(locale, "theMemes.empty.description")}
+        </p>
       </div>
     );
   }
@@ -376,7 +406,7 @@ export default function TheMemesComponent() {
       return (
         <section key={`${meme.meme}-${meme.meme_name}`} className="tw-pt-6">
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
-            {meme.meme} - {meme.meme_name}
+            {formatInteger(locale, meme.meme)} - {meme.meme_name}
           </h2>
           <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-4 xl:tw-gap-5">
             {memeNfts.map((nft) => printNft(nft))}
@@ -403,7 +433,7 @@ export default function TheMemesComponent() {
                     <CollectionsDropdown activePage="memes" variant="title" />
                   </div>
                   <h1 className="tw-mb-0 tw-hidden tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl min-[1200px]:tw-block">
-                    The Memes
+                    {t(locale, "theMemes.title")}
                   </h1>
                   <LFGButton contract={MEMES_CONTRACT} />
                 </div>
@@ -418,25 +448,27 @@ export default function TheMemesComponent() {
             </div>
           </header>
           <section
-            aria-label="Meme sorting"
+            aria-label={t(locale, "theMemes.sorting.regionLabel")}
             className="tw-mb-5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/80 tw-pb-4"
           >
             <div className="tw-flex tw-flex-col tw-gap-x-6 tw-gap-y-2 md:tw-flex-row md:tw-items-start">
               <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-500">
-                  Sort by
+                  {t(locale, "theMemes.sorting.sortBy")}
                 </span>
                 <fieldset className="tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-border-0 tw-p-0">
-                  <legend className="tw-sr-only">Sort direction</legend>
+                  <legend className="tw-sr-only">
+                    {t(locale, "theMemes.sorting.directionLegend")}
+                  </legend>
                   {printSortDirectionButton(
                     SortDirection.ASC,
                     faChevronCircleUp,
-                    "Sort ascending"
+                    t(locale, "theMemes.sorting.ascendingLabel")
                   )}
                   {printSortDirectionButton(
                     SortDirection.DESC,
                     faChevronCircleDown,
-                    "Sort descending"
+                    t(locale, "theMemes.sorting.descendingLabel")
                   )}
                 </fieldset>
               </div>
@@ -448,6 +480,7 @@ export default function TheMemesComponent() {
                       key={v}
                       currentSort={sort}
                       sort={v}
+                      locale={locale}
                       select={() => setSort(v)}
                     />
                   ))}
@@ -457,6 +490,7 @@ export default function TheMemesComponent() {
                     selectedVolumeSort={volumeType}
                     setVolumeType={setVolumeType}
                     setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                    locale={locale}
                   />
                 </div>
               </div>
@@ -465,9 +499,14 @@ export default function TheMemesComponent() {
           {nfts.length > 0 && sort === MemesSort.MEME
             ? printMemes()
             : printNfts()}
+          {printEmptyState()}
           {fetching && nftsNextPage && (
-            <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
-              Fetching <DotLoader />
+            <div
+              role="status"
+              aria-live="polite"
+              className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300"
+            >
+              {t(locale, "theMemes.loading.fetching")} <DotLoader />
             </div>
           )}
         </div>
@@ -478,16 +517,22 @@ export default function TheMemesComponent() {
 
 function SortButton(
   props: Readonly<{
-    currentSort: MemesSort | MemeLabSort;
-    sort: MemesSort | MemeLabSort;
+    currentSort: MemesSort;
+    sort: MemesSort;
+    locale: SupportedLocale;
     select: () => void;
   }>
 ) {
   const isActive = props.currentSort === props.sort;
+  const label = getMemesSortLabel(props.sort, props.locale);
 
   return (
     <button
       type="button"
+      aria-pressed={isActive}
+      aria-label={t(props.locale, "theMemes.sorting.sortButtonLabel", {
+        sort: label,
+      })}
       onClick={() => props.select()}
       className={`tw-relative tw-m-0 tw-shrink-0 tw-cursor-pointer tw-whitespace-nowrap tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-sm tw-font-medium tw-leading-5 tw-no-underline tw-transition-colors tw-duration-200 after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-shrink ${
         isActive
@@ -495,7 +540,7 @@ function SortButton(
           : "tw-text-iron-500 after:tw-scale-x-0 after:tw-bg-iron-700 hover:tw-text-iron-200 hover:after:tw-scale-x-100"
       }`}
     >
-      {props.sort}
+      {label}
     </button>
   );
 }
@@ -504,7 +549,8 @@ export function printVolumeTypeDropdown(
   isVolumeSort: boolean,
   setVolumeType: (volumeType: VolumeType) => void,
   setVolumeSort: () => void,
-  selectedVolumeSort: VolumeType = VolumeType.ALL_TIME
+  selectedVolumeSort: VolumeType = VolumeType.ALL_TIME,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ) {
   return (
     <VolumeTypeDropdown
@@ -512,6 +558,7 @@ export function printVolumeTypeDropdown(
       selectedVolumeSort={selectedVolumeSort}
       setVolumeType={setVolumeType}
       setVolumeSort={setVolumeSort}
+      locale={locale}
     />
   );
 }
