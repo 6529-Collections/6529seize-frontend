@@ -111,8 +111,8 @@ export function resolveSeizeVideoTemplate({
 
 function getPrefersReducedMotionSnapshot(): boolean {
   if (
-    typeof globalThis.window === "undefined" ||
-    typeof globalThis.window.matchMedia !== "function"
+    globalThis.window === undefined ||
+    globalThis.window.matchMedia === undefined
   ) {
     return false;
   }
@@ -121,8 +121,8 @@ function getPrefersReducedMotionSnapshot(): boolean {
 
 function subscribePrefersReducedMotion(onStoreChange: () => void) {
   if (
-    typeof globalThis.window === "undefined" ||
-    typeof globalThis.window.matchMedia !== "function"
+    globalThis.window === undefined ||
+    globalThis.window.matchMedia === undefined
   ) {
     return () => undefined;
   }

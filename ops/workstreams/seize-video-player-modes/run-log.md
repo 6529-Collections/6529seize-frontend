@@ -157,3 +157,23 @@
   - full focused media+i18n matrix: 14 suites, 153 tests
   - `seize exec react-doctor . --project 6529seize --verbose --offline
     --diff=origin/main` with warnings only, score 95/100
+- 6529bot follow-up review on `fdfd5aa13` narrowed the remaining important
+  item to native fullscreen state on imperative native entry paths. SonarCloud
+  also reported several maintainability/accessibility issues. Second follow-up
+  cleanup:
+  - successful imperative native fullscreen entry sets native fullscreen state
+    again, with the exit branch still checked before unsupported-wrapper entry
+  - minimal custom controls stay visible instead of auto-hiding behind wrapper
+    mouse/touch handlers
+  - reduced-motion test helper now uses `globalThis`
+  - `usePrefersReducedMotion` now compares globals directly with `undefined`
+  - regression test now covers native fullscreen state without dispatching the
+    vendor begin event
+- Second follow-up validation passed:
+  - focused player/i18n tests: 2 suites, 26 tests
+  - `codex-diff-check`
+  - `seize run lint:changed`
+  - `seize run typecheck:changed` for 20 changed TypeScript files
+  - full focused media+i18n matrix: 14 suites, 153 tests
+  - `seize exec react-doctor . --project 6529seize --verbose --offline
+    --diff=origin/main` with warnings only, score 95/100

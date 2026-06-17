@@ -169,6 +169,19 @@ Validation so far:
   - full focused media+i18n regression matrix passed: 14 suites, 153 tests
   - `seize exec react-doctor . --project 6529seize --verbose --offline
     --diff=origin/main` passed with warnings only, score 95/100
+- After the first follow-up review and SonarCloud pass:
+  - native fullscreen state is set again on successful imperative native entry,
+    while exit still runs before unsupported-wrapper fallback
+  - minimal custom controls now remain visible instead of relying on wrapper
+    hover/touch handlers
+  - easy Sonar style issues were cleaned up in the reduced-motion helper/tests
+  - focused player/i18n tests passed: 2 suites, 26 tests
+  - `codex-diff-check` passed
+  - `seize run lint:changed` passed
+  - `seize run typecheck:changed` passed for 20 changed TypeScript files
+  - full focused media+i18n regression matrix passed: 14 suites, 153 tests
+  - `seize exec react-doctor . --project 6529seize --verbose --offline
+    --diff=origin/main` passed with warnings only, score 95/100
 - Browser verification on `http://localhost:3126/codex-video-harness` passed
   with a temporary local harness route that was removed before commit:
   - initial route load: 0 console errors
@@ -199,7 +212,7 @@ Validation so far:
 
 ## Immediate Next Actions
 
-1. Push the bot-feedback fix commit to PR #2718.
+1. Push the second follow-up fix commit to PR #2718.
 2. Iterate on CI/review bots until agent-happy and bot-happy.
 3. Merge only when checks/approvals allow.
 4. Deploy to staging, smoke/E2E validate, then deploy to production and

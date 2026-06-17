@@ -183,7 +183,7 @@ export default function SeizeVideoPlayer({
     readonly value?: boolean | undefined;
   }>({});
   const [isPaused, setIsPaused] = useState(!resolvedTemplate.autoPlay);
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [, setControlsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
@@ -411,8 +411,13 @@ export default function SeizeVideoPlayer({
     event.stopPropagation();
     const wrapper = wrapperRef.current;
     const video = videoElement;
+    const enterNativeFullscreen = () => {
+      if (enterNativeVideoFullscreen(video)) {
+        setIsNativeFullscreen(true);
+      }
+    };
     if (!wrapper) {
-      enterNativeVideoFullscreen(video);
+      enterNativeFullscreen();
       revealControls();
       return;
     }
@@ -426,7 +431,7 @@ export default function SeizeVideoPlayer({
     }
 
     if (!isFullscreenEnabled()) {
-      enterNativeVideoFullscreen(video);
+      enterNativeFullscreen();
       revealControls();
       return;
     }
@@ -441,7 +446,7 @@ export default function SeizeVideoPlayer({
       wrapper as FullscreenElement
     ).catch(() => false);
     if (!enteredFullscreen) {
-      enterNativeVideoFullscreen(video);
+      enterNativeFullscreen();
     }
     revealControls();
   }
@@ -547,8 +552,7 @@ export default function SeizeVideoPlayer({
       : resolvedTemplate.muted;
   const isAnyFullscreen = isFullscreen || isNativeFullscreen;
   const isWrapperFullscreen = isFullscreen;
-  const controlsAreVisible =
-    showMinimalControls && (controlsVisible || isPaused || isAnyFullscreen);
+  const controlsAreVisible = showMinimalControls;
   const responsiveMediaStyle = getResponsiveMediaStyle();
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
@@ -606,15 +610,6 @@ export default function SeizeVideoPlayer({
   return (
     <div
       ref={setWrapperRef}
-      onMouseMove={showMinimalControls ? revealControls : undefined}
-      onMouseEnter={showMinimalControls ? revealControls : undefined}
-      onMouseLeave={() => {
-        clearHideControlsTimer();
-        if (showMinimalControls && !isPaused) {
-          setControlsVisible(false);
-        }
-      }}
-      onTouchStart={showMinimalControls ? revealControls : undefined}
       className={clsx(
         "tw-relative tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-transparent tw-outline-none tw-transition",
         showMinimalControls ? "tw-cursor-default" : "tw-cursor-auto",

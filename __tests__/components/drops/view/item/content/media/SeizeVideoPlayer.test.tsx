@@ -48,7 +48,7 @@ function installIntersectionObserverMock() {
 }
 
 function mockPrefersReducedMotion(matches: boolean) {
-  jest.spyOn(window, "matchMedia").mockImplementation(
+  jest.spyOn(globalThis, "matchMedia").mockImplementation(
     (query: string) =>
       ({
       addEventListener: jest.fn(),
@@ -127,7 +127,9 @@ describe("SeizeVideoPlayer", () => {
   });
 
   it("toggles mute state from the custom control", async () => {
-    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" />
+    );
 
     await userEvent.click(screen.getByRole("button", { name: "Unmute video" }));
 
@@ -184,7 +186,9 @@ describe("SeizeVideoPlayer", () => {
       value: false,
     });
 
-    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" />
+    );
 
     await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
 
@@ -521,21 +525,10 @@ describe("SeizeVideoPlayer", () => {
       value: false,
     });
 
-    const { container } = render(
-      <SeizeVideoPlayer src="https://example.com/video.mp4" />
-    );
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
 
     await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
     expect(webkitEnterFullscreen).toHaveBeenCalled();
-
-    const video = container.querySelector("video");
-    if (!video) {
-      throw new Error("Expected video element to render");
-    }
-
-    act(() => {
-      video.dispatchEvent(new Event("webkitbeginfullscreen"));
-    });
 
     expect(
       screen.getByRole("button", { name: "Exit full screen" })
