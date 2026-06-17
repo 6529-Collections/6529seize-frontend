@@ -3,6 +3,9 @@ import type { ApiGlobalRepCategoryGiversPage } from "@/generated/models/ApiGloba
 import type { ApiGlobalRepCategoryOverview } from "@/generated/models/ApiGlobalRepCategoryOverview";
 import type { ApiGlobalRepCategoryRatingsPage } from "@/generated/models/ApiGlobalRepCategoryRatingsPage";
 import type { ApiGlobalRepCategoryRecipientsPage } from "@/generated/models/ApiGlobalRepCategoryRecipientsPage";
+import type { ApiWaveRepCategoriesPage } from "@/generated/models/ApiWaveRepCategoriesPage";
+import type { ApiWaveRepCategory } from "@/generated/models/ApiWaveRepCategory";
+import type { ApiWaveRepContributorsPage } from "@/generated/models/ApiWaveRepContributorsPage";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   GLOBAL_REP_CATEGORY_PAGE_SIZE,
@@ -16,7 +19,7 @@ type ApiSortParams = {
   readonly order_by: "rep" | "last_modified";
 };
 
-export type GlobalRepCategoryPage =
+type GlobalRepCategoryPage =
   | ({ readonly tab: "recipients" } & ApiGlobalRepCategoryRecipientsPage)
   | ({ readonly tab: "givers" } & ApiGlobalRepCategoryGiversPage)
   | ({ readonly tab: "pairings" | "recent" } & ApiGlobalRepCategoryRatingsPage);
@@ -24,6 +27,11 @@ export type GlobalRepCategoryPage =
 export const getGlobalRepCategoryOverviewQueryKey = (category: string) => [
   QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW,
   { category },
+];
+
+export const getGlobalRepCategorySearchQueryKey = (term: string) => [
+  QueryKey.GLOBAL_REP_CATEGORY_SEARCH,
+  { term },
 ];
 
 export const getGlobalRepCategoryPageQueryKey = ({
@@ -36,6 +44,22 @@ export const getGlobalRepCategoryPageQueryKey = ({
   readonly sort: GlobalRepCategorySort;
 }) => [QueryKey.GLOBAL_REP_CATEGORY_PAGE, { category, tab, sort }];
 
+export const getWaveRepCategoryQueryKey = ({
+  waveId,
+  category,
+}: {
+  readonly waveId: string;
+  readonly category: string;
+}) => [QueryKey.WAVE_REP_CATEGORY, { waveId, category }];
+
+export const getWaveRepCategoryContributorsQueryKey = ({
+  waveId,
+  category,
+}: {
+  readonly waveId: string;
+  readonly category: string;
+}) => [QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS, { waveId, category }];
+
 const getSortParams = (sort: GlobalRepCategorySort): ApiSortParams => {
   if (sort === "rep_asc") {
     return { order: "ASC", order_by: "rep" };
@@ -47,6 +71,15 @@ const getSortParams = (sort: GlobalRepCategorySort): ApiSortParams => {
 
   return { order: "DESC", order_by: "rep" };
 };
+
+export async function searchGlobalRepCategories(
+  term: string
+): Promise<string[]> {
+  return await commonApiFetch<string[]>({
+    endpoint: "/rep/categories",
+    params: { param: term },
+  });
+}
 
 export async function fetchGlobalRepCategoryOverview(
   category: string
@@ -95,4 +128,47 @@ export async function fetchGlobalRepCategoryPage({
     params,
   });
   return { ...response, tab };
+}
+
+export async function fetchWaveRepCategorySummary({
+  waveId,
+  category,
+}: {
+  readonly waveId: string;
+  readonly category: string;
+}): Promise<ApiWaveRepCategory | null> {
+  const response = await commonApiFetch<ApiWaveRepCategoriesPage>({
+    endpoint: `waves/${waveId}/rep/categories`,
+    params: {
+      page: "1",
+      page_size: "100",
+      top_contributors_limit: "5",
+    },
+  });
+  const normalizedCategory = category.trim().toLowerCase();
+  return (
+    response.data.find(
+      (item) => item.category.trim().toLowerCase() === normalizedCategory
+    ) ?? null
+  );
+}
+
+export async function fetchWaveRepCategoryContributors({
+  waveId,
+  category,
+  page,
+}: {
+  readonly waveId: string;
+  readonly category: string;
+  readonly page: number;
+}): Promise<ApiWaveRepContributorsPage> {
+  return await commonApiFetch<ApiWaveRepContributorsPage>({
+    endpoint: `waves/${waveId}/rep/categories/${encodeRepCategoryPath(
+      category
+    )}/contributors`,
+    params: {
+      page: page.toString(),
+      page_size: GLOBAL_REP_CATEGORY_PAGE_SIZE.toString(),
+    },
+  });
 }

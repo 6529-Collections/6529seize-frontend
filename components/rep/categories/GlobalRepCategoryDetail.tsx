@@ -10,6 +10,7 @@ import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -19,6 +20,7 @@ import {
   getGlobalRepCategoryOverviewQueryKey,
   getGlobalRepCategoryPageQueryKey,
 } from "./globalRepCategory.api";
+import GlobalRepCategoryWaveScope from "./GlobalRepCategoryWaveScope";
 import {
   GLOBAL_REP_CATEGORY_PAGE_SIZE,
   formatRepCategoryDate,
@@ -41,6 +43,16 @@ const TABS: ReadonlyArray<{
   { id: "recent", label: "Recent" },
 ];
 
+type RepCategoryScope = "profile" | "wave";
+
+const SCOPES: ReadonlyArray<{
+  readonly id: RepCategoryScope;
+  readonly label: string;
+}> = [
+  { id: "profile", label: "Profile REP" },
+  { id: "wave", label: "Wave REP" },
+];
+
 const SORTS: ReadonlyArray<{
   readonly id: GlobalRepCategorySort;
   readonly label: string;
@@ -60,9 +72,12 @@ function ProfileCell({ profile }: { readonly profile: ApiProfileMin }) {
     >
       <span className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
         {profile.pfp ? (
-          <img
+          <Image
+            unoptimized
             src={getScaledImageUri(profile.pfp, ImageScale.W_AUTO_H_50)}
             alt={`${display} profile`}
+            width={32}
+            height={32}
             className="tw-h-full tw-w-full tw-object-cover"
           />
         ) : (
@@ -556,6 +571,7 @@ export default function GlobalRepCategoryDetail({
 }) {
   const [activeTab, setActiveTab] = useState<GlobalRepCategoryTab>("overview");
   const [sort, setSort] = useState<GlobalRepCategorySort>("rep_desc");
+  const [activeScope, setActiveScope] = useState<RepCategoryScope>("profile");
 
   return (
     <div
@@ -587,47 +603,71 @@ export default function GlobalRepCategoryDetail({
           )}
         </div>
 
-        <div
-          role="tablist"
-          aria-label="Global REP category sections"
-          className="tw-flex tw-gap-2 tw-overflow-x-auto tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2"
-        >
-          {TABS.map((tab) => (
+        <div className="tw-flex tw-flex-wrap tw-gap-2">
+          {SCOPES.map((scope) => (
             <button
-              key={tab.id}
+              key={scope.id}
               type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              aria-controls={`global-rep-category-${tab.id}`}
-              id={`global-rep-category-tab-${tab.id}`}
-              onClick={() => setActiveTab(tab.id)}
-              className={`tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
-                activeTab === tab.id
-                  ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
-                  : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
+              aria-pressed={activeScope === scope.id}
+              onClick={() => setActiveScope(scope.id)}
+              className={`tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
+                activeScope === scope.id
+                  ? "tw-text-primary-100 tw-border-primary-400/50 tw-bg-primary-500/15"
+                  : "tw-border-white/10 tw-bg-white/[0.03] tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-200"
               }`}
             >
-              {tab.label}
+              {scope.label}
             </button>
           ))}
         </div>
 
-        <div
-          role="tabpanel"
-          id={`global-rep-category-${activeTab}`}
-          aria-labelledby={`global-rep-category-tab-${activeTab}`}
-        >
-          {activeTab === "overview" ? (
-            <OverviewContent category={category} />
-          ) : (
-            <PaginatedTable
-              category={category}
-              tab={activeTab}
-              sort={sort}
-              onSortChange={setSort}
-            />
-          )}
-        </div>
+        {activeScope === "profile" ? (
+          <>
+            <div
+              role="tablist"
+              aria-label="Global REP category sections"
+              className="tw-flex tw-gap-2 tw-overflow-x-auto tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2"
+            >
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`global-rep-category-${tab.id}`}
+                  id={`global-rep-category-tab-${tab.id}`}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
+                    activeTab === tab.id
+                      ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
+                      : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div
+              role="tabpanel"
+              id={`global-rep-category-${activeTab}`}
+              aria-labelledby={`global-rep-category-tab-${activeTab}`}
+            >
+              {activeTab === "overview" ? (
+                <OverviewContent category={category} />
+              ) : (
+                <PaginatedTable
+                  category={category}
+                  tab={activeTab}
+                  sort={sort}
+                  onSortChange={setSort}
+                />
+              )}
+            </div>
+          </>
+        ) : (
+          <GlobalRepCategoryWaveScope category={category} />
+        )}
       </div>
     </div>
   );
