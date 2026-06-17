@@ -4,6 +4,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   type FC,
+  type ReactNode,
   useEffect,
   useId,
   useMemo,
@@ -105,17 +106,25 @@ interface ApprovalStatusItemProps {
   readonly label: string;
   readonly value: string;
   readonly valueClassName?: string | undefined;
+  readonly withSeparator?: boolean | undefined;
 }
 
 const ApprovalStatusItem: FC<ApprovalStatusItemProps> = ({
   label,
   value,
   valueClassName = "tw-text-iron-100",
+  withSeparator = false,
 }) => (
-  <div className="tw-flex tw-min-w-0 tw-flex-col tw-items-center tw-gap-1 tw-text-center tw-leading-5">
-    <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
+  <div
+    className={`tw-flex tw-min-w-0 tw-items-baseline tw-gap-1.5 tw-text-left tw-leading-5 ${
+      withSeparator
+        ? "md:tw-border-0 md:tw-border-l md:tw-border-solid md:tw-border-iron-700 md:tw-pl-3"
+        : ""
+    }`}
+  >
+    <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-500">
       {label}
-    </span>
+    </span>{" "}
     <span
       className={`tw-min-w-0 tw-text-sm tw-font-semibold ${valueClassName}`}
     >
@@ -134,6 +143,70 @@ interface ApprovalRulesHelpProps {
   readonly thresholdLabel: string;
 }
 
+const getApprovalThresholdRuleText = ({
+  creditNoun,
+  holdTimeLabel,
+  isTimeWeighted,
+  requiresHoldTime,
+  thresholdLabel,
+}: Pick<
+  ApprovalRulesHelpProps,
+  | "creditNoun"
+  | "holdTimeLabel"
+  | "isTimeWeighted"
+  | "requiresHoldTime"
+  | "thresholdLabel"
+>): ReactNode => {
+  if (isTimeWeighted && requiresHoldTime) {
+    return (
+      <>
+        A drop is approved when its time-weighted score reaches {thresholdLabel}{" "}
+        {creditNoun} and keeps at least that much credit for {holdTimeLabel}.
+      </>
+    );
+  }
+
+  if (isTimeWeighted) {
+    return (
+      <>
+        A drop is approved when its time-weighted score reaches {thresholdLabel}{" "}
+        {creditNoun}.
+      </>
+    );
+  }
+
+  if (requiresHoldTime) {
+    return (
+      <>
+        A drop is approved when it reaches {thresholdLabel} {creditNoun} and
+        keeps at least that much credit for {holdTimeLabel}.
+      </>
+    );
+  }
+
+  return (
+    <>
+      A drop is approved as soon as it reaches {thresholdLabel} {creditNoun}.
+    </>
+  );
+};
+
+const getVoteScoringDescription = (
+  isTimeWeighted: boolean,
+  scoringDurationLabel: string | null
+): ReactNode => {
+  if (isTimeWeighted && scoringDurationLabel !== null) {
+    return (
+      <>
+        Approval uses a {scoringDurationLabel} average. New votes gain influence
+        gradually, so votes given now can be higher than the approval score.
+      </>
+    );
+  }
+
+  return <>Votes count immediately in the approval score.</>;
+};
+
 const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
   creditNoun,
   holdTimeLabel,
@@ -148,28 +221,13 @@ const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
       {thresholdIsSet ? (
         <p className="tw-mb-0">
           This wave uses {creditNoun}.{" "}
-          {isTimeWeighted && requiresHoldTime ? (
-            <>
-              A drop is approved when its time-weighted score reaches{" "}
-              {thresholdLabel} {creditNoun} and keeps at least that much credit
-              {" "}for {holdTimeLabel}.
-            </>
-          ) : isTimeWeighted ? (
-            <>
-              A drop is approved when its time-weighted score reaches{" "}
-              {thresholdLabel} {creditNoun}.
-            </>
-          ) : requiresHoldTime ? (
-            <>
-              A drop is approved when it reaches {thresholdLabel} {creditNoun}{" "}
-              and keeps at least that much credit for {holdTimeLabel}.
-            </>
-          ) : (
-            <>
-              A drop is approved as soon as it reaches {thresholdLabel}{" "}
-              {creditNoun}.
-            </>
-          )}
+          {getApprovalThresholdRuleText({
+            creditNoun,
+            holdTimeLabel,
+            isTimeWeighted,
+            requiresHoldTime,
+            thresholdLabel,
+          })}
         </p>
       ) : (
         <p className="tw-mb-0">This wave has no credit threshold set yet.</p>
@@ -190,15 +248,7 @@ const ApprovalRulesHelp: FC<ApprovalRulesHelpProps> = ({
           Vote scoring
         </dt>
         <dd className="tw-mb-0 tw-mt-1 tw-text-iron-200">
-          {isTimeWeighted && scoringDurationLabel !== null ? (
-            <>
-              Approval uses a {scoringDurationLabel} average. New votes gain
-              {" "}influence gradually, so votes given now can be higher than
-              the approval score.
-            </>
-          ) : (
-            <>Votes count immediately in the approval score.</>
-          )}
+          {getVoteScoringDescription(isTimeWeighted, scoringDurationLabel)}
         </dd>
       </div>
       <div>
@@ -258,6 +308,172 @@ const ApprovalRulesButton: FC<ApprovalRulesButtonProps> = ({
   </button>
 );
 
+const formatWinningThreshold = (
+  winningThreshold: number | null | undefined
+): string => {
+  if (
+    typeof winningThreshold === "number" &&
+    Number.isFinite(winningThreshold)
+  ) {
+    return formatNumberWithCommas(winningThreshold);
+  }
+
+  return "Not set";
+};
+
+const getCreditLabel = (
+  creditType: ApiWave["voting"]["credit_type"]
+): string => {
+  const votingLabels: Partial<
+    Record<ApiWave["voting"]["credit_type"], string>
+  > = WAVE_VOTING_LABELS;
+
+  return votingLabels[creditType] ?? FALLBACK_CREDIT_LABEL;
+};
+
+const getCreditNoun = (creditLabel: string): string => {
+  if (creditLabel === FALLBACK_CREDIT_LABEL) {
+    return FALLBACK_CREDIT_LABEL;
+  }
+
+  return `${creditLabel} credit`;
+};
+
+const getThresholdValueLabel = (
+  thresholdIsSet: boolean,
+  thresholdLabel: string,
+  creditLabel: string
+): string => {
+  if (thresholdIsSet) {
+    return `${thresholdLabel} ${creditLabel}`;
+  }
+
+  return thresholdLabel;
+};
+
+interface ApprovedLabelArgs {
+  readonly approvedCount: number | null;
+  readonly isApprovalStatusError: boolean;
+  readonly isCountOnlyError: boolean;
+  readonly maxWinners: number | null | undefined;
+}
+
+const getApprovedLabel = ({
+  approvedCount,
+  isApprovalStatusError,
+  isCountOnlyError,
+  maxWinners,
+}: ApprovedLabelArgs): string => {
+  if (isApprovalStatusError || isCountOnlyError) {
+    return "Unavailable";
+  }
+
+  if (approvedCount === null) {
+    return "Checking";
+  }
+
+  if (typeof maxWinners === "number" && Number.isFinite(maxWinners)) {
+    const approved = formatNumberWithCommas(approvedCount);
+    const max = formatNumberWithCommas(maxWinners);
+    return `${approved} / ${max}`;
+  }
+
+  return formatNumberWithCommas(approvedCount);
+};
+
+interface ApprovalStatusLabelArgs {
+  readonly approvedCount: number | null;
+  readonly closeStatus: ApprovalWaveCloseStatus;
+  readonly currentMillis: number;
+  readonly endTime: number | null;
+  readonly isApprovalStatusError: boolean;
+  readonly isCountOnlyError: boolean;
+}
+
+const getApprovalStatusLabel = ({
+  approvedCount,
+  closeStatus,
+  currentMillis,
+  endTime,
+  isApprovalStatusError,
+  isCountOnlyError,
+}: ApprovalStatusLabelArgs): string => {
+  if (closeStatus === "max_reached") {
+    return "Max approvals reached";
+  }
+
+  if (closeStatus === "ended") {
+    return "Approval window ended";
+  }
+
+  if (isApprovalStatusError) {
+    return "Unable to check approvals";
+  }
+
+  if (approvedCount === null && !isCountOnlyError) {
+    return "Checking";
+  }
+
+  if (endTime !== null) {
+    return formatTimeLeft(endTime, currentMillis);
+  }
+
+  return "Open";
+};
+
+const getApprovalStatusTextClassName = (
+  isApprovalStatusError: boolean,
+  closeStatus: ApprovalWaveCloseStatus
+): string => {
+  if (isApprovalStatusError) {
+    return "tw-text-rose-200";
+  }
+
+  if (closeStatus === null) {
+    return "tw-text-iron-100";
+  }
+
+  return "tw-text-amber-200";
+};
+
+const getApprovalErrorMessage = (
+  isApprovalStatusError: boolean,
+  isCountOnlyError: boolean
+): string | null => {
+  if (isApprovalStatusError) {
+    return approvalStatusErrorMessage;
+  }
+
+  if (isCountOnlyError) {
+    return approvalCountErrorMessage;
+  }
+
+  return null;
+};
+
+const getRetryError = ({
+  isApprovalStatusError,
+  isCountOnlyError,
+  retryApprovalCount,
+  retryApprovalStatus,
+}: Pick<
+  WaveApprovalStatusBarProps,
+  "retryApprovalCount" | "retryApprovalStatus"
+> & {
+  readonly isApprovalStatusError: boolean;
+  readonly isCountOnlyError: boolean;
+}): (() => void) | null | undefined => {
+  if (isApprovalStatusError) {
+    return retryApprovalStatus;
+  }
+
+  if (isCountOnlyError) {
+    return retryApprovalCount;
+  }
+
+  return null;
+};
+
 export default function WaveApprovalStatusBar({
   approvedCount,
   closeStatus,
@@ -305,10 +521,7 @@ export default function WaveApprovalStatusBar({
     };
   }, [closeStatus, endTime]);
 
-  const thresholdLabel =
-    typeof winningThreshold === "number" && Number.isFinite(winningThreshold)
-      ? formatNumberWithCommas(winningThreshold)
-      : "Not set";
+  const thresholdLabel = formatWinningThreshold(winningThreshold);
   const thresholdIsSet = thresholdLabel !== "Not set";
   const thresholdMinDurationLabel = formatWinningThresholdMinDuration(
     winningThresholdMinDuration
@@ -317,74 +530,41 @@ export default function WaveApprovalStatusBar({
     typeof winningThresholdMinDuration === "number" &&
     Number.isFinite(winningThresholdMinDuration) &&
     winningThresholdMinDuration > 0;
-  const creditLabel =
-    WAVE_VOTING_LABELS[wave.voting.credit_type] ?? FALLBACK_CREDIT_LABEL;
-  const creditNoun =
-    creditLabel === FALLBACK_CREDIT_LABEL
-      ? FALLBACK_CREDIT_LABEL
-      : `${creditLabel} credit`;
-  const thresholdValueLabel = thresholdIsSet
-    ? `${thresholdLabel} ${creditLabel}`
-    : thresholdLabel;
-  const approvedLabel = (() => {
-    if (isApprovalStatusError || isCountOnlyError) {
-      return "Unavailable";
-    }
-
-    if (approvedCount === null) {
-      return "Checking";
-    }
-
-    if (typeof maxWinners === "number" && Number.isFinite(maxWinners)) {
-      const approved = formatNumberWithCommas(approvedCount);
-      const max = formatNumberWithCommas(maxWinners);
-      return `${approved} / ${max}`;
-    }
-
-    return formatNumberWithCommas(approvedCount);
-  })();
-  let statusLabel: string;
-  if (closeStatus === "max_reached") {
-    statusLabel = "Max approvals reached";
-  } else if (closeStatus === "ended") {
-    statusLabel = "Approval window ended";
-  } else if (isApprovalStatusError) {
-    statusLabel = "Unable to check approvals";
-  } else if (approvedCount === null && !isCountOnlyError) {
-    statusLabel = "Checking";
-  } else if (endTime !== null) {
-    statusLabel = formatTimeLeft(endTime, currentMillis);
-  } else {
-    statusLabel = "Open";
-  }
-  let statusTextClassName = "tw-text-amber-200";
-  if (isApprovalStatusError) {
-    statusTextClassName = "tw-text-rose-200";
-  } else if (closeStatus === null) {
-    statusTextClassName = "tw-text-iron-100";
-  }
-  const errorMessage = (() => {
-    if (isApprovalStatusError) {
-      return approvalStatusErrorMessage;
-    }
-
-    if (isCountOnlyError) {
-      return approvalCountErrorMessage;
-    }
-
-    return null;
-  })();
-  const retryError = (() => {
-    if (isApprovalStatusError) {
-      return retryApprovalStatus;
-    }
-
-    if (isCountOnlyError) {
-      return retryApprovalCount;
-    }
-
-    return null;
-  })();
+  const creditLabel = getCreditLabel(wave.voting.credit_type);
+  const creditNoun = getCreditNoun(creditLabel);
+  const thresholdValueLabel = getThresholdValueLabel(
+    thresholdIsSet,
+    thresholdLabel,
+    creditLabel
+  );
+  const approvedLabel = getApprovedLabel({
+    approvedCount,
+    isApprovalStatusError,
+    isCountOnlyError,
+    maxWinners,
+  });
+  const statusLabel = getApprovalStatusLabel({
+    approvedCount,
+    closeStatus,
+    currentMillis,
+    endTime,
+    isApprovalStatusError,
+    isCountOnlyError,
+  });
+  const statusTextClassName = getApprovalStatusTextClassName(
+    isApprovalStatusError,
+    closeStatus
+  );
+  const errorMessage = getApprovalErrorMessage(
+    isApprovalStatusError,
+    isCountOnlyError
+  );
+  const retryError = getRetryError({
+    isApprovalStatusError,
+    isCountOnlyError,
+    retryApprovalCount,
+    retryApprovalStatus,
+  });
   const approvalRulesHelp = (
     <ApprovalRulesHelp
       creditNoun={creditNoun}
@@ -424,7 +604,7 @@ export default function WaveApprovalStatusBar({
         aria-label="Approval status"
         className="tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2"
       >
-        <div className="tw-grid tw-grid-cols-2 tw-items-center tw-gap-x-4 tw-gap-y-1 md:tw-grid-cols-4">
+        <div className="tw-grid tw-grid-cols-2 tw-items-center tw-gap-x-3 tw-gap-y-1 md:tw-flex md:tw-flex-wrap md:tw-gap-x-3">
           <ApprovalStatusItem
             label="Credit needed"
             value={thresholdValueLabel}
@@ -432,19 +612,25 @@ export default function WaveApprovalStatusBar({
           <ApprovalStatusItem
             label="Hold time"
             value={thresholdMinDurationLabel}
+            withSeparator
           />
-          <ApprovalStatusItem label="Approved drops" value={approvedLabel} />
+          <ApprovalStatusItem
+            label="Approved drops"
+            value={approvedLabel}
+            withSeparator
+          />
           <ApprovalStatusItem
             label="Approval window"
             value={statusLabel}
             valueClassName={statusTextClassName}
+            withSeparator
           />
         </div>
         {timeWeightedDurationLabel !== null && (
           <p className="tw-mb-0 tw-mt-2 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
             Time-weighted scoring is on: approval uses a{" "}
-            {timeWeightedDurationLabel} average, not the raw votes-given-now
-            {" "}total.
+            {timeWeightedDurationLabel} average, not the raw votes-given-now{" "}
+            total.
           </p>
         )}
         {errorMessage && (

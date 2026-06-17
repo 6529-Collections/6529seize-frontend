@@ -83,12 +83,14 @@ describe("WaveApprovalStatusBar", () => {
     expect(statusGroup.firstElementChild).toHaveClass(
       "tw-grid",
       "tw-grid-cols-2",
-      "md:tw-grid-cols-4"
+      "md:tw-flex"
     );
     expect(statusGroup.firstElementChild?.firstElementChild).toHaveClass(
-      "tw-flex-col",
-      "tw-items-center",
-      "tw-text-center"
+      "tw-items-baseline",
+      "tw-text-left"
+    );
+    expect(statusGroup.firstElementChild?.firstElementChild).not.toHaveClass(
+      "tw-flex-col"
     );
   });
 
@@ -185,21 +187,24 @@ describe("WaveApprovalStatusBar", () => {
     ["null", null],
     ["zero", 0],
     ["invalid", Number.NaN],
-  ])("does not show time-weighted scoring when time lock is %s", (_label, timeLockMs) => {
-    render(
-      <WaveApprovalStatusBar
-        approvedCount={1}
-        closeStatus={null}
-        wave={makeWave({
-          ...(timeLockMs !== undefined ? { time_lock_ms: timeLockMs } : {}),
-        })}
-      />
-    );
+  ])(
+    "does not show time-weighted scoring when time lock is %s",
+    (_label, timeLockMs) => {
+      render(
+        <WaveApprovalStatusBar
+          approvedCount={1}
+          closeStatus={null}
+          wave={makeWave({
+            ...(timeLockMs !== undefined ? { time_lock_ms: timeLockMs } : {}),
+          })}
+        />
+      );
 
-    expect(
-      screen.queryByText(/Time-weighted scoring is on/)
-    ).not.toBeInTheDocument();
-  });
+      expect(
+        screen.queryByText(/Time-weighted scoring is on/)
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("shows time-weighted scoring when the wave has a time lock", () => {
     render(
