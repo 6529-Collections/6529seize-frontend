@@ -60,7 +60,9 @@ jest.mock("@capacitor/core", () => ({
   Capacitor: {
     isNativePlatform: jest.fn(() => false),
   },
-  WebPlugin: class {},
+  WebPlugin: class {
+    readonly pluginName = "mock";
+  },
   registerPlugin: jest.fn(() => ({
     get: jest.fn(),
     remove: jest.fn(),

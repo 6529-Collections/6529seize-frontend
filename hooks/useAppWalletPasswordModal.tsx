@@ -5,7 +5,7 @@ import { UnlockAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 
 export const useAppWalletPasswordModal = (
   onVerifiedUnlock?:
-    | ((address: string, password: string) => Promise<unknown> | unknown)
+    | ((address: string, password: string) => Promise<unknown> | void)
     | undefined
 ) => {
   const [isOpen, setIsOpen] = useState(false);

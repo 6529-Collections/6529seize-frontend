@@ -129,6 +129,7 @@ export async function loginWithSessionV2({
   readonly signerAddress: string;
   readonly role: string | null;
 }): Promise<SessionLoginResponse> {
+  const roleBody = role === null ? {} : { role };
   return await commonApiPost<SessionLoginRequest, SessionLoginResponse>({
     endpoint: "auth/session-login",
     body: {
@@ -136,7 +137,7 @@ export async function loginWithSessionV2({
       server_signature: serverSignature,
       client_signature: clientSignature,
       client_address: signerAddress,
-      ...(role != null ? { role } : {}),
+      ...roleBody,
     },
     credentials: "include",
   });

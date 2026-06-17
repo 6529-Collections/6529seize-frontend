@@ -79,7 +79,7 @@ const createCredentialMarker = (credential: string): string => {
   let secondary = 5381;
 
   for (let index = 0; index < credential.length; index += 1) {
-    const code = credential.charCodeAt(index);
+    const code = credential.codePointAt(index) ?? 0;
     primary = (primary * 31 + code) % 2_147_483_647;
     secondary = (secondary * 33 + code) % 2_147_483_647;
   }

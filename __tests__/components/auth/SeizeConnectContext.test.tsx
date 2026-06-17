@@ -122,7 +122,6 @@ const TestComponent: React.FC = () => {
     address,
     hasActiveWalletAddress,
     hasValidWalletAuth,
-    isAuthenticated,
     hasInitializationError,
     initializationError,
   } = useSeizeConnectContext();
@@ -169,7 +168,7 @@ const TestComponent: React.FC = () => {
       <div data-testid="has-valid-wallet-auth">
         {hasValidWalletAuth.toString()}
       </div>
-      <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>
+      <div data-testid="is-authenticated">{hasValidWalletAuth.toString()}</div>
       <div data-testid="has-error">{hasInitializationError.toString()}</div>
       <div data-testid="error-message">
         {initializationError?.message || "no error"}
@@ -955,7 +954,7 @@ describe("SeizeConnectContext Security Logging", () => {
       }
 
       // Should remain unauthenticated after all attempts
-      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current.hasValidWalletAuth).toBe(false);
       expect(result.current.address).toBeUndefined();
     });
 
@@ -1003,7 +1002,7 @@ describe("SeizeConnectContext Security Logging", () => {
       });
 
       expect(result.current.connectionState).toBe("error");
-      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current.hasValidWalletAuth).toBe(false);
     });
   });
 });

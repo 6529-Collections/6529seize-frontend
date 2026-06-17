@@ -56,18 +56,34 @@ export function getWalletSignatureAudience(): string {
 }
 
 export function getWalletSignatureDomain(): string {
-  if (typeof window !== "undefined" && window.location.host) {
-    return window.location.host.toLowerCase();
+  if (
+    typeof globalThis.window !== "undefined" &&
+    globalThis.window.location.host
+  ) {
+    return globalThis.window.location.host.toLowerCase();
   }
   return new URL(publicEnv.BASE_ENDPOINT).host.toLowerCase();
 }
 
 export function getWalletSignatureClientOrigin(): string | null {
-  if (typeof window !== "undefined" && window.location.origin) {
-    const origin = window.location.origin.toLowerCase();
+  if (
+    typeof globalThis.window !== "undefined" &&
+    globalThis.window.location.origin
+  ) {
+    const origin = globalThis.window.location.origin.toLowerCase();
     return origin === "null" ? null : origin;
   }
   return new URL(publicEnv.BASE_ENDPOINT).origin.toLowerCase();
+}
+
+function compareJsonKeys(left: string, right: string): number {
+  if (left < right) {
+    return -1;
+  }
+  if (left > right) {
+    return 1;
+  }
+  return 0;
 }
 
 export function buildStructuredWalletSignatureMessage({
@@ -137,7 +153,7 @@ export function canonicalJSONStringify(value: unknown): string {
 
   const record = value as Record<string, unknown>;
   const keyValuePairs = Object.keys(record)
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+    .sort(compareJsonKeys)
     .filter((key) => record[key] !== undefined)
     .map(
       (key) => `${JSON.stringify(key)}:${canonicalJSONStringify(record[key])}`

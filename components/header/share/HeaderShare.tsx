@@ -20,10 +20,18 @@ import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
 
+type ConnectionShare = Awaited<ReturnType<typeof createConnectionShare>>;
+
 type CachedConnectionShare = {
   readonly addressKey: string;
   readonly expiresAtMs: number;
-  readonly share: Awaited<ReturnType<typeof createConnectionShare>>;
+  readonly share: ConnectionShare;
+};
+
+type SetQrSource = (dataUrl: string) => void;
+type IsStaleGeneration = () => boolean | undefined;
+type SearchParamsLike = {
+  toString(): string;
 };
 
 function isAbortError(error: unknown, signal?: AbortSignal): boolean {
@@ -34,6 +42,95 @@ function isAbortError(error: unknown, signal?: AbortSignal): boolean {
       "name" in error &&
       error.name === "AbortError")
   );
+}
+
+function buildRouterPath(
+  pathname: string | null,
+  searchParams: SearchParamsLike | null
+): string {
+  let routerPath = pathname ?? "";
+  if (routerPath.endsWith("/")) {
+    routerPath = routerPath.slice(0, -1);
+  }
+
+  const searchParamsString = searchParams?.toString() ?? "";
+  if (searchParamsString) {
+    return `${routerPath}?${searchParamsString}`;
+  }
+
+  return routerPath;
+}
+
+function getCachedConnectionShare(
+  cachedShare: CachedConnectionShare | null,
+  addressKey: string
+): ConnectionShare | null {
+  if (cachedShare?.addressKey === addressKey) {
+    const isReusable = cachedShare.expiresAtMs > Date.now() + 30_000;
+    if (isReusable) {
+      return cachedShare.share;
+    }
+  }
+
+  return null;
+}
+
+function buildConnectionShareUrls({
+  share,
+  appScheme,
+  coreScheme,
+}: {
+  readonly share: ConnectionShare;
+  readonly appScheme: string;
+  readonly coreScheme: string;
+}): {
+  readonly appUrl: string;
+  readonly coreUrl: string;
+} {
+  const shareParams = new URLSearchParams({
+    connection_share_code: share.connection_share_code,
+    address: share.address,
+  });
+
+  if (share.role) {
+    shareParams.set("role", share.role);
+  }
+
+  return {
+    appUrl: `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`,
+    coreUrl: `${coreScheme}://${DeepLinkScope.NAVIGATE}${share.deep_link_path}`,
+  };
+}
+
+function generateQrCodeSource({
+  url,
+  setSource,
+  clearSource,
+  staleGeneration,
+  signal,
+  errorMessage,
+}: {
+  readonly url: string;
+  readonly setSource: SetQrSource;
+  readonly clearSource: () => void;
+  readonly staleGeneration: IsStaleGeneration;
+  readonly signal?: AbortSignal | undefined;
+  readonly errorMessage: string;
+}): void {
+  QRCode.toDataURL(url, { width: 500, margin: 0 })
+    .then((dataUrl: string) => {
+      if (staleGeneration()) {
+        return;
+      }
+      setSource(dataUrl);
+    })
+    .catch((error: unknown) => {
+      if (staleGeneration() || isAbortError(error, signal)) {
+        return;
+      }
+      console.error(errorMessage, error);
+      clearSource();
+    });
 }
 
 interface OSInfo {
@@ -346,20 +443,11 @@ export function HeaderQRModal({
     const isStaleGeneration = () =>
       generationId !== shareGenerationIdRef.current || signal?.aborted;
 
-    let routerPath = pathname ?? "";
-    if (routerPath.endsWith("/")) {
-      routerPath = routerPath.slice(0, -1);
-    }
-
-    const searchParamsString = searchParams?.toString() ?? "";
-    if (searchParamsString) {
-      routerPath += `?${searchParamsString}`;
-    }
-
+    const routerPath = buildRouterPath(pathname, searchParams);
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
     const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
 
-    const browserUrl = `${window.location.origin}${routerPath}`;
+    const browserUrl = `${globalThis.window.location.origin}${routerPath}`;
     const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
     const coreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
 
@@ -372,14 +460,13 @@ export function HeaderQRModal({
 
     if (walletAddress && hasValidWalletAuth) {
       try {
-        const cachedShare = cachedConnectionShareRef.current;
         const addressKey = walletAddress.toLowerCase();
+        const cachedShare = getCachedConnectionShare(
+          cachedConnectionShareRef.current,
+          addressKey
+        );
         const share =
-          cachedShare &&
-          cachedShare.addressKey === addressKey &&
-          cachedShare.expiresAtMs > Date.now() + 30_000
-            ? cachedShare.share
-            : await createConnectionShare({ signal });
+          cachedShare ?? (await createConnectionShare({ signal }));
 
         if (isStaleGeneration()) {
           return;
@@ -394,17 +481,14 @@ export function HeaderQRModal({
           };
         }
 
-        const shareParams = new URLSearchParams({
-          connection_share_code: share.connection_share_code,
-          address: share.address,
+        const shareUrls = buildConnectionShareUrls({
+          share,
+          appScheme,
+          coreScheme,
         });
 
-        if (share.role) {
-          shareParams.set("role", share.role);
-        }
-
-        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`;
-        shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${share.deep_link_path}`;
+        shareConnectionAppUrl = shareUrls.appUrl;
+        shareConnectionCoreUrl = shareUrls.coreUrl;
 
         setCanShareConnection(true);
         setShareConnectionAppUrl(shareConnectionAppUrl);
@@ -425,51 +509,33 @@ export function HeaderQRModal({
       setShareConnectionSrc("");
     }
 
-    QRCode.toDataURL(browserUrl, { width: 500, margin: 0 })
-      .then((dataUrl: string) => {
-        if (isStaleGeneration()) {
-          return;
-        }
-        setNavigateBrowserSrc(dataUrl);
-      })
-      .catch((error: unknown) => {
-        if (isStaleGeneration() || isAbortError(error, signal)) {
-          return;
-        }
-        console.error("Failed to generate browser QR code", error);
-        setNavigateBrowserSrc("");
-      });
+    generateQrCodeSource({
+      url: browserUrl,
+      setSource: setNavigateBrowserSrc,
+      clearSource: () => setNavigateBrowserSrc(""),
+      staleGeneration: isStaleGeneration,
+      signal,
+      errorMessage: "Failed to generate browser QR code",
+    });
 
-    QRCode.toDataURL(appUrl, { width: 500, margin: 0 })
-      .then((dataUrl: string) => {
-        if (isStaleGeneration()) {
-          return;
-        }
-        setNavigateAppSrc(dataUrl);
-      })
-      .catch((error: unknown) => {
-        if (isStaleGeneration() || isAbortError(error, signal)) {
-          return;
-        }
-        console.error("Failed to generate mobile app QR code", error);
-        setNavigateAppSrc("");
-      });
+    generateQrCodeSource({
+      url: appUrl,
+      setSource: setNavigateAppSrc,
+      clearSource: () => setNavigateAppSrc(""),
+      staleGeneration: isStaleGeneration,
+      signal,
+      errorMessage: "Failed to generate mobile app QR code",
+    });
 
     if (shareConnectionAppUrl) {
-      QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 })
-        .then((dataUrl: string) => {
-          if (isStaleGeneration()) {
-            return;
-          }
-          setShareConnectionSrc(dataUrl);
-        })
-        .catch((error: unknown) => {
-          if (isStaleGeneration() || isAbortError(error, signal)) {
-            return;
-          }
-          console.error("Failed to generate share connection QR code", error);
-          setShareConnectionSrc("");
-        });
+      generateQrCodeSource({
+        url: shareConnectionAppUrl,
+        setSource: setShareConnectionSrc,
+        clearSource: () => setShareConnectionSrc(""),
+        staleGeneration: isStaleGeneration,
+        signal,
+        errorMessage: "Failed to generate share connection QR code",
+      });
     }
   }
 
