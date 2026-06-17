@@ -365,6 +365,28 @@ export const hasWaveTrustSummaryScore = (
   waveScore?: ApiWaveScore | null | undefined
 ): boolean => formatScore(waveScore?.visibility_score) !== null;
 
+const buildSummaryRepDetail = ({
+  rawRep,
+  repSortScore,
+}: {
+  readonly rawRep: string | null;
+  readonly repSortScore: string | null;
+}): string | null => {
+  if (rawRep !== null && repSortScore !== null) {
+    return `REP: ${rawRep} raw, ${repSortScore} score`;
+  }
+
+  if (rawRep !== null) {
+    return `REP: ${rawRep} raw`;
+  }
+
+  if (repSortScore !== null) {
+    return `REP score: ${repSortScore}`;
+  }
+
+  return null;
+};
+
 const buildSummaryDetails = ({
   visibilityScore,
   qualityScore,
@@ -379,14 +401,7 @@ const buildSummaryDetails = ({
   readonly waveRep: ApiWaveRepSummary | null | undefined;
 }): string[] => {
   const rawRep = formatSignedFullNumber(waveRep?.total_rep);
-  const repDetail =
-    rawRep !== null && repSortScore !== null
-      ? `REP: ${rawRep} raw, ${repSortScore} score`
-      : rawRep !== null
-        ? `REP: ${rawRep} raw`
-        : repSortScore !== null
-          ? `REP score: ${repSortScore}`
-          : null;
+  const repDetail = buildSummaryRepDetail({ rawRep, repSortScore });
 
   return [
     `Combined score: ${visibilityScore}`,
@@ -580,6 +595,9 @@ export function WaveTrustSignals({
         )}
       </>
     );
+    const inlineSidebarTooltipAttributes = shouldUseInlineSidebarTooltip
+      ? getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)
+      : {};
 
     return renderContainer({
       variant,
@@ -600,9 +618,7 @@ export function WaveTrustSignals({
               className={summaryChipClasses}
               aria-label={summaryLabel}
               title={summaryTitle}
-              {...(shouldUseInlineSidebarTooltip
-                ? getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)
-                : {})}
+              {...inlineSidebarTooltipAttributes}
             >
               {summaryChipContent}
             </span>
