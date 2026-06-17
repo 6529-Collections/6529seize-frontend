@@ -155,9 +155,18 @@ function buildApiUrl(
   return url.toString();
 }
 
+function normalizeApiOrigin(base: string): string {
+  try {
+    const url = new URL(`${trimTrailingSlashes(base)}/`);
+    return url.origin.toLowerCase();
+  } catch {
+    return trimTrailingSlashes(base).toLowerCase();
+  }
+}
+
 function getApiBases(): readonly string[] {
   const primary = getApiBase();
-  if (primary === PUBLIC_API_BASE) {
+  if (normalizeApiOrigin(primary) === normalizeApiOrigin(PUBLIC_API_BASE)) {
     return [primary];
   }
 
@@ -205,6 +214,10 @@ const PUBLIC_API_HEADERS: HeadersInit = {
   accept: "application/json",
 };
 
+function shouldRetryApiStatus(status: number): boolean {
+  return status >= 500 && status < 600;
+}
+
 async function getApiFetch(): Promise<typeof fetch> {
   if (typeof window !== "undefined") {
     return fetch;
@@ -227,20 +240,40 @@ async function fetchApiJson<T>(
   const fetchImpl = await getApiFetch();
   const bases = getApiBases();
   let lastStatus: number | undefined;
+  let primaryStatus: number | undefined;
+  let lastError: unknown;
 
   for (const [index, base] of bases.entries()) {
-    const response = await fetchImpl(buildApiUrl(base, endpoint, params), {
-      headers: index === 0 ? createApiHeaders(context) : PUBLIC_API_HEADERS,
-    });
+    try {
+      const response = await fetchImpl(buildApiUrl(base, endpoint, params), {
+        headers: index === 0 ? createApiHeaders(context) : PUBLIC_API_HEADERS,
+      });
 
-    if (response.ok) {
-      return (await response.json()) as T;
+      if (response.ok) {
+        return (await response.json()) as T;
+      }
+
+      lastStatus = response.status;
+      if (index === 0) {
+        primaryStatus = response.status;
+      }
+
+      if (!shouldRetryApiStatus(response.status)) {
+        break;
+      }
+    } catch (error) {
+      lastError = error;
     }
-
-    lastStatus = response.status;
   }
 
-  throw new Error(`6529 API request failed with status ${lastStatus}.`);
+  const status = primaryStatus ?? lastStatus;
+  if (status !== undefined) {
+    throw new Error(`6529 API request failed with status ${status}.`);
+  }
+
+  throw new Error("6529 API request failed.", {
+    cause: lastError,
+  });
 }
 
 async function fetchOptionalApiJson<T>(
