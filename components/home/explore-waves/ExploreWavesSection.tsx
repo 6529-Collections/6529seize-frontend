@@ -88,7 +88,7 @@ export function ExploreWavesSection({
         overviewType,
         page: 1,
         pageSize: limit,
-        excludeFollowed: effectiveExcludeFollowed,
+        excludeFollowed: effectiveExcludeFollowed ? true : undefined,
         scoreSort,
         minVisibilityScore,
         minQualityScore,

@@ -44,7 +44,7 @@ describe("ExploreWavesSection", () => {
     await waitFor(() => expect(fetchWavesV2PageMock).toHaveBeenCalled());
     expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        excludeFollowed: false,
+        excludeFollowed: undefined,
       })
     );
   });
