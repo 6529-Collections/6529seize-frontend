@@ -2,7 +2,7 @@ import LruTtlCache from "@/lib/cache/lruTtl";
 import type { EnsPreview } from "@/components/waves/ens/types";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 
-interface LinkPreviewMedia {
+export interface LinkPreviewMedia {
   readonly url?: string | null | undefined;
   readonly secureUrl?: string | null | undefined;
   readonly type?: string | null | undefined;
@@ -25,6 +25,39 @@ interface LinkPreviewBase {
   readonly image?: LinkPreviewMedia | null | undefined;
   readonly images?: readonly LinkPreviewMedia[] | null | undefined;
   readonly [key: string]: unknown;
+}
+
+export type SeizeCollectionPreviewKind =
+  | "the-memes"
+  | "meme-lab"
+  | "6529-gradient"
+  | "nextgen-token"
+  | "rememes";
+
+export interface SeizeCollectionPreviewPerson {
+  readonly label?: string | null | undefined;
+  readonly name: string;
+  readonly href?: string | null | undefined;
+}
+
+export interface SeizeCollectionPreviewFact {
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface SeizeCollectionPreviewTrait {
+  readonly label: string;
+  readonly value: string;
+}
+
+export interface SeizeCollectionLinkPreview extends LinkPreviewBase {
+  readonly type: "6529.collection";
+  readonly kind: SeizeCollectionPreviewKind;
+  readonly title: string;
+  readonly kicker?: string | null | undefined;
+  readonly people?: readonly SeizeCollectionPreviewPerson[] | null | undefined;
+  readonly facts?: readonly SeizeCollectionPreviewFact[] | null | undefined;
+  readonly traits?: readonly SeizeCollectionPreviewTrait[] | null | undefined;
 }
 
 type GoogleWorkspaceAvailability = "public" | "restricted";
@@ -91,6 +124,7 @@ export type LinkPreviewResponse =
   | GenericLinkPreviewResponse
   | EnsLinkPreviewResponse
   | ManifoldListingLinkPreview
+  | SeizeCollectionLinkPreview
   | GoogleWorkspaceLinkPreview;
 
 const LINK_PREVIEW_CACHE_TTL_MS = 5 * 60 * 1000;

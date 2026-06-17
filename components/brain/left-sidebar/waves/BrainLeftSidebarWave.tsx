@@ -1,6 +1,7 @@
 "use client";
 
 import WavePicture from "@/components/waves/WavePicture";
+import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
@@ -322,6 +323,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           <div className="tw-truncate tw-text-sm tw-font-medium">
             {formattedWaveName}
           </div>
+          <WaveTrustSignals
+            waveRep={wave.waveRep}
+            waveScore={wave.waveScore}
+            variant="sidebar"
+          />
           {latestDropTimestamp !== null && (
             <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>
