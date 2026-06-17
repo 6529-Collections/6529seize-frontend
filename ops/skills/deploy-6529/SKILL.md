@@ -29,14 +29,14 @@ Before deploying, check what else is already deploying to the same environment. 
    - frontend staging: `.github/workflows/deploy-staging.yml`, `scripts/staging.sh`, `bin/6529`
    - frontend production: `.github/workflows/build-upload-deploy-prod.yml`, `bin/ghdeploy`
    - package and wrapper notes: `ops/docs/developer/pnpm-and-socket-firewall.md`
-   - backend: when backend is involved, use `ops/skills/deploy-6529/SKILL.md` in `6529-Collections/6529seize-backend` as the backend deployment authority.
+   - backend: when backend is involved, use `ops/skills/deploy-6529/SKILL.md` from the separate repository `6529-Collections/6529seize-backend` as the backend deployment authority. Do not resolve that path inside the frontend repo.
 3. Verify PR readiness before merge:
    - agent review complete
    - review bots addressed or explicitly deferred
    - required CI and DCO passing
    - human approval present when required
    - release risk and rollback/fix-forward plan understood
-4. For local frontend commands from Windows Codex shells, use the local `seize` wrapper. Use repo `6529` paths when describing CI, staging host scripts, or checked-in docs.
+4. Use the repo-local `6529` wrapper for frontend project commands in release notes, checked-in docs, CI descriptions, and deploy instructions.
 
 ## Merge
 
@@ -53,7 +53,7 @@ Before deploying, check what else is already deploying to the same environment. 
 
 1. Confirm no active staging deploy is already using the lane.
 2. Deploy the exact intended frontend merge commit to staging. Current frontend staging is driven by the `1a-staging` branch and `.github/workflows/deploy-staging.yml`; the workflow runs `./bin/6529 staging` on the staging host through SSM and verifies the deployed SHA. Do not force-push, reset, or replace `1a-staging` over another active candidate without coordination.
-3. If staging requires backend changes, use the backend `deploy-6529` skill to deploy backend staging first when the frontend depends on new API behavior.
+3. If staging requires backend changes, use the backend `deploy-6529` skill from `6529-Collections/6529seize-backend` to deploy backend staging first when the frontend depends on new API behavior.
 4. Watch the staging workflow to a terminal state. Capture the run URL, status, and deployed SHA.
 5. If the staging deploy fails, inspect logs, identify the owner layer, fix through the normal PR cycle, merge the fix, and redeploy staging from the new SHA. Keep iterating until staging deploys cleanly or a safety/access boundary requires user input.
 
@@ -78,7 +78,7 @@ Before deploying, check what else is already deploying to the same environment. 
 1. Proceed to production when the user already asked to take the release through production, such as "take it all the way through prod." Ask only when the current request did not include production deployment.
 2. Reconfirm staging passed for the same SHAs or the same ordered frontend/backend release set.
 3. Confirm no active production deploy is in progress.
-4. Deploy backend production before frontend production when frontend depends on new backend behavior. Use the backend `deploy-6529` skill for backend service order, validation, and recovery.
+4. Deploy backend production before frontend production when frontend depends on new backend behavior. Use the backend `deploy-6529` skill from `6529-Collections/6529seize-backend` for backend service order, validation, and recovery.
 5. Deploy frontend production through the repo-approved path. Current frontend production deploy is `Web Deploy - PROD` in `.github/workflows/build-upload-deploy-prod.yml`; `bin/ghdeploy` triggers that workflow for a clean, upstream-synced branch.
 6. If the local worktree is dirty with unrelated user or agent changes, do not clean or revert them just to run `ghdeploy`. Use a clean worktree or trigger the workflow with an explicit verified ref through GitHub tooling.
 7. Watch production deployment to completion. Record the workflow run URL, Elastic Beanstalk or workflow health result, and deployed SHA/version label.
@@ -102,15 +102,15 @@ Before deploying, check what else is already deploying to the same environment. 
 
 ## Backend Coordination
 
-Use `ops/skills/deploy-6529/SKILL.md` in `6529-Collections/6529seize-backend` for backend deployment work. The frontend skill owns frontend merge/deploy/validation; the backend skill owns backend service order, migrations, API/lambda smoke checks, failed-gate recovery, and backend production validation.
+Use `ops/skills/deploy-6529/SKILL.md` from the separate repository `6529-Collections/6529seize-backend` for backend deployment work. Do not resolve that path inside the frontend repo. The frontend skill owns frontend merge/deploy/validation; the backend skill owns backend service order, migrations, API/lambda smoke checks, failed-gate recovery, and backend production validation.
 
 ## Useful Commands
 
 Use exact commands only after checking the current repo state and available tooling:
 
 ```bash
-ghruns --workflow deploy-staging.yml --branch 1a-staging -L 10
-ghruns --workflow build-upload-deploy-prod.yml -L 10
+gh run list -R 6529-Collections/6529seize-frontend --workflow deploy-staging.yml --branch 1a-staging -L 10
+gh run list -R 6529-Collections/6529seize-frontend --workflow build-upload-deploy-prod.yml -L 10
 gh run watch <run-id> -R 6529-Collections/6529seize-frontend
 gh run view <run-id> -R 6529-Collections/6529seize-frontend --log-failed
 gh workflow run build-upload-deploy-prod.yml --ref <verified-branch-or-tag> -R 6529-Collections/6529seize-frontend
@@ -119,10 +119,10 @@ gh workflow run build-upload-deploy-prod.yml --ref <verified-branch-or-tag> -R 6
 For local validation in this Windows Codex environment:
 
 ```powershell
-seize run lint:changed
-seize run typecheck:changed
-seize run check:changed
-seize run test:e2e
+6529 run lint:changed
+6529 run typecheck:changed
+6529 run check:changed
+6529 run test:e2e
 ```
 
 ## Closeout

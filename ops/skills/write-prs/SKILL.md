@@ -101,7 +101,7 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
 - Before merging, ensure the PR is agent-happy, bot-happy, required checks are passing or explained, and required approvals are present.
 - Before staging deploy, confirm the merge commit/ref, use the repo-approved staging deployment path, then validate the deployed target. In this repo, the documented fresh-clone staging refresh path is `./bin/6529 staging`.
 - Before production deploy, require successful staging validation unless the user explicitly overrides it. Use the repo-approved production deployment path and verify the deployed version or visible behavior afterward. In this repo, production deploy is the `Web Deploy - PROD` workflow in `.github/workflows/build-upload-deploy-prod.yml`.
-- If deployment or E2E fails, stop, summarize the failure, and do not proceed to the next environment without a fix or explicit user direction.
+- If deployment or E2E fails, hand off to `ops/skills/deploy-6529/SKILL.md` to diagnose, fix, redeploy, and rerun validation before proceeding.
 
 ## Anti-Patterns
 
