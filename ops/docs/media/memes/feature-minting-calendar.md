@@ -34,7 +34,8 @@ distribution routes.
 ## User Journey
 
 1. Open `/meme-calendar`.
-2. Switch between `Local` and `UTC`.
+2. Switch between `Local` and `UTC`; the timezone toggle exposes pressed
+   state and accessible names.
 3. Read the top panel:
    - Heading changes by state: `Next Mint`, `Upcoming Mint`, `Mint Live`, or
      `Past Mint`.
@@ -119,6 +120,18 @@ distribution routes.
 - Mint start/end are anchored to Europe/Athens wall-clock timing before
   rendering in local or UTC display modes.
 - Calendar/API output is schedule information, not wallet eligibility.
+- During progressive localization, `/meme-calendar?locale=<supported-locale>`
+  can be used to smoke-test the overview shell and the first lower-calendar
+  pass. The timezone toggle, overview heading/full-calendar link, top-panel
+  controls/headings/countdown labels, screenshot label, upcoming-card
+  heading/empty state, lower-calendar zoom/guide/navigation/jump controls,
+  default SZN month names, mint numbers, mint-day accessible names, and
+  calendar invite link/event labels are routed through the source-message and
+  formatting helpers. Higher-level lower-calendar drilldown cards (`Year`,
+  `Epoch`, `Period`, `Era`, `Eon`) now use message-backed titles, date ranges,
+  mint ranges, and accessible button names.
+- Reviewed non-English product translations and locale-prefixed routing remain
+  deferred.
 - `Date` jump is month-level only.
 - Compact fallback panels are intentionally limited to local-time next-mint
   context.

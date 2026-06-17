@@ -6,6 +6,7 @@ import type { NextGenCollection } from "@/entities/INextgen";
 import type { Transaction } from "@/entities/ITransaction";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { Page } from "@/helpers/Types";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -21,6 +22,7 @@ import {
 } from "../activity.helpers";
 import { UserPageStatsActivityWalletFilterType } from "./UserPageStatsActivityWallet.types";
 import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivityWalletTableWrapper";
+import { getWalletActivityMessage } from "./wallet-activity.messages";
 
 const ENUM_AND_PATH: {
   type: UserPageStatsActivityWalletFilterType;
@@ -48,9 +50,11 @@ const pathToEnum = (path: string): UserPageStatsActivityWalletFilterType => {
 export default function UserPageStatsActivityWallet({
   profile,
   activeAddress,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const FILTER_TO_PARAM: Record<UserPageStatsActivityWalletFilterType, string> =
     {
@@ -212,7 +216,11 @@ export default function UserPageStatsActivityWallet({
     <div className="tw-mt-4 md:tw-mt-5">
       <div className="tw-flex">
         <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100">
-          Wallet Activity
+          {getWalletActivityMessage(
+            "user.collected.stats.walletActivity.title",
+            undefined,
+            locale
+          )}
         </h3>
       </div>
       <UserPageStatsActivityWalletTableWrapper
@@ -230,6 +238,7 @@ export default function UserPageStatsActivityWallet({
         loading={isFetching}
         setPage={onPageFilter}
         onActiveFilter={onActiveFilter}
+        locale={locale}
       />
     </div>
   );

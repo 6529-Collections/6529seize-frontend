@@ -14,6 +14,9 @@
 - Collection list: `/meme-lab/collection/{collection}`
 - Card handoff: `/meme-lab/{id}` (documented in
   [Meme Lab Card Route Tabs and Navigation](feature-meme-lab-card-route-tabs-and-navigation.md))
+- During progressive i18n migration, `/meme-lab` and
+  `/meme-lab/collection/{collection}` accept an optional `locale` query value
+  for smoke-testing supported locales.
 
 ## Entry Points
 
@@ -23,6 +26,10 @@
 - On `/meme-lab`, switch to `Collections`, then select `view` for a collection.
 - Open `/meme-lab/collection/{collection}` directly.
 - On mobile and tablet (`< xl`), use the collections dropdown on `/meme-lab`.
+- Browse and collection card grids render as labelled lists so assistive
+  technology can announce grouped card results.
+- Card tiles expose accessible names in the form
+  `View {name}, Meme Lab card #{tokenId}`.
 
 ## User Journey
 
@@ -39,7 +46,8 @@
 7. If `Volume` is not active, picking a volume window also switches sort to
    `Volume`.
 8. In grouped `Collections`, select `view` to open
-   `/meme-lab/collection/{collection}`.
+   `/meme-lab/collection/{collection}`. During progressive i18n migration, a
+   supported non-default `locale` query is preserved on the collection link.
 9. Open any card tile to go to `/meme-lab/{id}`.
 
 ### Collection Route `/meme-lab/collection/{collection}`
@@ -63,11 +71,16 @@
   keeps those query values even though those buttons are hidden and grouping is
   not shown.
 - Sort changes use in-place URL replacement and keep only sort keys in the
-  query string.
+  query string, plus a supported `locale` query value when one is present.
+- Unsupported `locale` values fall back to `en-US`.
+- Collection `view` links normalize spaces to hyphenated slugs and the
+  collection page decodes older encoded-space URLs such as
+  `/meme-lab/collection/6529-Intern%20JPGs`.
+- Collection `view` links preserve supported non-default `locale` query values.
 
 ## Loading, Empty, and Error States
 
-- `/meme-lab` shows a `Fetching ...` row during initial load.
+- `/meme-lab` shows a message-backed `Fetching ...` row during initial load.
 - If `/meme-lab` fetch calls fail, the route falls back to `Nothing here yet`
   with no inline error banner.
 - `/meme-lab/collection/{collection}` does not show a dedicated loading row.
@@ -85,6 +98,8 @@
   does not open grouped sections.
 - Manually malformed collection slugs can resolve to an empty-state collection
   route.
+- Legacy collection URLs with encoded spaces are decoded before querying the
+  collection API.
 
 ## Recovery
 
@@ -106,6 +121,12 @@
   through each sort change.
 - Card tiles reuse shared NFT rendering, including wallet balance chips when
   signed in.
+- List, grouped collection/artist list labels, sorting, card accessible names,
+  and card metric labels are message-backed for the progressive i18n path.
+  Non-`en-US` dictionaries may still fall back to `en-US` for Meme Lab-specific
+  labels while reviewed translations are pending.
+- Card metric dates, numbers, percentages, ETH values, and grouped label
+  sorting use the repo `Intl` helpers.
 - Card-level tabs and navigation are documented in
   [Meme Lab Card Route Tabs and Navigation](feature-meme-lab-card-route-tabs-and-navigation.md).
 - Card-level action details are documented in media NFT pages.

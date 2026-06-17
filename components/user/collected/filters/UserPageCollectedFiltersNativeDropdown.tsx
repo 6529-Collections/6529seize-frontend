@@ -1,7 +1,10 @@
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { CollectedCollectionType } from "@/entities/IProfile";
-import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
+import {
+  getCollectedCollectionLabel,
+  getCollectedFilterMessage,
+} from "./user-page-collected-filter-labels";
 
 type SelectedType = CollectedCollectionType | null;
 
@@ -14,15 +17,17 @@ export default function UserPageCollectedFiltersNativeDropdown({
 }) {
   const items: CommonSelectItem<SelectedType>[] = [
     {
-      label: "All",
-      mobileLabel: "All Collections",
+      label: getCollectedFilterMessage("user.collected.filters.collection.all"),
+      mobileLabel: getCollectedFilterMessage(
+        "user.collected.filters.collection.allCollections"
+      ),
       value: null,
       key: "all",
     },
     ...Object.values(CollectedCollectionType)
       .filter((collection) => collection !== CollectedCollectionType.NETWORK)
       .map((collection) => ({
-        label: COLLECTED_COLLECTIONS_META[collection].label,
+        label: getCollectedCollectionLabel(collection),
         value: collection,
         key: collection,
       })),
@@ -32,7 +37,9 @@ export default function UserPageCollectedFiltersNativeDropdown({
     <CommonDropdown
       items={items}
       activeItem={selected}
-      filterLabel="Collection"
+      filterLabel={getCollectedFilterMessage(
+        "user.collected.filters.collection"
+      )}
       setSelected={setSelected}
       size="sm"
     />

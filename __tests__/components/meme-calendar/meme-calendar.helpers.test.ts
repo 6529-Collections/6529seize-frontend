@@ -1,9 +1,11 @@
 import type { ZoomLevel } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
+  displayedSeasonNumberFromIndex,
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
   getMintTimelineDetails,
+  getMonthWeeks,
   getNextMintStart,
   getRangeDatesByZoom,
   getSeasonIndexForDate,
@@ -44,16 +46,35 @@ const countMintsBetween = (start: Date, end: Date): number => {
   return count;
 };
 
+const DIVISION_DATE_FORMAT = {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+} satisfies Intl.DateTimeFormatOptions;
+
+const formatDivisionDate = (
+  date: Date,
+  locale: string
+): string => new Intl.DateTimeFormat(locale, DIVISION_DATE_FORMAT).format(date);
+
+const formatDivisionNumber = (value: number, locale: string): string =>
+  new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
+
+const getDivisionRows = (node: unknown): ReactElement<any>[] => {
+  expect(isValidElement(node)).toBe(true);
+
+  const elementNode = asElement(node);
+  const tbody = asElement(elementNode.props.children as unknown);
+  expect(isValidElement(tbody)).toBe(true);
+
+  return Children.toArray(tbody.props.children).map(asElement);
+};
+
 describe("formatToFullDivision", () => {
   it("renders each division with a date range", () => {
     const node = formatToFullDivision(new Date(Date.UTC(2025, 9, 1)));
-    expect(isValidElement(node)).toBe(true);
-
-    const elementNode = asElement(node as unknown);
-    const tbody = asElement(elementNode.props.children as unknown);
-    expect(isValidElement(tbody)).toBe(true);
-
-    const rows = Children.toArray(tbody.props.children).map(asElement);
+    const rows = getDivisionRows(node);
 
     expect(rows).toHaveLength(6);
 
@@ -75,6 +96,44 @@ describe("formatToFullDivision", () => {
       /^SZN\s+\d+\b[^\r\n]*?Year\s+\d+\b[^\r\n]*?Epoch\s+\d+\b[^\r\n]*?Period\s+\d+\b[^\r\n]*?Era\s+\d+\b[^\r\n]*?Eon\s+\d+\b$/
     );
   });
+
+  it("formats division ranges with the active locale", () => {
+    const date = new Date(Date.UTC(2025, 9, 1));
+    const rows = getDivisionRows(formatToFullDivision(date, "de-DE"));
+    const sznRow = asElement(rows[0]);
+    const cells = Children.toArray(sznRow.props.children).map(asElement);
+    const rangeCell = asElement(cells[1]);
+    const span = asElement(rangeCell.props.children as unknown);
+    const { start, end } = getRangeDatesByZoom(
+      "szn",
+      getSeasonIndexForDate(date)
+    );
+    const expectedRange = `${formatDivisionDate(
+      start,
+      "de-DE"
+    )} - ${formatDivisionDate(end, "de-DE")}`;
+
+    expect(String(span.props.children)).toBe(expectedRange);
+  });
+
+  it("formats division numbers with the active locale", () => {
+    const date = new Date(Date.UTC(2500, 0, 1));
+    const rows = getDivisionRows(formatToFullDivision(date, "de-DE"));
+    const sznRow = asElement(rows[0]);
+    const cells = Children.toArray(sznRow.props.children).map(asElement);
+    const labelCell = asElement(cells[0]);
+    const labelText = Children.toArray(labelCell.props.children)
+      .map((child) => String(child).trim())
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const expectedNumber = formatDivisionNumber(
+      displayedSeasonNumberFromIndex(getSeasonIndexForDate(date)),
+      "de-DE"
+    );
+
+    expect(labelText).toBe(`SZN ${expectedNumber}`);
+  });
 });
 
 describe("printCalendarInvites", () => {
@@ -86,6 +145,9 @@ describe("printCalendarInvites", () => {
 
     expect(html).toContain("dates=20240703T144000Z%2F20240704T140000Z");
     expect(html).toContain("DTEND%3A20240704T140000Z");
+    expect(html).toContain('aria-label="Add to Calendar"');
+    expect(html).toContain('aria-label="Add to Google Calendar"');
+    expect(html).toContain('alt="" aria-hidden="true"');
   });
 
   it("sets a 15:00 UTC end time for winter mints", () => {
@@ -106,6 +168,56 @@ describe("printCalendarInvites", () => {
 
     expect(html).toContain("dates=20231026T144000Z%2F20231027T140000Z");
     expect(html).toContain("DTEND%3A20231027T140000Z");
+  });
+
+  it("escapes generated calendar link attributes", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const mintNumber = getMintNumberForMintDate(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      mintNumber,
+      'red";background:url(test)',
+      22,
+      {
+        addToCalendar: `Add "ICS" calendar's event`,
+        addToGoogleCalendar: "Add <Google> calendar",
+      }
+    );
+
+    expect(html).toContain(
+      'aria-label="Add &quot;ICS&quot; calendar&#39;s event"'
+    );
+    expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
+    expect(html).toContain("color:red&quot;;background:url(test);");
+  });
+
+  it("accepts escaped accessible labels for calendar links", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const mintNumber = getMintNumberForMintDate(mintDay);
+    const html = printCalendarInvites(mintInstant, mintNumber, "#fff", 22, {
+      addToCalendar: 'Add "ICS" calendar',
+      addToGoogleCalendar: "Add <Google> calendar",
+    });
+
+    expect(html).toContain('aria-label="Add &quot;ICS&quot; calendar"');
+    expect(html).toContain('aria-label="Add &lt;Google&gt; calendar"');
+  });
+
+  it("formats calendar event titles with the active locale", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2026, 0, 2)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      1234,
+      "#fff",
+      22,
+      undefined,
+      "de-DE"
+    );
+
+    expect(decodeURIComponent(html)).toContain("SUMMARY:Meme #1.234 Minting");
   });
 });
 
@@ -254,5 +366,18 @@ describe("meme-calendar helpers", () => {
       new Date(Date.UTC(2023, 0, 2))
     );
     expect(yearRemaining).toBeGreaterThanOrEqual(earlySeason);
+  });
+
+  it("pads month grids for Monday-first weekday headers", () => {
+    expect(getMonthWeeks(2022, 5)[0]).toEqual([null, null, 1, 2, 3, 4, 5]);
+    expect(getMonthWeeks(2022, 4)[0]).toEqual([
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      1,
+    ]);
   });
 });

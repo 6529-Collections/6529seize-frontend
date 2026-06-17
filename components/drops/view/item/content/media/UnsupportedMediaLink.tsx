@@ -1,6 +1,8 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 import {
   ArrowTopRightOnSquareIcon,
   ExclamationTriangleIcon,
@@ -12,7 +14,12 @@ const CONFIRM_RESET_MS = 2500;
 
 function getSafeUrl(rawUrl: string): string | null {
   try {
-    const parsed = new URL(rawUrl);
+    const resolvedUrl =
+      normalizeDecentralizedMediaUrl(
+        rawUrl,
+        publicEnv.MEDIA_RESOLVER_ENDPOINT
+      ) ?? rawUrl;
+    const parsed = new URL(resolvedUrl);
     if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
       return parsed.toString();
     }

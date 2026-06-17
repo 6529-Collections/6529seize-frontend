@@ -87,27 +87,6 @@ describe("ExpandedWave", () => {
     );
   });
 
-  it("reserves the expand column for a non-expandable row in an expandable list", () => {
-    renderExpandedWave({
-      showPin: true,
-      reserveExpandControlSpace: true,
-    });
-
-    const row = screen.getByRole("link").parentElement;
-
-    expect(
-      screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
-    ).not.toBeInTheDocument();
-    expect(row).toHaveClass("tw-pl-2");
-    expect(row).toHaveClass("md:tw-pl-1");
-    expect(row).toHaveClass("tw-gap-x-2");
-    expect(row).toHaveClass("md:tw-gap-x-1");
-    expect(screen.getByRole("link").previousElementSibling).not.toBeNull();
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
-  });
-
   it("renders the subwave expand button before the pin without opening the wave", async () => {
     const user = userEvent.setup();
     const { onClick, onToggleExpand } = renderExpandedWave({

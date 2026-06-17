@@ -2,6 +2,8 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
+import { getMediaResolverHostname } from "../lib/media/decentralized-media";
+import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import path from "node:path";
 
 import { fileURLToPath } from "node:url";
@@ -29,7 +31,15 @@ export function sharedConfig(
       remotePatterns: [
         { protocol: "https", hostname: "6529.io" },
         { protocol: "https", hostname: "staging.6529.io" },
+        {
+          protocol: "https",
+          hostname: getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
+        },
         ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
+          protocol: "https" as const,
+          hostname,
+        })),
+        ...IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES.map((hostname) => ({
           protocol: "https" as const,
           hostname,
         })),
@@ -60,6 +70,7 @@ export function sharedConfig(
           headers: createSecurityHeaders(
             publicEnv["API_ENDPOINT"],
             publicEnv["IPFS_GATEWAY_ENDPOINT"],
+              publicEnv["MEDIA_RESOLVER_ENDPOINT"],
             {
               allowInsecureLocalhostConnectSrc:
                 publicEnv.NODE_ENV === "development" ||

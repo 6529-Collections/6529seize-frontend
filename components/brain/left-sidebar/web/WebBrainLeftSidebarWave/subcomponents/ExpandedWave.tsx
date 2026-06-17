@@ -5,6 +5,12 @@ import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
 import { SidebarWaveExpandControl } from "@/components/brain/left-sidebar/waves/SidebarWaveExpandControl";
 import { getSidebarWaveRowLayoutClasses } from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
+import {
+  hasWaveTrustSignals,
+  WaveTrustSignals,
+} from "@/components/waves/WaveTrustSignals";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { Tooltip } from "react-tooltip";
 import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
@@ -32,7 +38,6 @@ interface ExpandedWaveProps {
   readonly waveId: string;
   readonly depth?: 0 | 1 | undefined;
   readonly canExpand?: boolean | undefined;
-  readonly reserveExpandControlSpace?: boolean | undefined;
   readonly isExpanded?: boolean | undefined;
   readonly hasUnreadSubwaves?: boolean | undefined;
   readonly isLastSubwave?: boolean | undefined;
@@ -60,7 +65,6 @@ export const ExpandedWave = ({
   waveId,
   depth = 0,
   canExpand = false,
-  reserveExpandControlSpace = false,
   isExpanded = false,
   hasUnreadSubwaves = false,
   isLastSubwave = false,
@@ -82,8 +86,15 @@ export const ExpandedWave = ({
       : null;
   const isChildRow = depth === 1;
   const shouldShowExpandControl = canExpand && depth === 0;
-  const shouldReserveExpandControlSpace =
-    shouldShowExpandControl || (reserveExpandControlSpace && depth === 0);
+  const shouldReserveExpandControlSpace = shouldShowExpandControl;
+  const shouldShowPinButton = showPin && depth === 0;
+  const trustSignalsTooltipId = `sidebar-expanded-wave-trust-signals-${waveId}`;
+  const hasTrustSignals = hasWaveTrustSignals({
+    waveRep: wave.waveRep,
+    waveScore: wave.waveScore,
+  });
+  const shouldShowTrustSignalsRow =
+    hasTrustSignals || presentLatestDropTimestamp !== null;
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
@@ -188,26 +199,57 @@ export const ExpandedWave = ({
         <div className="tw-min-w-0 tw-flex-1">
           <div
             ref={nameRef}
-            className="-tw-mt-0.5 tw-mb-0.5 tw-truncate tw-text-sm"
+            className={`-tw-mt-1 tw-mb-1 tw-truncate tw-text-sm ${
+              shouldShowPinButton ? "tw-pr-7" : ""
+            }`}
             {...tooltipAttributes}
           >
             {formattedWaveName}
           </div>
-          {presentLatestDropTimestamp !== null && (
-            <div className="tw-text-xs tw-text-iron-500">
-              <span className="tw-pr-1">Last drop:</span>
-              <BrainLeftSidebarWaveDropTime time={presentLatestDropTimestamp} />
+          {shouldShowTrustSignalsRow && (
+            <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
+              {hasTrustSignals && (
+                <WaveTrustSignals
+                  waveRep={wave.waveRep}
+                  waveScore={wave.waveScore}
+                  variant="sidebar-inline"
+                  className="tw-shrink-0"
+                  tooltipId={trustSignalsTooltipId}
+                />
+              )}
+              {presentLatestDropTimestamp !== null && (
+                <span className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center tw-whitespace-nowrap">
+                  <BrainLeftSidebarWaveDropTime
+                    time={presentLatestDropTimestamp}
+                  />
+                </span>
+              )}
             </div>
           )}
         </div>
       </Link>
-      {showPin && depth === 0 && (
-        <BrainLeftSidebarWavePin waveId={waveId} isPinned={isPinned} />
+      {shouldShowPinButton && (
+        <BrainLeftSidebarWavePin
+          waveId={waveId}
+          isPinned={isPinned}
+          compact
+          className="tw-absolute tw-right-3 tw-top-2 tw-z-10"
+        />
       )}
       {showExpandedTooltip && (
         <WaveTooltip id={tooltipId} place={tooltipPlacement}>
           {tooltipContent}
         </WaveTooltip>
+      )}
+      {hasTrustSignals && (
+        <Tooltip
+          id={trustSignalsTooltipId}
+          place="top"
+          offset={8}
+          opacity={1}
+          positionStrategy="fixed"
+          style={TOOLTIP_STYLES}
+        />
       )}
     </div>
   );
