@@ -197,9 +197,18 @@ describe("NFTVideoRenderer", () => {
       const video = container.querySelector("video");
       expect(video).toHaveAttribute("autoplay");
       expect(video).toHaveProperty("muted", true);
-      expect(video).toHaveAttribute("controls");
+      expect(video).not.toHaveAttribute("controls");
       expect(video).toHaveAttribute("loop");
       expect(video).toHaveAttribute("playsinline");
+      expect(
+        screen.getAllByRole("button", { name: "Pause video" }).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByRole("button", { name: "Unmute video" }).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getByRole("button", { name: "Full screen" })
+      ).toBeInTheDocument();
     });
 
     it("uses custom id when provided", () => {
@@ -520,8 +529,14 @@ describe("NFTVideoRenderer", () => {
       const video = container.querySelector("video");
       expect(video).toBeInTheDocument();
       expect(video).toHaveProperty("muted", true); // Important for autoplay
-      expect(video).toHaveAttribute("controls"); // Accessibility
+      expect(video).not.toHaveAttribute("controls");
       expect(video).toHaveAttribute("playsinline"); // Mobile compatibility
+      expect(
+        screen.getAllByRole("button", { name: "Pause video" }).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByRole("button", { name: "Unmute video" }).length
+      ).toBeGreaterThan(0);
     });
 
     it("handles missing NFT name gracefully in video context", () => {
@@ -710,9 +725,13 @@ describe("NFTVideoRenderer", () => {
   describe("Error Resistance and Edge Cases", () => {
     it("handles completely empty NFT animation properties gracefully", () => {
       const nft = createMockNFT({
-        ...(undefined !== undefined ? { animation: undefined } : {}),
+        animation: undefined as any,
         compressed_animation: undefined,
-        ...(undefined !== undefined ? { metadata: undefined } : {}),
+        metadata: {
+          ...createMockNFT().metadata,
+          animation: undefined,
+          animation_url: undefined,
+        },
       });
       const props = createDefaultProps({ nft });
 

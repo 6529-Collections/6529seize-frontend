@@ -10,13 +10,16 @@ diagnostics.
 - Bare `/delegation` is not a valid page route.
 - Use this area for section routing, write actions, collection routes, manager
   actions, lock controls, and Wallet Checker checks.
-- Unknown or multi-segment delegation paths use HTML fallback by final segment.
+- Unknown or multi-segment delegation paths use manifest-backed HTML fallback by
+  final segment.
 
 ## Quick Start
 
-1. Need feature behavior by route family: start in **Features**.
-2. Need end-to-end execution (center to write to verify): open **Flows**.
-3. Need failure recovery: open **Troubleshooting**.
+1. Need source-of-truth decisions, content ownership, or agent work status:
+   open [Delegation Source Of Truth Spec](source-of-truth-spec.md).
+2. Need feature behavior by route family: start in **Features**.
+3. Need end-to-end execution (center to write to verify): open **Flows**.
+4. Need failure recovery: open **Troubleshooting**.
 
 ## Start by Goal
 
@@ -30,6 +33,12 @@ diagnostics.
   [Delegation Collection Management](feature-delegation-collection-management.md)
 - Run read-only wallet diagnostics and consolidation checks:
   [Wallet Checker](feature-wallet-checker.md)
+- Understand the repo-reviewed docs bundle, IPFS publishing target, and
+  S3/CloudFront acceleration boundary:
+  [Delegation Docs Content Delivery Pilot](content-delivery-ipfs-pilot.md)
+- Confirm the accepted model for terminology, content ownership, delivery
+  precedence, and future article rewrite work:
+  [Delegation Source Of Truth Spec](source-of-truth-spec.md)
 - Run one continuous journey from center to onchain result verification:
   [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
 - Recover from not-found/fallback issues, blocked manager actions, validation
@@ -47,7 +56,8 @@ diagnostics.
 - Collection routes: `/delegation/any-collection`, `/delegation/the-memes`,
   `/delegation/meme-lab`, `/delegation/6529-gradient`
 - Bare route: `/delegation` resolves to not-found (no page route).
-- Unknown or multi-segment delegation paths use HTML fallback by final segment.
+- Unknown or multi-segment delegation paths use manifest-backed HTML fallback by
+  final segment.
 
 ## Read In This Order
 
@@ -55,8 +65,10 @@ diagnostics.
 2. [Delegation Write Action Routes](feature-delegation-action-flows.md)
 3. [Delegation Collection Management](feature-delegation-collection-management.md)
 4. [Wallet Checker](feature-wallet-checker.md)
-5. [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
-6. [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
+5. [Delegation Docs Content Delivery Pilot](content-delivery-ipfs-pilot.md)
+6. [Delegation Source Of Truth Spec](source-of-truth-spec.md)
+7. [Delegation Center to Onchain Actions](flow-delegation-center-to-onchain-actions.md)
+8. [Delegation Routes and Actions Troubleshooting](troubleshooting-delegation-routes-and-actions.md)
 
 ## Features
 
@@ -72,6 +84,11 @@ diagnostics.
 ### Diagnostics
 
 - [Wallet Checker](feature-wallet-checker.md): read-only wallet diagnostics, deep-link behavior, and consolidation checks.
+
+### Content Delivery
+
+- [Delegation Source Of Truth Spec](source-of-truth-spec.md): governing definitions, content ownership, delivery precedence, and agent workplan.
+- [Delegation Docs Content Delivery Pilot](content-delivery-ipfs-pilot.md): repo-reviewed article source, IPFS publishing target, hash-verified loading, and S3/CloudFront acceleration rules.
 
 ## Flows
 

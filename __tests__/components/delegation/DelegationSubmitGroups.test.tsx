@@ -2,21 +2,34 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
 import { DelegationSubmitGroups } from "@/components/delegation/DelegationFormParts";
 
-import { useWriteContract } from "wagmi";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 jest.mock("wagmi", () => ({
   useWriteContract: jest.fn(),
-  useWaitForTransactionReceipt: jest.fn().mockReturnValue({
-    isLoading: false,
-  }),
+  useWaitForTransactionReceipt: jest.fn(),
 }));
 
 const mockWriteContract = jest.fn();
-(useWriteContract as jest.Mock).mockReturnValue({
-  writeContract: mockWriteContract,
-});
+const mockUseWriteContract = useWriteContract as jest.Mock;
+const mockUseWaitForTransactionReceipt =
+  useWaitForTransactionReceipt as jest.Mock;
 
 describe("DelegationSubmitGroups", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseWriteContract.mockReturnValue({
+      writeContract: mockWriteContract,
+      data: undefined,
+      error: undefined,
+    });
+    mockUseWaitForTransactionReceipt.mockReturnValue({
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      error: undefined,
+    });
+  });
+
   it("displays errors when validation fails", () => {
     Object.defineProperty(global, "scrollBy", {
       value: jest.fn(),
@@ -59,5 +72,43 @@ describe("DelegationSubmitGroups", () => {
       title: "T",
       message: "Confirm in your wallet...",
     });
+  });
+
+  it("shows receipt errors instead of success toast", () => {
+    const onSetToast = jest.fn();
+    mockUseWriteContract.mockReturnValue({
+      writeContract: mockWriteContract,
+      data: "0xabc",
+      error: undefined,
+    });
+    mockUseWaitForTransactionReceipt.mockReturnValue({
+      isLoading: false,
+      isSuccess: false,
+      isError: true,
+      error: new Error("receipt failed Request Arguments"),
+    });
+
+    render(
+      <DelegationSubmitGroups
+        title="Register Delegation"
+        writeParams={{ foo: "bar" }}
+        showCancel={false}
+        gasError={undefined}
+        validate={() => []}
+        onHide={jest.fn()}
+        onSetToast={onSetToast}
+      />
+    );
+
+    expect(onSetToast).toHaveBeenCalledWith({
+      title: "Register Delegation Failed",
+      message: "receipt failed",
+    });
+    expect(onSetToast).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Register Delegation",
+        message: expect.any(Object),
+      })
+    );
   });
 });

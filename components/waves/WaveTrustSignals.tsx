@@ -5,7 +5,8 @@ import {
   ScaleIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
+import Link from "next/link";
+import { useId, type ReactNode } from "react";
 
 type WaveTrustSignalsVariant =
   | "card"
@@ -21,6 +22,7 @@ interface WaveTrustSignalsProps {
   readonly mode?: WaveTrustSignalsMode | undefined;
   readonly className?: string | undefined;
   readonly tooltipId?: string | undefined;
+  readonly learnMoreHref?: string | undefined;
 }
 
 const compactNumberFormatter = new Intl.NumberFormat(undefined, {
@@ -28,6 +30,7 @@ const compactNumberFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 1,
 });
 const fullNumberFormatter = new Intl.NumberFormat();
+const WAVE_SCORE_FORMULA_HINT = "Open Network > Wave Score for the formula";
 
 const formatScore = (value: number | null | undefined): string | null => {
   if (value === null || value === undefined || !Number.isFinite(value)) {
@@ -92,20 +95,75 @@ const isInlineHeaderVariant = (variant: WaveTrustSignalsVariant): boolean =>
 const isInlineVariant = (variant: WaveTrustSignalsVariant): boolean =>
   isInlineSidebarVariant(variant) || isInlineHeaderVariant(variant);
 
+const isSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
+  variant === "sidebar" || isInlineSidebarVariant(variant);
+
 const INLINE_STAT_TONE_CLASSES =
   "tw-text-[#e2e8f0]/[0.85] desktop-hover:hover:tw-text-[#e2e8f0]/[0.95]";
 
-const getVisibilityToneClasses = (variant: WaveTrustSignalsVariant): string => {
-  if (isInlineSidebarVariant(variant)) {
-    return INLINE_STAT_TONE_CLASSES;
-  }
+type VisibilityTone = "excellent" | "healthy" | "low" | "default";
+type VisibilityToneContext = "inline-sidebar" | "inline-header" | "default";
 
-  if (isInlineHeaderVariant(variant)) {
-    return "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]";
-  }
-
-  return "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25";
+const VISIBILITY_TONE_CLASSES: Record<
+  VisibilityToneContext,
+  Record<VisibilityTone, string>
+> = {
+  "inline-sidebar": {
+    excellent: "tw-text-emerald-300 desktop-hover:hover:tw-text-emerald-200",
+    healthy: "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200",
+    low: "tw-text-rose-300 desktop-hover:hover:tw-text-rose-200",
+    default: INLINE_STAT_TONE_CLASSES,
+  },
+  "inline-header": {
+    excellent: "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300",
+    healthy: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+    low: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
+    default: "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]",
+  },
+  default: {
+    excellent:
+      "tw-bg-emerald-500/10 tw-text-emerald-200 tw-ring-emerald-400/25",
+    healthy: "tw-bg-amber-500/10 tw-text-amber-200 tw-ring-amber-400/25",
+    low: "tw-bg-rose-500/10 tw-text-rose-200 tw-ring-rose-400/25",
+    default: "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25",
+  },
 };
+
+const getVisibilityTone = (
+  value: number | null | undefined
+): VisibilityTone => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "default";
+  }
+
+  if (value >= 85) {
+    return "excellent";
+  }
+
+  if (value >= 65) {
+    return "healthy";
+  }
+
+  return value < 35 ? "low" : "default";
+};
+
+const getVisibilityToneContext = (
+  variant: WaveTrustSignalsVariant
+): VisibilityToneContext => {
+  if (isInlineSidebarVariant(variant)) {
+    return "inline-sidebar";
+  }
+
+  return isInlineHeaderVariant(variant) ? "inline-header" : "default";
+};
+
+const getVisibilityToneClasses = (
+  variant: WaveTrustSignalsVariant,
+  value: number | null | undefined
+): string =>
+  VISIBILITY_TONE_CLASSES[getVisibilityToneContext(variant)][
+    getVisibilityTone(value)
+  ];
 
 const getHotnessToneClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
@@ -190,7 +248,7 @@ const getChipClasses = (
     sizeClasses = "";
   } else if (isInlineHeaderVariant(variant)) {
     variantClasses =
-      "tw-cursor-default tw-gap-1 tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
+      "tw-cursor-help tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none";
     sizeClasses = "";
   } else if (variant === "sidebar") {
     sizeClasses = "tw-h-5 tw-px-1.5 tw-text-[10px]";
@@ -243,14 +301,14 @@ const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
 
 const getValueClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
-    return "";
+    return "tw-tabular-nums";
   }
 
   if (isInlineHeaderVariant(variant)) {
-    return "tw-text-[11px] tw-font-semibold";
+    return "tw-text-[11px] tw-font-semibold tw-tabular-nums";
   }
 
-  return "";
+  return "tw-tabular-nums";
 };
 
 const getSeparatorClasses = (variant: WaveTrustSignalsVariant): string => {
@@ -307,6 +365,28 @@ export const hasWaveTrustSummaryScore = (
   waveScore?: ApiWaveScore | null | undefined
 ): boolean => formatScore(waveScore?.visibility_score) !== null;
 
+const buildSummaryRepDetail = ({
+  rawRep,
+  repSortScore,
+}: {
+  readonly rawRep: string | null;
+  readonly repSortScore: string | null;
+}): string | null => {
+  if (rawRep !== null && repSortScore !== null) {
+    return `REP: ${rawRep} raw, ${repSortScore} score`;
+  }
+
+  if (rawRep !== null) {
+    return `REP: ${rawRep} raw`;
+  }
+
+  if (repSortScore !== null) {
+    return `REP score: ${repSortScore}`;
+  }
+
+  return null;
+};
+
 const buildSummaryDetails = ({
   visibilityScore,
   qualityScore,
@@ -319,28 +399,92 @@ const buildSummaryDetails = ({
   readonly hotnessScore: string | null;
   readonly repSortScore: string | null;
   readonly waveRep: ApiWaveRepSummary | null | undefined;
-}) => {
-  const details = [`Combined score: ${visibilityScore}`];
-
-  if (qualityScore !== null) {
-    details.push(`Quality: ${qualityScore}`);
-  }
-
-  if (hotnessScore !== null) {
-    details.push(`Hotness: ${hotnessScore}`);
-  }
-
+}): string[] => {
   const rawRep = formatSignedFullNumber(waveRep?.total_rep);
-  if (rawRep !== null && repSortScore !== null) {
-    details.push(`REP: ${rawRep} raw, ${repSortScore} score`);
-  } else if (rawRep !== null) {
-    details.push(`REP: ${rawRep} raw`);
-  } else if (repSortScore !== null) {
-    details.push(`REP score: ${repSortScore}`);
-  }
+  const repDetail = buildSummaryRepDetail({ rawRep, repSortScore });
 
-  return details;
+  return [
+    `Combined score: ${visibilityScore}`,
+    "A quick signal for which waves deserve broad attention",
+    ...(qualityScore === null
+      ? []
+      : [`Quality: ${qualityScore} (65% of visibility)`]),
+    ...(hotnessScore === null
+      ? []
+      : [`Hotness: ${hotnessScore} (gated, 35% of visibility)`]),
+    ...(repDetail === null ? [] : [repDetail]),
+    WAVE_SCORE_FORMULA_HINT,
+  ];
 };
+
+const buildHotnessDetails = ({
+  hotnessScore,
+  qualityScore,
+}: {
+  readonly hotnessScore: string;
+  readonly qualityScore: string | null;
+}): string[] => {
+  return [
+    `Hotness score: ${hotnessScore}`,
+    ...(qualityScore === null
+      ? []
+      : [`Quality input: ${qualityScore} (35% of hotness)`]),
+    "Recent trusted activity carries the other 65%",
+    "Hotness is gated by quality before visibility",
+    WAVE_SCORE_FORMULA_HINT,
+  ];
+};
+
+const buildRepDetails = ({
+  repSortScore,
+  waveRep,
+}: {
+  readonly repSortScore: string | null;
+  readonly waveRep: ApiWaveRepSummary | null | undefined;
+}): string[] => {
+  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
+
+  return [
+    ...(rawRep === null ? [] : [`Wave REP: ${rawRep} raw`]),
+    ...(repSortScore === null ? [] : [`REP score: ${repSortScore}`]),
+    "REP contributes 35% of quality",
+    WAVE_SCORE_FORMULA_HINT,
+  ];
+};
+
+function WaveScoreSummaryTooltip({
+  details,
+  id,
+}: {
+  readonly details: readonly string[];
+  readonly id: string;
+}) {
+  const [primaryDetail, ...secondaryDetails] = details;
+
+  return (
+    <span
+      id={id}
+      role="tooltip"
+      className="tw-pointer-events-none tw-absolute tw-left-0 tw-top-full tw-z-[10000] tw-mt-2 tw-hidden tw-w-72 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-shadow-2xl tw-ring-1 tw-ring-white/10 group-hover:tw-block group-focus-within:tw-block"
+    >
+      {primaryDetail && (
+        <span className="tw-block tw-text-sm tw-font-semibold tw-text-white">
+          {primaryDetail}
+        </span>
+      )}
+      <span className="tw-mt-2 tw-block tw-space-y-1.5">
+        {secondaryDetails.map((detail) => (
+          <span key={detail} className="tw-block tw-text-iron-300">
+            {detail}
+          </span>
+        ))}
+      </span>
+      <span className="tw-mt-3 tw-block tw-text-xs tw-font-semibold tw-text-primary-300">
+        Click score to open the full formula
+      </span>
+    </span>
+  );
+}
 
 const renderContainer = ({
   children,
@@ -365,7 +509,9 @@ export function WaveTrustSignals({
   mode = "details",
   className,
   tooltipId,
+  learnMoreHref,
 }: WaveTrustSignalsProps) {
+  const generatedTooltipId = useId();
   const visibilityScore = formatScore(waveScore?.visibility_score);
   const qualityScore = formatScore(waveScore?.quality_score);
   const hotnessScore = formatScore(waveScore?.hotness_score);
@@ -390,6 +536,8 @@ export function WaveTrustSignals({
   const inlineSidebarTooltipId = isInlineSidebarVariant(variant)
     ? tooltipId
     : undefined;
+  const shouldUseInlineSidebarTooltip =
+    inlineSidebarTooltipId !== undefined && mode !== "summary";
   const hasVisibilityScore = visibilityScore !== null;
   const hasHotnessScore = hotnessScore !== null;
   const hasRepScore = repScore !== null;
@@ -418,35 +566,92 @@ export function WaveTrustSignals({
       repSortScore,
       waveRep,
     });
+    const richTooltipId = `${generatedTooltipId}-wave-score-tooltip`;
+    const hasRichTooltip = learnMoreHref !== undefined;
+    const hasNativeTitle = !hasRichTooltip && !isSidebarVariant(variant);
     const summaryLabel = summaryDetails.join(". ");
-    const summaryTitle = summaryDetails.join("\n");
+    const summaryTitle = hasNativeTitle ? summaryDetails.join("\n") : undefined;
     const summaryTooltip = summaryDetails.join(" | ");
+    const summaryChipClasses = `${getChipClasses(
+      variant,
+      mode,
+      getVisibilityToneClasses(variant, waveScore?.visibility_score)
+    )} ${
+      hasRichTooltip
+        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline desktop-hover:hover:tw-z-[10000] focus:tw-z-[10000] focus-visible:tw-z-[10000]"
+        : ""
+    }`;
+    const summaryChipContent = (
+      <>
+        <ShieldCheckIcon
+          className={getIconClasses(variant)}
+          strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
+          aria-hidden="true"
+        />
+        <span className={getChipLabelClasses(variant)}>Score</span>
+        <span className={getValueClasses(variant)}>{visibilityScore}</span>
+        {hasRichTooltip && (
+          <WaveScoreSummaryTooltip id={richTooltipId} details={summaryDetails} />
+        )}
+      </>
+    );
+    const inlineSidebarTooltipAttributes = shouldUseInlineSidebarTooltip
+      ? getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)
+      : {};
 
     return renderContainer({
       variant,
       className: containerClasses,
       children: (
-        <span
-          className={getChipClasses(
-            variant,
-            mode,
-            getVisibilityToneClasses(variant)
+        <>
+          {hasRichTooltip ? (
+            <Link
+              href={learnMoreHref}
+              className={summaryChipClasses}
+              aria-label={summaryLabel}
+              aria-describedby={richTooltipId}
+            >
+              {summaryChipContent}
+            </Link>
+          ) : (
+            <span
+              className={summaryChipClasses}
+              aria-label={summaryLabel}
+              title={summaryTitle}
+              {...inlineSidebarTooltipAttributes}
+            >
+              {summaryChipContent}
+            </span>
           )}
-          aria-label={summaryLabel}
-          title={summaryTitle}
-          {...getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)}
-        >
-          <ShieldCheckIcon
-            className={getIconClasses(variant)}
-            strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
-            aria-hidden="true"
-          />
-          <span className={getChipLabelClasses(variant)}>Score</span>
-          <span className={getValueClasses(variant)}>{visibilityScore}</span>
-        </span>
+        </>
       ),
     });
   }
+
+  const visibilityDetails =
+    visibilityScore === null
+      ? []
+      : buildSummaryDetails({
+          visibilityScore,
+          qualityScore,
+          hotnessScore,
+          repSortScore,
+          waveRep,
+        });
+  const visibilityTitle = visibilityDetails.join("\n");
+  const visibilityTooltip = visibilityDetails.join(" | ");
+  const hotnessDetails =
+    hotnessScore === null
+      ? []
+      : buildHotnessDetails({ hotnessScore, qualityScore });
+  const hotnessTitle = hotnessDetails.join("\n");
+  const hotnessTooltip = hotnessDetails.join(" | ");
+  const repDetails =
+    hasRepScore || repSortScore !== null
+      ? buildRepDetails({ repSortScore, waveRep })
+      : [];
+  const repTitle = repDetails.join("\n");
+  const repTooltip = repDetails.join(" | ");
 
   const signals = (
     <>
@@ -455,10 +660,14 @@ export function WaveTrustSignals({
           className={getChipClasses(
             variant,
             mode,
-            getVisibilityToneClasses(variant)
+            getVisibilityToneClasses(variant, waveScore?.visibility_score)
           )}
           aria-label={`Visibility score ${visibilityScore} out of 100`}
-          {...getTooltipAttributes(inlineSidebarTooltipId, "Score")}
+          title={visibilityTitle}
+          {...getTooltipAttributes(
+            shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,
+            visibilityTooltip
+          )}
         >
           <ShieldCheckIcon
             className={getIconClasses(variant)}
@@ -484,7 +693,11 @@ export function WaveTrustSignals({
             getHotnessToneClasses(variant)
           )}
           aria-label={`Hotness score ${hotnessScore} out of 100`}
-          {...getTooltipAttributes(inlineSidebarTooltipId, "Hot")}
+          title={hotnessTitle}
+          {...getTooltipAttributes(
+            shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,
+            hotnessTooltip
+          )}
         >
           <FireIcon
             className={getIconClasses(variant)}
@@ -510,7 +723,11 @@ export function WaveTrustSignals({
             getRepToneClasses(repToneValue, variant)
           )}
           aria-label={repLabel ?? undefined}
-          {...getTooltipAttributes(inlineSidebarTooltipId, "REP")}
+          title={repTitle}
+          {...getTooltipAttributes(
+            shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,
+            repTooltip
+          )}
         >
           <ScaleIcon
             className={getIconClasses(variant)}
