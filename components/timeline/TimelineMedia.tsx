@@ -23,6 +23,7 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
   if (props.type === MediaType.VIDEO) {
     return (
       <SeizeVideoPlayer
+        template="ambient-media"
         className={styles["timelineMediaImage"]}
         src={props.url}
         autoPlay

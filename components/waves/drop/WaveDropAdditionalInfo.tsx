@@ -165,6 +165,7 @@ export const WaveDropAdditionalInfo = ({
             <div className="tw-flex tw-w-full tw-max-w-2xl tw-justify-center">
               <SeizeVideoPlayer
                 src={promoVideo}
+                template="watch-media"
                 preload="metadata"
                 layout="prominent"
                 align="center"
@@ -192,6 +193,7 @@ export const WaveDropAdditionalInfo = ({
                 {item.isVideo ? (
                   <SeizeVideoPlayer
                     src={item.url}
+                    template="watch-media"
                     preload="metadata"
                     layout="fill"
                   />

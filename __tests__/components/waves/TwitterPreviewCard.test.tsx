@@ -22,9 +22,7 @@ describe("TwitterPreviewCard", () => {
     jest
       .spyOn(HTMLMediaElement.prototype, "load")
       .mockImplementation(() => undefined);
-    jest
-      .spyOn(HTMLMediaElement.prototype, "play")
-      .mockResolvedValue(undefined);
+    jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
     jest
       .spyOn(HTMLMediaElement.prototype, "pause")
       .mockImplementation(() => undefined);
@@ -116,6 +114,7 @@ describe("TwitterPreviewCard", () => {
       mediaImageUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
       mediaVideoUrl: "https://video.twimg.com/tweet_video/1080x1350.mp4",
       mediaVideoHlsUrl: "https://video.twimg.com/tweet_video/playlist.m3u8",
+      mediaCaptionsUrl: "https://video.twimg.com/tweet_video/captions.vtt",
       mediaPosterUrl: "https://pbs.twimg.com/tweet_video_thumb/example.jpg",
       mediaVideoVariants: [
         {
@@ -162,12 +161,20 @@ describe("TwitterPreviewCard", () => {
       "poster",
       "https://pbs.twimg.com/tweet_video_thumb/example.jpg"
     );
-    expect(video).not.toHaveAttribute("controls");
-    expect(screen.getByRole("button", { name: "Full screen" })).toBeInTheDocument();
+    expect(video).toHaveAttribute("controls");
+    expect(video).not.toHaveAttribute("autoplay");
+    expect(
+      screen.queryByRole("button", { name: "Full screen" })
+    ).not.toBeInTheDocument();
     expect(container.querySelector("track")).toHaveAttribute(
       "kind",
       "captions"
     );
+    expect(container.querySelector("track")).toHaveAttribute(
+      "label",
+      "Captions"
+    );
+    expect(container.querySelector("track")).toHaveAttribute("default");
 
     expect(screen.queryByText("1080p")).not.toBeInTheDocument();
     await userEvent.click(
@@ -202,7 +209,10 @@ describe("TwitterPreviewCard", () => {
     expect(
       screen.getByRole("dialog", { name: "Video quality" })
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("group", { name: "Video player" }));
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    await userEvent.click(video);
     expect(
       screen.queryByRole("dialog", { name: "Video quality" })
     ).not.toBeInTheDocument();
@@ -322,6 +332,7 @@ describe("TwitterPreviewCard", () => {
   });
 
   it("renders multiple media items in a gallery grid", async () => {
+    const playMock = jest.mocked(HTMLMediaElement.prototype.play);
     mockedFetchTwitterPreview.mockResolvedValue({
       tweetId: "2058813617554723314",
       url: "https://x.com/Casa_NUA/status/2058813617554723314",
@@ -369,10 +380,15 @@ describe("TwitterPreviewCard", () => {
       2
     );
     await userEvent.click(screen.getByRole("button", { name: "Tweet video" }));
-    expect(container.querySelector("video")).toHaveAttribute(
+    const video = container.querySelector("video");
+    expect(video).toHaveAttribute(
       "src",
       "https://video.twimg.com/ext_tw_video/video-one.mp4"
     );
+    expect(video).toHaveAttribute("controls");
+    expect(video).toHaveAttribute("autoplay");
+    expect(video).toHaveProperty("muted", true);
+    expect(playMock).toHaveBeenCalled();
     expect(
       screen.queryByRole("button", { name: "Video quality" })
     ).not.toBeInTheDocument();
