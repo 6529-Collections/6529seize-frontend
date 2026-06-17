@@ -72,8 +72,20 @@ function canonicalizeObject(value: object, seen: CanonicalJsonSeen): string {
   seen.add(value);
   const record = value as Record<string, unknown>;
   const canonicalProperties = Object.keys(record)
-    .sort()
+    .sort(compareUtf16CodeUnits)
     .map((key) => `${JSON.stringify(key)}:${canonicalize(record[key], seen)}`);
   seen.delete(value);
   return `{${canonicalProperties.join(",")}}`;
+}
+
+function compareUtf16CodeUnits(left: string, right: string): number {
+  if (left < right) {
+    return -1;
+  }
+
+  if (left > right) {
+    return 1;
+  }
+
+  return 0;
 }

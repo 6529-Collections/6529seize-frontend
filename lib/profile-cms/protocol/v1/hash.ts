@@ -42,21 +42,21 @@ export function withComputedCmsHashes(
 }
 
 export function toPackageHashInput(cmsPackage: CmsPackageV1): unknown {
-  const {
-    integrity,
-    signatures: packageSignatures,
-    storage: packageStorage,
-    ...packageWithoutMutableEnvelopes
-  } = cmsPackage;
-  const { package_hash: packageHash, ...integrityWithoutPackageHash } =
-    integrity;
-  void packageHash;
-  void packageSignatures;
-  void packageStorage;
-
   return {
-    ...packageWithoutMutableEnvelopes,
-    integrity: integrityWithoutPackageHash,
+    schema: cmsPackage.schema,
+    package_id: cmsPackage.package_id,
+    profile: cmsPackage.profile,
+    site: cmsPackage.site,
+    payload: cmsPackage.payload,
+    integrity: {
+      canonicalization: cmsPackage.integrity.canonicalization,
+      hash_algorithm: cmsPackage.integrity.hash_algorithm,
+      payload_hash: cmsPackage.integrity.payload_hash,
+      ...(cmsPackage.integrity.note !== undefined
+        ? { note: cmsPackage.integrity.note }
+        : {}),
+    },
+    provenance: cmsPackage.provenance,
   };
 }
 

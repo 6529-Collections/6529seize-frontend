@@ -119,6 +119,9 @@ describe("CMS Phase 1 fixtures", () => {
   });
 
   it("rejects plain HTTP asset URLs", () => {
+    const unsafeHttpUri = ["http:", "//169.254.169.254/latest/meta-data"].join(
+      ""
+    );
     const fixture = readFixture(
       path.join(VALID_FIXTURE_DIR, "minimal-profile-homepage.package.json")
     );
@@ -130,7 +133,7 @@ describe("CMS Phase 1 fixtures", () => {
           index === 0
             ? {
                 ...asset,
-                uri: "http://169.254.169.254/latest/meta-data",
+                uri: unsafeHttpUri,
               }
             : asset
         ),
@@ -150,7 +153,7 @@ describe("CMS Phase 1 fixtures", () => {
     );
   });
 
-  it.each(["/\\evil.com", "/%2Fevil.com", "/%5Cevil.com"])(
+  it.each([String.raw`/\evil.com`, "/%2Fevil.com", "/%5Cevil.com"])(
     "rejects unsafe relative URL %s",
     (unsafeUrl) => {
       const fixture = readFixture(

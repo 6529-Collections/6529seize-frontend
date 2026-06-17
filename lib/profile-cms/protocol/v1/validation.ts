@@ -254,13 +254,7 @@ function validateRoutes(
         });
       }
     } else {
-      if (!route.target) {
-        addIssue(issues, {
-          code: "route.target.required",
-          message: `${route.kind} routes must include target.`,
-          path: `/payload/routes/${index}/target`,
-        });
-      } else {
+      if (route.target) {
         validateRouteTarget(
           route.target,
           route.kind,
@@ -269,6 +263,12 @@ function validateRoutes(
           `/payload/routes/${index}/target`,
           issues
         );
+      } else {
+        addIssue(issues, {
+          code: "route.target.required",
+          message: `${route.kind} routes must include target.`,
+          path: `/payload/routes/${index}/target`,
+        });
       }
 
       if (route.page_id) {
@@ -1353,7 +1353,7 @@ function toJsonPointer(path: ZodIssue["path"]): string {
 }
 
 function escapePointerSegment(segment: string): string {
-  return segment.replace(/~/g, "~0").replace(/\//g, "~1");
+  return segment.replaceAll("~", "~0").replaceAll("/", "~1");
 }
 
 function getTarget(input: unknown): CmsValidationResultV1["target"] | undefined {

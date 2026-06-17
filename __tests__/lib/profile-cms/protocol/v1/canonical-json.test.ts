@@ -13,7 +13,7 @@ describe("CMS canonical JSON", () => {
 
   it("sorts astral-plane keys by UTF-16 code units", () => {
     const astralKey = String.fromCodePoint(0x1f4a9);
-    const privateUseKey = String.fromCharCode(0xe000);
+    const privateUseKey = String.fromCodePoint(0xe000);
 
     expect(canonicalizeJson({ [privateUseKey]: "bmp", [astralKey]: "astral" }))
       .toBe(
@@ -24,8 +24,10 @@ describe("CMS canonical JSON", () => {
   });
 
   it("serializes numeric edge cases with ECMAScript JSON number rules", () => {
+    const roundedFixtureNumber = Number("333333333.33333329");
+
     expect(
-      canonicalizeJson([-0, 5e21, 1e-7, 333333333.33333329, 9007199254740991])
+      canonicalizeJson([-0, 5e21, 1e-7, roundedFixtureNumber, 9007199254740991])
     ).toBe("[0,5e+21,1e-7,333333333.3333333,9007199254740991]");
   });
 
