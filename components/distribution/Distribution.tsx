@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import { mainnet } from "viem/chains";
 import Address from "@/components/address/Address";
@@ -25,8 +25,10 @@ import {
   areEqualAddresses,
   capitalizeEveryWord,
   isValidPositiveInteger,
-  numberWithCommas,
 } from "@/helpers/Helpers";
+import { compareLocalized, formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import styles from "./Distribution.module.scss";
 
@@ -34,11 +36,13 @@ interface Props {
   header: string;
   contract: string;
   link: string;
+  locale?: SupportedLocale;
 }
 
 export default function DistributionPage(props: Readonly<Props>) {
   const params = useParams();
   const { setTitle } = useTitle();
+  const locale = props.locale ?? DEFAULT_LOCALE;
   const [pageProps, setPageProps] = useState<{
     page: number;
     pageSize: number;
@@ -48,7 +52,6 @@ export default function DistributionPage(props: Readonly<Props>) {
   const [isValidNftId, setIsValidNftId] = useState(false);
 
   const [distributions, setDistributions] = useState<Distribution[]>([]);
-  const [distributionsPhases, setDistributionsPhases] = useState<string[]>([]);
   const [distributionPhotos, setDistributionPhotos] = useState<
     DistributionPhoto[]
   >([]);
@@ -60,17 +63,17 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   const [fetching, setFetching] = useState(true);
 
-  function updateDistributionPhases(mydistributions: Distribution[]) {
+  const distributionsPhases = useMemo(() => {
     const phasesSet = new Set<string>();
-    mydistributions.forEach((d) => {
+    distributions.forEach((d) => {
       d.phases.forEach((p) => {
         phasesSet.add(p);
       });
     });
     const phases = Array.from(phasesSet);
-    phases.sort((a, b) => a.localeCompare(b));
-    setDistributionsPhases(phases);
-  }
+    phases.sort((a, b) => compareLocalized(locale, a, b));
+    return phases;
+  }, [distributions, locale]);
 
   async function fetchDistribution() {
     setFetching(true);
@@ -82,7 +85,6 @@ export default function DistributionPage(props: Readonly<Props>) {
       setTotalResults(r.count);
       const mydistributions: Distribution[] = r.data;
       setDistributions(mydistributions);
-      updateDistributionPhases(mydistributions);
     } catch (error) {
       console.error(
         `Failed to fetch distribution data for NFT ${nftId} on contract ${props.contract}`,
@@ -90,7 +92,6 @@ export default function DistributionPage(props: Readonly<Props>) {
       );
       setTotalResults(0);
       setDistributions([]);
-      setDistributionsPhases([]);
     } finally {
       setFetching(false);
     }
@@ -105,9 +106,14 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   useEffect(() => {
     if (isValidNftId && nftId) {
-      setTitle(`${props.header} #${nftId} | DISTRIBUTION`);
+      setTitle(
+        t(locale, "distribution.documentTitle", {
+          collection: props.header,
+          tokenId: formatInteger(locale, Number.parseInt(nftId, 10)),
+        })
+      );
     }
-  }, [isValidNftId, nftId, props.header, setTitle]);
+  }, [isValidNftId, locale, nftId, props.header, setTitle]);
 
   useEffect(() => {
     if (nftId) {
@@ -166,7 +172,14 @@ export default function DistributionPage(props: Readonly<Props>) {
                     width={0}
                     height={0}
                     src={dp.link}
-                    alt={dp.link}
+                    alt={t(locale, "distribution.photos.alt", {
+                      collection: props.header,
+                      tokenId: formatInteger(
+                        locale,
+                        Number.parseInt(nftId ?? "0", 10)
+                      ),
+                      photoNumber: formatInteger(locale, index + 1),
+                    })}
                   />
                 </Carousel.Item>
               ))}
@@ -188,7 +201,7 @@ export default function DistributionPage(props: Readonly<Props>) {
       count = p?.spots ?? 0;
     }
 
-    return count ? numberWithCommas(count) : "-";
+    return count ? formatInteger(locale, count) : "-";
   }
 
   function getSpotsForPhase(d: Distribution, phase: string) {
@@ -207,9 +220,9 @@ export default function DistributionPage(props: Readonly<Props>) {
 
       return (
         <span className="tw-text-sm tw-text-iron-400">
-          {spotsAirdrop > 0 ? numberWithCommas(spotsAirdrop) : "0"}
+          {spotsAirdrop > 0 ? formatInteger(locale, spotsAirdrop) : "0"}
           {" | "}
-          {spotsAllowlist > 0 ? numberWithCommas(spotsAllowlist) : "0"}
+          {spotsAllowlist > 0 ? formatInteger(locale, spotsAllowlist) : "0"}
         </span>
       );
     }
@@ -235,43 +248,69 @@ export default function DistributionPage(props: Readonly<Props>) {
           <Row className={styles["distributionsScrollContainer"]}>
             <Col className="no-padding">
               <Table className={styles["distributionsTable"]}>
+                <caption className="tw-sr-only">
+                  {t(locale, "distribution.table.caption", {
+                    collection: props.header,
+                    tokenId: formatInteger(
+                      locale,
+                      Number.parseInt(nftId ?? "0", 10)
+                    ),
+                  })}
+                </caption>
                 <thead>
                   <tr>
-                    <th colSpan={2}></th>
+                    <th colSpan={2} scope="colgroup">
+                      <span className="tw-sr-only">
+                        {t(locale, "distribution.table.walletDetails")}
+                      </span>
+                    </th>
                     <th
                       colSpan={distributionsPhases.length}
                       className="text-center"
+                      scope="colgroup"
                     >
-                      ALLOWLIST SPOTS
+                      {t(locale, "distribution.table.allowlistSpots")}
                     </th>
-                    <th colSpan={2} className="text-center">
-                      ACTUAL
+                    <th colSpan={2} className="text-center" scope="colgroup">
+                      {t(locale, "distribution.table.actual")}
                     </th>
                   </tr>
                   <tr>
-                    <th colSpan={2}>
-                      Wallet{" "}
+                    <th colSpan={2} scope="colgroup">
+                      {t(locale, "distribution.table.wallet")}{" "}
                       {fetching ? (
                         <DotLoader />
                       ) : (
                         <span className="font-larger">
-                          x{totalResults.toLocaleString()}
+                          {t(locale, "distribution.table.walletCount", {
+                            count: formatInteger(locale, totalResults),
+                          })}
                         </span>
                       )}
                     </th>
                     {distributionsPhases.map((p) => (
-                      <th key={`${p}-header`} className="text-center">
+                      <th
+                        key={`${p}-header`}
+                        className="text-center"
+                        scope="col"
+                      >
                         {capitalizeEveryWord(p.replaceAll("_", " "))}
                       </th>
                     ))}
-                    <th className="text-center">Minted</th>
-                    <th className="text-center">Total</th>
+                    <th className="text-center" scope="col">
+                      {t(locale, "distribution.table.minted")}
+                    </th>
+                    <th className="text-center" scope="col">
+                      {t(locale, "distribution.table.total")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {distributions.map((d) => (
                     <tr key={`${d.wallet}`}>
-                      <td className="font-smaller">{d.wallet}</td>
+                      <th className="font-smaller" scope="row">
+                        {d.wallet}
+                      </th>
                       <td>
                         <Address
                           wallets={[d.wallet as `0x${string}`]}
@@ -286,10 +325,12 @@ export default function DistributionPage(props: Readonly<Props>) {
                         </td>
                       ))}
                       <td className="text-center">
-                        {d.minted === 0 ? "-" : numberWithCommas(d.minted)}
+                        {d.minted === 0 ? "-" : formatInteger(locale, d.minted)}
                       </td>
                       <td className="text-center">
-                        {!d.total_count ? "-" : numberWithCommas(d.total_count)}
+                        {d.total_count
+                          ? formatInteger(locale, d.total_count)
+                          : "-"}
                       </td>
                     </tr>
                   ))}
@@ -338,20 +379,22 @@ export default function DistributionPage(props: Readonly<Props>) {
             height={0}
             style={{ height: "auto", width: "100px" }}
             src="/SummerGlasses.svg"
-            alt="SummerGlasses"
+            alt=""
+            aria-hidden="true"
           />{" "}
-          The Distribution Plan will be made available soon!
+          {t(locale, "distribution.empty.soon")}
         </Col>
-        <Col xs={12}>
-          Please check back later and make sure to also check the{" "}
+        <Col xs={12} className="tw-flex tw-flex-wrap tw-gap-x-1">
+          <span>{t(locale, "distribution.empty.checkBack")}</span>
+          <span>{t(locale, "distribution.empty.dropUpdates")}</span>
           <a
             href="https://x.com/6529Collections"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={t(locale, "distribution.empty.xLink.ariaLabel")}
           >
             &#64;6529Collections
-          </a>{" "}
-          account on X for drop updates.
+          </a>
         </Col>
       </Row>
     );
@@ -360,13 +403,13 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printNotFound() {
     return (
       <Row>
-        <Col xs={12}>No results found for the search criteria.</Col>
+        <Col xs={12}>{t(locale, "distribution.empty.noResults")}</Col>
       </Row>
     );
   }
 
   if (!isValidNftId) {
-    return <NotFound label="DISTRIBUTION" />;
+    return <NotFound label={t(locale, "distribution.notFound.label")} />;
   }
 
   return (
@@ -381,7 +424,13 @@ export default function DistributionPage(props: Readonly<Props>) {
               <Row>
                 <Col className={`${styles["distributionHeader"]} pb-1`}>
                   <h1 className="text-center mb-0">
-                    {props.header} Card #{nftId} Distribution
+                    {t(locale, "distribution.heading", {
+                      collection: props.header,
+                      tokenId: formatInteger(
+                        locale,
+                        Number.parseInt(nftId ?? "0", 10)
+                      ),
+                    })}
                   </h1>
                   {printMintingLink()}
                 </Col>
@@ -401,9 +450,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                 <Row>
                   <Col>
                     <span className="tw-text-sm tw-text-iron-400">
-                      * Note: Each column shows the total allowlist spots for
-                      that phase. The breakdown next to it displays: airdrops
-                      from subscriptions | allowlist spots for mint.
+                      {t(locale, "distribution.table.note")}
                     </span>
                   </Col>
                 </Row>

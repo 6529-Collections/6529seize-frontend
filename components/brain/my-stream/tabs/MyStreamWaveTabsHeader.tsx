@@ -60,6 +60,140 @@ interface MyStreamWaveTabsHeaderProps {
     | undefined;
 }
 
+type WavePictureContributors = React.ComponentProps<
+  typeof WavePicture
+>["contributors"];
+
+interface MyStreamWaveHeaderIdentityProps {
+  readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
+  readonly directMessageProfileHref: string | null;
+  readonly isCompact: boolean;
+  readonly isDescriptionPreviewTruncated: boolean;
+  readonly previewText: string | null;
+  readonly showDescriptionPreview: boolean;
+  readonly wave: ApiWave;
+  readonly wavePictureContributors: WavePictureContributors;
+}
+
+function MyStreamWaveHeaderIdentity({
+  descriptionPreviewRef,
+  directMessageProfileHref,
+  isCompact,
+  isDescriptionPreviewTruncated,
+  previewText,
+  showDescriptionPreview,
+  wave,
+  wavePictureContributors,
+}: MyStreamWaveHeaderIdentityProps) {
+  if (directMessageProfileHref) {
+    return (
+      <Link
+        href={directMessageProfileHref}
+        aria-label={`View ${wave.name}'s profile`}
+        className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3 tw-text-white/95 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
+      >
+        <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
+          <WavePicture
+            name={wave.name}
+            picture={wave.picture}
+            contributors={wavePictureContributors}
+          />
+        </div>
+        <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight lg:tw-text-xl">
+          {wave.name}
+        </h1>
+      </Link>
+    );
+  }
+
+  return (
+    <>
+      <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
+        <WavePicture
+          name={wave.name}
+          picture={wave.picture}
+          contributors={wavePictureContributors}
+        />
+      </div>
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+        {showDescriptionPreview ? (
+          <>
+            <WaveDescriptionPopover
+              wave={wave}
+              align="left"
+              ariaLabel="Show wave description"
+              triggerClassName={`tw-group tw-flex tw-min-w-0 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
+                isCompact
+                  ? "tw-items-center"
+                  : "tw-w-full tw-flex-col tw-items-start"
+              }`}
+            >
+              {isCompact ? (
+                <h1 className="tw-mb-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
+                  <span className="tw-min-w-0 tw-truncate">{wave.name}</span>
+                  <ChevronDownIcon
+                    aria-hidden="true"
+                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
+                  />
+                </h1>
+              ) : (
+                <>
+                  <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+                    {wave.name}
+                  </h1>
+                  <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-6">
+                    <span
+                      ref={descriptionPreviewRef}
+                      className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
+                    >
+                      {previewText}
+                    </span>
+                    {isDescriptionPreviewTruncated && (
+                      <ChevronDownIcon
+                        aria-hidden="true"
+                        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
+                      />
+                    )}
+                    <WaveTrustSignals
+                      waveRep={wave.wave_rep}
+                      waveScore={wave.wave_score}
+                      variant="header-inline"
+                      mode="summary"
+                      className="tw-shrink-0"
+                    />
+                  </span>
+                </>
+              )}
+            </WaveDescriptionPopover>
+            {isCompact && (
+              <WaveTrustSignals
+                waveRep={wave.wave_rep}
+                waveScore={wave.wave_score}
+                variant="header-inline"
+                mode="summary"
+                className="tw-mt-1"
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+              {wave.name}
+            </h1>
+            <WaveTrustSignals
+              waveRep={wave.wave_rep}
+              waveScore={wave.wave_score}
+              variant="header-inline"
+              mode="summary"
+              className="tw-mt-1"
+            />
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
 export default function MyStreamWaveTabsHeader({
   wave,
   activeContentTab,
@@ -262,92 +396,16 @@ export default function MyStreamWaveTabsHeader({
               <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-6 sm:tw-w-6" />
             </button>
           )}
-          {directMessageProfileHref ? (
-            <Link
-              href={directMessageProfileHref}
-              aria-label={`View ${wave.name}'s profile`}
-              className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3 tw-text-white/95 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
-            >
-              <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
-                <WavePicture
-                  name={wave.name}
-                  picture={wave.picture}
-                  contributors={wavePictureContributors}
-                />
-              </div>
-              <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight lg:tw-text-xl">
-                {wave.name}
-              </h1>
-            </Link>
-          ) : (
-            <>
-              <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
-                <WavePicture
-                  name={wave.name}
-                  picture={wave.picture}
-                  contributors={wavePictureContributors}
-                />
-              </div>
-              <div className="tw-flex tw-min-w-0 tw-flex-col">
-                {showDescriptionPreview ? (
-                  <WaveDescriptionPopover
-                    wave={wave}
-                    align="left"
-                    ariaLabel="Show wave description"
-                    triggerClassName={`tw-group tw-flex tw-min-w-0 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left ${
-                      isCompact
-                        ? "tw-items-center"
-                        : "tw-flex-col tw-items-start"
-                    }`}
-                  >
-                    {isCompact ? (
-                      <h1 className="tw-mb-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
-                        <span className="tw-min-w-0 tw-truncate">
-                          {wave.name}
-                        </span>
-                        <ChevronDownIcon
-                          aria-hidden="true"
-                          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
-                        />
-                      </h1>
-                    ) : (
-                      <>
-                        <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                          {wave.name}
-                        </h1>
-                        <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-max-w-xl tw-items-center tw-gap-x-1.5">
-                          <span
-                            ref={descriptionPreviewRef}
-                            className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
-                          >
-                            {previewText}
-                          </span>
-                          {isDescriptionPreviewTruncated && (
-                            <ChevronDownIcon
-                              aria-hidden="true"
-                              className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
-                            />
-                          )}
-                        </span>
-                      </>
-                    )}
-                  </WaveDescriptionPopover>
-                ) : (
-                  <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-                    {wave.name}
-                  </h1>
-                )}
-                {!isCompact && (
-                  <WaveTrustSignals
-                    waveRep={wave.wave_rep}
-                    waveScore={wave.wave_score}
-                    variant="sidebar"
-                    className="tw-mt-1"
-                  />
-                )}
-              </div>
-            </>
-          )}
+          <MyStreamWaveHeaderIdentity
+            descriptionPreviewRef={descriptionPreviewRef}
+            directMessageProfileHref={directMessageProfileHref}
+            isCompact={isCompact}
+            isDescriptionPreviewTruncated={isDescriptionPreviewTruncated}
+            previewText={previewText}
+            showDescriptionPreview={showDescriptionPreview}
+            wave={wave}
+            wavePictureContributors={wavePictureContributors}
+          />
         </div>
         <div className={actionsClassName}>
           {renderLeadingActions?.(actionContext)}

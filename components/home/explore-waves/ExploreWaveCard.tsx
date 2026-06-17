@@ -66,6 +66,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <WaveTrustSignals
           waveRep={wave.waveRep}
           waveScore={wave.waveScore}
+          variant="header-inline"
           className="tw-mt-3"
         />
 
@@ -110,7 +111,7 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
+      className="tw-mt-2.5 tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
       textClassName="tw-line-clamp-2 tw-break-words tw-text-[10px] tw-font-normal tw-leading-tight sm:tw-text-xs"
       linkify={false}
     />

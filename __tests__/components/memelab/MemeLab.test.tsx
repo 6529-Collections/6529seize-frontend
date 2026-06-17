@@ -88,6 +88,27 @@ describe("MemeLab utilities", () => {
     expect(container.textContent).toContain("Collectors: 2");
   });
 
+  it("printNftContent formats metrics with the requested locale", () => {
+    const nft: LabNFT = {
+      id: 1,
+      supply: 1234,
+    } as any;
+
+    const { container } = render(
+      <div>
+        {printNftContent(
+          nft,
+          MemeLabSort.EDITION_SIZE,
+          [],
+          VolumeType.ALL_TIME,
+          "de-DE"
+        )}
+      </div>
+    );
+
+    expect(container.textContent).toContain("Edition Size: 1.234");
+  });
+
   it("sortChanged sorts and updates router", () => {
     const router = { replace: jest.fn() } as any;
     const nfts: LabNFT[] = [
