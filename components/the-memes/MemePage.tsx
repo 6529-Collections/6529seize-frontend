@@ -104,7 +104,7 @@ function getMemeHistoryTabLabel(
 function getMemePageTabButtonClassName(isActive: boolean) {
   return `${MEME_TAB_BUTTON_BASE_CLASS_NAME} ${
     isActive
-      ? "tw-cursor-default tw-border-primary-400 tw-text-iron-100 disabled:tw-opacity-100"
+      ? "tw-cursor-default tw-border-primary-400 tw-text-iron-100"
       : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
   }`;
 }
@@ -123,7 +123,6 @@ function MemePageTabButton({
       type="button"
       className={getMemePageTabButtonClassName(isActive)}
       aria-current={isActive ? "page" : undefined}
-      disabled={isActive}
       onClick={onClick}
     >
       {title}

@@ -467,11 +467,12 @@ describe("MemePage search params handling", () => {
     );
 
     const overviewButton = screen.getByRole("button", { name: "Overview" });
-    expect(overviewButton).toBeDisabled();
+    expect(overviewButton).not.toBeDisabled();
     expect(overviewButton).toHaveAttribute("aria-current", "page");
 
     mockReplace.mockClear();
     overviewButton.focus();
+    expect(overviewButton).toHaveFocus();
     await userEvent.keyboard("{Enter}");
     await userEvent.click(overviewButton);
 
@@ -678,7 +679,7 @@ describe("MemePage loading states", () => {
         const overviewButton = screen.getByRole("button", {
           name: "Overview",
         });
-        expect(overviewButton).toBeDisabled();
+        expect(overviewButton).not.toBeDisabled();
         expect(overviewButton).toHaveAttribute("aria-current", "page");
       },
       { timeout: 3000 }
@@ -747,7 +748,7 @@ describe("MemePage accessibility labels", () => {
 
     await waitFor(() => {
       const overviewButton = screen.getByRole("button", { name: "Overview" });
-      expect(overviewButton).toBeDisabled();
+      expect(overviewButton).not.toBeDisabled();
       expect(overviewButton).toHaveAttribute("aria-current", "page");
     });
 
