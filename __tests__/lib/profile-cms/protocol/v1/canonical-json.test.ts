@@ -11,6 +11,24 @@ describe("CMS canonical JSON", () => {
     );
   });
 
+  it("sorts astral-plane keys by UTF-16 code units", () => {
+    const astralKey = String.fromCodePoint(0x1f4a9);
+    const privateUseKey = String.fromCharCode(0xe000);
+
+    expect(canonicalizeJson({ [privateUseKey]: "bmp", [astralKey]: "astral" }))
+      .toBe(
+        `{${JSON.stringify(astralKey)}:"astral",${JSON.stringify(
+          privateUseKey
+        )}:"bmp"}`
+      );
+  });
+
+  it("serializes numeric edge cases with ECMAScript JSON number rules", () => {
+    expect(
+      canonicalizeJson([-0, 5e21, 1e-7, 333333333.33333329, 9007199254740991])
+    ).toBe("[0,5e+21,1e-7,333333333.3333333,9007199254740991]");
+  });
+
   it("rejects values that are not valid canonical JSON inputs", () => {
     expect(() => canonicalizeJson({ a: undefined })).toThrow(
       CanonicalJsonError

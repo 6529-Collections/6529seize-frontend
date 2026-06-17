@@ -78,6 +78,13 @@ const DEEP_ZOOM_REFERENCE_FIELDS = [
 
 const ALLOWED_BLOCK_URL_FIELDS = new Set(["url", "href", "src", "uri"]);
 const URL_LIKE_FIELD = /(url|uri|href|src)$/i;
+const HASH_FIELD_NAMES = new Set([
+  "base_package_hash",
+  "content_hash",
+  "metadata_hash",
+  "package_hash",
+  "payload_hash",
+]);
 
 export function validateCmsPackageV1(
   input: unknown,
@@ -1261,7 +1268,10 @@ function mapZodIssue(issue: ZodIssue): CmsValidationIssueV1 {
     });
   }
 
-  if (issue.path[issue.path.length - 1] === "block_type") {
+  if (
+    issue.code === "invalid_enum_value" &&
+    issue.path[issue.path.length - 1] === "block_type"
+  ) {
     return issueFromInput({
       code: "block.unknown_type",
       message: "Unknown block type. V1 CMS packages fail closed.",
@@ -1269,7 +1279,13 @@ function mapZodIssue(issue: ZodIssue): CmsValidationIssueV1 {
     });
   }
 
-  if (issue.path.some((segment) => String(segment).includes("hash"))) {
+  const lastPathSegment = issue.path[issue.path.length - 1];
+  if (
+    issue.code === "invalid_string" &&
+    issue.validation === "regex" &&
+    typeof lastPathSegment === "string" &&
+    HASH_FIELD_NAMES.has(lastPathSegment)
+  ) {
     return issueFromInput({
       code: "hash.invalid",
       message: issue.message,

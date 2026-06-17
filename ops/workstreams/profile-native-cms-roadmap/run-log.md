@@ -325,6 +325,7 @@ Completed locally:
 Coverage from that slice:
 
 - Canonical JSON object ordering, array order, and invalid input rejection.
+- RFC 8785/JCS-oriented numeric edge cases and astral-key ordering.
 - Hash vectors for object ordering and unicode title.
 - Computed minimal-profile payload and package hash enforcement.
 - Mutation detection for payload/package hash mismatch.
@@ -333,6 +334,18 @@ Coverage from that slice:
 - Production-mode fixture signature/storage rejection.
 - Unsafe URL-scheme rejection.
 - Uppercase hash hex and non-`sha256:` prefix rejection.
+- Type-vs-format schema failures for block types and hash fields.
+
+### Bot Review Iteration
+
+6529bot general review requested changes on:
+
+- Making the canonical number path explicit and adding JCS edge vectors.
+- Adding an astral-key ordering vector.
+- Narrowing `block_type` issue mapping to enum failures only.
+- Narrowing `hash.invalid` issue mapping to regex failures on known hash fields.
+
+Follow-up changes were made and revalidated locally.
 
 ### Remaining Work
 

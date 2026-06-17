@@ -22,10 +22,7 @@ function canonicalize(value: unknown, seen: CanonicalJsonSeen): string {
     case "boolean":
       return value ? "true" : "false";
     case "number":
-      if (!Number.isFinite(value)) {
-        throw new CanonicalJsonError("Cannot canonicalize non-finite numbers");
-      }
-      return JSON.stringify(value);
+      return serializeNumber(value);
     case "undefined":
       throw new CanonicalJsonError("Cannot canonicalize undefined");
     case "bigint":
@@ -39,6 +36,20 @@ function canonicalize(value: unknown, seen: CanonicalJsonSeen): string {
     default:
       throw new CanonicalJsonError(`Cannot canonicalize ${typeof value}`);
   }
+}
+
+function serializeNumber(value: number): string {
+  if (!Number.isFinite(value)) {
+    throw new CanonicalJsonError("Cannot canonicalize non-finite numbers");
+  }
+
+  // RFC 8785 uses ECMAScript number serialization; JSON.stringify delegates to
+  // that behavior for finite JSON numbers and serializes -0 as 0.
+  const serialized = JSON.stringify(value);
+  if (serialized === undefined) {
+    throw new CanonicalJsonError("Cannot canonicalize number");
+  }
+  return serialized;
 }
 
 function canonicalizeObject(value: object, seen: CanonicalJsonSeen): string {

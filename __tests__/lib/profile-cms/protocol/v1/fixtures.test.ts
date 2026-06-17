@@ -146,6 +146,60 @@ describe("CMS Phase 1 fixtures", () => {
       validateCmsPackageV1(uppercaseHash).issues.map((issue) => issue.code)
     ).toEqual(expect.arrayContaining(["hash.invalid"]));
   });
+
+  it("does not report non-enum block_type failures as unknown block types", () => {
+    const fixture = readFixture(
+      path.join(VALID_FIXTURE_DIR, "minimal-profile-homepage.package.json")
+    );
+    const invalidBlockType = {
+      ...fixture,
+      payload: {
+        ...fixture.payload,
+        pages: fixture.payload.pages.map((page, pageIndex) =>
+          pageIndex === 0
+            ? {
+                ...page,
+                blocks: page.blocks.map((block, blockIndex) =>
+                  blockIndex === 0
+                    ? {
+                        ...block,
+                        block_type: 123,
+                      }
+                    : block
+                ),
+              }
+            : page
+        ),
+      },
+    };
+
+    const codes = validateCmsPackageV1(invalidBlockType).issues.map(
+      (issue) => issue.code
+    );
+
+    expect(codes).toEqual(expect.arrayContaining(["schema.invalid"]));
+    expect(codes).not.toEqual(expect.arrayContaining(["block.unknown_type"]));
+  });
+
+  it("does not report non-string hash failures as hash string format errors", () => {
+    const fixture = readFixture(
+      path.join(VALID_FIXTURE_DIR, "minimal-profile-homepage.package.json")
+    );
+    const invalidHashType = {
+      ...fixture,
+      integrity: {
+        ...fixture.integrity,
+        payload_hash: 123,
+      },
+    };
+
+    const codes = validateCmsPackageV1(invalidHashType).issues.map(
+      (issue) => issue.code
+    );
+
+    expect(codes).toEqual(expect.arrayContaining(["schema.invalid"]));
+    expect(codes).not.toEqual(expect.arrayContaining(["hash.invalid"]));
+  });
 });
 
 function readFixtureNames(directory: string): string[] {
