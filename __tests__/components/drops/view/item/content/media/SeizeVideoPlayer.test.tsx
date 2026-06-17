@@ -325,7 +325,7 @@ describe("SeizeVideoPlayer", () => {
     );
 
     const track = container.querySelector("track");
-    expect(track).toHaveAttribute("srclang", "und");
+    expect(track).toHaveAttribute("srclang", "en-US");
     expect(track).toHaveAttribute("label", "Captions");
   });
 

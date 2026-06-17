@@ -146,7 +146,7 @@
   - added `media.video.*` message keys in the locale dictionaries
   - routed video control labels, poster-gate label, caption default label, and
     fallback video text through `t(locale, ...)`
-  - initially changed the default caption language to `en-US`
+  - changed the default caption language to `en-US`
   - removed the Twitter hardcoded `captionsLabel="Captions"` prop so it uses
     the player default catalog label
 - Bot-feedback validation passed:
@@ -175,7 +175,8 @@
   - native/watch videos have a localized default player label
   - paused minimal-control videos use one real center play button, with no
     duplicate bottom-right play button while paused
-  - default caption language is now `und` for unknown-language captions
+  - default caption language remains `en-US` for first-party captions, while
+    Twitter explicitly passes `captionsLang="und"` for unknown-language captions
   - conditional caption-track rendering is kept, with a narrow `NOSONAR`,
     because fake empty tracks were intentionally removed
   - reduced-motion test helper now uses `globalThis`

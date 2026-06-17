@@ -90,7 +90,7 @@ interface SeizeVideoPlayerProps {
 }
 
 const CONTROL_HIDE_DELAY_MS = 1800;
-const DEFAULT_CAPTIONS_LANGUAGE = "und";
+const DEFAULT_CAPTIONS_LANGUAGE = DEFAULT_LOCALE;
 
 function SeizeVideoControlButton({
   label,

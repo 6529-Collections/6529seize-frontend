@@ -133,7 +133,8 @@ Implemented:
     poster identity is stable
   - video control accessible names, caption defaults, and fallback text use the
     repo i18n message catalog
-  - default caption language is `und` when the caption language is unknown
+  - default caption language is `en-US` for first-party captions, with
+    unknown-language callers expected to pass `und`
   - added focused tests for in-view autoplay, out-of-view pause, reduced-motion
     gating, user-pause persistence, poster-gate source resilience, native
     fullscreen exit reset, and i18n message keys
@@ -177,7 +178,8 @@ Validation so far:
     mouse/touch handlers
   - native/watch videos have a localized default player label
   - paused minimal-control videos use one real center play button
-  - unknown caption languages use `srcLang="und"`
+  - Twitter captions pass `srcLang="und"` because Twitter caption language is
+    unknown; the player default remains `en-US` for first-party captions
   - easy Sonar style issues were cleaned up in the reduced-motion helper/tests,
     and the intentional conditional-caption-track rule is marked with a narrow
     `NOSONAR`

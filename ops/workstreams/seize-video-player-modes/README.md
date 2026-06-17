@@ -57,7 +57,8 @@ Implemented on branch `codex/seize-video-player-templates`:
 - Poster-gated previews render one explicit play button before exposing native
   controls.
 - Caption tracks render only when `captionsSrc` is real, with caller-provided
-  label/lang/default metadata and `und` as the unknown-language fallback.
+  label/lang/default metadata; first-party captions default to `en-US`, while
+  unknown-language user media should pass `und`.
 - Player-owned autoplay is muted, visibility-aware, reduced-motion-aware, and
   handles rejected `play()` promises.
 - The video element has a localized default accessible label, and the paused
@@ -279,8 +280,9 @@ Implementation notes:
 - Render a caption `<track>` only when there is a real `captionsSrc`, unless a
   caller has a documented reason to render an empty track. A real caption track
   should get a real label such as "Captions", a real BCP 47 `srcLang`, and may
-  be marked `default` by prop. Use `und` when captions exist but the language is
-  unknown.
+  be marked `default` by prop. Use the canonical first-party default `en-US`
+  only when that is a fair language assumption; pass `und` when captions exist
+  but the language is unknown.
 - Always keep `playsInline` on the rendered `<video>`, including native-control
   mode, to preserve iPhone inline playback behavior.
 - Always treat `video.play()` as fallible. Catch rejected promises and keep the
@@ -467,8 +469,8 @@ Add or update tests for:
   autoplaying player.
 - Missing `captionsSrc` does not render a fake "No captions available" track.
 - Caption props render `kind="captions"`, `src`, `srcLang`, user-readable
-  `label`, and `default` only when requested; missing language metadata uses
-  `srcLang="und"` rather than inventing `en-US`.
+  `label`, and `default` only when requested; unknown-language callers pass
+  `srcLang="und"` rather than relying on the first-party `en-US` default.
 - Rejected `play()` leaves the player in paused/user-action-needed state.
 - Paused minimal-control video shows a clickable center play button and does not
   duplicate a second bottom-right play button.
