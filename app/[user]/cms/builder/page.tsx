@@ -34,7 +34,7 @@ export default async function ProfileCmsBuilderPage({
 
   const headers = await getAppCommonHeaders();
   const profile = await resolveBuilderProfile(handle, headers);
-  if (!profile?.id && !profile?.handle) {
+  if (!profile?.id) {
     return notFound();
   }
 

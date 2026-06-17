@@ -80,8 +80,10 @@ Write calls are disabled unless one of these flags is true:
 - `NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED=true`
 
 When disabled, save/validate CTAs show the expected endpoint and do not pretend
-the draft was saved. Publish is always blocked in this frontend MVP until the
-signed decentralized storage flow and exact BE publish body are wired.
+the draft was saved. When enabled, save and server-validate are still gated to
+the connected non-proxy profile owner before any backend request is issued.
+Publish is always blocked in this frontend MVP until the signed decentralized
+storage flow and exact BE publish body are wired.
 
 ## Remaining Production Gates
 

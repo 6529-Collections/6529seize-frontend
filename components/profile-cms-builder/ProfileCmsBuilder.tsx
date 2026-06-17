@@ -8,6 +8,7 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
+  PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
   runProfileCmsBuilderAction,
   type ProfileCmsBuilderAction,
   type ProfileCmsBuilderActionCode,
@@ -70,7 +71,7 @@ export default function ProfileCmsBuilder({
     () => JSON.stringify(validation.cmsPackage, null, 2),
     [validation.cmsPackage]
   );
-  const canSaveDraft =
+  const canUseBuilderApi =
     !!profileId && connectedProfile?.id === profileId && !activeProfileProxy;
 
   const clearActionResult = () => {
@@ -127,11 +128,17 @@ export default function ProfileCmsBuilder({
   };
 
   const runAction = async (action: ProfileCmsBuilderAction) => {
-    if (action === "save_draft" && !canSaveDraft) {
+    if (
+      (action === "save_draft" || action === "validate") &&
+      !canUseBuilderApi
+    ) {
       setActionResult({
         ok: false,
         action,
-        expectedEndpoint: PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
+        expectedEndpoint:
+          action === "save_draft"
+            ? PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT
+            : PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT,
         code: "profile_not_authorized",
       });
       return;
@@ -147,7 +154,7 @@ export default function ProfileCmsBuilder({
         action,
         cmsPackage: validation.cmsPackage,
         draftId,
-        profileId: canSaveDraft ? profileId : undefined,
+        profileId: canUseBuilderApi ? profileId : undefined,
       });
       if (
         actionRequestId !== actionRequestIdRef.current ||

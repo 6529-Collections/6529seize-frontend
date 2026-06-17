@@ -575,3 +575,8 @@ PR status:
   results after editor changes, localized builder block/severity/error chrome,
   split template status text, documented builder locale fallback debt, and
   switched unresolved publish endpoint display to `:id`.
+- 6529bot follow-up asked whether server-validate should share the owner gate
+  and whether profile lookup must return an id. Follow-up tightened both: save
+  and server-validate now require the connected non-proxy owner profile before
+  any backend request, and the builder route returns `notFound()` unless profile
+  lookup returns an id.

@@ -134,7 +134,38 @@ describe("ProfileCmsBuilder", () => {
 
     expect(commonApiPostMock).not.toHaveBeenCalled();
     expect(
-      screen.getByText("Connect as this profile before saving a draft.")
+      screen.getByText(
+        "Connect as this profile before using backend builder actions."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("blocks server validation unless the connected profile owns the target", async () => {
+    const user = userEvent.setup();
+    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-other" },
+    });
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Server validate" }));
+
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(
+        "Connect as this profile before using backend builder actions."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("profile-cms/packages/validate")
     ).toBeInTheDocument();
   });
 

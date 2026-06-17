@@ -85,4 +85,15 @@ describe("profile CMS builder route", () => {
       })
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
+
+  it("returns not found when the profile lookup has no profile id", async () => {
+    process.env["PROFILE_CMS_BUILDER_ENABLED"] = "true";
+    getUserProfileMock.mockResolvedValueOnce({ handle: "punk6529" });
+
+    await expect(
+      ProfileCmsBuilderPage({
+        params: Promise.resolve({ user: "punk6529" }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
 });

@@ -736,7 +736,7 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.api.missingProfileId":
     "This route could not resolve a profile id for the builder API.",
   "profileCms.builder.api.profileNotAuthorized":
-    "Connect as this profile before saving a draft.",
+    "Connect as this profile before using backend builder actions.",
   "profileCms.builder.api.publishRequiresSignedStorage":
     "Publishing needs the signed decentralized storage flow and is not enabled in this MVP.",
   "profileCms.builder.api.serverValidationCompleted":
