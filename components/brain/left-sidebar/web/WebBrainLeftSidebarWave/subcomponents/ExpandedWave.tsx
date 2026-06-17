@@ -6,7 +6,7 @@ import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/Brain
 import { SidebarWaveExpandControl } from "@/components/brain/left-sidebar/waves/SidebarWaveExpandControl";
 import { getSidebarWaveRowLayoutClasses } from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
 import {
-  hasWaveTrustSignals,
+  hasWaveTrustSummaryScore,
   WaveTrustSignals,
 } from "@/components/waves/WaveTrustSignals";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -89,12 +89,9 @@ export const ExpandedWave = ({
   const shouldReserveExpandControlSpace = shouldShowExpandControl;
   const shouldShowPinButton = showPin && depth === 0;
   const trustSignalsTooltipId = `sidebar-expanded-wave-trust-signals-${waveId}`;
-  const hasTrustSignals = hasWaveTrustSignals({
-    waveRep: wave.waveRep,
-    waveScore: wave.waveScore,
-  });
+  const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowTrustSignalsRow =
-    hasTrustSignals || presentLatestDropTimestamp !== null;
+    hasSummaryScore || presentLatestDropTimestamp !== null;
   const { rowPaddingClasses, rowGapClasses, linkGapClasses } =
     getSidebarWaveRowLayoutClasses({
       isChildRow,
@@ -208,11 +205,12 @@ export const ExpandedWave = ({
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
-              {hasTrustSignals && (
+              {hasSummaryScore && (
                 <WaveTrustSignals
                   waveRep={wave.waveRep}
                   waveScore={wave.waveScore}
                   variant="sidebar-inline"
+                  mode="summary"
                   className="tw-shrink-0"
                   tooltipId={trustSignalsTooltipId}
                 />
@@ -241,7 +239,7 @@ export const ExpandedWave = ({
           {tooltipContent}
         </WaveTooltip>
       )}
-      {hasTrustSignals && (
+      {hasSummaryScore && (
         <Tooltip
           id={trustSignalsTooltipId}
           place="top"
