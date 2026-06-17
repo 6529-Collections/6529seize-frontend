@@ -1,0 +1,202 @@
+import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
+import { ProfileCmsEmptyState } from "@/components/profile-cms/CmsSiteStates";
+import { getAppMetadata } from "@/components/providers/metadata";
+import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
+import { getUserProfile } from "@/helpers/server.helpers";
+import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
+import {
+  buildProfileCmsPath,
+  resolveCmsRoute,
+} from "@/lib/profile-cms/runtime/routes";
+import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
+import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
+
+type ProfileCmsRouteParams = {
+  readonly user: string;
+  readonly cmsPath?: string[] | undefined;
+};
+
+export default async function ProfileCmsPage({
+  params,
+}: {
+  readonly params?: Promise<ProfileCmsRouteParams>;
+}) {
+  const context = await getProfileCmsRouteContext(params);
+  if (!context) {
+    return notFound();
+  }
+
+  if (context.redirectTo) {
+    redirect(context.redirectTo);
+  }
+
+  if (!context.site) {
+    return notFound();
+  }
+
+  const routeResolution = resolveCmsRoute(
+    context.site.cmsPackage,
+    context.cmsPath
+  );
+
+  if (routeResolution.kind === "redirect") {
+    const target = resolveCmsUri(routeResolution.target, {
+      allowRelative: true,
+    });
+    if (target) {
+      redirect(target);
+    }
+    return <ProfileCmsEmptyState title="Website route unavailable" />;
+  }
+
+  if (routeResolution.kind === "not_found") {
+    return <ProfileCmsEmptyState />;
+  }
+
+  return (
+    <CmsSiteRenderer
+      cmsPackage={context.site.cmsPackage}
+      page={routeResolution.page}
+    />
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  readonly params?: Promise<ProfileCmsRouteParams>;
+}): Promise<Metadata> {
+  const context = await getProfileCmsRouteContext(params);
+  if (!context?.site) {
+    return notFound();
+  }
+
+  const routeResolution = resolveCmsRoute(
+    context.site.cmsPackage,
+    context.cmsPath
+  );
+
+  if (routeResolution.kind !== "page") {
+    return getAppMetadata({
+      title: context.site.cmsPackage.site.title,
+      description: context.site.cmsPackage.site.description,
+    });
+  }
+
+  const page = routeResolution.page;
+  const socialImage = context.site.cmsPackage.payload.assets.find(
+    (asset) => asset.id === page.metadata.social_image_asset_id
+  );
+  const socialImageUrl = resolveCmsUri(socialImage?.uri);
+
+  return getAppMetadata({
+    title: page.metadata.title,
+    description: page.metadata.description,
+    ...(socialImageUrl ? { ogImage: socialImageUrl } : {}),
+    ...(socialImage?.width ? { ogImageWidth: socialImage.width } : {}),
+    ...(socialImage?.height ? { ogImageHeight: socialImage.height } : {}),
+    ...(socialImage?.alt_text ? { ogImageAlt: socialImage.alt_text } : {}),
+  });
+}
+
+async function getProfileCmsRouteContext(
+  params: Promise<ProfileCmsRouteParams> | undefined
+) {
+  const resolvedParams = params ? await params : undefined;
+  const user = resolvedParams?.user;
+  const cmsPathSegments = resolvedParams?.cmsPath;
+  if (!user || !cmsPathSegments?.length) {
+    return null;
+  }
+
+  const normalizedUser = user.toLowerCase();
+  const requestCmsPath = buildProfileCmsPath({
+    handle: normalizedUser,
+    segments: cmsPathSegments,
+  });
+  if (!requestCmsPath) {
+    return null;
+  }
+
+  const headers = await getAppCommonHeaders();
+  const profile = await getUserProfile({
+    user: normalizedUser,
+    headers,
+  }).catch((error: unknown) => {
+    if (isNotFoundError(error)) {
+      notFound();
+    }
+    throw error;
+  });
+
+  const canonicalHandle = profile.handle?.toLowerCase();
+  if (!canonicalHandle) {
+    return null;
+  }
+
+  if (canonicalHandle !== normalizedUser) {
+    return {
+      cmsPath: requestCmsPath,
+      redirectTo: `/${encodeURIComponent(canonicalHandle)}/${cmsPathSegments
+        .map(encodeCmsPathSegment)
+        .join("/")}`,
+      site: null,
+    };
+  }
+
+  const site = await getProfileCmsPrimarySite({
+    handle: canonicalHandle,
+    headers,
+  });
+  if (!site) {
+    return null;
+  }
+
+  if (site.cmsPackage.profile.handle.toLowerCase() !== canonicalHandle) {
+    return null;
+  }
+
+  const canonicalCmsPath = buildProfileCmsPath({
+    handle: site.cmsPackage.profile.handle.toLowerCase(),
+    segments: cmsPathSegments,
+  });
+  if (!canonicalCmsPath) {
+    return null;
+  }
+
+  return {
+    cmsPath: canonicalCmsPath,
+    redirectTo: null,
+    site,
+  };
+}
+
+function isNotFoundError(error: unknown): boolean {
+  const status =
+    typeof error === "object" && error !== null
+      ? ((error as { status?: number | undefined }).status ??
+        (error as { response?: { status?: number | undefined } | undefined })
+          .response?.status)
+      : undefined;
+
+  if (status === 404) {
+    return true;
+  }
+
+  const message =
+    typeof error === "string"
+      ? error
+      : error instanceof Error
+        ? error.message
+        : "";
+  return /not found|404/i.test(message);
+}
+
+function encodeCmsPathSegment(segment: string): string {
+  try {
+    return encodeURIComponent(decodeURIComponent(segment));
+  } catch {
+    return encodeURIComponent(segment);
+  }
+}

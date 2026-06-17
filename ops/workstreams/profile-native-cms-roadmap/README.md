@@ -40,6 +40,7 @@ Examples:
 - [Phase 1 Schema Index](phase-1/schema-index.md)
 - [Phase 1 Fixture Corpus](phase-1/fixtures/README.md)
 - [Phase 1 Validation Plan](phase-1/validation-plan.md)
+- [Runtime Bridge Integration Assumptions](runtime-bridge-integration-assumptions.md)
 - [Active Context](active-context.md)
 - [Run Log](run-log.md)
 
