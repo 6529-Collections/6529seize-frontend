@@ -5,6 +5,8 @@ import {
   getTechReportBySlug,
 } from "@/components/about/tech/reports";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import styles from "@/styles/Home.module.scss";
 import { AboutSection } from "@/types/enums";
 import type { Metadata } from "next";
@@ -59,8 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!report) {
     return getAppMetadata({
-      title: "Tech",
-      description: "About",
+      title: t(DEFAULT_LOCALE, "about.tech.metadata.title"),
+      description: t(DEFAULT_LOCALE, "about.tech.metadata.description"),
     });
   }
 

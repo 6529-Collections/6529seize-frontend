@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
 import {
   FOLLOW_THE_REPO_WAVE_URL,
   TECH_WEEKLY_PR_REPORT,
@@ -14,7 +18,10 @@ const stripMarkdownTitle = (markdown: string): string =>
 export default function TechReportPage({
   report = TECH_WEEKLY_PR_REPORT,
 }: Readonly<{ report?: TechWeeklyPrReport }>) {
+  const locale = DEFAULT_LOCALE;
   const reportTotal = getTechReportTotal(report);
+  const formattedReportTotal = formatInteger(locale, reportTotal);
+  const formattedRepoCount = formatInteger(locale, report.repos.length);
 
   return (
     <article className="tw-flex tw-flex-col tw-gap-10 tw-text-iron-200">
@@ -53,23 +60,23 @@ export default function TechReportPage({
           <dl className="tw-mb-0 tw-grid tw-grid-cols-3 tw-gap-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 lg:tw-grid-cols-1">
             <div className="tw-border-r tw-border-solid tw-border-iron-800 tw-p-4 lg:tw-border-b lg:tw-border-r-0">
               <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                Total
+                {t(locale, "about.tech.report.total")}
               </dt>
               <dd className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                {reportTotal}
+                {formattedReportTotal}
               </dd>
             </div>
             <div className="tw-border-r tw-border-solid tw-border-iron-800 tw-p-4 lg:tw-border-b lg:tw-border-r-0">
               <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                Repos
+                {t(locale, "about.tech.report.repos")}
               </dt>
               <dd className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                {report.repos.length}
+                {formattedRepoCount}
               </dd>
             </div>
             <div className="tw-p-4">
               <dt className="tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                Daily
+                {t(locale, "about.tech.report.daily")}
               </dt>
               <dd className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-leading-none tw-text-iron-50">
                 14:00
@@ -91,10 +98,7 @@ export default function TechReportPage({
             In This Report
           </h2>
           <p className="tw-mb-0 tw-max-w-4xl tw-text-sm tw-leading-6 tw-text-iron-300">
-            The weekly write-up is split into five repo reports. Use this index
-            to jump directly to the area you want, or read through from the
-            frontend app work into backend, Stream contracts, Safe app
-            hardening, and the review bot launch train.
+            {t(locale, "about.tech.report.tocDescription")}
           </p>
         </div>
         <nav aria-label="Report repositories">
@@ -113,7 +117,9 @@ export default function TechReportPage({
                     {repo.focus}
                   </span>
                   <span className="tw-text-sm tw-text-iron-400 md:tw-text-right">
-                    {repo.prCount} PRs
+                    {t(locale, "about.tech.report.prCount", {
+                      count: formatInteger(locale, repo.prCount),
+                    })}
                   </span>
                 </a>
               </li>
@@ -138,7 +144,11 @@ export default function TechReportPage({
                   {repo.name}
                 </h2>
                 <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-400">
-                  {repo.focus}. {repo.prCount} PRs, {repo.stateSummary}.
+                  {t(locale, "about.tech.report.repoSummary", {
+                    focus: repo.focus,
+                    count: formatInteger(locale, repo.prCount),
+                    stateSummary: repo.stateSummary,
+                  })}
                 </p>
               </div>
               <a

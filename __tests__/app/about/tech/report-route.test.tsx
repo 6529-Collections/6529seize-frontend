@@ -11,6 +11,8 @@ import {
   TECH_WEEKLY_PR_REPORT,
 } from "@/components/about/tech/reports";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { render, screen } from "@testing-library/react";
 import { notFound } from "next/navigation";
 
@@ -51,9 +53,15 @@ describe("AboutTechReportRoute", () => {
   });
 
   it("calls notFound for an unknown report slug", async () => {
-    await AboutTechReportRoute({
-      params: Promise.resolve({ reportSlug: "missing-report" }),
+    (notFound as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("NEXT_NOT_FOUND");
     });
+
+    await expect(
+      AboutTechReportRoute({
+        params: Promise.resolve({ reportSlug: "missing-report" }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
 
     expect(notFound).toHaveBeenCalled();
   });
@@ -85,8 +93,8 @@ describe("generateMetadata", () => {
     });
 
     expect(getAppMetadata).toHaveBeenCalledWith({
-      title: "Tech",
-      description: "About",
+      title: t(DEFAULT_LOCALE, "about.tech.metadata.title"),
+      description: t(DEFAULT_LOCALE, "about.tech.metadata.description"),
     });
   });
 });

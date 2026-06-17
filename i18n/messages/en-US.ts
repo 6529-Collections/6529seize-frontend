@@ -258,6 +258,19 @@ const FOLLOWERS_MESSAGES = objectMessages("followers", {
   "profile.avatarAlt": "{handle}'s profile image",
 } as const);
 
+const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {
+  "metadata.title": "Tech",
+  "metadata.description": "About",
+  "index.prsCovered": "PRs Covered",
+  "report.total": "Total",
+  "report.repos": "Repos",
+  "report.daily": "Daily",
+  "report.prCount": "{count} PRs",
+  "report.repoSummary": "{focus}. {count} PRs, {stateSummary}.",
+  "report.tocDescription":
+    "This report is split by repository. Use this index to jump directly to the area you want, or read through from the frontend app work into backend, Stream contracts, Safe app hardening, and review bot updates.",
+} as const);
+
 const MEME_LAB_DETAIL_MESSAGES = namespaceMessages("memeLab.detail", [
   ["browserTitle", "{name} | Meme Lab #{tokenId}"],
   ["browserTitleWithTab", "{title} | {tab}"],
@@ -781,6 +794,7 @@ export const EN_US_MESSAGES = {
   "user.collected.networkCards.xtdhPerDay": "xTDH/day",
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
+  ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
 } as const;
 

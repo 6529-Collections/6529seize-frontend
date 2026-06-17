@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+
 import {
   FOLLOW_THE_REPO_WAVE_URL,
   TECH_PR_REPORTS,
@@ -8,6 +12,8 @@ import {
 } from "./reports";
 
 export default function AboutTech() {
+  const locale = DEFAULT_LOCALE;
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-10 tw-text-iron-200">
       <section className="tw-pb-2">
@@ -95,10 +101,10 @@ export default function AboutTech() {
                   </div>
                   <div className="tw-border-t tw-border-solid tw-border-iron-800 tw-p-5 md:tw-border-l md:tw-border-t-0">
                     <p className="tw-mb-1 tw-text-3xl tw-font-semibold tw-leading-none tw-text-iron-50">
-                      {getTechReportTotal(report)}
+                      {formatInteger(locale, getTechReportTotal(report))}
                     </p>
                     <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
-                      PRs Covered
+                      {t(locale, "about.tech.index.prsCovered")}
                     </p>
                   </div>
                 </div>
