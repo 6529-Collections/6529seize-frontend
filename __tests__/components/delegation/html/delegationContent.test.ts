@@ -68,6 +68,10 @@ function splitInsideFirstMultibyteCharacter(bytes: Uint8Array) {
 }
 
 describe("delegationContent", () => {
+  const publishedRootCid =
+    "bafybeieb2sb6bid4usgivmujduxcvpzjyouaipnep5defzefwq7dljx5xq";
+  const publishedGatewayBaseUrl = `https://ipfs.6529.io/ipfs/${publishedRootCid}`;
+
   it("keeps the reviewed source manifest and public mirror in sync", async () => {
     const publicManifestPath = path.join(
       process.cwd(),
@@ -108,11 +112,13 @@ describe("delegationContent", () => {
     expect(missingAlt).toEqual([]);
   });
 
-  it("uses the reviewed local bundle while the IPFS CID is pending", () => {
+  it("uses CID-addressed IPFS gateways, then the local bundle", () => {
     const article = getDelegationArticle("delegation-faq");
 
     expect(article).toBeDefined();
     expect(buildDelegationArticleUrls(article!)).toEqual([
+      `${publishedGatewayBaseUrl}/html/delegation-faq.html`,
+      `https://ipfs.io/ipfs/${publishedRootCid}/html/delegation-faq.html`,
       "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
     ]);
   });
@@ -179,7 +185,7 @@ describe("delegationContent", () => {
     ).resolves.toMatchObject({
       article,
       html,
-      url: "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+      url: `${publishedGatewayBaseUrl}/html/delegation-faq.html`,
     });
   });
 
@@ -195,9 +201,9 @@ describe("delegationContent", () => {
     await expect(
       fetchDelegationArticleHtml("using-safe", fetchArticle)
     ).resolves.toMatchObject({
-      url: "/delegation-content/delegation-docs-2026-06-16/html/using-safe.html",
+      url: `${publishedGatewayBaseUrl}/html/using-safe.html`,
       html: expect.stringContaining(
-        'src="/delegation-content/delegation-docs-2026-06-16/assets/screenshots/safe1.png"'
+        `src="${publishedGatewayBaseUrl}/assets/screenshots/safe1.png"`
       ),
     });
   });
@@ -243,7 +249,7 @@ describe("delegationContent", () => {
       fetchDelegationArticleHtml("register-delegation", fetchArticle)
     ).resolves.toMatchObject({
       article,
-      url: "/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html",
+      url: `${publishedGatewayBaseUrl}/html/register-delegation.html`,
     });
     expect(text).not.toHaveBeenCalled();
   });
