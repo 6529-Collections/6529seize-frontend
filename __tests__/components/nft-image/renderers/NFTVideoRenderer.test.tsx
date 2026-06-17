@@ -195,7 +195,7 @@ describe("NFTVideoRenderer", () => {
       const { container } = render(<NFTVideoRenderer {...props} />);
 
       const video = container.querySelector("video");
-      expect(video).toHaveAttribute("autoplay");
+      expect(video).not.toHaveAttribute("autoplay");
       expect(video).toHaveProperty("muted", true);
       expect(video).not.toHaveAttribute("controls");
       expect(video).toHaveAttribute("loop");
@@ -555,17 +555,17 @@ describe("NFTVideoRenderer", () => {
       const video = container.querySelector("video");
       expect(video).toHaveAttribute("preload", "auto");
       expect(video).toHaveAttribute("loop");
-      expect(video).toHaveAttribute("autoplay");
+      expect(video).not.toHaveAttribute("autoplay");
     });
   });
 
   describe("Video Loading and Performance", () => {
-    it("sets video to autoplay and loop for optimal user experience", () => {
+    it("sets video to muted loop while player-owned in-view logic controls autoplay", () => {
       const props = createDefaultProps();
       const { container } = render(<NFTVideoRenderer {...props} />);
 
       const video = container.querySelector("video");
-      expect(video).toHaveAttribute("autoplay");
+      expect(video).not.toHaveAttribute("autoplay");
       expect(video).toHaveAttribute("loop");
       expect(video).toHaveProperty("muted", true); // Required for autoplay in most browsers
     });

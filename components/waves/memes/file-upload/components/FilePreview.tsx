@@ -70,8 +70,8 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   const renderVideoPreview = () => (
     <SeizeVideoPlayer
       src={url}
+      template="watch-media"
       className="tw-max-h-full tw-max-w-full tw-shadow-lg"
-      autoPlay={false}
       preload="metadata"
       layout="prominent"
       align="center"

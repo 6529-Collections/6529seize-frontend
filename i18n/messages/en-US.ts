@@ -667,6 +667,21 @@ const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages("theMemes.detail.art", [
   ["values.rank", "#{rank}"],
 ] as const);
 
+const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
+  ["captions", "Captions"],
+  ["download", "Download media"],
+  ["downloading", "Downloading media"],
+  ["exitFullscreen", "Exit full screen"],
+  ["fullscreen", "Full screen"],
+  ["mute", "Mute video"],
+  ["pause", "Pause video"],
+  ["play", "Play video"],
+  ["player", "Video player"],
+  ["playPreview", "Play video preview"],
+  ["unmute", "Unmute video"],
+  ["unsupported", "Your browser does not support the video tag."],
+] as const);
+
 export const EN_US_MESSAGES = {
   "home.boostedDrop.anonymousAuthor": "Anonymous",
   "home.boostedDrop.badge": "Boosted post",
@@ -880,6 +895,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_REP_MODAL_MESSAGES,
   ...ABOUT_TECH_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
+  ...MEDIA_VIDEO_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

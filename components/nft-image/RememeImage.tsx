@@ -107,6 +107,7 @@ export default function RememeImage(props: Readonly<Props>) {
       >
         <SeizeVideoPlayer
           id={`${props.nft.contract}-${props.nft.id}`}
+          template="ambient-media"
           src={videoFallbackUrls[0]}
           fallbackSources={videoFallbackUrls.slice(1)}
           autoPlay={props.animation}

@@ -31,7 +31,9 @@ import type {
 } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
-import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import SeizeVideoPlayer, {
+  type SeizeVideoTemplate,
+} from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 import { useLinkPreviewContext } from "./LinkPreviewContext";
 
@@ -826,7 +828,9 @@ function TwitterVideoPlayer({
   captionsUrl,
   className,
   hlsUrl,
+  muted,
   posterUrl,
+  template = "watch-media",
   variants,
   videoUrl,
 }: {
@@ -835,7 +839,9 @@ function TwitterVideoPlayer({
   readonly captionsUrl: string | undefined;
   readonly className: string;
   readonly hlsUrl: string | undefined;
+  readonly muted?: boolean;
   readonly posterUrl: string | undefined;
+  readonly template?: SeizeVideoTemplate;
   readonly variants: readonly TweetPreviewVideoVariant[] | undefined;
   readonly videoUrl: string;
 }) {
@@ -898,6 +904,11 @@ function TwitterVideoPlayer({
       setSelection({ type: "variant", url: videoUrl });
       setCurrentAutoQuality(undefined);
     };
+    const playSelectedSource = () => {
+      if (autoPlay) {
+        videoElement.play().catch(() => undefined);
+      }
+    };
 
     destroyHls();
     const src = getVideoSource(selection, hlsUrl, videoUrl);
@@ -921,6 +932,7 @@ function TwitterVideoPlayer({
             return;
           }
           restoreVideoPlayback(videoElement, playbackSnapshot, () => cancelled);
+          playSelectedSource();
         })
         .catch(() => {
           if (!cancelled) {
@@ -932,13 +944,14 @@ function TwitterVideoPlayer({
       videoElement.src = src;
       videoElement.load();
       restoreVideoPlayback(videoElement, playbackSnapshot, () => cancelled);
+      playSelectedSource();
     }
 
     return () => {
       cancelled = true;
       destroyHls();
     };
-  }, [hlsUrl, selection, videoUrl]);
+  }, [autoPlay, hlsUrl, selection, videoUrl]);
 
   return (
     <div className="tw-relative tw-h-full tw-w-full">
@@ -986,11 +999,14 @@ function TwitterVideoPlayer({
       )}
       <SeizeVideoPlayer
         videoRef={videoRef}
+        template={template}
         poster={posterUrl}
         className={className}
         preload="metadata"
         autoPlay={autoPlay}
+        muted={muted}
         captionsSrc={captionsUrl}
+        captionsLang="und"
         layout="fill"
         showActions={false}
         onVideoClick={(event) => {
@@ -1065,6 +1081,7 @@ function TweetMediaGridVideo({ media }: { readonly media: TweetPreviewMedia }) {
       captionsUrl={media.captionsUrl}
       className="tw-h-full tw-w-full tw-object-contain"
       hlsUrl={media.videoHlsUrl}
+      muted={playing}
       posterUrl={posterUrl}
       variants={media.videoVariants}
       videoUrl={media.videoUrl}
