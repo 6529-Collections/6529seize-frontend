@@ -100,8 +100,16 @@ function toResolverUrl(prefix: "ipfs" | "arweave", value: string): string {
     .filter((part) => part.trim().length > 0)
     .map(encodePathPart)
     .join("/");
-  const endpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT.replace(/\/+$/, "");
+  const endpoint = trimTrailingSlashes(publicEnv.MEDIA_RESOLVER_ENDPOINT);
   return `${endpoint}/${prefix}/${path}`;
+}
+
+function trimTrailingSlashes(value: string): string {
+  let endIndex = value.length;
+  while (endIndex > 0 && value[endIndex - 1] === "/") {
+    endIndex -= 1;
+  }
+  return value.slice(0, endIndex);
 }
 
 function encodePathPart(value: string): string {

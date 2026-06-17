@@ -3,6 +3,8 @@ import { ProfileCmsEmptyState } from "@/components/profile-cms/CmsSiteStates";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { getUserProfile } from "@/helpers/server.helpers";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getProfileCmsPrimarySite } from "@/lib/profile-cms/runtime/fetcher";
 import {
   buildProfileCmsPath,
@@ -19,12 +21,18 @@ type ProfileCmsRouteParams = {
   readonly user: string;
   readonly cmsPath?: string[] | undefined;
 };
+type ProfileCmsSearchParams = {
+  readonly locale?: string | string[] | undefined;
+};
 
 export default async function ProfileCmsPage({
   params,
+  searchParams,
 }: {
   readonly params?: Promise<ProfileCmsRouteParams>;
+  readonly searchParams?: Promise<ProfileCmsSearchParams>;
 }) {
+  const locale = getProfileCmsRouteLocale(await searchParams);
   const context = await getProfileCmsRouteContext(params);
   if (!context) {
     return notFound();
@@ -52,16 +60,22 @@ export default async function ProfileCmsPage({
     ) {
       redirect(routeResolution.target);
     }
-    return <ProfileCmsEmptyState title="Website route unavailable" />;
+    return (
+      <ProfileCmsEmptyState
+        locale={locale}
+        title={t(locale, "profileCms.state.routeUnavailable.title")}
+      />
+    );
   }
 
   if (routeResolution.kind === "not_found") {
-    return <ProfileCmsEmptyState />;
+    return <ProfileCmsEmptyState locale={locale} />;
   }
 
   return (
     <CmsSiteRenderer
       cmsPackage={context.site.cmsPackage}
+      locale={locale}
       page={routeResolution.page}
     />
   );
@@ -222,6 +236,18 @@ function encodeCmsPathSegment(segment: string): string {
   } catch {
     return encodeURIComponent(segment);
   }
+}
+
+function getProfileCmsRouteLocale(
+  searchParams: ProfileCmsSearchParams | undefined
+): SupportedLocale {
+  return normalizeLocale(getSearchParamValue(searchParams?.locale));
+}
+
+function getSearchParamValue(
+  value: string | string[] | undefined
+): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
 function isProfileOwnedCmsRedirectTarget({

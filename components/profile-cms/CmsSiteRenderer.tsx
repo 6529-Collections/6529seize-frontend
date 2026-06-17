@@ -10,6 +10,12 @@ import {
   isExternalCmsHref,
   resolveCmsUri,
 } from "@/lib/profile-cms/runtime/uri";
+import {
+  formatDate as formatLocalizedDate,
+  formatInteger,
+} from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   CmsAssetV1,
   CmsBlockV1,
@@ -35,6 +41,7 @@ type RendererContext = {
   readonly nftProfileMap: Map<string, CmsNftMediaProfileV1>;
   readonly deepZoomMap: Map<string, CmsDeepZoomManifestV1>;
   readonly roomMap: Map<string, CmsExhibitionRoomV1>;
+  readonly locale: SupportedLocale;
 };
 
 const SANDBOX_PERMISSION_ALLOWLIST = new Set([
@@ -43,18 +50,17 @@ const SANDBOX_PERMISSION_ALLOWLIST = new Set([
   "allow-presentation",
   "allow-scripts",
 ]);
-const EMPTY_MEDIA_CAPTION_TRACK_SRC = getWebVttDataUri(
-  "No captions were provided for this media asset."
-);
 
 export default function CmsSiteRenderer({
   cmsPackage,
+  locale = DEFAULT_LOCALE,
   page,
 }: {
   readonly cmsPackage: CmsPackageV1;
+  readonly locale?: SupportedLocale | undefined;
   readonly page: CmsPageV1;
 }) {
-  const context = createRendererContext(cmsPackage);
+  const context = createRendererContext(cmsPackage, locale);
   const navigationItems = getCmsNavigationItems(cmsPackage);
   const accentStyle = {
     "--profile-cms-accent": cmsPackage.site.theme.accent,
@@ -76,7 +82,11 @@ export default function CmsSiteRenderer({
             </h1>
           </div>
           {navigationItems.length ? (
-            <nav aria-label={`${cmsPackage.site.title} navigation`}>
+            <nav
+              aria-label={t(locale, "profileCms.nav.label", {
+                siteTitle: cmsPackage.site.title,
+              })}
+            >
               <ul className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                 {navigationItems.map((item) => (
                   <NavigationItem
@@ -182,9 +192,9 @@ function CmsBlock({
     case "nft_reference":
       return <NftReferenceBlock block={block} context={context} />;
     case "collection_reference":
-      return <CollectionReferenceBlock block={block} />;
+      return <CollectionReferenceBlock block={block} context={context} />;
     case "transaction_reference":
-      return <TransactionReferenceBlock block={block} />;
+      return <TransactionReferenceBlock block={block} context={context} />;
     case "generated_wallet_gallery":
       return <GeneratedWalletGalleryBlock block={block} context={context} />;
     case "deep_zoom":
@@ -196,7 +206,11 @@ function CmsBlock({
     case "room_viewer":
       return <RoomViewerBlock block={block} context={context} />;
     default:
-      return <UnsupportedBlock label="Unsupported block" />;
+      return (
+        <UnsupportedBlock
+          label={t(context.locale, "profileCms.block.unsupported")}
+        />
+      );
   }
 }
 
@@ -283,7 +297,13 @@ function ImageBlock({
   readonly context: RendererContext;
 }) {
   const asset = getAsset(context, getString(block, "asset_id"));
-  return <AssetImage asset={asset} caption={getString(block, "caption")} />;
+  return (
+    <AssetImage
+      asset={asset}
+      caption={getString(block, "caption")}
+      locale={context.locale}
+    />
+  );
 }
 
 function VideoBlock({
@@ -297,10 +317,14 @@ function VideoBlock({
   const poster = getAsset(context, getString(block, "poster_asset_id"));
   const assetUrl = resolveAssetUrl(asset);
   const posterUrl = resolveAssetUrl(poster);
-  const captionTrackSrc = getMediaCaptionTrackSrc(asset);
+  const captionTrackSrc = getMediaCaptionTrackSrc(asset, context.locale);
 
   if (!assetUrl) {
-    return <UnsupportedBlock label="Video unavailable" />;
+    return (
+      <UnsupportedBlock
+        label={t(context.locale, "profileCms.block.videoUnavailable")}
+      />
+    );
   }
 
   return (
@@ -315,7 +339,7 @@ function VideoBlock({
         <track
           default
           kind="captions"
-          label="Description"
+          label={t(context.locale, "profileCms.media.captionTrackLabel")}
           src={captionTrackSrc}
           srcLang="en"
         />
@@ -334,10 +358,14 @@ function AudioBlock({
 }) {
   const asset = getAsset(context, getString(block, "asset_id"));
   const assetUrl = resolveAssetUrl(asset);
-  const captionTrackSrc = getMediaCaptionTrackSrc(asset);
+  const captionTrackSrc = getMediaCaptionTrackSrc(asset, context.locale);
 
   if (!assetUrl) {
-    return <UnsupportedBlock label="Audio unavailable" />;
+    return (
+      <UnsupportedBlock
+        label={t(context.locale, "profileCms.block.audioUnavailable")}
+      />
+    );
   }
 
   return (
@@ -347,7 +375,7 @@ function AudioBlock({
         <track
           default
           kind="captions"
-          label="Description"
+          label={t(context.locale, "profileCms.media.captionTrackLabel")}
           src={captionTrackSrc}
           srcLang="en"
         />
@@ -373,13 +401,17 @@ function GalleryBlock({
     .filter((asset): asset is CmsAssetV1 => !!asset);
 
   if (!assets.length) {
-    return <UnsupportedBlock label="Gallery unavailable" />;
+    return (
+      <UnsupportedBlock
+        label={t(context.locale, "profileCms.block.galleryUnavailable")}
+      />
+    );
   }
 
   return (
     <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
       {assets.map((asset) => (
-        <AssetImage key={asset.id} asset={asset} />
+        <AssetImage key={asset.id} asset={asset} locale={context.locale} />
       ))}
     </div>
   );
@@ -432,7 +464,9 @@ function ButtonLinkBlock({
   readonly context: RendererContext;
 }) {
   const label =
-    getString(block, "label") ?? getString(block, "text") ?? "Open link";
+    getString(block, "label") ??
+    getString(block, "text") ??
+    t(context.locale, "profileCms.block.openLink");
   const pageId = getString(block, "page_id");
   const directHref =
     getString(block, "url") ?? getString(block, "href") ?? undefined;
@@ -441,7 +475,11 @@ function ButtonLinkBlock({
     : resolveCmsUri(directHref, { allowRelative: true });
 
   if (!href) {
-    return <UnsupportedBlock label="Link unavailable" />;
+    return (
+      <UnsupportedBlock
+        label={t(context.locale, "profileCms.block.linkUnavailable")}
+      />
+    );
   }
 
   return (
@@ -467,7 +505,11 @@ function NftReferenceBlock({
     getString(block, "nft_media_profile_id") ?? ""
   );
   if (!nftProfile) {
-    return <UnsupportedBlock label="NFT reference unavailable" />;
+    return (
+      <UnsupportedBlock
+        label={t(context.locale, "profileCms.block.nftReferenceUnavailable")}
+      />
+    );
   }
 
   const displayAsset =
@@ -476,36 +518,64 @@ function NftReferenceBlock({
 
   return (
     <ReferencePanel
-      title={`Token #${nftProfile.token_id}`}
-      subtitle={`Chain ${nftProfile.chain_id}`}
+      title={t(context.locale, "profileCms.reference.tokenTitle", {
+        tokenId: nftProfile.token_id,
+      })}
+      subtitle={t(context.locale, "profileCms.reference.chain", {
+        chainId: nftProfile.chain_id,
+      })}
       detail={nftProfile.contract}
-      media={<AssetImage asset={displayAsset} />}
+      media={<AssetImage asset={displayAsset} locale={context.locale} />}
     />
   );
 }
 
-function CollectionReferenceBlock({ block }: { readonly block: CmsBlockV1 }) {
+function CollectionReferenceBlock({
+  block,
+  context,
+}: {
+  readonly block: CmsBlockV1;
+  readonly context: RendererContext;
+}) {
   const title =
-    getString(block, "title") ?? getString(block, "name") ?? "Collection";
+    getString(block, "title") ??
+    getString(block, "name") ??
+    t(context.locale, "profileCms.block.collectionFallback");
   const chainId = getNumber(block, "chain_id");
   const contract = getString(block, "contract");
   return (
     <ReferencePanel
       title={title}
-      subtitle={chainId ? `Chain ${chainId}` : undefined}
+      subtitle={
+        chainId
+          ? t(context.locale, "profileCms.reference.chain", { chainId })
+          : undefined
+      }
       detail={contract}
     />
   );
 }
 
-function TransactionReferenceBlock({ block }: { readonly block: CmsBlockV1 }) {
-  const title = getString(block, "title") ?? "Transaction";
+function TransactionReferenceBlock({
+  block,
+  context,
+}: {
+  readonly block: CmsBlockV1;
+  readonly context: RendererContext;
+}) {
+  const title =
+    getString(block, "title") ??
+    t(context.locale, "profileCms.block.transactionFallback");
   const chainId = getNumber(block, "chain_id");
   const txHash = getString(block, "tx_hash") ?? getString(block, "hash");
   return (
     <ReferencePanel
       title={title}
-      subtitle={chainId ? `Chain ${chainId}` : undefined}
+      subtitle={
+        chainId
+          ? t(context.locale, "profileCms.reference.chain", { chainId })
+          : undefined
+      }
       detail={txHash}
     />
   );
@@ -527,13 +597,37 @@ function GeneratedWalletGalleryBlock({
   return (
     <section className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
       <h3 className="tw-text-xl tw-font-semibold tw-text-white">
-        Wallet gallery
+        {t(context.locale, "profileCms.walletGallery.title")}
       </h3>
       <p className="tw-mt-2 tw-text-sm tw-text-iron-300">
-        {wallets.length} wallet{wallets.length === 1 ? "" : "s"}
-        {blockNumber ? ` at block ${blockNumber}` : ""}
-        {capturedAt ? `, captured ${formatDate(capturedAt)}` : ""}
+        {t(
+          context.locale,
+          wallets.length === 1
+            ? "profileCms.walletGallery.summary.one"
+            : "profileCms.walletGallery.summary.many",
+          { count: formatInteger(context.locale, wallets.length) }
+        )}
       </p>
+      {blockNumber || capturedAt ? (
+        <dl className="tw-mt-3 tw-grid tw-gap-2 tw-text-sm tw-text-iron-300 sm:tw-grid-cols-2">
+          {blockNumber ? (
+            <div>
+              <dt className="tw-font-semibold tw-text-iron-100">
+                {t(context.locale, "profileCms.walletGallery.blockNumber")}
+              </dt>
+              <dd>{formatInteger(context.locale, blockNumber)}</dd>
+            </div>
+          ) : null}
+          {capturedAt ? (
+            <div>
+              <dt className="tw-font-semibold tw-text-iron-100">
+                {t(context.locale, "profileCms.walletGallery.capturedAt")}
+              </dt>
+              <dd>{formatCmsDate(context.locale, capturedAt)}</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : null}
       {featuredPageIds.length ? (
         <ul className="tw-mt-4 tw-flex tw-flex-wrap tw-gap-2">
           {featuredPageIds.map((pageId) => {
@@ -573,8 +667,12 @@ function DeepZoomBlock({
   const asset = getAsset(context, manifest?.source_asset_id);
   return (
     <InteractiveFallback
-      title="Deep zoom preview"
-      description="This V1 renderer keeps deep zoom static until the interactive viewer is enabled."
+      locale={context.locale}
+      title={t(context.locale, "profileCms.interactive.deepZoom.title")}
+      description={t(
+        context.locale,
+        "profileCms.interactive.deepZoom.description"
+      )}
       asset={asset}
     />
   );
@@ -597,7 +695,10 @@ function HtmlEmbedBlock({
       <iframe
         className="tw-aspect-video tw-w-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
         src={assetUrl}
-        title={asset?.alt_text ?? "Embedded profile website media"}
+        title={
+          asset?.alt_text ??
+          t(context.locale, "profileCms.interactive.embed.iframeTitle")
+        }
         sandbox={sanitizeSandboxPermissions(policy.sandbox_permissions)}
         loading="lazy"
         referrerPolicy="no-referrer"
@@ -607,8 +708,12 @@ function HtmlEmbedBlock({
 
   return (
     <InteractiveFallback
-      title="Embedded media preview"
-      description="This embed is not marked for sandboxed rendering."
+      locale={context.locale}
+      title={t(context.locale, "profileCms.interactive.embed.title")}
+      description={t(
+        context.locale,
+        "profileCms.interactive.embed.description"
+      )}
       asset={fallbackAsset ?? asset}
     />
   );
@@ -628,8 +733,12 @@ function ObjectViewerBlock({
   );
   return (
     <InteractiveFallback
-      title="3D object preview"
-      description="This V1 renderer shows the declared fallback until the object viewer island is enabled."
+      locale={context.locale}
+      title={t(context.locale, "profileCms.interactive.object.title")}
+      description={t(
+        context.locale,
+        "profileCms.interactive.object.description"
+      )}
       asset={fallbackAsset ?? asset}
       href={resolveAssetUrl(asset)}
     />
@@ -650,8 +759,11 @@ function RoomViewerBlock({
     : null;
   return (
     <InteractiveFallback
-      title={room?.title ?? "Room preview"}
-      description="This V1 renderer keeps room navigation static until the room viewer island is enabled."
+      locale={context.locale}
+      title={
+        room?.title ?? t(context.locale, "profileCms.interactive.room.title")
+      }
+      description={t(context.locale, "profileCms.interactive.room.description")}
       asset={poster}
       href={fallbackHref}
     />
@@ -661,13 +773,19 @@ function RoomViewerBlock({
 function AssetImage({
   asset,
   caption,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly asset: CmsAssetV1 | null | undefined;
   readonly caption?: string | undefined;
+  readonly locale?: SupportedLocale | undefined;
 }) {
   const assetUrl = resolveAssetUrl(asset);
   if (!assetUrl || !asset) {
-    return <UnsupportedBlock label="Image unavailable" />;
+    return (
+      <UnsupportedBlock
+        label={t(locale, "profileCms.block.imageUnavailable")}
+      />
+    );
   }
 
   const altText = asset.decorative ? "" : (asset.alt_text ?? "");
@@ -702,10 +820,13 @@ function MediaCaption({ asset }: { readonly asset: CmsAssetV1 | undefined }) {
   );
 }
 
-function getMediaCaptionTrackSrc(asset: CmsAssetV1 | undefined): string {
+function getMediaCaptionTrackSrc(
+  asset: CmsAssetV1 | undefined,
+  locale: SupportedLocale
+): string {
   const caption = asset?.alt_text?.trim();
   if (!caption) {
-    return EMPTY_MEDIA_CAPTION_TRACK_SRC;
+    return getWebVttDataUri(t(locale, "profileCms.media.noCaptions"));
   }
 
   return getWebVttDataUri(caption);
@@ -755,11 +876,13 @@ function ReferencePanel({
 }
 
 function InteractiveFallback({
+  locale = DEFAULT_LOCALE,
   title,
   description,
   asset,
   href,
 }: {
+  readonly locale?: SupportedLocale | undefined;
   readonly title: string;
   readonly description: string;
   readonly asset?: CmsAssetV1 | null | undefined;
@@ -768,7 +891,7 @@ function InteractiveFallback({
   return (
     <section className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-5">
       <div className="tw-grid tw-gap-4 md:tw-grid-cols-[16rem_minmax(0,1fr)]">
-        <AssetImage asset={asset} />
+        <AssetImage asset={asset} locale={locale} />
         <div>
           <h3 className="tw-text-xl tw-font-semibold tw-text-white">{title}</h3>
           <p className="tw-mt-2 tw-text-base tw-leading-7 tw-text-iron-300">
@@ -779,7 +902,7 @@ function InteractiveFallback({
               className="tw-mt-4 tw-inline-flex tw-min-h-10 tw-items-center tw-border tw-border-solid tw-border-iron-700 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400 hover:tw-text-white"
               href={href}
             >
-              Open source media
+              {t(locale, "profileCms.interactive.openSourceMedia")}
             </CmsLink>
           ) : null}
         </div>
@@ -820,9 +943,13 @@ function CmsLink({
   );
 }
 
-function createRendererContext(cmsPackage: CmsPackageV1): RendererContext {
+function createRendererContext(
+  cmsPackage: CmsPackageV1,
+  locale: SupportedLocale
+): RendererContext {
   return {
     cmsPackage,
+    locale,
     assetMap: new Map(
       cmsPackage.payload.assets.map((asset) => [asset.id, asset])
     ),
@@ -939,14 +1066,14 @@ function getStringArray(
   return value.filter((item): item is string => typeof item === "string");
 }
 
-function formatDate(value: string): string {
+function formatCmsDate(locale: SupportedLocale, value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return new Intl.DateTimeFormat("en", {
+  return formatLocalizedDate(locale, date, {
     dateStyle: "medium",
     timeZone: "UTC",
-  }).format(date);
+  });
 }

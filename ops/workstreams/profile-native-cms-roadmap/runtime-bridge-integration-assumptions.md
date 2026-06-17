@@ -70,3 +70,20 @@ All expected backend-envelope assumptions are localized under
 `lib/profile-cms/runtime/fetcher.ts`. When generated backend API models land,
 the adapter can be replaced without changing the route, renderer, or profile
 header contract.
+
+## I18n Fallback Debt
+
+- Route/component: `app/[user]/[...cmsPath]`,
+  `components/profile-cms/*`, and the profile header Website link.
+- Current coverage: renderer chrome, route state/error copy, fallback labels,
+  accessible names, wallet-gallery counts, and dates are message-backed.
+- Current fallback: profile CMS routes use `?locale=` when present and fall
+  back to `en-US`; route-level loading/error states and the profile header
+  Website link currently use `en-US` until a profile-route locale source is
+  available.
+- User impact: non-English users can receive English chrome in loading/error
+  states and the profile header link even though the core renderer path is
+  locale-ready.
+- Remediation: introduce a profile-route locale source, pass it through profile
+  header rendering, and add localized dictionaries beyond the canonical
+  `en-US` source messages.
