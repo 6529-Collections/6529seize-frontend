@@ -35,6 +35,7 @@ import { mainnet } from "viem/chains";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
+const PUBLIC_API_BASE = "https://api.6529.io";
 const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const MAINNET_RPC_TIMEOUT_MS = 5_000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
@@ -137,10 +138,11 @@ function getApiBase(): string {
 }
 
 function buildApiUrl(
+  base: string,
   endpoint: string,
   params?: Record<string, string | number | undefined>
 ): string {
-  const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${getApiBase()}/`);
+  const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${base}/`);
 
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -151,6 +153,24 @@ function buildApiUrl(
   }
 
   return url.toString();
+}
+
+function normalizeApiOrigin(base: string): string {
+  try {
+    const url = new URL(`${trimTrailingSlashes(base)}/`);
+    return url.origin.toLowerCase();
+  } catch {
+    return trimTrailingSlashes(base).toLowerCase();
+  }
+}
+
+function getApiBases(): readonly string[] {
+  const primary = getApiBase();
+  if (normalizeApiOrigin(primary) === normalizeApiOrigin(PUBLIC_API_BASE)) {
+    return [primary];
+  }
+
+  return [primary, PUBLIC_API_BASE];
 }
 
 function getCallerApiAuth(context?: ApiContext): string | undefined {
@@ -190,6 +210,14 @@ function createApiHeaders(context?: ApiContext): HeadersInit {
   return headers;
 }
 
+const PUBLIC_API_HEADERS: HeadersInit = {
+  accept: "application/json",
+};
+
+function shouldRetryApiStatus(status: number): boolean {
+  return status >= 500 && status < 600;
+}
+
 async function getApiFetch(): Promise<typeof fetch> {
   if (typeof window !== "undefined") {
     return fetch;
@@ -210,15 +238,42 @@ async function fetchApiJson<T>(
   context?: ApiContext
 ): Promise<T> {
   const fetchImpl = await getApiFetch();
-  const response = await fetchImpl(buildApiUrl(endpoint, params), {
-    headers: createApiHeaders(context),
-  });
+  const bases = getApiBases();
+  let lastStatus: number | undefined;
+  let primaryStatus: number | undefined;
+  let lastError: unknown;
 
-  if (!response.ok) {
-    throw new Error(`6529 API request failed with status ${response.status}.`);
+  for (const [index, base] of bases.entries()) {
+    try {
+      const response = await fetchImpl(buildApiUrl(base, endpoint, params), {
+        headers: index === 0 ? createApiHeaders(context) : PUBLIC_API_HEADERS,
+      });
+
+      if (response.ok) {
+        return (await response.json()) as T;
+      }
+
+      lastStatus = response.status;
+      if (index === 0) {
+        primaryStatus = response.status;
+      }
+
+      if (!shouldRetryApiStatus(response.status)) {
+        break;
+      }
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return (await response.json()) as T;
+  const status = primaryStatus ?? lastStatus;
+  if (status !== undefined) {
+    throw new Error(`6529 API request failed with status ${status}.`);
+  }
+
+  throw new Error("6529 API request failed.", {
+    cause: lastError,
+  });
 }
 
 async function fetchOptionalApiJson<T>(
