@@ -578,7 +578,7 @@ export function WaveTrustSignals({
       getVisibilityToneClasses(variant, waveScore?.visibility_score)
     )} ${
       hasRichTooltip
-        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline"
+        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline desktop-hover:hover:tw-z-[10000] focus:tw-z-[10000] focus-visible:tw-z-[10000]"
         : ""
     }`;
     const summaryChipContent = (
