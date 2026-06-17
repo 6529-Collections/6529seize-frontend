@@ -71,19 +71,49 @@ it('disables create button when no filters selected', () => {
   expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
 });
 
-it('creates group and marks visible on save', async () => {
+it('shows save button when editing an existing group', () => {
+  mockValidate.mockReturnValue({ valid: false, issues: [] });
+  renderActions({ originalGroup: { id: 'old' } as any });
+  expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  expect(screen.queryByRole('button', { name: 'Create' })).not.toBeInTheDocument();
+});
+
+it('creates group and marks visible on create', async () => {
   const groupConfig = {
     ...defaultGroup,
     name: 'New Group',
+    group: { ...defaultGroup.group, identity_addresses: ['0x1'] },
+  };
+  mockValidate.mockReturnValue({ valid: true, issues: [] });
+  mockSubmit.mockResolvedValueOnce({ ok: true, group: { id: '123' }, published: true });
+
+  const { auth, onCompleted } = renderActions({ groupConfig });
+
+  await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+
+  await waitFor(() => expect(mockSubmit).toHaveBeenCalledTimes(1));
+  expect(mockSubmit).toHaveBeenCalledWith({
+    payload: groupConfig,
+    previousGroup: null,
+    currentHandle: 'alice',
+  });
+  expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group created.', type: 'success' });
+  expect(onCompleted).toHaveBeenCalled();
+});
+
+it('saves group changes in edit mode', async () => {
+  const groupConfig = {
+    ...defaultGroup,
+    name: 'Edited Group',
     group: { ...defaultGroup.group, identity_addresses: ['0x1'] },
   };
   const originalGroup = { id: 'old', created_by: { handle: 'Alice' } } as any;
   mockValidate.mockReturnValue({ valid: true, issues: [] });
   mockSubmit.mockResolvedValueOnce({ ok: true, group: { id: '123' }, published: true });
 
-  const { auth, queryCtx, onCompleted } = renderActions({ groupConfig, originalGroup });
+  const { auth, onCompleted } = renderActions({ groupConfig, originalGroup });
 
-  await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Save' }));
 
   await waitFor(() => expect(mockSubmit).toHaveBeenCalledTimes(1));
   expect(mockSubmit).toHaveBeenCalledWith({
@@ -91,6 +121,6 @@ it('creates group and marks visible on save', async () => {
     previousGroup: originalGroup,
     currentHandle: 'alice',
   });
-  expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group created.', type: 'success' });
+  expect(auth.setToast).toHaveBeenCalledWith({ message: 'Group saved.', type: 'success' });
   expect(onCompleted).toHaveBeenCalled();
 });

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useSetTitle } from "@/contexts/TitleContext";
 import {
@@ -18,15 +18,15 @@ export default function CommunityDownloadsTeam() {
   const downloads: TeamDownload[] = [
     {
       created_at: "2023-05-10 11:44:03",
-      url: "https://arweave.net/lRR1YuRwnThzKVXNIuDCbA-LfyfyZYU6sezNtF9-Dn0",
+      url: "https://media.6529.io/arweave/lRR1YuRwnThzKVXNIuDCbA-LfyfyZYU6sezNtF9-Dn0",
     },
     {
       created_at: "2023-03-02 10:42:49",
-      url: "https://arweave.net/iDa7cvYLdS95XNnISou4h3Zzvt0qu6w7BUXJiGrCyVE",
+      url: "https://media.6529.io/arweave/iDa7cvYLdS95XNnISou4h3Zzvt0qu6w7BUXJiGrCyVE",
     },
     {
       created_at: "2024-04-11 16:02:56",
-      url: "https://arweave.net/Q1asRH7r36XAbAghCL_PbI0eZufThkMMnhYiD55KYc4",
+      url: "https://media.6529.io/arweave/Q1asRH7r36XAbAghCL_PbI0eZufThkMMnhYiD55KYc4",
     },
   ];
 

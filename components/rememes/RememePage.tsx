@@ -25,12 +25,14 @@ import {
   formatAddress,
   isIPFS,
   isUrl,
-  numberWithCommas,
   parseIpfsUrl,
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import {
@@ -45,18 +47,24 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useEnsName } from "wagmi";
+import {
+  getRememeDetailApiQuery,
+  getRememeDetailHref,
+  getRouteHrefWithLocale,
+} from "./rememesRouteParams";
 
 export { printMemeReferences } from "@/components/rememes/RememeReferences";
 
 interface Props {
   contract: string;
   id: string;
+  locale?: SupportedLocale | undefined;
 }
 
 enum Tabs {
-  LIVE = "Overview",
-  METADATA = "Metadata",
-  REFERENCES = "References",
+  LIVE = "overview",
+  METADATA = "metadata",
+  REFERENCES = "references",
 }
 
 function getRememeTitle(rememe: Rememe) {
@@ -171,11 +179,13 @@ function RememeExternalLink({
   children,
   align = "center",
   openInNewTab = true,
+  ariaLabel,
 }: {
   readonly href: string;
   readonly children: ReactNode;
   readonly align?: "center" | "start" | undefined;
   readonly openInNewTab?: boolean | undefined;
+  readonly ariaLabel?: string | undefined;
 }) {
   const alignmentClass =
     align === "start" ? "tw-items-start" : "tw-items-center";
@@ -186,10 +196,14 @@ function RememeExternalLink({
       {...(openInNewTab
         ? { target: "_blank", rel: "noopener noreferrer" }
         : {})}
-      className={`tw-inline-flex tw-min-w-0 ${alignmentClass} tw-gap-3 tw-break-all tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-no-underline hover:tw-text-iron-300 md:tw-text-lg md:tw-leading-6`}
+      aria-label={ariaLabel}
+      className={`tw-inline-flex tw-min-w-0 ${alignmentClass} tw-gap-3 tw-break-all tw-rounded-sm tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-no-underline hover:tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 md:tw-text-lg md:tw-leading-6`}
     >
       {children}
-      <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400" />
+      <ArrowTopRightOnSquareIcon
+        aria-hidden="true"
+        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
+      />
     </a>
   );
 }
@@ -206,10 +220,13 @@ function RememeMetadataLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-inline-flex tw-min-w-0 tw-items-start tw-gap-2 tw-break-all tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300 tw-no-underline hover:tw-text-iron-100"
+      className="tw-inline-flex tw-min-w-0 tw-items-start tw-gap-2 tw-break-all tw-rounded-sm tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300 tw-no-underline hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
     >
       {children}
-      <ArrowTopRightOnSquareIcon className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
+      <ArrowTopRightOnSquareIcon
+        aria-hidden="true"
+        className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
+      />
     </a>
   );
 }
@@ -226,12 +243,13 @@ function RememeTabButton({
   return (
     <button
       type="button"
-      className={`tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out ${
+      className={`tw-m-0 tw-flex tw-items-center tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-4 tw-text-base tw-font-semibold tw-leading-4 tw-no-underline tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
         isActive
           ? "tw-pointer-events-none tw-border-primary-400 tw-text-iron-100"
           : "tw-cursor-pointer tw-border-transparent tw-text-iron-500 hover:tw-border-gray-300 hover:tw-text-iron-100"
       }`}
       onClick={onClick}
+      aria-pressed={isActive}
     >
       {title}
     </button>
@@ -239,6 +257,7 @@ function RememeTabButton({
 }
 
 export default function RememePage(props: Readonly<Props>) {
+  const locale = props.locale ?? DEFAULT_LOCALE;
   const { setTitle } = useTitle();
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
@@ -255,8 +274,12 @@ export default function RememePage(props: Readonly<Props>) {
       }
 
       try {
+        const query = getRememeDetailApiQuery({
+          contract: props.contract,
+          id: props.id,
+        });
         const response = await fetchUrl<DBResponse<Rememe>>(
-          `${publicEnv.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
+          `${publicEnv.API_ENDPOINT}/api/rememes?${query}`
         );
         const fetchedRememe = response.data[0];
         if (response.data.length !== 1 || fetchedRememe === undefined) {
@@ -264,10 +287,11 @@ export default function RememePage(props: Readonly<Props>) {
         }
 
         setRememe(fetchedRememe);
-        const metadataName = getRememeMetadataRecord(fetchedRememe)["name"];
-        if (typeof metadataName === "string" && metadataName.length > 0) {
-          setTitle(`${metadataName} | ReMemes | 6529.io`);
-        }
+        setTitle(
+          t(locale, "rememes.detail.browserTitle", {
+            name: getRememeTitle(fetchedRememe),
+          })
+        );
 
         const responseNfts = await fetchAllPages<NFT>(
           `${
@@ -283,7 +307,7 @@ export default function RememePage(props: Readonly<Props>) {
     }
 
     void fetchRememeAndReferences();
-  }, [props.contract, props.id, setTitle]);
+  }, [locale, props.contract, props.id, setTitle]);
 
   const ensResolutionDeployer = useEnsName({
     address: rememe ? (rememe.deployer as `0x${string}`) : undefined,
@@ -304,7 +328,18 @@ export default function RememePage(props: Readonly<Props>) {
       case Tabs.METADATA:
         return printMetadata();
       case Tabs.REFERENCES:
-        return <RememeReferencesGrid memes={memes} />;
+        return <RememeReferencesGrid memes={memes} locale={locale} />;
+    }
+  }
+
+  function getTabLabel(tab: Tabs) {
+    switch (tab) {
+      case Tabs.LIVE:
+        return t(locale, "rememes.detail.tabs.overview");
+      case Tabs.METADATA:
+        return t(locale, "rememes.detail.tabs.metadata");
+      case Tabs.REFERENCES:
+        return t(locale, "rememes.detail.tabs.references");
     }
   }
 
@@ -331,16 +366,16 @@ export default function RememePage(props: Readonly<Props>) {
         </div>
         <div className="tw-pt-6 md:tw-pt-8 lg:tw-pt-2">
           <section
-            aria-label="ReMeme details"
+            aria-label={t(locale, "rememes.detail.sections.details")}
             className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 md:tw-pb-8"
           >
             <div className="tw-space-y-5">
-              <RememeInfoMetric label="Collection">
+              <RememeInfoMetric label={t(locale, "rememes.detail.collection")}>
                 {getRememeTokenLabel(rememe)}
               </RememeInfoMetric>
               {!isOpenSeaStorefront && (
                 <RememeInfoMetric
-                  label="Created by"
+                  label={t(locale, "rememes.detail.createdBy")}
                   valueClassName="!tw-flex-nowrap [&_a]:tw-text-white [&_a:hover]:tw-text-iron-300"
                 >
                   <RememeAddressValue
@@ -351,7 +386,7 @@ export default function RememePage(props: Readonly<Props>) {
               )}
               {addedByVisible && (
                 <RememeInfoMetric
-                  label="Added by"
+                  label={t(locale, "rememes.detail.addedBy")}
                   valueClassName="!tw-flex-nowrap [&_a]:tw-text-white [&_a:hover]:tw-text-iron-300"
                 >
                   <RememeAddressValue
@@ -368,6 +403,9 @@ export default function RememePage(props: Readonly<Props>) {
                 <div className="tw-flex tw-min-w-0">
                   <RememeExternalLink
                     href={`https://etherscan.io/token/${rememe.contract}/?a=${rememe.id}`}
+                    ariaLabel={t(locale, "rememes.detail.external.etherscan", {
+                      collectionName: getRememeCollectionName(rememe),
+                    })}
                   >
                     <Image
                       unoptimized
@@ -375,7 +413,8 @@ export default function RememePage(props: Readonly<Props>) {
                       height={0}
                       style={{ width: "20px", height: "auto" }}
                       src="/etherscan_w.png"
-                      alt="etherscan"
+                      alt=""
+                      aria-hidden="true"
                     />
                     <span>{getRememeCollectionName(rememe)}</span>
                   </RememeExternalLink>
@@ -385,8 +424,14 @@ export default function RememePage(props: Readonly<Props>) {
                     <RememeExternalLink
                       href={rememe.contract_opensea_data.externalUrl}
                       openInNewTab={false}
+                      ariaLabel={t(locale, "rememes.detail.external.website", {
+                        url: rememe.contract_opensea_data.externalUrl,
+                      })}
                     >
-                      <GlobeAltIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-400" />
+                      <GlobeAltIcon
+                        aria-hidden="true"
+                        className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-text-iron-400"
+                      />
                       <span>{rememe.contract_opensea_data.externalUrl}</span>
                     </RememeExternalLink>
                   </div>
@@ -395,6 +440,9 @@ export default function RememePage(props: Readonly<Props>) {
                   <div className="tw-flex tw-min-w-0">
                     <RememeExternalLink
                       href={`https://x.com/${rememe.contract_opensea_data.twitterUsername}`}
+                      ariaLabel={t(locale, "rememes.detail.external.twitter", {
+                        username: rememe.contract_opensea_data.twitterUsername,
+                      })}
                     >
                       <Image
                         unoptimized
@@ -402,7 +450,8 @@ export default function RememePage(props: Readonly<Props>) {
                         height={0}
                         style={{ width: "20px", height: "auto" }}
                         src="/twitter.png"
-                        alt={`${rememe.contract_opensea_data.twitterUsername} Twitter`}
+                        alt=""
+                        aria-hidden="true"
                       />
                       <span>
                         @{rememe.contract_opensea_data.twitterUsername}
@@ -461,22 +510,31 @@ export default function RememePage(props: Readonly<Props>) {
       <section className="tw-pb-5 tw-pt-3">
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
           <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
-            Replicas
+            {t(locale, "rememes.detail.replicas.title")}
           </h2>
           <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400">
-            (x{numberWithCommas(rememe.replicas.length)})
+            {t(locale, "rememes.detail.replicas.count", {
+              count: formatInteger(locale, rememe.replicas.length),
+            })}
           </span>
         </div>
         <div className="tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500">
-          * Replicas are tokens with identical images
+          {t(locale, "rememes.detail.replicas.description")}
         </div>
         <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           {rememe.replicas
             .filter((rep) => Number(rep) !== Number.parseInt(rememe.id, 10))
             .map((rep) => (
               <Link
-                href={`/rememes/${rememe.contract}/${rep}`}
-                className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 hover:tw-text-white"
+                href={getRememeDetailHref({
+                  contract: rememe.contract,
+                  id: rep,
+                  locale,
+                })}
+                aria-label={t(locale, "rememes.detail.replicas.link", {
+                  tokenId: rep,
+                })}
+                className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 key={`${rememe.contract}-${rep}-replica`}
               >
                 #{rep}
@@ -582,16 +640,19 @@ export default function RememePage(props: Readonly<Props>) {
         <section>
           <div className="tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 md:tw-grid-cols-3 md:tw-gap-x-10">
             <div className="tw-min-w-0 md:tw-col-span-2">
-              <RememeInfoMetric label="Token URI">
+              <RememeInfoMetric label={t(locale, "rememes.detail.tokenUri")}>
                 <RememeExternalLink href={rememe.token_uri} align="start">
-                  <LinkIcon className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 md:tw-mt-1" />
+                  <LinkIcon
+                    aria-hidden="true"
+                    className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 md:tw-mt-1"
+                  />
                   <span className="tw-min-w-0 tw-break-words">
                     {rememe.token_uri}
                   </span>
                 </RememeExternalLink>
               </RememeInfoMetric>
             </div>
-            <RememeInfoMetric label="Token Type">
+            <RememeInfoMetric label={t(locale, "rememes.detail.tokenType")}>
               {rememe.token_type}
             </RememeInfoMetric>
           </div>
@@ -599,7 +660,7 @@ export default function RememePage(props: Readonly<Props>) {
 
         {metadataRows.length > 0 && (
           <AdditionalDetailsSection
-            title="Metadata"
+            title={t(locale, "rememes.detail.metadata.title")}
             icon={CodeBracketSquareIcon}
           >
             <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
@@ -625,7 +686,10 @@ export default function RememePage(props: Readonly<Props>) {
         )}
 
         {attributes.length > 0 && (
-          <AdditionalDetailsSection title="Properties" icon={SwatchIcon}>
+          <AdditionalDetailsSection
+            title={t(locale, "rememes.detail.properties.title")}
+            icon={SwatchIcon}
+          >
             <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
               {attributes.map((attribute) => (
                 <MetadataCard
@@ -648,7 +712,7 @@ export default function RememePage(props: Readonly<Props>) {
 
     return (
       <nav
-        aria-label="ReMemes page sections"
+        aria-label={t(locale, "rememes.detail.sections.tabs")}
         className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
@@ -656,7 +720,7 @@ export default function RememePage(props: Readonly<Props>) {
             {Object.values(Tabs).map((tab) => (
               <RememeTabButton
                 key={`${tab}-tab`}
-                title={tab}
+                title={getTabLabel(tab)}
                 isActive={activeTab === tab}
                 onClick={() => setActiveTab(tab)}
               />
@@ -674,20 +738,23 @@ export default function RememePage(props: Readonly<Props>) {
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-mb-0 tw-flex tw-items-center">
               <Link
-                href="/rememes"
+                href={getRouteHrefWithLocale({ href: "/rememes", locale })}
+                aria-label={t(locale, "rememes.detail.backLink.ariaLabel")}
                 className="tw-group -tw-ml-2 tw-inline-flex tw-items-center tw-gap-2 tw-rounded-md tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               >
                 <ArrowLeftIcon
                   aria-hidden="true"
                   className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform group-hover:-tw-translate-x-0.5"
                 />
-                ReMemes
+                {t(locale, "rememes.title")}
               </Link>
             </div>
             {rememe ? (
               <h1
                 className="tw-mb-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 md:tw-flex-nowrap md:tw-gap-x-0"
-                aria-label={`ReMemes - ${getRememeTitle(rememe)}`}
+                aria-label={t(locale, "rememes.detail.heading.ariaLabel", {
+                  name: getRememeTitle(rememe),
+                })}
               >
                 <span className="tw-shrink-0">
                   <Image
@@ -697,7 +764,7 @@ export default function RememePage(props: Readonly<Props>) {
                     height={0}
                     style={{ width: "200px", height: "auto" }}
                     src="/re-memes.png"
-                    alt="re-memes"
+                    alt={t(locale, "rememes.logoAlt")}
                   />
                 </span>
                 <span
@@ -716,7 +783,7 @@ export default function RememePage(props: Readonly<Props>) {
                 height={0}
                 style={{ width: "200px", height: "auto" }}
                 src="/re-memes.png"
-                alt="re-memes"
+                alt={t(locale, "rememes.logoAlt")}
               />
             )}
           </div>

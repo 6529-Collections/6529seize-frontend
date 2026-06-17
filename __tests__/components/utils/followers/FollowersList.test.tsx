@@ -32,6 +32,7 @@ describe('FollowersList', () => {
       { identity: { id: '2', handle: 'b' } } as any,
     ];
     render(<FollowersList followers={followers} />);
+    expect(screen.getByRole('list', { name: 'Followers' })).toBeInTheDocument();
     expect(Follower).toHaveBeenCalledTimes(2);
     expect(screen.getAllByTestId('follower').length).toBe(2);
   });

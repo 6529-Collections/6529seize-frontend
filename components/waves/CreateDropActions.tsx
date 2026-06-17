@@ -355,6 +355,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   data-testid="drop-actions-chevron-motion"
                   {...chevronMotionProps}
                   onClick={onSetShowIconsClick}
+                  type="button"
+                  aria-label="Show drop actions"
                   className={`tw-absolute tw-inset-y-0 tw-left-0 tw-my-auto tw-flex-shrink-0 ${
                     (isDropMode && isRequiredMetadataMissing) ||
                     isRequiredMediaMissing ||

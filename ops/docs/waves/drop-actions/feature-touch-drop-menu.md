@@ -13,8 +13,8 @@ Use the touch drop menu to run drop actions without leaving the thread.
 
 ## Entry Points
 
-- Open a wave, direct-message thread, or single-drop overlay on a touch surface
-  that does not expose hover controls.
+- Open a wave, direct-message thread, or single-drop overlay in the compact
+  mobile/tablet layout on a touch surface.
 - Press and hold an eligible drop, or use `Open drop actions` when that button
   is the touch entry surface.
 - On leaderboard list cards, press and hold the card to open the compact
@@ -22,13 +22,18 @@ Use the touch drop menu to run drop actions without leaving the thread.
 
 ## Menu Entry Rules
 
-- Chat drops, touch small layouts: press and hold for about `500ms`.
-- Chat drops, touch medium+ layouts: tap `Open drop actions` in the drop
-  header. Long-press does not open the menu in this layout.
-- Winner and participation drops (including memes variants): press and hold the
-  drop on touch layouts, including medium+ touch widths.
-- Hybrid touchscreen desktops/laptops that still expose hover support use the
-  desktop drop action controls instead of the touch sheet.
+- Touch drops in compact mobile/tablet layouts: press and hold for about
+  `500ms`.
+- Compact touch layouts use the touch sheet even when the browser also reports
+  hover support.
+- Chat drops in compact mobile/tablet layouts can also expose `Open drop
+actions` in the drop header.
+- Desktop-width layouts with hover support use desktop drop action controls
+  instead of the touch sheet, even when the hardware reports a touchscreen.
+- Desktop-width touch surfaces without hover support keep the touch sheet so
+  drop actions remain reachable.
+- Hybrid touchscreen desktops/laptops use desktop drop action controls when
+  their browser reports hover support.
 - If a chat drop is in edit mode, touch-menu entry is blocked for that drop.
 
 ## What the Menu Can Show
@@ -71,10 +76,12 @@ Use the touch drop menu to run drop actions without leaving the thread.
 
 ## Common Scenarios
 
-- Chat drops on touch small layouts open the menu after a press-and-hold.
-- Chat drops on touch medium+ layouts use `Open drop actions` instead of
-  long-press.
-- Winner and participation drops support touch long-press across touch widths.
+- Touch drops on compact mobile/tablet layouts open the menu after a
+  press-and-hold.
+- Chat drops on compact mobile/tablet layouts can use `Open drop actions`
+  instead of long-press.
+- Winner and participation drops support touch long-press in compact
+  mobile/tablet layouts and on touch-only desktop-width surfaces without hover.
 - Leaderboard list cards keep vertical scrolling responsive until the hold
   completes, then show the compact action sheet.
 - Wave admins can use the same touch sheet to change the wave's pinned
@@ -99,8 +106,9 @@ Use the touch drop menu to run drop actions without leaving the thread.
 ## Limitations / Notes
 
 - Menu composition differs by drop type and current user/session state.
-- Touchscreen laptops with mouse/trackpad hover support are treated as desktop
-  interaction surfaces.
+- Touchscreen laptops and desktops are treated as desktop interaction surfaces
+  at desktop-width viewports when hover controls are available. Touch-only
+  desktop-width surfaces keep the touch sheet fallback.
 - Link preview visibility actions are not in this menu. Use preview-card
   controls to hide previews, and use the desktop `More` menu to restore them
   after they are hidden.

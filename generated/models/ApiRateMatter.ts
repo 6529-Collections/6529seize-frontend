@@ -15,5 +15,6 @@ import { HttpFile } from '../http/http';
 
 export enum ApiRateMatter {
     Rep = 'REP',
-    Cic = 'CIC'
+    Cic = 'CIC',
+    WaveRep = 'WAVE_REP'
 }

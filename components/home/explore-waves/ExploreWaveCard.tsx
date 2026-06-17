@@ -9,6 +9,7 @@ import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { SidebarWave } from "@/types/waves.types";
+import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -62,6 +63,12 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <span className="tw-m-0 tw-line-clamp-1 tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-white tw-transition-colors group-hover:tw-text-white/80 sm:tw-text-base">
           {wave.name}
         </span>
+        <WaveTrustSignals
+          waveRep={wave.waveRep}
+          waveScore={wave.waveScore}
+          variant="header-inline"
+          className="tw-mt-3"
+        />
 
         {descriptionPreview && (
           <MessagePreviewContent previewContent={descriptionPreview} />
@@ -104,7 +111,7 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
+      className="tw-mt-2.5 tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-1 tw-overflow-hidden tw-text-iron-500"
       textClassName="tw-line-clamp-2 tw-break-words tw-text-[10px] tw-font-normal tw-leading-tight sm:tw-text-xs"
       linkify={false}
     />

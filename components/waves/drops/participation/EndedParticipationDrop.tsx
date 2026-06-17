@@ -9,12 +9,11 @@ import type { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DropCurationButton from "../DropCurationButton";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import WaveDropActions from "../WaveDropActions";
@@ -105,8 +104,8 @@ export default function EndedParticipationDrop({
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
-  const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { canUseDesktopHoverActions, canUseTouchActionSheet } =
+    useDropActionInteractionMode();
   const showIdentity = identityMode !== "hidden";
   const isStackedTimestamp = timestampLayout === "stacked";
   const shouldOffsetRows = showIdentity && !inlineAuthorOnDesktop;
@@ -118,10 +117,19 @@ export default function EndedParticipationDrop({
   };
 
   const handleLongPress = useCallback(() => {
-    if (!showInteractions || !hasTouch) return;
+    if (!showInteractions || !canUseTouchActionSheet) return;
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch, showInteractions]);
+  }, [canUseTouchActionSheet, showInteractions]);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+  }, [canUseTouchActionSheet]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -207,7 +215,7 @@ export default function EndedParticipationDrop({
       mediaContainerHeightClassName="tw-h-96"
       fullWidthMedia={fullWidthMedia}
       fullWidthLinkPreviews={fullWidthLinkPreviews}
-      hasTouch={hasTouch}
+      hasTouch={showInteractions && canUseTouchActionSheet}
       contentPresentation={contentPresentation}
       embedPath={embedPath}
       quotePath={quotePath}
@@ -223,7 +231,7 @@ export default function EndedParticipationDrop({
       } tw-w-full`}
     >
       <div className="tw-group tw-relative tw-w-full">
-        {!isMobile && showInteractions && showReplyAndQuote && (
+        {canUseDesktopHoverActions && showInteractions && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
             activePartIndex={activePartIndex}
@@ -244,9 +252,7 @@ export default function EndedParticipationDrop({
               ? showIdentity && (
                   <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2">
                     <WaveDropAuthorPfp drop={drop} />
-                    <div className="tw-min-w-0 tw-flex-1">
-                      {identityHeader}
-                    </div>
+                    <div className="tw-min-w-0 tw-flex-1">{identityHeader}</div>
                   </div>
                 )
               : showIdentity && <WaveDropAuthorPfp drop={drop} />}
@@ -333,7 +339,7 @@ export default function EndedParticipationDrop({
           {showInteractions && (
             <WaveDropMobileMenu
               drop={drop}
-              isOpen={isSlideUp}
+              isOpen={isSlideUp && canUseTouchActionSheet}
               longPressTriggered={longPressTriggered}
               showReplyAndQuote={showReplyAndQuote}
               setOpen={setIsSlideUp}

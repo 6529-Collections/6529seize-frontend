@@ -34,7 +34,7 @@ jest.mock("@/hooks/useIsTouchDevice", () => ({
 jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
   getMediaGatewayFallbackUrls: (url: string) =>
     url === "ipfs://gpebbles"
-      ? ["https://ipfs.6529.io/ipfs/gpebbles", "https://ipfs.io/ipfs/gpebbles"]
+      ? ["https://media.6529.io/ipfs/gpebbles", "https://ipfs.io/ipfs/gpebbles"]
       : [url],
 }));
 
@@ -69,7 +69,7 @@ describe("OverlappingAvatars", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("falls back from the configured ipfs gateway to ipfs.io", () => {
+  it("falls back from the 6529 resolver to ipfs.io", () => {
     render(
       <OverlappingAvatars
         items={[
@@ -86,7 +86,7 @@ describe("OverlappingAvatars", () => {
     const firstAttempt = screen.getByRole("img", { name: "View @gpebbles" });
     expect(firstAttempt).toHaveAttribute(
       "src",
-      "https://ipfs.6529.io/ipfs/gpebbles"
+      "https://media.6529.io/ipfs/gpebbles"
     );
     expect(firstAttempt).toHaveAttribute("data-unoptimized", "false");
 
@@ -95,7 +95,7 @@ describe("OverlappingAvatars", () => {
     const secondAttempt = screen.getByRole("img", { name: "View @gpebbles" });
     expect(secondAttempt).toHaveAttribute(
       "src",
-      "https://ipfs.6529.io/ipfs/gpebbles"
+      "https://media.6529.io/ipfs/gpebbles"
     );
     expect(secondAttempt).toHaveAttribute("data-unoptimized", "true");
 
