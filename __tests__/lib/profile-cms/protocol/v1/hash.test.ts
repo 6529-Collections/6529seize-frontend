@@ -79,6 +79,41 @@ describe("CMS hash helpers", () => {
       ])
     );
   });
+
+  it("excludes signatures and storage receipts from package hash input", () => {
+    const fixture = withComputedCmsHashes(
+      readFixture("valid/minimal-profile-homepage.package.json")
+    );
+    const mutatedEnvelopes: CmsPackageV1 = {
+      ...fixture,
+      signatures: [
+        {
+          ...fixture.signatures[0]!,
+          signature: "fixture-signature-mutated",
+        },
+      ],
+      storage: [
+        {
+          ...fixture.storage[0]!,
+          provider_content_id: "bafyfixturemutated",
+        },
+      ],
+    };
+    const mutatedContent: CmsPackageV1 = {
+      ...fixture,
+      site: {
+        ...fixture.site,
+        title: "mutated site title",
+      },
+    };
+
+    expect(computeCmsPackageHash(mutatedEnvelopes)).toBe(
+      fixture.integrity.package_hash
+    );
+    expect(computeCmsPackageHash(mutatedContent)).not.toBe(
+      fixture.integrity.package_hash
+    );
+  });
 });
 
 function readFixture(relativePath: string): CmsPackageV1 {

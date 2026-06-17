@@ -303,9 +303,8 @@ Updated docs:
 - Canonical JSON rejects undefined, functions, symbols, bigint, non-finite
   numbers, non-plain objects, and cycles.
 - Hash helper uses `sha256:<64 lowercase hex>`.
-- Package hash input omits only `integrity.package_hash` to avoid
-  self-reference; `integrity.payload_hash`, signatures, and storage receipts
-  remain in the hash input.
+- Package hash input omits `integrity.package_hash`, `signatures`, and
+  `storage` to avoid self-reference and mutable envelope coupling.
 - Default validation accepts fixture signatures/storage for fixture/dev usage.
   Production mode can disable both.
 - Hash enforcement is optional so placeholder-hash fixtures can stay useful
@@ -333,8 +332,11 @@ Coverage from that slice:
 - All three invalid fixtures return documented error codes.
 - Production-mode fixture signature/storage rejection.
 - Unsafe URL-scheme rejection.
+- Plain HTTP asset URI rejection.
+- Unsafe relative URL rejection for backslash and encoded scheme-relative forms.
 - Uppercase hash hex and non-`sha256:` prefix rejection.
 - Type-vs-format schema failures for block types and hash fields.
+- Signature/storage envelope exclusion from package hash input.
 
 ### Bot Review Iteration
 
@@ -344,6 +346,12 @@ Coverage from that slice:
 - Adding an astral-key ordering vector.
 - Narrowing `block_type` issue mapping to enum failures only.
 - Narrowing `hash.invalid` issue mapping to regex failures on known hash fields.
+- Excluding signatures/storage from package hash input and documenting that
+  production signatures attest through EIP-712 rather than signing over their
+  own signature envelope.
+- Removing plain `http:` from the CMS URI allowlist.
+- Rejecting unsafe relative URL forms with backslashes, control characters, and
+  encoded scheme-relative prefixes.
 
 Follow-up changes were made and revalidated locally.
 

@@ -1205,8 +1205,8 @@ function validateSafeUri(
 }
 
 function isSafeUri(value: string, allowRelative: boolean): boolean {
-  if (allowRelative && value.startsWith("/") && !value.startsWith("//")) {
-    return true;
+  if (allowRelative && value.startsWith("/")) {
+    return isSafeRelativeUri(value);
   }
 
   try {
@@ -1215,6 +1215,19 @@ function isSafeUri(value: string, allowRelative: boolean): boolean {
   } catch {
     return false;
   }
+}
+
+function isSafeRelativeUri(value: string): boolean {
+  if (value.startsWith("//")) {
+    return false;
+  }
+
+  if (/[\\\u0000-\u001f\u007f]/.test(value)) {
+    return false;
+  }
+
+  const lowercaseValue = value.toLowerCase();
+  return !lowercaseValue.startsWith("/%2f") && !lowercaseValue.startsWith("/%5c");
 }
 
 function validateEthereumAddress(

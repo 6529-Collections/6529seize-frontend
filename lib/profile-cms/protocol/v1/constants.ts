@@ -100,7 +100,6 @@ export const CMS_SOURCE_PACKET_TYPES = [
 
 export const CMS_SAFE_URI_PROTOCOLS = [
   "https:",
-  "http:",
   "ipfs:",
   "ar:",
   "arweave:",

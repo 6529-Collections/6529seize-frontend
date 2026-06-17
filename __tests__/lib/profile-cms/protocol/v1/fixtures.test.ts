@@ -118,6 +118,78 @@ describe("CMS Phase 1 fixtures", () => {
     );
   });
 
+  it("rejects plain HTTP asset URLs", () => {
+    const fixture = readFixture(
+      path.join(VALID_FIXTURE_DIR, "minimal-profile-homepage.package.json")
+    );
+    const unsafeFixture: CmsPackageV1 = {
+      ...fixture,
+      payload: {
+        ...fixture.payload,
+        assets: fixture.payload.assets.map((asset, index) =>
+          index === 0
+            ? {
+                ...asset,
+                uri: "http://169.254.169.254/latest/meta-data",
+              }
+            : asset
+        ),
+      },
+    };
+
+    const result = validateCmsPackageV1(unsafeFixture);
+
+    expect(result.valid).toBe(false);
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "asset.unsafe_uri",
+          path: "/payload/assets/0/uri",
+        }),
+      ])
+    );
+  });
+
+  it.each(["/\\evil.com", "/%2Fevil.com", "/%5Cevil.com"])(
+    "rejects unsafe relative URL %s",
+    (unsafeUrl) => {
+      const fixture = readFixture(
+        path.join(VALID_FIXTURE_DIR, "minimal-profile-homepage.package.json")
+      );
+      const unsafeFixture: CmsPackageV1 = {
+        ...fixture,
+        payload: {
+          ...fixture.payload,
+          navigation: fixture.payload.navigation.map((navigation, index) =>
+            index === 0
+              ? {
+                  ...navigation,
+                  items: [
+                    {
+                      label: "Unsafe",
+                      url: unsafeUrl,
+                    },
+                  ],
+                }
+              : navigation
+          ),
+        },
+      };
+
+      const result = validateCmsPackageV1(unsafeFixture);
+
+      expect(result.valid).toBe(false);
+      expect(result.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            code: "navigation.unsafe_url",
+            path: "/payload/navigation/0/items/0/url",
+          }),
+        ])
+      );
+    }
+  );
+
   it("rejects non-V1 hash strings at schema time", () => {
     const fixture = readFixture(
       path.join(VALID_FIXTURE_DIR, "minimal-profile-homepage.package.json")

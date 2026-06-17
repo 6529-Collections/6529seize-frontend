@@ -42,13 +42,20 @@ export function withComputedCmsHashes(
 }
 
 export function toPackageHashInput(cmsPackage: CmsPackageV1): unknown {
-  const { integrity, ...packageWithoutIntegrity } = cmsPackage;
+  const {
+    integrity,
+    signatures: packageSignatures,
+    storage: packageStorage,
+    ...packageWithoutMutableEnvelopes
+  } = cmsPackage;
   const { package_hash: packageHash, ...integrityWithoutPackageHash } =
     integrity;
   void packageHash;
+  void packageSignatures;
+  void packageStorage;
 
   return {
-    ...packageWithoutIntegrity,
+    ...packageWithoutMutableEnvelopes,
     integrity: integrityWithoutPackageHash,
   };
 }

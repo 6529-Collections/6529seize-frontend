@@ -73,15 +73,19 @@ sha256:ad8d45da7c8810c3b3096cf0290b853a946e39cf579bfa05f7a9d20e30fa7d80
 Expected package hash:
 
 ```text
-sha256:b8a7cc1340a7e3591c66696efcc7f44c560332bc1a044b7cd124879349607f9b
+sha256:16395e1fece98a76de58fcc4fc42569661b7a3fc88bf33272d5ee2be0c6c4f91
 ```
 
 Package hash input rule for Wave 0:
 
 - Compute and set `integrity.payload_hash` first.
-- Compute package hash over the package with `integrity.package_hash` omitted.
-- Signatures and storage receipts remain part of that package hash input; the
-  self-referential `package_hash` field is the only omitted field.
+- Compute package hash over the package with `integrity.package_hash`,
+  `signatures`, and `storage` omitted.
+- Production signatures should attest to the payload/package hash commitment
+  through the EIP-712 publish flow, not to a package hash that contains their
+  own signature envelope.
+- Storage receipts are verification/delivery evidence and must be verified
+  against their own content IDs and content hashes in the publish/storage wave.
 
 ## Validator Requirements
 
