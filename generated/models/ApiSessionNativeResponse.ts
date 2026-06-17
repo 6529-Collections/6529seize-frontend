@@ -11,8 +11,6 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
 export class ApiSessionNativeResponse {
     'address': string;
     'role'?: string | null;
@@ -81,4 +79,3 @@ export class ApiSessionNativeResponse {
 export enum ApiSessionNativeResponseClientTypeEnum {
     Native = 'native'
 }
-
