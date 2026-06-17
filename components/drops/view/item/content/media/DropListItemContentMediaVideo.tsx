@@ -54,6 +54,10 @@ function DropListItemContentMediaVideo({
   useEffect(() => {
     const videoEl = videoRef.current;
     if (!videoEl || isLoading) return;
+    const fullscreenElement = document.fullscreenElement;
+    if (fullscreenElement?.contains(videoEl) ?? false) {
+      return;
+    }
 
     if (shouldAutoPlay) {
       // ensure muted autoplay works

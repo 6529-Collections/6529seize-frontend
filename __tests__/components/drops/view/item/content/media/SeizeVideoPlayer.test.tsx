@@ -86,6 +86,25 @@ describe("SeizeVideoPlayer", () => {
     ).toBeInTheDocument();
   });
 
+  it("does not carry a local mute toggle across source changes", async () => {
+    const { rerender } = render(
+      <SeizeVideoPlayer src="https://example.com/slide-1.mp4" muted={false} />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Mute video" }));
+    expect(
+      screen.getByRole("button", { name: "Unmute video" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <SeizeVideoPlayer src="https://example.com/slide-2.mp4" muted={false} />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Mute video" })
+    ).toBeInTheDocument();
+  });
+
   it("falls back to native iOS video fullscreen when wrapper fullscreen is unavailable", async () => {
     const webkitEnterFullscreen = jest.fn();
     Object.defineProperty(HTMLVideoElement.prototype, "webkitEnterFullscreen", {

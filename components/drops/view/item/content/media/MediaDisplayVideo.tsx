@@ -57,6 +57,10 @@ const MediaDisplayVideo: React.FC<Props> = ({
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid || isLoading) return;
+    const fullscreenElement = document.fullscreenElement;
+    if (fullscreenElement?.contains(vid) ?? false) {
+      return;
+    }
 
     if (!inView || isApp) {
       vid.pause();
