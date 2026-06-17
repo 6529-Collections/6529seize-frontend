@@ -524,17 +524,17 @@ function SeizeCollectionPreviewCard({
     >
       <div
         className={[
-          "tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-py-3 tw-pl-3",
+          "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-items-center tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-p-3",
           isHome
             ? "tw-border-white/10 tw-bg-black/30"
             : "tw-border-iron-700 tw-bg-iron-950/70",
-          !isHome && !hideActions ? "tw-pr-12 sm:tw-pr-3" : "tw-pr-3",
+          !isHome && !hideActions ? "tw-pr-12 sm:tw-pr-3" : "",
         ].join(" ")}
         data-testid="6529-collection-preview-card"
       >
         <div
           className={[
-            "tw-grid tw-h-full tw-min-h-0 tw-min-w-0 tw-items-center tw-gap-3",
+            "tw-grid tw-w-full tw-min-w-0 tw-items-center tw-gap-3 sm:tw-gap-4",
             imageUrl
               ? "tw-grid-cols-[5.5rem,minmax(0,1fr)] sm:tw-grid-cols-[6.75rem,minmax(0,1fr)] md:tw-grid-cols-[8.25rem,minmax(0,1fr)]"
               : "tw-grid-cols-1",
@@ -546,22 +546,25 @@ function SeizeCollectionPreviewCard({
               target={linkTarget}
               rel={linkRel}
               onClick={(e) => e.stopPropagation()}
-              className="tw-relative tw-block tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-no-underline"
+              className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-black tw-bg-black tw-p-1 tw-no-underline tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05)]"
+              data-testid="6529-collection-preview-image-frame"
             >
-              <Image
-                src={imageUrl}
-                alt={preview.title}
-                fill
-                className="tw-object-cover"
-                loading="lazy"
-                sizes="(max-width: 640px) 5.5rem, (max-width: 768px) 6.75rem, 8.25rem"
-                unoptimized
-              />
+              <span className="tw-relative tw-block tw-h-full tw-w-full">
+                <Image
+                  src={imageUrl}
+                  alt={preview.title}
+                  fill
+                  className="tw-object-contain"
+                  loading="lazy"
+                  sizes="(max-width: 640px) 5.5rem, (max-width: 768px) 6.75rem, 8.25rem"
+                  unoptimized
+                />
+              </span>
             </Link>
           )}
-          <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
+          <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden md:tw-gap-2">
             {preview.kicker && (
-              <div className="tw-[overflow-wrap:anywhere] tw-line-clamp-1 tw-break-words tw-text-xs tw-font-medium tw-text-iron-400">
+              <div className="tw-[overflow-wrap:anywhere] tw-line-clamp-1 tw-break-words tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400">
                 {wrapLongUnbrokenSegments(preview.kicker)}
               </div>
             )}
@@ -570,12 +573,12 @@ function SeizeCollectionPreviewCard({
               target={linkTarget}
               rel={linkRel}
               onClick={(e) => e.stopPropagation()}
-              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white md:tw-text-lg"
             >
               {wrapLongUnbrokenSegments(preview.title)}
             </Link>
             {people.length > 0 && (
-              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-overflow-hidden tw-text-xs tw-leading-5">
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-overflow-hidden tw-text-xs tw-leading-5 md:tw-text-sm">
                 {people.map((person, index) => {
                   const personHref = person.href ?? undefined;
                   const personIsExternal = isExternalHref(personHref);
@@ -617,7 +620,7 @@ function SeizeCollectionPreviewCard({
                 {facts.map((fact) => (
                   <span
                     key={`${fact.label}-${fact.value}`}
-                    className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-[11px] tw-leading-5"
+                    className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-[11px] tw-leading-5"
                   >
                     <span className="tw-flex-shrink-0 tw-text-iron-400">
                       {fact.label}

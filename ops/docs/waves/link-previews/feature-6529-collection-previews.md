@@ -79,7 +79,9 @@ supply as final edition size.
 
 - Title: token name, for example `Pebbles #514`
 - Kicker: `NextGen &middot; {collection name}`
-- People: artist profile link when resolvable
+- People:
+  - artist profile link when resolvable
+  - `Collector {profile or display}` when the current owner resolves
 - Facts:
   - `Rarity #{rank} / {supply}`
   - `Mint date {date}`
@@ -110,6 +112,9 @@ the card lands on the real token page.
   the right.
 - Mobile: same left/right structure with smaller fixed thumbnail dimensions so
   chat cards stay scannable and stable.
+- Collection art renders inside a black square matte with a black border and
+  preserved aspect ratio. The card should show the whole NFT image instead of
+  cropping it.
 - Text is clamped and wrapped inside the card; long titles, handles, or trait
   values must not resize the preview frame.
 - Facts and traits wrap into compact chips and overflow is clipped inside the
