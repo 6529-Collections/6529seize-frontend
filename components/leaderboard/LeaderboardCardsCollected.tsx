@@ -2,9 +2,10 @@
 
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
+import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import { Table } from "react-bootstrap";
 import type { Collector, Content } from "./Leaderboard";
 import styles from "./Leaderboard.module.scss";
 import type { LeaderboardMetrics } from "./leaderboard_helpers";
@@ -25,6 +26,7 @@ interface Props {
   collector: Collector;
   selectedSeason: number;
   searchWallets: string[];
+  tdhView: ApiConsolidatedTdhView;
   globalTdhRateChange?: number | undefined;
   seasons: MemeSeason[];
   isLoading: boolean;
@@ -39,7 +41,7 @@ export default function LeaderboardCardsCollectedComponent(
     sort: LeaderboardCardsCollectedSort;
     sort_direction: SortDirection;
   }>({
-    sort: LeaderboardCardsCollectedSort.level,
+    sort: LeaderboardCardsCollectedSort.Level,
     sort_direction: SortDirection.DESC,
   });
 
@@ -53,24 +55,26 @@ export default function LeaderboardCardsCollectedComponent(
         content: props.content,
         collector: props.collector,
         selectedSeason: props.selectedSeason,
+        tdhView: props.tdhView,
+        useGeneratedFilterValues: true,
       },
       props.setIsLoading
     );
 
   function getTDHChange(lead: LeaderboardMetrics) {
-    if (!lead.total_tdh) {
+    if (!lead.tdh) {
       return "";
     }
 
-    const tdhChange = (lead.day_change / lead.total_tdh) * 100;
+    const tdhChange = ((lead.day_change ?? 0) / lead.tdh) * 100;
     return ` (${tdhChange.toFixed(2)}%)`;
   }
 
   function calculateTdhVsCommunity(lead: LeaderboardMetrics) {
-    if (!props.globalTdhRateChange || !lead.day_change || !lead.total_tdh) {
+    if (!props.globalTdhRateChange || !lead.day_change || !lead.tdh) {
       return "-";
     }
-    const tdhChange = (lead.day_change / lead.total_tdh) * 100;
+    const tdhChange = (lead.day_change / lead.tdh) * 100;
     return `${Math.abs(tdhChange / props.globalTdhRateChange).toFixed(2)}x`;
   }
 
@@ -80,27 +84,23 @@ export default function LeaderboardCardsCollectedComponent(
 
   if (leaderboard.length === 0 && !props.isLoading) {
     return (
-      <Container>
-        <Row>
-          <Col>No results found. Change filters and try again.</Col>
-        </Row>
-      </Container>
+      <div className={styles["leaderboardEmpty"]}>
+        No results found. Change filters and try again.
+      </div>
     );
   }
 
   return (
     <>
-      <Container>
-        <Row>
-          <Col>
-            <Table bordered={false} className={styles["leaderboardTable"]}>
+      <div className={styles["leaderboardTableShell"]}>
+        <Table bordered={false} className={styles["leaderboardTable"]}>
               <thead>
                 <tr>
                   <th className={styles["rank"]}>Rank</th>
                   <th className={`${styles["hodlerContainer"]}`}>
                     <span>Collector</span>
                     <span className={styles["totalResults"]}>
-                      {props.isLoading
+                      {props.isLoading && totalResults === 0
                         ? "..."
                         : `x${totalResults.toLocaleString()}`}
                     </span>
@@ -109,7 +109,7 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Level&nbsp;
                       <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.level}
+                        sort_option={LeaderboardCardsCollectedSort.Level}
                         sort={sort}
                         setSort={setSort}
                       />
@@ -119,7 +119,7 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Cards Collected&nbsp;
                       <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.balance}
+                        sort_option={LeaderboardCardsCollectedSort.Balance}
                         sort={sort}
                         setSort={setSort}
                       />
@@ -129,7 +129,7 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Unique Memes&nbsp;
                       <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.unique_memes}
+                        sort_option={LeaderboardCardsCollectedSort.UniqueMemes}
                         sort={sort}
                         setSort={setSort}
                       />
@@ -140,7 +140,7 @@ export default function LeaderboardCardsCollectedComponent(
                       Sets&nbsp;
                       <LeaderboardSort
                         sort_option={
-                          LeaderboardCardsCollectedSort.memes_cards_sets
+                          LeaderboardCardsCollectedSort.MemesCardsSets
                         }
                         sort={sort}
                         setSort={setSort}
@@ -151,7 +151,7 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       TDH&nbsp;
                       <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.boosted_tdh}
+                        sort_option={LeaderboardCardsCollectedSort.Tdh}
                         sort={sort}
                         setSort={setSort}
                       />
@@ -161,7 +161,7 @@ export default function LeaderboardCardsCollectedComponent(
                     <span className="d-flex align-items-center justify-content-center">
                       Daily Change&nbsp;
                       <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.day_change}
+                        sort_option={LeaderboardCardsCollectedSort.DayChange}
                         sort={sort}
                         setSort={setSort}
                       />
@@ -177,40 +177,40 @@ export default function LeaderboardCardsCollectedComponent(
               <tbody>
                 {leaderboard.map((lead: LeaderboardMetrics, index) => {
                   return (
-                    <tr key={lead.consolidation_key}>
+                    <tr key={lead.consolidation_key ?? index}>
                       <td className={styles["rank"]}>
                         {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
                       </td>
-                      <td className="tw-max-w-[20px] tw-truncate">
+                      <td>
                         <LeaderboardCollector
-                          handle={lead.handle}
-                          consolidationKey={lead.consolidation_key}
-                          consolidationDisplay={lead.consolidation_display}
-                          pfp={lead.pfp_url}
-                          level={lead.level}
+                          handle={lead.handle ?? ""}
+                          consolidationKey={lead.consolidation_key ?? ""}
+                          consolidationDisplay={lead.consolidation_display ?? ""}
+                          pfp={lead.pfp_url ?? ""}
+                          level={lead.level ?? 0}
                         />
                       </td>
 
-                      <td className={styles["tdhSub"]}>{lead.level}</td>
+                      <td className={styles["tdhSub"]}>{lead.level ?? 0}</td>
                       <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.balance)}
+                        {numberWithCommas(lead.balance ?? 0)}
                       </td>
                       <td className={styles["tdhSub"]}>
                         {lead.unique_memes
                           ? numberWithCommas(lead.unique_memes)
                           : 0}{" "}
-                        / {numberWithCommas(lead.unique_memes_total)} (
+                        / {numberWithCommas(lead.unique_memes_total ?? 0)} (
                         {formatPercentageFromCounts(
-                          lead.unique_memes,
-                          lead.unique_memes_total
+                          lead.unique_memes ?? 0,
+                          lead.unique_memes_total ?? 0
                         )}
                         )
                       </td>
                       <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.memes_cards_sets)}
+                        {numberWithCommas(lead.memes_cards_sets ?? 0)}
                       </td>
                       <td className={styles["tdhSub"]}>
-                        {numberWithCommas(Math.round(lead.boosted_tdh))}
+                        {numberWithCommas(Math.round(lead.tdh ?? 0))}
                       </td>
                       <td className={styles["tdhSub"]}>
                         {!lead.day_change ? (
@@ -236,10 +236,8 @@ export default function LeaderboardCardsCollectedComponent(
                   );
                 })}
               </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
+        </Table>
+      </div>
       <LeaderboardFooter
         url={myFetchUrl}
         totalResults={totalResults}

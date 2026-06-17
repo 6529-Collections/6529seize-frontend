@@ -5,13 +5,14 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { GlobalTDHHistory, TDHCalc } from "@/entities/ITDH";
 import type { ApiBlocksPage } from "@/generated/models/ApiBlocksPage";
+import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { LeaderboardFocus } from "@/types/enums";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Col, Container, Dropdown, Row } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import {
   SearchModalDisplay,
@@ -43,6 +44,8 @@ export default function Leaderboard(
   props: Readonly<{
     focus: LeaderboardFocus;
     setFocus: (focus: LeaderboardFocus) => void;
+    tdhView: ApiConsolidatedTdhView;
+    setTdhView: (tdhView: ApiConsolidatedTdhView) => void;
   }>
 ) {
   const [content, setContent] = useState<Content>(Content.ALL);
@@ -58,9 +61,25 @@ export default function Leaderboard(
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   const [globalTdhHistory, setGlobalTdhHistory] = useState<GlobalTDHHistory>();
-  const [globalTdhRateChange, setGlobalTdhRateChange] = useState<number>();
-
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isUnboostedTdhView =
+    props.tdhView === ApiConsolidatedTdhView.Unboosted;
+  const selectedNetworkTdh = globalTdhHistory
+    ? isUnboostedTdhView
+      ? globalTdhHistory.total_tdh
+      : globalTdhHistory.total_boosted_tdh
+    : undefined;
+  const selectedNetworkTdhChange = globalTdhHistory
+    ? isUnboostedTdhView
+      ? globalTdhHistory.net_tdh
+      : globalTdhHistory.net_boosted_tdh
+    : undefined;
+  const selectedGlobalTdhRateChange =
+    selectedNetworkTdh !== undefined &&
+    selectedNetworkTdh !== 0 &&
+    selectedNetworkTdhChange !== undefined
+      ? (selectedNetworkTdhChange / selectedNetworkTdh) * 100
+      : undefined;
 
   useEffect(() => {
     if (
@@ -100,20 +119,20 @@ export default function Leaderboard(
       .then((response: DBResponse) => {
         const tdhH = response.data[0];
         setGlobalTdhHistory(tdhH);
-        const change = (tdhH.net_boosted_tdh / tdhH.total_boosted_tdh) * 100;
-        setGlobalTdhRateChange(change);
       })
       .catch((error) => {
         console.error("Failed to fetch global TDH history", error);
         setGlobalTdhHistory(undefined);
-        setGlobalTdhRateChange(undefined);
       });
   }, []);
 
   function printCollectorsDropdown() {
     return (
       <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
-        <Dropdown.Toggle>Collectors: {collector}</Dropdown.Toggle>
+        <Dropdown.Toggle>
+          <span>Collectors: {collector}</span>
+          <span aria-hidden="true" className={styles["dropdownCaret"]} />
+        </Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(Collector).map((collector) => (
             <Dropdown.Item
@@ -132,10 +151,86 @@ export default function Leaderboard(
     );
   }
 
+  function printTdhViewToggle() {
+    const isBoostedTdhView =
+      props.tdhView !== ApiConsolidatedTdhView.Unboosted;
+
+    return (
+      <div
+        className={styles["tdhViewSegmentedControl"]}
+        role="group"
+        aria-label="TDH view"
+      >
+        <button
+          type="button"
+          aria-pressed={isBoostedTdhView}
+          className={`${styles["tdhViewSegment"]} ${
+            isBoostedTdhView ? styles["tdhViewSegmentActive"] : ""
+          }`}
+          onClick={() => props.setTdhView(ApiConsolidatedTdhView.Boosted)}
+        >
+          Boosted
+        </button>
+        <button
+          type="button"
+          aria-pressed={props.tdhView === ApiConsolidatedTdhView.Unboosted}
+          className={`${styles["tdhViewSegment"]} ${
+            props.tdhView === ApiConsolidatedTdhView.Unboosted
+              ? styles["tdhViewSegmentActive"]
+              : ""
+          }`}
+          onClick={() => props.setTdhView(ApiConsolidatedTdhView.Unboosted)}
+        >
+          Unboosted
+        </button>
+        <span className="tw-sr-only" aria-live="polite">
+          {props.tdhView === ApiConsolidatedTdhView.Unboosted
+            ? "Showing unboosted TDH values"
+            : "Showing boosted TDH values"}
+        </span>
+      </div>
+    );
+  }
+
+  function printCardsInteractionsToggle() {
+    return (
+      <>
+        <span>
+          <span
+            onClick={() => props.setFocus(LeaderboardFocus.TDH)}
+            className={`${styles["focus"]} ${
+              props.focus === LeaderboardFocus.TDH
+                ? ""
+                : styles["disabled"]
+            }`}
+          >
+            {LeaderboardFocus.TDH}
+          </span>
+        </span>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <span>
+          <span
+            onClick={() => props.setFocus(LeaderboardFocus.INTERACTIONS)}
+            className={`${styles["focus"]} ${
+              props.focus === LeaderboardFocus.INTERACTIONS
+                ? ""
+                : styles["disabled"]
+            }`}
+          >
+            {LeaderboardFocus.INTERACTIONS}
+          </span>
+        </span>
+      </>
+    );
+  }
+
   function printCollectionsDropdown() {
     return (
       <Dropdown className={styles["contentDropdown"]} drop={"down-centered"}>
-        <Dropdown.Toggle>Collection: {content}</Dropdown.Toggle>
+        <Dropdown.Toggle>
+          <span>Collection: {content}</span>
+          <span aria-hidden="true" className={styles["dropdownCaret"]} />
+        </Dropdown.Toggle>
         <Dropdown.Menu>
           {Object.values(Content).map((content) => (
             <Dropdown.Item key={content} onClick={() => setContent(content)}>
@@ -157,7 +252,8 @@ export default function Leaderboard(
             collector != Collector.MEMES_SETS
           }
         >
-          SZN: {selectedSeason > 0 ? selectedSeason : "All"}
+          <span>SZN: {selectedSeason > 0 ? selectedSeason : "All"}</span>
+          <span aria-hidden="true" className={styles["dropdownCaret"]} />
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <Dropdown.Item onClick={() => setSelectedSeason(0)}>
@@ -177,14 +273,10 @@ export default function Leaderboard(
   }
 
   return (
-    <Container className={`pt-4`}>
-      <Row className="pb-3">
-        <Col
-          className={`d-flex align-items-center`}
-          xs={{ span: showViewAll ? 12 : 6 }}
-          sm={{ span: 6 }}
-        >
-          <h1>
+    <div className={styles["networkPage"]}>
+      <section className={styles["networkHeader"]}>
+        <div className={styles["networkTitleBlock"]}>
+          <h1 className={styles["networkTitle"]}>
             Network{" "}
             {showViewAll && (
               <Link href="/network/nerd">
@@ -192,17 +284,20 @@ export default function Leaderboard(
               </Link>
             )}
           </h1>
-        </Col>
-        {lastTDH && (
-          <Col
-            className={
-              "no-padding d-flex flex-column align-items-end justify-content-center"
-            }
-            xs={{ span: 6 }}
-          >
-            <div className={styles["statsContainer"]}>
-              <span>
-                TDH Block&nbsp;
+          {!showViewAll && (
+            <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3">
+              <span className="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wide tw-text-iron-500">
+                TDH View
+              </span>
+              {printTdhViewToggle()}
+            </div>
+          )}
+        </div>
+        <div className={styles["networkStats"]}>
+          <div className={styles["networkStat"]}>
+            <span className={styles["networkStatLabel"]}>TDH Block</span>
+            <span className={styles["networkStatValue"]}>
+              {lastTDH ? (
                 <a
                   href={`https://etherscan.io/block/${lastTDH.block}`}
                   rel="noopener noreferrer"
@@ -210,138 +305,105 @@ export default function Leaderboard(
                 >
                   {lastTDH.block}
                 </a>
-              </span>
-              <span>
-                Network TDH:{" "}
-                {globalTdhHistory ? (
-                  numberWithCommas(globalTdhHistory.total_boosted_tdh)
-                ) : (
-                  <DotLoader />
-                )}
-              </span>
-              <span>
-                Daily Change:{" "}
-                {globalTdhHistory ? (
-                  <>
-                    {numberWithCommas(globalTdhHistory.net_boosted_tdh)}{" "}
-                    <span className="font-smaller">
-                      (
-                      {(
-                        (globalTdhHistory.net_boosted_tdh /
-                          globalTdhHistory.total_boosted_tdh) *
-                        100
-                      ).toFixed(2)}
-                      %)
-                    </span>
-                  </>
-                ) : (
-                  <DotLoader />
-                )}
-              </span>
-            </div>
-          </Col>
-        )}
-      </Row>
+              ) : (
+                <DotLoader />
+              )}
+            </span>
+          </div>
+          <div className={styles["networkStat"]}>
+            <span className={styles["networkStatLabel"]}>Network TDH</span>
+            <span className={styles["networkStatValue"]}>
+              {selectedNetworkTdh !== undefined ? (
+                numberWithCommas(selectedNetworkTdh)
+              ) : (
+                <DotLoader />
+              )}
+            </span>
+          </div>
+          <div className={styles["networkStat"]}>
+            <span className={styles["networkStatLabel"]}>Daily Change</span>
+            <span className={styles["networkStatValue"]}>
+              {selectedNetworkTdhChange !== undefined &&
+              selectedGlobalTdhRateChange !== undefined ? (
+                <>
+                  {numberWithCommas(selectedNetworkTdhChange)}{" "}
+                  <span className="font-smaller">
+                    ({selectedGlobalTdhRateChange.toFixed(2)}%)
+                  </span>
+                </>
+              ) : (
+                <DotLoader />
+              )}
+            </span>
+          </div>
+        </div>
+      </section>
       {!showViewAll && (
-        <>
-          <Row className="pt-2 pb-2" id={`leaderboard-page`}>
-            <Col
-              className="d-flex justify-content-start gap-5 align-items-center"
-              sm={{ span: 12 }}
-              md={{ span: 9 }}
-            >
+        <section className={styles["networkToolbar"]} id="leaderboard-page">
+          <div className={styles["networkToolbarTop"]}>
+            <div className={styles["networkFilters"]}>
               {printCollectorsDropdown()}
               {printCollectionsDropdown()}
               {printSeasonsDropdown()}
-            </Col>
-            <Col
-              className={`${styles["pageHeader"]}`}
-              sm={{ span: 12 }}
-              md={{ span: 3 }}
-            >
+            </div>
+            <div className={styles["networkViewTabs"]}>
+              {printCardsInteractionsToggle()}
+            </div>
+          </div>
+          <div className={styles["networkToolbarSearchRow"]}>
+            <div className={styles["networkSearch"]}>
               <div
-                className={`${styles["headerMenuFocus"]} d-flex justify-content-center align-items-center`}
+                className={`${styles["networkLoadingSlot"]} ${
+                  isLoading ? "" : "tw-invisible"
+                }`}
               >
-                <span>
-                  <span
-                    onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-                    className={`${styles["focus"]} ${
-                      props.focus === LeaderboardFocus.TDH
-                        ? ""
-                        : styles["disabled"]
-                    }`}
-                  >
-                    {LeaderboardFocus.TDH}
-                  </span>
-                </span>
-                &nbsp;&nbsp;|&nbsp;&nbsp;
-                <span>
-                  <span
-                    onClick={() =>
-                      props.setFocus(LeaderboardFocus.INTERACTIONS)
-                    }
-                    className={`${styles["focus"]} ${
-                      props.focus === LeaderboardFocus.INTERACTIONS
-                        ? ""
-                        : styles["disabled"]
-                    }`}
-                  >
-                    {LeaderboardFocus.INTERACTIONS}
-                  </span>
-                </span>
+                <Spinner dimension={30} />
               </div>
-            </Col>
-          </Row>
-          <Row className="pt-1 pb-1 d-flex align-items-center">
-            <Col xs={1}>{isLoading && <Spinner dimension={30} />}</Col>
-            <Col
-              xs={11}
-              className={`d-flex justify-content-end align-items-center`}
-            >
               <SearchWalletsDisplay
                 searchWallets={searchWallets}
                 setSearchWallets={setSearchWallets}
                 setShowSearchModal={setShowSearchModal}
+                variant="dark"
               />
-            </Col>
-          </Row>
-        </>
+            </div>
+          </div>
+        </section>
       )}
-      <Row className={`${styles["scrollContainer"]} pt-2`}>
-        <Col>
-          {props.focus === LeaderboardFocus.TDH && (
-            <LeaderboardCardsCollectedComponent
-              block={lastTDH?.block}
-              content={content}
-              collector={collector}
-              selectedSeason={selectedSeason}
-              searchWallets={searchWallets}
-              globalTdhRateChange={globalTdhRateChange}
-              seasons={seasons}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-            />
-          )}
-          {props.focus === LeaderboardFocus.INTERACTIONS && (
-            <LeaderboardInteractionsComponent
-              block={lastTDH?.block}
-              content={content}
-              collector={collector}
-              selectedSeason={selectedSeason}
-              searchWallets={searchWallets}
-              seasons={seasons}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-            />
-          )}
-        </Col>
-      </Row>
+      <div className={`${styles["scrollContainer"]} ${styles["leaderboardSurface"]}`}>
+        {props.focus === LeaderboardFocus.TDH && (
+          <LeaderboardCardsCollectedComponent
+            block={lastTDH?.block}
+            content={content}
+            collector={collector}
+            selectedSeason={selectedSeason}
+            searchWallets={searchWallets}
+            tdhView={props.tdhView}
+            globalTdhRateChange={selectedGlobalTdhRateChange}
+            seasons={seasons}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+        )}
+        {props.focus === LeaderboardFocus.INTERACTIONS && (
+          <LeaderboardInteractionsComponent
+            block={lastTDH?.block}
+            content={content}
+            collector={collector}
+            selectedSeason={selectedSeason}
+            searchWallets={searchWallets}
+            seasons={seasons}
+            isLoading={isLoading}
+            setIsLoading={setIsLoading}
+          />
+        )}
+      </div>
       <SearchModalDisplay
         show={showSearchModal}
         setShow={setShowSearchModal}
         searchWallets={searchWallets}
         setSearchWallets={setSearchWallets}
+        variant="dark"
       />
-    </Container>
+    </div>
   );
 }

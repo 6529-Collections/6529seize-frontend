@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import { Table } from "react-bootstrap";
 import styles from "./Leaderboard.module.scss";
 import { numberWithCommas } from "@/helpers/Helpers";
 import { SortDirection } from "@/entities/ISort";
@@ -9,8 +9,7 @@ import { LeaderboardCollector } from "./LeaderboardCollector";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { Collector, Content } from "./Leaderboard";
 import LeaderboardSort from "./LeaderboardSort";
-import type {
-  LeaderboardInteractions} from "./leaderboard_helpers";
+import type { LeaderboardInteractions } from "./leaderboard_helpers";
 import {
   LEADERBOARD_PAGE_SIZE,
   LeaderboardInteractionsSort,
@@ -61,11 +60,9 @@ export default function LeaderboardInteractionsComponent(
 
   if (leaderboard.length === 0 && !props.isLoading) {
     return (
-      <Container>
-        <Row>
-          <Col>No results found. Change filters and try again.</Col>
-        </Row>
-      </Container>
+      <div className={styles["leaderboardEmpty"]}>
+        No results found. Change filters and try again.
+      </div>
     );
   }
 
@@ -77,10 +74,11 @@ export default function LeaderboardInteractionsComponent(
 
   return (
     <>
-      <Container>
-        <Row>
-          <Col>
-            <Table bordered={false} className={styles["leaderboardTable"]}>
+      <div className={styles["leaderboardTableShell"]}>
+        <Table
+          bordered={false}
+          className={`${styles["leaderboardTable"]} ${styles["interactionsFitTable"]}`}
+        >
               <thead>
                 <tr>
                   <th colSpan={2}></th>
@@ -110,10 +108,10 @@ export default function LeaderboardInteractionsComponent(
                 </tr>
                 <tr>
                   <th className={styles["rank"]}>Rank</th>
-                  <th className={`${styles["hodlerContainer"]}`}>
+                  <th className={styles["hodlerContainer"]}>
                     <span>Collector</span>
                     <span className={styles["totalResults"]}>
-                      {props.isLoading
+                      {props.isLoading && totalResults === 0
                         ? "..."
                         : `x${totalResults.toLocaleString()}`}
                     </span>
@@ -204,7 +202,7 @@ export default function LeaderboardInteractionsComponent(
                           index + 1 + (page - 1) * LEADERBOARD_PAGE_SIZE
                         )}
                       </td>
-                      <td className="tw-max-w-[20px] tw-truncate">
+                      <td className={styles["interactionsCollectorCell"]}>
                         <LeaderboardCollector
                           handle={lead.handle}
                           consolidationKey={lead.consolidation_key}
@@ -256,10 +254,8 @@ export default function LeaderboardInteractionsComponent(
                   );
                 })}
               </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
+        </Table>
+      </div>
       <LeaderboardFooter
         url={myFetchUrl}
         totalResults={totalResults}

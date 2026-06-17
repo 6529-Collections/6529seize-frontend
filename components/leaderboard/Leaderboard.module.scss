@@ -11,15 +11,199 @@
   display: none;
 }
 
+.networkPage {
+  padding-top: 2rem;
+}
+
+.networkHeader {
+  align-items: end;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: 2rem;
+}
+
+.networkTitleBlock {
+  min-width: 0;
+}
+
+.networkTitle {
+  color: white;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
+.networkStats {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(150px, auto));
+}
+
+.networkStat {
+  background-color: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 74px;
+  min-width: 160px;
+  padding: 0.85rem 1rem;
+}
+
+.networkStatLabel {
+  color: variables.$lightest-grey;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.networkStatValue {
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.networkToolbar {
+  background-color: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 1rem;
+  min-height: 112px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.networkToolbarTop {
+  align-items: center;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
+  min-height: 56px;
+  min-width: 0;
+  padding: 0 1rem;
+}
+
+.networkToolbarSearchRow {
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  display: flex;
+  justify-content: flex-end;
+  min-height: 56px;
+  min-width: 0;
+  padding: 0 1rem;
+}
+
+.networkViewTabs {
+  color: variables.$lightest-grey;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.networkSearch {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  min-width: 0;
+  width: 100%;
+}
+
+.networkLoadingSlot {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  width: 32px;
+}
+
+.networkFilters {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.networkFilters .contentDropdown {
+  line-height: 1;
+  text-align: left;
+}
+
+.networkFilters .contentDropdown button {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+  line-height: 1.1;
+}
+
+.dropdownCaret {
+  border-left: 0.28em solid transparent;
+  border-right: 0.28em solid transparent;
+  border-top: 0.28em solid currentColor;
+  display: inline-block;
+  flex-shrink: 0;
+  height: 0;
+  margin-top: 0.08em;
+  width: 0;
+}
+
+.leaderboardSurface {
+  padding-top: 0.5rem;
+}
+
 .headerMenuFocus {
   background-color: transparent;
-  width: 100%;
-  height: 48px;
-  height: 48px;
-  line-height: 48px;
+  min-height: 48px;
+  line-height: 1;
   font-size: larger;
   font-weight: bold;
   color: variables.$lightest-grey;
+}
+
+.tdhViewSegmentedControl {
+  align-items: center;
+  background-color: variables.$almost-very-dark-grey;
+  border: 1px solid variables.$dark-grey;
+  border-radius: 9999px;
+  display: inline-flex;
+  line-height: 1;
+  padding: 2px;
+}
+
+.tdhViewSegment {
+  background: transparent;
+  border: 0;
+  border-radius: 9999px;
+  color: variables.$lightest-grey;
+  font-size: 0.8em;
+  font-weight: bold;
+  line-height: 1;
+  padding: 6px 10px;
+
+  &:hover {
+    color: white;
+  }
+}
+
+.tdhViewSegmentActive {
+  background-color: variables.$font-color;
+  color: variables.$very-dark-grey;
+
+  &:hover {
+    color: variables.$very-dark-grey;
+  }
 }
 
 .pageHeader {
@@ -36,6 +220,7 @@
 
 .hodlerContainer {
   width: 40%;
+  text-align: left;
 }
 
 .hodler {
@@ -193,7 +378,33 @@
   height: 5px;
 }
 
+.interactionsFitTable {
+  .hodlerContainer {
+    width: 28%;
+  }
+
+  .tdhSub {
+    width: auto;
+  }
+
+  .rank {
+    width: 4%;
+  }
+}
+
+.interactionsFitTable > :not(caption) > * > * {
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.interactionsCollectorCell {
+  max-width: 0;
+}
+
 .leaderboardTable {
+  margin-bottom: 0 !important;
+  width: 100%;
+
   tr td {
     white-space: nowrap;
     align-items: center;
@@ -228,6 +439,16 @@
   tbody tr:nth-child(odd) {
     background-color: variables.$almost-very-dark-grey;
   }
+}
+
+.leaderboardTableShell {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.leaderboardEmpty {
+  color: variables.$font-color;
+  padding: 1rem 0;
 }
 
 .collectorLevel {
@@ -356,13 +577,16 @@
     line-height: 30px;
   }
   button {
+    align-items: center;
+    display: inline-flex;
     font-size: larger !important;
     font-weight: bolder !important;
+    gap: 0.35rem;
     padding: 0;
     background-color: transparent !important;
     border-color: transparent !important;
     &::after {
-      margin-top: 0.8rem;
+      display: none;
     }
   }
   div {
@@ -380,16 +604,6 @@
   text-decoration: none;
   &:hover {
     color: white;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .contentDropdown {
-    button {
-      &::after {
-        margin-top: 0.5rem;
-      }
-    }
   }
 }
 
@@ -445,8 +659,9 @@
 
 .statsContainer {
   background-color: variables.$very-dark-grey;
+  border: 1px solid rgba(255, 255, 255, 0.06);
   padding: 15px 20px;
-  width: fit-content;
+  min-width: 360px;
   color: white;
   box-shadow:
     0.5px 0.5px 3px 0px rgba(255, 255, 255, 0.02),
