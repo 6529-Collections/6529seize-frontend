@@ -751,11 +751,11 @@ function PublishStatePanel({
           }`}
         >
           <p>{getActionResultMessage(locale, actionResult.code)}</p>
-          {!actionResult.ok ? (
+          {actionResult.ok ? null : (
             <p className="tw-mt-2 tw-font-mono tw-text-xs">
               {actionResult.expectedEndpoint}
             </p>
-          ) : null}
+          )}
         </div>
       ) : (
         <p className="tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
