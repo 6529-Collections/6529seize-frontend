@@ -21,6 +21,10 @@ import {
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 const MNEMONIC_UNAVAILABLE = APP_WALLET_MNEMONIC_UNAVAILABLE;
+const MNEMONIC_WORD_FIELD_IDS = Array.from(
+  { length: 12 },
+  (_, index) => `mnemonic-word-${index + 1}`
+);
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
@@ -131,7 +135,7 @@ function AppWalletImportMnemonic() {
             sm={4}
             md={3}
             className="pt-2 pb-2"
-            key={`mnemonic-word-${i}`}
+            key={MNEMONIC_WORD_FIELD_IDS[i]}
           >
             <Container className={`${styles["phrase"]}`}>
               <Row>
@@ -175,7 +179,7 @@ function AppWalletImportMnemonic() {
             variant="warning"
             onClick={clear}
             className="font-bolder"
-            disabled={!phrase.some((w) => w) && !isCompletePhrase()}
+            disabled={!phrase.some(Boolean) && !isCompletePhrase()}
           >
             Clear
           </Button>

@@ -19,10 +19,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
 }));
 
 class MockWebSocket {
-  static OPEN = 1;
-  static CONNECTING = 0;
-  static CLOSING = 2;
-  static CLOSED = 3;
+  static readonly OPEN = 1;
+  static readonly CONNECTING = 0;
+  static readonly CLOSING = 2;
+  static readonly CLOSED = 3;
   static autoAuthenticate = true;
 
   readyState = 0; // Start as CONNECTING

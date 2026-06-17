@@ -108,6 +108,114 @@ type AuthContextType = {
   ) => Promise<void>;
 };
 
+type AuthLoadingState = "idle" | "validating" | "signing";
+type MutableCurrentRef<T> = {
+  current: T;
+};
+
+interface RunImmediateAuthValidationParams {
+  readonly currentAddress: string;
+  readonly operationId: string;
+  readonly latestAddressRef: MutableCurrentRef<string | undefined>;
+  readonly activeValidationOperationIdRef: MutableCurrentRef<string | null>;
+  readonly abortControllerRef: MutableCurrentRef<AbortController | null>;
+  readonly activeProfileProxy: ApiProfileProxy | null;
+  readonly isConnected: boolean;
+  readonly setAuthLoadingState: (state: AuthLoadingState) => void;
+  readonly setShowSignModal: (show: boolean) => void;
+  readonly invalidateAll: () => void;
+  readonly reset: () => void;
+}
+
+const isCurrentValidationOperation = ({
+  latestAddressRef,
+  activeValidationOperationIdRef,
+  currentAddress,
+  operationId,
+}: {
+  readonly latestAddressRef: MutableCurrentRef<string | undefined>;
+  readonly activeValidationOperationIdRef: MutableCurrentRef<string | null>;
+  readonly currentAddress: string;
+  readonly operationId: string;
+}): boolean =>
+  latestAddressRef.current === currentAddress &&
+  activeValidationOperationIdRef.current === operationId;
+
+const runImmediateAuthValidation = async ({
+  currentAddress,
+  operationId,
+  latestAddressRef,
+  activeValidationOperationIdRef,
+  abortControllerRef,
+  activeProfileProxy,
+  isConnected,
+  setAuthLoadingState,
+  setShowSignModal,
+  invalidateAll,
+  reset,
+}: RunImmediateAuthValidationParams): Promise<void> => {
+  if (
+    isCurrentValidationOperation({
+      latestAddressRef,
+      activeValidationOperationIdRef,
+      currentAddress,
+      operationId,
+    }) === false
+  ) {
+    return;
+  }
+
+  const abortController = new AbortController();
+  abortControllerRef.current = abortController;
+  setAuthLoadingState("validating");
+
+  try {
+    const result = await measureMobileLaunchAsync(
+      "auth_immediate_validation",
+      () =>
+        validateAuthImmediate({
+          params: {
+            currentAddress,
+            connectionAddress: currentAddress,
+            jwt: getAuthJwt(),
+            activeProfileProxy,
+            isConnected,
+            operationId,
+            abortSignal: abortController.signal,
+          },
+          callbacks: {
+            onShowSignModal: setShowSignModal,
+            onInvalidateCache: invalidateAll,
+            onReset: reset,
+            onRemoveJwt: () => removeAuthJwt(),
+            onLogError: logErrorSecurely,
+          },
+        })
+    );
+
+    if (
+      result.wasCancelled ||
+      isCurrentValidationOperation({
+        latestAddressRef,
+        activeValidationOperationIdRef,
+        currentAddress,
+        operationId,
+      }) === false
+    ) {
+      return;
+    }
+  } finally {
+    if (
+      abortControllerRef.current === abortController &&
+      activeValidationOperationIdRef.current === operationId
+    ) {
+      abortControllerRef.current = null;
+      activeValidationOperationIdRef.current = null;
+      setAuthLoadingState("idle");
+    }
+  }
+};
+
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
   fetchingProfile: false,
@@ -166,9 +274,8 @@ export default function Auth({
   const abortControllerRef = useRef<AbortController | null>(null);
   const latestAddressRef = useRef<string | undefined>(address);
   const activeValidationOperationIdRef = useRef<string | null>(null);
-  const [authLoadingState, setAuthLoadingState] = useState<
-    "idle" | "validating" | "signing"
-  >("idle");
+  const [authLoadingState, setAuthLoadingState] =
+    useState<AuthLoadingState>("idle");
 
   // Centralized abort mechanism for cancelling in-flight operations
   const abortCurrentAuthOperation = useCallback(() => {
@@ -319,62 +426,19 @@ export default function Auth({
     activeValidationOperationIdRef.current = operationId;
 
     // IMMEDIATE validation - no setTimeout to prevent timing window vulnerability
-    const validateImmediately = async () => {
-      if (
-        latestAddressRef.current !== currentAddress ||
-        activeValidationOperationIdRef.current !== operationId
-      ) {
-        return;
-      }
-
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-      setAuthLoadingState("validating");
-
-      try {
-        const result = await measureMobileLaunchAsync(
-          "auth_immediate_validation",
-          () =>
-            validateAuthImmediate({
-              params: {
-                currentAddress,
-                connectionAddress: currentAddress,
-                jwt: getAuthJwt(),
-                activeProfileProxy,
-                isConnected,
-                operationId,
-                abortSignal: abortController.signal,
-              },
-              callbacks: {
-                onShowSignModal: setShowSignModal,
-                onInvalidateCache: invalidateAll,
-                onReset: reset,
-                onRemoveJwt: () => removeAuthJwt(),
-                onLogError: logErrorSecurely,
-              },
-            })
-        );
-
-        if (
-          result.wasCancelled ||
-          latestAddressRef.current !== currentAddress ||
-          activeValidationOperationIdRef.current !== operationId
-        ) {
-          return;
-        }
-      } finally {
-        if (
-          abortControllerRef.current === abortController &&
-          activeValidationOperationIdRef.current === operationId
-        ) {
-          abortControllerRef.current = null;
-          activeValidationOperationIdRef.current = null;
-          setAuthLoadingState("idle");
-        }
-      }
-    };
-
-    void validateImmediately().catch((error) => {
+    void runImmediateAuthValidation({
+      currentAddress,
+      operationId,
+      latestAddressRef,
+      activeValidationOperationIdRef,
+      abortControllerRef,
+      activeProfileProxy,
+      isConnected,
+      setAuthLoadingState,
+      setShowSignModal,
+      invalidateAll,
+      reset,
+    }).catch((error) => {
       logErrorSecurely("auth_immediate_validation_unhandled", error);
     });
 

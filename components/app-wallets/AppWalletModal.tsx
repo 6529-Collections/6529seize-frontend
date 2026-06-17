@@ -236,7 +236,7 @@ export function UnlockAppWalletModal(
     address_hashed: string;
     onUnlock: (pass: string) => void;
     onVerifiedUnlock?:
-      | ((address: string, pass: string) => Promise<unknown> | unknown)
+      | ((address: string, pass: string) => Promise<unknown> | void)
       | undefined;
     onHide: () => void;
     sensitiveAction?: {

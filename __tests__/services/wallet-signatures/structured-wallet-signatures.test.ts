@@ -14,6 +14,29 @@ import {
 } from "@/services/wallet-signatures/structured-wallet-signatures";
 import { DropHasher } from "@/utils/drop-hasher";
 
+function createDrop(): ApiCreateDropRequest {
+  return {
+    wave_id: "wave-1",
+    reply_to: undefined,
+    drop_type: ApiDropType.Participatory,
+    mentioned_groups: [],
+    title: "Signed drop",
+    parts: [
+      {
+        content: "Hello world",
+        media: [],
+        attachments: [],
+      },
+    ],
+    referenced_nfts: [],
+    mentioned_users: [],
+    mentioned_waves: [],
+    metadata: [],
+    signature: null,
+    signer_address: "0x1111111111111111111111111111111111111111",
+  };
+}
+
 describe("structured wallet signatures", () => {
   const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
   const originalApiEndpoint = publicEnv.API_ENDPOINT;
@@ -86,8 +109,9 @@ describe("structured wallet signatures", () => {
 
   it("derives the signing domain from the current runtime", () => {
     const expectedDomain =
-      typeof window !== "undefined" && window.location.host
-        ? window.location.host.toLowerCase()
+      typeof globalThis.window !== "undefined" &&
+      globalThis.window.location.host
+        ? globalThis.window.location.host.toLowerCase()
         : "www.6529.io";
 
     expect(getWalletSignatureDomain()).toBe(expectedDomain);
@@ -101,8 +125,9 @@ describe("structured wallet signatures", () => {
 
   it("derives the client origin from the current runtime", () => {
     const expectedOrigin =
-      typeof window !== "undefined" && window.location.origin
-        ? window.location.origin.toLowerCase()
+      typeof globalThis.window !== "undefined" &&
+      globalThis.window.location.origin
+        ? globalThis.window.location.origin.toLowerCase()
         : "https://www.6529.io";
 
     expect(getWalletSignatureClientOrigin()).toBe(expectedOrigin);
@@ -138,26 +163,4 @@ describe("structured wallet signatures", () => {
     expect(result.message).toContain("Chain ID: 11155111");
   });
 
-  function createDrop(): ApiCreateDropRequest {
-    return {
-      wave_id: "wave-1",
-      reply_to: undefined,
-      drop_type: ApiDropType.Participatory,
-      mentioned_groups: [],
-      title: "Signed drop",
-      parts: [
-        {
-          content: "Hello world",
-          media: [],
-          attachments: [],
-        },
-      ],
-      referenced_nfts: [],
-      mentioned_users: [],
-      mentioned_waves: [],
-      metadata: [],
-      signature: null,
-      signer_address: "0x1111111111111111111111111111111111111111",
-    };
-  }
 });

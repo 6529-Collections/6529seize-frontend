@@ -10,26 +10,29 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: jest.fn().mockReturnValue({ isCapacitor: true }),
 }));
 
-var mockSet: jest.Mock;
-var mockRemove: jest.Mock;
-var mockKeys: jest.Mock;
-var mockGet: jest.Mock;
+jest.mock("capacitor-secure-storage-plugin", () => ({
+  SecureStoragePlugin: {
+    keys: jest.fn().mockResolvedValue({ value: [] }),
+    set: jest.fn().mockResolvedValue({ value: true }),
+    get: jest.fn().mockResolvedValue({ value: "{}" }),
+    remove: jest.fn().mockResolvedValue({ value: true }),
+  },
+}));
 
-jest.mock("capacitor-secure-storage-plugin", () => {
-  mockSet = jest.fn().mockResolvedValue({ value: true });
-  mockRemove = jest.fn().mockResolvedValue({ value: true });
-  mockKeys = jest.fn().mockResolvedValue({ value: [] });
-  mockGet = jest.fn().mockResolvedValue({ value: "{}" });
-
-  return {
-    SecureStoragePlugin: {
-      keys: mockKeys,
-      set: mockSet,
-      get: mockGet,
-      remove: mockRemove,
-    },
+const mockSecureStorage = jest.requireMock(
+  "capacitor-secure-storage-plugin"
+) as {
+  SecureStoragePlugin: {
+    keys: jest.Mock;
+    set: jest.Mock;
+    get: jest.Mock;
+    remove: jest.Mock;
   };
-});
+};
+const mockSet = mockSecureStorage.SecureStoragePlugin.set;
+const mockRemove = mockSecureStorage.SecureStoragePlugin.remove;
+const mockKeys = mockSecureStorage.SecureStoragePlugin.keys;
+const mockGet = mockSecureStorage.SecureStoragePlugin.get;
 
 jest.mock("ethers", () => ({
   ethers: {

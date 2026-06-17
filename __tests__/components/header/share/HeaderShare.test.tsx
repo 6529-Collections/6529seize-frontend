@@ -135,7 +135,7 @@ Object.assign(navigator, {
   },
 });
 
-const testOrigin = window.location.origin;
+const testOrigin = globalThis.window.location.origin;
 
 function createPendingPromise<T>(): Promise<T> {
   return new Promise<T>(() => {

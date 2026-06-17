@@ -23,28 +23,28 @@ const mockWalletClient = {
   account: { address: "0x1234567890123456789012345678901234567890" },
 };
 
-var mockCreateWalletClient: jest.Mock;
-var mockPrivateKeyToAccount: jest.Mock;
-var mockFallback: jest.Mock;
-var mockHttp: jest.Mock;
+jest.mock("viem/accounts", () => ({
+  privateKeyToAccount: jest.fn(),
+}));
 
-jest.mock("viem/accounts", () => {
-  mockPrivateKeyToAccount = jest.fn();
-  return {
-    privateKeyToAccount: mockPrivateKeyToAccount,
-  };
-});
+jest.mock("viem", () => ({
+  createWalletClient: jest.fn(),
+  fallback: jest.fn(),
+  http: jest.fn(),
+}));
 
-jest.mock("viem", () => {
-  mockCreateWalletClient = jest.fn();
-  mockFallback = jest.fn();
-  mockHttp = jest.fn();
-  return {
-    createWalletClient: mockCreateWalletClient,
-    fallback: mockFallback,
-    http: mockHttp,
-  };
-});
+const mockViemAccounts = jest.requireMock("viem/accounts") as {
+  privateKeyToAccount: jest.Mock;
+};
+const mockViem = jest.requireMock("viem") as {
+  createWalletClient: jest.Mock;
+  fallback: jest.Mock;
+  http: jest.Mock;
+};
+const mockCreateWalletClient = mockViem.createWalletClient;
+const mockPrivateKeyToAccount = mockViemAccounts.privateKeyToAccount;
+const mockFallback = mockViem.fallback;
+const mockHttp = mockViem.http;
 
 const mockDecryptData = decryptData as jest.MockedFunction<typeof decryptData>;
 const mockAreEqualAddresses = areEqualAddresses as jest.MockedFunction<

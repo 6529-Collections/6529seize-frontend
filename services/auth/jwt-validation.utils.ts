@@ -38,6 +38,25 @@ interface ValidateJwtResult {
   wasCancelled: boolean;
 }
 
+type RefreshedSession = NonNullable<
+  Awaited<ReturnType<typeof refreshSessionV2>>
+>;
+
+const INVALID_JWT_RESULT: ValidateJwtResult = {
+  isValid: false,
+  wasCancelled: false,
+};
+
+const CANCELLED_JWT_RESULT: ValidateJwtResult = {
+  isValid: false,
+  wasCancelled: true,
+};
+
+const VALID_JWT_RESULT: ValidateJwtResult = {
+  isValid: true,
+  wasCancelled: false,
+};
+
 export const getRole = (jwt: string | null): string | null => {
   if (!jwt) return null;
   const decodedJwt = jwtDecode<JwtPayload>(jwt);
@@ -116,6 +135,54 @@ const isAbortError = (error: unknown): boolean =>
   "name" in error &&
   error.name === "AbortError";
 
+const assertRefreshedSessionMatchesWallet = (
+  refreshedSession: RefreshedSession,
+  wallet: string
+): void => {
+  if (!areEqualAddresses(refreshedSession.address, wallet)) {
+    throw new Error(
+      `Address mismatch in token response: expected ${wallet}, got ${refreshedSession.address}`
+    );
+  }
+};
+
+const persistValidatedRefreshedSession = async ({
+  refreshedSession,
+  role,
+  activeProfileProxy,
+}: {
+  refreshedSession: RefreshedSession;
+  role: string | null;
+  activeProfileProxy?: ApiProfileProxy | null | undefined;
+}): Promise<void> => {
+  const walletRole = getWalletRole();
+  const freshTokenRole = getRole(refreshedSession.access_token);
+
+  if (role) {
+    validateProxyRole({
+      role,
+      activeProfileProxy,
+      freshTokenRole,
+    });
+  }
+
+  if (walletRole !== freshTokenRole) {
+    logErrorSecurely("JWT_ROLE_UPDATE", {
+      message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
+      oldRole: walletRole,
+      newRole: freshTokenRole,
+      address: refreshedSession.address,
+    });
+  }
+
+  const didPersist = await persistSessionResponse(refreshedSession);
+  if (!didPersist) {
+    throw new Error("Failed to persist refreshed session");
+  }
+
+  syncWalletRoleWithServer(freshTokenRole, refreshedSession.address);
+};
+
 const handleTokenRefresh = async ({
   wallet,
   role,
@@ -131,63 +198,39 @@ const handleTokenRefresh = async ({
 
   // Check for cancellation before proceeding
   if (abortSignal.aborted) {
-    return { isValid: false, wasCancelled: true };
+    return CANCELLED_JWT_RESULT;
   }
 
   try {
-    if (walletAddress) {
-      const refreshedSession = await refreshSessionV2({
-        address: walletAddress,
-        abortSignal,
-      });
-
-      if (refreshedSession) {
-        if (abortSignal.aborted) {
-          return { isValid: false, wasCancelled: true };
-        }
-
-        if (!areEqualAddresses(refreshedSession.address, wallet)) {
-          throw new Error(
-            `Address mismatch in token response: expected ${wallet}, got ${refreshedSession.address}`
-          );
-        }
-
-        const walletRole = getWalletRole();
-        const freshTokenRole = getRole(refreshedSession.access_token);
-
-        if (role) {
-          validateProxyRole({
-            role,
-            activeProfileProxy,
-            freshTokenRole,
-          });
-        }
-
-        if (walletRole !== freshTokenRole) {
-          logErrorSecurely("JWT_ROLE_UPDATE", {
-            message: `Updating local wallet role from ${walletRole} to ${freshTokenRole}`,
-            oldRole: walletRole,
-            newRole: freshTokenRole,
-            address: refreshedSession.address,
-          });
-        }
-
-        const didPersist = await persistSessionResponse(refreshedSession);
-        if (!didPersist) {
-          throw new Error("Failed to persist refreshed session");
-        }
-
-        syncWalletRoleWithServer(freshTokenRole, refreshedSession.address);
-
-        return { isValid: true, wasCancelled: false };
-      }
+    if (!walletAddress) {
+      return INVALID_JWT_RESULT;
     }
 
-    return { isValid: false, wasCancelled: false };
+    const refreshedSession = await refreshSessionV2({
+      address: walletAddress,
+      abortSignal,
+    });
+
+    if (!refreshedSession) {
+      return INVALID_JWT_RESULT;
+    }
+
+    if (abortSignal.aborted) {
+      return CANCELLED_JWT_RESULT;
+    }
+
+    assertRefreshedSessionMatchesWallet(refreshedSession, wallet);
+    await persistValidatedRefreshedSession({
+      refreshedSession,
+      role,
+      activeProfileProxy,
+    });
+
+    return VALID_JWT_RESULT;
   } catch (error: unknown) {
     // Handle cancellation errors
     if (error instanceof TokenRefreshCancelledError || isAbortError(error)) {
-      return { isValid: false, wasCancelled: true };
+      return CANCELLED_JWT_RESULT;
     }
     // Re-throw all other errors.
     throw error;
@@ -207,7 +250,7 @@ export const validateJwt = async ({
 
   // Check if already aborted
   if (abortSignal.aborted) {
-    return { isValid: false, wasCancelled: true };
+    return CANCELLED_JWT_RESULT;
   }
 
   // Validate the current JWT
@@ -215,7 +258,7 @@ export const validateJwt = async ({
 
   // If JWT is valid, return success
   if (isValid) {
-    return { isValid: true, wasCancelled: false };
+    return VALID_JWT_RESULT;
   }
 
   // JWT is invalid, attempt token refresh

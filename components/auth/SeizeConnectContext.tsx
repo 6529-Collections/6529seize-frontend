@@ -200,6 +200,57 @@ const createWalletError = (
   );
 };
 
+const getLogoutSessionError = (error: unknown, message: string): Error =>
+  error instanceof Error ? error : new Error(message);
+
+const revokeActiveSessionForLogoutAll = async (): Promise<void> => {
+  const activeAddress = getWalletAddress();
+  if (!activeAddress) {
+    return;
+  }
+
+  try {
+    await logoutSessionV2({
+      address: activeAddress,
+      allSessions: true,
+    });
+  } catch (error: unknown) {
+    logError(
+      "seizeDisconnectAndLogoutAll.logoutSessionV2",
+      getLogoutSessionError(error, "Failed to revoke session during logout all")
+    );
+  }
+};
+
+const clearAllAuthenticatedProfiles = async (): Promise<void> => {
+  let remainingProfiles = getConnectedWalletAccounts().length;
+  const maxIterations = Math.max(
+    MAX_CONNECTED_PROFILES * 2,
+    remainingProfiles + 2
+  );
+  let iterations = 0;
+
+  while (remainingProfiles > 0) {
+    iterations += 1;
+    if (iterations > maxIterations) {
+      const iterationError = new AuthenticationError(
+        `Failed to clear all authenticated profiles: exceeded ${maxIterations} iterations during logout cleanup.`
+      );
+      logError("seizeDisconnectAndLogoutAll", iterationError);
+      throw iterationError;
+    }
+
+    await revokeActiveSessionForLogoutAll();
+    await removeAuthJwt();
+
+    const nextRemainingProfiles = getConnectedWalletAccounts().length;
+    if (nextRemainingProfiles >= remainingProfiles) {
+      throw new Error("Failed to clear all authenticated profiles.");
+    }
+    remainingProfiles = nextRemainingProfiles;
+  }
+};
+
 // Address validation utilities
 interface AddressValidationResult {
   isValid: boolean;
@@ -882,50 +933,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      let remainingProfiles = getConnectedWalletAccounts().length;
-      const maxIterations = Math.max(
-        MAX_CONNECTED_PROFILES * 2,
-        remainingProfiles + 2
-      );
-      let iterations = 0;
-
-      while (remainingProfiles > 0) {
-        iterations += 1;
-        if (iterations > maxIterations) {
-          const iterationError = new AuthenticationError(
-            `Failed to clear all authenticated profiles: exceeded ${maxIterations} iterations during logout cleanup.`
-          );
-          logError("seizeDisconnectAndLogoutAll", iterationError);
-          throw iterationError;
-        }
-
-        const activeAddress = getWalletAddress();
-        if (activeAddress) {
-          try {
-            await logoutSessionV2({
-              address: activeAddress,
-              allSessions: true,
-            });
-          } catch (error: unknown) {
-            const revokeError =
-              error instanceof Error
-                ? error
-                : new Error("Failed to revoke session during logout all");
-            logError(
-              "seizeDisconnectAndLogoutAll.logoutSessionV2",
-              revokeError
-            );
-          }
-        }
-
-        await removeAuthJwt();
-        const nextRemainingProfiles = getConnectedWalletAccounts().length;
-        if (nextRemainingProfiles >= remainingProfiles) {
-          throw new Error("Failed to clear all authenticated profiles.");
-        }
-        remainingProfiles = nextRemainingProfiles;
-      }
-
+      await clearAllAuthenticatedProfiles();
       refreshStoredConnectedAccounts();
       setDisconnected();
     } catch (error: unknown) {
