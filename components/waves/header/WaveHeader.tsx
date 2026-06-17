@@ -16,7 +16,6 @@ import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
-import { WaveTrustSignals } from "../WaveTrustSignals";
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
@@ -61,7 +60,8 @@ export default function WaveHeader({
   const showNotificationSettings =
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
-    canUseWaveActions && normalizedConnectedHandle === normalizedWaveAuthorHandle;
+    canUseWaveActions &&
+    normalizedConnectedHandle === normalizedWaveAuthorHandle;
   const showCreateSubwaveOption =
     canUseWaveActions &&
     !isDirectMessage &&
@@ -147,11 +147,6 @@ export default function WaveHeader({
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
-              {showWaveRepAction && (
-                <div className="tw-shrink-0">
-                  <WaveRepButton wave={wave} />
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -182,14 +177,8 @@ export default function WaveHeader({
           </span>
         </div>
 
-        <WaveTrustSignals
-          waveRep={wave.wave_rep}
-          waveScore={wave.wave_score}
-          className="tw-mt-3"
-        />
-
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-3">
             <div className="tw-flex tw-items-center tw-gap-x-4">
               <WaveHeaderFollowers
                 wave={wave}
@@ -206,6 +195,11 @@ export default function WaveHeader({
                 </div>
               )}
             </div>
+            {showWaveRepAction && (
+              <div className="tw-shrink-0">
+                <WaveRepButton wave={wave} />
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -21,7 +21,9 @@ pagination.
 - Open a card from `/meme-lab` or `/meme-lab/collection/{collection}`.
 - Open a direct card URL such as `/meme-lab/123`.
 - Open a direct tab URL such as `/meme-lab/123?focus=activity`.
-- On card `Live`, use `Distribution Plan` when shown.
+- Open a progressive locale URL such as `/meme-lab/123?locale=de-DE`.
+- On card `Overview`, use `Distribution Plan` when shown; supported
+  non-default `locale` values are preserved in the linked distribution URL.
 - Open `/meme-lab/{id}/distribution` directly.
 
 ## User Journey
@@ -29,44 +31,51 @@ pagination.
 ### Card Route `/meme-lab/{id}`
 
 1. Open `/meme-lab/{id}`.
-2. The route reads `focus` and resolves one tab:
-   `Live`, `Your Cards`, `The Art`, `Collectors`, `Activity`, or `Timeline`.
-3. If `focus` is missing or unsupported, the page opens `Live` and rewrites the
-   query to `?focus=live`.
-4. Switch tabs from the tab row; each switch rewrites `focus` in place.
+2. The route reads `focus` and resolves one visible tab:
+   `Overview`, `Collectors`, `History`, or `References`.
+3. If `focus` is missing or unsupported, the page opens `Overview`.
+4. Switch tabs from the tab row; each switch rewrites `focus` in place while
+   preserving supported `locale` query values.
 5. Use previous/next arrows to move to adjacent card IDs while keeping the
    current query string.
-6. On `Live`, review card stats, collection links, references, and marketplace
-   shortcuts (when available).
-7. On `Your Cards`, connect wallet to review ownership summary, transfer
-   actions, and wallet transaction history.
-8. On `The Art`, review original media, fullscreen controls, Arweave
-   links/downloads, and card details for the currently visible slide.
-9. On `Collectors`, review the holder leaderboard.
-10. On `Activity`, filter transaction types, review rows, and paginate.
-11. On `Timeline`, review card history milestones.
+6. On `Overview`, review card stats, collection links, ownership summary when
+   connected, original media controls, and marketplace shortcuts when available.
+7. Legacy `focus=the-art` URLs open `Overview` with additional details expanded.
+8. On `Collectors`, review the holder leaderboard.
+9. On `References`, review linked The Memes cards referenced by the Meme Lab
+   card.
+10. On `History`, use the sub-tabs for `Card Activity`, `Your Transactions`
+    when wallet transactions are available, or `Timeline`.
+11. On `Card Activity`, filter transaction types, review rows, and paginate.
+12. On `Timeline`, review card history milestones.
 
 ### Distribution Route `/meme-lab/{id}/distribution`
 
-1. Open this route from `Distribution Plan` on `Live`, or open the route
+1. Open this route from `Distribution Plan` on `Overview`, or open the route
    directly.
 2. The route validates `{id}` as a positive integer.
-3. Review the page header, optional distribution photos, and wallet table.
-4. Use wallet search filters to narrow rows; changing filters resets pagination
+3. The route reads supported `locale` query values for progressive
+   message-backed copy and locale-aware number formatting.
+4. Review the page header, optional distribution photos, and wallet table.
+5. Use wallet search filters to narrow rows; changing filters resets pagination
    to page 1.
-5. Review allowlist-phase columns, minted/total columns, and pagination when
+6. Review allowlist-phase columns, minted/total columns, and pagination when
    enough rows are available.
 
 ## Common Scenarios
 
 - Share a deep link such as `/meme-lab/123?focus=timeline`.
+- Preserve a non-default locale while moving between tabs, for example
+  `/meme-lab/123?locale=de-DE&focus=collectors`.
 - Stay on the same tab while moving card-to-card with navigation arrows.
-- Open `Distribution Plan`, filter for one or more wallets, then clear filters
-  and return to the card route.
+- Open `Distribution Plan` from a non-default locale URL, keep that locale on
+  the distribution route, filter for one or more wallets, then clear filters.
 
 ## Edge Cases
 
-- Unsupported `focus` values fall back to `Live`.
+- Unsupported `focus` values fall back to `Overview`.
+- Legacy `focus=activity`, `focus=timeline`, and `focus=your-transactions`
+  deep links open the grouped `History` tab and select the matching sub-tab.
 - If card metadata does not resolve for `{id}`, the route can render only the
   page heading, with no inline not-found panel.
 - Previous/next arrows are disabled at the first and last available card index.
@@ -76,14 +85,14 @@ pagination.
   slide and its matching download/link row.
 - `File Type` and `Dimensions` rows appear only when the active `The Art`
   slide has usable metadata values.
-- `Activity` can show a loading spinner first, then an empty-state panel when
-  no rows are available.
+- `Card Activity` can show a loading spinner first, then an empty-state panel
+  when no rows are available.
 - `/meme-lab/{id}/distribution` with non-positive or invalid IDs shows the
   distribution not-found screen.
 - Distribution routes with valid IDs can show an empty
   `The Distribution Plan will be made available soon!` state.
 - Distribution wallet filters can show `No results found for the search
-  criteria.` even when unfiltered distribution data exists.
+criteria.` even when unfiltered distribution data exists.
 - Distribution fetch failures fall back to the same empty-state view (no
   dedicated inline error panel).
 
@@ -101,12 +110,16 @@ pagination.
 
 ## Limitations / Notes
 
-- `focus` supports only the six tab keys listed above.
+- `focus` supports the visible tabs plus legacy/deep-link keys described above.
+- Non-default `locale` values currently use progressive message fallbacks; the
+  detail route preserves supported locale values but does not add locale path
+  prefixes yet.
 - Tab switches use in-place URL replacement, so browser Back does not step
   through prior tab changes.
-- Tab switches preserve `focus`; other query keys are not preserved.
-- `Distribution Plan` link on card `Live` is shown only when distribution is
-  available for that card.
+- Tab switches preserve supported locale query values.
+- `Distribution Plan` link on card `Overview` is shown only when distribution
+  is available for that card, and preserves supported non-default `locale`
+  query values.
 - Marketplace shortcuts are hidden on iOS unless detected country is `US`.
 - Card and distribution data are API-backed snapshots and can lag briefly.
 - Card-level ownership chips, marketplace details, media fallback, and transfer

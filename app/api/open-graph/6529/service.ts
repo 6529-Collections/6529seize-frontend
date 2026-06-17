@@ -1,7 +1,12 @@
 import { createHash } from "node:crypto";
 
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
+import {
+  MANIFOLD_LAZY_CLAIM_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "@/constants/constants";
 import { publicEnv } from "@/config/env";
 import type {
   BaseNFT,
@@ -25,12 +30,25 @@ import type {
   SeizeCollectionPreviewPerson,
   SeizeCollectionPreviewTrait,
 } from "@/services/api/link-preview-api";
+import { createPublicClient, fallback, http } from "viem";
+import { mainnet } from "viem/chains";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
 const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const MAINNET_RPC_TIMEOUT_MS = 5_000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
+
+const mainnetPublicClient = createPublicClient({
+  chain: mainnet,
+  transport: fallback([
+    http("https://rpc1.6529.io", { timeout: MAINNET_RPC_TIMEOUT_MS }),
+    http("https://ethereum.publicnode.com", {
+      timeout: MAINNET_RPC_TIMEOUT_MS,
+    }),
+  ]),
+});
 
 type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -172,12 +190,27 @@ function createApiHeaders(context?: ApiContext): HeadersInit {
   return headers;
 }
 
+async function getApiFetch(): Promise<typeof fetch> {
+  if (typeof window !== "undefined") {
+    return fetch;
+  }
+
+  try {
+    const { ssrFetch } = await import("@/lib/fetch/ssrFetch");
+    return ssrFetch;
+  } catch {
+    // Preview enrichment should degrade to public API data if server signing is unavailable.
+    return fetch;
+  }
+}
+
 async function fetchApiJson<T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   context?: ApiContext
 ): Promise<T> {
-  const response = await fetch(buildApiUrl(endpoint, params), {
+  const fetchImpl = await getApiFetch();
+  const response = await fetchImpl(buildApiUrl(endpoint, params), {
     headers: createApiHeaders(context),
   });
 
@@ -522,8 +555,8 @@ function compactPeople(
   );
 }
 
-function profileLookupCandidate(value: string | null | undefined): string | null {
-  const normalized = value?.trim().replace(/^@/, "");
+function profileLookupCandidate(value: unknown): string | null {
+  const normalized = readString(value)?.replace(/^@/, "");
   if (!normalized || normalized.includes(",") || normalized.includes(" ")) {
     return null;
   }
@@ -531,8 +564,31 @@ function profileLookupCandidate(value: string | null | undefined): string | null
   return normalized;
 }
 
+function identityProfileHandle(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  return firstNonEmptyString(profile?.handle, profile?.normalised_handle);
+}
+
+function identityProfileHref(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  const handle = identityProfileHandle(profile);
+  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
+}
+
+function identityProfileDisplay(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  return firstNonEmptyString(
+    profile?.display,
+    profile?.handle,
+    profile?.normalised_handle
+  );
+}
+
 async function resolveProfileHref(
-  value: string | null | undefined,
+  value: unknown,
   context?: ApiContext
 ): Promise<string | undefined> {
   const candidate = profileLookupCandidate(value);
@@ -540,14 +596,24 @@ async function resolveProfileHref(
     return undefined;
   }
 
-  const profile = await fetchOptionalApiJson<IdentityResponse>(
+  const profile = await resolveIdentityProfile(candidate, context);
+  return identityProfileHref(profile);
+}
+
+async function resolveIdentityProfile(
+  value: unknown,
+  context?: ApiContext
+): Promise<IdentityResponse | null> {
+  const candidate = profileLookupCandidate(value);
+  if (!candidate) {
+    return null;
+  }
+
+  return await fetchOptionalApiJson<IdentityResponse>(
     `identities/${encodeURIComponent(candidate.toLowerCase())}`,
     undefined,
     context
   );
-  const handle = firstNonEmptyString(profile?.handle, profile?.normalised_handle);
-
-  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
 }
 
 function shouldUseExtendedEditionSize(
@@ -598,6 +664,40 @@ function readMemeSeason(
     nft.season,
     readAttributeValue(readAttributes(metadata), "Type - Season")
   );
+}
+
+function readManifoldClaimTotalMax(data: unknown): number | undefined {
+  if (Array.isArray(data)) {
+    return readPositiveNumber(asRecord(data[1])?.["totalMax"]);
+  }
+
+  const dataRecord = asRecord(data);
+  const claim = asRecord(dataRecord?.["claim"] ?? data);
+  return readPositiveNumber(claim?.["totalMax"]);
+}
+
+async function fetchTheMemesManifoldEditionSize(
+  id: string
+): Promise<number | undefined> {
+  const decimalTokenId = readNumericPathSegment(id);
+  if (!decimalTokenId) {
+    return undefined;
+  }
+
+  const tokenId = BigInt(decimalTokenId);
+
+  try {
+    const data = await mainnetPublicClient.readContract({
+      address: MANIFOLD_LAZY_CLAIM_CONTRACT,
+      abi: MEMES_MANIFOLD_PROXY_ABI,
+      functionName: "getClaimForToken",
+      args: [MEMES_CONTRACT, tokenId],
+    });
+
+    return readManifoldClaimTotalMax(data);
+  } catch {
+    return undefined;
+  }
 }
 
 async function fetchTheMemesPreview(
@@ -652,8 +752,18 @@ async function fetchTheMemesPreview(
   )
     ? extendedEditionSize
     : undefined;
+  const shouldFetchManifoldEditionSize =
+    claimEditionSize === undefined &&
+    guardedMintStatEditionSize === undefined &&
+    fallbackEditionSize === undefined;
+  const manifoldEditionSize = shouldFetchManifoldEditionSize
+    ? await fetchTheMemesManifoldEditionSize(id)
+    : undefined;
   const editionSize =
-    claimEditionSize ?? guardedMintStatEditionSize ?? fallbackEditionSize;
+    claimEditionSize ??
+    manifoldEditionSize ??
+    guardedMintStatEditionSize ??
+    fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRate = readPositiveNumber(source.hodl_rate);
   const mintDate = formatMintDate(source.mint_date);
@@ -932,7 +1042,12 @@ async function fetchNextGenPreview(
   );
   const rarityRank = readPositiveNumber(token.rarity_score_rank);
   const mintDate = formatMintDate(token.mint_date);
-  const artistHref = await resolveProfileHref(collection?.artist, context);
+  const [artistHref, collectorProfile] = await Promise.all([
+    resolveProfileHref(collection?.artist, context),
+    resolveIdentityProfile(readString(token.owner), context),
+  ]);
+  const collectorHref = identityProfileHref(collectorProfile);
+  const collectorDisplay = identityProfileDisplay(collectorProfile);
   const canonicalRequestUrl = new URL(
     `/nextgen/token/${token.id}`,
     requestUrl.origin
@@ -948,6 +1063,11 @@ async function fetchNextGenPreview(
         label: "by",
         name: collection?.artist,
         href: artistHref,
+      }),
+      createPerson({
+        label: "Collector",
+        name: collectorDisplay,
+        href: collectorHref,
       }),
     ]),
     facts: compactFacts([

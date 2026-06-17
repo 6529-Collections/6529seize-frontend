@@ -337,6 +337,13 @@ describe("OpenGraphPreview", () => {
     );
 
     expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
+    expect(screen.getByTestId("6529-collection-preview-image-frame")).toHaveClass(
+      "tw-bg-black",
+      "tw-border-black"
+    );
+    expect(screen.getByAltText("The Collective Synapse")).toHaveClass(
+      "tw-object-contain"
+    );
     expect(screen.getAllByText("The Memes #509")).toHaveLength(1);
     expect(screen.getByText("The Collective Synapse")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "elnaz555" })).toHaveAttribute(
@@ -365,7 +372,14 @@ describe("OpenGraphPreview", () => {
           kind: "nextgen-token",
           title: "Pebbles #514",
           kicker: "NextGen \u00b7 Pebbles",
-          people: [{ label: "by", name: "Zeblocks", href: "/zeblocks" }],
+          people: [
+            { label: "by", name: "Zeblocks", href: "/zeblocks" },
+            {
+              label: "Collector",
+              name: "perilousvault.eth",
+              href: "/perilousvault",
+            },
+          ],
           facts: [
             { label: "Rarity", value: "#86 / 1,000" },
             { label: "Mint date", value: "11 Apr 2024" },
@@ -381,6 +395,11 @@ describe("OpenGraphPreview", () => {
     );
 
     expect(screen.getByTestId("6529-collection-preview-card")).toBeInTheDocument();
+    expect(screen.getByTestId("6529-collection-preview-image-frame")).toHaveClass(
+      "tw-bg-black",
+      "tw-border-black"
+    );
+    expect(screen.getByAltText("Pebbles #514")).toHaveClass("tw-object-contain");
     expect(screen.getByText("Pebbles #514")).toBeInTheDocument();
     expect(screen.getByText("NextGen \u00b7 Pebbles")).toBeInTheDocument();
     expect(screen.getByText("Rarity")).toBeInTheDocument();
@@ -392,5 +411,8 @@ describe("OpenGraphPreview", () => {
       "href",
       "/zeblocks"
     );
+    expect(
+      screen.getByRole("link", { name: "perilousvault.eth" })
+    ).toHaveAttribute("href", "/perilousvault");
   });
 });

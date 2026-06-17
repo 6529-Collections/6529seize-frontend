@@ -104,7 +104,6 @@ jest.mock(
       data-pin={String(props.showPin)}
       data-depth={String(props.depth)}
       data-can-expand={String(props.canExpand)}
-      data-reserve-expand={String(props.reserveExpandControlSpace)}
       data-expanded={String(props.isExpanded)}
       data-unread-subwaves={String(props.hasUnreadSubwaves)}
     >
@@ -141,10 +140,6 @@ it("renders announcement, official, pinned, and regular sections without double 
   expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.getByTestId("wave-a1")).toHaveAttribute(
-    "data-reserve-expand",
-    "false"
-  );
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
@@ -217,10 +212,6 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
     "data-unread-subwaves",
     "true"
   );
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-reserve-expand",
-    "true"
-  );
   expect(screen.queryByTestId("wave-child")).toBeNull();
 
   fireEvent.click(screen.getByTestId("toggle-parent"));
@@ -235,10 +226,6 @@ it("expands regular subwaves and keeps child rows unpinned", () => {
     "false"
   );
   expect(screen.getByTestId("wave-child")).toHaveAttribute("data-depth", "1");
-  expect(screen.getByTestId("wave-child")).toHaveAttribute(
-    "data-reserve-expand",
-    "true"
-  );
   expect(screen.getByTestId("wave-child")).toHaveAttribute(
     "data-can-expand",
     "false"

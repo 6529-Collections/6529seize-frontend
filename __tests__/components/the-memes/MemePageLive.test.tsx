@@ -3,24 +3,35 @@ import {
   MemePageLiveRightMenu,
   MemePageLiveSubMenu,
 } from "@/components/the-memes/MemePageLive";
+import { MemeCollectorsStats } from "@/components/the-memes/MemePageLiveStats";
 import { MemePageReferencesSubMenu } from "@/components/the-memes/MemePageReferences";
 import type { MemesExtendedData, NFT, Rememe } from "@/entities/INFT";
+import {
+  formatDate,
+  formatInteger,
+  formatNumber,
+  formatPercent,
+} from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createElement } from "react";
 
 let mockCountry = "US";
 let mockIsIos = false;
+const mockMemePageArt = jest.fn((..._args: unknown[]) => (
+  <div data-testid="meme-page-art" />
+));
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ unoptimized, priority, ...props }: any) => (
-    <img
-      alt={props.alt ?? ""}
-      {...props}
-      data-unoptimized={unoptimized}
-      data-priority={priority}
-    />
-  ),
+  default: ({ unoptimized, priority, ...props }: any) =>
+    createElement("img", {
+      ...props,
+      alt: props.alt ?? "",
+      "data-unoptimized": unoptimized,
+      "data-priority": priority,
+    }),
 }));
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -32,24 +43,11 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("@/components/the-memes/MemePageArt", () => ({
   __esModule: true,
-  MemePageArt: () => <div data-testid="meme-page-art" />,
+  MemePageArt: (...args: unknown[]) => mockMemePageArt(...args),
 }));
 jest.mock("@/components/nft-image/RememeImage", () => ({
   __esModule: true,
   default: () => <div data-testid="rememe-image" />,
-}));
-jest.mock("@/components/nft-attributes/NftStats", () => ({
-  __esModule: true,
-  NftPageStats: ({ afterMetadata }: { afterMetadata?: React.ReactNode }) => (
-    <>
-      <tr>
-        <td>Metadata</td>
-        <td>View</td>
-      </tr>
-      {afterMetadata}
-      <tr data-testid="nft-stats" />
-    </>
-  ),
 }));
 
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
@@ -98,6 +96,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockMemePageArt.mockClear();
   mockCountry = "US";
   mockIsIos = false;
 });
@@ -171,7 +170,7 @@ function createMeta(): MemesExtendedData {
   } as MemesExtendedData;
 }
 
-function createRememe(name: string): Rememe {
+function createRememe(name: string, overrides: Partial<Rememe> = {}): Rememe {
   return {
     created_at: new Date(),
     updated_at: new Date(),
@@ -199,6 +198,7 @@ function createRememe(name: string): Rememe {
     replicas: [],
     source: "",
     added_by: "",
+    ...overrides,
   } as Rememe;
 }
 
@@ -247,20 +247,85 @@ describe("MemePageReferencesSubMenu sorting", () => {
       .mockResolvedValueOnce({ data: firstData, count: 21 })
       .mockResolvedValueOnce({ data: refreshed, count: 21 });
 
-    const { container } = render(<MemePageReferencesSubMenu show nft={nft} />);
+    render(<MemePageReferencesSubMenu show nft={nft} />);
 
     await waitFor(() =>
       expect(screen.getByText(/Random1/)).toBeInTheDocument()
     );
 
-    const refreshIcon = container.querySelector(
-      'svg[data-icon="arrows-rotate"]'
-    ) as Element;
-    expect(refreshIcon).toBeInTheDocument();
-    fireEvent.click(refreshIcon);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: t("en-US", "theMemes.detail.references.refresh.ariaLabel"),
+      })
+    );
 
     await waitFor(() =>
       expect(screen.getByText(/Random2/)).toBeInTheDocument()
+    );
+  });
+
+  it("renders references labels and links with the active locale", async () => {
+    const nft = createNft();
+    const firstData = [
+      createRememe("Locale Rememe", {
+        contract: "0xabc",
+        id: "42",
+        replicas: [1, 2],
+      }),
+    ];
+
+    mockFetchUrl
+      .mockResolvedValueOnce({ data: [], count: 0 })
+      .mockResolvedValueOnce({ data: firstData, count: 21 });
+
+    render(<MemePageReferencesSubMenu show nft={nft} locale="de-DE" />);
+
+    expect(
+      screen.getByAltText(
+        t("de-DE", "theMemes.detail.references.memeLab.logoAlt")
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        t("de-DE", "theMemes.detail.references.memeLab.description")
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByAltText(
+        t("de-DE", "theMemes.detail.references.rememes.logoAlt")
+      )
+    ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.getByText("Locale Rememe")).toBeInTheDocument()
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.references.sort.trigger", {
+          sort: t("de-DE", "rememes.sort.random"),
+        }),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.references.refresh.ariaLabel"),
+      })
+    ).toBeInTheDocument();
+    const rememeLink = screen.getByRole("link", {
+      name: t("de-DE", "rememes.card.linkAriaLabel", {
+        name: "Locale Rememe",
+        tokenId: "42",
+      }),
+    });
+    expect(rememeLink).toHaveAttribute(
+      "href",
+      "/rememes/0xabc/42?locale=de-DE"
+    );
+    expect(rememeLink).toHaveTextContent(
+      t("de-DE", "rememes.card.replicaCount", {
+        count: formatInteger("de-DE", 2),
+      })
     );
   });
 });
@@ -344,7 +409,7 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.getByText("97")).toBeInTheDocument();
     expect(screen.getByText("Rank 480/498")).toHaveClass(
       "tw-text-[10px]",
-      "md:tw-text-xs"
+      "md:tw-text-[11px]"
     );
     expect(exMuseumLabel).toBeInTheDocument();
     expect(
@@ -354,6 +419,85 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(
       collectorsLabel.parentElement?.parentElement?.parentElement
     ).toHaveClass("tw-flex", "tw-flex-wrap");
+  });
+
+  it("formats live panel stats with the selected locale", () => {
+    const nft = createNft({
+      mint_date: new Date("2024-01-02T00:00:00.000Z"),
+      mint_price: 1234.5,
+      floor_price: 1.2345,
+      market_cap: 9876.54,
+      highest_offer: 2.5,
+      hodl_rate: 12.345,
+    });
+    const nftMeta = {
+      ...createMeta(),
+      collection_size: 1200,
+      edition_size: 1234,
+      edition_size_cleaned: 1200,
+      edition_size_cleaned_rank: 12,
+      hodlers: 5678,
+      hodlers_rank: 987,
+      percent_unique: 0.1234,
+      percent_unique_cleaned: 0.4567,
+    };
+
+    render(
+      <MemePageLiveRightMenu show nft={nft} nftMeta={nftMeta} locale="de-DE" />
+    );
+
+    expect(
+      screen.getByText(
+        formatDate("de-DE", nft.mint_date, {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        })
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(formatInteger("de-DE", nftMeta.edition_size)).length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByText(formatInteger("de-DE", nftMeta.hodlers))
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        t("de-DE", "theMemes.detail.live.rank", {
+          rank: formatInteger("de-DE", nftMeta.hodlers_rank),
+          total: formatInteger("de-DE", nftMeta.collection_size),
+        })
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        formatNumber("de-DE", nft.market_cap, { maximumFractionDigits: 2 })
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(t("de-DE", "theMemes.detail.live.market.title"))
+    ).toBeInTheDocument();
+  });
+
+  it("formats collector percentages with the selected locale", () => {
+    const nftMeta = {
+      ...createMeta(),
+      percent_unique: 0.1234,
+    };
+
+    render(<MemeCollectorsStats nftMeta={nftMeta} locale="de-DE" />);
+
+    const expectedPercent = formatPercent(
+      "de-DE",
+      nftMeta.percent_unique,
+      1
+    ).replace(/\s/g, " ");
+    expect(
+      screen.getByText(
+        (content) => content.replace(/\s/g, " ") === expectedPercent
+      )
+    ).toBeInTheDocument();
   });
 
   it("shows distribution plan link", async () => {
@@ -367,6 +511,23 @@ describe("MemePageLiveRightMenu distribution link", () => {
     });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
+  });
+
+  it("preserves locale in distribution plan links", async () => {
+    const nft = createNft({ id: 5, has_distribution: true });
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageLiveRightMenu show nft={nft} locale="de-DE" />
+        </CookieConsentProvider>
+      );
+    });
+
+    const link = screen.getByRole("link", { name: /distribution plan/i });
+    expect(link).toHaveAttribute(
+      "href",
+      `/the-memes/5/distribution?locale=de-DE`
+    );
   });
 
   it("shows marketplace links outside non-US iOS", async () => {
@@ -433,6 +594,23 @@ describe("MemePageLiveSubMenu details", () => {
       expect(
         screen.getByRole("button", { name: /additional details/i })
       ).toHaveAttribute("aria-expanded", "true")
+    );
+  });
+
+  it("passes locale into additional details content", () => {
+    render(
+      <MemePageLiveSubMenu
+        show
+        nft={createNft()}
+        nftMeta={createMeta()}
+        defaultAdditionalDetailsOpen={true}
+        locale="de-DE"
+      />
+    );
+
+    expect(mockMemePageArt).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "de-DE" }),
+      undefined
     );
   });
 });

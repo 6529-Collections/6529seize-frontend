@@ -6,7 +6,12 @@
 - `/rememes/{contract}/{id}` is the ReMeme detail route.
 - Browse supports sort/filter controls, random refresh, pagination, and detail
   handoff.
-- Detail uses in-page tabs: `Live`, `Metadata`, and `References`.
+- Browse is progressively i18n-ready for labels, accessible names, metadata,
+  logo alt text, loading text, count formatting, locale-preserving card/detail
+  navigation, and the Add ReMeme action.
+- Detail is progressively i18n-ready for document metadata, labels, accessible
+  names, tab labels, reference-card labels, and locale-preserving navigation.
+- Detail uses in-page tabs: `Overview`, `Metadata`, and `References`.
 
 ## Location in the Site
 
@@ -31,7 +36,7 @@
 3. Review the header actions:
    - Result count badge
    - `LFG: Start the Show!`
-   - `Add ReMeme` (`/rememes/add`)
+   - `Add ReMeme` (`/rememes/add`, preserving non-default `locale`)
 4. Apply filters:
    - `Sort`: `Random` or `Recently Added`
    - `Token Type`: `All`, `ERC-721`, `ERC-1155`
@@ -43,9 +48,9 @@
 ### Detail Route `/rememes/{contract}/{id}`
 
 1. Open the route directly or from a browse card.
-2. On `Live`, review artwork, collection/contract label, creator/added-by
+2. On `Overview`, review artwork, collection/contract label, creator/added-by
    fields (when shown), and external links.
-3. Use `Live` replica chips (when shown) to open sibling token IDs.
+3. Use `Overview` replica chips (when shown) to open sibling token IDs.
 4. Open `Metadata` to review token URI, token type, parsed metadata, and
    attributes.
 5. Open `References` to view linked `The Memes` cards and open
@@ -53,21 +58,34 @@
 
 ## Common Scenarios
 
-- Filter by one Meme reference, then open a replica from detail `Live`.
+- Filter by one Meme reference, then open a replica from detail `Overview`.
 - Switch to `Recently Added` to inspect newer additions first.
 - Open `Metadata` for token URI and attributes, then open `References` to
   inspect linked Meme cards.
 
 ## URL and Query Behavior
 
-- Browse reads and writes only one query key: `meme_id`.
+- Browse reads `meme_id` and `locale`.
+- Detail reads `locale`.
 - Changing `Meme Reference` updates the URL to `?meme_id={id}` (or clears it
-  for `All`).
-- Non-numeric `meme_id` values are cleared back to `/rememes`.
+  for `All`) and preserves non-default `locale` values.
+- Supported locale query values are `en-US`, `en-GB`, `fr-FR`, `es-ES`, and
+  `de-DE`; unsupported locale values fall back to `en-US`.
+- Malformed, non-positive, unsafe, and non-canonical `meme_id` values are
+  normalized before browse renders. Invalid values are removed from the URL
+  while unrelated params and supported non-default locales are preserved;
+  leading-zero positive values such as `0042` redirect to canonical
+  `?meme_id=42`.
+- Count formatting follows the active locale; visible token IDs remain stable
+  identifiers.
+- Browse exposes the card grid as a labelled results list for assistive
+  technology.
+- Browse card, Add ReMeme, detail back, replica, and reference-card links
+  preserve non-default `locale` values.
 - Sort, token type, and page are in-memory state and reset on reload.
 - Changing sort/token type/meme filter resets pagination to page 1.
-- Detail tabs (`Live`, `Metadata`, `References`) are in-page state only and do
-  not use URL query keys.
+- Detail tabs (`Overview`, `Metadata`, `References`) are in-page state only and
+  do not use URL query keys.
 
 ## Loading, Empty, and Error States
 
@@ -93,8 +111,8 @@
 - `NFT Marketplace Links` are hidden on iOS unless detected country is `US`.
 - On mobile/tablet (`< xl`), collection switching appears in a dropdown above
   filters.
-- Numeric `meme_id` values that are not in the loaded meme list still apply as
-  a filter and can return empty results.
+- Valid positive numeric `meme_id` values that are not in the loaded meme list
+  still apply as a filter and can return empty results.
 
 ## Failure and Recovery
 
@@ -115,6 +133,8 @@
 - Filter state is not fully shareable by URL (`meme_id` only).
 - Detail tabs are not deep-linkable by URL.
 - Marketplace behavior is documented canonically in NFT marketplace docs.
+- Non-`en-US` Rememes browse/detail translations currently fall back to
+  `en-US` while the route-level migration pattern is reviewed.
 
 ## Related Pages
 
