@@ -4,23 +4,23 @@ import { DropHasher } from "@/utils/drop-hasher";
 import { sha256 } from "js-sha256";
 import { v4 as uuidv4 } from "uuid";
 
-export const STRUCTURED_WALLET_SIGNATURE_VERSION = 2;
-export const STRUCTURED_WALLET_SIGNATURE_TTL_SECONDS = 5 * 60;
+const STRUCTURED_WALLET_SIGNATURE_VERSION = 2;
+const STRUCTURED_WALLET_SIGNATURE_TTL_SECONDS = 5 * 60;
 
-export type StructuredWalletSignatureAction =
+type StructuredWalletSignatureAction =
   | "login"
   | "create_drop"
   | "add_rememe"
   | "nextgen_admin";
 
-export type StructuredWalletSignatureKind = "authentication" | "action";
+type StructuredWalletSignatureKind = "authentication" | "action";
 
-export type StructuredWalletSignatureSessionType =
+type StructuredWalletSignatureSessionType =
   | "first_party_web"
   | "external_client"
   | "native";
 
-export interface StructuredWalletSignatureResult {
+interface StructuredWalletSignatureResult {
   readonly message: string;
   readonly nonce: string;
   readonly issuedAt: string;
@@ -37,7 +37,10 @@ interface BuildStructuredWalletSignatureMessageParams {
   readonly audience?: string | undefined;
   readonly domain?: string | undefined;
   readonly clientOrigin?: string | null | undefined;
-  readonly sessionType?: StructuredWalletSignatureSessionType | null | undefined;
+  readonly sessionType?:
+    | StructuredWalletSignatureSessionType
+    | null
+    | undefined;
   readonly chainId?: number | undefined;
   readonly nonce?: string | undefined;
   readonly issuedAt?: Date | undefined;

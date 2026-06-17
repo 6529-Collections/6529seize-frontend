@@ -215,7 +215,11 @@ function parseStatusCode(status: unknown): number | null {
   }
 
   if (typeof status === "string") {
-    const parsed = Number.parseInt(status, 10);
+    const normalizedStatus = status.trim();
+    if (!/^\d+$/.test(normalizedStatus)) {
+      return null;
+    }
+    const parsed = Number.parseInt(normalizedStatus, 10);
     return Number.isNaN(parsed) ? null : parsed;
   }
 

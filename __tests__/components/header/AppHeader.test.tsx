@@ -440,8 +440,9 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: true },
     });
 
-    expect(screen.getByRole("link", { name: "View prxt0's profile" }))
-      .toHaveAttribute("href", "/prxt0");
+    expect(
+      screen.getByRole("link", { name: "View prxt0's profile" })
+    ).toHaveAttribute("href", "/prxt0");
     expect(
       screen.queryByRole("button", { name: /copy wave link|share wave/i })
     ).not.toBeInTheDocument();

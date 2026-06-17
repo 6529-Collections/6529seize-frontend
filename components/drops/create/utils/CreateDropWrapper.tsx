@@ -321,7 +321,7 @@ const CreateDropWrapper = forwardRef<
         }
         if (
           i.type === ApiWaveMetadataType.Number &&
-          isNaN(Number(item.data_value))
+          Number.isNaN(Number(item.data_value))
         ) {
           return true;
         }

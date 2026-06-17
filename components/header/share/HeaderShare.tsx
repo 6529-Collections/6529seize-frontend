@@ -13,25 +13,17 @@ import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
 import { useElectron } from "@/hooks/useElectron";
-import {
-  getRefreshToken,
-  getWalletAddress,
-  getWalletRole,
-} from "@/services/auth/auth.utils";
-import {
-  createConnectionTransfer,
-  isConnectionTransferV2Enabled,
-} from "@/services/auth/session-v2.utils";
+import { getWalletAddress } from "@/services/auth/auth.utils";
+import { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
 
-type CachedConnectionTransfer = {
+type CachedConnectionShare = {
   readonly addressKey: string;
-  readonly roleKey: string;
   readonly expiresAtMs: number;
-  readonly transfer: Awaited<ReturnType<typeof createConnectionTransfer>>;
+  readonly share: Awaited<ReturnType<typeof createConnectionShare>>;
 };
 
 function isAbortError(error: unknown, signal?: AbortSignal): boolean {
@@ -266,11 +258,9 @@ export function HeaderQRModal({
   const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
-  const transferAbortRef = useRef<AbortController | null>(null);
+  const connectionShareAbortRef = useRef<AbortController | null>(null);
   const shareGenerationIdRef = useRef(0);
-  const cachedConnectionTransferRef = useRef<CachedConnectionTransfer | null>(
-    null
-  );
+  const cachedConnectionShareRef = useRef<CachedConnectionShare | null>(null);
 
   const trapFocusInDialog = useCallback((event: KeyboardEvent) => {
     if (event.key !== "Tab") {
@@ -349,9 +339,7 @@ export function HeaderQRModal({
   );
 
   async function generateSources(
-    refreshToken: string | null,
     walletAddress: string | null,
-    role: string | null,
     signal?: AbortSignal
   ) {
     const generationId = ++shareGenerationIdRef.current;
@@ -382,43 +370,41 @@ export function HeaderQRModal({
     let shareConnectionAppUrl = "";
     let shareConnectionCoreUrl = "";
 
-    if (
-      isConnectionTransferV2Enabled() &&
-      walletAddress &&
-      hasValidWalletAuth
-    ) {
+    if (walletAddress && hasValidWalletAuth) {
       try {
-        const cachedTransfer = cachedConnectionTransferRef.current;
+        const cachedShare = cachedConnectionShareRef.current;
         const addressKey = walletAddress.toLowerCase();
-        const roleKey = role ?? "";
-        const transfer =
-          cachedTransfer &&
-          cachedTransfer.addressKey === addressKey &&
-          cachedTransfer.roleKey === roleKey &&
-          cachedTransfer.expiresAtMs > Date.now() + 30_000
-            ? cachedTransfer.transfer
-            : await createConnectionTransfer({ role, signal });
+        const share =
+          cachedShare &&
+          cachedShare.addressKey === addressKey &&
+          cachedShare.expiresAtMs > Date.now() + 30_000
+            ? cachedShare.share
+            : await createConnectionShare({ signal });
 
         if (isStaleGeneration()) {
           return;
         }
 
-        const expiresAtMs = Date.parse(transfer.expires_at);
+        const expiresAtMs = Date.parse(share.expires_at);
         if (Number.isFinite(expiresAtMs)) {
-          cachedConnectionTransferRef.current = {
+          cachedConnectionShareRef.current = {
             addressKey,
-            roleKey,
             expiresAtMs,
-            transfer,
+            share,
           };
         }
 
-        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?transfer_code=${encodeURIComponent(transfer.transfer_code)}&address=${encodeURIComponent(transfer.address)}`;
-        shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${transfer.deep_link_path}`;
+        const shareParams = new URLSearchParams({
+          connection_share_code: share.connection_share_code,
+          address: share.address,
+        });
 
-        if (transfer.role) {
-          shareConnectionAppUrl += `&role=${encodeURIComponent(transfer.role)}`;
+        if (share.role) {
+          shareParams.set("role", share.role);
         }
+
+        shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`;
+        shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${share.deep_link_path}`;
 
         setCanShareConnection(true);
         setShareConnectionAppUrl(shareConnectionAppUrl);
@@ -427,24 +413,13 @@ export function HeaderQRModal({
         if (isStaleGeneration() || isAbortError(error, signal)) {
           return;
         }
-        console.error("Failed to create connection transfer", error);
+        console.error("Failed to create connection share", error);
         setCanShareConnection(false);
         setShareConnectionAppUrl("");
         setShareConnectionCoreUrl("");
         setShareConnectionSrc("");
         setActiveTab(Mode.NAVIGATE);
       }
-    } else if (refreshToken && walletAddress) {
-      shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
-      shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
-
-      if (role) {
-        shareConnectionAppUrl += `&role=${role}`;
-        shareConnectionCoreUrl += `&role=${role}`;
-      }
-      setCanShareConnection(true);
-      setShareConnectionAppUrl(shareConnectionAppUrl);
-      setShareConnectionCoreUrl(shareConnectionCoreUrl);
     } else {
       setCanShareConnection(false);
       setShareConnectionSrc("");
@@ -501,9 +476,9 @@ export function HeaderQRModal({
   useEffect(() => {
     if (!show) {
       shareGenerationIdRef.current += 1;
-      cachedConnectionTransferRef.current = null;
-      transferAbortRef.current?.abort();
-      transferAbortRef.current = null;
+      cachedConnectionShareRef.current = null;
+      connectionShareAbortRef.current?.abort();
+      connectionShareAbortRef.current = null;
       setCanShareConnection(false);
       setShareConnectionAppUrl("");
       setShareConnectionCoreUrl("");
@@ -511,22 +486,17 @@ export function HeaderQRModal({
       return;
     }
 
-    transferAbortRef.current?.abort();
+    connectionShareAbortRef.current?.abort();
     const controller = new AbortController();
-    transferAbortRef.current = controller;
+    connectionShareAbortRef.current = controller;
 
-    void generateSources(
-      getRefreshToken(),
-      getWalletAddress(),
-      getWalletRole(),
-      controller.signal
-    );
+    void generateSources(getWalletAddress(), controller.signal);
 
     return () => {
       shareGenerationIdRef.current += 1;
       controller.abort();
-      if (transferAbortRef.current === controller) {
-        transferAbortRef.current = null;
+      if (connectionShareAbortRef.current === controller) {
+        connectionShareAbortRef.current = null;
       }
     };
   }, [show, hasValidWalletAuth]);

@@ -30,8 +30,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 jest.mock("@/services/auth/auth.utils");
 jest.mock("@/services/auth/session-v2.utils", () => ({
-  createConnectionTransfer: jest.fn(),
-  isConnectionTransferV2Enabled: jest.fn(() => false),
+  createConnectionShare: jest.fn(),
 }));
 
 // Mock Reown AppKit
@@ -138,6 +137,12 @@ Object.assign(navigator, {
 
 const testOrigin = window.location.origin;
 
+function createPendingPromise<T>(): Promise<T> {
+  return new Promise<T>(() => {
+    // Intentionally pending for abort and stale-share coverage.
+  });
+}
+
 describe("HeaderShare", () => {
   const mockSeizeConnect = require("@/components/auth/SeizeConnectContext");
 
@@ -165,8 +170,16 @@ describe("HeaderShare", () => {
     qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
 
     const sessionV2 = require("@/services/auth/session-v2.utils");
-    sessionV2.isConnectionTransferV2Enabled.mockReturnValue(false);
-    sessionV2.createConnectionTransfer.mockReset();
+    sessionV2.createConnectionShare.mockReset();
+    sessionV2.createConnectionShare.mockResolvedValue({
+      connection_share_code: "mock-share-code",
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+      address: "0x1234567890123456789012345678901234567890",
+      role: "user",
+      target_client_type: "native",
+      deep_link_path:
+        "/accept-connection-sharing?connection_share_code=mock-share-code",
+    });
   });
 
   afterEach(() => {
@@ -348,7 +361,7 @@ describe("HeaderShare", () => {
     });
   });
 
-  describe("Connection transfer codes", () => {
+  describe("Connection sharing", () => {
     beforeEach(() => {
       mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
       mockIsMobile.mockReturnValue(false);
@@ -367,14 +380,13 @@ describe("HeaderShare", () => {
       });
     });
 
-    it("aborts in-flight transfer-code creation when the modal closes", async () => {
+    it("aborts in-flight connection-share creation when the modal closes", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       const signals: AbortSignal[] = [];
-      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
-      sessionV2.createConnectionTransfer.mockImplementation(
+      sessionV2.createConnectionShare.mockImplementation(
         ({ signal }: { readonly signal?: AbortSignal }) => {
           signals.push(signal!);
-          return new Promise(() => undefined);
+          return createPendingPromise();
         }
       );
 
@@ -382,7 +394,7 @@ describe("HeaderShare", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await waitFor(() =>
-        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(1)
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
       );
 
       await userEvent.click(screen.getByLabelText("Close share modal"));
@@ -390,18 +402,17 @@ describe("HeaderShare", () => {
       expect(signals[0]?.aborted).toBe(true);
     });
 
-    it("generates connection QR codes from one-time transfer codes", async () => {
+    it("generates connection QR codes from one-time connection share codes", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
-      sessionV2.createConnectionTransfer.mockResolvedValue({
-        transfer_code: "transfer-code",
+      sessionV2.createConnectionShare.mockResolvedValue({
+        connection_share_code: "share-code",
         expires_at: new Date(Date.now() + 300_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
         role: null,
         target_client_type: "native",
         deep_link_path:
-          "/accept-connection-sharing?transfer_code=transfer-code&address=0x1234567890123456789012345678901234567890",
+          "/accept-connection-sharing?connection_share_code=share-code",
       });
 
       renderWithProviders(<HeaderShare />);
@@ -409,14 +420,13 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledWith({
-          role: null,
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledWith({
           signal: expect.objectContaining({ aborted: false }),
         })
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
-          expect.stringContaining("transfer_code=transfer-code"),
+          expect.stringContaining("connection_share_code=share-code"),
           { width: 500, margin: 0 }
         )
       );
@@ -429,28 +439,27 @@ describe("HeaderShare", () => {
       ).toBe(false);
     });
 
-    it("mints a fresh transfer code after the share modal closes", async () => {
+    it("mints a fresh connection share code after the share modal closes", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
-      sessionV2.createConnectionTransfer
+      sessionV2.createConnectionShare
         .mockResolvedValueOnce({
-          transfer_code: "first-transfer-code",
+          connection_share_code: "first-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
           address: "0x1234567890123456789012345678901234567890",
           role: null,
           target_client_type: "native",
           deep_link_path:
-            "/accept-connection-sharing?transfer_code=first-transfer-code&address=0x1234567890123456789012345678901234567890",
+            "/accept-connection-sharing?connection_share_code=first-share-code",
         })
         .mockResolvedValueOnce({
-          transfer_code: "second-transfer-code",
+          connection_share_code: "second-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
           address: "0x1234567890123456789012345678901234567890",
           role: null,
           target_client_type: "native",
           deep_link_path:
-            "/accept-connection-sharing?transfer_code=second-transfer-code&address=0x1234567890123456789012345678901234567890",
+            "/accept-connection-sharing?connection_share_code=second-share-code",
         });
 
       renderWithProviders(<HeaderShare />);
@@ -459,11 +468,11 @@ describe("HeaderShare", () => {
       await userEvent.click(shareButton);
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(1)
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
-          expect.stringContaining("transfer_code=first-transfer-code"),
+          expect.stringContaining("connection_share_code=first-share-code"),
           { width: 500, margin: 0 }
         )
       );
@@ -472,62 +481,58 @@ describe("HeaderShare", () => {
       await userEvent.click(shareButton);
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(2)
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
-          expect.stringContaining("transfer_code=second-transfer-code"),
+          expect.stringContaining("connection_share_code=second-share-code"),
           { width: 500, margin: 0 }
         )
       );
     });
 
-    it("clears one-time transfer URLs as soon as the share modal closes", async () => {
+    it("clears one-time connection share URLs as soon as the share modal closes", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
-      sessionV2.createConnectionTransfer
+      sessionV2.createConnectionShare
         .mockResolvedValueOnce({
-          transfer_code: "first-transfer-code",
+          connection_share_code: "first-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
           address: "0x1234567890123456789012345678901234567890",
           role: null,
           target_client_type: "native",
           deep_link_path:
-            "/accept-connection-sharing?transfer_code=first-transfer-code&address=0x1234567890123456789012345678901234567890",
+            "/accept-connection-sharing?connection_share_code=first-share-code",
         })
-        .mockImplementationOnce(() => new Promise(() => undefined));
+        .mockImplementationOnce(() => createPendingPromise());
 
       renderWithProviders(<HeaderShare />);
 
       const shareButton = screen.getByRole("button", { name: "QR Code" });
       await userEvent.click(shareButton);
 
-      await screen.findByTitle(/first-transfer-code/);
+      await screen.findByTitle(/first-share-code/);
 
       await userEvent.click(screen.getByLabelText("Close share modal"));
       await userEvent.click(shareButton);
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionTransfer).toHaveBeenCalledTimes(2)
+        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
       );
-      expect(
-        screen.queryByTitle(/first-transfer-code/)
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTitle(/first-share-code/)).not.toBeInTheDocument();
       expect(screen.queryByText("Connection")).not.toBeInTheDocument();
     });
 
-    it("encodes transfer-code deep-link query values", async () => {
+    it("encodes connection-share deep-link query values", async () => {
       const qrcode = require("qrcode");
       const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
-      sessionV2.createConnectionTransfer.mockResolvedValue({
-        transfer_code: "transfer&code=value%",
+      sessionV2.createConnectionShare.mockResolvedValue({
+        connection_share_code: "share&code=value%",
         expires_at: new Date(Date.now() + 300_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
         role: "role+admin&test",
         target_client_type: "native",
         deep_link_path:
-          "/accept-connection-sharing?transfer_code=transfer%26code%3Dvalue%25&address=0x1234567890123456789012345678901234567890&role=role%2Badmin%26test",
+          "/accept-connection-sharing?connection_share_code=share%26code%3Dvalue%25",
       });
 
       renderWithProviders(<HeaderShare />);
@@ -536,7 +541,9 @@ describe("HeaderShare", () => {
 
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
-          expect.stringContaining("transfer_code=transfer%26code%3Dvalue%25"),
+          expect.stringContaining(
+            "connection_share_code=share%26code%3Dvalue%25"
+          ),
           { width: 500, margin: 0 }
         )
       );
@@ -549,12 +556,11 @@ describe("HeaderShare", () => {
       ).toBe(true);
     });
 
-    it("disables the Connection tab when transfer-code creation fails", async () => {
+    it("disables the Connection tab when connection-share creation fails", async () => {
       const sessionV2 = require("@/services/auth/session-v2.utils");
       jest.spyOn(console, "error").mockImplementation(() => undefined);
-      sessionV2.isConnectionTransferV2Enabled.mockReturnValue(true);
-      sessionV2.createConnectionTransfer.mockRejectedValue(
-        new Error("transfer creation failed")
+      sessionV2.createConnectionShare.mockRejectedValue(
+        new Error("connection share creation failed")
       );
 
       renderWithProviders(<HeaderShare />);
@@ -562,7 +568,7 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionTransfer).toHaveBeenCalled()
+        expect(sessionV2.createConnectionShare).toHaveBeenCalled()
       );
       await waitFor(() =>
         expect(screen.queryByText("Connection")).not.toBeInTheDocument()

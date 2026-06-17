@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiWaveOverviewContextProfileContext } from '../models/ApiWaveOverviewContextProfileContext';
 import { ApiWaveOverviewContributor } from '../models/ApiWaveOverviewContributor';
 import { ApiWaveOverviewDescriptionDrop } from '../models/ApiWaveOverviewDescriptionDrop';
@@ -20,6 +21,7 @@ export class ApiWaveOverview {
     'id': string;
     'name': string;
     'pfp'?: string;
+    'creator': ApiProfileMin;
     'last_drop_time': number;
     'created_at': number;
     'subscribers_count': number;
@@ -55,6 +57,12 @@ export class ApiWaveOverview {
             "name": "pfp",
             "baseName": "pfp",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "creator",
+            "baseName": "creator",
+            "type": "ApiProfileMin",
             "format": ""
         },
         {

@@ -7,7 +7,7 @@ export type WebSocketMessage<T = {}> = {
   type: WsMessageType;
 } & T;
 
-export interface WebSocketMessageMetadata {
+interface WebSocketMessageMetadata {
   readonly reason?: string | undefined;
 }
 

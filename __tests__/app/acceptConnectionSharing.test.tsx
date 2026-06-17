@@ -7,9 +7,8 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  isConnectionTransferV2Enabled,
   persistSessionResponse,
-  redeemConnectionTransfer,
+  redeemConnectionShare,
 } from "@/services/auth/session-v2.utils";
 import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
 
@@ -44,9 +43,8 @@ jest.mock("@/components/nft-transfer/TransferModalPfp", () => ({
 }));
 
 jest.mock("@/services/auth/session-v2.utils", () => ({
-  isConnectionTransferV2Enabled: jest.fn(() => false),
   persistSessionResponse: jest.fn(),
-  redeemConnectionTransfer: jest.fn(),
+  redeemConnectionShare: jest.fn(),
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
@@ -96,8 +94,7 @@ describe("AcceptConnectionSharing page", () => {
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
-    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(false);
-    (redeemConnectionTransfer as jest.Mock).mockReset();
+    (redeemConnectionShare as jest.Mock).mockReset();
     (persistSessionResponse as jest.Mock).mockReset();
     (persistSessionResponse as jest.Mock).mockResolvedValue(true);
     (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(true);
@@ -108,7 +105,7 @@ describe("AcceptConnectionSharing page", () => {
     });
   });
 
-  it("shows missing parameters message when token or address missing", () => {
+  it("shows missing parameters message when connection share code is missing", () => {
     render(
       <TestProvider>
         <AcceptConnectionSharingPage />
@@ -117,9 +114,10 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getByText(/Missing required parameters/)).toBeInTheDocument();
   });
 
-  it("includes provided token and address in the page", () => {
+  it("includes provided address in the page", () => {
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("token=abc12345&address=0x123")
+      new URLSearchParams("connection_share_code=abc12345&address=0x123")
     );
     render(
       <TestProvider>
@@ -130,11 +128,10 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getAllByText(/0x123/).length).toBeGreaterThan(0);
   });
 
-  it("does not redeem native transfer codes in a web browser", () => {
-    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(true);
+  it("does not redeem native connection shares in a web browser", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("transfer_code=abc12345&address=0x123")
+      new URLSearchParams("connection_share_code=abc12345&address=0x123")
     );
 
     render(
@@ -147,14 +144,13 @@ describe("AcceptConnectionSharing page", () => {
       screen.getByText(/Open this connection link in the 6529 mobile app/)
     ).toBeInTheDocument();
     expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
-    expect(redeemConnectionTransfer).not.toHaveBeenCalled();
+    expect(redeemConnectionShare).not.toHaveBeenCalled();
   });
 
-  it("allows transfer-code accept UI in the native app", () => {
-    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(true);
+  it("allows connection share accept UI in the native app", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("transfer_code=abc12345&address=0x123")
+      new URLSearchParams("connection_share_code=abc12345&address=0x123")
     );
 
     render(
@@ -167,21 +163,20 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getByText("Accept connection")).toBeInTheDocument();
   });
 
-  it("redeems and persists a native transfer-code session", async () => {
+  it("redeems and persists a native connection share session", async () => {
     const push = jest.fn();
     const seizeAcceptConnection = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push });
-    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(true);
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("transfer_code=abc12345&address=0x123")
+      new URLSearchParams("connection_share_code=abc12345&address=0x123")
     );
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
       seizeAcceptConnection,
     });
-    (redeemConnectionTransfer as jest.Mock).mockResolvedValue({
+    (redeemConnectionShare as jest.Mock).mockResolvedValue({
       client_type: "native",
       address: "0x123",
       role: null,
@@ -200,7 +195,7 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionTransfer).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
     );
     expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
     expect(persistSessionResponse).toHaveBeenCalledWith(
@@ -214,13 +209,12 @@ describe("AcceptConnectionSharing page", () => {
     expect(push).toHaveBeenCalledWith("/");
   });
 
-  it("does not burn a native transfer code when profile storage is full", async () => {
+  it("does not burn a native connection share code when profile storage is full", async () => {
     const setToast = jest.fn();
-    (isConnectionTransferV2Enabled as jest.Mock).mockReturnValue(true);
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(false);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("transfer_code=abc12345&address=0x123")
+      new URLSearchParams("connection_share_code=abc12345&address=0x123")
     );
 
     render(
@@ -238,7 +232,7 @@ describe("AcceptConnectionSharing page", () => {
       })
     );
     expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
-    expect(redeemConnectionTransfer).not.toHaveBeenCalled();
+    expect(redeemConnectionShare).not.toHaveBeenCalled();
     expect(persistSessionResponse).not.toHaveBeenCalled();
   });
 });

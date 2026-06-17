@@ -249,8 +249,7 @@ export default function AppWalletComponent(
     async (name: string, address: string) => {
       if (areEqualAddresses(address, account.address)) {
         setToast({
-          message:
-            "Disconnect this wallet before deleting it.",
+          message: "Disconnect this wallet before deleting it.",
           type: "error",
         });
         return;

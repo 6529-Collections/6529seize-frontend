@@ -23,10 +23,8 @@ import {
   MissingActiveProfileError,
 } from "@/errors/authentication";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiLoginRequest } from "@/generated/models/ApiLoginRequest";
-import type { ApiLoginResponse } from "@/generated/models/ApiLoginResponse";
-import type { ApiNonceResponse } from "@/generated/models/ApiNonceResponse";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
@@ -38,7 +36,7 @@ import {
   SigningProviderError,
   useSecureSign,
 } from "@/hooks/useSecureSign";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import {
   canStoreAnotherWalletAccount,
@@ -47,24 +45,16 @@ import {
   PROFILE_SWITCHED_EVENT,
   removeAuthJwt,
   setActiveWalletAccount,
-  setAuthJwt,
   syncConnectedWalletProfile,
 } from "@/services/auth/auth.utils";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import { getRole, validateJwt } from "@/services/auth/jwt-validation.utils";
 import {
   getSessionClientType,
-  isWalletAuthSessionV2Enabled,
+  getSessionNonce,
   loginWithSessionV2,
   persistSessionResponse,
 } from "@/services/auth/session-v2.utils";
-import {
-  getWalletSignatureAudience,
-  getWalletSignatureClientOrigin,
-  getWalletSignatureDomain,
-  isStructuredSignaturesEnabled,
-  type StructuredWalletSignatureSessionType,
-} from "@/services/wallet-signatures/structured-wallet-signatures";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { measureMobileLaunchAsync } from "@/utils/monitoring/mobileLaunchTiming";
 import { validateRoleForAuthentication } from "@/utils/role-validation";
@@ -103,34 +93,6 @@ class NonceResponseValidationError extends Error {
     this.name = "NonceResponseValidationError";
   }
 }
-
-const getStructuredWalletSignatureSessionType =
-  (): StructuredWalletSignatureSessionType => {
-    if (getSessionClientType() === "native") {
-      return "native";
-    }
-    const signingDomain = getWalletSignatureDomain();
-    if (
-      signingDomain.startsWith("localhost") ||
-      signingDomain.startsWith("127.0.0.1")
-    ) {
-      return "external_client";
-    }
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.userAgent.toLowerCase().includes("electron")
-    ) {
-      return "external_client";
-    }
-    return "first_party_web";
-  };
-
-const isWalletAuthSessionV2LoginAllowed = (
-  sessionType: StructuredWalletSignatureSessionType
-): boolean =>
-  isWalletAuthSessionV2Enabled() &&
-  isStructuredSignaturesEnabled() &&
-  sessionType !== "external_client";
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
@@ -433,7 +395,7 @@ export default function Auth({
     signerAddress,
   }: {
     signerAddress: string;
-  }): Promise<ApiNonceResponse> => {
+  }): Promise<ApiSessionNonceResponse> => {
     // Input validation - fail fast on invalid input
     if (!signerAddress || typeof signerAddress !== "string") {
       throw new InvalidSignerAddressError(signerAddress);
@@ -446,24 +408,7 @@ export default function Auth({
     }
 
     try {
-      const params: Record<string, string> = {
-        signer_address: signerAddress,
-      };
-      if (isStructuredSignaturesEnabled()) {
-        const clientOrigin = getWalletSignatureClientOrigin();
-        params["structured_signature"] = "true";
-        params["audience"] = getWalletSignatureAudience();
-        params["domain"] = getWalletSignatureDomain();
-        if (clientOrigin) {
-          params["client_origin"] = clientOrigin;
-        }
-        params["session_type"] = getStructuredWalletSignatureSessionType();
-        params["chain_id"] = "1";
-      }
-      const response = await commonApiFetch<ApiNonceResponse>({
-        endpoint: "auth/nonce",
-        params,
-      });
+      const response = await getSessionNonce({ signerAddress });
 
       // Response validation - fail fast on invalid response
       if (!response) {
@@ -473,12 +418,12 @@ export default function Auth({
       }
 
       if (
-        !response.nonce ||
-        typeof response.nonce !== "string" ||
-        response.nonce.trim().length === 0
+        !response.signable_message ||
+        typeof response.signable_message !== "string" ||
+        response.signable_message.length === 0
       ) {
         throw new NonceResponseValidationError(
-          "Invalid nonce in API response",
+          "Invalid signable_message in API response",
           response
         );
       }
@@ -581,12 +526,7 @@ export default function Auth({
     readonly role: string | null;
   }): Promise<{ success: boolean }> => {
     try {
-      const structuredSessionType = getStructuredWalletSignatureSessionType();
-      const useWalletAuthSessionV2 = isWalletAuthSessionV2LoginAllowed(
-        structuredSessionType
-      );
-      const isSingleWebSessionV2 =
-        useWalletAuthSessionV2 && structuredSessionType === "first_party_web";
+      const isSingleWebSessionV2 = getSessionClientType() === "web";
       if (
         !canStoreAnotherWalletAccount(signerAddress, {
           allowAdditionalAccounts: !isSingleWebSessionV2,
@@ -602,9 +542,9 @@ export default function Auth({
       }
 
       const nonceResponse = await getNonce({ signerAddress });
-      const { nonce, server_signature } = nonceResponse;
+      const { signable_message, server_signature } = nonceResponse;
 
-      const clientSignature = await getSignature({ message: nonce });
+      const clientSignature = await getSignature({ message: signable_message });
       if (clientSignature.userRejected) {
         setToast({
           message: "Authentication was canceled in your wallet.",
@@ -621,31 +561,12 @@ export default function Auth({
         return { success: false };
       }
 
-      const isPersisted = useWalletAuthSessionV2
-        ? await loginWithSessionV2({
-            serverSignature: server_signature,
-            clientSignature: clientSignature.signature,
-            signerAddress,
-            role,
-            isSafeWallet,
-          }).then(persistSessionResponse)
-        : await commonApiPost<ApiLoginRequest, ApiLoginResponse>({
-            endpoint: "auth/login",
-            body: {
-              server_signature,
-              client_signature: clientSignature.signature,
-              is_safe_wallet: isSafeWallet,
-              client_address: signerAddress,
-              ...(role != null && { role }),
-            },
-          }).then((tokenResponse) =>
-            setAuthJwt(
-              signerAddress,
-              tokenResponse.token,
-              tokenResponse.refresh_token,
-              role ?? undefined
-            )
-          );
+      const isPersisted = await loginWithSessionV2({
+        serverSignature: server_signature,
+        clientSignature: clientSignature.signature,
+        signerAddress,
+        role,
+      }).then(persistSessionResponse);
       if (!isPersisted) {
         setToast({
           message: "Couldn't save this connected profile. Please try again.",

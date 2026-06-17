@@ -26,7 +26,7 @@ beforeEach(() => {
 
 describe("distribution-plan-api", () => {
   it("handles successful fetch", async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    globalThis.fetch = jest.fn().mockResolvedValue({
       status: 200,
       json: () => Promise.resolve({ foo: "bar" }),
     }) as any;
@@ -35,7 +35,7 @@ describe("distribution-plan-api", () => {
   });
 
   it("handles unauthorized", async () => {
-    global.fetch = jest
+    globalThis.fetch = jest
       .fn()
       .mockResolvedValue({ status: 401, json: jest.fn() }) as any;
     const res = await distributionPlanApiFetch<any>("/x");
@@ -50,7 +50,7 @@ describe("distribution-plan-api", () => {
     (removeAuthJwt as jest.Mock).mockRejectedValueOnce(
       new Error("cleanup failed")
     );
-    global.fetch = jest
+    globalThis.fetch = jest
       .fn()
       .mockResolvedValue({ status: 401, json: jest.fn() }) as any;
 
@@ -65,7 +65,7 @@ describe("distribution-plan-api", () => {
 
   it("posts data with auth header", async () => {
     (getAuthJwt as jest.Mock).mockReturnValue("jwt");
-    global.fetch = jest.fn().mockResolvedValue({
+    globalThis.fetch = jest.fn().mockResolvedValue({
       status: 200,
       json: () => Promise.resolve({ a: 1 }),
     }) as any;
@@ -75,7 +75,7 @@ describe("distribution-plan-api", () => {
   });
 
   it("deletes and handles plain ok response", async () => {
-    global.fetch = jest.fn().mockResolvedValue({
+    globalThis.fetch = jest.fn().mockResolvedValue({
       status: 200,
       statusText: "OK",
       json: () => {

@@ -318,7 +318,11 @@ export function createAppWalletConnector(
       emitter.emit("change", { accounts: accounts as Address[] });
     },
     onChainChanged(hexChainId) {
-      const numericId = parseInt(hexChainId, 16);
+      const normalizedHexChainId = hexChainId.trim();
+      if (!/^0x[0-9a-f]+$/i.test(normalizedHexChainId)) {
+        return;
+      }
+      const numericId = Number.parseInt(normalizedHexChainId, 16);
       emitter.emit("change", { chainId: numericId });
     },
     onConnect() {

@@ -15,26 +15,23 @@ export async function loginAndFetchFeed() {
   // Rebuild wallet from private key
   const wallet = new Wallet(clientPrivateKey);
 
-  // 1. Get nonce from server
+  // 1. Get the session-v2 signable message from the server
   const nonceResp = await fetch(
-    \`https://api.6529.io/api/auth/nonce?signer_address=\${clientAddress}&short_nonce=true\`,
+    \`https://api.6529.io/api/auth/session-nonce?signer_address=\${clientAddress}&client_type=native&chain_id=1\`,
     {
       headers: { accept: 'application/json' },
       method: 'GET'
     }
   );
 
-  // short_nonce=true → nonce is a UUID (easier for programmatic use).
-  // short_nonce=false → nonce is a long, multiline welcome message (better for GUIs, but may cause encoding issues).
+  const { signable_message, server_signature } = await nonceResp.json();
 
-  const { nonce, server_signature } = await nonceResp.json();
+  // 2. Sign signable_message exactly as returned
+  const clientSignature = await wallet.signMessage(signable_message);
 
-  // 2. Sign the nonce locally
-  const signedNonce = await wallet.signMessage(nonce);
-
-  // 3. Send signed nonce back to login endpoint
+  // 3. Send the signed message back to the session-v2 login endpoint
   const loginResp = await fetch(
-    \`https://api.6529.io/api/auth/login?signer_address=\${clientAddress}\`,
+    'https://api.6529.io/api/auth/session-login',
     {
       headers: {
         accept: 'application/json',
@@ -42,20 +39,21 @@ export async function loginAndFetchFeed() {
       },
       method: 'POST',
       body: JSON.stringify({
+        client_type: 'native',
         client_address: clientAddress,
-        client_signature: signedNonce,
+        client_signature: clientSignature,
         server_signature
       })
     }
   );
 
-  const { token } = await loginResp.json();
+  const { access_token } = await loginResp.json();
 
   // 4. Fetch feed with the received authorization token
   const feedResp = await fetch('https://api.6529.io/api/feed', {
     headers: {
       accept: 'application/json',
-      authorization: \`Bearer \${token}\`
+      authorization: \`Bearer \${access_token}\`
     },
     method: 'GET'
   });
