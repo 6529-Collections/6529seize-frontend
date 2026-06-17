@@ -42,6 +42,9 @@ for metadata, diagnostics, and future generated API model alignment.
   pages.
 - The primary pointer is mutable, so the frontend keeps only a short in-memory
   lookup cache. Immutable hash/version package fetches can be added later.
+- The primary pointer endpoint is public and auth-agnostic. The frontend does
+  not forward request auth headers to it, so the short handle cache is shared
+  safely across server requests.
 
 ## Validation And Safety
 

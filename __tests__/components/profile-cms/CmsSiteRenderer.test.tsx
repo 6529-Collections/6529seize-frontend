@@ -145,4 +145,33 @@ describe("CmsSiteRenderer", () => {
     expect(screen.queryByTitle("Embedded profile website media")).toBeNull();
     expect(screen.getByText("Embedded media preview")).toBeInTheDocument();
   });
+
+  it("shows a safe fallback for unknown future block types", () => {
+    const cmsPackage: CmsPackageV1 = {
+      ...minimalCmsPackage,
+      payload: {
+        ...minimalCmsPackage.payload,
+        pages: [
+          {
+            ...minimalPage,
+            blocks: [
+              {
+                id: "block-future",
+                block_type: "future_block",
+              } as unknown as CmsPackageV1["payload"]["pages"][number]["blocks"][number],
+            ],
+          },
+        ],
+      },
+    };
+
+    render(
+      <CmsSiteRenderer
+        cmsPackage={cmsPackage}
+        page={cmsPackage.payload.pages[0] ?? minimalPage}
+      />
+    );
+
+    expect(screen.getByText("Unsupported block")).toBeInTheDocument();
+  });
 });

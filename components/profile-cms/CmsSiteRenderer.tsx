@@ -192,6 +192,8 @@ function CmsBlock({
       return <ObjectViewerBlock block={block} context={context} />;
     case "room_viewer":
       return <RoomViewerBlock block={block} context={context} />;
+    default:
+      return <UnsupportedBlock label="Unsupported block" />;
   }
 }
 
@@ -231,7 +233,9 @@ function RichTextBlock({ block }: { readonly block: CmsBlockV1 }) {
   return (
     <div className="tw-space-y-4 tw-text-base tw-leading-8 tw-text-iron-200">
       {paragraphs.length ? (
-        paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+        paragraphs.map((paragraph, index) => (
+          <p key={`paragraph-${index}`}>{paragraph}</p>
+        ))
       ) : (
         <p>{content}</p>
       )}

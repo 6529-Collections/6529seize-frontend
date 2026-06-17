@@ -135,7 +135,13 @@ describe("profile CMS primary-site fetcher", () => {
     commonApiFetchMock.mockRejectedValueOnce({ status: 404 });
 
     await expect(
-      fetchProfileCmsPrimarySite({ handle: "Alice", headers: {} })
+      fetchProfileCmsPrimarySite({
+        handle: "Alice",
+        headers: {
+          Authorization: "Bearer private",
+          "6529-auth": "private",
+        },
+      })
     ).resolves.toBeNull();
 
     expect(commonApiFetchMock).toHaveBeenCalledWith({

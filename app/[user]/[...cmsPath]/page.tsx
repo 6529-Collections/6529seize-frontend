@@ -73,6 +73,10 @@ export async function generateMetadata({
   readonly params?: Promise<ProfileCmsRouteParams>;
 }): Promise<Metadata> {
   const context = await getProfileCmsRouteContext(params);
+  if (context?.redirectTo) {
+    return {};
+  }
+
   if (!context?.site) {
     return notFound();
   }

@@ -15,6 +15,10 @@ import { commonApiFetch } from "@/services/api/common-api";
  *
  * Expected envelope:
  * { package, package_id, version, package_hash, payload_hash, updated_at, published_at? }
+ *
+ * This public primary pointer is auth-agnostic by contract. Do not forward
+ * request auth headers into this endpoint; the short handle cache is shared
+ * across server requests.
  */
 export const PROFILE_CMS_PRIMARY_SITE_ENDPOINT = "profile-cms/{handle}/primary";
 
@@ -53,7 +57,6 @@ const cache = new Map<string, ProfileCmsPrimarySiteCacheEntry>();
 
 export async function getProfileCmsPrimarySite({
   handle,
-  headers,
 }: {
   readonly handle: string;
   readonly headers: Record<string, string>;
@@ -75,7 +78,6 @@ export async function getProfileCmsPrimarySite({
 
   const promise = fetchProfileCmsPrimarySite({
     handle: cacheKey,
-    headers,
   }).catch((error: unknown) => {
     cache.delete(cacheKey);
     throw error;
@@ -89,10 +91,9 @@ export async function getProfileCmsPrimarySite({
 
 export async function fetchProfileCmsPrimarySite({
   handle,
-  headers,
 }: {
   readonly handle: string;
-  readonly headers: Record<string, string>;
+  readonly headers?: Record<string, string>;
 }): Promise<ProfileCmsPrimarySite | null> {
   const normalizedHandle = handle.trim().toLowerCase();
   const endpoint = PROFILE_CMS_PRIMARY_SITE_ENDPOINT.replace(
@@ -102,9 +103,11 @@ export async function fetchProfileCmsPrimarySite({
 
   let response: ProfileCmsPrimarySiteApiResponse;
   try {
+    // This endpoint is public by contract; do not vary the cached primary
+    // pointer by caller auth headers.
     response = await commonApiFetch<ProfileCmsPrimarySiteApiResponse>({
       endpoint,
-      headers,
+      headers: {},
     });
   } catch (error) {
     const fixtureSite = getFixturePrimarySite(normalizedHandle);
@@ -332,12 +335,7 @@ function isApiUnavailableError(error: unknown): boolean {
     return false;
   }
 
-  const message =
-    typeof error === "string"
-      ? error
-      : error instanceof Error
-        ? error.message
-        : "";
+  const message = getErrorMessage(error);
   return /failed to fetch|network request failed|network error|econnrefused|enotfound/i.test(
     message
   );
