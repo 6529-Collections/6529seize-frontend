@@ -602,6 +602,18 @@ const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages("theMemes.detail.art", [
 ] as const);
 
 export const EN_US_MESSAGES = {
+  "home.boostedDrop.anonymousAuthor": "Anonymous",
+  "home.boostedDrop.badge": "Boosted post",
+  "home.boostedDrop.boost": "Boost",
+  "home.boostedDrop.boostDrop": "Boost post by {author}",
+  "home.boostedDrop.boosted": "Boosted",
+  "home.boostedDrop.boostCount.one": "{count} boost",
+  "home.boostedDrop.boostCount.many": "{count} boosts",
+  "home.boostedDrop.internalLinkSource": "{source} link",
+  "home.boostedDrop.openDrop": "Open boosted post from {author}",
+  "home.boostedDrop.removeBoost": "Remove boost",
+  "home.boostedDrop.removeBoostFromDrop": "Remove boost from post by {author}",
+  "home.boostedDrop.viewAuthor": "View {author}'s profile",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
