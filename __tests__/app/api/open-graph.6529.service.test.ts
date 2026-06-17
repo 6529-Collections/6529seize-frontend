@@ -48,6 +48,10 @@ function readFetchUrl(input: RequestInfo | URL): URL {
   return new URL(String(input));
 }
 
+function readFetchHeaders(init: RequestInit | undefined): Record<string, string> {
+  return Object.fromEntries(new Headers(init?.headers).entries());
+}
+
 function mockFreshTheMemesLiveCountApis(): void {
   mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
     const url = readFetchUrl(input);
@@ -452,7 +456,48 @@ describe("createFirstParty6529Plan", () => {
     ]);
   });
 
-  it("does not retry production fallback for primary auth failures", async () => {
+  it("falls back to the production public API for anonymous staging auth gates", async () => {
+    publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.hostname === "api.staging.6529.io") {
+        return jsonResponse({ message: "Unauthorized" }, 401);
+      }
+
+      if (url.hostname === "api.6529.io") {
+        const response = productionTheMemesResponse(url);
+        if (response) {
+          return response;
+        }
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(data.title).toBe("The Collective Synapse");
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "328" },
+      { label: "TDH rate", value: "22.78" },
+      { label: "Season", value: "15" },
+      { label: "Mint date", value: "15 Jun 2026" },
+    ]);
+    expect(
+      mockFetch.mock.calls.some(
+        (call) =>
+          readFetchUrl(call[0]).hostname === "api.6529.io" &&
+          readFetchHeaders(call[1])["x-6529-auth"] !== undefined
+      )
+    ).toBe(false);
+  });
+
+  it("does not retry production fallback for authenticated primary auth failures", async () => {
     publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
 
     mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
@@ -466,7 +511,8 @@ describe("createFirstParty6529Plan", () => {
     });
 
     const plan = createFirstParty6529Plan(
-      new URL("https://6529.io/the-memes/509")
+      new URL("https://6529.io/the-memes/509"),
+      { apiAuth: "bad-staging-auth" }
     );
 
     await expect(plan!.execute()).rejects.toThrow("The Memes card was not found.");
