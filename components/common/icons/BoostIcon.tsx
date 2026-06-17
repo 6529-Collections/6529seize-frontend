@@ -1,4 +1,6 @@
-interface BoostIconProps {
+import type { SVGProps } from "react";
+
+interface BoostIconProps extends Omit<SVGProps<SVGSVGElement>, "className"> {
   readonly className?: string;
   /**
    * - "filled": Solid flame (for boosted state)
@@ -8,7 +10,11 @@ interface BoostIconProps {
   readonly variant?: "filled" | "outlined" | "animated";
 }
 
-const BoostIcon = ({ className, variant = "filled" }: BoostIconProps) => {
+const BoostIcon = ({
+  className,
+  variant = "filled",
+  ...props
+}: BoostIconProps) => {
   const isFilled = variant === "filled" || variant === "animated";
 
   return (
@@ -19,6 +25,7 @@ const BoostIcon = ({ className, variant = "filled" }: BoostIconProps) => {
       stroke="currentColor"
       strokeWidth={isFilled ? 0 : 1.5}
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
       <path
         d="M12 23C16.1421 23 19.5 19.6421 19.5 15.5C19.5 14.1685 19.1755 12.9177 18.6062 11.8214C17.7863 13.0488 16.5 13.5 15.5 13C15.5 11 14.5 8 12 5.5C11 8 10.5 9.5 9 11C8.11281 11.8872 7.5 13.1287 7.5 14.5C7.5 15.5 8 17 9 18C8 17.5 7 16.5 6.5 15C5.83333 16 5 17.5 5 19C5 20.5 5.5 21.5 6.5 22.5C8 21 8.5 20 8.5 19C8.5 20.5 9.5 22 11 23H12Z"
