@@ -17,8 +17,15 @@ const mockMemeDropVoteStats = jest.fn(
     </button>
   )
 );
+const mockUseDropActionInteractionMode = jest.fn(() => ({
+  canUseDesktopHoverActions: true,
+  canUseTouchActionSheet: false,
+}));
 
-jest.mock("@/hooks/isMobileDevice", () => jest.fn(() => false));
+jest.mock("@/hooks/useDropActionInteractionMode", () => ({
+  __esModule: true,
+  default: () => mockUseDropActionInteractionMode(),
+}));
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
   <button data-testid="reply" onClick={() => props.onReply({})} />
 ));
@@ -76,13 +83,15 @@ const drop: any = {
 };
 
 beforeEach(() => {
-  const useMobile = require("@/hooks/isMobileDevice");
-  (useMobile as jest.Mock).mockReturnValue(false);
+  mockUseDropActionInteractionMode.mockReturnValue({
+    canUseDesktopHoverActions: true,
+    canUseTouchActionSheet: false,
+  });
   mockMobileMenuClick.mockClear();
   mockMemeDropVoteStats.mockClear();
 });
 
-test("renders actions on desktop", () => {
+test("renders actions when desktop hover actions are active", () => {
   const onReply = jest.fn();
   render(
     <MemeWinnerDrop
@@ -95,6 +104,24 @@ test("renders actions on desktop", () => {
   expect(screen.getByTestId("identity")).toBeInTheDocument();
   fireEvent.click(screen.getByTestId("reply"));
   expect(onReply).toHaveBeenCalled();
+});
+
+test("keeps actions for desktop hover mode even when the user agent is mobile", () => {
+  mockUseDropActionInteractionMode.mockReturnValue({
+    canUseDesktopHoverActions: true,
+    canUseTouchActionSheet: false,
+  });
+
+  render(
+    <MemeWinnerDrop
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    />
+  );
+
+  expect(screen.getByTestId("reply")).toBeInTheDocument();
 });
 
 test("renders vote details through meme vote stats", () => {
@@ -136,9 +163,12 @@ test("does not trigger the mobile menu wrapper when vote details is clicked", ()
   expect(mockMobileMenuClick).not.toHaveBeenCalled();
 });
 
-test("hides actions when mobile", () => {
-  const useMobile = require("@/hooks/isMobileDevice");
-  (useMobile as jest.Mock).mockReturnValue(true);
+test("hides desktop actions when touch sheet mode is active", () => {
+  mockUseDropActionInteractionMode.mockReturnValue({
+    canUseDesktopHoverActions: false,
+    canUseTouchActionSheet: true,
+  });
+
   const { queryByTestId } = render(
     <MemeWinnerDrop
       drop={drop}

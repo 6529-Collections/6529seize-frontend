@@ -122,6 +122,10 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             Register Consolidation{" "}
             {props.subdelegation && `as Delegation Manager`}
           </h4>
+          <p className={styles["actionIntro"]}>
+            Register an ownership link between wallets you control. NFTs stay
+            where they are.
+          </p>
         </Col>
         <Col
           xs={2}
@@ -187,6 +191,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
               validate={validate}
               onHide={props.onHide}
               onSetToast={props.onSetToast}
+              submitBtnLabel="Register Consolidation"
             />
           </Form>
         </Col>

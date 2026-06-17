@@ -10,20 +10,35 @@ describe('MemeDropActions', () => {
   const drop = { id: 'd1' } as any;
   const callbacks = { onReply: jest.fn(), onQuote: jest.fn() };
 
-  it('returns null on mobile or when hidden', () => {
+  it('returns null when desktop hover actions are unavailable or hidden', () => {
     const { rerender } = render(
-      <MemeDropActions drop={drop} isMobile showReplyAndQuote={true} {...callbacks} />
+      <MemeDropActions
+        drop={drop}
+        canUseDesktopHoverActions={false}
+        showReplyAndQuote={true}
+        {...callbacks}
+      />
     );
     expect(screen.queryByTestId('wave-actions')).toBeNull();
     rerender(
-      <MemeDropActions drop={drop} isMobile={false} showReplyAndQuote={false} {...callbacks} />
+      <MemeDropActions
+        drop={drop}
+        canUseDesktopHoverActions={true}
+        showReplyAndQuote={false}
+        {...callbacks}
+      />
     );
     expect(screen.queryByTestId('wave-actions')).toBeNull();
   });
 
   it('renders WaveDropActions when allowed', () => {
     render(
-      <MemeDropActions drop={drop} isMobile={false} showReplyAndQuote {...callbacks} />
+      <MemeDropActions
+        drop={drop}
+        canUseDesktopHoverActions={true}
+        showReplyAndQuote
+        {...callbacks}
+      />
     );
     const element = screen.getByTestId("wave-actions");
     expect(element.textContent).toContain("d1");

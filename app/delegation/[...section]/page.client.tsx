@@ -1,6 +1,10 @@
 "use client";
 
 import DelegationCenterMenu from "@/components/delegation/DelegationCenterMenu";
+import {
+  getDelegationAppTitle,
+  getDelegationRouteMetadata,
+} from "@/components/delegation/delegation-page-metadata";
 import { useSetTitle } from "@/contexts/TitleContext";
 import styles from "@/styles/Home.module.scss";
 import { DelegationCenterSection } from "@/types/enums";
@@ -14,7 +18,8 @@ export default function DelegationPageClient(props: {
   readonly useCaseQuery: number;
   readonly path?: string[] | undefined;
 }) {
-  useSetTitle("Delegation | 6529.io");
+  const metadata = getDelegationRouteMetadata(props.path ?? [props.section]);
+  useSetTitle(getDelegationAppTitle(metadata));
   const router = useRouter();
   const section = props.section;
   const [addressQuery, setAddressQuery] = useState<string>(
