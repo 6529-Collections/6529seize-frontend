@@ -1,4 +1,9 @@
 import MemeCalendarOverview from "@/components/meme-calendar/MemeCalendarOverview";
+import {
+  getRangeDatesByZoom,
+  getSeasonIndexForDate,
+  nextMintDateOnOrAfter,
+} from "@/components/meme-calendar/meme-calendar.helpers";
 import { render, screen } from "@testing-library/react";
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -15,6 +20,32 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 
 describe("MemeCalendarOverview upcoming mints card", () => {
+  const DIVISION_DATE_FORMAT = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  } satisfies Intl.DateTimeFormatOptions;
+
+  const formatDivisionDate = (
+    date: Date,
+    locale: string
+  ): string =>
+    new Intl.DateTimeFormat(locale, DIVISION_DATE_FORMAT).format(date);
+
+  const getSznDivisionRange = (date: Date, locale: string): string => {
+    const nextMintDate = nextMintDateOnOrAfter(date);
+    const { start, end } = getRangeDatesByZoom(
+      "szn",
+      getSeasonIndexForDate(nextMintDate)
+    );
+
+    return `${formatDivisionDate(start, locale)} - ${formatDivisionDate(
+      end,
+      locale
+    )}`;
+  };
+
   afterEach(() => {
     jest.useRealTimers();
   });
@@ -31,7 +62,8 @@ describe("MemeCalendarOverview upcoming mints card", () => {
   });
 
   it("uses locale-aware overview labels and preserves locale on the full calendar link", () => {
-    jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2025, 11, 31)));
+    const now = new Date(Date.UTC(2025, 11, 31));
+    jest.useFakeTimers().setSystemTime(now);
     render(<MemeCalendarOverview displayTz="utc" locale="de-DE" showViewAll />);
 
     expect(
@@ -58,6 +90,9 @@ describe("MemeCalendarOverview upcoming mints card", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Calendar links" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(getSznDivisionRange(now, "de-DE"))
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Screenshot" })).toHaveClass(
       "focus-visible:tw-outline"

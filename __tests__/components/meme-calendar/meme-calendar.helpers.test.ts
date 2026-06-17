@@ -1,5 +1,6 @@
 import type { ZoomLevel } from "@/components/meme-calendar/meme-calendar.helpers";
 import {
+  displayedSeasonNumberFromIndex,
   formatToFullDivision,
   getCardsRemainingUntilEndOf,
   getMintNumberForMintDate,
@@ -45,16 +46,35 @@ const countMintsBetween = (start: Date, end: Date): number => {
   return count;
 };
 
+const DIVISION_DATE_FORMAT = {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+} satisfies Intl.DateTimeFormatOptions;
+
+const formatDivisionDate = (
+  date: Date,
+  locale: string
+): string => new Intl.DateTimeFormat(locale, DIVISION_DATE_FORMAT).format(date);
+
+const formatDivisionNumber = (value: number, locale: string): string =>
+  new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
+
+const getDivisionRows = (node: unknown): ReactElement<any>[] => {
+  expect(isValidElement(node)).toBe(true);
+
+  const elementNode = asElement(node);
+  const tbody = asElement(elementNode.props.children as unknown);
+  expect(isValidElement(tbody)).toBe(true);
+
+  return Children.toArray(tbody.props.children).map(asElement);
+};
+
 describe("formatToFullDivision", () => {
   it("renders each division with a date range", () => {
     const node = formatToFullDivision(new Date(Date.UTC(2025, 9, 1)));
-    expect(isValidElement(node)).toBe(true);
-
-    const elementNode = asElement(node as unknown);
-    const tbody = asElement(elementNode.props.children as unknown);
-    expect(isValidElement(tbody)).toBe(true);
-
-    const rows = Children.toArray(tbody.props.children).map(asElement);
+    const rows = getDivisionRows(node);
 
     expect(rows).toHaveLength(6);
 
@@ -75,6 +95,44 @@ describe("formatToFullDivision", () => {
     expect(labels.join(" ")).toMatch(
       /^SZN\s+\d+\b[^\r\n]*?Year\s+\d+\b[^\r\n]*?Epoch\s+\d+\b[^\r\n]*?Period\s+\d+\b[^\r\n]*?Era\s+\d+\b[^\r\n]*?Eon\s+\d+\b$/
     );
+  });
+
+  it("formats division ranges with the active locale", () => {
+    const date = new Date(Date.UTC(2025, 9, 1));
+    const rows = getDivisionRows(formatToFullDivision(date, "de-DE"));
+    const sznRow = asElement(rows[0]);
+    const cells = Children.toArray(sznRow.props.children).map(asElement);
+    const rangeCell = asElement(cells[1]);
+    const span = asElement(rangeCell.props.children as unknown);
+    const { start, end } = getRangeDatesByZoom(
+      "szn",
+      getSeasonIndexForDate(date)
+    );
+    const expectedRange = `${formatDivisionDate(
+      start,
+      "de-DE"
+    )} - ${formatDivisionDate(end, "de-DE")}`;
+
+    expect(String(span.props.children)).toBe(expectedRange);
+  });
+
+  it("formats division numbers with the active locale", () => {
+    const date = new Date(Date.UTC(2500, 0, 1));
+    const rows = getDivisionRows(formatToFullDivision(date, "de-DE"));
+    const sznRow = asElement(rows[0]);
+    const cells = Children.toArray(sznRow.props.children).map(asElement);
+    const labelCell = asElement(cells[0]);
+    const labelText = Children.toArray(labelCell.props.children)
+      .map((child) => String(child).trim())
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const expectedNumber = formatDivisionNumber(
+      displayedSeasonNumberFromIndex(getSeasonIndexForDate(date)),
+      "de-DE"
+    );
+
+    expect(labelText).toBe(`SZN ${expectedNumber}`);
   });
 });
 

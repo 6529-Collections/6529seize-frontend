@@ -792,7 +792,10 @@ export function getRangeLabel(
   });
 }
 
-export function formatToFullDivision(d: Date): React.ReactNode {
+export function formatToFullDivision(
+  d: Date,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): React.ReactNode {
   const idx = getSeasonIndexForDate(d);
   const eon = displayedEonNumberFromIndex(idx);
   const era = displayedEraNumberFromIndex(idx);
@@ -802,7 +805,7 @@ export function formatToFullDivision(d: Date): React.ReactNode {
   const szn = displayedSeasonNumberFromIndex(idx);
 
   const fmt = (date: Date) =>
-    date.toLocaleDateString(undefined, {
+    date.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -820,26 +823,57 @@ export function formatToFullDivision(d: Date): React.ReactNode {
   return (
     <table className="tw-inline-table tw-w-auto tw-table-auto tw-border-collapse">
       <tbody>
-        {printDivision("SZN", szn, range(seasonDates.start, seasonDates.end))}
-        {printDivision("Year", year, range(yearDates.start, yearDates.end))}
-        {printDivision("Epoch", epoch, range(epochDates.start, epochDates.end))}
+        {printDivision(
+          "SZN",
+          szn,
+          range(seasonDates.start, seasonDates.end),
+          locale
+        )}
+        {printDivision(
+          "Year",
+          year,
+          range(yearDates.start, yearDates.end),
+          locale
+        )}
+        {printDivision(
+          "Epoch",
+          epoch,
+          range(epochDates.start, epochDates.end),
+          locale
+        )}
         {printDivision(
           "Period",
           period,
-          range(periodDates.start, periodDates.end)
+          range(periodDates.start, periodDates.end),
+          locale
         )}
-        {printDivision("Era", era, range(eraDates.start, eraDates.end))}
-        {printDivision("Eon", eon, range(eonDates.start, eonDates.end))}
+        {printDivision(
+          "Era",
+          era,
+          range(eraDates.start, eraDates.end),
+          locale
+        )}
+        {printDivision(
+          "Eon",
+          eon,
+          range(eonDates.start, eonDates.end),
+          locale
+        )}
       </tbody>
     </table>
   );
 }
 
-function printDivision(label: string, number: number, range: string) {
+function printDivision(
+  label: string,
+  number: number,
+  range: string,
+  locale: SupportedLocale
+) {
   return (
     <tr>
       <td className="tw-whitespace-nowrap tw-py-1 tw-pr-4 tw-font-semibold">
-        {label} {number.toLocaleString()}
+        {label} {formatInteger(locale, number)}
       </td>
       <td className="tw-whitespace-nowrap tw-py-1">
         <span className="tw-text-gray-400">{range}</span>

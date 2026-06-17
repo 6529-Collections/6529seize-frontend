@@ -424,7 +424,7 @@ export function MemeCalendarOverviewNextMint({
             {formatFullDateTime(mintDetails.instantUtc, displayTz, locale)}
           </div>
           <div className="tw-text-sm">
-            {formatToFullDivision(mintDetails.instantUtc)}
+            {formatToFullDivision(mintDetails.instantUtc, locale)}
           </div>
 
           <div className="tw-pt-2 tw-text-sm tw-text-gray-400">
