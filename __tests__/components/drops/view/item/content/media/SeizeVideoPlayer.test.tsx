@@ -136,6 +136,45 @@ describe("SeizeVideoPlayer", () => {
     ).toBeInTheDocument();
   });
 
+  it("prevents hidden minimal controls from intercepting pointer input", () => {
+    jest.useFakeTimers();
+
+    try {
+      const { container } = render(
+        <SeizeVideoPlayer src="https://example.com/video.mp4" />
+      );
+
+      const video = container.querySelector("video");
+      if (!video) {
+        throw new Error("Expected video element to render");
+      }
+
+      Object.defineProperty(video, "paused", {
+        configurable: true,
+        value: false,
+      });
+
+      const muteControlZone = screen.getByRole("button", {
+        name: "Unmute video",
+      }).parentElement;
+      if (!muteControlZone) {
+        throw new Error("Expected mute control zone to render");
+      }
+
+      expect(muteControlZone).toHaveClass("tw-pointer-events-auto");
+
+      act(() => {
+        fireEvent.play(video);
+        jest.advanceTimersByTime(1800);
+      });
+
+      expect(muteControlZone).toHaveClass("tw-pointer-events-none");
+      expect(muteControlZone).not.toHaveClass("tw-pointer-events-auto");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("syncs mute state when the muted prop changes", () => {
     const { rerender } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" muted={false} />

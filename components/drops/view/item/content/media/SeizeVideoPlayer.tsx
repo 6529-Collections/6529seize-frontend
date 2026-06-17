@@ -206,6 +206,10 @@ function SeizeVideoMinimalControls({
   readonly showActions: boolean;
   readonly showFullscreen: boolean;
 }) {
+  const controlsHitTestClass = showControls
+    ? "tw-pointer-events-auto"
+    : "tw-pointer-events-none";
+
   return (
     <>
       <div
@@ -222,14 +226,22 @@ function SeizeVideoMinimalControls({
               title={labels.play}
               onClick={onPlaybackClick}
               onFocus={onControlsFocus}
-              className="tw-pointer-events-auto tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/65 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
+              className={clsx(
+                controlsHitTestClass,
+                "tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/65 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
+              )}
             >
               <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
             </button>
           </div>
         )}
 
-        <div className="tw-pointer-events-auto tw-absolute tw-bottom-4 tw-left-3">
+        <div
+          className={clsx(
+            controlsHitTestClass,
+            "tw-absolute tw-bottom-4 tw-left-3"
+          )}
+        >
           <SeizeVideoControlButton
             label={isMuted ? labels.unmute : labels.mute}
             onClick={onMuteClick}
@@ -243,7 +255,12 @@ function SeizeVideoMinimalControls({
           </SeizeVideoControlButton>
         </div>
 
-        <div className="tw-pointer-events-auto tw-absolute tw-bottom-4 tw-right-3 tw-flex tw-items-center tw-gap-2">
+        <div
+          className={clsx(
+            controlsHitTestClass,
+            "tw-absolute tw-bottom-4 tw-right-3 tw-flex tw-items-center tw-gap-2"
+          )}
+        >
           {!isPaused && (
             <SeizeVideoControlButton
               label={labels.pause}
