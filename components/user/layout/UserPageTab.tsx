@@ -38,10 +38,10 @@ export default function UserPageTab({
   const localeParam = searchParams?.get("locale");
 
   if (addressParam) {
-    tabQuery.address = addressParam;
+    tabQuery["address"] = addressParam;
   }
   if (localeParam) {
-    tabQuery.locale = localeParam;
+    tabQuery["locale"] = localeParam;
   }
 
   const isVisibleInViewportSide = () => {
