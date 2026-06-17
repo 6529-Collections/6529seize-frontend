@@ -209,4 +209,21 @@ describe("WaveHeader", () => {
       options.compareDocumentPosition(pin) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
+
+  it("shows a visible Add REP action for eligible non-author waves", () => {
+    wrapper(
+      {
+        ...baseWave,
+        wave_rep: { total_rep: 1250 },
+      },
+      undefined,
+      { connectedProfile: { handle: "alice" } }
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Add or edit Wave REP/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Add REP")).toBeInTheDocument();
+    expect(screen.getByText("1.3K")).toBeInTheDocument();
+  });
 });

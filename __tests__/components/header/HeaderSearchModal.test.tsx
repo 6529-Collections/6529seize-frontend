@@ -30,6 +30,10 @@ afterAll(() => {
   Element.prototype.scrollIntoView = originalScrollIntoView;
 });
 
+beforeAll(() => {
+  HTMLElement.prototype.scrollIntoView = jest.fn();
+});
+
 jest.mock("react-use", () => {
   return {
     createBreakpoint: () => () => "MD",
@@ -112,6 +116,16 @@ jest.mock("@/components/header/header-search/HeaderSearchModalItem", () => {
 const profile = { handle: "alice", wallet: "0x1", display: "Alice", level: 1 };
 
 const defaultSidebarSections = [
+  {
+    key: "network",
+    name: "Network",
+    icon: () => null,
+    items: [
+      { name: "xTDH", href: "/xtdh" },
+      { name: "Wave Score", href: "/network/wave-score" },
+    ],
+    subsections: [],
+  },
   {
     key: "tools",
     name: "Tools",
@@ -293,6 +307,24 @@ describe("HeaderSearchModal", () => {
       .map((element) => element.textContent ?? "");
     expect(
       renderedItems.some((content) => content.includes('"type":"PAGE"'))
+    ).toBe(true);
+  });
+
+  it("finds the Network Wave Score page by formula aliases", () => {
+    setup();
+    const input = screen.getByRole("textbox", { name: "Search" });
+    fireEvent.change(input, { target: { value: "wave rep formula" } });
+
+    const renderedItems = screen
+      .getAllByTestId("item")
+      .map((element) => element.textContent ?? "");
+    expect(
+      renderedItems.some(
+        (content) =>
+          content.includes('"title":"Wave Score"') &&
+          content.includes('"/network/wave-score"') &&
+          content.includes('"breadcrumbs":["Network"]')
+      )
     ).toBe(true);
   });
 

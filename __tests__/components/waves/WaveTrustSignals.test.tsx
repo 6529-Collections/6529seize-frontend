@@ -41,19 +41,61 @@ describe("WaveTrustSignals", () => {
     expect(summaryBadge).not.toBeNull();
     expect(summaryBadge).toHaveAttribute(
       "aria-label",
-      expect.stringContaining("Combined score: 83. Quality: 78. Hotness: 92.")
+      expect.stringContaining(
+        "Combined score: 83. A quick signal for which waves deserve broad attention. Quality: 78 (65% of visibility). Hotness: 92 (gated, 35% of visibility)."
+      )
     );
     expect(summaryBadge?.getAttribute("aria-label")).toMatch(
-      /^Combined score: 83\. Quality: 78\. Hotness: 92\. REP: .+ raw, 41 score$/
+      /^Combined score: 83\. A quick signal for which waves deserve broad attention\. Quality: 78 \(65% of visibility\)\. Hotness: 92 \(gated, 35% of visibility\)\. REP: .+ raw, 41 score\. Open Network > Wave Score for the formula$/
     );
-    expect(summaryBadge).toHaveAttribute(
-      "title",
-      expect.stringContaining("Combined score: 83\nQuality: 78\nHotness: 92")
-    );
+    expect(summaryBadge).not.toHaveAttribute("title");
     expect(screen.getByText("Score")).toBeInTheDocument();
     expect(screen.getByText("83")).toBeInTheDocument();
     expect(screen.queryByText("Hot")).not.toBeInTheDocument();
     expect(screen.queryByText("REP")).not.toBeInTheDocument();
+  });
+
+  it("renders a dark learn-more popover when requested", () => {
+    render(
+      <WaveTrustSignals
+        waveRep={waveRep}
+        waveScore={waveScore}
+        variant="header-inline"
+        mode="summary"
+        learnMoreHref="/network/wave-score"
+      />
+    );
+
+    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
+
+    expect(summaryBadge).not.toBeNull();
+    expect(summaryBadge).toHaveAttribute("tabindex", "0");
+    expect(summaryBadge).not.toHaveAttribute("title");
+    expect(
+      screen.getByRole("link", { name: "Learn how wave score works" })
+    ).toHaveAttribute("href", "/network/wave-score");
+    expect(
+      screen.getByText("A quick signal for which waves deserve broad attention")
+    ).toBeInTheDocument();
+  });
+
+  it("does not attach hover tooltip content in sidebar summary mode", () => {
+    render(
+      <WaveTrustSignals
+        waveRep={waveRep}
+        waveScore={waveScore}
+        variant="sidebar-inline"
+        mode="summary"
+        tooltipId="wave-score-tooltip"
+      />
+    );
+
+    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
+
+    expect(summaryBadge).not.toBeNull();
+    expect(summaryBadge).not.toHaveAttribute("data-tooltip-content");
+    expect(summaryBadge).not.toHaveAttribute("data-tooltip-id");
+    expect(summaryBadge).not.toHaveAttribute("title");
   });
 
   it("renders nothing in summary mode without a combined score", () => {

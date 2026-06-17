@@ -18,8 +18,8 @@ export default function WaveRepButton({ wave }: { readonly wave: ApiWave }) {
     totalRep === null ? null : compactNumberFormatter.format(totalRep);
   const label =
     formattedTotalRep === null
-      ? "Rate wave REP"
-      : `Rate wave REP. Current total ${formattedTotalRep}`;
+      ? "Add or edit Wave REP"
+      : `Add or edit Wave REP. Current total ${formattedTotalRep}`;
   const tooltipId = `wave-rep-rating-${wave.id}`;
 
   return (
@@ -30,10 +30,15 @@ export default function WaveRepButton({ wave }: { readonly wave: ApiWave }) {
         data-tooltip-id={tooltipId}
         data-tooltip-content={label}
         onClick={() => setIsModalOpen(true)}
-        className="tw-flex tw-h-8 tw-min-w-8 tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-all tw-duration-200 hover:tw-border-primary-400/70 hover:tw-bg-iron-800 hover:tw-text-white"
+        className="tw-flex tw-h-8 tw-min-w-8 tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-200 tw-transition-all tw-duration-200 hover:tw-border-primary-400/70 hover:tw-bg-iron-800 hover:tw-text-white"
       >
         <ScaleIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
-        {formattedTotalRep !== null && <span>{formattedTotalRep}</span>}
+        <span>Add REP</span>
+        {formattedTotalRep !== null && (
+          <span className="tw-rounded-md tw-bg-black/25 tw-px-1.5 tw-py-0.5 tw-text-iron-300">
+            {formattedTotalRep}
+          </span>
+        )}
       </button>
       <MyStreamActionTooltip id={tooltipId} />
       {isModalOpen && (
