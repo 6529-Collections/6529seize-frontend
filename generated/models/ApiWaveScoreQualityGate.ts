@@ -11,12 +11,10 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiWaveScoreQualityGate {
+    'threshold': number;
+    'multiplier': number;
+    'gated_hotness_score': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +22,26 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
+            "name": "threshold",
+            "baseName": "threshold",
             "type": "number",
-            "format": "int64"
+            "format": "double"
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
+            "name": "multiplier",
+            "baseName": "multiplier",
             "type": "number",
-            "format": "int64"
+            "format": "double"
         },
         {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
+            "name": "gated_hotness_score",
+            "baseName": "gated_hotness_score",
             "type": "number",
-            "format": "int64"
+            "format": "double"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiWaveScoreQualityGate.attributeTypeMap;
     }
 
     public constructor() {

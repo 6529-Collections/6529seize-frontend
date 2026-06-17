@@ -11,10 +11,9 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
-
-export enum ApiWavesOverviewType {
-    MostSubscribed = 'MOST_SUBSCRIBED',
-    RecentlyDroppedTo = 'RECENTLY_DROPPED_TO',
-    ScoredRecentlyDroppedTo = 'SCORED_RECENTLY_DROPPED_TO'
+export enum ApiWaveVisibilityTier {
+    TrustedVisible = 'TRUSTED_VISIBLE',
+    ExplorationNeutral = 'EXPLORATION_NEUTRAL',
+    Demoted = 'DEMOTED',
+    Suppressed = 'SUPPRESSED'
 }

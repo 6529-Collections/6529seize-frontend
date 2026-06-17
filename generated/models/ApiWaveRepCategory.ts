@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
+import { ApiWaveRepContributor } from '../models/ApiWaveRepContributor';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiWaveRepCategory {
+    'category': string;
+    'total_rep': number;
+    'contributor_count': number;
+    'authenticated_user_contribution': number | null;
+    'top_contributors': Array<ApiWaveRepContributor>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +26,38 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
+            "name": "category",
+            "baseName": "category",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "total_rep",
+            "baseName": "total_rep",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
+            "name": "contributor_count",
+            "baseName": "contributor_count",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
+            "name": "authenticated_user_contribution",
+            "baseName": "authenticated_user_contribution",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "top_contributors",
+            "baseName": "top_contributors",
+            "type": "Array<ApiWaveRepContributor>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiWaveRepCategory.attributeTypeMap;
     }
 
     public constructor() {

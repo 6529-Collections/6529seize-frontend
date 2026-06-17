@@ -11,12 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { HttpFile } from '../http/http';
+import { ApiProfileMin } from '../models/ApiProfileMin';
 
-export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+export class ApiWaveRepContributor {
+    'contribution': number;
+    'profile': ApiProfileMin;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,26 +23,20 @@ export class ApiAvailableRatingCredit {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "cic_credit",
-            "baseName": "cic_credit",
+            "name": "contribution",
+            "baseName": "contribution",
             "type": "number",
             "format": "int64"
         },
         {
-            "name": "rep_credit",
-            "baseName": "rep_credit",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "wave_rep_credit",
-            "baseName": "wave_rep_credit",
-            "type": "number",
-            "format": "int64"
+            "name": "profile",
+            "baseName": "profile",
+            "type": "ApiProfileMin",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiAvailableRatingCredit.attributeTypeMap;
+        return ApiWaveRepContributor.attributeTypeMap;
     }
 
     public constructor() {
