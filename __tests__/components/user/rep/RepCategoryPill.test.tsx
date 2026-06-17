@@ -1,4 +1,5 @@
 import RepCategoryPill from "@/components/user/rep/RepCategoryPill";
+import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/components/common/OverlappingAvatars", () => ({
@@ -6,7 +7,7 @@ jest.mock("@/components/common/OverlappingAvatars", () => ({
   default: () => <div data-testid="avatars" />,
 }));
 
-const category = {
+const category: ApiRepCategory = {
   category: "Dev extraordinaire",
   total_rep: 1234,
   contributor_count: 2,
@@ -20,7 +21,7 @@ describe("RepCategoryPill", () => {
 
     render(
       <RepCategoryPill
-        category={category as any}
+        category={category}
         canEdit={false}
         onEdit={() => undefined}
         onOpenGlobalCategory={onOpenGlobalCategory}
@@ -44,7 +45,7 @@ describe("RepCategoryPill", () => {
 
     render(
       <RepCategoryPill
-        category={category as any}
+        category={category}
         canEdit
         onEdit={onEdit}
         onOpenGlobalCategory={onOpenGlobalCategory}

@@ -511,6 +511,18 @@ const createReactQueryContextValue = (
     });
   };
 
+  const invalidateRepCategoryAnalytics = () => {
+    [
+      QueryKey.GLOBAL_REP_CATEGORY_SEARCH,
+      QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW,
+      QueryKey.GLOBAL_REP_CATEGORY_PAGE,
+      QueryKey.WAVE_REP_CATEGORY,
+      QueryKey.WAVE_REP_CATEGORY_CONTRIBUTORS,
+    ].forEach((queryKey) => {
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+    });
+  };
+
   const invalidateProfileRaters = ({
     profile,
     matter,
@@ -651,6 +663,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_CATEGORIES],
     });
+    invalidateRepCategoryAnalytics();
     invalidateProfileRaters({
       profile: targetProfile,
       matter: RateMatter.REP,
@@ -903,6 +916,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_CATEGORIES],
     });
+    invalidateRepCategoryAnalytics();
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });
