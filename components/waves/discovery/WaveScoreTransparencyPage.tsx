@@ -618,7 +618,7 @@ function CalculatorPanel({
               id="wave-score-calculator-input"
               value={input}
               onChange={(event) => onInputChange(event.target.value)}
-              placeholder="meme-chat or https://6529.io/waves/..."
+              placeholder="Memes-Chat or https://6529.io/waves/..."
               aria-invalid={Boolean(error)}
               aria-describedby={error ? errorId : undefined}
               className="tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-black/35 tw-px-10 tw-text-sm tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
