@@ -1,12 +1,10 @@
 "use client";
 
 import Leaderboard from "@/components/leaderboard/Leaderboard";
-import { useTitle } from "@/contexts/TitleContext";
 import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import styles from "@/styles/Home.module.scss";
 import { LeaderboardFocus } from "@/types/enums";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Col, Container, Row } from "react-bootstrap";
 
 const TDH_VIEW_PARAM = "tdh_view";
@@ -20,24 +18,45 @@ function getTdhViewFromSearchParams(
 }
 
 function getFocusPath(focus: LeaderboardFocus): string {
-  return `/network/nerd${
-    focus === LeaderboardFocus.INTERACTIONS
-      ? "/interactions"
-      : "/cards-collected"
-  }`;
+  if (focus === LeaderboardFocus.INTERACTIONS) {
+    return "/network/nerd/interactions";
+  }
+
+  return "/network/nerd/cards-collected";
 }
 
-function replaceUrl(pathname: string, tdhView: ApiConsolidatedTdhView): void {
-  const params = new URLSearchParams(window.location.search);
+function getFocusFromPathname(
+  pathname: string,
+  fallback: LeaderboardFocus
+): LeaderboardFocus {
+  if (pathname.includes("/interactions")) {
+    return LeaderboardFocus.INTERACTIONS;
+  }
+
+  if (pathname.includes("/cards-collected")) {
+    return LeaderboardFocus.TDH;
+  }
+
+  if (pathname === "/network/nerd") {
+    return LeaderboardFocus.TDH;
+  }
+
+  return fallback;
+}
+
+function getNextUrl(
+  pathname: string,
+  tdhView: ApiConsolidatedTdhView,
+  searchParams: Pick<URLSearchParams, "toString">
+): string {
+  const params = new URLSearchParams(searchParams.toString());
   if (tdhView === ApiConsolidatedTdhView.Unboosted) {
     params.set(TDH_VIEW_PARAM, ApiConsolidatedTdhView.Unboosted);
   } else {
     params.delete(TDH_VIEW_PARAM);
   }
 
-  const nextUrl =
-    params.size > 0 ? `${pathname}?${params.toString()}` : pathname;
-  window.history.replaceState(window.history.state, "", nextUrl);
+  return params.size > 0 ? `${pathname}?${params.toString()}` : pathname;
 }
 
 export default function CommunityNerdPageClient({
@@ -45,26 +64,23 @@ export default function CommunityNerdPageClient({
 }: {
   focus: LeaderboardFocus;
 }) {
-  const { setTitle } = useTitle();
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [focus, setFocus] = useState<LeaderboardFocus>(initialFocus);
-  const [tdhView, setTdhView] = useState<ApiConsolidatedTdhView>(() =>
-    getTdhViewFromSearchParams(searchParams)
-  );
+  const focus = getFocusFromPathname(pathname, initialFocus);
+  const tdhView = getTdhViewFromSearchParams(searchParams);
 
   const handleSetFocus = (newFocus: LeaderboardFocus) => {
-    setFocus(newFocus);
-    replaceUrl(getFocusPath(newFocus), tdhView);
+    router.replace(getNextUrl(getFocusPath(newFocus), tdhView, searchParams), {
+      scroll: false,
+    });
   };
 
   const handleSetTdhView = (newTdhView: ApiConsolidatedTdhView) => {
-    setTdhView(newTdhView);
-    replaceUrl(getFocusPath(focus), newTdhView);
+    router.replace(getNextUrl(getFocusPath(focus), newTdhView, searchParams), {
+      scroll: false,
+    });
   };
-
-  useEffect(() => {
-    setTitle(`Network Nerd - ${focus}`);
-  }, [focus, setTitle]);
 
   return (
     <main className={styles["main"]}>

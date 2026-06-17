@@ -11,6 +11,7 @@ import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { LeaderboardFocus } from "@/types/enums";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import DotLoader, { Spinner } from "../dotLoader/DotLoader";
@@ -40,6 +41,36 @@ export enum Collector {
   NEXTGEN = "NextGen",
 }
 
+function getSelectedNetworkTdh(
+  globalTdhHistory: GlobalTDHHistory | undefined,
+  isUnboostedTdhView: boolean
+) {
+  if (!globalTdhHistory) {
+    return undefined;
+  }
+
+  if (isUnboostedTdhView) {
+    return globalTdhHistory.total_tdh;
+  }
+
+  return globalTdhHistory.total_boosted_tdh;
+}
+
+function getSelectedNetworkTdhChange(
+  globalTdhHistory: GlobalTDHHistory | undefined,
+  isUnboostedTdhView: boolean
+) {
+  if (!globalTdhHistory) {
+    return undefined;
+  }
+
+  if (isUnboostedTdhView) {
+    return globalTdhHistory.net_tdh;
+  }
+
+  return globalTdhHistory.net_boosted_tdh;
+}
+
 export default function Leaderboard(
   props: Readonly<{
     focus: LeaderboardFocus;
@@ -55,25 +86,24 @@ export default function Leaderboard(
 
   const [lastTDH, setLastTDH] = useState<TDHCalc>();
 
-  const showViewAll = !window.location.pathname.includes("network");
+  const pathname = usePathname();
+  const isNetworkPage = pathname.includes("network");
+  const showViewAll = !isNetworkPage;
 
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [searchWallets, setSearchWallets] = useState<string[]>([]);
 
   const [globalTdhHistory, setGlobalTdhHistory] = useState<GlobalTDHHistory>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const isUnboostedTdhView =
-    props.tdhView === ApiConsolidatedTdhView.Unboosted;
-  const selectedNetworkTdh = globalTdhHistory
-    ? isUnboostedTdhView
-      ? globalTdhHistory.total_tdh
-      : globalTdhHistory.total_boosted_tdh
-    : undefined;
-  const selectedNetworkTdhChange = globalTdhHistory
-    ? isUnboostedTdhView
-      ? globalTdhHistory.net_tdh
-      : globalTdhHistory.net_boosted_tdh
-    : undefined;
+  const isUnboostedTdhView = props.tdhView === ApiConsolidatedTdhView.Unboosted;
+  const selectedNetworkTdh = getSelectedNetworkTdh(
+    globalTdhHistory,
+    isUnboostedTdhView
+  );
+  const selectedNetworkTdhChange = getSelectedNetworkTdhChange(
+    globalTdhHistory,
+    isUnboostedTdhView
+  );
   const selectedGlobalTdhRateChange =
     selectedNetworkTdh !== undefined &&
     selectedNetworkTdh !== 0 &&
@@ -152,15 +182,11 @@ export default function Leaderboard(
   }
 
   function printTdhViewToggle() {
-    const isBoostedTdhView =
-      props.tdhView !== ApiConsolidatedTdhView.Unboosted;
+    const isBoostedTdhView = props.tdhView !== ApiConsolidatedTdhView.Unboosted;
 
     return (
-      <div
-        className={styles["tdhViewSegmentedControl"]}
-        role="group"
-        aria-label="TDH view"
-      >
+      <fieldset className={styles["tdhViewSegmentedControl"]}>
+        <legend className="tw-sr-only">TDH view</legend>
         <button
           type="button"
           aria-pressed={isBoostedTdhView}
@@ -188,39 +214,38 @@ export default function Leaderboard(
             ? "Showing unboosted TDH values"
             : "Showing boosted TDH values"}
         </span>
-      </div>
+      </fieldset>
     );
   }
 
   function printCardsInteractionsToggle() {
     return (
-      <>
-        <span>
-          <span
-            onClick={() => props.setFocus(LeaderboardFocus.TDH)}
-            className={`${styles["focus"]} ${
-              props.focus === LeaderboardFocus.TDH
-                ? ""
-                : styles["disabled"]
-            }`}
-          >
-            {LeaderboardFocus.TDH}
-          </span>
-        </span>
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        <span>
-          <span
-            onClick={() => props.setFocus(LeaderboardFocus.INTERACTIONS)}
-            className={`${styles["focus"]} ${
-              props.focus === LeaderboardFocus.INTERACTIONS
-                ? ""
-                : styles["disabled"]
-            }`}
-          >
-            {LeaderboardFocus.INTERACTIONS}
-          </span>
-        </span>
-      </>
+      <fieldset className={styles["focusToggle"]}>
+        <legend className="tw-sr-only">Leaderboard view</legend>
+        <button
+          type="button"
+          aria-pressed={props.focus === LeaderboardFocus.TDH}
+          onClick={() => props.setFocus(LeaderboardFocus.TDH)}
+          className={`${styles["focus"]} ${
+            props.focus === LeaderboardFocus.TDH ? "" : styles["disabled"]
+          }`}
+        >
+          {LeaderboardFocus.TDH}
+        </button>
+        <span aria-hidden="true">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+        <button
+          type="button"
+          aria-pressed={props.focus === LeaderboardFocus.INTERACTIONS}
+          onClick={() => props.setFocus(LeaderboardFocus.INTERACTIONS)}
+          className={`${styles["focus"]} ${
+            props.focus === LeaderboardFocus.INTERACTIONS
+              ? ""
+              : styles["disabled"]
+          }`}
+        >
+          {LeaderboardFocus.INTERACTIONS}
+        </button>
+      </fieldset>
     );
   }
 
@@ -284,7 +309,7 @@ export default function Leaderboard(
               </Link>
             )}
           </h1>
-          {!showViewAll && (
+          {isNetworkPage && (
             <div className="tw-mt-5 tw-flex tw-items-center tw-gap-3">
               <span className="tw-text-xs tw-font-bold tw-uppercase tw-tracking-wide tw-text-iron-500">
                 TDH View
@@ -338,7 +363,7 @@ export default function Leaderboard(
           </div>
         </div>
       </section>
-      {!showViewAll && (
+      {isNetworkPage && (
         <section className={styles["networkToolbar"]} id="leaderboard-page">
           <div className={styles["networkToolbarTop"]}>
             <div className={styles["networkFilters"]}>
@@ -369,7 +394,9 @@ export default function Leaderboard(
           </div>
         </section>
       )}
-      <div className={`${styles["scrollContainer"]} ${styles["leaderboardSurface"]}`}>
+      <div
+        className={`${styles["scrollContainer"]} ${styles["leaderboardSurface"]}`}
+      >
         {props.focus === LeaderboardFocus.TDH && (
           <LeaderboardCardsCollectedComponent
             block={lastTDH?.block}

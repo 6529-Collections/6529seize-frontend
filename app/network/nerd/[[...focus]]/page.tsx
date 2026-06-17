@@ -1,5 +1,6 @@
 import { LeaderboardFocus } from "@/types/enums";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import CommunityNerdPageClient from "./page.client";
 
 export async function generateMetadata({
@@ -30,5 +31,9 @@ export default async function CommunityNerdPage({
       ? LeaderboardFocus.INTERACTIONS
       : LeaderboardFocus.TDH;
 
-  return <CommunityNerdPageClient focus={focusParam} />;
+  return (
+    <Suspense fallback={null}>
+      <CommunityNerdPageClient focus={focusParam} />
+    </Suspense>
+  );
 }

@@ -22,10 +22,25 @@ interface Props {
   variant?: "default" | "dark";
 }
 
+function getEmptySearchButtonClass(isDark: boolean): string {
+  if (isDark) {
+    return "tw-border-white/10 tw-bg-white/[0.04] tw-text-iron-300 hover:tw-border-white/20 hover:tw-bg-white/[0.08] hover:tw-text-white";
+  }
+
+  return "tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400 hover:tw-border-iron-700 hover:tw-bg-iron-800 hover:tw-text-iron-100";
+}
+
 function SearchModal(props: Readonly<Props>) {
   const [invalidWalletAdded, setInvalidWalletAdded] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const isDark = props.variant === "dark";
+  const darkModalProps = isDark
+    ? {
+        backdropClassName: "tw-bg-black !tw-opacity-50",
+        contentClassName:
+          "!tw-rounded-xl tw-border tw-border-solid !tw-border-iron-200 !tw-bg-white !tw-text-iron-950 tw-shadow-2xl",
+      }
+    : {};
 
   function addSearchWallet(): void {
     if (!props.searchWallets.some((sw) => sw === searchValue)) {
@@ -43,12 +58,7 @@ function SearchModal(props: Readonly<Props>) {
     <Modal
       show={props.show}
       centered={true}
-      backdropClassName={isDark ? "tw-bg-black !tw-opacity-50" : undefined}
-      contentClassName={
-        isDark
-          ? "!tw-rounded-xl tw-border tw-border-solid !tw-border-iron-200 !tw-bg-white !tw-text-iron-950 tw-shadow-2xl"
-          : undefined
-      }
+      {...darkModalProps}
       onHide={() => {
         props.setShow(false);
       }}
@@ -56,14 +66,14 @@ function SearchModal(props: Readonly<Props>) {
       <Modal.Header
         className={
           isDark
-            ? "!tw-border-b-0 !tw-bg-white tw-px-6 tw-pt-6 tw-pb-3"
+            ? "!tw-border-b-0 !tw-bg-white tw-px-6 tw-pb-3 tw-pt-6"
             : undefined
         }
       >
         <Modal.Title
           className={
             isDark
-              ? "!tw-text-iron-950 tw-text-3xl tw-font-semibold tw-leading-tight"
+              ? "tw-text-3xl tw-font-semibold tw-leading-tight !tw-text-iron-950"
               : undefined
           }
         >
@@ -73,7 +83,7 @@ function SearchModal(props: Readonly<Props>) {
       <Modal.Body
         className={
           isDark
-            ? "!tw-bg-white !tw-text-iron-950 tw-px-6 tw-pt-4 tw-pb-6"
+            ? "!tw-bg-white tw-px-6 tw-pb-6 tw-pt-4 !tw-text-iron-950"
             : undefined
         }
       >
@@ -190,13 +200,18 @@ export function SearchWalletsDisplay(
   const { searchWallets, setSearchWallets, setShowSearchModal, variant } =
     props;
   const isDark = variant === "dark";
+  const hasSearchWallets = searchWallets.length > 0;
+  const searchButtonClass = hasSearchWallets
+    ? "hover:tw-text-primary-200 tw-border-primary-500/30 tw-bg-primary-500/10 tw-text-primary-300 hover:tw-border-primary-500/50 hover:tw-bg-primary-500/20"
+    : getEmptySearchButtonClass(isDark);
+
   return (
     <span
       className={`d-flex flex-wrap align-items-center justify-content-end ${
         isDark ? "tw-gap-2" : ""
       }`}
     >
-      {searchWallets.length > 0 &&
+      {hasSearchWallets &&
         searchWallets.map((sw) => (
           <span
             className={`${styles["searchWalletDisplayWrapper"]} ${
@@ -240,7 +255,7 @@ export function SearchWalletsDisplay(
             </span>
           </span>
         ))}
-      {searchWallets.length > 0 && (
+      {hasSearchWallets && (
         <>
           <FontAwesomeIcon
             onClick={() => setSearchWallets([])}
@@ -269,11 +284,7 @@ export function SearchWalletsDisplay(
         className={`tw-inline-flex ${
           isDark ? "tw-size-9" : "tw-size-10"
         } tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-p-0 tw-transition-colors focus:tw-outline-none ${
-          searchWallets.length > 0
-            ? "hover:tw-text-primary-200 tw-border-primary-500/30 tw-bg-primary-500/10 tw-text-primary-300 hover:tw-border-primary-500/50 hover:tw-bg-primary-500/20"
-            : isDark
-              ? "tw-border-white/10 tw-bg-white/[0.04] tw-text-iron-300 hover:tw-border-white/20 hover:tw-bg-white/[0.08] hover:tw-text-white"
-              : "tw-border-iron-800 tw-bg-iron-900 tw-text-iron-400 hover:tw-border-iron-700 hover:tw-bg-iron-800 hover:tw-text-iron-100"
+          searchButtonClass
         }`}
       >
         <FontAwesomeIcon
@@ -298,6 +309,7 @@ export function SearchModalDisplay(
   }>
 ) {
   const { show, setShow, searchWallets, setSearchWallets, variant } = props;
+  const variantProps = variant ? { variant } : {};
 
   return (
     <SearchModal
@@ -313,7 +325,7 @@ export function SearchModalDisplay(
       clearSearchWallets={function () {
         setSearchWallets([]);
       }}
-      variant={variant}
+      {...variantProps}
     />
   );
 }

@@ -1,10 +1,12 @@
 import Leaderboard from "@/components/leaderboard/Leaderboard";
+import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { LeaderboardFocus } from "@/types/enums";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const fetchUrl = jest.fn();
 const commonApiFetch = jest.fn();
+const usePathnameMock = jest.fn();
 
 jest.mock("@/services/6529api", () => ({
   fetchUrl: (...args: any[]) => fetchUrl(...args),
@@ -12,6 +14,10 @@ jest.mock("@/services/6529api", () => ({
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: (...args: any[]) => commonApiFetch(...args),
+}));
+
+jest.mock("next/navigation", () => ({
+  usePathname: () => usePathnameMock(),
 }));
 
 jest.mock("@/components/leaderboard/LeaderboardCardsCollected", () => () => (
@@ -33,26 +39,40 @@ jest.mock("@/components/dotLoader/DotLoader", () => ({
 beforeEach(() => {
   fetchUrl.mockResolvedValue({ data: [{ block_number: 1, timestamp: 0 }] });
   commonApiFetch.mockResolvedValue([]);
+  usePathnameMock.mockReturnValue("/");
 });
 
 test("shows view all link when not on network page", async () => {
-  globalThis.location.pathname = "/";
-  render(<Leaderboard focus={LeaderboardFocus.TDH} setFocus={jest.fn()} />);
+  render(
+    <Leaderboard
+      focus={LeaderboardFocus.TDH}
+      setFocus={jest.fn()}
+      tdhView={ApiConsolidatedTdhView.Boosted}
+      setTdhView={jest.fn()}
+    />
+  );
   await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
   expect(screen.getByText("View All")).toBeInTheDocument();
 });
 
 test("renders seasons and switches focus", async () => {
-  globalThis.history.pushState({}, "", "/network");
+  usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
   commonApiFetch.mockResolvedValue([{ id: 1, display: "S1" }]);
   const setFocus = jest.fn();
   const user = userEvent.setup();
-  render(<Leaderboard focus={LeaderboardFocus.TDH} setFocus={setFocus} />);
+  render(
+    <Leaderboard
+      focus={LeaderboardFocus.TDH}
+      setFocus={setFocus}
+      tdhView={ApiConsolidatedTdhView.Boosted}
+      setTdhView={jest.fn()}
+    />
+  );
   await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
   expect(screen.queryByText("View All")).toBeNull();
 
   // Switch to Interactions focus
-  await user.click(screen.getByText("Interactions"));
+  await user.click(screen.getByRole("button", { name: "Interactions" }));
   expect(setFocus).toHaveBeenCalledWith(LeaderboardFocus.INTERACTIONS);
 
   // Change collector to MEMES to enable seasons dropdown

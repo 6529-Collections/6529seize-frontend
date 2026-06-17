@@ -20,6 +20,23 @@ import LeaderboardSort from "./LeaderboardSort";
 
 const PAGE_SIZE = 50;
 
+function getLeaderboardRowKey(lead: LeaderboardMetrics) {
+  return (
+    lead.consolidation_key ??
+    lead.primary_wallet ??
+    lead.handle ??
+    lead.consolidation_display ??
+    [
+      lead.level,
+      lead.balance,
+      lead.unique_memes,
+      lead.memes_cards_sets,
+      lead.tdh,
+      lead.day_change,
+    ].join("-")
+  );
+}
+
 interface Props {
   block: number | undefined;
   content: Content;
@@ -94,148 +111,146 @@ export default function LeaderboardCardsCollectedComponent(
     <>
       <div className={styles["leaderboardTableShell"]}>
         <Table bordered={false} className={styles["leaderboardTable"]}>
-              <thead>
-                <tr>
-                  <th className={styles["rank"]}>Rank</th>
-                  <th className={`${styles["hodlerContainer"]}`}>
-                    <span>Collector</span>
-                    <span className={styles["totalResults"]}>
-                      {props.isLoading && totalResults === 0
-                        ? "..."
-                        : `x${totalResults.toLocaleString()}`}
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Level&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.Level}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Cards Collected&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.Balance}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Unique Memes&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.UniqueMemes}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Sets&nbsp;
-                      <LeaderboardSort
-                        sort_option={
-                          LeaderboardCardsCollectedSort.MemesCardsSets
-                        }
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      TDH&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.Tdh}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      Daily Change&nbsp;
-                      <LeaderboardSort
-                        sort_option={LeaderboardCardsCollectedSort.DayChange}
-                        sort={sort}
-                        setSort={setSort}
-                      />
-                    </span>
-                  </th>
-                  <th className={styles["tdhSub"]}>
-                    <span className="d-flex align-items-center justify-content-center">
-                      vs Network&nbsp;
-                    </span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((lead: LeaderboardMetrics, index) => {
-                  return (
-                    <tr key={lead.consolidation_key ?? index}>
-                      <td className={styles["rank"]}>
-                        {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
-                      </td>
-                      <td>
-                        <LeaderboardCollector
-                          handle={lead.handle ?? ""}
-                          consolidationKey={lead.consolidation_key ?? ""}
-                          consolidationDisplay={lead.consolidation_display ?? ""}
-                          pfp={lead.pfp_url ?? ""}
-                          level={lead.level ?? 0}
-                        />
-                      </td>
+          <thead>
+            <tr>
+              <th className={styles["rank"]}>Rank</th>
+              <th className={`${styles["hodlerContainer"]}`}>
+                <span>Collector</span>
+                <span className={styles["totalResults"]}>
+                  {props.isLoading && totalResults === 0
+                    ? "..."
+                    : `x${totalResults.toLocaleString()}`}
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  Level&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.Level}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  Cards Collected&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.Balance}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  Unique Memes&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.UniqueMemes}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  Sets&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.MemesCardsSets}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  TDH&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.Tdh}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  Daily Change&nbsp;
+                  <LeaderboardSort
+                    sort_option={LeaderboardCardsCollectedSort.DayChange}
+                    sort={sort}
+                    setSort={setSort}
+                  />
+                </span>
+              </th>
+              <th className={styles["tdhSub"]}>
+                <span className="d-flex align-items-center justify-content-center">
+                  vs Network&nbsp;
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((lead: LeaderboardMetrics, index) => {
+              return (
+                <tr key={getLeaderboardRowKey(lead)}>
+                  <td className={styles["rank"]}>
+                    {numberWithCommas(index + 1 + (page - 1) * PAGE_SIZE)}
+                  </td>
+                  <td>
+                    <LeaderboardCollector
+                      handle={lead.handle ?? ""}
+                      consolidationKey={lead.consolidation_key ?? ""}
+                      consolidationDisplay={lead.consolidation_display ?? ""}
+                      pfp={lead.pfp_url ?? ""}
+                      level={lead.level ?? 0}
+                    />
+                  </td>
 
-                      <td className={styles["tdhSub"]}>{lead.level ?? 0}</td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.balance ?? 0)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {lead.unique_memes
-                          ? numberWithCommas(lead.unique_memes)
-                          : 0}{" "}
-                        / {numberWithCommas(lead.unique_memes_total ?? 0)} (
-                        {formatPercentageFromCounts(
-                          lead.unique_memes ?? 0,
-                          lead.unique_memes_total ?? 0
+                  <td className={styles["tdhSub"]}>{lead.level ?? 0}</td>
+                  <td className={styles["tdhSub"]}>
+                    {numberWithCommas(lead.balance ?? 0)}
+                  </td>
+                  <td className={styles["tdhSub"]}>
+                    {lead.unique_memes
+                      ? numberWithCommas(lead.unique_memes)
+                      : 0}{" "}
+                    / {numberWithCommas(lead.unique_memes_total ?? 0)} (
+                    {formatPercentageFromCounts(
+                      lead.unique_memes ?? 0,
+                      lead.unique_memes_total ?? 0
+                    )}
+                    )
+                  </td>
+                  <td className={styles["tdhSub"]}>
+                    {numberWithCommas(lead.memes_cards_sets ?? 0)}
+                  </td>
+                  <td className={styles["tdhSub"]}>
+                    {numberWithCommas(Math.round(lead.tdh ?? 0))}
+                  </td>
+                  <td className={styles["tdhSub"]}>
+                    {!lead.day_change ? (
+                      "-"
+                    ) : (
+                      <>
+                        {lead.day_change > 0 ? `+` : ``}
+                        {numberWithCommas(lead.day_change)}
+                        {lead.day_change != 0 && (
+                          <span className={styles["tdhBoost"]}>
+                            {getTDHChange(lead)}
+                          </span>
                         )}
-                        )
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(lead.memes_cards_sets ?? 0)}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {numberWithCommas(Math.round(lead.tdh ?? 0))}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {!lead.day_change ? (
-                          "-"
-                        ) : (
-                          <>
-                            {lead.day_change > 0 ? `+` : ``}
-                            {numberWithCommas(lead.day_change)}
-                            {lead.day_change != 0 && (
-                              <span className={styles["tdhBoost"]}>
-                                {getTDHChange(lead)}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </td>
-                      <td className={styles["tdhSub"]}>
-                        {!lead.day_change
-                          ? "-"
-                          : `${calculateTdhVsCommunity(lead)}`}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
+                      </>
+                    )}
+                  </td>
+                  <td className={styles["tdhSub"]}>
+                    {!lead.day_change
+                      ? "-"
+                      : `${calculateTdhVsCommunity(lead)}`}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
         </Table>
       </div>
       <LeaderboardFooter

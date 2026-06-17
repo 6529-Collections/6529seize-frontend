@@ -197,6 +197,7 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
     setIsLoading(false);
     setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
   }, [
+    endpoint,
     page,
     sort.sort,
     sort.sort_direction,
@@ -206,6 +207,7 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
     query.selectedSeason,
     query.tdhView,
     query.useGeneratedFilterValues,
+    setIsLoading,
   ]);
 
   useEffect(() => {

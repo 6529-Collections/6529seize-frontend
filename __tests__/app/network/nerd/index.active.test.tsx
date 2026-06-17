@@ -1,4 +1,5 @@
 import ClientCommunityNerdPage from "@/app/network/nerd/[[...focus]]/page.client";
+import { ApiConsolidatedTdhView } from "@/generated/models/ApiConsolidatedTdhView";
 import { LeaderboardFocus } from "@/types/enums";
 import { act, render } from "@testing-library/react";
 import React from "react";
@@ -19,9 +20,12 @@ jest.mock("@/components/leaderboard/Leaderboard", () => ({
 
 // 🧪 Mock next/navigation
 const replaceMock = jest.fn();
+const usePathnameMock = jest.fn();
+const useSearchParamsMock = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: replaceMock }),
-  usePathname: () => "/network/nerd",
+  usePathname: () => usePathnameMock(),
+  useSearchParams: () => useSearchParamsMock(),
 }));
 
 // 🧪 Mock TitleContext
@@ -43,6 +47,9 @@ describe("ClientCommunityNerdPage", () => {
   beforeEach(() => {
     capturedProps = undefined;
     jest.clearAllMocks();
+    globalThis.history.pushState({}, "", "/network/nerd/cards-collected");
+    usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   const renderPage = (focus: LeaderboardFocus) => {
@@ -57,6 +64,16 @@ describe("ClientCommunityNerdPage", () => {
   it("updates path when focus changes", () => {
     renderPage(LeaderboardFocus.TDH);
     act(() => capturedProps.setFocus(LeaderboardFocus.INTERACTIONS));
-    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions");
+    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions", {
+      scroll: false,
+    });
+  });
+
+  it("reads tdh view from search params", () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams("tdh_view=unboosted")
+    );
+    renderPage(LeaderboardFocus.TDH);
+    expect(capturedProps.tdhView).toBe(ApiConsolidatedTdhView.Unboosted);
   });
 });

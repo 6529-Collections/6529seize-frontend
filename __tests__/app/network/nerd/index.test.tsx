@@ -30,14 +30,13 @@ jest.mock("@/components/leaderboard/Leaderboard", () => {
 
 // 🧪 Mock next/navigation
 const replaceMock = jest.fn();
-const useRouterMock = jest.fn(() => ({
-  replace: replaceMock,
-}));
 const usePathnameMock = jest.fn(() => "/network/nerd");
+const useSearchParamsMock = jest.fn();
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => useRouterMock(),
+  useRouter: () => ({ replace: replaceMock }),
   usePathname: () => usePathnameMock(),
+  useSearchParams: () => useSearchParamsMock(),
 }));
 
 // 🧪 Mock TitleContext
@@ -58,6 +57,9 @@ jest.mock("@/contexts/TitleContext", () => ({
 describe("ClientCommunityNerdPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    globalThis.history.pushState({}, "", "/network/nerd/cards-collected");
+    usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+    useSearchParamsMock.mockReturnValue(new URLSearchParams());
   });
 
   const renderPage = (focus: LeaderboardFocus) => {
@@ -74,7 +76,9 @@ describe("ClientCommunityNerdPage", () => {
     renderPage(LeaderboardFocus.TDH);
     fireEvent.click(screen.getByTestId("set-focus"));
 
-    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions");
+    expect(replaceMock).toHaveBeenCalledWith("/network/nerd/interactions", {
+      scroll: false,
+    });
   });
 });
 
