@@ -16,6 +16,7 @@ import { parseSeizeWaveLink } from "@/helpers/SeizeLinkParser";
 import { fetchWaveById, searchWavesByName } from "@/services/api/waves-v2-api";
 import type { SidebarWave } from "@/types/waves.types";
 import {
+  ArrowLongLeftIcon,
   ArrowLongRightIcon,
   ArrowPathIcon,
   CalculatorIcon,
@@ -1388,8 +1389,8 @@ export function WaveScoreTransparencyPage() {
               href="/network"
               className="tw-text-primary-200 desktop-hover:hover:tw-text-primary-100 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              <ArrowLongRightIcon
-                className="tw-size-4 tw-rotate-180"
+              <ArrowLongLeftIcon
+                className="tw-size-4"
                 aria-hidden="true"
               />
               Back to Network

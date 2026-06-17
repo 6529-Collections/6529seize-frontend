@@ -21,17 +21,16 @@ const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
 const originalScrollIntoView = Element.prototype.scrollIntoView;
+const originalHtmlScrollIntoView = HTMLElement.prototype.scrollIntoView;
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = jest.fn();
+  HTMLElement.prototype.scrollIntoView = jest.fn();
 });
 
 afterAll(() => {
   Element.prototype.scrollIntoView = originalScrollIntoView;
-});
-
-beforeAll(() => {
-  HTMLElement.prototype.scrollIntoView = jest.fn();
+  HTMLElement.prototype.scrollIntoView = originalHtmlScrollIntoView;
 });
 
 jest.mock("react-use", () => {
