@@ -140,7 +140,7 @@ const closesFence = (line: string, fenceDelimiter: string): boolean => {
   const closingDelimiter = getClosingFenceDelimiter(line);
   return (
     closingDelimiter !== null &&
-    closingDelimiter.charAt(0) === fenceDelimiter.charAt(0) &&
+    closingDelimiter.startsWith(fenceDelimiter.slice(0, 1)) &&
     closingDelimiter.length >= fenceDelimiter.length
   );
 };
