@@ -110,11 +110,69 @@ function hasBlockedHtmlUrlScheme(value) {
   }
 }
 
-function hasBlockedStyleUrl(value) {
+function isCssWhitespace(character) {
   return (
-    /expression\s*\(/i.test(value) ||
-    /url\s*\(\s*["']?\s*(?:data|javascript|vbscript)\s*:/i.test(value)
+    character === " " ||
+    character === "\n" ||
+    character === "\r" ||
+    character === "\t" ||
+    character === "\f"
   );
+}
+
+function skipCssWhitespace(value, startIndex) {
+  let index = startIndex;
+  while (index < value.length && isCssWhitespace(value[index])) {
+    index += 1;
+  }
+  return index;
+}
+
+function compactCssWhitespace(value) {
+  let compacted = "";
+  for (const character of value) {
+    if (!isCssWhitespace(character)) {
+      compacted += character;
+    }
+  }
+  return compacted;
+}
+
+function hasBlockedStyleUrl(value) {
+  const lowerValue = value.toLowerCase();
+
+  if (compactCssWhitespace(lowerValue).includes("expression(")) {
+    return true;
+  }
+
+  let searchStart = 0;
+  while (searchStart < lowerValue.length) {
+    const urlIndex = lowerValue.indexOf("url", searchStart);
+    if (urlIndex === -1) {
+      return false;
+    }
+
+    let valueStart = skipCssWhitespace(lowerValue, urlIndex + 3);
+    if (lowerValue[valueStart] !== "(") {
+      searchStart = urlIndex + 3;
+      continue;
+    }
+
+    valueStart = skipCssWhitespace(lowerValue, valueStart + 1);
+    if (lowerValue[valueStart] === '"' || lowerValue[valueStart] === "'") {
+      valueStart = skipCssWhitespace(lowerValue, valueStart + 1);
+    }
+
+    for (const scheme of BLOCKED_HTML_URL_SCHEMES) {
+      if (lowerValue.startsWith(scheme, valueStart)) {
+        return true;
+      }
+    }
+
+    searchStart = valueStart + 1;
+  }
+
+  return false;
 }
 
 function normalizePackageAssetPath(sourceUrl) {
