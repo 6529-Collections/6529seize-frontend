@@ -91,3 +91,19 @@ signed decentralized storage flow and exact BE publish body are wired.
 - Storage upload and content-addressed receipt creation are out of scope here.
 - Wallet gallery generation, NFT indexing, 3D rooms, and AI-agent MCP flows are
   out of scope here.
+
+## Localization Follow-Up
+
+- Route: `/{handle}/cms/builder`
+- Current source locale: `en-US`
+- Current fallback behavior: partial locale dictionaries fall back to `en-US`
+  for the builder chrome.
+- User impact while feature-flagged: authors using `en-GB`, `fr-FR`, `es-ES`,
+  or `de-DE` see English-only builder chrome and English starter package
+  content. Starter package text is treated as editable authored content, not
+  translated runtime chrome.
+- Owner/follow-up: frontend CMS builder lane should add partial-locale builder
+  keys before the route exits hidden feature-flag status.
+- Remediation: translate `profileCms.builder.*` chrome keys and decide whether
+  seed package copy should remain authored defaults or move to locale-specific
+  starter templates.

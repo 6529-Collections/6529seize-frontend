@@ -227,7 +227,7 @@ export function validateCmsBuilderState(
   });
   const page = cmsPackage.payload.pages[0];
   if (!page) {
-    throw new Error("Builder package did not include a homepage.");
+    throw new Error("missing_builder_homepage");
   }
 
   return {
@@ -248,8 +248,7 @@ export function parseCmsPackageCandidateJson(input: string): CmsPackageV1 {
   });
 
   if (!validation.valid) {
-    const issue = validation.issues.find((item) => item.severity === "error");
-    throw new Error(issue?.message ?? "Imported package failed V1 validation.");
+    throw new Error("invalid_imported_cms_package");
   }
 
   return parsed as CmsPackageV1;

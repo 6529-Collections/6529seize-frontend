@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 
+import { useAuth } from "@/components/auth/Auth";
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
   runProfileCmsBuilderAction,
   type ProfileCmsBuilderAction,
   type ProfileCmsBuilderActionCode,
@@ -59,16 +61,26 @@ export default function ProfileCmsBuilder({
     useState<ProfileCmsBuilderActionResult | null>(null);
   const [draftId, setDraftId] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const actionRequestIdRef = useRef(0);
+  const stateVersionRef = useRef(0);
+  const { activeProfileProxy, connectedProfile } = useAuth();
 
   const validation = useMemo(() => validateCmsBuilderState(state), [state]);
   const packageJson = useMemo(
     () => JSON.stringify(validation.cmsPackage, null, 2),
     [validation.cmsPackage]
   );
+  const canSaveDraft =
+    !!profileId && connectedProfile?.id === profileId && !activeProfileProxy;
+
+  const clearActionResult = () => {
+    stateVersionRef.current += 1;
+    setActionResult(null);
+  };
 
   const updateState = (patch: Partial<CmsBuilderState>) => {
     setState((current) => ({ ...current, ...patch }));
-    setActionResult(null);
+    clearActionResult();
   };
 
   const updateBlock = (index: number, patch: Partial<CmsBuilderBlock>) => {
@@ -78,7 +90,7 @@ export default function ProfileCmsBuilder({
         blockIndex === index ? { ...block, ...patch } : block
       ),
     }));
-    setActionResult(null);
+    clearActionResult();
   };
 
   const addBlock = (kind: CmsBuilderBlockKind) => {
@@ -89,7 +101,7 @@ export default function ProfileCmsBuilder({
         createBuilderBlock(kind, current.blocks.length),
       ],
     }));
-    setActionResult(null);
+    clearActionResult();
   };
 
   const removeBlock = (index: number) => {
@@ -97,7 +109,7 @@ export default function ProfileCmsBuilder({
       ...current,
       blocks: current.blocks.filter((_, blockIndex) => blockIndex !== index),
     }));
-    setActionResult(null);
+    clearActionResult();
   };
 
   const importJson = () => {
@@ -107,18 +119,27 @@ export default function ProfileCmsBuilder({
         jsonDraft || packageJson
       );
       setState(createBuilderStateFromPackage(importedPackage));
-      setActionResult(null);
+      clearActionResult();
       setActiveTab("editor");
-    } catch (error) {
-      setImportError(
-        error instanceof Error
-          ? error.message
-          : t(locale, "profileCms.builder.json.importFailed")
-      );
+    } catch {
+      setImportError(t(locale, "profileCms.builder.json.importFailed"));
     }
   };
 
   const runAction = async (action: ProfileCmsBuilderAction) => {
+    if (action === "save_draft" && !canSaveDraft) {
+      setActionResult({
+        ok: false,
+        action,
+        expectedEndpoint: PROFILE_CMS_BUILDER_PACKAGES_ENDPOINT,
+        code: "profile_not_authorized",
+      });
+      return;
+    }
+
+    const actionRequestId = actionRequestIdRef.current + 1;
+    actionRequestIdRef.current = actionRequestId;
+    const stateVersion = stateVersionRef.current;
     setIsSubmitting(true);
     setActionResult(null);
     try {
@@ -126,13 +147,25 @@ export default function ProfileCmsBuilder({
         action,
         cmsPackage: validation.cmsPackage,
         draftId,
-        profileId,
+        profileId: canSaveDraft ? profileId : undefined,
       });
+      if (
+        actionRequestId !== actionRequestIdRef.current ||
+        stateVersion !== stateVersionRef.current
+      ) {
+        return;
+      }
       if (result.ok && result.draftId) {
         setDraftId(result.draftId);
       }
       setActionResult(result);
     } catch {
+      if (
+        actionRequestId !== actionRequestIdRef.current ||
+        stateVersion !== stateVersionRef.current
+      ) {
+        return;
+      }
       setActionResult({
         ok: false,
         action,
@@ -140,7 +173,9 @@ export default function ProfileCmsBuilder({
         code: "request_failed",
       });
     } finally {
-      setIsSubmitting(false);
+      if (actionRequestId === actionRequestIdRef.current) {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -291,7 +326,8 @@ function EditorPanel({
             disabled
             type="button"
           >
-            {t(locale, "profileCms.builder.templates.walletGallery")}
+            {t(locale, "profileCms.builder.templates.walletGallery")}{" "}
+            {t(locale, "profileCms.builder.templates.status.comingSoon")}
           </button>
           <button
             aria-disabled="true"
@@ -299,7 +335,8 @@ function EditorPanel({
             disabled
             type="button"
           >
-            {t(locale, "profileCms.builder.templates.gallery")}
+            {t(locale, "profileCms.builder.templates.gallery")}{" "}
+            {t(locale, "profileCms.builder.templates.status.comingSoon")}
           </button>
         </div>
       </div>
@@ -404,6 +441,7 @@ function BlockEditor({
   readonly onRemove: () => void;
 }) {
   const fieldId = `cms-builder-block-${index}`;
+  const blockLabelKey = getBlockLabelKey(block.kind);
   return (
     <section
       aria-labelledby={`${fieldId}-title`}
@@ -415,7 +453,7 @@ function BlockEditor({
           className="tw-text-sm tw-font-semibold tw-uppercase tw-text-primary-300"
           id={`${fieldId}-title`}
         >
-          {block.kind.replaceAll("_", " ")}
+          {t(locale, blockLabelKey)}
         </h3>
         <button
           className="tw-min-h-9 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-iron-200 hover:tw-border-red"
@@ -632,10 +670,10 @@ function ValidationIssueItem({
   return (
     <li className="tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-p-3">
       <p className="tw-text-sm tw-font-semibold tw-text-white">
-        {issue.severity.toUpperCase()} · {issue.code}
+        {t(locale, getValidationSeverityKey(issue.severity))} · {issue.code}
       </p>
       <p className="tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {issue.message}
+        {t(locale, "profileCms.builder.validation.issueDetail")}
       </p>
       <p className="tw-mt-1 tw-font-mono tw-text-xs tw-text-iron-500">
         {issue.path}
@@ -732,6 +770,8 @@ function getActionResultMessage(
       return t(locale, "profileCms.builder.api.missingDraftId");
     case "missing_profile_id":
       return t(locale, "profileCms.builder.api.missingProfileId");
+    case "profile_not_authorized":
+      return t(locale, "profileCms.builder.api.profileNotAuthorized");
     case "publish_requires_signed_storage":
       return t(locale, "profileCms.builder.api.publishRequiresSignedStorage");
     case "request_failed":
@@ -741,6 +781,23 @@ function getActionResultMessage(
     case "draft_saved":
       return t(locale, "profileCms.builder.api.draftSaved");
   }
+}
+
+function getBlockLabelKey(
+  kind: CmsBuilderBlockKind
+): (typeof BLOCK_OPTIONS)[number]["labelKey"] {
+  return (
+    BLOCK_OPTIONS.find((option) => option.kind === kind)?.labelKey ??
+    "profileCms.builder.block.heading"
+  );
+}
+
+function getValidationSeverityKey(
+  severity: CmsValidationIssueV1["severity"]
+): Parameters<typeof t>[1] {
+  return severity === "warning"
+    ? "profileCms.builder.validation.severity.warning"
+    : "profileCms.builder.validation.severity.error";
 }
 
 function Fieldset({

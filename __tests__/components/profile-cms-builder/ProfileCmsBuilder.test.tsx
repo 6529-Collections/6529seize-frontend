@@ -1,8 +1,18 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 
+import { useAuth } from "@/components/auth/Auth";
 import ProfileCmsBuilder from "@/components/profile-cms-builder/ProfileCmsBuilder";
+import { commonApiPost } from "@/services/api/common-api";
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
+
+jest.mock("@/services/api/common-api", () => ({
+  commonApiPost: jest.fn(),
+}));
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -21,10 +31,18 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+const useAuthMock = useAuth as jest.Mock;
+const commonApiPostMock = commonApiPost as jest.Mock;
+
 describe("ProfileCmsBuilder", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     delete process.env["PROFILE_CMS_BUILDER_API_ENABLED"];
     delete process.env["NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED"];
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: null,
+    });
   });
 
   it("edits homepage content and previews with the real CMS renderer", async () => {
@@ -68,7 +86,17 @@ describe("ProfileCmsBuilder", () => {
 
   it("keeps publish honest when backend writes are disabled", async () => {
     const user = userEvent.setup();
-    render(<ProfileCmsBuilder handle="punk6529" title="Profile CMS builder" />);
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-punk6529" },
+    });
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "Save draft" }));
 
@@ -84,6 +112,66 @@ describe("ProfileCmsBuilder", () => {
     expect(
       within(statePanel as HTMLElement).getByText("profile-cms/packages")
     ).toBeInTheDocument();
+  });
+
+  it("blocks draft saves unless the connected profile owns the target", async () => {
+    const user = userEvent.setup();
+    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-other" },
+    });
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+
+    expect(commonApiPostMock).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Connect as this profile before saving a draft.")
+    ).toBeInTheDocument();
+  });
+
+  it("does not show a stale save result after edits during the request", async () => {
+    const user = userEvent.setup();
+    process.env["PROFILE_CMS_BUILDER_API_ENABLED"] = "true";
+    useAuthMock.mockReturnValue({
+      activeProfileProxy: null,
+      connectedProfile: { id: "profile-punk6529" },
+    });
+    let resolvePost:
+      | ((value: { draft_id: string; package_hash: string }) => void)
+      | undefined;
+    commonApiPostMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolvePost = resolve;
+        })
+    );
+
+    render(
+      <ProfileCmsBuilder
+        handle="punk6529"
+        profileId="profile-punk6529"
+        title="Profile CMS builder"
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await user.clear(screen.getByLabelText("Page title"));
+    await user.type(screen.getByLabelText("Page title"), "Changed draft");
+    await act(async () => {
+      resolvePost?.({ draft_id: "draft-1", package_hash: "hash-1" });
+    });
+
+    expect(screen.queryByText("Draft saved.")).not.toBeInTheDocument();
+    expect(screen.queryByText("draft-1")).not.toBeInTheDocument();
   });
 
   it("keeps production publish disabled until the signed storage flow exists", async () => {
@@ -104,7 +192,7 @@ describe("ProfileCmsBuilder", () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText("profile-cms/packages/{id}/publish")
+      screen.getByText("profile-cms/packages/:id/publish")
     ).toBeInTheDocument();
   });
 });

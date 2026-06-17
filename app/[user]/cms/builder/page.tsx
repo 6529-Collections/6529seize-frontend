@@ -33,7 +33,10 @@ export default async function ProfileCmsBuilderPage({
   }
 
   const headers = await getAppCommonHeaders();
-  const profile = await getUserProfile({ user: handle.toLowerCase(), headers });
+  const profile = await resolveBuilderProfile(handle, headers);
+  if (!profile?.id && !profile?.handle) {
+    return notFound();
+  }
 
   return (
     <ProfileCmsBuilder
@@ -43,4 +46,15 @@ export default async function ProfileCmsBuilderPage({
       title={t(DEFAULT_LOCALE, "profileCms.builder.pageTitle")}
     />
   );
+}
+
+async function resolveBuilderProfile(
+  handle: string,
+  headers: Awaited<ReturnType<typeof getAppCommonHeaders>>
+) {
+  try {
+    return await getUserProfile({ user: handle.toLowerCase(), headers });
+  } catch {
+    return null;
+  }
 }

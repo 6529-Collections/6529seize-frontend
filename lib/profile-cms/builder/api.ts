@@ -13,6 +13,7 @@ export type ProfileCmsBuilderActionCode =
   | "api_disabled"
   | "missing_draft_id"
   | "missing_profile_id"
+  | "profile_not_authorized"
   | "publish_requires_signed_storage"
   | "request_failed"
   | "server_validation_completed"
@@ -108,10 +109,12 @@ function getEndpoint({
     case "validate":
       return PROFILE_CMS_BUILDER_VALIDATE_ENDPOINT;
     case "publish":
-      return PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT.replace(
-        "{id}",
-        draftId ? encodeURIComponent(draftId) : "{id}"
-      );
+      return draftId
+        ? PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT.replace(
+            "{id}",
+            encodeURIComponent(draftId)
+          )
+        : PROFILE_CMS_BUILDER_PUBLISH_ENDPOINT.replace("{id}", ":id");
   }
 }
 
@@ -156,7 +159,7 @@ async function postBuilderAction({
         errorMode: "structured",
       });
     case "publish":
-      throw new Error("Publish requires signed decentralized storage flow.");
+      throw new Error("unsupported_publish_action");
   }
 }
 

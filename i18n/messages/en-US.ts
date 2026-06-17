@@ -677,8 +677,9 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.cta.publish": "Publish",
   "profileCms.builder.templates.title": "Site template",
   "profileCms.builder.templates.homepage": "Basic homepage",
-  "profileCms.builder.templates.walletGallery": "Wallet gallery - coming soon",
-  "profileCms.builder.templates.gallery": "Gallery - coming soon",
+  "profileCms.builder.templates.walletGallery": "Wallet gallery",
+  "profileCms.builder.templates.gallery": "Gallery",
+  "profileCms.builder.templates.status.comingSoon": "Coming soon",
   "profileCms.builder.siteSettings": "Site settings",
   "profileCms.builder.pageSettings": "Homepage settings",
   "profileCms.builder.field.siteTitle": "Site title",
@@ -716,6 +717,10 @@ export const EN_US_MESSAGES = {
   "profileCms.builder.validation.invalid": "Package candidate needs changes.",
   "profileCms.builder.validation.noIssues": "No validation issues.",
   "profileCms.builder.validation.focusField": "Focus field",
+  "profileCms.builder.validation.severity.error": "Error",
+  "profileCms.builder.validation.severity.warning": "Warning",
+  "profileCms.builder.validation.issueDetail":
+    "Review this field before saving or publishing.",
   "profileCms.builder.publishState.title": "Draft and publish state",
   "profileCms.builder.publishState.draftId": "Draft id",
   "profileCms.builder.publishState.noDraft": "No saved draft",
@@ -730,6 +735,8 @@ export const EN_US_MESSAGES = {
     "Save a draft before requesting publish.",
   "profileCms.builder.api.missingProfileId":
     "This route could not resolve a profile id for the builder API.",
+  "profileCms.builder.api.profileNotAuthorized":
+    "Connect as this profile before saving a draft.",
   "profileCms.builder.api.publishRequiresSignedStorage":
     "Publishing needs the signed decentralized storage flow and is not enabled in this MVP.",
   "profileCms.builder.api.serverValidationCompleted":

@@ -74,4 +74,15 @@ describe("profile CMS builder route", () => {
       headers: {},
     });
   });
+
+  it("returns not found when the profile lookup fails", async () => {
+    process.env["PROFILE_CMS_BUILDER_ENABLED"] = "true";
+    getUserProfileMock.mockRejectedValueOnce(new Error("not found"));
+
+    await expect(
+      ProfileCmsBuilderPage({
+        params: Promise.resolve({ user: "missing" }),
+      })
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
 });

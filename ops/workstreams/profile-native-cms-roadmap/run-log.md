@@ -569,3 +569,9 @@ PR status:
 - Initial CodeRabbit status was success, but the explicit review request hit
   the organization review rate limit. No actionable review findings were
   returned before handoff.
+- 6529bot review on the first head returned actionable findings. Follow-up
+  hardening gated draft saves to the connected non-proxy owner profile,
+  converted failed profile lookups to `notFound()`, ignored stale async action
+  results after editor changes, localized builder block/severity/error chrome,
+  split template status text, documented builder locale fallback debt, and
+  switched unresolved publish endpoint display to `:id`.
