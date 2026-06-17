@@ -95,6 +95,50 @@ function mockFreshTheMemesLiveCountApis(): void {
   });
 }
 
+function productionTheMemesResponse(url: URL): Response | null {
+  if (url.pathname === "/api/nfts") {
+    return jsonResponse({
+      data: [
+        {
+          id: 509,
+          name: "The Collective Synapse",
+          supply: 173,
+          artist: "elnaz555",
+          artist_seize_handle: "elnaz555",
+          hodl_rate: 22.7803,
+          mint_date: "2026-06-15T09:23:23.000Z",
+          thumbnail: "https://cdn.6529.io/memes/509.png",
+          metadata: {
+            attributes: [{ trait_type: "Type - Season", value: 15 }],
+          },
+        },
+      ],
+    });
+  }
+
+  if (url.pathname === "/api/memes_extended_data") {
+    return jsonResponse({
+      data: [{ id: 509, edition_size: 173, season: 15 }],
+    });
+  }
+
+  if (url.pathname === `/api/minting-claims/${MEMES_CONTRACT}/claims/509`) {
+    return jsonResponse({
+      name: "The Collective Synapse",
+      edition_size: 328,
+    });
+  }
+
+  if (url.pathname === "/api/memes-mint-stats/509") {
+    return jsonResponse({
+      mint_date: "2026-06-15T09:23:23.000Z",
+      total_count: 94,
+    });
+  }
+
+  return null;
+}
+
 describe("createFirstParty6529Plan", () => {
   const originalApiEndpoint = publicEnv.API_ENDPOINT;
   const originalBaseEndpoint = publicEnv.BASE_ENDPOINT;
@@ -315,6 +359,167 @@ describe("createFirstParty6529Plan", () => {
       { label: "Season", value: "15" },
       { label: "Mint date", value: "15 Jun 2026" },
     ]);
+  });
+
+  it("falls back to the production public API when the configured staging API fails", async () => {
+    publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
+    publicEnv.STAGING_API_KEY = "staging-secret";
+    const productionFallbackAuthHeaders: Array<string | null> = [];
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL, init) => {
+      const url = readFetchUrl(input);
+      const headers = new Headers(init?.headers);
+
+      if (url.hostname === "api.staging.6529.io") {
+        return jsonResponse({ message: "staging unavailable" }, 503);
+      }
+
+      if (url.hostname === "api.6529.io") {
+        productionFallbackAuthHeaders.push(headers.get("x-6529-auth"));
+        const response = productionTheMemesResponse(url);
+        if (response) {
+          return response;
+        }
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("https://api.staging.6529.io/api/nfts"),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          "x-6529-auth": "staging-secret",
+        }),
+      })
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("https://api.6529.io/api/nfts"),
+      expect.objectContaining({
+        headers: { accept: "application/json" },
+      })
+    );
+    expect(productionFallbackAuthHeaders).toEqual([null, null, null, null]);
+    expect(data).toMatchObject({
+      type: "6529.collection",
+      kind: "the-memes",
+      title: "The Collective Synapse",
+      kicker: "The Memes #509",
+    });
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "328" },
+      { label: "TDH rate", value: "22.78" },
+      { label: "Season", value: "15" },
+      { label: "Mint date", value: "15 Jun 2026" },
+    ]);
+  });
+
+  it("falls back to the production public API after a primary network error", async () => {
+    publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.hostname === "api.staging.6529.io") {
+        throw new Error("primary timeout");
+      }
+
+      if (url.hostname === "api.6529.io") {
+        const response = productionTheMemesResponse(url);
+        if (response) {
+          return response;
+        }
+      }
+
+      return jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    const { data } = await plan!.execute();
+
+    expect(data.facts).toEqual([
+      { label: "Edition size", value: "328" },
+      { label: "TDH rate", value: "22.78" },
+      { label: "Season", value: "15" },
+      { label: "Mint date", value: "15 Jun 2026" },
+    ]);
+  });
+
+  it("does not retry production fallback for primary auth failures", async () => {
+    publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+
+      if (url.hostname === "api.6529.io") {
+        throw new Error("production fallback should not be called");
+      }
+
+      return jsonResponse({ message: "Unauthorized" }, 401);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+
+    await expect(plan!.execute()).rejects.toThrow("The Memes card was not found.");
+    expect(
+      mockFetch.mock.calls.some(
+        (call) => readFetchUrl(call[0]).hostname === "api.6529.io"
+      )
+    ).toBe(false);
+  });
+
+  it("does not add a production fallback when the configured API is production", async () => {
+    publicEnv.API_ENDPOINT = "https://API.6529.io/";
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+      const response = productionTheMemesResponse(url);
+      return response ?? jsonResponse({}, 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+    await plan!.execute();
+
+    const fetchHosts = mockFetch.mock.calls.map((call) =>
+      readFetchUrl(call[0]).host
+    );
+    expect(fetchHosts).toEqual([
+      "api.6529.io",
+      "api.6529.io",
+      "api.6529.io",
+      "api.6529.io",
+    ]);
+  });
+
+  it("tries the production fallback for primary server errors", async () => {
+    publicEnv.API_ENDPOINT = "https://api.staging.6529.io";
+
+    mockFetch.mockImplementation(async (input: RequestInfo | URL) => {
+      const url = readFetchUrl(input);
+      return jsonResponse({}, url.hostname === "api.staging.6529.io" ? 503 : 404);
+    });
+
+    const plan = createFirstParty6529Plan(
+      new URL("https://6529.io/the-memes/509")
+    );
+
+    await expect(plan!.execute()).rejects.toThrow("The Memes card was not found.");
+    expect(
+      mockFetch.mock.calls.some(
+        (call) => readFetchUrl(call[0]).hostname === "api.6529.io"
+      )
+    ).toBe(true);
   });
 
   it("does not label live The Memes counts when Manifold fallback fails", async () => {
