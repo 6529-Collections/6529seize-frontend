@@ -91,6 +91,10 @@ import {
   hasCurrentDropPartContent,
   shouldUseInitialDropConfig,
 } from "./utils/createDropContentSubmission";
+import {
+  hasPendingInlineImageUploadDrop,
+  hasPendingInlineImageUploadMarkdown,
+} from "@/helpers/waves/inline-image-upload.helpers";
 import type { MissingRequirements } from "./utils/getMissingRequirements";
 import { getMissingRequirements } from "./utils/getMissingRequirements";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
@@ -803,6 +807,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return true;
   };
 
+  const hasPendingInlineImageUpload = useMemo(
+    () =>
+      hasPendingInlineImageUploadMarkdown(getMarkdown) ||
+      (drop ? hasPendingInlineImageUploadDrop(drop) : false),
+    [drop, getMarkdown]
+  );
+
   const getCanSubmit = () => {
     const dropParts = drop?.parts ?? [];
 
@@ -814,6 +825,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         hasMetadata,
         hasPoll: hasValidPoll,
       }) &&
+      !hasPendingInlineImageUpload &&
       !hasMetadataValidationErrors &&
       !hasPollValidationError &&
       !!(dropParts.length ? getCanSubmitStorm() : true)
@@ -828,7 +840,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       getMarkdown?.length ?? 0
     ) ?? 0) >= 24000;
 
-  const getCanAddPart = () => getHaveMarkdownOrFile() && !getIsDropLimit();
+  const getCanAddPart = () =>
+    getHaveMarkdownOrFile() &&
+    !hasPendingInlineImageUpload &&
+    !getIsDropLimit();
   const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
   const isChatLinksRestrictionActive = isChatLinkRestrictionApplicable({
     dropType: ApiDropType.Chat,
@@ -1462,6 +1477,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       return;
     }
 
+    if (hasPendingInlineImageUpload) {
+      return;
+    }
+
     if (isSlowModeSubmitBlocked) {
       return;
     }
@@ -1511,6 +1530,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 
   const onGifDrop = async (gif: string): Promise<void> => {
     if (submitting) {
+      return;
+    }
+    if (hasPendingInlineImageUpload) {
       return;
     }
     if (identityValidationMessage) {
