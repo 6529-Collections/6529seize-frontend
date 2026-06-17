@@ -100,6 +100,36 @@ Before deploying, check what else is already deploying to the same environment. 
    - after rollback or fix-forward, rerun production validation until the failure is resolved or a safety/access boundary requires user input
    - record the incident evidence, chosen action, and final state
 
+## Release Notes Publication
+
+Publish public release notes after production is deployed and production validation passes, unless the user explicitly asked to skip public notes.
+
+1. Use an authorized 6529.io account/profile that the current operator personally has access to. This account may vary by developer. Confirm the browser is logged in as the intended profile and that the profile can post in the `6529 Releases` wave before drafting. If no authorized account is available, treat release-note publication as blocked and ask the user or release owner to post; do not use shared wallets, another person's account, or automation keys unless that was explicitly approved for the release.
+2. Open the `6529 Releases` wave at `https://6529.io/waves/05b14183-e153-4e47-bc66-42a0f49102d4`.
+3. Determine the next web release number from the latest release-note drop in that wave immediately before posting:
+   - normal user-facing feature or grouped release: bump the minor number, e.g. `4.38.0` to `4.39.0`
+   - small fix, copy change, narrow polish, or follow-up to an existing release: bump the patch number, e.g. `4.38.0` to `4.38.1`
+   - broad site-wide, platform, or intentionally breaking release: bump the major number and reset minor/patch, e.g. `4.38.0` to `5.0.0`
+   - when unsure whether a change deserves a minor or patch bump, prefer the smaller patch bump unless the release adds a clear new user-facing capability
+4. Draft the release note in plain user-facing language. Recommended shape:
+
+```text
+4.39.0: Short summary of the release
+
+- What users can now do or see
+- Important changed behavior
+- Fixes that matter to users or operators
+```
+
+5. Write the note from production reality, not PR internals:
+   - mention visible behavior, affected pages, and operationally relevant changes
+   - avoid raw PR numbers, commit SHAs, implementation trivia, private links, secrets, local paths, hidden prompts, unreleased follow-ups, or internal-only risk notes
+   - keep it concise; combine tiny changes under one clear bullet
+   - include screenshots or links only when they help users understand the change and are safe to publish
+   - if the release contains backend and frontend work, describe the product behavior rather than the service boundary
+6. Re-check the latest wave drop before posting so the number did not advance while the deploy was running. If another release note appeared, renumber and adjust the draft.
+7. Post the release note only after production validation is green. Capture the wave drop URL or serial number for closeout evidence.
+
 ## Backend Coordination
 
 Use `ops/skills/deploy-6529/SKILL.md` from the separate repository `6529-Collections/6529seize-backend` for backend deployment work. Do not resolve that path inside the frontend repo. The frontend skill owns frontend merge/deploy/validation; the backend skill owns backend service order, migrations, API/lambda smoke checks, failed-gate recovery, and backend production validation.
@@ -132,6 +162,7 @@ Report:
 - merged PRs and SHAs
 - staging deploy run, deployed SHA, and E2E result
 - production deploy run, deployed SHA, and E2E result
+- release-note wave drop URL or serial number, or why publication was skipped/blocked
 - backend deploy status when involved
 - failures encountered and fixes or rollbacks performed
 - remaining risks, skipped checks, and any human follow-up required
