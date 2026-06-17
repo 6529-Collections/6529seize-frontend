@@ -19,7 +19,7 @@ limits:
 admission:
   publicRepoMode: trusted
   privateRepoMode: open
-  draftPrMode: skip
+  draftPrMode: allow
   trustedPermission: write
   trustedUsers: []
   trustedTeams: []

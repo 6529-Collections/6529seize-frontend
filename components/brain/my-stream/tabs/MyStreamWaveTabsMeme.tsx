@@ -6,7 +6,7 @@ import { useContentTab } from "@/components/brain/ContentTabContext";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
-import MyStreamWaveCreateCurationAction from "./MyStreamWaveCreateCurationAction";
+import MyStreamWaveCreateActionsMenu from "./MyStreamWaveCreateActionsMenu";
 import MyStreamWaveTabsHeader from "./MyStreamWaveTabsHeader";
 import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 
@@ -66,14 +66,16 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
               setActiveTab={setActiveContentTab}
               activeCurationId={activeCurationId}
               onSelectCuration={onSelectCuration}
-              showCreateCurationAction={!showExternalCreateCurationAction}
+              showCreateActionsMenu={!showExternalCreateCurationAction}
             />
           </div>
           {showExternalCreateCurationAction && (
-            <MyStreamWaveCreateCurationAction
-              wave={wave}
-              onCreated={onSelectCuration}
-            />
+            <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-pr-2 sm:tw-pr-4">
+              <MyStreamWaveCreateActionsMenu
+                wave={wave}
+                onCreated={onSelectCuration}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -26,6 +26,8 @@ export interface CompactMenuProps {
   readonly unstyledTrigger?: boolean | undefined;
   readonly menuClassName?: string | undefined;
   readonly unstyledMenu?: boolean | undefined;
+  readonly header?: ReactNode | undefined;
+  readonly headerClassName?: string | undefined;
   readonly itemsWrapperClassName?: string | undefined;
   readonly itemClassName?: string | undefined;
   readonly activeItemClassName?: string | undefined;

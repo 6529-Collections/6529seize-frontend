@@ -60,6 +60,14 @@ export const publicEnvSchema = z.object({
     .string()
     .url("IPFS_GATEWAY_ENDPOINT must be a valid URL"),
   // OPTIONAL
+  MEDIA_RESOLVER_ENDPOINT: z
+    .string()
+    .url("MEDIA_RESOLVER_ENDPOINT must be a valid URL")
+    .refine((value) => new URL(value).protocol === "https:", {
+      message: "MEDIA_RESOLVER_ENDPOINT must use HTTPS",
+    })
+    .optional()
+    .default("https://media.6529.io"),
   IPFS_MFS_PATH: z.string().optional(),
 
   /**
