@@ -1,7 +1,12 @@
 import { createHash } from "node:crypto";
 
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
+import {
+  MANIFOLD_LAZY_CLAIM_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "@/constants/constants";
 import { publicEnv } from "@/config/env";
 import type {
   BaseNFT,
@@ -25,12 +30,26 @@ import type {
   SeizeCollectionPreviewPerson,
   SeizeCollectionPreviewTrait,
 } from "@/services/api/link-preview-api";
+import { createPublicClient, fallback, http } from "viem";
+import { mainnet } from "viem/chains";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
+const PUBLIC_API_BASE = "https://api.6529.io";
 const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const MAINNET_RPC_TIMEOUT_MS = 5_000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
+
+const mainnetPublicClient = createPublicClient({
+  chain: mainnet,
+  transport: fallback([
+    http("https://rpc1.6529.io", { timeout: MAINNET_RPC_TIMEOUT_MS }),
+    http("https://ethereum.publicnode.com", {
+      timeout: MAINNET_RPC_TIMEOUT_MS,
+    }),
+  ]),
+});
 
 type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -119,10 +138,11 @@ function getApiBase(): string {
 }
 
 function buildApiUrl(
+  base: string,
   endpoint: string,
   params?: Record<string, string | number | undefined>
 ): string {
-  const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${getApiBase()}/`);
+  const url = new URL(`/api/${trimLeadingSlashes(endpoint)}`, `${base}/`);
 
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -133,6 +153,24 @@ function buildApiUrl(
   }
 
   return url.toString();
+}
+
+function normalizeApiOrigin(base: string): string {
+  try {
+    const url = new URL(`${trimTrailingSlashes(base)}/`);
+    return url.origin.toLowerCase();
+  } catch {
+    return trimTrailingSlashes(base).toLowerCase();
+  }
+}
+
+function getApiBases(): readonly string[] {
+  const primary = getApiBase();
+  if (normalizeApiOrigin(primary) === normalizeApiOrigin(PUBLIC_API_BASE)) {
+    return [primary];
+  }
+
+  return [primary, PUBLIC_API_BASE];
 }
 
 function getCallerApiAuth(context?: ApiContext): string | undefined {
@@ -172,6 +210,14 @@ function createApiHeaders(context?: ApiContext): HeadersInit {
   return headers;
 }
 
+const PUBLIC_API_HEADERS: HeadersInit = {
+  accept: "application/json",
+};
+
+function shouldRetryApiStatus(status: number): boolean {
+  return status >= 500 && status < 600;
+}
+
 async function getApiFetch(): Promise<typeof fetch> {
   if (typeof window !== "undefined") {
     return fetch;
@@ -192,15 +238,42 @@ async function fetchApiJson<T>(
   context?: ApiContext
 ): Promise<T> {
   const fetchImpl = await getApiFetch();
-  const response = await fetchImpl(buildApiUrl(endpoint, params), {
-    headers: createApiHeaders(context),
-  });
+  const bases = getApiBases();
+  let lastStatus: number | undefined;
+  let primaryStatus: number | undefined;
+  let lastError: unknown;
 
-  if (!response.ok) {
-    throw new Error(`6529 API request failed with status ${response.status}.`);
+  for (const [index, base] of bases.entries()) {
+    try {
+      const response = await fetchImpl(buildApiUrl(base, endpoint, params), {
+        headers: index === 0 ? createApiHeaders(context) : PUBLIC_API_HEADERS,
+      });
+
+      if (response.ok) {
+        return (await response.json()) as T;
+      }
+
+      lastStatus = response.status;
+      if (index === 0) {
+        primaryStatus = response.status;
+      }
+
+      if (!shouldRetryApiStatus(response.status)) {
+        break;
+      }
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  return (await response.json()) as T;
+  const status = primaryStatus ?? lastStatus;
+  if (status !== undefined) {
+    throw new Error(`6529 API request failed with status ${status}.`);
+  }
+
+  throw new Error("6529 API request failed.", {
+    cause: lastError,
+  });
 }
 
 async function fetchOptionalApiJson<T>(
@@ -648,6 +721,40 @@ function readMemeSeason(
   );
 }
 
+function readManifoldClaimTotalMax(data: unknown): number | undefined {
+  if (Array.isArray(data)) {
+    return readPositiveNumber(asRecord(data[1])?.["totalMax"]);
+  }
+
+  const dataRecord = asRecord(data);
+  const claim = asRecord(dataRecord?.["claim"] ?? data);
+  return readPositiveNumber(claim?.["totalMax"]);
+}
+
+async function fetchTheMemesManifoldEditionSize(
+  id: string
+): Promise<number | undefined> {
+  const decimalTokenId = readNumericPathSegment(id);
+  if (!decimalTokenId) {
+    return undefined;
+  }
+
+  const tokenId = BigInt(decimalTokenId);
+
+  try {
+    const data = await mainnetPublicClient.readContract({
+      address: MANIFOLD_LAZY_CLAIM_CONTRACT,
+      abi: MEMES_MANIFOLD_PROXY_ABI,
+      functionName: "getClaimForToken",
+      args: [MEMES_CONTRACT, tokenId],
+    });
+
+    return readManifoldClaimTotalMax(data);
+  } catch {
+    return undefined;
+  }
+}
+
 async function fetchTheMemesPreview(
   id: string,
   requestUrl: URL,
@@ -700,8 +807,18 @@ async function fetchTheMemesPreview(
   )
     ? extendedEditionSize
     : undefined;
+  const shouldFetchManifoldEditionSize =
+    claimEditionSize === undefined &&
+    guardedMintStatEditionSize === undefined &&
+    fallbackEditionSize === undefined;
+  const manifoldEditionSize = shouldFetchManifoldEditionSize
+    ? await fetchTheMemesManifoldEditionSize(id)
+    : undefined;
   const editionSize =
-    claimEditionSize ?? guardedMintStatEditionSize ?? fallbackEditionSize;
+    claimEditionSize ??
+    manifoldEditionSize ??
+    guardedMintStatEditionSize ??
+    fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRate = readPositiveNumber(source.hodl_rate);
   const mintDate = formatMintDate(source.mint_date);

@@ -67,6 +67,7 @@ import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 import { WsMessageType } from "@/helpers/Types";
 import { isReservedIdentitySubmissionMetadataKey } from "@/helpers/waves/identity-submission-metadata";
+import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { useWebSocket } from "@/services/websocket";
@@ -733,15 +734,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getMarkdown = useMemo(
     () =>
       editorState
-        ? exportDropMarkdown(editorState, [
-            ...SAFE_MARKDOWN_TRANSFORMERS,
-            MENTION_TRANSFORMER,
-            ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
-            HASHTAG_TRANSFORMER,
-            WAVE_MENTION_TRANSFORMER,
-            IMAGE_TRANSFORMER,
-            EMOJI_TRANSFORMER,
-          ])
+        ? normalizeTypedEmojiShortcuts(
+            exportDropMarkdown(editorState, [
+              ...SAFE_MARKDOWN_TRANSFORMERS,
+              MENTION_TRANSFORMER,
+              ...(canMentionAll ? [GROUP_MENTION_TRANSFORMER] : []),
+              HASHTAG_TRANSFORMER,
+              WAVE_MENTION_TRANSFORMER,
+              IMAGE_TRANSFORMER,
+              EMOJI_TRANSFORMER,
+            ])
+          )
         : null,
     [canMentionAll, editorState]
   );

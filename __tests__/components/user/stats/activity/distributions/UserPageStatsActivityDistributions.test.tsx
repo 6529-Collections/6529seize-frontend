@@ -1,4 +1,5 @@
 import UserPageStatsActivityDistributions from "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributions";
+import { getDistributionsMessage } from "@/components/user/stats/activity/distributions/distributions.messages";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -19,13 +20,22 @@ jest.mock("next/navigation", () => ({
 
 jest.mock(
   "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableWrapper",
-  () => (props: { page: number; setPage: (page: number) => void }) => (
-    <div data-testid="wrapper" data-page={props.page}>
-      <button data-testid="set-page" onClick={() => props.setPage(3)}>
-        set
-      </button>
-    </div>
-  )
+  () =>
+    (props: {
+      page: number;
+      setPage: (page: number) => void;
+      locale: string;
+    }) => (
+      <div
+        data-testid="wrapper"
+        data-page={props.page}
+        data-locale={props.locale}
+      >
+        <button data-testid="set-page" onClick={() => props.setPage(3)}>
+          set
+        </button>
+      </div>
+    )
 );
 
 jest.mock("@tanstack/react-query", () => ({
@@ -65,10 +75,24 @@ test("hydrates the page from query params and updates the url on page change", a
     <UserPageStatsActivityDistributions
       profile={{ wallets: [] } as any}
       activeAddress={null}
+      locale="de-DE"
     />
   );
 
+  expect(
+    screen.getByRole("heading", {
+      name: getDistributionsMessage(
+        "user.collected.stats.distributions.title",
+        undefined,
+        "de-DE"
+      ),
+    })
+  ).toBeInTheDocument();
   expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
+  expect(screen.getByTestId("wrapper")).toHaveAttribute(
+    "data-locale",
+    "de-DE"
+  );
 
   await userEvent.click(screen.getByTestId("set-page"));
 

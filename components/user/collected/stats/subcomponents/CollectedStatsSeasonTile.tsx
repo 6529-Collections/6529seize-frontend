@@ -1,3 +1,6 @@
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import { useReducedMotion } from "framer-motion";
 import { useState } from "react";
 import type { DisplaySeason } from "../types";
@@ -6,6 +9,7 @@ interface CollectedStatsSeasonTileProps {
   readonly season: DisplaySeason;
   readonly isSelected: boolean;
   readonly showDetailText: boolean;
+  readonly locale?: SupportedLocale | undefined;
   readonly hasTouchScreen: boolean;
   readonly shouldAnimateProgressOnMount: boolean;
   readonly onPreview: () => void;
@@ -82,18 +86,30 @@ const getButtonClassName = (isSelected: boolean): string =>
     ? "tw-border-iron-700 tw-bg-iron-950/80"
     : "tw-border-transparent tw-bg-transparent";
 
-const getSetsHeldLabel = (setsHeld: number): string => {
+const getSetsHeldLabel = (
+  setsHeld: number,
+  locale: SupportedLocale
+): string => {
   if (setsHeld <= 0) {
-    return "0 sets";
+    return translate(locale, "user.collected.stats.seasonTile.sets.zero");
   }
 
-  return `${setsHeld} set${setsHeld > 1 ? "s" : ""}`;
+  if (setsHeld === 1) {
+    return translate(locale, "user.collected.stats.seasonTile.sets.one", {
+      count: formatInteger(locale, setsHeld),
+    });
+  }
+
+  return translate(locale, "user.collected.stats.seasonTile.sets.many", {
+    count: formatInteger(locale, setsHeld),
+  });
 };
 
 export function CollectedStatsSeasonTile({
   season,
   isSelected,
   showDetailText,
+  locale = DEFAULT_LOCALE,
   hasTouchScreen,
   shouldAnimateProgressOnMount,
   onPreview,
@@ -195,7 +211,7 @@ export function CollectedStatsSeasonTile({
           setsHeldClassName,
         ].join(" ")}
       >
-        {getSetsHeldLabel(season.setsHeld)}
+        {getSetsHeldLabel(season.setsHeld, locale)}
       </span>
 
       <span

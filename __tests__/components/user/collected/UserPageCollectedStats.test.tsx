@@ -16,6 +16,7 @@ jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
     tdh: unknown;
     ownerBalance: unknown;
     balanceMemes: unknown[];
+    locale: string;
   }) => (
     <div
       data-testid="details"
@@ -23,6 +24,7 @@ jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
       data-has-tdh={String(Boolean(props.tdh))}
       data-has-owner-balance={String(Boolean(props.ownerBalance))}
       data-balance-memes={props.balanceMemes.length}
+      data-locale={props.locale}
     />
   ),
 }));
@@ -163,6 +165,49 @@ describe("UserPageCollectedStats", () => {
 
     await user.click(screen.getByRole("button", { name: /szn2/i }));
     expect(screen.getByText("26/39 to set 2")).toBeInTheDocument();
+  });
+
+  it("formats collected summary metrics and season details with the active locale", () => {
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: {
+            ...collectedStats,
+            nextgen_balance: 1200,
+            memes_balance: 3107,
+            unique_memes: 1465,
+            boost: 1.76,
+            seasons: [
+              {
+                season: "Season 1",
+                total_cards_in_season: 1234,
+                sets_held: 0,
+                partial_set_unique_cards_held: 1000,
+                total_cards_held: 1000,
+              },
+              {
+                season: "Season 2",
+                total_cards_in_season: 39,
+                sets_held: 1,
+                partial_set_unique_cards_held: 0,
+                total_cards_held: 39,
+              },
+            ],
+          } as any,
+        })}
+        locale="de-DE"
+      />
+    );
+
+    expect(screen.getByText("NextGen")).toBeInTheDocument();
+    expect(screen.getByText("x1.200")).toBeInTheDocument();
+    expect(screen.getByText("Memes")).toBeInTheDocument();
+    expect(screen.getByText("x3.107")).toBeInTheDocument();
+    expect(screen.getByText("unique x1.465")).toBeInTheDocument();
+    expect(screen.getByText("x1,76")).toBeInTheDocument();
+    expect(screen.getByText("1.000/1.234 to set 1")).toBeInTheDocument();
   });
 
   it("uses collection shortcuts for collection-backed metrics and keeps boost informational", async () => {
@@ -621,6 +666,7 @@ describe("UserPageCollectedStats", () => {
         profile={profile}
         activeAddress={null}
         initialStatsData={buildInitialStatsData()}
+        locale="de-DE"
       />
     );
 
@@ -637,7 +683,37 @@ describe("UserPageCollectedStats", () => {
       "owners-balances/consolidation/key",
       "owners-balances/consolidation/key/memes",
     ]);
-    expect(screen.getByTestId("details")).toBeInTheDocument();
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+  });
+
+  it("uses source-locale copy when stats details are unavailable", async () => {
+    const user = userEvent.setup();
+
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={
+          {
+            handle: "",
+            wallets: [],
+            consolidation_key: "",
+          } as any
+        }
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData({
+          initialCollectedStats: undefined,
+        })}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: "Details" }));
+
+    expect(
+      screen.getByText("Stats are unavailable for this profile.")
+    ).toBeInTheDocument();
+    expect(apiMock).not.toHaveBeenCalled();
   });
 
   it("starts with details open when an activity query param is present", async () => {
@@ -650,13 +726,63 @@ describe("UserPageCollectedStats", () => {
         profile={profile}
         activeAddress={null}
         initialStatsData={buildInitialStatsData()}
+        locale="de-DE"
       />
     );
 
     await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
 
-    expect(screen.getByRole("button", { name: "Hide Details" })).toBeInTheDocument();
-    expect(screen.getByTestId("details")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Hide Details" })
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+  });
+
+  it("uses non-undefined fallbacks when detail stats fetches fail", async () => {
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    apiMock.mockRejectedValue(new Error("Network request failed"));
+    useSearchParamsMock.mockReturnValue({
+      get: (key: string) => (key === "activity" ? "tdh-history" : null),
+    });
+
+    try {
+      renderWithQueryClient(
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      );
+
+      await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
+
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-seasons",
+        "0"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-tdh",
+        "false"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-has-owner-balance",
+        "false"
+      );
+      expect(screen.getByTestId("details")).toHaveAttribute(
+        "data-balance-memes",
+        "0"
+      );
+      expect(consoleErrorSpy.mock.calls.join("\n")).not.toContain(
+        "Query data cannot be undefined"
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 
   it("clears previous detail stats while the next address detail queries are in flight", async () => {

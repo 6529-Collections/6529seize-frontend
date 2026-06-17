@@ -81,6 +81,7 @@ import {
   normalizeDropMarkdown,
 } from "./normalizeDropMarkdown";
 import { areMentionedGroupsEqual } from "@/helpers/waves/drop-group-mentions";
+import { normalizeTypedEmojiShortcuts } from "@/helpers/waves/typed-emoji-shortcuts";
 import { containsDisallowedLink } from "@/components/drops/view/part/dropPartMarkdown/linkPreviewDetection";
 
 interface EditDropLexicalProps {
@@ -614,7 +615,7 @@ const EditDropLexical: React.FC<EditDropLexicalProps> = ({
     }
 
     onSave(
-      sanitizedMarkdown,
+      normalizeTypedEmojiShortcuts(sanitizedMarkdown),
       mentionedUsers,
       sanitizedMentionedGroups,
       mentionedWaves

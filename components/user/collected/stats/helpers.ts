@@ -6,7 +6,9 @@ import { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiCollectedStats } from "@/generated/models/ApiCollectedStats";
 import type { ApiCollectedStatsSeason } from "@/generated/models/ApiCollectedStatsSeason";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import type {
   CollectedHeaderMetric,
   CollectedStatsViewModel,
@@ -38,8 +40,17 @@ export const getSafeCollectedStatsIdentityKey = (
   }
 };
 
-const formatMetricValue = (value: number | undefined) =>
-  `x${formatNumberWithCommasOrDash(value ?? 0)}`;
+const METRIC_NUMBER_FORMAT_OPTIONS = {
+  maximumFractionDigits: 2,
+} satisfies Intl.NumberFormatOptions;
+
+const formatMetricValue = (
+  value: number | undefined,
+  locale: SupportedLocale
+) =>
+  translate(locale, "user.collected.stats.metric.value", {
+    value: formatInteger(locale, value ?? 0),
+  });
 
 const parseSeasonNumber = (season: string) => {
   const trimmed = season.trim();
@@ -58,7 +69,8 @@ const parseSeasonNumber = (season: string) => {
 };
 
 const buildMainMetrics = (
-  collectedStats: ApiCollectedStats | undefined
+  collectedStats: ApiCollectedStats | undefined,
+  locale: SupportedLocale
 ): CollectedHeaderMetric[] => {
   if (!collectedStats) {
     return [];
@@ -77,8 +89,8 @@ const buildMainMetrics = (
   if (collectedStats.nextgen_balance) {
     metrics.push({
       id: "nextgen",
-      label: "NextGen",
-      val: formatMetricValue(collectedStats.nextgen_balance),
+      label: translate(locale, "user.collected.stats.metrics.nextGen"),
+      val: formatMetricValue(collectedStats.nextgen_balance, locale),
       collection: CollectedCollectionType.NEXTGEN,
     });
   }
@@ -86,8 +98,8 @@ const buildMainMetrics = (
   if (memeSets > 0) {
     metrics.push({
       id: "memes_sets",
-      label: "Meme Sets",
-      val: formatMetricValue(memeSets),
+      label: translate(locale, "user.collected.stats.metrics.memeSets"),
+      val: formatMetricValue(memeSets, locale),
       collection: CollectedCollectionType.MEMES,
     });
   }
@@ -96,12 +108,14 @@ const buildMainMetrics = (
     const uniqueSub =
       collectedStats.unique_memes === collectedStats.memes_balance
         ? undefined
-        : `unique x${formatNumberWithCommasOrDash(collectedStats.unique_memes)}`;
+        : translate(locale, "user.collected.stats.metrics.unique", {
+            value: formatInteger(locale, collectedStats.unique_memes),
+          });
 
     metrics.push({
       id: "memes",
-      label: "Memes",
-      val: formatMetricValue(collectedStats.memes_balance),
+      label: translate(locale, "user.collected.stats.metrics.memes"),
+      val: formatMetricValue(collectedStats.memes_balance, locale),
       collection: CollectedCollectionType.MEMES,
       ...(uniqueSub ? { sub: uniqueSub } : {}),
     });
@@ -110,8 +124,8 @@ const buildMainMetrics = (
   if (collectedStats.gradients_balance) {
     metrics.push({
       id: "gradients",
-      label: "Gradients",
-      val: formatMetricValue(collectedStats.gradients_balance),
+      label: translate(locale, "user.collected.stats.metrics.gradients"),
+      val: formatMetricValue(collectedStats.gradients_balance, locale),
       collection: CollectedCollectionType.GRADIENTS,
     });
   }
@@ -119,10 +133,14 @@ const buildMainMetrics = (
   if (collectedStats.boost) {
     metrics.push({
       id: "boost",
-      label: "Boost",
-      val: formatMetricValue(
-        Number.parseFloat(collectedStats.boost.toFixed(2))
-      ),
+      label: translate(locale, "user.collected.stats.metrics.boost"),
+      val: translate(locale, "user.collected.stats.metric.value", {
+        value: formatNumber(
+          locale,
+          Number.parseFloat(collectedStats.boost.toFixed(2)),
+          METRIC_NUMBER_FORMAT_OPTIONS
+        ),
+      }),
     });
   }
 
@@ -130,7 +148,8 @@ const buildMainMetrics = (
 };
 
 const buildDisplaySeason = (
-  season: ApiCollectedStatsSeason
+  season: ApiCollectedStatsSeason,
+  locale: SupportedLocale
 ): DisplaySeason | null => {
   const seasonNumber = parseSeasonNumber(season.season);
   const totalCards = season.total_cards_in_season;
@@ -150,17 +169,29 @@ const buildDisplaySeason = (
   let detailText: string | null = null;
   if (isStarted) {
     if (nextSetCards > 0) {
-      detailText = `${formatNumberWithCommasOrDash(
-        nextSetCards
-      )}/${formatNumberWithCommasOrDash(totalCards)} to set ${setsHeld + 1}`;
+      detailText = translate(
+        locale,
+        "user.collected.stats.seasonTile.toNextSet",
+        {
+          held: formatInteger(locale, nextSetCards),
+          total: formatInteger(locale, totalCards),
+          setNumber: setsHeld + 1,
+        }
+      );
     } else if (setsHeld > 0) {
-      detailText = `Set ${formatNumberWithCommasOrDash(setsHeld)} complete`;
+      detailText = translate(
+        locale,
+        "user.collected.stats.seasonTile.setComplete",
+        { count: formatInteger(locale, setsHeld) }
+      );
     }
   }
 
   return {
     id: season.season,
-    label: `SZN${seasonNumber}`,
+    label: translate(locale, "user.collected.stats.seasonTile.label", {
+      seasonNumber,
+    }),
     seasonNumber,
     totalCards,
     setsHeld,
@@ -174,11 +205,12 @@ const buildDisplaySeason = (
 };
 
 export const buildCollectedStatsViewModel = (
-  collectedStats: ApiCollectedStats | undefined
+  collectedStats: ApiCollectedStats | undefined,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): CollectedStatsViewModel => {
-  const mainMetrics = buildMainMetrics(collectedStats);
+  const mainMetrics = buildMainMetrics(collectedStats, locale);
   const allSeasons = (collectedStats?.seasons ?? []).flatMap((season) => {
-    const displaySeason = buildDisplaySeason(season);
+    const displaySeason = buildDisplaySeason(season, locale);
     return displaySeason ? [displaySeason] : [];
   });
   const startedSeasons = allSeasons.filter((season) => season.isStarted);
