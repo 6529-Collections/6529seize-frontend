@@ -10,6 +10,9 @@ This folder stores repo-local Codex skills and agent guidance.
   6529 frontend workstreams from instruction to validated closeout.
 - [Commit Docs Updater](commit-docs-updater/SKILL.md):
   maintains user-facing Markdown documentation under `ops/docs/`.
+- [Deploy 6529](deploy-6529/SKILL.md): carries approved frontend or
+  coordinated frontend/backend releases through merge, staging, production,
+  E2E validation, and deployment coordination.
 - [I18n Localization](i18n-localization/SKILL.md): guides progressive
   frontend message extraction, locale formatting, and fallback review.
 - [React Doctor](react-doctor/SKILL.md): provides React-focused review and
@@ -21,7 +24,7 @@ This folder stores repo-local Codex skills and agent guidance.
 - [Write Skills](write-skills/SKILL.md): helps create, improve, or review
   Codex/OpenAI Agent Skills and `SKILL.md` files.
 - [Write PRs](write-prs/SKILL.md): helps create PR descriptions, iterate with
-  review bots, and carry PRs through requested merge or deployment gates.
+  review bots, and prepare PRs for requested merge or deployment gates.
 
 ## Related Areas
 
