@@ -464,11 +464,7 @@ import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMult
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
 import { ApiConsolidatedTdh } from '../models/ApiConsolidatedTdh';
 import { ApiConsolidatedTdhMetrics                   } from '../models/ApiConsolidatedTdhMetrics';
-import { ApiConsolidatedTdhMetricsCollector } from '../models/ApiConsolidatedTdhMetricsCollector';
-import { ApiConsolidatedTdhMetricsContent } from '../models/ApiConsolidatedTdhMetricsContent';
 import { ApiConsolidatedTdhMetricsPage } from '../models/ApiConsolidatedTdhMetricsPage';
-import { ApiConsolidatedTdhMetricsSort } from '../models/ApiConsolidatedTdhMetricsSort';
-import { ApiConsolidatedTdhView } from '../models/ApiConsolidatedTdhView';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
@@ -504,7 +500,6 @@ import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOut
 import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
 import { ApiCurationDrop                                 } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
-import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
 import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
 import { ApiDistributionAirdropsCsvUploadRequest } from '../models/ApiDistributionAirdropsCsvUploadRequest';
 import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistributionAirdropsUploadResponse';
