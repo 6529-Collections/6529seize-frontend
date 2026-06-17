@@ -1,6 +1,8 @@
 import { MemePageActivity } from "@/components/the-memes/MemePageActivity";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { TypeFilter } from "@/hooks/useActivityData";
+import { formatNumber, roundTo } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -84,6 +86,48 @@ describe("MemePageActivity", () => {
       expect(screen.getByText("123,456.78 ETH")).toBeInTheDocument();
       expect(screen.getByText("1,234,567.89 ETH")).toBeInTheDocument();
     });
+
+    it("formats volume data with the selected locale", () => {
+      const nftWithLargeVolumes = {
+        ...nft,
+        total_volume_last_24_hours: 1234.56,
+      };
+
+      render(
+        <MemePageActivity
+          show
+          nft={nftWithLargeVolumes}
+          pageSize={10}
+          locale="de-DE"
+        />
+      );
+
+      expect(
+        screen.getByRole("region", {
+          name: t("de-DE", "theMemes.detail.activity.region"),
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(t("de-DE", "theMemes.detail.activity.volume.heading"))
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          t("de-DE", "theMemes.detail.activity.volume.ethValue", {
+            value: formatNumber("de-DE", roundTo(1234.56, 2), {
+              maximumFractionDigits: 2,
+            }),
+          })
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", {
+          name: `${t(
+            "de-DE",
+            "theMemes.detail.activity.transactionType"
+          )}: ${t("de-DE", "theMemes.detail.activity.filters.allTransactions")}`,
+        })
+      ).toBeInTheDocument();
+    });
   });
 
   describe("Component Rendering", () => {
@@ -114,6 +158,17 @@ describe("MemePageActivity", () => {
       render(<MemePageActivity show={false} nft={nft} pageSize={10} />);
 
       expect(fetchUrlMock).not.toHaveBeenCalled();
+    });
+
+    it("renders a translated loading output while activity is pending", () => {
+      fetchUrlMock.mockReturnValueOnce(new Promise(() => {}));
+
+      render(<MemePageActivity show nft={nft} pageSize={10} locale="de-DE" />);
+
+      expect(
+        screen.getByLabelText(t("de-DE", "theMemes.detail.activity.loading"))
+          .tagName
+      ).toBe("OUTPUT");
     });
 
     it("fetches activity with correct base url", async () => {
@@ -163,6 +218,23 @@ describe("MemePageActivity", () => {
           `https://api.test.6529.io/api/transactions?contract=${MEMES_CONTRACT}&id=1&page_size=10&page=2`
         );
       });
+    });
+
+    it("renders a translated table caption for activity results", async () => {
+      fetchUrlMock.mockResolvedValueOnce({ count: 1, data: [{} as any] });
+
+      render(<MemePageActivity show nft={nft} pageSize={10} locale="de-DE" />);
+
+      await waitFor(() =>
+        expect(screen.getByTestId("activity-row")).toBeInTheDocument()
+      );
+      expect(
+        screen.getByText(
+          t("de-DE", "theMemes.detail.activity.table.caption", {
+            tokenId: nft.id,
+          })
+        )
+      ).toHaveClass("tw-sr-only");
     });
 
     it("tests all TypeFilter values", async () => {

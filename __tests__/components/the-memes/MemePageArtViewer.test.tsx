@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { t } from "@/i18n/messages";
 
 const mockDownloadMediaUrl = jest.fn().mockResolvedValue(undefined);
 type MockNFTImageProps = {
@@ -273,6 +274,31 @@ describe("MemePageArtViewer", () => {
     expect(mockHelpers.enterArtFullScreen).toHaveBeenCalledWith(
       "the-art-fullscreen-animation"
     );
+  });
+
+  it("uses locale-backed labels for artwork media controls", () => {
+    render(<MemePageArtViewer nft={baseNft as any} locale="de-DE" />);
+
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.art.media.fullscreen"),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.art.media.openInNewTab"),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.art.media.download"),
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: t("de-DE", "theMemes.detail.art.media.next"),
+      })
+    ).toBeInTheDocument();
   });
 
   it("renders only fullscreen for html artwork media actions", () => {

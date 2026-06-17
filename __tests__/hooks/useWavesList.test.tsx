@@ -6,6 +6,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveById } from "@/hooks/useWaveById";
 import { SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("@/hooks/useWavesV2", () => {
@@ -44,9 +45,7 @@ jest.mock("@/hooks/useWaveSubwaves", () => ({
         "WAVE_SUBWAVES",
         {
           parent_wave_id: parentWaveId,
-          ...(viewerIdentityKey
-            ? { viewer_identity: viewerIdentityKey }
-            : {}),
+          ...(viewerIdentityKey ? { viewer_identity: viewerIdentityKey } : {}),
         },
       ],
       queryFn: jest.fn().mockResolvedValue([]),
@@ -68,12 +67,12 @@ const useSeizeConnectContextMock =
 const useSeizeSettingsMock = require("@/contexts/SeizeSettingsContext")
   .useSeizeSettings as jest.Mock;
 const useWaveByIdMock = useWaveById as jest.Mock;
-const useOfficialWavesMock =
-  require("@/hooks/useOfficialWaves").useOfficialWaves as jest.Mock;
-const useWaveSubwavesMapMock =
-  require("@/hooks/useWaveSubwaves").useWaveSubwavesMap as jest.Mock;
-const getWaveSubwavesQueryOptionsMock =
-  require("@/hooks/useWaveSubwaves").getWaveSubwavesQueryOptions as jest.Mock;
+const useOfficialWavesMock = require("@/hooks/useOfficialWaves")
+  .useOfficialWaves as jest.Mock;
+const useWaveSubwavesMapMock = require("@/hooks/useWaveSubwaves")
+  .useWaveSubwavesMap as jest.Mock;
+const getWaveSubwavesQueryOptionsMock = require("@/hooks/useWaveSubwaves")
+  .getWaveSubwavesQueryOptions as jest.Mock;
 
 let queryClient: QueryClient;
 
@@ -243,9 +242,10 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   expect(result.current.pinnedWaves.map((w: any) => w.id)).toEqual(["3"]);
   expect(useWavesV2Mock).toHaveBeenCalledWith(
     expect.objectContaining({
-      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+      overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
       pageSize: 20,
       directMessage: false,
+      scoreSort: ApiWaveScoreSort.Balanced,
       refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
       refetchIntervalInBackground: false,
     })
@@ -257,6 +257,43 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
       refetchIntervalInBackground: false,
     })
   );
+});
+
+test("preserves backend order for regular scored waves", () => {
+  const firstRegularWave = createSidebarWave({
+    id: "first",
+    latestDropTimestamp: 10,
+  });
+  const secondRegularWave = createSidebarWave({
+    id: "second",
+    latestDropTimestamp: 999,
+  });
+
+  useWavesV2Mock.mockReturnValue({
+    waves: [firstRegularWave, secondRegularWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  });
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "first",
+    "second",
+  ]);
 });
 
 test("documents root-wave sources by ignoring malformed subwave cache entries", () => {

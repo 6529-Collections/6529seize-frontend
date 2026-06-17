@@ -87,6 +87,7 @@ const useWavesList = () => {
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
     directMessage: false,
+    scoreSort: WAVE_FOLLOWING_WAVES_PARAMS.scoreSort,
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
@@ -247,9 +248,19 @@ const useWavesList = () => {
         (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
       );
 
-    const sortedNonAnnouncementWaves = [...allWavesMap.values()].sort(
-      (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
+    const nonAnnouncementWaves = [...allWavesMap.values()];
+    const sortedPinnedWaves = nonAnnouncementWaves
+      .filter((wave) => wave.isPinned)
+      .sort(
+        (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
+      );
+    const backendOrderedRegularWaves = nonAnnouncementWaves.filter(
+      (wave) => !wave.isPinned
     );
+    const sortedNonAnnouncementWaves = [
+      ...sortedPinnedWaves,
+      ...backendOrderedRegularWaves,
+    ];
 
     if (announcementWave) {
       allWavesArray.push({
@@ -313,10 +324,7 @@ const useWavesList = () => {
     [queryClient, rootWaveIds, viewerIdentityKey]
   );
 
-  const {
-    subwaves,
-    refetch: refetchSubwaves,
-  } = useWaveSubwavesMap({
+  const { subwaves, refetch: refetchSubwaves } = useWaveSubwavesMap({
     parentWaveIds: loadedSubwaveParentIds,
     viewerIdentityKey,
   });
