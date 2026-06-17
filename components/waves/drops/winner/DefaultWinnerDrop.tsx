@@ -7,7 +7,7 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import type {
   DropIdentityMode,
   DropInteractionParams,
@@ -130,6 +130,15 @@ const DefaultWinnerDrop = ({
     setLongPressTriggered(true);
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, showInteractions]);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+  }, [canUseTouchActionSheet]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);

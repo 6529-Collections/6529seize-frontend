@@ -271,6 +271,49 @@ describe("DefaultWinnerDrop", () => {
     expect(mobileMenuProps.isOpen).toBe(true);
   });
 
+  it("clears an open touch sheet when the mode switches to desktop hover", () => {
+    mockUseHasTouchInput.mockReturnValue(true);
+    mockUseIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    const renderDrop = () => (
+      <DefaultWinnerDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        dropViewDropId={null}
+        location={0 as any}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const { rerender } = render(renderDrop());
+    const onLongPress = mockWaveDropContent.mock.calls.at(-1)?.[0]
+      ?.onLongPress;
+
+    act(() => {
+      onLongPress();
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+
+    setHoverSupport(true);
+    rerender(renderDrop());
+
+    expect(mobileMenuProps.isOpen).toBe(false);
+
+    setHoverSupport(false);
+    rerender(renderDrop());
+
+    expect(mobileMenuProps.isOpen).toBe(false);
+  });
+
   it("does not enable content touch handling when interactions are disabled", () => {
     mockUseHasTouchInput.mockReturnValue(true);
     mockUseIsTouchDevice.mockReturnValue(true);

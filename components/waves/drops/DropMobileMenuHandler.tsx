@@ -33,6 +33,7 @@ export default function DropMobileMenuHandler({
   const {
     markNextClickForSuppression,
     releaseSuppressionAfterTouchEnd,
+    clearSuppression,
     handleClickCapture,
   } = useLongPressClickSuppression();
 
@@ -101,6 +102,21 @@ export default function DropMobileMenuHandler({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+    clearSuppression();
+  }, [canUseTouchActionSheet, clearSuppression]);
 
   return (
     <div

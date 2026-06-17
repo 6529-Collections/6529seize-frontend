@@ -359,6 +359,51 @@ describe("WaveDrop", () => {
     );
   });
 
+  it("clears an open touch sheet when the layout switches to desktop hover mode", () => {
+    isMobileMock.mockReturnValue(false);
+    hasTouchInputMock.mockReturnValue(true);
+    isTouchDeviceMock.mockReturnValue(false);
+    setHoverSupport(true);
+    setViewportWidth(800);
+
+    renderWithRedux(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={0 as any}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onQuote={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    act(() => {
+      getLastMockProps(mockWaveDropHeader).onOpenActions({
+        stopPropagation: jest.fn(),
+      });
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+
+    act(() => {
+      setViewportWidth(1440);
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(false);
+
+    act(() => {
+      setViewportWidth(800);
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(false);
+  });
+
   it("keeps mobile drop interactions for true mobile devices", () => {
     isMobileMock.mockReturnValue(true);
     hasTouchInputMock.mockReturnValue(false);

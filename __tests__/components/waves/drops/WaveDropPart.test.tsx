@@ -439,6 +439,24 @@ describe("WaveDropPart", () => {
       expect(mockSetLongPressTriggered).toHaveBeenCalledWith(false);
       expect(mockOnLongPress).not.toHaveBeenCalled();
     });
+
+    it("clears a pending long press when touch handling is disabled", () => {
+      const { rerender } = render(<WaveDropPart {...defaultProps} />);
+      const container = getDropContainer();
+
+      fireEvent.touchStart(container, {
+        touches: [{ clientX: 100, clientY: 100 }],
+      });
+
+      rerender(<WaveDropPart {...defaultProps} hasTouch={false} />);
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(mockSetLongPressTriggered).toHaveBeenCalledWith(false);
+      expect(mockOnLongPress).not.toHaveBeenCalled();
+    });
   });
 
   describe("Active Part Updates", () => {

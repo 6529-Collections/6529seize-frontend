@@ -232,6 +232,46 @@ describe("EndedParticipationDrop", () => {
     expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true);
   });
 
+  it("clears an open touch sheet when the mode switches to desktop hover", () => {
+    mockUseIsMobileDevice.mockReturnValue(false);
+    mockUseHasTouchInput.mockReturnValue(true);
+    mockUseIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    const renderDrop = () => (
+      <EndedParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    const { rerender } = render(renderDrop());
+    const onLongPress = WaveDropContentMock.mock.calls.at(-1)?.[0]
+      ?.onLongPress;
+
+    act(() => {
+      onLongPress();
+    });
+
+    expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true);
+
+    setHoverSupport(true);
+    rerender(renderDrop());
+
+    expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(false);
+
+    setHoverSupport(false);
+    rerender(renderDrop());
+
+    expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(false);
+  });
+
   it("does not enable content touch handling when interactions are disabled", () => {
     mockUseIsMobileDevice.mockReturnValue(false);
     mockUseHasTouchInput.mockReturnValue(true);

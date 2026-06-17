@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -90,8 +90,31 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const {
       markNextClickForSuppression,
       releaseSuppressionAfterTouchEnd,
+      clearSuppression,
       handleClickCapture,
     } = useLongPressClickSuppression();
+
+    useEffect(() => {
+      if (hasTouch) {
+        return;
+      }
+
+      if (longPressTimeout.current) {
+        clearTimeout(longPressTimeout.current);
+        longPressTimeout.current = null;
+      }
+      setLongPressTriggered(false);
+      clearSuppression();
+    }, [hasTouch, clearSuppression, setLongPressTriggered]);
+
+    useEffect(() => {
+      return () => {
+        if (longPressTimeout.current) {
+          clearTimeout(longPressTimeout.current);
+          longPressTimeout.current = null;
+        }
+      };
+    }, []);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
       if (isTemporaryDrop || !hasTouch) return;

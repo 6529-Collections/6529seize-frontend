@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import OngoingParticipationDrop from "@/components/waves/drops/participation/OngoingParticipationDrop";
@@ -208,6 +208,7 @@ describe("OngoingParticipationDrop", () => {
     ParticipationDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
     participationDropContentProps = undefined;
+    mobileMenuProps = undefined;
     footerProps = undefined;
     useHasTouchInput.mockReturnValue(false);
     useIsTouchDevice.mockReturnValue(false);
@@ -248,6 +249,51 @@ describe("OngoingParticipationDrop", () => {
 
     expect(participationDropContentProps.hasTouch).toBe(true);
     expect(mobileMenuProps.isOpen).toBe(true);
+  });
+
+  it("clears an open touch sheet when the mode switches to desktop hover", () => {
+    useHasTouchInput.mockReturnValue(true);
+    useIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    const { rerender } = renderComp();
+
+    act(() => {
+      participationDropContentProps.onLongPress();
+    });
+
+    expect(mobileMenuProps.isOpen).toBe(true);
+
+    setHoverSupport(true);
+    rerender(
+      <OngoingParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location="wave"
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mobileMenuProps.isOpen).toBe(false);
+
+    setHoverSupport(false);
+    rerender(
+      <OngoingParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location="wave"
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(mobileMenuProps.isOpen).toBe(false);
   });
 
   it("does not enable content touch handling when interactions are disabled", () => {

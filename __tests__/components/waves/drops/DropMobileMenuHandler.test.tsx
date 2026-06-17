@@ -176,6 +176,42 @@ test("suppresses the child click after an extended long press opens the menu", (
   expect(onChildClick).not.toHaveBeenCalled();
 });
 
+test("clears an open touch sheet when the layout switches to desktop hover mode", () => {
+  jest.useFakeTimers();
+  const { getByTestId } = render(
+    <DropMobileMenuHandler
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    >
+      <div data-testid="child" />
+    </DropMobileMenuHandler>
+  );
+
+  fireEvent.touchStart(getByTestId("child"), {
+    touches: [{ clientX: 0, clientY: 0 }],
+  });
+  act(() => {
+    jest.advanceTimersByTime(600);
+  });
+
+  expect(getByTestId("menu").dataset.open).toBe("true");
+
+  setHoverSupport(true);
+  act(() => {
+    setViewportWidth(1440);
+  });
+
+  expect(getByTestId("menu").dataset.open).toBe("false");
+
+  act(() => {
+    setViewportWidth(390);
+  });
+
+  expect(getByTestId("menu").dataset.open).toBe("false");
+});
+
 test("does not open menu on desktop-width touch devices with hover", () => {
   jest.useFakeTimers();
   setViewportWidth(1440);

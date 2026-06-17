@@ -50,6 +50,10 @@ export default function useLongPressClickSuppression() {
         return;
       }
 
+      if (!event.currentTarget.contains(event.target as Node)) {
+        return;
+      }
+
       clearSuppression();
       event.preventDefault();
       event.stopPropagation();

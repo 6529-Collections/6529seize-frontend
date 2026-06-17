@@ -8,7 +8,7 @@ import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -126,6 +126,15 @@ export default function OngoingParticipationDrop({
     setLongPressTriggered(true);
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, showInteractions]);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+  }, [canUseTouchActionSheet]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);

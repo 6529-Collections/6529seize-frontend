@@ -13,7 +13,7 @@ import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DropCurationButton from "../DropCurationButton";
 import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import WaveDropActions from "../WaveDropActions";
@@ -121,6 +121,15 @@ export default function EndedParticipationDrop({
     setLongPressTriggered(true);
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, showInteractions]);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+  }, [canUseTouchActionSheet]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);

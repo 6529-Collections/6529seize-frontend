@@ -287,6 +287,7 @@ const clearLongPressTimeout = ({
 }) => {
   if (longPressTimeoutRef.current) {
     clearTimeout(longPressTimeoutRef.current);
+    longPressTimeoutRef.current = null;
   }
 };
 
@@ -670,6 +671,7 @@ const WaveDrop = ({
   const {
     markNextClickForSuppression,
     releaseSuppressionAfterTouchEnd,
+    clearSuppression,
     handleClickCapture,
   } = useLongPressClickSuppression();
   const dropUpdateMutation = useDropUpdateMutation();
@@ -920,6 +922,18 @@ const WaveDrop = ({
       clearLongPressTimeout({ longPressTimeoutRef });
     };
   }, []);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    clearLongPressTimeout({ longPressTimeoutRef });
+    touchStartPosition.current = null;
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+    clearSuppression();
+  }, [canUseTouchActionSheet, clearSuppression]);
 
   // Derive effective menu state - menu can't be open while editing
   const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
