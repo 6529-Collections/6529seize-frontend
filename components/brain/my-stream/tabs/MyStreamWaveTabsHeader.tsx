@@ -74,6 +74,20 @@ interface MyStreamWaveHeaderIdentityProps {
   readonly showDescriptionPreview: boolean;
   readonly wave: ApiWave;
   readonly wavePictureContributors: WavePictureContributors;
+  readonly waveScoreLearnMoreHref: string;
+}
+
+function getWaveScoreLearnMoreHref({
+  pathname,
+  searchParams,
+}: {
+  readonly pathname: string;
+  readonly searchParams: { toString: () => string };
+}): string {
+  const currentQuery = searchParams.toString();
+  const returnTo = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+  const params = new URLSearchParams({ returnTo });
+  return `${WAVE_SCORE_LEARN_MORE_HREF}?${params.toString()}`;
 }
 
 function MyStreamWaveHeaderIdentity({
@@ -85,6 +99,7 @@ function MyStreamWaveHeaderIdentity({
   showDescriptionPreview,
   wave,
   wavePictureContributors,
+  waveScoreLearnMoreHref,
 }: MyStreamWaveHeaderIdentityProps) {
   if (directMessageProfileHref) {
     return (
@@ -166,7 +181,7 @@ function MyStreamWaveHeaderIdentity({
                 variant="header-inline"
                 mode="summary"
                 className="tw-mt-1 tw-self-start"
-                learnMoreHref={WAVE_SCORE_LEARN_MORE_HREF}
+                learnMoreHref={waveScoreLearnMoreHref}
               />
             )}
             {isCompact && (
@@ -176,7 +191,7 @@ function MyStreamWaveHeaderIdentity({
                 variant="header-inline"
                 mode="summary"
                 className="tw-mt-1"
-                learnMoreHref={WAVE_SCORE_LEARN_MORE_HREF}
+                learnMoreHref={waveScoreLearnMoreHref}
               />
             )}
           </>
@@ -191,7 +206,7 @@ function MyStreamWaveHeaderIdentity({
               variant="header-inline"
               mode="summary"
               className="tw-mt-1"
-              learnMoreHref={WAVE_SCORE_LEARN_MORE_HREF}
+              learnMoreHref={waveScoreLearnMoreHref}
             />
           </>
         )}
@@ -218,6 +233,10 @@ export default function MyStreamWaveTabsHeader({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const waveScoreLearnMoreHref = getWaveScoreLearnMoreHref({
+    pathname,
+    searchParams,
+  });
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -411,6 +430,7 @@ export default function MyStreamWaveTabsHeader({
             showDescriptionPreview={showDescriptionPreview}
             wave={wave}
             wavePictureContributors={wavePictureContributors}
+            waveScoreLearnMoreHref={waveScoreLearnMoreHref}
           />
         </div>
         <div className={actionsClassName}>

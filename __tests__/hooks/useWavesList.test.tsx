@@ -69,6 +69,8 @@ const useSeizeSettingsMock = require("@/contexts/SeizeSettingsContext")
 const useWaveByIdMock = useWaveById as jest.Mock;
 const useOfficialWavesMock = require("@/hooks/useOfficialWaves")
   .useOfficialWaves as jest.Mock;
+const useShowFollowingWavesMock = require("@/hooks/useShowFollowingWaves")
+  .useShowFollowingWaves as jest.Mock;
 const useWaveSubwavesMapMock = require("@/hooks/useWaveSubwaves")
   .useWaveSubwavesMap as jest.Mock;
 const getWaveSubwavesQueryOptionsMock = require("@/hooks/useWaveSubwaves")
@@ -94,12 +96,14 @@ const createSidebarWave = ({
   isDirectMessage = false,
   type = ApiWaveType.Rank,
   pinned = false,
+  subscribed = false,
 }: {
   readonly id: string;
   readonly latestDropTimestamp: number;
   readonly isDirectMessage?: boolean;
   readonly type?: ApiWaveType;
   readonly pinned?: boolean;
+  readonly subscribed?: boolean;
 }) => ({
   id,
   name: id,
@@ -123,7 +127,7 @@ const createSidebarWave = ({
   latestReadTimestamp: 0,
   pinned,
   muted: false,
-  subscribed: false,
+  subscribed,
 });
 
 const createLegacyApiWave = (id: string, latestDropTimestamp: number) =>
@@ -187,6 +191,7 @@ beforeEach(() => {
   });
   announcementRefetchMock = jest.fn();
   officialWavesRefetchMock = jest.fn();
+  useShowFollowingWavesMock.mockReturnValue([false]);
   useSeizeConnectContextMock.mockReturnValue({ address: "0xABC" });
   useWavesV2Mock.mockReturnValue({
     waves: [dmWave, mainWave],
@@ -240,16 +245,35 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
   expect(waves.map((w: any) => w.id)).toEqual(["3", "2"]);
   expect(waves.every((w: any) => w.isPinned)).toBe(true);
   expect(result.current.pinnedWaves.map((w: any) => w.id)).toEqual(["3"]);
-  expect(useWavesV2Mock).toHaveBeenCalledWith(
-    expect.objectContaining({
-      overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
-      pageSize: 20,
-      directMessage: false,
-      scoreSort: ApiWaveScoreSort.Balanced,
-      refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
-      refetchIntervalInBackground: false,
-    })
+  const waveQueryArgs = useWavesV2Mock.mock.calls.map(([args]) => args);
+  expect(waveQueryArgs).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+        pageSize: 20,
+        directMessage: false,
+        excludeFollowed: true,
+        scoreSort: ApiWaveScoreSort.Balanced,
+        enabled: true,
+        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        refetchIntervalInBackground: false,
+      }),
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+        pageSize: 20,
+        following: true,
+        directMessage: false,
+        enabled: true,
+        refetchInterval: false,
+        refetchIntervalInBackground: false,
+      }),
+    ])
   );
+  expect(
+    waveQueryArgs.find(
+      (args) => args.overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+    )
+  ).not.toHaveProperty("scoreSort");
   expect(useOfficialWavesMock).toHaveBeenCalledWith(
     expect.objectContaining({
       viewerIdentityKey: "0xabc:primary",
@@ -257,6 +281,77 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
       refetchIntervalInBackground: false,
     })
   );
+});
+
+test("polls followed activity when the sidebar is in joined mode", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+
+  renderHook(() => useWavesList(), { wrapper });
+
+  const waveQueryArgs = useWavesV2Mock.mock.calls.map(([args]) => args);
+  expect(
+    waveQueryArgs.find(
+      (args) =>
+        args.overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo
+    )
+  ).toMatchObject({
+    enabled: false,
+  });
+  expect(
+    waveQueryArgs.find(
+      (args) => args.overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+    )
+  ).toMatchObject({
+    enabled: true,
+    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+  });
+});
+
+test("puts followed activity before combined-score discovery rows", () => {
+  const followedOld = createSidebarWave({
+    id: "followed-old",
+    latestDropTimestamp: 10,
+    subscribed: true,
+  });
+  const followedNew = createSidebarWave({
+    id: "followed-new",
+    latestDropTimestamp: 500,
+    subscribed: true,
+  });
+  const scoreSuggestion = createSidebarWave({
+    id: "score-suggestion",
+    latestDropTimestamp: 999,
+  });
+
+  useWavesV2Mock.mockImplementation(({ overviewType }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? [followedOld, followedNew]
+        : [scoreSuggestion, followedOld],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch: jest.fn(),
+  }));
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [],
+    pinnedWaves: [],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
+    "followed-new",
+    "followed-old",
+    "score-suggestion",
+  ]);
 });
 
 test("preserves backend order for regular scored waves", () => {
@@ -269,15 +364,18 @@ test("preserves backend order for regular scored waves", () => {
     latestDropTimestamp: 999,
   });
 
-  useWavesV2Mock.mockReturnValue({
-    waves: [firstRegularWave, secondRegularWave],
+  useWavesV2Mock.mockImplementation(({ overviewType }) => ({
+    waves:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo
+        ? []
+        : [firstRegularWave, secondRegularWave],
     isFetching: false,
     isFetchingNextPage: false,
     hasNextPage: false,
     fetchNextPage: jest.fn(),
     status: "success",
     refetch: jest.fn(),
-  });
+  }));
   usePinnedWavesServerMock.mockReturnValue({
     pinnedIds: [],
     pinnedWaves: [],

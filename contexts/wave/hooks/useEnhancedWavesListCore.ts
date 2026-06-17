@@ -19,6 +19,7 @@ export interface MinimalWave {
   picture: string | null;
   contributors: readonly SidebarWaveContributor[];
   isPinned: boolean;
+  isFollowing: boolean;
   isOfficial: boolean;
   isMuted: boolean;
   parentWaveId: string | null;
@@ -179,6 +180,7 @@ function useEnhancedWavesListCore(
         isPinned: options.supportsPinning
           ? (wave.isPinned ?? wave.pinned ?? false)
           : false,
+        isFollowing: wave.subscribed ?? false,
         isOfficial: wave.isOfficial ?? false,
         isMuted: wave.muted,
         parentWaveId: wave.parentWaveId,

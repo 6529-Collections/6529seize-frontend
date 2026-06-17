@@ -4,7 +4,8 @@ export interface SidebarWaveGroups {
   readonly announcementWaves: MinimalWave[];
   readonly officialWaves: MinimalWave[];
   readonly pinnedWaves: MinimalWave[];
-  readonly regularWaves: MinimalWave[];
+  readonly followingWaves: MinimalWave[];
+  readonly scoreWaves: MinimalWave[];
 }
 
 export const isValidSidebarWave = (wave: unknown): wave is MinimalWave => {
@@ -17,7 +18,8 @@ export const isValidSidebarWave = (wave: unknown): wave is MinimalWave => {
     typeof w.id === "string" &&
     w.id.length > 0 &&
     typeof w.name === "string" &&
-    typeof w.isPinned === "boolean"
+    typeof w.isPinned === "boolean" &&
+    typeof w.isFollowing === "boolean"
   );
 };
 
@@ -62,7 +64,8 @@ export const groupSidebarWaves = ({
   const announcementWaves: MinimalWave[] = [];
   const officialWaves: MinimalWave[] = [];
   const pinnedWaves: MinimalWave[] = [];
-  const regularWaves: MinimalWave[] = [];
+  const followingWaves: MinimalWave[] = [];
+  const scoreWaves: MinimalWave[] = [];
 
   for (const wave of waves) {
     if (isAnnouncementsWave?.(wave.id) === true) {
@@ -71,8 +74,10 @@ export const groupSidebarWaves = ({
       officialWaves.push(wave);
     } else if (wave.isPinned) {
       pinnedWaves.push(wave);
+    } else if (wave.isFollowing) {
+      followingWaves.push(wave);
     } else {
-      regularWaves.push(wave);
+      scoreWaves.push(wave);
     }
   }
 
@@ -80,6 +85,7 @@ export const groupSidebarWaves = ({
     announcementWaves,
     officialWaves,
     pinnedWaves,
-    regularWaves,
+    followingWaves,
+    scoreWaves,
   };
 };

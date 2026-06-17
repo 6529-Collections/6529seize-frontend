@@ -4,7 +4,10 @@ import { useAuth } from "@/components/auth/Auth";
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
-import type { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import {
+  ApiWavesOverviewType,
+  type ApiWavesOverviewType as ApiWavesOverviewTypeValue,
+} from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -23,7 +26,8 @@ interface ExploreWavesSectionProps {
   readonly viewAllHref?: string | null | undefined;
   readonly excludeFollowed?: boolean | undefined;
   readonly view?: ApiWavesV2ListType | undefined;
-  readonly overviewType?: ApiWavesOverviewType | undefined;
+  readonly overviewType?: ApiWavesOverviewTypeValue | undefined;
+  readonly directMessage?: boolean | undefined;
   readonly scoreSort?: ApiWaveScoreSort | undefined;
   readonly minVisibilityScore?: number | undefined;
   readonly minQualityScore?: number | undefined;
@@ -44,7 +48,8 @@ export function ExploreWavesSection({
   excludeFollowed = false,
   view = ApiWavesV2ListType.Overview,
   overviewType = WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
-  scoreSort = WAVE_SCORE_DISCOVERY_PARAMS.scoreSort,
+  directMessage,
+  scoreSort,
   minVisibilityScore,
   minQualityScore,
   minHotnessScore,
@@ -62,6 +67,16 @@ export function ExploreWavesSection({
     connectedProfile?.handle ??
     null;
   const effectiveExcludeFollowed = excludeFollowed && userScope !== null;
+  const shouldDefaultScoreSort =
+    view === ApiWavesV2ListType.Overview &&
+    overviewType === ApiWavesOverviewType.ScoredRecentlyDroppedTo;
+  const effectiveScoreSort =
+    scoreSort ??
+    (shouldDefaultScoreSort
+      ? WAVE_SCORE_DISCOVERY_PARAMS.scoreSort
+      : undefined);
+  const shouldServerExcludeFollowed =
+    effectiveExcludeFollowed && view !== ApiWavesV2ListType.Search;
 
   const {
     data: waves,
@@ -72,7 +87,8 @@ export function ExploreWavesSection({
       "explore-waves",
       view,
       overviewType,
-      scoreSort,
+      directMessage,
+      effectiveScoreSort,
       minVisibilityScore,
       minQualityScore,
       minHotnessScore,
@@ -88,8 +104,9 @@ export function ExploreWavesSection({
         overviewType,
         page: 1,
         pageSize: limit,
-        excludeFollowed: effectiveExcludeFollowed ? true : undefined,
-        scoreSort,
+        directMessage,
+        excludeFollowed: shouldServerExcludeFollowed ? true : undefined,
+        scoreSort: effectiveScoreSort,
         minVisibilityScore,
         minQualityScore,
         minHotnessScore,
