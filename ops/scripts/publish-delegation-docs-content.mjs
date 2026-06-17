@@ -411,7 +411,7 @@ async function main() {
   await buildBundle();
 
   const files = await listFiles(BUNDLE_DIR);
-  const manifest = await readManifest();
+  await readManifest();
   const fileReceipts = await collectFileReceipts(files);
 
   if (dryRun) {
@@ -459,7 +459,9 @@ async function main() {
   console.log(receipt.manifestUpdateCommand);
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error(error);
   process.exit(1);
-});
+}
