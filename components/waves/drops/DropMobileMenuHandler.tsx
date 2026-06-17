@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import useIsMobileDevice from "@/hooks/isMobileDevice";
-import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;
@@ -25,39 +25,39 @@ export default function DropMobileMenuHandler({
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
-  const isMobile = useIsMobileDevice();
-  const hasTouch = useIsTouchDevice() || isMobile;
+  const { canUseTouchActionSheet } = useDropActionInteractionMode();
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
+  const {
+    markNextClickForSuppression,
+    releaseSuppressionAfterTouchEnd,
+    clearSuppression,
+    handleClickCapture,
+  } = useLongPressClickSuppression();
 
   const handleLongPress = useCallback(() => {
-    if (!hasTouch) return;
+    if (!canUseTouchActionSheet) return;
+    markNextClickForSuppression();
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [hasTouch]);
+  }, [canUseTouchActionSheet, markNextClickForSuppression]);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (isTemporaryDrop) return;
-
-    // Prevent text selection highlighting during long press
-    if (hasTouch) {
-      e.preventDefault();
-    }
+    if (isTemporaryDrop || !canUseTouchActionSheet) return;
 
     touchStartX.current = e.touches[0]!.clientX;
     touchStartY.current = e.touches[0]!.clientY;
 
     longPressTimeout.current = setTimeout(() => {
-      setLongPressTriggered(true);
       handleLongPress();
     }, LONG_PRESS_DURATION);
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     // Prevent scrolling/selection during long press detection
-    if (hasTouch && longPressTimeout.current) {
+    if (canUseTouchActionSheet && longPressTimeout.current) {
       e.preventDefault();
     }
 
@@ -81,6 +81,7 @@ export default function DropMobileMenuHandler({
       clearTimeout(longPressTimeout.current);
       longPressTimeout.current = null;
     }
+    releaseSuppressionAfterTouchEnd();
     setLongPressTriggered(false);
   };
 
@@ -93,8 +94,38 @@ export default function DropMobileMenuHandler({
     setIsSlideUp(false);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (longPressTimeout.current) {
+        clearTimeout(longPressTimeout.current);
+        longPressTimeout.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (canUseTouchActionSheet) {
+      return;
+    }
+
+    if (longPressTimeout.current) {
+      clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+    }
+
+    setIsSlideUp(false);
+    setLongPressTriggered(false);
+    clearSuppression();
+  }, [canUseTouchActionSheet, clearSuppression]);
+
+  const rootClassName = canUseTouchActionSheet
+    ? "touch-action-sheet-select-none"
+    : undefined;
+
   return (
     <div
+      className={rootClassName}
+      onClickCapture={handleClickCapture}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -103,7 +134,7 @@ export default function DropMobileMenuHandler({
       {children} {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
-        isOpen={isSlideUp}
+        isOpen={isSlideUp && canUseTouchActionSheet}
         longPressTriggered={longPressTriggered}
         showReplyAndQuote={showReplyAndQuote}
         setOpen={setIsSlideUp}
