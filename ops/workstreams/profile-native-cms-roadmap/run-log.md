@@ -290,6 +290,7 @@ Added tests:
 Updated docs:
 
 - `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+
 - `ops/workstreams/profile-native-cms-roadmap/phase-1/README.md`
 - `ops/workstreams/profile-native-cms-roadmap/phase-1/schema-index.md`
 - `ops/workstreams/profile-native-cms-roadmap/phase-1/hash-test-vectors.md`
@@ -517,3 +518,47 @@ gallery, art display, 3D, AI-agent affordances, and migration lanes.
   dependency junction points outside the project root. This is a local
   dependency-shape caveat from avoiding another broad install, not a CMS
   runtime error.
+
+## 2026-06-17 - Builder MVP Stacked Lane
+
+Started FE CMS Builder + Publish UI MVP on
+`codex/profile-cms-builder-mvp`, stacked on PR #2720 head
+`d50547de0ad62e36da881659a80173d6cf619059`.
+
+Scope guardrails:
+
+- FE builder/publish UX only.
+- No V1 protocol, hash, or canonicalization changes.
+- No wallet gallery generator, NFT indexer, storage upload, 3D rooms, or
+  AI-agent MCP work.
+- Existing runtime bridge branch remains untouched except as the stacked base.
+
+Implemented locally before validation:
+
+- Hidden feature-flagged `/{handle}/cms/builder` route.
+- Builder package helper that emits a one-page V1 package candidate, computes
+  existing V1 hashes, and validates via the merged V1 validator.
+- Builder UI with template picker, homepage metadata, navigation label, block
+  editor, real `CmsSiteRenderer` preview, validation checklist, JSON
+  import/export, and honest save/validate/publish adapter states.
+- Narrow write adapter boundary and assumptions doc for backend save,
+  server-validate, and publish endpoints.
+
+Focused validation passed:
+
+- `seize run format:changed`
+- `seize run test:no-coverage -- __tests__/lib/profile-cms/builder/package.test.ts __tests__/components/profile-cms-builder/ProfileCmsBuilder.test.tsx __tests__/app/profile-cms-builder-route.test.tsx --runInBand`
+  (3 suites, 9 tests)
+- `seize run lint:changed`
+- `seize run typecheck:changed`
+- `seize run react-doctor:diff`
+- `codex-diff-check`
+- Local browser smoke was timeboxed. The assigned dev server reached Ready on
+  the builder worktree port, then exited because the local helper/process
+  environment surfaced `PORT_SEARCH_LIMIT=0`, even though tracked config only
+  declares `PORT_SEARCH_LIMIT` as an optional positive number and the worktree
+  `.env` does not set it. This is being treated as a local helper/process-env
+  caveat, not a tracked CMS builder code defect.
+
+PR status to be filled after remaining focused checks and stacked PR
+publication.
