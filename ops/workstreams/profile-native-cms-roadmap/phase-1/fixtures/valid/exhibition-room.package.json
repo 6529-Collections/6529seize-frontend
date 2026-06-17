@@ -1,0 +1,185 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-exhibition-room-v1",
+  "profile": {
+    "handle": "punk6529",
+    "profile_id": "profile-punk6529"
+  },
+  "site": {
+    "title": "3D Room Fixture",
+    "description": "Simple 3D room fixture with faithful 2D fallback.",
+    "base_path": "/punk6529/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "dark",
+      "accent": "#ffffff"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": ["room_viewer", "nft_detail"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/punk6529/index.html",
+        "kind": "page",
+        "page_id": "page-room"
+      },
+      {
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "kind": "page",
+        "page_id": "page-nft"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-room",
+        "type": "room",
+        "path": "/punk6529/index.html",
+        "metadata": {
+          "title": "3D Room Fixture",
+          "description": "A simple wall room with faithful 2D fallback.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/index.html",
+          "social_image_asset_id": "asset-room-poster",
+          "navigation_label": "Room",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-room",
+            "block_type": "room_viewer",
+            "room_id": "room-main",
+            "interactive_policy": {
+              "hydration": "deferred_island",
+              "requires_user_activation": true,
+              "fallback_asset_id": "asset-room-poster"
+            }
+          }
+        ]
+      },
+      {
+        "id": "page-nft",
+        "type": "nft_detail",
+        "path": "/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+        "metadata": {
+          "title": "Room Work Detail",
+          "description": "Faithful 2D detail page for a room artwork.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/punk6529/nfts/ethereum/0x33fd426905f149f8376e227d0c9d3340aad17af1/1/index.html",
+          "social_image_asset_id": "asset-room-work",
+          "navigation_label": "Work",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-work-image",
+            "block_type": "image",
+            "asset_id": "asset-room-work"
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-room-poster",
+        "kind": "image",
+        "uri": "ipfs://bafyfixtureroom/poster.jpg",
+        "content_hash": "sha256:3535353535353535353535353535353535353535353535353535353535353535",
+        "mime_type": "image/jpeg",
+        "width": 1600,
+        "height": 900,
+        "file_size_bytes": 180000,
+        "roles": ["poster", "social", "fallback"],
+        "alt_text": "Poster for a simple 3D exhibition room"
+      },
+      {
+        "id": "asset-room-work",
+        "kind": "image",
+        "uri": "ipfs://bafyfixtureroom/work.png",
+        "content_hash": "sha256:3636363636363636363636363636363636363636363636363636363636363636",
+        "mime_type": "image/png",
+        "width": 2400,
+        "height": 2400,
+        "file_size_bytes": 900000,
+        "roles": ["original", "detail", "fullscreen"],
+        "alt_text": "Artwork displayed in the 3D room"
+      }
+    ],
+    "exhibition_rooms": [
+      {
+        "id": "room-main",
+        "title": "Simple Wall Room",
+        "room_type": "wall",
+        "poster_asset_id": "asset-room-poster",
+        "fallback_page_id": "page-nft",
+        "navigation_mode": "guided_hotspots",
+        "placements": [
+          {
+            "id": "placement-work",
+            "asset_id": "asset-room-work",
+            "detail_page_id": "page-nft",
+            "position": [0, 1.5, -3],
+            "rotation": [0, 0, 0],
+            "size": [1.2, 1.2],
+            "display_mode": "faithful",
+            "label": "Room Work Detail"
+          }
+        ]
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Room",
+            "page_id": "page-room"
+          }
+        ]
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 2,
+      "asset_count": 2,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:3737373737373737373737373737373737373737373737373737373737373737",
+    "package_hash": "sha256:3838383838383838383838383838383838383838383838383838383838383838",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:punk6529",
+      "signature": "fixture-signature-room",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixtureroom",
+      "content_hash": "sha256:3838383838383838383838383838383838383838383838383838383838383838",
+      "provider_content_id": "bafyfixtureroom",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Valid 3D exhibition room fixture."
+  }
+}

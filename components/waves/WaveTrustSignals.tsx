@@ -465,7 +465,7 @@ function WaveScoreSummaryTooltip({
     <span
       id={id}
       role="tooltip"
-      className="tw-pointer-events-none tw-absolute tw-left-0 tw-top-full tw-z-50 tw-mt-2 tw-hidden tw-w-72 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-shadow-2xl tw-ring-1 tw-ring-white/10 group-hover:tw-block group-focus-within:tw-block"
+      className="tw-pointer-events-none tw-absolute tw-left-0 tw-top-full tw-z-[10000] tw-mt-2 tw-hidden tw-w-72 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-shadow-2xl tw-ring-1 tw-ring-white/10 group-hover:tw-block group-focus-within:tw-block"
     >
       {primaryDetail && (
         <span className="tw-block tw-text-sm tw-font-semibold tw-text-white">
@@ -578,7 +578,7 @@ export function WaveTrustSignals({
       getVisibilityToneClasses(variant, waveScore?.visibility_score)
     )} ${
       hasRichTooltip
-        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline"
+        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline desktop-hover:hover:tw-z-[10000] focus:tw-z-[10000] focus-visible:tw-z-[10000]"
         : ""
     }`;
     const summaryChipContent = (

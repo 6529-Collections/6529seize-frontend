@@ -22,6 +22,12 @@ describe("TwitterPreviewCard", () => {
     jest
       .spyOn(HTMLMediaElement.prototype, "load")
       .mockImplementation(() => undefined);
+    jest
+      .spyOn(HTMLMediaElement.prototype, "play")
+      .mockResolvedValue(undefined);
+    jest
+      .spyOn(HTMLMediaElement.prototype, "pause")
+      .mockImplementation(() => undefined);
     mockedFetchTwitterPreview.mockReset();
     Object.assign(navigator, {
       clipboard: {
@@ -156,7 +162,8 @@ describe("TwitterPreviewCard", () => {
       "poster",
       "https://pbs.twimg.com/tweet_video_thumb/example.jpg"
     );
-    expect(video).toHaveAttribute("controls");
+    expect(video).not.toHaveAttribute("controls");
+    expect(screen.getByRole("button", { name: "Full screen" })).toBeInTheDocument();
     expect(container.querySelector("track")).toHaveAttribute(
       "kind",
       "captions"
@@ -185,6 +192,17 @@ describe("TwitterPreviewCard", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Close video quality menu" })
     );
+    expect(
+      screen.queryByRole("dialog", { name: "Video quality" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Video quality" })
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Video quality" })
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("group", { name: "Video player" }));
     expect(
       screen.queryByRole("dialog", { name: "Video quality" })
     ).not.toBeInTheDocument();
