@@ -38,6 +38,24 @@ describe("SeizeVideoPlayer", () => {
     expect(HTMLMediaElement.prototype.load).toHaveBeenCalled();
   });
 
+  it("recovers to the first fallback source when the direct source is missing", () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        fallbackSources={["https://example.com/fallback.mp4"]}
+      />
+    );
+
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+
+    fireEvent.error(video);
+
+    expect(video).toHaveAttribute("src", "https://example.com/fallback.mp4");
+    expect(HTMLMediaElement.prototype.load).toHaveBeenCalled();
+  });
+
   it("toggles mute state from the custom control", async () => {
     render(<SeizeVideoPlayer src="https://example.com/video.mp4" />);
 
@@ -47,6 +65,24 @@ describe("SeizeVideoPlayer", () => {
 
     expect(
       screen.getByRole("button", { name: "Mute video" })
+    ).toBeInTheDocument();
+  });
+
+  it("syncs mute state when the muted prop changes", () => {
+    const { rerender } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" muted={false} />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Mute video" })
+    ).toBeInTheDocument();
+
+    rerender(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" muted={true} />
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Unmute video" })
     ).toBeInTheDocument();
   });
 

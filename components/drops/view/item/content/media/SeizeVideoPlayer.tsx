@@ -256,7 +256,10 @@ export default function SeizeVideoPlayer({
   const resolvedVideoRef = videoRef ?? internalVideoRef;
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const [orientation, setOrientation] = useState("unknown");
-  const [isMuted, setIsMuted] = useState(muted);
+  const [mutedState, setMutedState] = useState<{
+    readonly prop?: boolean | undefined;
+    readonly value?: boolean | undefined;
+  }>({});
   const [isPaused, setIsPaused] = useState(!autoPlay);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -413,7 +416,7 @@ export default function SeizeVideoPlayer({
   function toggleMuted(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setIsMuted((current) => !current);
+    setMutedState({ prop: muted, value: !isMuted });
     revealControls();
   }
 
@@ -524,6 +527,10 @@ export default function SeizeVideoPlayer({
 
   const isFillLayout = layout === "fill";
   const widthClassName = getNaturalWidthClassName(orientation, layout);
+  const isMuted =
+    mutedState.prop === muted && typeof mutedState.value === "boolean"
+      ? mutedState.value
+      : muted;
   const controlsAreVisible = controlsVisible || isPaused || isFullscreen;
   const responsiveMediaStyle = getResponsiveMediaStyle();
   const directSrc =
