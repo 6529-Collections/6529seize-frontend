@@ -42,6 +42,39 @@ interface IssueInput {
 }
 
 type IdMap<T extends { id: string }> = Map<string, { value: T; index: number }>;
+type CmsPageV1 = CmsPackageV1["payload"]["pages"][number];
+type CmsNftMediaProfileV1 = NonNullable<
+  CmsPackageV1["payload"]["nft_media_profiles"]
+>[number];
+type CmsDeepZoomManifestV1 = NonNullable<
+  CmsPackageV1["payload"]["deep_zoom_manifests"]
+>[number];
+type CmsExhibitionRoomV1 = NonNullable<
+  CmsPackageV1["payload"]["exhibition_rooms"]
+>[number];
+type CmsSourcePacketV1 = NonNullable<
+  CmsPackageV1["payload"]["source_packets"]
+>[number];
+
+interface SemanticValidationContext {
+  issues: CmsValidationIssueV1[];
+  pageMap: IdMap<CmsPageV1>;
+  assetMap: IdMap<CmsAssetV1>;
+  nftProfileMap: IdMap<CmsNftMediaProfileV1>;
+  deepZoomMap: IdMap<CmsDeepZoomManifestV1>;
+  roomMap: IdMap<CmsExhibitionRoomV1>;
+  sourcePacketMap: IdMap<CmsSourcePacketV1>;
+}
+
+interface PageValidationContext {
+  pageId: string;
+  pagePath: string;
+}
+
+interface BlockValidationContext extends PageValidationContext {
+  blockId: string;
+  blockPath: string;
+}
 
 const VALIDATOR_NAME = "6529-cms-protocol-v1";
 const VALIDATOR_VERSION = "0.1.0";
@@ -168,19 +201,19 @@ function validateSemantics(
     "source_packet",
     issues
   );
-
-  validateRoutes(cmsPackage, pageMap, issues);
-  validateSiteManifest(cmsPackage, assetMap, issues);
-  validatePages(
-    cmsPackage,
+  const context: SemanticValidationContext = {
+    issues,
     pageMap,
     assetMap,
     nftProfileMap,
     deepZoomMap,
     roomMap,
     sourcePacketMap,
-    issues
-  );
+  };
+
+  validateRoutes(cmsPackage, pageMap, issues);
+  validateSiteManifest(cmsPackage, assetMap, issues);
+  validatePages(cmsPackage, context);
   validateAssets(payload.assets, issues);
   validateNftMediaProfiles(payload.nft_media_profiles ?? [], assetMap, issues);
   validateDeepZoomManifests(payload.deep_zoom_manifests ?? [], assetMap, issues);
@@ -370,22 +403,9 @@ function validateSiteManifest(
 
 function validatePages(
   cmsPackage: CmsPackageV1,
-  pageMap: IdMap<CmsPackageV1["payload"]["pages"][number]>,
-  assetMap: IdMap<CmsAssetV1>,
-  nftProfileMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["nft_media_profiles"]>[number]
-  >,
-  deepZoomMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["deep_zoom_manifests"]>[number]
-  >,
-  roomMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["exhibition_rooms"]>[number]
-  >,
-  sourcePacketMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["source_packets"]>[number]
-  >,
-  issues: CmsValidationIssueV1[]
+  context: SemanticValidationContext
 ): void {
+  const { assetMap, issues, sourcePacketMap } = context;
   const routePaths = new Set(cmsPackage.payload.routes.map((route) => route.path));
 
   cmsPackage.payload.pages.forEach((page, pageIndex) => {
@@ -445,49 +465,33 @@ function validatePages(
       });
     }
 
-    validateBlocks(
-      page.blocks,
-      pagePath,
-      page.id,
-      pageMap,
-      assetMap,
-      nftProfileMap,
-      deepZoomMap,
-      roomMap,
-      issues
-    );
+    validateBlocks(page.blocks, { pageId: page.id, pagePath }, context);
   });
 }
 
 function validateBlocks(
   blocks: CmsBlockV1[],
-  pagePath: string,
-  pageId: string,
-  pageMap: IdMap<CmsPackageV1["payload"]["pages"][number]>,
-  assetMap: IdMap<CmsAssetV1>,
-  nftProfileMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["nft_media_profiles"]>[number]
-  >,
-  deepZoomMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["deep_zoom_manifests"]>[number]
-  >,
-  roomMap: IdMap<
-    NonNullable<CmsPackageV1["payload"]["exhibition_rooms"]>[number]
-  >,
-  issues: CmsValidationIssueV1[]
+  pageContext: PageValidationContext,
+  context: SemanticValidationContext
 ): void {
+  const { assetMap, deepZoomMap, issues, nftProfileMap, pageMap, roomMap } = context;
   const blockIds = new Set<string>();
 
   blocks.forEach((block, blockIndex) => {
-    const blockPath = `${pagePath}/blocks/${blockIndex}`;
+    const blockPath = `${pageContext.pagePath}/blocks/${blockIndex}`;
+    const blockContext: BlockValidationContext = {
+      ...pageContext,
+      blockId: block.id,
+      blockPath,
+    };
     const record = block as Record<string, unknown>;
 
     if (blockIds.has(block.id)) {
       addIssue(issues, {
         code: "block.duplicate_id",
-        message: `Block id '${block.id}' is duplicated on page '${pageId}'.`,
+        message: `Block id '${block.id}' is duplicated on page '${pageContext.pageId}'.`,
         path: `${blockPath}/id`,
-        pageId,
+        pageId: pageContext.pageId,
         blockId: block.id,
       });
     }
@@ -497,81 +501,67 @@ function validateBlocks(
       record,
       ASSET_REFERENCE_FIELDS,
       assetMap,
-      blockPath,
+      blockContext,
       issues,
-      "asset.reference_missing",
-      pageId,
-      block.id
+      "asset.reference_missing"
     );
     validateBlockReferenceArrayFields(
       record,
       ASSET_REFERENCE_ARRAY_FIELDS,
       assetMap,
-      blockPath,
+      blockContext,
       issues,
-      "asset.reference_missing",
-      pageId,
-      block.id
+      "asset.reference_missing"
     );
     validateBlockReferenceFields(
       record,
       PAGE_REFERENCE_FIELDS,
       pageMap,
-      blockPath,
+      blockContext,
       issues,
-      "page.reference_missing",
-      pageId,
-      block.id
+      "page.reference_missing"
     );
     validateBlockReferenceArrayFields(
       record,
       PAGE_REFERENCE_ARRAY_FIELDS,
       pageMap,
-      blockPath,
+      blockContext,
       issues,
-      "page.reference_missing",
-      pageId,
-      block.id
+      "page.reference_missing"
     );
     validateBlockReferenceFields(
       record,
       NFT_PROFILE_REFERENCE_FIELDS,
       nftProfileMap,
-      blockPath,
+      blockContext,
       issues,
-      "nft_media_profile.reference_missing",
-      pageId,
-      block.id
+      "nft_media_profile.reference_missing"
     );
     validateBlockReferenceFields(
       record,
       DEEP_ZOOM_REFERENCE_FIELDS,
       deepZoomMap,
-      blockPath,
+      blockContext,
       issues,
-      "deep_zoom.reference_missing",
-      pageId,
-      block.id
+      "deep_zoom.reference_missing"
     );
     validateBlockReferenceFields(
       record,
       ROOM_REFERENCE_FIELDS,
       roomMap,
-      blockPath,
+      blockContext,
       issues,
-      "room.reference_missing",
-      pageId,
-      block.id
+      "room.reference_missing"
     );
     validateInteractivePolicyReferences(
       block,
       assetMap,
       blockPath,
-      pageId,
+      pageContext.pageId,
       issues
     );
-    validateBlockUrls(record, blockPath, pageId, block.id, issues);
-    validateHeavyMediaBlock(block, assetMap, blockPath, pageId, issues);
+    validateBlockUrls(record, blockPath, pageContext.pageId, block.id, issues);
+    validateHeavyMediaBlock(block, assetMap, blockPath, pageContext.pageId, issues);
   });
 }
 
@@ -1041,21 +1031,19 @@ function validateBlockReferenceFields<T extends { id: string }>(
   block: Record<string, unknown>,
   fields: readonly string[],
   referenceMap: IdMap<T>,
-  blockPath: string,
+  blockContext: BlockValidationContext,
   issues: CmsValidationIssueV1[],
-  code: string,
-  pageId: string,
-  blockId: string
+  code: string
 ): void {
   fields.forEach((field) => {
     validateOptionalReference(
       getString(block[field]),
       referenceMap,
-      `${blockPath}/${field}`,
+      `${blockContext.blockPath}/${field}`,
       issues,
       code,
-      pageId,
-      blockId
+      blockContext.pageId,
+      blockContext.blockId
     );
   });
 }
@@ -1064,11 +1052,9 @@ function validateBlockReferenceArrayFields<T extends { id: string }>(
   block: Record<string, unknown>,
   fields: readonly string[],
   referenceMap: IdMap<T>,
-  blockPath: string,
+  blockContext: BlockValidationContext,
   issues: CmsValidationIssueV1[],
-  code: string,
-  pageId: string,
-  blockId: string
+  code: string
 ): void {
   fields.forEach((field) => {
     const value = block[field];
@@ -1080,11 +1066,11 @@ function validateBlockReferenceArrayFields<T extends { id: string }>(
       validateOptionalReference(
         getString(item),
         referenceMap,
-        `${blockPath}/${field}/${index}`,
+        `${blockContext.blockPath}/${field}/${index}`,
         issues,
         code,
-        pageId,
-        blockId
+        blockContext.pageId,
+        blockContext.blockId
       );
     });
   });
