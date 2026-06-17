@@ -87,6 +87,9 @@ signed decentralized storage flow and exact BE publish body are wired.
 
 - Backend auth must verify the caller controls the target profile.
 - Backend publish must produce real non-fixture signatures and storage receipts.
+- Backend publish must discard or overwrite client-provided fixture
+  `signatures` and `storage` fields, then rebuild them from server-verified
+  profile authority and real decentralized storage receipts.
 - Backend publish must reject schema/hash drift and unsafe URI violations.
 - Storage upload and content-addressed receipt creation are out of scope here.
 - Wallet gallery generation, NFT indexing, 3D rooms, and AI-agent MCP flows are
