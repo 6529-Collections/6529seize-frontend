@@ -61,6 +61,7 @@ export function ExploreWavesSection({
     connectedProfile?.normalised_handle ??
     connectedProfile?.handle ??
     null;
+  const effectiveExcludeFollowed = excludeFollowed && userScope !== null;
 
   const {
     data: waves,
@@ -78,7 +79,7 @@ export function ExploreWavesSection({
       minRepSortScore,
       visibilityTier,
       limit,
-      excludeFollowed,
+      effectiveExcludeFollowed,
       userScope,
     ],
     queryFn: async () => {
@@ -87,7 +88,7 @@ export function ExploreWavesSection({
         overviewType,
         page: 1,
         pageSize: limit,
-        excludeFollowed,
+        excludeFollowed: effectiveExcludeFollowed,
         scoreSort,
         minVisibilityScore,
         minQualityScore,
@@ -97,8 +98,8 @@ export function ExploreWavesSection({
       });
       return page.waves;
     },
-    staleTime: excludeFollowed ? 0 : 5 * 60 * 1000,
-    ...(excludeFollowed ? { gcTime: 0 } : {}),
+    staleTime: effectiveExcludeFollowed ? 0 : 5 * 60 * 1000,
+    ...(effectiveExcludeFollowed ? { gcTime: 0 } : {}),
   });
 
   if (isError) {
