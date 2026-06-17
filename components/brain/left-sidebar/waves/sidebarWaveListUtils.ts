@@ -1,5 +1,4 @@
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
-import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
 
 export interface SidebarWaveGroups {
   readonly announcementWaves: MinimalWave[];
@@ -84,7 +83,3 @@ export const groupSidebarWaves = ({
     regularWaves,
   };
 };
-
-export const hasExpandableTopLevelRows = (
-  rows: readonly SidebarWaveTreeRow[]
-) => rows.some((row) => row.depth === 0 && row.canExpand);
