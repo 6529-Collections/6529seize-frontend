@@ -191,6 +191,59 @@ describe("SeizeVideoPlayer", () => {
     }
   });
 
+  it("keeps focused minimal controls visible across the hide timer", () => {
+    jest.useFakeTimers();
+
+    try {
+      const { container } = render(
+        <SeizeVideoPlayer src="https://example.com/video.mp4" />
+      );
+
+      const video = container.querySelector("video");
+      if (!video) {
+        throw new Error("Expected video element to render");
+      }
+
+      Object.defineProperty(video, "paused", {
+        configurable: true,
+        value: false,
+      });
+
+      const muteButton = screen.getByRole("button", {
+        name: "Unmute video",
+      });
+      const muteControlZone = muteButton.parentElement;
+      if (!muteControlZone) {
+        throw new Error("Expected mute control zone to render");
+      }
+
+      act(() => {
+        fireEvent.play(video);
+        jest.advanceTimersByTime(1800);
+      });
+
+      expect(muteControlZone).toHaveClass("tw-pointer-events-none");
+      expect(muteButton).toHaveAttribute("tabindex", "-1");
+
+      act(() => {
+        muteButton.focus();
+      });
+
+      expect(document.activeElement).toBe(muteButton);
+      expect(muteControlZone).toHaveClass("tw-pointer-events-auto");
+      expect(muteButton).not.toHaveAttribute("tabindex");
+
+      act(() => {
+        jest.advanceTimersByTime(1800);
+      });
+
+      expect(muteControlZone).toHaveClass("tw-pointer-events-auto");
+      expect(muteButton).not.toHaveAttribute("tabindex");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("syncs mute state when the muted prop changes", () => {
     const { rerender } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" muted={false} />
