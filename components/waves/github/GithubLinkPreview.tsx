@@ -52,7 +52,81 @@ interface GithubFact {
   readonly tone?: "default" | "success" | "warning" | "danger" | undefined;
 }
 
+interface GithubAccent {
+  readonly kind: GithubLinkKind;
+  readonly railColor: string;
+  readonly borderColor: string;
+  readonly backgroundColor: string;
+  readonly textColor: string;
+}
+
 const GITHUB_NUMBER_PATTERN = /^\d+$/;
+
+const GITHUB_ACCENTS: Record<
+  GithubLinkKind,
+  Omit<GithubAccent, "kind">
+> = {
+  pull: {
+    railColor: "#8b5cf6",
+    borderColor: "rgba(139, 92, 246, 0.32)",
+    backgroundColor: "rgba(139, 92, 246, 0.12)",
+    textColor: "#ddd6fe",
+  },
+  issue: {
+    railColor: "#22c55e",
+    borderColor: "rgba(34, 197, 94, 0.3)",
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
+    textColor: "#bbf7d0",
+  },
+  repository: {
+    railColor: "#38bdf8",
+    borderColor: "rgba(56, 189, 248, 0.28)",
+    backgroundColor: "rgba(56, 189, 248, 0.1)",
+    textColor: "#bae6fd",
+  },
+  file: {
+    railColor: "#f59e0b",
+    borderColor: "rgba(245, 158, 11, 0.32)",
+    backgroundColor: "rgba(245, 158, 11, 0.11)",
+    textColor: "#fde68a",
+  },
+  directory: {
+    railColor: "#14b8a6",
+    borderColor: "rgba(20, 184, 166, 0.3)",
+    backgroundColor: "rgba(20, 184, 166, 0.1)",
+    textColor: "#99f6e4",
+  },
+  commit: {
+    railColor: "#fb923c",
+    borderColor: "rgba(251, 146, 60, 0.3)",
+    backgroundColor: "rgba(251, 146, 60, 0.1)",
+    textColor: "#fed7aa",
+  },
+  release: {
+    railColor: "#10b981",
+    borderColor: "rgba(16, 185, 129, 0.3)",
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    textColor: "#a7f3d0",
+  },
+  actions: {
+    railColor: "#60a5fa",
+    borderColor: "rgba(96, 165, 250, 0.3)",
+    backgroundColor: "rgba(96, 165, 250, 0.1)",
+    textColor: "#bfdbfe",
+  },
+  discussion: {
+    railColor: "#ec4899",
+    borderColor: "rgba(236, 72, 153, 0.3)",
+    backgroundColor: "rgba(236, 72, 153, 0.1)",
+    textColor: "#fbcfe8",
+  },
+  github: {
+    railColor: "#94a3b8",
+    borderColor: "rgba(148, 163, 184, 0.26)",
+    backgroundColor: "rgba(148, 163, 184, 0.08)",
+    textColor: "#cbd5e1",
+  },
+};
 
 const safeDecode = (value: string): string => {
   try {
@@ -381,6 +455,42 @@ const getKindLabelFromPreview = (
     case undefined:
       return null;
   }
+};
+
+const getAccentKind = (
+  link: ParsedGithubLink,
+  preview: GithubPreviewResponse | null
+): GithubLinkKind => {
+  switch (preview?.type) {
+    case "github.issue":
+      return "issue";
+    case "github.pull_request":
+      return "pull";
+    case "github.repository":
+      return "repository";
+    case "github.file":
+      return "file";
+    case "github.directory":
+      return "directory";
+    case "github.commit":
+      return "commit";
+    case "github.release":
+      return "release";
+    case "github.actions":
+      return "actions";
+    case "github.discussion":
+      return "discussion";
+    case undefined:
+      return link.kind;
+  }
+};
+
+const getAccent = (
+  link: ParsedGithubLink,
+  preview: GithubPreviewResponse | null
+): GithubAccent => {
+  const kind = getAccentKind(link, preview);
+  return { kind, ...GITHUB_ACCENTS[kind] };
 };
 
 const getFallbackTitle = (link: ParsedGithubLink): string => {
@@ -946,6 +1056,7 @@ export default function GithubLinkPreview({ href }: GithubLinkPreviewProps) {
   const metaText = getMetaText(preview);
   const facts = getPreviewFacts(preview);
   const labels = getPreviewLabels(preview);
+  const accent = getAccent(link, preview);
 
   return (
     <LinkHandlerFrame href={href}>
@@ -959,8 +1070,21 @@ export default function GithubLinkPreview({ href }: GithubLinkPreviewProps) {
         data-testid="github-link-preview-card"
         aria-label={getAriaLabel(link, preview)}
       >
+        <span
+          aria-hidden="true"
+          className="tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-opacity-85"
+          data-testid="github-preview-accent"
+          data-accent-kind={accent.kind}
+          style={{ backgroundColor: accent.railColor }}
+        />
         <span className="tw-grid tw-min-w-0 tw-grid-cols-[2.5rem,minmax(0,1fr)] tw-gap-3 sm:tw-grid-cols-[3rem,minmax(0,1fr)]">
-          <span className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/35 sm:tw-h-12 sm:tw-w-12">
+          <span
+            className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/35 sm:tw-h-12 sm:tw-w-12"
+            style={{
+              borderColor: accent.borderColor,
+              backgroundColor: accent.backgroundColor,
+            }}
+          >
             <Image
               src="/github_w.png"
               alt=""
@@ -976,7 +1100,15 @@ export default function GithubLinkPreview({ href }: GithubLinkPreviewProps) {
               <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-none tw-text-iron-500">
                 GitHub
               </span>
-              <span className="tw-inline-flex tw-items-center tw-rounded-md tw-bg-iron-800/75 tw-px-2 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-iron-200">
+              <span
+                className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/75 tw-px-2 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none tw-text-iron-200"
+                data-testid="github-preview-kind-badge"
+                style={{
+                  borderColor: accent.borderColor,
+                  backgroundColor: accent.backgroundColor,
+                  color: accent.textColor,
+                }}
+              >
                 {kindLabel}
               </span>
               {state.type === "loading" && <LoadingStatus />}

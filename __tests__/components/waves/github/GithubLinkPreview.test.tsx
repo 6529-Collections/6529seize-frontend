@@ -166,6 +166,13 @@ describe("GithubLinkPreview", () => {
       "aria-label",
       expect.stringContaining("Open GitHub pull request")
     );
+    expect(screen.getByTestId("github-preview-accent")).toHaveAttribute(
+      "data-accent-kind",
+      "pull"
+    );
+    expect(screen.getByTestId("github-preview-kind-badge")).toHaveTextContent(
+      "Pull request"
+    );
     expect(card).not.toHaveClass("tw-h-[10rem]");
     expect(card).not.toHaveClass("md:tw-h-[11rem]");
     expect(screen.getByAltText("")).toHaveAttribute("src", "/github_w.png");
@@ -246,6 +253,10 @@ describe("GithubLinkPreview", () => {
     );
 
     expect(screen.getByText("Repository")).toBeInTheDocument();
+    expect(screen.getByTestId("github-preview-accent")).toHaveAttribute(
+      "data-accent-kind",
+      "repository"
+    );
     expect(mockedFetchGithubPreview).toHaveBeenCalledWith(
       "https://github.com/6529-Collections/6529Stream"
     );
@@ -287,6 +298,10 @@ describe("GithubLinkPreview", () => {
     );
 
     expect(screen.getByText("File")).toBeInTheDocument();
+    expect(screen.getByTestId("github-preview-accent")).toHaveAttribute(
+      "data-accent-kind",
+      "file"
+    );
 
     await waitFor(() => {
       expect(screen.getByText("app.ts")).toBeInTheDocument();
