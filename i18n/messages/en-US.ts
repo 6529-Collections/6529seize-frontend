@@ -137,6 +137,12 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
   } as const
 );
 
+const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "loading.details": "Loading REP category details",
+  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.editAriaLabel": "Edit REP category {category}",
+} as const);
+
 const USER_COLLECTED_STATS_ACTIVITY_MESSAGES = objectMessages(
   "user.collected.stats.activityOverview",
   {
@@ -782,6 +788,7 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...REMEMES_DETAIL_MESSAGES,
+  ...REP_CATEGORY_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;
