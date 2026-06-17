@@ -338,26 +338,26 @@ export default function Leaderboard(
           <div className={styles["networkStat"]}>
             <span className={styles["networkStatLabel"]}>Network TDH</span>
             <span className={styles["networkStatValue"]}>
-              {selectedNetworkTdh !== undefined ? (
-                numberWithCommas(selectedNetworkTdh)
-              ) : (
+              {selectedNetworkTdh === undefined ? (
                 <DotLoader />
+              ) : (
+                numberWithCommas(selectedNetworkTdh)
               )}
             </span>
           </div>
           <div className={styles["networkStat"]}>
             <span className={styles["networkStatLabel"]}>Daily Change</span>
             <span className={styles["networkStatValue"]}>
-              {selectedNetworkTdhChange !== undefined &&
-              selectedGlobalTdhRateChange !== undefined ? (
+              {selectedNetworkTdhChange === undefined ||
+              selectedGlobalTdhRateChange === undefined ? (
+                <DotLoader />
+              ) : (
                 <>
                   {numberWithCommas(selectedNetworkTdhChange)}{" "}
                   <span className="font-smaller">
                     ({selectedGlobalTdhRateChange.toFixed(2)}%)
                   </span>
                 </>
-              ) : (
-                <DotLoader />
               )}
             </span>
           </div>
