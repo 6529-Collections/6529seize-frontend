@@ -42,6 +42,11 @@ type ProfileCmsPrimarySiteApiResponse =
       readonly published_at?: string | undefined;
     };
 
+type PrimarySiteEnvelopeHashes = {
+  readonly packageHash: string;
+  readonly payloadHash: string;
+};
+
 export type ProfileCmsPrimarySite = {
   readonly cmsPackage: CmsPackageV1;
   readonly packageId?: string | undefined;
@@ -135,15 +140,32 @@ export function normalizePrimarySiteResponse(
     return normalizeFixturePackage(response);
   }
 
+  const cmsPackage = getValidatedPrimarySitePackage(response);
+  assertExpectedHandle(cmsPackage, options.expectedHandle);
+  const hashes = getPrimarySiteEnvelopeHashes(response, cmsPackage);
+  assertEnvelopeHashes(cmsPackage, hashes);
+
+  return createPrimarySiteResult(response, cmsPackage, hashes);
+}
+
+function getValidatedPrimarySitePackage(
+  response: ProfileCmsPrimarySiteApiResponse
+): CmsPackageV1 {
   const cmsPackage = extractPackage(response, {
     allowDirectPackage: allowDirectFixturePackageResponse(),
   });
+
   if (!cmsPackage) {
     throw new Error(
       "Profile CMS primary-site response did not include a package."
     );
   }
 
+  assertProductionPackage(cmsPackage);
+  return cmsPackage;
+}
+
+function assertProductionPackage(cmsPackage: CmsPackageV1): void {
   const validation = validateCmsPackageV1(cmsPackage, {
     allowFixtureSignatures: false,
     allowFixtureStorage: false,
@@ -151,41 +173,73 @@ export function normalizePrimarySiteResponse(
   });
 
   if (!validation.valid) {
-    const issueSummary = validation.issues
-      .filter((issue) => issue.severity === "error")
-      .slice(0, 3)
-      .map((issue) => `${issue.code} at ${issue.path}`)
-      .join(", ");
     throw new Error(
-      `Profile CMS package failed V1 validation${
-        issueSummary ? `: ${issueSummary}` : "."
-      }`
+      `Profile CMS package failed V1 validation${getIssueSummarySuffix(
+        validation.issues
+      )}`
     );
   }
+}
 
+function getIssueSummarySuffix(
+  issues: ReadonlyArray<{
+    readonly severity: string;
+    readonly code: string;
+    readonly path: string;
+  }>
+): string {
+  const issueSummary = issues
+    .filter((issue) => issue.severity === "error")
+    .slice(0, 3)
+    .map((issue) => `${issue.code} at ${issue.path}`)
+    .join(", ");
+  return issueSummary ? `: ${issueSummary}` : ".";
+}
+
+function assertExpectedHandle(
+  cmsPackage: CmsPackageV1,
+  expectedHandle: string | undefined
+): void {
   if (
-    options.expectedHandle &&
-    cmsPackage.profile.handle.toLowerCase() !==
-      options.expectedHandle.toLowerCase()
+    expectedHandle &&
+    cmsPackage.profile.handle.toLowerCase() !== expectedHandle.toLowerCase()
   ) {
     throw new Error("Profile CMS package handle mismatch.");
   }
+}
 
-  const packageHash =
-    getStringField(response, "package_hash") ??
-    cmsPackage.integrity.package_hash;
-  const payloadHash =
-    getStringField(response, "payload_hash") ??
-    cmsPackage.integrity.payload_hash;
+function getPrimarySiteEnvelopeHashes(
+  response: ProfileCmsPrimarySiteApiResponse,
+  cmsPackage: CmsPackageV1
+): PrimarySiteEnvelopeHashes {
+  return {
+    packageHash:
+      getStringField(response, "package_hash") ??
+      cmsPackage.integrity.package_hash,
+    payloadHash:
+      getStringField(response, "payload_hash") ??
+      cmsPackage.integrity.payload_hash,
+  };
+}
 
-  if (packageHash !== cmsPackage.integrity.package_hash) {
+function assertEnvelopeHashes(
+  cmsPackage: CmsPackageV1,
+  hashes: PrimarySiteEnvelopeHashes
+): void {
+  if (hashes.packageHash !== cmsPackage.integrity.package_hash) {
     throw new Error("Profile CMS package_hash envelope mismatch.");
   }
 
-  if (payloadHash !== cmsPackage.integrity.payload_hash) {
+  if (hashes.payloadHash !== cmsPackage.integrity.payload_hash) {
     throw new Error("Profile CMS payload_hash envelope mismatch.");
   }
+}
 
+function createPrimarySiteResult(
+  response: ProfileCmsPrimarySiteApiResponse,
+  cmsPackage: CmsPackageV1,
+  hashes: PrimarySiteEnvelopeHashes
+): ProfileCmsPrimarySite {
   const packageId =
     getStringField(response, "package_id") ?? cmsPackage.package_id;
   const version = getStringField(response, "version");
@@ -196,8 +250,8 @@ export function normalizePrimarySiteResponse(
     cmsPackage,
     ...(packageId ? { packageId } : {}),
     ...(version ? { version } : {}),
-    ...(packageHash ? { packageHash } : {}),
-    ...(payloadHash ? { payloadHash } : {}),
+    packageHash: hashes.packageHash,
+    payloadHash: hashes.payloadHash,
     ...(updatedAt ? { updatedAt } : {}),
     ...(publishedAt ? { publishedAt } : {}),
     source: "api",

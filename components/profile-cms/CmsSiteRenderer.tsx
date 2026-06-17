@@ -43,6 +43,9 @@ const SANDBOX_PERMISSION_ALLOWLIST = new Set([
   "allow-presentation",
   "allow-scripts",
 ]);
+const EMPTY_MEDIA_CAPTION_TRACK_SRC = getWebVttDataUri(
+  "No captions were provided for this media asset."
+);
 
 export default function CmsSiteRenderer({
   cmsPackage,
@@ -225,22 +228,51 @@ function HeadingBlock({ block }: { readonly block: CmsBlockV1 }) {
 
 function RichTextBlock({ block }: { readonly block: CmsBlockV1 }) {
   const content = getString(block, "content") ?? "";
-  const paragraphs = content
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
+  const paragraphs = getParagraphItems(content);
 
   return (
     <div className="tw-space-y-4 tw-text-base tw-leading-8 tw-text-iron-200">
       {paragraphs.length ? (
-        paragraphs.map((paragraph, index) => (
-          <p key={`paragraph-${index}`}>{paragraph}</p>
+        paragraphs.map((paragraph) => (
+          <p key={paragraph.key}>{paragraph.text}</p>
         ))
       ) : (
         <p>{content}</p>
       )}
     </div>
   );
+}
+
+function getParagraphItems(
+  content: string
+): ReadonlyArray<{ readonly key: string; readonly text: string }> {
+  const seen = new Map<string, number>();
+  const paragraphs: Array<{ readonly key: string; readonly text: string }> = [];
+
+  for (const paragraph of content.split(/\n{2,}/)) {
+    const text = paragraph.trim();
+    if (!text) {
+      continue;
+    }
+
+    const hash = hashTextForKey(text);
+    const occurrence = (seen.get(hash) ?? 0) + 1;
+    seen.set(hash, occurrence);
+    paragraphs.push({
+      key: `paragraph-${hash}-${occurrence}`,
+      text,
+    });
+  }
+
+  return paragraphs;
+}
+
+function hashTextForKey(value: string): string {
+  let hash = 0;
+  for (const character of value) {
+    hash = (hash * 31 + (character.codePointAt(0) ?? 0)) >>> 0;
+  }
+  return hash.toString(36);
 }
 
 function ImageBlock({
@@ -280,15 +312,13 @@ function VideoBlock({
         poster={posterUrl ?? undefined}
       >
         <source src={assetUrl} type={asset?.mime_type} />
-        {captionTrackSrc ? (
-          <track
-            default
-            kind="captions"
-            label="Description"
-            src={captionTrackSrc}
-            srcLang="en"
-          />
-        ) : null}
+        <track
+          default
+          kind="captions"
+          label="Description"
+          src={captionTrackSrc}
+          srcLang="en"
+        />
       </video>
       <MediaCaption asset={asset} />
     </figure>
@@ -314,15 +344,13 @@ function AudioBlock({
     <figure className="tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4">
       <audio className="tw-w-full" controls preload="metadata">
         <source src={assetUrl} type={asset?.mime_type} />
-        {captionTrackSrc ? (
-          <track
-            default
-            kind="captions"
-            label="Description"
-            src={captionTrackSrc}
-            srcLang="en"
-          />
-        ) : null}
+        <track
+          default
+          kind="captions"
+          label="Description"
+          src={captionTrackSrc}
+          srcLang="en"
+        />
       </audio>
       <MediaCaption asset={asset} />
     </figure>
@@ -674,14 +702,16 @@ function MediaCaption({ asset }: { readonly asset: CmsAssetV1 | undefined }) {
   );
 }
 
-function getMediaCaptionTrackSrc(
-  asset: CmsAssetV1 | undefined
-): string | undefined {
+function getMediaCaptionTrackSrc(asset: CmsAssetV1 | undefined): string {
   const caption = asset?.alt_text?.trim();
   if (!caption) {
-    return undefined;
+    return EMPTY_MEDIA_CAPTION_TRACK_SRC;
   }
 
+  return getWebVttDataUri(caption);
+}
+
+function getWebVttDataUri(caption: string): string {
   const vtt = `WEBVTT\n\n00:00:00.000 --> 99:59:59.000\n${escapeWebVttText(caption)}\n`;
   return `data:text/vtt;charset=utf-8,${encodeURIComponent(vtt)}`;
 }
