@@ -35,11 +35,13 @@ jest.mock(
       page: number;
       onActiveFilter: (filter: UserPageStatsActivityWalletFilterType) => void;
       setPage: (page: number) => void;
+      locale: string;
     }) => (
       <div
         data-testid="wrapper"
         data-filter={props.filter}
         data-page={props.page}
+        data-locale={props.locale}
       >
         <button
           data-testid="set-filter"
@@ -86,6 +88,7 @@ describe("UserPageStatsActivityWallet", () => {
       <UserPageStatsActivityWallet
         profile={{ wallets: [] } as any}
         activeAddress={null}
+        locale="de-DE"
       />
     );
 
@@ -96,6 +99,10 @@ describe("UserPageStatsActivityWallet", () => {
       )
     );
     expect(screen.getByTestId("wrapper")).toHaveAttribute("data-page", "2");
+    expect(screen.getByTestId("wrapper")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
   });
 
   it("preserves collected page query param without using it for wallet activity", async () => {
