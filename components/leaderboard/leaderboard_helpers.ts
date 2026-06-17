@@ -185,17 +185,20 @@ export function useFetchLeaderboard<T extends LeaderboardItem>(
 
   const fetchResults = useCallback(async () => {
     setIsLoading(true);
-    const data = await fetchLeaderboardData<T>(
-      endpoint,
-      LEADERBOARD_PAGE_SIZE,
-      page,
-      sort,
-      query
-    );
-    setTotalResults(data.count);
-    setLeaderboard(data.data);
-    setIsLoading(false);
-    setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
+    try {
+      const data = await fetchLeaderboardData<T>(
+        endpoint,
+        LEADERBOARD_PAGE_SIZE,
+        page,
+        sort,
+        query
+      );
+      setTotalResults(data.count);
+      setLeaderboard(data.data);
+      setMyFetchUrl(`${publicEnv.API_ENDPOINT}/api/${data.url}`);
+    } finally {
+      setIsLoading(false);
+    }
   }, [
     endpoint,
     page,

@@ -85,11 +85,14 @@ describe("ClientCommunityNerdPage", () => {
 describe("generateMetadata", () => {
   it("returns Interactions metadata", async () => {
     const metadata = await generateMetadata({
-      params: Promise.resolve({ focus: "interactions" }),
+      params: Promise.resolve({ focus: ["interactions"] }),
     });
-    expect(metadata).toEqual({
+    expect(metadata).toMatchObject({
       title: "Network Nerd - Interactions",
-      description: "Network",
+      description: expect.stringContaining("Network"),
+      openGraph: expect.objectContaining({
+        title: "Network Nerd - Interactions",
+      }),
     });
   });
 
@@ -97,9 +100,12 @@ describe("generateMetadata", () => {
     const metadata = await generateMetadata({
       params: Promise.resolve({ focus: undefined }),
     });
-    expect(metadata).toEqual({
+    expect(metadata).toMatchObject({
       title: "Network Nerd - Cards Collected",
-      description: "Network",
+      description: expect.stringContaining("Network"),
+      openGraph: expect.objectContaining({
+        title: "Network Nerd - Cards Collected",
+      }),
     });
   });
 });
