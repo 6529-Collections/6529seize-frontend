@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 
 interface DropMobileMenuHandlerProps {
   readonly drop: ExtendedDrop;
@@ -14,7 +15,6 @@ interface DropMobileMenuHandlerProps {
 
 const LONG_PRESS_DURATION = 500; // milliseconds
 const MOVE_THRESHOLD = 10; // pixels
-const SUPPRESS_CLICK_AFTER_LONG_PRESS_MS = 750;
 
 export default function DropMobileMenuHandler({
   drop,
@@ -28,39 +28,20 @@ export default function DropMobileMenuHandler({
   const { canUseTouchActionSheet } = useDropActionInteractionMode();
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
-  const suppressClickTimeout = useRef<NodeJS.Timeout | null>(null);
-  const shouldSuppressNextClick = useRef(false);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
-
-  const clearSuppressNextClick = useCallback(() => {
-    if (suppressClickTimeout.current) {
-      clearTimeout(suppressClickTimeout.current);
-      suppressClickTimeout.current = null;
-    }
-
-    shouldSuppressNextClick.current = false;
-  }, []);
-
-  const markSuppressNextClick = useCallback(() => {
-    shouldSuppressNextClick.current = true;
-
-    if (suppressClickTimeout.current) {
-      clearTimeout(suppressClickTimeout.current);
-    }
-
-    suppressClickTimeout.current = setTimeout(() => {
-      shouldSuppressNextClick.current = false;
-      suppressClickTimeout.current = null;
-    }, SUPPRESS_CLICK_AFTER_LONG_PRESS_MS);
-  }, []);
+  const {
+    markNextClickForSuppression,
+    releaseSuppressionAfterTouchEnd,
+    handleClickCapture,
+  } = useLongPressClickSuppression();
 
   const handleLongPress = useCallback(() => {
     if (!canUseTouchActionSheet) return;
-    markSuppressNextClick();
+    markNextClickForSuppression();
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [canUseTouchActionSheet, markSuppressNextClick]);
+  }, [canUseTouchActionSheet, markNextClickForSuppression]);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (isTemporaryDrop || !canUseTouchActionSheet) return;
@@ -99,15 +80,8 @@ export default function DropMobileMenuHandler({
       clearTimeout(longPressTimeout.current);
       longPressTimeout.current = null;
     }
+    releaseSuppressionAfterTouchEnd();
     setLongPressTriggered(false);
-  };
-
-  const handleClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!shouldSuppressNextClick.current) return;
-
-    clearSuppressNextClick();
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   const handleOnReply = useCallback(() => {
@@ -125,10 +99,8 @@ export default function DropMobileMenuHandler({
         clearTimeout(longPressTimeout.current);
         longPressTimeout.current = null;
       }
-
-      clearSuppressNextClick();
     };
-  }, [clearSuppressNextClick]);
+  }, []);
 
   return (
     <div

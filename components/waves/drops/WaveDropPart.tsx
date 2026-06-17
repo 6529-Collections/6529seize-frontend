@@ -9,6 +9,7 @@ import WaveDropPartDrop from "./WaveDropPartDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { DropContentPresentation } from "./dropContentPresentation";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 
 interface WaveDropPartProps {
   readonly drop: ExtendedDrop;
@@ -86,6 +87,11 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
     const touchStartX = useRef(0);
     const touchStartY = useRef(0);
+    const {
+      markNextClickForSuppression,
+      releaseSuppressionAfterTouchEnd,
+      handleClickCapture,
+    } = useLongPressClickSuppression();
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
       if (isTemporaryDrop || !hasTouch) return;
@@ -94,6 +100,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       touchStartY.current = e.touches[0]!.clientY;
 
       longPressTimeout.current = setTimeout(() => {
+        markNextClickForSuppression();
         setLongPressTriggered(true);
         onLongPress();
       }, LONG_PRESS_DURATION);
@@ -121,6 +128,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         clearTimeout(longPressTimeout.current);
         longPressTimeout.current = null;
       }
+      releaseSuppressionAfterTouchEnd();
       setLongPressTriggered(false);
     };
 
@@ -158,6 +166,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
 
     return (
       <div
+        onClickCapture={handleClickCapture}
         onClick={handleClick}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}

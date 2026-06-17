@@ -148,7 +148,7 @@ test("lets short touch taps click child controls", () => {
   expect(onChildClick).toHaveBeenCalledTimes(1);
 });
 
-test("suppresses the child click after long press opens the menu", () => {
+test("suppresses the child click after an extended long press opens the menu", () => {
   jest.useFakeTimers();
   const onChildClick = jest.fn();
   const { getByTestId } = render(
@@ -167,8 +167,9 @@ test("suppresses the child click after long press opens the menu", () => {
     touches: [{ clientX: 0, clientY: 0 }],
   });
   act(() => {
-    jest.advanceTimersByTime(600);
+    jest.advanceTimersByTime(1300);
   });
+  fireEvent.touchEnd(child);
   fireEvent.click(child);
 
   expect(getByTestId("menu").dataset.open).toBe("true");

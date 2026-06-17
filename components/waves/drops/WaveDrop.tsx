@@ -12,6 +12,7 @@ import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
+import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
@@ -37,7 +38,6 @@ import WaveDropReactions from "./WaveDropReactions";
 import WaveDropReply from "./WaveDropReply";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
-const SUPPRESS_CLICK_AFTER_LONG_PRESS_MS = 750;
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
@@ -666,9 +666,12 @@ const WaveDrop = ({
   const editingDropId = useSelector(selectEditingDropId);
   const isEditing = editingDropId === drop.id;
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const suppressClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const shouldSuppressNextClickRef = useRef(false);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
+  const {
+    markNextClickForSuppression,
+    releaseSuppressionAfterTouchEnd,
+    handleClickCapture,
+  } = useLongPressClickSuppression();
   const dropUpdateMutation = useDropUpdateMutation();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
@@ -719,38 +722,16 @@ const WaveDrop = ({
     previousDrop,
   });
 
-  const clearSuppressNextClick = useCallback(() => {
-    if (suppressClickTimeoutRef.current) {
-      clearTimeout(suppressClickTimeoutRef.current);
-      suppressClickTimeoutRef.current = null;
-    }
-
-    shouldSuppressNextClickRef.current = false;
-  }, []);
-
-  const markSuppressNextClick = useCallback(() => {
-    shouldSuppressNextClickRef.current = true;
-
-    if (suppressClickTimeoutRef.current) {
-      clearTimeout(suppressClickTimeoutRef.current);
-    }
-
-    suppressClickTimeoutRef.current = setTimeout(() => {
-      shouldSuppressNextClickRef.current = false;
-      suppressClickTimeoutRef.current = null;
-    }, SUPPRESS_CLICK_AFTER_LONG_PRESS_MS);
-  }, []);
-
   const handleLongPress = useCallback(() => {
     if (!allowLongPress) return;
-    markSuppressNextClick();
+    markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
       dispatch(setEditingDropId(null));
     }
     setLongPressTriggered(true);
     setIsSlideUp(true);
-  }, [allowLongPress, editingDropId, dispatch, markSuppressNextClick]);
+  }, [allowLongPress, editingDropId, dispatch, markNextClickForSuppression]);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -771,7 +752,8 @@ const WaveDrop = ({
       longPressTimeoutRef,
       touchStartPosition,
     });
-  }, []);
+    releaseSuppressionAfterTouchEnd();
+  }, [releaseSuppressionAfterTouchEnd]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
@@ -783,17 +765,6 @@ const WaveDrop = ({
       });
     },
     [allowLongPress]
-  );
-
-  const handleClickCapture = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!shouldSuppressNextClickRef.current) return;
-
-      clearSuppressNextClick();
-      e.preventDefault();
-      e.stopPropagation();
-    },
-    [clearSuppressNextClick]
   );
 
   const handleOnReply = useCallback(() => {
@@ -947,9 +918,8 @@ const WaveDrop = ({
   useEffect(() => {
     return () => {
       clearLongPressTimeout({ longPressTimeoutRef });
-      clearSuppressNextClick();
     };
-  }, [clearSuppressNextClick]);
+  }, []);
 
   // Derive effective menu state - menu can't be open while editing
   const effectiveIsSlideUp = isSlideUp && !isEditing && canUseTouchActionSheet;
@@ -1040,6 +1010,7 @@ const WaveDrop = ({
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchMove}
         onClickCapture={handleClickCapture}
       >

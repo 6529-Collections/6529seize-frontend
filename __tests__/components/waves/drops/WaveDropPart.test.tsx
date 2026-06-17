@@ -293,6 +293,63 @@ describe("WaveDropPart", () => {
       expect(mockOnLongPress).toHaveBeenCalled();
     });
 
+    it("suppresses the root click after an extended long press", () => {
+      render(<WaveDropPart {...defaultProps} />);
+
+      const container = getDropContainer();
+
+      fireEvent.touchStart(container, {
+        touches: [{ clientX: 100, clientY: 100 }],
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(1300);
+      });
+
+      fireEvent.touchEnd(container);
+      fireEvent.click(container);
+
+      expect(mockSetLongPressTriggered).toHaveBeenCalledWith(true);
+      expect(mockOnLongPress).toHaveBeenCalled();
+      expect(mockOnDropContentClick).not.toHaveBeenCalled();
+    });
+
+    it("suppresses child control clicks after long press", () => {
+      render(<WaveDropPart {...defaultProps} />);
+
+      const quoteButton = screen.getByTestId("quote-button");
+
+      fireEvent.touchStart(quoteButton, {
+        touches: [{ clientX: 100, clientY: 100 }],
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      fireEvent.touchEnd(quoteButton);
+      fireEvent.click(quoteButton);
+
+      expect(mockOnLongPress).toHaveBeenCalled();
+      expect(mockOnQuoteClick).not.toHaveBeenCalled();
+      expect(mockOnDropContentClick).not.toHaveBeenCalled();
+    });
+
+    it("keeps short touch taps clickable", () => {
+      render(<WaveDropPart {...defaultProps} />);
+
+      const container = getDropContainer();
+
+      fireEvent.touchStart(container, {
+        touches: [{ clientX: 100, clientY: 100 }],
+      });
+      fireEvent.touchEnd(container);
+      fireEvent.click(container);
+
+      expect(mockOnLongPress).not.toHaveBeenCalled();
+      expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
+    });
+
     it("cancels long press on touch move beyond threshold", () => {
       render(<WaveDropPart {...defaultProps} />);
 
@@ -315,6 +372,11 @@ describe("WaveDropPart", () => {
 
       expect(mockSetLongPressTriggered).not.toHaveBeenCalledWith(true);
       expect(mockOnLongPress).not.toHaveBeenCalled();
+
+      fireEvent.touchEnd(container);
+      fireEvent.click(container);
+
+      expect(mockOnDropContentClick).toHaveBeenCalledWith(mockSinglePartDrop);
     });
 
     it("cancels long press on touch end", () => {

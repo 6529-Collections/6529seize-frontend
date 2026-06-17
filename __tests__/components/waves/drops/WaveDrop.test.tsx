@@ -454,7 +454,7 @@ describe("WaveDrop", () => {
     );
   });
 
-  it("suppresses the synthetic click after touch long press opens the sheet", () => {
+  it("suppresses the synthetic click after an extended touch long press opens the sheet", () => {
     jest.useFakeTimers();
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(true);
@@ -485,7 +485,7 @@ describe("WaveDrop", () => {
       touches: [{ clientX: 0, clientY: 0 }],
     });
     act(() => {
-      jest.advanceTimersByTime(600);
+      jest.advanceTimersByTime(1300);
     });
     fireEvent.touchEnd(screen.getByTestId("content"));
     fireEvent.click(screen.getByTestId("content"));
