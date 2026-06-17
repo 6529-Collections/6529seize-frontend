@@ -244,6 +244,41 @@ describe("SeizeVideoPlayer", () => {
     }
   });
 
+  it("keeps the same video element across minimal-control state changes", () => {
+    jest.useFakeTimers();
+
+    try {
+      const { container } = render(
+        <SeizeVideoPlayer src="https://example.com/video.mp4" />
+      );
+
+      const video = container.querySelector("video");
+      if (!video) {
+        throw new Error("Expected video element to render");
+      }
+
+      Object.defineProperty(video, "paused", {
+        configurable: true,
+        value: false,
+      });
+
+      act(() => {
+        fireEvent.play(video);
+        jest.advanceTimersByTime(1800);
+      });
+
+      expect(container.querySelector("video")).toBe(video);
+
+      act(() => {
+        fireEvent.pointerMove(video);
+      });
+
+      expect(container.querySelector("video")).toBe(video);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("syncs mute state when the muted prop changes", () => {
     const { rerender } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" muted={false} />
