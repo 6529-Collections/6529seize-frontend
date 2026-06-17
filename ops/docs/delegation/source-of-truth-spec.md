@@ -139,7 +139,8 @@ Use this workflow for article edits.
 Do not treat current imported S3 bodies as permanent editorial quality. They
 are the seed content package that allowed the repo to become reviewable. Use
 `DELEGATION_DOCS_IMPORT_LEGACY_S3=1` only when intentionally refreshing that
-seed import; normal builds must package the checked-in versioned bundle.
+seed import; imported asset references must already map to reviewed local files,
+and normal builds must package the checked-in versioned bundle.
 
 ## Route Copy Standards
 

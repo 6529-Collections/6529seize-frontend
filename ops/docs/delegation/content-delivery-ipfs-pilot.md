@@ -24,7 +24,7 @@ slug/path.
 
 ## Current Pilot State
 
-`ops/scripts/build-delegation-docs-content.mjs` packages the reviewed repo bundle by default. It removes active HTML, strips duplicate leading article headings, verifies packaged asset references, rewrites internal delegation links to absolute app routes, and refreshes the public bundle in place. Set `DELEGATION_DOCS_IMPORT_LEGACY_S3=1` only when intentionally refreshing the seed import from the legacy S3 source; that mode also mirrors same-package instructional assets into the reviewed source package.
+`ops/scripts/build-delegation-docs-content.mjs` packages the reviewed repo bundle by default. It removes active HTML, strips duplicate leading article headings, verifies packaged asset references, rewrites internal delegation links to absolute app routes, and refreshes the public bundle in place. Set `DELEGATION_DOCS_IMPORT_LEGACY_S3=1` only when intentionally refreshing article HTML from the legacy S3 source. Import mode still requires article assets to already exist as reviewed files under `content/delegation/assets`; new or changed remote assets must be downloaded and reviewed separately before rebuilding.
 
 The manifest currently has `canonicalStorage.rootCid: null` because the frontend repo does not have IPFS publishing credentials. After publishing the bundle directory to IPFS, update the manifest with the root CID and regenerate the public copy.
 

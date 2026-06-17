@@ -30,6 +30,12 @@ const FALLBACK_GATEWAY_BASE_URLS = (
   .split(",")
   .map((url) => url.trim())
   .filter(Boolean);
+const BLOCKED_HTML_URL_SCHEMES = new Set([
+  "data:",
+  "javascript:",
+  "vbscript:",
+]);
+const BLOCKED_HTML_URL_SCHEME_PATTERN = /\b(?:data|javascript|vbscript)\s*:/i;
 
 function getArticleDefinitions(manifest) {
   const articles = manifest?.articles;
@@ -93,6 +99,22 @@ function normalizeGeneratedHtml(html) {
     .split("\n")
     .map((line) => (line.trim().length === 0 ? "" : line.trimEnd()))
     .join("\n");
+}
+
+function hasBlockedHtmlUrlScheme(value) {
+  try {
+    const parsed = new URL(value.trim(), "https://delegation-content.invalid/");
+    return BLOCKED_HTML_URL_SCHEMES.has(parsed.protocol.toLowerCase());
+  } catch {
+    return true;
+  }
+}
+
+function hasBlockedStyleUrl(value) {
+  return (
+    /expression\s*\(/i.test(value) ||
+    /url\s*\(\s*["']?\s*(?:data|javascript|vbscript)\s*:/i.test(value)
+  );
 }
 
 function normalizePackageAssetPath(sourceUrl) {
@@ -252,7 +274,7 @@ function sanitizeHtmlFragment(rawHtml) {
 
       if (
         ["href", "src", "xlink:href"].includes(lowerName) &&
-        rawValue.trim().toLowerCase().startsWith("javascript:")
+        hasBlockedHtmlUrlScheme(rawValue)
       ) {
         $(element).removeAttr(name);
         continue;
@@ -260,7 +282,7 @@ function sanitizeHtmlFragment(rawHtml) {
 
       if (
         lowerName === "style" &&
-        /expression\s*\(|url\s*\(\s*javascript:/i.test(rawValue)
+        hasBlockedStyleUrl(rawValue)
       ) {
         $(element).removeAttr(name);
       }
@@ -283,7 +305,10 @@ function sanitizeHtmlFragment(rawHtml) {
 
   const sanitized = $.root().html()?.trim() ?? "";
 
-  if (/<script\b|javascript:|<iframe\b|<object\b|<embed\b/i.test(sanitized)) {
+  if (
+    /<script\b|<iframe\b|<object\b|<embed\b/i.test(sanitized) ||
+    BLOCKED_HTML_URL_SCHEME_PATTERN.test(sanitized)
+  ) {
     throw new Error("Sanitized HTML still contains blocked active content.");
   }
 
@@ -411,16 +436,6 @@ async function readArticleHtml(sourceHtmlDir, slug) {
   return readFile(path.join(sourceHtmlDir, `${slug}.html`), "utf8");
 }
 
-async function fetchAsset(sourceUrl) {
-  const response = await fetch(sourceUrl);
-
-  if (!response.ok) {
-    throw new Error(`Failed to import ${sourceUrl}: ${response.status}`);
-  }
-
-  return Buffer.from(await response.arrayBuffer());
-}
-
 async function readJsonOrNull(filePath) {
   try {
     return JSON.parse(await readFile(filePath, "utf8"));
@@ -431,6 +446,18 @@ async function readJsonOrNull(filePath) {
 
 async function writeJson(filePath, value) {
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+async function readReviewedAssetBytes(sourceAssetPath, assetPath, sourceUrl) {
+  try {
+    return await readFile(sourceAssetPath);
+  } catch (error) {
+    const sourceNote = sourceUrl ? ` referenced by ${sourceUrl}` : "";
+    throw new Error(
+      `Missing reviewed delegation asset ${assetPath}${sourceNote}. Add it under content/delegation/assets before rebuilding.`,
+      { cause: error }
+    );
+  }
 }
 
 async function main() {
@@ -454,10 +481,6 @@ async function main() {
         await readArticleHtml(publicHtmlDir, definition.slug)
       );
     }
-  }
-
-  if (IMPORT_LEGACY_S3) {
-    await rm(sourceAssetsDir, { recursive: true, force: true });
   }
 
   await rm(publicBundleDir, { recursive: true, force: true });
@@ -514,16 +537,13 @@ async function main() {
     const assetSourceUrl = assetInfo.sourceUrl ?? previousAsset.sourceUrl;
     const sourceAssetPath = path.join(sourceAssetsDir, assetPath);
     const publicAssetPath = path.join(publicAssetsDir, assetPath);
-    const bytes =
-      IMPORT_LEGACY_S3 && assetInfo.sourceUrl
-        ? await fetchAsset(assetInfo.sourceUrl)
-        : await readFile(sourceAssetPath);
+    const bytes = await readReviewedAssetBytes(
+      sourceAssetPath,
+      assetPath,
+      assetInfo.sourceUrl
+    );
 
-    await mkdir(path.dirname(sourceAssetPath), { recursive: true });
     await mkdir(path.dirname(publicAssetPath), { recursive: true });
-    if (IMPORT_LEGACY_S3 && assetInfo.sourceUrl) {
-      await writeFile(sourceAssetPath, bytes);
-    }
     await copyFile(sourceAssetPath, publicAssetPath);
 
     assets[`assets/${assetPath}`] = {
