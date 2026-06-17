@@ -135,6 +135,34 @@ interface SeizeVideoLabels {
   readonly unsupported: string;
 }
 
+interface MinimalVideoHandlers {
+  readonly onPointerEnter?: (() => void) | undefined;
+  readonly onPointerLeave?: (() => void) | undefined;
+  readonly onPointerMove?: (() => void) | undefined;
+  readonly onTouchStart?: (() => void) | undefined;
+}
+
+function getMinimalVideoHandlers({
+  hideControlsSoon,
+  revealControls,
+  showMinimalControls,
+}: {
+  readonly hideControlsSoon: () => void;
+  readonly revealControls: () => void;
+  readonly showMinimalControls: boolean;
+}): MinimalVideoHandlers {
+  if (!showMinimalControls) {
+    return {};
+  }
+
+  return {
+    onPointerEnter: revealControls,
+    onPointerLeave: hideControlsSoon,
+    onPointerMove: revealControls,
+    onTouchStart: revealControls,
+  };
+}
+
 function SeizeVideoMinimalControls({
   isAnyFullscreen,
   isDownloading,
@@ -836,6 +864,11 @@ export default function SeizeVideoPlayer({
       resolvedTemplate.mode === "inert-preview");
   const videoAutoPlay =
     resolvedTemplate.autoPlay && !playerOwnsAutoplay && !isPosterGateClosed;
+  const minimalVideoHandlers = getMinimalVideoHandlers({
+    hideControlsSoon,
+    revealControls,
+    showMinimalControls,
+  });
   const isMuted =
     mutedState.src === src &&
     mutedState.prop === resolvedTemplate.muted &&
@@ -936,11 +969,11 @@ export default function SeizeVideoPlayer({
         onLoadedMetadata={handleMetadata}
         onPause={handlePause}
         onPlay={handlePlay}
-        onPointerEnter={showMinimalControls ? revealControls : undefined}
-        onPointerLeave={showMinimalControls ? hideControlsSoon : undefined}
-        onPointerMove={showMinimalControls ? revealControls : undefined}
+        onPointerEnter={minimalVideoHandlers.onPointerEnter}
+        onPointerLeave={minimalVideoHandlers.onPointerLeave}
+        onPointerMove={minimalVideoHandlers.onPointerMove}
         onTimeUpdate={updateProgress}
-        onTouchStart={showMinimalControls ? revealControls : undefined}
+        onTouchStart={minimalVideoHandlers.onTouchStart}
         poster={poster}
         preload={resolvedTemplate.preload}
         setVideoRef={setVideoRef}
