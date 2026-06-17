@@ -108,9 +108,7 @@ export function getDelegationArticle(
   return delegationContentManifest.articles[slug];
 }
 
-export function getDelegationArticleSlugAt(
-  index: number
-): string | undefined {
+export function getDelegationArticleSlugAt(index: number): string | undefined {
   return delegationArticleSlugs[index];
 }
 
@@ -184,9 +182,12 @@ export function resolveDelegationArticleAssetUrls(
   html: string,
   articleUrl: string
 ) {
-  const document = globalThis.document?.implementation?.createHTMLDocument(
-    "delegation article"
-  );
+  // Article body URL rewriting is intentionally browser-only today. Metadata
+  // paths read the manifest but do not fetch or render HTML bodies server-side.
+  const document =
+    globalThis.document?.implementation?.createHTMLDocument(
+      "delegation article"
+    );
 
   if (!document) {
     throw new Error("Delegation article URL rewriting requires a DOM document");

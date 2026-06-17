@@ -305,9 +305,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           <Container>
             <Row>
               <Col>
-                <Container className="no-padding">
-                  {printMenuRows()}
-                </Container>
+                <Container className="no-padding">{printMenuRows()}</Container>
               </Col>
               <Col>
                 <Container className="no-padding">
@@ -382,7 +380,10 @@ function DelegationConnectWalletState(
   }>
 ) {
   return (
-    <section className={styles["connectRequired"]} aria-labelledby="connect-wallet-heading">
+    <section
+      className={styles["connectRequired"]}
+      aria-labelledby="connect-wallet-heading"
+    >
       <h1 id="connect-wallet-heading">{props.title}</h1>
       <p>{props.body}</p>
       <button

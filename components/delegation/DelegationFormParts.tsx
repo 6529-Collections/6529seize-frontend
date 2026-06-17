@@ -113,7 +113,10 @@ export function DelegationFormOriginalDelegatorFormGroup(
 }
 
 export function DelegationAddressDisabledInput(
-  props: Readonly<{ address?: string | undefined; ens: string | null | undefined }>
+  props: Readonly<{
+    address?: string | undefined;
+    ens: string | null | undefined;
+  }>
 ) {
   const displayValue = props.address
     ? props.ens
@@ -335,7 +338,8 @@ export function DelegationSubmitGroups(
           title,
           message: (
             <>
-              Transaction Successful! {getTransactionAnchor(writeDelegation.data)}
+              Transaction Successful!{" "}
+              {getTransactionAnchor(writeDelegation.data)}
             </>
           ),
         });

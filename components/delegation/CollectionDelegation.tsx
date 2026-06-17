@@ -58,16 +58,15 @@ import {
   type ContractWalletDelegation,
 } from "./CollectionDelegation.utils";
 import type { DelegationCollection } from "./delegation-constants";
-import {
-  DelegationToast,
-  useDelegationToast,
-} from "./DelegationToast";
+import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import {
   ALL_USE_CASES,
   ANY_COLLECTION_PATH,
   CONSOLIDATION_USE_CASE,
   DELEGATION_USE_CASES,
+  GRADIENTS_COLLECTION,
   MAX_BULK_ACTIONS,
+  MEME_LAB_COLLECTION,
   MEMES_COLLECTION,
   PRIMARY_ADDRESS_USE_CASE,
   SUB_DELEGATION_USE_CASE,
@@ -182,23 +181,31 @@ function getActiveKeys(
 }
 
 function getCollectionScopeDescription(collection: DelegationCollection) {
-  switch (collection.title) {
-    case "Any Collection":
-      return "Records here apply across every supported delegation collection.";
-    case "The Memes":
-      return "Records here apply only to The Memes collection.";
-    case "Meme Lab":
-      return "Records here apply only to Meme Lab.";
-    case "6529 Gradient":
-      return "Records here apply only to 6529 Gradient.";
-    default:
-      return "Records here apply to the selected collection scope.";
+  if (areEqualAddresses(collection.contract, DELEGATION_ALL_ADDRESS)) {
+    return "Records here apply across every supported delegation collection.";
   }
+
+  if (areEqualAddresses(collection.contract, MEMES_COLLECTION.contract)) {
+    return "Records here apply only to The Memes collection.";
+  }
+
+  if (areEqualAddresses(collection.contract, MEME_LAB_COLLECTION.contract)) {
+    return "Records here apply only to Meme Lab.";
+  }
+
+  if (areEqualAddresses(collection.contract, GRADIENTS_COLLECTION.contract)) {
+    return "Records here apply only to 6529 Gradient.";
+  }
+
+  return "Records here apply to the selected collection scope.";
 }
 
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const accountResolution = useSeizeConnectContext();
   const previousAccountAddressRef = useRef<string | undefined>(undefined);
+  // The refs hold the title for the lock write currently in flight. Set them
+  // immediately before each writeContract call so success/error toasts stay tied
+  // to the user action that opened the wallet.
   const collectionLockToastTitleRef = useRef("Locking Wallet");
   const useCaseLockToastTitleRef = useRef("Locking Wallet");
   const networkResolution = useChainId();
@@ -522,10 +529,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         if (waitContractWriteRevoke.isLoading) {
           showDelegationToast({
             title: "Revoking Delegation",
-            message: getTransactionToastMessage(
-              contractWriteRevoke.data,
-              true
-            ),
+            message: getTransactionToastMessage(contractWriteRevoke.data, true),
           });
         } else {
           showDelegationToast({
@@ -600,7 +604,10 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
         } else {
           showDelegationToast({
             title,
-            message: getTransactionToastMessage(collectionLockWrite.data, false),
+            message: getTransactionToastMessage(
+              collectionLockWrite.data,
+              false
+            ),
           });
         }
       }
@@ -726,7 +733,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     previousAccountAddressRef.current = currentAddress;
 
     reset({
-      clearToast: Boolean(previousAddress && previousAddress !== currentAddress),
+      clearToast: Boolean(
+        previousAddress && previousAddress !== currentAddress
+      ),
     });
   }, [accountResolution.address]);
 
@@ -848,9 +857,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printSubDelegations() {
     return (
       <>
-        <h5 className="pt-4 pb-1">
-          Delegation Managers
-        </h5>
+        <h5 className="pt-4 pb-1">Delegation Managers</h5>
         <p className={styles["collectionSectionIntro"]}>
           Manager rights let another wallet maintain delegations or
           consolidations for this collection scope.

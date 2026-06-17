@@ -79,7 +79,9 @@ export function DelegationToast(
           <Toast.Header>
             <span className="me-auto">{props.toast.title}</span>
           </Toast.Header>
-          {props.toast.message && <Toast.Body>{props.toast.message}</Toast.Body>}
+          {props.toast.message && (
+            <Toast.Body>{props.toast.message}</Toast.Body>
+          )}
         </Toast>
       </ToastContainer>
     </div>

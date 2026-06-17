@@ -142,7 +142,9 @@ export default function NewSubDelegationComponent(props: Readonly<Props>) {
             )}
             <Form.Group as={Row} className="pb-4">
               <DelegationFormLabel
-                title={props.subdelegation ? "Manager Wallet" : "Managed Wallet"}
+                title={
+                  props.subdelegation ? "Manager Wallet" : "Managed Wallet"
+                }
                 tooltip={`Address ${
                   props.subdelegation ? `executing` : `registering`
                 } the sub-delegation`}
