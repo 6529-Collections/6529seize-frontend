@@ -9,6 +9,7 @@ import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
 import {
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
+  WAVE_SCORE_DISCOVERY_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
 import { useWaveById } from "./useWaveById";
@@ -73,25 +74,73 @@ const useWavesList = () => {
     return `${normalizedAddress}:primary`;
   }, [address, activeProfileProxy?.id]);
 
-  // Fetch main waves list
+  // Fetch score-ranked waves for sidebar discovery.
   const {
-    waves: mainWaves,
-    isFetching,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    status: mainWavesStatus,
-    refetch: mainWavesRefetch,
+    waves: scoreWaves,
+    isFetching: isScoreWavesFetching,
+    isFetchingNextPage: isScoreWavesFetchingNextPage,
+    hasNextPage: hasScoreWavesNextPage,
+    fetchNextPage: fetchNextScoreWavesPage,
+    status: scoreWavesStatus,
+    refetch: scoreWavesRefetch,
   } = useWavesV2({
-    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    overviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
-    following: isConnectedIdentity && following,
+    following: false,
     directMessage: false,
-    scoreSort: WAVE_FOLLOWING_WAVES_PARAMS.scoreSort,
+    excludeFollowed: isConnectedIdentity ? true : undefined,
+    scoreSort: WAVE_SCORE_DISCOVERY_PARAMS.scoreSort,
     viewerIdentityKey,
     refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
     refetchIntervalInBackground: false,
+    enabled: !following,
   });
+  // Fetch followed waves by latest post activity for the known-wave sidebar.
+  const {
+    waves: followedActivityWaves,
+    isFetching: isFollowedActivityWavesFetching,
+    isFetchingNextPage: isFollowedActivityWavesFetchingNextPage,
+    hasNextPage: hasFollowedActivityWavesNextPage,
+    fetchNextPage: fetchNextFollowedActivityWavesPage,
+    status: followedActivityWavesStatus,
+    refetch: followedActivityWavesRefetch,
+  } = useWavesV2({
+    overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+    pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+    following: isConnectedIdentity,
+    directMessage: false,
+    viewerIdentityKey,
+    refetchInterval: following
+      ? SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS
+      : false,
+    refetchIntervalInBackground: false,
+    enabled: isConnectedIdentity,
+  });
+  const mainWaves = useMemo(
+    () =>
+      following
+        ? followedActivityWaves
+        : [...followedActivityWaves, ...scoreWaves],
+    [following, followedActivityWaves, scoreWaves]
+  );
+  const isMainWavesFetching = following
+    ? isFollowedActivityWavesFetching
+    : isScoreWavesFetching || isFollowedActivityWavesFetching;
+  const isMainWavesFetchingNextPage = following
+    ? isFollowedActivityWavesFetchingNextPage
+    : isScoreWavesFetchingNextPage;
+  const hasMainWavesNextPage = following
+    ? hasFollowedActivityWavesNextPage
+    : hasScoreWavesNextPage;
+  const fetchNextMainWavesPage = following
+    ? fetchNextFollowedActivityWavesPage
+    : fetchNextScoreWavesPage;
+  const mainWavesStatus = following
+    ? followedActivityWavesStatus
+    : scoreWavesStatus;
+  const mainWavesRefetch = following
+    ? followedActivityWavesRefetch
+    : scoreWavesRefetch;
   const {
     waves: officialWaves,
     isFetching: isOfficialWavesFetching,
@@ -215,8 +264,8 @@ const useWavesList = () => {
 
   // New drops counts are now managed externally
 
-  // Combine main waves with separately fetched pinned waves using useMemo
-  // Simplified order: All waves sorted by latest_drop_timestamp (most recent first)
+  // Combine activity and discovery sources. Pinned/followed rows are
+  // activity-first; non-followed rows preserve the score-ranked backend order.
   const combinedWaves = useMemo(() => {
     const allWavesMap = new Map<string, EnhancedWave>();
     const pinnedWavesSet = new Set(pinnedIds);
@@ -232,8 +281,10 @@ const useWavesList = () => {
         return;
       }
 
+      const existingWave = allWavesMap.get(wave.id);
       allWavesMap.set(wave.id, {
         ...wave,
+        subscribed: existingWave?.subscribed || wave.subscribed,
         isPinned: pinnedWavesSet.has(wave.id),
       });
     });
@@ -254,12 +305,18 @@ const useWavesList = () => {
       .sort(
         (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
       );
-    const backendOrderedRegularWaves = nonAnnouncementWaves.filter(
-      (wave) => !wave.isPinned
+    const activityOrderedFollowingWaves = nonAnnouncementWaves
+      .filter((wave) => !wave.isPinned && wave.subscribed)
+      .sort(
+        (a, b) => (b.latestDropTimestamp ?? 0) - (a.latestDropTimestamp ?? 0)
+      );
+    const backendOrderedScoreWaves = nonAnnouncementWaves.filter(
+      (wave) => !wave.isPinned && !wave.subscribed
     );
     const sortedNonAnnouncementWaves = [
       ...sortedPinnedWaves,
-      ...backendOrderedRegularWaves,
+      ...activityOrderedFollowingWaves,
+      ...backendOrderedScoreWaves,
     ];
 
     if (announcementWave) {
@@ -331,7 +388,8 @@ const useWavesList = () => {
 
   // Function to refetch all waves (main, pinned, official, announcements, subwaves)
   const refetchAllWaves = useCallback(() => {
-    mainWavesRefetch();
+    scoreWavesRefetch();
+    followedActivityWavesRefetch();
     officialWavesRefetch();
     void refetchPinnedWaves();
     refetchSubwaves();
@@ -339,7 +397,8 @@ const useWavesList = () => {
       void announcementRefetch();
     }
   }, [
-    mainWavesRefetch,
+    scoreWavesRefetch,
+    followedActivityWavesRefetch,
     officialWavesRefetch,
     refetchPinnedWaves,
     refetchSubwaves,
@@ -361,8 +420,8 @@ const useWavesList = () => {
 
   // Memoize the fetchNextPage function to ensure it doesn't change on every render
   const fetchNextPageStable = useCallback(() => {
-    return fetchNextPage();
-  }, [fetchNextPage]);
+    return fetchNextMainWavesPage();
+  }, [fetchNextMainWavesPage]);
 
   // Memoize the entire return object to prevent unnecessary re-renders in consumer components
   // Components using this hook will only re-render when the values they use actually change
@@ -372,9 +431,9 @@ const useWavesList = () => {
       waves: allWaves,
 
       // Original waves pagination and loading
-      isFetching: isFetching || isOfficialWavesFetching,
-      isFetchingNextPage,
-      hasNextPage,
+      isFetching: isMainWavesFetching || isOfficialWavesFetching,
+      isFetchingNextPage: isMainWavesFetchingNextPage,
+      hasNextPage: hasMainWavesNextPage,
       fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
 
@@ -403,10 +462,10 @@ const useWavesList = () => {
     }),
     [
       allWaves,
-      isFetching,
+      isMainWavesFetching,
       isOfficialWavesFetching,
-      isFetchingNextPage,
-      hasNextPage,
+      isMainWavesFetchingNextPage,
+      hasMainWavesNextPage,
       fetchNextPageStable,
       mainWavesStatus,
       mainWaves,

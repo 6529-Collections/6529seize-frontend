@@ -71,11 +71,13 @@ describe("WaveTrustSignals", () => {
     expect(summaryBadge).not.toBeNull();
     expect(summaryBadge).not.toHaveAttribute("title");
     expect(
-      screen.getByRole("link", { name: /^Combined score: 83\./ })
-    ).toHaveAttribute("href", "/network/wave-score");
-    expect(
-      screen.getByText("Click score to open the full formula")
+      screen.getByRole("button", { name: /^Combined score: 83\./ })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Open full formula" })
+    ).toHaveAttribute("href", "/network/wave-score");
+    expect(screen.getByText("REP")).toBeInTheDocument();
+    expect(screen.getByText("+1.3K")).toBeInTheDocument();
     expect(
       screen.getByText("A quick signal for which waves deserve broad attention")
     ).toBeInTheDocument();
@@ -92,9 +94,10 @@ describe("WaveTrustSignals", () => {
       />
     );
 
-    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
+    const summaryBadge = screen.getByText("83").closest("[aria-label]");
 
     expect(summaryBadge).not.toBeNull();
+    expect(screen.queryByText("Score")).not.toBeInTheDocument();
     expect(summaryBadge).not.toHaveAttribute("data-tooltip-content");
     expect(summaryBadge).not.toHaveAttribute("data-tooltip-id");
     expect(summaryBadge).not.toHaveAttribute("title");

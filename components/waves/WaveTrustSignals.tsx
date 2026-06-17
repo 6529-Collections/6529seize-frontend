@@ -23,6 +23,7 @@ interface WaveTrustSignalsProps {
   readonly className?: string | undefined;
   readonly tooltipId?: string | undefined;
   readonly learnMoreHref?: string | undefined;
+  readonly showHeaderRepChip?: boolean | undefined;
 }
 
 const compactNumberFormatter = new Intl.NumberFormat(undefined, {
@@ -109,9 +110,9 @@ const VISIBILITY_TONE_CLASSES: Record<
   Record<VisibilityTone, string>
 > = {
   "inline-sidebar": {
-    excellent: "tw-text-emerald-300 desktop-hover:hover:tw-text-emerald-200",
-    healthy: "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200",
-    low: "tw-text-rose-300 desktop-hover:hover:tw-text-rose-200",
+    excellent: INLINE_STAT_TONE_CLASSES,
+    healthy: INLINE_STAT_TONE_CLASSES,
+    low: INLINE_STAT_TONE_CLASSES,
     default: INLINE_STAT_TONE_CLASSES,
   },
   "inline-header": {
@@ -215,7 +216,8 @@ const getContainerClasses = (
 ) => {
   let baseClasses = "tw-flex tw-flex-wrap tw-items-center tw-gap-1.5";
   if (mode === "summary") {
-    baseClasses = "tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5";
+    baseClasses =
+      "tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5";
   }
 
   if (isInlineSidebarVariant(variant)) {
@@ -257,8 +259,10 @@ const getChipClasses = (
   let summaryClasses = "";
   if (mode === "summary") {
     summaryClasses = "tw-shrink-0 tw-justify-center";
-    if (variant === "sidebar" || isInlineSidebarVariant(variant)) {
+    if (variant === "sidebar") {
       summaryClasses = `${summaryClasses} tw-w-[4.75rem]`;
+    } else if (isInlineSidebarVariant(variant)) {
+      summaryClasses = `${summaryClasses} tw-min-w-[2.35rem]`;
     }
   }
 
@@ -405,7 +409,7 @@ const buildSummaryDetails = ({
 
   return [
     `Combined score: ${visibilityScore}`,
-    "A quick signal for which waves deserve broad attention",
+    "Discovery signal for evaluating new waves",
     ...(qualityScore === null
       ? []
       : [`Quality: ${qualityScore} (65% of visibility)`]),
@@ -455,9 +459,11 @@ const buildRepDetails = ({
 function WaveScoreSummaryTooltip({
   details,
   id,
+  learnMoreHref,
 }: {
   readonly details: readonly string[];
   readonly id: string;
+  readonly learnMoreHref: string;
 }) {
   const [primaryDetail, ...secondaryDetails] = details;
 
@@ -465,7 +471,7 @@ function WaveScoreSummaryTooltip({
     <span
       id={id}
       role="tooltip"
-      className="tw-pointer-events-none tw-absolute tw-left-0 tw-top-full tw-z-[10000] tw-mt-2 tw-hidden tw-w-72 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-shadow-2xl tw-ring-1 tw-ring-white/10 group-hover:tw-block group-focus-within:tw-block"
+      className="tw-pointer-events-auto tw-absolute tw-left-0 tw-top-full tw-z-[10000] tw-mt-2 tw-hidden tw-w-72 tw-rounded-lg tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-200 tw-shadow-2xl tw-ring-1 tw-ring-white/10 group-focus-within:tw-block group-hover:tw-block"
     >
       {primaryDetail && (
         <span className="tw-block tw-text-sm tw-font-semibold tw-text-white">
@@ -479,9 +485,12 @@ function WaveScoreSummaryTooltip({
           </span>
         ))}
       </span>
-      <span className="tw-mt-3 tw-block tw-text-xs tw-font-semibold tw-text-primary-300">
-        Click score to open the full formula
-      </span>
+      <Link
+        href={learnMoreHref}
+        className="desktop-hover:hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-items-center tw-rounded-md tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      >
+        Open full formula
+      </Link>
     </span>
   );
 }
@@ -510,6 +519,7 @@ export function WaveTrustSignals({
   className,
   tooltipId,
   learnMoreHref,
+  showHeaderRepChip = true,
 }: WaveTrustSignalsProps) {
   const generatedTooltipId = useId();
   const visibilityScore = formatScore(waveScore?.visibility_score);
@@ -572,15 +582,21 @@ export function WaveTrustSignals({
     const summaryLabel = summaryDetails.join(". ");
     const summaryTitle = hasNativeTitle ? summaryDetails.join("\n") : undefined;
     const summaryTooltip = summaryDetails.join(" | ");
-    const summaryChipClasses = `${getChipClasses(
+    const summaryChipClasses = getChipClasses(
       variant,
       mode,
       getVisibilityToneClasses(variant, waveScore?.visibility_score)
-    )} ${
-      hasRichTooltip
-        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline desktop-hover:hover:tw-z-[10000] focus:tw-z-[10000] focus-visible:tw-z-[10000]"
-        : ""
-    }`;
+    );
+    const richTooltipWrapperClasses =
+      "tw-group tw-relative tw-isolate tw-inline-flex tw-overflow-visible tw-align-middle desktop-hover:hover:tw-z-[10000] focus-within:tw-z-[10000]";
+    const summaryButtonResetClasses = isInlineHeaderVariant(variant)
+      ? "tw-bg-transparent"
+      : "";
+    const showSummaryLabel = !isInlineSidebarVariant(variant);
+    const showHeaderRepSummary =
+      showHeaderRepChip && isInlineHeaderVariant(variant) && hasRepScore;
+    const headerRepDetails = buildRepDetails({ repSortScore, waveRep });
+    const headerRepTitle = headerRepDetails.join("\n");
     const summaryChipContent = (
       <>
         <ShieldCheckIcon
@@ -588,11 +604,10 @@ export function WaveTrustSignals({
           strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
           aria-hidden="true"
         />
-        <span className={getChipLabelClasses(variant)}>Score</span>
-        <span className={getValueClasses(variant)}>{visibilityScore}</span>
-        {hasRichTooltip && (
-          <WaveScoreSummaryTooltip id={richTooltipId} details={summaryDetails} />
+        {showSummaryLabel && (
+          <span className={getChipLabelClasses(variant)}>Score</span>
         )}
+        <span className={getValueClasses(variant)}>{visibilityScore}</span>
       </>
     );
     const inlineSidebarTooltipAttributes = shouldUseInlineSidebarTooltip
@@ -605,14 +620,21 @@ export function WaveTrustSignals({
       children: (
         <>
           {hasRichTooltip ? (
-            <Link
-              href={learnMoreHref}
-              className={summaryChipClasses}
-              aria-label={summaryLabel}
-              aria-describedby={richTooltipId}
-            >
-              {summaryChipContent}
-            </Link>
+            <span className={richTooltipWrapperClasses}>
+              <button
+                type="button"
+                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] ${summaryButtonResetClasses}`}
+                aria-label={summaryLabel}
+                aria-describedby={richTooltipId}
+              >
+                {summaryChipContent}
+              </button>
+              <WaveScoreSummaryTooltip
+                id={richTooltipId}
+                details={summaryDetails}
+                learnMoreHref={learnMoreHref}
+              />
+            </span>
           ) : (
             <span
               className={summaryChipClasses}
@@ -621,6 +643,25 @@ export function WaveTrustSignals({
               {...inlineSidebarTooltipAttributes}
             >
               {summaryChipContent}
+            </span>
+          )}
+          {showHeaderRepSummary && (
+            <span
+              className={getChipClasses(
+                variant,
+                mode,
+                getRepToneClasses(repToneValue, variant)
+              )}
+              aria-label={repLabel ?? undefined}
+              title={headerRepTitle}
+            >
+              <ScaleIcon
+                className={getIconClasses(variant)}
+                strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
+                aria-hidden="true"
+              />
+              <span className={getChipLabelClasses(variant)}>REP</span>
+              <span className={getValueClasses(variant)}>{repScore}</span>
             </span>
           )}
         </>

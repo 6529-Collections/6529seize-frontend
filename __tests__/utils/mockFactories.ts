@@ -22,6 +22,7 @@ export function createMockMinimalWave(
     picture: null,
     contributors: [],
     isPinned: false,
+    isFollowing: false,
     isOfficial: false,
     parentWaveId: null,
     hasSubwaves: false,

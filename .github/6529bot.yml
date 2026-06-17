@@ -2,8 +2,8 @@ version: 1
 enabled: true
 
 reviewKinds:
-  allowed: [general, followup, wcag, i18n, security]
-  initial: [general, security]
+  allowed: [general, followup, wcag, i18n, security, responsiveness]
+  initial: [general, i18n, security, responsiveness]
   followup: [followup]
 
 commands:

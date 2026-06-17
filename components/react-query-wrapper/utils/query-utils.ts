@@ -9,8 +9,7 @@ export const WAVE_SCORE_DISCOVERY_PARAMS = {
 
 export const WAVE_FOLLOWING_WAVES_PARAMS = {
   limit: 20,
-  initialWavesOverviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
-  scoreSort: WAVE_SCORE_DISCOVERY_PARAMS.scoreSort,
+  initialWavesOverviewType: ApiWavesOverviewType.RecentlyDroppedTo,
   only_waves_followed_by_authenticated_user: true,
 };
 
