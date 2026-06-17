@@ -103,18 +103,33 @@ Phase 1 docs live in the frontend repo. Before production code lands:
 
 ## Current Artifact Validation Evidence
 
-Completed in this docs-only Phase 0/1 pass:
+Completed in the docs-only Phase 0/1 pass:
 
 - All Phase 1 JSON schemas and fixtures parse as JSON.
 - All valid fixtures have unique route paths.
 - `invalid/route-collision.package.json` intentionally duplicates
   `/punk6529/index.html`.
 
-Not completed in this pass:
+Completed in Wave 0 executable bridge:
 
-- Full JSON Schema validation. `ajv` was not resolvable in the local Node
-  environment, and Python `jsonschema` was also unavailable, so implementation
-  must add an explicit validator dependency or repo-approved validation path
-  before treating the schema as executable.
-- Real RFC 8785 hash vectors. Fixture hashes are placeholder-shaped until the
-  canonicalization implementation lands.
+- `lib/profile-cms/protocol/v1/` exports a Zod schema mirror, canonical JSON
+  helper, SHA-256 helper, and semantic validator.
+- Valid fixture corpus passes the executable validator.
+- Invalid fixture corpus returns the documented error codes for missing
+  signature, duplicate route, and unknown block type.
+- Fixture signatures/storage are accepted in default fixture/dev mode and
+  rejected when production options disable them.
+- Optional hash enforcement catches payload and package mutations once computed
+  hashes are applied.
+- Hash shape validation rejects uppercase hex and non-`sha256:` prefixes.
+
+Still not completed:
+
+- Literal draft-2020-12 JSON Schema execution. The runtime bridge uses Zod plus
+  semantic validation; if we need exact JSON Schema execution, add a direct AJV
+  dependency in a later shared-package pass.
+- Full production signature authority verification, EIP-1271/Safe verification,
+  pointer expected-previous concurrency, and storage provider receipt checks.
+- Replacement of every placeholder fixture root hash. The helper can compute
+  hashes now, but fixtures keep placeholder-shaped values until the publish
+  package format is signed off.

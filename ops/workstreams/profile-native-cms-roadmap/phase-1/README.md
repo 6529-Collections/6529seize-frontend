@@ -56,6 +56,14 @@ These schemas are the first protocol foundation, not the final generated API
 model. Implementation PRs should either use these directly or move them into a
 shared protocol package with identical semantics.
 
-Current validation is docs/artifact-level only: JSON parse and focused semantic
-checks have run, but full JSON Schema validation has not run in this pass
-because `ajv` is not currently resolvable in the local Node environment.
+Wave 0 now mirrors the package contract into executable TypeScript under
+`lib/profile-cms/protocol/v1/`:
+
+- Zod schema mirror for package, payload, agent patch, and validation result.
+- Strict canonical JSON helper.
+- SHA-256 helpers and real hash vectors.
+- Semantic validator against the Phase 1 fixture corpus.
+
+The JSON Schema files remain the protocol reference. A later shared-package pass
+can decide whether to add a direct AJV dependency for literal draft-2020-12
+execution or keep the Zod mirror as the runtime validator.

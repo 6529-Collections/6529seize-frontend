@@ -263,6 +263,105 @@ Changes made from bot feedback:
   validation.
 - Tightened roadmap language so unsupported blocks fail closed in V1.
 
+## 2026-06-17: Wave 0 Executable Protocol Bridge
+
+### Current Objective
+
+Turn the Phase 1 CMS protocol artifacts into executable frontend code that
+future FE, BE, renderer, builder, and agent lanes can validate against.
+
+### Output
+
+Added executable protocol package:
+
+- `lib/profile-cms/protocol/v1/constants.ts`
+- `lib/profile-cms/protocol/v1/schemas.ts`
+- `lib/profile-cms/protocol/v1/canonical-json.ts`
+- `lib/profile-cms/protocol/v1/hash.ts`
+- `lib/profile-cms/protocol/v1/validation.ts`
+- `lib/profile-cms/protocol/v1/index.ts`
+
+Added tests:
+
+- `__tests__/lib/profile-cms/protocol/v1/canonical-json.test.ts`
+- `__tests__/lib/profile-cms/protocol/v1/hash.test.ts`
+- `__tests__/lib/profile-cms/protocol/v1/fixtures.test.ts`
+
+Updated docs:
+
+- `ops/workstreams/profile-native-cms-roadmap/active-context.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/README.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/schema-index.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/hash-test-vectors.md`
+- `ops/workstreams/profile-native-cms-roadmap/phase-1/validation-plan.md`
+
+### Implementation Notes
+
+- Runtime validation uses existing direct `zod` dependency, not a new AJV
+  dependency.
+- JSON Schema files remain the protocol reference.
+- Canonical JSON rejects undefined, functions, symbols, bigint, non-finite
+  numbers, non-plain objects, and cycles.
+- Hash helper uses `sha256:<64 lowercase hex>`.
+- Package hash input omits `integrity.package_hash`, `signatures`, and
+  `storage` to avoid self-reference and mutable envelope coupling.
+- Default validation accepts fixture signatures/storage for fixture/dev usage.
+  Production mode can disable both.
+- Hash enforcement is optional so placeholder-hash fixtures can stay useful
+  until publish/signing finalizes.
+
+### Validation Evidence
+
+Completed locally:
+
+- `seize run test:no-coverage -- __tests__/lib/profile-cms/protocol/v1`
+  passed.
+- `seize run lint:changed` passed.
+- `seize run typecheck:changed` passed.
+- `codex-diff-check -- lib/profile-cms __tests__/lib/profile-cms ops/workstreams/profile-native-cms-roadmap`
+  passed.
+
+Coverage from that slice:
+
+- Canonical JSON object ordering, array order, and invalid input rejection.
+- RFC 8785/JCS-oriented numeric edge cases and astral-key ordering.
+- Hash vectors for object ordering and unicode title.
+- Computed minimal-profile payload and package hash enforcement.
+- Mutation detection for payload/package hash mismatch.
+- All seven valid Phase 1 fixtures pass.
+- All three invalid fixtures return documented error codes.
+- Production-mode fixture signature/storage rejection.
+- Unsafe URL-scheme rejection.
+- Plain HTTP asset URI rejection.
+- Unsafe relative URL rejection for backslash and encoded scheme-relative forms.
+- Uppercase hash hex and non-`sha256:` prefix rejection.
+- Type-vs-format schema failures for block types and hash fields.
+- Signature/storage envelope exclusion from package hash input.
+
+### Bot Review Iteration
+
+6529bot general review requested changes on:
+
+- Making the canonical number path explicit and adding JCS edge vectors.
+- Adding an astral-key ordering vector.
+- Narrowing `block_type` issue mapping to enum failures only.
+- Narrowing `hash.invalid` issue mapping to regex failures on known hash fields.
+- Excluding signatures/storage from package hash input and documenting that
+  production signatures attest through EIP-712 rather than signing over their
+  own signature envelope.
+- Removing plain `http:` from the CMS URI allowlist.
+- Rejecting unsafe relative URL forms with backslashes, control characters, and
+  encoded scheme-relative prefixes.
+
+Follow-up changes were made and revalidated locally.
+
+### Remaining Work
+
+- Decide whether to move the executable protocol into a shared 6529mono package
+  before BE adoption.
+- Add BE tests against the same fixture corpus.
+- Start Wave 1 route/render/profile-button work behind feature flags.
+
 ## 2026-06-17: Art And NFT Display Research
 
 ### Current Objective
