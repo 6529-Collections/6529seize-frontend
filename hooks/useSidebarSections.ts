@@ -22,6 +22,7 @@ function getNetworkSection(): SidebarSection {
       { name: "Memes Calendar", href: "/meme-calendar" },
       { name: "TDH", href: "/network/tdh" },
       { name: "xTDH", href: "/xtdh" },
+      { name: "Wave Score", href: "/network/wave-score" },
     ],
     subsections: [
       {

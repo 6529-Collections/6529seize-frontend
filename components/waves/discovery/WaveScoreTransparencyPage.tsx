@@ -16,6 +16,7 @@ import { parseSeizeWaveLink } from "@/helpers/SeizeLinkParser";
 import { fetchWaveById, searchWavesByName } from "@/services/api/waves-v2-api";
 import type { SidebarWave } from "@/types/waves.types";
 import {
+  ArrowLongLeftIcon,
   ArrowLongRightIcon,
   ArrowPathIcon,
   CalculatorIcon,
@@ -1306,7 +1307,7 @@ function ConstantStat({
 }
 
 export function WaveScoreTransparencyPage() {
-  useSetTitle("Wave Score | Discovery");
+  useSetTitle("Wave Score | Network");
 
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<CalculatorStatus>("idle");
@@ -1382,27 +1383,30 @@ export function WaveScoreTransparencyPage() {
   return (
     <div className="tw-px-4 tw-pb-16 tw-pt-6 md:tw-px-6 md:tw-pt-8 lg:tw-px-8">
       <div className="tw-mx-auto tw-max-w-7xl tw-space-y-8">
-        <section className="tw-grid tw-gap-6 lg:tw-grid-cols-[minmax(0,1.05fr)_minmax(340px,0.95fr)]">
+        <section className="tw-grid tw-gap-6 xl:tw-grid-cols-[minmax(0,0.9fr)_minmax(380px,1.1fr)]">
           <div className="tw-rounded-lg tw-bg-iron-950/50 tw-p-5 tw-ring-1 tw-ring-inset tw-ring-white/10 md:tw-p-6">
             <Link
-              href="/discover"
+              href="/network"
               className="tw-text-primary-200 desktop-hover:hover:tw-text-primary-100 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-medium tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
             >
-              <ArrowLongRightIcon
-                className="tw-size-4 tw-rotate-180"
+              <ArrowLongLeftIcon
+                className="tw-size-4"
                 aria-hidden="true"
               />
-              Back to discovery
+              Back to Network
             </Link>
+            <p className="tw-mt-5 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500">
+              Network menu / Wave Score
+            </p>
             <h1 className="tw-mt-5 tw-text-3xl tw-font-semibold tw-leading-tight tw-text-white md:tw-text-4xl">
               Wave score transparency
             </h1>
             <p className="tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-              Discovery uses a visibility score made from quality and gated
-              hotness. Quality is where TDH-backed REP, creator level, and the
-              level of posters carry the most weight.
+              This Network page explains the score shown on waves across
+              discovery, the sidebar, home, and wave pages. Find it from the
+              Network menu directly below xTDH whenever you want the formula or
+              a live wave calculation.
             </p>
-            <FormulaPipeline />
           </div>
 
           <CalculatorPanel
@@ -1417,6 +1421,8 @@ export function WaveScoreTransparencyPage() {
             }}
           />
         </section>
+
+        <FormulaPipeline />
 
         <FormulaSummary />
 

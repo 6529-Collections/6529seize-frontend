@@ -7,6 +7,9 @@ import GroupsPage, {
 import TDHPage, {
   generateMetadata as generateTDHMetadata,
 } from "@/app/network/tdh/page";
+import NetworkWaveScorePage, {
+  generateMetadata as generateWaveScoreMetadata,
+} from "@/app/network/wave-score/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -89,6 +92,18 @@ describe("network pages render", () => {
     expect(screen.getByText(/Unique Memes/i)).toBeInTheDocument();
   });
 
+  it("renders Wave Score page in Network", () => {
+    renderWithAuth(<NetworkWaveScorePage />);
+    expect(
+      screen.getByRole("heading", { level: 1, name: /Wave score transparency/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Network menu / Wave Score")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Calculate a wave" })
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Quality").length).toBeGreaterThan(0);
+  });
+
   it("generates metadata for Groups page", async () => {
     const metadata = await generateGroupsMetadata();
     expect(metadata.title).toEqual("Groups");
@@ -105,5 +120,13 @@ describe("network pages render", () => {
     const metadata = await generateDefinitionsMetadata();
     expect(metadata.title).toEqual("Definitions");
     expect(metadata.description).toEqual("Network | 6529.io");
+  });
+
+  it("generates metadata for Wave Score page", async () => {
+    const metadata = await generateWaveScoreMetadata();
+    expect(metadata.title).toEqual("Wave Score");
+    expect(metadata.description).toEqual(
+      "Network wave score formula and calculator | 6529.io"
+    );
   });
 });
