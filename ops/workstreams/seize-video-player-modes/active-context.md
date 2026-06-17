@@ -125,6 +125,18 @@ Implemented:
   removal, mute state, rejected play, marketplace link-query brittleness,
   Twitter native controls/captions, upload previews, slideshow captions, and
   ambient owner behavior.
+- Addressed first PR bot feedback:
+  - player-owned ambient autoplay now respects an explicit user pause
+  - native fullscreen exit is handled before unsupported-wrapper fallback
+  - native fullscreen state no longer applies wrapper fullscreen sizing
+  - poster-gated playback stays open across source/quality changes when the
+    poster identity is stable
+  - video control accessible names, caption defaults, and fallback text use the
+    repo i18n message catalog
+  - default caption language is `en-US`
+  - added focused tests for in-view autoplay, out-of-view pause, reduced-motion
+    gating, user-pause persistence, poster-gate source resilience, native
+    fullscreen exit reset, and i18n message keys
 
 Validation so far:
 
@@ -149,6 +161,14 @@ Validation so far:
   - Focused video regression matrix passed: 13 suites, 144 tests.
   - `seize exec react-doctor . --project 6529seize --verbose --offline
     --diff=origin/main` passed with warnings only, score 95/100.
+- After addressing bot feedback:
+  - focused player/Twitter/i18n tests passed: 3 suites, 36 tests
+  - `codex-diff-check` passed
+  - `seize run lint:changed` passed
+  - `seize run typecheck:changed` passed for 29 changed TypeScript files
+  - full focused media+i18n regression matrix passed: 14 suites, 153 tests
+  - `seize exec react-doctor . --project 6529seize --verbose --offline
+    --diff=origin/main` passed with warnings only, score 95/100
 - Browser verification on `http://localhost:3126/codex-video-harness` passed
   with a temporary local harness route that was removed before commit:
   - initial route load: 0 console errors
@@ -179,11 +199,10 @@ Validation so far:
 
 ## Immediate Next Actions
 
-1. Push the DCO-signed implementation branch.
-2. Open/update PR with validation notes.
-3. Iterate on CI/review bots until agent-happy and bot-happy.
-4. Merge only when checks/approvals allow.
-5. Deploy to staging, smoke/E2E validate, then deploy to production and
+1. Push the bot-feedback fix commit to PR #2718.
+2. Iterate on CI/review bots until agent-happy and bot-happy.
+3. Merge only when checks/approvals allow.
+4. Deploy to staging, smoke/E2E validate, then deploy to production and
    validate production.
 
 ## Open Decisions

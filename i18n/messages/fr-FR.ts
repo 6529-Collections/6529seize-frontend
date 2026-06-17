@@ -1,6 +1,18 @@
 import type { MessageKey } from "@/i18n/messages/en-US";
 
 export const FR_FR_MESSAGES = {
+  "media.video.captions": "Sous-titres",
+  "media.video.download": "Telecharger le media",
+  "media.video.downloading": "Telechargement du media",
+  "media.video.exitFullscreen": "Quitter le plein ecran",
+  "media.video.fullscreen": "Plein ecran",
+  "media.video.mute": "Couper le son de la video",
+  "media.video.pause": "Mettre la video en pause",
+  "media.video.play": "Lire la video",
+  "media.video.playPreview": "Lire l'apercu video",
+  "media.video.unmute": "Activer le son de la video",
+  "media.video.unsupported":
+    "Votre navigateur ne prend pas en charge la balise video.",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
   "theMemes.sorting.regionLabel": "Tri des memes",

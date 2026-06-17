@@ -1,11 +1,75 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
+function installIntersectionObserverMock() {
+  let callback: IntersectionObserverCallback | undefined;
+  const observe = jest.fn();
+  const disconnect = jest.fn();
+
+  class MockIntersectionObserver implements IntersectionObserver {
+    readonly root = null;
+    readonly rootMargin = "";
+    readonly thresholds = [0.1];
+    readonly observe = observe;
+    readonly disconnect = disconnect;
+    readonly unobserve = jest.fn();
+    readonly takeRecords = jest.fn(() => []);
+
+    constructor(nextCallback: IntersectionObserverCallback) {
+      callback = nextCallback;
+    }
+  }
+
+  Object.defineProperty(globalThis, "IntersectionObserver", {
+    configurable: true,
+    value: MockIntersectionObserver,
+  });
+
+  return {
+    disconnect,
+    observe,
+    trigger(isIntersecting: boolean) {
+      act(() => {
+        callback?.(
+          [{ isIntersecting } as IntersectionObserverEntry],
+          {} as IntersectionObserver
+        );
+      });
+    },
+  };
+}
+
+function mockPrefersReducedMotion(matches: boolean) {
+  jest.spyOn(window, "matchMedia").mockImplementation(
+    (query: string) =>
+      ({
+      addEventListener: jest.fn(),
+      addListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+      matches,
+      media: query,
+      onchange: null,
+      removeEventListener: jest.fn(),
+      removeListener: jest.fn(),
+    }) as MediaQueryList
+  );
+}
+
 describe("SeizeVideoPlayer", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
+    Object.defineProperty(globalThis, "IntersectionObserver", {
+      configurable: true,
+      value: undefined,
+    });
     Object.defineProperty(document, "fullscreenElement", {
       configurable: true,
       value: null,
@@ -251,6 +315,20 @@ describe("SeizeVideoPlayer", () => {
     expect(track).toHaveAttribute("default");
   });
 
+  it("uses localized default caption metadata when captions are provided without overrides", () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        src="https://example.com/video.mp4"
+        template="watch-media"
+        captionsSrc="https://example.com/captions.vtt"
+      />
+    );
+
+    const track = container.querySelector("track");
+    expect(track).toHaveAttribute("srclang", "en-US");
+    expect(track).toHaveAttribute("label", "Captions");
+  });
+
   it("renders no focusable player controls for card previews", () => {
     render(
       <SeizeVideoPlayer
@@ -286,6 +364,48 @@ describe("SeizeVideoPlayer", () => {
     expect(video).toHaveAttribute("controls");
   });
 
+  it("keeps a poster-gated video open across source changes for the same poster", async () => {
+    const { container, rerender } = render(
+      <SeizeVideoPlayer
+        src="https://example.com/video-720.mp4"
+        poster="https://example.com/poster.jpg"
+        template="poster-gated"
+      />
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Play video preview" })
+    );
+
+    expect(container.querySelector("video")).toHaveAttribute("controls");
+
+    rerender(
+      <SeizeVideoPlayer
+        src="https://example.com/video-1080.mp4"
+        poster="https://example.com/poster.jpg"
+        template="poster-gated"
+      />
+    );
+
+    expect(container.querySelector("video")).toHaveAttribute("controls");
+    expect(
+      screen.queryByRole("button", { name: "Play video preview" })
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <SeizeVideoPlayer
+        src="https://example.com/other-video.mp4"
+        poster="https://example.com/other-poster.jpg"
+        template="poster-gated"
+      />
+    );
+
+    expect(container.querySelector("video")).not.toHaveAttribute("controls");
+    expect(
+      screen.getByRole("button", { name: "Play video preview" })
+    ).toBeInTheDocument();
+  });
+
   it("syncs mute changes to the DOM media element", async () => {
     const { container } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" muted={false} />
@@ -316,5 +436,119 @@ describe("SeizeVideoPlayer", () => {
     expect(
       await screen.findByRole("button", { name: "Play video" })
     ).toBeInTheDocument();
+  });
+
+  it("plays and pauses player-owned autoplay based on visibility", async () => {
+    const observer = installIntersectionObserverMock();
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay />);
+
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    jest.mocked(HTMLMediaElement.prototype.pause).mockClear();
+
+    observer.trigger(true);
+
+    await waitFor(() => {
+      expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    });
+
+    observer.trigger(false);
+
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+  });
+
+  it("does not resume player-owned autoplay after the user pauses it", async () => {
+    const observer = installIntersectionObserverMock();
+    let paused = false;
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      get: () => paused,
+    });
+
+    observer.trigger(true);
+    await waitFor(() => {
+      expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    });
+    fireEvent.play(video);
+
+    await userEvent.click(screen.getByRole("button", { name: "Pause video" }));
+    paused = true;
+    fireEvent.pause(video);
+
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    observer.trigger(false);
+    observer.trigger(true);
+
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it("does not start player-owned autoplay when reduced motion is preferred", () => {
+    mockPrefersReducedMotion(true);
+    const observer = installIntersectionObserverMock();
+    render(<SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay />);
+
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    jest.mocked(HTMLMediaElement.prototype.pause).mockClear();
+
+    observer.trigger(true);
+
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+  });
+
+  it("resets native fullscreen state when the native exit API is missing", async () => {
+    const webkitEnterFullscreen = jest.fn();
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(HTMLElement.prototype, "webkitRequestFullscreen", {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(HTMLVideoElement.prototype, "webkitEnterFullscreen", {
+      configurable: true,
+      value: webkitEnterFullscreen,
+    });
+    Object.defineProperty(document, "fullscreenEnabled", {
+      configurable: true,
+      value: false,
+    });
+
+    const { container } = render(
+      <SeizeVideoPlayer src="https://example.com/video.mp4" />
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
+    expect(webkitEnterFullscreen).toHaveBeenCalled();
+
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+
+    act(() => {
+      video.dispatchEvent(new Event("webkitbeginfullscreen"));
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Exit full screen" })
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Exit full screen" })
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Full screen" })
+      ).toBeInTheDocument();
+    });
   });
 });

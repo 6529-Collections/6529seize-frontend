@@ -1006,7 +1006,6 @@ function TwitterVideoPlayer({
         autoPlay={autoPlay}
         muted={muted}
         captionsSrc={captionsUrl}
-        captionsLabel="Captions"
         captionsDefault={Boolean(captionsUrl)}
         layout="fill"
         showActions={false}

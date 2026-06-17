@@ -11,6 +11,8 @@ import {
   SpeakerXMarkIcon,
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import React, {
   useCallback,
   useEffect,
@@ -64,6 +66,7 @@ interface SeizeVideoPlayerProps {
   readonly captionsLabel?: string | undefined;
   readonly captionsLang?: string | undefined;
   readonly captionsDefault?: boolean | undefined;
+  readonly locale?: SupportedLocale | undefined;
   readonly layout?: VideoLayout | undefined;
   readonly align?: VideoAlign | undefined;
   readonly className?: string | undefined;
@@ -126,9 +129,10 @@ export default function SeizeVideoPlayer({
   preload,
   poster,
   captionsSrc,
-  captionsLabel = "Captions",
-  captionsLang = "en",
+  captionsLabel,
+  captionsLang = DEFAULT_LOCALE,
   captionsDefault = false,
+  locale = DEFAULT_LOCALE,
   layout = "natural",
   align = "left",
   className,
@@ -186,6 +190,9 @@ export default function SeizeVideoPlayer({
   const [openPosterGateKey, setOpenPosterGateKey] = useState<string | null>(
     null
   );
+  const [userPausedAutoplaySrc, setUserPausedAutoplaySrc] = useState<
+    string | null
+  >(null);
   const [videoSize, setVideoSize] = useState<
     | {
         readonly width: number;
@@ -378,6 +385,7 @@ export default function SeizeVideoPlayer({
     if (!video) return;
 
     if (video.paused || video.ended) {
+      setUserPausedAutoplaySrc(null);
       video.play().catch(() => {
         setIsPaused(true);
         setControlsVisible(true);
@@ -385,6 +393,9 @@ export default function SeizeVideoPlayer({
       return;
     }
 
+    if (playerOwnsAutoplay) {
+      setUserPausedAutoplaySrc(directSrc ?? null);
+    }
     video.pause();
   }
 
@@ -406,16 +417,16 @@ export default function SeizeVideoPlayer({
       return;
     }
 
-    if (!isFullscreenEnabled()) {
-      enterNativeVideoFullscreen(video);
-      revealControls();
-      return;
-    }
-
     if (isNativeFullscreen) {
       const nativeFullscreenVideo = video as NativeFullscreenVideo | null;
       nativeFullscreenVideo?.webkitExitFullscreen?.();
       setIsNativeFullscreen(false);
+      revealControls();
+      return;
+    }
+
+    if (!isFullscreenEnabled()) {
+      enterNativeVideoFullscreen(video);
       revealControls();
       return;
     }
@@ -430,10 +441,7 @@ export default function SeizeVideoPlayer({
       wrapper as FullscreenElement
     ).catch(() => false);
     if (!enteredFullscreen) {
-      const enteredNativeFullscreen = enterNativeVideoFullscreen(video);
-      if (enteredNativeFullscreen) {
-        setIsNativeFullscreen(true);
-      }
+      enterNativeVideoFullscreen(video);
     }
     revealControls();
   }
@@ -448,6 +456,7 @@ export default function SeizeVideoPlayer({
     event.preventDefault();
     event.stopPropagation();
     setOpenPosterGateKey(posterGateKey);
+    setUserPausedAutoplaySrc(null);
     const video = videoElement;
     if (!video) {
       return;
@@ -515,7 +524,8 @@ export default function SeizeVideoPlayer({
 
   const isFillLayout = layout === "fill";
   const widthClassName = getNaturalWidthClassName(orientation, layout);
-  const posterGateKey = `${template}:${src ?? ""}`;
+  const posterGateIdentity = poster ?? id ?? dataUrl ?? src ?? "";
+  const posterGateKey = `${template}:${posterGateIdentity}`;
   const isPosterGateClosed =
     template === "poster-gated" && openPosterGateKey !== posterGateKey;
   const effectiveControls = isPosterGateClosed
@@ -536,12 +546,31 @@ export default function SeizeVideoPlayer({
       ? mutedState.value
       : resolvedTemplate.muted;
   const isAnyFullscreen = isFullscreen || isNativeFullscreen;
+  const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible =
     showMinimalControls && (controlsVisible || isPaused || isAnyFullscreen);
   const responsiveMediaStyle = getResponsiveMediaStyle();
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
   const videoSourceProps = directSrc ? { src: directSrc } : {};
+  const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
+  const labels = useMemo(
+    () => ({
+      captions: t(locale, "media.video.captions"),
+      download: t(locale, "media.video.download"),
+      downloading: t(locale, "media.video.downloading"),
+      exitFullscreen: t(locale, "media.video.exitFullscreen"),
+      fullscreen: t(locale, "media.video.fullscreen"),
+      mute: t(locale, "media.video.mute"),
+      pause: t(locale, "media.video.pause"),
+      play: t(locale, "media.video.play"),
+      playPreview: t(locale, "media.video.playPreview"),
+      unmute: t(locale, "media.video.unmute"),
+      unsupported: t(locale, "media.video.unsupported"),
+    }),
+    [locale]
+  );
+  const resolvedCaptionsLabel = captionsLabel ?? labels.captions;
 
   const syncOwnedAutoplay = useCallback(() => {
     const video = videoElement;
@@ -553,12 +582,21 @@ export default function SeizeVideoPlayer({
       video.pause();
       return;
     }
+    if (hasUserPausedOwnedAutoplay) {
+      return;
+    }
 
     video.play().catch(() => {
       setIsPaused(true);
       setControlsVisible(true);
     });
-  }, [isInView, playerOwnsAutoplay, prefersReducedMotion, videoElement]);
+  }, [
+    hasUserPausedOwnedAutoplay,
+    isInView,
+    playerOwnsAutoplay,
+    prefersReducedMotion,
+    videoElement,
+  ]);
 
   useEffect(() => {
     // Browser playback is an imperative media side effect of visibility policy.
@@ -583,7 +621,7 @@ export default function SeizeVideoPlayer({
         widthClassName,
         align === "center" && "tw-mx-auto",
         isFillLayout && "tw-flex tw-items-center tw-justify-center",
-        isAnyFullscreen &&
+        isWrapperFullscreen &&
           "tw-h-screen tw-w-screen tw-rounded-none tw-bg-black",
         className
       )}
@@ -612,7 +650,7 @@ export default function SeizeVideoPlayer({
         onClick={handleVideoClick}
         className={clsx(
           "tw-block tw-h-full tw-w-full tw-rounded-xl tw-object-contain",
-          isAnyFullscreen && "tw-rounded-none",
+          isWrapperFullscreen && "tw-rounded-none",
           videoClassName
         )}
         data-testid={dataTestId}
@@ -625,18 +663,18 @@ export default function SeizeVideoPlayer({
             kind="captions"
             src={captionsSrc}
             srcLang={captionsLang}
-            label={captionsLabel}
+            label={resolvedCaptionsLabel}
             default={captionsDefault}
           />
         )}
-        Your browser does not support the video tag.
+        {labels.unsupported}
       </video>
 
       {isPosterGateClosed && (
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">
           <button
             type="button"
-            aria-label="Play video preview"
+            aria-label={labels.playPreview}
             onClick={openPosterGate}
             className="tw-pointer-events-auto tw-flex tw-size-14 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
           >
@@ -663,7 +701,7 @@ export default function SeizeVideoPlayer({
 
             <div className="tw-pointer-events-auto tw-absolute tw-bottom-4 tw-left-3">
               <SeizeVideoControlButton
-                label={isMuted ? "Unmute video" : "Mute video"}
+                label={isMuted ? labels.unmute : labels.mute}
                 onClick={toggleMuted}
               >
                 {isMuted ? (
@@ -677,7 +715,7 @@ export default function SeizeVideoPlayer({
             <div className="tw-pointer-events-auto tw-absolute tw-bottom-4 tw-right-3 tw-flex tw-items-center tw-gap-2">
               {isPaused && (
                 <SeizeVideoControlButton
-                  label="Play video"
+                  label={labels.play}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -692,7 +730,7 @@ export default function SeizeVideoPlayer({
               )}
               {!isPaused && (
                 <SeizeVideoControlButton
-                  label="Pause video"
+                  label={labels.pause}
                   onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -715,7 +753,7 @@ export default function SeizeVideoPlayer({
               )}
               {showActions && onDownload && (
                 <SeizeVideoControlButton
-                  label={isDownloading ? "Downloading media" : "Download media"}
+                  label={isDownloading ? labels.downloading : labels.download}
                   onClick={stopAndRun(onDownload)}
                   disabled={isDownloading}
                 >
@@ -724,7 +762,9 @@ export default function SeizeVideoPlayer({
               )}
               {showFullscreen && (
                 <SeizeVideoControlButton
-                  label={isAnyFullscreen ? "Exit full screen" : "Full screen"}
+                  label={
+                    isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen
+                  }
                   onClick={requestFullscreen}
                 >
                   {isAnyFullscreen ? (
