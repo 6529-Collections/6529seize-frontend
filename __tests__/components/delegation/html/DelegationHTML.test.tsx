@@ -52,7 +52,7 @@ test("renders fetched html", async () => {
   await waitFor(() =>
     expect(mockFetchDelegationArticleHtml).toHaveBeenCalledWith("page")
   );
-  const container = document.querySelector('.htmlContainer') as HTMLElement;
+  const container = document.querySelector(".htmlContainer") as HTMLElement;
   await waitFor(() => expect(container.innerHTML).toContain("hi"));
   expect(
     screen.getByRole("heading", { name: "Hello World" })

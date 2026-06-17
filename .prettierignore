@@ -11,6 +11,8 @@ build
 generated
 *.generated.*
 coverage
+content/delegation
+public/delegation-content
 
 # Package manager
 pnpm-lock.yaml

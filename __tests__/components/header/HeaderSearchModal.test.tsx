@@ -20,6 +20,15 @@ const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+
+beforeAll(() => {
+  Element.prototype.scrollIntoView = jest.fn();
+});
+
+afterAll(() => {
+  Element.prototype.scrollIntoView = originalScrollIntoView;
+});
 
 jest.mock("react-use", () => {
   return {
@@ -555,7 +564,7 @@ describe("HeaderSearchModal", () => {
               name: "NFT Delegation",
               items: [
                 {
-                  name: "Delegation FAQs",
+                  name: "Delegation FAQ",
                   href: "/delegation/delegation-faq",
                 },
               ],
@@ -588,7 +597,7 @@ describe("HeaderSearchModal", () => {
 
     const items = await screen.findAllByTestId("item");
     expect(items[0]?.textContent).toContain('"title":"FAQ"');
-    expect(items[1]?.textContent).toContain('"title":"Delegation FAQs"');
+    expect(items[1]?.textContent).toContain('"title":"Delegation FAQ"');
   });
 
   it("renders result categories in deterministic order in All view", async () => {

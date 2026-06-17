@@ -40,7 +40,52 @@ function createOversizedReadableBody() {
   } as unknown as ReadableStream<Uint8Array>;
 }
 
+function createReadableBody(chunks: Uint8Array[]) {
+  let index = 0;
+
+  return {
+    getReader: () => ({
+      cancel: jest.fn(() => Promise.resolve()),
+      read: jest.fn(() => {
+        if (index >= chunks.length) {
+          return Promise.resolve({ done: true, value: undefined });
+        }
+
+        return Promise.resolve({ done: false, value: chunks[index++] });
+      }),
+    }),
+  } as unknown as ReadableStream<Uint8Array>;
+}
+
+function splitInsideFirstMultibyteCharacter(bytes: Uint8Array) {
+  const splitIndex = bytes.findIndex((byte) => byte >= 0xc0);
+
+  if (splitIndex < 0) {
+    throw new Error("Expected article fixture to contain multibyte text");
+  }
+
+  return [bytes.slice(0, splitIndex + 1), bytes.slice(splitIndex + 1)];
+}
+
 describe("delegationContent", () => {
+  it("keeps the reviewed source manifest and public mirror in sync", async () => {
+    const publicManifestPath = path.join(
+      process.cwd(),
+      "public",
+      delegationContentManifest.localBasePath.replace(/^\/+/, ""),
+      "manifest.json"
+    );
+    const [sourceManifest, publicManifest] = await Promise.all([
+      readFile(
+        path.join(process.cwd(), "content", "delegation", "manifest.json"),
+        "utf8"
+      ),
+      readFile(publicManifestPath, "utf8"),
+    ]);
+
+    expect(JSON.parse(publicManifest)).toEqual(JSON.parse(sourceManifest));
+  });
+
   it("uses the reviewed local bundle while the IPFS CID is pending", () => {
     const article = getDelegationArticle("delegation-faq");
 
@@ -72,6 +117,28 @@ describe("delegationContent", () => {
       "https://cdn.6529.io/delegation-content/bafydelegationdocs/html/delegation-faq.html",
       "https://ipfs.6529.io/ipfs/bafydelegationdocs/html/delegation-faq.html",
       "https://ipfs.io/ipfs/bafydelegationdocs/html/delegation-faq.html",
+      "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+    ]);
+  });
+
+  it("does not emit CDN or gateway URLs without a root CID", () => {
+    const article = getDelegationArticle("delegation-faq");
+
+    expect(article).toBeDefined();
+    expect(
+      buildDelegationArticleUrls(article!, {
+        ...delegationContentManifest,
+        canonicalStorage: {
+          type: "ipfs",
+          rootCid: null,
+        },
+        acceleration: {
+          ...delegationContentManifest.acceleration,
+          cloudFrontBaseUrl:
+            "https://cdn.6529.io/delegation-content/bafydelegationdocs",
+        },
+      })
+    ).toEqual([
       "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
     ]);
   });
@@ -136,6 +203,27 @@ describe("delegationContent", () => {
     );
     expect(html).toContain('href="#toc"');
     expect(html).toContain('href="/delegation/delegation-faq"');
+  });
+
+  it("loads hash-verified article html from a multi-chunk stream", async () => {
+    const article = getDelegationArticle("register-delegation");
+    const html = await readFile(getReviewedArticlePath(article!), "utf8");
+    const text = jest.fn();
+    const bytes = new TextEncoder().encode(html);
+    const fetchArticle = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      body: createReadableBody(splitInsideFirstMultibyteCharacter(bytes)),
+      text,
+    });
+
+    await expect(
+      fetchDelegationArticleHtml("register-delegation", fetchArticle)
+    ).resolves.toMatchObject({
+      article,
+      url: "/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html",
+    });
+    expect(text).not.toHaveBeenCalled();
   });
 
   it("rejects oversized article responses before calling text when content-length is available", async () => {

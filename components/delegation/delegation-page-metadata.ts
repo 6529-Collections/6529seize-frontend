@@ -25,7 +25,12 @@ export interface DelegationArticleNavigation {
 }
 
 const SECTION_METADATA: Readonly<
-  Partial<Record<DelegationCenterSection, Omit<DelegationPageMetadata, "isFaqChildArticle">>>
+  Partial<
+    Record<
+      DelegationCenterSection,
+      Omit<DelegationPageMetadata, "isFaqChildArticle">
+    >
+  >
 > = {
   [DelegationCenterSection.CENTER]: {
     title: "Delegation Center",
@@ -35,7 +40,8 @@ const SECTION_METADATA: Readonly<
   [DelegationCenterSection.REGISTER_DELEGATION]: {
     title: "Register Delegation",
     navLabel: "Register Delegation",
-    description: "Register a wallet that can use NFT utility without moving NFTs.",
+    description:
+      "Register a wallet that can use NFT utility without moving NFTs.",
   },
   [DelegationCenterSection.REGISTER_SUB_DELEGATION]: {
     title: "Register Delegation Manager",
@@ -166,7 +172,11 @@ export function getDelegationArticleNavigation(
 
   function toLink(candidateSlug: string | undefined) {
     const article = getDelegationArticle(candidateSlug);
-    if (!candidateSlug || !article || !isDelegationFaqChildArticle(candidateSlug)) {
+    if (
+      !candidateSlug ||
+      !article ||
+      !isDelegationFaqChildArticle(candidateSlug)
+    ) {
       return undefined;
     }
 

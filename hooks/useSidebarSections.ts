@@ -71,7 +71,7 @@ function getToolsSection(
             name: "Wallet Architecture",
             href: "/delegation/wallet-architecture",
           },
-          { name: "Delegation FAQs", href: "/delegation/delegation-faq" },
+          { name: "Delegation FAQ", href: "/delegation/delegation-faq" },
           {
             name: "Consolidation Use Cases",
             href: "/delegation/consolidation-use-cases",

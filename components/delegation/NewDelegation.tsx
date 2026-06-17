@@ -156,6 +156,10 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
           <h4>
             Register Delegation {props.subdelegation && `as Delegation Manager`}
           </h4>
+          <p className={styles["actionIntro"]}>
+            Register utility rights for another wallet. NFTs stay in the
+            delegator wallet.
+          </p>
         </Col>
         <Col
           xs={2}
@@ -319,6 +323,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
               validate={validate}
               onHide={props.onHide}
               onSetToast={props.onSetToast}
+              submitBtnLabel="Register Delegation"
             />
           </Form>
         </Col>
