@@ -5,17 +5,20 @@ import {
   ScaleIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 
 type WaveTrustSignalsVariant =
   | "card"
   | "sidebar"
   | "sidebar-inline"
   | "header-inline";
+type WaveTrustSignalsMode = "details" | "summary";
 
 interface WaveTrustSignalsProps {
   readonly waveRep?: ApiWaveRepSummary | null | undefined;
   readonly waveScore?: ApiWaveScore | null | undefined;
   readonly variant?: WaveTrustSignalsVariant | undefined;
+  readonly mode?: WaveTrustSignalsMode | undefined;
   readonly className?: string | undefined;
   readonly tooltipId?: string | undefined;
 }
@@ -44,6 +47,23 @@ const formatRep = (value: number | null | undefined): string | null => {
   }
 
   return compactNumberFormatter.format(value);
+};
+
+const formatSignedFullNumber = (
+  value: number | null | undefined
+): string | null => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const formatted = fullNumberFormatter.format(Math.abs(value));
+  if (value > 0) {
+    return `+${formatted}`;
+  }
+  if (value < 0) {
+    return `-${formatted}`;
+  }
+  return formatted;
 };
 
 const formatRepAccessibleValue = (
@@ -132,21 +152,33 @@ const getRepToneClasses = (
 
 const getContainerClasses = (
   variant: WaveTrustSignalsVariant,
+  mode: WaveTrustSignalsMode,
   className: string | undefined
 ) => {
   let baseClasses = "tw-flex tw-flex-wrap tw-items-center tw-gap-1.5";
-  if (isInlineSidebarVariant(variant)) {
-    baseClasses =
-      "tw-inline-flex tw-items-center tw-gap-[11px] tw-align-middle";
+  if (mode === "summary") {
+    baseClasses = "tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5";
   }
 
-  return [baseClasses, variant === "sidebar" ? "tw-mt-1" : "", className ?? ""]
+  if (isInlineSidebarVariant(variant)) {
+    baseClasses =
+      mode === "summary"
+        ? "tw-inline-flex tw-min-w-0 tw-items-center tw-gap-[4px] tw-align-middle"
+        : "tw-inline-flex tw-items-center tw-gap-[11px] tw-align-middle";
+  }
+
+  return [
+    baseClasses,
+    variant === "sidebar" && mode === "details" ? "tw-mt-1" : "",
+    className ?? "",
+  ]
     .filter(Boolean)
     .join(" ");
 };
 
 const getChipClasses = (
   variant: WaveTrustSignalsVariant,
+  mode: WaveTrustSignalsMode,
   toneClasses: string
 ) => {
   let variantClasses = "tw-gap-1 tw-rounded-md tw-ring-1 tw-ring-inset";
@@ -164,10 +196,19 @@ const getChipClasses = (
     sizeClasses = "tw-h-5 tw-px-1.5 tw-text-[10px]";
   }
 
+  const summaryClasses =
+    mode === "summary" &&
+    (variant === "sidebar" || isInlineSidebarVariant(variant))
+      ? "tw-w-[4.75rem] tw-shrink-0 tw-justify-center"
+      : mode === "summary"
+        ? "tw-shrink-0 tw-justify-center"
+        : "";
+
   return [
     "tw-inline-flex tw-items-center",
     variantClasses,
     sizeClasses,
+    summaryClasses,
     toneClasses,
   ].join(" ");
 };
@@ -175,6 +216,10 @@ const getChipClasses = (
 const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineHeaderVariant(variant)) {
     return "tw-text-[11px] tw-font-medium tw-text-iron-400";
+  }
+
+  if (isInlineSidebarVariant(variant)) {
+    return "tw-text-[11px] tw-font-medium";
   }
 
   if (variant === "sidebar") {
@@ -258,15 +303,73 @@ export const hasWaveTrustSignals = ({
   return visibilityScore !== null || hotnessScore !== null || repScore !== null;
 };
 
+export const hasWaveTrustSummaryScore = (
+  waveScore?: ApiWaveScore | null | undefined
+): boolean => formatScore(waveScore?.visibility_score) !== null;
+
+const buildSummaryDetails = ({
+  visibilityScore,
+  qualityScore,
+  hotnessScore,
+  repSortScore,
+  waveRep,
+}: {
+  readonly visibilityScore: string;
+  readonly qualityScore: string | null;
+  readonly hotnessScore: string | null;
+  readonly repSortScore: string | null;
+  readonly waveRep: ApiWaveRepSummary | null | undefined;
+}) => {
+  const details = [`Combined score: ${visibilityScore}`];
+
+  if (qualityScore !== null) {
+    details.push(`Quality: ${qualityScore}`);
+  }
+
+  if (hotnessScore !== null) {
+    details.push(`Hotness: ${hotnessScore}`);
+  }
+
+  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
+  if (rawRep !== null && repSortScore !== null) {
+    details.push(`REP: ${rawRep} raw, ${repSortScore} score`);
+  } else if (rawRep !== null) {
+    details.push(`REP: ${rawRep} raw`);
+  } else if (repSortScore !== null) {
+    details.push(`REP score: ${repSortScore}`);
+  }
+
+  return details;
+};
+
+const renderContainer = ({
+  children,
+  className,
+  variant,
+}: {
+  readonly children: ReactNode;
+  readonly className: string;
+  readonly variant: WaveTrustSignalsVariant;
+}) => {
+  if (isInlineVariant(variant)) {
+    return <span className={className}>{children}</span>;
+  }
+
+  return <div className={className}>{children}</div>;
+};
+
 export function WaveTrustSignals({
   waveRep,
   waveScore,
   variant = "card",
+  mode = "details",
   className,
   tooltipId,
 }: WaveTrustSignalsProps) {
   const visibilityScore = formatScore(waveScore?.visibility_score);
+  const qualityScore = formatScore(waveScore?.quality_score);
   const hotnessScore = formatScore(waveScore?.hotness_score);
+  const repSortScore = formatScore(waveScore?.rep_sort_score);
   const hasRepSummary = waveRep !== null && waveRep !== undefined;
   const repScore = getRepScore({ waveRep, waveScore });
   let repAccessibleValue: string | null = null;
@@ -301,11 +404,59 @@ export function WaveTrustSignals({
     return null;
   }
 
+  const containerClasses = getContainerClasses(variant, mode, className);
+
+  if (mode === "summary") {
+    if (visibilityScore === null) {
+      return null;
+    }
+
+    const summaryDetails = buildSummaryDetails({
+      visibilityScore,
+      qualityScore,
+      hotnessScore,
+      repSortScore,
+      waveRep,
+    });
+    const summaryLabel = summaryDetails.join(". ");
+    const summaryTitle = summaryDetails.join("\n");
+    const summaryTooltip = summaryDetails.join(" | ");
+
+    return renderContainer({
+      variant,
+      className: containerClasses,
+      children: (
+        <span
+          className={getChipClasses(
+            variant,
+            mode,
+            getVisibilityToneClasses(variant)
+          )}
+          aria-label={summaryLabel}
+          title={summaryTitle}
+          {...getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)}
+        >
+          <ShieldCheckIcon
+            className={getIconClasses(variant)}
+            strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
+            aria-hidden="true"
+          />
+          <span className={getChipLabelClasses(variant)}>Score</span>
+          <span className={getValueClasses(variant)}>{visibilityScore}</span>
+        </span>
+      ),
+    });
+  }
+
   const signals = (
     <>
       {hasVisibilityScore && (
         <span
-          className={getChipClasses(variant, getVisibilityToneClasses(variant))}
+          className={getChipClasses(
+            variant,
+            mode,
+            getVisibilityToneClasses(variant)
+          )}
           aria-label={`Visibility score ${visibilityScore} out of 100`}
           {...getTooltipAttributes(inlineSidebarTooltipId, "Score")}
         >
@@ -327,7 +478,11 @@ export function WaveTrustSignals({
       )}
       {hasHotnessScore && (
         <span
-          className={getChipClasses(variant, getHotnessToneClasses(variant))}
+          className={getChipClasses(
+            variant,
+            mode,
+            getHotnessToneClasses(variant)
+          )}
           aria-label={`Hotness score ${hotnessScore} out of 100`}
           {...getTooltipAttributes(inlineSidebarTooltipId, "Hot")}
         >
@@ -351,6 +506,7 @@ export function WaveTrustSignals({
         <span
           className={getChipClasses(
             variant,
+            mode,
             getRepToneClasses(repToneValue, variant)
           )}
           aria-label={repLabel ?? undefined}
@@ -369,11 +525,10 @@ export function WaveTrustSignals({
       )}
     </>
   );
-  const containerClasses = getContainerClasses(variant, className);
 
-  if (isInlineVariant(variant)) {
-    return <span className={containerClasses}>{signals}</span>;
-  }
-
-  return <div className={containerClasses}>{signals}</div>;
+  return renderContainer({
+    variant,
+    className: containerClasses,
+    children: signals,
+  });
 }

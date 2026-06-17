@@ -2,7 +2,7 @@
 
 import WavePicture from "@/components/waves/WavePicture";
 import {
-  hasWaveTrustSignals,
+  hasWaveTrustSummaryScore,
   WaveTrustSignals,
 } from "@/components/waves/WaveTrustSignals";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -113,12 +113,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const latestDropTimestamp = getPresentNumber(
     wave.newDropsCount.latestDropTimestamp
   );
-  const hasTrustSignals = hasWaveTrustSignals({
-    waveRep: wave.waveRep,
-    waveScore: wave.waveScore,
-  });
+  const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowTrustSignalsRow =
-    hasTrustSignals || latestDropTimestamp !== null;
+    hasSummaryScore || latestDropTimestamp !== null;
   const trustSignalsTooltipId = hasTouchScreen
     ? undefined
     : `sidebar-wave-trust-signals-${wave.id}`;
@@ -341,11 +338,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
           {shouldShowTrustSignalsRow && (
             <div className="tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
-              {hasTrustSignals && (
+              {hasSummaryScore && (
                 <WaveTrustSignals
                   waveRep={wave.waveRep}
                   waveScore={wave.waveScore}
                   variant="sidebar-inline"
+                  mode="summary"
                   className="tw-shrink-0"
                   tooltipId={trustSignalsTooltipId}
                 />
@@ -367,7 +365,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           className="tw-absolute tw-right-3 tw-top-3 tw-z-10"
         />
       )}
-      {trustSignalsTooltipId !== undefined && hasTrustSignals && (
+      {trustSignalsTooltipId !== undefined && hasSummaryScore && (
         <Tooltip
           id={trustSignalsTooltipId}
           place="top"
