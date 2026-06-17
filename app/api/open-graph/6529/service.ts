@@ -1,7 +1,12 @@
 import { createHash } from "node:crypto";
 
+import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
-import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
+import {
+  MANIFOLD_LAZY_CLAIM_CONTRACT,
+  MEMELAB_CONTRACT,
+  MEMES_CONTRACT,
+} from "@/constants/constants";
 import { publicEnv } from "@/config/env";
 import type {
   BaseNFT,
@@ -25,12 +30,25 @@ import type {
   SeizeCollectionPreviewPerson,
   SeizeCollectionPreviewTrait,
 } from "@/services/api/link-preview-api";
+import { createPublicClient, fallback, http } from "viem";
+import { mainnet } from "viem/chains";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FIRST_PARTY_HOST = "6529.io";
 const LIVE_MINT_FALLBACK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const MAINNET_RPC_TIMEOUT_MS = 5_000;
 const NEXTGEN_TOKEN_ID_MULTIPLIER = 10_000_000_000;
 const NEXTGEN_SHORT_TOKEN_LOOKUP_MAX_COLLECTIONS = 5;
+
+const mainnetPublicClient = createPublicClient({
+  chain: mainnet,
+  transport: fallback([
+    http("https://rpc1.6529.io", { timeout: MAINNET_RPC_TIMEOUT_MS }),
+    http("https://ethereum.publicnode.com", {
+      timeout: MAINNET_RPC_TIMEOUT_MS,
+    }),
+  ]),
+});
 
 type ApiContext = {
   readonly apiAuth?: string | null | undefined;
@@ -648,6 +666,40 @@ function readMemeSeason(
   );
 }
 
+function readManifoldClaimTotalMax(data: unknown): number | undefined {
+  if (Array.isArray(data)) {
+    return readPositiveNumber(asRecord(data[1])?.["totalMax"]);
+  }
+
+  const dataRecord = asRecord(data);
+  const claim = asRecord(dataRecord?.["claim"] ?? data);
+  return readPositiveNumber(claim?.["totalMax"]);
+}
+
+async function fetchTheMemesManifoldEditionSize(
+  id: string
+): Promise<number | undefined> {
+  const decimalTokenId = readNumericPathSegment(id);
+  if (!decimalTokenId) {
+    return undefined;
+  }
+
+  const tokenId = BigInt(decimalTokenId);
+
+  try {
+    const data = await mainnetPublicClient.readContract({
+      address: MANIFOLD_LAZY_CLAIM_CONTRACT,
+      abi: MEMES_MANIFOLD_PROXY_ABI,
+      functionName: "getClaimForToken",
+      args: [MEMES_CONTRACT, tokenId],
+    });
+
+    return readManifoldClaimTotalMax(data);
+  } catch {
+    return undefined;
+  }
+}
+
 async function fetchTheMemesPreview(
   id: string,
   requestUrl: URL,
@@ -700,8 +752,18 @@ async function fetchTheMemesPreview(
   )
     ? extendedEditionSize
     : undefined;
+  const shouldFetchManifoldEditionSize =
+    claimEditionSize === undefined &&
+    guardedMintStatEditionSize === undefined &&
+    fallbackEditionSize === undefined;
+  const manifoldEditionSize = shouldFetchManifoldEditionSize
+    ? await fetchTheMemesManifoldEditionSize(id)
+    : undefined;
   const editionSize =
-    claimEditionSize ?? guardedMintStatEditionSize ?? fallbackEditionSize;
+    claimEditionSize ??
+    manifoldEditionSize ??
+    guardedMintStatEditionSize ??
+    fallbackEditionSize;
   const season = readMemeSeason(source, metadata);
   const tdhRate = readPositiveNumber(source.hodl_rate);
   const mintDate = formatMintDate(source.mint_date);
