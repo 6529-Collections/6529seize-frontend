@@ -4,10 +4,9 @@ import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
-import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import React, { useEffect } from "react";
-import { InlineMediaActions } from "./MediaActionToolbar";
+import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import { useMediaActions } from "./useMediaActions";
 
 interface Props {
@@ -48,7 +47,6 @@ function DropListItemContentMediaVideo({
     fallbackSrc: src,
     autoPlay: inView && !isApp && !disableAutoPlay,
   });
-  const showNativeControls = !isApp;
 
   // 3) Play/pause & mute based on scroll visibility
   const shouldAutoPlay = inView && !isApp && !disableAutoPlay;
@@ -98,63 +96,18 @@ function DropListItemContentMediaVideo({
     };
   }, [isApp, videoRef]);
 
-  const enterFullscreenAndPlay = () => {
-    const videoEl = videoRef.current;
-    if (!videoEl) {
-      return;
-    }
-
-    videoEl.play().catch(() => undefined);
-    videoEl.requestFullscreen().catch(() => undefined);
-  };
-
   return (
     <div
       ref={wrapperRef}
       className={clsx(
-        "tw-group tw-relative tw-flex tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-bg-black",
-        fillContainer
-          ? "tw-h-full tw-max-h-full"
-          : "tw-max-h-64 tw-min-h-[200px]"
+        "tw-flex tw-w-full tw-items-start tw-justify-start",
+        fillContainer && "tw-h-full tw-max-h-full"
       )}
     >
-      <video
-        ref={videoRef}
-        onClick={() => {
-          if (!isApp) {
-            return;
-          }
-          enterFullscreenAndPlay();
-        }}
-        playsInline
-        controls={showNativeControls}
-        controlsList="nodownload noplaybackrate"
+      <SeizeVideoPlayer
+        videoRef={videoRef}
         autoPlay={false}
-        muted
-        loop
-        className={clsx(
-          "tw-w-full tw-rounded-xl tw-object-contain",
-          fillContainer ? "tw-h-full tw-max-h-full" : "tw-h-auto tw-max-h-64"
-        )}
-      >
-        Your browser does not support the video tag.
-      </video>
-      {isApp && (
-        <button
-          type="button"
-          aria-label="Play video"
-          title="Play video"
-          onClick={(event) => {
-            event.stopPropagation();
-            enterFullscreenAndPlay();
-          }}
-          className="tw-absolute tw-left-1/2 tw-top-1/2 tw-z-20 tw-flex tw-size-16 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700/75 tw-text-white tw-shadow-lg tw-shadow-black/30 tw-backdrop-blur-sm"
-        >
-          <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
-        </button>
-      )}
-      <InlineMediaActions
-        variant="video"
+        layout={fillContainer ? "fill" : "natural"}
         onDownload={downloadMedia}
         onOpen={openMedia}
         openLabel={openLabel}
