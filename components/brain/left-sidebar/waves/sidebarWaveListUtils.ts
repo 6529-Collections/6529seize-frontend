@@ -2,10 +2,10 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 
 export interface SidebarWaveGroups {
   readonly announcementWaves: MinimalWave[];
-  readonly officialWaves: MinimalWave[];
+  readonly highlyRatedWaves: MinimalWave[];
   readonly pinnedWaves: MinimalWave[];
   readonly followingWaves: MinimalWave[];
-  readonly scoreWaves: MinimalWave[];
+  readonly allWaves: MinimalWave[];
 }
 
 export const isValidSidebarWave = (wave: unknown): wave is MinimalWave => {
@@ -62,30 +62,30 @@ export const groupSidebarWaves = ({
   readonly waves: readonly MinimalWave[];
 }): SidebarWaveGroups => {
   const announcementWaves: MinimalWave[] = [];
-  const officialWaves: MinimalWave[] = [];
+  const highlyRatedWaves: MinimalWave[] = [];
   const pinnedWaves: MinimalWave[] = [];
   const followingWaves: MinimalWave[] = [];
-  const scoreWaves: MinimalWave[] = [];
+  const allWaves: MinimalWave[] = [];
 
   for (const wave of waves) {
     if (isAnnouncementsWave?.(wave.id) === true) {
       announcementWaves.push(wave);
-    } else if (wave.isOfficial) {
-      officialWaves.push(wave);
     } else if (wave.isPinned) {
       pinnedWaves.push(wave);
     } else if (wave.isFollowing) {
       followingWaves.push(wave);
+    } else if (wave.sidebarSection === "highly-rated") {
+      highlyRatedWaves.push(wave);
     } else {
-      scoreWaves.push(wave);
+      allWaves.push(wave);
     }
   }
 
   return {
     announcementWaves,
-    officialWaves,
+    highlyRatedWaves,
     pinnedWaves,
     followingWaves,
-    scoreWaves,
+    allWaves,
   };
 };

@@ -157,7 +157,7 @@ test("keeps the pinned cache key at the logical limit but requests API pages of 
   expect(fetchWavesV2PageMock).toHaveBeenCalledWith({
     page: 1,
     pageSize: 20,
-    overviewType: ApiWavesOverviewType.MostSubscribed,
+    overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
     pinned: ApiWavesPinFilter.Pinned,
   });
 });

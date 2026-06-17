@@ -30,6 +30,9 @@ export function createMockMinimalWave(
     latestReadTimestamp: 0,
     firstUnreadDropSerialNo: null,
     isMuted: false,
+    waveRep: null,
+    waveScore: null,
+    sidebarSection: null,
     ...overrides,
   };
 }
