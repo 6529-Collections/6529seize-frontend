@@ -86,6 +86,28 @@ describe("delegationContent", () => {
     expect(JSON.parse(publicManifest)).toEqual(JSON.parse(sourceManifest));
   });
 
+  it("publishes article images with alt text", async () => {
+    const missingAlt: string[] = [];
+
+    for (const [slug, article] of Object.entries(
+      delegationContentManifest.articles
+    )) {
+      const html = await readFile(getReviewedArticlePath(article), "utf8");
+      const template = document.createElement("template");
+      template.innerHTML = html;
+
+      for (const image of Array.from(
+        template.content.querySelectorAll("img")
+      )) {
+        if (!image.hasAttribute("alt")) {
+          missingAlt.push(`${slug}: ${image.getAttribute("src") ?? ""}`);
+        }
+      }
+    }
+
+    expect(missingAlt).toEqual([]);
+  });
+
   it("uses the reviewed local bundle while the IPFS CID is pending", () => {
     const article = getDelegationArticle("delegation-faq");
 
