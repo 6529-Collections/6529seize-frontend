@@ -48,6 +48,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useEnsName } from "wagmi";
 import {
+  getRememeDetailApiQuery,
   getRememeDetailHref,
   getRouteHrefWithLocale,
 } from "./rememesRouteParams";
@@ -273,8 +274,12 @@ export default function RememePage(props: Readonly<Props>) {
       }
 
       try {
+        const query = getRememeDetailApiQuery({
+          contract: props.contract,
+          id: props.id,
+        });
         const response = await fetchUrl<DBResponse<Rememe>>(
-          `${publicEnv.API_ENDPOINT}/api/rememes?contract=${props.contract}&id=${props.id}`
+          `${publicEnv.API_ENDPOINT}/api/rememes?${query}`
         );
         const fetchedRememe = response.data[0];
         if (response.data.length !== 1 || fetchedRememe === undefined) {

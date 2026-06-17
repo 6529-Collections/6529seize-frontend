@@ -131,6 +131,16 @@ export function getRememeDetailHref({
   });
 }
 
+export function getRememeDetailApiQuery({
+  contract,
+  id,
+}: {
+  readonly contract: string;
+  readonly id: string | number;
+}): string {
+  return new URLSearchParams({ contract, id: String(id) }).toString();
+}
+
 export function getRememesAddHref({
   locale,
 }: {

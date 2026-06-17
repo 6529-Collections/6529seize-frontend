@@ -154,6 +154,21 @@ describe("ReMeme generateMetadata", () => {
     expect(imgs?.[0]).toBe("https://test.6529.io/custom-image.png");
   });
 
+  it("encodes reserved route params before fetching metadata", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+
+    await generateMetadata({
+      params: Promise.resolve({
+        contract: "collection/alpha",
+        id: "token#1",
+      }),
+    });
+
+    expect(mockFetchUrl).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/rememes?contract=collection%2Falpha&id=token%231"
+    );
+  });
+
   it("returns metadata with default name and image when API returns empty data", async () => {
     const mockResponse = { data: [] };
     mockFetchUrl.mockResolvedValue(mockResponse);

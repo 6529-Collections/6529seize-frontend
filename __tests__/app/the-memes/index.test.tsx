@@ -1,4 +1,4 @@
-import TheMemesPage from "@/app/the-memes/page";
+import TheMemesPage, { generateMetadata } from "@/app/the-memes/page";
 import { render, screen } from "@testing-library/react";
 
 const mockTheMemesComponent = jest.fn(
@@ -57,5 +57,13 @@ describe("The Memes page", () => {
       "data-locale",
       "en-US"
     );
+  });
+
+  it("localizes metadata from supported locale search params", async () => {
+    const metadata = await generateMetadata({
+      searchParams: Promise.resolve({ locale: "de-DE" }),
+    });
+
+    expect(metadata.description).toContain("Sammlungen");
   });
 });

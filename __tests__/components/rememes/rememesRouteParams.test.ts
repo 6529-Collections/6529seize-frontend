@@ -1,5 +1,6 @@
 import {
   getInitialRememesMemeId,
+  getRememeDetailApiQuery,
   getRememeDetailHref,
   getRememesAddHref,
   getRememesBrowseQuery,
@@ -92,5 +93,14 @@ describe("Rememes route params", () => {
         locale: "de-DE",
       })
     ).toBe("/rememes/collection%2Falpha/token%231?locale=de-DE");
+  });
+
+  it("builds encoded detail API queries", () => {
+    expect(
+      getRememeDetailApiQuery({
+        contract: "collection/alpha",
+        id: "token#1",
+      })
+    ).toBe("contract=collection%2Falpha&id=token%231");
   });
 });

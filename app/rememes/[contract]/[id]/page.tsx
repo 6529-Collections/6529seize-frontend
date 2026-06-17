@@ -1,6 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import RememePage from "@/components/rememes/RememePage";
 import {
+  getRememeDetailApiQuery,
   getRememesRouteLocale,
   type RememesSearchParams,
 } from "@/components/rememes/rememesRouteParams";
@@ -47,8 +48,9 @@ export async function generateMetadata({
   let name = `${formatAddress(contract)} #${id}`;
   let image = `${publicEnv.BASE_ENDPOINT}/6529io.png`;
   try {
+    const query = getRememeDetailApiQuery({ contract, id });
     const response = await fetchUrl<DBResponse<Rememe>>(
-      `${publicEnv.API_ENDPOINT}/api/rememes?contract=${contract}&id=${id}`
+      `${publicEnv.API_ENDPOINT}/api/rememes?${query}`
     );
 
     if (response?.data?.length > 0) {

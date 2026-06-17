@@ -590,6 +590,7 @@ const THE_MEMES_DETAIL_ART_MESSAGES = namespaceMessages("theMemes.detail.art", [
 
 export const EN_US_MESSAGES = {
   "theMemes.documentTitle": "The Memes | Collections",
+  "theMemes.description.collections": "Collections",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",

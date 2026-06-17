@@ -80,6 +80,10 @@ const referenceMeme = {
   contract: "0xmemes",
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 it("loads data and switches tabs", async () => {
   fetchUrl.mockResolvedValue({ data: [rememe] });
   fetchAllPages.mockResolvedValue([referenceMeme]);
@@ -116,4 +120,27 @@ it("loads data and switches tabs", async () => {
       name: "View referenced Meme Card #1: Reference Meme",
     })
   ).toHaveAttribute("href", "/the-memes/1?locale=de-DE");
+});
+
+it("encodes reserved route params before fetching the rememe", async () => {
+  fetchUrl.mockResolvedValue({ data: [rememe] });
+  fetchAllPages.mockResolvedValue([referenceMeme]);
+
+  render(
+    <CookieConsentProvider>
+      <TitleProvider>
+        <RememePage
+          contract="collection/alpha"
+          id="token#1"
+          locale="de-DE"
+        />
+      </TitleProvider>
+    </CookieConsentProvider>
+  );
+
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
+
+  expect(fetchUrl.mock.calls[0]?.[0]).toContain(
+    "contract=collection%2Falpha&id=token%231"
+  );
 });
