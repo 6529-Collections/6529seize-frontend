@@ -26,6 +26,8 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => ({
 }));
 
 const drop = { id: "drop", type: DropSize.FULL } as any;
+const TOUCH_ACTION_SHEET_SELECT_NONE_CLASS =
+  "touch-action-sheet-select-none";
 
 const isMobileMock = useIsMobileDevice as jest.Mock;
 const isTouchDeviceMock = useIsTouchDevice as jest.Mock;
@@ -62,6 +64,15 @@ const setHoverSupport = (hasHover: boolean) => {
   });
 };
 
+const getHandlerRoot = (child: HTMLElement) => {
+  const root = child.parentElement;
+  if (!root) {
+    throw new Error("DropMobileMenuHandler root not found");
+  }
+
+  return root;
+};
+
 beforeEach(() => {
   isMobileMock.mockReturnValue(false);
   isTouchDeviceMock.mockReturnValue(true);
@@ -71,6 +82,43 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.useRealTimers();
+});
+
+test("applies selection suppression while touch sheet mode is active", () => {
+  const { getByTestId } = render(
+    <DropMobileMenuHandler
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    >
+      <div data-testid="child" />
+    </DropMobileMenuHandler>
+  );
+
+  expect(getHandlerRoot(getByTestId("child"))).toHaveClass(
+    TOUCH_ACTION_SHEET_SELECT_NONE_CLASS
+  );
+});
+
+test("keeps selection suppression for compact hybrid touch layouts with hover", () => {
+  setViewportWidth(800);
+  setHoverSupport(true);
+
+  const { getByTestId } = render(
+    <DropMobileMenuHandler
+      drop={drop}
+      showReplyAndQuote
+      onReply={jest.fn()}
+      onQuote={jest.fn()}
+    >
+      <div data-testid="child" />
+    </DropMobileMenuHandler>
+  );
+
+  expect(getHandlerRoot(getByTestId("child"))).toHaveClass(
+    TOUCH_ACTION_SHEET_SELECT_NONE_CLASS
+  );
 });
 
 test("opens menu on long press", () => {
@@ -237,4 +285,7 @@ test("does not open menu on desktop-width touch devices with hover", () => {
 
   expect(getByTestId("menu").dataset.open).toBe("false");
   expect(getByTestId("menu").dataset.longPressTriggered).toBe("false");
+  expect(getHandlerRoot(getByTestId("child"))).not.toHaveClass(
+    TOUCH_ACTION_SHEET_SELECT_NONE_CLASS
+  );
 });

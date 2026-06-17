@@ -118,8 +118,13 @@ export default function DropMobileMenuHandler({
     clearSuppression();
   }, [canUseTouchActionSheet, clearSuppression]);
 
+  const rootClassName = canUseTouchActionSheet
+    ? "touch-action-sheet-select-none"
+    : undefined;
+
   return (
     <div
+      className={rootClassName}
       onClickCapture={handleClickCapture}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
