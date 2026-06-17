@@ -540,14 +540,26 @@ async function resolveProfileHref(
     return undefined;
   }
 
-  const profile = await fetchOptionalApiJson<IdentityResponse>(
+  const profile = await resolveIdentityProfile(candidate, context);
+  const handle = firstNonEmptyString(profile?.handle, profile?.normalised_handle);
+
+  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
+}
+
+async function resolveIdentityProfile(
+  value: string | null | undefined,
+  context?: ApiContext
+): Promise<IdentityResponse | null> {
+  const candidate = profileLookupCandidate(value);
+  if (!candidate) {
+    return null;
+  }
+
+  return await fetchOptionalApiJson<IdentityResponse>(
     `identities/${encodeURIComponent(candidate.toLowerCase())}`,
     undefined,
     context
   );
-  const handle = firstNonEmptyString(profile?.handle, profile?.normalised_handle);
-
-  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
 }
 
 function shouldUseExtendedEditionSize(
@@ -933,6 +945,19 @@ async function fetchNextGenPreview(
   const rarityRank = readPositiveNumber(token.rarity_score_rank);
   const mintDate = formatMintDate(token.mint_date);
   const artistHref = await resolveProfileHref(collection?.artist, context);
+  const collectorProfile = await resolveIdentityProfile(token.owner, context);
+  const collectorHandle = firstNonEmptyString(
+    collectorProfile?.handle,
+    collectorProfile?.normalised_handle
+  );
+  const collectorHref = collectorHandle
+    ? `/${collectorHandle.replace(/^@/, "")}`
+    : undefined;
+  const collectorDisplay = firstNonEmptyString(
+    collectorProfile?.display,
+    collectorProfile?.handle,
+    collectorProfile?.normalised_handle
+  );
   const canonicalRequestUrl = new URL(
     `/nextgen/token/${token.id}`,
     requestUrl.origin
@@ -948,6 +973,11 @@ async function fetchNextGenPreview(
         label: "by",
         name: collection?.artist,
         href: artistHref,
+      }),
+      createPerson({
+        label: "Collector",
+        name: collectorDisplay,
+        href: collectorHref,
       }),
     ]),
     facts: compactFacts([

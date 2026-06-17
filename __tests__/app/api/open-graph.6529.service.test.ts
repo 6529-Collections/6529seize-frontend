@@ -500,6 +500,7 @@ describe("createFirstParty6529Plan", () => {
           mint_date: "2024-04-11T12:00:00.000Z",
           rarity_score_rank: 86,
           thumbnail_url: "https://cdn.6529.io/nextgen/514.png",
+          owner: "0x06e13bd0a3cba08e61028f2326b9ea2ca2539900",
         });
       }
 
@@ -556,6 +557,16 @@ describe("createFirstParty6529Plan", () => {
         return jsonResponse({ handle: "zeblocks" });
       }
 
+      if (
+        url.pathname ===
+        "/api/identities/0x06e13bd0a3cba08e61028f2326b9ea2ca2539900"
+      ) {
+        return jsonResponse({
+          handle: "perilousvault",
+          display: "perilousvault.eth",
+        });
+      }
+
       return jsonResponse({}, 404);
     });
 
@@ -574,7 +585,14 @@ describe("createFirstParty6529Plan", () => {
       kicker: "NextGen \u00b7 Pebbles",
       requestUrl: "https://6529.io/nextgen/token/10000000514",
       url: "https://6529.io/nextgen/token/10000000514",
-      people: [{ label: "by", name: "Zeblocks", href: "/zeblocks" }],
+      people: [
+        { label: "by", name: "Zeblocks", href: "/zeblocks" },
+        {
+          label: "Collector",
+          name: "perilousvault.eth",
+          href: "/perilousvault",
+        },
+      ],
     });
     expect(data.facts).toEqual([
       { label: "Rarity", value: "#86 / 1,000" },
