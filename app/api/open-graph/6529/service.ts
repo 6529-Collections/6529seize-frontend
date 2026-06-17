@@ -172,12 +172,27 @@ function createApiHeaders(context?: ApiContext): HeadersInit {
   return headers;
 }
 
+async function getApiFetch(): Promise<typeof fetch> {
+  if (typeof window !== "undefined") {
+    return fetch;
+  }
+
+  try {
+    const { ssrFetch } = await import("@/lib/fetch/ssrFetch");
+    return ssrFetch;
+  } catch {
+    // Preview enrichment should degrade to public API data if server signing is unavailable.
+    return fetch;
+  }
+}
+
 async function fetchApiJson<T>(
   endpoint: string,
   params?: Record<string, string | number | undefined>,
   context?: ApiContext
 ): Promise<T> {
-  const response = await fetch(buildApiUrl(endpoint, params), {
+  const fetchImpl = await getApiFetch();
+  const response = await fetchImpl(buildApiUrl(endpoint, params), {
     headers: createApiHeaders(context),
   });
 
