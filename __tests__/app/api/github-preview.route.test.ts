@@ -267,6 +267,32 @@ describe("github-preview API route", () => {
     });
   });
 
+  it("omits file excerpts when line anchors start past the file length", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "file",
+        name: "short.ts",
+        path: "short.ts",
+        size: 12,
+        encoding: "base64",
+        content: Buffer.from("const one = 1;\n").toString("base64"),
+        html_url: "https://github.com/o/r/blob/main/short.ts",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/blob/main/short.ts#L300-L320")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.file",
+      lineCount: 2,
+      lineStart: null,
+      lineEnd: null,
+      excerpt: null,
+    });
+  });
+
   it("tries longer ref splits for file links on slash-named branches", async () => {
     fetchMock
       .mockResolvedValueOnce(
@@ -316,6 +342,32 @@ describe("github-preview API route", () => {
       entries: ["a.ts", "b.ts", "components"],
       fileCount: 2,
       directoryCount: 1,
+    });
+  });
+
+  it("maps single-object GitHub directory responses with null excerpt fields", async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        type: "dir",
+        name: "src",
+        path: "src",
+        html_url: "https://github.com/o/r/tree/main/src",
+      })
+    );
+
+    const response = await GET(
+      requestFor("https://github.com/o/r/tree/main/src")
+    );
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.directory",
+      title: "src",
+      path: "src",
+      ref: "main",
+      lineCount: null,
+      lineStart: null,
+      lineEnd: null,
+      excerpt: null,
     });
   });
 
@@ -658,6 +710,52 @@ describe("github-preview API route", () => {
         failed: 0,
         pending: 0,
         url: "https://github.com/o/r/actions/runs/1/job/1",
+      },
+    });
+  });
+
+  it("falls back to combined status when check-runs are truncated", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: "https://github.com/o/r/pull/10",
+          title: "Lots of checks",
+          state: "open",
+          merged: false,
+          draft: false,
+          mergeable_state: "clean",
+          head: { ref: "feature/checks", sha: "abc123" },
+        })
+      )
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          total_count: 51,
+          check_runs: Array.from({ length: 50 }, () => ({
+            status: "completed",
+            conclusion: "success",
+          })),
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          state: "failure",
+          total_count: 1,
+          target_url: "https://github.com/o/r/actions",
+        })
+      );
+
+    const response = await GET(requestFor("https://github.com/o/r/pull/10"));
+
+    await expect(response.json()).resolves.toMatchObject({
+      type: "github.pull_request",
+      checks: {
+        state: "failure",
+        total: 1,
+        successful: null,
+        failed: null,
+        pending: null,
+        url: "https://github.com/o/r/actions",
       },
     });
   });

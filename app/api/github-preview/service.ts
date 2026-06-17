@@ -840,6 +840,13 @@ const buildCheckSummaryFromRuns = (
     return null;
   }
 
+  if (
+    typeof response.total_count === "number" &&
+    response.total_count > runs.length
+  ) {
+    return null;
+  }
+
   let successful = 0;
   let failed = 0;
   let pending = 0;
@@ -1169,10 +1176,22 @@ const buildContentExcerpt = (
   const lines = decoded.replace(/\r\n/g, "\n").split("\n");
   const lineCount = lines.length;
   const requestedStart = resource.lineStart ?? 1;
+  if (requestedStart > lineCount) {
+    return {
+      lineCount,
+      excerpt: null,
+      lineStart: null,
+      lineEnd: null,
+    };
+  }
+
+  const normalizedLineEnd = resource.lineStart
+    ? Math.min(resource.lineEnd ?? resource.lineStart, lineCount)
+    : null;
   const startIndex = Math.max(0, requestedStart - 1);
   const endIndex =
-    resource.lineEnd && resource.lineEnd >= requestedStart
-      ? Math.min(lines.length, resource.lineEnd)
+    normalizedLineEnd && normalizedLineEnd >= requestedStart
+      ? normalizedLineEnd
       : Math.min(lines.length, startIndex + CONTENT_EXCERPT_MAX_LINES);
   const excerpt = lines
     .slice(startIndex, Math.max(startIndex + 1, endIndex))
@@ -1183,9 +1202,7 @@ const buildContentExcerpt = (
     lineCount,
     excerpt,
     lineStart: resource.lineStart,
-    lineEnd: resource.lineStart
-      ? (resource.lineEnd ?? resource.lineStart)
-      : null,
+    lineEnd: normalizedLineEnd,
   };
 };
 
@@ -1242,7 +1259,14 @@ const buildContentPreview = (
       type === "github.file"
         ? getFileLanguage(content.path ?? candidate.path)
         : null,
-    ...(type === "github.file" ? buildContentExcerpt(content, resource) : {}),
+    ...(type === "github.file"
+      ? buildContentExcerpt(content, resource)
+      : {
+          lineCount: null,
+          excerpt: null,
+          lineStart: null,
+          lineEnd: null,
+        }),
     entries: null,
     fileCount: null,
     directoryCount: null,
