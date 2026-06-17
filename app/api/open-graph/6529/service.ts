@@ -667,11 +667,12 @@ function readMemeSeason(
 }
 
 function readManifoldClaimTotalMax(data: unknown): number | undefined {
-  const dataRecord = asRecord(data);
-  const claim = Array.isArray(data)
-    ? asRecord(data[1])
-    : asRecord(dataRecord?.["claim"] ?? data);
+  if (Array.isArray(data)) {
+    return readPositiveNumber(asRecord(data[1])?.["totalMax"]);
+  }
 
+  const dataRecord = asRecord(data);
+  const claim = asRecord(dataRecord?.["claim"] ?? data);
   return readPositiveNumber(claim?.["totalMax"]);
 }
 
