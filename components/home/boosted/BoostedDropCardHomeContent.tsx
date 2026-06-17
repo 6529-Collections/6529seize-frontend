@@ -38,13 +38,13 @@ const CHAT_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${CHAT_TEXT_MAX_HEIGHT_
 const HOME_PREVIEW_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_CLASSES} tw-w-full tw-flex-col tw-items-stretch tw-justify-stretch tw-gap-3 tw-overflow-hidden tw-rounded-xl`;
 const HOME_TEXT_CONTAINER_CLASSES = `tw-relative tw-flex ${HOME_ASPECT_RATIO_CLASSES} tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-px-6 tw-pb-6 sm:tw-pb-0 tw-pt-4 sm:tw-pt-16 md:tw-pt-12`;
 const CHAT_PREVIEW_WRAPPER_BASE_CLASSES =
-  "tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto]";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
 const HOME_PREVIEW_WRAPPER_BASE_CLASSES =
-  "tw-relative tw-z-10 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto]";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-grid tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-grid-rows-[minmax(0,1fr)_auto] [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto [&_video]:tw-pointer-events-auto";
 const CHAT_TEXT_WRAPPER_CLASSES =
-  "tw-relative tw-z-10 tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-flex tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto";
 const HOME_TEXT_WRAPPER_CLASSES =
-  "tw-relative tw-z-10 tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center";
+  "tw-pointer-events-none tw-relative tw-z-30 tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center [&_a]:tw-pointer-events-auto [&_button]:tw-pointer-events-auto";
 const WITH_PREVIEW_CONTENT_CLASS_NAME =
   "tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-start tw-gap-1 tw-break-words tw-px-3 tw-pb-3 tw-text-left sm:tw-px-4 sm:tw-pb-4 tw-tracking-[0.01em] tw-font-normal tw-text-iron-300";
 const CHAT_WITH_PREVIEW_CONTENT_CLASS_NAME =

@@ -610,6 +610,7 @@ export const EN_US_MESSAGES = {
   "home.boostedDrop.boostCount.one": "{count} boost",
   "home.boostedDrop.boostCount.many": "{count} boosts",
   "home.boostedDrop.internalLinkSource": "{source} link",
+  "home.boostedDrop.internalLinks.networkWaveScoreTitle": "Network: Wave Score",
   "home.boostedDrop.openDrop": "Open boosted post from {author}",
   "home.boostedDrop.removeBoost": "Remove boost",
   "home.boostedDrop.removeBoostFromDrop": "Remove boost from post by {author}",
