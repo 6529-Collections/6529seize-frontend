@@ -2,19 +2,36 @@ import styles from "@/styles/Home.module.scss";
 
 import DistributionComponent from "@/components/distribution/Distribution";
 import {
+  getDistributionRouteLocale,
+  type DistributionSearchParams,
+} from "@/components/distribution/distributionRouteParams";
+import {
   getSharedAppServerSideProps,
   MEME_FOCUS,
 } from "@/components/the-memes/MemeShared";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { Metadata } from "next";
 
-export default function MemeDistributionPage() {
+type MemeDistributionPageProps = {
+  readonly searchParams: Promise<DistributionSearchParams>;
+};
+
+type MemeDistributionMetadataProps = MemeDistributionPageProps & {
+  readonly params: Promise<{ id: string }>;
+};
+
+export default async function MemeDistributionPage({
+  searchParams,
+}: MemeDistributionPageProps) {
+  const locale = getDistributionRouteLocale(await searchParams);
+
   return (
     <main className={styles["main"]}>
       <DistributionComponent
         header="The Memes"
         contract={MEMES_CONTRACT}
         link="/the-memes"
+        locale={locale}
       />
     </main>
   );
@@ -22,9 +39,19 @@ export default function MemeDistributionPage() {
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
-  const { id } = await params;
-  return getSharedAppServerSideProps(MEMES_CONTRACT, id, MEME_FOCUS.LIVE, true);
+  searchParams,
+}: MemeDistributionMetadataProps): Promise<Metadata> {
+  const [{ id }, resolvedSearchParams] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const locale = getDistributionRouteLocale(resolvedSearchParams);
+
+  return getSharedAppServerSideProps(
+    MEMES_CONTRACT,
+    id,
+    MEME_FOCUS.LIVE,
+    true,
+    locale
+  );
 }
