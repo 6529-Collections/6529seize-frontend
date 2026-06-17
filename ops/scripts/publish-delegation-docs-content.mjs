@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable security/detect-non-literal-fs-filename -- all filesystem paths are constrained to this repo before use */
 
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
@@ -26,6 +27,10 @@ const dryRun = args.has("--dry-run");
 const skipBuild = args.has("--skip-build");
 const skipGatewayVerify = args.has("--skip-gateway-verify");
 const skipCdnSync = args.has("--skip-cdn-sync");
+
+function logLine(message) {
+  process.stdout.write(`${message}\n`);
+}
 
 function trimTrailingSlashes(value) {
   let end = value.length;
@@ -429,8 +434,8 @@ async function main() {
         "Run without --dry-run with DELEGATION_DOCS_IPFS_API_ENDPOINT set to publish to the internal IPFS node.",
     };
     await writeReceipt(receipt);
-    console.log(`dry-run receipt=${RECEIPT_PATH}`);
-    console.log(`files=${files.length}`);
+    logLine(`dry-run receipt=${RECEIPT_PATH}`);
+    logLine(`files=${files.length}`);
     return;
   }
 
@@ -459,9 +464,9 @@ async function main() {
   };
 
   await writeReceipt(receipt);
-  console.log(`rootCid=${published.rootCid}`);
-  console.log(`receipt=${RECEIPT_PATH}`);
-  console.log(receipt.manifestUpdateCommand);
+  logLine(`rootCid=${published.rootCid}`);
+  logLine(`receipt=${RECEIPT_PATH}`);
+  logLine(receipt.manifestUpdateCommand);
 }
 
 try {
