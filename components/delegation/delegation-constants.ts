@@ -27,24 +27,21 @@ export const MEMES_COLLECTION: DelegationCollection = {
   title: "The Memes",
   display: `The Memes - ${MEMES_CONTRACT}`,
   contract: MEMES_CONTRACT,
-  preview:
-    "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/1.WEBP",
+  preview: "/memes-preview.png",
 };
 
 export const MEME_LAB_COLLECTION: DelegationCollection = {
   title: "Meme Lab",
   display: `Meme Lab - ${MEMELAB_CONTRACT}`,
   contract: MEMELAB_CONTRACT,
-  preview:
-    "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb/1.WEBP",
+  preview: "/meme-lab.jpg",
 };
 
 export const GRADIENTS_COLLECTION: DelegationCollection = {
   title: "6529 Gradient",
   display: `6529 Gradient - ${GRADIENT_CONTRACT}`,
   contract: GRADIENT_CONTRACT,
-  preview:
-    "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x0c58ef43ff3032005e472cb5709f8908acb00205/0.WEBP",
+  preview: "/gradients-preview.png",
 };
 
 export const SUPPORTED_COLLECTIONS: DelegationCollection[] = [

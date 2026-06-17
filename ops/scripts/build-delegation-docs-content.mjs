@@ -314,6 +314,49 @@ function rewriteContentReferences(rawHtml, assetSources, routeByArticleSlug) {
   return `${normalizeGeneratedHtml($.root().html()?.trim() ?? "")}\n`;
 }
 
+function humanizeAssetName(reference) {
+  const cleanReference = reference.split(/[?#]/, 1)[0] ?? "";
+  const fileName = decodeURIComponent(path.posix.basename(cleanReference));
+  const stem = fileName.replace(/\.[^.]+$/, "");
+  const words = stem
+    .replace(/__+/g, " ")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return words || "delegation article image";
+}
+
+function inferImageKind(reference) {
+  if (reference.includes("/diagrams/")) {
+    return "diagram";
+  }
+
+  if (
+    reference.includes("/screenshots/") ||
+    reference.includes("/assets/html/")
+  ) {
+    return "screenshot";
+  }
+
+  return "image";
+}
+
+function addMissingImageAltText($) {
+  $("img").each((_, element) => {
+    const $element = $(element);
+
+    if ($element.attr("alt") !== undefined) {
+      return;
+    }
+
+    const reference = $element.attr("src") ?? "";
+    const label = humanizeAssetName(reference);
+    const kind = inferImageKind(reference);
+    $element.attr("alt", `${label} ${kind}`);
+  });
+}
+
 function sanitizeHtmlFragment(rawHtml) {
   const $ = cheerio.load(rawHtml, { decodeEntities: false }, false);
 
@@ -360,6 +403,8 @@ function sanitizeHtmlFragment(rawHtml) {
     relTokens.add("noreferrer");
     $element.attr("rel", [...relTokens].join(" "));
   });
+
+  addMissingImageAltText($);
 
   const sanitized = $.root().html()?.trim() ?? "";
 
