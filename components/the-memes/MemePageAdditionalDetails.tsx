@@ -1,7 +1,9 @@
 "use client";
 
-import Download from "@/components/download/Download";
+import Download, { type DownloadLabels } from "@/components/download/Download";
+import { publicEnv } from "@/config/env";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ComponentType, ReactNode, SVGProps } from "react";
@@ -12,8 +14,10 @@ export type AdditionalDetailsMediaRow = {
   readonly title: string;
   readonly url: string;
   readonly openLabel: string;
+  readonly openText?: string | undefined;
   readonly extension?: string | undefined;
   readonly downloadName?: string | undefined;
+  readonly downloadLabels?: Partial<DownloadLabels> | undefined;
 };
 
 const SAFE_EXTERNAL_PROTOCOLS = new Set([
@@ -44,11 +48,17 @@ function getSafeUrl(
 }
 
 export function getSafeExternalUrl(url: string): string | null {
-  return getSafeUrl(url, SAFE_EXTERNAL_PROTOCOLS);
+  const resolvedUrl =
+    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
+    url;
+  return getSafeUrl(resolvedUrl, SAFE_EXTERNAL_PROTOCOLS);
 }
 
 function getSafeDownloadUrl(url: string): string | null {
-  return getSafeUrl(url, SAFE_DOWNLOAD_PROTOCOLS);
+  const resolvedUrl =
+    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
+    url;
+  return getSafeUrl(resolvedUrl, SAFE_DOWNLOAD_PROTOCOLS);
 }
 
 export function AdditionalDetailsSection({
@@ -118,6 +128,7 @@ export function ArweaveLinkRow({
             extension={row.extension ?? ""}
             variant="text"
             alwaysShowText={true}
+            labels={row.downloadLabels}
           />
         )}
         {safeExternalUrl && (
@@ -126,9 +137,9 @@ export function ArweaveLinkRow({
             target="_blank"
             rel="noopener noreferrer"
             aria-label={row.openLabel}
-            className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
+            className="tw-flex tw-min-h-6 tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"
           >
-            Open
+            {row.openText ?? "Open"}
             <ArrowTopRightOnSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </Link>
         )}

@@ -24,7 +24,6 @@ import {
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
   groupSidebarWaves,
-  hasExpandableTopLevelRows,
   isValidSidebarWave,
   validateSidebarWaveDetailed,
 } from "./sidebarWaveListUtils";
@@ -165,12 +164,6 @@ const UnifiedWavesListWaves = forwardRef<
     const animatedOfficialRows = useAnimatedSidebarWaveRows(officialRows);
     const animatedPinnedRows = useAnimatedSidebarWaveRows(pinnedRows);
     const animatedRegularRows = useAnimatedSidebarWaveRows(regularRows);
-    const reserveExpandControlSpace = [
-      announcementRows,
-      officialRows,
-      pinnedRows,
-      regularRows,
-    ].some(hasExpandableTopLevelRows);
     const getSidebarRowHeight = useCallback(
       (row: SidebarWaveTreeRow) =>
         row.depth === 1 ? SUBWAVE_ROW_HEIGHT : WAVE_ROW_HEIGHT,
@@ -194,7 +187,6 @@ const UnifiedWavesListWaves = forwardRef<
         isDirectMessage={isDirectMessage}
         depth={row.depth}
         canExpand={row.canExpand}
-        reserveExpandControlSpace={reserveExpandControlSpace}
         isExpanded={row.isExpanded}
         hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
         isLastSubwave={row.isLastSubwave}
@@ -214,11 +206,7 @@ const UnifiedWavesListWaves = forwardRef<
         {!hideHeaders && (
           <SectionHeader
             label="All Waves"
-            paddingClassName={
-              reserveExpandControlSpace
-                ? "tw-pl-10 tw-pr-4 md:tw-pl-9"
-                : "tw-px-4"
-            }
+            paddingClassName="tw-px-4"
             rightContent={hideToggle ? undefined : <JoinedToggle />}
           />
         )}

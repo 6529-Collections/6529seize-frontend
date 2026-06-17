@@ -1,3 +1,6 @@
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t as translate } from "@/i18n/messages";
 import type { RefObject } from "react";
 import type { DisplaySeason } from "../types";
 import { CollectedStatsSeasonTile } from "./CollectedStatsSeasonTile";
@@ -10,6 +13,7 @@ interface CollectedStatsSeasonsProps {
   readonly notStartedSeasons: DisplaySeason[];
   readonly activeSeasonId: string | null;
   readonly activeSeasonNumber: number | null;
+  readonly locale?: SupportedLocale | undefined;
   readonly hasTouchScreen: boolean;
   readonly isDesktopLayout: boolean;
   readonly isDesktopSeasonListExpanded: boolean;
@@ -17,6 +21,50 @@ interface CollectedStatsSeasonsProps {
   readonly onActivateSeason: (seasonId: string) => void;
   readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
   readonly onToggleExpanded: () => void;
+}
+
+interface SeasonTilesProps {
+  readonly seasons: DisplaySeason[];
+  readonly activeSeasonId: string | null;
+  readonly activeSeasonNumber: number | null;
+  readonly locale: SupportedLocale;
+  readonly hasTouchScreen: boolean;
+  readonly shouldAnimateProgressOnMount: boolean;
+  readonly onActivateSeason: (seasonId: string) => void;
+  readonly onSeasonShortcut?: ((seasonNumber: number) => void) | undefined;
+}
+
+function SeasonTiles({
+  seasons,
+  activeSeasonId,
+  activeSeasonNumber,
+  locale,
+  hasTouchScreen,
+  shouldAnimateProgressOnMount,
+  onActivateSeason,
+  onSeasonShortcut,
+}: Readonly<SeasonTilesProps>) {
+  return (
+    <>
+      {seasons.map((season) => (
+        <CollectedStatsSeasonTile
+          key={season.id}
+          season={season}
+          isSelected={season.seasonNumber === activeSeasonNumber}
+          showDetailText={hasTouchScreen || season.id === activeSeasonId}
+          locale={locale}
+          hasTouchScreen={hasTouchScreen}
+          shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
+          onPreview={() => onActivateSeason(season.id)}
+          onSelect={
+            onSeasonShortcut
+              ? () => onSeasonShortcut(season.seasonNumber)
+              : undefined
+          }
+        />
+      ))}
+    </>
+  );
 }
 
 export function CollectedStatsSeasons({
@@ -27,6 +75,7 @@ export function CollectedStatsSeasons({
   notStartedSeasons,
   activeSeasonId,
   activeSeasonNumber,
+  locale = DEFAULT_LOCALE,
   hasTouchScreen,
   isDesktopLayout,
   isDesktopSeasonListExpanded,
@@ -44,32 +93,48 @@ export function CollectedStatsSeasons({
     return null;
   }
 
-  const renderTiles = (seasons: DisplaySeason[]) =>
-    seasons.map((season) => (
-      <CollectedStatsSeasonTile
-        key={season.id}
-        season={season}
-        isSelected={season.seasonNumber === activeSeasonNumber}
-        showDetailText={hasTouchScreen || season.id === activeSeasonId}
-        hasTouchScreen={hasTouchScreen}
-        shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
-        onPreview={() => onActivateSeason(season.id)}
-        onSelect={
-          onSeasonShortcut
-            ? () => onSeasonShortcut(season.seasonNumber)
-            : undefined
-        }
-      />
-    ));
+  const title = translate(locale, "user.collected.stats.seasons.title");
+  const startedCountValue = formatInteger(locale, startedSeasons.length);
+  const allSeasonCountValue = formatInteger(locale, allSeasonCount);
+  const hiddenStartedSeasonCountValue = formatInteger(
+    locale,
+    hiddenStartedSeasonCount
+  );
+  const startedCount = translate(
+    locale,
+    "user.collected.stats.seasons.startedCount",
+    {
+      started: startedCountValue,
+      total: allSeasonCountValue,
+    }
+  );
+  const showLess = translate(
+    locale,
+    "user.collected.stats.seasons.showLess"
+  );
+  const showMore = translate(
+    locale,
+    "user.collected.stats.seasons.showMore",
+    { count: hiddenStartedSeasonCountValue }
+  );
+  const showMoreAriaLabel = translate(
+    locale,
+    "user.collected.stats.seasons.showMoreAriaLabel",
+    { count: hiddenStartedSeasonCountValue }
+  );
+  const unseizedLabel = translate(
+    locale,
+    "user.collected.stats.seasons.unseized"
+  );
 
   return (
     <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
       <div className="tw-flex tw-items-baseline tw-gap-2 tw-px-1">
         <span className="tw-text-xs tw-font-semibold tw-tracking-tight tw-text-iron-400">
-          Seasons
+          {title}
         </span>
         <span className="tw-ml-auto tw-text-[10px] tw-font-medium tw-text-iron-500">
-          {startedSeasons.length}/{allSeasonCount} started
+          {startedCount}
         </span>
       </div>
 
@@ -78,31 +143,40 @@ export function CollectedStatsSeasons({
           <>
             <div className="tw-w-full tw-pt-3">
               <div className="tw-flex tw-w-full tw-flex-wrap tw-items-start tw-gap-x-1 tw-gap-y-2">
-                {renderTiles(visibleStartedSeasons)}
+                <SeasonTiles
+                  seasons={visibleStartedSeasons}
+                  activeSeasonId={activeSeasonId}
+                  activeSeasonNumber={activeSeasonNumber}
+                  locale={locale}
+                  hasTouchScreen={hasTouchScreen}
+                  shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
+                  onActivateSeason={onActivateSeason}
+                  onSeasonShortcut={onSeasonShortcut}
+                />
               </div>
             </div>
 
             {hiddenStartedSeasonCount > 0 && (
-              <div className="tw-flex tw-justify-center -tw-mb-2 tw-mt-1">
+              <div className="-tw-mb-2 tw-mt-1 tw-flex tw-justify-center">
                 {isDesktopSeasonListExpanded ? (
                   <button
                     type="button"
                     aria-expanded
-                    aria-label="Show less"
+                    aria-label={showLess}
                     onClick={onToggleExpanded}
                     className={desktopToggleClassName}
                   >
-                    Show less
+                    {showLess}
                   </button>
                 ) : (
                   <button
                     type="button"
                     aria-expanded={false}
-                    aria-label={`Show ${hiddenStartedSeasonCount} more started seasons`}
+                    aria-label={showMoreAriaLabel}
                     onClick={onToggleExpanded}
                     className={desktopToggleClassName}
                   >
-                    +{hiddenStartedSeasonCount} more
+                    {showMore}
                   </button>
                 )}
               </div>
@@ -111,7 +185,16 @@ export function CollectedStatsSeasons({
         ) : (
           <div className="tw-overflow-x-auto tw-overflow-y-hidden tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
             <div className="tw-flex tw-w-max tw-flex-nowrap tw-items-start tw-gap-x-3 tw-gap-y-0 tw-pt-3">
-              {renderTiles(startedSeasons)}
+              <SeasonTiles
+                seasons={startedSeasons}
+                activeSeasonId={activeSeasonId}
+                activeSeasonNumber={activeSeasonNumber}
+                locale={locale}
+                hasTouchScreen={hasTouchScreen}
+                shouldAnimateProgressOnMount={shouldAnimateProgressOnMount}
+                onActivateSeason={onActivateSeason}
+                onSeasonShortcut={onSeasonShortcut}
+              />
             </div>
           </div>
         )}
@@ -120,7 +203,7 @@ export function CollectedStatsSeasons({
       {notStartedSeasons.length > 0 && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5 tw-px-1 tw-pt-2">
           <span className="tw-mr-0.5 tw-text-[8px] tw-font-medium tw-text-iron-500">
-            Unseized
+            {unseizedLabel}
           </span>
           {notStartedSeasons.map((season) => (
             <span

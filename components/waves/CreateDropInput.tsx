@@ -258,6 +258,8 @@ const CreateDropInput = forwardRef<
       onDropRef.current();
     }, []);
 
+    const placeholderText = getPlaceHolderText();
+
     return (
       <div className="tailwind-scope" ref={editorRef}>
         <LexicalComposer initialConfig={editorConfig}>
@@ -269,6 +271,7 @@ const CreateDropInput = forwardRef<
                     <ContentEditable
                       spellCheck={true}
                       autoCorrect="on"
+                      ariaLabel={placeholderText}
                       style={{ touchAction: "manipulation" }}
                       onClick={(e) => {
                         // Ensure the contenteditable is properly focused and ready for paste
@@ -302,7 +305,7 @@ const CreateDropInput = forwardRef<
                       submitting ? "tw-opacity-50" : ""
                     }`}
                   >
-                    {getPlaceHolderText()}
+                    {placeholderText}
                   </span>
                 }
                 ErrorBoundary={LexicalErrorBoundary}

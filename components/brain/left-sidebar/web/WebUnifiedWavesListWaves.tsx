@@ -26,7 +26,6 @@ import {
 import { useAnimatedSidebarWaveRows } from "@/hooks/useAnimatedSidebarWaveRows";
 import {
   groupSidebarWaves,
-  hasExpandableTopLevelRows,
   isValidSidebarWave,
 } from "../waves/sidebarWaveListUtils";
 
@@ -192,11 +191,9 @@ const isVisibleSectionRow = ({
 function WebProfileFeedShortcut({
   basePath,
   isCollapsed,
-  reserveExpandControlSpace,
 }: {
   readonly basePath: string;
   readonly isCollapsed: boolean;
-  readonly reserveExpandControlSpace: boolean;
 }) {
   const { activeWave } = useMyStream();
   const isActive = activeWave.id === null;
@@ -237,9 +234,7 @@ function WebProfileFeedShortcut({
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-        reserveExpandControlSpace ? "tw-pl-10 tw-pr-5 md:tw-pl-7" : "tw-px-5"
-      } ${
+      className={`tw-group tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-800/80"
@@ -347,17 +342,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const hasOfficialRows = animatedOfficialRows.length > 0;
   const hasPinnedRows = animatedPinnedRows.length > 0;
   const hasRegularRows = animatedRegularRows.length > 0;
-  const reserveExpandControlSpace =
-    !isCollapsed &&
-    [announcementRows, officialRows, pinnedRows, regularRows].some(
-      hasExpandableTopLevelRows
-    );
-  const headerPaddingClassName = reserveExpandControlSpace
-    ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
-    : "tw-px-4";
-  const filterPaddingClassName = reserveExpandControlSpace
-    ? "tw-pl-10 tw-pr-4 md:tw-pl-7"
-    : "tw-px-4";
+  const headerPaddingClassName = "tw-px-4";
+  const filterPaddingClassName = "tw-px-4";
   const sectionClassName = isCollapsed
     ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
     : "tw-flex tw-flex-col";
@@ -389,7 +375,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       collapsed={isCollapsed}
       depth={row.depth}
       canExpand={row.canExpand && !isCollapsed}
-      reserveExpandControlSpace={reserveExpandControlSpace}
       isExpanded={row.isExpanded}
       hasUnreadSubwaves={row.hasUnreadSubwaves && !row.isExpanded}
       isLastSubwave={row.isLastSubwave}
@@ -418,7 +403,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           <WebProfileFeedShortcut
             basePath={basePath}
             isCollapsed={isCollapsed}
-            reserveExpandControlSpace={reserveExpandControlSpace}
           />
         )}
 

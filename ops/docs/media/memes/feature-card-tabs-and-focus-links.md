@@ -3,7 +3,7 @@
 ## Overview
 
 - `/the-memes/{id}` uses `focus` to open a specific card tab.
-- Missing or invalid `focus` is normalized to `?focus=live`.
+- Missing or invalid `focus` opens the default Overview tab.
 - Tab changes and card arrows keep URL query state and update in place.
 - If a numeric `{id}` does not resolve to a published card, the route shows the shared next-mint fallback panel.
 
@@ -22,19 +22,56 @@
 
 ## Focus Keys
 
-- Supported `focus` values: `live`, `your-cards`, `the-art`, `collectors`, `activity`, `timeline`.
-- User-visible tabs: `Live`, `Your Cards`, `The Art`, `Collectors`, `Activity`, `Timeline`.
+- Supported `focus` values map to the visible detail UI as follows:
+
+| Focus Value         | User-Visible Area                                  |
+| ------------------- | -------------------------------------------------- |
+| `live`              | `Overview` primary tab                             |
+| `your-cards`        | `History` primary tab, `Your Transactions` sub-tab |
+| `the-art`           | `Overview` primary tab, art details opened         |
+| `references`        | `References` primary tab                           |
+| `collectors`        | `Collectors` primary tab                           |
+| `history`           | `History` primary tab, default history sub-tab     |
+| `your-transactions` | `History` primary tab, `Your Transactions` sub-tab |
+| `activity`          | `History` primary tab, `Card Activity` sub-tab     |
+| `timeline`          | `History` primary tab, `Timeline` sub-tab          |
+
+- Missing or invalid `focus` opens `Overview`.
+- `Your Transactions` appears only when the connected wallet has transactions
+  for the card; otherwise the route falls back to `Card Activity`.
 
 ## User Journey
 
 1. Open `/the-memes/{id}`.
 2. The route loads card metadata and card data for `{id}`.
 3. The route resolves `focus` to one tab.
-4. If `focus` is missing or unsupported, the route opens `Live` and rewrites to `?focus=live`.
+4. If `focus` is missing or unsupported, the route opens `Overview`.
 5. Switching tabs updates `focus` with `router.replace`, so the route does not do a full-page navigation.
 6. Previous/next arrows move to adjacent card IDs and keep the full query string.
-7. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted for later tab switches.
-8. If a numeric card id is unresolved, the route removes `focus`, hides tab content, and shows the shared next-mint fallback panel.
+7. The `Overview` live stats use the active supported `locale` for source
+   copy fallbacks, mint dates, counts, ranks, percentages, and market numbers.
+8. `Card Activity` uses the active supported `locale` for volume labels and
+   ETH numbers, activity headings, the transaction-type dropdown label/options,
+   loading and empty states, and the hidden activity-table caption.
+9. `Timeline` uses the active supported `locale` for its region label, UTC date
+   formatting, URI/TXN link labels, change field labels, and timeline media
+   accessible names.
+10. `References` uses the active supported `locale` for Meme Lab/ReMemes
+    descriptions, logo alt text, sort labels, refresh labels, ReMeme empty
+    state, ReMeme card accessible names, ReMeme link locale preservation, and
+    replica counts.
+11. The header calendar period strip uses the active supported `locale` for
+    period labels, season-link accessible text, locale-preserving season
+    links, and period number formatting.
+12. `The Art`, `Activity`, and `Timeline` load on first open, then stay mounted
+    for later tab switches.
+13. The header Art Viewer uses the active supported `locale` for media action
+    accessible names and save dialog titles.
+14. The Art additional-details rows use the active supported `locale` for
+    section headings, metric labels, empty states, open/download labels, and
+    TDH/rank number formatting.
+15. If a numeric card id is unresolved, the route removes `focus`, hides tab
+    content, and shows the shared next-mint fallback panel.
 
 ## Route States
 
@@ -54,8 +91,9 @@
 
 ## Edge Cases
 
-- Unknown `focus` values are rewritten to `?focus=live`.
-- Tab and fallback URL rewrites preserve other existing query keys and only change/remove `focus`.
+- Unknown `focus` values open `Overview`.
+- Tab URL replacements preserve other existing query keys and only change
+  `focus`.
 - Tab switches update the current URL entry, so browser Back does not step through each tab change.
 - `Your Cards` shows wallet-specific empty states:
   - No wallet connected: prompt to connect a wallet.
@@ -78,6 +116,47 @@
 ## Limitations / Notes
 
 - Tab changes use in-place URL replacement, so browser Back skips prior tab changes.
+- Primary tab labels, history tab labels, heading accessible names, and the
+  back link accessible name are message-backed for progressive localization.
+- During component-level migration, the optional `locale` query parameter can be
+  used to smoke-test supported locales on this detail route. Missing or
+  unsupported `locale` values fall back to `en-US`.
+- Overview live-stat labels, creator labels, additional-details controls, mint
+  dates, counts, ranks, percentages, and market numbers are routed through the
+  progressive i18n helpers.
+- Card Activity headings, dropdown labels/options, volume labels and ETH
+  numbers, loading and empty states, and the hidden table caption are routed
+  through the progressive i18n helpers.
+- Shared activity-row copy, pagination copy, and transaction-specific date and
+  amount formatting remain deferred activity-surface debt.
+- Header Art Viewer fullscreen/open/download/downloading/close controls,
+  previous/next media buttons, and save dialog titles are routed through the
+  progressive i18n helpers.
+- The Art additional-details section headings, metric labels, empty states,
+  open/download labels, and TDH/rank number formatting are routed through the
+  progressive i18n helpers. Property trait names/values and media URLs remain
+  source-data copy.
+- References tab Meme Lab/ReMemes descriptions, logo alt text, sort labels,
+  refresh labels, ReMeme empty state, ReMeme card accessible names, ReMeme link
+  locale preservation, and replica counts are routed through the progressive
+  i18n helpers. ReMeme names, collection names, token IDs, and source NFT
+  metadata remain source-data copy.
+- The References refresh action is keyboard reachable with a semantic button.
+- The header calendar period strip has message-backed period labels and
+  accessible names, locale-aware number formatting, locale-preserving season
+  links, a labelled group for the secondary period cluster, and a 24px minimum
+  target on the season link.
+- Timeline region labels, UTC date formatting, URI/TXN link labels, and shared
+  change field labels are routed through the progressive i18n helpers.
+- Timeline image alt text, video accessible labels, and HTML iframe titles use
+  message-backed text based on the localized change label.
+- Timeline metadata values render as plain text with preserved line breaks;
+  event text remains source-data copy and deeper media semantics remain
+  deferred shared-timeline debt.
+- Non-source locales fall back to `en-US` for this detail surface until
+  reviewed translations are added.
+- Primary tabs expose selected state with `aria-pressed`; History tabs use the
+  shared tablist pattern with `aria-selected` and arrow-key navigation.
 - Deferred loading applies to `The Art`, `Activity`, and `Timeline`; first open can be slower than later switches.
 - Fallback panel is the compact card-route view and is fixed to local timezone.
 - Fallback panel does not expose full `/meme-calendar` controls: no timezone toggle, no `Next Mint` jump button, no `Meme #` input, and no upcoming-mints table.

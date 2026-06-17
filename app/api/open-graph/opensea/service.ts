@@ -1,6 +1,8 @@
 import type { PreviewPlan } from "@/app/api/open-graph/compound/service";
 import { buildResponse } from "@/app/api/open-graph/utils";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { publicEnv } from "@/config/env";
+import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import type { LinkPreviewResponse } from "@/services/api/link-preview-api";
 import {
@@ -31,7 +33,6 @@ const OPENSEA_ITEM_PATH_PATTERN =
   /^\/item\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
 const OPENSEA_ASSET_PATH_PATTERN =
   /^\/assets\/([^/]+)\/(0x[a-f0-9]{40})\/([^/?#]+)\/?$/i;
-const DEFAULT_IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 const TOKEN_URI_PREFIXED_PLACEHOLDER_PATTERN = /0x(?:\{id\}|%7Bid%7D)/i;
 const TOKEN_URI_FETCH_TIMEOUT_MS = 4000;
 
@@ -174,20 +175,12 @@ const extractOpenSeaContext = (url: URL): OpenSeaContext | null => {
 
 const normalizeMediaUrl = (value: string): string => {
   const trimmed = value.trim();
-
-  if (trimmed.startsWith("ipfs://ipfs/")) {
-    return `${DEFAULT_IPFS_GATEWAY}${trimmed.slice("ipfs://ipfs/".length)}`;
-  }
-
-  if (trimmed.startsWith("ipfs://")) {
-    return `${DEFAULT_IPFS_GATEWAY}${trimmed.slice("ipfs://".length)}`;
-  }
-
-  if (trimmed.startsWith("ar://")) {
-    return `https://arweave.net/${trimmed.slice("ar://".length)}`;
-  }
-
-  return trimmed;
+  return (
+    normalizeDecentralizedMediaUrl(
+      trimmed,
+      publicEnv.MEDIA_RESOLVER_ENDPOINT
+    ) ?? trimmed
+  );
 };
 
 const isBlockedMarketplaceOverlayUrl = (value: string): boolean => {

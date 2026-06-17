@@ -78,7 +78,8 @@
 - End of list:
   - When the API returns no `next` page, automatic loading stops.
 - Empty result:
-  - No dedicated empty-state message is shown.
+  - When a fetch completes with no cards, the route shows a dedicated empty
+    state suggesting a different season or sort option.
 - Fetch failure:
   - The page has no inline error banner or retry button.
   - Already loaded rows stay visible.
@@ -125,7 +126,7 @@
 - List rows are API-backed and can lag briefly after metadata or market changes.
 - Loading more rows depends on scrolling near the page bottom.
 - The route does not preserve unrelated query keys.
-- The route has no dedicated empty-state or error-state callout.
+- The route has no dedicated error-state callout.
 
 ## Related Pages
 

@@ -395,7 +395,7 @@ export default function AboutFAQ() {
             <p>
               The book is CC0 and you can download it here:{" "}
               <a
-                href="https://arweave.net/HRGsv6tXpKx-yUPD8j7zi8Vz8-ILZr378oNDYemST0E"
+                href="https://media.6529.io/arweave/HRGsv6tXpKx-yUPD8j7zi8Vz8-ILZr378oNDYemST0E"
                 target="_blank"
                 rel="noreferrer"
               >

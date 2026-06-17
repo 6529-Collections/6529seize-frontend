@@ -1,9 +1,16 @@
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
+import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWaveSubscriptionTargetAction } from "@/generated/models/ApiWaveSubscriptionTargetAction";
+
+export const WAVE_SCORE_DISCOVERY_PARAMS = {
+  overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+  scoreSort: ApiWaveScoreSort.Balanced,
+} as const;
 
 export const WAVE_FOLLOWING_WAVES_PARAMS = {
   limit: 20,
-  initialWavesOverviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+  initialWavesOverviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
+  scoreSort: WAVE_SCORE_DISCOVERY_PARAMS.scoreSort,
   only_waves_followed_by_authenticated_user: true,
 };
 
