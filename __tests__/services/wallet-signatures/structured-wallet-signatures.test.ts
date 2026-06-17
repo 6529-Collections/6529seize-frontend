@@ -108,11 +108,10 @@ describe("structured wallet signatures", () => {
   });
 
   it("derives the signing domain from the current runtime", () => {
-    const expectedDomain =
-      typeof globalThis.window !== "undefined" &&
-      globalThis.window.location.host
-        ? globalThis.window.location.host.toLowerCase()
-        : "www.6529.io";
+    const currentHost = globalThis.window?.location.host;
+    const expectedDomain = currentHost
+      ? currentHost.toLowerCase()
+      : "www.6529.io";
 
     expect(getWalletSignatureDomain()).toBe(expectedDomain);
   });
@@ -124,11 +123,10 @@ describe("structured wallet signatures", () => {
   });
 
   it("derives the client origin from the current runtime", () => {
-    const expectedOrigin =
-      typeof globalThis.window !== "undefined" &&
-      globalThis.window.location.origin
-        ? globalThis.window.location.origin.toLowerCase()
-        : "https://www.6529.io";
+    const currentOrigin = globalThis.window?.location.origin;
+    const expectedOrigin = currentOrigin
+      ? currentOrigin.toLowerCase()
+      : "https://www.6529.io";
 
     expect(getWalletSignatureClientOrigin()).toBe(expectedOrigin);
   });
