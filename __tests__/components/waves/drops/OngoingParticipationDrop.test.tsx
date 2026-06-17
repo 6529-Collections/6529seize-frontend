@@ -50,11 +50,13 @@ jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => (
 ));
 
 let longPressCb: () => void;
+let participationDropContentProps: any;
 
 jest.mock(
   "@/components/waves/drops/participation/ParticipationDropContent",
   () => (props: any) => {
     longPressCb = props.onLongPress;
+    participationDropContentProps = props;
     return (
       <button data-testid="content" onClick={() => longPressCb()}></button>
     );
@@ -170,11 +172,15 @@ const renderComp = ({
   dropOverride = drop,
   isVotingClosed = false,
   isVotingControlsLocked = false,
+  onDropContentClick,
+  showInteractions = true,
 }: {
   readonly mobile?: boolean;
   readonly dropOverride?: ExtendedDrop;
   readonly isVotingClosed?: boolean;
   readonly isVotingControlsLocked?: boolean;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
+  readonly showInteractions?: boolean | undefined;
 } = {}) => {
   const onReply = jest.fn();
   useIsMobileDevice.mockReturnValue(mobile);
@@ -188,8 +194,10 @@ const renderComp = ({
       location="wave"
       onReply={onReply}
       onQuoteClick={jest.fn()}
+      onDropContentClick={onDropContentClick}
       isVotingClosed={isVotingClosed}
       isVotingControlsLocked={isVotingControlsLocked}
+      showInteractions={showInteractions}
     />
   );
   return { onReply, ...view };
@@ -199,6 +207,7 @@ describe("OngoingParticipationDrop", () => {
   beforeEach(() => {
     ParticipationDropMetadataMock.mockClear();
     ParticipationIdentityProfileCardMock.mockClear();
+    participationDropContentProps = undefined;
     footerProps = undefined;
     useHasTouchInput.mockReturnValue(false);
     useIsTouchDevice.mockReturnValue(false);
@@ -237,7 +246,23 @@ describe("OngoingParticipationDrop", () => {
 
     await user.click(screen.getByTestId("content"));
 
+    expect(participationDropContentProps.hasTouch).toBe(true);
     expect(mobileMenuProps.isOpen).toBe(true);
+  });
+
+  it("does not enable content touch handling when interactions are disabled", () => {
+    useHasTouchInput.mockReturnValue(true);
+    useIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    renderComp({
+      onDropContentClick: jest.fn(),
+      showInteractions: false,
+    });
+
+    expect(participationDropContentProps.hasTouch).toBe(false);
+    expect(mobileMenuProps).toBeUndefined();
   });
 
   it("hides voting in the mobile menu when voting is closed", () => {

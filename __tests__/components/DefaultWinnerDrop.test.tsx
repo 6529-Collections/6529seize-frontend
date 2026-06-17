@@ -245,6 +245,7 @@ describe("DefaultWinnerDrop", () => {
     );
 
     expect(screen.queryByTestId("reply")).not.toBeInTheDocument();
+    expect(mockWaveDropContent.mock.calls[0][0]?.hasTouch).toBe(true);
 
     const onLongPress = mockWaveDropContent.mock.calls[0][0]?.onLongPress;
     act(() => {
@@ -268,5 +269,33 @@ describe("DefaultWinnerDrop", () => {
     );
 
     expect(mobileMenuProps.isOpen).toBe(true);
+  });
+
+  it("does not enable content touch handling when interactions are disabled", () => {
+    mockUseHasTouchInput.mockReturnValue(true);
+    mockUseIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    render(
+      <DefaultWinnerDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        dropViewDropId={null}
+        location={0 as any}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        showInteractions={false}
+      />
+    );
+
+    expect(mockWaveDropContent.mock.calls.at(-1)?.[0]?.hasTouch).toBe(false);
+    expect(mobileMenuProps).toBeUndefined();
   });
 });

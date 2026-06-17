@@ -154,7 +154,7 @@ export default function OngoingParticipationDrop({
       onQuoteClick={onQuoteClick}
       setLongPressTriggered={setLongPressTriggered}
       isCompetitionDrop={true}
-      hasTouch={canUseTouchActionSheet}
+      hasTouch={showInteractions && canUseTouchActionSheet}
       mediaImageScale={mediaImageScale}
       fullWidthMedia={fullWidthMedia}
       fullWidthLinkPreviews={fullWidthLinkPreviews}

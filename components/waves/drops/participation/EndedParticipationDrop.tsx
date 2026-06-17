@@ -206,7 +206,7 @@ export default function EndedParticipationDrop({
       mediaContainerHeightClassName="tw-h-96"
       fullWidthMedia={fullWidthMedia}
       fullWidthLinkPreviews={fullWidthLinkPreviews}
-      hasTouch={canUseTouchActionSheet}
+      hasTouch={showInteractions && canUseTouchActionSheet}
       contentPresentation={contentPresentation}
       embedPath={embedPath}
       quotePath={quotePath}

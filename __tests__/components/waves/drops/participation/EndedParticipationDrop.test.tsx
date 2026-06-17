@@ -210,6 +210,7 @@ describe("EndedParticipationDrop", () => {
     );
 
     expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    expect(WaveDropContentMock.mock.calls[0][0]?.hasTouch).toBe(true);
 
     const onLongPress = WaveDropContentMock.mock.calls[0][0]?.onLongPress;
     act(() => {
@@ -229,6 +230,31 @@ describe("EndedParticipationDrop", () => {
     );
 
     expect(WaveDropMobileMenuMock.mock.calls.at(-1)?.[0]?.isOpen).toBe(true);
+  });
+
+  it("does not enable content touch handling when interactions are disabled", () => {
+    mockUseIsMobileDevice.mockReturnValue(false);
+    mockUseHasTouchInput.mockReturnValue(true);
+    mockUseIsTouchDevice.mockReturnValue(true);
+    setViewportWidth(1440);
+    setHoverSupport(false);
+
+    render(
+      <EndedParticipationDrop
+        drop={drop}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={true}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+        onDropContentClick={jest.fn()}
+        showInteractions={false}
+      />
+    );
+
+    expect(WaveDropContentMock.mock.calls.at(-1)?.[0]?.hasTouch).toBe(false);
+    expect(WaveDropMobileMenuMock).not.toHaveBeenCalled();
   });
 
   it("renders the identity profile card and filters identity metadata", () => {
