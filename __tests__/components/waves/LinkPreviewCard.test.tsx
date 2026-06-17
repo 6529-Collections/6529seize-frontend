@@ -49,6 +49,18 @@ describe("LinkPreviewCard", () => {
     );
     return frame;
   };
+  const assertFirstPartyFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-h-[15rem]",
+      "tw-min-h-[15rem]",
+      "tw-max-h-[15rem]",
+      "lg:tw-h-[11rem]",
+      "lg:tw-min-h-[11rem]",
+      "lg:tw-max-h-[11rem]"
+    );
+    return frame;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -124,6 +136,37 @@ describe("LinkPreviewCard", () => {
     assertStableFrame();
   });
 
+  it("uses the richer chat frame for generated first-party previews", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      title: "punk6529bot",
+      description: "Identity | 6529.io",
+      image: {
+        url: "https://6529.io/api/og-metadata/profiles/punk6529bot",
+      },
+      siteName: "6529.io",
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://6529.io/punk6529bot"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    assertStableFrame();
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          href: "https://6529.io/punk6529bot",
+          preview: expect.objectContaining({ title: "punk6529bot" }),
+        })
+      )
+    );
+
+    assertFirstPartyFrame();
+  });
+
   it("renders ENS previews when ENS data is returned", async () => {
     fetchLinkPreview.mockResolvedValue({
       type: "ens.name",
@@ -147,6 +190,40 @@ describe("LinkPreviewCard", () => {
 
     expect(screen.queryByTestId("fallback")).toBeNull();
     assertStableFrame();
+  });
+
+  it("lets 6529 collection previews grow beyond the generic fixed frame", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "6529.collection",
+      title: "Pebbles #514",
+      url: "https://6529.io/nextgen/token/514",
+      facts: [{ label: "Rarity", value: "#86 / 1,000" }],
+      traits: [
+        { label: "Palette", value: "Electric Blue" },
+        { label: "Mint Type", value: "Airdrop" },
+        { label: "Color Density", value: "Sparse" },
+      ],
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://6529.io/nextgen/token/514"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "6529.collection" }),
+        })
+      )
+    );
+
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass("tw-min-h-[11rem]", "md:tw-min-h-[12rem]");
+    expect(frame.className).not.toContain("tw-max-h-[11rem]");
+    expect(frame.className).not.toContain("tw-max-h-[12rem]");
   });
 
   it("does not enforce chat stable frame for home variant", async () => {

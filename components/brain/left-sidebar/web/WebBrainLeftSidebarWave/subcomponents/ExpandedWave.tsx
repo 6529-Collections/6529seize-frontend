@@ -5,6 +5,7 @@ import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
 import { SidebarWaveExpandControl } from "@/components/brain/left-sidebar/waves/SidebarWaveExpandControl";
 import { getSidebarWaveRowLayoutClasses } from "@/components/brain/left-sidebar/waves/sidebarWaveRowLayout";
+import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import { WaveAvatar } from "./WaveAvatar";
 import type { WaveTooltipPlacement } from "./WaveTooltip";
 import { WaveTooltip } from "./WaveTooltip";
@@ -193,6 +194,11 @@ export const ExpandedWave = ({
           >
             {formattedWaveName}
           </div>
+          <WaveTrustSignals
+            waveRep={wave.waveRep}
+            waveScore={wave.waveScore}
+            variant="sidebar"
+          />
           {presentLatestDropTimestamp !== null && (
             <div className="tw-text-xs tw-text-iron-500">
               <span className="tw-pr-1">Last drop:</span>

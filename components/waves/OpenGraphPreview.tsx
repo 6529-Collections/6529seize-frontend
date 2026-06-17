@@ -7,7 +7,9 @@ import { removeBaseEndpoint } from "@/helpers/Helpers";
 import type {
   GithubPreviewEnvelope,
   GithubPreviewResponse,
+  GithubStatusPreviewResponse,
 } from "@/services/api/github-preview-api";
+import type { SeizeCollectionLinkPreview } from "@/services/api/link-preview-api";
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import GithubPreviewStatusBadge from "./GithubPreviewStatusBadge";
 import {
@@ -64,6 +66,25 @@ const IMAGE_KEYS = [
 ];
 const IMAGE_COLLECTION_KEYS = ["images", "ogImages", "og_images", "thumbnails"];
 const LONG_UNBROKEN_SEGMENT_THRESHOLD = 32;
+
+export type FirstPartyOpenGraphPreviewKind = "profile" | "drop" | "wave";
+
+const FIRST_PARTY_OG_KIND_LABELS: Record<
+  FirstPartyOpenGraphPreviewKind,
+  string
+> = {
+  profile: "Profile",
+  drop: "Drop",
+  wave: "Wave",
+};
+
+function isFirstParty6529Hostname(hostname: string): boolean {
+  const normalizedHostname = hostname.toLowerCase();
+  return (
+    normalizedHostname === "6529.io" ||
+    normalizedHostname.endsWith(".6529.io")
+  );
+}
 
 function readFirstString(
   data: OpenGraphPreviewData | null | undefined,
@@ -146,6 +167,46 @@ function extractImageUrl(
   }
 
   return undefined;
+}
+
+function getFirstPartyOgKindFromImageUrl(
+  imageUrl: string | undefined
+): FirstPartyOpenGraphPreviewKind | null {
+  if (!imageUrl) {
+    return null;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(imageUrl, "https://6529.io");
+  } catch {
+    return null;
+  }
+
+  const pathname = parsed.pathname.toLowerCase();
+  if (!isFirstParty6529Hostname(parsed.hostname)) {
+    return null;
+  }
+
+  if (pathname.startsWith("/api/og-metadata/profiles/")) {
+    return "profile";
+  }
+
+  if (pathname.startsWith("/api/og-metadata/drops/")) {
+    return "drop";
+  }
+
+  if (pathname.startsWith("/api/og-metadata/waves/")) {
+    return "wave";
+  }
+
+  return null;
+}
+
+export function getFirstPartyOpenGraphPreviewKind(
+  preview: OpenGraphPreviewData | null | undefined
+): FirstPartyOpenGraphPreviewKind | null {
+  return getFirstPartyOgKindFromImageUrl(extractImageUrl(preview));
 }
 
 function wrapLongUnbrokenSegments(value: string | undefined): ReactNode {
@@ -238,7 +299,17 @@ function isGithubPreviewResponse(
   }
 
   const type = (value as { readonly type?: unknown }).type;
-  return type === "github.issue" || type === "github.pull_request";
+  return (
+    type === "github.issue" ||
+    type === "github.pull_request" ||
+    type === "github.repository" ||
+    type === "github.file" ||
+    type === "github.directory" ||
+    type === "github.commit" ||
+    type === "github.release" ||
+    type === "github.actions" ||
+    type === "github.discussion"
+  );
 }
 
 function extractGithubPreview(
@@ -247,6 +318,31 @@ function extractGithubPreview(
   const githubPreview = (preview as GithubPreviewEnvelope | null | undefined)
     ?.githubPreview;
   return isGithubPreviewResponse(githubPreview) ? githubPreview : null;
+}
+
+function isGithubStatusPreviewResponse(
+  preview: GithubPreviewResponse | null
+): preview is GithubStatusPreviewResponse {
+  return (
+    preview?.type === "github.issue" || preview?.type === "github.pull_request"
+  );
+}
+
+function isSeizeCollectionPreview(
+  value: unknown
+): value is SeizeCollectionLinkPreview {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const record = value as { readonly type?: unknown; readonly title?: unknown };
+  return record.type === "6529.collection" && typeof record.title === "string";
+}
+
+function extractSeizeCollectionPreview(
+  preview: OpenGraphPreviewData | null | undefined
+): SeizeCollectionLinkPreview | null {
+  return isSeizeCollectionPreview(preview) ? preview : null;
 }
 
 function getRelativeHref(href: string): string | undefined {
@@ -306,10 +402,251 @@ export function hasOpenGraphContent(
     return false;
   }
 
+  if (isSeizeCollectionPreview(preview)) {
+    return true;
+  }
+
   return Boolean(
     readFirstString(preview, TITLE_KEYS) ??
     readFirstString(preview, DESCRIPTION_KEYS) ??
     extractImageUrl(preview)
+  );
+}
+
+function isExternalHref(href: string | null | undefined): boolean {
+  return typeof href === "string" && /^https?:\/\//i.test(href);
+}
+
+function FirstPartyOpenGraphPreviewCard({
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  imageUrl,
+  title,
+  domain,
+  description,
+  kind,
+}: {
+  readonly effectiveHref: string;
+  readonly linkTarget: "_blank" | undefined;
+  readonly linkRel: string | undefined;
+  readonly imageUrl: string;
+  readonly title: string;
+  readonly domain: string | undefined;
+  readonly description: string | undefined;
+  readonly kind: FirstPartyOpenGraphPreviewKind;
+}) {
+  const kindLabel = FIRST_PARTY_OG_KIND_LABELS[kind];
+
+  return (
+    <div
+      className="tw-relative tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-3 sm:tw-p-4"
+      data-testid="og-preview-card"
+      data-og-kind={kind}>
+      <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-gap-2 lg:tw-flex-row lg:tw-gap-3">
+        <Link
+          href={effectiveHref}
+          target={linkTarget}
+          rel={linkRel}
+          className="tw-relative tw-block tw-h-28 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-black/35 lg:tw-h-full lg:tw-w-72 xl:tw-w-80">
+          {/* Generated 6529 OG images are already complete cards; preserve them. */}
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            className="tw-object-contain"
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 14rem, (max-width: 1024px) 18rem, 20rem"
+            unoptimized
+          />
+        </Link>
+
+        <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-y-1.5 tw-overflow-hidden">
+          <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+            {domain && (
+              <span className="tw-min-w-0 tw-truncate tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
+                {wrapLongUnbrokenSegments(domain)}
+              </span>
+            )}
+            <span className="tw-flex-shrink-0 tw-rounded-full tw-border tw-border-primary-400/35 tw-bg-primary-400/10 tw-px-2 tw-py-0.5 tw-text-[0.68rem] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-primary-200">
+              {kindLabel}
+            </span>
+          </div>
+
+          <Link
+            href={effectiveHref}
+            target={linkTarget}
+            rel={linkRel}
+            className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-snug tw-text-iron-100 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white">
+            {wrapLongUnbrokenSegments(title)}
+          </Link>
+
+          {description && (
+            <p className="tw-[overflow-wrap:anywhere] tw-m-0 tw-line-clamp-1 tw-whitespace-pre-line tw-break-words tw-text-sm tw-leading-snug tw-text-iron-300 sm:tw-line-clamp-2">
+              {wrapLongUnbrokenSegments(description)}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SeizeCollectionPreviewCard({
+  href,
+  preview,
+  effectiveHref,
+  linkTarget,
+  linkRel,
+  variant,
+  hideActions,
+}: {
+  readonly href: string;
+  readonly preview: SeizeCollectionLinkPreview;
+  readonly effectiveHref: string;
+  readonly linkTarget?: string | undefined;
+  readonly linkRel?: string | undefined;
+  readonly variant?: LinkPreviewVariant | undefined;
+  readonly hideActions?: boolean | undefined;
+}) {
+  const imageUrl = extractImageUrl(preview);
+  const people = Array.isArray(preview.people) ? preview.people : [];
+  const facts = Array.isArray(preview.facts) ? preview.facts : [];
+  const traits = Array.isArray(preview.traits) ? preview.traits.slice(0, 3) : [];
+  const resolvedVariant = variant ?? "chat";
+  const isHome = resolvedVariant === "home";
+
+  return (
+    <LinkPreviewCardLayout
+      href={href}
+      variant={resolvedVariant}
+      hideActions={hideActions}
+    >
+      <div
+        className={[
+          "tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-py-3 tw-pl-3",
+          isHome
+            ? "tw-border-white/10 tw-bg-black/30"
+            : "tw-border-iron-700 tw-bg-iron-950/70",
+          !isHome && !hideActions ? "tw-pr-12 sm:tw-pr-3" : "tw-pr-3",
+        ].join(" ")}
+        data-testid="6529-collection-preview-card"
+      >
+        <div
+          className={[
+            "tw-grid tw-h-full tw-min-h-0 tw-min-w-0 tw-items-center tw-gap-3",
+            imageUrl
+              ? "tw-grid-cols-[5.5rem,minmax(0,1fr)] sm:tw-grid-cols-[6.75rem,minmax(0,1fr)] md:tw-grid-cols-[8.25rem,minmax(0,1fr)]"
+              : "tw-grid-cols-1",
+          ].join(" ")}
+        >
+          {imageUrl && (
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              onClick={(e) => e.stopPropagation()}
+              className="tw-relative tw-block tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-black tw-no-underline"
+            >
+              <Image
+                src={imageUrl}
+                alt={preview.title}
+                fill
+                className="tw-object-cover"
+                loading="lazy"
+                sizes="(max-width: 640px) 5.5rem, (max-width: 768px) 6.75rem, 8.25rem"
+                unoptimized
+              />
+            </Link>
+          )}
+          <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
+            {preview.kicker && (
+              <div className="tw-[overflow-wrap:anywhere] tw-line-clamp-1 tw-break-words tw-text-xs tw-font-medium tw-text-iron-400">
+                {wrapLongUnbrokenSegments(preview.kicker)}
+              </div>
+            )}
+            <Link
+              href={effectiveHref}
+              target={linkTarget}
+              rel={linkRel}
+              onClick={(e) => e.stopPropagation()}
+              className="tw-[overflow-wrap:anywhere] tw-line-clamp-2 tw-block tw-break-words tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-50 tw-no-underline tw-transition tw-duration-200 hover:tw-text-white"
+            >
+              {wrapLongUnbrokenSegments(preview.title)}
+            </Link>
+            {people.length > 0 && (
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-overflow-hidden tw-text-xs tw-leading-5">
+                {people.map((person, index) => {
+                  const personHref = person.href ?? undefined;
+                  const personIsExternal = isExternalHref(personHref);
+
+                  return (
+                    <span
+                      key={`${person.label ?? "person"}-${person.name}-${index}`}
+                      className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-baseline tw-gap-1"
+                    >
+                      {person.label && (
+                        <span className="tw-flex-shrink-0 tw-text-iron-500">
+                          {person.label}
+                        </span>
+                      )}
+                      {personHref ? (
+                        <Link
+                          href={personHref}
+                          target={personIsExternal ? "_blank" : undefined}
+                          rel={
+                            personIsExternal ? "noopener noreferrer" : undefined
+                          }
+                          onClick={(e) => e.stopPropagation()}
+                          className="tw-truncate tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-text-white"
+                        >
+                          {person.name}
+                        </Link>
+                      ) : (
+                        <span className="tw-truncate tw-font-medium tw-text-iron-200">
+                          {person.name}
+                        </span>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+            {facts.length > 0 && (
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-1.5 tw-overflow-hidden">
+                {facts.map((fact) => (
+                  <span
+                    key={`${fact.label}-${fact.value}`}
+                    className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/75 tw-px-2 tw-py-0.5 tw-text-[11px] tw-leading-5"
+                  >
+                    <span className="tw-flex-shrink-0 tw-text-iron-400">
+                      {fact.label}
+                    </span>
+                    <span className="tw-truncate tw-font-medium tw-text-iron-100">
+                      {fact.value}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+            {traits.length > 0 && (
+              <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-gap-1.5 tw-overflow-hidden">
+                {traits.map((trait) => (
+                  <span
+                    key={`${trait.label}-${trait.value}`}
+                    className="tw-inline-flex tw-max-w-full tw-rounded-md tw-bg-emerald-500/10 tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-leading-5 tw-text-emerald-100"
+                  >
+                    <span className="tw-truncate">
+                      {trait.label}: {trait.value}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </LinkPreviewCardLayout>
   );
 }
 
@@ -377,7 +714,9 @@ export default function OpenGraphPreview({
   const imageUrl = extractImageUrl(preview);
   const domain = deriveDomain(href, preview);
   const githubPreview = extractGithubPreview(preview);
+  const seizePreview = extractSeizeCollectionPreview(preview);
   const hasContent = Boolean(title ?? description ?? imageUrl);
+  const firstPartyKind = getFirstPartyOgKindFromImageUrl(imageUrl);
 
   if (imageOnly && imageUrl) {
     return (
@@ -468,6 +807,41 @@ export default function OpenGraphPreview({
     );
   }
 
+  if (!imageOnly && seizePreview) {
+    return (
+      <SeizeCollectionPreviewCard
+        href={href}
+        preview={seizePreview}
+        effectiveHref={effectiveHref}
+        linkTarget={linkTarget}
+        linkRel={linkRel}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+      />
+    );
+  }
+
+  if (resolvedVariant !== "home" && imageUrl && firstPartyKind) {
+    return (
+      <LinkPreviewCardLayout
+        href={href}
+        variant={resolvedVariant}
+        hideActions={hideActions}
+      >
+        <FirstPartyOpenGraphPreviewCard
+          effectiveHref={effectiveHref}
+          linkTarget={linkTarget}
+          linkRel={linkRel}
+          imageUrl={imageUrl}
+          title={title ?? domain ?? href}
+          domain={domain}
+          description={description}
+          kind={firstPartyKind}
+        />
+      </LinkPreviewCardLayout>
+    );
+  }
+
   return (
     <LinkPreviewCardLayout
       href={href}
@@ -483,11 +857,13 @@ export default function OpenGraphPreview({
           className="tw-relative tw-block tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-no-underline"
           data-testid="og-preview-card"
         >
-          <GithubPreviewStatusBadge
-            href={href}
-            initialPreview={githubPreview}
-            compact
-          />
+          {isGithubStatusPreviewResponse(githubPreview) && (
+            <GithubPreviewStatusBadge
+              href={href}
+              initialPreview={githubPreview}
+              compact
+            />
+          )}
           {imageUrl && (
             <Image
               src={imageUrl}
@@ -523,10 +899,12 @@ export default function OpenGraphPreview({
           className="tw-relative tw-h-full tw-min-h-0 tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/40 tw-p-4"
           data-testid="og-preview-card"
         >
-          <GithubPreviewStatusBadge
-            href={href}
-            initialPreview={githubPreview}
-          />
+          {isGithubStatusPreviewResponse(githubPreview) && (
+            <GithubPreviewStatusBadge
+              href={href}
+              initialPreview={githubPreview}
+            />
+          )}
           <div
             className={
               imageUrl

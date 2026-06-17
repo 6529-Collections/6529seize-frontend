@@ -95,7 +95,7 @@ describe("createTransientPlan", () => {
         description: "Alchemy description",
         siteName: "Transient Labs",
         image: expect.objectContaining({
-          url: "https://ipfs.io/ipfs/QmExampleHash/stitched.png",
+          url: "https://media.6529.io/ipfs/QmExampleHash/stitched.png",
           type: "image/png",
         }),
       })
@@ -148,7 +148,7 @@ describe("createTransientPlan", () => {
         type: "transient.nft",
         title: "Token with token URI fallback",
         image: expect.objectContaining({
-          url: "https://ipfs.io/ipfs/QmExampleHash/token-uri-image.png",
+          url: "https://media.6529.io/ipfs/QmExampleHash/token-uri-image.png",
         }),
       })
     );
