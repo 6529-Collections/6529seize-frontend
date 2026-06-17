@@ -603,12 +603,17 @@ export default function GlobalRepCategoryDetail({
           )}
         </div>
 
-        <div className="tw-flex tw-flex-wrap tw-gap-2">
+        <div
+          role="tablist"
+          aria-label="REP category scope"
+          className="tw-flex tw-flex-wrap tw-gap-2"
+        >
           {SCOPES.map((scope) => (
             <button
               key={scope.id}
               type="button"
-              aria-pressed={activeScope === scope.id}
+              role="tab"
+              aria-selected={activeScope === scope.id}
               onClick={() => setActiveScope(scope.id)}
               className={`tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
                 activeScope === scope.id

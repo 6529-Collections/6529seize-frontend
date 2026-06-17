@@ -76,7 +76,7 @@ export async function searchGlobalRepCategories(
   term: string
 ): Promise<string[]> {
   return await commonApiFetch<string[]>({
-    endpoint: "/rep/categories",
+    endpoint: "rep/categories",
     params: { param: term },
   });
 }
@@ -137,20 +137,32 @@ export async function fetchWaveRepCategorySummary({
   readonly waveId: string;
   readonly category: string;
 }): Promise<ApiWaveRepCategory | null> {
-  const response = await commonApiFetch<ApiWaveRepCategoriesPage>({
-    endpoint: `waves/${waveId}/rep/categories`,
-    params: {
-      page: "1",
-      page_size: "100",
-      top_contributors_limit: "5",
-    },
-  });
   const normalizedCategory = category.trim().toLowerCase();
-  return (
-    response.data.find(
+  let page = 1;
+
+  while (true) {
+    const response = await commonApiFetch<ApiWaveRepCategoriesPage>({
+      endpoint: `waves/${waveId}/rep/categories`,
+      params: {
+        page: page.toString(),
+        page_size: "100",
+        top_contributors_limit: "5",
+      },
+    });
+    const match = response.data.find(
       (item) => item.category.trim().toLowerCase() === normalizedCategory
-    ) ?? null
-  );
+    );
+
+    if (match) {
+      return match;
+    }
+
+    if (!response.next) {
+      return null;
+    }
+
+    page += 1;
+  }
 }
 
 export async function fetchWaveRepCategoryContributors({

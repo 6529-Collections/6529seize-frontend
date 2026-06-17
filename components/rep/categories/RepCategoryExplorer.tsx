@@ -14,6 +14,74 @@ import {
 
 const MIN_CATEGORY_SEARCH_LENGTH = 3;
 
+function RepCategorySearchResults({
+  showPrompt,
+  isPending,
+  isError,
+  categories,
+  onSelect,
+}: {
+  readonly showPrompt: boolean;
+  readonly isPending: boolean;
+  readonly isError: boolean;
+  readonly categories: string[] | undefined;
+  readonly onSelect: (category: string) => void;
+}) {
+  if (showPrompt) {
+    return (
+      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+        Type at least 3 characters to search.
+      </p>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <output
+        aria-label="Searching REP categories"
+        className="tw-flex tw-justify-center tw-py-4"
+      >
+        <CircleLoader size={CircleLoaderSize.MEDIUM} />
+      </output>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="tw-mb-0 tw-text-sm tw-text-error">
+        Could not search REP categories.
+      </p>
+    );
+  }
+
+  if (!categories || categories.length === 0) {
+    return (
+      <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+        No matching categories found.
+      </p>
+    );
+  }
+
+  return (
+    <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
+      {categories.map((category) => (
+        <li key={category}>
+          <button
+            type="button"
+            onClick={() => onSelect(category)}
+            className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/10"
+          >
+            <span className="tw-min-w-0 tw-break-words">{category}</span>
+            <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+              View
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function RepCategoryExplorer() {
   const [input, setInput] = useState("");
   const [debouncedInput, setDebouncedInput] = useState("");
@@ -49,53 +117,19 @@ export default function RepCategoryExplorer() {
           autoComplete="off"
         />
 
-        <div
+        <section
           className="tw-mt-4"
-          role="region"
           aria-live="polite"
           aria-label="REP category search results"
         >
-          {showPrompt ? (
-            <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-              Type at least 3 characters to search.
-            </p>
-          ) : searchQuery.isPending ? (
-            <div
-              role="status"
-              aria-label="Searching REP categories"
-              className="tw-flex tw-justify-center tw-py-4"
-            >
-              <CircleLoader size={CircleLoaderSize.MEDIUM} />
-            </div>
-          ) : searchQuery.isError ? (
-            <p className="tw-mb-0 tw-text-sm tw-text-error">
-              Could not search REP categories.
-            </p>
-          ) : searchQuery.data.length === 0 ? (
-            <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
-              No matching categories found.
-            </p>
-          ) : (
-            <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
-              {searchQuery.data.map((category) => (
-                <li key={category}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCategory(category)}
-                    className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-semibold tw-text-white tw-transition-colors hover:tw-border-primary-400/40 hover:tw-bg-primary-500/10"
-                  >
-                    <span className="tw-min-w-0 tw-break-words">
-                      {category}
-                    </span>
-                    <span className="tw-flex-shrink-0 tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
-                      View
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+          <RepCategorySearchResults
+            showPrompt={showPrompt}
+            isPending={searchQuery.isPending}
+            isError={searchQuery.isError}
+            categories={searchQuery.data}
+            onSelect={setSelectedCategory}
+          />
+        </section>
       </section>
 
       {selectedCategory && (

@@ -35,12 +35,19 @@ export function getProfileDisplay(profile: ApiProfileMin): string {
     return handle;
   }
 
-  return formatAddress(profile.primary_address);
+  const primaryAddress = profile.primary_address?.trim();
+  return primaryAddress ? formatAddress(primaryAddress) : "Unknown profile";
 }
 
 export function getProfileHref(profile: ApiProfileMin): string {
-  const identity = profile.handle?.trim() || profile.primary_address;
-  return `/${encodeURIComponent(identity.toLowerCase())}`;
+  const handle = profile.handle?.trim();
+
+  if (handle) {
+    return `/${encodeURIComponent(handle)}`;
+  }
+
+  const primaryAddress = profile.primary_address?.trim();
+  return primaryAddress ? `/${encodeURIComponent(primaryAddress)}` : "#";
 }
 
 export function getProfileAvatarFallback(profile: ApiProfileMin): string {

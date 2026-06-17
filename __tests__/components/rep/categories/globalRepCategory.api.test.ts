@@ -15,6 +15,7 @@ describe("globalRepCategory.api", () => {
   const commonApiFetchMock = commonApiFetch as jest.Mock;
 
   beforeEach(() => {
+    commonApiFetchMock.mockReset();
     commonApiFetchMock.mockResolvedValue({ data: [], page: 1, next: false });
   });
 
@@ -76,25 +77,39 @@ describe("globalRepCategory.api", () => {
     ]);
 
     expect(commonApiFetchMock).toHaveBeenCalledWith({
-      endpoint: "/rep/categories",
+      endpoint: "rep/categories",
       params: { param: "bui" },
     });
   });
 
-  it("finds a wave REP category summary from the wave category page", async () => {
-    commonApiFetchMock.mockResolvedValueOnce({
-      page: 1,
-      next: false,
-      data: [
-        {
-          category: "Builder",
-          total_rep: 10,
-          contributor_count: 2,
-          authenticated_user_contribution: null,
-          top_contributors: [],
-        },
-      ],
-    });
+  it("finds a wave REP category summary across wave category pages", async () => {
+    commonApiFetchMock
+      .mockResolvedValueOnce({
+        page: 1,
+        next: true,
+        data: [
+          {
+            category: "Artist",
+            total_rep: 5,
+            contributor_count: 1,
+            authenticated_user_contribution: null,
+            top_contributors: [],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        page: 2,
+        next: false,
+        data: [
+          {
+            category: "Builder",
+            total_rep: 10,
+            contributor_count: 2,
+            authenticated_user_contribution: null,
+            top_contributors: [],
+          },
+        ],
+      });
 
     await expect(
       fetchWaveRepCategorySummary({
@@ -109,10 +124,18 @@ describe("globalRepCategory.api", () => {
       top_contributors: [],
     });
 
-    expect(commonApiFetchMock).toHaveBeenCalledWith({
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(1, {
       endpoint: "waves/wave-1/rep/categories",
       params: {
         page: "1",
+        page_size: "100",
+        top_contributors_limit: "5",
+      },
+    });
+    expect(commonApiFetchMock).toHaveBeenNthCalledWith(2, {
+      endpoint: "waves/wave-1/rep/categories",
+      params: {
+        page: "2",
         page_size: "100",
         top_contributors_limit: "5",
       },
