@@ -101,55 +101,69 @@ const isSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
 const INLINE_STAT_TONE_CLASSES =
   "tw-text-[#e2e8f0]/[0.85] desktop-hover:hover:tw-text-[#e2e8f0]/[0.95]";
 
+type VisibilityTone = "excellent" | "healthy" | "low" | "default";
+type VisibilityToneContext = "inline-sidebar" | "inline-header" | "default";
+
+const VISIBILITY_TONE_CLASSES: Record<
+  VisibilityToneContext,
+  Record<VisibilityTone, string>
+> = {
+  "inline-sidebar": {
+    excellent: "tw-text-emerald-300 desktop-hover:hover:tw-text-emerald-200",
+    healthy: "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200",
+    low: "tw-text-rose-300 desktop-hover:hover:tw-text-rose-200",
+    default: INLINE_STAT_TONE_CLASSES,
+  },
+  "inline-header": {
+    excellent: "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300",
+    healthy: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+    low: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
+    default: "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]",
+  },
+  default: {
+    excellent:
+      "tw-bg-emerald-500/10 tw-text-emerald-200 tw-ring-emerald-400/25",
+    healthy: "tw-bg-amber-500/10 tw-text-amber-200 tw-ring-amber-400/25",
+    low: "tw-bg-rose-500/10 tw-text-rose-200 tw-ring-rose-400/25",
+    default: "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25",
+  },
+};
+
+const getVisibilityTone = (
+  value: number | null | undefined
+): VisibilityTone => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "default";
+  }
+
+  if (value >= 85) {
+    return "excellent";
+  }
+
+  if (value >= 65) {
+    return "healthy";
+  }
+
+  return value < 35 ? "low" : "default";
+};
+
+const getVisibilityToneContext = (
+  variant: WaveTrustSignalsVariant
+): VisibilityToneContext => {
+  if (isInlineSidebarVariant(variant)) {
+    return "inline-sidebar";
+  }
+
+  return isInlineHeaderVariant(variant) ? "inline-header" : "default";
+};
+
 const getVisibilityToneClasses = (
   variant: WaveTrustSignalsVariant,
   value: number | null | undefined
-): string => {
-  const numericValue =
-    value !== null && value !== undefined && Number.isFinite(value)
-      ? value
-      : null;
-
-  if (isInlineSidebarVariant(variant)) {
-    if (numericValue !== null && numericValue >= 85) {
-      return "tw-text-emerald-300 desktop-hover:hover:tw-text-emerald-200";
-    }
-    if (numericValue !== null && numericValue >= 65) {
-      return "tw-text-amber-300 desktop-hover:hover:tw-text-amber-200";
-    }
-    if (numericValue !== null && numericValue < 35) {
-      return "tw-text-rose-300 desktop-hover:hover:tw-text-rose-200";
-    }
-
-    return INLINE_STAT_TONE_CLASSES;
-  }
-
-  if (isInlineHeaderVariant(variant)) {
-    if (numericValue !== null && numericValue >= 85) {
-      return "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300";
-    }
-    if (numericValue !== null && numericValue >= 65) {
-      return "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300";
-    }
-    if (numericValue !== null && numericValue < 35) {
-      return "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300";
-    }
-
-    return "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]";
-  }
-
-  if (numericValue !== null && numericValue >= 85) {
-    return "tw-bg-emerald-500/10 tw-text-emerald-200 tw-ring-emerald-400/25";
-  }
-  if (numericValue !== null && numericValue >= 65) {
-    return "tw-bg-amber-500/10 tw-text-amber-200 tw-ring-amber-400/25";
-  }
-  if (numericValue !== null && numericValue < 35) {
-    return "tw-bg-rose-500/10 tw-text-rose-200 tw-ring-rose-400/25";
-  }
-
-  return "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25";
-};
+): string =>
+  VISIBILITY_TONE_CLASSES[getVisibilityToneContext(variant)][
+    getVisibilityTone(value)
+  ];
 
 const getHotnessToneClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
@@ -363,32 +377,29 @@ const buildSummaryDetails = ({
   readonly hotnessScore: string | null;
   readonly repSortScore: string | null;
   readonly waveRep: ApiWaveRepSummary | null | undefined;
-}) => {
-  const details = [
+}): string[] => {
+  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
+  const repDetail =
+    rawRep !== null && repSortScore !== null
+      ? `REP: ${rawRep} raw, ${repSortScore} score`
+      : rawRep !== null
+        ? `REP: ${rawRep} raw`
+        : repSortScore !== null
+          ? `REP score: ${repSortScore}`
+          : null;
+
+  return [
     `Combined score: ${visibilityScore}`,
     "A quick signal for which waves deserve broad attention",
+    ...(qualityScore === null
+      ? []
+      : [`Quality: ${qualityScore} (65% of visibility)`]),
+    ...(hotnessScore === null
+      ? []
+      : [`Hotness: ${hotnessScore} (gated, 35% of visibility)`]),
+    ...(repDetail === null ? [] : [repDetail]),
+    WAVE_SCORE_FORMULA_HINT,
   ];
-
-  if (qualityScore !== null) {
-    details.push(`Quality: ${qualityScore} (65% of visibility)`);
-  }
-
-  if (hotnessScore !== null) {
-    details.push(`Hotness: ${hotnessScore} (gated, 35% of visibility)`);
-  }
-
-  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
-  if (rawRep !== null && repSortScore !== null) {
-    details.push(`REP: ${rawRep} raw, ${repSortScore} score`);
-  } else if (rawRep !== null) {
-    details.push(`REP: ${rawRep} raw`);
-  } else if (repSortScore !== null) {
-    details.push(`REP score: ${repSortScore}`);
-  }
-
-  details.push(WAVE_SCORE_FORMULA_HINT);
-
-  return details;
 };
 
 const buildHotnessDetails = ({
@@ -398,17 +409,15 @@ const buildHotnessDetails = ({
   readonly hotnessScore: string;
   readonly qualityScore: string | null;
 }): string[] => {
-  const details = [`Hotness score: ${hotnessScore}`];
-
-  if (qualityScore !== null) {
-    details.push(`Quality input: ${qualityScore} (35% of hotness)`);
-  }
-
-  details.push("Recent trusted activity carries the other 65%");
-  details.push("Hotness is gated by quality before visibility");
-  details.push(WAVE_SCORE_FORMULA_HINT);
-
-  return details;
+  return [
+    `Hotness score: ${hotnessScore}`,
+    ...(qualityScore === null
+      ? []
+      : [`Quality input: ${qualityScore} (35% of hotness)`]),
+    "Recent trusted activity carries the other 65%",
+    "Hotness is gated by quality before visibility",
+    WAVE_SCORE_FORMULA_HINT,
+  ];
 };
 
 const buildRepDetails = ({
@@ -418,31 +427,22 @@ const buildRepDetails = ({
   readonly repSortScore: string | null;
   readonly waveRep: ApiWaveRepSummary | null | undefined;
 }): string[] => {
-  const details: string[] = [];
   const rawRep = formatSignedFullNumber(waveRep?.total_rep);
 
-  if (rawRep !== null) {
-    details.push(`Wave REP: ${rawRep} raw`);
-  }
-
-  if (repSortScore !== null) {
-    details.push(`REP score: ${repSortScore}`);
-  }
-
-  details.push("REP contributes 35% of quality");
-  details.push(WAVE_SCORE_FORMULA_HINT);
-
-  return details;
+  return [
+    ...(rawRep === null ? [] : [`Wave REP: ${rawRep} raw`]),
+    ...(repSortScore === null ? [] : [`REP score: ${repSortScore}`]),
+    "REP contributes 35% of quality",
+    WAVE_SCORE_FORMULA_HINT,
+  ];
 };
 
 function WaveScoreSummaryTooltip({
   details,
   id,
-  learnMoreHref,
 }: {
   readonly details: readonly string[];
   readonly id: string;
-  readonly learnMoreHref: string;
 }) {
   const [primaryDetail, ...secondaryDetails] = details;
 
@@ -464,12 +464,9 @@ function WaveScoreSummaryTooltip({
           </span>
         ))}
       </span>
-      <Link
-        href={learnMoreHref}
-        className="tw-pointer-events-auto tw-mt-3 tw-inline-flex tw-items-center tw-rounded-md tw-bg-primary-500/15 tw-px-2 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-primary-200 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-primary-400/30 tw-transition hover:tw-bg-primary-500/25 hover:tw-text-primary-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
-      >
-        Learn how wave score works
-      </Link>
+      <span className="tw-mt-3 tw-block tw-text-xs tw-font-semibold tw-text-primary-300">
+        Click score to open the full formula
+      </span>
     </span>
   );
 }
@@ -560,64 +557,77 @@ export function WaveTrustSignals({
     const summaryLabel = summaryDetails.join(". ");
     const summaryTitle = hasNativeTitle ? summaryDetails.join("\n") : undefined;
     const summaryTooltip = summaryDetails.join(" | ");
+    const summaryChipClasses = `${getChipClasses(
+      variant,
+      mode,
+      getVisibilityToneClasses(variant, waveScore?.visibility_score)
+    )} ${
+      hasRichTooltip
+        ? "tw-group tw-relative tw-isolate tw-overflow-visible tw-no-underline"
+        : ""
+    }`;
+    const summaryChipContent = (
+      <>
+        <ShieldCheckIcon
+          className={getIconClasses(variant)}
+          strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
+          aria-hidden="true"
+        />
+        <span className={getChipLabelClasses(variant)}>Score</span>
+        <span className={getValueClasses(variant)}>{visibilityScore}</span>
+        {hasRichTooltip && (
+          <WaveScoreSummaryTooltip id={richTooltipId} details={summaryDetails} />
+        )}
+      </>
+    );
 
     return renderContainer({
       variant,
       className: containerClasses,
       children: (
-        <span
-          className={`${getChipClasses(
-            variant,
-            mode,
-            getVisibilityToneClasses(variant, waveScore?.visibility_score)
-          )} ${
-            hasRichTooltip
-              ? "tw-group tw-relative tw-isolate tw-overflow-visible"
-              : ""
-          }`}
-          aria-label={summaryLabel}
-          aria-describedby={hasRichTooltip ? richTooltipId : undefined}
-          tabIndex={hasRichTooltip ? 0 : undefined}
-          title={summaryTitle}
-          {...(hasRichTooltip || !shouldUseInlineSidebarTooltip
-            ? {}
-            : getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip))}
-        >
-          <ShieldCheckIcon
-            className={getIconClasses(variant)}
-            strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
-            aria-hidden="true"
-          />
-          <span className={getChipLabelClasses(variant)}>Score</span>
-          <span className={getValueClasses(variant)}>{visibilityScore}</span>
-          {hasRichTooltip && (
-            <WaveScoreSummaryTooltip
-              id={richTooltipId}
-              details={summaryDetails}
-              learnMoreHref={learnMoreHref}
-            />
+        <>
+          {hasRichTooltip ? (
+            <Link
+              href={learnMoreHref}
+              className={summaryChipClasses}
+              aria-label={summaryLabel}
+              aria-describedby={richTooltipId}
+            >
+              {summaryChipContent}
+            </Link>
+          ) : (
+            <span
+              className={summaryChipClasses}
+              aria-label={summaryLabel}
+              title={summaryTitle}
+              {...(shouldUseInlineSidebarTooltip
+                ? getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)
+                : {})}
+            >
+              {summaryChipContent}
+            </span>
           )}
-        </span>
+        </>
       ),
     });
   }
 
   const visibilityDetails =
-    visibilityScore !== null
-      ? buildSummaryDetails({
+    visibilityScore === null
+      ? []
+      : buildSummaryDetails({
           visibilityScore,
           qualityScore,
           hotnessScore,
           repSortScore,
           waveRep,
-        })
-      : [];
+        });
   const visibilityTitle = visibilityDetails.join("\n");
   const visibilityTooltip = visibilityDetails.join(" | ");
   const hotnessDetails =
-    hotnessScore !== null
-      ? buildHotnessDetails({ hotnessScore, qualityScore })
-      : [];
+    hotnessScore === null
+      ? []
+      : buildHotnessDetails({ hotnessScore, qualityScore });
   const hotnessTitle = hotnessDetails.join("\n");
   const hotnessTooltip = hotnessDetails.join(" | ");
   const repDetails =

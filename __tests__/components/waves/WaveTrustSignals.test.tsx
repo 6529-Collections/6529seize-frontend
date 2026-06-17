@@ -69,11 +69,13 @@ describe("WaveTrustSignals", () => {
     const summaryBadge = screen.getByText("Score").closest("[aria-label]");
 
     expect(summaryBadge).not.toBeNull();
-    expect(summaryBadge).toHaveAttribute("tabindex", "0");
     expect(summaryBadge).not.toHaveAttribute("title");
     expect(
-      screen.getByRole("link", { name: "Learn how wave score works" })
+      screen.getByRole("link", { name: /^Combined score: 83\./ })
     ).toHaveAttribute("href", "/network/wave-score");
+    expect(
+      screen.getByText("Click score to open the full formula")
+    ).toBeInTheDocument();
     expect(
       screen.getByText("A quick signal for which waves deserve broad attention")
     ).toBeInTheDocument();
