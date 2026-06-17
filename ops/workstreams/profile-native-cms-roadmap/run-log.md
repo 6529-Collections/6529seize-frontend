@@ -560,5 +560,12 @@ Focused validation passed:
   `.env` does not set it. This is being treated as a local helper/process-env
   caveat, not a tracked CMS builder code defect.
 
-PR status to be filled after remaining focused checks and stacked PR
-publication.
+PR status:
+
+- Opened stacked FE PR #2726:
+  https://github.com/6529-Collections/6529seize-frontend/pull/2726
+- Base: `codex/profile-cms-runtime-bridge`
+- Head: `codex/profile-cms-builder-mvp`
+- Initial CodeRabbit status was success, but the explicit review request hit
+  the organization review rate limit. No actionable review findings were
+  returned before handoff.
