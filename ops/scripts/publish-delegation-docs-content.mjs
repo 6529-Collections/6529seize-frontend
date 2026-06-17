@@ -19,6 +19,7 @@ const BUNDLE_DIR = path.join(
 const RECEIPT_DIR = path.join(REPO_ROOT, "tmp", "delegation-docs-publish");
 const RECEIPT_PATH = path.join(RECEIPT_DIR, `${VERSION}-ipfs-receipt.json`);
 const DEFAULT_GATEWAY_BASE_URL = "https://ipfs.6529.io/ipfs";
+const CID_V1_BASE32_PATTERN = /^b[a-z2-7]{20,120}$/;
 
 const args = new Set(process.argv.slice(2));
 const dryRun = args.has("--dry-run");
@@ -38,6 +39,14 @@ function trimTrailingSlashes(value) {
 
 function isPlainObject(value) {
   return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function assertCid(value, label) {
+  if (typeof value !== "string" || !CID_V1_BASE32_PATTERN.test(value)) {
+    throw new Error(`${label} is not a CIDv1 base32 value: ${String(value)}`);
+  }
+
+  return value;
 }
 
 function assertInsideRepo(targetPath) {
@@ -260,13 +269,9 @@ async function publishToIpfs(files) {
     }
   });
   const rootEntry = entries.find((entry) => entry.Name === "") ?? entries.at(-1);
-  const rootCid = rootEntry?.Hash;
+  const rootCid = assertCid(rootEntry?.Hash, "IPFS root CID");
 
-  if (!rootCid) {
-    throw new Error("IPFS add response did not include a root CID");
-  }
-
-  return { rootCid, entries };
+  return { rootCid, entryCount: entries.length };
 }
 
 function getGatewayBaseUrl() {
@@ -447,7 +452,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     bundleDir: BUNDLE_DIR,
     files: fileReceipts,
-    ipfsEntries: published.entries,
+    ipfsEntryCount: published.entryCount,
     gatewayVerification,
     cdnVerification,
     manifestUpdateCommand: `DELEGATION_DOCS_IPFS_ROOT_CID=${published.rootCid} node ops/scripts/build-delegation-docs-content.mjs`,
