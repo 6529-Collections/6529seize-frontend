@@ -130,6 +130,33 @@ Publish public release notes after production is deployed and production validat
 6. Re-check the latest wave drop before posting so the number did not advance while the deploy was running. If another release note appeared, renumber and adjust the draft.
 7. Post the release note only after production validation is green. Capture the wave drop URL or serial number for closeout evidence.
 
+## Follow The Repo Deployment Overview
+
+After production validation passes, post a detailed deployment overview to the `Follow The Repo` wave unless the user explicitly asked to skip repo-facing deploy notes. This is separate from the public `6529 Releases` note: use it for repo watchers who need enough operational detail to understand exactly what shipped.
+
+1. Use any authorized 6529.io account/profile or posting credential that the current operator personally controls or is explicitly approved to use for this release, such as an existing browser session or an approved local helper/API token. Do not request raw credentials, expose tokens, use shared wallets, use another person's account, or use automation keys unless that access was explicitly approved for this release.
+2. Resolve the wave immediately before posting. The current `Follow The Repo` wave is `https://6529.io/waves/49f0e595-ec7c-4235-8695-a527f61b69f4`; if using the local helper, verify it first:
+
+```powershell
+punk6529bot waves search --name "follow the repo"
+```
+
+3. Draft the overview from deployed production reality. Unlike the public release note, this repo-facing overview should include public PR links and SHAs. Include:
+   - what user-facing and operator-facing changes were deployed
+   - frontend and backend PRs, merge SHAs, production deployed SHA/version label, and deploy run links
+   - staging and production validation performed, including E2E or smoke results
+   - incidents, failed gates, fix-forward or rollback decisions, and final state
+   - known follow-ups, skipped checks, and remaining risks
+4. Keep the post detailed but safe to publish. Use public GitHub/workflow links when possible, but omit secrets, credentials, cookies, private URLs, raw production data, local paths, hidden prompts, and internal-only exploit or incident details.
+5. Re-check the wave before sending so the overview is not duplicating a newer deploy note. If the local helper is available, dry-run or draft first, then send after the content passes the safety check:
+
+```powershell
+punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --text "<deployment overview>"
+punk6529bot waves post 49f0e595-ec7c-4235-8695-a527f61b69f4 --text "<deployment overview>" --send
+```
+
+6. Capture the wave drop URL or serial number for closeout evidence. If no authorized 6529.io posting credential is available, include the exact ready-to-post overview in the closeout and mark the wave publication as blocked.
+
 ## Backend Coordination
 
 Use `ops/skills/deploy-6529/SKILL.md` from the separate repository `6529-Collections/6529seize-backend` for backend deployment work. Do not resolve that path inside the frontend repo. The frontend skill owns frontend merge/deploy/validation; the backend skill owns backend service order, migrations, API/lambda smoke checks, failed-gate recovery, and backend production validation.
@@ -163,6 +190,7 @@ Report:
 - staging deploy run, deployed SHA, and E2E result
 - production deploy run, deployed SHA, and E2E result
 - release-note wave drop URL or serial number, or why publication was skipped/blocked
+- `Follow The Repo` wave drop URL or serial number, or the ready-to-post overview if publication was blocked
 - backend deploy status when involved
 - failures encountered and fixes or rollbacks performed
 - remaining risks, skipped checks, and any human follow-up required
