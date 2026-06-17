@@ -1,0 +1,585 @@
+{
+  "version": "delegation-docs-2026-06-16",
+  "generatedAt": "2026-06-16T00:00:00.000Z",
+  "source": {
+    "type": "reviewed-package",
+    "importedFrom": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html",
+    "note": "Runtime code must not fetch this mutable S3 source. Use DELEGATION_DOCS_IMPORT_LEGACY_S3=1 only to refresh seed content, then review the versioned repo package and publish that package by CID."
+  },
+  "canonicalStorage": {
+    "type": "ipfs",
+    "rootCid": null,
+    "note": "Set DELEGATION_DOCS_IPFS_ROOT_CID after the reviewed bundle is published and pinned."
+  },
+  "acceleration": {
+    "primaryGatewayBaseUrl": "https://ipfs.6529.io/ipfs",
+    "fallbackGatewayBaseUrls": [
+      "https://ipfs.io/ipfs"
+    ],
+    "cloudFrontBaseUrl": null,
+    "note": "CloudFront/S3 may be used only as a CID/version-addressed mirror. Runtime verifies article hashes before rendering."
+  },
+  "localBasePath": "/delegation-content/delegation-docs-2026-06-16",
+  "assets": {
+    "assets/diagrams/2-add-con-trans1.png": {
+      "path": "assets/diagrams/2-add-con-trans1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/2-add-con-trans1.png",
+      "sha256": "19d92a56c5f74225e573aee54a798f155598b29392ada4ac8b5f8aeeb196f9a9",
+      "bytes": 45089
+    },
+    "assets/diagrams/2-add-con-trans2.png": {
+      "path": "assets/diagrams/2-add-con-trans2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/2-add-con-trans2.png",
+      "sha256": "4180b08482fb63361a04a31894f9b5e6b66b73e50b65fc09b10acf0523d1cba0",
+      "bytes": 39990
+    },
+    "assets/diagrams/2-address-consolidation.png": {
+      "path": "assets/diagrams/2-address-consolidation.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/2-address-consolidation.png",
+      "sha256": "eee27d6f79b4a5754fa2314acc45c63efbdbf37818d2e074d92fab2b89ea88eb",
+      "bytes": 7351
+    },
+    "assets/diagrams/3-address-consolidation-del-man-trans1.png": {
+      "path": "assets/diagrams/3-address-consolidation-del-man-trans1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-del-man-trans1.png",
+      "sha256": "35a47931cd8cedc3f218d186ad51e73e8f148bdf9b72770546b3d5131382616d",
+      "bytes": 37079
+    },
+    "assets/diagrams/3-address-consolidation-del-man-trans2.png": {
+      "path": "assets/diagrams/3-address-consolidation-del-man-trans2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-del-man-trans2.png",
+      "sha256": "51edfd2bd8a868a2f60b981731c01df311e5d1cb472d6e1eee3a806fb669654e",
+      "bytes": 32395
+    },
+    "assets/diagrams/3-address-consolidation-del-man-trans3.png": {
+      "path": "assets/diagrams/3-address-consolidation-del-man-trans3.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-del-man-trans3.png",
+      "sha256": "55fb2e8b62b25436176638747100fbcbc592dd927ec4e5570cad735d12a35c12",
+      "bytes": 55689
+    },
+    "assets/diagrams/3-address-consolidation-del-man-trans4.png": {
+      "path": "assets/diagrams/3-address-consolidation-del-man-trans4.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-del-man-trans4.png",
+      "sha256": "f30e0eb350d0f62e14a4422f0b805e2a84d60d832f69cd44331d53a24c0c4b84",
+      "bytes": 49990
+    },
+    "assets/diagrams/3-address-consolidation-del-man-trans5.png": {
+      "path": "assets/diagrams/3-address-consolidation-del-man-trans5.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-del-man-trans5.png",
+      "sha256": "c96cde6371e715531e1dd092e400e0b4cd6a227dbef48b1e740ba6397691f781",
+      "bytes": 36382
+    },
+    "assets/diagrams/3-address-consolidation-del-man-trans6.png": {
+      "path": "assets/diagrams/3-address-consolidation-del-man-trans6.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-del-man-trans6.png",
+      "sha256": "4a0603d2fb7b629e8c3270ae81ad4ff9b8f133d31c8fcbad0eaf8c440d24f3b6",
+      "bytes": 43101
+    },
+    "assets/diagrams/3-address-consolidation-trans1.png": {
+      "path": "assets/diagrams/3-address-consolidation-trans1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-trans1.png",
+      "sha256": "bb175f1c1a9ac8cb435592d183f1b86dc3c8a4ee554c1dcc1892bc243971a5af",
+      "bytes": 43799
+    },
+    "assets/diagrams/3-address-consolidation-trans2.png": {
+      "path": "assets/diagrams/3-address-consolidation-trans2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-trans2.png",
+      "sha256": "dd2d7f009b407e2482217f2aca32280723778927554a271b8398b6bcd0628270",
+      "bytes": 37023
+    },
+    "assets/diagrams/3-address-consolidation-trans3.png": {
+      "path": "assets/diagrams/3-address-consolidation-trans3.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-trans3.png",
+      "sha256": "8acb03bb93255fdaf46794499f093b20e5e31c16ccd093a30c37f96da701a172",
+      "bytes": 37116
+    },
+    "assets/diagrams/3-address-consolidation-trans4.png": {
+      "path": "assets/diagrams/3-address-consolidation-trans4.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-trans4.png",
+      "sha256": "f97fddf10aa8910ac7785617f136f98189f357a2c10a5572b098efeba71ab249",
+      "bytes": 37302
+    },
+    "assets/diagrams/3-address-consolidation-trans5.png": {
+      "path": "assets/diagrams/3-address-consolidation-trans5.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-trans5.png",
+      "sha256": "9308c1c3a85ac5386f1f62d0ccbd4993545cf77fa76733e7dd0e64271654aecd",
+      "bytes": 36620
+    },
+    "assets/diagrams/3-address-consolidation-trans6.png": {
+      "path": "assets/diagrams/3-address-consolidation-trans6.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation-trans6.png",
+      "sha256": "7ce840446de2c7dc212228dba3bb06b602a3ab5920ebe7b1ef8608c16b895a23",
+      "bytes": 42981
+    },
+    "assets/diagrams/3-address-consolidation.png": {
+      "path": "assets/diagrams/3-address-consolidation.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/3-address-consolidation.png",
+      "sha256": "19486f1e5ebb2a286afcece3e4815d81d88e5dfb81002ba1b3dbe06e8166fcd6",
+      "bytes": 15843
+    },
+    "assets/diagrams/normal-delegation.png": {
+      "path": "assets/diagrams/normal-delegation.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/normal-delegation.png",
+      "sha256": "389f713375cd56a8c00eed9807c727b65c25d39b89bff85e62bc72efd3a5ad40",
+      "bytes": 37249
+    },
+    "assets/diagrams/register-using-delegation-manager-2add.png": {
+      "path": "assets/diagrams/register-using-delegation-manager-2add.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/register-using-delegation-manager-2add.png",
+      "sha256": "3d17fc6d64a2e26cab8d5a6da15fbd87480bc66e6c15339d2bf757587924d4e2",
+      "bytes": 50458
+    },
+    "assets/diagrams/register-using-delegation-manager.png": {
+      "path": "assets/diagrams/register-using-delegation-manager.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/register-using-delegation-manager.png",
+      "sha256": "025346c6eccd9ac72006b97ad1d784bc7568b033bdc0f27a9e7ecb0d3aafb05d",
+      "bytes": 50766
+    },
+    "assets/diagrams/set-delegation-manager.png": {
+      "path": "assets/diagrams/set-delegation-manager.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/diagrams/set-delegation-manager.png",
+      "sha256": "5717279346428d772ed4570e71131c8ce274f3ba1662037dca6bd64a82f8f17e",
+      "bytes": 36972
+    },
+    "assets/html/reference-delegation/proposed_set_delegation_step1__2.png": {
+      "path": "assets/html/reference-delegation/proposed_set_delegation_step1__2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegation/proposed_set_delegation_step1__2.png",
+      "sha256": "22ea49d2496e278d91262c2c58f1b0f0883d3623e1dc63825f898f3db1b7ba85",
+      "bytes": 27618
+    },
+    "assets/html/reference-delegation/proposed_set_delegation_step2a__2.png": {
+      "path": "assets/html/reference-delegation/proposed_set_delegation_step2a__2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegation/proposed_set_delegation_step2a__2.png",
+      "sha256": "697db7213da8623b4cb4ec9990f7c4dacf259925c84cf7f920fad086cef5eb91",
+      "bytes": 38988
+    },
+    "assets/html/reference-delegation/proposed_set_delegation_step2b__1.png": {
+      "path": "assets/html/reference-delegation/proposed_set_delegation_step2b__1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegation/proposed_set_delegation_step2b__1.png",
+      "sha256": "2d1e3d960cf6b28735069bb7c2c35482518967ef8dd992d7da473e55e7646982",
+      "bytes": 32349
+    },
+    "assets/html/reference-delegation/proposed_set_delegation_step2b__2.png": {
+      "path": "assets/html/reference-delegation/proposed_set_delegation_step2b__2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegation/proposed_set_delegation_step2b__2.png",
+      "sha256": "7c7534b3cd74e64b85d196ada4b954d88706d2f4d845c36ce9143e8d31861b4f",
+      "bytes": 32325
+    },
+    "assets/html/reference-delegation/proposed_set_delegation_step2b__3.png": {
+      "path": "assets/html/reference-delegation/proposed_set_delegation_step2b__3.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegation/proposed_set_delegation_step2b__3.png",
+      "sha256": "c2bedd2798fec05ea2d66158a1de1f5deaf3749c1080a64a19a071558e20e831",
+      "bytes": 60453
+    },
+    "assets/screenshots/how_to_register_consolidation_1.png": {
+      "path": "assets/screenshots/how_to_register_consolidation_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/how_to_register_consolidation_1.png",
+      "sha256": "9eb7e3056c5a6951006445d7f212ee242dc1d8834ced4f11b401fdb9e8e80ee9",
+      "bytes": 3022
+    },
+    "assets/screenshots/how_to_register_consolidation_2.png": {
+      "path": "assets/screenshots/how_to_register_consolidation_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/how_to_register_consolidation_2.png",
+      "sha256": "eb1f0f122c0c2ea7305c9ac3f68def6298b36623ceb30ea514a295d60d1f4714",
+      "bytes": 33102
+    },
+    "assets/screenshots/how_to_register_delegation_1.png": {
+      "path": "assets/screenshots/how_to_register_delegation_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/how_to_register_delegation_1.png",
+      "sha256": "26e88ee5ddb61c431616819ea3c80dfb298d220c983697405c51515a9dbd810e",
+      "bytes": 2827
+    },
+    "assets/screenshots/how_to_register_delegation_2.png": {
+      "path": "assets/screenshots/how_to_register_delegation_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/how_to_register_delegation_2.png",
+      "sha256": "48e6d95ae8675d89d36f85bf83eddd75adb5072dab93dc35d2be1fd2cc10a69b",
+      "bytes": 39923
+    },
+    "assets/screenshots/how_to_register_sub-delegation_1.png": {
+      "path": "assets/screenshots/how_to_register_sub-delegation_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/how_to_register_sub-delegation_1.png",
+      "sha256": "dd588637d25fc0208a764bdcf631a3dd2925c69eccaaa9d2924acb5841a52831",
+      "bytes": 4323
+    },
+    "assets/screenshots/how_to_register_sub-delegation_2.png": {
+      "path": "assets/screenshots/how_to_register_sub-delegation_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/how_to_register_sub-delegation_2.png",
+      "sha256": "22ea49d2496e278d91262c2c58f1b0f0883d3623e1dc63825f898f3db1b7ba85",
+      "bytes": 27618
+    },
+    "assets/screenshots/lock_wallet_global_1.png": {
+      "path": "assets/screenshots/lock_wallet_global_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/lock_wallet_global_1.png",
+      "sha256": "e7a14ad30dc44e7f087e34aa3467d9336eabef787e5e9a77a6662b092bca2b99",
+      "bytes": 4493
+    },
+    "assets/screenshots/lock_wallet_usecase_1.png": {
+      "path": "assets/screenshots/lock_wallet_usecase_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/lock_wallet_usecase_1.png",
+      "sha256": "5a3313e7c47ccc14e52a09967d60ace80d930526c6691b6b256d35777ffd2d46",
+      "bytes": 72136
+    },
+    "assets/screenshots/lock_wallet_usecase_2.png": {
+      "path": "assets/screenshots/lock_wallet_usecase_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/lock_wallet_usecase_2.png",
+      "sha256": "4b1251c3e4bd2042f017db3b1fa916d86f2dae42155e9b01827fdec7ebef200e",
+      "bytes": 7591
+    },
+    "assets/screenshots/NFTDelegationABI.js.json": {
+      "path": "assets/screenshots/NFTDelegationABI.js.json",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/NFTDelegationABI.js.json",
+      "sha256": "89d56429eb5c5c82b9a02eb2a937c3bfd27488fb8d232369283ab17d41f06cf8",
+      "bytes": 17412
+    },
+    "assets/screenshots/proposed_set_delegation-2address_step2b.png": {
+      "path": "assets/screenshots/proposed_set_delegation-2address_step2b.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/proposed_set_delegation-2address_step2b.png",
+      "sha256": "24d50f8908189851a026b3af18dad8b1bc8eff76a444bd49dfb6a2f9590551db",
+      "bytes": 60583
+    },
+    "assets/screenshots/register_delegation_sub-del_1.png": {
+      "path": "assets/screenshots/register_delegation_sub-del_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/register_delegation_sub-del_1.png",
+      "sha256": "e17a3ad516f49f6687bf3709523d62c4e1e3b6c5f1250a2363fa7c478858bc1a",
+      "bytes": 38534
+    },
+    "assets/screenshots/register_delegation_sub-del_2.png": {
+      "path": "assets/screenshots/register_delegation_sub-del_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/register_delegation_sub-del_2.png",
+      "sha256": "1a1b1ff91d043adecd782da2145ab73e83ee7e91f7e476e8211f91b197759912",
+      "bytes": 25869
+    },
+    "assets/screenshots/register_delegation_sub-del_3.png": {
+      "path": "assets/screenshots/register_delegation_sub-del_3.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/register_delegation_sub-del_3.png",
+      "sha256": "31e6aa1b0ff8bb05bb2943d0ea1f886093286e20169336482811b390288b61eb",
+      "bytes": 60077
+    },
+    "assets/screenshots/revoke_delegation_sub-del_1.png": {
+      "path": "assets/screenshots/revoke_delegation_sub-del_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/revoke_delegation_sub-del_1.png",
+      "sha256": "43136558088cf9c23d84b37cfe3813f69123445527bef67bad01250d17cfa453",
+      "bytes": 28999
+    },
+    "assets/screenshots/revoke_delegation_sub-del_2.png": {
+      "path": "assets/screenshots/revoke_delegation_sub-del_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/revoke_delegation_sub-del_2.png",
+      "sha256": "c0e927d69c852f42154899b16fef02d0e832ee799bec453f2bdd514432ec561d",
+      "bytes": 40063
+    },
+    "assets/screenshots/safe1.png": {
+      "path": "assets/screenshots/safe1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/safe1.png",
+      "sha256": "c83d8131c4205901a6934f839c5b80a6d218ded7f2aa5c018c12e37b8fe2739f",
+      "bytes": 43911
+    },
+    "assets/screenshots/safe2.png": {
+      "path": "assets/screenshots/safe2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/safe2.png",
+      "sha256": "5671792021535b20cafc809a2d44a84634c235759c24586d525a36ac2e672512",
+      "bytes": 47924
+    },
+    "assets/screenshots/safe3.png": {
+      "path": "assets/screenshots/safe3.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/safe3.png",
+      "sha256": "4ec5182b1ff762a642d22357720dab497c9522a97bf033e4ed6ccf700245d6f3",
+      "bytes": 13254
+    },
+    "assets/screenshots/safe4.png": {
+      "path": "assets/screenshots/safe4.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/safe4.png",
+      "sha256": "f21a23308c0d911ace4386caa0adcb27c7ebc2e5852eb9807ddf69ae5f98da64",
+      "bytes": 29209
+    },
+    "assets/screenshots/safe5.png": {
+      "path": "assets/screenshots/safe5.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/safe5.png",
+      "sha256": "8ba074fcbdff6fb36fa58e9c1265ee1bb40ceba1365cd0ba26e7973b0dd40047",
+      "bytes": 34008
+    },
+    "assets/screenshots/unlock_collection_wallet_1.png": {
+      "path": "assets/screenshots/unlock_collection_wallet_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/unlock_collection_wallet_1.png",
+      "sha256": "ade4d2e9065514594adf43edc0782933507f234cbe8d8e59efd800753cd3bf51",
+      "bytes": 4655
+    },
+    "assets/screenshots/unlock_wallet_usecase_1.png": {
+      "path": "assets/screenshots/unlock_wallet_usecase_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/unlock_wallet_usecase_1.png",
+      "sha256": "5057b3e5e2ee86fafc93ca57428c8a15f1e72fa8e4c93afb0688219639b903ed",
+      "bytes": 7425
+    },
+    "assets/screenshots/update_delegation_1.png": {
+      "path": "assets/screenshots/update_delegation_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/update_delegation_1.png",
+      "sha256": "4cfbcb50409388908112969f367940f6f5b1e9f72e60bc75d54ab31debd6ed5a",
+      "bytes": 21309
+    },
+    "assets/screenshots/update_delegation_2.png": {
+      "path": "assets/screenshots/update_delegation_2.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/update_delegation_2.png",
+      "sha256": "c261e1f954ece8931e419b2e1e6c907009f6a6572744618d148874c842c08293",
+      "bytes": 50645
+    },
+    "assets/screenshots/view_manage_1.png": {
+      "path": "assets/screenshots/view_manage_1.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/view_manage_1.png",
+      "sha256": "12723f35e059dd10e97cae608a4b1bc9a750dcbf94af59bf4957206700492d09",
+      "bytes": 37141
+    },
+    "assets/screenshots/view_manage_3.png": {
+      "path": "assets/screenshots/view_manage_3.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/view_manage_3.png",
+      "sha256": "4c7ff95d842bad11ed4856999a18ebc790a11f00c7bd1a29397a7118c9068845",
+      "bytes": 35599
+    },
+    "assets/screenshots/view_manage_4.png": {
+      "path": "assets/screenshots/view_manage_4.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/view_manage_4.png",
+      "sha256": "cc193dde82c72bda9804f3754f16c9ae684fa7858f65287a0c4a7259fa815574",
+      "bytes": 38952
+    },
+    "assets/screenshots/view_manage_5.png": {
+      "path": "assets/screenshots/view_manage_5.png",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/screenshots/view_manage_5.png",
+      "sha256": "d944cf1aa71597cd03854fbdbb6a16f6a478c46f099064e352d19632a27f611d",
+      "bytes": 37546
+    }
+  },
+  "articles": {
+    "reference-overview-wallet-architecture": {
+      "title": "Wallet Architecture",
+      "summary": "How vault, transaction, and minting wallets fit into the delegation architecture.",
+      "group": "Reference",
+      "path": "html/reference-overview-wallet-architecture.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-overview-wallet-architecture.html",
+      "sourceUri": null,
+      "sha256": "f6837483a872cf36cd92bf7fb9a6d5418d09b0d34a97354c2b1bfee4a78cb6a1"
+    },
+    "delegation-faq": {
+      "title": "Delegation FAQ",
+      "summary": "Index of the registration, viewing, management, lock, and unlock help articles.",
+      "group": "Reference",
+      "path": "html/delegation-faq.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/delegation-faq.html",
+      "sourceUri": null,
+      "sha256": "525178915ab9a82807baa4367f12689071e822e1579c22ff61cb36a74b444512"
+    },
+    "consolidation-use-cases": {
+      "title": "Consolidation Use Cases",
+      "summary": "When to use consolidations and how they affect 6529 collection metrics.",
+      "group": "Reference",
+      "path": "html/consolidation-use-cases.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/consolidation-use-cases.html",
+      "sourceUri": null,
+      "sha256": "dea36f29f402ebf42fc1e9714ce6c758aecd9196ab15e0f604e8eb39d4db56d1"
+    },
+    "register-delegation": {
+      "title": "How to Register a Delegation?",
+      "summary": "Register a wallet that can use NFT utility without transferring the NFT.",
+      "group": "How to Register",
+      "path": "html/register-delegation.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation.html",
+      "sourceUri": null,
+      "sha256": "31ce2842e8ff73d4de62d096b6067993340ebbce8488638bd537bdeb121e0801"
+    },
+    "register-sub-delegation": {
+      "title": "How to Register a Delegation Manager?",
+      "summary": "Give a manager wallet permission to maintain delegations and consolidations.",
+      "group": "How to Register",
+      "path": "html/register-sub-delegation.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-sub-delegation.html",
+      "sourceUri": null,
+      "sha256": "b32847c4ad659430d13d0ffa6caab370fc40224781b51cccc0054be836e2ecba"
+    },
+    "register-consolidation": {
+      "title": "How to Register a Consolidation?",
+      "summary": "Connect wallets you control so 6529 can treat them together for wallet metrics.",
+      "group": "How to Register",
+      "path": "html/register-consolidation.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-consolidation.html",
+      "sourceUri": null,
+      "sha256": "d7dbb0df9ad3e71fac99a477be880d6d237c362b05838a4742d70b617d9ca360"
+    },
+    "reference-delegations-2address-del-manager": {
+      "title": "How to Register Delegations (2-Address Architecture) with Delegation Manager?",
+      "summary": "Set up a vault and transaction wallet pattern using a delegation manager.",
+      "group": "How to Register",
+      "path": "html/reference-delegations-2address-del-manager.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-2address-del-manager.html",
+      "sourceUri": null,
+      "sha256": "6d87d53d4a4bb3d1195f1f4418fa9da31cb8dfbaf09ae2b16151cc3a98068be1"
+    },
+    "reference-delegations-3address-del-manager": {
+      "title": "How to Register Delegations (TAP) with Delegation Manager?",
+      "summary": "Set up a three-address vault, transaction, and minting wallet pattern.",
+      "group": "How to Register",
+      "path": "html/reference-delegations-3address-del-manager.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-delegations-3address-del-manager.html",
+      "sourceUri": null,
+      "sha256": "81f4d5b48b78c856a65a31a581b86c1e233150fb69ef0aec7da9f1e70805df72"
+    },
+    "reference-consolidations-2address": {
+      "title": "How to Register Consolidations (2-Address Architecture)?",
+      "summary": "Register reciprocal consolidations between two wallets you control.",
+      "group": "How to Register",
+      "path": "html/reference-consolidations-2address.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-2address.html",
+      "sourceUri": null,
+      "sha256": "e0c495f50d3ee36ee48ef1912b8dcd77f7b48df0d9b3a8c3f8ab634b04c71e88"
+    },
+    "reference-consolidations-3address": {
+      "title": "How to Register Consolidations (TAP)?",
+      "summary": "Register the consolidation links needed for a three-address wallet setup.",
+      "group": "How to Register",
+      "path": "html/reference-consolidations-3address.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-3address.html",
+      "sourceUri": null,
+      "sha256": "bc3019f33b76d78f8c1c596879b04bf23480f658713a79ea1071c3e747bf2e94"
+    },
+    "reference-consolidations-3address-del-manager": {
+      "title": "How to Register Consolidations (TAP) with Delegation Manager?",
+      "summary": "Use manager rights to maintain consolidations in a three-address setup.",
+      "group": "How to Register",
+      "path": "html/reference-consolidations-3address-del-manager.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/reference-consolidations-3address-del-manager.html",
+      "sourceUri": null,
+      "sha256": "708e81247df24e47f94c556807804ac6fcd4bf887ca41f47b00bfd1c28290057"
+    },
+    "using-safe": {
+      "title": "How to Delegate using SAFE (formerly GNOSIS)?",
+      "summary": "Use Safe transaction builder to register delegation manager rights.",
+      "group": "How to Register",
+      "path": "html/using-safe.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/using-safe.html",
+      "sourceUri": null,
+      "sha256": "b88d389fc32193d8e7015b7fc3245a977b79cf24aaa78ea25c63c3bc62c563f1"
+    },
+    "use-cases-overview": {
+      "title": "Which Use Cases are Supported?",
+      "summary": "Review the canonical delegation use-case numbers supported by 6529.",
+      "group": "How to Register",
+      "path": "html/use-cases-overview.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/use-cases-overview.html",
+      "sourceUri": null,
+      "sha256": "5d6f0f17a5b2c2670da128d8489e06596f0f112c00c07e732f0e0941cf6ba1f5"
+    },
+    "view-delegations": {
+      "title": "How to View Your Delegations?",
+      "summary": "Find outgoing and incoming delegation records from the collection pages.",
+      "group": "How to View",
+      "path": "html/view-delegations.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-delegations.html",
+      "sourceUri": null,
+      "sha256": "7372ee3f0af310a7c661a3a9dd160dd67e8f8248837a7c05424954bf24aa1379"
+    },
+    "view-sub-delegations": {
+      "title": "How to View Your Delegation Managers?",
+      "summary": "Find outgoing and incoming delegation manager permissions.",
+      "group": "How to View",
+      "path": "html/view-sub-delegations.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-sub-delegations.html",
+      "sourceUri": null,
+      "sha256": "769017de3ce98b964c6e73a67a0a40e9daac3cee4e6283d1003f0012c3ee9925"
+    },
+    "view-consolidations": {
+      "title": "How to View Your Consolidations?",
+      "summary": "Find outgoing and incoming consolidation records from the collection pages.",
+      "group": "How to View",
+      "path": "html/view-consolidations.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/view-consolidations.html",
+      "sourceUri": null,
+      "sha256": "9793b8a8b894e9e38aecf854176d92385bb4397ed80cc218f032b11231834640"
+    },
+    "manage-update": {
+      "title": "How to Update a Delegation, Delegation Manager, or Consolidation?",
+      "summary": "Update the delegated wallet, expiry, or token scope for an existing record.",
+      "group": "How to Manage",
+      "path": "html/manage-update.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/manage-update.html",
+      "sourceUri": null,
+      "sha256": "519304288b84992e25f0e85fea0ae4853d7e23f618f079734e5dff9bd3106db5"
+    },
+    "manage-revoke": {
+      "title": "How to Revoke a Delegation, Delegation Manager, or Consolidation?",
+      "summary": "Remove a delegation, manager permission, or consolidation record.",
+      "group": "How to Manage",
+      "path": "html/manage-revoke.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/manage-revoke.html",
+      "sourceUri": null,
+      "sha256": "9c50eb855c2145cf4b42ce8eaaf18b4cdae0733a03a96032d99ed59655198c1c"
+    },
+    "register-delegation-using-sub-delegation": {
+      "title": "How to Register a Delegation Using Delegation Management Rights?",
+      "summary": "Register a delegation from a manager wallet after manager rights exist.",
+      "group": "How to Manage using Delegation Management Rights",
+      "path": "html/register-delegation-using-sub-delegation.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/register-delegation-using-sub-delegation.html",
+      "sourceUri": null,
+      "sha256": "476df1a30feda31e8dc906321b9df2767bf0d578ce8a92b46a7a0fafdbab36bc"
+    },
+    "revoke-delegation-using-sub-delegation": {
+      "title": "How to Revoke a Delegation Using Delegation Management Rights?",
+      "summary": "Revoke a delegation from a manager wallet after manager rights exist.",
+      "group": "How to Manage using Delegation Management Rights",
+      "path": "html/revoke-delegation-using-sub-delegation.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/revoke-delegation-using-sub-delegation.html",
+      "sourceUri": null,
+      "sha256": "661cd1486637d1cede70a1e4507fc7f7e5827d0532973dc782abbcaf30e7155d"
+    },
+    "lock-global": {
+      "title": "How to Lock Your Wallet for Any Collection?",
+      "summary": "Stop the wallet from accepting incoming delegations for any collection.",
+      "group": "How to Lock or Unlock Your Wallet",
+      "path": "html/lock-global.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-global.html",
+      "sourceUri": null,
+      "sha256": "716f1cdcc373e1ef6f080d3bf2106666d390603686e6f6b8b9096dbe02243adb"
+    },
+    "lock-collection": {
+      "title": "How to Lock Your Wallet for a Specific Collection?",
+      "summary": "Stop the wallet from accepting incoming delegations for one collection.",
+      "group": "How to Lock or Unlock Your Wallet",
+      "path": "html/lock-collection.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-collection.html",
+      "sourceUri": null,
+      "sha256": "84ed73c5cd9644b26627385878e0a078d93658568b25ad16f8e974237db63feb"
+    },
+    "lock-use-case": {
+      "title": "How to Lock Your Wallet for a Specific Use Case on a Collection?",
+      "summary": "Stop the wallet from accepting incoming delegations for one use case.",
+      "group": "How to Lock or Unlock Your Wallet",
+      "path": "html/lock-use-case.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/lock-use-case.html",
+      "sourceUri": null,
+      "sha256": "34ce2fcb51d42245c6b1ea0b49f86ae4dc366e41997c833513d83c2f0cd11ec3"
+    },
+    "unlock-global": {
+      "title": "How to Unlock Your Wallet for Any Collection?",
+      "summary": "Allow the wallet to accept incoming delegations for any collection again.",
+      "group": "How to Lock or Unlock Your Wallet",
+      "path": "html/unlock-global.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-global.html",
+      "sourceUri": null,
+      "sha256": "22103e8b7d22aeefe5f1744816fe95e7a5c9bf63173f81050596c88061e39e19"
+    },
+    "unlock-collection": {
+      "title": "How to Unlock Your Wallet for a Specific Collection?",
+      "summary": "Allow the wallet to accept incoming delegations for one collection again.",
+      "group": "How to Lock or Unlock Your Wallet",
+      "path": "html/unlock-collection.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-collection.html",
+      "sourceUri": null,
+      "sha256": "0fd1d8df301de34d064f6b076ca92dc8e85b1788a4db94430d9772033e15bb06"
+    },
+    "unlock-use-case": {
+      "title": "How to Unlock Your Wallet for a Specific Use Case?",
+      "summary": "Allow the wallet to accept incoming delegations for one use case again.",
+      "group": "How to Lock or Unlock Your Wallet",
+      "path": "html/unlock-use-case.html",
+      "sourceUrl": "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started/html/unlock-use-case.html",
+      "sourceUri": null,
+      "sha256": "c830e53b2809068480804a464dadf1c407d9cdc2fd31458560a929e268fac7d1"
+    }
+  }
+}
