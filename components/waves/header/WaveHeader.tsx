@@ -15,6 +15,8 @@ import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
+import WaveRepButton from "./rep/WaveRepButton";
+import { WaveTrustSignals } from "../WaveTrustSignals";
 
 interface WaveHeaderProps {
   readonly wave: ApiWave;
@@ -51,12 +53,26 @@ export default function WaveHeader({
   }
 
   const connectedHandle = connectedProfile?.handle;
-  const canUseWaveActions = !!connectedHandle && !activeProfileProxy;
+  const normalizedConnectedHandle = connectedHandle?.toLowerCase() ?? null;
+  const waveAuthorHandle = wave.author?.handle ?? null;
+  const normalizedWaveAuthorHandle = waveAuthorHandle?.toLowerCase() ?? null;
+  const canUseWaveActions =
+    normalizedConnectedHandle !== null && !activeProfileProxy;
   const showNotificationSettings =
     canUseWaveActions && !!wave.subscribed_actions.length;
   const showOwnerOptions =
-    canUseWaveActions && connectedHandle === wave.author.handle;
-  const showOptions = showOwnerOptions;
+    canUseWaveActions && normalizedConnectedHandle === normalizedWaveAuthorHandle;
+  const showCreateSubwaveOption =
+    canUseWaveActions &&
+    !isDirectMessage &&
+    !isSubwave &&
+    wave.wave.authenticated_user_eligible_for_admin === true;
+  const showWaveRepAction =
+    canUseWaveActions &&
+    !isDirectMessage &&
+    normalizedWaveAuthorHandle !== null &&
+    normalizedConnectedHandle !== normalizedWaveAuthorHandle;
+  const showOptions = showOwnerOptions || showCreateSubwaveOption;
   const titleActionAlignmentClass = isSubwave ? "tw-mt-[22px]" : "";
 
   return (
@@ -73,7 +89,7 @@ export default function WaveHeader({
         <div
           className="tw-relative tw-h-16 tw-w-full tw-object-cover"
           style={{
-            background: `linear-gradient(135deg, ${wave.author.banner1_color ?? "#1f2937"} 0%, ${wave.author.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
+            background: `linear-gradient(135deg, ${wave.author?.banner1_color ?? "#1f2937"} 0%, ${wave.author?.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
             boxShadow: "inset 0 -22px 34px rgba(0,0,0,0.42)",
           }}
         >
@@ -131,6 +147,11 @@ export default function WaveHeader({
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
               </div>
+              {showWaveRepAction && (
+                <div className="tw-shrink-0">
+                  <WaveRepButton wave={wave} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -160,6 +181,12 @@ export default function WaveHeader({
             {Time.millis(wave.created_at).toDate().toLocaleDateString()}
           </span>
         </div>
+
+        <WaveTrustSignals
+          waveRep={wave.wave_rep}
+          waveScore={wave.wave_score}
+          className="tw-mt-3"
+        />
 
         <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">

@@ -1,6 +1,8 @@
 "use client";
 
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
+import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MinimalWaveNewDropsCount } from "./useNewDropCounter";
@@ -24,6 +26,8 @@ export interface MinimalWave {
   unreadDropsCount: number;
   latestReadTimestamp: number;
   firstUnreadDropSerialNo: number | null;
+  waveRep: ApiWaveRepSummary | null;
+  waveScore: ApiWaveScore | null;
 }
 
 type EnhancedSidebarWave = SidebarWave & {
@@ -49,6 +53,7 @@ interface UseEnhancedWavesListCoreOptions {
   supportsPinning: boolean;
   otherListWaveIds?: ReadonlySet<string> | undefined;
   unknownWaveRefetchCooldownMs?: number | undefined;
+  preserveBackendWaveOrder?: boolean | undefined;
 }
 
 const DEFAULT_OPTIONS: UseEnhancedWavesListCoreOptions = {
@@ -181,6 +186,8 @@ function useEnhancedWavesListCore(
         unreadDropsCount,
         latestReadTimestamp: wave.latestReadTimestamp,
         firstUnreadDropSerialNo,
+        waveRep: wave.waveRep,
+        waveScore: wave.waveScore,
       };
     },
     [
@@ -202,12 +209,15 @@ function useEnhancedWavesListCore(
         if (a.isMuted !== b.isMuted) {
           return a.isMuted ? 1 : -1;
         }
+        if (options.preserveBackendWaveOrder) {
+          return 0;
+        }
         return (
           (b.newDropsCount.latestDropTimestamp ?? 0) -
           (a.newDropsCount.latestDropTimestamp ?? 0)
         );
       }),
-    [minimal]
+    [minimal, options.preserveBackendWaveOrder]
   );
 
   return useMemo(
