@@ -271,6 +271,7 @@ function CommunityCurationsMasonryItem({
           inlineAuthorOnDesktop={true}
           fullWidthMedia={true}
           fullWidthLinkPreviews={true}
+          showVideoFullscreen={false}
         />
       </WaveDropQuoteDisplayProvider>
       <div

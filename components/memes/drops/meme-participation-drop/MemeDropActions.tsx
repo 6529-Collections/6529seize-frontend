@@ -3,18 +3,18 @@ import WaveDropActions from "@/components/waves/drops/WaveDropActions";
 
 interface MemeDropActionsProps {
   readonly drop: ExtendedDrop;
-  readonly isMobile: boolean;
+  readonly canUseDesktopHoverActions: boolean;
   readonly showReplyAndQuote: boolean;
   readonly onReply: () => void;
 }
 
 export default function MemeDropActions({
   drop,
-  isMobile,
+  canUseDesktopHoverActions,
   showReplyAndQuote,
   onReply,
 }: MemeDropActionsProps) {
-  if (isMobile || !showReplyAndQuote) {
+  if (!canUseDesktopHoverActions || !showReplyAndQuote) {
     return null;
   }
 

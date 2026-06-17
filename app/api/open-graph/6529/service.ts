@@ -214,8 +214,19 @@ const PUBLIC_API_HEADERS: HeadersInit = {
   accept: "application/json",
 };
 
-function shouldRetryApiStatus(status: number): boolean {
-  return status >= 500 && status < 600;
+function hasApiAuth(context?: ApiContext): boolean {
+  return getApiAuth(context) !== undefined;
+}
+
+function shouldRetryApiStatus(
+  status: number,
+  context?: ApiContext
+): boolean {
+  if (status >= 500 && status < 600) {
+    return true;
+  }
+
+  return (status === 401 || status === 403) && !hasApiAuth(context);
 }
 
 async function getApiFetch(): Promise<typeof fetch> {
@@ -258,7 +269,7 @@ async function fetchApiJson<T>(
         primaryStatus = response.status;
       }
 
-      if (!shouldRetryApiStatus(response.status)) {
+      if (!shouldRetryApiStatus(response.status, context)) {
         break;
       }
     } catch (error) {

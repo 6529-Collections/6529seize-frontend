@@ -30,22 +30,35 @@ jest.mock(
   "@/components/utils/input/ens-address/EnsAddressInput",
   () =>
     function MockEnsAddressInput(props: {
+      id?: string;
       value?: string;
       placeholder?: string;
       onAddressChange: (address: string) => void;
+      onValueChange?: (value: string) => void;
       disabled?: boolean;
       autoFocus?: boolean;
       className?: string;
+      ariaDescribedBy?: string;
     }) {
       return (
         <input
+          id={props.id}
           data-testid="ens-address-input"
           placeholder={props.placeholder}
           value={props.value ?? ""}
           disabled={props.disabled}
           autoFocus={props.autoFocus}
           className={props.className}
-          onChange={(e) => props.onAddressChange(e.target.value)}
+          aria-describedby={props.ariaDescribedBy}
+          onChange={(e) => {
+            const value = e.target.value;
+            props.onValueChange?.(value);
+            props.onAddressChange(
+              value.toLowerCase().endsWith(".eth")
+                ? RESOLVED_ENS_ADDRESS
+                : value
+            );
+          }}
         />
       );
     }
@@ -54,6 +67,7 @@ jest.mock(
 jest.mock("@/services/6529api");
 
 const mockFetchUrl = fetchUrl as jest.Mock;
+const RESOLVED_ENS_ADDRESS = "0x2222222222222222222222222222222222222222";
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => {
   const queryClient = new QueryClient({
@@ -79,9 +93,12 @@ describe("WalletChecker", () => {
     fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
       target: { value: "bad" },
     });
-    fireEvent.click(screen.getByText("Check"));
+    fireEvent.click(screen.getByText("Check Wallet"));
     expect(setAddressQuery).not.toHaveBeenCalled();
     expect(mockFetchUrl).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Enter a valid Ethereum address or ENS name.")
+    ).toBeInTheDocument();
   });
 
   it("fetches data for valid address", async () => {
@@ -95,7 +112,7 @@ describe("WalletChecker", () => {
     fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
       target: { value: "0x1111111111111111111111111111111111111111" },
     });
-    fireEvent.click(screen.getByText("Check"));
+    fireEvent.click(screen.getByText("Check Wallet"));
     expect(setAddressQuery).toHaveBeenCalledWith(
       "0x1111111111111111111111111111111111111111"
     );
@@ -105,6 +122,27 @@ describe("WalletChecker", () => {
     expect(mockFetchUrl).toHaveBeenCalledWith(
       "https://api.test.6529.io/api/consolidations/0x1111111111111111111111111111111111111111?show_incomplete=true"
     );
+  });
+
+  it("accepts uppercase ENS suffixes after resolution", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+    const setAddressQuery = jest.fn();
+    render(
+      <TestWrapper>
+        <WalletChecker address_query="" setAddressQuery={setAddressQuery} />
+      </TestWrapper>
+    );
+    fireEvent.change(screen.getByPlaceholderText("0x... or ENS"), {
+      target: { value: "seize.ETH" },
+    });
+    fireEvent.click(screen.getByText("Check Wallet"));
+    expect(setAddressQuery).toHaveBeenCalledWith(RESOLVED_ENS_ADDRESS);
+    expect(mockFetchUrl).toHaveBeenCalledWith(
+      `https://api.test.6529.io/api/delegations/${RESOLVED_ENS_ADDRESS}`
+    );
+    expect(
+      screen.queryByText("Enter a valid Ethereum address or ENS name.")
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -118,7 +156,7 @@ describe("WalletChecker extras", () => {
     );
     const input = screen.getByPlaceholderText("0x... or ENS");
     fireEvent.change(input, { target: { value: "bad" } });
-    fireEvent.click(screen.getByText("Check"));
+    fireEvent.click(screen.getByText("Check Wallet"));
     fireEvent.change(input, {
       target: { value: "0x1234567890123456789012345678901234567890" },
     });

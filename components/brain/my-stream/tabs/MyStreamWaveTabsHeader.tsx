@@ -32,6 +32,7 @@ import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 
 const TRUNCATION_EPSILON_PX = 1;
+const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
 
 export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
@@ -141,7 +142,7 @@ function MyStreamWaveHeaderIdentity({
                   <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
                     {wave.name}
                   </h1>
-                  <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-6">
+                  <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
                     <span
                       ref={descriptionPreviewRef}
                       className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
@@ -154,17 +155,20 @@ function MyStreamWaveHeaderIdentity({
                         className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
                       />
                     )}
-                    <WaveTrustSignals
-                      waveRep={wave.wave_rep}
-                      waveScore={wave.wave_score}
-                      variant="header-inline"
-                      mode="summary"
-                      className="tw-shrink-0"
-                    />
                   </span>
                 </>
               )}
             </WaveDescriptionPopover>
+            {!isCompact && (
+              <WaveTrustSignals
+                waveRep={wave.wave_rep}
+                waveScore={wave.wave_score}
+                variant="header-inline"
+                mode="summary"
+                className="tw-mt-1 tw-self-start"
+                learnMoreHref={WAVE_SCORE_LEARN_MORE_HREF}
+              />
+            )}
             {isCompact && (
               <WaveTrustSignals
                 waveRep={wave.wave_rep}
@@ -172,6 +176,7 @@ function MyStreamWaveHeaderIdentity({
                 variant="header-inline"
                 mode="summary"
                 className="tw-mt-1"
+                learnMoreHref={WAVE_SCORE_LEARN_MORE_HREF}
               />
             )}
           </>
@@ -186,6 +191,7 @@ function MyStreamWaveHeaderIdentity({
               variant="header-inline"
               mode="summary"
               className="tw-mt-1"
+              learnMoreHref={WAVE_SCORE_LEARN_MORE_HREF}
             />
           </>
         )}

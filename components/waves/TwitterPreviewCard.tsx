@@ -31,6 +31,7 @@ import type {
 } from "@/lib/twitter";
 import { parseTweetUrl } from "@/lib/twitter/url";
 import { fetchTwitterPreview } from "@/services/api/twitter-preview-api";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 
 import { useLinkPreviewContext } from "./LinkPreviewContext";
 
@@ -983,29 +984,20 @@ function TwitterVideoPlayer({
           />
         </>
       )}
-      <video
-        ref={videoRef}
+      <SeizeVideoPlayer
+        videoRef={videoRef}
         poster={posterUrl}
         className={className}
-        controls
-        playsInline
         preload="metadata"
         autoPlay={autoPlay}
-        onClick={(event) => {
-          if (isMenuOpen) {
-            setIsMenuOpen(false);
-          }
+        captionsSrc={captionsUrl}
+        layout="fill"
+        showActions={false}
+        onVideoClick={(event) => {
           stopMediaEvent(event);
+          setIsMenuOpen(false);
         }}
-      >
-        <track
-          kind="captions"
-          src={captionsUrl ?? "data:text/vtt,WEBVTT"}
-          srcLang="en"
-          label="Captions"
-          default
-        />
-      </video>
+      />
     </div>
   );
 }
