@@ -154,13 +154,15 @@ describe("SeizeVideoPlayer", () => {
         value: false,
       });
 
-      const muteControlZone = screen.getByRole("button", {
+      const muteButton = screen.getByRole("button", {
         name: "Unmute video",
-      }).parentElement;
+      });
+      const muteControlZone = muteButton.parentElement;
       if (!muteControlZone) {
         throw new Error("Expected mute control zone to render");
       }
 
+      expect(video).toHaveAttribute("tabindex", "0");
       expect(muteControlZone).toHaveClass("tw-pointer-events-auto");
 
       act(() => {
@@ -170,6 +172,20 @@ describe("SeizeVideoPlayer", () => {
 
       expect(muteControlZone).toHaveClass("tw-pointer-events-none");
       expect(muteControlZone).not.toHaveClass("tw-pointer-events-auto");
+      expect(muteButton).toHaveAttribute("tabindex", "-1");
+
+      act(() => {
+        video.focus();
+      });
+
+      expect(muteControlZone).toHaveClass("tw-pointer-events-auto");
+      expect(muteButton).not.toHaveAttribute("tabindex");
+
+      act(() => {
+        jest.advanceTimersByTime(1800);
+      });
+
+      expect(muteControlZone).toHaveClass("tw-pointer-events-auto");
     } finally {
       jest.useRealTimers();
     }

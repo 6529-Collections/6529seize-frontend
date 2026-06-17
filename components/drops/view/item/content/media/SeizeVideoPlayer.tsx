@@ -96,12 +96,14 @@ function SeizeVideoControlButton({
   label,
   onClick,
   onFocus,
+  tabIndex,
   children,
   disabled = false,
 }: {
   readonly label: string;
   readonly onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   readonly onFocus?: (() => void) | undefined;
+  readonly tabIndex?: number | undefined;
   readonly children: React.ReactNode;
   readonly disabled?: boolean | undefined;
 }) {
@@ -113,6 +115,7 @@ function SeizeVideoControlButton({
       disabled={disabled}
       onClick={onClick}
       onFocus={onFocus}
+      tabIndex={tabIndex}
       className="tw-inline-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-text-white tw-shadow-lg tw-shadow-black/25 tw-backdrop-blur-md tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800/90"
     >
       {children}
@@ -209,6 +212,7 @@ function SeizeVideoMinimalControls({
   const controlsHitTestClass = showControls
     ? "tw-pointer-events-auto"
     : "tw-pointer-events-none";
+  const controlsTabIndex = showControls ? undefined : -1;
 
   return (
     <>
@@ -226,6 +230,7 @@ function SeizeVideoMinimalControls({
               title={labels.play}
               onClick={onPlaybackClick}
               onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
               className={clsx(
                 controlsHitTestClass,
                 "tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/65 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
@@ -246,6 +251,7 @@ function SeizeVideoMinimalControls({
             label={isMuted ? labels.unmute : labels.mute}
             onClick={onMuteClick}
             onFocus={onControlsFocus}
+            tabIndex={controlsTabIndex}
           >
             {isMuted ? (
               <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
@@ -266,6 +272,7 @@ function SeizeVideoMinimalControls({
               label={labels.pause}
               onClick={onPlaybackClick}
               onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
             >
               <PauseIcon className="tw-size-5" aria-hidden="true" />
             </SeizeVideoControlButton>
@@ -275,6 +282,7 @@ function SeizeVideoMinimalControls({
               label={openLabel}
               onClick={onOpenClick}
               onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
             >
               <ArrowTopRightOnSquareIcon
                 className="tw-size-5"
@@ -288,6 +296,7 @@ function SeizeVideoMinimalControls({
               onClick={onDownloadClick}
               onFocus={onControlsFocus}
               disabled={isDownloading}
+              tabIndex={controlsTabIndex}
             >
               <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
             </SeizeVideoControlButton>
@@ -297,6 +306,7 @@ function SeizeVideoMinimalControls({
               label={isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen}
               onClick={onFullscreenClick}
               onFocus={onControlsFocus}
+              tabIndex={controlsTabIndex}
             >
               {isAnyFullscreen ? (
                 <ArrowsPointingInIcon
@@ -346,6 +356,7 @@ function SeizeVideoElement({
   onDurationChange,
   onEnded,
   onError,
+  onFocus,
   onLoadedMetadata,
   onPause,
   onPlay,
@@ -361,6 +372,7 @@ function SeizeVideoElement({
   videoAutoPlay,
   videoClassName,
   videoControls,
+  videoTabIndex,
 }: {
   readonly ariaLabel: string;
   readonly captionsDefault: boolean;
@@ -380,6 +392,7 @@ function SeizeVideoElement({
   readonly onDurationChange: () => void;
   readonly onEnded: () => void;
   readonly onError: React.ReactEventHandler<HTMLVideoElement>;
+  readonly onFocus?: React.FocusEventHandler<HTMLVideoElement> | undefined;
   readonly onLoadedMetadata: React.ReactEventHandler<HTMLVideoElement>;
   readonly onPause: () => void;
   readonly onPlay: () => void;
@@ -395,6 +408,7 @@ function SeizeVideoElement({
   readonly videoAutoPlay: boolean;
   readonly videoClassName?: string | undefined;
   readonly videoControls: boolean;
+  readonly videoTabIndex?: number | undefined;
 }) {
   return (
     <>
@@ -409,6 +423,7 @@ function SeizeVideoElement({
         preload={preload}
         poster={poster}
         controls={videoControls}
+        tabIndex={videoTabIndex}
         aria-label={ariaLabel}
         {...{ "webkit-playsinline": "true", "x5-playsinline": "true" }}
         onLoadedMetadata={onLoadedMetadata}
@@ -418,6 +433,7 @@ function SeizeVideoElement({
         onPause={onPause}
         onEnded={onEnded}
         onError={onError}
+        onFocus={onFocus}
         onClick={onClick}
         onPointerEnter={onPointerEnter}
         onPointerMove={onPointerMove}
@@ -575,7 +591,11 @@ export default function SeizeVideoPlayer({
     clearHideControlsTimer();
     hideControlsTimerRef.current = globalThis.window.setTimeout(() => {
       const video = videoElement;
-      if (video && !video.paused && !isAnyFullscreen) {
+      const activeElement = globalThis.document.activeElement;
+      const playerHasFocus = activeElement
+        ? (wrapperRef.current?.contains(activeElement) ?? false)
+        : false;
+      if (video && !video.paused && !isAnyFullscreen && !playerHasFocus) {
         setControlsVisible(false);
       }
     }, CONTROL_HIDE_DELAY_MS);
@@ -983,6 +1003,7 @@ export default function SeizeVideoPlayer({
         onDurationChange={updateProgress}
         onEnded={handlePause}
         onError={handleError}
+        onFocus={showMinimalControls ? revealControls : undefined}
         onLoadedMetadata={handleMetadata}
         onPause={handlePause}
         onPlay={handlePlay}
@@ -998,6 +1019,7 @@ export default function SeizeVideoPlayer({
         videoAutoPlay={videoAutoPlay}
         videoClassName={videoClassName}
         videoControls={videoControls}
+        videoTabIndex={showMinimalControls ? 0 : undefined}
       />
 
       {isPosterGateClosed && (
