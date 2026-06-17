@@ -2910,6 +2910,39 @@ paths:
                 $ref: "#/components/schemas/ApiIdentityActivity"
         "404":
           description: Identity not found
+  /media/resolve:
+    post:
+      tags:
+        - Media
+      summary: Resolve decentralized media references
+      description: >-
+        Resolves native IPFS, IPNS, Arweave, 6529 media resolver, and recognized
+        third-party gateway URLs into canonical native URIs, 6529 resolver URLs,
+        and optional external fallback URLs. Unrecognized HTTP(S) URLs are
+        returned as unrecognized items instead of failing the batch.
+      operationId: resolveDecentralizedMedia
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/media/decentralized-media.handlers"
+          name: handleResolveDecentralizedMedia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMediaResolveRequest"
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMediaResolveResponse"
+        "400":
+          description: Invalid request shape
   /memes-mint-stats:
     get:
       tags:
@@ -4577,6 +4610,231 @@ paths:
                 $ref: "#/components/schemas/ApiRepContributorsPage"
         "404":
           description: Profile not found
+  /rep/categories/{category}/overview:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get global REP category overview
+      operationId: getGlobalRepCategoryOverview
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryOverview
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryOverview"
+  /rep/categories/{category}/ratings:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get global REP category giver-recipient pairings
+      operationId: getGlobalRepCategoryRatings
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryRatings
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rep
+              - last_modified
+              - giver
+              - recipient
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryRatingsPage"
+  /rep/categories/{category}/recipients:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get global REP category recipients
+      operationId: getGlobalRepCategoryRecipients
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryRecipients
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rep
+              - last_modified
+              - profile
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryRecipientsPage"
+  /rep/categories/{category}/givers:
+    get:
+      tags:
+        - ProfileREP
+      summary: Get global REP category givers
+      operationId: getGlobalRepCategoryGivers
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/rep-categories/global-rep-category.handlers"
+          name: handleGetGlobalRepCategoryGivers
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+            pattern: ^[\p{L}\p{N}?!,.\x27() ]{1,100}$
+          description: URL-encoded REP category name.
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: order_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rep
+              - last_modified
+              - profile
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiGlobalRepCategoryGiversPage"
   /profiles:
     post:
       tags:
@@ -6053,7 +6311,9 @@ paths:
             type: string
         - name: from_identity
           in: query
-          description: If omitted, the authenticated profile is used. Anonymous requests without from_identity return 0.
+          description: >-
+            If omitted, the authenticated profile is used. Anonymous requests
+            without from_identity return 0.
           required: false
           schema:
             type: string
@@ -7711,8 +7971,9 @@ paths:
         - name: exclude_followed
           in: query
           description: >-
-            HOT view only. If true then result excludes waves the authenticated
-            user already follows.
+            HOT view and OVERVIEW view with
+            overview_type=SCORED_RECENTLY_DROPPED_TO only. If true then result
+            excludes waves the authenticated user already follows.
           required: false
           schema:
             type: boolean
@@ -10533,6 +10794,44 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiCurationDrop"
+    ApiDecentralizedMediaProtocol:
+      type: string
+      enum:
+        - ipfs
+        - ipns
+        - arweave
+    ApiDecentralizedMediaResolution:
+      type: object
+      required:
+        - input
+        - recognized
+        - external_fallback_urls
+        - warnings
+      properties:
+        input:
+          type: string
+        recognized:
+          type: boolean
+        protocol:
+          $ref: "#/components/schemas/ApiDecentralizedMediaProtocol"
+        native_uri:
+          type: string
+        id:
+          type: string
+        path:
+          type: string
+        resolver_url:
+          type: string
+          format: uri
+        external_fallback_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        warnings:
+          type: array
+          items:
+            type: string
     ApiDistributionAirdropsCsvUploadRequest:
       type: object
       required:
@@ -11645,6 +11944,133 @@ components:
         - WAVE_CREATED
         - DROP_CREATED
         - DROP_REPLIED
+    ApiGlobalRepCategoryGiver:
+      type: object
+      required:
+        - profile
+        - total_rep
+        - recipient_count
+        - last_modified
+      properties:
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+        total_rep:
+          type: number
+          format: int64
+        recipient_count:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+    ApiGlobalRepCategoryGiversPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryGiver"
+    ApiGlobalRepCategoryOverview:
+      type: object
+      required:
+        - category
+        - total_rep
+        - pair_count
+        - giver_count
+        - recipient_count
+        - top_recipients
+        - top_givers
+        - recently_updated
+      properties:
+        category:
+          type: string
+        total_rep:
+          type: number
+          format: int64
+        pair_count:
+          type: number
+          format: int64
+        giver_count:
+          type: number
+          format: int64
+        recipient_count:
+          type: number
+          format: int64
+        top_recipients:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryRecipient"
+        top_givers:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryGiver"
+        recently_updated:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryRating"
+    ApiGlobalRepCategoryRating:
+      type: object
+      required:
+        - giver
+        - recipient
+        - rep
+        - last_modified
+        - category
+      properties:
+        giver:
+          $ref: "#/components/schemas/ApiProfileMin"
+        recipient:
+          $ref: "#/components/schemas/ApiProfileMin"
+        rep:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+        category:
+          type: string
+    ApiGlobalRepCategoryRatingsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryRating"
+    ApiGlobalRepCategoryRecipient:
+      type: object
+      required:
+        - profile
+        - total_rep
+        - rater_count
+        - last_modified
+      properties:
+        profile:
+          $ref: "#/components/schemas/ApiProfileMin"
+        total_rep:
+          type: number
+          format: int64
+        rater_count:
+          type: number
+          format: int64
+        last_modified:
+          type: string
+    ApiGlobalRepCategoryRecipientsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageWithoutCount"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiGlobalRepCategoryRecipient"
     ApiGroup:
       type: object
       required:
@@ -12176,6 +12602,29 @@ components:
         first_unread_drop_serial_no:
           type: integer
           nullable: true
+    ApiMediaResolveRequest:
+      type: object
+      required:
+        - inputs
+      properties:
+        inputs:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+        include_external_fallbacks:
+          type: boolean
+          default: true
+    ApiMediaResolveResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDecentralizedMediaResolution"
     ApiMediaUploadMimeType:
       type: string
       enum:

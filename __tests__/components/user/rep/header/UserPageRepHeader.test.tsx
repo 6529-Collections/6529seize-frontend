@@ -7,6 +7,21 @@ const mockProfile = {
   query: "testuser",
 } as any;
 
+const defaultProps = {
+  categories: [],
+  profile: mockProfile,
+  repDirection: "received" as const,
+  onOpenOverviewContributors: jest.fn(),
+  onOpenCategoryContributors: jest.fn(),
+  onOpenGlobalCategory: jest.fn(),
+  onRepDirectionChange: jest.fn(),
+  loading: false,
+  visibleCount: 5,
+  onShowMore: jest.fn(),
+  hasNextPage: false,
+  isFetchingNextPage: false,
+};
+
 describe("UserPageRepHeader", () => {
   it("shows rep totals when provided", () => {
     const overview = {
@@ -15,29 +30,13 @@ describe("UserPageRepHeader", () => {
       authenticated_user_contribution: null,
       contributors: { data: [], page: 1, next: false },
     } as any;
-    render(
-      <UserPageRepHeader
-        overview={overview}
-        categories={[]}
-        profile={mockProfile}
-        repDirection="received"
-        onRepDirectionChange={() => {}}
-        loading={false}
-      />
-    );
+    render(<UserPageRepHeader {...defaultProps} overview={overview} />);
     expect(screen.getByText("1,500")).toBeInTheDocument();
   });
 
   it("renders without overview", () => {
     const { container } = render(
-      <UserPageRepHeader
-        overview={null}
-        categories={[]}
-        profile={mockProfile}
-        repDirection="received"
-        onRepDirectionChange={() => {}}
-        loading={false}
-      />
+      <UserPageRepHeader {...defaultProps} overview={null} />
     );
     expect(container).toHaveTextContent("Rep");
   });

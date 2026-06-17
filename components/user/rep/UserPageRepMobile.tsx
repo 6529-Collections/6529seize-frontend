@@ -39,6 +39,7 @@ export default function UserPageRepMobile({
   hasNextPage,
   isFetchingNextPage,
   onOpenOverviewContributors,
+  onOpenGlobalCategory,
   onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
@@ -54,6 +55,7 @@ export default function UserPageRepMobile({
   readonly hasNextPage: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onOpenOverviewContributors: () => void;
+  readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -139,6 +141,7 @@ export default function UserPageRepMobile({
               isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
               onEditCategory={setEditCategory}
+              onOpenGlobalCategory={onOpenGlobalCategory}
               onOpenCategoryContributors={onOpenCategoryContributors}
             />
           </motion.div>

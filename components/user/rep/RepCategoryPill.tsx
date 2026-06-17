@@ -3,11 +3,13 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { useMemo } from "react";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 
 export default function RepCategoryPill({
   category,
   canEdit,
   onEdit,
+  onOpenGlobalCategory,
   onOpenContributors,
   compact = false,
   direction = "received",
@@ -15,6 +17,7 @@ export default function RepCategoryPill({
   readonly category: ApiRepCategory;
   readonly canEdit: boolean;
   readonly onEdit: (category: string) => void;
+  readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenContributors?:
     | ((category: ApiRepCategory) => void)
     | undefined;
@@ -90,23 +93,28 @@ export default function RepCategoryPill({
 
   return (
     <div
-      className={`${baseClasses} ${
-        canEdit
-          ? "hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-shadow-md"
-          : "tw-cursor-default"
-      }`}
+      className={`${baseClasses} hover:tw-border-white/20 hover:tw-bg-white/10 hover:tw-shadow-md`}
     >
-      {canEdit ? (
+      <div className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2">
         <button
           type="button"
-          onClick={() => onEdit(category.category)}
+          onClick={() => onOpenGlobalCategory(category.category)}
+          aria-label={`Open global REP category ${category.category}`}
           className={`${detailClasses} tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
         >
           {details}
         </button>
-      ) : (
-        <div className={detailClasses}>{details}</div>
-      )}
+        {canEdit && (
+          <button
+            type="button"
+            onClick={() => onEdit(category.category)}
+            aria-label={`Edit REP category ${category.category}`}
+            className="tw-inline-flex tw-h-7 tw-w-7 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.03] tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-border-white/20 hover:tw-bg-white/[0.07] hover:tw-text-white"
+          >
+            <PencilSquareIcon className="tw-h-4 tw-w-4" aria-hidden="true" />
+          </button>
+        )}
+      </div>
 
       <div className="tw-inline-flex tw-items-center tw-gap-1.5">
         {avatarItems.length > 0 && (

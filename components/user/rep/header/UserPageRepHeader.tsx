@@ -26,6 +26,7 @@ export default function UserPageRepHeader({
   repDirection,
   onOpenOverviewContributors,
   onOpenCategoryContributors,
+  onOpenGlobalCategory,
   onRepDirectionChange,
   loading,
   visibleCount,
@@ -39,6 +40,7 @@ export default function UserPageRepHeader({
   readonly repDirection: RepDirection;
   readonly onOpenOverviewContributors: () => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
+  readonly onOpenGlobalCategory: (category: string) => void;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly loading: boolean;
   readonly visibleCount: number;
@@ -205,6 +207,7 @@ export default function UserPageRepHeader({
                     category={cat}
                     canEdit={canEditRep && repDirection === "received"}
                     onEdit={setEditCategory}
+                    onOpenGlobalCategory={onOpenGlobalCategory}
                     onOpenContributors={onOpenCategoryContributors}
                     direction={repDirection}
                   />

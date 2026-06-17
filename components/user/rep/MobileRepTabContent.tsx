@@ -46,6 +46,7 @@ export default function MobileRepTabContent({
   isFetchingNextPage,
   onGrantRep,
   onEditCategory,
+  onOpenGlobalCategory,
   onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
@@ -62,6 +63,7 @@ export default function MobileRepTabContent({
   readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
   readonly onEditCategory: (category: string) => void;
+  readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const hiddenLoadedCategoryCount = Math.max(
@@ -166,6 +168,7 @@ export default function MobileRepTabContent({
                 category={cat}
                 canEdit={canEditRep && repDirection === "received"}
                 onEdit={onEditCategory}
+                onOpenGlobalCategory={onOpenGlobalCategory}
                 onOpenContributors={onOpenCategoryContributors}
                 direction={repDirection}
                 compact
