@@ -158,6 +158,7 @@ function MyStreamWaveHeaderIdentity({
                       waveRep={wave.wave_rep}
                       waveScore={wave.wave_score}
                       variant="header-inline"
+                      mode="summary"
                       className="tw-shrink-0"
                     />
                   </span>
@@ -169,6 +170,7 @@ function MyStreamWaveHeaderIdentity({
                 waveRep={wave.wave_rep}
                 waveScore={wave.wave_score}
                 variant="header-inline"
+                mode="summary"
                 className="tw-mt-1"
               />
             )}
@@ -182,6 +184,7 @@ function MyStreamWaveHeaderIdentity({
               waveRep={wave.wave_rep}
               waveScore={wave.wave_score}
               variant="header-inline"
+              mode="summary"
               className="tw-mt-1"
             />
           </>
