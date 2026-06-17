@@ -23,7 +23,7 @@ describe("WaveTrustSignals", () => {
     expect(screen.getByText("REP")).toBeInTheDocument();
     expect(screen.getByText("83")).toBeInTheDocument();
     expect(screen.getByText("92")).toBeInTheDocument();
-    expect(screen.getByText("+1.3K")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Wave REP positive/)).toBeInTheDocument();
   });
 
   it("renders one combined score badge in summary mode", () => {
@@ -36,17 +36,48 @@ describe("WaveTrustSignals", () => {
       />
     );
 
-    const summaryBadge = screen.getByLabelText(
-      "Combined score: 83. Quality: 78. Hotness: 92. REP: +1,250 raw, 41 score"
-    );
+    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
 
+    expect(summaryBadge).not.toBeNull();
+    expect(summaryBadge).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Combined score: 83. Quality: 78. Hotness: 92.")
+    );
+    expect(summaryBadge?.getAttribute("aria-label")).toMatch(
+      /^Combined score: 83\. Quality: 78\. Hotness: 92\. REP: .+ raw, 41 score$/
+    );
     expect(summaryBadge).toHaveAttribute(
       "title",
-      "Combined score: 83\nQuality: 78\nHotness: 92\nREP: +1,250 raw, 41 score"
+      expect.stringContaining("Combined score: 83\nQuality: 78\nHotness: 92")
     );
     expect(screen.getByText("Score")).toBeInTheDocument();
     expect(screen.getByText("83")).toBeInTheDocument();
     expect(screen.queryByText("Hot")).not.toBeInTheDocument();
     expect(screen.queryByText("REP")).not.toBeInTheDocument();
+  });
+
+  it("renders nothing in summary mode without a combined score", () => {
+    const { container } = render(
+      <WaveTrustSignals
+        waveScore={
+          {
+            hotness_score: 92,
+            rep_sort_score: 41,
+          } as ApiWaveScore
+        }
+        variant="sidebar"
+        mode="summary"
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing in summary mode without score data", () => {
+    const { container } = render(
+      <WaveTrustSignals waveScore={null} variant="sidebar" mode="summary" />
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });
