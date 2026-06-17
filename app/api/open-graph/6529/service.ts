@@ -522,8 +522,8 @@ function compactPeople(
   );
 }
 
-function profileLookupCandidate(value: string | null | undefined): string | null {
-  const normalized = value?.trim().replace(/^@/, "");
+function profileLookupCandidate(value: unknown): string | null {
+  const normalized = readString(value)?.replace(/^@/, "");
   if (!normalized || normalized.includes(",") || normalized.includes(" ")) {
     return null;
   }
@@ -531,8 +531,31 @@ function profileLookupCandidate(value: string | null | undefined): string | null
   return normalized;
 }
 
+function identityProfileHandle(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  return firstNonEmptyString(profile?.handle, profile?.normalised_handle);
+}
+
+function identityProfileHref(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  const handle = identityProfileHandle(profile);
+  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
+}
+
+function identityProfileDisplay(
+  profile: IdentityResponse | null | undefined
+): string | undefined {
+  return firstNonEmptyString(
+    profile?.display,
+    profile?.handle,
+    profile?.normalised_handle
+  );
+}
+
 async function resolveProfileHref(
-  value: string | null | undefined,
+  value: unknown,
   context?: ApiContext
 ): Promise<string | undefined> {
   const candidate = profileLookupCandidate(value);
@@ -541,13 +564,11 @@ async function resolveProfileHref(
   }
 
   const profile = await resolveIdentityProfile(candidate, context);
-  const handle = firstNonEmptyString(profile?.handle, profile?.normalised_handle);
-
-  return handle ? `/${handle.replace(/^@/, "")}` : undefined;
+  return identityProfileHref(profile);
 }
 
 async function resolveIdentityProfile(
-  value: string | null | undefined,
+  value: unknown,
   context?: ApiContext
 ): Promise<IdentityResponse | null> {
   const candidate = profileLookupCandidate(value);
@@ -944,20 +965,12 @@ async function fetchNextGenPreview(
   );
   const rarityRank = readPositiveNumber(token.rarity_score_rank);
   const mintDate = formatMintDate(token.mint_date);
-  const artistHref = await resolveProfileHref(collection?.artist, context);
-  const collectorProfile = await resolveIdentityProfile(token.owner, context);
-  const collectorHandle = firstNonEmptyString(
-    collectorProfile?.handle,
-    collectorProfile?.normalised_handle
-  );
-  const collectorHref = collectorHandle
-    ? `/${collectorHandle.replace(/^@/, "")}`
-    : undefined;
-  const collectorDisplay = firstNonEmptyString(
-    collectorProfile?.display,
-    collectorProfile?.handle,
-    collectorProfile?.normalised_handle
-  );
+  const [artistHref, collectorProfile] = await Promise.all([
+    resolveProfileHref(collection?.artist, context),
+    resolveIdentityProfile(readString(token.owner), context),
+  ]);
+  const collectorHref = identityProfileHref(collectorProfile);
+  const collectorDisplay = identityProfileDisplay(collectorProfile);
   const canonicalRequestUrl = new URL(
     `/nextgen/token/${token.id}`,
     requestUrl.origin
