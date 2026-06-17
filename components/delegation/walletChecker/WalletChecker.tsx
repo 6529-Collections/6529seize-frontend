@@ -427,16 +427,23 @@ export default function WalletCheckerComponent(
     }
   }, [delegationsLoaded, consolidationsLoaded]);
 
+  const normalizedWalletAddress = walletAddress.trim();
+  const normalizedWalletAddressLower = normalizedWalletAddress.toLowerCase();
+  const walletAddressIsValidEthAddress =
+    isValidEthAddress(normalizedWalletAddress);
+  const walletAddressLooksLikeEns =
+    normalizedWalletAddressLower.endsWith(".eth");
+
   const formDisabled =
     checking ||
-    !walletAddress ||
-    (!isValidEthAddress(walletAddress) && !walletAddress.endsWith(".eth")) ||
+    !normalizedWalletAddress ||
+    (!walletAddressIsValidEthAddress && !walletAddressLooksLikeEns) ||
     ensLoading;
   const showAddressError =
     addressError ||
-    (!!walletAddress &&
-      !isValidEthAddress(walletAddress) &&
-      !walletAddress.endsWith(".eth") &&
+    (!!normalizedWalletAddress &&
+      !walletAddressIsValidEthAddress &&
+      !walletAddressLooksLikeEns &&
       !ensLoading);
 
   return (
@@ -479,7 +486,7 @@ export default function WalletCheckerComponent(
                   ariaDescribedBy="wallet-checker-help"
                   value={walletInputValue}
                   onAddressChange={(addr) => {
-                    setWalletAddress(addr);
+                    setWalletAddress(addr.trim());
                     setAddressError(false);
                   }}
                   onValueChange={setWalletInputValue}

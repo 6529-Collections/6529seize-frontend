@@ -1,10 +1,10 @@
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { createRef } from "react";
+import { createRef, type ComponentProps } from "react";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} alt="test" />,
+  default: (props: ComponentProps<"img">) => <img {...props} />,
 }));
 
 jest.mock("@/components/delegation/DelegationCenter", () => () => (
@@ -53,7 +53,7 @@ describe("DelegationCenterMenu links", () => {
       .getAllByText("Etherscan")[0]
       ?.closest("a") as HTMLAnchorElement;
     expect(etherscan?.href).toContain("etherscan.io/address");
-    const github = screen.getAllByText("Github")[0]?.closest("a");
+    const github = screen.getAllByText("GitHub")[0]?.closest("a");
     expect(github).toHaveAttribute(
       "href",
       "https://github.com/6529-Collections/nftdelegation"

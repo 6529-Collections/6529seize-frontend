@@ -343,7 +343,7 @@ function EtherscanLink() {
       <Image
         unoptimized
         src="/etherscan_w.png"
-        alt="Etherscan"
+        alt=""
         width={30}
         height={30}
       />
@@ -363,11 +363,11 @@ function GithubLink() {
       <Image
         unoptimized
         src="/github_w.png"
-        alt="GitHub"
+        alt=""
         width={30}
         height={30}
       />
-      <span>Github</span>
+      <span>GitHub</span>
     </Link>
   );
 }

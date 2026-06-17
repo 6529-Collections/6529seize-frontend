@@ -9,7 +9,6 @@ jest.mock("@fortawesome/react-fontawesome", () => ({
 const mockSubmitGroups = jest.fn(() => null);
 
 jest.mock("@/components/delegation/DelegationFormParts", () => {
-  const React = require("react");
   return {
     __esModule: true,
     DelegationCloseButton: (props: any) => (

@@ -121,6 +121,14 @@ function getTransactionToastMessage(
   return <>Transaction Successful! {getTransactionAnchor(hash)}</>;
 }
 
+function getTransactionErrorToastMessage(
+  error: { message?: string } | null | undefined,
+  fallback: string
+) {
+  const message = error?.message?.split("Request Arguments")[0]?.trim();
+  return message || fallback;
+}
+
 function getActiveDelegationsReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
@@ -520,68 +528,89 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (contractWriteRevoke.error) {
       showDelegationToast({
         title: "Revoking Delegation Failed",
-        message:
-          contractWriteRevoke.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          contractWriteRevoke.error,
+          "Failed to start revoking delegation."
+        ),
       });
     }
     if (contractWriteRevoke.data) {
-      if (contractWriteRevoke.data) {
-        if (waitContractWriteRevoke.isLoading) {
-          showDelegationToast({
-            title: "Revoking Delegation",
-            message: getTransactionToastMessage(contractWriteRevoke.data, true),
-          });
-        } else {
-          showDelegationToast({
-            title: "Revoking Delegation",
-            message: getTransactionToastMessage(
-              contractWriteRevoke.data,
-              false
-            ),
-          });
-        }
+      if (waitContractWriteRevoke.isLoading) {
+        showDelegationToast({
+          title: "Revoking Delegation",
+          message: getTransactionToastMessage(contractWriteRevoke.data, true),
+        });
+      } else if (waitContractWriteRevoke.isSuccess) {
+        showDelegationToast({
+          title: "Revoking Delegation",
+          message: getTransactionToastMessage(contractWriteRevoke.data, false),
+        });
+      } else if (waitContractWriteRevoke.isError) {
+        showDelegationToast({
+          title: "Revoking Delegation Failed",
+          message: getTransactionErrorToastMessage(
+            waitContractWriteRevoke.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     contractWriteRevoke.error,
     contractWriteRevoke.data,
+    showDelegationToast,
+    waitContractWriteRevoke.error,
+    waitContractWriteRevoke.isError,
     waitContractWriteRevoke.isLoading,
+    waitContractWriteRevoke.isSuccess,
   ]);
 
   useEffect(() => {
     if (contractWriteBatchRevoke.error) {
       showDelegationToast({
         title: "Revoking Delegations Failed",
-        message:
-          contractWriteBatchRevoke.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          contractWriteBatchRevoke.error,
+          "Failed to start revoking delegations."
+        ),
       });
     }
     if (contractWriteBatchRevoke.data) {
-      if (contractWriteBatchRevoke.data) {
-        if (waitContractWriteBatchRevoke.isLoading) {
-          showDelegationToast({
-            title: "Batch Revoking Delegations",
-            message: getTransactionToastMessage(
-              contractWriteBatchRevoke.data,
-              true
-            ),
-          });
-        } else {
-          setBulkRevocations([]);
-          showDelegationToast({
-            title: "Batch Revoking Delegations",
-            message: getTransactionToastMessage(
-              contractWriteBatchRevoke.data,
-              false
-            ),
-          });
-        }
+      if (waitContractWriteBatchRevoke.isLoading) {
+        showDelegationToast({
+          title: "Batch Revoking Delegations",
+          message: getTransactionToastMessage(
+            contractWriteBatchRevoke.data,
+            true
+          ),
+        });
+      } else if (waitContractWriteBatchRevoke.isSuccess) {
+        setBulkRevocations([]);
+        showDelegationToast({
+          title: "Batch Revoking Delegations",
+          message: getTransactionToastMessage(
+            contractWriteBatchRevoke.data,
+            false
+          ),
+        });
+      } else if (waitContractWriteBatchRevoke.isError) {
+        showDelegationToast({
+          title: "Revoking Delegations Failed",
+          message: getTransactionErrorToastMessage(
+            waitContractWriteBatchRevoke.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     contractWriteBatchRevoke.error,
     contractWriteBatchRevoke.data,
+    showDelegationToast,
+    waitContractWriteBatchRevoke.error,
+    waitContractWriteBatchRevoke.isError,
     waitContractWriteBatchRevoke.isLoading,
+    waitContractWriteBatchRevoke.isSuccess,
   ]);
 
   useEffect(() => {
@@ -590,33 +619,41 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (collectionLockWrite.error) {
       showDelegationToast({
         title,
-        message:
-          collectionLockWrite.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          collectionLockWrite.error,
+          "Failed to start wallet lock update."
+        ),
       });
     }
     if (collectionLockWrite.data) {
-      if (collectionLockWrite.data) {
-        if (waitCollectionLockWrite.isLoading) {
-          showDelegationToast({
-            title,
-            message: getTransactionToastMessage(collectionLockWrite.data, true),
-          });
-        } else {
-          showDelegationToast({
-            title,
-            message: getTransactionToastMessage(
-              collectionLockWrite.data,
-              false
-            ),
-          });
-        }
+      if (waitCollectionLockWrite.isLoading) {
+        showDelegationToast({
+          title,
+          message: getTransactionToastMessage(collectionLockWrite.data, true),
+        });
+      } else if (waitCollectionLockWrite.isSuccess) {
+        showDelegationToast({
+          title,
+          message: getTransactionToastMessage(collectionLockWrite.data, false),
+        });
+      } else if (waitCollectionLockWrite.isError) {
+        showDelegationToast({
+          title: `${title} Failed`,
+          message: getTransactionErrorToastMessage(
+            waitCollectionLockWrite.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     collectionLockWrite.error,
     collectionLockWrite.data,
     showDelegationToast,
+    waitCollectionLockWrite.error,
+    waitCollectionLockWrite.isError,
     waitCollectionLockWrite.isLoading,
+    waitCollectionLockWrite.isSuccess,
   ]);
 
   useEffect(() => {
@@ -625,29 +662,41 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     if (useCaseLockWrite.error) {
       showDelegationToast({
         title: title,
-        message: useCaseLockWrite.error.message.split("Request Arguments")[0],
+        message: getTransactionErrorToastMessage(
+          useCaseLockWrite.error,
+          "Failed to start use-case lock update."
+        ),
       });
     }
     if (useCaseLockWrite.data) {
-      if (useCaseLockWrite.data) {
-        if (waitUseCaseLockWrite.isLoading) {
-          showDelegationToast({
-            title: title,
-            message: getTransactionToastMessage(useCaseLockWrite.data, true),
-          });
-        } else {
-          showDelegationToast({
-            title: title,
-            message: getTransactionToastMessage(useCaseLockWrite.data, false),
-          });
-        }
+      if (waitUseCaseLockWrite.isLoading) {
+        showDelegationToast({
+          title: title,
+          message: getTransactionToastMessage(useCaseLockWrite.data, true),
+        });
+      } else if (waitUseCaseLockWrite.isSuccess) {
+        showDelegationToast({
+          title: title,
+          message: getTransactionToastMessage(useCaseLockWrite.data, false),
+        });
+      } else if (waitUseCaseLockWrite.isError) {
+        showDelegationToast({
+          title: `${title} Failed`,
+          message: getTransactionErrorToastMessage(
+            waitUseCaseLockWrite.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     useCaseLockWrite.error,
     useCaseLockWrite.data,
     showDelegationToast,
+    waitUseCaseLockWrite.error,
+    waitUseCaseLockWrite.isError,
     waitUseCaseLockWrite.isLoading,
+    waitUseCaseLockWrite.isSuccess,
   ]);
 
   useEffect(() => {

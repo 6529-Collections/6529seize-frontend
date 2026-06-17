@@ -42,6 +42,11 @@
   &:hover {
     background-color: color.adjust(variables.$project-blue, $lightness: 5%);
   }
+
+  &:focus-visible {
+    outline: 2px solid variables.$project-blue;
+    outline-offset: 3px;
+  }
 }
 
 .viewManageBtn {

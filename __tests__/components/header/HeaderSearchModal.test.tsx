@@ -20,9 +20,14 @@ const useCookieConsentMock = jest.fn();
 const useSidebarSectionsMock = jest.fn();
 const capacitorMock = jest.fn();
 const useDropForgePermissionsMock = jest.fn();
+const originalScrollIntoView = Element.prototype.scrollIntoView;
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = jest.fn();
+});
+
+afterAll(() => {
+  Element.prototype.scrollIntoView = originalScrollIntoView;
 });
 
 jest.mock("react-use", () => {

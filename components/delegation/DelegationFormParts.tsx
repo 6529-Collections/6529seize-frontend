@@ -22,6 +22,14 @@ import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
 import { useOrignalDelegatorEnsResolution } from "./delegation-shared";
 import styles from "./Delegation.module.scss";
 
+function getTransactionErrorToastMessage(
+  error: { message?: string } | null | undefined,
+  fallback: string
+) {
+  const message = error?.message?.split("Request Arguments")[0]?.trim();
+  return message || fallback;
+}
+
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
 ) {
@@ -317,7 +325,10 @@ export function DelegationSubmitGroups(
     if (writeDelegation.error) {
       emitToast({
         title,
-        message: writeDelegation.error.message.split("Request Arguments")[0]!,
+        message: getTransactionErrorToastMessage(
+          writeDelegation.error,
+          "Failed to start transaction."
+        ),
       });
     }
     if (writeDelegation.data) {
@@ -333,7 +344,7 @@ export function DelegationSubmitGroups(
             </>
           ),
         });
-      } else {
+      } else if (waitWriteDelegation.isSuccess) {
         emitToast({
           title,
           message: (
@@ -343,12 +354,23 @@ export function DelegationSubmitGroups(
             </>
           ),
         });
+      } else if (waitWriteDelegation.isError) {
+        emitToast({
+          title: `${title} Failed`,
+          message: getTransactionErrorToastMessage(
+            waitWriteDelegation.error,
+            "Transaction failed while waiting for confirmation."
+          ),
+        });
       }
     }
   }, [
     writeDelegation.error,
     writeDelegation.data,
+    waitWriteDelegation.error,
+    waitWriteDelegation.isError,
     waitWriteDelegation.isLoading,
+    waitWriteDelegation.isSuccess,
     title,
   ]);
 

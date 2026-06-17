@@ -11,11 +11,21 @@ import CollectionDelegationComponent from "@/components/delegation/CollectionDel
 import { MEMES_COLLECTION } from "@/components/delegation/delegation-constants";
 import { DelegationCenterSection } from "@/types/enums";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
+import {
+  useReadContract,
+  useReadContracts,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 
 jest.mock("wagmi", () => {
   const ensNameResult = { data: undefined };
-  const waitReceiptResult = { isLoading: false };
+  const waitReceiptResult = {
+    isLoading: false,
+    isSuccess: false,
+    isError: false,
+    error: undefined,
+  };
 
   return {
     useReadContract: jest.fn(),
@@ -33,9 +43,23 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 
 const mockUseReadContract = useReadContract as jest.Mock;
 const mockUseReadContracts = useReadContracts as jest.Mock;
+const mockUseWaitForTransactionReceipt =
+  useWaitForTransactionReceipt as jest.Mock;
 const mockUseWriteContract = useWriteContract as jest.Mock;
 const mockWriteContract = jest.fn();
 const mockWriteContractReset = jest.fn();
+const defaultWriteContractResult = {
+  writeContract: mockWriteContract,
+  reset: mockWriteContractReset,
+  data: undefined,
+  error: undefined,
+};
+const defaultWaitReceiptResult = {
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
+  error: undefined,
+};
 
 describe("CollectionDelegationComponent", () => {
   const collection = {
@@ -59,12 +83,8 @@ describe("CollectionDelegationComponent", () => {
       data: undefined,
       refetch: jest.fn(),
     });
-    mockUseWriteContract.mockReturnValue({
-      writeContract: mockWriteContract,
-      reset: mockWriteContractReset,
-      data: undefined,
-      error: undefined,
-    });
+    mockUseWriteContract.mockReturnValue(defaultWriteContractResult);
+    mockUseWaitForTransactionReceipt.mockReturnValue(defaultWaitReceiptResult);
   });
 
   it("renders collection title and back button works", () => {
@@ -171,5 +191,38 @@ describe("CollectionDelegationComponent", () => {
         functionName: "setCollectionLock",
       })
     );
+  });
+
+  it("shows collection lock receipt failures instead of success", () => {
+    mockCollectionLockState(false);
+    mockUseWriteContract
+      .mockReturnValueOnce(defaultWriteContractResult)
+      .mockReturnValueOnce(defaultWriteContractResult)
+      .mockReturnValueOnce({
+        ...defaultWriteContractResult,
+        data: "0xlock",
+      })
+      .mockReturnValue(defaultWriteContractResult);
+    mockUseWaitForTransactionReceipt
+      .mockReturnValueOnce(defaultWaitReceiptResult)
+      .mockReturnValueOnce(defaultWaitReceiptResult)
+      .mockReturnValueOnce({
+        isLoading: false,
+        isSuccess: false,
+        isError: true,
+        error: new Error("receipt failed Request Arguments"),
+      })
+      .mockReturnValue(defaultWaitReceiptResult);
+
+    render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+
+    expect(screen.getByText("Locking Wallet Failed")).toBeInTheDocument();
+    expect(screen.getByText("receipt failed")).toBeInTheDocument();
+    expect(screen.queryByText(/Transaction Successful!/i)).not.toBeInTheDocument();
   });
 });
