@@ -1,0 +1,4 @@
+interface:
+  display_name: "I18n Localization"
+  short_description: "Extract and verify frontend copy, locale formatting, and fallbacks."
+  default_prompt: "Use $i18n-localization to make the touched frontend UI translation-ready and locale-aware."

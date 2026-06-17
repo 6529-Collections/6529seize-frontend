@@ -54,7 +54,8 @@ type StandaloneWavePollFields = Pick<
   | "anonymous"
   | "closing_time"
   | "is_open"
->;
+> &
+  Partial<Pick<ApiWavePoll, "only_droppers_can_respond">>;
 
 type WavePollDropRow = ApiWavePollDropRow & Partial<ApiDropV2>;
 
@@ -120,6 +121,7 @@ const mapWavePollToDropPoll = (
   voted: poll.voted,
   multichoice: poll.multichoice,
   anonymous: poll.anonymous,
+  only_droppers_can_respond: poll.only_droppers_can_respond ?? false,
   closing_time: poll.closing_time,
   is_open: poll.is_open,
 });
@@ -141,6 +143,10 @@ const getWavePollRowPoll = (row: ApiWavePollDropRow): ApiDropPoll | null => {
     voted: row.voted,
     multichoice: row.multichoice,
     anonymous: row.anonymous,
+    only_droppers_can_respond:
+      row.only_droppers_can_respond ??
+      embeddedPoll.only_droppers_can_respond ??
+      false,
     closing_time: row.closing_time,
     is_open: row.is_open,
   };

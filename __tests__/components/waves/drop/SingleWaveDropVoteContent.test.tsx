@@ -74,7 +74,6 @@ jest.mock("@/components/waves/drop/SingleWaveDropVoteSlider", () => ({
         />
         <span data-testid="slider-value">{props.voteValue}</span>
         <span data-testid="slider-credit-type">{props.label}</span>
-        <span data-testid="slider-rank">{props.rank}</span>
       </div>
     );
   },
@@ -583,14 +582,13 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("new-rating")).toHaveTextContent("85");
   });
 
-  it("passes correct props to slider component", () => {
+  it("passes correct vote bounds and label to slider component", () => {
     const drop = createMockDrop({
       context_profile_context: {
         rating: 30,
         min_rating: 10,
         max_rating: 90,
       },
-      rank: 3,
       wave: {
         id: "wave-123",
         name: "Test Wave",
@@ -610,7 +608,6 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("slider-input")).toHaveAttribute("max", "90");
     expect(screen.getByTestId("slider-input")).toHaveAttribute("value", "30");
     expect(screen.getByTestId("slider-credit-type")).toHaveTextContent("Rep");
-    expect(screen.getByTestId("slider-rank")).toHaveTextContent("3");
   });
 
   it("passes correct props to numeric input component", () => {
@@ -751,26 +748,20 @@ describe("SingleWaveDropVoteContent", () => {
     expect(screen.getByTestId("current-rating")).toHaveTextContent("0");
   });
 
-  it("stops event propagation on container click", () => {
+  it("renders vote controls as a native group", () => {
     const drop = createMockDrop();
-    const parentClickHandler = jest.fn();
 
     render(
-      <div onClick={parentClickHandler}>
-        <SingleWaveDropVoteContent
-          drop={drop}
-          size={SingleWaveDropVoteSize.NORMAL}
-          onVoteSuccess={mockOnVoteSuccess}
-        />
-      </div>
+      <SingleWaveDropVoteContent
+        drop={drop}
+        size={SingleWaveDropVoteSize.NORMAL}
+        onVoteSuccess={mockOnVoteSuccess}
+      />
     );
 
-    const container = screen
-      .getByTestId("vote-slider")
-      .closest(".tw-space-y-6");
-    fireEvent.click(container!);
-
-    expect(parentClickHandler).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("group", { name: "Vote controls" })
+    ).toBeInTheDocument();
   });
 
   it("shows correct icon flip based on mode", () => {

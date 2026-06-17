@@ -1,7 +1,4 @@
 "use client";
-
-/* eslint-disable max-lines -- This composer already exceeds the diff lint limit. */
-
 import { SAFE_MARKDOWN_TRANSFORMERS } from "@/components/drops/create/lexical/transformers/markdownTransformers";
 import type {
   CreateDropConfig,
@@ -20,6 +17,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { selectEditingDropId, setEditingDropId } from "@/store/editSlice";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -1435,8 +1433,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       refreshState();
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't submit this drop.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setSubmitting(false);
@@ -1588,8 +1588,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       });
     } catch (error) {
       setToast({
-        message: error instanceof Error ? error.message : String(error),
         type: "error",
+        title: "Couldn't add this file.",
+        description: "Check the file and try again.",
+        details: getToastErrorDetails(error),
       });
       return;
     }

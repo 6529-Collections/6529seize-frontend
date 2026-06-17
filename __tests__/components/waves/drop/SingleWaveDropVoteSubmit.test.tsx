@@ -1,5 +1,11 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { SingleWaveDropVoteSubmitHandles } from "@/components/waves/drop/SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSubmit from "@/components/waves/drop/SingleWaveDropVoteSubmit";
@@ -125,6 +131,8 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   };
   const backgroundModalCloseDelayMs = 1500;
+  const defaultVoteLabel = "Rep";
+  const defaultIdleButtonLabel = `Vote +100 ${defaultVoteLabel}`;
 
   const renderComponent = (props: any = {}) => {
     queryClient = new QueryClient({
@@ -143,6 +151,7 @@ describe("SingleWaveDropVoteSubmit", () => {
             <SingleWaveDropVoteSubmit
               drop={mockDrop}
               newRating={100}
+              voteLabel={defaultVoteLabel}
               {...props}
             />
           </ReactQueryWrapperContext.Provider>
@@ -171,7 +180,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     renderComponent();
 
     expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByText("Vote")).toBeInTheDocument();
+    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
   });
 
   it("applies correct styling based on drop rank", () => {
@@ -192,7 +201,7 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     // Should show loading spinner
     await waitFor(() => {
-      expect(screen.getByText("Vote")).toBeInTheDocument();
+      expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
     });
   });
 
@@ -432,7 +441,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     expect(onVoteRequestStarted).not.toHaveBeenCalled();
     expect(onVoteApplied).not.toHaveBeenCalled();
     await waitFor(() => {
-      expect(screen.getByText("Vote")).toBeInTheDocument();
+      expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
     });
 
     await advanceTimers(backgroundModalCloseDelayMs);
@@ -578,7 +587,7 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
 
     // Button should show initial text
-    expect(screen.getByText("Vote")).toBeInTheDocument();
+    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
     expect(onVoteApplied).not.toHaveBeenCalled();
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
@@ -617,7 +626,7 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-    expect(screen.getByText("Vote")).toBeInTheDocument();
+    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
   });
 
   it("exposes handleClick method through ref", () => {
@@ -687,7 +696,11 @@ describe("SingleWaveDropVoteSubmit", () => {
           <ReactQueryWrapperContext.Provider
             value={mockReactQueryWrapperContext as any}
           >
-            <SingleWaveDropVoteSubmit drop={mockDrop} newRating={100} />
+            <SingleWaveDropVoteSubmit
+              drop={mockDrop}
+              newRating={100}
+              voteLabel={defaultVoteLabel}
+            />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
       </QueryClientProvider>

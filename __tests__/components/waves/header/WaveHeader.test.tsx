@@ -176,6 +176,9 @@ describe("WaveHeader", () => {
       "data-show-owner",
       "true"
     );
+    expect(
+      screen.getByTestId("wave-header-options").parentElement?.className
+    ).toContain("tw-mt-[22px]");
     expect(screen.queryByTestId("wave-header-pin")).toBeNull();
   });
 

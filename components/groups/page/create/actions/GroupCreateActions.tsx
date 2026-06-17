@@ -57,8 +57,12 @@ export default function GroupCreateActions({
     }
 
     setToast({
-      message: result.error,
       type: "error",
+      title: originalGroup
+        ? "Couldn't save this group."
+        : "Couldn't create this group.",
+      description: "Please check the group setup and try again.",
+      details: result.error,
     });
   };
 

@@ -237,7 +237,7 @@ const ensureAuthenticated = async (
   }
   setToast({
     type: "error",
-    message: "Failed to authenticate",
+    message: "Couldn't authenticate. Reconnect your wallet and try again.",
   });
   return false;
 };

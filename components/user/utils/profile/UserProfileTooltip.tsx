@@ -16,6 +16,7 @@ import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -146,13 +147,11 @@ export default function UserProfileTooltip({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
-      const errorMessage =
-        error instanceof Error
-          ? `Failed to create direct message: ${error.message}`
-          : "Failed to create direct message. Please try again.";
       setToast({
-        message: errorMessage,
         type: "error",
+        title: "Couldn't create this direct message.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     } finally {
       setDirectMessageLoading(false);

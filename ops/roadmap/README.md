@@ -7,6 +7,211 @@ repository operations but should not appear in user-facing product docs.
 Keep roadmap pages current-state oriented. Archive or replace stale plans
 instead of leaving conflicting guidance in place.
 
+## Agent Release Railway Roadmap
+
+Last reviewed: 2026-06-11 against `origin/main` at `334b02c57`.
+
+The repository is moving from one-human-per-PR review toward a higher-throughput
+agent development model. The operating goal is to stop treating "PR opened" as
+the main holding point. Agents should be able to classify, validate, merge, and
+exercise suitable work on staging, while humans reserve their attention for
+production release decisions and genuinely high-risk changes.
+
+The production gate stays human-owned. The system below is intended to make
+staging and release state explicit enough that humans can decide "what should
+ship now?" from evidence rather than reconstructing branch history by hand.
+
+### P1: Add PR Risk Lanes
+
+Create a deterministic PR classifier backed by a repo-owned policy file, for
+example `ops/risk-areas.yml`. The classifier should inspect changed paths,
+dependency deltas, generated files, configuration files, diff size, and PR
+metadata, then apply GitHub labels and leave a short PR comment explaining the
+classification.
+
+Initial labels:
+
+- `risk:low`, `risk:medium`, and `risk:high`.
+- Area labels such as `area:waves`, `area:auth-wallet`,
+  `area:media-resolver`, `area:deps`, `area:deploy`,
+  `area:generated-api`, `area:security`, `area:ui-copy`, and `area:docs`.
+- Flow labels such as `staging:eligible`, `staging:queued`,
+  `staging:deployed`, `staging:passed`, `staging:failed`,
+  `release:candidate`, `release:hold`, and `release:blocked`.
+
+Default risk rules should be conservative:
+
+- Low risk: docs, tests, isolated copy changes, and small leaf UI changes that
+  do not touch shared state, auth, APIs, deployment, or generated code.
+- Medium risk: shared UI, hooks, Waves behavior, cache updates, visible UX
+  changes, profile flows, and changes that require focused browser validation.
+- High risk: wallet/auth/signing, dependencies, `next.config.ts`, `proxy.ts`,
+  CSP/security headers, OpenAPI/generated models, IPFS/IPNS/Arweave/media
+  resolution, deployment scripts, app-wallet code, and production environment
+  behavior.
+
+Human overrides should be possible, but overrides must be explicit labels with
+an accompanying reason in the PR discussion.
+
+### P1: Treat Staging As The Integration Surface
+
+Use staging to test integrated work before production selection. The preferred
+branch model is:
+
+- `main` acts as the agent integration trunk.
+- Low and medium risk PRs can merge to `main` after required automated checks,
+  bot review, and focused validation pass.
+- High risk PRs can receive staging validation, but require explicit human
+  approval before merging to the integration trunk unless the policy is later
+  relaxed.
+- Production deploys selected release branches, not "whatever `main` currently
+  contains."
+
+This keeps new work based on a common codebase while preserving production
+safety through release branch selection.
+
+### P1: Build A Staging Train
+
+Add a staging train workflow that serializes deploys and records exactly what
+is on staging. It should build on the existing staging pattern of a dedicated
+staging branch, serial deploy concurrency, and expected-SHA verification.
+
+Triggers:
+
+- PR merged to `main`.
+- Manual dispatch.
+- Applying a staging queue label.
+- A scheduled bus, initially every 15 minutes.
+
+Behavior:
+
+- Collect merged PRs that have not yet been deployed to staging.
+- Bundle waiting eligible changes when the queue is non-empty or the scheduled
+  bus fires.
+- Update the staging deploy target and create a GitHub Deployment for an
+  environment such as `staging-integration`.
+- Store the deployed SHA, included PRs, risk labels, touched areas, and required
+  test packs in the deployment payload or an attached artifact.
+- Run staging smoke/E2E checks after the deploy.
+- Comment the staging result back onto included PRs and update flow labels.
+
+The train should support two modes:
+
+- Immediate mode: deploy one change when staging is idle and the queue is small.
+- Bus mode: deploy all waiting eligible changes on the fixed interval so PR
+  velocity cannot create an infinite queue.
+
+### P1: Add Staging-Targeted E2E
+
+Make Playwright capable of testing an already deployed staging URL without
+starting a local dev server.
+
+Implementation direction:
+
+- Add a `PLAYWRIGHT_BASE_URL` or equivalent environment override.
+- Add a `PLAYWRIGHT_SKIP_WEB_SERVER` or equivalent flag for remote targets.
+- Add a `6529 run test:e2e:staging` command that targets the staging host.
+- Keep the existing local E2E path for localhost development.
+
+Organize tests into small packs that can be selected from risk and area labels:
+
+- `e2e/smoke`
+- `e2e/waves`
+- `e2e/auth-wallet`
+- `e2e/media`
+- `e2e/profiles`
+- `e2e/delegation`
+- `e2e/distribution-plan`
+
+Initial label mapping:
+
+- `area:waves` runs smoke plus Waves tests.
+- `area:auth-wallet` runs smoke plus auth-wallet tests.
+- `area:media-resolver` runs smoke plus media tests.
+- `area:deps` runs smoke, build, and a broader selected suite.
+- `area:deploy` runs build, deployment health, and smoke.
+
+Agents should also perform exploratory browser checks for visible behavior, but
+the scripted E2E packs are the durable release signal.
+
+### P1: Promote To Production Through Release Branches
+
+Production releases should be selected batches of validated work.
+
+Flow:
+
+- Resolve the latest production SHA from the last successful production deploy.
+- Create a branch such as `release/YYYY-MM-DD-N` from that SHA.
+- Cherry-pick selected validated PR merge commits in a deterministic order.
+- Generate a release manifest.
+- Deploy the release branch to a quiet pre-production environment or a staged
+  final-smoke window.
+- Require human approval of the manifest before production deploy.
+- Deploy production through the existing production workflow against the release
+  branch.
+
+The release manifest should include:
+
+- PR number, title, author or agent, risk, areas, and commit SHA.
+- Staging deployment SHA and staging validation result.
+- Checks and E2E packs run.
+- Known caveats and intentionally skipped validation.
+- Include, hold, or blocked decision with reason.
+- Rollback notes.
+
+High-risk PRs must require explicit human inclusion in the release manifest.
+
+Longer term, add a second environment:
+
+- `staging-integration`: noisy, continuous, agent-tested.
+- `preprod-release`: quiet, exact production candidate.
+
+Until that exists, schedule release freezes where staging temporarily validates
+the exact release branch.
+
+### P1: Create A Release Dashboard And Ledger
+
+Use GitHub as the source of truth first, then add repo CLI helpers when the
+workflow is stable.
+
+Data sources:
+
+- PR labels and comments.
+- GitHub Deployments and deployment statuses.
+- Workflow runs and artifacts.
+- Release branch manifests.
+- Latest production deployment SHA.
+
+Dashboard views:
+
+- Open PRs grouped by risk and area.
+- Merged PRs not yet deployed to staging.
+- Current staging SHA and included PRs.
+- Staging failures with failing checks and owners.
+- Validated PRs not yet included in a release.
+- Current release candidate contents.
+- High-risk holds.
+- Production lag from the integration trunk.
+
+The most important health metrics are:
+
+- Number of integration commits ahead of production.
+- Number of high-risk commits ahead of production.
+- Number of validated low/medium PRs waiting for release.
+- Median time from PR merge to staging validation.
+- Median time from staging validation to production release decision.
+
+### Suggested Build Order
+
+1. Add risk policy, classifier, labels, and PR comments.
+2. Add staging Playwright base-URL support.
+3. Add GitHub Deployment-based staging ledger.
+4. Add the staging train workflow with serial and scheduled deploy modes.
+5. Add per-PR staging result comments.
+6. Add release branch creation and manifest generation.
+7. Add pre-production or final-smoke release validation.
+8. Add a `ghtrain`-style dashboard or CLI once the data model is stable.
+
 ## Public Rendering And SEO Roadmap
 
 Last reviewed: 2026-06-11 against `origin/main` at `278c5fa1a`, with the

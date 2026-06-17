@@ -1,7 +1,21 @@
 import { getAppMetadata } from "@/components/providers/metadata";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildArticlePageJsonLd } from "@/lib/structured-data/article";
 import Link from "next/link";
 const IndexPage = () => (
   <div>
+    <JsonLdScript
+      data={buildArticlePageJsonLd({
+        path: "/news/introducing-om",
+        headline: "Introducing OM",
+        description: "Introducing OM, the alpha version of the first district of OM.",
+        image: "https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/2022/04/Artboard-1-80.jpg",
+        author: "6529er",
+        datePublished: "2022-04-14T17:26:36+00:00",
+        dateModified: "2022-04-14T21:42:14+00:00",
+        section: "News",
+      })}
+    />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
     <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
     <meta

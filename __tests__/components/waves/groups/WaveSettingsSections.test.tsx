@@ -220,11 +220,14 @@ describe("WaveSettingsSections", () => {
     });
 
     expect(screen.getByText("Approval tabs")).toBeInTheDocument();
+    expect(screen.getByText("Display")).toBeInTheDocument();
     expect(screen.getByText("Approval rule")).toBeInTheDocument();
     expect(screen.getByText("Chat")).toBeInTheDocument();
     expect(screen.getByText("Access")).toBeInTheDocument();
     expect(screen.getByText("Approvals tab")).toBeInTheDocument();
     expect(screen.getByText("Approved tab")).toBeInTheDocument();
+    expect(screen.getByText("Outcomes")).toBeInTheDocument();
+    expect(screen.getByText("Shown")).toBeInTheDocument();
     expect(screen.getByText("Approve after")).toBeInTheDocument();
     expect(screen.getByText("12 approvals")).toBeInTheDocument();
     expect(screen.getByText("Hold time")).toBeInTheDocument();
@@ -234,11 +237,108 @@ describe("WaveSettingsSections", () => {
   it("keeps approve-only settings out of rank waves", () => {
     renderSettings({ wave: makeWave({ waveType: ApiWaveType.Rank }) });
 
+    expect(screen.getByText("Display")).toBeInTheDocument();
+    expect(screen.getByText("Outcomes")).toBeInTheDocument();
     expect(screen.queryByText("Approval tabs")).not.toBeInTheDocument();
     expect(screen.queryByText("Approvals tab")).not.toBeInTheDocument();
     expect(screen.queryByText("Approval rule")).not.toBeInTheDocument();
     expect(screen.queryByText("Approve after")).not.toBeInTheDocument();
-    expect(fetchWaveMetadataMock).not.toHaveBeenCalled();
+    expect(fetchWaveMetadataMock).toHaveBeenCalledWith({ waveId: "wave-1" });
+  });
+
+  it("shows outcome visibility as read-only for non-admins", async () => {
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+        data_value: "false",
+      },
+    ];
+
+    renderSettings({
+      wave: makeWave({
+        canAdmin: false,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+
+    expect(await screen.findByText("Hidden")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Edit outcome visibility" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("saves hidden outcome visibility metadata", async () => {
+    const user = userEvent.setup();
+    const { queryClient } = renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Rank,
+      }),
+    });
+    const invalidateSpy = jest.spyOn(queryClient, "invalidateQueries");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Edit outcome visibility" })
+    );
+    await user.click(screen.getByLabelText("Show outcomes"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(createWaveMetadataMock).toHaveBeenCalledWith({
+        waveId: "wave-1",
+        body: {
+          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+          data_value: "false",
+        },
+      });
+    });
+    expect(deleteWaveMetadataMock).not.toHaveBeenCalled();
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: "wave-1" }],
+    });
+  });
+
+  it("deletes outcome visibility metadata when reset to shown", async () => {
+    const user = userEvent.setup();
+    waveMetadata = [
+      {
+        id: 1,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+        data_value: "hidden",
+      },
+      {
+        id: 2,
+        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
+        data_value: "false",
+      },
+    ];
+    renderSettings({
+      wave: makeWave({
+        canAdmin: true,
+        waveType: ApiWaveType.Approve,
+      }),
+    });
+
+    expect(await screen.findByText("Hidden")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "Edit outcome visibility" })
+    );
+    await user.click(screen.getByLabelText("Show outcomes"));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => {
+      expect(deleteWaveMetadataMock).toHaveBeenCalledTimes(2);
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 1,
+    });
+    expect(deleteWaveMetadataMock).toHaveBeenCalledWith({
+      waveId: "wave-1",
+      metadataId: 2,
+    });
+    expect(createWaveMetadataMock).not.toHaveBeenCalled();
   });
 
   it("shows approve labels as read-only for non-admins", async () => {

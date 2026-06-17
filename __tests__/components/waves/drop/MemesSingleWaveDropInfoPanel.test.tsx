@@ -4,6 +4,11 @@ import { MemesSingleWaveDropInfoPanel } from "@/components/waves/drop/MemesSingl
 import { ApiDropType } from "@/generated/models/ApiDropType";
 
 const mockUseDropInteractionRules = jest.fn();
+const mockUseWaveRankReward = jest.fn(() => ({
+  nicTotal: 0,
+  repTotal: 0,
+  manualOutcomes: [],
+}));
 let mockIsMobileScreen = false;
 
 jest.mock("framer-motion", () => ({
@@ -96,11 +101,7 @@ jest.mock("@/hooks/isMobileScreen", () => ({
   default: () => mockIsMobileScreen,
 }));
 jest.mock("@/hooks/waves/useWaveRankReward", () => ({
-  useWaveRankReward: jest.fn(() => ({
-    nicTotal: 0,
-    repTotal: 0,
-    manualOutcomes: [],
-  })),
+  useWaveRankReward: (args: any) => mockUseWaveRankReward(args),
 }));
 
 const baseDrop: any = {
@@ -134,6 +135,7 @@ describe("MemesSingleWaveDropInfoPanel", () => {
     });
     mockIsMobileScreen = false;
     mockUseDropInteractionRules.mockReset();
+    mockUseWaveRankReward.mockClear();
     mockUseDropInteractionRules.mockReturnValue({
       isWinner: true,
       canDelete: true,
@@ -352,5 +354,30 @@ describe("MemesSingleWaveDropInfoPanel", () => {
       "data-open",
       "false"
     );
+  });
+
+  it("hides outcome rows and disables reward fetch when outcomes are hidden", () => {
+    mockUseWaveRankReward.mockReturnValue({
+      nicTotal: 12,
+      repTotal: 3,
+      manualOutcomes: ["Special prize"],
+    });
+
+    render(
+      <MemesSingleWaveDropInfoPanel
+        drop={baseDrop}
+        wave={null}
+        outcomesVisible={false}
+      />
+    );
+
+    expect(mockUseWaveRankReward).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+    expect(screen.queryByText("Special prize")).toBeNull();
+    expect(screen.queryByText("12 NIC")).toBeNull();
+    expect(screen.queryByText("3 Rep")).toBeNull();
   });
 });

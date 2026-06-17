@@ -11,6 +11,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 
 export default function ProxyCreate({
   profileProxies,
@@ -39,8 +40,10 @@ export default function ProxyCreate({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't create this proxy.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

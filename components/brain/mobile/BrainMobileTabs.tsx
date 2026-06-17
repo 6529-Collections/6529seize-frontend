@@ -48,6 +48,7 @@ interface BrainMobileTabsProps {
   readonly wave?: ApiWave | undefined;
   readonly waveActive: boolean;
   readonly hasPolls?: boolean | undefined;
+  readonly outcomesVisible?: boolean | undefined;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
   readonly isApp?: boolean | undefined;
@@ -59,6 +60,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   wave,
   waveActive,
   hasPolls = false,
+  outcomesVisible = true,
   showWavesTab,
   showStreamBack,
   isApp,
@@ -99,7 +101,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
     useWave(wave);
   const isCompetitionWave = isRankWave || isApproveWave;
-  const supportsOutcomeView = isCompetitionWave && !isCurationWave;
+  const supportsOutcomeView =
+    isCompetitionWave && !isCurationWave && outcomesVisible;
   const canShowMyVotesTab = isCurationWave || hasAuthenticatedProfile;
 
   // Get unread indicator for messages

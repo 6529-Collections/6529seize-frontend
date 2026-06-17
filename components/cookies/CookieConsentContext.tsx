@@ -157,7 +157,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       console.error("Failed to post cookie consent", error);
       setToast({
         type: "error",
-        message: "Something went wrong...",
+        title: "Couldn't save cookie preferences.",
+        description: "Please try again.",
       });
     }
   }, [getCookieConsent, setToast]);
@@ -169,14 +170,15 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       Cookies.set(CONSENT_PERFORMANCE_COOKIE, "false", { expires: 365 });
       setToast({
         type: "success",
-        message: "Cookie preferences updated",
+        message: "Cookie preferences saved.",
       });
       getCookieConsent();
     } catch (error) {
       console.error("Failed to delete cookie consent", error);
       setToast({
         type: "error",
-        message: "Something went wrong...",
+        title: "Couldn't save cookie preferences.",
+        description: "Please try again.",
       });
     }
   }, [getCookieConsent, setToast]);

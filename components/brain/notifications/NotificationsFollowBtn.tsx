@@ -10,6 +10,7 @@ import {
 } from "@/components/user/utils/UserFollowBtn";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   commonApiDeleteWithBody,
   commonApiPost,
@@ -54,8 +55,10 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't follow this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {
@@ -78,8 +81,10 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
         type: "error",
+        title: "Couldn't unfollow this profile.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
       });
     },
     onSettled: () => {

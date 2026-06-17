@@ -45,7 +45,8 @@ March 19, 2026.
 - Download datasets and exports: [Open Data](open-data/README.md)
 - Check app shell navigation and mobile handoff:
   [Navigation](navigation/README.md)
-- Use utility routes under `/tools/*`: [API Tool](api-tool/README.md)
+- Use utility routes under `/tools/*`, including private 6529bot operator
+  tools: [API Tool](api-tool/README.md)
 - Debug shared cross-route behavior: [Shared](shared/README.md)
 
 ## Area Index
@@ -69,10 +70,11 @@ March 19, 2026.
 - [API Tool](api-tool/README.md): `/tools/api`, `/tools/block-finder`,
   `/tools/subscriptions-report`, `/tools/app-wallets`,
   `/tools/app-wallets/import-wallet`, `/tools/app-wallets/{appWalletAddress}`
+  and `/tools/6529bot/admin`
 - [EMMA](emma/README.md): `/emma`, `/emma/plans`, `/emma/plans/{planId}`
-- [Open Data](open-data/README.md): `/open-data`, `/open-data/meme-subscriptions`,
-  `/open-data/network-metrics`, `/open-data/rememes`, `/open-data/royalties`,
-  `/open-data/team`
+- [Open Data](open-data/README.md): `/open-data`, `/open-data/6529bot`,
+  `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
+  `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
 - [Navigation](navigation/README.md): app shell controls and `/open-mobile`
 - [Shared](shared/README.md): behavior reused by multiple areas
 
@@ -119,9 +121,11 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Tools and open data:
   `/tools/api`, `/tools/block-finder`, `/tools/subscriptions-report`,
   `/tools/app-wallets`, `/tools/app-wallets/import-wallet`,
-  `/tools/app-wallets/{appWalletAddress}`, `/open-data`,
-  `/open-data/meme-subscriptions`, `/open-data/network-metrics`,
-  `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
+  `/tools/app-wallets/{appWalletAddress}`, `/tools/6529bot/admin`,
+  `/open-data`,
+  `/open-data/6529bot`, `/open-data/meme-subscriptions`,
+  `/open-data/network-metrics`, `/open-data/rememes`,
+  `/open-data/royalties`, `/open-data/team`
 - Shared app-shell behavior:
   [Navigation](navigation/README.md) and [Shared](shared/README.md),
   including `/open-mobile`

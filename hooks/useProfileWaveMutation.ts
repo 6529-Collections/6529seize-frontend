@@ -10,6 +10,7 @@ import {
 } from "@/services/api/profile-wave-api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   getProfileWaveIdentity,
   setProfileWaveQueryData,
@@ -77,8 +78,13 @@ export function useProfileWaveMutation(profile: ApiIdentity | null) {
           ? "Unable to update profile wave."
           : "Unable to clear profile wave.";
       setToast({
-        message: error instanceof Error ? error.message : fallbackMessage,
         type: "error",
+        title:
+          action.type === "set"
+            ? "Couldn't update the profile wave."
+            : "Couldn't clear the profile wave.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error, fallbackMessage),
       });
     },
   });
