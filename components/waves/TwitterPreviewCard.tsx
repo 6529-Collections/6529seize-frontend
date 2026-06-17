@@ -993,6 +993,10 @@ function TwitterVideoPlayer({
         captionsSrc={captionsUrl}
         layout="fill"
         showActions={false}
+        onVideoClick={(event) => {
+          stopMediaEvent(event);
+          setIsMenuOpen(false);
+        }}
       />
     </div>
   );

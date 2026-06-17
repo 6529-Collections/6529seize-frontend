@@ -37,6 +37,9 @@ interface SeizeVideoPlayerProps {
   readonly openLabel?: string | undefined;
   readonly isDownloading?: boolean | undefined;
   readonly fallbackSources?: readonly string[] | undefined;
+  readonly onVideoClick?:
+    | ((event: React.MouseEvent<HTMLDivElement>) => void)
+    | undefined;
   readonly onError?: React.ReactEventHandler<HTMLVideoElement> | undefined;
   readonly "aria-label"?: string | undefined;
   readonly "data-testid"?: string | undefined;
@@ -64,6 +67,11 @@ type FullscreenElement = HTMLDivElement & {
   webkitRequestFullscreen?: () => Promise<void> | void;
   mozRequestFullScreen?: () => Promise<void> | void;
   msRequestFullscreen?: () => Promise<void> | void;
+};
+
+type NativeFullscreenVideo = HTMLVideoElement & {
+  webkitEnterFullscreen?: () => void;
+  webkitEnterFullScreen?: () => void;
 };
 
 function getFullscreenElement() {
@@ -97,13 +105,18 @@ function isFullscreenEnabled() {
 async function enterFullscreen(element: FullscreenElement) {
   if (typeof element.requestFullscreen === "function") {
     await element.requestFullscreen();
+    return true;
   } else if (typeof element.webkitRequestFullscreen === "function") {
     await element.webkitRequestFullscreen();
+    return true;
   } else if (typeof element.mozRequestFullScreen === "function") {
     await element.mozRequestFullScreen();
+    return true;
   } else if (typeof element.msRequestFullscreen === "function") {
     await element.msRequestFullscreen();
+    return true;
   }
+  return false;
 }
 
 async function exitFullscreen() {
@@ -117,6 +130,23 @@ async function exitFullscreen() {
   } else if (typeof doc.msExitFullscreen === "function") {
     await doc.msExitFullscreen();
   }
+}
+
+function enterNativeVideoFullscreen(video: HTMLVideoElement | null) {
+  if (!video) {
+    return false;
+  }
+
+  const nativeFullscreenVideo = video as NativeFullscreenVideo;
+  if (typeof nativeFullscreenVideo.webkitEnterFullscreen === "function") {
+    nativeFullscreenVideo.webkitEnterFullscreen();
+    return true;
+  }
+  if (typeof nativeFullscreenVideo.webkitEnterFullScreen === "function") {
+    nativeFullscreenVideo.webkitEnterFullScreen();
+    return true;
+  }
+  return false;
 }
 
 function getAspectRatio(width: number, height: number): string | undefined {
@@ -211,6 +241,7 @@ export default function SeizeVideoPlayer({
   openLabel,
   isDownloading = false,
   fallbackSources,
+  onVideoClick,
   onError,
   "aria-label": ariaLabel,
   "data-testid": dataTestId,
@@ -390,7 +421,15 @@ export default function SeizeVideoPlayer({
     event.preventDefault();
     event.stopPropagation();
     const wrapper = wrapperRef.current;
-    if (!wrapper || !isFullscreenEnabled()) {
+    const video = resolvedVideoRef.current;
+    if (!wrapper) {
+      enterNativeVideoFullscreen(video);
+      revealControls();
+      return;
+    }
+
+    if (!isFullscreenEnabled()) {
+      enterNativeVideoFullscreen(video);
       revealControls();
       return;
     }
@@ -401,13 +440,19 @@ export default function SeizeVideoPlayer({
       return;
     }
 
-    await enterFullscreen(wrapper as FullscreenElement).catch(() => undefined);
+    const enteredWrapper = await enterFullscreen(
+      wrapper as FullscreenElement
+    ).catch(() => false);
+    if (!enteredWrapper) {
+      enterNativeVideoFullscreen(video);
+    }
     revealControls();
   }
 
   function handleWrapperClick(event: React.MouseEvent<HTMLDivElement>) {
     event.preventDefault();
     event.stopPropagation();
+    onVideoClick?.(event);
     revealControls();
     togglePlayback();
   }

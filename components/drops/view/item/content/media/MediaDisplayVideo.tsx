@@ -73,7 +73,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
     const pauseWhenFullscreenCloses = () => {
       const vid = videoRef.current;
-      if (!vid || document.fullscreenElement === vid) {
+      if (!vid || document.fullscreenElement) {
         return;
       }
 

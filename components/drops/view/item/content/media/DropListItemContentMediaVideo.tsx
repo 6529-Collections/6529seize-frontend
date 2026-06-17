@@ -80,7 +80,7 @@ function DropListItemContentMediaVideo({
 
     const pauseWhenFullscreenCloses = () => {
       const videoEl = videoRef.current;
-      if (!videoEl || document.fullscreenElement === videoEl) {
+      if (!videoEl || document.fullscreenElement) {
         return;
       }
 
