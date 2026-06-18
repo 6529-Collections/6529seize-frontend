@@ -2,7 +2,7 @@
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useIsVersionStale } from "@/hooks/useIsVersionStale";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { normalizeLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { type JSX } from "react";
 
@@ -19,6 +19,11 @@ const refreshWithoutToastOverride = () => {
   globalThis.location.reload();
 };
 
+const getBrowserLocale = () =>
+  normalizeLocale(
+    globalThis.navigator?.languages?.[0] ?? globalThis.navigator?.language
+  );
+
 const NewVersionToast = (): JSX.Element | null => {
   const isVersionStale = useIsVersionStale();
   const { isApp } = useDeviceInfo();
@@ -27,7 +32,8 @@ const NewVersionToast = (): JSX.Element | null => {
     return null;
   }
 
-  const refreshActionLabel = t(DEFAULT_LOCALE, "newVersionToast.refreshAction");
+  const locale = getBrowserLocale();
+  const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
 
   return (
     <div
@@ -44,10 +50,10 @@ const NewVersionToast = (): JSX.Element | null => {
       >
         <div className="tw-relative tw-z-10 tw-min-w-0 tw-pr-1">
           <div className="tw-whitespace-nowrap tw-text-[15px] tw-font-bold tw-leading-tight tw-text-[#f5f7f6] sm:tw-text-base">
-            {t(DEFAULT_LOCALE, "newVersionToast.title")}
+            {t(locale, "newVersionToast.title")}
           </div>
           <div className="tw-mt-0.5 tw-flex tw-items-center tw-gap-1 tw-text-[13px] tw-font-semibold tw-leading-none tw-text-[#b9c0c4] sm:tw-text-sm">
-            <span>{t(DEFAULT_LOCALE, "newVersionToast.eyebrow")}</span>
+            <span>{t(locale, "newVersionToast.eyebrow")}</span>
             <img
               src="/emojis/sgt_wink.webp"
               alt=""
