@@ -334,6 +334,12 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   allQualityRankedAriaLabel: "All quality-ranked waves list",
 } as const);
 
+const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
+  createdLabel: "Created {relativeTime} · {date}",
+  "postsCount.one": "{count} Post",
+  "postsCount.other": "{count} Posts",
+} as const);
+
 const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
   title: "Score",
   quality: "Quality",
@@ -354,6 +360,7 @@ const WAVE_SCORE_SUMMARY_MESSAGES = objectMessages("waves.score.summary", {
 } as const);
 
 const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
+  statsAriaLabel: "Wave trust stats",
   visibilityAria: "Visibility score {visibilityScore} out of 100",
   hotnessAria: "Hotness score {hotnessScore} out of 100",
   hotnessTitle: "Hotness score: {hotnessScore}",
@@ -367,6 +374,7 @@ const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
   repNegative: "negative {value}",
   repNeutral: "{value}",
   repAriaRaw: "Wave REP {value}",
+  repTotalAria: "Wave REP total {value}",
   repAriaScore: "Wave REP score {repScore} out of 100",
   scoreLabel: "Score",
   hotLabel: "Hot",
@@ -375,10 +383,12 @@ const WAVE_SCORE_DETAILS_MESSAGES = objectMessages("waves.score.details", {
 
 const WAVE_REP_ACTION_MESSAGES = objectMessages("waves.rep.action", {
   add: "Add REP",
-  remove: "Remove REP",
+  edit: "Edit REP",
   addAriaLabel: "Add Wave REP to this wave",
-  editRemoveAriaLabel:
-    "Edit or remove your Wave REP for this wave. Current contribution {contribution}",
+  editAriaLabel:
+    "Edit your Wave REP for this wave. Current contribution {contribution}",
+  tooltip:
+    "Add, increase, decrease, or remove your Wave REP using your available TDH-backed REP credit.",
 } as const);
 
 const WAVE_REP_MODAL_MESSAGES = objectMessages("waves.rep.modal", {
@@ -975,6 +985,7 @@ export const EN_US_MESSAGES = {
   ...USER_PROFILE_TABS_MESSAGES,
   ...FOLLOWERS_MESSAGES,
   ...WAVES_SIDEBAR_MESSAGES,
+  ...WAVE_HEADER_MESSAGES,
   ...WAVE_SCORE_SUMMARY_MESSAGES,
   ...WAVE_SCORE_DETAILS_MESSAGES,
   ...WAVE_REP_ACTION_MESSAGES,

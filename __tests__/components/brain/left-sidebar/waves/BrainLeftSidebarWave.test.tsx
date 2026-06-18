@@ -8,12 +8,20 @@ import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children, onMouseEnter, onClick, className }: any) => (
+  default: ({
+    href,
+    children,
+    onMouseEnter,
+    onClick,
+    className,
+    ...rest
+  }: any) => (
     <a
       href={href}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
       className={className}
+      {...rest}
     >
       {children}
     </a>
@@ -41,6 +49,14 @@ jest.mock(
 
 const mockedPrefetch = usePrefetchWaveData as jest.Mock;
 const mockedUseMyStream = useMyStream as jest.Mock;
+
+const getWaveRow = (): HTMLElement => {
+  const row = screen.getByRole("link").closest(".tw-group");
+  if (row === null) {
+    throw new Error("Expected wave link to have a row ancestor");
+  }
+  return row as HTMLElement;
+};
 
 describe("BrainLeftSidebarWave", () => {
   const prefetch = jest.fn();
@@ -198,7 +214,7 @@ describe("BrainLeftSidebarWave", () => {
   it("uses normal row padding when a wave has no subwaves", () => {
     render(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
 
-    const row = screen.getByRole("link").parentElement;
+    const row = getWaveRow();
 
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
@@ -206,13 +222,9 @@ describe("BrainLeftSidebarWave", () => {
     expect(row).toHaveClass("tw-px-5");
     expect(row).toHaveClass("tw-gap-x-4");
     expect(row).not.toHaveClass("tw-pl-2");
-    expect(screen.getByRole("link").previousElementSibling).toBeNull();
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
-    );
   });
 
-  it("renders the subwave expand button before the pin without opening the wave", async () => {
+  it("renders the subwave expand button beside the wave name without opening the wave", async () => {
     const onToggleExpand = jest.fn();
     const user = userEvent.setup();
 
@@ -233,26 +245,33 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton).toHaveAttribute("aria-expanded", "false");
     expect(expandButton).not.toHaveClass("tw-absolute");
     expect(expandButton).toHaveClass("tw-relative");
+    expect(expandButton).toHaveClass("tw-inline-flex");
     expect(expandButton).toHaveClass("tw-size-6");
-    expect(expandButton).toHaveClass("md:tw-size-5");
     expect(expandButton).toHaveClass("tw-rounded-full");
     expect(expandButton).toHaveClass("tw-border-0");
     expect(expandButton).toHaveClass("tw-bg-transparent");
     expect(expandButton).toHaveClass("desktop-hover:hover:tw-bg-iron-700/70");
+    expect(expandButton.querySelector("svg")).toHaveClass("tw-size-4");
     expect(expandButton.querySelector(".tw-bg-primary-400")).toBeNull();
-    const unreadSubwavesDot = screen
-      .getByRole("link")
-      .querySelector(".tw-bg-primary-400");
+    const unreadSubwavesDot = getWaveRow().querySelector(".tw-bg-primary-400");
     expect(unreadSubwavesDot).not.toBeNull();
     expect(unreadSubwavesDot).toHaveClass("tw-right-[-3px]");
     expect(unreadSubwavesDot).toHaveClass("tw-top-[-3px]");
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-pl-2");
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-gap-x-2");
-    expect(screen.getByRole("link").previousElementSibling).toContainElement(
-      expandButton
-    );
-    expect(screen.getByRole("link").nextElementSibling).toBe(
-      screen.getByTestId("pin")
+    expect(getWaveRow()).toHaveClass("tw-px-5");
+    expect(getWaveRow()).toHaveClass("tw-gap-x-4");
+    expect(getWaveRow()).not.toHaveClass("tw-pl-2");
+    const titleLink = screen.getByRole("link", { name: "Chat Wave" });
+    expect(titleLink.nextElementSibling).toBe(expandButton);
+    expect(expandButton.parentElement).toContainElement(titleLink);
+    const avatar = screen.getByTestId("sidebar-wave-avatar");
+    expect(avatar).toHaveAttribute("aria-hidden", "true");
+    expect(avatar.closest("a")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(
+      screen.getByRole("link", { name: "Chat Wave" }).closest(".tw-pr-7")
+    ).not.toBeNull();
+    expect(screen.getByRole("link", { name: "Chat Wave" })).toHaveClass(
+      "focus-visible:tw-outline"
     );
 
     await user.click(expandButton);
@@ -275,10 +294,7 @@ describe("BrainLeftSidebarWave", () => {
         />
       );
 
-      const waveRow = screen.getByRole("link").parentElement;
-      if (waveRow === null) {
-        throw new Error("Expected wave link to have a row parent");
-      }
+      const waveRow = getWaveRow();
 
       fireEvent.mouseEnter(waveRow);
 
@@ -312,7 +328,7 @@ describe("BrainLeftSidebarWave", () => {
     });
 
     expect(expandButton).toHaveClass("tw-bg-iron-700/60");
-    expect(expandButton).toHaveClass("tw-text-iron-300");
+    expect(expandButton).toHaveClass("tw-text-iron-200");
     expect(expandButton).toHaveClass("tw-opacity-100");
   });
 
@@ -349,10 +365,7 @@ describe("BrainLeftSidebarWave", () => {
         />
       );
 
-      const row = screen.getByRole("link").parentElement;
-      if (row === null) {
-        throw new Error("Expected wave link to have a row parent");
-      }
+      const row = getWaveRow();
 
       fireEvent.mouseEnter(row);
       fireEvent.mouseLeave(row);
@@ -381,22 +394,18 @@ describe("BrainLeftSidebarWave", () => {
     expect(
       screen.queryByRole("button", { name: "Expand Chat Wave subwaves" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link").parentElement).toHaveClass("tw-pl-[84px]");
-    expect(screen.getByRole("link").parentElement).toHaveClass("md:tw-pl-20");
+    expect(getWaveRow()).toHaveClass("tw-pl-[84px]");
+    expect(getWaveRow()).toHaveClass("md:tw-pl-20");
     expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
       "tw-size-7"
     );
-    const rail = screen
-      .getByRole("link")
-      .parentElement?.querySelector(".tw-w-px");
+    const rail = getWaveRow().querySelector(".tw-w-px");
     expect(rail).not.toBeNull();
     expect(rail).toHaveClass("tw-left-14");
     expect(rail).toHaveClass("md:tw-left-[52px]");
     expect(rail).toHaveClass("-tw-top-1");
     expect(rail).toHaveClass("tw-bottom-4");
-    expect(
-      screen.getByRole("link").parentElement?.querySelector(".tw-h-px")
-    ).toBeNull();
+    expect(getWaveRow().querySelector(".tw-h-px")).toBeNull();
     expect(screen.queryByTestId("pin")).not.toBeInTheDocument();
   });
 });
