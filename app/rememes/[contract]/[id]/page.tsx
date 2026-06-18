@@ -5,15 +5,13 @@ import {
 } from "@/components/providers/metadata";
 import RememePage from "@/components/rememes/RememePage";
 import {
-  getRememeDetailApiQuery,
   getRememesRouteLocale,
   type RememesSearchParams,
 } from "@/components/rememes/rememesRouteParams";
-import { publicEnv } from "@/config/env";
 import { formatAddress } from "@/helpers/Helpers";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { t } from "@/i18n/messages";
-import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import styles from "@/styles/Home.module.scss";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { Rememe } from "@/entities/INFT";
@@ -121,11 +119,14 @@ export async function generateMetadata({
 
   try {
     const headers = await getAppCommonHeaders();
-    const query = getRememeDetailApiQuery({ contract, id });
-    const response = await fetchUrl<DBResponse<Rememe>>(
-      `${publicEnv.API_ENDPOINT}/api/rememes?${query}`,
-      { headers }
-    );
+    const response = await commonApiFetch<
+      DBResponse<Rememe>,
+      { contract: string; id: string }
+    >({
+      endpoint: "rememes",
+      headers,
+      params: { contract, id },
+    });
 
     const firstRememe = response?.data?.[0];
     if (firstRememe !== undefined) {

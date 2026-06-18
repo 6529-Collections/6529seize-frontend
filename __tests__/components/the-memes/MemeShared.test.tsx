@@ -111,4 +111,18 @@ describe("getSharedAppServerSideProps", () => {
     expect(url.searchParams.get("image")).toBeNull();
     expect(url.searchParams.get("title")).toBe("Meme Lab #2 | Distribution");
   });
+
+  it("encodes NFT lookup query parameters", async () => {
+    (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
+
+    await getSharedAppServerSideProps(
+      "collection/alpha",
+      "token#1",
+      MEME_FOCUS.LIVE
+    );
+
+    expect(fetchUrl).toHaveBeenCalledWith(
+      "https://api.test.6529.io/api/nfts?contract=collection%2Falpha&id=token%231"
+    );
+  });
 });

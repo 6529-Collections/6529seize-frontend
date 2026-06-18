@@ -93,8 +93,9 @@ async function getMetadataProps(
     collection = "Meme Lab";
     name = `Meme Lab #${idDisplay}`;
   }
+  const query = new URLSearchParams({ contract, id }).toString();
   const response = await fetchUrl(
-    `${publicEnv.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
+    `${publicEnv.API_ENDPOINT}/api/${urlPath}?${query}`
   );
   let artist: string | null = null;
   let image: string | null = null;

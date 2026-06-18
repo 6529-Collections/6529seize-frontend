@@ -2,10 +2,10 @@ import { generateMetadata as generateRememeDetailMetadata } from "@/app/rememes/
 import { generateMetadata as generateRememesAddMetadata } from "@/app/rememes/add/page";
 import { generateMetadata as generateRememesMetadata } from "@/app/rememes/page";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
-import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
 
-jest.mock("@/services/6529api", () => ({ fetchUrl: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
@@ -77,7 +77,7 @@ describe("ReMemes metadata", () => {
   });
 
   it("uses branded NFT card metadata for ReMeme detail pages", async () => {
-    (fetchUrl as jest.Mock).mockResolvedValue({
+    (commonApiFetch as jest.Mock).mockResolvedValue({
       data: [
         {
           contract_opensea_data: {
@@ -98,10 +98,11 @@ describe("ReMemes metadata", () => {
     });
 
     expect(getAppCommonHeaders).toHaveBeenCalled();
-    expect(fetchUrl).toHaveBeenCalledWith(
-      expect.stringContaining("/api/rememes?contract=0xabc&id=7"),
-      { headers: { "x-test": "1" } }
-    );
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "rememes",
+      headers: { "x-test": "1" },
+      params: { contract: "0xabc", id: "7" },
+    });
 
     const image = getSocialImage(metadata);
     const url = new URL(image.url);
@@ -124,7 +125,7 @@ describe("ReMemes metadata", () => {
   });
 
   it("uses Alchemy-style media objects for ReMeme detail card images", async () => {
-    (fetchUrl as jest.Mock).mockResolvedValue({
+    (commonApiFetch as jest.Mock).mockResolvedValue({
       data: [
         {
           contract_opensea_data: {
@@ -168,17 +169,18 @@ describe("ReMemes metadata", () => {
   });
 
   it("falls back to a branded ReMeme NFT card when API data is missing", async () => {
-    (fetchUrl as jest.Mock).mockResolvedValue({ data: [] });
+    (commonApiFetch as jest.Mock).mockResolvedValue({ data: [] });
 
     const metadata = await generateRememeDetailMetadata({
       params: Promise.resolve({ contract: "0xabc", id: "8" }),
     });
 
     expect(getAppCommonHeaders).toHaveBeenCalled();
-    expect(fetchUrl).toHaveBeenCalledWith(
-      expect.stringContaining("/api/rememes?contract=0xabc&id=8"),
-      { headers: { "x-test": "1" } }
-    );
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "rememes",
+      headers: { "x-test": "1" },
+      params: { contract: "0xabc", id: "8" },
+    });
 
     const image = getSocialImage(metadata);
     const url = new URL(image.url);

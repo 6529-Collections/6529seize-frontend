@@ -1,11 +1,11 @@
 import ReMeme, { generateMetadata } from "@/app/rememes/[contract]/[id]/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { formatAddress } from "@/helpers/Helpers";
-import { fetchUrl } from "@/services/6529api";
+import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-jest.mock("@/services/6529api");
+jest.mock("@/services/api/common-api");
 jest.mock("@/helpers/Helpers");
 jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn().mockResolvedValue({ "x-test": "1" }),
@@ -60,7 +60,7 @@ describe("ReMeme page", () => {
   it("renders RememePageComponent with correct props", async () => {
     const props = { contract: "0x123abc", id: "456" };
 
-    (fetchUrl as jest.Mock).mockResolvedValue({
+    (commonApiFetch as jest.Mock).mockResolvedValue({
       data: [
         {
           metadata: { name: "Test ReMeme" },
@@ -124,7 +124,9 @@ describe("ReMeme generateMetadata", () => {
   const mockFormatAddress = formatAddress as jest.MockedFunction<
     typeof formatAddress
   >;
-  const mockFetchUrl = fetchUrl as jest.MockedFunction<typeof fetchUrl>;
+  const mockCommonApiFetch = commonApiFetch as jest.MockedFunction<
+    typeof commonApiFetch
+  >;
 
   const getImageUrl = (
     metadata: Awaited<ReturnType<typeof generateMetadata>>
@@ -152,16 +154,17 @@ describe("ReMeme generateMetadata", () => {
         },
       ],
     };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
     });
 
-    expect(mockFetchUrl).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/rememes?contract=0x123abc&id=456",
-      { headers: { "x-test": "1" } }
-    );
+    expect(mockCommonApiFetch).toHaveBeenCalledWith({
+      endpoint: "rememes",
+      headers: { "x-test": "1" },
+      params: { contract: "0x123abc", id: "456" },
+    });
     expect(result.title).toBe("Custom ReMeme Name | ReMemes");
     expect(result.description).toContain("ReMemes");
     const imageUrl = getImageUrl(result);
@@ -172,7 +175,7 @@ describe("ReMeme generateMetadata", () => {
   });
 
   it("encodes reserved route params before fetching metadata", async () => {
-    mockFetchUrl.mockResolvedValue({ data: [] });
+    mockCommonApiFetch.mockResolvedValue({ data: [] });
 
     await generateMetadata({
       params: Promise.resolve({
@@ -181,15 +184,16 @@ describe("ReMeme generateMetadata", () => {
       }),
     });
 
-    expect(mockFetchUrl).toHaveBeenCalledWith(
-      "https://api.test.6529.io/api/rememes?contract=collection%2Falpha&id=token%231",
-      { headers: { "x-test": "1" } }
-    );
+    expect(mockCommonApiFetch).toHaveBeenCalledWith({
+      endpoint: "rememes",
+      headers: { "x-test": "1" },
+      params: { contract: "collection/alpha", id: "token#1" },
+    });
   });
 
   it("returns metadata with default name and image when API returns empty data", async () => {
     const mockResponse = { data: [] };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
@@ -203,7 +207,7 @@ describe("ReMeme generateMetadata", () => {
   });
 
   it("returns default metadata when API returns null", async () => {
-    mockFetchUrl.mockResolvedValue(null);
+    mockCommonApiFetch.mockResolvedValue(null);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
@@ -224,7 +228,7 @@ describe("ReMeme generateMetadata", () => {
         },
       ],
     };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
@@ -247,7 +251,7 @@ describe("ReMeme generateMetadata", () => {
         },
       ],
     };
-    mockFetchUrl.mockResolvedValue(mockResponse);
+    mockCommonApiFetch.mockResolvedValue(mockResponse);
 
     const result = await generateMetadata({
       params: Promise.resolve({ contract: "0x123abc", id: "456" }),
