@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/cms-validation-result-v1.schema.json",
+  "title": "6529 CMS Validation Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "valid", "checked_at", "issues"],
+  "properties": {
+    "schema": { "const": "6529.cms.validation_result.v1" },
+    "valid": { "type": "boolean" },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "validator": { "type": "string" },
+    "validator_version": { "type": "string" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "package_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "draft_id": { "type": "string" },
+        "package_id": { "type": "string" }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "code", "message", "path"],
+        "properties": {
+          "severity": { "enum": ["error", "warning", "note"] },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "path": { "type": "string" },
+          "page_id": { "type": "string" },
+          "block_id": { "type": "string" },
+          "suggested_fix": { "type": "string" }
+        }
+      }
+    }
+  }
+}

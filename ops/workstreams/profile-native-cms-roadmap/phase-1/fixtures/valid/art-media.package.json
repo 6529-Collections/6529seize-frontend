@@ -1,0 +1,193 @@
+{
+  "schema": "6529.cms.package.v1",
+  "package_id": "pkg-art-media-v1",
+  "profile": {
+    "handle": "media6529",
+    "profile_id": "profile-media6529"
+  },
+  "site": {
+    "title": "Art Media Fixture",
+    "description": "Mixed media fixture with posters and fallbacks.",
+    "base_path": "/media6529/index.html",
+    "default_locale": "en",
+    "direction": "ltr",
+    "theme": {
+      "mode": "dark",
+      "accent": "#f6c744"
+    },
+    "navigation_id": "nav-main",
+    "required_renderer_capabilities": ["media_posters", "sandboxed_embed", "object_viewer"]
+  },
+  "payload": {
+    "schema": "6529.cms.payload.v1",
+    "routes": [
+      {
+        "path": "/media6529/index.html",
+        "kind": "page",
+        "page_id": "page-home"
+      }
+    ],
+    "pages": [
+      {
+        "id": "page-home",
+        "type": "page",
+        "path": "/media6529/index.html",
+        "metadata": {
+          "title": "Art Media Fixture",
+          "description": "Mixed media display fixture with image, video, audio, HTML, and model assets.",
+          "locale": "en",
+          "canonical_url": "https://6529.io/media6529/index.html",
+          "social_image_asset_id": "asset-og",
+          "navigation_label": "Media",
+          "search": "include",
+          "robots": "index"
+        },
+        "blocks": [
+          {
+            "id": "block-video",
+            "block_type": "video",
+            "asset_id": "asset-video",
+            "poster_asset_id": "asset-poster"
+          },
+          {
+            "id": "block-html",
+            "block_type": "html_embed",
+            "asset_id": "asset-html",
+            "interactive_policy": {
+              "hydration": "sandboxed_embed",
+              "requires_user_activation": true,
+              "fallback_asset_id": "asset-poster",
+              "sandbox_permissions": ["allow-scripts"]
+            }
+          },
+          {
+            "id": "block-model",
+            "block_type": "object_viewer",
+            "asset_id": "asset-model",
+            "interactive_policy": {
+              "hydration": "deferred_island",
+              "requires_user_activation": true,
+              "fallback_asset_id": "asset-poster"
+            }
+          }
+        ]
+      }
+    ],
+    "assets": [
+      {
+        "id": "asset-og",
+        "kind": "social_image",
+        "uri": "ipfs://bafyfixturemedia/og.png",
+        "content_hash": "sha256:2727272727272727272727272727272727272727272727272727272727272727",
+        "mime_type": "image/png",
+        "width": 1200,
+        "height": 630,
+        "file_size_bytes": 50000,
+        "roles": ["social"],
+        "alt_text": "Social preview for mixed media fixture"
+      },
+      {
+        "id": "asset-poster",
+        "kind": "image",
+        "uri": "ipfs://bafyfixturemedia/poster.jpg",
+        "content_hash": "sha256:2828282828282828282828282828282828282828282828282828282828282828",
+        "mime_type": "image/jpeg",
+        "width": 1600,
+        "height": 900,
+        "file_size_bytes": 160000,
+        "roles": ["poster", "fallback"],
+        "alt_text": "Poster fallback for mixed media artwork"
+      },
+      {
+        "id": "asset-video",
+        "kind": "video",
+        "uri": "ipfs://bafyfixturemedia/video.mp4",
+        "content_hash": "sha256:2929292929292929292929292929292929292929292929292929292929292929",
+        "mime_type": "video/mp4",
+        "width": 1920,
+        "height": 1080,
+        "duration_seconds": 12,
+        "file_size_bytes": 6000000,
+        "roles": ["original"]
+      },
+      {
+        "id": "asset-audio",
+        "kind": "audio",
+        "uri": "ipfs://bafyfixturemedia/audio.mp3",
+        "content_hash": "sha256:3030303030303030303030303030303030303030303030303030303030303030",
+        "mime_type": "audio/mpeg",
+        "duration_seconds": 33,
+        "file_size_bytes": 1200000,
+        "roles": ["original"]
+      },
+      {
+        "id": "asset-html",
+        "kind": "html",
+        "uri": "ipfs://bafyfixturemedia/index.html",
+        "content_hash": "sha256:3131313131313131313131313131313131313131313131313131313131313131",
+        "mime_type": "text/html",
+        "file_size_bytes": 40000,
+        "roles": ["original"]
+      },
+      {
+        "id": "asset-model",
+        "kind": "model",
+        "uri": "ipfs://bafyfixturemedia/model.glb",
+        "content_hash": "sha256:3232323232323232323232323232323232323232323232323232323232323232",
+        "mime_type": "model/gltf-binary",
+        "file_size_bytes": 8000000,
+        "roles": ["original"]
+      }
+    ],
+    "navigation": [
+      {
+        "id": "nav-main",
+        "items": [
+          {
+            "label": "Media",
+            "page_id": "page-home"
+          }
+        ]
+      }
+    ],
+    "build_manifest": {
+      "renderer": "6529-cms-static",
+      "renderer_version": "0.0.0-fixture",
+      "route_count": 1,
+      "asset_count": 6,
+      "warnings": []
+    }
+  },
+  "integrity": {
+    "canonicalization": "jcs-rfc8785",
+    "hash_algorithm": "sha256",
+    "payload_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "package_hash": "sha256:3434343434343434343434343434343434343434343434343434343434343434",
+    "note": "Fixture placeholder hash; replace with generated vector before Phase 2."
+  },
+  "signatures": [
+    {
+      "type": "fixture",
+      "signer": "fixture:media6529",
+      "signature": "fixture-signature-art-media",
+      "signed_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "storage": [
+    {
+      "provider": "fixture",
+      "uri": "ipfs://bafyfixturemedia",
+      "content_hash": "sha256:3434343434343434343434343434343434343434343434343434343434343434",
+      "provider_content_id": "bafyfixturemedia",
+      "pinned": true,
+      "canonical": true,
+      "recorded_at": "2026-06-17T00:00:00Z"
+    }
+  ],
+  "provenance": {
+    "builder": "6529-cms-fixture",
+    "builder_version": "0.0.0",
+    "created_at": "2026-06-17T00:00:00Z",
+    "notes": "Valid mixed media fixture."
+  }
+}

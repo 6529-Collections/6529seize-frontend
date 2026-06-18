@@ -68,6 +68,17 @@ function splitInsideFirstMultibyteCharacter(bytes: Uint8Array) {
 }
 
 describe("delegationContent", () => {
+  const publishedRootCid = delegationContentManifest.canonicalStorage.rootCid;
+  if (!publishedRootCid) {
+    throw new Error("Expected delegation content manifest to define rootCid");
+  }
+  const publishedCloudFrontBaseUrl =
+    delegationContentManifest.acceleration.cloudFrontBaseUrl;
+  if (!publishedCloudFrontBaseUrl) {
+    throw new Error("Expected delegation content manifest to define CDN URL");
+  }
+  const publishedGatewayBaseUrl = `https://ipfs.6529.io/ipfs/${publishedRootCid}`;
+
   it("keeps the reviewed source manifest and public mirror in sync", async () => {
     const publicManifestPath = path.join(
       process.cwd(),
@@ -86,13 +97,46 @@ describe("delegationContent", () => {
     expect(JSON.parse(publicManifest)).toEqual(JSON.parse(sourceManifest));
   });
 
-  it("uses the reviewed local bundle while the IPFS CID is pending", () => {
+  it("publishes article images with alt text", async () => {
+    const missingAlt: string[] = [];
+
+    for (const [slug, article] of Object.entries(
+      delegationContentManifest.articles
+    )) {
+      const html = await readFile(getReviewedArticlePath(article), "utf8");
+      const template = document.createElement("template");
+      template.innerHTML = html;
+
+      for (const image of Array.from(
+        template.content.querySelectorAll("img")
+      )) {
+        if (!image.hasAttribute("alt")) {
+          missingAlt.push(`${slug}: ${image.getAttribute("src") ?? ""}`);
+        }
+      }
+    }
+
+    expect(missingAlt).toEqual([]);
+  });
+
+  it("uses CloudFront, CID-addressed IPFS gateways, then the local bundle", () => {
     const article = getDelegationArticle("delegation-faq");
 
     expect(article).toBeDefined();
     expect(buildDelegationArticleUrls(article!)).toEqual([
+      `${publishedCloudFrontBaseUrl}/html/delegation-faq.html`,
+      `${publishedGatewayBaseUrl}/html/delegation-faq.html`,
+      `https://ipfs.io/ipfs/${publishedRootCid}/html/delegation-faq.html`,
       "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
     ]);
+  });
+
+  it("records each article source URI under the canonical CID", () => {
+    for (const article of Object.values(delegationContentManifest.articles)) {
+      expect(article.sourceUri).toBe(
+        `ipfs://${publishedRootCid}/${article.path}`
+      );
+    }
   });
 
   it("prefers the CDN and IPFS gateways when a root CID is configured", () => {
@@ -157,7 +201,7 @@ describe("delegationContent", () => {
     ).resolves.toMatchObject({
       article,
       html,
-      url: "/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+      url: `${publishedCloudFrontBaseUrl}/html/delegation-faq.html`,
     });
   });
 
@@ -173,9 +217,9 @@ describe("delegationContent", () => {
     await expect(
       fetchDelegationArticleHtml("using-safe", fetchArticle)
     ).resolves.toMatchObject({
-      url: "/delegation-content/delegation-docs-2026-06-16/html/using-safe.html",
+      url: `${publishedCloudFrontBaseUrl}/html/using-safe.html`,
       html: expect.stringContaining(
-        'src="/delegation-content/delegation-docs-2026-06-16/assets/screenshots/safe1.png"'
+        `src="${publishedCloudFrontBaseUrl}/assets/screenshots/safe1.png"`
       ),
     });
   });
@@ -221,7 +265,7 @@ describe("delegationContent", () => {
       fetchDelegationArticleHtml("register-delegation", fetchArticle)
     ).resolves.toMatchObject({
       article,
-      url: "/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html",
+      url: `${publishedCloudFrontBaseUrl}/html/register-delegation.html`,
     });
     expect(text).not.toHaveBeenCalled();
   });

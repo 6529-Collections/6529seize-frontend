@@ -30,8 +30,10 @@ import WavePicture from "../../../waves/WavePicture";
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import MyStreamActionTooltip from "../MyStreamActionTooltip";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
+import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
 
 const TRUNCATION_EPSILON_PX = 1;
+const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
 
 export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
@@ -73,6 +75,21 @@ interface MyStreamWaveHeaderIdentityProps {
   readonly showDescriptionPreview: boolean;
   readonly wave: ApiWave;
   readonly wavePictureContributors: WavePictureContributors;
+  readonly waveScoreLearnMoreHref: string;
+  readonly showWaveRepAction: boolean;
+}
+
+function getWaveScoreLearnMoreHref({
+  pathname,
+  searchParams,
+}: {
+  readonly pathname: string;
+  readonly searchParams: { toString: () => string };
+}): string {
+  const currentQuery = searchParams.toString();
+  const returnTo = currentQuery ? `${pathname}?${currentQuery}` : pathname;
+  const params = new URLSearchParams({ returnTo });
+  return `${WAVE_SCORE_LEARN_MORE_HREF}?${params.toString()}`;
 }
 
 function MyStreamWaveHeaderIdentity({
@@ -84,7 +101,22 @@ function MyStreamWaveHeaderIdentity({
   showDescriptionPreview,
   wave,
   wavePictureContributors,
+  waveScoreLearnMoreHref,
+  showWaveRepAction,
 }: MyStreamWaveHeaderIdentityProps) {
+  const scoreActions = (
+    <span className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5">
+      <WaveTrustSignals
+        waveRep={wave.wave_rep}
+        waveScore={wave.wave_score}
+        variant="header-inline"
+        mode="summary"
+        learnMoreHref={waveScoreLearnMoreHref}
+      />
+      {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
+    </span>
+  );
+
   if (directMessageProfileHref) {
     return (
       <Link
@@ -141,7 +173,7 @@ function MyStreamWaveHeaderIdentity({
                   <h1 className="tw-mb-0 tw-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
                     {wave.name}
                   </h1>
-                  <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-6">
+                  <span className="tw-mt-0.5 tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
                     <span
                       ref={descriptionPreviewRef}
                       className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors tw-duration-300 group-hover:tw-text-iron-300"
@@ -154,39 +186,21 @@ function MyStreamWaveHeaderIdentity({
                         className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
                       />
                     )}
-                    <WaveTrustSignals
-                      waveRep={wave.wave_rep}
-                      waveScore={wave.wave_score}
-                      variant="header-inline"
-                      mode="summary"
-                      className="tw-shrink-0"
-                    />
                   </span>
                 </>
               )}
             </WaveDescriptionPopover>
-            {isCompact && (
-              <WaveTrustSignals
-                waveRep={wave.wave_rep}
-                waveScore={wave.wave_score}
-                variant="header-inline"
-                mode="summary"
-                className="tw-mt-1"
-              />
+            {!isCompact && (
+              <span className="tw-self-start">{scoreActions}</span>
             )}
+            {isCompact && scoreActions}
           </>
         ) : (
           <>
             <h1 className="tw-mb-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
               {wave.name}
             </h1>
-            <WaveTrustSignals
-              waveRep={wave.wave_rep}
-              waveScore={wave.wave_score}
-              variant="header-inline"
-              mode="summary"
-              className="tw-mt-1"
-            />
+            {scoreActions}
           </>
         )}
       </div>
@@ -212,6 +226,10 @@ export default function MyStreamWaveTabsHeader({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const waveScoreLearnMoreHref = getWaveScoreLearnMoreHref({
+    pathname,
+    searchParams,
+  });
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -220,6 +238,14 @@ export default function MyStreamWaveTabsHeader({
     useState(false);
   const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const connectedHandle = connectedProfile?.handle?.toLowerCase() ?? null;
+  const waveAuthorHandle = wave.author?.handle?.toLowerCase() ?? null;
+  const showWaveRepAction =
+    connectedHandle !== null &&
+    !activeProfileProxy &&
+    !isDirectMessage &&
+    waveAuthorHandle !== null &&
+    connectedHandle !== waveAuthorHandle;
   const directMessageProfileHref = getDirectMessageProfileHref({
     isDirectMessage,
     identity: wave.name,
@@ -405,6 +431,8 @@ export default function MyStreamWaveTabsHeader({
             showDescriptionPreview={showDescriptionPreview}
             wave={wave}
             wavePictureContributors={wavePictureContributors}
+            waveScoreLearnMoreHref={waveScoreLearnMoreHref}
+            showWaveRepAction={showWaveRepAction}
           />
         </div>
         <div className={actionsClassName}>

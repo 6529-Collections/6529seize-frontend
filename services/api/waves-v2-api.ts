@@ -63,6 +63,7 @@ export interface WavesV2OverviewQueryKeyParams {
   readonly only_waves_followed_by_authenticated_user: boolean;
   readonly direct_message?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly exclude_followed?: boolean | undefined;
   readonly score_sort?: ApiWaveScoreSort | undefined;
   readonly min_visibility_score?: number | undefined;
   readonly min_quality_score?: number | undefined;
@@ -78,6 +79,7 @@ export function getWavesV2OverviewQueryKeyParams({
   following = false,
   directMessage,
   pinned,
+  excludeFollowed,
   scoreSort,
   minVisibilityScore,
   minQualityScore,
@@ -91,6 +93,7 @@ export function getWavesV2OverviewQueryKeyParams({
   readonly following?: boolean | undefined;
   readonly directMessage?: boolean | undefined;
   readonly pinned?: ApiWavesPinFilter | undefined;
+  readonly excludeFollowed?: boolean | undefined;
   readonly scoreSort?: ApiWaveScoreSort | undefined;
   readonly minVisibilityScore?: number | undefined;
   readonly minQualityScore?: number | undefined;
@@ -109,6 +112,9 @@ export function getWavesV2OverviewQueryKeyParams({
     only_waves_followed_by_authenticated_user: following,
     ...(directMessage === undefined ? {} : { direct_message: directMessage }),
     ...(pinned === undefined ? {} : { pinned }),
+    ...(excludeFollowed === undefined
+      ? {}
+      : { exclude_followed: excludeFollowed }),
     ...(scoreSort === undefined ? {} : { score_sort: scoreSort }),
     ...(minVisibilityScore === undefined
       ? {}
@@ -409,11 +415,7 @@ export async function searchWavesByName({
   let firstSearchError: unknown;
 
   try {
-    const waves = await searchWavesV2ByName({ name, pageSize, headers });
-    completedSearches += 1;
-    if (waves.length > 0) {
-      return waves;
-    }
+    return await searchWavesV2ByName({ name, pageSize, headers });
   } catch (error) {
     failedSearches += 1;
     primarySearchError = error;

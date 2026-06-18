@@ -200,16 +200,14 @@ const DropsList = memo(
         return (
           <div
             key={`boost-card-${boostedIndex}-${boostedDrop.id}`}
-            className="tw-px-3 tw-py-4 sm:tw-px-4"
+            className="tw-px-3 tw-py-3 sm:tw-px-4"
           >
-            <div className="tw-rounded-2xl tw-bg-iron-900/50 tw-p-2 sm:tw-p-3">
-              <BoostedDropCardHome
-                drop={boostedDrop}
-                variant="chat"
-                rank={boostedIndex + 1}
-                onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
-              />
-            </div>
+            <BoostedDropCardHome
+              drop={boostedDrop}
+              variant="chat"
+              rank={boostedIndex + 1}
+              onClick={() => onBoostedDropClick(boostedDrop.serial_no)}
+            />
           </div>
         );
       },

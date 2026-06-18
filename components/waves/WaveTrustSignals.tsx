@@ -1,11 +1,16 @@
 import type { ApiWaveRepSummary } from "@/generated/models/ApiWaveRepSummary";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
+import HoverCard from "@/components/utils/tooltip/HoverCard";
 import {
   FireIcon,
   ScaleIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
+import { formatInteger, formatNumber } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import Link from "next/link";
+import type { ReactElement, ReactNode } from "react";
 
 type WaveTrustSignalsVariant =
   | "card"
@@ -21,20 +26,22 @@ interface WaveTrustSignalsProps {
   readonly mode?: WaveTrustSignalsMode | undefined;
   readonly className?: string | undefined;
   readonly tooltipId?: string | undefined;
+  readonly learnMoreHref?: string | undefined;
 }
 
-const compactNumberFormatter = new Intl.NumberFormat(undefined, {
-  notation: "compact",
-  maximumFractionDigits: 1,
-});
-const fullNumberFormatter = new Intl.NumberFormat();
+const WAVE_TRUST_LOCALE = DEFAULT_LOCALE;
+const compactNumber = (value: number): string =>
+  formatNumber(WAVE_TRUST_LOCALE, value, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
 
 const formatScore = (value: number | null | undefined): string | null => {
   if (value === null || value === undefined || !Number.isFinite(value)) {
     return null;
   }
 
-  return `${Math.round(value)}`;
+  return formatInteger(WAVE_TRUST_LOCALE, Math.round(value));
 };
 
 const formatRep = (value: number | null | undefined): string | null => {
@@ -43,10 +50,10 @@ const formatRep = (value: number | null | undefined): string | null => {
   }
 
   if (value > 0) {
-    return `+${compactNumberFormatter.format(value)}`;
+    return `+${compactNumber(value)}`;
   }
 
-  return compactNumberFormatter.format(value);
+  return compactNumber(value);
 };
 
 const formatSignedFullNumber = (
@@ -56,7 +63,7 @@ const formatSignedFullNumber = (
     return null;
   }
 
-  const formatted = fullNumberFormatter.format(Math.abs(value));
+  const formatted = formatInteger(WAVE_TRUST_LOCALE, Math.abs(value));
   if (value > 0) {
     return `+${formatted}`;
   }
@@ -73,14 +80,20 @@ const formatRepAccessibleValue = (
     return null;
   }
 
-  const formatted = fullNumberFormatter.format(Math.abs(value));
+  const formatted = formatInteger(WAVE_TRUST_LOCALE, Math.abs(value));
   if (value > 0) {
-    return `positive ${formatted}`;
+    return t(WAVE_TRUST_LOCALE, "waves.score.details.repPositive", {
+      value: formatted,
+    });
   }
   if (value < 0) {
-    return `negative ${formatted}`;
+    return t(WAVE_TRUST_LOCALE, "waves.score.details.repNegative", {
+      value: formatted,
+    });
   }
-  return formatted;
+  return t(WAVE_TRUST_LOCALE, "waves.score.details.repNeutral", {
+    value: formatted,
+  });
 };
 
 const isInlineSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
@@ -92,20 +105,75 @@ const isInlineHeaderVariant = (variant: WaveTrustSignalsVariant): boolean =>
 const isInlineVariant = (variant: WaveTrustSignalsVariant): boolean =>
   isInlineSidebarVariant(variant) || isInlineHeaderVariant(variant);
 
+const isSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
+  variant === "sidebar" || isInlineSidebarVariant(variant);
+
 const INLINE_STAT_TONE_CLASSES =
   "tw-text-[#e2e8f0]/[0.85] desktop-hover:hover:tw-text-[#e2e8f0]/[0.95]";
 
-const getVisibilityToneClasses = (variant: WaveTrustSignalsVariant): string => {
-  if (isInlineSidebarVariant(variant)) {
-    return INLINE_STAT_TONE_CLASSES;
-  }
+type VisibilityTone = "excellent" | "healthy" | "low" | "default";
+type VisibilityToneContext = "inline-sidebar" | "inline-header" | "default";
 
-  if (isInlineHeaderVariant(variant)) {
-    return "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]";
-  }
-
-  return "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25";
+const VISIBILITY_TONE_CLASSES: Record<
+  VisibilityToneContext,
+  Record<VisibilityTone, string>
+> = {
+  "inline-sidebar": {
+    excellent: INLINE_STAT_TONE_CLASSES,
+    healthy: INLINE_STAT_TONE_CLASSES,
+    low: INLINE_STAT_TONE_CLASSES,
+    default: INLINE_STAT_TONE_CLASSES,
+  },
+  "inline-header": {
+    excellent: "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300",
+    healthy: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+    low: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
+    default: "tw-text-primary-300 desktop-hover:hover:tw-text-[#A8C4FF]",
+  },
+  default: {
+    excellent:
+      "tw-bg-emerald-500/10 tw-text-emerald-200 tw-ring-emerald-400/25",
+    healthy: "tw-bg-amber-500/10 tw-text-amber-200 tw-ring-amber-400/25",
+    low: "tw-bg-rose-500/10 tw-text-rose-200 tw-ring-rose-400/25",
+    default: "tw-bg-sky-500/10 tw-text-sky-200 tw-ring-sky-400/25",
+  },
 };
+
+const getVisibilityTone = (
+  value: number | null | undefined
+): VisibilityTone => {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "default";
+  }
+
+  if (value >= 85) {
+    return "excellent";
+  }
+
+  if (value >= 65) {
+    return "healthy";
+  }
+
+  return value < 35 ? "low" : "default";
+};
+
+const getVisibilityToneContext = (
+  variant: WaveTrustSignalsVariant
+): VisibilityToneContext => {
+  if (isInlineSidebarVariant(variant)) {
+    return "inline-sidebar";
+  }
+
+  return isInlineHeaderVariant(variant) ? "inline-header" : "default";
+};
+
+const getVisibilityToneClasses = (
+  variant: WaveTrustSignalsVariant,
+  value: number | null | undefined
+): string =>
+  VISIBILITY_TONE_CLASSES[getVisibilityToneContext(variant)][
+    getVisibilityTone(value)
+  ];
 
 const getHotnessToneClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
@@ -157,7 +225,8 @@ const getContainerClasses = (
 ) => {
   let baseClasses = "tw-flex tw-flex-wrap tw-items-center tw-gap-1.5";
   if (mode === "summary") {
-    baseClasses = "tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5";
+    baseClasses =
+      "tw-flex tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-1.5";
   }
 
   if (isInlineSidebarVariant(variant)) {
@@ -190,7 +259,7 @@ const getChipClasses = (
     sizeClasses = "";
   } else if (isInlineHeaderVariant(variant)) {
     variantClasses =
-      "tw-cursor-default tw-gap-1 tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
+      "tw-cursor-help tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-px-1.5 tw-py-1 tw-text-[11px] tw-font-semibold tw-leading-none";
     sizeClasses = "";
   } else if (variant === "sidebar") {
     sizeClasses = "tw-h-5 tw-px-1.5 tw-text-[10px]";
@@ -199,8 +268,10 @@ const getChipClasses = (
   let summaryClasses = "";
   if (mode === "summary") {
     summaryClasses = "tw-shrink-0 tw-justify-center";
-    if (variant === "sidebar" || isInlineSidebarVariant(variant)) {
+    if (variant === "sidebar") {
       summaryClasses = `${summaryClasses} tw-w-[4.75rem]`;
+    } else if (isInlineSidebarVariant(variant)) {
+      summaryClasses = `${summaryClasses} tw-min-w-[2.35rem]`;
     }
   }
 
@@ -243,14 +314,14 @@ const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
 
 const getValueClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
-    return "";
+    return "tw-tabular-nums";
   }
 
   if (isInlineHeaderVariant(variant)) {
-    return "tw-text-[11px] tw-font-semibold";
+    return "tw-text-[11px] tw-font-semibold tw-tabular-nums";
   }
 
-  return "";
+  return "tw-tabular-nums";
 };
 
 const getSeparatorClasses = (variant: WaveTrustSignalsVariant): string => {
@@ -307,6 +378,35 @@ export const hasWaveTrustSummaryScore = (
   waveScore?: ApiWaveScore | null | undefined
 ): boolean => formatScore(waveScore?.visibility_score) !== null;
 
+const buildSummaryRepDetail = ({
+  rawRep,
+  repSortScore,
+}: {
+  readonly rawRep: string | null;
+  readonly repSortScore: string | null;
+}): string | null => {
+  if (rawRep !== null && repSortScore !== null) {
+    return t(WAVE_TRUST_LOCALE, "waves.score.summary.repRawAndScore", {
+      rawRep,
+      repSortScore,
+    });
+  }
+
+  if (rawRep !== null) {
+    return t(WAVE_TRUST_LOCALE, "waves.score.summary.repRaw", {
+      rawRep,
+    });
+  }
+
+  if (repSortScore !== null) {
+    return t(WAVE_TRUST_LOCALE, "waves.score.summary.repScore", {
+      repSortScore,
+    });
+  }
+
+  return null;
+};
+
 const buildSummaryDetails = ({
   visibilityScore,
   qualityScore,
@@ -319,29 +419,221 @@ const buildSummaryDetails = ({
   readonly hotnessScore: string | null;
   readonly repSortScore: string | null;
   readonly waveRep: ApiWaveRepSummary | null | undefined;
-}) => {
-  const details = [`Combined score: ${visibilityScore}`];
-
-  if (qualityScore !== null) {
-    details.push(`Quality: ${qualityScore}`);
-  }
-
-  if (hotnessScore !== null) {
-    details.push(`Hotness: ${hotnessScore}`);
-  }
-
+}): string[] => {
   const rawRep = formatSignedFullNumber(waveRep?.total_rep);
-  if (rawRep !== null && repSortScore !== null) {
-    details.push(`REP: ${rawRep} raw, ${repSortScore} score`);
-  } else if (rawRep !== null) {
-    details.push(`REP: ${rawRep} raw`);
-  } else if (repSortScore !== null) {
-    details.push(`REP score: ${repSortScore}`);
-  }
+  const repDetail = buildSummaryRepDetail({ rawRep, repSortScore });
 
-  return details;
+  return [
+    t(WAVE_TRUST_LOCALE, "waves.score.summary.scoreAria", {
+      visibilityScore,
+    }),
+    ...(qualityScore === null
+      ? []
+      : [
+          t(WAVE_TRUST_LOCALE, "waves.score.summary.qualityAria", {
+            qualityScore,
+          }),
+        ]),
+    ...(hotnessScore === null
+      ? []
+      : [
+          t(WAVE_TRUST_LOCALE, "waves.score.summary.hotnessAria", {
+            hotnessScore,
+          }),
+        ]),
+    ...(repDetail === null ? [] : [repDetail]),
+  ];
 };
 
+const buildHotnessDetails = ({
+  hotnessScore,
+  qualityScore,
+}: {
+  readonly hotnessScore: string;
+  readonly qualityScore: string | null;
+}): string[] => {
+  return [
+    t(WAVE_TRUST_LOCALE, "waves.score.details.hotnessTitle", {
+      hotnessScore,
+    }),
+    ...(qualityScore === null
+      ? []
+      : [
+          t(WAVE_TRUST_LOCALE, "waves.score.details.qualityInput", {
+            qualityScore,
+          }),
+        ]),
+    t(WAVE_TRUST_LOCALE, "waves.score.details.recentTrustedActivity"),
+    t(WAVE_TRUST_LOCALE, "waves.score.details.hotnessQualityGate"),
+  ];
+};
+
+const buildRepDetails = ({
+  repSortScore,
+  waveRep,
+}: {
+  readonly repSortScore: string | null;
+  readonly waveRep: ApiWaveRepSummary | null | undefined;
+}): string[] => {
+  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
+
+  return [
+    ...(rawRep === null
+      ? []
+      : [
+          t(WAVE_TRUST_LOCALE, "waves.score.details.repRaw", {
+            rawRep,
+          }),
+        ]),
+    ...(repSortScore === null
+      ? []
+      : [
+          t(WAVE_TRUST_LOCALE, "waves.score.details.repScore", {
+            repSortScore,
+          }),
+        ]),
+    t(WAVE_TRUST_LOCALE, "waves.score.details.repQualityWeight"),
+  ];
+};
+
+function WaveScoreSummaryPopoverContent({
+  learnMoreHref,
+  visibilityScore,
+  qualityScore,
+  hotnessScore,
+  repSortScore,
+  waveRep,
+}: {
+  readonly learnMoreHref: string;
+  readonly visibilityScore: string;
+  readonly qualityScore: string | null;
+  readonly hotnessScore: string | null;
+  readonly repSortScore: string | null;
+  readonly waveRep: ApiWaveRepSummary | null | undefined;
+}) {
+  const rawRep = formatSignedFullNumber(waveRep?.total_rep);
+  const rows = [
+    ...(qualityScore === null
+      ? []
+      : [
+          {
+            label: t(WAVE_TRUST_LOCALE, "waves.score.summary.quality"),
+            value: t(WAVE_TRUST_LOCALE, "waves.score.summary.qualityValue", {
+              qualityScore,
+            }),
+          },
+        ]),
+    ...(hotnessScore === null
+      ? []
+      : [
+          {
+            label: t(WAVE_TRUST_LOCALE, "waves.score.summary.hotness"),
+            value: t(WAVE_TRUST_LOCALE, "waves.score.summary.hotnessValue", {
+              hotnessScore,
+            }),
+          },
+        ]),
+    ...(rawRep === null && repSortScore === null
+      ? []
+      : [
+          {
+            label: t(WAVE_TRUST_LOCALE, "waves.score.summary.waveRep"),
+            value:
+              rawRep !== null && repSortScore !== null
+                ? t(
+                    WAVE_TRUST_LOCALE,
+                    "waves.score.summary.repRawAndScoreValue",
+                    {
+                      rawRep,
+                      repSortScore,
+                    }
+                  )
+                : (rawRep ??
+                  t(WAVE_TRUST_LOCALE, "waves.score.summary.repScoreValue", {
+                    repSortScore: repSortScore ?? "",
+                  })),
+          },
+        ]),
+  ];
+
+  return (
+    <div className="tw-w-56 tw-bg-iron-950 tw-p-3 tw-text-left tw-text-xs tw-text-iron-300">
+      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-3">
+        <span className="tw-font-semibold tw-text-white">
+          {t(WAVE_TRUST_LOCALE, "waves.score.summary.title")}
+        </span>
+        <span className="tw-font-semibold tw-tabular-nums tw-text-primary-300">
+          {visibilityScore}
+        </span>
+      </div>
+      {rows.length > 0 && (
+        <div className="tw-mt-2 tw-space-y-1.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-2">
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-3"
+            >
+              <span className="tw-min-w-0 tw-truncate tw-text-iron-500">
+                {row.label}
+              </span>
+              <span className="tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-200">
+                {row.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      <Link
+        href={learnMoreHref}
+        className="desktop-hover:hover:tw-text-primary-200 tw-mt-3 tw-inline-flex tw-items-center tw-rounded-md tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      >
+        {t(WAVE_TRUST_LOCALE, "waves.score.summary.learnMore")}
+      </Link>
+    </div>
+  );
+}
+
+function WaveScoreSummaryHoverCard({
+  children,
+  learnMoreHref,
+  visibilityScore,
+  qualityScore,
+  hotnessScore,
+  repSortScore,
+  waveRep,
+}: {
+  readonly children: ReactElement;
+  readonly learnMoreHref: string;
+  readonly visibilityScore: string;
+  readonly qualityScore: string | null;
+  readonly hotnessScore: string | null;
+  readonly repSortScore: string | null;
+  readonly waveRep: ApiWaveRepSummary | null | undefined;
+}) {
+  return (
+    <HoverCard
+      ariaLabel={t(WAVE_TRUST_LOCALE, "waves.score.summary.detailsAriaLabel")}
+      placement="bottom"
+      delayShow={100}
+      delayHide={120}
+      hoverTransitionDelay={80}
+      offset={8}
+      openOnClick
+      content={
+        <WaveScoreSummaryPopoverContent
+          learnMoreHref={learnMoreHref}
+          visibilityScore={visibilityScore}
+          qualityScore={qualityScore}
+          hotnessScore={hotnessScore}
+          repSortScore={repSortScore}
+          waveRep={waveRep}
+        />
+      }
+    >
+      {children}
+    </HoverCard>
+  );
+}
 const renderContainer = ({
   children,
   className,
@@ -365,6 +657,7 @@ export function WaveTrustSignals({
   mode = "details",
   className,
   tooltipId,
+  learnMoreHref,
 }: WaveTrustSignalsProps) {
   const visibilityScore = formatScore(waveScore?.visibility_score);
   const qualityScore = formatScore(waveScore?.quality_score);
@@ -378,10 +671,14 @@ export function WaveTrustSignals({
   }
   let repLabel: string | null = null;
   if (hasRepSummary && repAccessibleValue !== null) {
-    repLabel = `Wave REP ${repAccessibleValue}`;
+    repLabel = t(WAVE_TRUST_LOCALE, "waves.score.details.repAriaRaw", {
+      value: repAccessibleValue,
+    });
   }
   if (!hasRepSummary && repScore !== null) {
-    repLabel = `Wave REP score ${repScore} out of 100`;
+    repLabel = t(WAVE_TRUST_LOCALE, "waves.score.details.repAriaScore", {
+      repScore,
+    });
   }
   const repToneValue =
     waveRep !== null && waveRep !== undefined ? waveRep.total_rep : null;
@@ -390,6 +687,8 @@ export function WaveTrustSignals({
   const inlineSidebarTooltipId = isInlineSidebarVariant(variant)
     ? tooltipId
     : undefined;
+  const shouldUseInlineSidebarTooltip =
+    inlineSidebarTooltipId !== undefined && mode !== "summary";
   const hasVisibilityScore = visibilityScore !== null;
   const hasHotnessScore = hotnessScore !== null;
   const hasRepScore = repScore !== null;
@@ -418,35 +717,100 @@ export function WaveTrustSignals({
       repSortScore,
       waveRep,
     });
+    const hasRichTooltip = learnMoreHref !== undefined;
+    const hasNativeTitle = !hasRichTooltip && !isSidebarVariant(variant);
     const summaryLabel = summaryDetails.join(". ");
-    const summaryTitle = summaryDetails.join("\n");
+    const summaryTitle = hasNativeTitle ? summaryDetails.join("\n") : undefined;
     const summaryTooltip = summaryDetails.join(" | ");
+    const summaryChipClasses = getChipClasses(
+      variant,
+      mode,
+      getVisibilityToneClasses(variant, waveScore?.visibility_score)
+    );
+    const summaryButtonResetClasses = isInlineHeaderVariant(variant)
+      ? "tw-bg-transparent"
+      : "";
+    const showSummaryLabel = !isInlineSidebarVariant(variant);
+    const summaryChipContent = (
+      <>
+        <ShieldCheckIcon
+          className={getIconClasses(variant)}
+          strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
+          aria-hidden="true"
+        />
+        {showSummaryLabel && (
+          <span className={getChipLabelClasses(variant)}>
+            {t(WAVE_TRUST_LOCALE, "waves.score.details.scoreLabel")}
+          </span>
+        )}
+        <span className={getValueClasses(variant)}>{visibilityScore}</span>
+      </>
+    );
+    const inlineSidebarTooltipAttributes = shouldUseInlineSidebarTooltip
+      ? getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)
+      : {};
 
     return renderContainer({
       variant,
       className: containerClasses,
       children: (
-        <span
-          className={getChipClasses(
-            variant,
-            mode,
-            getVisibilityToneClasses(variant)
+        <>
+          {hasRichTooltip ? (
+            <WaveScoreSummaryHoverCard
+              learnMoreHref={learnMoreHref}
+              visibilityScore={visibilityScore}
+              qualityScore={qualityScore}
+              hotnessScore={hotnessScore}
+              repSortScore={repSortScore}
+              waveRep={waveRep}
+            >
+              <button
+                type="button"
+                className={`${summaryChipClasses} tw-border-0 tw-font-[inherit] tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${summaryButtonResetClasses}`}
+                aria-label={summaryLabel}
+              >
+                {summaryChipContent}
+              </button>
+            </WaveScoreSummaryHoverCard>
+          ) : (
+            <span
+              className={summaryChipClasses}
+              aria-label={summaryLabel}
+              title={summaryTitle}
+              {...inlineSidebarTooltipAttributes}
+            >
+              {summaryChipContent}
+            </span>
           )}
-          aria-label={summaryLabel}
-          title={summaryTitle}
-          {...getTooltipAttributes(inlineSidebarTooltipId, summaryTooltip)}
-        >
-          <ShieldCheckIcon
-            className={getIconClasses(variant)}
-            strokeWidth={isInlineVariant(variant) ? 1.5 : undefined}
-            aria-hidden="true"
-          />
-          <span className={getChipLabelClasses(variant)}>Score</span>
-          <span className={getValueClasses(variant)}>{visibilityScore}</span>
-        </span>
+        </>
       ),
     });
   }
+
+  const visibilityDetails =
+    visibilityScore === null
+      ? []
+      : buildSummaryDetails({
+          visibilityScore,
+          qualityScore,
+          hotnessScore,
+          repSortScore,
+          waveRep,
+        });
+  const visibilityTitle = visibilityDetails.join("\n");
+  const visibilityTooltip = visibilityDetails.join(" | ");
+  const hotnessDetails =
+    hotnessScore === null
+      ? []
+      : buildHotnessDetails({ hotnessScore, qualityScore });
+  const hotnessTitle = hotnessDetails.join("\n");
+  const hotnessTooltip = hotnessDetails.join(" | ");
+  const repDetails =
+    hasRepScore || repSortScore !== null
+      ? buildRepDetails({ repSortScore, waveRep })
+      : [];
+  const repTitle = repDetails.join("\n");
+  const repTooltip = repDetails.join(" | ");
 
   const signals = (
     <>
@@ -455,10 +819,16 @@ export function WaveTrustSignals({
           className={getChipClasses(
             variant,
             mode,
-            getVisibilityToneClasses(variant)
+            getVisibilityToneClasses(variant, waveScore?.visibility_score)
           )}
-          aria-label={`Visibility score ${visibilityScore} out of 100`}
-          {...getTooltipAttributes(inlineSidebarTooltipId, "Score")}
+          aria-label={t(WAVE_TRUST_LOCALE, "waves.score.details.visibilityAria", {
+            visibilityScore,
+          })}
+          title={visibilityTitle}
+          {...getTooltipAttributes(
+            shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,
+            visibilityTooltip
+          )}
         >
           <ShieldCheckIcon
             className={getIconClasses(variant)}
@@ -466,7 +836,9 @@ export function WaveTrustSignals({
             aria-hidden="true"
           />
           {showLabels && (
-            <span className={getChipLabelClasses(variant)}>Score</span>
+            <span className={getChipLabelClasses(variant)}>
+              {t(WAVE_TRUST_LOCALE, "waves.score.details.scoreLabel")}
+            </span>
           )}
           <span className={getValueClasses(variant)}>{visibilityScore}</span>
         </span>
@@ -483,8 +855,14 @@ export function WaveTrustSignals({
             mode,
             getHotnessToneClasses(variant)
           )}
-          aria-label={`Hotness score ${hotnessScore} out of 100`}
-          {...getTooltipAttributes(inlineSidebarTooltipId, "Hot")}
+          aria-label={t(WAVE_TRUST_LOCALE, "waves.score.details.hotnessAria", {
+            hotnessScore: hotnessScore ?? "",
+          })}
+          title={hotnessTitle}
+          {...getTooltipAttributes(
+            shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,
+            hotnessTooltip
+          )}
         >
           <FireIcon
             className={getIconClasses(variant)}
@@ -492,7 +870,9 @@ export function WaveTrustSignals({
             aria-hidden="true"
           />
           {showLabels && (
-            <span className={getChipLabelClasses(variant)}>Hot</span>
+            <span className={getChipLabelClasses(variant)}>
+              {t(WAVE_TRUST_LOCALE, "waves.score.details.hotLabel")}
+            </span>
           )}
           <span className={getValueClasses(variant)}>{hotnessScore}</span>
         </span>
@@ -510,7 +890,11 @@ export function WaveTrustSignals({
             getRepToneClasses(repToneValue, variant)
           )}
           aria-label={repLabel ?? undefined}
-          {...getTooltipAttributes(inlineSidebarTooltipId, "REP")}
+          title={repTitle}
+          {...getTooltipAttributes(
+            shouldUseInlineSidebarTooltip ? inlineSidebarTooltipId : undefined,
+            repTooltip
+          )}
         >
           <ScaleIcon
             className={getIconClasses(variant)}
@@ -518,7 +902,9 @@ export function WaveTrustSignals({
             aria-hidden="true"
           />
           {showLabels && (
-            <span className={getChipLabelClasses(variant)}>REP</span>
+            <span className={getChipLabelClasses(variant)}>
+              {t(WAVE_TRUST_LOCALE, "waves.score.details.repLabel")}
+            </span>
           )}
           <span className={getValueClasses(variant)}>{repScore}</span>
         </span>

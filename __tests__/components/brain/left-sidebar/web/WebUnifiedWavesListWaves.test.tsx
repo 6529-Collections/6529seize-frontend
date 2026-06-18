@@ -66,8 +66,9 @@ const sentinel = document.createElement("div");
 
 const baseWaves = [
   createMockMinimalWave({ id: "a1" }),
-  createMockMinimalWave({ id: "o1", isOfficial: true }),
+  createMockMinimalWave({ id: "h1", sidebarSection: "highly-rated" }),
   createMockMinimalWave({ id: "p1", isPinned: true }),
+  createMockMinimalWave({ id: "f1", isFollowing: true }),
   createMockMinimalWave({ id: "r1", isPinned: false }),
 ];
 
@@ -118,7 +119,7 @@ jest.mock(
   )
 );
 
-it("renders announcement, official, pinned, and regular sections without double rendering", () => {
+it("renders announcement, highly rated, pinned, following, and all sections without double rendering", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
 
   render(
@@ -137,19 +138,24 @@ it("renders announcement, official, pinned, and regular sections without double 
   );
   expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
+  expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
+  expect(screen.getByLabelText("Following waves")).toBeInTheDocument();
+  expect(
+    screen.getByLabelText("All quality-ranked waves list")
+  ).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
-  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
+  expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
+  expect(screen.getByTestId("wave-f1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
-  ).toEqual(["wave-a1", "wave-o1", "wave-p1", "wave-r1"]);
+  ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
 });
 
-it("hides pin controls for pinned official waves", () => {
+it("does not give special placement to official waves", () => {
   render(
     <WebUnifiedWavesListWaves
       waves={[
@@ -165,7 +171,8 @@ it("hides pin controls for pinned official waves", () => {
     />
   );
 
-  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "false");
+  expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
+  expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });
 
 it("passes pin controls through for pinned announcement waves", () => {
@@ -349,56 +356,57 @@ it("keeps child rows mounted while collapse animation runs", () => {
   }
 });
 
-it("keeps official child rows mounted while the section exit animation runs", () => {
+it("keeps highly rated child rows mounted while the section exit animation runs", () => {
   jest.useFakeTimers();
 
   try {
-    const officialParent = createMockMinimalWave({
-      id: "official-parent",
-      isOfficial: true,
+    const highlyRatedParent = createMockMinimalWave({
+      id: "highly-rated-parent",
+      sidebarSection: "highly-rated",
       hasSubwaves: true,
     });
-    const officialChild = createMockMinimalWave({
-      id: "official-child",
-      parentWaveId: "official-parent",
+    const highlyRatedChild = createMockMinimalWave({
+      id: "highly-rated-child",
+      parentWaveId: "highly-rated-parent",
+      sidebarSection: "highly-rated",
       createdAt: 10,
     });
     const sentinelRef = React.createRef<HTMLDivElement>();
     const { rerender } = render(
       <WebUnifiedWavesListWaves
-        waves={[officialParent, officialChild]}
+        waves={[highlyRatedParent, highlyRatedChild]}
         onHover={jest.fn()}
         scrollContainerRef={scrollRef}
         sentinelRef={sentinelRef}
       />
     );
 
-    fireEvent.click(screen.getByTestId("toggle-official-parent"));
-    expect(loadSubwavesForParent).toHaveBeenCalledWith("official-parent");
-    expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
-    expect(screen.getByTestId("wave-official-child")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("toggle-highly-rated-parent"));
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("highly-rated-parent");
+    expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-highly-rated-child")).toBeInTheDocument();
 
     rerender(
       <WebUnifiedWavesListWaves
-        waves={[officialChild]}
+        waves={[highlyRatedChild]}
         onHover={jest.fn()}
         scrollContainerRef={scrollRef}
         sentinelRef={sentinelRef}
       />
     );
 
-    expect(screen.queryByTestId("wave-official-parent")).toBeNull();
-    expect(screen.getByLabelText("Official waves")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
+    expect(screen.getByLabelText("Highly rated waves")).toBeInTheDocument();
     expect(
-      screen.getByTestId("wave-official-child").parentElement
+      screen.getByTestId("wave-highly-rated-child").parentElement
     ).toHaveAttribute("data-sidebar-subwave-row-state", "exiting");
 
     act(() => {
       jest.advanceTimersByTime(SIDEBAR_SUBWAVE_ROW_TRANSITION_MS);
     });
 
-    expect(screen.queryByTestId("wave-official-child")).toBeNull();
-    expect(screen.queryByLabelText("Official waves")).toBeNull();
+    expect(screen.queryByTestId("wave-highly-rated-child")).toBeNull();
+    expect(screen.queryByLabelText("Highly rated waves")).toBeNull();
   } finally {
     jest.useRealTimers();
   }

@@ -121,8 +121,8 @@ const PRIMARY_NAVIGATION_PAGES: SidebarPageEntry[] = [
   },
   {
     name: "Wave Score",
-    href: "/discover/wave-score",
-    section: "Discovery",
+    href: "/network/wave-score",
+    section: "Network",
     icon: ScaleIcon,
   },
   {
@@ -559,9 +559,10 @@ const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
   [DROP_FORGE_PATH]: [DROP_FORGE_TITLE],
   [DROP_FORGE_SECTIONS.CRAFT.path]: [`${DROP_FORGE_TITLE} Craft`],
   [DROP_FORGE_SECTIONS.LAUNCH.path]: [`${DROP_FORGE_TITLE} Launch`],
-  "/discover/wave-score": [
+  "/network/wave-score": [
     "Wave scoring",
     "Wave score formula",
+    "Wave score calculator",
     "Visibility score",
     "Hotness score",
     "Wave REP formula",

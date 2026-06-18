@@ -61,7 +61,7 @@ function createPinnedWavesQueryKey(
   return [
     QueryKey.WAVES_V2,
     getWavesV2OverviewQueryKeyParams({
-      overviewType: ApiWavesOverviewType.MostSubscribed,
+      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
       pageSize: PINNED_WAVES_QUERY_LIMIT,
       pinned: ApiWavesPinFilter.Pinned,
       viewerIdentityKey,
@@ -86,7 +86,7 @@ async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
     const page = await fetchWavesV2Page({
       page: pageNumber,
       pageSize: PINNED_WAVES_API_PAGE_SIZE,
-      overviewType: ApiWavesOverviewType.MostSubscribed,
+      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
       pinned: ApiWavesPinFilter.Pinned,
     });
 

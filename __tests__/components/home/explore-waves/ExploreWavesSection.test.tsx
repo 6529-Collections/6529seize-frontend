@@ -2,6 +2,8 @@ import { renderWithQueryClient } from "../../../utils/reactQuery";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { waitFor } from "@testing-library/react";
+import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
+import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -62,6 +64,39 @@ describe("ExploreWavesSection", () => {
     expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
       expect.objectContaining({
         excludeFollowed: true,
+      })
+    );
+  });
+
+  it("defaults score sort only for scored discovery overview", async () => {
+    useAuthMock.mockReturnValue({ connectedProfile: null });
+
+    renderWithQueryClient(<ExploreWavesSection showEmptyState />);
+
+    await waitFor(() => expect(fetchWavesV2PageMock).toHaveBeenCalled());
+    expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
+        scoreSort: ApiWaveScoreSort.Balanced,
+      })
+    );
+  });
+
+  it("does not send score sort for latest-post overview", async () => {
+    useAuthMock.mockReturnValue({ connectedProfile: null });
+
+    renderWithQueryClient(
+      <ExploreWavesSection
+        overviewType={ApiWavesOverviewType.RecentlyDroppedTo}
+        showEmptyState
+      />
+    );
+
+    await waitFor(() => expect(fetchWavesV2PageMock).toHaveBeenCalled());
+    expect(fetchWavesV2PageMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+        scoreSort: undefined,
       })
     );
   });

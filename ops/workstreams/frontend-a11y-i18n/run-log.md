@@ -1071,3 +1071,10 @@
   responses unrelated to the followers modal change.
 - Opened review-ready stacked PR #2641 against PR #2640. Per workstream policy,
   do not merge PR #2641.
+- Recorded `/about/tech` and `/about/tech/[reportSlug]` fallback debt while
+  addressing PR #2719 bot feedback: the report index/detail count chrome now
+  uses source-locale messages and `formatInteger`, and the not-found metadata
+  fallback is message-backed. Remaining debt is the broader tech-report chrome
+  and editorial report data (`dateLabel`, `publishedAt`, repo focus summaries,
+  and markdown report bodies), which intentionally stays `en-US` until the
+  About Tech shelf gets a full localization pass.

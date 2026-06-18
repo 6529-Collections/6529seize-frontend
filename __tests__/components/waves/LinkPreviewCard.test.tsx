@@ -31,6 +31,11 @@ jest.mock("@/components/waves/ens/EnsPreviewCard", () => ({
   default: (props: any) => mockEnsPreviewCard(props),
 }));
 
+jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
+  __esModule: true,
+  default: () => <div data-testid="href-buttons" />,
+}));
+
 jest.mock("@/services/api/link-preview-api", () => ({
   fetchLinkPreview: jest.fn(),
 }));
@@ -47,6 +52,14 @@ describe("LinkPreviewCard", () => {
       "md:tw-min-h-[11rem]",
       "md:tw-max-h-[11rem]"
     );
+    return frame;
+  };
+  const assertFallbackFrame = () => {
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass("tw-min-h-[4.5rem]", "tw-w-full");
+    expect(frame.className).not.toContain("tw-h-[10rem]");
+    expect(frame.className).not.toContain("tw-max-h-[10rem]");
+    expect(frame.className).not.toContain("md:tw-h-[11rem]");
     return frame;
   };
   const assertFirstPartyFrame = () => {
@@ -117,7 +130,7 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
-    assertStableFrame();
+    assertFallbackFrame();
   });
 
   it("renders fallback when request fails", async () => {
@@ -133,7 +146,25 @@ describe("LinkPreviewCard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("fallback")).toBeInTheDocument();
     });
-    assertStableFrame();
+    assertFallbackFrame();
+  });
+
+  it("hides link actions in fallback state when requested", async () => {
+    fetchLinkPreview.mockRejectedValue(new Error("network"));
+
+    render(
+      <LinkPreviewCard
+        hideActions
+        href="https://example.com/article"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("fallback")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId("href-buttons")).toBeNull();
   });
 
   it("uses the richer chat frame for generated first-party previews", async () => {
@@ -224,6 +255,41 @@ describe("LinkPreviewCard", () => {
     expect(frame).toHaveClass("tw-min-h-[11rem]", "md:tw-min-h-[12rem]");
     expect(frame.className).not.toContain("tw-max-h-[11rem]");
     expect(frame.className).not.toContain("tw-max-h-[12rem]");
+  });
+
+  it("lets YouTube video previews grow beyond the generic fixed frame", async () => {
+    fetchLinkPreview.mockResolvedValue({
+      type: "youtube.video",
+      title: "A Good Video",
+      videoId: "abc123XYZ_0",
+      embedUrl: "https://www.youtube-nocookie.com/embed/abc123XYZ_0",
+      watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+      thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+    });
+
+    render(
+      <LinkPreviewCard
+        href="https://youtu.be/abc123XYZ_0"
+        renderFallback={() => <div data-testid="fallback">fallback</div>}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockOpenGraphPreview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          preview: expect.objectContaining({ type: "youtube.video" }),
+        })
+      )
+    );
+
+    const frame = screen.getByTestId("link-preview-card-stable-frame");
+    expect(frame).toHaveClass(
+      "tw-min-h-[18rem]",
+      "sm:tw-min-h-[14rem]",
+      "md:tw-min-h-[15rem]"
+    );
+    expect(frame.className).not.toContain("tw-max-h-[10rem]");
+    expect(frame.className).not.toContain("tw-max-h-[11rem]");
   });
 
   it("does not enforce chat stable frame for home variant", async () => {
