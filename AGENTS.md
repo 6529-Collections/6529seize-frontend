@@ -203,6 +203,9 @@ is available, use it; otherwise read the relevant files in
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
   - `ops/skills/write-skills/SKILL.md` for repo-local skill work.
+- For merge, staging, production, or release-lane work, read
+  `ops/docs/developer/deployment-bus-process.md` and
+  `ops/skills/deploy-6529/SKILL.md` before acting.
 - Operational plans, roadmaps, runbooks, workstream state, and agent process
   docs belong under `ops/`, not top-level `docs/`.
 - Operational scripts belong under `ops/scripts/`; app build/runtime scripts
