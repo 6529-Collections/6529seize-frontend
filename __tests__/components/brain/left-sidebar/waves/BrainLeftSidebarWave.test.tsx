@@ -4,6 +4,7 @@ import BrainLeftSidebarWave from "@/components/brain/left-sidebar/waves/BrainLef
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -26,8 +27,8 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: jest.fn(),
 }));
 jest.mock("@/hooks/usePrefetchWaveData");
-jest.mock("@/components/waves/WavePicture", () => (props: any) => (
-  <img data-testid="wave-picture" alt={props.name} />
+jest.mock("@/components/waves/WavePicture", () => () => (
+  <span data-testid="wave-picture" />
 ));
 jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime",
@@ -60,6 +61,12 @@ describe("BrainLeftSidebarWave", () => {
     firstUnreadDropSerialNo: null,
     isMuted: false,
   } as any;
+  const waveScore = {
+    visibility_score: 83,
+    quality_score: 78,
+    hotness_score: 92,
+    rep_sort_score: 41,
+  } as ApiWaveScore;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -307,6 +314,25 @@ describe("BrainLeftSidebarWave", () => {
     expect(expandButton).toHaveClass("tw-bg-iron-700/60");
     expect(expandButton).toHaveClass("tw-text-iron-300");
     expect(expandButton).toHaveClass("tw-opacity-100");
+  });
+
+  it("places the timestamp below the title and pushes score to the far edge", () => {
+    render(
+      <BrainLeftSidebarWave
+        wave={{ ...baseWave, waveScore }}
+        onHover={onHover}
+      />
+    );
+
+    const timestamp = screen.getByTestId("drop-time");
+    const timestampWrapper = timestamp.parentElement;
+    const metadataRow = timestampWrapper?.parentElement;
+    const score = screen.getByText("83").closest("[aria-label]")?.parentElement;
+
+    expect(metadataRow?.children[0]).toBe(timestampWrapper);
+    expect(metadataRow?.children[1]).toBe(score);
+    expect(timestampWrapper).not.toHaveClass("tw-ml-auto");
+    expect(score).toHaveClass("tw-ml-auto");
   });
 
   it("cancels subwave prefetch when hover intent ends early", () => {
